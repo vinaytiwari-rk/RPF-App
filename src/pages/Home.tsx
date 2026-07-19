@@ -1,0 +1,411 @@
+import React, { useState, useEffect } from "react";
+import { useOutletContext, useNavigate } from "react-router-dom";
+import { 
+  ChevronRight, Heart, Calendar, MapPin, QrCode, Activity, 
+  BookOpen, Briefcase, Users, Flame, Compass, Award, 
+  AlertTriangle, Shield, CheckCircle, PhoneCall, HelpCircle, 
+  GraduationCap, FileText, ArrowRight, ShieldCheck, Play
+} from "lucide-react";
+import { translations } from "../translations";
+import { useAuth } from "../context/AuthContext";
+import { useApp } from "../context/AppContext";
+// Purged Firebase imports for portability
+
+export default function Home() {
+  const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
+  const { user } = useAuth();
+  const { settings, cmsConfig } = useApp();
+  const navigate = useNavigate();
+  const t = translations[lang];
+
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [stats, setStats] = useState({
+    beneficiaries: 0,
+    volunteers: 0,
+    healthCamps: 0,
+    scholarships: 0
+  });
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchStatsAndCampaigns = async () => {
+      try {
+        const statsRes = await fetch("/api/stats");
+        if (statsRes.ok) {
+          const data = await statsRes.json();
+          setStats({
+            beneficiaries: data.beneficiaries || 0,
+            volunteers: data.volunteers || 0,
+            healthCamps: data.healthCamps || 0,
+            scholarships: data.scholarships || 0
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching live stats:", err);
+      }
+
+      try {
+        const campRes = await fetch("/api/campaigns");
+        if (campRes.ok) {
+          const data = await campRes.json();
+          setCampaigns(data.campaigns || []);
+        }
+      } catch (err) {
+        console.error("Error fetching live campaigns:", err);
+      }
+    };
+    fetchStatsAndCampaigns();
+  }, []);
+
+  const slides = cmsConfig.carouselSlides || [];
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  const coreServicesList = [
+    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: QrCode, route: "/jan-seva-card", color: "text-blue-600 bg-blue-50 border-blue-100", badgeEn: "Active", badgeHi: "सक्रिय" },
+    { id: "blood", labelEn: "Blood Network", labelHi: "रक्त नेटवर्क", icon: Activity, route: "/blood-network", color: "text-red-600 bg-red-50 border-red-100" },
+    { id: "grievance", labelEn: "File Complaint", labelHi: "शिकायत निवारण", icon: FileText, route: "/grievance", color: "text-orange-650 bg-orange-50 border-orange-100" },
+    { id: "donations", labelEn: "Donate Now", labelHi: "दान सहायता", icon: Heart, route: "/donations", color: "text-rose-600 bg-rose-50 border-rose-100" },
+    { id: "health_camp", labelEn: "Health Camps", labelHi: "स्वास्थ्य शिविर", icon: Heart, route: "/health-camps", color: "text-[#000080] bg-[#000080]/5 border-[#000080]/15" },
+    { id: "jobs", labelEn: "Jobs & Training", labelHi: "कौशल विकास", icon: Briefcase, route: "/jobs", color: "text-amber-600 bg-amber-50 border-amber-100" },
+    { id: "scholarships", labelEn: "Scholarships", labelHi: "छात्रवृत्ति", icon: GraduationCap, route: "/scholarships", color: "text-indigo-600 bg-indigo-50 border-indigo-100" },
+    { id: "women", labelEn: "Women Safety", labelHi: "महिला सुरक्षा", icon: Shield, route: "/women", color: "text-purple-605 bg-purple-50 border-purple-100" },
+    { id: "seniors", labelEn: "Senior Citizens", labelHi: "वरिष्ठ नागरिक", icon: Users, route: "/seniors", color: "text-teal-605 bg-teal-50 border-teal-100" },
+    { id: "environment", labelEn: "Environment", labelHi: "पर्यावरण विकास", icon: Compass, route: "/environment", color: "text-emerald-650 bg-emerald-50 border-emerald-100" }
+  ];
+
+  const customActions = (cmsConfig.customServices || []).map((cs: any) => ({
+    id: cs.id,
+    labelEn: cs.titleEn,
+    labelHi: cs.titleHi,
+    icon: Compass,
+    route: "/services",
+    color: "text-indigo-600 bg-indigo-50 border-indigo-100"
+  }));
+
+  const activeActions = [...coreServicesList, ...customActions].filter((action) => {
+    return settings?.servicesStatus?.[action.id] !== false;
+  });
+
+  const quickActions = activeActions.slice(0, 10);
+
+  return (
+    <div className="space-y-5 animate-fadeIn min-h-full pb-16 font-sans relative overflow-x-hidden bg-slate-50/50" id="live-impact-dashboard">
+      
+      {/* Dynamic Global Emergency Banner */}
+      {(lang === "hi" ? cmsConfig.alertBannerHi : cmsConfig.alertBannerEn) && (
+        <div className="bg-red-600 text-white px-4 py-2 text-[10.5px] font-black flex items-center gap-2 animate-pulse shadow-sm z-50 relative shrink-0">
+          <AlertTriangle className="w-4 h-4 text-white fill-white shrink-0" />
+          <div className="overflow-hidden whitespace-nowrap w-full relative">
+            <div className="inline-block animate-marquee uppercase tracking-wide">
+              {lang === "hi" ? cmsConfig.alertBannerHi : cmsConfig.alertBannerEn}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* 1. Indian Heritage Mandala Backdrop */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[340px] h-[340px] opacity-[0.03] pointer-events-none z-0">
+        <svg viewBox="0 0 100 100" className="w-full h-full text-[#D4AF37]" fill="currentColor">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+          <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+          <path d="M50 5l2 15 15-15-5 25 15-5-25 5 15 15-25-2 5 25-15-15-5 15-15-15-5 15-5-25-25 2 15-15-25-5 15-5-15-25 15 15z"/>
+        </svg>
+      </div>
+
+      {/* 2. Top Carousel Banner (Matches Screenshot 4/5 Carousel Banner) */}
+      {slides.length > 0 && (
+        <div className="px-4 pt-4 relative z-10">
+          <div className="relative rounded-3xl overflow-hidden h-48 shadow-lg border border-slate-200/50 bg-slate-900 text-white">
+            <img 
+              src={slides[activeSlide]?.image} 
+              alt="Carousel Banner" 
+              className="absolute inset-0 w-full h-full object-cover opacity-35" 
+            />
+            {/* Saffron & Green Waves gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent"></div>
+            
+            {/* Subtle Tricolour Bottom Trim */}
+            <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-tricolour"></div>
+            
+            <div className="relative z-10 p-5 flex flex-col justify-between h-full">
+              <div className="space-y-1.5 max-w-[240px]">
+                <h3 className="font-display font-extrabold text-base leading-tight tracking-wide text-white drop-shadow-md">
+                  {lang === "hi" ? slides[activeSlide]?.titleHi : slides[activeSlide]?.titleEn}
+                </h3>
+                <p className="text-[10px] text-slate-200 font-semibold drop-shadow-xs">
+                  {lang === "hi" ? slides[activeSlide]?.subHi : slides[activeSlide]?.subEn}
+                </p>
+              </div>
+              
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => navigate("/jan-seva-card")}
+                  className="bg-[#FF9933] hover:bg-[#e68a2e] text-white text-[9.5px] font-black uppercase tracking-widest px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-md transition transform active:scale-95 cursor-pointer"
+                >
+                  <span>{lang === "hi" ? "कार्ड प्राप्त करें >" : "Get Jan Seva Card >"}</span>
+                </button>
+                <button 
+                  onClick={() => navigate("/services")}
+                  className="bg-white/15 hover:bg-white/20 border border-white/25 text-white text-[9.5px] font-black uppercase tracking-widest px-3 py-2 rounded-lg flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer"
+                >
+                  <Play className="w-3 h-3 text-white fill-white" />
+                  <span>{lang === "hi" ? "वीडियो देखें" : "Watch Video"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Dots Indicator */}
+            <div className="absolute bottom-3 right-4 flex gap-1 z-10">
+              {slides.map((_, i) => (
+                <span 
+                  key={i} 
+                  className={`w-1.5 h-1.5 rounded-full transition ${activeSlide === i ? "bg-[#FF9933] w-3" : "bg-white/40"}`}
+                ></span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Our Impact Section (Matches Screenshot 5 Our Impact Grid) */}
+      <div className="px-4 relative z-10">
+        <div className="flex justify-between items-center mb-2.5">
+          <h4 className="font-display font-extrabold text-xs text-[#0B1E3F]">
+            {lang === "hi" ? "हमारा प्रभाव" : "Our Impact"}
+          </h4>
+          <button 
+            onClick={() => navigate("/services")}
+            className="text-[9px] font-black text-[#000080] uppercase tracking-wider hover:underline"
+          >
+            {lang === "hi" ? "सभी देखें >" : "See All >"}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2 bg-white border border-slate-200/60 rounded-2xl p-3.5 shadow-sm">
+          <div className="text-center space-y-1">
+            <span className="text-[14px] font-black text-slate-900 tracking-tight block">
+              {stats.beneficiaries === 0 ? "0" : stats.beneficiaries >= 1000 ? `${(stats.beneficiaries / 1000).toFixed(1)}K+` : stats.beneficiaries}
+            </span>
+            <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
+              {lang === "hi" ? "लाभार्थी" : "Beneficiaries"}
+            </span>
+          </div>
+          <div className="text-center space-y-1 border-l border-slate-100">
+            <span className="text-[14px] font-black text-slate-900 tracking-tight block">
+              {stats.volunteers === 0 ? "0" : stats.volunteers >= 1000 ? `${(stats.volunteers / 1000).toFixed(1)}K+` : stats.volunteers}
+            </span>
+            <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
+              {lang === "hi" ? "स्वयंसेवक" : "Volunteers"}
+            </span>
+          </div>
+          <div className="text-center space-y-1 border-l border-slate-100">
+            <span className="text-[14px] font-black text-slate-900 tracking-tight block">
+              {stats.healthCamps === 0 ? "0" : stats.healthCamps >= 1000 ? `${(stats.healthCamps / 1000).toFixed(1)}K+` : stats.healthCamps}
+            </span>
+            <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
+              {lang === "hi" ? "स्वास्थ्य शिविर" : "Health Camps"}
+            </span>
+          </div>
+          <div className="text-center space-y-1 border-l border-slate-100">
+            <span className="text-[14px] font-black text-slate-900 tracking-tight block">
+              {stats.scholarships === 0 ? "0" : stats.scholarships >= 1000 ? `${(stats.scholarships / 1000).toFixed(1)}K+` : stats.scholarships}
+            </span>
+            <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
+              {lang === "hi" ? "छात्रवृत्ति" : "Scholarships"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Quick Actions (Matches Screenshot 5 View All Services Grid - 5 columns x 2 rows) */}
+      <div className="px-4 relative z-10">
+        <div className="flex justify-between items-center mb-2.5">
+          <h4 className="font-display font-extrabold text-xs text-[#0B1E3F]">
+            {lang === "hi" ? "त्वरित सेवाएं" : "Quick Actions"}
+          </h4>
+          <button 
+            onClick={() => navigate("/services")}
+            className="text-[9px] font-black text-[#000080] uppercase tracking-wider hover:underline"
+          >
+            {lang === "hi" ? "सभी सेवाएं देखें >" : "View All Services >"}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-5 gap-2 bg-white border border-slate-200/60 rounded-2xl p-3 shadow-sm">
+          {quickActions.map((action, idx) => {
+            const IconComponent = action.icon;
+            return (
+              <button 
+                key={idx}
+                onClick={() => navigate(action.route)}
+                className="flex flex-col items-center justify-center p-1.5 transition text-center gap-1.5 active:scale-95 duration-100 cursor-pointer group relative"
+              >
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center border shadow-inner ${action.color}`}>
+                  <IconComponent className="w-4.5 h-4.5" />
+                </div>
+                <span className="font-bold text-[8.5px] text-slate-700 leading-none line-clamp-2 px-0.5">
+                  {lang === "hi" ? action.labelHi : action.labelEn}
+                </span>
+
+                {/* Optional Tag badge */}
+                {action.badgeEn && (
+                  <span className="absolute -top-1 right-0 bg-[#FF9933] text-white text-[6px] font-black uppercase px-1 rounded shadow-xs leading-none">
+                    {lang === "hi" ? action.badgeHi : action.badgeEn}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 5. Latest Campaigns Section (Matches Screenshot 5 Latest Campaigns 3 vertical cards) */}
+      <div className="px-4 relative z-10">
+        <div className="flex justify-between items-center mb-2.5">
+          <h4 className="font-display font-extrabold text-xs text-[#0B1E3F]">
+            {lang === "hi" ? "नवीनतम अभियान" : "Latest Campaigns"}
+          </h4>
+          <button 
+            onClick={() => navigate("/services")}
+            className="text-[9px] font-black text-[#000080] uppercase tracking-wider hover:underline"
+          >
+            {lang === "hi" ? "सभी देखें >" : "See All >"}
+          </button>
+        </div>
+
+        <div className="flex overflow-x-auto gap-3.5 pb-2.5 no-scrollbar snap-x snap-mandatory">
+          {campaigns.length === 0 ? (
+            <div className="w-full text-center py-8 text-slate-400 font-bold border border-slate-100 bg-white rounded-2xl">
+              {lang === "hi" ? "कोई सक्रिय दान अभियान नहीं है" : "No active crowdfunding campaigns"}
+            </div>
+          ) : (
+            campaigns.map((camp: any, idx) => {
+              const progress = Number(camp.goalAmount) > 0 ? Math.min(100, Math.round((Number(camp.raisedAmount || 0) / Number(camp.goalAmount)) * 100)) : 0;
+              const formatRupees = (val: any) => {
+                const num = Number(val) || 0;
+                if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
+                return `₹${num.toLocaleString()}`;
+              };
+              return (
+                <div 
+                  key={camp.id || idx} 
+                  onClick={() => navigate("/donations")}
+                  className="bg-white border border-slate-200/60 rounded-2xl overflow-hidden min-w-[210px] max-w-[210px] snap-center cursor-pointer shadow-sm hover:shadow-md transition transform hover:-translate-y-0.5 duration-250 flex flex-col justify-between"
+                >
+                  <div className="relative h-24 bg-slate-100">
+                    <img src={camp.coverImgUrl || "/assets/mega_camp_banner.png"} alt={camp.titleEn} className="w-full h-full object-cover" />
+                    <span className="absolute top-2 left-2 text-[7.5px] font-black uppercase text-white px-2 py-0.5 rounded bg-[#138808]">
+                      {lang === "hi" ? "लाइव" : "Live"}
+                    </span>
+                  </div>
+                  <div className="p-3.5 space-y-2">
+                    <h5 className="font-display font-extrabold text-[11px] text-slate-800 leading-tight line-clamp-2 min-h-[30px]">
+                      {lang === "hi" ? camp.titleHi : camp.titleEn}
+                    </h5>
+                    <div className="flex items-center gap-1 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
+                      <MapPin className="w-3 h-3 text-slate-400" />
+                      <span>{lang === "hi" ? camp.locationHi || "सीहोर, म.प्र." : camp.locationEn || "Sehore, MP"}</span>
+                    </div>
+                    
+                    {/* Progress bar */}
+                    <div className="space-y-1 pt-1.5 border-t border-slate-100">
+                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-[#FF9933] h-full rounded-full" style={{ width: `${progress}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-[8px] font-black text-slate-500 uppercase tracking-wide">
+                        <span>{formatRupees(camp.raisedAmount)} / {formatRupees(camp.goalAmount)}</span>
+                        <span>{progress}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* 6. Message from Founder Section (Matches Screenshot 5 Message from Founder card) */}
+      <div className="px-4 relative z-10">
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF9933]/5 rounded-full blur-xl"></div>
+          
+          <div className="flex items-start gap-4">
+            {/* Founder avatar with golden ring */}
+            <div className="relative shrink-0 mt-1">
+              <img 
+                src={cmsConfig.founderImgUrl || "/assets/founder.png"} 
+                alt="Founder Message Avatar" 
+                className="w-16 h-16 rounded-full object-cover border-2 border-[#D4AF37]/50 shadow-sm"
+              />
+            </div>
+            
+            {/* Message details */}
+            <div className="space-y-2">
+              <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider">
+                {lang === "hi" ? "संस्थापक का संदेश" : "Message from Founder"}
+              </h4>
+              <p className="text-[10px] text-slate-600 leading-relaxed italic font-medium">
+                "{lang === "hi" ? settings.founderMessageHi : settings.founderMessageEn}"
+              </p>
+              <div className="pt-1.5 border-t border-slate-100">
+                <p className="font-display font-black text-[10.5px] text-[#000080] leading-none">
+                  {cmsConfig.founderName || "Rohit Pandit"}
+                </p>
+                <p className="text-[8px] text-[#D4AF37] font-black uppercase tracking-wider mt-1">
+                  {cmsConfig.founderDesignation || "Founder, RP Foundation"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 7. Trusted strip (Matches Screenshot 5 bottom footer strip) */}
+      <div className="px-4 relative z-10 pb-4">
+        <div className="bg-[#0B1E3F] text-white rounded-2xl p-3 shadow-md flex items-center justify-between gap-3 relative overflow-hidden border border-white/5">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20 text-green-400 shrink-0">
+              <ShieldCheck className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <p className="text-[8.5px] font-black uppercase tracking-widest text-[#FF9933] leading-none">
+                {lang === "hi" 
+                  ? `${(stats?.beneficiaries || 12500).toLocaleString()} से अधिक नागरिक` 
+                  : `Trusted by ${(stats?.beneficiaries || 12500).toLocaleString()}+ Citizens`}
+              </p>
+              <p className="text-[8px] text-slate-300 font-bold uppercase tracking-wider mt-1 leading-none">
+                Secure • Transparent • Reliable
+              </p>
+            </div>
+          </div>
+
+          {/* User avatars cluster */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex -space-x-2.5 overflow-hidden">
+              {[1, 2, 3].map((num) => (
+                <div 
+                  key={num} 
+                  className="inline-block h-6 w-6 rounded-full ring-2 ring-[#0B1E3F] bg-gradient-to-br from-slate-600 to-slate-800 text-[8px] font-black flex items-center justify-center text-white"
+                >
+                  {num === 1 ? "A" : num === 2 ? "S" : "R"}
+                </div>
+              ))}
+            </div>
+            <span className="text-[8.5px] font-black text-[#138808] bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
+              {stats?.beneficiaries ? `${stats.beneficiaries.toLocaleString()}+` : "0"}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  );
+}

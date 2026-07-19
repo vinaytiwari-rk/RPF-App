@@ -1,0 +1,6 @@
+{
+  "name": "RP Foundation",
+  "description": "RP Foundation: A simplified social service and Jan Seva platform providing Digital Member cards, Help Requests, Blood donor search, Grievance tracking, and AI assistance in Hindi & English.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
