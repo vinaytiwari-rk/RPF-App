@@ -21,7 +21,7 @@ app.use(express.json());
 const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
 const pool = new pg.Pool({
   connectionString: dbUrl,
-  ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.1") ? false : { rejectUnauthorized: false }
+  ssl: dbUrl && (dbUrl.includes("localhost") || dbUrl.includes("127.0.0.")) ? false : { rejectUnauthorized: false }
 });
 
 // Lazy-loaded Gemini AI client helper
