@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import VolunteerRegistrationWizard from "./VolunteerRegistrationWizard";
 import { ArrowLeft, Loader2, Phone, UserPlus, KeyRound, Smartphone, Mail, ShieldCheck, Heart, Users, ChevronRight, Lock, AlertTriangle } from "lucide-react";
 import axios from "axios";
 
@@ -18,14 +19,6 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
 
-  const [regName, setRegName] = useState("");
-  const [regPhone, setRegPhone] = useState("");
-  const [regEmail, setRegEmail] = useState("");
-  const [regPassword, setRegPassword] = useState("");
-  const [regAddress, setRegAddress] = useState("");
-  const [regPincode, setRegPincode] = useState("");
-  const [regInterest, setRegInterest] = useState("Medical");
-  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,7 +63,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
     setOtp(newOtp);
 
     if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-\${index + 1}`);
+      const nextInput = document.getElementById("otp-" + (index + 1));
       nextInput?.focus();
     }
   };
@@ -94,26 +87,6 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
       } catch (err: any) {
         console.error("OTP Verification Error:", err);
         setError("Incorrect verification code. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleRegistrationSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (regName && regPhone && regEmail && regPassword && regAddress && regPincode && regInterest) {
-      setIsLoading(true);
-      try {
-        const uid = "usr_" + regPhone;
-        await onLoginSuccess("volunteer", { 
-          phone: regPhone,
-          email: regEmail,
-          name: regName,
-          id: uid 
-        });
-      } catch (err) {
-        console.error("Registration Error", err);
       } finally {
         setIsLoading(false);
       }
@@ -263,27 +236,21 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
               <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
                 <button
                   onClick={() => setAuthMethod("phone")}
-                  className={`flex-1 py-1.5 text-[9px] font-bold rounded uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 \${
-                    authMethod === "phone" ? "bg-white text-[#FF9933] shadow-sm border border-slate-200" : "text-slate-500 hover:text-slate-700"
-                  }`}
+                  className={"flex-1 py-1.5 text-[9px] font-bold rounded uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 " + (authMethod === "phone" ? "bg-white text-[#FF9933] shadow-sm border border-slate-200" : "text-slate-500 hover:text-slate-700")}
                 >
                   <Smartphone className="w-3 h-3" />
                   Mobile
                 </button>
                 <button
                   onClick={() => setAuthMethod("email")}
-                  className={`flex-1 py-1.5 text-[9px] font-bold rounded uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 \${
-                    authMethod === "email" ? "bg-white text-[#138808] shadow-sm border border-slate-200" : "text-slate-500 hover:text-slate-700"
-                  }`}
+                  className={"flex-1 py-1.5 text-[9px] font-bold rounded uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 " + (authMethod === "email" ? "bg-white text-[#138808] shadow-sm border border-slate-200" : "text-slate-500 hover:text-slate-700")}
                 >
                   <Mail className="w-3 h-3" />
                   Email
                 </button>
                 <button
                   onClick={() => setAuthMethod("password")}
-                  className={`flex-1 py-1.5 text-[9px] font-bold rounded uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 \${
-                    authMethod === "password" ? "bg-white text-[#000080] shadow-sm border border-slate-200" : "text-slate-500 hover:text-slate-700"
-                  }`}
+                  className={"flex-1 py-1.5 text-[9px] font-bold rounded uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 " + (authMethod === "password" ? "bg-white text-[#000080] shadow-sm border border-slate-200" : "text-slate-500 hover:text-slate-700")}
                 >
                   <Lock className="w-3 h-3" />
                   User ID
@@ -311,7 +278,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                       <input
                         type="tel"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\\D/g, '').slice(0, 10))}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                         className="block w-full pl-16 pr-3 py-2.5 border border-slate-200 rounded-xl focus:border-[#FF9933] outline-none text-xs font-bold text-slate-800 bg-slate-50 transition placeholder-slate-350"
                         placeholder="99999 99999"
                         required
@@ -392,7 +359,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                 </button>
                 <div>
                   <h3 className="font-display font-black text-sm text-slate-800">Verify OTP</h3>
-                  <p className="text-[8.5px] text-slate-400 font-bold uppercase tracking-wider">Sent to {authMethod === "email" ? email : `+91 \${phone}`}</p>
+                  <p className="text-[8.5px] text-slate-400 font-bold uppercase tracking-wider">Sent to {authMethod === "email" ? email : `+91 ${phone}`}</p>
                 </div>
               </div>
 
@@ -401,14 +368,14 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                   {otp.map((digit, idx) => (
                     <input
                       key={idx}
-                      id={`otp-\${idx}`}
+                      id={"otp-" + idx}
                       type="tel"
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Backspace" && !digit && idx > 0) {
-                          const prevInput = document.getElementById(`otp-\${idx - 1}`);
+                          const prevInput = document.getElementById("otp-" + (idx - 1));
                           prevInput?.focus();
                         }
                       }}
@@ -424,67 +391,22 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
             </div>
           )}
 
+          
           {mode === "registerForm" && (
-            <div className="space-y-4 animate-fadeIn max-h-[500px] overflow-y-auto pr-2 pb-4 scrollbar-thin">
-              <div className="flex items-center gap-2.5 pb-1 border-b border-slate-100 sticky top-0 bg-white/95 backdrop-blur z-10 pt-1">
-                <button onClick={() => setMode("welcome")} className="p-1 rounded-full hover:bg-slate-100 text-slate-700 transition">
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
-                <div>
-                  <h3 className="font-display font-black text-sm text-slate-800">Volunteer Registration</h3>
-                  <p className="text-[8.5px] text-slate-400 font-bold uppercase tracking-wider">Create Your Account</p>
-                </div>
+            <div className="absolute inset-0 z-50 bg-white/50 backdrop-blur-sm p-4 flex items-center justify-center">
+              <div className="w-full h-full max-h-[750px] relative">
+                <VolunteerRegistrationWizard 
+                  onBack={() => setMode("welcome")} 
+                  onComplete={async (username, pass) => {
+                    // Automatically log them in with the new credentials
+                    const uid = "usr_" + username;
+                    await onLoginSuccess("volunteer", { id: uid, name: "Volunteer (" + username + ")" });
+                  }} 
+                />
               </div>
-
-              <form onSubmit={handleRegistrationSubmit} className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block ml-1">Full Name</label>
-                  <input type="text" value={regName} onChange={(e) => setRegName(e.target.value)} className="block w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-[#000080]" placeholder="John Doe" required />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block ml-1">Mobile</label>
-                    <input type="tel" value={regPhone} onChange={(e) => setRegPhone(e.target.value.replace(/\\D/g, '').slice(0, 10))} className="block w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-[#000080]" placeholder="9999999999" required />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block ml-1">Email</label>
-                    <input type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className="block w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-[#000080]" placeholder="name@email.com" required />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block ml-1">Create Password</label>
-                  <input type="password" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} className="block w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-[#000080]" placeholder="••••••••" required />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block ml-1">Full Address / City</label>
-                  <input type="text" value={regAddress} onChange={(e) => setRegAddress(e.target.value)} className="block w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-[#000080]" placeholder="123 Street, Bhopal" required />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block ml-1">Pincode</label>
-                    <input type="text" value={regPincode} onChange={(e) => setRegPincode(e.target.value)} className="block w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-[#000080]" placeholder="462001" required />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block ml-1">Area of Interest</label>
-                    <select value={regInterest} onChange={(e) => setRegInterest(e.target.value)} className="block w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 outline-none focus:border-[#000080]" required>
-                      <option value="Medical">Medical</option>
-                      <option value="Education">Education</option>
-                      <option value="Environment">Environment</option>
-                      <option value="Relief">Relief</option>
-                    </select>
-                  </div>
-                </div>
-
-                <button type="submit" disabled={isLoading} className="w-full flex justify-center items-center gap-1.5 py-3 mt-4 rounded-xl shadow-md text-xs font-bold text-white bg-[#000080] hover:bg-[#000066] disabled:opacity-50 transition uppercase tracking-wider">
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <span>Complete Registration</span>}
-                </button>
-              </form>
             </div>
           )}
+
         </div>
       </div>
 
