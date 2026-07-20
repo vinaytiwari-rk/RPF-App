@@ -27,7 +27,7 @@ jobs:
         run: sed -i '/dist\//d' .gitignore || true
 
       - name: Trigger cPanel Node.js Restart
-        run: echo "App restarted by GitHub Actions on $(date)" > restart.txt
+        run: mkdir -p tmp && echo "App restarted by GitHub Actions on $(date)" > tmp/restart.txt
 
       - name: Sync files with cPanel
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
