@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ArrowLeft, Loader2, Phone, UserPlus, KeyRound, Smartphone, Mail, ShieldCheck, Heart, Users, ChevronRight, Lock, AlertTriangle } from "lucide-react";
+import axios from "axios";
 // Replaced Firebase Auth with client-side mock verification for stability
 
 interface LoginScreenProps {
@@ -26,8 +27,8 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
       setIsLoading(true);
       setError(null);
       try {
-        // Mock sending SMS
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        // Call real Auth endpoint
+        await axios.post('/api/auth/login', { phone });
         setMode("otp");
       } catch (err: any) {
         console.error("SMS Send Error:", err);
@@ -58,6 +59,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
       setError(null);
       try {
         const uid = "usr_" + phone;
+        await axios.post('/api/auth/verify', { phone, otp: fullOtp });
         await onLoginSuccess(phone.startsWith("9") ? "volunteer" : "guest", { 
           phone, 
           name: phone.startsWith("9") ? "Volunteer (" + phone.slice(-4) + ")" : "Citizen (" + phone.slice(-4) + ")",

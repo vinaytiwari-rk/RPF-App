@@ -16,9 +16,21 @@ export default function WomenSafety() {
   const handleSOS = async () => {
     setSosActive(true);
     try {
+      let locationStr = "Location unavailable";
+      if ("geolocation" in navigator) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+          });
+          locationStr = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+        } catch (e) {
+          console.warn("GPS failed", e);
+        }
+      }
+
       const data = {
         sosTriggered: true,
-        userLocation: "Current GPS Coordinates (Mock)",
+        userLocation: locationStr,
         designatedContacts: contacts
       };
 

@@ -704,26 +704,16 @@ export default function Community() {
                       try {
                         const formData = new FormData();
                         formData.append("file", file);
-                        
-                        const fakeProgress = setInterval(() => {
-                          setUploadPct((prev) => {
-                            if (prev === null || prev >= 90) {
-                              clearInterval(fakeProgress);
-                              return prev;
+                        const response = await axios.post("/api/upload/image", formData, {
+                          onUploadProgress: (progressEvent) => {
+                            if (progressEvent.total) {
+                              const pct = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                              setUploadPct(pct);
                             }
-                            return prev + 15;
-                          });
-                        }, 100);
-
-                        const response = await fetch("/api/upload/image", {
-                          method: "POST",
-                          body: formData
+                          }
                         });
                         
-                        clearInterval(fakeProgress);
-                        if (!response.ok) throw new Error("Upload failed");
-                        
-                        const data = await response.json();
+                        const data = response.data;
                         setUploadPct(100);
                         setUploadedImageUrl(data.url);
                       } catch (err) {

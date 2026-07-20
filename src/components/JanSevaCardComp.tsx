@@ -67,9 +67,9 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
     }, 1200);
   };
 
-  // Generate a mock verification QR link
-  const qrData = `RP-FOUNDATION-VERIFIED\nID: ${profile.janSevaId}\nName: ${profile.name}\nPhone: ${profile.phone}\nRole: ${profile.role}\nPoints: ${profile.points}\nBadge: ${profile.badge}`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+  // Generate dynamic verification QR link
+  const verifyUrl = `${window.location.origin}/verify?id=${profile.janSevaId}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`;
 
   return (
     <div className="space-y-6" id="jan-seva-card-section">
