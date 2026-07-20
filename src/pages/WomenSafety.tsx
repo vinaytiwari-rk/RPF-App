@@ -22,9 +22,16 @@ export default function WomenSafety() {
           const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
           });
-          locationStr = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
-        } catch (e) {
+          const lat = pos.coords.latitude.toFixed(6);
+          const lon = pos.coords.longitude.toFixed(6);
+          locationStr = `https://www.google.com/maps?q=${lat},${lon}`;
+        } catch (e: any) {
           console.warn("GPS failed", e);
+          if (e.code === 1) { // PERMISSION_DENIED
+            locationStr = "Location Permission Denied";
+          } else {
+            locationStr = "Location unavailable (Error or Timeout)";
+          }
         }
       }
 

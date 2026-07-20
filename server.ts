@@ -8,6 +8,7 @@ import pg from "pg";
 import fs from "fs";
 import crypto from "crypto";
 import multer from "multer";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 

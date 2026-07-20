@@ -10,9 +10,10 @@ interface LoginScreenProps {
 
 export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) {
   const [mode, setMode] = useState<"welcome" | "phone" | "otp" | "password">("welcome");
-  const [authMethod, setAuthMethod] = useState<"phone" | "password">("phone");
+  const [authMethod, setAuthMethod] = useState<"phone" | "email" | "password">("phone");
   
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   
   const [userId, setUserId] = useState("");
@@ -339,7 +340,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
 
                   <button
                     type="submit"
-                    disabled={phone.length < 10 || isLoading}
+                    disabled={(authMethod === "phone" ? phone.length < 10 : !email.includes("@")) || isLoading}
                     className="w-full flex justify-center items-center gap-1.5 py-3 rounded-xl shadow-md text-xs font-bold text-white bg-[#FF9933] hover:bg-[#e68a2e] disabled:opacity-50 transition uppercase tracking-wider"
                   >
                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
