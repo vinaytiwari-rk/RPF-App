@@ -1064,7 +1064,7 @@ app.post("/api/auth/login", async (req, res) => {
     // Create otps table if not exists
     await pool.query(`
       CREATE TABLE IF NOT EXISTS otps (
-        phone VARCHAR(15) PRIMARY KEY,
+        phone VARCHAR(255) PRIMARY KEY,
         otp VARCHAR(10) NOT NULL,
         "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
