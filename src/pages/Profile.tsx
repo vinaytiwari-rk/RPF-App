@@ -11,36 +11,9 @@ import {
 } from "lucide-react";
 import { translations } from "../translations";
 
-type Level = { label: string; color: string; bg: string; points: number };
 
-function getMemberLevel(role: string, status: string | undefined, isVol?: boolean, isDonor?: boolean): Level {
-  if (role === "super_admin" || role === "admin") {
-    return { label: "Platinum", color: "text-blue-700", bg: "bg-blue-50 border-blue-200", points: 1000 };
-  }
-  if (isVol && isDonor) {
-    return { label: "Gold", color: "text-amber-700", bg: "bg-amber-50 border-amber-250", points: 750 };
-  }
-  if (isVol || isDonor || status === "approved") {
-    return { label: "Silver", color: "text-slate-700", bg: "bg-slate-50 border-slate-200", points: 500 };
-  }
-  if (status === "pending") {
-    return { label: "Bronze", color: "text-amber-900", bg: "bg-amber-100/50 border-amber-200", points: 250 };
-  }
-  return { label: "Member", color: "text-slate-600", bg: "bg-slate-100 border-slate-200", points: 50 };
-}
 
-type Badge = { id: string; label: string; color: string; earned: boolean };
 
-function getBadges(status: string | undefined, isVol?: boolean, isDonor?: boolean): Badge[] {
-  return [
-    { id: "citizen", label: "Citizen", color: "bg-gradient-to-br from-blue-600 to-blue-800", earned: true },
-    { id: "jan-seva", label: "Jan Seva", color: "bg-gradient-to-br from-purple-600 to-purple-800", earned: (status !== "none" && !!status) },
-    { id: "volunteer", label: "Volunteer", color: "bg-gradient-to-br from-green-600 to-green-800", earned: !!isVol },
-    { id: "donor", label: "Donor", color: "bg-gradient-to-br from-red-600 to-red-800", earned: !!isDonor },
-    { id: "community", label: "Community", color: "bg-gradient-to-br from-amber-600 to-amber-800", earned: false },
-    { id: "hero", label: "Seva Hero", color: "bg-gradient-to-br from-orange-600 to-orange-800", earned: false },
-  ];
-}
 
 export default function Profile() {
   const { user, logout, language, setLanguage } = useAuth();
@@ -68,10 +41,7 @@ export default function Profile() {
   }
 
   const initials = user.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
-  const level = getMemberLevel(user.role, user.janSevaCardStatus, user.isVolunteer, user.isDonor);
-  const badges = getBadges(user.janSevaCardStatus, user.isVolunteer, user.isDonor);
-  const earnedCount = badges.filter((b) => b.earned).length;
-
+  
 
 
   const roleLabel: Record<string, string> = {
@@ -135,10 +105,7 @@ export default function Profile() {
                 {initials}
               </div>
             </div>
-            <div className={`absolute -bottom-2 -right-1 flex items-center gap-0.5 px-2.5 py-0.5 rounded-full border border-gold-soft bg-slate-900 text-[8px] font-black uppercase tracking-widest text-[#D4AF37] shadow-lg`}>
-              <Award className="w-2.5 h-2.5" />
-              <span>{level.label}</span>
-            </div>
+            
           </div>
 
           <div className="flex-1 space-y-1.5">
@@ -153,16 +120,8 @@ export default function Profile() {
 
         {/* Stats Strip */}
         <div className="grid grid-cols-4 gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 mt-5 text-center shadow-inner">
-          <div className="flex flex-col">
-            <span className="text-sm font-extrabold text-[#D4AF37]">{earnedCount}</span>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Badges</span>
-          </div>
-          <div className="w-[1px] h-6 bg-white/10 self-center"></div>
-          <div className="flex flex-col">
-            <span className="text-sm font-extrabold text-[#D4AF37]">{level.points}</span>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Points</span>
-          </div>
-          <div className="w-[1px] h-6 bg-white/10 self-center"></div>
+          
+          
           <div className="flex flex-col">
             <span className="text-sm font-extrabold text-[#D4AF37]">
               {user.janSevaCardStatus === "approved" ? "Active" : user.janSevaCardStatus === "pending" ? "Pending" : "None"}
@@ -251,27 +210,7 @@ export default function Profile() {
           </>
         )}
 
-        {/* Achievements Card */}
-        <div className="glass-card bg-white/90 p-4 border-gold-soft shadow-gold-premium space-y-3.5">
-          <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-            <h3 className="font-display font-extrabold text-xs text-chakra-navy uppercase tracking-wider">Achievements & Badges</h3>
-            <span className="text-[9px] font-black text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-250">{earnedCount}/{badges.length} Earned</span>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            {badges.map((b) => (
-              <div key={b.id} className={`flex flex-col items-center justify-center p-2 rounded-xl border text-center transition ${
-                b.earned ? "bg-white border-[#D4AF37]/25 shadow-gold-premium" : "bg-slate-100/30 border-slate-100 opacity-40"
-              }`}>
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 shadow-md font-black text-[10px] ${
-                  b.earned ? `${b.color} border border-white/20` : "bg-slate-200 text-slate-400"
-                }`}>
-                  {b.label.slice(0, 2).toUpperCase()}
-                </div>
-                <span className={`text-[9px] font-bold ${b.earned ? "text-slate-800" : "text-slate-400"}`}>{b.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+
 
         {/* System Administration Control Card (Role-Based Visibility) */}
         {(user.role === "admin" || user.role === "super_admin" || user.role === "volunteer") && (

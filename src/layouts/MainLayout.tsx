@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Users, Bell, Activity, Globe, Search, MessageSquare, Bot, X, Send, Mic } from "lucide-react";
+import { ArrowLeft, User, Compass, Users, Bell, Activity, Globe, Search, MessageSquare, Bot, X, Send, Mic, Shield } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import AIAssistant from "../components/AIAssistant";
 
@@ -30,7 +30,16 @@ function GridIcon(props: React.SVGProps<SVGSVGElement>) {
 export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { language, setLanguage, user } = useAuth();
+  const { language, setLanguage, user, logout } = useAuth();
+  const [showGuestModal, setShowGuestModal] = useState(false);
+
+  const handleNav = (path) => {
+    if (user?.role === "guest" && (path === "/services" || path === "/community" || path === "/notifications")) {
+      setShowGuestModal(true);
+      return;
+    }
+    navigate(path);
+  };
 
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "bot"; text: string }[]>([
@@ -184,7 +193,7 @@ export default function MainLayout() {
               <Search className="w-4 h-4" />
             </button>
             <div className="relative">
-              <button onClick={() => navigate("/notifications")} className="p-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 hover:shadow-xs transition relative">
+              <button onClick={() => handleNav("/notifications")} className="p-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 hover:shadow-xs transition relative">
                 <Bell className="w-4 h-4" />
               </button>
               <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[8px] font-black border border-white">
@@ -193,7 +202,7 @@ export default function MainLayout() {
             </div>
             <button 
               className="w-8 h-8 rounded-full border border-[#D4AF37]/50 overflow-hidden shadow-sm transition hover:scale-105 active:scale-95 cursor-pointer bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-white text-xs font-black" 
-              onClick={() => navigate("/profile")}
+              onClick={() => handleNav("/profile")}
             >
               {language === "hi" ? "रा" : "RA"}
             </button>
@@ -209,7 +218,7 @@ export default function MainLayout() {
         <div className="w-full bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0">
           
           <button 
-            onClick={() => navigate("/")}
+            onClick={() => handleNav("/")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
               location.pathname === "/" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
             }`}
@@ -220,7 +229,7 @@ export default function MainLayout() {
           </button>
 
           <button 
-            onClick={() => navigate("/services")}
+            onClick={() => handleNav("/services")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
               location.pathname === "/services" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
             }`}
@@ -231,7 +240,7 @@ export default function MainLayout() {
           </button>
 
           <button 
-            onClick={() => navigate("/community")}
+            onClick={() => handleNav("/community")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
               location.pathname === "/community" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
             }`}
@@ -242,7 +251,7 @@ export default function MainLayout() {
           </button>
 
           <button 
-            onClick={() => navigate("/notifications")}
+            onClick={() => handleNav("/notifications")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
               location.pathname === "/notifications" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
             }`}
@@ -253,7 +262,7 @@ export default function MainLayout() {
           </button>
 
           <button 
-            onClick={() => navigate("/profile")}
+            onClick={() => handleNav("/profile")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
               location.pathname === "/profile" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
             }`}

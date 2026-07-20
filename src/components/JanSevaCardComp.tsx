@@ -13,50 +13,12 @@ interface JanSevaCardCompProps {
 export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardCompProps) {
   const [success, setSuccess] = useState(false);
   const [renewing, setRenewing] = useState(false);
-  const [printBlockedNotice, setPrintBlockedNotice] = useState(false);
-
-  // Badge tier color mappings
-  const getBadgeConfig = () => {
-    switch (profile.badge) {
-      case "Platinum":
-        return {
-          bg: "from-slate-700 via-zinc-800 to-slate-900 border-zinc-400",
-          text: "text-zinc-200",
-          glow: "shadow-zinc-500/20",
-          label: lang === "hi" ? "प्लैटिनम स्वयंसेवक" : "Platinum Volunteer",
-        };
-      case "Gold":
-        return {
-          bg: "from-amber-600 via-yellow-700 to-amber-800 border-yellow-300",
-          text: "text-yellow-100",
-          glow: "shadow-yellow-500/20",
-          label: lang === "hi" ? "स्वर्ण स्वयंसेवक" : "Gold Volunteer",
-        };
-      case "Silver":
-        return {
-          bg: "from-slate-500 via-gray-600 to-slate-700 border-gray-300",
-          text: "text-slate-100",
-          glow: "shadow-slate-400/20",
-          label: lang === "hi" ? "रजत स्वयंसेवक" : "Silver Volunteer",
-        };
-      case "Bronze":
-        return {
-          bg: "from-orange-600 via-amber-700 to-orange-800 border-orange-400",
-          text: "text-orange-100",
-          glow: "shadow-orange-500/20",
-          label: lang === "hi" ? "कांस्य स्वयंसेवक" : "Bronze Volunteer",
-        };
-      default:
-        return {
-          bg: "from-[#0f4c81] via-[#155e9c] to-[#0f4c81] border-[#FF9933]",
-          text: "text-[#FF9933]",
-          glow: "shadow-[#0f4c81]/20",
-          label: lang === "hi" ? "सक्रिय नागरिक" : "Active Citizen",
-        };
-    }
+  const [printBlockedNotice, setPrintBlockedNotice] = useState(false);  const badgeConfig = {
+    bg: "from-[#0f4c81] via-[#155e9c] to-[#0f4c81] border-[#FF9933]",
+    text: "text-[#FF9933]",
+    glow: "shadow-[#0f4c81]/20",
+    label: lang === "hi" ? "सक्रिय नागरिक" : "Active Citizen",
   };
-
-  const badgeConfig = getBadgeConfig();
 
   const handleRenewClick = () => {
     setRenewing(true);
@@ -126,13 +88,7 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
                   <p className="text-[8px] text-white/60 font-mono tracking-wider uppercase">{lang === "hi" ? "जिला / प्रभाग" : "DIVISION"}</p>
                   <p className="text-[10px] font-semibold truncate leading-tight uppercase">{profile.division || "Bhopal, MP"}</p>
                 </div>
-                <div>
-                  <p className="text-[8px] text-white/60 font-mono tracking-wider uppercase">{lang === "hi" ? "प्रभाव पॉइंट्स" : "POINTS"}</p>
-                  <p className="text-[11px] font-bold text-[#FF9933] flex items-center gap-0.5">
-                    <Award className="w-3 h-3 text-[#FF9933]" />
-                    {profile.points}
-                  </p>
-                </div>
+                
               </div>
               
               <div className="flex items-center gap-1.5 text-[8px] font-bold bg-[#138808]/20 px-2 py-1 rounded-sm text-white border border-[#138808]/50 uppercase tracking-wider w-fit">
@@ -214,41 +170,6 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
         )}
       </div>
 
-      {/* Gamification progress tracking */}
-      <div className="bg-white rounded-md p-5 border border-slate-200 space-y-4 max-w-lg mx-auto shadow-sm">
-        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-          <div>
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">{lang === "hi" ? "अगले स्तर की प्रगति" : "Progress to Next Level"}</span>
-            <h4 className="font-bold text-sm text-[#0f4c81] mt-1">
-              {profile.badge === "Platinum" ? "Platinum Master Level" : `${profile.badge || "Citizen"} → Upgrade Tier`}
-            </h4>
           </div>
-          <div className="h-9 w-9 bg-[#FF9933]/10 rounded-sm flex items-center justify-center border border-[#FF9933]/30 text-[#FF9933]">
-            <Award className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex justify-between text-[11px] font-bold text-slate-600 uppercase">
-            <span>{profile.points} / {profile.badge === "Gold" ? "500" : profile.badge === "Silver" ? "300" : profile.badge === "Bronze" ? "150" : "50"} PTS</span>
-            <span className="text-[#0f4c81]">
-              {profile.badge === "Platinum" ? "100%" : `${Math.min(100, Math.round((profile.points / (profile.badge === "Gold" ? 500 : profile.badge === "Silver" ? 300 : profile.badge === "Bronze" ? 150 : 50)) * 100))}%`}
-            </span>
-          </div>
-          <div className="h-2 bg-slate-100 rounded-sm overflow-hidden border border-slate-200">
-            <div 
-              style={{ width: `${profile.badge === "Platinum" ? 100 : Math.min(100, Math.round((profile.points / (profile.badge === "Gold" ? 500 : profile.badge === "Silver" ? 300 : profile.badge === "Bronze" ? 150 : 50)) * 100))}%` }}
-              className="h-full bg-gradient-to-r from-[#FF9933] to-[#e68a2e]"
-            />
-          </div>
-        </div>
-
-        <p className="text-[10px] text-slate-500 font-medium leading-relaxed bg-slate-50 p-2 rounded-sm border border-slate-100">
-          <span className="font-bold text-slate-700">INFO:</span> {lang === "hi" 
-            ? "स्वयंसेवक अभियानों में भाग लेने, सहायता पोस्ट को पूरा करने या शिकायतें दर्ज कर निराकरण में मदद करने पर आपको 'प्रभाव पॉइंट्स' मिलते हैं।" 
-            : "Contribute to community tasks, join camps, or resolve verified local complaints to earn impact points and auto-elevate your badges."}
-        </p>
-      </div>
-    </div>
   );
 }
