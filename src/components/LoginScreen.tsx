@@ -26,6 +26,26 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.includes("@")) {
+      setIsLoading(true);
+      setError(null);
+      try {
+        await axios.post('/api/auth/login-email', { email });
+        // Since we reuse the "phone" mode for verification layout, we'll store email in phone state for verify endpoint
+        setPhone(email); 
+        setMode("otp");
+      } catch (err: any) {
+        console.error("Email Send Error:", err);
+        setError("Failed to send verification code. Please check your email address.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (phone.length === 10) {
@@ -322,6 +342,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                 </div>
               </div>
 
+              
               {/* Auth Method Tabs */}
               <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
                 <button
@@ -333,7 +354,18 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                   }`}
                 >
                   <Smartphone className="w-3 h-3" />
-                  Mobile OTP
+                  Mobile
+                </button>
+                <button
+                  onClick={() => setAuthMethod("email")}
+                  className={`flex-1 py-1.5 text-[9px] font-bold rounded uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                    authMethod === "email" 
+                      ? "bg-white text-[#138808] shadow-sm border border-slate-200" 
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  <Mail className="w-3 h-3" />
+                  Email
                 </button>
                 <button
                   onClick={() => setAuthMethod("password")}
@@ -348,6 +380,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                 </button>
               </div>
 
+
               {error && (
                 <div className="p-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[10px] font-bold flex items-start gap-1.5 animate-fadeIn">
                   <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
@@ -355,6 +388,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                 </div>
               )}
 
+              
               {authMethod === "phone" ? (
                 <form onSubmit={handlePhoneSubmit} className="space-y-3.5">
                   <div className="space-y-1.5">
@@ -379,7 +413,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
 
                   <button
                     type="submit"
-                    disabled={(authMethod === "phone" ? phone.length < 10 : !email.includes("@")) || isLoading}
+                    disabled={phone.length < 10 || isLoading}
                     className="w-full flex justify-center items-center gap-1.5 py-3 rounded-xl shadow-md text-xs font-bold text-white bg-[#FF9933] hover:bg-[#e68a2e] disabled:opacity-50 transition uppercase tracking-wider"
                   >
                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
@@ -387,7 +421,39 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                     )}
                   </button>
                 </form>
+              ) : authMethod === "email" ? (
+                <form onSubmit={handleEmailSubmit} className="space-y-3.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block ml-1">
+                      {lang === "hi" ? "अपना ईमेल" : "Enter Email Address"}
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail className="h-3.5 w-3.5 text-[#138808]" />
+                      </div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="block w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl focus:border-[#138808] outline-none text-xs font-bold text-slate-800 bg-slate-50 transition placeholder-slate-350"
+                        placeholder="volunteer@example.com"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!email.includes("@") || isLoading}
+                    className="w-full flex justify-center items-center gap-1.5 py-3 rounded-xl shadow-md text-xs font-bold text-white bg-[#138808] hover:bg-[#0e6606] disabled:opacity-50 transition uppercase tracking-wider"
+                  >
+                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                      <span>{lang === "hi" ? "ओटीपी प्राप्त करें" : "Get Verification OTP"}</span>
+                    )}
+                  </button>
+                </form>
               ) : (
+
                 <form onSubmit={handlePasswordSubmit} className="space-y-3">
                   <div className="space-y-2">
                     <div className="space-y-1.5">
