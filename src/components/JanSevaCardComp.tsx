@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { UserProfile } from "../types";
 import { Award, QrCode, RefreshCw, CheckCircle, Shield, AlertCircle, Camera, Award as BadgeIcon } from "lucide-react";
+import QRCode from "react-qr-code";
 
 interface JanSevaCardCompProps {
   lang: "hi" | "en";
@@ -68,8 +69,7 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
   };
 
   // Generate dynamic verification QR link
-  const verifyUrl = `${window.location.origin}/verify?id=${profile.janSevaId}`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`;
+  const verifyUrl = `https://jansevacard.therpfoundation.org/verify?id=${profile.janSevaId}`;
 
   return (
     <div className="space-y-6" id="jan-seva-card-section">
@@ -143,12 +143,16 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
 
             {/* QR Code section */}
             <div className="w-[85px] flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 p-1.5 shrink-0">
-              <img 
-                src={qrCodeUrl} 
-                alt="QR Code Verification" 
-                className="w-full aspect-square bg-white rounded-sm p-0.5"
-                referrerPolicy="no-referrer"
-              />
+              <div className="w-full aspect-square bg-white rounded-sm p-1 flex items-center justify-center">
+                <QRCode 
+                  value={verifyUrl} 
+                  size={150} 
+                  style={{ height: "auto", maxWidth: "100%", width: "100%" }} 
+                  bgColor="#FFFFFF" 
+                  fgColor="#000000" 
+                  level="Q"
+                />
+              </div>
               <p className="text-[7px] text-white/80 font-mono mt-1 select-none flex items-center gap-0.5 font-bold tracking-wider">
                 <QrCode className="w-2.5 h-2.5" />
                 {lang === "hi" ? "सत्यापन कोड" : "SCAN VERIFY"}
