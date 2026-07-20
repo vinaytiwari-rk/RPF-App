@@ -392,23 +392,21 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
           )}
 
           
-          {mode === "registerForm" && (
-            <div className="absolute inset-0 z-50 bg-white/50 backdrop-blur-sm p-4 flex items-center justify-center">
-              <div className="w-full h-full max-h-[750px] relative">
-                <VolunteerRegistrationWizard 
-                  onBack={() => setMode("welcome")} 
-                  onComplete={async (username, pass) => {
-                    // Automatically log them in with the new credentials
-                    const uid = "usr_" + username;
-                    await onLoginSuccess("volunteer", { id: uid, name: "Volunteer (" + username + ")" });
-                  }} 
-                />
-              </div>
-            </div>
-          )}
-
+          {/* mode === "registerForm" has been moved outside */}
         </div>
       </div>
+
+      {mode === "registerForm" && (
+        <div className="absolute inset-0 z-50 bg-slate-50 sm:rounded-3xl shadow-2xl">
+          <VolunteerRegistrationWizard 
+            onBack={() => setMode("welcome")} 
+            onComplete={async (username, pass) => {
+              const uid = "usr_" + username;
+              await onLoginSuccess("volunteer", { id: uid, name: "Volunteer (" + username + ")" });
+            }} 
+          />
+        </div>
+      )}
 
       {/* Footer Strip */}
       <div className="w-full pb-4 text-center shrink-0 z-10">
