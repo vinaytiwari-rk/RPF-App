@@ -40,3 +40,5 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+            Seva-Hub/**
+            Seva-Hub
