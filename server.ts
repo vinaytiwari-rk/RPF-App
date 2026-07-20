@@ -717,7 +717,6 @@ app.get("/api/gov/mandi-prices", async (req, res) => {
   
   if (apiKey && apiKey !== "MOCK_KEY") {
     try {
-      const axios = (await import('axios')).default;
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state as string)}`;
       if (commodity) url += `&filters[commodity]=${encodeURIComponent(commodity as string)}`;
@@ -748,7 +747,6 @@ app.get("/api/gov/hospitals", async (req, res) => {
   
   if (apiKey && apiKey !== "MOCK_KEY") {
     try {
-      const axios = (await import('axios')).default;
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state as string)}`;
       if (district) url += `&filters[district]=${encodeURIComponent(district as string)}`;
