@@ -12,6 +12,20 @@ jobs:
       - name: Get latest code
         uses: actions/checkout@v3
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Allow dist in FTP
+        run: sed -i '/dist\//d' .gitignore || true
+
       - name: Trigger cPanel Node.js Restart
         run: echo "App restarted by GitHub Actions on $(date)" > restart.txt
 
@@ -22,3 +36,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
