@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import Volunteers from "../components/Volunteers";
 import { useAuth } from "../context/AuthContext";
 import { UserProfile, Camp } from "../types";
-import { supabase } from "../lib/supabaseClient";
+import axios from 'axios';
 
 export default function VolunteersPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -14,9 +14,7 @@ export default function VolunteersPage() {
   useEffect(() => {
     const fetchCamps = async () => {
       try {
-        const { data, error } = await supabase
-          .from("camps")
-          .select("*");
+        const response = await axios.get('/api/camps'); const data = response.data.data || response.data.camps; const error = null;
         if (error) throw error;
         setCamps(data || []);
       } catch (error) {
@@ -47,10 +45,7 @@ export default function VolunteersPage() {
       const camp = camps.find(c => c.id === campId);
       const nextCount = (camp?.registeredCount || 0) + 1;
       
-      const { error } = await supabase
-        .from("camps")
-        .update({ registeredCount: nextCount })
-        .eq("id", campId);
+      await axios.put('/api/camps/' + campId, { registeredCount: nextCount }); const error = null;
       if (error) throw error;
 
       setCamps(prev => prev.map(c => c.id === campId ? { ...c, registeredCount: nextCount } : c));
@@ -62,15 +57,13 @@ export default function VolunteersPage() {
   const handleRegisterVolunteer = async (skills: string) => {
     await updateUser({ isVolunteer: true, interests: skills.split(", ") });
     try {
-      const { error } = await supabase
-        .from("volunteers")
-        .insert([{
+      await axios.post('/api/volunteers', {
           userId: user?.id || "guest",
           name: user?.name || "Citizen",
           phone: user?.phone || "9999999999",
           skills: skills,
           registeredAt: new Date().toISOString()
-        }]);
+        }); const error = null;
       if (error) throw error;
     } catch (error) {
       console.error("Supabase register volunteer error:", error);

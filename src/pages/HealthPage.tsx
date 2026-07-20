@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import HealthBlood from "../components/HealthBlood";
 import { BloodDonor } from "../types";
-import { supabase } from "../lib/supabaseClient";
+import axios from 'axios';
 
 export default function HealthPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -12,9 +12,7 @@ export default function HealthPage() {
   useEffect(() => {
     const fetchDonors = async () => {
       try {
-        const { data, error } = await supabase
-          .from("blood_donors")
-          .select("*");
+        const response = await axios.get('/api/blood_donors'); const data = response.data.data || response.data.blood_donors; const error = null;
         if (error) throw error;
         setDonors(data || []);
       } catch (error) {
@@ -28,9 +26,7 @@ export default function HealthPage() {
 
   const handleAddDonor = async (newDonor: BloodDonor) => {
     try {
-      const { error } = await supabase
-        .from("blood_donors")
-        .insert([newDonor]);
+      await axios.post('/api/blood_donors', newDonor); const error = null;
       if (error) throw error;
       setDonors(prev => [newDonor, ...prev]);
     } catch (error) {

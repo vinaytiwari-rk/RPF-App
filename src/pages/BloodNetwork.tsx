@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Activity, AlertTriangle, Droplet, Heart, Search, ChevronRight, CheckCircle, MapPin, Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-// import { supabase } from "../lib/supabaseClient";
+// import axios from 'axios';
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 

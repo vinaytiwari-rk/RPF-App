@@ -29,7 +29,7 @@ import {
   Play,
   Globe
 } from "lucide-react";
-import { supabase } from "../lib/supabaseClient";
+import axios from 'axios';
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 
@@ -107,10 +107,9 @@ export default function Community() {
   ───────────────────────────────────── */
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from("community_posts")
-        .select("*")
-        .order("createdAt", { ascending: false });
+      const response = await axios.get('/api/community_posts');
+      const data = response.data.data;
+      const error = null;
       if (error) throw error;
       setPosts(data || []);
     } catch (err) {
@@ -122,10 +121,9 @@ export default function Community() {
 
   const fetchCampaigns = async () => {
     try {
-      const { data, error } = await supabase
-        .from("campaigns")
-        .select("*")
-        .order("createdAt", { ascending: false });
+      const response = await axios.get('/api/campaigns');
+      const data = response.data.campaigns || response.data.data;
+      const error = null;
       if (error) throw error;
       setCampaigns(data || []);
     } catch (err) {
@@ -150,9 +148,7 @@ export default function Community() {
     if (!postText.trim()) return;
     setIsPosting(true);
     try {
-      const { error } = await supabase
-        .from("community_posts")
-        .insert([{
+      await axios.post('/api/community_posts', {
           authorName: user?.displayName ?? user?.name ?? "Anonymous Citizen",
           authorPhone: user?.phone ?? "",
           authorRole: user?.role ?? "citizen",
@@ -164,7 +160,7 @@ export default function Community() {
           likes: 0,
           likedByMe: false,
           createdAt: new Date().toISOString()
-        }]);
+        }); const error = null;
       if (error) throw error;
       setPostText("");
       setPostLocation("");
@@ -190,13 +186,8 @@ export default function Community() {
       // Update local state first for instant response
       setPosts(prev => prev.map(p => p.id === post.id ? { ...p, likedByMe: nextLiked, likes: nextLikes } : p));
       
-      const { error } = await supabase
-        .from("community_posts")
-        .update({
-          likes: nextLikes,
-          likedByMe: nextLiked
-        })
-        .eq("id", post.id);
+      await axios.put('/api/community_posts/' + post.id, { likes: nextLikes,
+          likedByMe: nextLiked }); const error = null;
       if (error) throw error;
     } catch (err) {
       console.error("Like error:", err);

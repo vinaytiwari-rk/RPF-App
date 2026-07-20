@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Shield, AlertOctagon, Phone, User, Plus, Heart, HelpCircle, CheckCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-// import { supabase } from "../lib/supabaseClient";
+// import axios from 'axios';
 
 export default function WomenSafety() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();

@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
-// import { supabase } from "../lib/supabaseClient";
+// import axios from 'axios';
 
 /* ─────────────────────────────────────────────
    Types

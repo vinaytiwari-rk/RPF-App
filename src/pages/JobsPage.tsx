@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { Briefcase, MapPin, DollarSign, UploadCloud, CheckCircle, ArrowLeft, Info, Calendar } from "lucide-react";
-// import { supabase } from "../lib/supabaseClient";
+// import axios from 'axios';
 import { useAuth } from "../context/AuthContext";
 
 interface Job {

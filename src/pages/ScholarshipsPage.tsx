@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { GraduationCap, Award, CheckCircle, UploadCloud, BookOpen, ArrowLeft, Info, Calendar } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-// import { supabase } from "../lib/supabaseClient";
+// import axios from 'axios';
 
 interface Scholarship {
   id: string;

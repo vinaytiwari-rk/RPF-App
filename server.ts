@@ -12,7 +12,7 @@ import multer from "multer";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 300;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
 
 app.use(express.json());
 
@@ -65,7 +65,95 @@ async function queryExternalSearch(searchQuery: string): Promise<{ title: string
     "Upgrade-Insecure-Requests": "1"
   };
 
-  // ═══════════════════════════════════════════════════════════════
+  
+// =============================================================================
+// MISSING SUPABASE MIGRATION ENDPOINTS
+// =============================================================================
+
+// --- community_posts ---
+app.get("/api/community_posts", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM community_posts ORDER BY "createdAt" DESC');
+    res.json({ data: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/community_posts", async (req, res) => {
+  try {
+    const { authorName, authorPhone, authorRole, textEn, textHi, segment, location, imageUrl, likes, likedByMe, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO community_posts (id, "authorName", "authorPhone", "authorRole", "textEn", "textHi", segment, location, "imageUrl", likes, "likedByMe", "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [id, authorName, authorPhone, authorRole, textEn, textHi, segment, location, imageUrl, likes, likedByMe, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put("/api/community_posts/:id", async (req, res) => {
+  try {
+    const { likes, likedByMe } = req.body;
+    await pool.query('UPDATE community_posts SET likes = $1, "likedByMe" = $2 WHERE id = $3', [likes, likedByMe, req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- support_requests (FoodSupport) ---
+app.post("/api/support_requests", async (req, res) => {
+  try {
+    const { citizenName, citizenPhone, requestType, location, description, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO support_requests (id, "citizenName", "citizenPhone", "requestType", location, description, status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, citizenName, citizenPhone, requestType, location, description, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- sos_alerts (WomenSafety) ---
+app.post("/api/sos_alerts", async (req, res) => {
+  try {
+    const { citizenName, citizenPhone, location, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO sos_alerts (id, "citizenName", "citizenPhone", location, status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, citizenName, citizenPhone, location, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- scholarships ---
+app.post("/api/scholarships", async (req, res) => {
+  try {
+    const { studentName, phone, educationLevel, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO scholarships (id, "studentName", phone, "educationLevel", status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, studentName, phone, educationLevel, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
   // TIER 1: Tavily AI (Primary)
   // ═══════════════════════════════════════════════════════════════
   if (tavilyKey) {

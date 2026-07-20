@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { HandHelping, MapPin, CheckCircle, Apple, ArrowLeft, Info, Calendar, Users, Award } from "lucide-react";
-// import { supabase } from "../lib/supabaseClient";
+// import axios from 'axios';
 import { useAuth } from "../context/AuthContext";
 
 interface KitchenCenter {
