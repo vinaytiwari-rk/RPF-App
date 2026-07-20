@@ -499,6 +499,1689 @@ app.post("/api/ai/categorize", async (req, res) => {
     return res.status(400).json({ error: "Title and description are required" });
   }
 
+  const safeDefault = {
+    category: "Uncategorized",
+    urgency: "Pending Review",
+    summary: title ? title.substring(0, 50) + "..." : "Complaint under review"
+  };
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn("AI Categorization skipped: No GEMINI_API_KEY provided.");
+    return res.json(safeDefault);
+  }
+
+  try {
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `You are an auto-triage AI for RP Foundation's Grievance Redressal system. Your task is to categorize citizens' complaints.
+Analyze the following title and description of a complaint, and return a JSON object with:
+1. "category": strictly one of ["Water Supply", "Roads & Transit", "Sanitation & Waste", "Education & Schools", "Healthcare Facilities", "Street Lights & Power", "Others"]
+2. "urgency": strictly one of ["Low", "Medium", "High", "Critical"]
+3. "summary": a single compact summary line (in Hindi if complaint is in Hindi, otherwise English).
+
+Complaint Title: "${title}"
+Complaint Description: "${description}"`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            category: { type: Type.STRING },
+            urgency: { type: Type.STRING },
+            summary: { type: Type.STRING }
+          },
+          required: ["category", "urgency", "summary"]
+        }
+      }
+    });
+
+    const result = JSON.parse(response.text || "{}");
+    res.json(result);
+  } catch (error: any) {
+    console.error("AI Categorization Error:", error);
+    // Return safe default instead of crashing frontend
+    res.json(safeDefault);
+  }
+}); GoogleGenAI, Type } from "@google/genai";
+import dotenv from "dotenv";
+import * as cheerio from "cheerio";
+import pg from "pg";
+import fs from "fs";
+import crypto from "crypto";
+import multer from "multer";
+import nodemailer from "nodemailer";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
+
+app.use(express.json());
+
+// PostgreSQL Pool Connection
+const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+const pool = new pg.Pool({
+  connectionString: dbUrl,
+  ssl: dbUrl && (dbUrl.includes("localhost") || dbUrl.includes("127.0.0.")) ? false : { rejectUnauthorized: false }
+});
+
+// Lazy-loaded Gemini AI client helper
+let aiClient: GoogleGenAI | null = null;
+function getGeminiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_SEARCH_API_KEY || process.env.VITE_GOOGLE_SEARCH_API_KEY;
+    if (!apiKey) {
+      console.warn("WARNING: GEMINI_API_KEY or GOOGLE_SEARCH_API_KEY environment variable is not set. AI Features will use mock mode.");
+    }
+    aiClient = new GoogleGenAI({
+      apiKey: apiKey || "MOCK_KEY",
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  }
+  return aiClient;
+}
+
+// Unified search helper using a 4-Tier Multi-Engine Search Cluster
+async function queryExternalSearch(searchQuery: string): Promise<{ title: string, link: string, url: string, snippet: string, displayLink: string }[]> {
+  const tavilyKey = process.env.TAVILY_API_KEY;
+  const targetDomains = [
+    "gov.in",
+    "nic.in",
+    "mp.gov.in",
+    "bhaskar.com",
+    "jagran.com",
+    "ndtv.com",
+    "timesofindia.indiatimes.com",
+    "hindustantimes.com",
+    "wikipedia.org"
+  ];
+
+  const browserHeaders = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Upgrade-Insecure-Requests": "1"
+  };
+
+  
+// =============================================================================
+// MISSING SUPABASE MIGRATION ENDPOINTS
+// =============================================================================
+
+// --- community_posts ---
+app.get("/api/community_posts", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM community_posts ORDER BY "createdAt" DESC');
+    res.json({ data: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/community_posts", async (req, res) => {
+  try {
+    const { authorName, authorPhone, authorRole, textEn, textHi, segment, location, imageUrl, likes, likedByMe, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO community_posts (id, "authorName", "authorPhone", "authorRole", "textEn", "textHi", segment, location, "imageUrl", likes, "likedByMe", "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [id, authorName, authorPhone, authorRole, textEn, textHi, segment, location, imageUrl, likes, likedByMe, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put("/api/community_posts/:id", async (req, res) => {
+  try {
+    const { likes, likedByMe } = req.body;
+    await pool.query('UPDATE community_posts SET likes = $1, "likedByMe" = $2 WHERE id = $3', [likes, likedByMe, req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- support_requests (FoodSupport) ---
+app.post("/api/support_requests", async (req, res) => {
+  try {
+    const { citizenName, citizenPhone, requestType, location, description, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO support_requests (id, "citizenName", "citizenPhone", "requestType", location, description, status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, citizenName, citizenPhone, requestType, location, description, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- sos_alerts (WomenSafety) ---
+app.post("/api/sos_alerts", async (req, res) => {
+  try {
+    const { citizenName, citizenPhone, location, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO sos_alerts (id, "citizenName", "citizenPhone", location, status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, citizenName, citizenPhone, location, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- scholarships ---
+app.post("/api/scholarships", async (req, res) => {
+  try {
+    const { studentName, phone, educationLevel, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO scholarships (id, "studentName", phone, "educationLevel", status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, studentName, phone, educationLevel, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+  // TIER 1: Tavily AI (Primary)
+  // ═══════════════════════════════════════════════════════════════
+  if (tavilyKey) {
+    try {
+      console.log(`[Search/Tier-1/Tavily] Querying: "${searchQuery}"`);
+      const response = await axios.post(
+        "https://api.tavily.com/search",
+        {
+          api_key: tavilyKey,
+          query: searchQuery,
+          include_domains: targetDomains,
+          max_results: 5
+        },
+        {
+          timeout: 4000
+        }
+      );
+
+      const items = response.data.results ?? [];
+      if (items.length > 0) {
+        return items.slice(0, 3).map((item: any) => {
+          let host = "";
+          try {
+            host = new URL(item.url).hostname;
+          } catch {
+            host = "tavily.com";
+          }
+          return {
+            title: (item.title ?? "").slice(0, 120),
+            link: item.url ?? "",
+            url: item.url ?? "",
+            snippet: (item.content ?? "").replace(/\n/g, " ").slice(0, 260),
+            displayLink: host
+          };
+        });
+      }
+    } catch (err: any) {
+      console.warn(`[Search/Tier-1/Tavily] Failed: ${err.message}. Cascading to Tier 2...`);
+    }
+  } else {
+    console.warn(`[Search/Tier-1/Tavily] TAVILY_API_KEY is not set. Cascading to Tier 2...`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 2: DuckDuckGo HTML Scraper
+  // ═══════════════════════════════════════════════════════════════
+  try {
+    const constrainedQuery = `${searchQuery} site:gov.in`;
+    console.log(`[Search/Tier-2/DDG-Scraper] Querying: "${constrainedQuery}"`);
+    const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(constrainedQuery)}`;
+    
+    const response = await axios.get(ddgUrl, {
+      headers: browserHeaders,
+      timeout: 4500
+    });
+
+    const $ = cheerio.load(response.data);
+    const results: { title: string, link: string, url: string, snippet: string, displayLink: string }[] = [];
+
+    $(".result").each((_, el) => {
+      if (results.length >= 3) return;
+
+      const title = $(el).find(".result__title").text().trim();
+      const rawLink = $(el).find(".result__url").attr("href");
+      const snippet = $(el).find(".result__snippet").text().trim();
+
+      if (title && rawLink) {
+        let link = rawLink;
+        if (rawLink.startsWith("//")) {
+          link = "https:" + rawLink;
+        } else if (rawLink.startsWith("/l/?kh=")) {
+          try {
+            const urlObj = new URL("https://html.duckduckgo.com" + rawLink);
+            const uddg = urlObj.searchParams.get("uddg");
+            if (uddg) {
+              link = decodeURIComponent(uddg);
+            }
+          } catch {
+            // fallback
+          }
+        }
+
+        let host = "duckduckgo.com";
+        try {
+          host = new URL(link).hostname;
+        } catch {
+          // fallback
+        }
+
+        results.push({
+          title: title.slice(0, 120),
+          link,
+          url: link,
+          snippet: snippet.replace(/\n/g, " ").slice(0, 260),
+          displayLink: host
+        });
+      }
+    });
+
+    if (results.length > 0) {
+      return results;
+    }
+    console.warn(`[Search/Tier-2/DDG-Scraper] No results found or blocked. Cascading to Tier 3...`);
+  } catch (err: any) {
+    console.warn(`[Search/Tier-2/DDG-Scraper] Failed: ${err.message}. Cascading to Tier 3...`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 3: SearXNG Public Instance Cluster
+  // ═══════════════════════════════════════════════════════════════
+  try {
+    console.log(`[Search/Tier-3/SearXNG] Dynamic instance lookup...`);
+    const spaceRes = await axios.get("https://searx.space/data/instances.json", {
+      timeout: 3000
+    });
+    const instances = spaceRes.data?.instances || {};
+    const healthyUrls: string[] = [];
+    for (const [domain, info] of Object.entries(instances)) {
+      const details = info as any;
+      if (details.http?.status_code === 200 && details.uptime?.uptimeDay > 95) {
+        const url = domain.startsWith("http") ? domain : `https://${domain}`;
+        healthyUrls.push(url.endsWith("/") ? url : url + "/");
+      }
+    }
+
+    if (healthyUrls.length > 0) {
+      // Try the top 3 healthy SearXNG instances in order
+      for (const instanceUrl of healthyUrls.slice(0, 3)) {
+        const searchUrl = `${instanceUrl}search`;
+        try {
+          console.log(`[Search/Tier-3/SearXNG] Trying instance: ${searchUrl}`);
+          const res = await axios.get(searchUrl, {
+            params: {
+              q: `${searchQuery} site:gov.in`,
+              format: "json"
+            },
+            headers: browserHeaders,
+            timeout: 3500
+          });
+
+          if (res.data && typeof res.data === "object" && Array.isArray(res.data.results)) {
+            const items = res.data.results || [];
+            if (items.length > 0) {
+              return items.slice(0, 3).map((item: any) => {
+                let host = "searxng.org";
+                try {
+                  host = new URL(item.url).hostname;
+                } catch {
+                  // fallback
+                }
+                return {
+                  title: (item.title ?? "").slice(0, 120),
+                  link: item.url ?? "",
+                  url: item.url ?? "",
+                  snippet: (item.content ?? "").replace(/\n/g, " ").slice(0, 260),
+                  displayLink: host
+                };
+              });
+            }
+          }
+        } catch (err: any) {
+          console.warn(`[Search/Tier-3/SearXNG] Instance ${searchUrl} failed: ${err.message}`);
+        }
+      }
+    }
+    console.warn(`[Search/Tier-3/SearXNG] Cluster search failed or rate-limited. Cascading to Tier 4...`);
+  } catch (err: any) {
+    console.warn(`[Search/Tier-3/SearXNG] Dynamic discovery failed: ${err.message}. Cascading to Tier 4...`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 4: Wikipedia & Open Knowledge API
+  // ═══════════════════════════════════════════════════════════════
+  try {
+    console.log(`[Search/Tier-4/Wikipedia] Querying: "${searchQuery}"`);
+    const wikiUrl = "https://en.wikipedia.org/w/api.php";
+    const res = await axios.get(wikiUrl, {
+      params: {
+        action: "query",
+        list: "search",
+        srsearch: searchQuery,
+        format: "json",
+        utf8: 1,
+        origin: "*"
+      },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+      },
+      timeout: 4000
+    });
+
+    const items = res.data?.query?.search || [];
+    if (items.length > 0) {
+      return items.slice(0, 3).map((item: any) => ({
+        title: item.title,
+        link: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+        url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+        snippet: (item.snippet ?? "").replace(/<span class="searchmatch">/g, "").replace(/<\/span>/g, "").slice(0, 260),
+        displayLink: "en.wikipedia.org"
+      }));
+    }
+  } catch (err: any) {
+    console.error("[Search/Tier-4/Wikipedia] Failed completely:", err.message);
+  }
+
+  return [];
+}
+
+// Helper function for elegant server-side fallback when Gemini is unavailable
+async function handleOfflineFallback(message: string, language: string, res: any) {
+  const query = message.toLowerCase();
+  
+  // Auto-detect Hindi (either Devanagari or common Hinglish words)
+  const hasDevanagari = /[\u0900-\u097F]/.test(message);
+  const commonHinglish = ["kya", "hai", "kaise", "kab", "karo", "naam", "sewa", "chahiye", "chal", "raha", "hoga", "apna", "banao", "madad", "namaste", "namaskar", "aaj"];
+  const isHinglish = commonHinglish.some(word => query.includes(word));
+  const isHi = language === "hi" || hasDevanagari || isHinglish;
+
+  // General Status Check ("aaj kya chal raha hai" / "today")
+  if (query.includes("aaj") || query.includes("today") || query.includes("kya chal") || query.includes("status") || query.includes("whats up")) {
+    const reply = isHi
+      ? "नमस्ते! आज आरपी फाउंडेशन के तहत **पर्यावरण संरक्षण अभियान**, **निःशुल्क स्वास्थ्य जांच शिविर**, और **जन सेवा कार्ड पंजीकरण** की सेवाएं सक्रिय रूप से चल रही हैं। आप इनमें से किस सेवा के बारे में जानकारी प्राप्त करना चाहते हैं?"
+      : "Hello! Today at the RP Foundation, our **Environment Protection Drive**, **Free Health Checkup Camps**, and **Jan Seva Card Registrations** are actively running. Which service would you like to know more about?";
+    return res.json({ response: reply });
+  }
+
+  // RP Foundation Motive / Purpose Check
+  if (query.includes("motive") || query.includes("purpose") || query.includes("dhyey") || query.includes("aim") || (query.includes("rp") && query.includes("kya")) || (query.includes("foundation") && query.includes("kya"))) {
+    const reply = isHi
+      ? "**आरपी फाउंडेशन (RP Foundation)** एक गैर-सरकारी संगठन (NGO) है जो समाज कल्याण, स्वास्थ्य सहायता, निःशुल्क शिक्षा सहयोग, सामुदायिक स्वयंसेवा और डिजिटल सशक्तिकरण (जैसे जन सेवा कार्ड) के लिए समर्पित है। हमारा ध्येय **'सेवा, समर्पण, संकल्प'** है।"
+      : "**RP Foundation** is a non-governmental organization (NGO) dedicated to social welfare, healthcare assistance, educational support, community volunteering, and digital empowerment (such as the Jan Seva Card). Our motto is **'Service, Dedication, Resolve'**.";
+    return res.json({ response: reply });
+  }
+
+  // Founder Check
+  if (query.includes("founder") || query.includes("sanchalak") || query.includes("kisne banaya") || query.includes("founder kon") || query.includes("rohit")) {
+    const reply = isHi
+      ? "आरपी फाउंडेशन (RP Foundation) के संस्थापक **रोहित पंडित** (रोहित सर) हैं। उनके नेतृत्व में फाउंडेशन समाज के गरीब और पिछड़े वर्गों की सहायता के लिए कई कल्याणकारी योजनाएं चला रहा है।"
+      : "RP Foundation was founded by **Rohit Pandit** (Rohit Sir). Under his guidance, the foundation carries out multiple community welfare programs, health camps, and free education drives.";
+    return res.json({ response: reply });
+  }
+
+  // 1. Simple Keyword Matcher on server side
+  if (query.includes("card") || query.includes("कार्ड") || query.includes("jan seva") || query.includes("जन सेवा")) {
+    const reply = isHi 
+      ? "**जन सेवा कार्ड** आरपी फाउंडेशन का आपका digital identity pass है।\n\n📋 **आवेदन के चरण:**\n1. Go to *Services → Jan Seva Card*.\n2. Fill Name, DOB and upload a valid ID document.\n3. Your Aadhaar is masked for privacy.\n4. Once approved, download your QR-enabled digital pass."
+      : "**Jan Seva Card** is your digital identity pass from RP Foundation.\n\n📋 **Steps to Apply:**\n1. Go to *Services → Jan Seva Card*.\n2. Fill Name, DOB and upload a valid ID document.\n3. Your Aadhaar is masked for privacy — never stored as plain text.\n4. Once approved, download your QR-enabled digital pass.";
+    return res.json({ response: reply });
+  }
+
+  if (query.includes("blood") || query.includes("रक्त") || query.includes("ब्लड") || query.includes("donor")) {
+    const reply = isHi
+      ? "**रक्त नेटवर्क (Blood Network)** — आपातकालीन या स्वैच्छिक रक्तदान।\n\n🩸 **रक्त अनुरोध:** आवश्यक ग्रुप, अस्पताल का नाम और यूनिट दर्ज करें।\n🩸 **रक्तदाता पंजीकरण:** ब्लड टाइप और अंतिम दान तिथि सबमिट करें।"
+      : "**Blood Network** — Emergency or voluntary blood donation.\n\n🩸 **Request Blood:** Post your required group, hospital name and units needed.\n🩸 **Register as Donor:** Submit blood type, last donation date.";
+    return res.json({ response: reply });
+  }
+
+  if (query.includes("volunteer") || query.includes("स्वयंसेवक") || query.includes("seva")) {
+    const reply = isHi
+      ? "**RP Foundation में स्वयंसेवक बनें।**\n\n🤝 **कैसे जुड़ें:**\n1. *सेवाएं → स्वयंसेवक अवसर* पर जाएं।\n2. कौशल श्रेणी चुनें: शिक्षण, IT, क्षेत्र कार्य, स्वास्थ्य।\n3. सप्ताहांत अभियानों, भोजन शिविरों के लिए साइन अप करें।"
+      : "**Volunteer Opportunities** at RP Foundation.\n\n🤝 **How to Join:**\n1. Go to *Services → Volunteer Opportunities*.\n2. Choose a skill: Teaching, IT, Field Work, Healthcare.\n3. Sign up for weekend drives, food camps, plantation events.";
+    return res.json({ response: reply });
+  }
+
+  if (query.includes("donate") || query.includes("दान") || query.includes("donation")) {
+    const reply = isHi
+      ? "**आरपी फाउंडेशन को दान करें** — आपका योगदान जीवन बदलता है।\n\n💛 **त्वरित विकल्प:** ₹500 / ₹1000 / ₹5000 या कस्टम राशि।\n📜 **80G सर्टिफिकेट:** स्वत: निर्मित कर-छूट PDF।"
+      : "**Donate to RP Foundation** — Your contribution changes lives.\n\n💛 **Quick options:** ₹500 / ₹1000 / ₹5000 or a custom amount.\n📜 **80G Certificate:** Auto-generated tax-exemption PDF.";
+    return res.json({ response: reply });
+  }
+  // 2. Web Search Fallback using unified query helper
+  try {
+    const results = await queryExternalSearch(message);
+    if (results && results.length > 0) {
+      let reply = isHi 
+        ? "मुझे इसके बारे में वेब से ये परिणाम मिले हैं:\n\n" 
+        : "I found the following results from the web:\n\n";
+      results.forEach((r: any) => {
+        reply += `🔗 **[${r.title}](${r.link})**\n${r.snippet}\n\n`;
+      });
+      return res.json({ response: reply });
+    }
+  } catch (e) {
+    // Ignore search errors and fall through
+  }
+
+  // Default fallback answer
+  const defaultReply = isHi
+    ? "नमस्ते! मैं आपकी खोज में सहायता करने की कोशिश कर रहा हूँ। अधिक विशिष्ट प्रश्न पूछें (जैसे 'जन सेवा कार्ड कैसे प्राप्त करें' या 'रक्तदान कैसे करें') या हमारी हेल्पलाइन **1800-569-0991** पर कॉल करें।"
+    : "Hello! I am trying to assist you with your search. Please ask a more specific question (e.g. 'how to get jan seva card' or 'how to donate blood') or call our helpline at **1800-569-0991**.";
+  return res.json({ response: defaultReply });
+}
+
+// 1. AI Chat Endpoint
+app.post("/api/ai/chat", async (req, res) => {
+  const { message, history = [], language = "hi" } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  // Try GEMINI_API_KEY first, fallback to GOOGLE_SEARCH_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_SEARCH_API_KEY || process.env.VITE_GOOGLE_SEARCH_API_KEY;
+
+  if (!apiKey || apiKey === "MOCK_KEY") {
+    return handleOfflineFallback(message, language, res);
+  }
+
+  try {
+    const ai = getGeminiClient();
+    const systemPrompt = `You are "RP Foundation AI Mitr" (आरपी फाउंडेशन एआई मित्र), a friendly and general-purpose AI assistant.
+You can answer any general questions, solve math problems, write text, explain concepts, or translate languages just like Gemini, ChatGPT, or Grok, while maintaining your identity as RP AI Mitr.
+When asked about RP Foundation, guide them about its initiatives (Jan Seva Card, blood donation, volunteer opportunities, government schemes).
+Always match the user's language preference (Hindi, English, or Hinglish) and keep responses clear, concise, and helpful.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.-flash",
+      contents: [
+        { role: "user", parts: [{ text: `System instruction: ${systemPrompt}` }] },
+        ...history.map((h: any) => ({
+          role: h.role === "user" ? "user" : "model",
+          parts: [{ text: h.text }]
+        })),
+        { role: "user", parts: [{ text: message }] }
+      ]
+    });
+
+    const replyText = response.text || "Sorry, I am unable to process that right now.";
+    return res.json({ response: replyText });
+  } catch (error: any) {
+    console.error("Gemini Chat Error, falling back:", error);
+    // Graceful fallback if Gemini API call fails due to invalid key restrictions
+    return handleOfflineFallback(message, language, res);
+  }
+});
+
+// 2. AI Auto-Categorize Grievance Endpoint
+app.post("/api/ai/categorize", async (req, res) => {
+  const { title, description } = req.body;
+
+  if (!title || !description) {
+    return res.status(400).json({ error: "Title and description are required" });
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    // Fallback Mock categorization if key is not declared
+    return res.json({ 
+      category: "Water Supply", 
+      urgency: "Medium", 
+      summary: "शिकायत जल आपूर्ति की कमी के संबंध में दर्ज की गई है।" 
+    });
+  }
+
+  try {
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: "gemini-2.-flash",
+      contents: `You are an auto-triage AI for RP Foundation's Grievance Redressal system. Your task is to categorize citizens' complaints.
+Analyze the following title and description of a complaint, and return a JSON object with:
+1. "category": strictly one of ["Water Supply", "Roads & Transit", "Sanitation & Waste", "Education & Schools", "Healthcare Facilities", "Street Lights & Power", "Others"]
+2. "urgency": strictly one of ["Low", "Medium", "High", "Critical"]
+3. "summary": a single compact summary line (in Hindi if complaint is in Hindi, otherwise English).
+
+Complaint Title: "${title}"
+Complaint Description: "${description}"`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            category: { type: Type.STRING },
+            urgency: { type: Type.STRING },
+            summary: { type: Type.STRING }
+          },
+          required: ["category", "urgency", "summary"]
+        }
+      }
+    });
+
+    const result = JSON.parse(response.text || "{}");
+    res.json(result);
+  } catch (error: any) {
+    console.error("AI Categorization Error:", error);
+    res.status(500).json({ error: error.message || "Failed to categorize grievance" });
+  }
+});
+
+// 3. AI Government Scheme Matcher
+app.post("/api/ai/scheme-match", async (req, res) => {
+  const { age, gender, annualIncome, occupation, state, category } = req.body;
+
+  const safeDefault = { schemes: [] };
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn("AI Scheme Match skipped: No GEMINI_API_KEY provided.");
+    return res.json(safeDefault);
+  }
+
+  try {
+    const ai = getGeminiClient();
+    const prompt = `Formulate custom recommended Indian Government Schemes or RP Foundation scholarships for a citizen with the following details:
+- Age: ${age}
+- Gender: ${gender}
+- Annual Income: ₹${annualIncome}
+- Occupation: ${occupation}
+- State: ${state}
+- Social Category/Work: ${category}
+
+Respond with a JSON array of up to 3 highly tailored schemes. Each scheme should contain:
+1. "name" (Scheme/Scholarship name in Bilingual format e.g. "Ayushman Bharat / आयुष्मान भारत")
+2. "eligibility" (Why they are eligible)
+3. "benefits" (Key benefits)
+4. "steps" (Simple steps to apply)`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING },
+              eligibility: { type: Type.STRING },
+              benefits: { type: Type.STRING },
+              steps: { type: Type.STRING }
+            },
+            required: ["name", "eligibility", "benefits", "steps"]
+          }
+        }
+      }
+    });
+
+    const result = JSON.parse(response.text || "[]");
+    res.json({ schemes: result });
+  } catch (error: any) {
+    console.error("AI Scheme Match Error:", error);
+    res.json(safeDefault);
+  }
+});mport { GoogleGenAI, Type } from "@google/genai";
+import dotenv from "dotenv";
+import * as cheerio from "cheerio";
+import pg from "pg";
+import fs from "fs";
+import crypto from "crypto";
+import multer from "multer";
+import nodemailer from "nodemailer";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
+
+app.use(express.json());
+
+// PostgreSQL Pool Connection
+const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+const pool = new pg.Pool({
+  connectionString: dbUrl,
+  ssl: dbUrl && (dbUrl.includes("localhost") || dbUrl.includes("127.0.0.")) ? false : { rejectUnauthorized: false }
+});
+
+// Lazy-loaded Gemini AI client helper
+let aiClient: GoogleGenAI | null = null;
+function getGeminiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_SEARCH_API_KEY || process.env.VITE_GOOGLE_SEARCH_API_KEY;
+    if (!apiKey) {
+      console.warn("WARNING: GEMINI_API_KEY or GOOGLE_SEARCH_API_KEY environment variable is not set. AI Features will use mock mode.");
+    }
+    aiClient = new GoogleGenAI({
+      apiKey: apiKey || "MOCK_KEY",
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  }
+  return aiClient;
+}
+
+// Unified search helper using a 4-Tier Multi-Engine Search Cluster
+async function queryExternalSearch(searchQuery: string): Promise<{ title: string, link: string, url: string, snippet: string, displayLink: string }[]> {
+  const tavilyKey = process.env.TAVILY_API_KEY;
+  const targetDomains = [
+    "gov.in",
+    "nic.in",
+    "mp.gov.in",
+    "bhaskar.com",
+    "jagran.com",
+    "ndtv.com",
+    "timesofindia.indiatimes.com",
+    "hindustantimes.com",
+    "wikipedia.org"
+  ];
+
+  const browserHeaders = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Upgrade-Insecure-Requests": "1"
+  };
+
+  
+// =============================================================================
+// MISSING SUPABASE MIGRATION ENDPOINTS
+// =============================================================================
+
+// --- community_posts ---
+app.get("/api/community_posts", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM community_posts ORDER BY "createdAt" DESC');
+    res.json({ data: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/community_posts", async (req, res) => {
+  try {
+    const { authorName, authorPhone, authorRole, textEn, textHi, segment, location, imageUrl, likes, likedByMe, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO community_posts (id, "authorName", "authorPhone", "authorRole", "textEn", "textHi", segment, location, "imageUrl", likes, "likedByMe", "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [id, authorName, authorPhone, authorRole, textEn, textHi, segment, location, imageUrl, likes, likedByMe, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put("/api/community_posts/:id", async (req, res) => {
+  try {
+    const { likes, likedByMe } = req.body;
+    await pool.query('UPDATE community_posts SET likes = $1, "likedByMe" = $2 WHERE id = $3', [likes, likedByMe, req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- support_requests (FoodSupport) ---
+app.post("/api/support_requests", async (req, res) => {
+  try {
+    const { citizenName, citizenPhone, requestType, location, description, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO support_requests (id, "citizenName", "citizenPhone", "requestType", location, description, status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, citizenName, citizenPhone, requestType, location, description, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- sos_alerts (WomenSafety) ---
+app.post("/api/sos_alerts", async (req, res) => {
+  try {
+    const { citizenName, citizenPhone, location, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO sos_alerts (id, "citizenName", "citizenPhone", location, status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, citizenName, citizenPhone, location, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- scholarships ---
+app.post("/api/scholarships", async (req, res) => {
+  try {
+    const { studentName, phone, educationLevel, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO scholarships (id, "studentName", phone, "educationLevel", status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, studentName, phone, educationLevel, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+  // TIER 1: Tavily AI (Primary)
+  // ═══════════════════════════════════════════════════════════════
+  if (tavilyKey) {
+    try {
+      console.log(`[Search/Tier-1/Tavily] Querying: "${searchQuery}"`);
+      const response = await axios.post(
+        "https://api.tavily.com/search",
+        {
+          api_key: tavilyKey,
+          query: searchQuery,
+          include_domains: targetDomains,
+          max_results: 5
+        },
+        {
+          timeout: 4000
+        }
+      );
+
+      const items = response.data.results ?? [];
+      if (items.length > 0) {
+        return items.slice(0, 3).map((item: any) => {
+          let host = "";
+          try {
+            host = new URL(item.url).hostname;
+          } catch {
+            host = "tavily.com";
+          }
+          return {
+            title: (item.title ?? "").slice(0, 120),
+            link: item.url ?? "",
+            url: item.url ?? "",
+            snippet: (item.content ?? "").replace(/\n/g, " ").slice(0, 260),
+            displayLink: host
+          };
+        });
+      }
+    } catch (err: any) {
+      console.warn(`[Search/Tier-1/Tavily] Failed: ${err.message}. Cascading to Tier 2...`);
+    }
+  } else {
+    console.warn(`[Search/Tier-1/Tavily] TAVILY_API_KEY is not set. Cascading to Tier 2...`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 2: DuckDuckGo HTML Scraper
+  // ═══════════════════════════════════════════════════════════════
+  try {
+    const constrainedQuery = `${searchQuery} site:gov.in`;
+    console.log(`[Search/Tier-2/DDG-Scraper] Querying: "${constrainedQuery}"`);
+    const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(constrainedQuery)}`;
+    
+    const response = await axios.get(ddgUrl, {
+      headers: browserHeaders,
+      timeout: 4500
+    });
+
+    const $ = cheerio.load(response.data);
+    const results: { title: string, link: string, url: string, snippet: string, displayLink: string }[] = [];
+
+    $(".result").each((_, el) => {
+      if (results.length >= 3) return;
+
+      const title = $(el).find(".result__title").text().trim();
+      const rawLink = $(el).find(".result__url").attr("href");
+      const snippet = $(el).find(".result__snippet").text().trim();
+
+      if (title && rawLink) {
+        let link = rawLink;
+        if (rawLink.startsWith("//")) {
+          link = "https:" + rawLink;
+        } else if (rawLink.startsWith("/l/?kh=")) {
+          try {
+            const urlObj = new URL("https://html.duckduckgo.com" + rawLink);
+            const uddg = urlObj.searchParams.get("uddg");
+            if (uddg) {
+              link = decodeURIComponent(uddg);
+            }
+          } catch {
+            // fallback
+          }
+        }
+
+        let host = "duckduckgo.com";
+        try {
+          host = new URL(link).hostname;
+        } catch {
+          // fallback
+        }
+
+        results.push({
+          title: title.slice(0, 120),
+          link,
+          url: link,
+          snippet: snippet.replace(/\n/g, " ").slice(0, 260),
+          displayLink: host
+        });
+      }
+    });
+
+    if (results.length > 0) {
+      return results;
+    }
+    console.warn(`[Search/Tier-2/DDG-Scraper] No results found or blocked. Cascading to Tier 3...`);
+  } catch (err: any) {
+    console.warn(`[Search/Tier-2/DDG-Scraper] Failed: ${err.message}. Cascading to Tier 3...`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 3: SearXNG Public Instance Cluster
+  // ═══════════════════════════════════════════════════════════════
+  try {
+    console.log(`[Search/Tier-3/SearXNG] Dynamic instance lookup...`);
+    const spaceRes = await axios.get("https://searx.space/data/instances.json", {
+      timeout: 3000
+    });
+    const instances = spaceRes.data?.instances || {};
+    const healthyUrls: string[] = [];
+    for (const [domain, info] of Object.entries(instances)) {
+      const details = info as any;
+      if (details.http?.status_code === 200 && details.uptime?.uptimeDay > 95) {
+        const url = domain.startsWith("http") ? domain : `https://${domain}`;
+        healthyUrls.push(url.endsWith("/") ? url : url + "/");
+      }
+    }
+
+    if (healthyUrls.length > 0) {
+      // Try the top 3 healthy SearXNG instances in order
+      for (const instanceUrl of healthyUrls.slice(0, 3)) {
+        const searchUrl = `${instanceUrl}search`;
+        try {
+          console.log(`[Search/Tier-3/SearXNG] Trying instance: ${searchUrl}`);
+          const res = await axios.get(searchUrl, {
+            params: {
+              q: `${searchQuery} site:gov.in`,
+              format: "json"
+            },
+            headers: browserHeaders,
+            timeout: 3500
+          });
+
+          if (res.data && typeof res.data === "object" && Array.isArray(res.data.results)) {
+            const items = res.data.results || [];
+            if (items.length > 0) {
+              return items.slice(0, 3).map((item: any) => {
+                let host = "searxng.org";
+                try {
+                  host = new URL(item.url).hostname;
+                } catch {
+                  // fallback
+                }
+                return {
+                  title: (item.title ?? "").slice(0, 120),
+                  link: item.url ?? "",
+                  url: item.url ?? "",
+                  snippet: (item.content ?? "").replace(/\n/g, " ").slice(0, 260),
+                  displayLink: host
+                };
+              });
+            }
+          }
+        } catch (err: any) {
+          console.warn(`[Search/Tier-3/SearXNG] Instance ${searchUrl} failed: ${err.message}`);
+        }
+      }
+    }
+    console.warn(`[Search/Tier-3/SearXNG] Cluster search failed or rate-limited. Cascading to Tier 4...`);
+  } catch (err: any) {
+    console.warn(`[Search/Tier-3/SearXNG] Dynamic discovery failed: ${err.message}. Cascading to Tier 4...`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 4: Wikipedia & Open Knowledge API
+  // ═══════════════════════════════════════════════════════════════
+  try {
+    console.log(`[Search/Tier-4/Wikipedia] Querying: "${searchQuery}"`);
+    const wikiUrl = "https://en.wikipedia.org/w/api.php";
+    const res = await axios.get(wikiUrl, {
+      params: {
+        action: "query",
+        list: "search",
+        srsearch: searchQuery,
+        format: "json",
+        utf8: 1,
+        origin: "*"
+      },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+      },
+      timeout: 4000
+    });
+
+    const items = res.data?.query?.search || [];
+    if (items.length > 0) {
+      return items.slice(0, 3).map((item: any) => ({
+        title: item.title,
+        link: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+        url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+        snippet: (item.snippet ?? "").replace(/<span class="searchmatch">/g, "").replace(/<\/span>/g, "").slice(0, 260),
+        displayLink: "en.wikipedia.org"
+      }));
+    }
+  } catch (err: any) {
+    console.error("[Search/Tier-4/Wikipedia] Failed completely:", err.message);
+  }
+
+  return [];
+}
+
+// Helper function for elegant server-side fallback when Gemini is unavailable
+async function handleOfflineFallback(message: string, language: string, res: any) {
+  const query = message.toLowerCase();
+  
+  // Auto-detect Hindi (either Devanagari or common Hinglish words)
+  const hasDevanagari = /[\u0900-\u097F]/.test(message);
+  const commonHinglish = ["kya", "hai", "kaise", "kab", "karo", "naam", "sewa", "chahiye", "chal", "raha", "hoga", "apna", "banao", "madad", "namaste", "namaskar", "aaj"];
+  const isHinglish = commonHinglish.some(word => query.includes(word));
+  const isHi = language === "hi" || hasDevanagari || isHinglish;
+
+  // General Status Check ("aaj kya chal raha hai" / "today")
+  if (query.includes("aaj") || query.includes("today") || query.includes("kya chal") || query.includes("status") || query.includes("whats up")) {
+    const reply = isHi
+      ? "नमस्ते! आज आरपी फाउंडेशन के तहत **पर्यावरण संरक्षण अभियान**, **निःशुल्क स्वास्थ्य जांच शिविर**, और **जन सेवा कार्ड पंजीकरण** की सेवाएं सक्रिय रूप से चल रही हैं। आप इनमें से किस सेवा के बारे में जानकारी प्राप्त करना चाहते हैं?"
+      : "Hello! Today at the RP Foundation, our **Environment Protection Drive**, **Free Health Checkup Camps**, and **Jan Seva Card Registrations** are actively running. Which service would you like to know more about?";
+    return res.json({ response: reply });
+  }
+
+  // RP Foundation Motive / Purpose Check
+  if (query.includes("motive") || query.includes("purpose") || query.includes("dhyey") || query.includes("aim") || (query.includes("rp") && query.includes("kya")) || (query.includes("foundation") && query.includes("kya"))) {
+    const reply = isHi
+      ? "**आरपी फाउंडेशन (RP Foundation)** एक गैर-सरकारी संगठन (NGO) है जो समाज कल्याण, स्वास्थ्य सहायता, निःशुल्क शिक्षा सहयोग, सामुदायिक स्वयंसेवा और डिजिटल सशक्तिकरण (जैसे जन सेवा कार्ड) के लिए समर्पित है। हमारा ध्येय **'सेवा, समर्पण, संकल्प'** है।"
+      : "**RP Foundation** is a non-governmental organization (NGO) dedicated to social welfare, healthcare assistance, educational support, community volunteering, and digital empowerment (such as the Jan Seva Card). Our motto is **'Service, Dedication, Resolve'**.";
+    return res.json({ response: reply });
+  }
+
+  // Founder Check
+  if (query.includes("founder") || query.includes("sanchalak") || query.includes("kisne banaya") || query.includes("founder kon") || query.includes("rohit")) {
+    const reply = isHi
+      ? "आरपी फाउंडेशन (RP Foundation) के संस्थापक **रोहित पंडित** (रोहित सर) हैं। उनके नेतृत्व में फाउंडेशन समाज के गरीब और पिछड़े वर्गों की सहायता के लिए कई कल्याणकारी योजनाएं चला रहा है।"
+      : "RP Foundation was founded by **Rohit Pandit** (Rohit Sir). Under his guidance, the foundation carries out multiple community welfare programs, health camps, and free education drives.";
+    return res.json({ response: reply });
+  }
+
+  // 1. Simple Keyword Matcher on server side
+  if (query.includes("card") || query.includes("कार्ड") || query.includes("jan seva") || query.includes("जन सेवा")) {
+    const reply = isHi 
+      ? "**जन सेवा कार्ड** आरपी फाउंडेशन का आपका digital identity pass है।\n\n📋 **आवेदन के चरण:**\n1. Go to *Services → Jan Seva Card*.\n2. Fill Name, DOB and upload a valid ID document.\n3. Your Aadhaar is masked for privacy.\n4. Once approved, download your QR-enabled digital pass."
+      : "**Jan Seva Card** is your digital identity pass from RP Foundation.\n\n📋 **Steps to Apply:**\n1. Go to *Services → Jan Seva Card*.\n2. Fill Name, DOB and upload a valid ID document.\n3. Your Aadhaar is masked for privacy — never stored as plain text.\n4. Once approved, download your QR-enabled digital pass.";
+    return res.json({ response: reply });
+  }
+
+  if (query.includes("blood") || query.includes("रक्त") || query.includes("ब्लड") || query.includes("donor")) {
+    const reply = isHi
+      ? "**रक्त नेटवर्क (Blood Network)** — आपातकालीन या स्वैच्छिक रक्तदान।\n\n🩸 **रक्त अनुरोध:** आवश्यक ग्रुप, अस्पताल का नाम और यूनिट दर्ज करें।\n🩸 **रक्तदाता पंजीकरण:** ब्लड टाइप और अंतिम दान तिथि सबमिट करें।"
+      : "**Blood Network** — Emergency or voluntary blood donation.\n\n🩸 **Request Blood:** Post your required group, hospital name and units needed.\n🩸 **Register as Donor:** Submit blood type, last donation date.";
+    return res.json({ response: reply });
+  }
+
+  if (query.includes("volunteer") || query.includes("स्वयंसेवक") || query.includes("seva")) {
+    const reply = isHi
+      ? "**RP Foundation में स्वयंसेवक बनें।**\n\n🤝 **कैसे जुड़ें:**\n1. *सेवाएं → स्वयंसेवक अवसर* पर जाएं।\n2. कौशल श्रेणी चुनें: शिक्षण, IT, क्षेत्र कार्य, स्वास्थ्य।\n3. सप्ताहांत अभियानों, भोजन शिविरों के लिए साइन अप करें।"
+      : "**Volunteer Opportunities** at RP Foundation.\n\n🤝 **How to Join:**\n1. Go to *Services → Volunteer Opportunities*.\n2. Choose a skill: Teaching, IT, Field Work, Healthcare.\n3. Sign up for weekend drives, food camps, plantation events.";
+    return res.json({ response: reply });
+  }
+
+  if (query.includes("donate") || query.includes("दान") || query.includes("donation")) {
+    const reply = isHi
+      ? "**आरपी फाउंडेशन को दान करें** — आपका योगदान जीवन बदलता है।\n\n💛 **त्वरित विकल्प:** ₹500 / ₹1000 / ₹5000 या कस्टम राशि।\n📜 **80G सर्टिफिकेट:** स्वत: निर्मित कर-छूट PDF।"
+      : "**Donate to RP Foundation** — Your contribution changes lives.\n\n💛 **Quick options:** ₹500 / ₹1000 / ₹5000 or a custom amount.\n📜 **80G Certificate:** Auto-generated tax-exemption PDF.";
+    return res.json({ response: reply });
+  }
+  // 2. Web Search Fallback using unified query helper
+  try {
+    const results = await queryExternalSearch(message);
+    if (results && results.length > 0) {
+      let reply = isHi 
+        ? "मुझे इसके बारे में वेब से ये परिणाम मिले हैं:\n\n" 
+        : "I found the following results from the web:\n\n";
+      results.forEach((r: any) => {
+        reply += `🔗 **[${r.title}](${r.link})**\n${r.snippet}\n\n`;
+      });
+      return res.json({ response: reply });
+    }
+  } catch (e) {
+    // Ignore search errors and fall through
+  }
+
+  // Default fallback answer
+  const defaultReply = isHi
+    ? "नमस्ते! मैं आपकी खोज में सहायता करने की कोशिश कर रहा हूँ। अधिक विशिष्ट प्रश्न पूछें (जैसे 'जन सेवा कार्ड कैसे प्राप्त करें' या 'रक्तदान कैसे करें') या हमारी हेल्पलाइन **1800-569-0991** पर कॉल करें।"
+    : "Hello! I am trying to assist you with your search. Please ask a more specific question (e.g. 'how to get jan seva card' or 'how to donate blood') or call our helpline at **1800-569-0991**.";
+  return res.json({ response: defaultReply });
+}
+
+// 1. AI Chat Endpoint
+app.post("/api/ai/chat", async (req, res) => {
+  const { message, history = [], language = "hi" } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  // Try GEMINI_API_KEY first, fallback to GOOGLE_SEARCH_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_SEARCH_API_KEY || process.env.VITE_GOOGLE_SEARCH_API_KEY;
+
+  if (!apiKey || apiKey === "MOCK_KEY") {
+    return handleOfflineFallback(message, language, res);
+  }
+
+  try {
+    const ai = getGeminiClient();
+    const systemPrompt = `You are "RP Foundation AI Mitr" (आरपी फाउंडेशन एआई मित्र), a friendly and general-purpose AI assistant.
+You can answer any general questions, solve math problems, write text, explain concepts, or translate languages just like Gemini, ChatGPT, or Grok, while maintaining your identity as RP AI Mitr.
+When asked about RP Foundation, guide them about its initiatives (Jan Seva Card, blood donation, volunteer opportunities, government schemes).
+Always match the user's language preference (Hindi, English, or Hinglish) and keep responses clear, concise, and helpful.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.-flash",
+      contents: [
+        { role: "user", parts: [{ text: `System instruction: ${systemPrompt}` }] },
+        ...history.map((h: any) => ({
+          role: h.role === "user" ? "user" : "model",
+          parts: [{ text: h.text }]
+        })),
+        { role: "user", parts: [{ text: message }] }
+      ]
+    });
+
+    const replyText = response.text || "Sorry, I am unable to process that right now.";
+    return res.json({ response: replyText });
+  } catch (error: any) {
+    console.error("Gemini Chat Error, falling back:", error);
+    // Graceful fallback if Gemini API call fails due to invalid key restrictions
+    return handleOfflineFallback(message, language, res);
+  }
+});
+
+// 2. AI Auto-Categorize Grievance Endpoint
+app.post("/api/ai/categorize", async (req, res) => {
+  const { title, description } = req.body;
+
+  if (!title || !description) {
+    return res.status(400).json({ error: "Title and description are required" });
+  }
+
+  const safeDefault = {
+    category: "Uncategorized",
+    urgency: "Pending Review",
+    summary: title ? title.substring(0, 50) + "..." : "Complaint under review"
+  };
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn("AI Categorization skipped: No GEMINI_API_KEY provided.");
+    return res.json(safeDefault);
+  }
+
+  try {
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `You are an auto-triage AI for RP Foundation's Grievance Redressal system. Your task is to categorize citizens' complaints.
+Analyze the following title and description of a complaint, and return a JSON object with:
+1. "category": strictly one of ["Water Supply", "Roads & Transit", "Sanitation & Waste", "Education & Schools", "Healthcare Facilities", "Street Lights & Power", "Others"]
+2. "urgency": strictly one of ["Low", "Medium", "High", "Critical"]
+3. "summary": a single compact summary line (in Hindi if complaint is in Hindi, otherwise English).
+
+Complaint Title: "${title}"
+Complaint Description: "${description}"`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            category: { type: Type.STRING },
+            urgency: { type: Type.STRING },
+            summary: { type: Type.STRING }
+          },
+          required: ["category", "urgency", "summary"]
+        }
+      }
+    });
+
+    const result = JSON.parse(response.text || "{}");
+    res.json(result);
+  } catch (error: any) {
+    console.error("AI Categorization Error:", error);
+    // Return safe default instead of crashing frontend
+    res.json(safeDefault);
+  }
+}); GoogleGenAI, Type } from "@google/genai";
+import dotenv from "dotenv";
+import * as cheerio from "cheerio";
+import pg from "pg";
+import fs from "fs";
+import crypto from "crypto";
+import multer from "multer";
+import nodemailer from "nodemailer";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
+
+app.use(express.json());
+
+// PostgreSQL Pool Connection
+const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+const pool = new pg.Pool({
+  connectionString: dbUrl,
+  ssl: dbUrl && (dbUrl.includes("localhost") || dbUrl.includes("127.0.0.")) ? false : { rejectUnauthorized: false }
+});
+
+// Lazy-loaded Gemini AI client helper
+let aiClient: GoogleGenAI | null = null;
+function getGeminiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_SEARCH_API_KEY || process.env.VITE_GOOGLE_SEARCH_API_KEY;
+    if (!apiKey) {
+      console.warn("WARNING: GEMINI_API_KEY or GOOGLE_SEARCH_API_KEY environment variable is not set. AI Features will use mock mode.");
+    }
+    aiClient = new GoogleGenAI({
+      apiKey: apiKey || "MOCK_KEY",
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  }
+  return aiClient;
+}
+
+// Unified search helper using a 4-Tier Multi-Engine Search Cluster
+async function queryExternalSearch(searchQuery: string): Promise<{ title: string, link: string, url: string, snippet: string, displayLink: string }[]> {
+  const tavilyKey = process.env.TAVILY_API_KEY;
+  const targetDomains = [
+    "gov.in",
+    "nic.in",
+    "mp.gov.in",
+    "bhaskar.com",
+    "jagran.com",
+    "ndtv.com",
+    "timesofindia.indiatimes.com",
+    "hindustantimes.com",
+    "wikipedia.org"
+  ];
+
+  const browserHeaders = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Upgrade-Insecure-Requests": "1"
+  };
+
+  
+// =============================================================================
+// MISSING SUPABASE MIGRATION ENDPOINTS
+// =============================================================================
+
+// --- community_posts ---
+app.get("/api/community_posts", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM community_posts ORDER BY "createdAt" DESC');
+    res.json({ data: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/community_posts", async (req, res) => {
+  try {
+    const { authorName, authorPhone, authorRole, textEn, textHi, segment, location, imageUrl, likes, likedByMe, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO community_posts (id, "authorName", "authorPhone", "authorRole", "textEn", "textHi", segment, location, "imageUrl", likes, "likedByMe", "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [id, authorName, authorPhone, authorRole, textEn, textHi, segment, location, imageUrl, likes, likedByMe, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put("/api/community_posts/:id", async (req, res) => {
+  try {
+    const { likes, likedByMe } = req.body;
+    await pool.query('UPDATE community_posts SET likes = $1, "likedByMe" = $2 WHERE id = $3', [likes, likedByMe, req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- support_requests (FoodSupport) ---
+app.post("/api/support_requests", async (req, res) => {
+  try {
+    const { citizenName, citizenPhone, requestType, location, description, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO support_requests (id, "citizenName", "citizenPhone", "requestType", location, description, status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, citizenName, citizenPhone, requestType, location, description, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- sos_alerts (WomenSafety) ---
+app.post("/api/sos_alerts", async (req, res) => {
+  try {
+    const { citizenName, citizenPhone, location, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO sos_alerts (id, "citizenName", "citizenPhone", location, status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, citizenName, citizenPhone, location, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- scholarships ---
+app.post("/api/scholarships", async (req, res) => {
+  try {
+    const { studentName, phone, educationLevel, status, createdAt } = req.body;
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO scholarships (id, "studentName", phone, "educationLevel", status, "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, studentName, phone, educationLevel, status, createdAt || new Date()]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+  // TIER 1: Tavily AI (Primary)
+  // ═══════════════════════════════════════════════════════════════
+  if (tavilyKey) {
+    try {
+      console.log(`[Search/Tier-1/Tavily] Querying: "${searchQuery}"`);
+      const response = await axios.post(
+        "https://api.tavily.com/search",
+        {
+          api_key: tavilyKey,
+          query: searchQuery,
+          include_domains: targetDomains,
+          max_results: 5
+        },
+        {
+          timeout: 4000
+        }
+      );
+
+      const items = response.data.results ?? [];
+      if (items.length > 0) {
+        return items.slice(0, 3).map((item: any) => {
+          let host = "";
+          try {
+            host = new URL(item.url).hostname;
+          } catch {
+            host = "tavily.com";
+          }
+          return {
+            title: (item.title ?? "").slice(0, 120),
+            link: item.url ?? "",
+            url: item.url ?? "",
+            snippet: (item.content ?? "").replace(/\n/g, " ").slice(0, 260),
+            displayLink: host
+          };
+        });
+      }
+    } catch (err: any) {
+      console.warn(`[Search/Tier-1/Tavily] Failed: ${err.message}. Cascading to Tier 2...`);
+    }
+  } else {
+    console.warn(`[Search/Tier-1/Tavily] TAVILY_API_KEY is not set. Cascading to Tier 2...`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 2: DuckDuckGo HTML Scraper
+  // ═══════════════════════════════════════════════════════════════
+  try {
+    const constrainedQuery = `${searchQuery} site:gov.in`;
+    console.log(`[Search/Tier-2/DDG-Scraper] Querying: "${constrainedQuery}"`);
+    const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(constrainedQuery)}`;
+    
+    const response = await axios.get(ddgUrl, {
+      headers: browserHeaders,
+      timeout: 4500
+    });
+
+    const $ = cheerio.load(response.data);
+    const results: { title: string, link: string, url: string, snippet: string, displayLink: string }[] = [];
+
+    $(".result").each((_, el) => {
+      if (results.length >= 3) return;
+
+      const title = $(el).find(".result__title").text().trim();
+      const rawLink = $(el).find(".result__url").attr("href");
+      const snippet = $(el).find(".result__snippet").text().trim();
+
+      if (title && rawLink) {
+        let link = rawLink;
+        if (rawLink.startsWith("//")) {
+          link = "https:" + rawLink;
+        } else if (rawLink.startsWith("/l/?kh=")) {
+          try {
+            const urlObj = new URL("https://html.duckduckgo.com" + rawLink);
+            const uddg = urlObj.searchParams.get("uddg");
+            if (uddg) {
+              link = decodeURIComponent(uddg);
+            }
+          } catch {
+            // fallback
+          }
+        }
+
+        let host = "duckduckgo.com";
+        try {
+          host = new URL(link).hostname;
+        } catch {
+          // fallback
+        }
+
+        results.push({
+          title: title.slice(0, 120),
+          link,
+          url: link,
+          snippet: snippet.replace(/\n/g, " ").slice(0, 260),
+          displayLink: host
+        });
+      }
+    });
+
+    if (results.length > 0) {
+      return results;
+    }
+    console.warn(`[Search/Tier-2/DDG-Scraper] No results found or blocked. Cascading to Tier 3...`);
+  } catch (err: any) {
+    console.warn(`[Search/Tier-2/DDG-Scraper] Failed: ${err.message}. Cascading to Tier 3...`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 3: SearXNG Public Instance Cluster
+  // ═══════════════════════════════════════════════════════════════
+  try {
+    console.log(`[Search/Tier-3/SearXNG] Dynamic instance lookup...`);
+    const spaceRes = await axios.get("https://searx.space/data/instances.json", {
+      timeout: 3000
+    });
+    const instances = spaceRes.data?.instances || {};
+    const healthyUrls: string[] = [];
+    for (const [domain, info] of Object.entries(instances)) {
+      const details = info as any;
+      if (details.http?.status_code === 200 && details.uptime?.uptimeDay > 95) {
+        const url = domain.startsWith("http") ? domain : `https://${domain}`;
+        healthyUrls.push(url.endsWith("/") ? url : url + "/");
+      }
+    }
+
+    if (healthyUrls.length > 0) {
+      // Try the top 3 healthy SearXNG instances in order
+      for (const instanceUrl of healthyUrls.slice(0, 3)) {
+        const searchUrl = `${instanceUrl}search`;
+        try {
+          console.log(`[Search/Tier-3/SearXNG] Trying instance: ${searchUrl}`);
+          const res = await axios.get(searchUrl, {
+            params: {
+              q: `${searchQuery} site:gov.in`,
+              format: "json"
+            },
+            headers: browserHeaders,
+            timeout: 3500
+          });
+
+          if (res.data && typeof res.data === "object" && Array.isArray(res.data.results)) {
+            const items = res.data.results || [];
+            if (items.length > 0) {
+              return items.slice(0, 3).map((item: any) => {
+                let host = "searxng.org";
+                try {
+                  host = new URL(item.url).hostname;
+                } catch {
+                  // fallback
+                }
+                return {
+                  title: (item.title ?? "").slice(0, 120),
+                  link: item.url ?? "",
+                  url: item.url ?? "",
+                  snippet: (item.content ?? "").replace(/\n/g, " ").slice(0, 260),
+                  displayLink: host
+                };
+              });
+            }
+          }
+        } catch (err: any) {
+          console.warn(`[Search/Tier-3/SearXNG] Instance ${searchUrl} failed: ${err.message}`);
+        }
+      }
+    }
+    console.warn(`[Search/Tier-3/SearXNG] Cluster search failed or rate-limited. Cascading to Tier 4...`);
+  } catch (err: any) {
+    console.warn(`[Search/Tier-3/SearXNG] Dynamic discovery failed: ${err.message}. Cascading to Tier 4...`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 4: Wikipedia & Open Knowledge API
+  // ═══════════════════════════════════════════════════════════════
+  try {
+    console.log(`[Search/Tier-4/Wikipedia] Querying: "${searchQuery}"`);
+    const wikiUrl = "https://en.wikipedia.org/w/api.php";
+    const res = await axios.get(wikiUrl, {
+      params: {
+        action: "query",
+        list: "search",
+        srsearch: searchQuery,
+        format: "json",
+        utf8: 1,
+        origin: "*"
+      },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+      },
+      timeout: 4000
+    });
+
+    const items = res.data?.query?.search || [];
+    if (items.length > 0) {
+      return items.slice(0, 3).map((item: any) => ({
+        title: item.title,
+        link: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+        url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+        snippet: (item.snippet ?? "").replace(/<span class="searchmatch">/g, "").replace(/<\/span>/g, "").slice(0, 260),
+        displayLink: "en.wikipedia.org"
+      }));
+    }
+  } catch (err: any) {
+    console.error("[Search/Tier-4/Wikipedia] Failed completely:", err.message);
+  }
+
+  return [];
+}
+
+// Helper function for elegant server-side fallback when Gemini is unavailable
+async function handleOfflineFallback(message: string, language: string, res: any) {
+  const query = message.toLowerCase();
+  
+  // Auto-detect Hindi (either Devanagari or common Hinglish words)
+  const hasDevanagari = /[\u0900-\u097F]/.test(message);
+  const commonHinglish = ["kya", "hai", "kaise", "kab", "karo", "naam", "sewa", "chahiye", "chal", "raha", "hoga", "apna", "banao", "madad", "namaste", "namaskar", "aaj"];
+  const isHinglish = commonHinglish.some(word => query.includes(word));
+  const isHi = language === "hi" || hasDevanagari || isHinglish;
+
+  // General Status Check ("aaj kya chal raha hai" / "today")
+  if (query.includes("aaj") || query.includes("today") || query.includes("kya chal") || query.includes("status") || query.includes("whats up")) {
+    const reply = isHi
+      ? "नमस्ते! आज आरपी फाउंडेशन के तहत **पर्यावरण संरक्षण अभियान**, **निःशुल्क स्वास्थ्य जांच शिविर**, और **जन सेवा कार्ड पंजीकरण** की सेवाएं सक्रिय रूप से चल रही हैं। आप इनमें से किस सेवा के बारे में जानकारी प्राप्त करना चाहते हैं?"
+      : "Hello! Today at the RP Foundation, our **Environment Protection Drive**, **Free Health Checkup Camps**, and **Jan Seva Card Registrations** are actively running. Which service would you like to know more about?";
+    return res.json({ response: reply });
+  }
+
+  // RP Foundation Motive / Purpose Check
+  if (query.includes("motive") || query.includes("purpose") || query.includes("dhyey") || query.includes("aim") || (query.includes("rp") && query.includes("kya")) || (query.includes("foundation") && query.includes("kya"))) {
+    const reply = isHi
+      ? "**आरपी फाउंडेशन (RP Foundation)** एक गैर-सरकारी संगठन (NGO) है जो समाज कल्याण, स्वास्थ्य सहायता, निःशुल्क शिक्षा सहयोग, सामुदायिक स्वयंसेवा और डिजिटल सशक्तिकरण (जैसे जन सेवा कार्ड) के लिए समर्पित है। हमारा ध्येय **'सेवा, समर्पण, संकल्प'** है।"
+      : "**RP Foundation** is a non-governmental organization (NGO) dedicated to social welfare, healthcare assistance, educational support, community volunteering, and digital empowerment (such as the Jan Seva Card). Our motto is **'Service, Dedication, Resolve'**.";
+    return res.json({ response: reply });
+  }
+
+  // Founder Check
+  if (query.includes("founder") || query.includes("sanchalak") || query.includes("kisne banaya") || query.includes("founder kon") || query.includes("rohit")) {
+    const reply = isHi
+      ? "आरपी फाउंडेशन (RP Foundation) के संस्थापक **रोहित पंडित** (रोहित सर) हैं। उनके नेतृत्व में फाउंडेशन समाज के गरीब और पिछड़े वर्गों की सहायता के लिए कई कल्याणकारी योजनाएं चला रहा है।"
+      : "RP Foundation was founded by **Rohit Pandit** (Rohit Sir). Under his guidance, the foundation carries out multiple community welfare programs, health camps, and free education drives.";
+    return res.json({ response: reply });
+  }
+
+  // 1. Simple Keyword Matcher on server side
+  if (query.includes("card") || query.includes("कार्ड") || query.includes("jan seva") || query.includes("जन सेवा")) {
+    const reply = isHi 
+      ? "**जन सेवा कार्ड** आरपी फाउंडेशन का आपका digital identity pass है।\n\n📋 **आवेदन के चरण:**\n1. Go to *Services → Jan Seva Card*.\n2. Fill Name, DOB and upload a valid ID document.\n3. Your Aadhaar is masked for privacy.\n4. Once approved, download your QR-enabled digital pass."
+      : "**Jan Seva Card** is your digital identity pass from RP Foundation.\n\n📋 **Steps to Apply:**\n1. Go to *Services → Jan Seva Card*.\n2. Fill Name, DOB and upload a valid ID document.\n3. Your Aadhaar is masked for privacy — never stored as plain text.\n4. Once approved, download your QR-enabled digital pass.";
+    return res.json({ response: reply });
+  }
+
+  if (query.includes("blood") || query.includes("रक्त") || query.includes("ब्लड") || query.includes("donor")) {
+    const reply = isHi
+      ? "**रक्त नेटवर्क (Blood Network)** — आपातकालीन या स्वैच्छिक रक्तदान।\n\n🩸 **रक्त अनुरोध:** आवश्यक ग्रुप, अस्पताल का नाम और यूनिट दर्ज करें।\n🩸 **रक्तदाता पंजीकरण:** ब्लड टाइप और अंतिम दान तिथि सबमिट करें।"
+      : "**Blood Network** — Emergency or voluntary blood donation.\n\n🩸 **Request Blood:** Post your required group, hospital name and units needed.\n🩸 **Register as Donor:** Submit blood type, last donation date.";
+    return res.json({ response: reply });
+  }
+
+  if (query.includes("volunteer") || query.includes("स्वयंसेवक") || query.includes("seva")) {
+    const reply = isHi
+      ? "**RP Foundation में स्वयंसेवक बनें।**\n\n🤝 **कैसे जुड़ें:**\n1. *सेवाएं → स्वयंसेवक अवसर* पर जाएं।\n2. कौशल श्रेणी चुनें: शिक्षण, IT, क्षेत्र कार्य, स्वास्थ्य।\n3. सप्ताहांत अभियानों, भोजन शिविरों के लिए साइन अप करें।"
+      : "**Volunteer Opportunities** at RP Foundation.\n\n🤝 **How to Join:**\n1. Go to *Services → Volunteer Opportunities*.\n2. Choose a skill: Teaching, IT, Field Work, Healthcare.\n3. Sign up for weekend drives, food camps, plantation events.";
+    return res.json({ response: reply });
+  }
+
+  if (query.includes("donate") || query.includes("दान") || query.includes("donation")) {
+    const reply = isHi
+      ? "**आरपी फाउंडेशन को दान करें** — आपका योगदान जीवन बदलता है।\n\n💛 **त्वरित विकल्प:** ₹500 / ₹1000 / ₹5000 या कस्टम राशि।\n📜 **80G सर्टिफिकेट:** स्वत: निर्मित कर-छूट PDF।"
+      : "**Donate to RP Foundation** — Your contribution changes lives.\n\n💛 **Quick options:** ₹500 / ₹1000 / ₹5000 or a custom amount.\n📜 **80G Certificate:** Auto-generated tax-exemption PDF.";
+    return res.json({ response: reply });
+  }
+  // 2. Web Search Fallback using unified query helper
+  try {
+    const results = await queryExternalSearch(message);
+    if (results && results.length > 0) {
+      let reply = isHi 
+        ? "मुझे इसके बारे में वेब से ये परिणाम मिले हैं:\n\n" 
+        : "I found the following results from the web:\n\n";
+      results.forEach((r: any) => {
+        reply += `🔗 **[${r.title}](${r.link})**\n${r.snippet}\n\n`;
+      });
+      return res.json({ response: reply });
+    }
+  } catch (e) {
+    // Ignore search errors and fall through
+  }
+
+  // Default fallback answer
+  const defaultReply = isHi
+    ? "नमस्ते! मैं आपकी खोज में सहायता करने की कोशिश कर रहा हूँ। अधिक विशिष्ट प्रश्न पूछें (जैसे 'जन सेवा कार्ड कैसे प्राप्त करें' या 'रक्तदान कैसे करें') या हमारी हेल्पलाइन **1800-569-0991** पर कॉल करें।"
+    : "Hello! I am trying to assist you with your search. Please ask a more specific question (e.g. 'how to get jan seva card' or 'how to donate blood') or call our helpline at **1800-569-0991**.";
+  return res.json({ response: defaultReply });
+}
+
+// 1. AI Chat Endpoint
+app.post("/api/ai/chat", async (req, res) => {
+  const { message, history = [], language = "hi" } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  // Try GEMINI_API_KEY first, fallback to GOOGLE_SEARCH_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_SEARCH_API_KEY || process.env.VITE_GOOGLE_SEARCH_API_KEY;
+
+  if (!apiKey || apiKey === "MOCK_KEY") {
+    return handleOfflineFallback(message, language, res);
+  }
+
+  try {
+    const ai = getGeminiClient();
+    const systemPrompt = `You are "RP Foundation AI Mitr" (आरपी फाउंडेशन एआई मित्र), a friendly and general-purpose AI assistant.
+You can answer any general questions, solve math problems, write text, explain concepts, or translate languages just like Gemini, ChatGPT, or Grok, while maintaining your identity as RP AI Mitr.
+When asked about RP Foundation, guide them about its initiatives (Jan Seva Card, blood donation, volunteer opportunities, government schemes).
+Always match the user's language preference (Hindi, English, or Hinglish) and keep responses clear, concise, and helpful.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.-flash",
+      contents: [
+        { role: "user", parts: [{ text: `System instruction: ${systemPrompt}` }] },
+        ...history.map((h: any) => ({
+          role: h.role === "user" ? "user" : "model",
+          parts: [{ text: h.text }]
+        })),
+        { role: "user", parts: [{ text: message }] }
+      ]
+    });
+
+    const replyText = response.text || "Sorry, I am unable to process that right now.";
+    return res.json({ response: replyText });
+  } catch (error: any) {
+    console.error("Gemini Chat Error, falling back:", error);
+    // Graceful fallback if Gemini API call fails due to invalid key restrictions
+    return handleOfflineFallback(message, language, res);
+  }
+});
+
+// 2. AI Auto-Categorize Grievance Endpoint
+app.post("/api/ai/categorize", async (req, res) => {
+  const { title, description } = req.body;
+
+  if (!title || !description) {
+    return res.status(400).json({ error: "Title and description are required" });
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     // Fallback Mock categorization if key is not declared
