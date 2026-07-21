@@ -2327,6 +2327,55 @@ app.use("/app", import_express2.default.static(import_path.default.join(process.
 app.get("/app", (req, res) => {
   res.redirect("/app/");
 });
+var CORE_SERVICES = [
+  { id: "card", category: "welfare", iconName: "ShieldCheck", titleEn: "Jan Seva Card", titleHi: "\u091C\u0928 \u0938\u0947\u0935\u093E \u0915\u093E\u0930\u094D\u0921", descEn: "Apply for Foundational ID", descHi: "\u092C\u0941\u0928\u093F\u092F\u093E\u0926\u0940 \u0906\u0908\u0921\u0940 \u0915\u0947 \u0932\u093F\u090F \u0906\u0935\u0947\u0926\u0928" },
+  { id: "blood", category: "urgent", iconName: "Heart", titleEn: "Blood Network", titleHi: "\u0930\u0915\u094D\u0924 \u0928\u0947\u091F\u0935\u0930\u094D\u0915", descEn: "Emergency Blood Donor Requests", descHi: "\u0906\u092A\u093E\u0924\u0915\u093E\u0932\u0940\u0928 \u0930\u0915\u094D\u0924\u0926\u093E\u0924\u093E \u0905\u0928\u0941\u0930\u094B\u0927" },
+  { id: "donations", category: "involved", iconName: "HandCoins", titleEn: "Donations", titleHi: "\u0926\u093E\u0928", descEn: "Support our causes directly", descHi: "\u0939\u092E\u093E\u0930\u0947 \u0915\u093E\u0930\u0923\u094B\u0902 \u0915\u093E \u0938\u092E\u0930\u094D\u0925\u0928 \u0915\u0930\u0947\u0902" },
+  { id: "grievance", category: "civic", iconName: "AlertTriangle", titleEn: "Grievances", titleHi: "\u0936\u093F\u0915\u093E\u092F\u0924\u0947\u0902", descEn: "Report Civic Issues", descHi: "\u0928\u093E\u0917\u0930\u093F\u0915 \u0938\u092E\u0938\u094D\u092F\u093E\u0913\u0902 \u0915\u0940 \u0930\u093F\u092A\u094B\u0930\u094D\u091F" },
+  { id: "volunteers", category: "involved", iconName: "Users", titleEn: "Volunteering", titleHi: "\u0938\u094D\u0935\u092F\u0902\u0938\u0947\u0935\u093E", descEn: "Join the RP Force", descHi: "\u0906\u0930\u092A\u0940 \u092B\u094B\u0930\u094D\u0938 \u0938\u0947 \u091C\u0941\u0921\u093C\u0947\u0902" },
+  { id: "health-camps", category: "welfare", iconName: "Stethoscope", titleEn: "Health Camps", titleHi: "\u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0936\u093F\u0935\u093F\u0930", descEn: "Free checkups and drives", descHi: "\u092E\u0941\u092B\u094D\u0924 \u091C\u093E\u0902\u091A \u0914\u0930 \u0905\u092D\u093F\u092F\u093E\u0928" },
+  // Expanding to full 21...
+  { id: "education", category: "welfare", iconName: "GraduationCap", titleEn: "Education Aid", titleHi: "\u0936\u093F\u0915\u094D\u0937\u093E \u0938\u0939\u093E\u092F\u0924\u093E", descEn: "Scholarships and Books", descHi: "\u091B\u093E\u0924\u094D\u0930\u0935\u0943\u0924\u094D\u0924\u093F \u0914\u0930 \u0915\u093F\u0924\u093E\u092C\u0947\u0902" },
+  { id: "women-safety", category: "urgent", iconName: "Shield", titleEn: "Women Safety", titleHi: "\u092E\u0939\u093F\u0932\u093E \u0938\u0941\u0930\u0915\u094D\u0937\u093E", descEn: "24/7 Helpline and support", descHi: "24/7 \u0939\u0947\u0932\u094D\u092A\u0932\u093E\u0907\u0928" },
+  { id: "environment", category: "involved", iconName: "TreePine", titleEn: "Environment", titleHi: "\u092A\u0930\u094D\u092F\u093E\u0935\u0930\u0923", descEn: "Tree plantation drives", descHi: "\u0935\u0943\u0915\u094D\u0937\u093E\u0930\u094B\u092A\u0923 \u0905\u092D\u093F\u092F\u093E\u0928" },
+  { id: "legal-aid", category: "civic", iconName: "Scale", titleEn: "Free Legal Aid", titleHi: "\u092E\u0941\u092B\u094D\u0924 \u0915\u093E\u0928\u0942\u0928\u0940 \u0938\u0939\u093E\u092F\u0924\u093E", descEn: "Legal counseling for citizens", descHi: "\u0928\u093E\u0917\u0930\u093F\u0915\u094B\u0902 \u0915\u0947 \u0932\u093F\u090F \u0915\u093E\u0928\u0942\u0928\u0940 \u0938\u0932\u093E\u0939" }
+];
+app.get("/api/public/services", (req, res) => {
+  res.json({ success: true, data: CORE_SERVICES });
+});
+app.get("/api/public/services/:id/content", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool2.query(`SELECT * FROM service_content WHERE service_id = $1`, [id]);
+    if (result.rows.length === 0) {
+      return res.json({ success: true, data: null });
+    }
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+app.put("/api/admin/hq/services/:id/content", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const { id } = req.params;
+    const { content_en, content_hi, action_label_en, action_label_hi, action_url } = body;
+    await pool2.query(`
+      INSERT INTO service_content (service_id, content_en, content_hi, action_label_en, action_label_hi, action_url, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+      ON CONFLICT (service_id) DO UPDATE SET 
+        content_en = EXCLUDED.content_en,
+        content_hi = EXCLUDED.content_hi,
+        action_label_en = EXCLUDED.action_label_en,
+        action_label_hi = EXCLUDED.action_label_hi,
+        action_url = EXCLUDED.action_url,
+        updated_at = CURRENT_TIMESTAMP
+    `, [id, content_en, content_hi, action_label_en, action_label_hi, action_url]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 async function startServer() {
   await initDatabase();
   if (process.env.NODE_ENV !== "production") {
