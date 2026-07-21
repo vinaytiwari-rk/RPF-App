@@ -130,21 +130,7 @@ export default function Home() {
                 </p>
               </div>
               
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => navigate("/jan-seva-card")}
-                  className="bg-[#FF9933] hover:bg-[#e68a2e] text-white text-[9.5px] font-black uppercase tracking-widest px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-md transition transform active:scale-95 cursor-pointer"
-                >
-                  <span>{lang === "hi" ? "कार्ड प्राप्त करें >" : "Get Jan Seva Card >"}</span>
-                </button>
-                <button 
-                  onClick={() => navigate("/services")}
-                  className="bg-white/15 hover:bg-white/20 border border-white/25 text-white text-[9.5px] font-black uppercase tracking-widest px-3 py-2 rounded-lg flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer"
-                >
-                  <Play className="w-3 h-3 text-white fill-white" />
-                  <span>{lang === "hi" ? "वीडियो देखें" : "Watch Video"}</span>
-                </button>
-              </div>
+              
             </div>
 
             {/* Dots Indicator */}
