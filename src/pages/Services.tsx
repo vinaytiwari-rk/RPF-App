@@ -15,8 +15,7 @@ export default function Services() {
 
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
-  const [compactView, setCompactView] = useState(false);
-  const [webResults, setWebResults] = useState<any[]>([]);
+    const [webResults, setWebResults] = useState<any[]>([]);
   const [webLoading, setWebLoading] = useState(false);
 
   /* ─────────────────────────────────────
@@ -86,14 +85,7 @@ export default function Services() {
             {isHi ? "21 जनकल्याण सेवाएं • एक संकल्प" : "21 Active Welfare Services • Single Platform"}
           </p>
         </div>
-        <button
-          onClick={() => setCompactView((g) => !g)}
-          className={`px-2.5 py-1 rounded-full text-[9px] font-bold transition-all ${
-            compactView ? "bg-purple-600 text-white animate-pulse" : "bg-slate-200 text-slate-700"
-          }`}
-        >
-          🌌 {isHi ? "कॉम्पैक्ट" : "Compact"}
-        </button>
+        
       </div>
 
       {/* ══════════════════════════════════════
@@ -142,9 +134,7 @@ export default function Services() {
 
               return (
                 <button key={svc.id} onClick={() => navigate(route)}
-                  className={`bg-white/95 border border-slate-200/70 shadow-sm p-3 text-center flex flex-col items-center justify-center gap-2 h-28 rounded-2xl transition-all duration-700 ease-in-out hover:border-indigo-300 ${
-                    compactView ? "translate-y-[260px] rotate-[10deg] opacity-75" : "translate-y-0 rotate-0 opacity-100"
-                  }`}
+                  className={`bg-white/95 border border-slate-200/70 shadow-sm p-3 text-center flex flex-col items-center justify-center gap-2 h-28 rounded-2xl transition-all duration-700 ease-in-out hover:border-indigo-300 translate-y-0 rotate-0 opacity-100`}
                   style={{ transitionDelay: `${idx * 25}ms` }}
                 >
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center ${svc.color || "bg-indigo-50 text-indigo-600"} shadow-inner`}>
