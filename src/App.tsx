@@ -8,11 +8,13 @@ import JanSevaCard from "./pages/JanSevaCard";
 import BloodNetwork from "./pages/BloodNetwork";
 import Grievances from "./pages/Grievances";
 import Services from "./pages/Services";
+import ServiceDetails from "./pages/ServiceDetails";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
 
 // Wired Workflows
 import VolunteersPage from "./pages/VolunteersPage";
+import VolunteerDashboard from "./pages/VolunteerDashboard";
 import DonationsPage from "./pages/DonationsPage";
 import HealthPage from "./pages/HealthPage";
 import HealthCamps from "./pages/HealthCamps";
@@ -99,6 +101,7 @@ function AppContent() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/services/:id" element={<ServiceDetails />} />
           <Route path="/community" element={<Community />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/profile" element={<Profile />} />
@@ -109,6 +112,7 @@ function AppContent() {
           <Route path="/grievance" element={<Grievances />} />
           <Route path="/donations" element={<DonationsPage />} />
           <Route path="/volunteers" element={<VolunteersPage />} />
+          <Route path="/volunteer-dashboard" element={<VolunteerDashboard />} />
           <Route path="/health" element={<HealthPage />} />
           <Route path="/health-camps" element={<HealthCamps />} />
           <Route path="/jobs" element={<JobsPage />} />

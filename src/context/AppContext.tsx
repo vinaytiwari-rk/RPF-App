@@ -254,6 +254,8 @@ interface AppContextType {
   loading: boolean;
   settings: Settings;
   cmsConfig: CmsConfig;
+  servicesList: any[];
+  isLoadingServices: boolean;
   socialPosts: SocialPost[];
   socialLinks: SocialLink[];
   grievances: Grievance[];
@@ -282,9 +284,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [cmsConfig, setCmsConfig] = useState<CmsConfig>(DEFAULT_CMS_CONFIG);
-  const [socialPosts, setSocialPosts] = useState<SocialPost[]>(
-    DEFAULT_SOCIAL_POSTS.map((p, idx) => ({ id: `default_sp_${idx}`, ...p }))
-  );
+  const [servicesList, setServicesList] = useState<any[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState<boolean>(true);
+  const [socialPosts, setSocialPosts] = useState<SocialPost[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
   const [grievances, setGrievances] = useState<Grievance[]>([]);
   const [cardApplications, setCardApplications] = useState<CardApplication[]>([]);
@@ -327,17 +329,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (d.grievances) setGrievances(d.grievances);
       }
 
-      // 4. Card Applications
-      const cardsRes = await fetch("/api/cards");
-      if (cardsRes.ok) {
-        const d = await cardsRes.json();
-        if (d.applications) setCardApplications(d.applications);
+        // 4. Card Applications
+        const cardsRes = await fetch("/api/cards");
+        if (cardsRes.ok) {
+          const d = await cardsRes.json();
+          if (d.applications) setCardApplications(d.applications);
+        }
+
+        // 5. Services List
+        try {
+          const servicesRes = await fetch("/api/public/services");
+          if (servicesRes.ok) {
+            const d = await servicesRes.json();
+            if (d.data) setServicesList(d.data);
+          }
+        } catch (e) {
+          console.error("Failed to fetch services", e);
+        } finally {
+          setIsLoadingServices(false);
+        }
+      } catch (e) {
+        console.error("AppContext: fetch error:", e);
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      console.error("AppContext: fetch error:", e);
-    } finally {
-      setLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -485,6 +500,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         loading,
         settings,
         cmsConfig,
+        servicesList,
+        isLoadingServices,
         socialPosts,
         socialLinks,
         grievances,

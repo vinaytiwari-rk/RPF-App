@@ -7,7 +7,7 @@ import { jsPDF } from "jspdf";
 import { 
   User, Shield, Award, MapPin, Languages, BookMarked, 
   Settings, HelpCircle, AlertTriangle, Info, LogOut, CheckCircle2, 
-  ChevronRight, Heart, QrCode, Download, X, ShieldCheck
+  ChevronRight, Heart, QrCode, Download, X, ShieldCheck, Target
 } from "lucide-react";
 import { translations } from "../translations";
 
@@ -109,8 +109,23 @@ export default function Profile() {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
-
-
+        {user.isVolunteer && (
+          <button
+            onClick={() => navigate("/volunteer-dashboard")}
+            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-2xl p-4 flex items-center justify-between shadow-sm active:scale-[0.98] transition"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-xl">
+                <Target className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-sm">{isHi ? "स्वयंसेवक डैशबोर्ड" : "Volunteer Dashboard"}</p>
+                <p className="text-[10px] text-amber-100 font-bold mt-0.5">{isHi ? "कार्यों और गतिविधियों को प्रबंधित करें" : "Manage tasks & field activities"}</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-amber-200" />
+          </button>
+        )}
 
         {/* System Administration Control Card (Role-Based Visibility) */}
         {(user.role === "admin" || user.role === "super_admin" || user.role === "volunteer") && (

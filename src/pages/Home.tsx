@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { 
+import * as LucideIcons from "lucide-react";
+import { translations } from "../translations";
+import { useAuth } from "../context/AuthContext";
+import { useApp } from "../context/AppContext";
+
+const { 
   ChevronRight, Heart, Calendar, MapPin, QrCode, Activity, 
   BookOpen, Briefcase, Users, Flame, Compass, Award, 
   AlertTriangle, Shield, CheckCircle, PhoneCall, HelpCircle, 
   GraduationCap, FileText, ArrowRight, ShieldCheck, Play
-} from "lucide-react";
-import { translations } from "../translations";
-import { useAuth } from "../context/AuthContext";
-import { useApp } from "../context/AppContext";
+} = LucideIcons;
 // Purged Firebase imports for portability
 
 export default function Home() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const { user } = useAuth();
-  const { settings, cmsConfig } = useApp();
+  const { settings, cmsConfig, servicesList, isLoadingServices } = useApp();
   const navigate = useNavigate();
   const t = translations[lang];
 
@@ -25,7 +27,9 @@ export default function Home() {
     healthCamps: 0,
     scholarships: 0
   });
+  const [statsLoading, setStatsLoading] = useState(true);
   const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaignsLoading, setCampaignsLoading] = useState(true);
 
   useEffect(() => {
     const fetchStatsAndCampaigns = async () => {
@@ -42,6 +46,8 @@ export default function Home() {
         }
       } catch (err) {
         console.error("Error fetching live stats:", err);
+      } finally {
+        setStatsLoading(false);
       }
 
       try {
@@ -52,6 +58,8 @@ export default function Home() {
         }
       } catch (err) {
         console.error("Error fetching live campaigns:", err);
+      } finally {
+        setCampaignsLoading(false);
       }
     };
     fetchStatsAndCampaigns();
@@ -67,29 +75,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  const coreServicesList = [
-    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: QrCode, route: "/jan-seva-card", color: "text-blue-600 bg-blue-50 border-blue-100", badgeEn: "Active", badgeHi: "सक्रिय" },
-    { id: "blood", labelEn: "Blood Network", labelHi: "रक्त नेटवर्क", icon: Activity, route: "/blood-network", color: "text-red-600 bg-red-50 border-red-100" },
-    { id: "grievance", labelEn: "File Complaint", labelHi: "शिकायत निवारण", icon: FileText, route: "/grievance", color: "text-orange-650 bg-orange-50 border-orange-100" },
-    { id: "donations", labelEn: "Donate Now", labelHi: "दान सहायता", icon: Heart, route: "/donations", color: "text-rose-600 bg-rose-50 border-rose-100" },
-    { id: "health_camp", labelEn: "Health Camps", labelHi: "स्वास्थ्य शिविर", icon: Heart, route: "/health-camps", color: "text-[#000080] bg-[#000080]/5 border-[#000080]/15" },
-    { id: "jobs", labelEn: "Jobs & Training", labelHi: "कौशल विकास", icon: Briefcase, route: "/jobs", color: "text-amber-600 bg-amber-50 border-amber-100" },
-    { id: "scholarships", labelEn: "Scholarships", labelHi: "छात्रवृत्ति", icon: GraduationCap, route: "/scholarships", color: "text-indigo-600 bg-indigo-50 border-indigo-100" },
-    { id: "women", labelEn: "Women Safety", labelHi: "महिला सुरक्षा", icon: Shield, route: "/women", color: "text-purple-605 bg-purple-50 border-purple-100" },
-    { id: "seniors", labelEn: "Senior Citizens", labelHi: "वरिष्ठ नागरिक", icon: Users, route: "/seniors", color: "text-teal-605 bg-teal-50 border-teal-100" },
-    { id: "environment", labelEn: "Environment", labelHi: "पर्यावरण विकास", icon: Compass, route: "/environment", color: "text-emerald-650 bg-emerald-50 border-emerald-100" }
-  ];
-
-  const customActions = (cmsConfig.customServices || []).map((cs: any) => ({
-    id: cs.id,
-    labelEn: cs.titleEn,
-    labelHi: cs.titleHi,
-    icon: Compass,
-    route: "/services",
-    color: "text-indigo-600 bg-indigo-50 border-indigo-100"
-  }));
-
-  const activeActions = [...coreServicesList, ...customActions].filter((action) => {
+  const activeActions = (servicesList || []).filter((action) => {
     return settings?.servicesStatus?.[action.id] !== false;
   });
 
@@ -238,28 +224,27 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-5 gap-2 bg-white border border-slate-200/60 rounded-2xl p-3 shadow-sm">
-          {quickActions.map((action, idx) => {
-            const IconComponent = action.icon;
+        <div className="grid grid-cols-5 gap-2 bg-white border border-slate-200/60 rounded-2xl p-3 shadow-sm min-h-[90px]">
+          {isLoadingServices ? (
+            <div className="col-span-5 flex items-center justify-center text-xs text-slate-400">Loading services...</div>
+          ) : quickActions.length === 0 ? (
+            <div className="col-span-5 flex items-center justify-center text-xs text-slate-400">No active services.</div>
+          ) : quickActions.map((action, idx) => {
+            const IconComponent = (LucideIcons as any)[action.iconName || "Compass"] || Compass;
+            const route = action.id === 'card' ? '/jan-seva-card' : action.id === 'blood' ? '/blood-network' : action.id === 'donations' ? '/donations' : `/services/${action.id}`;
+            
             return (
               <button 
                 key={idx}
-                onClick={() => navigate(action.route)}
+                onClick={() => navigate(route)}
                 className="flex flex-col items-center justify-center p-1.5 transition text-center gap-1.5 active:scale-95 duration-100 cursor-pointer group relative"
               >
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center border shadow-inner ${action.color}`}>
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center border shadow-inner ${action.color || "bg-indigo-50 text-indigo-600 border-indigo-100"}`}>
                   <IconComponent className="w-4.5 h-4.5" />
                 </div>
-                <span className="font-bold text-[8.5px] text-slate-700 leading-none line-clamp-2 px-0.5">
-                  {lang === "hi" ? action.labelHi : action.labelEn}
+                <span className="text-[9.5px] font-bold text-slate-600 leading-[1.1] w-full line-clamp-2">
+                  {lang === "hi" ? action.titleHi : action.titleEn}
                 </span>
-
-                {/* Optional Tag badge */}
-                {action.badgeEn && (
-                  <span className="absolute -top-1 right-0 bg-[#FF9933] text-white text-[6px] font-black uppercase px-1 rounded shadow-xs leading-none">
-                    {lang === "hi" ? action.badgeHi : action.badgeEn}
-                  </span>
-                )}
               </button>
             );
           })}

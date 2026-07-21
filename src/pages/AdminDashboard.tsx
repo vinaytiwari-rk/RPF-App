@@ -56,6 +56,12 @@ export default function AdminDashboard() {
   // Volunteers list state
   const [volunteers, setVolunteers] = useState<any[]>([]);
   const [volunteersSuccess, setVolunteersSuccess] = useState(false);
+  const [taskTitleEn, setTaskTitleEn] = useState("");
+  const [taskTitleHi, setTaskTitleHi] = useState("");
+  const [taskDescEn, setTaskDescEn] = useState("");
+  const [taskDescHi, setTaskDescHi] = useState("");
+  const [taskPoints, setTaskPoints] = useState(10);
+  const [assigningTaskFor, setAssigningTaskFor] = useState<string | null>(null);
 
   // Comms states (Notifications & Testimonials)
   const [notifTitleEn, setNotifTitleEn] = useState("");
@@ -394,6 +400,33 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error("Error removing volunteer:", err);
+    }
+  };
+
+  const handleAssignTask = async (e: React.FormEvent, volunteerId: string) => {
+    e.preventDefault();
+    if (!taskTitleEn || !taskDescEn) return;
+    try {
+      const response = await fetch("/api/volunteer_tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          volunteerId,
+          titleEn: taskTitleEn,
+          titleHi: taskTitleHi || taskTitleEn,
+          descriptionEn: taskDescEn,
+          descriptionHi: taskDescHi || taskDescEn,
+          points: taskPoints
+        })
+      });
+      if (response.ok) {
+        setAssigningTaskFor(null);
+        setTaskTitleEn(""); setTaskTitleHi(""); setTaskDescEn(""); setTaskDescHi(""); setTaskPoints(10);
+        setVolunteersSuccess(true);
+        setTimeout(() => setVolunteersSuccess(false), 2000);
+      }
+    } catch (err) {
+      console.error("Error assigning task:", err);
     }
   };
 
@@ -1306,10 +1339,24 @@ export default function AdminDashboard() {
                       </div>
                       
                       <div className="flex justify-end gap-1.5 border-t border-slate-200/60 pt-2">
+                        <button onClick={() => assigningTaskFor === v.id ? setAssigningTaskFor(null) : setAssigningTaskFor(v.id)} className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-[9px] uppercase font-black transition active:scale-95">Assign Task</button>
                         <button onClick={() => handleUpdatePoints(v.id, v.points || 0, -50)} className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1 rounded-lg text-[9px] uppercase font-black transition active:scale-95">-50 Points</button>
                         <button onClick={() => handleUpdatePoints(v.id, v.points || 0, 50)} className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded-lg text-[9px] uppercase font-black transition active:scale-95">+50 Points</button>
                         <button onClick={() => handleDeleteVolunteer(v.id)} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 px-2 py-1 rounded-lg transition active:scale-95"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
+
+                      {assigningTaskFor === v.id && (
+                        <form onSubmit={(e) => handleAssignTask(e, v.id)} className="mt-3 bg-white border border-indigo-100 p-3 rounded-xl space-y-2 animate-fadeIn">
+                          <input type="text" placeholder="Task Title (English)" required value={taskTitleEn} onChange={e => setTaskTitleEn(e.target.value)} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px]" />
+                          <input type="text" placeholder="कार्य शीर्षक (Hindi)" value={taskTitleHi} onChange={e => setTaskTitleHi(e.target.value)} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px]" />
+                          <textarea placeholder="Task Description" required value={taskDescEn} onChange={e => setTaskDescEn(e.target.value)} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px] h-16" />
+                          <input type="number" placeholder="Points Reward" required min="10" value={taskPoints} onChange={e => setTaskPoints(Number(e.target.value))} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px]" />
+                          <div className="flex gap-2 justify-end pt-1">
+                            <button type="button" onClick={() => setAssigningTaskFor(null)} className="px-3 py-1.5 text-[9px] font-bold text-slate-500 hover:text-slate-700">CANCEL</button>
+                            <button type="submit" className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[9px] font-black uppercase">Send Task</button>
+                          </div>
+                        </form>
+                      )}
                     </div>
                   ))
                 )}
