@@ -120,17 +120,40 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
   const statesList = State.getStatesOfCountry(countryIso);
   const citiesList = City.getCitiesOfState(countryIso, stateIso);
 
-  // CRM Auto-fill effect for India
-  useEffect(() => {
-    if (isIndia && CRM_MAPPING[city as keyof typeof CRM_MAPPING]?.[area as any]) {
-      const data = (CRM_MAPPING[city as keyof typeof CRM_MAPPING] as any)[area];
-      setSansad(data.sansad);
-      setVidhan(data.vidhan);
-      setWard(data.ward);
-    } else {
-      setSansad(""); setVidhan(""); setWard("");
+  // CRM Search States
+  const [areaSuggestions, setAreaSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchTimer, setSearchTimer] = useState<any>(null);
+  const [isSearchingArea, setIsSearchingArea] = useState(false);
+
+  // Debounced Search function
+  const searchArea = (query: string) => {
+    setArea(query);
+    setShowSuggestions(true);
+    if (query.length < 2) {
+      setAreaSuggestions([]);
+      return;
     }
-  }, [isIndia, city, area]);
+    if (searchTimer) clearTimeout(searchTimer);
+    setIsSearchingArea(true);
+    setSearchTimer(setTimeout(async () => {
+      try {
+        const res = await axios.get(`/api/locations/search?q=${encodeURIComponent(query)}`);
+        setAreaSuggestions(res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsSearchingArea(false);
+      }
+    }, 400));
+  };
+
+  const handleSelectArea = (loc: any) => {
+    setArea(loc.vidhan_sabha);
+    setSansad(loc.sansad_kshetra);
+    setVidhan(loc.vidhan_sabha);
+    setShowSuggestions(false);
+  };
 
   // Handle Country Change gracefully
   const handleCountryChange = (iso: string) => {
@@ -394,34 +417,46 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
                   <label className="text-[10px] font-bold text-slate-500 uppercase">Zip/Postal Code</label>
                   <input type="text" maxLength={10} value={pincode} onChange={e=>setPincode(e.target.value)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" />
                 </div>
-                <div className="space-y-1">
-                  <label className={"text-[10px] font-bold uppercase " + (isIndia ? "text-[#FF9933]" : "text-slate-500")}>{isIndia ? "Area (Auto-fetch CRM)" : "Area/Locality"}</label>
-                  {isIndia && Object.keys(CRM_MAPPING).includes(city) ? (
-                    <select value={area} onChange={e=>setArea(e.target.value)} className="w-full p-2.5 border border-[#FF9933] rounded-lg text-xs font-black bg-orange-50 text-slate-800 outline-none">
-                      <option value="">Select Area...</option>
-                      {Object.keys((CRM_MAPPING as any)[city] || {}).map(a => <option key={a} value={a}>{a}</option>)}
-                    </select>
-                  ) : (
-                    <input type="text" value={area} onChange={e=>setArea(e.target.value)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" placeholder="E.g. Downtown" />
+                <div className="space-y-1 relative">
+                  <label className={"text-[10px] font-bold uppercase " + (isIndia ? "text-[#FF9933]" : "text-slate-500")}>{isIndia ? "Area Search (Auto-fetch CRM)" : "Area/Locality"}</label>
+                  <input type="text" value={area} onChange={e=>isIndia ? searchArea(e.target.value) : setArea(e.target.value)} onFocus={() => isIndia && setShowSuggestions(true)} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" placeholder="E.g. Bhopal" />
+                  
+                  {isIndia && showSuggestions && area.length >= 2 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto">
+                      {isSearchingArea ? (
+                        <div className="p-3 text-xs text-slate-500 text-center flex items-center justify-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" /> Searching...
+                        </div>
+                      ) : areaSuggestions.length > 0 ? (
+                        areaSuggestions.map((loc, idx) => (
+                          <div key={idx} onClick={() => handleSelectArea(loc)} className="p-3 border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition">
+                            <p className="text-xs font-black text-slate-800">{loc.vidhan_sabha} <span className="text-[10px] text-slate-500 font-normal">({loc.district})</span></p>
+                            <p className="text-[9px] font-bold text-[#FF9933] uppercase mt-0.5">Sansad: {loc.sansad_kshetra}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-3 text-xs text-slate-500 text-center">No locations found. You can type manually.</div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
             </div>
 
             {/* Smart CRM Mapping Result (Only for India) */}
-            {isIndia && area && sansad && (
+            {isIndia && (
               <div className="p-3 bg-slate-800 rounded-xl border border-slate-700 animate-fadeIn grid grid-cols-3 gap-2 mt-2 shadow-inner">
                 <div>
-                  <p className="text-[8px] text-slate-400 font-bold uppercase mb-0.5">Sansad Kshetra</p>
-                  <p className="text-[9px] text-white font-bold">{sansad}</p>
+                  <label className="text-[8px] text-slate-400 font-bold uppercase mb-0.5 block">Sansad Kshetra</label>
+                  <input type="text" value={sansad} onChange={e=>setSansad(e.target.value)} className="w-full bg-slate-700 text-[10px] text-white font-bold p-1.5 rounded outline-none border border-slate-600 focus:border-[#FF9933]" placeholder="Manual entry" />
                 </div>
                 <div>
-                  <p className="text-[8px] text-slate-400 font-bold uppercase mb-0.5">Vidhan Sabha</p>
-                  <p className="text-[9px] text-white font-bold">{vidhan}</p>
+                  <label className="text-[8px] text-slate-400 font-bold uppercase mb-0.5 block">Vidhan Sabha</label>
+                  <input type="text" value={vidhan} onChange={e=>setVidhan(e.target.value)} className="w-full bg-slate-700 text-[10px] text-white font-bold p-1.5 rounded outline-none border border-slate-600 focus:border-[#FF9933]" placeholder="Manual entry" />
                 </div>
                 <div>
-                  <p className="text-[8px] text-slate-400 font-bold uppercase mb-0.5">Ward No.</p>
-                  <p className="text-[9px] text-white font-bold">{ward}</p>
+                  <label className="text-[8px] text-slate-400 font-bold uppercase mb-0.5 block">Ward No.</label>
+                  <input type="text" value={ward} onChange={e=>setWard(e.target.value)} className="w-full bg-slate-700 text-[10px] text-white font-bold p-1.5 rounded outline-none border border-slate-600 focus:border-[#FF9933]" placeholder="e.g. 42" />
                 </div>
               </div>
             )}

@@ -706,6 +706,56 @@ Respond with a JSON array of up to 3 highly tailored schemes. Each scheme should
 });
 
 // =============================================================================
+// LOCATION SEARCH API (LOCAL GEOJSON)
+// =============================================================================
+let acGeoJsonData: any = null;
+
+app.get("/api/locations/search", (req, res) => {
+  const query = (req.query.q as string)?.trim().toLowerCase();
+  if (!query || query.length < 2) {
+    return res.json([]);
+  }
+
+  if (!acGeoJsonData) {
+    try {
+      const geoJsonPath = path.join(process.cwd(), "maps-master", "maps-master", "website", "docs", "data", "geojson", "ac.geojson");
+      const fileContent = fs.readFileSync(geoJsonPath, "utf-8");
+      acGeoJsonData = JSON.parse(fileContent);
+    } catch (err) {
+      console.error("Failed to load ac.geojson:", err);
+      return res.status(500).json({ error: "Location data unavailable" });
+    }
+  }
+
+  // Filter features matching District or AC_NAME
+  const results = [];
+  const seen = new Set();
+  const features = acGeoJsonData.features || [];
+  
+  for (const feature of features) {
+    const props = feature.properties;
+    if (props && props.ST_NAME === "MADHYA PRADESH") {
+      const dist = (props.DIST_NAME || "").toLowerCase();
+      const ac = (props.AC_NAME || "").toLowerCase();
+      if (dist.includes(query) || ac.includes(query)) {
+        const uniqueKey = `${props.DIST_NAME}-${props.AC_NAME}`;
+        if (!seen.has(uniqueKey)) {
+          seen.add(uniqueKey);
+          results.push({
+            district: props.DIST_NAME,
+            vidhan_sabha: props.AC_NAME,
+            sansad_kshetra: props.PC_NAME
+          });
+        }
+      }
+    }
+    if (results.length >= 10) break; // limit to 10 fast results
+  }
+
+  res.json(results);
+});
+
+// =============================================================================
 // OPEN GOVERNMENT DATA (data.gov.in) INTEGRATIONS
 // =============================================================================
 
