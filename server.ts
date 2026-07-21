@@ -34,7 +34,8 @@ const webAuthnChallengeStore = new Map();
 
 app.post("/api/auth/login-multi", async (req, res) => {
   try {
-    const { identifier, password } = req.body;
+    const body = req.body || {};
+    const { identifier, password } = body;
     if (!identifier || !password) return res.status(400).json({ error: "Missing fields" });
     
     if (identifier === "admin" && password === "admin") {
@@ -147,7 +148,8 @@ app.post("/api/auth/forgot-password", async (req, res) => {
 // Admin HQ Credentials API
 app.put("/api/admin/hq/credentials", async (req, res) => {
   try {
-    const { username, newPassword } = req.body;
+    const body = req.body || {};
+    const { username, newPassword } = body;
     if (!username || !newPassword) return res.status(400).json({ error: "Missing username or password" });
     
     const hash = await bcrypt.hash(newPassword, 10);
