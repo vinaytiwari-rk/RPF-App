@@ -21,6 +21,7 @@ export default function Profile() {
   const navigate = useNavigate();
   
   const t = translations[language];
+  const isHi = language === "hi";
 
   const [showFaqModal, setShowFaqModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
