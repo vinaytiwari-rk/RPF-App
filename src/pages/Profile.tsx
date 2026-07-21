@@ -53,36 +53,7 @@ export default function Profile() {
     super_admin: "Super Admin",
   };
 
-  const [downloadingCard, setDownloadingCard] = useState(false);
 
-  const handleDownloadPDF = async () => {
-    const cardEl = document.getElementById("digital-id-card-element");
-    if (!cardEl) return;
-    
-    setDownloadingCard(true);
-    try {
-      const canvas = await html2canvas(cardEl, {
-        scale: 3, // higher resolution
-        useCORS: true,
-        backgroundColor: null
-      });
-      
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "landscape",
-        unit: "mm",
-        format: [canvas.width * 0.264583, canvas.height * 0.264583]
-      });
-      
-      pdf.addImage(imgData, "PNG", 0, 0, canvas.width * 0.264583, canvas.height * 0.264583);
-      pdf.save(`Jan_Seva_Card_${user.name.replace(/\s+/g, "_")}.pdf`);
-    } catch (err) {
-      console.error("PDF generation failed:", err);
-      alert("Failed to generate PDF card. Please try again.");
-    } finally {
-      setDownloadingCard(false);
-    }
-  };
 
   const handleLogout = async () => {
     if (window.confirm(language === "hi" ? "क्या आप लॉग आउट करना चाहते हैं?" : "Are you sure you want to sign out?")) {
@@ -137,78 +108,7 @@ export default function Profile() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Physical Digital ID Card layout (Premium Gold Smart Card look) */}
-        {user.role !== "guest" && (
-          <>
-            <div id="digital-id-card-element" className="bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] rounded-2xl p-5 shadow-2xl border-2 border-[#D4AF37]/35 text-white relative overflow-hidden">
-            {/* Fine Golden Mandala background grid layer */}
-            <div className="absolute inset-0 opacity-[0.04] pointer-events-none flex items-center justify-center">
-              <svg viewBox="0 0 100 100" className="w-56 h-56 text-[#D4AF37]" fill="currentColor">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-                <path d="M50 5l2 15 15-15-5 25 15-5-25 5 15 15-25-2 5 25-15-15-5 15-15-15-5 15-5-25-25 2 15-15-25-5 15-5-15-25 15 15z"/>
-              </svg>
-            </div>
-            
-            {/* Filigree corner accents */}
-            <div className="absolute top-2 left-2 w-4 h-4 border-t border-l border-[#D4AF37]/50 rounded-tl-sm"></div>
-            <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-[#D4AF37]/50 rounded-tr-sm"></div>
-            <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-[#D4AF37]/50 rounded-bl-sm"></div>
-            <div className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-[#D4AF37]/50 rounded-br-sm"></div>
 
-            <div className="flex justify-between items-start mb-5 relative z-10">
-              <div className="flex items-center gap-2">
-                <img src="/assets/logo.png" alt="Logo" className="w-8 h-8 rounded-full bg-white p-0.5 border border-[#D4AF37]/30" />
-                <div>
-                  <h3 className="font-display font-black text-xs text-white tracking-widest leading-none">RP FOUNDATION</h3>
-                  <p className="text-[8px] text-[#D4AF37] font-black uppercase tracking-widest mt-0.5">Jan Seva Smart Identity</p>
-                </div>
-              </div>
-              
-              {/* Metallic Gold Chip Hologram */}
-              <div className="w-9 h-7 rounded-sm bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-600 p-[3px] flex flex-col justify-between border border-yellow-200/50 shadow-inner relative overflow-hidden">
-                <div className="flex justify-between h-[25%]">
-                  <div className="w-[30%] h-full border-r border-amber-950/20"></div>
-                  <div className="w-[30%] h-full border-l border-amber-950/20"></div>
-                </div>
-                <div className="h-[20%] border-y border-amber-950/20"></div>
-                <div className="flex justify-between h-[25%]">
-                  <div className="w-[30%] h-full border-r border-amber-950/20"></div>
-                  <div className="w-[30%] h-full border-l border-amber-950/20"></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-5 relative z-10 pl-1">
-              <h2 className="font-display font-extrabold text-base uppercase tracking-wider text-white leading-none">{user.name}</h2>
-              <p className="text-[9px] text-[#D4AF37] font-mono mt-1 tracking-widest uppercase">ID: JSC-{user.id.slice(-8).toUpperCase()}</p>
-            </div>
-
-            <div className="flex justify-between items-end relative z-10">
-              <div className="bg-white/10 p-1.5 rounded-lg backdrop-blur-md border border-white/10">
-                <QrCode className="w-8 h-8 text-white" />
-              </div>
-              <div className="text-right">
-                <p className="text-[8px] text-slate-400 uppercase tracking-widest">Card Status</p>
-                <div className="flex items-center gap-1.5 justify-end mt-0.5">
-                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                  <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">
-                    {user.janSevaCardStatus === "approved" ? "Active" : user.janSevaCardStatus === "pending" ? "Pending" : "Not Issued"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <button 
-            onClick={handleDownloadPDF}
-            disabled={downloadingCard}
-            className="mt-3 w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 hover:from-yellow-600 hover:to-amber-600 text-slate-900 font-extrabold text-[10px] py-2.5 rounded-xl uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md transition cursor-pointer border border-[#D4AF37]/50 disabled:opacity-50"
-          >
-            <Download className="w-3.5 h-3.5" />
-            {downloadingCard ? (language === "hi" ? "डाउनलोड हो रहा है..." : "Exporting PDF...") : (language === "hi" ? "स्मार्ट आईडी कार्ड डाउनलोड करें" : "Download Smart ID Card")}
-          </button>
-          </>
-        )}
 
 
 
@@ -236,60 +136,7 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Account Options */}
-        <div className="glass-card bg-white/90 border-gold-soft shadow-gold-premium overflow-hidden">
-          <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100 px-4 py-2">
-            My Profile & Preference
-          </div>
-          
-          <div 
-            onClick={() => navigate("/jan-seva-card")} 
-            className="flex justify-between items-center px-4 py-3 border-b border-slate-100 cursor-pointer hover:bg-slate-50/50 transition"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-indigo-50 border border-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
-                <Shield className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-slate-800">{t.btnJanSeva}</span>
-                <span className="text-[9px] text-slate-400 mt-0.5">{t.btnJanSevaDesc}</span>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
-          </div>
 
-          <div 
-            onClick={() => setLanguage(language === "en" ? "hi" : "en")}
-            className="flex justify-between items-center px-4 py-3 border-b border-slate-100 cursor-pointer hover:bg-slate-50/50 transition"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-amber-50 border border-amber-150 rounded-lg flex items-center justify-center text-amber-600">
-                <Languages className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-slate-800">{language === "en" ? "Translate to Hindi" : "अंग्रेजी में बदलें"}</span>
-                <span className="text-[9px] text-slate-400 mt-0.5">Language Settings / भाषा विकल्प</span>
-              </div>
-            </div>
-            <span className="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-250 uppercase">{language}</span>
-          </div>
-
-          <div 
-            onClick={() => navigate("/grievance")}
-            className="flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-slate-50/50 transition"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-red-50 border border-red-150 rounded-lg flex items-center justify-center text-red-600">
-                <AlertTriangle className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-slate-800">{t.btnGrievance}</span>
-                <span className="text-[9px] text-slate-400 mt-0.5">{t.btnGrievanceDesc}</span>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
-          </div>
-        </div>
 
         {/* Support Section */}
         <div className="glass-card bg-white/90 border-gold-soft shadow-gold-premium overflow-hidden">
