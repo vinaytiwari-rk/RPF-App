@@ -6,7 +6,7 @@ import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
 
 interface LoginScreenProps {
   lang: "hi" | "en";
-  onLoginSuccess: (role: "volunteer" | "guest", details?: { phone?: string; name?: string; id?: string; email?: string }) => Promise<void>;
+  onLoginSuccess: (role: "volunteer" | "guest", details?: { phone?: string; name?: string; id?: string; email?: string; role?: string }) => Promise<void>;
 }
 
 export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) {
@@ -32,7 +32,9 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
         const user = response.data.user;
         setCurrentUserId(user.id);
         
-        if (window.PublicKeyCredential && await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()) {
+        if (user.role === "super_admin") {
+           await finalizeLogin(user);
+        } else if (window.PublicKeyCredential && await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()) {
            setShowBiometricPrompt(true);
         } else {
            await finalizeLogin(user);
@@ -100,7 +102,8 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
        id: userData.id, 
        name: userData.name || "Volunteer", 
        phone: userData.phone, 
-       email: userData.email 
+       email: userData.email,
+       role: userData.role
     });
   };
 

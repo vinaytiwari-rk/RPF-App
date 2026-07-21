@@ -214,6 +214,20 @@ app.post("/api/auth/forgot-password", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+app.put("/api/admin/hq/credentials", async (req, res) => {
+  try {
+    const { username, newPassword } = req.body;
+    if (!username || !newPassword) return res.status(400).json({ error: "Missing username or password" });
+    const hash = await import_bcryptjs.default.hash(newPassword, 10);
+    await pool2.query(
+      `UPDATE admin_credentials SET username = $1, password_hash = $2 WHERE id = 'admin'`,
+      [username, hash]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.post("/api/auth/reset-ticket", async (req, res) => {
   res.json({ success: true, message: "Admin reset ticket created" });
 });

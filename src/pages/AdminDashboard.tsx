@@ -30,6 +30,34 @@ export default function AdminDashboard() {
   const [founderHi, setFounderHi] = useState(settings?.founderMessageHi || "");
   const [settingsSuccess, setSettingsSuccess] = useState(false);
 
+  // Admin Credentials State
+  const [adminUser, setAdminUser] = useState("");
+  const [adminPass, setAdminPass] = useState("");
+  const [adminCredMsg, setAdminCredMsg] = useState("");
+
+  const handleUpdateCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminUser || !adminPass) return;
+    try {
+      const res = await fetch("/api/admin/hq/credentials", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: adminUser, newPassword: adminPass })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAdminCredMsg("Credentials updated securely.");
+        setAdminPass("");
+        setTimeout(() => setAdminCredMsg(""), 3000);
+      } else {
+        setAdminCredMsg("Update failed.");
+      }
+    } catch (err) {
+      setAdminCredMsg("Update failed.");
+    }
+  };
+
+
   // PREMIUM ADDS: Founder Image and Live Emergency Alert Banner Controller
   const [founderImgUrl, setFounderImgUrl] = useState(settings?.founderImgUrl || "/assets/founder.png");
   const [alertBannerEn, setAlertBannerEn] = useState(settings?.alertBannerEn || "");
