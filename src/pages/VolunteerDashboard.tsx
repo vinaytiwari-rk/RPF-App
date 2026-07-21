@@ -25,6 +25,22 @@ export default function VolunteerDashboard() {
   const [tasks, setTasks] = useState<VolunteerTask[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [activeTab, setActiveTab] = useState<"tasks" | "certificates">("tasks");
+  const [certificates, setCertificates] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user && activeTab === "certificates") {
+      fetch(`/api/volunteers/me/certificates?volunteer_id=${user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setCertificates(data.certificates);
+          }
+        });
+    }
+  }, [user, activeTab]);
+
+
   useEffect(() => {
     if (!user) {
       navigate("/");
