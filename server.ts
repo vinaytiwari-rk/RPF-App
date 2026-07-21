@@ -18,6 +18,7 @@ import { setDbPool } from "./src/controllers/adminHqController.js";
 dotenv.config();
 
 const app = express();
+app.use(express.json());
 
 // =============================================================================
 // VOLUNTEER REGISTRATION ENDPOINTS (5-STEP FORM)
@@ -455,7 +456,6 @@ app.post('/api/auth/webauthn/login-verify', async (req, res) => {
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
 
-app.use(express.json());
 
 // PostgreSQL Pool Connection
 const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;

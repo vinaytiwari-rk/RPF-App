@@ -92,6 +92,7 @@ var adminHqRoutes_default = router;
 var import_pdf_lib = require("pdf-lib");
 import_dotenv.default.config();
 var app = (0, import_express2.default)();
+app.use(import_express2.default.json());
 var rpName = "RP Foundation Jan Seva";
 var rpID = process.env.WEBAUTHN_RP_ID || "localhost";
 var originUrl = `https://${rpID}`;
@@ -470,7 +471,6 @@ app.post("/api/auth/webauthn/login-verify", async (req, res) => {
   }
 });
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
-app.use(import_express2.default.json());
 var dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
 var pool2 = new import_pg.default.Pool({
   connectionString: dbUrl,
