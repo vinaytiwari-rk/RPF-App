@@ -204,13 +204,40 @@ app.post("/api/auth/logout", async (req, res) => {
 app.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
-    const result = await pool.query(`SELECT id, name, role, email, phone, points, badges FROM users WHERE id = $1`, [userId]);
+    const result = await pool.query(`SELECT id, name, role, email, phone, points, badges, avatar FROM users WHERE id = $1`, [userId]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, error: "User not found" });
     }
     
-    res.json({ success: true, user: result.rows[0] });
+    const user = result.rows[0];
+    
+    // Check if user is a volunteer
+    if (user.phone || user.email) {
+      const volResult = await pool.query(`SELECT * FROM volunteers WHERE mobile = $1 OR email = $2`, [user.phone, user.email]);
+      if (volResult.rows.length > 0) {
+        user.volunteerData = volResult.rows[0];
+        user.isVolunteer = true;
+      }
+    }
+    
+    res.json({ success: true, user });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post("/api/auth/profile/update", authenticateToken, async (req: any, res: any) => {
+  try {
+    const userId = req.user.id;
+    const { name, avatar } = req.body;
+    
+    await pool.query(
+      `UPDATE users SET name = $1, avatar = $2 WHERE id = $3`,
+      [name, avatar, userId]
+    );
+    
+    res.json({ success: true });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -1375,7 +1402,6 @@ async function initDatabase() {
   try {
     console.log("Initializing local PostgreSQL schema...");
     client = await pool.connect();
-    // gen_random_uuid() is built-in since PG 13 — no extension needed
     
     // Drop tables that may have wrong column casing from previous failed init
     const tablesToRecreate = ["social_posts", "campaigns", "jobs", "health_camps", "grievances", "service_submissions", "job_applications", "blood_donors", "card_applications"];
@@ -1493,7 +1519,7 @@ async function initDatabase() {
     // Create social_posts table
     await client.query(`
       CREATE TABLE IF NOT EXISTS social_posts (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY,
         author TEXT,
         role TEXT,
         avatar TEXT,
@@ -1512,7 +1538,7 @@ async function initDatabase() {
     // Create campaigns table
     await client.query(`
       CREATE TABLE IF NOT EXISTS campaigns (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY,
         "titleEn" TEXT,
         "titleHi" TEXT,
         "goalAmount" NUMERIC DEFAULT 0,
@@ -1527,7 +1553,7 @@ async function initDatabase() {
     // Create jobs table
     await client.query(`
       CREATE TABLE IF NOT EXISTS jobs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY,
         "titleEn" TEXT,
         "titleHi" TEXT,
         company TEXT,
@@ -1543,7 +1569,7 @@ async function initDatabase() {
     // Create health_camps table
     await client.query(`
       CREATE TABLE IF NOT EXISTS health_camps (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY,
         "titleEn" TEXT,
         "titleHi" TEXT,
         "dateEn" TEXT,
@@ -1564,7 +1590,7 @@ async function initDatabase() {
     // Create grievances table
     await client.query(`
       CREATE TABLE IF NOT EXISTS grievances (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY,
         title TEXT,
         description TEXT,
         category TEXT,
@@ -1581,7 +1607,7 @@ async function initDatabase() {
     // Create service_submissions table
     await client.query(`
       CREATE TABLE IF NOT EXISTS service_submissions (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY,
         "userId" TEXT,
         "serviceNameEn" TEXT,
         "serviceName" TEXT,
@@ -1633,7 +1659,7 @@ async function initDatabase() {
     // Create job_applications table
     await client.query(`
       CREATE TABLE IF NOT EXISTS job_applications (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY,
         "jobId" TEXT,
         "jobTitle" TEXT,
         "fullName" TEXT,
@@ -1646,7 +1672,7 @@ async function initDatabase() {
     // Create blood_donors table
     await client.query(`
       CREATE TABLE IF NOT EXISTS blood_donors (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY,
         name TEXT,
         "bloodGroup" TEXT,
         phone TEXT,
@@ -1708,9 +1734,9 @@ async function initDatabase() {
       ];
       for (const p of DEFAULT_POSTS) {
         await client.query(
-          `INSERT INTO social_posts (author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link) 
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-          [p.author, p.role, p.avatar, p.textEn, p.textHi, p.image, p.likes, p.commentsCount, p.liked, p.platform, p.link]
+          `INSERT INTO social_posts (id, author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+          [crypto.randomUUID(), p.author, p.role, p.avatar, p.textEn, p.textHi, p.image, p.likes, p.commentsCount, p.liked, p.platform, p.link]
         );
       }
     }

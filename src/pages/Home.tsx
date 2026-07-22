@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { translations } from "../translations";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
@@ -109,37 +110,53 @@ export default function Home() {
       {slides.length > 0 && (
         <div className="px-4 pt-4 relative z-10">
           <div className="relative rounded-3xl overflow-hidden h-48 shadow-lg border border-slate-200/50 bg-slate-900 text-white">
-            <img 
-              src={slides[activeSlide]?.image} 
-              alt="Carousel Banner" 
-              className="absolute inset-0 w-full h-full object-cover opacity-35" 
-            />
+            <AnimatePresence mode="wait">
+              <motion.img 
+                key={activeSlide}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 0.35, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                src={slides[activeSlide]?.image} 
+                alt="Carousel Banner" 
+                className="absolute inset-0 w-full h-full object-cover" 
+              />
+            </AnimatePresence>
             {/* Saffron & Green Waves gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent pointer-events-none"></div>
             
             {/* Subtle Tricolour Bottom Trim */}
             <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-tricolour"></div>
             
-            <div className="relative z-10 p-5 flex flex-col justify-between h-full">
-              <div className="space-y-1.5 max-w-[240px]">
-                <h3 className="font-display font-extrabold text-base leading-tight tracking-wide text-white drop-shadow-md">
-                  {lang === "hi" ? slides[activeSlide]?.titleHi : slides[activeSlide]?.titleEn}
-                </h3>
-                <p className="text-[10px] text-slate-200 font-semibold drop-shadow-xs">
-                  {lang === "hi" ? slides[activeSlide]?.subHi : slides[activeSlide]?.subEn}
-                </p>
-              </div>
-              
-              
+            <div className="relative z-10 p-5 flex flex-col justify-between h-full pointer-events-none">
+              <AnimatePresence mode="wait">
+                <motion.div 
+                  key={activeSlide}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -20, opacity: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="space-y-1.5 max-w-[240px]"
+                >
+                  <h3 className="font-display font-extrabold text-base leading-tight tracking-wide text-white drop-shadow-md">
+                    {lang === "hi" ? slides[activeSlide]?.titleHi : slides[activeSlide]?.titleEn}
+                  </h3>
+                  <p className="text-[10px] text-slate-200 font-semibold drop-shadow-xs">
+                    {lang === "hi" ? slides[activeSlide]?.subHi : slides[activeSlide]?.subEn}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
 
             {/* Dots Indicator */}
             <div className="absolute bottom-3 right-4 flex gap-1 z-10">
               {slides.map((_, i) => (
-                <span 
+                <button 
                   key={i} 
-                  className={`w-1.5 h-1.5 rounded-full transition ${activeSlide === i ? "bg-[#FF9933] w-3" : "bg-white/40"}`}
-                ></span>
+                  onClick={() => setActiveSlide(i)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${activeSlide === i ? "bg-[#FF9933] w-4" : "bg-white/40 w-1.5 hover:bg-white/60"}`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
               ))}
             </div>
           </div>
@@ -147,7 +164,13 @@ export default function Home() {
       )}
 
       {/* 3. Our Impact Section (Matches Screenshot 5 Our Impact Grid) */}
-      <div className="px-4 relative z-10">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.6 }}
+        className="px-4 relative z-10"
+      >
         <div className="flex justify-between items-center mb-2.5">
           <h4 className="font-display font-extrabold text-xs text-[#0B1E3F]">
             {lang === "hi" ? "हमारा प्रभाव" : "Our Impact"}
@@ -194,7 +217,7 @@ export default function Home() {
             </span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* 4. Quick Actions (Matches Screenshot 5 View All Services Grid - 5 columns x 2 rows) */}
       <div className="px-4 relative z-10">
@@ -244,6 +267,17 @@ export default function Home() {
               </button>
             );
           })}
+        </div>
+
+        {/* Dedicated Donate Button */}
+        <div className="mt-3">
+          <button 
+            onClick={() => navigate("/donations")}
+            className="w-full bg-gradient-to-r from-red-500 via-rose-500 to-red-600 text-white font-extrabold text-sm py-3 rounded-2xl shadow-[0_4px_20px_rgba(225,29,72,0.4)] flex items-center justify-center gap-2 hover:shadow-[0_4px_25px_rgba(225,29,72,0.6)] transition active:scale-[0.98]"
+          >
+            <LucideIcons.Heart className="w-5 h-5 fill-white/20 animate-pulse" />
+            {lang === "hi" ? ".'? -?" : "Donate Now"}
+          </button>
         </div>
       </div>
 
@@ -313,8 +347,14 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 6. Message from Founder Section (Matches Screenshot 5 Message from Founder card) */}
-      <div className="px-4 relative z-10">
+      {/* 6. Message from Founder (Matches Screenshot 5 Founder Msg) */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.6 }}
+        className="px-4 relative z-10"
+      >
         <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF9933]/5 rounded-full blur-xl"></div>
           
@@ -347,45 +387,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* 7. Trusted strip (Matches Screenshot 5 bottom footer strip) */}
-      <div className="px-4 relative z-10 pb-4">
-        <div className="bg-[#0B1E3F] text-white rounded-2xl p-3 shadow-md flex items-center justify-between gap-3 relative overflow-hidden border border-white/5">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20 text-green-400 shrink-0">
-              <ShieldCheck className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <p className="text-[8.5px] font-black uppercase tracking-widest text-[#FF9933] leading-none">
-                {lang === "hi" 
-                  ? `${(stats?.beneficiaries || 12500).toLocaleString()} से अधिक नागरिक` 
-                  : `Trusted by ${(stats?.beneficiaries || 12500).toLocaleString()}+ Citizens`}
-              </p>
-              <p className="text-[8px] text-slate-300 font-bold uppercase tracking-wider mt-1 leading-none">
-                Secure • Transparent • Reliable
-              </p>
-            </div>
-          </div>
-
-          {/* User avatars cluster */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="flex -space-x-2.5 overflow-hidden">
-              {[1, 2, 3].map((num) => (
-                <div 
-                  key={num} 
-                  className="inline-block h-6 w-6 rounded-full ring-2 ring-[#0B1E3F] bg-gradient-to-br from-slate-600 to-slate-800 text-[8px] font-black flex items-center justify-center text-white"
-                >
-                  {num === 1 ? "A" : num === 2 ? "S" : "R"}
-                </div>
-              ))}
-            </div>
-            <span className="text-[8.5px] font-black text-[#138808] bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
-              {stats?.beneficiaries ? `${stats.beneficiaries.toLocaleString()}+` : "0"}
-            </span>
-          </div>
-        </div>
-      </div>
+      </motion.div>
       
     </div>
   );

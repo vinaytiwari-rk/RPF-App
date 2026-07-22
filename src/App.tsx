@@ -1,8 +1,18 @@
 import React, { useState, useEffect, Suspense } from "react";
+import axios from 'axios';
 import ErrorBoundary from "./components/ErrorBoundary";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import MainLayout from "./layouts/MainLayout";
+
+// Configure Axios Defaults
+axios.defaults.headers.common['Accept'] = 'application/json';
+// Force API calls to use https if we are not on localhost, to avoid mixed-content and 415 errors
+if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  if (axios.defaults.baseURL && axios.defaults.baseURL.startsWith('http://')) {
+    axios.defaults.baseURL = axios.defaults.baseURL.replace('http://', 'https://');
+  }
+}
 
 import Home from "./pages/Home";
 const JanSevaCard = React.lazy(() => import("./pages/JanSevaCard"));

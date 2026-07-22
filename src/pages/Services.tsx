@@ -30,14 +30,19 @@ export default function Services() {
     { id: "civic", en: "⚖️ Civic", hi: "⚖️ नागरिक" },
   ];
 
-  const filtered = (servicesList || []).filter((s) => {
-    const enabled = s.enabled !== false && settings?.servicesStatus?.[s.id] !== false;
-    const matchesCat = category === "all" || s.category === category;
-    const matchesSearch =
-      (s.titleEn ?? "").toLowerCase().includes(search.toLowerCase()) ||
-      (s.titleHi ?? "").toLowerCase().includes(search.toLowerCase());
-    return enabled && matchesCat && matchesSearch;
-  }).sort((a, b) => {
+  const filtered = (Array.isArray(servicesList)
+    ? servicesList.filter((s: any) => {
+        // Exclude donations from services page as it's now on the home page
+        if (s.id === "donations") return false;
+        
+        const enabled = s.enabled !== false && settings?.servicesStatus?.[s.id] !== false;
+        const matchesCat = category === "all" || s.category === category;
+        const matchesSearch =
+          (s.titleEn ?? "").toLowerCase().includes(search.toLowerCase()) ||
+          (s.titleHi ?? "").toLowerCase().includes(search.toLowerCase());
+        return enabled && matchesCat && matchesSearch;
+      })
+    : []).sort((a, b) => {
     if (a.featured && !b.featured) return -1;
     if (!a.featured && b.featured) return 1;
     return 0;

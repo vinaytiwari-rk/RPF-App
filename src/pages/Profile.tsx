@@ -7,9 +7,11 @@ import { jsPDF } from "jspdf";
 import { 
   User, Shield, Award, MapPin, Languages, BookMarked, 
   Settings, HelpCircle, AlertTriangle, Info, LogOut, CheckCircle2, 
-  ChevronRight, Heart, QrCode, Download, X, ShieldCheck, Target
+  ChevronRight, Heart, QrCode, Download, X, ShieldCheck, Target, Edit2, Check, Save, FileText
 } from "lucide-react";
 import { translations } from "../translations";
+import { motion } from "motion/react";
+import axios from "axios";
 
 
 
@@ -25,6 +27,30 @@ export default function Profile() {
 
   const [showFaqModal, setShowFaqModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(user?.name || "");
+  const [editAvatar, setEditAvatar] = useState(user?.avatar || "");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name);
+      setEditAvatar(user.avatar || "");
+    }
+  }, [user]);
+
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
+      await axios.post("/api/auth/profile/update", { name: editName, avatar: editAvatar });
+      alert("Profile updated successfully!");
+      window.location.reload();
+    } catch (err) {
+      alert("Error updating profile");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -64,29 +90,90 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 animate-fadeIn pb-24">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col h-full bg-slate-50 pb-24"
+    >
       {/* Profile Hero section with Tricolour Gradient Header */}
-      <div className="bg-gradient-to-r from-[#07142A] via-[#0B1E3F] to-[#122A54] pt-6 pb-6 px-5 relative overflow-hidden shrink-0 text-white shadow-md border-b border-gold-soft">
-        <div className="absolute top-0 right-0 w-36 h-36 bg-[#FF9933]/5 rounded-full blur-2xl transform translate-x-10 -translate-y-10"></div>
+      <div className="bg-gradient-to-br from-[#0B1E3F] via-indigo-900 to-[#122A54] pt-8 pb-8 px-5 relative overflow-hidden shrink-0 text-white shadow-lg border-b border-white/10 rounded-b-[2.5rem]">
+        {/* Animated Background Ornaments */}
+        <motion.div 
+          animate={{ scale: [1, 1.1, 1], rotate: [0, 90, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-tr from-[#FF9933]/20 to-transparent rounded-full blur-3xl transform translate-x-10 -translate-y-10"
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], rotate: [0, -90, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#138808]/20 to-transparent rounded-full blur-3xl transform -translate-x-10 translate-y-10"
+        />
         
-        <div className="flex items-center gap-4 relative z-10">
+        <div className="flex items-center gap-5 relative z-10">
           {/* Avatar Ring & Floating Level */}
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full border-2 border-[#D4AF37]/50 p-1 bg-white/5 backdrop-blur-md flex items-center justify-center">
-              <div className="w-full h-full rounded-full bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-white font-extrabold text-2xl shadow-md">
-                {initials}
-              </div>
+          <div className="relative group">
+            <div className="w-24 h-24 rounded-full border-[3px] border-[#D4AF37]/50 p-1 bg-white/10 backdrop-blur-md flex items-center justify-center overflow-hidden">
+              {user.avatar ? (
+                <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-white font-extrabold text-3xl shadow-md">
+                  {initials}
+                </div>
+              )}
             </div>
-            
+            {!isEditing && (
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="absolute bottom-0 right-0 bg-white text-[#0B1E3F] p-1.5 rounded-full shadow-lg border border-slate-200"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          <div className="flex-1 space-y-1.5">
-            <h2 className="font-display font-extrabold text-xl tracking-tight leading-tight">{user.name}</h2>
-            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/5 py-0.5 px-2.5 rounded-full w-fit">
-              <span className="w-1.5 h-1.5 bg-[#138808] rounded-full animate-pulse"></span>
-              <span className="text-[9px] font-black tracking-widest uppercase text-slate-200">{roleLabel[user.role] || user.role}</span>
-            </div>
-            {user.phone && <p className="text-[10px] text-slate-400 font-bold tracking-wide font-mono">+91 {user.phone}</p>}
+          <div className="flex-1 space-y-2">
+            {isEditing ? (
+              <div className="space-y-2 w-full">
+                <input 
+                  type="text" 
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-sm text-white placeholder-white/50 focus:outline-none focus:border-[#FF9933]"
+                  placeholder="Full Name"
+                />
+                <input 
+                  type="text" 
+                  value={editAvatar}
+                  onChange={(e) => setEditAvatar(e.target.value)}
+                  className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-xs text-white placeholder-white/50 focus:outline-none focus:border-[#FF9933]"
+                  placeholder="Avatar Image URL"
+                />
+                <div className="flex gap-2">
+                  <button onClick={handleSaveProfile} disabled={isSaving} className="bg-[#FF9933] text-white text-[10px] px-3 py-1 rounded font-bold flex items-center gap-1">
+                    {isSaving ? "Saving..." : <><Save className="w-3 h-3" /> Save</>}
+                  </button>
+                  <button onClick={() => setIsEditing(false)} className="bg-white/10 text-white text-[10px] px-3 py-1 rounded font-bold">Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h2 className="font-display font-extrabold text-2xl tracking-tight leading-tight drop-shadow-sm">{user.name}</h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 py-1 px-3 rounded-full w-fit">
+                    <span className="w-2 h-2 bg-[#138808] rounded-full animate-pulse shadow-[0_0_8px_rgba(19,136,8,0.8)]"></span>
+                    <span className="text-[10px] font-black tracking-widest uppercase text-slate-200">{roleLabel[user.role] || user.role}</span>
+                  </div>
+                  {user.isVolunteer && user.volunteerData?.registration_number && (
+                    <div className="flex items-center gap-1.5 bg-[#FF9933]/20 backdrop-blur-md border border-[#FF9933]/30 py-1 px-3 rounded-full w-fit">
+                      <ShieldCheck className="w-3 h-3 text-[#FF9933]" />
+                      <span className="text-[10px] font-black tracking-widest uppercase text-[#FF9933]">V-ID: {user.volunteerData.registration_number}</span>
+                    </div>
+                  )}
+                </div>
+                {user.phone && <p className="text-xs text-slate-300 font-bold tracking-wide font-mono opacity-80">+91 {user.phone}</p>}
+              </>
+            )}
           </div>
         </div>
 
@@ -108,54 +195,99 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 relative -mt-6 z-20">
+
+        {/* Volunteer Identity Card */}
+        {user.isVolunteer && user.volunteerData && (
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-emerald-500 to-emerald-700 px-4 py-3 flex items-center justify-between text-white">
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-emerald-100" />
+                <span className="font-black text-xs uppercase tracking-wider">Volunteer Details</span>
+              </div>
+              <span className="bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-bold border border-white/20">
+                {user.volunteerData.approval_status?.toUpperCase() || "PENDING"}
+              </span>
+            </div>
+            <div className="p-4 grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+              <div className="flex flex-col">
+                <span className="text-[9px] font-bold text-slate-400 uppercase">Blood Group</span>
+                <span className="font-extrabold text-slate-800 flex items-center gap-1 text-sm"><Heart className="w-3 h-3 text-red-500" /> {user.volunteerData.blood_group || "N/A"}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] font-bold text-slate-400 uppercase">DOB</span>
+                <span className="font-semibold text-slate-700">{user.volunteerData.dob ? new Date(user.volunteerData.dob).toLocaleDateString() : "N/A"}</span>
+              </div>
+              <div className="flex flex-col col-span-2">
+                <span className="text-[9px] font-bold text-slate-400 uppercase">Address</span>
+                <span className="font-semibold text-slate-700 flex items-center gap-1"><MapPin className="w-3 h-3 text-slate-400" /> {user.volunteerData.city}, {user.volunteerData.state}</span>
+              </div>
+              <div className="flex flex-col col-span-2">
+                <span className="text-[9px] font-bold text-slate-400 uppercase">Father/Husband Name</span>
+                <span className="font-semibold text-slate-700 flex items-center gap-1"><User className="w-3 h-3 text-slate-400" /> {user.volunteerData.father_husband_name || "N/A"}</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {user.isVolunteer && (
-          <button
+          <motion.button
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigate("/volunteer-dashboard")}
-            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-2xl p-4 flex items-center justify-between shadow-sm active:scale-[0.98] transition"
+            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-2xl p-4 flex items-center justify-between shadow-md transition"
           >
             <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2 rounded-xl">
-                <Target className="w-5 h-5" />
+              <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                <Target className="w-6 h-6 shadow-sm" />
               </div>
               <div className="text-left">
                 <p className="font-black text-sm">{isHi ? "स्वयंसेवक डैशबोर्ड" : "Volunteer Dashboard"}</p>
-                <p className="text-[10px] text-amber-100 font-bold mt-0.5">{isHi ? "कार्यों और गतिविधियों को प्रबंधित करें" : "Manage tasks & field activities"}</p>
+                <p className="text-[10.5px] text-amber-100 font-bold mt-0.5">{isHi ? "कार्यों और गतिविधियों को प्रबंधित करें" : "Manage tasks & field activities"}</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-amber-200" />
-          </button>
+            <ChevronRight className="w-6 h-6 text-amber-200" />
+          </motion.button>
         )}
 
         {/* System Administration Control Card (Role-Based Visibility) */}
         {(user.role === "admin" || user.role === "super_admin" || user.role === "volunteer") && (
-          <div className="glass-card bg-[#0B1E3F] text-white border-[#D4AF37]/35 overflow-hidden rounded-2xl border">
-            <div className="text-[9px] font-black text-slate-300 uppercase tracking-wider bg-slate-900/50 border-b border-white/5 px-4 py-2">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-card bg-[#0B1E3F] text-white border-[#D4AF37]/35 overflow-hidden rounded-2xl border shadow-lg"
+          >
+            <div className="text-[9px] font-black text-slate-300 uppercase tracking-wider bg-slate-900/50 border-b border-white/5 px-4 py-2.5">
               System Administration
             </div>
             <div 
               onClick={() => navigate("/admin")}
-              className="flex justify-between items-center px-4 py-3.5 cursor-pointer hover:bg-white/5 transition"
+              className="flex justify-between items-center px-4 py-4 cursor-pointer hover:bg-white/5 transition"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-orange-500/10 border border-orange-500/20 rounded-lg flex items-center justify-center text-[#FF9933]">
-                  <Shield className="w-4 h-4" />
+                <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center text-[#FF9933]">
+                  <Shield className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-black uppercase tracking-wider text-white">Admin Command HQ</span>
-                  <span className="text-[9.5px] text-slate-350 mt-0.5">Control settings, approve cards, and resolve grievances</span>
+                  <span className="text-xs font-black uppercase tracking-wider text-white drop-shadow-sm">Admin Command HQ</span>
+                  <span className="text-[10px] text-slate-350 mt-0.5">Control settings, approve cards, and resolve grievances</span>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <ChevronRight className="w-5 h-5 text-slate-400" />
             </div>
-          </div>
+          </motion.div>
         )}
 
-
-
-        {/* Support Section */}
-        <div className="glass-card bg-white/90 border-gold-soft shadow-gold-premium overflow-hidden">
+        {/* Action Menu List */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+        >
           <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100 px-4 py-2">
             Support & Info
           </div>
@@ -187,7 +319,7 @@ export default function Profile() {
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </div>
-        </div>
+        </motion.div>
 
         {/* Sign Out Button */}
         <button 
@@ -294,6 +426,6 @@ export default function Profile() {
       )}
 
 
-    </div>
+    </motion.div>
   );
 }

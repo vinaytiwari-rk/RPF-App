@@ -4,6 +4,7 @@ import { ArrowLeft, User, Compass, Users, Bell, Activity, Globe, Search, Message
 import { useAuth } from "../context/AuthContext";
 import AIAssistant from "../components/AIAssistant";
 import { useApp } from "../context/AppContext";
+import { motion, AnimatePresence } from "motion/react";
 
 // Simple Helper Lucide Grid icon replacement
 function GridIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -192,7 +193,10 @@ export default function MainLayout() {
 
           {/* Right: Actions (Search, Notification Bell with red badge, and Profile) */}
           <div className="flex items-center gap-3 relative z-10">
-            <button className="p-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 hover:shadow-xs transition">
+            <button 
+              onClick={() => handleNav("/services")}
+              className="p-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 hover:shadow-xs transition"
+            >
               <Search className="w-4 h-4" />
             </button>
             <div className="relative">
@@ -220,48 +224,57 @@ export default function MainLayout() {
         </div>
 
         {/* FIXED BOTTOM NAVIGATION BAR */}
-        <div className="w-full bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0">
+        <motion.div 
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }}
+          className="w-full bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0"
+        >
           
-          <button 
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleNav("/")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
               location.pathname === "/" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
             }`}
           >
-            {location.pathname === "/" && <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></div>}
+            {location.pathname === "/" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
             <Compass className="w-5 h-5 mt-0.5" />
             <span className="text-[9px] font-bold">{language === "hi" ? "होम" : "Home"}</span>
-          </button>
+          </motion.button>
 
-          <button 
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleNav("/services")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
               location.pathname === "/services" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
             }`}
           >
-            {location.pathname === "/services" && <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></div>}
+            {location.pathname === "/services" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
             <GridIcon className="w-5 h-5 mt-0.5" />
             <span className="text-[9px] font-bold">{language === "hi" ? "सेवाएं" : "Services"}</span>
-          </button>
+          </motion.button>
 
-          <button 
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleNav("/community")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
               location.pathname === "/community" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
             }`}
           >
-            {location.pathname === "/community" && <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></div>}
+            {location.pathname === "/community" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
             <Users className="w-5 h-5 mt-0.5" />
             <span className="text-[9px] font-bold">{language === "hi" ? "समुदाय" : "Community"}</span>
-          </button>
+          </motion.button>
 
-          <button 
+          <motion.button 
+              whileTap={{ scale: 0.9 }}
               onClick={() => handleNav("/notifications")}
               className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
                 location.pathname === "/notifications" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
               }`}
             >
-              {location.pathname === "/notifications" && <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></div>}
+              {location.pathname === "/notifications" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
               <div className="relative">
                 <Bell className="w-5 h-5 mt-0.5" />
                 {unreadCount > 0 && (
@@ -271,20 +284,21 @@ export default function MainLayout() {
                 )}
               </div>
               <span className="text-[9px] font-bold">{language === "hi" ? "अलर्ट" : "Alerts"}</span>
-            </button>
+            </motion.button>
 
-          <button 
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleNav("/profile")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
               location.pathname === "/profile" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
             }`}
           >
-            {location.pathname === "/profile" && <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></div>}
+            {location.pathname === "/profile" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
             <User className="w-5 h-5 mt-0.5" />
             <span className="text-[9px] font-bold">{language === "hi" ? "प्रोफ़ाइल" : "Profile"}</span>
-          </button>
+          </motion.button>
 
-        </div>
+        </motion.div>
 
         {/* Global Floating AI Sahayak Button */}
         {!isAiOpen && (
