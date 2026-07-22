@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { useOutletContext, useNavigate } from "react-router-dom";
+import { useApp } from "../context/AppContext";
+import { useAuth } from "../context/AuthContext";
 import jsPDF from "jspdf";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
 import EmptyState from "../components/EmptyState";
+import JoditEditor from "jodit-react";
 import { 
   ArrowLeft, Settings, Users, AlertTriangle, MessageSquare, 
   Check, X, Save, CheckCircle, Plus, Trash2, Image, 
   Download, BarChart2, ShieldAlert, Megaphone, Grid, Heart,
-  Award, Bell, Inbox, CreditCard, Menu, FileText
+  Award, Bell, Inbox, CreditCard, Menu, FileText,
+  LayoutDashboard, ChevronRight, Star
 } from "lucide-react";
 
 export default function AdminDashboard() {

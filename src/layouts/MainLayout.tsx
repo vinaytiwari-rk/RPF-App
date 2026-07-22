@@ -32,6 +32,8 @@ export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { language, setLanguage, user, logout } = useAuth();
+  const { notifications } = useApp();
+  const unreadCount = notifications?.filter(n => !n.read).length || 0;
   const [showGuestModal, setShowGuestModal] = useState(false);
 
   const handleNav = (path) => {
