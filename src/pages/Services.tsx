@@ -31,12 +31,16 @@ export default function Services() {
   ];
 
   const filtered = (servicesList || []).filter((s) => {
-    const enabled = settings?.servicesStatus?.[s.id] !== false;
+    const enabled = s.enabled !== false && settings?.servicesStatus?.[s.id] !== false;
     const matchesCat = category === "all" || s.category === category;
     const matchesSearch =
       (s.titleEn ?? "").toLowerCase().includes(search.toLowerCase()) ||
       (s.titleHi ?? "").toLowerCase().includes(search.toLowerCase());
     return enabled && matchesCat && matchesSearch;
+  }).sort((a, b) => {
+    if (a.featured && !b.featured) return -1;
+    if (!a.featured && b.featured) return 1;
+    return 0;
   });
 
   /* Google Search fallback — fires on any search input query */

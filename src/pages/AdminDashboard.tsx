@@ -167,6 +167,9 @@ export default function AdminDashboard() {
   const [volunteers, setVolunteers] = useState<any[]>([]);
   const [volunteersSuccess, setVolunteersSuccess] = useState(false);
   const [taskTitleEn, setTaskTitleEn] = useState("");
+
+  const [allocationInputs, setAllocationInputs] = useState<{[key: string]: string}>({});
+
   const [taskTitleHi, setTaskTitleHi] = useState("");
   const [taskDescEn, setTaskDescEn] = useState("");
   const [taskDescHi, setTaskDescHi] = useState("");
@@ -373,7 +376,7 @@ export default function AdminDashboard() {
       titleEn: srvTitleEn, titleHi: srvTitleHi,
       descEn: srvDescEn, descHi: srvDescHi,
       category: srvCategory, iconName: srvIcon,
-      color: srvColor, enabled: true
+      color: srvColor, enabled: true, featured: false, views: 0
     };
 
     const updatedServices = [...customServices, newService];
@@ -518,6 +521,34 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error("Error updating volunteer points:", err);
+    }
+  };
+
+  const handleApproveVolunteer = async (id: string, status: string) => {
+    try {
+      const res = await fetch(`/api/volunteers/${id}/approve`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) fetchCampaignsAndVolunteers();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAllocateVolunteer = async (id: string) => {
+    try {
+      const allocation = allocationInputs[id] || "";
+      if (!allocation) return;
+      const res = await fetch(`/api/volunteers/${id}/allocate`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ allocation })
+      });
+      if (res.ok) fetchCampaignsAndVolunteers();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -1178,20 +1209,54 @@ export default function AdminDashboard() {
               {/* List of active custom injected schemes */}
               <div className="space-y-2">
                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Active Dynamic Nodes</span>
-                {customServices.map((srv) => (
-                  <div key={srv.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-2xl bg-white shadow-sm">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 shrink-0"><Heart className="w-4 h-4" /></div>
-                      <div className="min-w-0">
-                        <p className="font-extrabold text-xs text-slate-800 truncate">{lang === "hi" ? srv.titleHi : srv.titleEn}</p>
-                        <p className="text-[9px] text-slate-400 uppercase font-black leading-none mt-0.5">{srv.category}</p>
+                {customServices.map((srv, idx) => (
+                    <div key={srv.id} className="flex flex-col gap-2 p-3 border border-slate-200 rounded-2xl bg-white shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                            {srv.featured ? <Award className="w-4 h-4 text-amber-500" /> : <Heart className="w-4 h-4" />}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-extrabold text-xs text-slate-800 truncate">{lang === "hi" ? srv.titleHi : srv.titleEn}</p>
+                            <p className="text-[9px] text-slate-400 uppercase font-black leading-none mt-0.5">
+                              {srv.category} &bull; {srv.views || 0} Views
+                            </p>
+                          </div>
+                        </div>
+                        <button onClick={() => handleDeleteService(srv.id)} className="text-red-600 p-1.5 rounded-xl hover:bg-red-50 border border-transparent hover:border-red-100 transition shrink-0">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                        <label className="text-[10px] font-black uppercase text-slate-500 flex items-center gap-1 cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            checked={srv.enabled !== false} 
+                            onChange={(e) => {
+                               const updated = [...customServices];
+                               updated[idx].enabled = e.target.checked;
+                               setCustomServices(updated);
+                            }} 
+                            className="accent-green-500"
+                          />
+                          Enabled
+                        </label>
+                        <label className="text-[10px] font-black uppercase text-slate-500 flex items-center gap-1 cursor-pointer ml-auto">
+                          <input 
+                            type="checkbox" 
+                            checked={srv.featured || false} 
+                            onChange={(e) => {
+                               const updated = [...customServices];
+                               updated[idx].featured = e.target.checked;
+                               setCustomServices(updated);
+                            }} 
+                            className="accent-amber-500"
+                          />
+                          Featured (Pin to Top)
+                        </label>
                       </div>
                     </div>
-                    <button onClick={() => handleDeleteService(srv.id)} className="text-red-600 p-1.5 rounded-xl hover:bg-red-50 border border-transparent hover:border-red-100 transition shrink-0">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                  ))}
                 {customServices.length === 0 && (
                   <p className="text-slate-400 text-[10.5px] text-center font-bold py-2">No custom schemes appended yet.</p>
                 )}

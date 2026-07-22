@@ -148,6 +148,44 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+app.put("/api/volunteers/:id/approve", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await pool.query(`UPDATE volunteers SET approval_status = $1 WHERE id = $2`, [status, id]);
+    res.json({ success: true, message: "Volunteer status updated" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.put("/api/volunteers/:id/allocate", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { allocation } = req.body;
+    await pool.query(`UPDATE volunteers SET constituency_allocation = $1 WHERE id = $2`, [allocation, id]);
+    res.json({ success: true, message: "Volunteer allocated" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post("/api/volunteers/report", async (req, res) => {
+  try {
+    const { volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng } = req.body;
+    await pool.query(
+      `INSERT INTO volunteer_reports (id, volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [crypto.randomUUID(), volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng]
+    );
+    res.json({ success: true, message: "Report submitted" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Alias for old frontend calls
+
 // Alias for old frontend calls
 app.post("/api/auth/login-multi", (req, res) => {
    // Forward to the new unified login
@@ -247,7 +285,7 @@ app.post("/api/auth/register-volunteer", async (req, res) => {
     
     await pool.query(`
       INSERT INTO volunteers (
-        id, username, registration_number, full_name, father_husband_name, mother_name,
+        id, username, registration_number, full_name, father_husband_name, mother_name, approval_status,
         dob, mobile, email, education, blood_group, skills, reason_for_joining, availability,
         national_id_1, national_id_2, country, state, city, address, pincode, area_locality,
         sansad_kshetra, vidhan_sabha, ward_no
