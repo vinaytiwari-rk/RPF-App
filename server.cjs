@@ -24,6 +24,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 // server.ts
 var import_express2 = __toESM(require("express"), 1);
 var import_cors = __toESM(require("cors"), 1);
+var import_express_rate_limit = __toESM(require("express-rate-limit"), 1);
 var import_server = require("@simplewebauthn/server");
 var import_bcryptjs = __toESM(require("bcryptjs"), 1);
 var import_path = __toESM(require("path"), 1);
@@ -97,7 +98,31 @@ var app = (0, import_express2.default)();
 app.use((0, import_cors.default)());
 app.use(import_express2.default.json({ limit: "50mb" }));
 app.use(import_express2.default.urlencoded({ limit: "50mb", extended: true }));
+var limiter = (0, import_express_rate_limit.default)({
+  windowMs: 15 * 60 * 1e3,
+  max: 20,
+  message: { success: false, error: "Too many requests from this IP, please try again after 15 minutes" }
+});
+var sanitizePayload = (req, res, next) => {
+  const payloadStr = JSON.stringify(req.body);
+  if (payloadStr && (payloadStr.includes("DROP TABLE") || payloadStr.includes("SELECT * FROM") || payloadStr.includes("UNION SELECT"))) {
+    return res.status(403).json({ success: false, error: "Suspicious payload detected." });
+  }
+  next();
+};
+app.use(sanitizePayload);
+app.use("/api/auth", limiter);
+app.use("/api/support_requests", limiter);
+app.use("/api/grievances", limiter);
 var JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_development_only";
+var authorizeRole = (requiredRole) => {
+  return (req, res, next) => {
+    if (!req.user || req.user.role !== requiredRole) {
+      return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
+    }
+    next();
+  };
+};
 var authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -1754,7 +1779,7 @@ app.get("/api/settings", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.post("/api/settings", async (req, res) => {
+app.post("/api/settings", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
   try {
     const { tollFree, webUrl, email, founderMessageEn, founderMessageHi } = req.body;
     await pool2.query(
@@ -1781,7 +1806,7 @@ app.get("/api/cms/config", async (req, res) => {
     res.json({ success: true, data: {} });
   }
 });
-app.post("/api/cms/config", async (req, res) => {
+app.post("/api/cms/config", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
   try {
     await pool2.query(
       `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 

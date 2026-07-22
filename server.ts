@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import bcrypt from 'bcryptjs';
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
@@ -23,6 +24,25 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { success: false, error: "Too many requests from this IP, please try again after 15 minutes" },
+});
+
+const sanitizePayload = (req: any, res: any, next: any) => {
+  const payloadStr = JSON.stringify(req.body);
+  if (payloadStr && (payloadStr.includes("DROP TABLE") || payloadStr.includes("SELECT * FROM") || payloadStr.includes("UNION SELECT"))) {
+    return res.status(403).json({ success: false, error: "Suspicious payload detected." });
+  }
+  next();
+};
+
+app.use(sanitizePayload);
+app.use("/api/auth", limiter);
+app.use("/api/support_requests", limiter);
+app.use("/api/grievances", limiter);
+
 
 import jwt from "jsonwebtoken";
 
@@ -30,6 +50,16 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_development_only";
 
 // JWT Middleware
+
+const authorizeRole = (requiredRole: string) => {
+  return (req: any, res: any, next: any) => {
+    if (!req.user || req.user.role !== requiredRole) {
+      return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
+    }
+    next();
+  };
+};
+
 const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -2023,7 +2053,7 @@ app.get("/api/settings", async (req, res) => {
   }
 });
 
-app.post("/api/settings", async (req, res) => {
+app.post("/api/settings", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
   try {
     const { tollFree, webUrl, email, founderMessageEn, founderMessageHi } = req.body;
     await pool.query(
@@ -2053,7 +2083,7 @@ app.get("/api/cms/config", async (req, res) => {
   }
 });
 
-app.post("/api/cms/config", async (req, res) => {
+app.post("/api/cms/config", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
   try {
     await pool.query(
       `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 

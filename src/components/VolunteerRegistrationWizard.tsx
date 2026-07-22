@@ -50,42 +50,6 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
   // Step 2: Contact
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
-  const [mobileOtp, setMobileOtp] = useState("");
-  const [emailOtp, setEmailOtp] = useState("");
-  
-  const [mobileSent, setMobileSent] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [mobileVerified, setMobileVerified] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false);
-
-  const sendOtp = async (type: "mobile" | "email") => {
-    setLoading(true); setError(null);
-    try {
-      await axios.post("/api/auth/send-otp", { identifier: type === "mobile" ? mobile : email, type });
-      if (type === "mobile") setMobileSent(true);
-      else setEmailSent(true);
-    } catch (err: any) {
-      setError("Failed to send " + type + " OTP.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const verifyOtp = async (type: "mobile" | "email") => {
-    setLoading(true); setError(null);
-    try {
-      await axios.post("/api/auth/verify-otp", { 
-        identifier: type === "mobile" ? mobile : email, 
-        otp: type === "mobile" ? mobileOtp : emailOtp 
-      });
-      if (type === "mobile") setMobileVerified(true);
-      else setEmailVerified(true);
-    } catch (err: any) {
-      setError("Invalid " + type + " OTP.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Step 3: Identity & Profile
   const [education, setEducation] = useState<string[]>([]);
@@ -289,41 +253,25 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
             <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-sm space-y-2">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-bold text-slate-700 uppercase flex items-center gap-1.5"><Phone className="w-3 h-3 text-[#FF9933]"/> Mobile No.</label>
-                {mobileVerified && <span className="text-[9px] text-green-600 font-bold bg-green-50 px-1.5 py-0.5 rounded border border-green-200 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Verified</span>}
               </div>
               <div className="flex gap-2">
-                <input type="tel" disabled={mobileSent || mobileVerified} value={mobile} onChange={e=>setMobile(e.target.value.replace(/\D/g, '').slice(0, 15))} className="flex-1 p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none" placeholder={isIndia ? "10-digit number" : "Mobile Number"} />
-                {!mobileSent && !mobileVerified && <button onClick={()=>sendOtp("mobile")} disabled={mobile.length<8 || loading} className="px-3 bg-slate-800 text-white rounded-lg text-[10px] font-bold disabled:opacity-50">Get OTP</button>}
+                <input type="tel" value={mobile} onChange={e=>setMobile(e.target.value.replace(/\D/g, '').slice(0, 15))} className="flex-1 p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none" placeholder={isIndia ? "10-digit number" : "Mobile Number"} />
               </div>
-              {mobileSent && !mobileVerified && (
-                <div className="flex gap-2 pt-1 animate-fadeIn">
-                  <input type="text" maxLength={6} value={mobileOtp} onChange={e=>setMobileOtp(e.target.value)} className="flex-1 p-2 border border-[#FF9933] rounded-lg text-xs font-black text-center tracking-widest bg-orange-50 outline-none" placeholder="------" />
-                  <button onClick={()=>verifyOtp("mobile")} disabled={mobileOtp.length<6 || loading} className="px-4 bg-[#FF9933] text-white rounded-lg text-[10px] font-bold">Verify</button>
-                </div>
-              )}
             </div>
 
             {/* Email Block */}
             <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-sm space-y-2">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-bold text-slate-700 uppercase flex items-center gap-1.5"><Mail className="w-3 h-3 text-[#138808]"/> Email ID</label>
-                {emailVerified && <span className="text-[9px] text-green-600 font-bold bg-green-50 px-1.5 py-0.5 rounded border border-green-200 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Verified</span>}
               </div>
               <div className="flex gap-2">
-                <input type="email" disabled={emailSent || emailVerified} value={email} onChange={e=>setEmail(e.target.value)} className="flex-1 p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none" placeholder="name@example.com" />
-                {!emailSent && !emailVerified && <button onClick={()=>sendOtp("email")} disabled={!email.includes("@") || loading} className="px-3 bg-slate-800 text-white rounded-lg text-[10px] font-bold disabled:opacity-50">Get OTP</button>}
+                <input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="flex-1 p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none" placeholder="name@example.com" />
               </div>
-              {emailSent && !emailVerified && (
-                <div className="flex gap-2 pt-1 animate-fadeIn">
-                  <input type="text" maxLength={6} value={emailOtp} onChange={e=>setEmailOtp(e.target.value)} className="flex-1 p-2 border border-[#138808] rounded-lg text-xs font-black text-center tracking-widest bg-green-50 outline-none" placeholder="------" />
-                  <button onClick={()=>verifyOtp("email")} disabled={emailOtp.length<6 || loading} className="px-4 bg-[#138808] text-white rounded-lg text-[10px] font-bold">Verify</button>
-                </div>
-              )}
             </div>
 
             <div className="flex gap-2 mt-4">
               <button onClick={()=>setStep(1)} className="p-3 bg-slate-100 text-slate-600 rounded-xl transition hover:bg-slate-200"><ArrowLeft className="w-4 h-4"/></button>
-              <button disabled={!mobileVerified || !emailVerified} onClick={()=>setStep(3)} className="flex-1 py-3 bg-[#0B1E3F] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition">Next <ArrowRight className="w-4 h-4"/></button>
+              <button disabled={mobile.length < 8 || !email.includes('@')} onClick={()=>setStep(3)} className="flex-1 py-3 bg-[#0B1E3F] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition">Next <ArrowRight className="w-4 h-4"/></button>
             </div>
           </div>
         )}
