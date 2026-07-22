@@ -23,6 +23,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 
 // server.ts
 var import_express2 = __toESM(require("express"), 1);
+var import_cors = __toESM(require("cors"), 1);
 var import_server = require("@simplewebauthn/server");
 var import_bcryptjs = __toESM(require("bcryptjs"), 1);
 var import_path = __toESM(require("path"), 1);
@@ -92,7 +93,9 @@ var adminHqRoutes_default = router;
 var import_pdf_lib = require("pdf-lib");
 import_dotenv.default.config();
 var app = (0, import_express2.default)();
+app.use((0, import_cors.default)());
 app.use(import_express2.default.json());
+app.use(import_express2.default.urlencoded({ extended: true }));
 var rpName = "RP Foundation Jan Seva";
 var rpID = process.env.WEBAUTHN_RP_ID || "localhost";
 var originUrl = `https://${rpID}`;
@@ -473,10 +476,10 @@ app.post("/api/auth/webauthn/login-verify", async (req, res) => {
   }
 });
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
-var dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+var dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/rp_foundation";
 var pool2 = new import_pg.default.Pool({
   connectionString: dbUrl,
-  ssl: dbUrl && (dbUrl.includes("localhost") || dbUrl.includes("127.0.0.")) ? false : { rejectUnauthorized: false }
+  ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized: false }
 });
 var aiClient = null;
 function getGeminiClient() {
@@ -1060,6 +1063,61 @@ async function initDatabase() {
       )
     `);
     await client.query(`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE,
+      ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE,
+      ADD COLUMN IF NOT EXISTS father_husband_name TEXT,
+      ADD COLUMN IF NOT EXISTS mother_name TEXT,
+      ADD COLUMN IF NOT EXISTS dob DATE,
+      ADD COLUMN IF NOT EXISTS education JSONB,
+      ADD COLUMN IF NOT EXISTS blood_group VARCHAR(10),
+      ADD COLUMN IF NOT EXISTS skills JSONB,
+      ADD COLUMN IF NOT EXISTS reason_for_joining TEXT,
+      ADD COLUMN IF NOT EXISTS availability VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS national_id_1 VARCHAR(50),
+      ADD COLUMN IF NOT EXISTS national_id_2 VARCHAR(50),
+      ADD COLUMN IF NOT EXISTS country VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS state VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS city VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS address TEXT,
+      ADD COLUMN IF NOT EXISTS pincode VARCHAR(20),
+      ADD COLUMN IF NOT EXISTS area_locality VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS sansad_kshetra VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS vidhan_sabha VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS ward_no VARCHAR(255);
+    `);
+    await client.query(`
+      INSERT INTO users (id, name, username, password_hash, role)
+      VALUES ('admin', 'System Administrator', 'admin', '$2a$10$D/x31v5.7r7j0U.tH1Mv3ui/b0f1UuVfOaB2b9m8mUoU0F3aXF7u6', 'super_admin')
+      ON CONFLICT (id) DO UPDATE SET role = 'super_admin';
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id VARCHAR(255) PRIMARY KEY,
+        user_id VARCHAR(255),
+        token VARCHAR(255) UNIQUE,
+        expires_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id SERIAL PRIMARY KEY,
+        "userId" VARCHAR(255),
+        token VARCHAR(255),
+        expires_at TIMESTAMP WITH TIME ZONE
+      );
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS service_cms_content (
+        id VARCHAR(255) PRIMARY KEY,
+        service_id VARCHAR(255) UNIQUE,
+        content_html TEXT,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+    await client.query(`
       
         CREATE TABLE IF NOT EXISTS settings (
           id VARCHAR(255) PRIMARY KEY,
@@ -1616,6 +1674,30 @@ app.post("/api/settings", async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/cms/config", async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
+    if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
+      res.json({ success: true, data: JSON.parse(result.rows[0].founderMessageEn) });
+    } else {
+      res.json({ success: true, data: {} });
+    }
+  } catch (error) {
+    res.json({ success: true, data: {} });
+  }
+});
+app.post("/api/cms/config", async (req, res) => {
+  try {
+    await pool2.query(
+      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
+       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" = $1`,
+      [JSON.stringify(req.body)]
+    );
+    res.json({ success: true, data: req.body });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 app.get("/api/cms", async (req, res) => {
@@ -2278,13 +2360,13 @@ var upload = (0, import_multer.default)({
 async function saveFileLocally(file) {
   const fileExt = import_path.default.extname(file.originalname) || ".jpg";
   const filename = `${Date.now()}-${Math.round(Math.random() * 1e5)}${fileExt}`;
-  const destDir = import_path.default.join(process.cwd(), "appapi.therpfoundation.org", "public", "uploads");
+  const destDir = import_path.default.join(process.cwd(), "uploads");
   if (!import_fs.default.existsSync(destDir)) {
     import_fs.default.mkdirSync(destDir, { recursive: true });
   }
   const destFilePath = import_path.default.join(destDir, filename);
   await import_fs.default.promises.writeFile(destFilePath, file.buffer);
-  return `https://appapi.therpfoundation.org/uploads/${filename}`;
+  return `/uploads/${filename}`;
 }
 app.post("/api/upload/founder", upload.single("file"), async (req, res) => {
   try {
@@ -2322,7 +2404,7 @@ app.post("/api/upload/image", upload.single("file"), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.use("/uploads", import_express2.default.static(import_path.default.join(process.cwd(), "appapi.therpfoundation.org", "public", "uploads")));
+app.use("/uploads", import_express2.default.static(import_path.default.join(process.cwd(), "uploads")));
 app.use("/app", import_express2.default.static(import_path.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req, res) => {
   res.redirect("/app/");
