@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import bcrypt from 'bcryptjs';
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
@@ -18,7 +19,9 @@ import { setDbPool } from "./src/controllers/adminHqController.js";
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // =============================================================================
 // VOLUNTEER REGISTRATION ENDPOINTS (5-STEP FORM)
@@ -460,10 +463,10 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
 
 
 // PostgreSQL Pool Connection
-const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/rp_foundation";
 const pool = new pg.Pool({
   connectionString: dbUrl,
-  ssl: dbUrl && (dbUrl.includes("localhost") || dbUrl.includes("127.0.0.")) ? false : { rejectUnauthorized: false }
+  ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized: false }
 });
 
 // Lazy-loaded Gemini AI client helper
@@ -1837,6 +1840,33 @@ app.post("/api/settings", async (req, res) => {
   }
 });
 
+
+app.get("/api/cms/config", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
+    if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
+      res.json({ success: true, data: JSON.parse(result.rows[0].founderMessageEn) });
+    } else {
+      res.json({ success: true, data: {} });
+    }
+  } catch (error: any) {
+    res.json({ success: true, data: {} });
+  }
+});
+
+app.post("/api/cms/config", async (req, res) => {
+  try {
+    await pool.query(
+      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
+       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" = $1`,
+      [JSON.stringify(req.body)]
+    );
+    res.json({ success: true, data: req.body });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.get("/api/cms", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
@@ -2566,7 +2596,7 @@ async function saveFileLocally(file: Express.Multer.File): Promise<string> {
   const fileExt = path.extname(file.originalname) || ".jpg";
   const filename = `${Date.now()}-${Math.round(Math.random() * 100000)}${fileExt}`;
   
-  const destDir = path.join(process.cwd(), "appapi.therpfoundation.org", "public", "uploads");
+  const destDir = path.join(process.cwd(), "uploads");
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
   }
@@ -2574,7 +2604,7 @@ async function saveFileLocally(file: Express.Multer.File): Promise<string> {
   const destFilePath = path.join(destDir, filename);
   await fs.promises.writeFile(destFilePath, file.buffer);
   
-  return `https://appapi.therpfoundation.org/uploads/${filename}`;
+  return `/uploads/${filename}`;
 }
 
 app.post("/api/upload/founder", upload.single("file"), async (req, res) => {
@@ -2621,7 +2651,7 @@ app.post("/api/upload/image", upload.single("file"), async (req, res) => {
 // =============================================================================
 
 // Serve static assets for uploads directory
-app.use("/uploads", express.static(path.join(process.cwd(), "appapi.therpfoundation.org", "public", "uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Serve Flutter web app statically at /app
 app.use("/app", express.static(path.join(process.cwd(), "public", "app")));
