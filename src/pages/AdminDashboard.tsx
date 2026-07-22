@@ -228,8 +228,9 @@ export default function AdminDashboard() {
   const [jobTypeHi, setJobTypeHi] = useState("पूर्णकालिक");
 
   // Sync state variables with context database stream
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   useEffect(() => {
-    if (settings) {
+    if (settings && !settingsLoaded) {
       setTollFree(settings.tollFree || "");
       setWebUrl(settings.webUrl || "");
       setEmail(settings.email || "");
@@ -240,18 +241,21 @@ export default function AdminDashboard() {
       setAlertBannerHi(settings.alertBannerHi || "");
       if (settings.carouselSlides) setCmsSlides(settings.carouselSlides);
       if (settings.customServices) setCustomServices(settings.customServices);
+      setSettingsLoaded(true);
     }
-  }, [settings]);
+  }, [settings, settingsLoaded]);
 
+  const [cmsLoaded, setCmsLoaded] = useState(false);
   useEffect(() => {
-    if (cmsConfig) {
+    if (cmsConfig && !cmsLoaded) {
       if (cmsConfig.founderName) setFounderName(cmsConfig.founderName);
       if (cmsConfig.founderDesignation) setFounderDesignation(cmsConfig.founderDesignation);
       if (cmsConfig.aboutTextEn) setAboutTextEn(cmsConfig.aboutTextEn);
       if (cmsConfig.aboutTextHi) setAboutTextHi(cmsConfig.aboutTextHi);
       if (cmsConfig.logoImgUrl) setLogoImgUrl(cmsConfig.logoImgUrl);
+      setCmsLoaded(true);
     }
-  }, [cmsConfig]);
+  }, [cmsConfig, cmsLoaded]);
 
   const fetchCampaignsAndVolunteers = async () => {
     try {
@@ -320,9 +324,13 @@ export default function AdminDashboard() {
         setSettingsSuccess(true);
         setTimeout(() => setSettingsSuccess(false), 3000);
         refreshData();
+      } else {
+        const errorData = await settingsRes.json().catch(() => ({}));
+        alert(`Failed to save settings: ${errorData.error || "Unknown error"}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to commit advanced system payload:", err);
+      alert(`Network error saving settings: ${err.message}`);
     }
   };
 

@@ -95,8 +95,8 @@ var import_pdf_lib = require("pdf-lib");
 import_dotenv.default.config();
 var app = (0, import_express2.default)();
 app.use((0, import_cors.default)());
-app.use(import_express2.default.json());
-app.use(import_express2.default.urlencoded({ extended: true }));
+app.use(import_express2.default.json({ limit: "50mb" }));
+app.use(import_express2.default.urlencoded({ limit: "50mb", extended: true }));
 var JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_development_only";
 var authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
