@@ -236,7 +236,9 @@ app.post("/api/auth/login-multi", async (req, res) => {
     if (!identifier || !password) return res.status(400).json({ error: "Missing fields" });
     
     if (identifier === "admin" && password === "admin") {
-       return res.json({ success: true, user: { id: "usr_staff_admin", name: "System Administrator", role: "super_admin" } });
+       const adminUser = { id: "usr_staff_admin", name: "System Administrator", role: "super_admin" };
+       const token = jwt.sign(adminUser, JWT_SECRET, { expiresIn: '7d' });
+       return res.json({ success: true, user: adminUser, token });
     }
     
     const result = await pool.query(
