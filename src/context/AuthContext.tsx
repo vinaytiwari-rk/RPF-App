@@ -53,7 +53,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   language: "en" | "hi";
   setLanguage: (lang: "en" | "hi") => void;
-  login: (userData: Partial<User>) => Promise<void>;
+  login: (userData: Partial<User>, token?: string) => Promise<void>;
   loginAsGuest: () => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
@@ -86,17 +86,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loadUser = async () => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
+      const token = localStorage.getItem("@rpf_token");
+      
+      if (stored && token) {
         const parsed: User = JSON.parse(stored);
         setUser(parsed);
 
-        // Silently refresh role from backend in the background
+        // Fetch fresh user data with JWT
         try {
-          const res = await fetch(`/api/users/${parsed.id}`);
+          const res = await fetch(`/api/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
           if (res.ok) {
             const data = await res.json();
-            const fresh = data.user as Partial<User>;
-            if (fresh) {
+            if (data.success && data.user) {
+              const fresh = data.user as Partial<User>;
               const merged: User = {
                 ...parsed,
                 role: (fresh.role as UserRole) ?? parsed.role,
@@ -109,19 +115,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               };
               localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
               setUser(merged);
+            } else {
+               // Invalid token or user not found
+               localStorage.removeItem(STORAGE_KEY);
+               localStorage.removeItem("@rpf_token");
+               setUser(null);
             }
+          } else {
+             // Expired token or auth error
+             localStorage.removeItem(STORAGE_KEY);
+             localStorage.removeItem("@rpf_token");
+             setUser(null);
           }
         } catch {
-          // Backend unreachable — use cached user silently
+          // Backend unreachable - use cached user silently
         }
+      } else {
+        // No token, ensure clean state
+        setUser(null);
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("@rpf_token");
       }
     } catch {
-      // Corrupted storage — clear it
+      // Corrupted storage - clear it
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem("@rpf_token");
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const loadLanguage = () => {
     const stored = localStorage.getItem(LANG_KEY) as "en" | "hi" | null;

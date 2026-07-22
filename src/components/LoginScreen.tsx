@@ -29,6 +29,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
     try {
       const response = await axios.post('/api/auth/login-multi', { identifier, password });
       if (response.data.success && response.data.user) {
+        if (response.data.token) localStorage.setItem("@rpf_token", response.data.token);
         const user = response.data.user;
         setCurrentUserId(user.id);
         

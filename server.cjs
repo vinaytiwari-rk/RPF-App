@@ -90,12 +90,105 @@ router.post("/services/:serviceId/content", updateServiceContent);
 var adminHqRoutes_default = router;
 
 // server.ts
+var import_jsonwebtoken = __toESM(require("jsonwebtoken"), 1);
 var import_pdf_lib = require("pdf-lib");
 import_dotenv.default.config();
 var app = (0, import_express2.default)();
 app.use((0, import_cors.default)());
 app.use(import_express2.default.json());
 app.use(import_express2.default.urlencoded({ extended: true }));
+var JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_development_only";
+var authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null) return res.status(401).json({ success: false, error: "No token provided" });
+  import_jsonwebtoken.default.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ success: false, error: "Invalid token" });
+    req.user = user;
+    next();
+  });
+};
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    const { name, email, phone, password } = req.body;
+    const password_hash = await import_bcryptjs.default.hash(password, 10);
+    const userId = "citizen-" + Date.now();
+    await pool2.query(
+      `INSERT INTO users (id, name, email, phone, password_hash, role) 
+       VALUES ($1, $2, $3, $4, $5, 'citizen')`,
+      [userId, name, email, phone, password_hash]
+    );
+    const userPayload = { id: userId, role: "citizen", name };
+    const token = import_jsonwebtoken.default.sign(userPayload, JWT_SECRET, { expiresIn: "7d" });
+    await pool2.query(
+      `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
+      ["sess-" + Date.now(), userId, token]
+    );
+    res.json({ success: true, token, user: userPayload });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const identifier = req.body.identifier || req.body.phone || req.body.email;
+    const password = req.body.password;
+    if (!identifier || !password) {
+      return res.status(400).json({ success: false, error: "Missing identifier or password" });
+    }
+    const result = await pool2.query(
+      `SELECT * FROM users WHERE email = $1 OR phone = $1 OR username = $1`,
+      [identifier]
+    );
+    if (result.rows.length === 0) {
+      return res.status(401).json({ success: false, error: "User not found" });
+    }
+    const user = result.rows[0];
+    if (!user.password_hash) {
+      return res.status(401).json({ success: false, error: "Account missing password hash" });
+    }
+    const validPassword = await import_bcryptjs.default.compare(password, user.password_hash);
+    if (!validPassword) {
+      return res.status(401).json({ success: false, error: "Invalid credentials" });
+    }
+    const userPayload = { id: user.id, role: user.role, name: user.name, phone: user.phone, email: user.email };
+    const token = import_jsonwebtoken.default.sign(userPayload, JWT_SECRET, { expiresIn: "7d" });
+    await pool2.query(
+      `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
+      ["sess-" + Date.now(), user.id, token]
+    );
+    res.json({ success: true, token, user: userPayload });
+  } catch (error) {
+    console.error("Login Error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+app.post("/api/auth/login-multi", (req, res) => {
+});
+app.post("/api/auth/logout", async (req, res) => {
+  try {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (token) {
+      await pool2.query(`DELETE FROM sessions WHERE token = $1`, [token]);
+    }
+    res.json({ success: true, message: "Logged out" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+app.get("/api/auth/me", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool2.query(`SELECT id, name, role, email, phone, points, badges FROM users WHERE id = $1`, [userId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+    res.json({ success: true, user: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 var rpName = "RP Foundation Jan Seva";
 var rpID = process.env.WEBAUTHN_RP_ID || "localhost";
 var originUrl = `https://${rpID}`;
