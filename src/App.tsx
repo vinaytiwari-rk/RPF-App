@@ -1,20 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import MainLayout from "./layouts/MainLayout";
 
 import Home from "./pages/Home";
-import JanSevaCard from "./pages/JanSevaCard";
+const JanSevaCard = React.lazy(() => import("./pages/JanSevaCard"));
 import BloodNetwork from "./pages/BloodNetwork";
 import Grievances from "./pages/Grievances";
 import Services from "./pages/Services";
 import ServiceDetails from "./pages/ServiceDetails";
-import Community from "./pages/Community";
+const Community = React.lazy(() => import("./pages/Community"));
 import Profile from "./pages/Profile";
 
 // Wired Workflows
 import VolunteersPage from "./pages/VolunteersPage";
-import VolunteerDashboard from "./pages/VolunteerDashboard";
+const VolunteerDashboard = React.lazy(() => import("./pages/VolunteerDashboard"));
 import DonationsPage from "./pages/DonationsPage";
 import HealthPage from "./pages/HealthPage";
 import HealthCamps from "./pages/HealthCamps";
@@ -32,7 +33,7 @@ import ScholarshipsPage from "./pages/ScholarshipsPage";
 import FoodSupport from "./pages/FoodSupport";
 import MedicineSupport from "./pages/MedicineSupport";
 import EducationSupport from "./pages/EducationSupport";
-import AdminDashboard from "./pages/AdminDashboard";
+const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard"));
 import { AppProvider } from "./context/AppContext";
 
 import SplashScreen from "./components/SplashScreen";
@@ -41,6 +42,13 @@ import OnboardingModal from "./components/OnboardingModal";
 
 import { Settings } from "lucide-react";
 
+
+const PageLoader = () => (
+  <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-slate-50">
+    <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest animate-pulse">Loading Module...</p>
+  </div>
+);
 // Placeholder pages for remaining incomplete routes
 const Placeholder = ({ title }: { title: string }) => (
   <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 min-h-full pb-24">
@@ -96,7 +104,9 @@ function AppContent() {
 
   return (
     <>
+  <ErrorBoundary>
       <BrowserRouter>
+      <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
@@ -129,8 +139,10 @@ function AppContent() {
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
-      </Routes>
+</Routes>
+      </Suspense>
     </BrowserRouter>
+    </ErrorBoundary>
     {!onboardingCompleted && (
       <OnboardingModal onComplete={() => setOnboardingCompleted(true)} />
     )}

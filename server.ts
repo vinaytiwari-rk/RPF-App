@@ -20,6 +20,9 @@ import { setDbPool } from "./src/controllers/adminHqController.js";
 dotenv.config();
 
 const app = express();
+
+const apiCache = new Map<string, { data: any, timestamp: number }>();
+const CACHE_TTL = 60000; // 1 minute
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -2342,11 +2345,17 @@ app.post("/api/cms", async (req, res) => {
 // CROWDFUNDING CAMPAIGNS ENDPOINTS
 // =============================================================================
 app.get("/api/campaigns", async (req, res) => {
+  const cached = apiCache.get("/api/campaigns");
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return res.json(cached.data);
+  }
   try {
     const result = await pool.query(
       'SELECT id, "titleEn", "titleHi", "goalAmount", "raisedAmount", "imageUrl", "imageUrl" AS "coverImgUrl", urgent, "createdAt" FROM campaigns ORDER BY "createdAt" DESC'
     );
-    res.json({ campaigns: result.rows });
+    const data = { campaigns: result.rows };
+    apiCache.set("/api/campaigns", { data, timestamp: Date.now() });
+    res.json(data);
   } catch (error: any) {
     console.error("Error fetching campaigns:", error);
     res.status(500).json({ error: error.message });
@@ -2813,6 +2822,11 @@ app.get("/api/testimonials", async (req, res) => {
 // STATS ENDPOINT
 // =============================================================================
 app.get("/api/stats", async (req, res) => {
+  const cached = apiCache.get("/api/stats");
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return res.json(cached.data);
+  }
+
   let beneficiaries = 0;
   let volunteers = 0;
   let healthCamps = 0;
@@ -2841,12 +2855,14 @@ app.get("/api/stats", async (req, res) => {
     scholarships = parseInt(sRes.rows[0].count, 10);
   } catch (e) {}
 
-  res.json({
+  const data = {
     beneficiaries,
     volunteers,
     healthCamps,
     scholarships
-  });
+  };
+  apiCache.set("/api/stats", { data, timestamp: Date.now() });
+  res.json(data);
 });
 
 // =============================================================================

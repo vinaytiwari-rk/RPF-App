@@ -137,7 +137,7 @@ export default function Community() {
     const interval = setInterval(() => {
       fetchPosts();
       fetchCampaigns();
-    }, 5000);
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 

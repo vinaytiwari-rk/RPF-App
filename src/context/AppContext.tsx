@@ -367,7 +367,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchAllData();
-    const interval = setInterval(fetchAllData, 5000);
+    const interval = setInterval(fetchAllData, 60000);
     return () => clearInterval(interval);
   }, []);
 
