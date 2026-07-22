@@ -24,18 +24,6 @@ export default function AdminDashboard() {
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Auto-save simulation effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsAutoSaving(true);
-      setTimeout(() => {
-        setIsAutoSaving(false);
-        setLastSaved(new Date());
-      }, 800);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [founderEn, founderHi, aboutTextEn, aboutTextHi, postTextEn, postTextHi]);
-
 
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const navigate = useNavigate();
@@ -273,6 +261,20 @@ export default function AdminDashboard() {
   }, [settings, settingsLoaded]);
 
   const [cmsLoaded, setCmsLoaded] = useState(false);
+
+
+  // Auto-save simulation effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAutoSaving(true);
+      setTimeout(() => {
+        setIsAutoSaving(false);
+        setLastSaved(new Date());
+      }, 800);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [founderEn, founderHi, aboutTextEn, aboutTextHi, postTextEn, postTextHi]);
+
   useEffect(() => {
     if (cmsConfig && !cmsLoaded) {
       if (cmsConfig.founderName) setFounderName(cmsConfig.founderName);
