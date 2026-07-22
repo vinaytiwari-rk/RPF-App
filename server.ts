@@ -187,18 +187,6 @@ app.post("/api/volunteers/report", async (req, res) => {
   }
 });
 
-// Alias for old frontend calls
-
-// Alias for old frontend calls
-app.post("/api/auth/login-multi", (req, res) => {
-   // Forward to the new unified login
-   // req.url = "/api/auth/login";
-   // app._router.handle(req, res, next);
-   // Instead of forwarding, just redirect logic by invoking the route logic.
-   // But since it's defined right above, just call the exact same logic.
-   // We will just let the frontend change to /api/auth/login
-});
-
 app.post("/api/auth/logout", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
