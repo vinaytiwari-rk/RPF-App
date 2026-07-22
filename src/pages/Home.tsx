@@ -225,10 +225,9 @@ export default function Home() {
                 onClick={() => navigate(route)}
                 className="flex flex-col items-center justify-center p-1.5 transition text-center gap-1.5 active:scale-95 duration-100 cursor-pointer group relative"
               >
-                <div className="relative w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                  <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-20 duration-1000"></div>
-                  <div className="absolute inset-1 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.6)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.8)] transition-shadow duration-500"></div>
-                  <IconComponent className="w-5 h-5 text-white relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.9)] animate-pulse" style={{ animationDuration: '3s' }} />
+                <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 animate-bounce" style={{ animationDuration: '3s' }}>
+                  <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 via-purple-600 to-indigo-600 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.6)] group-hover:shadow-[0_0_30px_rgba(192,38,211,0.8)] transition-all duration-500 animate-pulse"></div>
+                  <IconComponent className="w-6 h-6 text-white relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,1)]" />
                 </div>
                 <span className="text-[9.5px] font-bold text-slate-600 leading-[1.1] w-full line-clamp-2">
                   {lang === "hi" ? action.titleHi : action.titleEn}

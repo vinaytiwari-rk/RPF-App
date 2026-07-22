@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboard() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const navigate = useNavigate();
   
@@ -789,58 +791,83 @@ export default function AdminDashboard() {
     link.click();
   };
 
+
+  const tabs = [
+    { key: "analytics", label: lang === "hi" ? "एनालिटिक्स" : "Insights", icon: BarChart2 },
+    { key: "cms", label: lang === "hi" ? "बैनर CMS" : "Banners CMS", icon: Image },
+    { key: "settings", label: lang === "hi" ? "ग्लोबल कंट्रोल" : "Global Control", icon: Settings },
+    { key: "services", label: lang === "hi" ? "21+ सेवाएं" : "Services Node", icon: Grid },
+    { key: "cards", label: lang === "hi" ? "कार्ड्स सूची" : "Cards Registry", icon: Users },
+    { key: "grievances", label: lang === "hi" ? "शिकायत कक्ष" : "Grievances", icon: AlertTriangle },
+    { key: "campaigns", label: lang === "hi" ? "दान अभियान" : "Campaigns", icon: Heart },
+    { key: "volunteers", label: lang === "hi" ? "स्वयंसेवक" : "Volunteers", icon: Award },
+    { key: "certs", label: "Certificates", icon: Award },
+    { key: "comms", label: lang === "hi" ? "घोषणाएं" : "Comms & Stories", icon: Bell }
+  ];
+
   return (
-    <div className="flex flex-col h-full bg-slate-50 animate-fadeIn max-w-md mx-auto border-x border-slate-200 shadow-2xl">
+    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans">
       
-      {/* Responsive Header Panel */}
-      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 pt-5 pb-5 px-5 relative shrink-0 text-white shadow-lg">
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/15 active:scale-95 transition text-white">
-              <ArrowLeft className="w-4 h-4" />
+      {/* SIDEBAR */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:flex flex-col`}>
+        <div className="flex items-center justify-between p-5 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-6 h-6 text-indigo-600 animate-pulse" />
+            <h1 className="font-display font-black text-sm tracking-widest uppercase text-slate-800">Admin HQ</h1>
+          </div>
+          <button className="md:hidden p-2 bg-slate-100 rounded-lg text-slate-500" onClick={() => setIsSidebarOpen(false)}>
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          {tabs.map(t => (
+            <button
+              key={t.key}
+              onClick={() => { setActiveTab(t.key as any); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                activeTab === t.key 
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20" 
+                : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+              }`}
+            >
+              <t.icon className={`w-4 h-4 ${activeTab === t.key ? "text-indigo-200" : "text-slate-400"}`} />
+              {t.label}
             </button>
-            <div>
-              <h2 className="font-display font-black text-sm tracking-wide uppercase text-indigo-50">
-                {lang === "hi" ? "एडमिन कमांड सेंटर" : "Admin Command HQ"}
-              </h2>
-              <p className="text-[8.5px] text-indigo-300 font-bold uppercase mt-0.5 tracking-widest">
-                {lang === "hi" ? "पूर्ण नियंत्रण प्रणाली" : "FULL ARCHITECTURE CONTROL DESK"}
-              </p>
+          ))}
+        </div>
+        <div className="p-4 border-t border-slate-100">
+          <button onClick={() => navigate(-1)} className="w-full flex justify-center items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">
+            <ArrowLeft className="w-4 h-4" /> Exit Admin
+          </button>
+        </div>
+      </aside>
+
+      {/* OVERLAY */}
+      {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/50 z-40 md:hidden" onClick={() => setIsSidebarOpen(false)}></div>}
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        
+        {/* HEADER */}
+        <header className="bg-white border-b border-slate-200 p-4 sticky top-0 z-30 shadow-sm flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <button className="md:hidden p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-600" onClick={() => setIsSidebarOpen(true)}>
+              <Menu className="w-4 h-4" />
+            </button>
+            
+            {/* BREADCRUMBS */}
+            <div className="flex items-center text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <span className="flex items-center gap-1 hover:text-indigo-600 cursor-pointer"><LayoutDashboard className="w-3 h-3" /> Dashboard</span>
+              <ChevronRight className="w-3 h-3 mx-1" />
+              <span className="text-indigo-600">{tabs.find(t => t.key === activeTab)?.label}</span>
             </div>
           </div>
-          <span className="bg-red-500/10 border border-red-500/30 text-red-400 text-[8px] font-black uppercase px-2 py-0.5 rounded-md flex items-center gap-1 animate-pulse">
-            <ShieldAlert className="w-2.5 h-2.5" /> Secure
-          </span>
-        </div>
-      </div>
+        </header>
 
-      {/* 📱 3x3 GRID TABS: Resolves Mobile & iPhone Screen Cutting Bug */}
-      <div className="bg-white border-b border-slate-200 p-2 grid grid-cols-3 gap-1.5 shrink-0 select-none shadow-sm">
-        {[
-          { key: "analytics", label: lang === "hi" ? "एनालिटिक्स" : "Insights", icon: BarChart2 },
-          { key: "cms", label: lang === "hi" ? "बैनर CMS" : "Banners CMS", icon: Image },
-          { key: "settings", label: lang === "hi" ? "ग्लोबल कंट्रोल" : "Global Control", icon: Settings },
-          { key: "services", label: lang === "hi" ? "21+ सेवाएं" : "Services Node", icon: Grid },
-          { key: "cards", label: lang === "hi" ? "कार्ड्स सूची" : "Cards Registry", icon: Users },
-          { key: "grievances", label: lang === "hi" ? "शिकायत कक्ष" : "Grievances", icon: AlertTriangle },
-          { key: "campaigns", label: lang === "hi" ? "दान अभियान" : "Campaigns", icon: Heart },
-          { key: "volunteers", label: lang === "hi" ? "स्वयंसेवक" : "Volunteers", icon: Award },
-          { key: "comms", label: lang === "hi" ? "घोषणाएं" : "Comms & Stories", icon: Bell }
-        ].map(t => (
-          <button 
-            key={t.key}
-            onClick={() => setActiveTab(t.key as any)}
-            className={`py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition flex flex-col items-center justify-center gap-1 cursor-pointer ${
-              activeTab === t.key ? "bg-indigo-600 text-white font-black shadow-md shadow-indigo-600/15" : "bg-slate-50 text-slate-400 hover:text-slate-600 border border-slate-200/40"
-            }`}
-          >
-            <t.icon className="w-3.5 h-3.5" />
-            <span>{t.label}</span>
-          </button>
-        ))}
-      </div>
+        {/* CONTENT AREA */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-32">
+          <div className="max-w-6xl mx-auto">
 
-      <div className="flex-1 overflow-y-auto p-4 pb-24 space-y-4">
         
         {/* TAB: REAL-TIME OPERATIONAL ANALYTICS */}
         {activeTab === "analytics" && (
@@ -1750,7 +1777,9 @@ export default function AdminDashboard() {
           </div>
         )}
 
-      </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

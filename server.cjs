@@ -2592,6 +2592,12 @@ async function startServer() {
       res.sendFile(import_path.default.join(distPath, "index.html"));
     });
   }
+  process.on("uncaughtException", (err) => {
+    console.error("CRITICAL: Uncaught Exception:", err);
+  });
+  process.on("unhandledRejection", (reason, promise) => {
+    console.error("CRITICAL: Unhandled Rejection at:", promise, "reason:", reason);
+  });
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
