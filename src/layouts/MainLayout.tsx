@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, User, Compass, Users, Bell, Activity, Globe, Search, MessageSquare, Bot, X, Send, Mic, Shield } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import AIAssistant from "../components/AIAssistant";
+import { useApp } from "../context/AppContext";
 
 // Simple Helper Lucide Grid icon replacement
 function GridIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -193,13 +194,15 @@ export default function MainLayout() {
               <Search className="w-4 h-4" />
             </button>
             <div className="relative">
-              <button onClick={() => handleNav("/notifications")} className="p-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 hover:shadow-xs transition relative">
-                <Bell className="w-4 h-4" />
-              </button>
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[8px] font-black border border-white">
-                3
-              </span>
-            </div>
+                <button onClick={() => handleNav("/notifications")} className="p-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 hover:shadow-xs transition relative">
+                  <Bell className="w-4 h-4" />
+                </button>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[8px] font-black border border-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
             <button 
               className="w-8 h-8 rounded-full border border-[#D4AF37]/50 overflow-hidden shadow-sm transition hover:scale-105 active:scale-95 cursor-pointer bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-white text-xs font-black" 
               onClick={() => handleNav("/profile")}
@@ -251,15 +254,22 @@ export default function MainLayout() {
           </button>
 
           <button 
-            onClick={() => handleNav("/notifications")}
-            className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
-              location.pathname === "/notifications" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
-            }`}
-          >
-            {location.pathname === "/notifications" && <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></div>}
-            <Bell className="w-5 h-5 mt-0.5" />
-            <span className="text-[9px] font-bold">{language === "hi" ? "अलर्ट" : "Alerts"}</span>
-          </button>
+              onClick={() => handleNav("/notifications")}
+              className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
+                location.pathname === "/notifications" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
+              }`}
+            >
+              {location.pathname === "/notifications" && <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></div>}
+              <div className="relative">
+                <Bell className="w-5 h-5 mt-0.5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center text-white text-[7px] font-black border border-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-[9px] font-bold">{language === "hi" ? "अलर्ट" : "Alerts"}</span>
+            </button>
 
           <button 
             onClick={() => handleNav("/profile")}

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
-import { useApp } from "../context/AppContext";
-import { useAuth } from "../context/AuthContext";
+import jsPDF from "jspdf";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
+import EmptyState from "../components/EmptyState";
 import { 
   ArrowLeft, Settings, Users, AlertTriangle, MessageSquare, 
   Check, X, Save, CheckCircle, Plus, Trash2, Image, 
   Download, BarChart2, ShieldAlert, Megaphone, Grid, Heart,
-  Award, Bell
+  Award, Bell, Inbox, CreditCard, Menu, FileText
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -838,7 +838,26 @@ export default function AdminDashboard() {
     }
   };
 
-  const exportToCSV = () => {
+  const exportToPDF = () => {
+      if (!grievances || grievances.length === 0) return;
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("RP Foundation - Grievance Report", 14, 20);
+      
+      doc.setFontSize(10);
+      let y = 30;
+      grievances.forEach((g, i) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(`${i + 1}. [${g.status.toUpperCase()}] ${g.title} (${g.category}) - by ${g.citizenName}`, 14, y);
+        y += 7;
+      });
+      doc.save(`RP_Grievances_${new Date().toISOString().slice(0, 10)}.pdf`);
+    };
+
+    const exportToCSV = () => {
     if (!grievances || grievances.length === 0) return;
     const headers = "ID,Title,Category,Urgency,Status,Reporter,Date\n";
     const rows = grievances.map(g => `"${g.id}","${g.title}","${g.category}","${g.urgency}","${g.status}","${g.citizenName}","${g.createdAt}"`).join("\n");
@@ -1258,7 +1277,7 @@ export default function AdminDashboard() {
                     </div>
                   ))}
                 {customServices.length === 0 && (
-                  <p className="text-slate-400 text-[10.5px] text-center font-bold py-2">No custom schemes appended yet.</p>
+                  <EmptyState icon={Inbox} title="No Services" message="No custom schemes appended yet." />
                 )}
               </div>
             </div>
@@ -1377,7 +1396,7 @@ export default function AdminDashboard() {
             {cardApplications?.filter(a => a.status === "pending" || a.status === "Pending")?.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center text-slate-400 py-10">
                 <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-1.5 opacity-50" />
-                <p className="text-xs font-bold">No pending card registrations found.</p>
+                <EmptyState icon={CreditCard} title="All Caught Up" message="No pending card registrations found." />
               </div>
             ) : (
               cardApplications?.filter(a => a.status === "pending" || a.status === "Pending")?.map(app => (
@@ -1407,7 +1426,7 @@ export default function AdminDashboard() {
         {activeTab === "grievances" && (
           <div className="space-y-3 animate-fadeIn">
             {grievances?.length === 0 ? (
-              <div className="p-8 text-center bg-white border border-slate-200 rounded-2xl text-slate-400 text-xs font-bold">No grievances logged.</div>
+              <EmptyState icon={ShieldAlert} title="Inbox Empty" message="No grievances logged." />
             ) : (
               grievances?.map(g => (
                 <div key={g.id} className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-2.5">
@@ -1604,7 +1623,7 @@ export default function AdminDashboard() {
               <div className="space-y-2">
                 <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider mt-4">Active Crowdfunding Banners ({campaigns.length})</span>
                 {campaigns.length === 0 ? (
-                  <div className="text-center py-6 text-slate-400 border border-slate-100 rounded-2xl bg-slate-50/50">No active campaigns.</div>
+                  <EmptyState icon={Award} title="No Campaigns" message="No active campaigns." />
                 ) : (
                   campaigns.map((c: any) => (
                     <div key={c.id} className="flex justify-between items-center bg-slate-50 border border-slate-200/80 p-3 rounded-2xl">
@@ -1637,7 +1656,7 @@ export default function AdminDashboard() {
               <div className="space-y-2">
                 <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider">Registered Helpers ({volunteers.length})</span>
                 {volunteers.length === 0 ? (
-                  <div className="text-center py-6 text-slate-400 border border-slate-100 rounded-2xl bg-slate-50/50">No registered volunteers found.</div>
+                  <EmptyState icon={Users} title="No Volunteers" message="No registered volunteers found." />
                 ) : (
                   volunteers.map((v: any) => (
                     <div key={v.id} className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-2xl space-y-2.5">
