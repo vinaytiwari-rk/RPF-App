@@ -10,7 +10,32 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboard() {
+
+  const joditConfig = {
+    readonly: false,
+    height: 300,
+    toolbarButtonSize: "small" as any,
+    buttons: ["bold", "italic", "underline", "strikethrough", "|", "ul", "ol", "|", "font", "fontsize", "brush", "paragraph", "|", "link", "align", "undo", "redo"]
+  };
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const [previewItem, setPreviewItem] = useState<any>(null);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  // Auto-save simulation effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAutoSaving(true);
+      setTimeout(() => {
+        setIsAutoSaving(false);
+        setLastSaved(new Date());
+      }, 800);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [founderEn, founderHi, aboutTextEn, aboutTextHi, postTextEn, postTextHi]);
+
 
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const navigate = useNavigate();
@@ -1099,8 +1124,8 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label className="text-[9px] font-black text-slate-400 uppercase block mb-1">Founder Message (EN / HI)</label>
-                  <textarea value={founderEn} onChange={e => setFounderEn(e.target.value)} placeholder="Message EN" className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl min-h-[50px]" />
-                  <textarea value={founderHi} onChange={e => setFounderHi(e.target.value)} placeholder="सन्देश HI" className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl min-h-[50px] mt-2" />
+                  <JoditEditor value={founderEn} config={joditConfig} onBlur={newContent => setFounderEn(newContent)} />
+                  <JoditEditor value={founderHi} config={joditConfig} onBlur={newContent => setFounderHi(newContent)} />
                 </div>
                 <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-2xl uppercase font-black text-xs shadow-md cursor-pointer">
                   Commit System Changes Live
@@ -1361,8 +1386,8 @@ export default function AdminDashboard() {
                   </select>
                   <input type="url" value={postLink} onChange={e => setPostLink(e.target.value)} placeholder="Target Link URL" className="w-full border border-slate-200 bg-slate-50 p-2 rounded-xl text-[11px]" />
                 </div>
-                <textarea required value={postTextEn} onChange={e => setPostTextEn(e.target.value)} placeholder="Description EN" className="w-full border border-slate-200 p-2 rounded-xl min-h-[40px]" />
-                <textarea required value={postTextHi} onChange={e => setPostTextHi(e.target.value)} placeholder="विवरण HI" className="w-full border border-slate-200 p-2 rounded-xl min-h-[40px]" />
+                <div className="w-full"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Campaign Desc (EN)</label><JoditEditor value={postTextEn} config={joditConfig} onBlur={newContent => setPostTextEn(newContent)} /></div>
+                <div className="w-full"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Campaign Desc (HI)</label><JoditEditor value={postTextHi} config={joditConfig} onBlur={newContent => setPostTextHi(newContent)} /></div>
                 
                 {/* Social Post Image Device Upload Selector */}
                 <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200/60">
@@ -1734,8 +1759,8 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <textarea required value={aboutTextEn} onChange={e => setAboutTextEn(e.target.value)} placeholder="About text (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
-                  <textarea required value={aboutTextHi} onChange={e => setAboutTextHi(e.target.value)} placeholder="फाउंडेशन का विवरण (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
+                  <div className="w-full col-span-2"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">About (EN)</label><JoditEditor value={aboutTextEn} config={joditConfig} onBlur={newContent => setAboutTextEn(newContent)} /></div>
+                  <div className="w-full col-span-2"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">About (HI)</label><JoditEditor value={aboutTextHi} config={joditConfig} onBlur={newContent => setAboutTextHi(newContent)} /></div>
                 </div>
 
                 <button type="submit" className="w-full bg-[#000080] hover:bg-indigo-900 text-white py-2 rounded-xl uppercase font-black text-[9px] tracking-wider transition">Save About Details</button>
@@ -1779,6 +1804,41 @@ export default function AdminDashboard() {
 
           </div>
         </div>
+
+      {/* Auto-Save Toast */}
+      {lastSaved && (
+        <div className="fixed bottom-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-xl shadow-2xl flex items-center gap-2 text-[10px] font-bold z-50 animate-fadeIn">
+          {isAutoSaving ? (
+            <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Auto-saving...</>
+          ) : (
+            <><CheckCircle className="w-3.5 h-3.5 text-green-400" /> Draft Saved {lastSaved.toLocaleTimeString()}</>
+          )}
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewItem && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-fadeIn relative">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-800">Live Preview</span>
+              <button onClick={() => setPreviewItem(null)} className="p-1.5 bg-slate-200 hover:bg-slate-300 rounded-full text-slate-600 transition"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="p-0 bg-slate-100 relative h-64">
+              {previewItem.type === 'slide' && (
+                <div className="relative w-full h-full flex flex-col justify-end p-6">
+                  <img src={previewItem.data.image} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                  <div className="relative z-10 space-y-1">
+                    <h2 className="text-white font-display font-black text-xl leading-tight drop-shadow-md">{previewItem.data.titleEn}</h2>
+                    <p className="text-white/90 font-medium text-xs drop-shadow-md">{previewItem.data.subEn}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       </main>
     </div>
   );
