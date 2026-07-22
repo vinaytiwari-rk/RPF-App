@@ -661,8 +661,17 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
 // PostgreSQL Pool Connection
 const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/rp_foundation";
 const pool = new pg.Pool({
-  connectionString: dbUrl,
-  ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized: false }
+    connectionString: dbUrl,
+    ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized: false }
+});
+
+app.get("/api/health", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW()");
+    res.json({ success: true, time: result.rows[0], env: process.env.DATABASE_URL ? "URL Set" : "URL Missing", dbUrl: dbUrl.substring(0, 15) + "..." });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message, stack: error.stack, env: process.env.DATABASE_URL ? "URL Set" : "URL Missing", dbUrl: dbUrl.substring(0, 15) + "..." });
+  }
 });
 
 // Lazy-loaded Gemini AI client helper
