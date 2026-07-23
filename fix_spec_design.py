@@ -1,4 +1,7 @@
-import React from "react";
+import os
+
+# 1. Update Home.tsx with the new Vision-aligned design
+new_home_code = '''import React from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
 import { motion } from "motion/react";
@@ -155,3 +158,134 @@ export default function Home() {
     </div>
   );
 }
+'''
+
+with open('src/pages/Home.tsx', 'w', encoding='utf-8') as f:
+    f.write(new_home_code)
+
+
+# 2. Update MainLayout.tsx with the precise Layout Header and Bottom navigation specifications
+with open('src/layouts/MainLayout.tsx', 'r', encoding='utf-8') as f:
+    layout_content = f.read()
+
+# Update top header branding with taglines & logo styling
+# Locate header branding block and replace with exact spec
+layout_content = re.sub(
+    r'<div className="flex items-center gap-3 relative z-10">.*?</div>\s*</div>\s*</div>\s*\{/\* Right: Actions',
+    '''<div className="flex items-center gap-2.5 relative z-10">
+              {location.pathname !== "/" ? (
+                <button 
+                  onClick={() => navigate(-1)}
+                  className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-700 hover:shadow-xs flex items-center justify-center transition cursor-pointer"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+              ) : (
+                <img src="/assets/logo.png" alt="RP Logo" className="w-9 h-9 rounded-full bg-white shadow-sm border border-slate-200/50 p-0.5" />
+              )}
+              <div className="flex flex-col justify-center text-left">
+                <h1 className="font-display font-black text-[13.5px] text-[#1C2D42] tracking-wide leading-none">
+                  RP FOUNDATION
+                </h1>
+                <span className="font-sans text-[7.5px] font-black text-[#F26522] mt-0.5 leading-none tracking-wider uppercase">
+                  सेवा • समर्पण • संकल्प
+                </span>
+              </div>
+            </div>''',
+    layout_content,
+    flags=re.DOTALL
+)
+
+# Apply curved bottom nav specification with center notch/elevated design
+# Replace navigation container styling
+layout_content = layout_content.replace(
+    'className="w-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808] backdrop-blur-md border-b-2 border-[#000080]/20 px-4 py-3.5 flex justify-between items-center relative z-50 shrink-0 select-none"',
+    'className="w-full bg-white/90 backdrop-blur-md border-b border-slate-200/60 px-4 py-3.5 flex justify-between items-center relative z-50 shrink-0 select-none"'
+)
+
+# Update Bottom Nav Container
+layout_content = re.sub(
+    r'<motion\.div\s*initial=\{\{ y: 100 \}\}\s*animate=\{\{ y: 0 \}\}.*?className="w-full bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0"',
+    r'<motion.div initial={{ y: 100 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }} className="w-full bg-white/95 border-t border-slate-200/60 rounded-t-[28px] shadow-[0_-8px_30px_rgba(28,45,66,0.08)] flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0"',
+    layout_content,
+    flags=re.DOTALL
+)
+
+# Replace the child-like Donate button with the precise glowing vector heart button
+# Elevated above navigation dock line, glowing crimson-saffron neon glow fill
+glowing_vector_heart = '''
+          {/* Central elevated Glowing Heart Donate Button */}
+          <motion.div className="relative -top-7">
+            <motion.button 
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleNav("/donations")}
+              className="flex items-center justify-center cursor-pointer p-0 bg-transparent border-0 outline-none relative"
+            >
+              <svg 
+                viewBox="0 0 100 100" 
+                className="w-16 h-16 filter drop-shadow-[0_0_15px_rgba(255,59,48,0.95)] animate-pulse"
+                style={{ animationDuration: '2.2s' }}
+              >
+                <defs>
+                  <linearGradient id="neonHeartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FF3B30" />
+                    <stop offset="100%" stopColor="#F26522" />
+                  </linearGradient>
+                </defs>
+                <path 
+                  d="M50 88.3L43.8 82.6C21.8 62.6 7.3 49.5 7.3 33.3C7.3 20.1 17.6 9.8 30.8 9.8C38.3 9.8 45.5 13.3 50 18.8C54.5 13.3 61.7 9.8 69.2 9.8C82.4 9.8 92.7 20.1 92.7 33.3C92.7 49.5 78.2 62.6 56.2 82.7L50 88.3Z" 
+                  fill="url(#neonHeartGrad)"
+                />
+                {/* Embedded silhouette of Folding Hands (Namaste) inside heart */}
+                <path 
+                  d="M50 28c-0.8 0-1.5 0.3-2 0.8l-8.5 8.5c-0.8 0.8-0.8 2 0 2.8 0.8 0.8 2 0.8 2.8 0L50 32.8l7.7 7.3c0.8 0.8 2 0.8 2.8 0 0.8-0.8 0.8-2 0-2.8l-8.5-8.5c-0.5-0.5-1.2-0.8-2-0.8z" 
+                  fill="#ffffff"
+                />
+                <path 
+                  d="M50 33.5c-0.5 0-1 0.2-1.4 0.6L41 42c-0.8 0.8-0.8 2 0 2.8s2 0.8 2.8 0l6.2-5.9 6.2 5.9c0.8 0.8 2 0.8 2.8 0s0.8-2 0-2.8l-7.6-7.9c-0.4-0.4-0.9-0.6-1.4-0.6z" 
+                  fill="#ffffff"
+                  opacity="0.9"
+                />
+                <path 
+                  d="M47.5 40v20c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5V40h-5z" 
+                  fill="#ffffff"
+                  opacity="0.95"
+                />
+              </svg>
+              <span className="absolute -bottom-4 text-[8px] font-black text-[#1C2D42] tracking-widest uppercase">DONATE</span>
+            </motion.button>
+          </motion.div>
+'''
+
+layout_content = re.sub(
+    r'\{/\* Central Donate Button \*/\}.*?</motion\.div>',
+    glowing_vector_heart,
+    layout_content,
+    flags=re.DOTALL
+)
+
+# Replace the navigation items label to match "Home", "Services", "Donate", "Impact", "Profile"
+# Specifically replacing Community navigation block title
+layout_content = re.sub(
+    r'\{/\* Central Donate Button \*/\}.*?<span className="text-\[9px\] font-bold">\{language === "hi" \? "??????" : "Community"\}</span>',
+    glowing_vector_heart,
+    layout_content,
+    flags=re.DOTALL
+)
+
+# Labeled bottom nav buttons:
+# 1. Home
+# 2. Services
+# 3. Donate (central)
+# 4. Community (labeled "Impact" / "हमारा प्रभाव")
+# 5. Profile
+layout_content = layout_content.replace(
+    '{language === "hi" ? "??????" : "Community"}',
+    '{language === "hi" ? "प्रभाव" : "Impact"}'
+)
+
+with open('src/layouts/MainLayout.tsx', 'w', encoding='utf-8') as f:
+    f.write(layout_content)
+
+print('Updated Home.tsx and MainLayout.tsx components')

@@ -224,11 +224,7 @@ export default function MainLayout() {
         </div>
 
         {/* FIXED BOTTOM NAVIGATION BAR */}
-        <motion.div 
-          initial={{ y: 100 }}
-          animate={{ y: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }}
-          className="w-full bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0"
+        <motion.div initial={{ y: 100 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }} className="w-full bg-white/95 border-t border-slate-200/60 rounded-t-[28px] shadow-[0_-8px_30px_rgba(28,45,66,0.08)] flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0"
         >
           
           <motion.button 
@@ -258,17 +254,50 @@ export default function MainLayout() {
           </motion.button>
 
           
-          {/* Central Donate Button */}
-          <motion.div className="relative -top-5">
+          
+          {/* Central elevated Glowing Heart Donate Button */}
+          <motion.div className="relative -top-7">
             <motion.button 
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.15 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleNav("/donations")}
-              className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full p-4 shadow-xl flex items-center justify-center border-4 border-slate-50"
+              className="flex items-center justify-center cursor-pointer p-0 bg-transparent border-0 outline-none relative"
             >
-              <img src="/assets/donate.jpg" alt="Donate Now" className="w-12 h-12 rounded-full object-cover animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]" />
+              <svg 
+                viewBox="0 0 100 100" 
+                className="w-16 h-16 filter drop-shadow-[0_0_15px_rgba(255,59,48,0.95)] animate-pulse"
+                style={{ animationDuration: '2.2s' }}
+              >
+                <defs>
+                  <linearGradient id="neonHeartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FF3B30" />
+                    <stop offset="100%" stopColor="#F26522" />
+                  </linearGradient>
+                </defs>
+                <path 
+                  d="M50 88.3L43.8 82.6C21.8 62.6 7.3 49.5 7.3 33.3C7.3 20.1 17.6 9.8 30.8 9.8C38.3 9.8 45.5 13.3 50 18.8C54.5 13.3 61.7 9.8 69.2 9.8C82.4 9.8 92.7 20.1 92.7 33.3C92.7 49.5 78.2 62.6 56.2 82.7L50 88.3Z" 
+                  fill="url(#neonHeartGrad)"
+                />
+                {/* Embedded silhouette of Folding Hands (Namaste) inside heart */}
+                <path 
+                  d="M50 28c-0.8 0-1.5 0.3-2 0.8l-8.5 8.5c-0.8 0.8-0.8 2 0 2.8 0.8 0.8 2 0.8 2.8 0L50 32.8l7.7 7.3c0.8 0.8 2 0.8 2.8 0 0.8-0.8 0.8-2 0-2.8l-8.5-8.5c-0.5-0.5-1.2-0.8-2-0.8z" 
+                  fill="#ffffff"
+                />
+                <path 
+                  d="M50 33.5c-0.5 0-1 0.2-1.4 0.6L41 42c-0.8 0.8-0.8 2 0 2.8s2 0.8 2.8 0l6.2-5.9 6.2 5.9c0.8 0.8 2 0.8 2.8 0s0.8-2 0-2.8l-7.6-7.9c-0.4-0.4-0.9-0.6-1.4-0.6z" 
+                  fill="#ffffff"
+                  opacity="0.9"
+                />
+                <path 
+                  d="M47.5 40v20c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5V40h-5z" 
+                  fill="#ffffff"
+                  opacity="0.95"
+                />
+              </svg>
+              <span className="absolute -bottom-4 text-[8px] font-black text-[#1C2D42] tracking-widest uppercase">DONATE</span>
             </motion.button>
           </motion.div>
+
 
           <motion.button 
             whileHover={{ scale: 1.15, y: -2 }}
