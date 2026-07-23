@@ -47,7 +47,7 @@ export default function SplashScreen() {
       <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center opacity-70">
         <div className="flex items-center gap-2 mb-1">
           <img src="/assets/logo.png" className="w-4 h-4 grayscale" alt="Gov" />
-          <span className="text-[#000080] font-display font-bold text-sm tracking-wide">RP Foundation Tech</span>
+          
         </div>
         <div className="flex items-center gap-1.5">
           <Loader2 className="w-3 h-3 text-[#FF9933] animate-spin" />
