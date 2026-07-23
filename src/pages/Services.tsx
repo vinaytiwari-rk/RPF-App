@@ -73,7 +73,7 @@ export default function Services() {
   }, [search]);
 
   return (
-    <div className="p-5 flex-1 flex flex-col min-h-screen bg-slate-50/50 pb-24 relative overflow-hidden">
+    <div className="p-5 flex-1 flex flex-col min-h-screen bg-transparent pb-24 relative overflow-hidden">
       {/* ── Decorative backdrop ── */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[340px] h-[340px] opacity-[0.03] pointer-events-none z-0">
         <svg viewBox="0 0 100 100" className="w-full h-full text-[#D4AF37]" fill="currentColor">

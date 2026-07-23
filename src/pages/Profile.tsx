@@ -54,7 +54,7 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 min-h-full pb-24">
+      <div className="flex flex-col items-center justify-center p-8 text-center bg-transparent min-h-full pb-24">
         <h2 className="font-display font-bold text-xl text-amber-900 mb-2">Not Logged In</h2>
         <p className="text-xs text-slate-500 mb-4">Please log in to view your profile.</p>
         <button 
@@ -94,7 +94,7 @@ export default function Profile() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-slate-50 pb-24"
+      className="flex flex-col h-full bg-transparent pb-24"
     >
       {/* Profile Hero section with Tricolour Gradient Header */}
       <div className="bg-gradient-to-br from-[#FF9933] via-white to-[#138808] pt-8 pb-8 px-5 relative overflow-hidden shrink-0 text-[#000080] shadow-lg border-b border-slate-100 rounded-b-[2.5rem]">
@@ -288,16 +288,16 @@ export default function Profile() {
           transition={{ delay: 0.1 }}
           className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
         >
-          <div className="text-[9px] font-black text-slate-600 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100 px-4 py-2">
+          <div className="text-[9px] font-black text-slate-600 uppercase tracking-wider bg-transparent/80 border-b border-slate-100 px-4 py-2">
             Support & Info
           </div>
           
           <div 
             onClick={() => setShowFaqModal(true)}
-            className="flex justify-between items-center px-4 py-3 border-b border-slate-100 cursor-pointer hover:bg-slate-50/50 transition"
+            className="flex justify-between items-center px-4 py-3 border-b border-slate-100 cursor-pointer hover:bg-transparent/50 transition"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
+              <div className="w-8 h-8 bg-transparent border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
                 <HelpCircle className="w-4 h-4" />
               </div>
               <span className="text-xs font-bold text-amber-900">Help & FAQs</span>
@@ -309,10 +309,10 @@ export default function Profile() {
 
           <div 
             onClick={() => setShowAboutModal(true)}
-            className="flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-slate-50/50 transition"
+            className="flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-transparent/50 transition"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
+              <div className="w-8 h-8 bg-transparent border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
                 <Info className="w-4 h-4" />
               </div>
               <span className="text-xs font-bold text-amber-900">About RP Foundation</span>
@@ -439,7 +439,7 @@ export default function Profile() {
                   ? (cmsConfig?.aboutTextHi || "आरपी फाउंडेशन एक गैर-लाभकारी संगठन है जो समाज के कमजोर वर्गों को सशक्त बनाने, शिक्षा, स्वास्थ्य, और आपातकालीन नागरिक राहत प्रदान करने के लिए प्रतिबद्ध है।")
                   : (cmsConfig?.aboutTextEn || "RP Foundation is a non-profit organization dedicated to grassroot community upliftment, educational scholarships, emergency healthcare support, and smart governance solutions.")}
               </p>
-              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150 text-[10px] font-bold text-slate-650 flex flex-col gap-1">
+              <div className="bg-transparent p-2.5 rounded-xl border border-slate-150 text-[10px] font-bold text-slate-650 flex flex-col gap-1">
                 <span className="flex justify-between"><span>Toll Free Helpline:</span><span className="font-mono text-amber-900">{settings?.tollFree || "1800-569-0991"}</span></span>
                 <span className="flex justify-between"><span>Email Support:</span><span className="text-amber-900">{settings?.email || "info@therpfoundation.org"}</span></span>
                 <span className="flex justify-between"><span>Official Web:</span><span className="text-amber-900">{settings?.webUrl || "therpfoundation.org"}</span></span>

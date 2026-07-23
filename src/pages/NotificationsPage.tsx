@@ -98,7 +98,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 animate-fadeIn max-w-md mx-auto">
+    <div className="flex flex-col h-full bg-transparent animate-fadeIn max-w-md mx-auto">
       
       {/* Upper Tab Switcher */}
       <div className="bg-white px-5 pt-5 pb-1 border-b border-slate-200 sticky top-0 z-10 shadow-xs shrink-0">

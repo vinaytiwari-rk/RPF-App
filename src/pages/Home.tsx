@@ -83,7 +83,7 @@ export default function Home() {
   const quickActions = activeActions.slice(0, 10);
 
   return (
-    <div className="space-y-5 animate-fadeIn min-h-full pb-16 font-sans relative overflow-x-hidden bg-slate-50/50" id="live-impact-dashboard">
+    <div className="space-y-5 animate-fadeIn min-h-full pb-16 font-sans relative overflow-x-hidden bg-transparent" id="live-impact-dashboard">
       
       {/* Dynamic Global Emergency Banner */}
       {(lang === "hi" ? cmsConfig.alertBannerHi : cmsConfig.alertBannerEn) && (
