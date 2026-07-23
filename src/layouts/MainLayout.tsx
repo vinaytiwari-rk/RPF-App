@@ -257,6 +257,7 @@ export default function MainLayout() {
           
           
           
+          
           {/* Central elevated Daan Peti (Donation Box) Button */}
           <motion.div className="relative -top-8">
             <motion.button 
@@ -267,8 +268,7 @@ export default function MainLayout() {
             >
               <svg 
                 viewBox="0 0 100 100" 
-                className="w-18 h-18 filter drop-shadow-[0_0_15px_rgba(242,101,34,0.95)] animate-pulse"
-                style={{ animationDuration: '2.5s' }}
+                className="w-18 h-18 filter drop-shadow-[0_0_15px_rgba(242,101,34,0.95)]"
               >
                 <defs>
                   <linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -281,9 +281,23 @@ export default function MainLayout() {
                   </linearGradient>
                 </defs>
 
-                {/* Floating Gold Coin */}
-                <circle cx="50" cy="18" r="4.5" fill="#FFE000" stroke="#FFFFFF" strokeWidth="1" />
-                <path d="M50 15v6 M47.5 18h5" stroke="#FF9933" strokeWidth="0.8" />
+                {/* Animated Gold Coin 1 (Falling) */}
+                <motion.g
+                  animate={{ y: [0, 24], opacity: [0, 1, 1, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeIn" }}
+                >
+                  <circle cx="50" cy="12" r="4.5" fill="#FFE000" stroke="#FFFFFF" strokeWidth="1" />
+                  <path d="M50 9v6 M47.5 12h5" stroke="#FF9933" strokeWidth="0.8" />
+                </motion.g>
+
+                {/* Animated Gold Coin 2 (Falling with 0.8s offset) */}
+                <motion.g
+                  animate={{ y: [0, 24], opacity: [0, 1, 1, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeIn", delay: 0.8 }}
+                >
+                  <circle cx="50" cy="12" r="4.5" fill="#FFE000" stroke="#FFFFFF" strokeWidth="1" />
+                  <path d="M50 9v6 M47.5 12h5" stroke="#FF9933" strokeWidth="0.8" />
+                </motion.g>
 
                 {/* Donation Box Lid */}
                 <polygon points="20,38 80,38 75,32 25,32" fill="url(#lidGrad)" stroke="#FFFFFF" strokeWidth="1" />
@@ -295,19 +309,41 @@ export default function MainLayout() {
                 {/* Front panel glass highlight */}
                 <rect x="27" y="42" width="46" height="36" rx="4" fill="#FFFFFF" fillOpacity="0.1" />
 
-                {/* Text: "दान पेटी" */}
-                <text x="50" y="56" textAnchor="middle" fill="#FFFFFF" fontFamily="sans-serif" fontWeight="900" fontSize="9.5" letterSpacing="0.5">
+                {/* Alternating Text: Hindi "दान पेटी" fades in/out, then English "DONATION BOX" fades in/out */}
+                <motion.text 
+                  x="50" 
+                  y="60" 
+                  textAnchor="middle" 
+                  fill="#FFFFFF" 
+                  fontFamily="sans-serif" 
+                  fontWeight="900" 
+                  fontSize="9.5" 
+                  letterSpacing="0.5"
+                  animate={{ opacity: [1, 1, 0, 0, 1] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
                   दान पेटी
-                </text>
+                </motion.text>
 
-                {/* Text: "DONATION BOX" */}
-                <text x="50" y="68" textAnchor="middle" fill="#FFFFFF" fontFamily="sans-serif" fontWeight="900" fontSize="5.5" letterSpacing="0.8" opacity="0.95">
+                <motion.text 
+                  x="50" 
+                  y="60" 
+                  textAnchor="middle" 
+                  fill="#FFFFFF" 
+                  fontFamily="sans-serif" 
+                  fontWeight="900" 
+                  fontSize="6.5" 
+                  letterSpacing="0.8"
+                  animate={{ opacity: [0, 0, 1, 1, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
                   DONATION BOX
-                </text>
+                </motion.text>
               </svg>
               <span className="absolute -bottom-4 text-[8px] font-black text-[#1C2D42] tracking-widest uppercase">DONATE</span>
             </motion.button>
           </motion.div>
+
 
 
 
