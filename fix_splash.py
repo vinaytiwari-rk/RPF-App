@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+new_splash_code = '''import React, { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export default function SplashScreen() {
@@ -57,3 +57,9 @@ export default function SplashScreen() {
     </div>
   );
 }
+'''
+
+with open('src/components/SplashScreen.tsx', 'w', encoding='utf-8') as f:
+    f.write(new_splash_code)
+
+print('Updated SplashScreen.tsx')
