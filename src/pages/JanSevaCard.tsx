@@ -60,6 +60,24 @@ export default function JanSevaCard() {
 
   const [submitting, setSubmitting] = useState(false);
 
+  // Pincode auto-fill effect
+  useEffect(() => {
+    if (form.pincode.length === 6) {
+      axios.get(`/api/locations/pincode?p=${form.pincode}`)
+        .then(res => {
+          if (res.data.success && res.data.data) {
+            const data = res.data.data;
+            setForm(prev => ({
+              ...prev,
+              city: data.city || prev.city,
+              state: data.state || prev.state
+            }));
+          }
+        })
+        .catch(err => console.error("Pincode lookup failed", err));
+    }
+  }, [form.pincode]);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setUploading(true);

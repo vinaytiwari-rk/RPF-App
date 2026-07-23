@@ -79,6 +79,26 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
   const [vidhan, setVidhan] = useState("");
   const [ward, setWard] = useState("");
 
+  // Pincode auto-fill effect
+  useEffect(() => {
+    if (pincode.length === 6) {
+      axios.get(`/api/locations/pincode?p=${pincode}`)
+        .then(res => {
+          if (res.data.success && res.data.data) {
+            const data = res.data.data;
+            if (data.state) {
+              const stateObj = State.getStatesOfCountry("IN").find(s => s.name === data.state);
+              if (stateObj) setStateIso(stateObj.isoCode);
+            }
+            if (data.city) setCity(data.city);
+            if (data.sansad_kshetra) setSansad(data.sansad_kshetra);
+            if (data.vidhan_sabha) setVidhan(data.vidhan_sabha);
+          }
+        })
+        .catch(err => console.error("Pincode lookup failed", err));
+    }
+  }, [pincode]);
+
   const isIndia = countryIso === "IN";
   const countriesList = Country.getAllCountries();
   const statesList = State.getStatesOfCountry(countryIso);
