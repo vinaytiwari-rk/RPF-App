@@ -55,7 +55,7 @@ export default function Profile() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 min-h-full pb-24">
-        <h2 className="font-display font-bold text-xl text-[#000080] mb-2">Not Logged In</h2>
+        <h2 className="font-display font-bold text-xl text-slate-800 mb-2">Not Logged In</h2>
         <p className="text-xs text-slate-500 mb-4">Please log in to view your profile.</p>
         <button 
           onClick={() => navigate("/")}
@@ -166,8 +166,8 @@ export default function Profile() {
                   </div>
                   {user.isVolunteer && user.volunteerData?.registration_number && (
                     <div className="flex items-center gap-1.5 bg-[#FF9933]/20 backdrop-blur-md border border-[#FF9933]/30 py-1 px-3 rounded-full w-fit">
-                      <ShieldCheck className="w-3 h-3 text-[#FF9933]" />
-                      <span className="text-[10px] font-black tracking-widest uppercase text-[#FF9933]">V-ID: {user.volunteerData.registration_number}</span>
+                      <ShieldCheck className="w-3 h-3 text-orange-500" />
+                      <span className="text-[10px] font-black tracking-widest uppercase text-orange-500">V-ID: {user.volunteerData.registration_number}</span>
                     </div>
                   )}
                 </div>
@@ -258,7 +258,7 @@ export default function Profile() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card bg-[#0B1E3F] text-white border-[#D4AF37]/35 overflow-hidden rounded-2xl border shadow-lg"
+            className="glass-card bg-slate-800 text-white border-[#D4AF37]/35 overflow-hidden rounded-2xl border shadow-lg"
           >
             <div className="text-[9px] font-black text-slate-300 uppercase tracking-wider bg-slate-900/50 border-b border-white/5 px-4 py-2.5">
               System Administration
@@ -268,7 +268,7 @@ export default function Profile() {
               className="flex justify-between items-center px-4 py-4 cursor-pointer hover:bg-white/5 transition"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center text-[#FF9933]">
+                <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center text-orange-500">
                   <Shield className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
@@ -335,9 +335,9 @@ export default function Profile() {
       {showFaqModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[80vh]">
-            <div className="bg-gradient-to-r from-[#000080] to-indigo-900 px-4 py-3.5 flex items-center justify-between text-white">
+            <div className="bg-slate-800 px-4 py-3.5 flex items-center justify-between text-white">
               <div className="flex items-center gap-1.5">
-                <HelpCircle className="w-4 h-4 text-[#FF9933]" />
+                <HelpCircle className="w-4 h-4 text-orange-500" />
                 <span className="text-xs font-black uppercase tracking-wider">{language === "hi" ? "अक्सर पूछे जाने वाले प्रश्न" : "Frequently Asked Questions"}</span>
               </div>
               <button onClick={() => setShowFaqModal(false)} className="w-7 h-7 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
@@ -369,7 +369,7 @@ export default function Profile() {
                 }
               ]).map((faq) => (
                 <div key={faq.id} className="space-y-1 border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
-                  <h5 className="font-extrabold text-[#000080]">Q: {language === "hi" ? faq.questionHi : faq.questionEn}</h5>
+                  <h5 className="font-extrabold text-slate-800">Q: {language === "hi" ? faq.questionHi : faq.questionEn}</h5>
                   <p className="text-slate-500 font-semibold leading-relaxed">
                     {language === "hi" ? faq.answerHi : faq.answerEn}
                   </p>
@@ -384,9 +384,9 @@ export default function Profile() {
       {showAboutModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 flex flex-col">
-            <div className="bg-gradient-to-r from-[#000080] to-indigo-900 px-4 py-3.5 flex items-center justify-between text-white">
+            <div className="bg-slate-800 px-4 py-3.5 flex items-center justify-between text-white">
               <div className="flex items-center gap-1.5">
-                <Info className="w-4 h-4 text-[#FF9933]" />
+                <Info className="w-4 h-4 text-orange-500" />
                 <span className="text-xs font-black uppercase tracking-wider">{language === "hi" ? "आरपी फाउंडेशन के बारे में" : "About RP Foundation"}</span>
               </div>
               <button onClick={() => setShowAboutModal(false)} className="w-7 h-7 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
@@ -407,7 +407,7 @@ export default function Profile() {
               <h4 className="font-extrabold text-slate-800 text-center leading-none">
                 {cmsConfig?.founderName || "Rohit Pandit"}
               </h4>
-              <p className="text-[9.5px] font-black text-[#FF9933] text-center uppercase tracking-widest leading-none mt-1">
+              <p className="text-[9.5px] font-black text-orange-500 text-center uppercase tracking-widest leading-none mt-1">
                 {cmsConfig?.founderDesignation || "Founder, RP Foundation"}
               </p>
               <p className="text-slate-500 font-semibold leading-relaxed text-center pt-2">
@@ -416,9 +416,9 @@ export default function Profile() {
                   : (cmsConfig?.aboutTextEn || "RP Foundation is a non-profit organization dedicated to grassroot community upliftment, educational scholarships, emergency healthcare support, and smart governance solutions.")}
               </p>
               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150 text-[10px] font-bold text-slate-650 flex flex-col gap-1">
-                <span className="flex justify-between"><span>Toll Free Helpline:</span><span className="font-mono text-[#000080]">{settings?.tollFree || "1800-569-0991"}</span></span>
-                <span className="flex justify-between"><span>Email Support:</span><span className="text-[#000080]">{settings?.email || "info@therpfoundation.org"}</span></span>
-                <span className="flex justify-between"><span>Official Web:</span><span className="text-[#000080]">{settings?.webUrl || "therpfoundation.org"}</span></span>
+                <span className="flex justify-between"><span>Toll Free Helpline:</span><span className="font-mono text-slate-800">{settings?.tollFree || "1800-569-0991"}</span></span>
+                <span className="flex justify-between"><span>Email Support:</span><span className="text-slate-800">{settings?.email || "info@therpfoundation.org"}</span></span>
+                <span className="flex justify-between"><span>Official Web:</span><span className="text-slate-800">{settings?.webUrl || "therpfoundation.org"}</span></span>
               </div>
             </div>
           </div>

@@ -269,15 +269,32 @@ app.post("/api/auth/logout", async (req, res) => {
 app.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
-    const result = await pool.query(`SELECT id, name, role, email, phone, points, badges, avatar FROM users WHERE id = $1`, [userId]);
+    let result = await pool.query(`SELECT id, name, role, email, phone, points, badges, avatar FROM users WHERE id = $1`, [userId]);
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, error: "User not found" });
+      // Check volunteers table
+      const volResult = await pool.query(`SELECT id, full_name as name, email, mobile as phone, avatar FROM volunteers WHERE id = $1`, [userId]);
+      if (volResult.rows.length === 0) {
+        return res.status(404).json({ success: false, error: "User not found" });
+      }
+      
+      const vol = volResult.rows[0];
+      return res.json({ 
+        success: true, 
+        user: {
+          ...vol,
+          role: "volunteer",
+          isVolunteer: true,
+          volunteerData: vol,
+          points: 0,
+          badges: []
+        }
+      });
     }
     
     const user = result.rows[0];
     
-    // Check if user is a volunteer
+    // Check if user is also a volunteer (by phone/email)
     if (user.phone || user.email) {
       const volResult = await pool.query(`SELECT * FROM volunteers WHERE mobile = $1 OR email = $2`, [user.phone, user.email]);
       if (volResult.rows.length > 0) {
@@ -297,8 +314,15 @@ app.post("/api/auth/profile/update", authenticateToken, async (req: any, res: an
     const userId = req.user.id;
     const { name, avatar } = req.body;
     
+    // Update users table
     await pool.query(
       `UPDATE users SET name = $1, avatar = $2 WHERE id = $3`,
+      [name, avatar, userId]
+    );
+    
+    // Update volunteers table
+    await pool.query(
+      `UPDATE volunteers SET full_name = $1, avatar = $2 WHERE id = $3`,
       [name, avatar, userId]
     );
     
@@ -330,19 +354,27 @@ app.post("/api/auth/register-volunteer", async (req, res) => {
     const regNumber = "RPF-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
     const username = data.full_name.split(" ")[0].toLowerCase() + Math.floor(100 + Math.random() * 900);
     
+    // Hash the provided password
+    let passwordHash = null;
+    if (data.password) {
+      passwordHash = await bcrypt.hash(data.password, 10);
+    }
+    
     await pool.query(`
       INSERT INTO volunteers (
         id, username, registration_number, full_name, father_husband_name, mother_name, approval_status,
         dob, mobile, email, education, blood_group, skills, reason_for_joining, availability,
         national_id_1, national_id_2, country, state, city, address, pincode, area_locality,
-        sansad_kshetra, vidhan_sabha, ward_no
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
+        sansad_kshetra, vidhan_sabha, ward_no, password_hash
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
+      )
     `, [
       id, username, regNumber, data.full_name, data.father_husband_name, data.mother_name,
-      data.dob, data.mobile, data.email, JSON.stringify(data.education), data.blood_group, JSON.stringify(data.skills),
+      'pending', data.dob, data.mobile, data.email, JSON.stringify(data.education), data.blood_group, JSON.stringify(data.skills),
       data.reason_for_joining, data.availability, data.national_id_1, data.national_id_2,
       data.country, data.state, data.city, data.address, data.pincode, data.area_locality,
-      data.sansad_kshetra, data.vidhan_sabha, data.ward_no
+      data.sansad_kshetra, data.vidhan_sabha, data.ward_no, passwordHash
     ]);
 
     res.json({ success: true, registration_number: regNumber, username });
@@ -1662,6 +1694,7 @@ async function initDatabase() {
         registration_number VARCHAR(255) UNIQUE,
         password_hash VARCHAR(255),
         full_name TEXT,
+        avatar TEXT,
         father_husband_name TEXT,
         mother_name TEXT,
         dob DATE,
@@ -2573,9 +2606,11 @@ app.post("/api/social/:id/edit", async (req, res) => {
 app.get("/api/volunteers", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, name, email, phone, points, "registeredAt" FROM volunteers ORDER BY "registeredAt" DESC'
+      'SELECT id, full_name as name, email, mobile as phone, approval_status as status, "registeredAt" FROM volunteers ORDER BY "registeredAt" DESC'
     );
-    res.json({ volunteers: result.rows });
+    // Add points as 0 for now since it's missing from volunteers schema
+    const volunteers = result.rows.map(v => ({ ...v, points: 0 }));
+    res.json({ volunteers });
   } catch (error: any) {
     console.error("Error fetching volunteers:", error);
     res.status(500).json({ error: error.message });

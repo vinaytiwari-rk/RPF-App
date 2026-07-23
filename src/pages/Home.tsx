@@ -144,7 +144,19 @@ export default function Home() {
                   <p className="text-[10px] text-slate-200 font-semibold drop-shadow-xs">
                     {lang === "hi" ? slides[activeSlide]?.subHi : slides[activeSlide]?.subEn}
                   </p>
-                </motion.div>
+                
+      {/* Floating Animated Donate Button */}
+      <motion.button 
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/donate")}
+        className="fixed bottom-24 right-5 z-40 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full px-5 py-3 shadow-2xl flex items-center gap-2 animate-bounce border-2 border-white/20 backdrop-blur-md"
+      >
+        <Heart className="w-5 h-5 fill-white" />
+        <span className="font-black text-sm uppercase tracking-wider drop-shadow-md">Donate Now</span>
+      </motion.button>
+
+    </motion.div>
               </AnimatePresence>
             </div>
 
@@ -217,7 +229,19 @@ export default function Home() {
             </span>
           </div>
         </div>
-      </motion.div>
+      
+      {/* Floating Animated Donate Button */}
+      <motion.button 
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/donate")}
+        className="fixed bottom-24 right-5 z-40 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full px-5 py-3 shadow-2xl flex items-center gap-2 animate-bounce border-2 border-white/20 backdrop-blur-md"
+      >
+        <Heart className="w-5 h-5 fill-white" />
+        <span className="font-black text-sm uppercase tracking-wider drop-shadow-md">Donate Now</span>
+      </motion.button>
+
+    </motion.div>
 
       {/* 4. Quick Actions (Matches Screenshot 5 View All Services Grid - 5 columns x 2 rows) */}
       <div className="px-4 relative z-10">
@@ -387,7 +411,19 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </motion.div>
+      
+      {/* Floating Animated Donate Button */}
+      <motion.button 
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/donate")}
+        className="fixed bottom-24 right-5 z-40 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full px-5 py-3 shadow-2xl flex items-center gap-2 animate-bounce border-2 border-white/20 backdrop-blur-md"
+      >
+        <Heart className="w-5 h-5 fill-white" />
+        <span className="font-black text-sm uppercase tracking-wider drop-shadow-md">Donate Now</span>
+      </motion.button>
+
+    </motion.div>
       
     </div>
   );

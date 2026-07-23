@@ -1108,7 +1108,7 @@ export default function AdminDashboard() {
                     <Megaphone className="w-3.5 h-3.5" /> Emergency Marquee Alert Headline / अलर्ट हेडलाइन
                   </span>
                   <div className="space-y-2">
-                    <input type="text" value={alertBannerEn} onChange={e => setAlertBannerEn(e.target.value)} placeholder="Emergency Headline (English)" className="w-full border border-red-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                    <input type="text" value={alertBannerEn} onChange={e  => { setAlertBannerEn(e.target.value); setAlertBannerHi(e.target.value); }} placeholder="Emergency Headline (Multi-Language)" className="w-full border border-red-200 bg-white p-2.5 rounded-xl text-[11px]" />
                     <input type="text" value={alertBannerHi} onChange={e => setAlertBannerHi(e.target.value)} placeholder="आपातकालीन हेडलाइन (हिंदी)" className="w-full border border-red-200 bg-white p-2.5 rounded-xl text-[11px]" />
                   </div>
                 </div>
@@ -1181,7 +1181,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label className="text-[9px] font-black text-slate-400 uppercase block mb-1">Founder Message (EN / HI)</label>
-                  <JoditEditor value={founderEn} config={joditConfig} onBlur={newContent => setFounderEn(newContent)} />
+                  <JoditEditor value={founderEn} config={joditConfig} onBlur={newContent  => { setFounderEn(newContent); setFounderHi(newContent); }} />
                   <JoditEditor value={founderHi} config={joditConfig} onBlur={newContent => setFounderHi(newContent)} />
                 </div>
                 <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-2xl uppercase font-black text-xs shadow-md cursor-pointer">
@@ -1204,11 +1204,11 @@ export default function AdminDashboard() {
               <form onSubmit={handleAddCustomService} className="space-y-3 text-xs font-bold text-slate-700 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/50">
                 <span className="text-[9px] font-black text-slate-400 uppercase block tracking-wider">Deploy New Scheme Node</span>
                 <div className="grid grid-cols-2 gap-2">
-                  <input required type="text" value={srvTitleEn} onChange={e => setSrvTitleEn(e.target.value)} placeholder="Scheme Title (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                  <input required type="text" value={srvTitleEn} onChange={e  => { setSrvTitleEn(e.target.value); setSrvTitleHi(e.target.value); }} placeholder="Scheme Title (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                   <input required type="text" value={srvTitleHi} onChange={e => setSrvTitleHi(e.target.value)} placeholder="योजना का नाम (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="text" value={srvDescEn} onChange={e => setSrvDescEn(e.target.value)} placeholder="Description (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                  <input type="text" value={srvDescEn} onChange={e  => { setSrvDescEn(e.target.value); setSrvDescHi(e.target.value); }} placeholder="Description (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                   <input type="text" value={srvDescHi} onChange={e => setSrvDescHi(e.target.value)} placeholder="योजना विवरण (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -1477,7 +1477,7 @@ export default function AdminDashboard() {
                   </select>
                   <input type="url" value={postLink} onChange={e => setPostLink(e.target.value)} placeholder="Target Link URL" className="w-full border border-slate-200 bg-slate-50 p-2 rounded-xl text-[11px]" />
                 </div>
-                <div className="w-full"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Campaign Desc (EN)</label><JoditEditor value={postTextEn} config={joditConfig} onBlur={newContent => setPostTextEn(newContent)} /></div>
+                <div className="w-full"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Campaign Desc (Multi-Language)</label><JoditEditor value={postTextEn} config={joditConfig} onBlur={newContent  => { setPostTextEn(newContent); setPostTextHi(newContent); }} /></div>
                 <div className="w-full"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Campaign Desc (HI)</label><JoditEditor value={postTextHi} config={joditConfig} onBlur={newContent => setPostTextHi(newContent)} /></div>
                 
                 {/* Social Post Image Device Upload Selector */}
@@ -1528,14 +1528,14 @@ export default function AdminDashboard() {
                 <span className="text-[9px] font-black text-indigo-900 uppercase block tracking-wider">Post Live Job Opportunity</span>
                 {jobSuccess && <div className="bg-green-50 text-green-700 p-2 rounded-lg text-center text-[10px]">Job Deployed Successfully!</div>}
                 <div className="grid grid-cols-2 gap-2">
-                  <input required type="text" value={jobTitleEn} onChange={e => setJobTitleEn(e.target.value)} placeholder="Title EN" className="w-full border border-slate-200 p-2 rounded-xl text-[11px]" />
+                  <input required type="text" value={jobTitleEn} onChange={e  => { setJobTitleEn(e.target.value); setJobTitleHi(e.target.value); }} placeholder="Title EN" className="w-full border border-slate-200 p-2 rounded-xl text-[11px]" />
                   <input type="text" value={jobTitleHi} onChange={e => setJobTitleHi(e.target.value)} placeholder="शीर्षक HI" className="w-full border border-slate-200 p-2 rounded-xl text-[11px]" />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <input required type="text" value={jobCompany} onChange={e => setJobCompany(e.target.value)} placeholder="Company" className="w-full border border-slate-200 p-2 rounded-xl text-[11px]" />
                   <input required type="text" value={jobSalary} onChange={e => setJobSalary(e.target.value)} placeholder="Salary Range" className="w-full border border-slate-200 p-2 rounded-xl text-[11px]" />
                 </div>
-                <input required type="text" value={jobLocEn} onChange={e => setJobLocEn(e.target.value)} placeholder="Location EN" className="w-full border border-slate-200 p-2 rounded-xl text-[11px]" />
+                <input required type="text" value={jobLocEn} onChange={e  => { setJobLocEn(e.target.value); setJobLocHi(e.target.value); }} placeholder="Location EN" className="w-full border border-slate-200 p-2 rounded-xl text-[11px]" />
                 <button type="submit" className="w-full bg-slate-900 text-white py-2 rounded-xl uppercase font-black text-[9px]">Deploy Job Opening</button>
               </form>
             </div>
@@ -1560,7 +1560,7 @@ export default function AdminDashboard() {
                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Launch New Crowdfunding Drive</span>
                 
                 <div className="grid grid-cols-2 gap-2">
-                  <input required type="text" value={campTitleEn} onChange={e => setCampTitleEn(e.target.value)} placeholder="Campaign Title (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                  <input required type="text" value={campTitleEn} onChange={e  => { setCampTitleEn(e.target.value); setCampTitleHi(e.target.value); }} placeholder="Campaign Title (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                   <input required type="text" value={campTitleHi} onChange={e => setCampTitleHi(e.target.value)} placeholder="अभियान शीर्षक (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                 </div>
 
@@ -1684,9 +1684,9 @@ export default function AdminDashboard() {
 
                       {assigningTaskFor === v.id && (
                         <form onSubmit={(e) => handleAssignTask(e, v.id)} className="mt-3 bg-white border border-indigo-100 p-3 rounded-xl space-y-2 animate-fadeIn">
-                          <input type="text" placeholder="Task Title (English)" required value={taskTitleEn} onChange={e => setTaskTitleEn(e.target.value)} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px]" />
+                          <input type="text" placeholder="Task Title (Multi-Language)" required value={taskTitleEn} onChange={e  => { setTaskTitleEn(e.target.value); setTaskTitleHi(e.target.value); }} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px]" />
                           <input type="text" placeholder="कार्य शीर्षक (Hindi)" value={taskTitleHi} onChange={e => setTaskTitleHi(e.target.value)} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px]" />
-                          <textarea placeholder="Task Description" required value={taskDescEn} onChange={e => setTaskDescEn(e.target.value)} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px] h-16" />
+                          <textarea placeholder="Task Description" required value={taskDescEn} onChange={e  => { setTaskDescEn(e.target.value); setTaskDescHi(e.target.value); }} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px] h-16" />
                           <input type="number" placeholder="Points Reward" required min="10" value={taskPoints} onChange={e => setTaskPoints(Number(e.target.value))} className="w-full border border-slate-200 bg-slate-50 p-2 rounded-lg text-[10px]" />
                           <div className="flex gap-2 justify-end pt-1">
                             <button type="button" onClick={() => setAssigningTaskFor(null)} className="px-3 py-1.5 text-[9px] font-bold text-slate-500 hover:text-slate-700">CANCEL</button>
@@ -1721,12 +1721,12 @@ export default function AdminDashboard() {
                 <span className="text-[9px] font-black text-indigo-900 uppercase block tracking-wider">Push Global Inbox Notification</span>
                 
                 <div className="grid grid-cols-2 gap-2">
-                  <input required type="text" value={notifTitleEn} onChange={e => setNotifTitleEn(e.target.value)} placeholder="Alert Title (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                  <input required type="text" value={notifTitleEn} onChange={e  => { setNotifTitleEn(e.target.value); setNotifTitleHi(e.target.value); }} placeholder="Alert Title (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                   <input required type="text" value={notifTitleHi} onChange={e => setNotifTitleHi(e.target.value)} placeholder="अलर्ट शीर्षक (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2">
-                  <textarea required value={notifBodyEn} onChange={e => setNotifBodyEn(e.target.value)} placeholder="Alert Description (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[40px] text-[11px]" />
+                  <textarea required value={notifBodyEn} onChange={e  => { setNotifBodyEn(e.target.value); setNotifBodyHi(e.target.value); }} placeholder="Alert Description (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[40px] text-[11px]" />
                   <textarea required value={notifBodyHi} onChange={e => setNotifBodyHi(e.target.value)} placeholder="अलर्ट विवरण (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[40px] text-[11px]" />
                 </div>
 
@@ -1755,17 +1755,17 @@ export default function AdminDashboard() {
                 <span className="text-[9px] font-black text-amber-800 uppercase block tracking-wider">Publish Citizen Success Story</span>
                 
                 <div className="grid grid-cols-2 gap-2">
-                  <input required type="text" value={testNameEn} onChange={e => setTestNameEn(e.target.value)} placeholder="Citizen Name (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                  <input required type="text" value={testNameEn} onChange={e  => { setTestNameEn(e.target.value); setTestNameHi(e.target.value); }} placeholder="Citizen Name (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                   <input required type="text" value={testNameHi} onChange={e => setTestNameHi(e.target.value)} placeholder="नागरिक का नाम (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="text" value={testVillageEn} onChange={e => setTestVillageEn(e.target.value)} placeholder="Village/Ward (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                  <input type="text" value={testVillageEn} onChange={e  => { setTestVillageEn(e.target.value); setTestVillageHi(e.target.value); }} placeholder="Village/Ward (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                   <input type="text" value={testVillageHi} onChange={e => setTestVillageHi(e.target.value)} placeholder="गाँव/वार्ड (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <textarea required value={testQuoteEn} onChange={e => setTestQuoteEn(e.target.value)} placeholder="Success Quote (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
+                  <textarea required value={testQuoteEn} onChange={e  => { setTestQuoteEn(e.target.value); setTestQuoteHi(e.target.value); }} placeholder="Success Quote (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
                   <textarea required value={testQuoteHi} onChange={e => setTestQuoteHi(e.target.value)} placeholder="सफलता की कहानी (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
                 </div>
 
@@ -1850,7 +1850,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="w-full col-span-2"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">About (EN)</label><JoditEditor value={aboutTextEn} config={joditConfig} onBlur={newContent => setAboutTextEn(newContent)} /></div>
+                  <div className="w-full col-span-2"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">About (Multi-Language)</label><JoditEditor value={aboutTextEn} config={joditConfig} onBlur={newContent  => { setAboutTextEn(newContent); setAboutTextHi(newContent); }} /></div>
                   <div className="w-full col-span-2"><label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">About (HI)</label><JoditEditor value={aboutTextHi} config={joditConfig} onBlur={newContent => setAboutTextHi(newContent)} /></div>
                 </div>
 
@@ -1862,12 +1862,12 @@ export default function AdminDashboard() {
                 <span className="text-[9px] font-black text-teal-900 uppercase block tracking-wider">Add Help & FAQ Question</span>
                 
                 <div className="grid grid-cols-2 gap-2">
-                  <input required type="text" value={faqQuestionEn} onChange={e => setFaqQuestionEn(e.target.value)} placeholder="Question (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                  <input required type="text" value={faqQuestionEn} onChange={e  => { setFaqQuestionEn(e.target.value); setFaqQuestionHi(e.target.value); }} placeholder="Question (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                   <input required type="text" value={faqQuestionHi} onChange={e => setFaqQuestionHi(e.target.value)} placeholder="प्रश्न (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <textarea required value={faqAnswerEn} onChange={e => setFaqAnswerEn(e.target.value)} placeholder="Answer (EN)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
+                  <textarea required value={faqAnswerEn} onChange={e  => { setFaqAnswerEn(e.target.value); setFaqAnswerHi(e.target.value); }} placeholder="Answer (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
                   <textarea required value={faqAnswerHi} onChange={e => setFaqAnswerHi(e.target.value)} placeholder="उत्तर (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
                 </div>
 

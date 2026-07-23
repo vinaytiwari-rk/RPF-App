@@ -210,10 +210,10 @@ export default function MainLayout() {
                 )}
               </div>
             <button 
-              className="w-8 h-8 rounded-full border border-[#D4AF37]/50 overflow-hidden shadow-sm transition hover:scale-105 active:scale-95 cursor-pointer bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-white text-xs font-black" 
+              className="w-8 h-8 rounded-full border border-[#D4AF37]/50 overflow-hidden shadow-sm transition hover:scale-105 active:scale-95 cursor-pointer bg-slate-100 flex items-center justify-center text-slate-500 text-xs font-black" 
               onClick={() => handleNav("/profile")}
             >
-              {language === "hi" ? "रा" : "RA"}
+              <User className="w-5 h-5 text-slate-400" />
             </button>
           </div>
         </div>
@@ -232,6 +232,7 @@ export default function MainLayout() {
         >
           
           <motion.button 
+            whileHover={{ scale: 1.15, y: -2 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => handleNav("/")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
@@ -244,6 +245,7 @@ export default function MainLayout() {
           </motion.button>
 
           <motion.button 
+            whileHover={{ scale: 1.15, y: -2 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => handleNav("/services")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
@@ -256,6 +258,7 @@ export default function MainLayout() {
           </motion.button>
 
           <motion.button 
+            whileHover={{ scale: 1.15, y: -2 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => handleNav("/community")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
@@ -268,6 +271,7 @@ export default function MainLayout() {
           </motion.button>
 
           <motion.button 
+              whileHover={{ scale: 1.15, y: -2 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => handleNav("/notifications")}
               className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
@@ -287,6 +291,7 @@ export default function MainLayout() {
             </motion.button>
 
           <motion.button 
+            whileHover={{ scale: 1.15, y: -2 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => handleNav("/profile")}
             className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
