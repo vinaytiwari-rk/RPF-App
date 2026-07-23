@@ -77363,10 +77363,30 @@ app.get("/api/search/external", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-app.get("/api/locations/pincode", (req, res) => {
+app.get("/api/locations/pincode", async (req, res) => {
   const pincode = req.query.p;
   if (!pincode || pincode.length !== 6) {
     return res.status(400).json({ success: false, error: "Invalid pincode" });
+  }
+  try {
+    const response = await import_axios.default.get("https://api.postalpincode.in/pincode/" + pincode, { timeout: 4e3 });
+    const data = response.data;
+    if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice) {
+      const office = data[0].PostOffice[0];
+      const areas = data[0].PostOffice.map((po) => po.Name);
+      const liveData = {
+        pincode,
+        state: office.State,
+        district: office.District,
+        city: office.Block && office.Block !== "NA" ? office.Block : office.District,
+        vidhan_sabha: office.District + " Assembly Constituency",
+        sansad_kshetra: office.District + " Lok Sabha constituency",
+        areas
+      };
+      return res.json({ success: true, data: liveData });
+    }
+  } catch (error) {
+    console.error("Live postal API query failed, falling back to mock:", error.message);
   }
   const mockData = {
     pincode,
