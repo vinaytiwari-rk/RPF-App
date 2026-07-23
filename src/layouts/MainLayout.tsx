@@ -182,10 +182,10 @@ export default function MainLayout() {
               <h1 className="font-display font-black text-[13px] text-[#000080] tracking-wide leading-none">
                 RP FOUNDATION
               </h1>
-              <span className="font-sans text-[9px] font-bold text-[#FF9933] mt-0.5 leading-none">
+              <span className="font-sans text-[9px] font-bold text-[#000080]/80 mt-0.5 leading-none">
                 Jan Seva Super App
               </span>
-              <span className="font-sans text-[8px] font-semibold text-[#138808] mt-0.5 leading-none tracking-wide">
+              <span className="font-sans text-[8px] font-semibold text-[#000080]/70 mt-0.5 leading-none tracking-wide">
                 सेवा • समर्पण • संकल्प
               </span>
             </div>
@@ -263,10 +263,10 @@ export default function MainLayout() {
             <motion.button 
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleNav("/donate")}
+              onClick={() => handleNav("/donations")}
               className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full p-4 shadow-xl flex items-center justify-center border-4 border-slate-50"
             >
-              <span className="text-xl animate-bounce drop-shadow-md">🙏</span>
+              <img src="/assets/donate.jpg" alt="Donate Now" className="w-12 h-12 rounded-full object-cover animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]" />
             </motion.button>
           </motion.div>
 

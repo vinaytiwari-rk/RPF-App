@@ -101,31 +101,6 @@ export default function Services() {
           SERVICE GRID VIEW
       ══════════════════════════════════════ */}
       <div className="flex-1 flex flex-col space-y-4 relative z-10">
-        {/* Global Search */}
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-          <input type="text"
-            placeholder={isHi ? "21 जन कल्याणकारी योजनाएं खोजें..." : "Search among 21 welfare services..."}
-            className="w-full bg-white border border-slate-200/80 rounded-2xl pl-10 pr-4 py-2.5 text-xs outline-none focus:border-[#000080] shadow-sm font-bold placeholder-slate-400"
-            value={search} onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
-        {/* Category chips */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1.5 scrollbar-none">
-          {categories.map((cat) => (
-            <button key={cat.id} onClick={() => setCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-full text-[9.5px] font-bold border transition whitespace-nowrap ${
-                category === cat.id
-                  ? "bg-[#000080] text-white border-[#000080] shadow-sm"
-                  : "bg-white text-slate-600 border-slate-200/80"
-              }`}
-            >
-              {isHi ? cat.hi : cat.en}
-            </button>
-          ))}
-        </div>
-
         {/* 21 service cards */}
         {isLoadingServices ? (
           <div className="py-12 flex justify-center items-center text-slate-400 text-xs font-bold">

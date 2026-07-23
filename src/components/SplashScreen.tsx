@@ -11,7 +11,7 @@ export default function SplashScreen() {
 
   return (
     <div 
-      className="fixed inset-0 bg-slate-50 flex flex-col items-center justify-center z-[100] transition-opacity duration-1000 ease-in-out"
+      className="fixed inset-0 bg-gradient-to-b from-[#FF9933] via-white to-[#138808] flex flex-col items-center justify-center z-[100] transition-opacity duration-1000 ease-in-out"
       style={{ opacity }}
     >
       {/* Decorative Tricolour top bar */}

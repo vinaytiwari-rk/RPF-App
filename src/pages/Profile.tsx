@@ -59,7 +59,7 @@ export default function Profile() {
         <p className="text-xs text-slate-500 mb-4">Please log in to view your profile.</p>
         <button 
           onClick={() => navigate("/")}
-          className="bg-[#000080] text-slate-800 px-4 py-2 rounded-lg text-xs font-bold"
+          className="bg-[#000080] text-[#000080] px-4 py-2 rounded-lg text-xs font-bold"
         >
           Go to Home
         </button>
@@ -97,7 +97,7 @@ export default function Profile() {
       className="flex flex-col h-full bg-slate-50 pb-24"
     >
       {/* Profile Hero section with Tricolour Gradient Header */}
-      <div className="bg-gradient-to-br from-[#FF9933] via-white to-[#138808] pt-8 pb-8 px-5 relative overflow-hidden shrink-0 text-slate-800 shadow-lg border-b border-slate-100 rounded-b-[2.5rem]">
+      <div className="bg-gradient-to-br from-[#FF9933] via-white to-[#138808] pt-8 pb-8 px-5 relative overflow-hidden shrink-0 text-[#000080] shadow-lg border-b border-slate-100 rounded-b-[2.5rem]">
         {/* Animated Background Ornaments */}
         <motion.div 
           animate={{ scale: [1, 1.1, 1], rotate: [0, 90, 0] }}
@@ -117,7 +117,7 @@ export default function Profile() {
               {user.avatar ? (
                 <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover rounded-full" />
               ) : (
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-slate-800 font-extrabold text-3xl shadow-md">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-[#000080] font-extrabold text-3xl shadow-md">
                   {initials}
                 </div>
               )}
@@ -139,21 +139,21 @@ export default function Profile() {
                   type="text" 
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-white shadow-sm border border-slate-200 border border-slate-200 rounded px-2 py-1 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#FF9933]"
+                  className="w-full bg-white shadow-sm border border-slate-200 border border-slate-200 rounded px-2 py-1 text-sm text-[#000080] placeholder-slate-400 focus:outline-none focus:border-[#FF9933]"
                   placeholder="Full Name"
                 />
                 <input 
                   type="text" 
                   value={editAvatar}
                   onChange={(e) => setEditAvatar(e.target.value)}
-                  className="w-full bg-white shadow-sm border border-slate-200 border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#FF9933]"
+                  className="w-full bg-white shadow-sm border border-slate-200 border border-slate-200 rounded px-2 py-1 text-xs text-[#000080] placeholder-slate-400 focus:outline-none focus:border-[#FF9933]"
                   placeholder="Avatar Image URL"
                 />
                 <div className="flex gap-2">
-                  <button onClick={handleSaveProfile} disabled={isSaving} className="bg-[#FF9933] text-slate-800 text-[10px] px-3 py-1 rounded font-bold flex items-center gap-1">
+                  <button onClick={handleSaveProfile} disabled={isSaving} className="bg-[#FF9933] text-[#000080] text-[10px] px-3 py-1 rounded font-bold flex items-center gap-1">
                     {isSaving ? "Saving..." : <><Save className="w-3 h-3" /> Save</>}
                   </button>
-                  <button onClick={() => setIsEditing(false)} className="bg-white shadow-sm border border-slate-200 text-slate-800 text-[10px] px-3 py-1 rounded font-bold">Cancel</button>
+                  <button onClick={() => setIsEditing(false)} className="bg-white shadow-sm border border-slate-200 text-[#000080] text-[10px] px-3 py-1 rounded font-bold">Cancel</button>
                 </div>
               </div>
             ) : (
@@ -162,7 +162,7 @@ export default function Profile() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-1.5 bg-white shadow-sm border border-slate-200 backdrop-blur-md border border-slate-100 py-1 px-3 rounded-full w-fit">
                     <span className="w-2 h-2 bg-[#138808] rounded-full animate-pulse shadow-[0_0_8px_rgba(19,136,8,0.8)]"></span>
-                    <span className="text-[10px] font-black tracking-widest uppercase text-slate-200">{roleLabel[user.role] || user.role}</span>
+                    <span className="text-[10px] font-black tracking-widest uppercase text-slate-700">{roleLabel[user.role] || user.role}</span>
                   </div>
                   {user.isVolunteer && user.volunteerData?.registration_number && (
                     <div className="flex items-center gap-1.5 bg-[#FF9933]/20 backdrop-blur-md border border-[#FF9933]/30 py-1 px-3 rounded-full w-fit">
@@ -171,7 +171,7 @@ export default function Profile() {
                     </div>
                   )}
                 </div>
-                {user.phone && <p className="text-xs text-slate-400 font-bold tracking-wide font-mono opacity-80">+91 {user.phone}</p>}
+                {user.phone && <p className="text-xs text-slate-600 font-bold tracking-wide font-mono opacity-80">+91 {user.phone}</p>}
               </>
             )}
           </div>
@@ -185,12 +185,12 @@ export default function Profile() {
             <span className="text-sm font-extrabold text-[#D4AF37]">
               {user.janSevaCardStatus === "approved" ? "Active" : user.janSevaCardStatus === "pending" ? "Pending" : "None"}
             </span>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Jan Seva</span>
+            <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">Jan Seva</span>
           </div>
           <div className="w-[1px] h-6 bg-white shadow-sm border border-slate-200 self-center"></div>
           <div className="flex flex-col">
             <span className="text-sm font-extrabold text-[#D4AF37]">{user.isVolunteer ? "Yes" : "No"}</span>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Volunteer</span>
+            <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">Volunteer</span>
           </div>
         </div>
       </div>
@@ -204,31 +204,31 @@ export default function Profile() {
             animate={{ y: 0, opacity: 1 }}
             className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden"
           >
-            <div className="bg-gradient-to-r from-emerald-500 to-emerald-700 px-4 py-3 flex items-center justify-between text-slate-800">
+            <div className="bg-gradient-to-r from-emerald-500 to-emerald-700 px-4 py-3 flex items-center justify-between text-[#000080]">
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-emerald-100" />
                 <span className="font-black text-xs uppercase tracking-wider">Volunteer Details</span>
               </div>
-              <span className="bg-white/20 text-slate-800 text-[9px] px-2 py-0.5 rounded-full font-bold border border-slate-200">
+              <span className="bg-white/20 text-[#000080] text-[9px] px-2 py-0.5 rounded-full font-bold border border-slate-200">
                 {user.volunteerData.approval_status?.toUpperCase() || "PENDING"}
               </span>
             </div>
             <div className="p-4 grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
               <div className="flex flex-col">
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Blood Group</span>
+                <span className="text-[9px] font-bold text-slate-600 uppercase">Blood Group</span>
                 <span className="font-extrabold text-amber-900 flex items-center gap-1 text-sm"><Heart className="w-3 h-3 text-red-500" /> {user.volunteerData.blood_group || "N/A"}</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-[9px] font-bold text-slate-400 uppercase">DOB</span>
+                <span className="text-[9px] font-bold text-slate-600 uppercase">DOB</span>
                 <span className="font-semibold text-slate-700">{user.volunteerData.dob ? new Date(user.volunteerData.dob).toLocaleDateString() : "N/A"}</span>
               </div>
               <div className="flex flex-col col-span-2">
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Address</span>
-                <span className="font-semibold text-slate-700 flex items-center gap-1"><MapPin className="w-3 h-3 text-slate-400" /> {user.volunteerData.city}, {user.volunteerData.state}</span>
+                <span className="text-[9px] font-bold text-slate-600 uppercase">Address</span>
+                <span className="font-semibold text-slate-700 flex items-center gap-1"><MapPin className="w-3 h-3 text-slate-600" /> {user.volunteerData.city}, {user.volunteerData.state}</span>
               </div>
               <div className="flex flex-col col-span-2">
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Father/Husband Name</span>
-                <span className="font-semibold text-slate-700 flex items-center gap-1"><User className="w-3 h-3 text-slate-400" /> {user.volunteerData.father_husband_name || "N/A"}</span>
+                <span className="text-[9px] font-bold text-slate-600 uppercase">Father/Husband Name</span>
+                <span className="font-semibold text-slate-700 flex items-center gap-1"><User className="w-3 h-3 text-slate-600" /> {user.volunteerData.father_husband_name || "N/A"}</span>
               </div>
             </div>
           </motion.div>
@@ -238,7 +238,7 @@ export default function Profile() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={() => navigate("/volunteer-dashboard")}
-            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-md transition"
+            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-[#000080] rounded-2xl p-4 flex items-center justify-between shadow-md transition"
           >
             <div className="flex items-center gap-3">
               <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
@@ -258,9 +258,9 @@ export default function Profile() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card bg-white text-slate-800 border-[#D4AF37]/35 overflow-hidden rounded-2xl border shadow-lg"
+            className="glass-card bg-white text-[#000080] border-[#D4AF37]/35 overflow-hidden rounded-2xl border shadow-lg"
           >
-            <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider bg-slate-900/50 border-b border-white/5 px-4 py-2.5">
+            <div className="text-[9px] font-black text-slate-600 uppercase tracking-wider bg-slate-900/50 border-b border-white/5 px-4 py-2.5">
               System Administration
             </div>
             <div 
@@ -272,11 +272,11 @@ export default function Profile() {
                   <Shield className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-800 drop-shadow-sm">Admin Command HQ</span>
+                  <span className="text-xs font-black uppercase tracking-wider text-[#000080] drop-shadow-sm">Admin Command HQ</span>
                   <span className="text-[10px] text-slate-350 mt-0.5">Control settings, approve cards, and resolve grievances</span>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-slate-400" />
+              <ChevronRight className="w-5 h-5 text-slate-600" />
             </div>
           </motion.div>
         )}
@@ -288,7 +288,7 @@ export default function Profile() {
           transition={{ delay: 0.1 }}
           className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
         >
-          <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100 px-4 py-2">
+          <div className="text-[9px] font-black text-slate-600 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100 px-4 py-2">
             Support & Info
           </div>
           
@@ -302,7 +302,7 @@ export default function Profile() {
               </div>
               <span className="text-xs font-bold text-amber-900">Help & FAQs</span>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
+            <ChevronRight className="w-4 h-4 text-slate-600" />
           </div>
 
 
@@ -317,9 +317,33 @@ export default function Profile() {
               </div>
               <span className="text-xs font-bold text-amber-900">About RP Foundation</span>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
+            <ChevronRight className="w-4 h-4 text-slate-600" />
           </div>
         </motion.div>
+
+        
+        {/* Support Panel (Helpline, website, email) */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3.5">
+          <h4 className="font-display font-extrabold text-xs text-[#000080] uppercase tracking-wider">
+            {isHi ? "सहायता एवं संपर्क" : "Help & Contact"}
+          </h4>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <span className="text-slate-500 font-bold">{isHi ? "टोल-फ्री हेल्पलाइन:" : "Toll-Free Helpline:"}</span>
+              <span className="font-extrabold text-amber-900 font-mono">{settings?.tollFree || "1800-569-0991"}</span>
+            </div>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <span className="text-slate-500 font-bold">{isHi ? "ईमेल समर्थन:" : "Email Support:"}</span>
+              <span className="font-extrabold text-amber-900">{settings?.email || "info@therpfoundation.org"}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500 font-bold">{isHi ? "आधिकारिक वेबसाइट:" : "Official Website:"}</span>
+              <a href={settings?.webUrl ? (settings.webUrl.startsWith("http") ? settings.webUrl : "https://" + settings.webUrl) : "https://therpfoundation.org"} target="_blank" rel="noreferrer" className="font-extrabold text-blue-600 hover:underline">
+                {settings?.webUrl || "therpfoundation.org"}
+              </a>
+            </div>
+          </div>
+        </div>
 
         {/* Sign Out Button */}
         <button 
@@ -335,7 +359,7 @@ export default function Profile() {
       {showFaqModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[80vh]">
-            <div className="bg-white px-4 py-3.5 flex items-center justify-between text-slate-800">
+            <div className="bg-white px-4 py-3.5 flex items-center justify-between text-[#000080]">
               <div className="flex items-center gap-1.5">
                 <HelpCircle className="w-4 h-4 text-orange-500" />
                 <span className="text-xs font-black uppercase tracking-wider">{language === "hi" ? "अक्सर पूछे जाने वाले प्रश्न" : "Frequently Asked Questions"}</span>
@@ -384,7 +408,7 @@ export default function Profile() {
       {showAboutModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 flex flex-col">
-            <div className="bg-white px-4 py-3.5 flex items-center justify-between text-slate-800">
+            <div className="bg-white px-4 py-3.5 flex items-center justify-between text-[#000080]">
               <div className="flex items-center gap-1.5">
                 <Info className="w-4 h-4 text-orange-500" />
                 <span className="text-xs font-black uppercase tracking-wider">{language === "hi" ? "आरपी फाउंडेशन के बारे में" : "About RP Foundation"}</span>
@@ -397,11 +421,11 @@ export default function Profile() {
               <div className="flex justify-center gap-4 mb-1">
                 <div className="flex flex-col items-center">
                   <img src={cmsConfig?.logoImgUrl || "/assets/logo.png"} alt="Logo" className="w-14 h-14 rounded-full border border-slate-200 object-cover shadow-sm bg-white p-0.5" />
-                  <span className="text-[7px] font-black uppercase text-slate-400 mt-1">Logo</span>
+                  <span className="text-[7px] font-black uppercase text-slate-600 mt-1">Logo</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <img src={cmsConfig?.founderImgUrl || "/assets/founder.png"} alt="Founder" className="w-14 h-14 rounded-full border border-slate-200 object-cover shadow-sm" />
-                  <span className="text-[7px] font-black uppercase text-slate-400 mt-1">Founder</span>
+                  <span className="text-[7px] font-black uppercase text-slate-600 mt-1">Founder</span>
                 </div>
               </div>
               <h4 className="font-extrabold text-amber-900 text-center leading-none">
