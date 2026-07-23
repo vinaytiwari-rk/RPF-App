@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Users, Bell, Activity, Globe, Search, MessageSquare, Bot, X, Send, Mic, Shield } from "lucide-react";
+import { ArrowLeft, User, Compass, Users, Bell, Activity, Globe, Search, MessageSquare, Bot, X, Send, Mic, Shield, Heart } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import AIAssistant from "../components/AIAssistant";
 import { useApp } from "../context/AppContext";
@@ -256,6 +256,19 @@ export default function MainLayout() {
             <GridIcon className="w-5 h-5 mt-0.5" />
             <span className="text-[9px] font-bold">{language === "hi" ? "सेवाएं" : "Services"}</span>
           </motion.button>
+
+          
+          {/* Central Donate Button */}
+          <motion.div className="relative -top-5">
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleNav("/donate")}
+              className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full p-4 shadow-xl flex items-center justify-center border-4 border-slate-50"
+            >
+              <Heart className="w-6 h-6 fill-white" />
+            </motion.button>
+          </motion.div>
 
           <motion.button 
             whileHover={{ scale: 1.15, y: -2 }}

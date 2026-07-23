@@ -55,11 +55,11 @@ export default function Profile() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 min-h-full pb-24">
-        <h2 className="font-display font-bold text-xl text-slate-800 mb-2">Not Logged In</h2>
+        <h2 className="font-display font-bold text-xl text-amber-900 mb-2">Not Logged In</h2>
         <p className="text-xs text-slate-500 mb-4">Please log in to view your profile.</p>
         <button 
           onClick={() => navigate("/")}
-          className="bg-[#000080] text-white px-4 py-2 rounded-lg text-xs font-bold"
+          className="bg-[#000080] text-slate-800 px-4 py-2 rounded-lg text-xs font-bold"
         >
           Go to Home
         </button>
@@ -97,7 +97,7 @@ export default function Profile() {
       className="flex flex-col h-full bg-slate-50 pb-24"
     >
       {/* Profile Hero section with Tricolour Gradient Header */}
-      <div className="bg-gradient-to-br from-[#0B1E3F] via-indigo-900 to-[#122A54] pt-8 pb-8 px-5 relative overflow-hidden shrink-0 text-white shadow-lg border-b border-white/10 rounded-b-[2.5rem]">
+      <div className="bg-gradient-to-br from-[#0B1E3F] via-indigo-900 to-[#122A54] pt-8 pb-8 px-5 relative overflow-hidden shrink-0 text-slate-800 shadow-lg border-b border-slate-100 rounded-b-[2.5rem]">
         {/* Animated Background Ornaments */}
         <motion.div 
           animate={{ scale: [1, 1.1, 1], rotate: [0, 90, 0] }}
@@ -113,11 +113,11 @@ export default function Profile() {
         <div className="flex items-center gap-5 relative z-10">
           {/* Avatar Ring & Floating Level */}
           <div className="relative group">
-            <div className="w-24 h-24 rounded-full border-[3px] border-[#D4AF37]/50 p-1 bg-white/10 backdrop-blur-md flex items-center justify-center overflow-hidden">
+            <div className="w-24 h-24 rounded-full border-[3px] border-[#D4AF37]/50 p-1 bg-white shadow-sm border border-slate-200 backdrop-blur-md flex items-center justify-center overflow-hidden">
               {user.avatar ? (
                 <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover rounded-full" />
               ) : (
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-white font-extrabold text-3xl shadow-md">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-slate-800 font-extrabold text-3xl shadow-md">
                   {initials}
                 </div>
               )}
@@ -139,28 +139,28 @@ export default function Profile() {
                   type="text" 
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-sm text-white placeholder-white/50 focus:outline-none focus:border-[#FF9933]"
+                  className="w-full bg-white shadow-sm border border-slate-200 border border-slate-200 rounded px-2 py-1 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#FF9933]"
                   placeholder="Full Name"
                 />
                 <input 
                   type="text" 
                   value={editAvatar}
                   onChange={(e) => setEditAvatar(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded px-2 py-1 text-xs text-white placeholder-white/50 focus:outline-none focus:border-[#FF9933]"
+                  className="w-full bg-white shadow-sm border border-slate-200 border border-slate-200 rounded px-2 py-1 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#FF9933]"
                   placeholder="Avatar Image URL"
                 />
                 <div className="flex gap-2">
-                  <button onClick={handleSaveProfile} disabled={isSaving} className="bg-[#FF9933] text-white text-[10px] px-3 py-1 rounded font-bold flex items-center gap-1">
+                  <button onClick={handleSaveProfile} disabled={isSaving} className="bg-[#FF9933] text-slate-800 text-[10px] px-3 py-1 rounded font-bold flex items-center gap-1">
                     {isSaving ? "Saving..." : <><Save className="w-3 h-3" /> Save</>}
                   </button>
-                  <button onClick={() => setIsEditing(false)} className="bg-white/10 text-white text-[10px] px-3 py-1 rounded font-bold">Cancel</button>
+                  <button onClick={() => setIsEditing(false)} className="bg-white shadow-sm border border-slate-200 text-slate-800 text-[10px] px-3 py-1 rounded font-bold">Cancel</button>
                 </div>
               </div>
             ) : (
               <>
                 <h2 className="font-display font-extrabold text-2xl tracking-tight leading-tight drop-shadow-sm">{user.name}</h2>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 py-1 px-3 rounded-full w-fit">
+                  <div className="flex items-center gap-1.5 bg-white shadow-sm border border-slate-200 backdrop-blur-md border border-slate-100 py-1 px-3 rounded-full w-fit">
                     <span className="w-2 h-2 bg-[#138808] rounded-full animate-pulse shadow-[0_0_8px_rgba(19,136,8,0.8)]"></span>
                     <span className="text-[10px] font-black tracking-widest uppercase text-slate-200">{roleLabel[user.role] || user.role}</span>
                   </div>
@@ -171,14 +171,14 @@ export default function Profile() {
                     </div>
                   )}
                 </div>
-                {user.phone && <p className="text-xs text-slate-300 font-bold tracking-wide font-mono opacity-80">+91 {user.phone}</p>}
+                {user.phone && <p className="text-xs text-slate-400 font-bold tracking-wide font-mono opacity-80">+91 {user.phone}</p>}
               </>
             )}
           </div>
         </div>
 
         {/* Stats Strip */}
-        <div className="grid grid-cols-4 gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 mt-5 text-center shadow-inner">
+        <div className="grid grid-cols-4 gap-2 bg-white/5 backdrop-blur-md border border-slate-100 rounded-xl p-3 mt-5 text-center shadow-inner">
           
           
           <div className="flex flex-col">
@@ -187,7 +187,7 @@ export default function Profile() {
             </span>
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Jan Seva</span>
           </div>
-          <div className="w-[1px] h-6 bg-white/10 self-center"></div>
+          <div className="w-[1px] h-6 bg-white shadow-sm border border-slate-200 self-center"></div>
           <div className="flex flex-col">
             <span className="text-sm font-extrabold text-[#D4AF37]">{user.isVolunteer ? "Yes" : "No"}</span>
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Volunteer</span>
@@ -204,19 +204,19 @@ export default function Profile() {
             animate={{ y: 0, opacity: 1 }}
             className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden"
           >
-            <div className="bg-gradient-to-r from-emerald-500 to-emerald-700 px-4 py-3 flex items-center justify-between text-white">
+            <div className="bg-gradient-to-r from-emerald-500 to-emerald-700 px-4 py-3 flex items-center justify-between text-slate-800">
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-emerald-100" />
                 <span className="font-black text-xs uppercase tracking-wider">Volunteer Details</span>
               </div>
-              <span className="bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-bold border border-white/20">
+              <span className="bg-white/20 text-slate-800 text-[9px] px-2 py-0.5 rounded-full font-bold border border-slate-200">
                 {user.volunteerData.approval_status?.toUpperCase() || "PENDING"}
               </span>
             </div>
             <div className="p-4 grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
               <div className="flex flex-col">
                 <span className="text-[9px] font-bold text-slate-400 uppercase">Blood Group</span>
-                <span className="font-extrabold text-slate-800 flex items-center gap-1 text-sm"><Heart className="w-3 h-3 text-red-500" /> {user.volunteerData.blood_group || "N/A"}</span>
+                <span className="font-extrabold text-amber-900 flex items-center gap-1 text-sm"><Heart className="w-3 h-3 text-red-500" /> {user.volunteerData.blood_group || "N/A"}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-[9px] font-bold text-slate-400 uppercase">DOB</span>
@@ -238,7 +238,7 @@ export default function Profile() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={() => navigate("/volunteer-dashboard")}
-            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-2xl p-4 flex items-center justify-between shadow-md transition"
+            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-md transition"
           >
             <div className="flex items-center gap-3">
               <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
@@ -258,9 +258,9 @@ export default function Profile() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card bg-slate-800 text-white border-[#D4AF37]/35 overflow-hidden rounded-2xl border shadow-lg"
+            className="glass-card bg-white text-slate-800 border-[#D4AF37]/35 overflow-hidden rounded-2xl border shadow-lg"
           >
-            <div className="text-[9px] font-black text-slate-300 uppercase tracking-wider bg-slate-900/50 border-b border-white/5 px-4 py-2.5">
+            <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider bg-slate-900/50 border-b border-white/5 px-4 py-2.5">
               System Administration
             </div>
             <div 
@@ -272,7 +272,7 @@ export default function Profile() {
                   <Shield className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-black uppercase tracking-wider text-white drop-shadow-sm">Admin Command HQ</span>
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-800 drop-shadow-sm">Admin Command HQ</span>
                   <span className="text-[10px] text-slate-350 mt-0.5">Control settings, approve cards, and resolve grievances</span>
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function Profile() {
               <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
                 <HelpCircle className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-slate-800">Help & FAQs</span>
+              <span className="text-xs font-bold text-amber-900">Help & FAQs</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </div>
@@ -315,7 +315,7 @@ export default function Profile() {
               <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
                 <Info className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-slate-800">About RP Foundation</span>
+              <span className="text-xs font-bold text-amber-900">About RP Foundation</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </div>
@@ -335,12 +335,12 @@ export default function Profile() {
       {showFaqModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[80vh]">
-            <div className="bg-slate-800 px-4 py-3.5 flex items-center justify-between text-white">
+            <div className="bg-white px-4 py-3.5 flex items-center justify-between text-slate-800">
               <div className="flex items-center gap-1.5">
                 <HelpCircle className="w-4 h-4 text-orange-500" />
                 <span className="text-xs font-black uppercase tracking-wider">{language === "hi" ? "अक्सर पूछे जाने वाले प्रश्न" : "Frequently Asked Questions"}</span>
               </div>
-              <button onClick={() => setShowFaqModal(false)} className="w-7 h-7 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
+              <button onClick={() => setShowFaqModal(false)} className="w-7 h-7 bg-white shadow-sm border border-slate-200 hover:bg-white/20 rounded-full flex items-center justify-center transition">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -369,7 +369,7 @@ export default function Profile() {
                 }
               ]).map((faq) => (
                 <div key={faq.id} className="space-y-1 border-b border-slate-100 pb-2.5 last:border-0 last:pb-0">
-                  <h5 className="font-extrabold text-slate-800">Q: {language === "hi" ? faq.questionHi : faq.questionEn}</h5>
+                  <h5 className="font-extrabold text-amber-900">Q: {language === "hi" ? faq.questionHi : faq.questionEn}</h5>
                   <p className="text-slate-500 font-semibold leading-relaxed">
                     {language === "hi" ? faq.answerHi : faq.answerEn}
                   </p>
@@ -384,12 +384,12 @@ export default function Profile() {
       {showAboutModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 flex flex-col">
-            <div className="bg-slate-800 px-4 py-3.5 flex items-center justify-between text-white">
+            <div className="bg-white px-4 py-3.5 flex items-center justify-between text-slate-800">
               <div className="flex items-center gap-1.5">
                 <Info className="w-4 h-4 text-orange-500" />
                 <span className="text-xs font-black uppercase tracking-wider">{language === "hi" ? "आरपी फाउंडेशन के बारे में" : "About RP Foundation"}</span>
               </div>
-              <button onClick={() => setShowAboutModal(false)} className="w-7 h-7 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
+              <button onClick={() => setShowAboutModal(false)} className="w-7 h-7 bg-white shadow-sm border border-slate-200 hover:bg-white/20 rounded-full flex items-center justify-center transition">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -404,7 +404,7 @@ export default function Profile() {
                   <span className="text-[7px] font-black uppercase text-slate-400 mt-1">Founder</span>
                 </div>
               </div>
-              <h4 className="font-extrabold text-slate-800 text-center leading-none">
+              <h4 className="font-extrabold text-amber-900 text-center leading-none">
                 {cmsConfig?.founderName || "Rohit Pandit"}
               </h4>
               <p className="text-[9.5px] font-black text-orange-500 text-center uppercase tracking-widest leading-none mt-1">
@@ -416,9 +416,9 @@ export default function Profile() {
                   : (cmsConfig?.aboutTextEn || "RP Foundation is a non-profit organization dedicated to grassroot community upliftment, educational scholarships, emergency healthcare support, and smart governance solutions.")}
               </p>
               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150 text-[10px] font-bold text-slate-650 flex flex-col gap-1">
-                <span className="flex justify-between"><span>Toll Free Helpline:</span><span className="font-mono text-slate-800">{settings?.tollFree || "1800-569-0991"}</span></span>
-                <span className="flex justify-between"><span>Email Support:</span><span className="text-slate-800">{settings?.email || "info@therpfoundation.org"}</span></span>
-                <span className="flex justify-between"><span>Official Web:</span><span className="text-slate-800">{settings?.webUrl || "therpfoundation.org"}</span></span>
+                <span className="flex justify-between"><span>Toll Free Helpline:</span><span className="font-mono text-amber-900">{settings?.tollFree || "1800-569-0991"}</span></span>
+                <span className="flex justify-between"><span>Email Support:</span><span className="text-amber-900">{settings?.email || "info@therpfoundation.org"}</span></span>
+                <span className="flex justify-between"><span>Official Web:</span><span className="text-amber-900">{settings?.webUrl || "therpfoundation.org"}</span></span>
               </div>
             </div>
           </div>

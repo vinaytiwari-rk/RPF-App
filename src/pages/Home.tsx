@@ -145,16 +145,7 @@ export default function Home() {
                     {lang === "hi" ? slides[activeSlide]?.subHi : slides[activeSlide]?.subEn}
                   </p>
                 
-      {/* Floating Animated Donate Button */}
-      <motion.button 
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => navigate("/donate")}
-        className="fixed bottom-24 right-5 z-40 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full px-5 py-3 shadow-2xl flex items-center gap-2 animate-bounce border-2 border-white/20 backdrop-blur-md"
-      >
-        <Heart className="w-5 h-5 fill-white" />
-        <span className="font-black text-sm uppercase tracking-wider drop-shadow-md">Donate Now</span>
-      </motion.button>
+      
 
     </motion.div>
               </AnimatePresence>
@@ -230,16 +221,7 @@ export default function Home() {
           </div>
         </div>
       
-      {/* Floating Animated Donate Button */}
-      <motion.button 
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => navigate("/donate")}
-        className="fixed bottom-24 right-5 z-40 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full px-5 py-3 shadow-2xl flex items-center gap-2 animate-bounce border-2 border-white/20 backdrop-blur-md"
-      >
-        <Heart className="w-5 h-5 fill-white" />
-        <span className="font-black text-sm uppercase tracking-wider drop-shadow-md">Donate Now</span>
-      </motion.button>
+      
 
     </motion.div>
 
@@ -412,16 +394,7 @@ export default function Home() {
           </div>
         </div>
       
-      {/* Floating Animated Donate Button */}
-      <motion.button 
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => navigate("/donate")}
-        className="fixed bottom-24 right-5 z-40 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full px-5 py-3 shadow-2xl flex items-center gap-2 animate-bounce border-2 border-white/20 backdrop-blur-md"
-      >
-        <Heart className="w-5 h-5 fill-white" />
-        <span className="font-black text-sm uppercase tracking-wider drop-shadow-md">Donate Now</span>
-      </motion.button>
+      
 
     </motion.div>
       

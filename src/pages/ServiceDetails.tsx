@@ -24,7 +24,7 @@ export default function ServiceDetails() {
 
     const fetchContent = async () => {
       setIsLoadingContent(true);
-      setError(null);
+      setContentData(null);
       try {
         const res = await fetch(`/api/public/services/${id}/content`);
         if (res.ok) {
@@ -36,11 +36,11 @@ export default function ServiceDetails() {
             setContentData(null);
           }
         } else {
-          setError(isHi ? "सामग्री लोड करने में विफल।" : "Failed to load content.");
+          setContentData(null);
         }
       } catch (err) {
         console.error("Error fetching service content:", err);
-        setError(isHi ? "नेटवर्क त्रुटि।" : "Network error.");
+        setContentData(null);
       } finally {
         setIsLoadingContent(false);
       }
