@@ -97,7 +97,7 @@ export default function Profile() {
       className="flex flex-col h-full bg-slate-50 pb-24"
     >
       {/* Profile Hero section with Tricolour Gradient Header */}
-      <div className="bg-gradient-to-br from-[#0B1E3F] via-indigo-900 to-[#122A54] pt-8 pb-8 px-5 relative overflow-hidden shrink-0 text-slate-800 shadow-lg border-b border-slate-100 rounded-b-[2.5rem]">
+      <div className="bg-gradient-to-br from-[#FF9933] via-white to-[#138808] pt-8 pb-8 px-5 relative overflow-hidden shrink-0 text-slate-800 shadow-lg border-b border-slate-100 rounded-b-[2.5rem]">
         {/* Animated Background Ornaments */}
         <motion.div 
           animate={{ scale: [1, 1.1, 1], rotate: [0, 90, 0] }}

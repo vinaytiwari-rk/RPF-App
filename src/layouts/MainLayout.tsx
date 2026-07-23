@@ -266,7 +266,7 @@ export default function MainLayout() {
               onClick={() => handleNav("/donate")}
               className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full p-4 shadow-xl flex items-center justify-center border-4 border-slate-50"
             >
-              <Heart className="w-6 h-6 fill-white" />
+              <span className="text-xl animate-bounce drop-shadow-md">🙏</span>
             </motion.button>
           </motion.div>
 
@@ -322,10 +322,10 @@ export default function MainLayout() {
         {!isAiOpen && (
           <button 
             onClick={() => setIsAiOpen(true)}
-            className="absolute bottom-20 right-4 z-40 bg-gradient-to-tr from-[#FF9933] to-[#FF5722] hover:from-[#FF7700] hover:to-[#FF5722] text-white p-3 rounded-full shadow-2xl flex items-center justify-center transition hover:scale-105 active:scale-95 cursor-pointer border border-white/20 animate-bounce"
+            className="absolute bottom-20 right-4 z-40 bg-white p-1 rounded-full shadow-2xl flex items-center justify-center transition hover:scale-105 active:scale-95 cursor-pointer border border-white/20 animate-bounce"
             style={{ boxShadow: '0 8px 30px rgba(255, 153, 51, 0.4)' }}
           >
-            <Bot className="w-6 h-6 text-white" />
+            <img src="/assets/chatbot.jpg" alt="AI Chatbot" className="w-10 h-10 rounded-full object-cover" />
             <span className="absolute -top-1 -right-1 flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-450 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>

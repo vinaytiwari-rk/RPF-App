@@ -78,7 +78,7 @@ export default function Home() {
 
   const activeActions = (servicesList || []).filter((action) => {
     return settings?.servicesStatus?.[action.id] !== false;
-  });
+  }).filter((action) => action.id !== "donations" && action.id !== "donate");
 
   const quickActions = activeActions.slice(0, 10);
 
@@ -275,17 +275,7 @@ export default function Home() {
           })}
         </div>
 
-        {/* Dedicated Donate Button */}
-        <div className="mt-3">
-          <button 
-            onClick={() => navigate("/donations")}
-            className="w-full bg-gradient-to-r from-red-500 via-rose-500 to-red-600 text-white font-extrabold text-sm py-3 rounded-2xl shadow-[0_4px_20px_rgba(225,29,72,0.4)] flex items-center justify-center gap-2 hover:shadow-[0_4px_25px_rgba(225,29,72,0.6)] transition active:scale-[0.98]"
-          >
-            <LucideIcons.Heart className="w-5 h-5 fill-white/20 animate-pulse" />
-            {lang === "hi" ? ".'? -?" : "Donate Now"}
-          </button>
         </div>
-      </div>
 
       {/* 5. Latest Campaigns Section (Matches Screenshot 5 Latest Campaigns 3 vertical cards) */}
       <div className="px-4 relative z-10">

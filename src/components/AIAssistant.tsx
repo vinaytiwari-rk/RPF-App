@@ -388,13 +388,13 @@ export default function AIAssistant({
           <div>
             <h3 className="font-bold text-sm leading-tight">RP AI मित्र (Mitr)</h3>
             <p className="text-[10px] text-teal-100">
-              {isHi ? "AI जन सेवा सहायक • Google Search बैकअप" : "AI Jan Seva Assistant • Google Search Backup"}
+              {isHi ? "AI जन सेवा सहायक" : "AI Jan Seva Assistant"}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-1 bg-white/10 text-[9px] px-2 py-1 rounded-full">
           <Sparkles className="w-3 h-3" />
-          <span>Gemini + Search</span>
+          <span></span>
         </div>
       </div>
 
