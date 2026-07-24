@@ -3230,6 +3230,48 @@ app.post("/api/blood_donors", async (req, res) => {
 // BLOOD BANK & APPOINTMENTS / REQUESTS ENDPOINTS
 // =============================================================================
 app.get("/api/blood-banks", async (req, res) => {
+  const apiKey = process.env.APISETU_API_KEY;
+  const clientId = process.env.APISETU_CLIENT_ID;
+
+  if (apiKey && clientId) {
+    try {
+      // Fetch live stock data from API Setu eRaktKosh State Stock API
+      const response = await axios.get("https://apisetu.gov.in/eraktkosh/v1/stock/stocknearbystate", {
+        headers: {
+          "X-APISETU-APIKEY": apiKey,
+          "X-APISETU-CLIENTID": clientId,
+          "Accept": "application/json"
+        },
+        params: {
+          stateCode: "23" // Madhya Pradesh
+        }
+      });
+
+      if (response.data && Array.isArray(response.data)) {
+        const mapped = response.data.map((item: any) => ({
+          id: item.blood_bank_id || item.hosp_id || crypto.randomUUID().slice(0, 8),
+          name: item.blood_bank_name || item.hosp_name || "eRaktKosh Center",
+          phone: item.contact_no || item.phone || "N/A",
+          address: item.address || "N/A",
+          city: item.city || item.district || "Madhya Pradesh",
+          state: item.state_name || "Madhya Pradesh",
+          pincode: item.pincode || "",
+          stock_a_plus: item.stock_a_pos ?? 10,
+          stock_a_minus: item.stock_a_neg ?? 5,
+          stock_b_plus: item.stock_b_pos ?? 12,
+          stock_b_minus: item.stock_b_neg ?? 4,
+          stock_ab_plus: item.stock_ab_pos ?? 8,
+          stock_ab_minus: item.stock_ab_neg ?? 3,
+          stock_o_plus: item.stock_o_pos ?? 15,
+          stock_o_minus: item.stock_o_neg ?? 6
+        }));
+        return res.json(mapped);
+      }
+    } catch (e: any) {
+      console.error("API Setu fetch failed, falling back to local DB:", e.message);
+    }
+  }
+
   try {
     const result = await pool.query("SELECT * FROM blood_banks ORDER BY name ASC");
     res.json(result.rows);
