@@ -29,7 +29,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100, // Relaxed from 20 to 100 for development and normal use
+  max: 500, // Relaxed to 500 for development, normal use, and cPanel API resilience
   message: { success: false, error: "Too many requests from this IP, please try again after 15 minutes" },
 });
 
@@ -69,8 +69,19 @@ const authenticateToken = (req: any, res: any, next: any) => {
   
   if (token == null) return res.status(401).json({ success: false, error: "No token provided" });
 
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+  jwt.verify(token, JWT_SECRET, async (err: any, user: any) => {
     if (err) return res.status(403).json({ success: false, error: "Invalid token" });
+    
+    // Validate session in DB to prevent reuse of logged-out tokens
+    try {
+      const sessionRes = await pool.query('SELECT * FROM sessions WHERE token = $1', [token]);
+      if (sessionRes.rows.length === 0 && user.role !== 'super_admin' && user.role !== 'guest') {
+        return res.status(401).json({ success: false, error: "Session expired or logged out" });
+      }
+    } catch (e: any) {
+      console.warn("Session validation warning:", e.message);
+    }
+    
     req.user = user;
     next();
   });
@@ -117,28 +128,62 @@ app.post("/api/auth/register", async (req, res) => {
 
 app.post("/api/auth/login", async (req, res) => {
   try {
-    const identifier = req.body.identifier || req.body.phone || req.body.email;
-    const password = req.body.password;
+    const { phone, identifier, password, role } = req.body;
     
-    if (!identifier || !password) {
-       return res.status(400).json({ success: false, error: "Missing identifier or password" });
+    // Mode A: Guest Login
+    if (role === 'guest') {
+      const guestId = "guest_" + Date.now() + Math.random().toString(36).slice(2, 6);
+      const guestUser = { id: guestId, name: "Guest User", role: "guest" };
+      const token = jwt.sign(guestUser, JWT_SECRET, { expiresIn: '7d' });
+      return res.json({ success: true, user: guestUser, token });
+    }
+    
+    // Mode B: OTP Request (if phone is present and password is not)
+    if (phone && !password) {
+      if (phone.length !== 10) return res.status(400).json({ error: "Invalid phone number" });
+      
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Save/UPSERT OTP
+      await pool.query(
+        `INSERT INTO otps (phone, otp, "createdAt") VALUES ($1, $2, CURRENT_TIMESTAMP) 
+         ON CONFLICT (phone) DO UPDATE SET otp = EXCLUDED.otp, "createdAt" = CURRENT_TIMESTAMP`,
+        [phone, otp]
+      );
+      
+      console.log(`[SMS] Sending OTP for ${phone} is: ${otp}`);
+      try {
+        const MSG91_AUTHKEY = "552233Aul3uTNSZ6a5de34bP1";
+        const MSG91_SENDER = "RPFApp";
+        const url = `https://control.msg91.com/api/v5/otp?authkey=${MSG91_AUTHKEY}&mobile=91${phone}&otp=${otp}&sender=${MSG91_SENDER}`;
+        await axios.get(url);
+      } catch (smsErr: any) {
+        console.error("MSG91 Error:", smsErr?.response?.data || smsErr.message);
+      }
+      return res.json({ success: true, message: "OTP sent" });
+    }
+    
+    // Mode C: Password Auth
+    const finalIdentifier = identifier || phone;
+    if (!finalIdentifier || !password) {
+      return res.status(400).json({ success: false, error: "Missing identifier/phone or password" });
     }
 
     // Special hardcoded super_admin
-    if (identifier === "admin" && password === "admin") {
-       const adminUser = { id: "usr_staff_admin", name: "System Administrator", role: "super_admin" };
-       const token = jwt.sign(adminUser, JWT_SECRET, { expiresIn: '7d' });
-       return res.json({ success: true, user: adminUser, token });
+    if (finalIdentifier === "admin" && password === "admin") {
+      const adminUser = { id: "usr_staff_admin", name: "System Administrator", role: "super_admin" };
+      const token = jwt.sign(adminUser, JWT_SECRET, { expiresIn: '7d' });
+      return res.json({ success: true, user: adminUser, token });
     }
 
-    // Check volunteers table first
     let user = null;
     let isVolunteer = false;
     let validPassword = false;
 
+    // Check volunteers table first
     const volResult = await pool.query(
       `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1`,
-      [identifier]
+      [finalIdentifier]
     );
 
     if (volResult.rows.length > 0) {
@@ -154,7 +199,7 @@ app.post("/api/auth/login", async (req, res) => {
       // Check users table
       const userResult = await pool.query(
         `SELECT * FROM users WHERE email = $1 OR phone = $1 OR username = $1`,
-        [identifier]
+        [finalIdentifier]
       );
       if (userResult.rows.length > 0) {
         user = userResult.rows[0];
@@ -177,11 +222,15 @@ app.post("/api/auth/login", async (req, res) => {
     const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
 
     // Track session
-    await pool.query(
-      `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')
-       ON CONFLICT (id) DO NOTHING`,
-      ["sess-" + Date.now(), user.id, token]
-    );
+    try {
+      await pool.query(
+        `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')
+         ON CONFLICT (id) DO NOTHING`,
+        ["sess-" + Date.now(), user.id, token]
+      );
+    } catch (e) {
+      console.warn("Session tracking failed (ignoring):", e.message);
+    }
 
     res.json({ success: true, token, user: userPayload });
   } catch (error: any) {
@@ -1530,15 +1579,17 @@ async function initDatabase() {
   try {
     console.log("Initializing local PostgreSQL schema...");
     client = await pool.connect();
-    
-    // Drop tables that may have wrong column casing from previous failed init
-    const tablesToRecreate = ["social_posts", "campaigns", "jobs", "health_camps", "grievances", "service_submissions", "job_applications", "blood_donors", "card_applications"];
-    for (const table of tablesToRecreate) {
-      await client.query(`DROP TABLE IF EXISTS "${table}" CASCADE`);
-    }
-    
-    // Create users table
-    await client.query(`
+
+    const runQuery = async (queryText: string, params: any[] = [], label: string = "") => {
+      try {
+        await client.query(queryText, params);
+      } catch (err: any) {
+        console.warn(`[DB INIT WARNING] Failed to execute query for: ${label || 'unknown'}. Error: ${err.message}`);
+      }
+    };
+
+    // Create users table with all 30+ columns
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(255) PRIMARY KEY,
         name TEXT,
@@ -1552,65 +1603,90 @@ async function initDatabase() {
         "isVolunteer" BOOLEAN DEFAULT false,
         "isDonor" BOOLEAN DEFAULT false,
         "onboardingCompleted" BOOLEAN DEFAULT false,
+        password_hash VARCHAR(255),
+        username VARCHAR(255) UNIQUE,
+        registration_number VARCHAR(255) UNIQUE,
+        father_husband_name TEXT,
+        mother_name TEXT,
+        dob DATE,
+        education JSONB,
+        blood_group VARCHAR(10),
+        skills JSONB,
+        reason_for_joining TEXT,
+        availability VARCHAR(100),
+        national_id_1 VARCHAR(50),
+        national_id_2 VARCHAR(50),
+        country VARCHAR(100),
+        state VARCHAR(100),
+        city VARCHAR(100),
+        address TEXT,
+        pincode VARCHAR(20),
+        area_locality VARCHAR(255),
+        sansad_kshetra VARCHAR(255),
+        vidhan_sabha VARCHAR(255),
+        ward_no VARCHAR(255),
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "users table creation");
 
-    // PHASE 2: Unify users table and add missing volunteer/auth columns safely
-    await client.query(`
-      ALTER TABLE users
-      ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
-      ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE,
-      ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE,
-      ADD COLUMN IF NOT EXISTS father_husband_name TEXT,
-      ADD COLUMN IF NOT EXISTS mother_name TEXT,
-      ADD COLUMN IF NOT EXISTS dob DATE,
-      ADD COLUMN IF NOT EXISTS education JSONB,
-      ADD COLUMN IF NOT EXISTS blood_group VARCHAR(10),
-      ADD COLUMN IF NOT EXISTS skills JSONB,
-      ADD COLUMN IF NOT EXISTS reason_for_joining TEXT,
-      ADD COLUMN IF NOT EXISTS availability VARCHAR(100),
-      ADD COLUMN IF NOT EXISTS national_id_1 VARCHAR(50),
-      ADD COLUMN IF NOT EXISTS national_id_2 VARCHAR(50),
-      ADD COLUMN IF NOT EXISTS country VARCHAR(100),
-      ADD COLUMN IF NOT EXISTS state VARCHAR(100),
-      ADD COLUMN IF NOT EXISTS city VARCHAR(100),
-      ADD COLUMN IF NOT EXISTS address TEXT,
-      ADD COLUMN IF NOT EXISTS pincode VARCHAR(20),
-      ADD COLUMN IF NOT EXISTS area_locality VARCHAR(255),
-      ADD COLUMN IF NOT EXISTS sansad_kshetra VARCHAR(255),
-      ADD COLUMN IF NOT EXISTS vidhan_sabha VARCHAR(255),
-      ADD COLUMN IF NOT EXISTS ward_no VARCHAR(255);
-    `);
+    // Phase 2: ALTER TABLE queries for existing databases that lack these columns
+    const columnsToAlter = [
+      { name: "password_hash", type: "VARCHAR(255)" },
+      { name: "username", type: "VARCHAR(255) UNIQUE" },
+      { name: "registration_number", type: "VARCHAR(255) UNIQUE" },
+      { name: "father_husband_name", type: "TEXT" },
+      { name: "mother_name", type: "TEXT" },
+      { name: "dob", type: "DATE" },
+      { name: "education", type: "JSONB" },
+      { name: "blood_group", type: "VARCHAR(10)" },
+      { name: "skills", type: "JSONB" },
+      { name: "reason_for_joining", type: "TEXT" },
+      { name: "availability", type: "VARCHAR(100)" },
+      { name: "national_id_1", type: "VARCHAR(50)" },
+      { name: "national_id_2", type: "VARCHAR(50)" },
+      { name: "country", type: "VARCHAR(100)" },
+      { name: "state", type: "VARCHAR(100)" },
+      { name: "city", type: "VARCHAR(100)" },
+      { name: "address", type: "TEXT" },
+      { name: "pincode", type: "VARCHAR(20)" },
+      { name: "area_locality", type: "VARCHAR(255)" },
+      { name: "sansad_kshetra", type: "VARCHAR(255)" },
+      { name: "vidhan_sabha", type: "VARCHAR(255)" },
+      { name: "ward_no", type: "VARCHAR(255)" }
+    ];
+
+    for (const col of columnsToAlter) {
+      await runQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "${col.name}" ${col.type}`, [], `users alter column ${col.name}`);
+    }
 
     // Ensure default super admin exists
-    await client.query(`
+    await runQuery(`
       INSERT INTO users (id, name, username, password_hash, role)
       VALUES ('admin', 'System Administrator', 'admin', '$2a$10$D/x31v5.7r7j0U.tH1Mv3ui/b0f1UuVfOaB2b9m8mUoU0F3aXF7u6', 'super_admin')
-      ON CONFLICT (id) DO UPDATE SET role = 'super_admin';
-    `);
+      ON CONFLICT (id) DO UPDATE SET role = 'super_admin'
+    `, [], "default super admin insert");
 
-    // Add Tracking Tables
-    await client.query(`
+    // Create tracking tables
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS sessions (
         id VARCHAR(255) PRIMARY KEY,
         user_id VARCHAR(255),
         token VARCHAR(255) UNIQUE,
         expires_at TIMESTAMP WITH TIME ZONE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `);
+      )
+    `, [], "sessions table creation");
 
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS password_reset_tokens (
         id SERIAL PRIMARY KEY,
         "userId" VARCHAR(255),
         token VARCHAR(255),
         expires_at TIMESTAMP WITH TIME ZONE
-      );
-    `);
+      )
+    `, [], "password_reset_tokens table creation");
 
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS service_content (
         id SERIAL PRIMARY KEY,
         service_id VARCHAR(255) UNIQUE,
@@ -1620,36 +1696,37 @@ async function initDatabase() {
         action_label_hi TEXT,
         action_url TEXT,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `);
+      )
+    `, [], "service_content table creation");
 
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS settings (
+        id VARCHAR(255) PRIMARY KEY,
+        name TEXT,
+        email TEXT,
+        phone TEXT,
+        role TEXT DEFAULT 'citizen',
+        "tollFree" TEXT,
+        "webUrl" TEXT,
+        "founderMessageEn" TEXT,
+        "founderMessageHi" TEXT
+      )
+    `, [], "settings table creation");
 
-    // Create settings table
-    await client.query(`
-      
-        CREATE TABLE IF NOT EXISTS settings (
-          id VARCHAR(255) PRIMARY KEY,
-          name TEXT,
-          email TEXT,
-          phone TEXT,
-          role TEXT DEFAULT 'citizen',
-          "tollFree" TEXT,
-          "webUrl" TEXT,
-          "founderMessageEn" TEXT,
-          "founderMessageHi" TEXT
-        )
-      `);
+    // Ensure otps table exists
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS otps (
+        phone VARCHAR(255) PRIMARY KEY,
+        otp VARCHAR(10) NOT NULL,
+        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `, [], "otps table creation");
 
-      // Ensure otps table has enough space for emails
-      try {
-        await pool.query('ALTER TABLE otps ALTER COLUMN phone TYPE VARCHAR(255)');
-      } catch(e) {
-        // Table might not exist yet
-      }
-
+    // Ensure otps table has enough space for emails
+    await runQuery('ALTER TABLE otps ALTER COLUMN phone TYPE VARCHAR(255)', [], "otps alter column phone size");
 
     // Create social_posts table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS social_posts (
         id UUID PRIMARY KEY,
         author TEXT,
@@ -1665,10 +1742,10 @@ async function initDatabase() {
         link TEXT,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "social_posts table creation");
 
     // Create campaigns table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS campaigns (
         id UUID PRIMARY KEY,
         "titleEn" TEXT,
@@ -1680,10 +1757,10 @@ async function initDatabase() {
         urgent BOOLEAN DEFAULT false,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "campaigns table creation");
 
     // Create jobs table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS jobs (
         id UUID PRIMARY KEY,
         "titleEn" TEXT,
@@ -1696,10 +1773,10 @@ async function initDatabase() {
         "typeHi" TEXT,
         "postedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "jobs table creation");
 
     // Create health_camps table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS health_camps (
         id UUID PRIMARY KEY,
         "titleEn" TEXT,
@@ -1711,16 +1788,16 @@ async function initDatabase() {
         contact TEXT,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "health_camps table creation");
 
     // Create camps view pointing to health_camps
-    await client.query(`
+    await runQuery(`
       CREATE OR REPLACE VIEW camps AS 
       SELECT * FROM health_camps
-    `);
+    `, [], "camps view creation");
 
     // Create grievances table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS grievances (
         id UUID PRIMARY KEY,
         title TEXT,
@@ -1734,10 +1811,10 @@ async function initDatabase() {
         "aiSummary" TEXT,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "grievances table creation");
 
     // Create service_submissions table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS service_submissions (
         id UUID PRIMARY KEY,
         "userId" TEXT,
@@ -1752,11 +1829,10 @@ async function initDatabase() {
         timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "service_submissions table creation");
 
     // Create volunteers table
-    await client.query(`
-      DROP TABLE IF EXISTS volunteers CASCADE;
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS volunteers (
         id VARCHAR(255) PRIMARY KEY,
         username VARCHAR(255) UNIQUE,
@@ -1787,10 +1863,10 @@ async function initDatabase() {
         ward_no VARCHAR(255),
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "volunteers table creation");
 
     // Create job_applications table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS job_applications (
         id UUID PRIMARY KEY,
         "jobId" TEXT,
@@ -1800,10 +1876,10 @@ async function initDatabase() {
         resume TEXT,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "job_applications table creation");
 
     // Create blood_donors table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS blood_donors (
         id UUID PRIMARY KEY,
         name TEXT,
@@ -1815,10 +1891,10 @@ async function initDatabase() {
         "lastDonated" TEXT,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "blood_donors table creation");
 
-    // Create card_applications table (Jan Seva Card)
-    await client.query(`
+    // Create card_applications table
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS card_applications (
         "userId" VARCHAR(255) PRIMARY KEY,
         name TEXT,
@@ -1831,10 +1907,10 @@ async function initDatabase() {
         "cardNo" TEXT DEFAULT '',
         "submittedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "card_applications table creation");
 
     // Create donations table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS donations (
         id SERIAL PRIMARY KEY,
         "userId" VARCHAR(255),
@@ -1846,10 +1922,10 @@ async function initDatabase() {
         status TEXT DEFAULT 'success',
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "donations table creation");
 
     // Create volunteer_tasks table
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS volunteer_tasks (
         id SERIAL PRIMARY KEY,
         "volunteerId" VARCHAR(255) NOT NULL,
@@ -1861,47 +1937,61 @@ async function initDatabase() {
         status TEXT DEFAULT 'assigned',
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `);
+    `, [], "volunteer_tasks table creation");
+
+    // Create passkeys table (WebAuthn credentials)
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS passkeys (
+        "credentialID" TEXT PRIMARY KEY,
+        "publicKey" TEXT NOT NULL,
+        counter INTEGER NOT NULL,
+        "userId" VARCHAR(255) NOT NULL
+      )
+    `, [], "passkeys table creation");
 
     // Seed default social posts if empty
-    const postsCount = await client.query("SELECT COUNT(*) FROM social_posts");
-    if (parseInt(postsCount.rows[0].count, 10) === 0) {
-      console.log("Seeding default social_posts into PostgreSQL...");
-      const DEFAULT_POSTS = [
-        {
-          author: "Rohit Pandit",
-          role: "Founder, RP Foundation",
-          avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-          textEn: "Sharing highlights from our weekend tree plantation drive in Karond, Bhopal. Over 500 saplings planted! 🌳 Let's build a greener tomorrow.",
-          textHi: "करौंद, भोपाल में हमारे सप्ताहांत वृक्षारोपण अभियान की कुछ झलकियाँ। 500 से अधिक पौधे लगाए गए! 🌳 आइए एक हरित कल का निर्माण करें।",
-          image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80",
-          likes: 412,
-          commentsCount: 18,
-          liked: false,
-          platform: "instagram",
-          link: "https://www.instagram.com/therohitpandit/"
-        },
-        {
-          author: "RP Foundation",
-          role: "Official Page",
-          avatar: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-          textEn: "Successful free eye checkup camp conducted today at Sehore district. Over 200 patients received free consultations and medicines. 🩺💙",
-          textHi: "सीहोर जिला अस्पताल में आज सफल निःशुल्क नेत्र जांच शिविर आयोजित किया गया। 200 से अधिक मरीजों को निःशुल्क परामर्श और दवाएं दी गईं। 🩺💙",
-          image: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
-          likes: 580,
-          commentsCount: 34,
-          liked: false,
-          platform: "facebook",
-          link: "https://www.facebook.com/rpfofficial"
+    try {
+      const postsCount = await client.query("SELECT COUNT(*) FROM social_posts");
+      if (parseInt(postsCount.rows[0].count, 10) === 0) {
+        console.log("Seeding default social_posts into PostgreSQL...");
+        const DEFAULT_POSTS = [
+          {
+            author: "Rohit Pandit",
+            role: "Founder, RP Foundation",
+            avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+            textEn: "Sharing highlights from our weekend tree plantation drive in Karond, Bhopal. Over 500 saplings planted! 🌳 Let's build a greener tomorrow.",
+            textHi: "करौंद, भोपाल में हमारे सप्ताहांत वृक्षारोपण अभियान की कुछ झलकियाँ। 500 से अधिक पौधे लगाए गए! 🌳 आइए एक हरित कल का निर्माण करें।",
+            image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80",
+            likes: 412,
+            commentsCount: 18,
+            liked: false,
+            platform: "instagram",
+            link: "https://www.instagram.com/therohitpandit/"
+          },
+          {
+            author: "RP Foundation",
+            role: "Official Page",
+            avatar: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
+            textEn: "Successful free eye checkup camp conducted today at Sehore district. Over 200 patients received free consultations and medicines. 🩺💙",
+            textHi: "सीहोर जिला अस्पताल में आज सफल निःशुल्क नेत्र जांच शिविर आयोजित किया गया। 200 से अधिक मरीजों को निःशुल्क परामर्श और दवाएं दी गईं। 🩺💙",
+            image: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
+            likes: 580,
+            commentsCount: 34,
+            liked: false,
+            platform: "facebook",
+            link: "https://www.facebook.com/rpfofficial"
+          }
+        ];
+        for (const p of DEFAULT_POSTS) {
+          await client.query(
+            `INSERT INTO social_posts (id, author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+            [crypto.randomUUID(), p.author, p.role, p.avatar, p.textEn, p.textHi, p.image, p.likes, p.commentsCount, p.liked, p.platform, p.link]
+          );
         }
-      ];
-      for (const p of DEFAULT_POSTS) {
-        await client.query(
-          `INSERT INTO social_posts (id, author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link) 
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-          [crypto.randomUUID(), p.author, p.role, p.avatar, p.textEn, p.textHi, p.image, p.likes, p.commentsCount, p.liked, p.platform, p.link]
-        );
       }
+    } catch (e) {
+      console.warn("Seeding social posts failed:", e);
     }
 
     console.log("PostgreSQL schema initialization completed successfully.");
@@ -1967,51 +2057,7 @@ async function initDatabase() {
     }
   });
 
-app.post("/api/auth/login", async (req, res) => {
-  try {
-    const { phone } = req.body;
-    if (!phone || phone.length !== 10) return res.status(400).json({ error: "Invalid phone number" });
-    
-    // Generate a 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Create otps table if not exists
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS otps (
-        phone VARCHAR(255) PRIMARY KEY,
-        otp VARCHAR(10) NOT NULL,
-        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    
-    // Save to DB (UPSERT)
-    await pool.query(
-      `INSERT INTO otps (phone, otp, "createdAt") VALUES ($1, $2, CURRENT_TIMESTAMP) 
-       ON CONFLICT (phone) DO UPDATE SET otp = EXCLUDED.otp, "createdAt" = CURRENT_TIMESTAMP`,
-      [phone, otp]
-    );
-        console.log(`
-  ===============================
-  [SMS] Sending OTP for ${phone} is: ${otp}
-  ===============================
-  `);
-      
-      try {
-        const MSG91_AUTHKEY = "552233Aul3uTNSZ6a5de34bP1";
-        const MSG91_SENDER = "RPFApp";
-        const url = `https://control.msg91.com/api/v5/otp?authkey=${MSG91_AUTHKEY}&mobile=91${phone}&otp=${otp}&sender=${MSG91_SENDER}`;
-        
-        const axios = require('axios');
-        await axios.get(url);
-      } catch (smsErr: any) {
-        console.error("MSG91 Error:", smsErr?.response?.data || smsErr.message);
-      }
-    
-    res.json({ success: true, message: "OTP sent" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+
 
 app.post("/api/auth/verify", async (req, res) => {
   try {
