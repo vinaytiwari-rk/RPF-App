@@ -78874,6 +78874,123 @@ async function initDatabase() {
     } catch (e) {
       console.warn("Seeding social posts failed:", e);
     }
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS blood_banks (
+        id VARCHAR(255) PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT,
+        phone TEXT,
+        address TEXT,
+        city TEXT,
+        state TEXT,
+        pincode TEXT,
+        stock_a_plus INTEGER DEFAULT 10,
+        stock_a_minus INTEGER DEFAULT 5,
+        stock_b_plus INTEGER DEFAULT 12,
+        stock_b_minus INTEGER DEFAULT 4,
+        stock_ab_plus INTEGER DEFAULT 8,
+        stock_ab_minus INTEGER DEFAULT 2,
+        stock_o_plus INTEGER DEFAULT 15,
+        stock_o_minus INTEGER DEFAULT 6
+      )
+    `, [], "blood_banks table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS blood_requests (
+        id VARCHAR(255) PRIMARY KEY,
+        user_id VARCHAR(255),
+        blood_group VARCHAR(10) NOT NULL,
+        component_type VARCHAR(50) NOT NULL,
+        quantity INTEGER NOT NULL,
+        urgency VARCHAR(20) NOT NULL,
+        status VARCHAR(20) DEFAULT 'Pending',
+        doctor_name TEXT,
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "blood_requests table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS blood_appointments (
+        id VARCHAR(255) PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        blood_bank_id VARCHAR(255) NOT NULL,
+        appointment_date TIMESTAMP WITH TIME ZONE NOT NULL,
+        blood_group VARCHAR(10),
+        status VARCHAR(20) DEFAULT 'Scheduled',
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "blood_appointments table creation");
+    try {
+      const bankCount = await client.query("SELECT COUNT(*) FROM blood_banks");
+      if (parseInt(bankCount.rows[0].count, 10) === 0) {
+        console.log("Seeding default blood banks...");
+        const DEFAULT_BANKS = [
+          {
+            id: "bank_bhopal_redcross",
+            name: "Bhopal Red Cross Blood Bank",
+            email: "bhopal.redcross@bloodbank.org",
+            phone: "+91-755-2550108",
+            address: "Link Road No. 1, near Shivaji Nagar",
+            city: "Bhopal",
+            state: "Madhya Pradesh",
+            pincode: "462016",
+            stock_a_plus: 15,
+            stock_a_minus: 3,
+            stock_b_plus: 22,
+            stock_b_minus: 5,
+            stock_ab_plus: 8,
+            stock_ab_minus: 1,
+            stock_o_plus: 28,
+            stock_o_minus: 7
+          },
+          {
+            id: "bank_indore_civil",
+            name: "Indore Central Blood Bank",
+            email: "indore.civil@bloodbank.org",
+            phone: "+91-731-2430200",
+            address: "MY Hospital Campus, Residency Area",
+            city: "Indore",
+            state: "Madhya Pradesh",
+            pincode: "452001",
+            stock_a_plus: 12,
+            stock_a_minus: 4,
+            stock_b_plus: 18,
+            stock_b_minus: 3,
+            stock_ab_plus: 5,
+            stock_ab_minus: 2,
+            stock_o_plus: 20,
+            stock_o_minus: 5
+          },
+          {
+            id: "bank_sehore_public",
+            name: "Sehore District Hospital Blood Bank",
+            email: "sehore.hospital@bloodbank.org",
+            phone: "+91-756-2224444",
+            address: "District Hospital, Main Road",
+            city: "Sehore",
+            state: "Madhya Pradesh",
+            pincode: "466001",
+            stock_a_plus: 8,
+            stock_a_minus: 2,
+            stock_b_plus: 10,
+            stock_b_minus: 2,
+            stock_ab_plus: 3,
+            stock_ab_minus: 1,
+            stock_o_plus: 12,
+            stock_o_minus: 3
+          }
+        ];
+        for (const b of DEFAULT_BANKS) {
+          await client.query(
+            `INSERT INTO blood_banks (id, name, email, phone, address, city, state, pincode, stock_a_plus, stock_a_minus, stock_b_plus, stock_b_minus, stock_ab_plus, stock_ab_minus, stock_o_plus, stock_o_minus) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+            [b.id, b.name, b.email, b.phone, b.address, b.city, b.state, b.pincode, b.stock_a_plus, b.stock_a_minus, b.stock_b_plus, b.stock_b_minus, b.stock_ab_plus, b.stock_ab_minus, b.stock_o_plus, b.stock_o_minus]
+          );
+        }
+      }
+    } catch (e) {
+      console.warn("Seeding blood banks failed:", e);
+    }
     console.log("PostgreSQL schema initialization completed successfully.");
   } catch (err) {
     console.error("Database connection or schema init error (non-fatal):", err.message);
@@ -79878,6 +79995,79 @@ app.post("/api/blood_donors", async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Error creating blood donor:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/blood-banks", async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM blood_banks ORDER BY name ASC");
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching blood banks:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/blood-requests/my", authenticateToken, async (req, res) => {
+  try {
+    const result = await pool2.query(
+      "SELECT * FROM blood_requests WHERE user_id = $1 ORDER BY created_at DESC",
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching my blood requests:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/blood-requests", authenticateToken, async (req, res) => {
+  try {
+    const { bloodGroup, componentType, quantity, urgency, doctorName, notes } = req.body;
+    const id = "req_" + import_crypto2.default.randomUUID().slice(0, 8);
+    await pool2.query(
+      `INSERT INTO blood_requests 
+       (id, user_id, blood_group, component_type, quantity, urgency, status, doctor_name, notes, created_at) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+      [id, req.user.id, bloodGroup, componentType, parseInt(quantity, 10) || 1, urgency || "Normal", "Pending", doctorName || "", notes || ""]
+    );
+    res.json({ success: true, id });
+  } catch (error) {
+    console.error("Error creating blood request:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/appointments/my", authenticateToken, async (req, res) => {
+  try {
+    const result = await pool2.query(
+      `SELECT a.*, b.name as "bloodBankName", b.phone as "bloodBankPhone", b.address as "bloodBankAddress" 
+       FROM blood_appointments a 
+       JOIN blood_banks b ON a.blood_bank_id = b.id 
+       WHERE a.user_id = $1 
+       ORDER BY a.appointment_date DESC`,
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching my appointments:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/appointments", authenticateToken, async (req, res) => {
+  try {
+    const { bloodBankId, appointmentDate, bloodGroup, notes } = req.body;
+    const id = "appt_" + import_crypto2.default.randomUUID().slice(0, 8);
+    await pool2.query(
+      `INSERT INTO blood_appointments 
+       (id, user_id, blood_bank_id, appointment_date, blood_group, status, notes, created_at) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
+      [id, req.user.id, bloodBankId, appointmentDate, bloodGroup || "", "Scheduled", notes || ""]
+    );
+    await pool2.query(
+      `UPDATE users SET points = points + 50 WHERE id = $1`,
+      [req.user.id]
+    );
+    res.json({ success: true, id });
+  } catch (error) {
+    console.error("Error creating blood appointment:", error);
     res.status(500).json({ error: error.message });
   }
 });
