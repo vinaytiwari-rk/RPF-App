@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { 
   Activity, AlertTriangle, Droplet, Heart, Search, ChevronRight, 
   CheckCircle, MapPin, Loader2, Calendar, Clock, User, FileText, 
-  Check, X, Award, TrendingUp, Printer
+  Check, X, Award, TrendingUp, Printer, Map
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
