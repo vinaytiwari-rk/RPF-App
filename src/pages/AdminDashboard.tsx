@@ -14,14 +14,14 @@ import {
   LayoutDashboard, ChevronRight, Star
 } from "lucide-react";
 
-export default function AdminDashboard() {
+const joditConfig = {
+  readonly: false,
+  height: 300,
+  toolbarButtonSize: "small" as any,
+  buttons: ["bold", "italic", "underline", "strikethrough", "|", "ul", "ol", "|", "font", "fontsize", "brush", "paragraph", "|", "link", "align", "undo", "redo"]
+};
 
-  const joditConfig = {
-    readonly: false,
-    height: 300,
-    toolbarButtonSize: "small" as any,
-    buttons: ["bold", "italic", "underline", "strikethrough", "|", "ul", "ol", "|", "font", "fontsize", "brush", "paragraph", "|", "link", "align", "undo", "redo"]
-  };
+export default function AdminDashboard() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -406,11 +406,11 @@ export default function AdminDashboard() {
 
   const handleUpdateCardStatus = async (targetUserId: string, nextStatus: "approved" | "rejected") => {
     try {
-      const cardNo = nextStatus === "approved" ? `JP-${Math.floor(100000 + Math.random() * 900000)}` : "";
-      const response = await fetch("/api/cards/status", {
-        method: "PATCH",
+      const url = nextStatus === "approved" ? "/api/cards/approve" : "/api/cards/reject";
+      const response = await fetch(url, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: targetUserId, status: nextStatus, cardNo })
+        body: JSON.stringify({ userId: targetUserId })
       });
       if (response.ok) refreshData();
     } catch (err) {

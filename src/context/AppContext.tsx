@@ -283,6 +283,7 @@ interface AppContextType {
   submitCardApplication: (app: CardApplication) => Promise<void>;
   approveCardApplication: (userId: string) => string;
   rejectCardApplication: (userId: string) => void;
+  refreshData: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -525,6 +526,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         submitCardApplication,
         approveCardApplication,
         rejectCardApplication,
+        refreshData: fetchAllData,
       }}
     >
       {children}

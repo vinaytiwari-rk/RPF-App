@@ -77272,6 +77272,13 @@ var authenticateToken = (req, res, next) => {
     next();
   });
 };
+var requireAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== "admin" && req.user.role !== "superadmin" && req.user.role !== "super_admin") {
+    return res.status(403).json({ success: false, error: "Access Denied: Admin role required" });
+  }
+  next();
+};
+app.use("/api/admin/hq", authenticateToken, requireAdmin);
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
@@ -78333,6 +78340,33 @@ Respond with a JSON array of up to 3 highly tailored schemes. Each scheme should
     res.status(500).json({ error: error.message || "Failed to analyze schemes" });
   }
 });
+var MP_CONSTITUENCIES_MOCK = [
+  { district: "Bhopal", vidhan_sabha: "Bhopal Uttar", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Bhopal Madhya", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Bhopal Dakshin-Pashchim", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Narela", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Govindpura", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Huzur", sansad_kshetra: "Bhopal" },
+  { district: "Sehore", vidhan_sabha: "Budhni", sansad_kshetra: "Vidisha" },
+  { district: "Sehore", vidhan_sabha: "Ichhawar", sansad_kshetra: "Vidisha" },
+  { district: "Sehore", vidhan_sabha: "Ashta", sansad_kshetra: "Dewas" },
+  { district: "Indore", vidhan_sabha: "Indore-1", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Indore-2", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Indore-3", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Indore-4", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Indore-5", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Rau", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Mhow", sansad_kshetra: "Dhar" },
+  { district: "Gwalior", vidhan_sabha: "Gwalior East", sansad_kshetra: "Gwalior" },
+  { district: "Gwalior", vidhan_sabha: "Gwalior South", sansad_kshetra: "Gwalior" },
+  { district: "Jabalpur", vidhan_sabha: "Jabalpur Cantt", sansad_kshetra: "Jabalpur" },
+  { district: "Jabalpur", vidhan_sabha: "Jabalpur East", sansad_kshetra: "Jabalpur" },
+  { district: "Vidisha", vidhan_sabha: "Vidisha", sansad_kshetra: "Vidisha" },
+  { district: "Sagar", vidhan_sabha: "Sagar", sansad_kshetra: "Sagar" },
+  { district: "Ujjain", vidhan_sabha: "Ujjain North", sansad_kshetra: "Ujjain" },
+  { district: "Ujjain", vidhan_sabha: "Ujjain South", sansad_kshetra: "Ujjain" },
+  { district: "Dewas", vidhan_sabha: "Dewas", sansad_kshetra: "Dewas" }
+];
 var acGeoJsonData = null;
 app.get("/api/locations/search", (req, res) => {
   const query = req.query.q?.trim().toLowerCase();
@@ -78342,36 +78376,46 @@ app.get("/api/locations/search", (req, res) => {
   if (!acGeoJsonData) {
     try {
       const geoJsonPath = import_path.default.join(process.cwd(), "maps-master", "maps-master", "website", "docs", "data", "geojson", "ac.geojson");
-      const fileContent = import_fs.default.readFileSync(geoJsonPath, "utf-8");
-      acGeoJsonData = JSON.parse(fileContent);
+      if (import_fs.default.existsSync(geoJsonPath)) {
+        const fileContent = import_fs.default.readFileSync(geoJsonPath, "utf-8");
+        acGeoJsonData = JSON.parse(fileContent);
+      } else {
+        console.warn("ac.geojson file not found, using memory fallback");
+      }
     } catch (err) {
       console.error("Failed to load ac.geojson:", err);
-      return res.status(500).json({ error: "Location data unavailable" });
     }
   }
-  const results = [];
-  const seen = /* @__PURE__ */ new Set();
-  const features = acGeoJsonData.features || [];
-  for (const feature of features) {
-    const props = feature.properties;
-    if (props && props.ST_NAME === "MADHYA PRADESH") {
-      const dist = (props.DIST_NAME || "").toLowerCase();
-      const ac = (props.AC_NAME || "").toLowerCase();
-      if (dist.includes(query) || ac.includes(query)) {
-        const uniqueKey = `${props.DIST_NAME}-${props.AC_NAME}`;
-        if (!seen.has(uniqueKey)) {
-          seen.add(uniqueKey);
-          results.push({
-            district: props.DIST_NAME,
-            vidhan_sabha: props.AC_NAME,
-            sansad_kshetra: props.PC_NAME
-          });
+  if (acGeoJsonData) {
+    const results = [];
+    const seen = /* @__PURE__ */ new Set();
+    const features = acGeoJsonData.features || [];
+    for (const feature of features) {
+      const props = feature.properties;
+      if (props && props.ST_NAME === "MADHYA PRADESH") {
+        const dist = (props.DIST_NAME || "").toLowerCase();
+        const ac = (props.AC_NAME || "").toLowerCase();
+        if (dist.includes(query) || ac.includes(query)) {
+          const uniqueKey = `${props.DIST_NAME}-${props.AC_NAME}`;
+          if (!seen.has(uniqueKey)) {
+            seen.add(uniqueKey);
+            results.push({
+              district: props.DIST_NAME,
+              vidhan_sabha: props.AC_NAME,
+              sansad_kshetra: props.PC_NAME
+            });
+          }
         }
       }
+      if (results.length >= 10) break;
     }
-    if (results.length >= 10) break;
+    res.json(results);
+  } else {
+    const results = MP_CONSTITUENCIES_MOCK.filter(
+      (item) => item.district.toLowerCase().includes(query) || item.vidhan_sabha.toLowerCase().includes(query)
+    ).slice(0, 10);
+    res.json(results);
   }
-  res.json(results);
 });
 app.get("/api/gov/mandi-prices", async (req, res) => {
   const { state, commodity } = req.query;
@@ -78685,6 +78729,32 @@ async function initDatabase() {
         status TEXT DEFAULT 'pending',
         "cardNo" TEXT DEFAULT '',
         "submittedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS donations (
+        id SERIAL PRIMARY KEY,
+        "userId" VARCHAR(255),
+        "donorName" TEXT NOT NULL,
+        "donorEmail" TEXT,
+        amount DECIMAL(10, 2) NOT NULL,
+        "campaignId" INTEGER,
+        "transactionId" VARCHAR(255) UNIQUE,
+        status TEXT DEFAULT 'success',
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS volunteer_tasks (
+        id SERIAL PRIMARY KEY,
+        "volunteerId" VARCHAR(255) NOT NULL,
+        "titleEn" TEXT NOT NULL,
+        "titleHi" TEXT NOT NULL,
+        "descriptionEn" TEXT,
+        "descriptionHi" TEXT,
+        points INTEGER DEFAULT 10,
+        status TEXT DEFAULT 'assigned',
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `);
     const postsCount = await client.query("SELECT COUNT(*) FROM social_posts");
@@ -79021,6 +79091,102 @@ app.delete("/api/cards/:userId", async (req, res) => {
   try {
     await pool2.query('DELETE FROM card_applications WHERE "userId" = $1', [req.params.userId]);
     res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/cards/my", async (req, res) => {
+  try {
+    const userId = req.query.userId;
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId parameter" });
+    }
+    const result = await pool2.query(
+      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications WHERE "userId" = $1',
+      [userId]
+    );
+    res.json({ success: true, application: result.rows[0] || null });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/cards/download/:id", async (req, res) => {
+  try {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=JanSevaCard_${req.params.id}.pdf`);
+    res.send(Buffer.from("%PDF-1.4 ... MOCK JAN SEVA CARD PDF FOR ID " + req.params.id));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/donations", async (req, res) => {
+  try {
+    const { userId, donorName, donorEmail, amount, campaignId } = req.body;
+    const transactionId = `TXN-${Math.floor(1e7 + Math.random() * 9e7)}`;
+    await pool2.query(
+      'INSERT INTO donations ("userId", "donorName", "donorEmail", amount, "campaignId", "transactionId", status) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [userId || null, donorName, donorEmail || null, amount, campaignId || null, transactionId, "success"]
+    );
+    if (userId) {
+      await pool2.query(
+        'UPDATE users SET "isDonor" = true WHERE id = $1',
+        [userId]
+      );
+    }
+    if (campaignId) {
+      await pool2.query(
+        "UPDATE campaigns SET raised = COALESCE(raised, 0) + $1 WHERE id = $2",
+        [amount, campaignId]
+      );
+    }
+    res.json({ success: true, transactionId, message: "Donation recorded successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/volunteer_tasks", async (req, res) => {
+  try {
+    const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi, points } = req.body;
+    await pool2.query(
+      'INSERT INTO volunteer_tasks ("volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", points, status) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [volunteerId, titleEn, titleHi, descriptionEn, descriptionHi, points || 10, "assigned"]
+    );
+    res.json({ success: true, message: "Task assigned successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/volunteer_tasks", async (req, res) => {
+  try {
+    const volunteerId = req.query.volunteerId;
+    if (!volunteerId) {
+      return res.status(400).json({ error: "Missing volunteerId parameter" });
+    }
+    const result = await pool2.query(
+      'SELECT id, "volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", points, status, "createdAt" FROM volunteer_tasks WHERE "volunteerId" = $1',
+      [volunteerId]
+    );
+    res.json({ success: true, tasks: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.patch("/api/volunteer_tasks/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const taskRes = await pool2.query(
+      'UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId", points',
+      [status, id]
+    );
+    if (taskRes.rows.length > 0 && status === "completed") {
+      const { volunteerId, points } = taskRes.rows[0];
+      await pool2.query(
+        "UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2",
+        [points, volunteerId]
+      );
+    }
+    res.json({ success: true, message: "Task status updated" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -79758,8 +79924,22 @@ var upload = (0, import_multer.default)({
   limits: {
     fileSize: 5 * 1024 * 1024
     // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedExtensions = [".png", ".jpg", ".jpeg", ".pdf"];
+    const ext = import_path.default.extname(file.originalname).toLowerCase();
+    if (!allowedExtensions.includes(ext)) {
+      return cb(new Error("Only PNG, JPG, JPEG and PDF files are allowed"));
+    }
+    cb(null, true);
   }
 });
+var handleUploadErrors = (err, req, res, next) => {
+  if (err) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+  next();
+};
 async function saveFileLocally(file) {
   const fileExt = import_path.default.extname(file.originalname) || ".jpg";
   const filename = `${Date.now()}-${Math.round(Math.random() * 1e5)}${fileExt}`;
@@ -79771,7 +79951,7 @@ async function saveFileLocally(file) {
   await import_fs.default.promises.writeFile(destFilePath, file.buffer);
   return `/uploads/${filename}`;
 }
-app.post("/api/upload/founder", upload.single("file"), async (req, res) => {
+app.post("/api/upload/founder", upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -79783,7 +79963,7 @@ app.post("/api/upload/founder", upload.single("file"), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.post("/api/upload/broadcast", upload.single("file"), async (req, res) => {
+app.post("/api/upload/broadcast", upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -79795,7 +79975,7 @@ app.post("/api/upload/broadcast", upload.single("file"), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.post("/api/upload/image", upload.single("file"), async (req, res) => {
+app.post("/api/upload/image", upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });

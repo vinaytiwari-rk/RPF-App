@@ -309,8 +309,8 @@ export default function MainLayout() {
                 {/* Front panel glass highlight */}
                 <rect x="27" y="42" width="46" height="36" rx="4" fill="#FFFFFF" fillOpacity="0.1" />
 
-                {/* Alternating Text: Hindi "दान पेटी" fades in/out, then English "DONATION BOX" fades in/out */}
-                <motion.text 
+                {/* Static Text: Hindi "दान पेटी" */}
+                <text 
                   x="50" 
                   y="60" 
                   textAnchor="middle" 
@@ -319,26 +319,9 @@ export default function MainLayout() {
                   fontWeight="900" 
                   fontSize="9.5" 
                   letterSpacing="0.5"
-                  animate={{ opacity: [1, 1, 0, 0, 1] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 >
                   दान पेटी
-                </motion.text>
-
-                <motion.text 
-                  x="50" 
-                  y="60" 
-                  textAnchor="middle" 
-                  fill="#FFFFFF" 
-                  fontFamily="sans-serif" 
-                  fontWeight="900" 
-                  fontSize="6.5" 
-                  letterSpacing="0.8"
-                  animate={{ opacity: [0, 0, 1, 1, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  DONATION BOX
-                </motion.text>
+                </text>
               </svg>
               <span className="absolute -bottom-4 text-[8px] font-black text-[#1C2D42] tracking-widest uppercase">DONATE</span>
             </motion.button>
