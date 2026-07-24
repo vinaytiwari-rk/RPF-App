@@ -49,6 +49,8 @@ export default function BloodNetwork() {
   const [bankSearchQuery, setBankSearchQuery] = useState("");
   const [selectedBankStock, setSelectedBankStock] = useState<any | null>(null);
   const [loadingBanks, setLoadingBanks] = useState(false);
+  const [mapSearchLocation, setMapSearchLocation] = useState("Bhopal");
+  const [generalMapUrl, setGeneralMapUrl] = useState("https://maps.google.com/maps?q=blood%20banks%20in%20Bhopal&t=&z=13&ie=UTF8&iwloc=&output=embed");
 
   // Donors Tab states
   const [activeDonors, setActiveDonors] = useState<any[]>([]);
@@ -217,16 +219,16 @@ export default function BloodNetwork() {
 
   // Filter Banks
   const filteredBanks = bloodBanks.filter(b => 
-    b.name.toLowerCase().includes(bankSearchQuery.toLowerCase()) ||
-    b.city.toLowerCase().includes(bankSearchQuery.toLowerCase()) ||
-    b.pincode.includes(bankSearchQuery)
+    (b.name || "").toLowerCase().includes(bankSearchQuery.toLowerCase()) ||
+    (b.city || "").toLowerCase().includes(bankSearchQuery.toLowerCase()) ||
+    (b.pincode || "").includes(bankSearchQuery)
   );
 
   // Filter Donors
   const filteredDonors = activeDonors.filter(d => 
-    d.name.toLowerCase().includes(donorSearchQuery.toLowerCase()) ||
-    d.bloodGroup.toLowerCase().includes(donorSearchQuery.toLowerCase()) ||
-    d.location.toLowerCase().includes(donorSearchQuery.toLowerCase())
+    (d.name || "").toLowerCase().includes(donorSearchQuery.toLowerCase()) ||
+    (d.bloodGroup || d.blood_group || "").toLowerCase().includes(donorSearchQuery.toLowerCase()) ||
+    (d.location || "").toLowerCase().includes(donorSearchQuery.toLowerCase())
   );
 
   // Print slip helper
@@ -765,14 +767,54 @@ export default function BloodNetwork() {
         {/* TAB 3: FIND BANKS & LIVE STOCK */}
         {tab === "find" && (
           <div className="space-y-4 animate-fadeIn max-w-4xl mx-auto">
-            {/* Search location bar */}
+            
+            {/* Interactive Map Search Card */}
+            <div className="bg-white border border-slate-200 shadow-md rounded-2xl p-5 space-y-4">
+              <h3 className="font-display font-extrabold text-slate-800 text-sm flex items-center gap-2">
+                <Map className="w-5 h-5 text-red-600" />
+                <span>Search Blood Banks on Live Map</span>
+              </h3>
+              <p className="text-[10px] text-slate-500 font-medium">Enter a city name or pincode to discover matching blood bank centers interactively.</p>
+              
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                if (mapSearchLocation.trim()) {
+                  setGeneralMapUrl(`https://maps.google.com/maps?q=blood%20banks%20in%20${encodeURIComponent(mapSearchLocation.trim())}&t=&z=13&ie=UTF8&iwloc=&output=embed`);
+                }
+              }} className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={mapSearchLocation}
+                  onChange={(e) => setMapSearchLocation(e.target.value)}
+                  placeholder="e.g., Indore, Sehore, Bhopal..." 
+                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs bg-slate-50 font-medium outline-none focus:ring-2 focus:ring-red-500/20"
+                />
+                <button type="submit" className="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-md">
+                  Search Map
+                </button>
+              </form>
+
+              <div className="relative overflow-hidden rounded-xl h-64 shadow-inner border border-slate-200">
+                <iframe
+                  src={generalMapUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  title="Live Blood Bank Map"
+                ></iframe>
+              </div>
+            </div>
+
+            {/* List Search location bar */}
             <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 flex items-center gap-2">
               <Search className="w-5 h-5 text-slate-400" />
               <input 
                 type="text" 
                 value={bankSearchQuery}
                 onChange={(e) => setBankSearchQuery(e.target.value)}
-                placeholder="Search blood banks by name, city or pin code..." 
+                placeholder="Filter blood banks below by name or address..." 
                 className="flex-1 text-xs outline-none bg-transparent font-medium"
               />
             </div>
