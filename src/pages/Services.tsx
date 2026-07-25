@@ -123,6 +123,10 @@ export default function Services() {
               const route = svc.id === 'card' ? '/jan-seva-card' 
                           : svc.id === 'blood' ? '/blood-network' 
                           : svc.id === 'donations' ? '/donations' 
+                          : svc.id === 'women-safety' ? '/women'
+                          : svc.id === 'seniors' ? '/seniors'
+                          : svc.id === 'environment' ? '/environment'
+                          : svc.id === 'education' ? '/education'
                           : `/services/${svc.id}`;
 
               return (

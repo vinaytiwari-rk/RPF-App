@@ -22,6 +22,23 @@ export default function ServiceDetails() {
   useEffect(() => {
     if (!id) return;
 
+    if (id === "women-safety") {
+      navigate("/women", { replace: true });
+      return;
+    }
+    if (id === "seniors") {
+      navigate("/seniors", { replace: true });
+      return;
+    }
+    if (id === "environment") {
+      navigate("/environment", { replace: true });
+      return;
+    }
+    if (id === "education") {
+      navigate("/education", { replace: true });
+      return;
+    }
+
     const fetchContent = async () => {
       setIsLoadingContent(true);
       setContentData(null);
