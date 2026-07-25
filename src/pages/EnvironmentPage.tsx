@@ -1,14 +1,44 @@
 import React, { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Compass, Flame, Leaf, CheckCircle, Gift } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function EnvironmentPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
+  const { user } = useAuth();
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleRegister = () => {
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+  const handleRegister = async () => {
+    setSubmitting(true);
+    try {
+      const data = {
+        campaignName: "Green Sehore Afforestation 2026",
+        joinedAsVolunteer: true
+      };
+      const submission = {
+        userId: user?.id || "guest",
+        citizenName: user?.name || "Citizen",
+        citizenPhone: user?.phone || "",
+        serviceName: "Environment Support",
+        submissionData: JSON.stringify(data),
+        status: "pending",
+        timestamp: new Date().toISOString(),
+      };
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submission)
+      });
+      if (res.ok) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      }
+    } catch (err) {
+      console.error("Environment registration error:", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -55,9 +85,10 @@ export default function EnvironmentPage() {
         ) : (
           <button 
             onClick={handleRegister}
-            className="w-full bg-[#138808] hover:bg-green-700 text-white font-bold py-3 rounded-lg text-xs shadow-md transition"
+            disabled={submitting}
+            className="w-full bg-[#138808] hover:bg-green-700 text-white font-bold py-3 rounded-lg text-xs shadow-md transition disabled:opacity-50"
           >
-            {lang === "hi" ? "अभियान में शामिल हों" : "Join Campaign as Volunteer"}
+            {submitting ? "Joining..." : (lang === "hi" ? "अभियान में शामिल हों" : "Join Campaign as Volunteer")}
           </button>
         )}
       </div>

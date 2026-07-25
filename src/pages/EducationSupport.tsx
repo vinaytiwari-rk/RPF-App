@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { BookOpen, GraduationCap, CheckCircle, ArrowLeft, Info, Calendar, MapPin, Check, Plus } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function EducationSupport() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<"books" | "tutoring">("books");
@@ -18,6 +20,8 @@ export default function EducationSupport() {
 
   // Tutoring states
   const [subject, setSubject] = useState("Mathematics");
+  const [tutorGrade, setTutorGrade] = useState("");
+  const [tutorAddress, setTutorAddress] = useState("");
   const [tutorSuccess, setTutorSuccess] = useState(false);
 
   const handleItemToggle = (item: string) => {
@@ -28,32 +32,83 @@ export default function EducationSupport() {
     }
   };
 
-  const handleBookSubmit = (e: React.FormEvent) => {
+  const handleBookSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentName || itemsList.length === 0) return;
 
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      const data = {
+        studentName,
+        grade,
+        board,
+        requestedItems: itemsList
+      };
+      const submission = {
+        userId: user?.id || "guest",
+        citizenName: user?.name || "Citizen",
+        citizenPhone: user?.phone || "",
+        serviceName: "Child Support - Book Bank",
+        submissionData: JSON.stringify(data),
+        status: "pending",
+        timestamp: new Date().toISOString(),
+      };
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submission)
+      });
+      if (res.ok) {
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          setStudentName("");
+          setItemsList([]);
+        }, 4000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
       setSubmitting(false);
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        setStudentName("");
-        setItemsList([]);
-      }, 3000);
-    }, 1500);
+    }
   };
 
-  const handleTutorSubmit = (e: React.FormEvent) => {
+  const handleTutorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      const data = {
+        subject,
+        grade: tutorGrade,
+        address: tutorAddress
+      };
+      const submission = {
+        userId: user?.id || "guest",
+        citizenName: user?.name || "Citizen",
+        citizenPhone: user?.phone || "",
+        serviceName: "Child Support - Tutoring",
+        submissionData: JSON.stringify(data),
+        status: "pending",
+        timestamp: new Date().toISOString(),
+      };
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submission)
+      });
+      if (res.ok) {
+        setTutorSuccess(true);
+        setTutorGrade("");
+        setTutorAddress("");
+        setTimeout(() => {
+          setTutorSuccess(false);
+        }, 4000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
       setSubmitting(false);
-      setTutorSuccess(true);
-      setTimeout(() => {
-        setTutorSuccess(false);
-      }, 3000);
-    }, 1500);
+    }
   };
 
   return (
@@ -244,12 +299,26 @@ export default function EducationSupport() {
 
                   <div>
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Grade Level / विद्यार्थी की कक्षा</label>
-                    <input type="text" required placeholder="e.g. Class 10" className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-indigo-500" />
+                    <input 
+                      type="text" 
+                      required 
+                      value={tutorGrade}
+                      onChange={e => setTutorGrade(e.target.value)}
+                      placeholder="e.g. Class 10" 
+                      className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-indigo-500" 
+                    />
                   </div>
 
                   <div>
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Address / वार्ड का नाम</label>
-                    <input type="text" required placeholder="e.g. Karond Ward 12, Bhopal" className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-indigo-500" />
+                    <input 
+                      type="text" 
+                      required 
+                      value={tutorAddress}
+                      onChange={e => setTutorAddress(e.target.value)}
+                      placeholder="e.g. Karond Ward 12, Bhopal" 
+                      className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-indigo-500" 
+                    />
                   </div>
 
                   <button 

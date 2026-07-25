@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Shield, AlertOctagon, Phone, User, Plus, Heart, HelpCircle, CheckCircle } from "lucide-react";
+import { Shield, AlertOctagon, Phone, User, Plus, Heart, HelpCircle, CheckCircle, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-// import axios from 'axios';
 
 export default function WomenSafety() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -12,6 +11,21 @@ export default function WomenSafety() {
   const [contacts, setContacts] = useState<string[]>([]);
   const [newContact, setNewContact] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+
+  // Modals state
+  const [showCounselingModal, setShowCounselingModal] = useState(false);
+  const [showWorkshopModal, setShowWorkshopModal] = useState(false);
+  
+  // Counseling form state
+  const [counselingType, setCounselingType] = useState("Legal Consultation");
+  const [counselingDesc, setCounselingDesc] = useState("");
+  const [counselingContact, setCounselingContact] = useState("Call");
+  const [submittingCounseling, setSubmittingCounseling] = useState(false);
+
+  // Workshop form state
+  const [preferredBatch, setPreferredBatch] = useState("Weekend Morning");
+  const [experienceLevel, setExperienceLevel] = useState("Beginner");
+  const [submittingWorkshop, setSubmittingWorkshop] = useState(false);
 
   const handleSOS = async () => {
     setSosActive(true);
@@ -69,6 +83,76 @@ export default function WomenSafety() {
     }
   };
 
+  const handleCounselingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingCounseling(true);
+    try {
+      const data = {
+        counselingType,
+        description: counselingDesc,
+        contactPreference: counselingContact
+      };
+      const submission = {
+        userId: user?.id || "guest",
+        citizenName: user?.name || "Citizen",
+        citizenPhone: user?.phone || "",
+        serviceName: "Women Support - Counseling",
+        submissionData: JSON.stringify(data),
+        status: "pending",
+        timestamp: new Date().toISOString(),
+      };
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submission)
+      });
+      if (res.ok) {
+        setSuccessMsg(lang === "hi" ? "परामर्श अनुरोध पंजीकृत किया गया!" : "Counseling request registered!");
+        setShowCounselingModal(false);
+        setCounselingDesc("");
+        setTimeout(() => setSuccessMsg(""), 4000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmittingCounseling(false);
+    }
+  };
+
+  const handleWorkshopSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingWorkshop(true);
+    try {
+      const data = {
+        preferredBatch,
+        experienceLevel
+      };
+      const submission = {
+        userId: user?.id || "guest",
+        citizenName: user?.name || "Citizen",
+        citizenPhone: user?.phone || "",
+        serviceName: "Women Support - Workshop",
+        submissionData: JSON.stringify(data),
+        status: "pending",
+        timestamp: new Date().toISOString(),
+      };
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submission)
+      });
+      if (res.ok) {
+        setSuccessMsg(lang === "hi" ? "कार्यशाला हेतु सफलतापूर्वक पंजीकृत!" : "Successfully registered for workshop!");
+        setShowWorkshopModal(false);
+        setTimeout(() => setSuccessMsg(""), 4000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmittingWorkshop(false);
+    }
+  };
+
   const addContact = (e: React.FormEvent) => {
     e.preventDefault();
     if (newContact.trim() && contacts.length < 5) {
@@ -118,10 +202,14 @@ export default function WomenSafety() {
         </h4>
         
         {[
-          { title: lang === "hi" ? "निःशुल्क कानूनी परामर्श" : "Free Legal Advice", desc: lang === "hi" ? "विशेषज्ञों से सुरक्षित सलाह" : "Confidential consultation with counselors", code: "1091" },
-          { title: lang === "hi" ? "आत्मरक्षा कार्यशाला" : "Self-Defense Workshops", desc: lang === "hi" ? "निशुल्क साप्ताहिक प्रशिक्षण" : "Register for free local skill sessions", code: "RPF-DEF" }
+          { title: lang === "hi" ? "निःशुल्क कानूनी परामर्श" : "Free Legal Advice", desc: lang === "hi" ? "विशेषज्ञों से सुरक्षित सलाह" : "Confidential consultation with counselors", code: "1091", action: () => setShowCounselingModal(true) },
+          { title: lang === "hi" ? "आत्मरक्षा कार्यशाला" : "Self-Defense Workshops", desc: lang === "hi" ? "निशुल्क साप्ताहिक प्रशिक्षण" : "Register for free local skill sessions", code: "RPF-DEF", action: () => setShowWorkshopModal(true) }
         ].map((item, idx) => (
-          <div key={idx} className="glass-card bg-white/95 p-4 border-gold-soft flex items-center justify-between">
+          <div 
+            key={idx} 
+            onClick={item.action}
+            className="glass-card bg-white/95 p-4 border-gold-soft flex items-center justify-between cursor-pointer hover:border-purple-400 hover:shadow-md transition duration-200"
+          >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100">
                 <Shield className="w-4.5 h-4.5" />
@@ -186,6 +274,120 @@ export default function WomenSafety() {
           </div>
         )}
       </div>
+
+      {/* 1. Legal & Counseling Form Modal */}
+      {showCounselingModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full p-5 space-y-4 animate-scaleUp">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <h4 className="font-display font-extrabold text-sm text-[#0B1E3F] uppercase tracking-wider">
+                {lang === "hi" ? "मुफ़्त कानूनी व परामर्श सेवा" : "Free Counseling Inquiry"}
+              </h4>
+              <button onClick={() => setShowCounselingModal(false)} className="text-slate-400 hover:text-slate-650 p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCounselingSubmit} className="space-y-3.5">
+              <div>
+                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Inquiry Type / परामर्श का प्रकार</label>
+                <select 
+                  value={counselingType}
+                  onChange={e => setCounselingType(e.target.value)}
+                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none"
+                >
+                  <option>Legal Consultation</option>
+                  <option>Psychological Counseling</option>
+                  <option>Crisis Support</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Description / विवरण</label>
+                <textarea 
+                  required
+                  value={counselingDesc}
+                  onChange={e => setCounselingDesc(e.target.value)}
+                  placeholder="Describe your query briefly..."
+                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none min-h-[70px]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Contact Preference / संपर्क का माध्यम</label>
+                <select 
+                  value={counselingContact}
+                  onChange={e => setCounselingContact(e.target.value)}
+                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none"
+                >
+                  <option>Call</option>
+                  <option>Email</option>
+                  <option>Anonymous Chat</option>
+                </select>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={submittingCounseling}
+                className="w-full bg-purple-600 hover:bg-purple-750 text-white font-bold py-3 rounded-xl text-xs shadow-md transition disabled:opacity-50"
+              >
+                {submittingCounseling ? "Submitting..." : (lang === "hi" ? "अनुरोध भेजें" : "Submit Consultation Request")}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Self-Defense Workshop Modal */}
+      {showWorkshopModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full p-5 space-y-4 animate-scaleUp">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <h4 className="font-display font-extrabold text-sm text-[#0B1E3F] uppercase tracking-wider">
+                {lang === "hi" ? "आत्मरक्षा कार्यशाला पंजीकरण" : "Self-Defense Registration"}
+              </h4>
+              <button onClick={() => setShowWorkshopModal(false)} className="text-slate-400 hover:text-slate-650 p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleWorkshopSubmit} className="space-y-3.5">
+              <div>
+                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Preferred Batch / पसंदीदा बैच</label>
+                <select 
+                  value={preferredBatch}
+                  onChange={e => setPreferredBatch(e.target.value)}
+                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none"
+                >
+                  <option>Weekend Morning (8:00 AM - 10:00 AM)</option>
+                  <option>Weekend Evening (4:00 PM - 6:00 PM)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Experience Level / अनुभव स्तर</label>
+                <select 
+                  value={experienceLevel}
+                  onChange={e => setExperienceLevel(e.target.value)}
+                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none"
+                >
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                </select>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={submittingWorkshop}
+                className="w-full bg-purple-600 hover:bg-purple-750 text-white font-bold py-3 rounded-xl text-xs shadow-md transition disabled:opacity-50"
+              >
+                {submittingWorkshop ? "Registering..." : (lang === "hi" ? "पंजीकरण करें" : "Book My Free Seat")}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

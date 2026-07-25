@@ -1,16 +1,52 @@
 import React, { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Phone, Heart, Users, Clock, ShieldAlert, CheckCircle } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function SeniorsPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
+  const { user } = useAuth();
   const [success, setSuccess] = useState(false);
   const [service, setService] = useState("Companion");
+  
+  const [elderName, setElderName] = useState("");
+  const [requestDetails, setRequestDetails] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 4000);
+    setSubmitting(true);
+    try {
+      const data = {
+        elderName,
+        assistanceType: service,
+        details: requestDetails
+      };
+      const submission = {
+        userId: user?.id || "guest",
+        citizenName: user?.name || "Citizen",
+        citizenPhone: user?.phone || "",
+        serviceName: "Senior Support",
+        submissionData: JSON.stringify(data),
+        status: "pending",
+        timestamp: new Date().toISOString(),
+      };
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submission)
+      });
+      if (res.ok) {
+        setSuccess(true);
+        setElderName("");
+        setRequestDetails("");
+        setTimeout(() => setSuccess(false), 4000);
+      }
+    } catch (err) {
+      console.error("Seniors submission error:", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -66,21 +102,38 @@ export default function SeniorsPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">
                 {lang === "hi" ? "बुजुर्ग का नाम" : "Elder's Full Name"}
               </label>
-              <input type="text" required placeholder="e.g. Ram Lal ji" className="w-full border border-slate-200 rounded-lg p-2.5 text-xs outline-none focus:border-indigo-500 font-bold" />
+              <input 
+                type="text" 
+                required 
+                value={elderName}
+                onChange={e => setElderName(e.target.value)}
+                placeholder="e.g. Ram Lal ji" 
+                className="w-full border border-slate-200 rounded-lg p-2.5 text-xs outline-none focus:border-indigo-500 font-bold bg-slate-50" 
+              />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
+              <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">
                 {lang === "hi" ? "आवश्यकता विवरण" : "Details of Request"}
               </label>
-              <textarea placeholder={lang === "hi" ? "सहायता का प्रकार..." : "Describe details, e.g. need medicine delivery"} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs min-h-[70px] outline-none focus:border-indigo-500 font-bold" />
+              <textarea 
+                required
+                value={requestDetails}
+                onChange={e => setRequestDetails(e.target.value)}
+                placeholder={lang === "hi" ? "सहायता का प्रकार..." : "Describe details, e.g. need medicine delivery"} 
+                className="w-full border border-slate-200 rounded-lg p-2.5 text-xs min-h-[70px] outline-none focus:border-indigo-500 font-bold bg-slate-50" 
+              />
             </div>
 
-            <button type="submit" className="w-full bg-[#000080] text-white font-bold py-3 rounded-lg text-xs shadow-md hover:bg-indigo-950 transition">
-              {lang === "hi" ? "अनुरोध सबमिट करें" : "Submit Care Request"}
+            <button 
+              type="submit" 
+              disabled={submitting}
+              className="w-full bg-[#000080] text-white font-bold py-3 rounded-lg text-xs shadow-md hover:bg-indigo-950 transition disabled:opacity-50"
+            >
+              {submitting ? "Submitting..." : (lang === "hi" ? "अनुरोध सबमिट करें" : "Submit Care Request")}
             </button>
           </form>
         )}
