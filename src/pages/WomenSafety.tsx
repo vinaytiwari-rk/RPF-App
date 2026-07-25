@@ -4,7 +4,7 @@ import {
   Shield, AlertOctagon, Phone, User, Plus, Heart,
   HelpCircle, CheckCircle, X, Volume2, Camera, Eye,
   Map, Settings, Play, Square, RefreshCw, Layers, Radio, Globe, ExternalLink,
-  Lock, ChevronRight, ChevronLeft, MapPin, Star, Sparkles, FileText, Activity
+  Lock, ChevronRight, ChevronLeft, MapPin, Star, Sparkles, FileText, Activity, BarChart2
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -186,7 +186,7 @@ export default function WomenSafety() {
   const [isUnlocked, setIsUnlocked] = useState(!stealthEnabled);
 
   // General safety states
-  const [activeTab, setActiveTab] = useState<"deterrents" | "scanner" | "ncw" | "routes" | "settings">("deterrents");
+  const [activeTab, setActiveTab] = useState<"deterrents" | "scanner" | "ncw" | "routes" | "stats" | "settings">("deterrents");
   const [sosActive, setSosActive] = useState(false);
   const [sosFired, setSosFired] = useState(false);
   const [sosLocationUrl, setSosLocationUrl] = useState("");
@@ -246,6 +246,35 @@ export default function WomenSafety() {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+
+  // OGD API States
+  const [ogdResourceId, setOgdResourceId] = useState(() => localStorage.getItem("ogd_resource_id") || "");
+  const [ogdData, setOgdData] = useState<any[]>([]);
+  const [ogdLoading, setOgdLoading] = useState(false);
+  const [ogdError, setOgdError] = useState("");
+  const OGD_API_KEY = "579b464db66ec23bdd00000190c6f32d55f843bf63331559161f2b1d";
+
+  const fetchOgdData = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!ogdResourceId.trim()) return;
+    setOgdLoading(true);
+    setOgdError("");
+    try {
+      localStorage.setItem("ogd_resource_id", ogdResourceId.trim());
+      const res = await fetch(`https://api.data.gov.in/resource/${ogdResourceId.trim()}?api-key=${OGD_API_KEY}&format=json&limit=100`);
+      if (!res.ok) throw new Error("Failed to fetch data from data.gov.in");
+      const json = await res.json();
+      if (json.records) {
+        setOgdData(json.records);
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (err: any) {
+      setOgdError(err.message || "An error occurred");
+    } finally {
+      setOgdLoading(false);
+    }
+  };
 
   // Local haptic feedback utility
   const triggerHaptic = (pattern = [100]) => {
@@ -671,6 +700,7 @@ export default function WomenSafety() {
     { key: "scanner", label: lang === "hi" ? "स्कैनर" : "Scan", icon: Camera },
     { key: "ncw", label: lang === "hi" ? "रिपोर्ट" : "Report", icon: FileText },
     { key: "routes", label: lang === "hi" ? "नेविगेशन" : "Routes", icon: Map },
+    { key: "stats", label: lang === "hi" ? "आँकड़े" : "Stats", icon: BarChart2 },
     { key: "settings", label: lang === "hi" ? "सेटिंग" : "Settings", icon: Settings },
   ] as const;
 
@@ -1085,9 +1115,72 @@ export default function WomenSafety() {
           </div>
         )}
 
-        {/* ================= TAB 5: SETTINGS ================= */}
+        {/* ================= TAB 5: STATS ================= */}
+        {activeTab === "stats" && (
+          <div className="space-y-4">
+            <div className="bg-white border border-gray-300 p-5 rounded-lg space-y-4">
+              <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <BarChart2 className="w-4 h-4" /> 
+                {lang === "hi" ? "WHL सहायता आँकड़े (Data.gov.in)" : "WHL Assistance Stats (Data.gov.in)"}
+              </h4>
+              <p className="text-xs text-gray-500">
+                {lang === "hi" ? "महिला हेल्पलाइन के माध्यम से राज्य-वार आँकड़े प्राप्त करें।" : "Fetch State-wise number of women assisted through WHL using Open Government Data API."}
+              </p>
+
+              <form onSubmit={fetchOgdData} className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Dataset Resource ID" 
+                  value={ogdResourceId} 
+                  onChange={e => setOgdResourceId(e.target.value)} 
+                  required 
+                  className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500 font-mono" 
+                />
+                <button 
+                  type="submit" 
+                  disabled={ogdLoading || !ogdResourceId.trim()} 
+                  className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded text-sm font-semibold transition disabled:opacity-50"
+                >
+                  {ogdLoading ? (lang === "hi" ? "लोड हो रहा..." : "Loading...") : (lang === "hi" ? "प्राप्त करें" : "Fetch Data")}
+                </button>
+              </form>
+
+              {ogdError && (
+                <div className="p-3 bg-red-50 text-red-700 text-xs border border-red-200 rounded">
+                  {ogdError}
+                </div>
+              )}
+
+              {ogdData.length > 0 && (
+                <div className="overflow-x-auto border border-gray-200 rounded mt-4">
+                  <table className="w-full text-left text-sm whitespace-nowrap">
+                    <thead className="bg-gray-100 border-b border-gray-200 text-gray-800 font-semibold text-xs uppercase">
+                      <tr>
+                        {Object.keys(ogdData[0]).filter(k => k !== 'id').map(key => (
+                          <th key={key} className="px-4 py-3">{key.replace(/_/g, ' ')}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 text-gray-700">
+                      {ogdData.map((row, i) => (
+                        <tr key={i} className="hover:bg-gray-50 transition">
+                          {Object.entries(row).filter(([k]) => k !== 'id').map(([k, v]: any, j) => (
+                            <td key={j} className="px-4 py-2">{v}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 6: SETTINGS ================= */}
         {activeTab === "settings" && (
           <div className="space-y-4">
+
             <div className="bg-white border border-gray-300 p-5 rounded-lg space-y-4">
               <h4 className="text-sm font-semibold text-gray-800">Application Settings</h4>
 
