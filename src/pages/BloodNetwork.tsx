@@ -5,12 +5,14 @@ import {
   Check, X, Award, TrendingUp, Printer, Map
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useOutletContext } from "react-router-dom";
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const COMPONENT_TYPES = ["Whole Blood", "Red Blood Cells", "Plasma", "Platelets", "Cryoprecipitate"];
 
 export default function BloodNetwork() {
   const { user } = useAuth();
+  const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const [tab, setTab] = useState<"request" | "donate" | "find" | "donors">("request");
   
   // Requests Tab states
