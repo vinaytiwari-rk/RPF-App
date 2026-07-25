@@ -86,10 +86,11 @@ export default function BloodNetwork() {
   };
 
   // Fetch Blood Banks
-  const fetchBloodBanks = async () => {
+  const fetchBloodBanks = async (query = "") => {
     setLoadingBanks(true);
     try {
-      const res = await fetch("/api/blood-banks");
+      const url = query ? `/api/blood-banks?search=${encodeURIComponent(query)}` : "/api/blood-banks";
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setBloodBanks(data);
@@ -808,16 +809,22 @@ export default function BloodNetwork() {
             </div>
 
             {/* List Search location bar */}
-            <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 flex items-center gap-2">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              fetchBloodBanks(bankSearchQuery);
+            }} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 flex items-center gap-2">
               <Search className="w-5 h-5 text-slate-400" />
               <input 
                 type="text" 
                 value={bankSearchQuery}
                 onChange={(e) => setBankSearchQuery(e.target.value)}
-                placeholder="Filter blood banks below by name or address..." 
+                placeholder="Search blood banks by name, city, or pincode..." 
                 className="flex-1 text-xs outline-none bg-transparent font-medium"
               />
-            </div>
+              <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-md">
+                Search
+              </button>
+            </form>
 
             {loadingBanks ? (
               <div className="flex flex-col items-center justify-center py-10 gap-2">
