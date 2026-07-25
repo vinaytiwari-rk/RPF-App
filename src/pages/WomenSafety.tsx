@@ -212,10 +212,19 @@ export default function WomenSafety() {
   const streamRef = useRef<MediaStream | null>(null);
   const sensorRef = useRef<any>(null);
 
-  // NCW Webview states
-  const [activeNcwUrl, setActiveNcwUrl] = useState("https://ncwapps.nic.in/onlinecomplaintsv2/");
-  const [ncwLoading, setNcwLoading] = useState(true);
-  const [ncwKey, setNcwKey] = useState(1);
+  // Built-in Complaint Portal states
+  const [complainantName, setComplainantName] = useState(user?.name || "");
+  const [complainantPhone, setComplainantPhone] = useState(user?.phone || "");
+  const [complaintType, setComplaintType] = useState("Harassment / Eve Teasing");
+  const [incidentDate, setIncidentDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [incidentLocation, setIncidentLocation] = useState("");
+  const [complaintDesc, setComplaintDesc] = useState("");
+  const [suspectDetails, setSuspectDetails] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [formStep, setFormStep] = useState(1);
+  const [complaintsList, setComplaintsList] = useState<any[]>([]);
+  const [fetchingComplaints, setFetchingComplaints] = useState(false);
+  const [submittingComplaint, setSubmittingComplaint] = useState(false);
 
   // Safe routes state
   const [searchPincode, setSearchPincode] = useState("");
@@ -344,6 +353,62 @@ export default function WomenSafety() {
       if (json.success) setRatingsList(json.data);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  // Fetch filed complaints when tab becomes active
+  useEffect(() => {
+    if (activeTab === "ncw") {
+      fetchComplaints();
+    }
+  }, [activeTab, user?.id]);
+
+  const fetchComplaints = async () => {
+    setFetchingComplaints(true);
+    try {
+      const res = await fetch(`/api/women/complaints?userId=${user?.id || "guest"}`);
+      const json = await res.json();
+      if (json.success) setComplaintsList(json.data);
+    } catch (e) {
+      console.error("Failed to fetch complaints", e);
+    } finally {
+      setFetchingComplaints(false);
+    }
+  };
+
+  const handleComplaintSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!complaintDesc.trim() || !incidentLocation.trim()) return;
+    setSubmittingComplaint(true);
+    try {
+      const res = await fetch("/api/women/complaints", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user?.id || "guest",
+          complainant_name: isAnonymous ? "Anonymous" : complainantName,
+          complainant_phone: isAnonymous ? "" : complainantPhone,
+          complaint_type: complaintType,
+          incident_date: incidentDate,
+          location: incidentLocation,
+          description: complaintDesc,
+          suspect_details: suspectDetails,
+          is_anonymous: isAnonymous
+        })
+      });
+      if (res.ok) {
+        setSuccessMsg(lang === "hi" ? "शिकायत सफलतापूर्वक दर्ज की गई!" : "Complaint submitted successfully!");
+        setComplaintDesc("");
+        setIncidentLocation("");
+        setSuspectDetails("");
+        setFormStep(1);
+        fetchComplaints();
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmittingComplaint(false);
     }
   };
 
@@ -988,95 +1053,268 @@ export default function WomenSafety() {
         </div>
       )}
 
-      {/* TAB 3: NCW PORTAL (Seamless Government Complaining WebView) */}
+      {/* TAB 3: NCW PORTAL & INCIDENT REPORTING DESK */}
       {activeTab === "ncw" && (
         <div className="space-y-4 animate-fadeIn text-slate-800">
+          {/* Quick Access to Official Portals (Browser Launch) */}
+          <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-3 shadow-sm">
+            <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5 border-b border-rose-100 pb-2">
+              <Globe className="w-4 h-4 text-rose-550" />
+              {lang === "hi" ? "महिला आयोग आधिकारिक लिंक" : "Official Women Commission Portals"}
+            </h4>
+            <p className="text-[9px] text-slate-450 font-semibold leading-relaxed">
+              If you wish to file a report directly with the National Commission for Women, click the buttons below to open the official portals in your phone browser:
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <a 
+                href="https://www.ncw.gov.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-2.5 px-3 bg-rose-50 text-rose-700 border border-rose-200/50 hover:bg-rose-100 rounded-xl text-[9px] font-black uppercase tracking-wider text-center decoration-none flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <span>NCW Website</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <a 
+                href="https://ncwapps.nic.in/onlinecomplaintsv2/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-2.5 px-3 bg-rose-50 text-rose-700 border border-rose-200/50 hover:bg-rose-100 rounded-xl text-[9px] font-black uppercase tracking-wider text-center decoration-none flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <span>NCW Complaints</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
+
+          {/* RPF Internal Complaint Lodging Desk */}
           <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 shadow-sm">
             <div className="flex justify-between items-center border-b border-rose-100 pb-2">
               <div className="flex items-center gap-1.5">
-                <Globe className="w-4 h-4 text-purple-650" />
+                <Shield className="w-4.5 h-4.5 text-rose-600 fill-rose-100" />
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-850">
-                  {lang === "hi" ? "राष्ट्रीय महिला आयोग" : "National Commission for Women"}
+                  {lang === "hi" ? "आरपीएफ अपराध एवं शिकायत डेस्क" : "RPF Crime & Complaint Desk"}
                 </h4>
               </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => {
-                    setNcwKey(k => k + 1);
-                    setNcwLoading(true);
-                  }}
-                  className="p-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/50 cursor-pointer"
-                  title="Refresh View"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                </button>
-                <a 
-                  href={activeNcwUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/50 flex items-center justify-center"
-                  title="Open in Browser"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+              <span className="text-[8px] font-mono font-black uppercase tracking-wider bg-rose-50 border border-rose-200 text-rose-750 px-2 py-0.5 rounded-full">
+                {lang === "hi" ? "सक्रिय डेस्क" : "Active Desk"}
+              </span>
+            </div>
+
+            <form onSubmit={handleComplaintSubmit} className="space-y-4">
+              {/* Anonymous Report Toggle */}
+              <div className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                <div>
+                  <span className="text-[10px] font-black block text-slate-800">
+                    {lang === "hi" ? "गुमनाम शिकायत (Anonymous)" : "File Anonymously"}
+                  </span>
+                  <span className="text-[8px] text-slate-450 font-semibold block mt-0.5">
+                    Hides your name and phone number from the report logs.
+                  </span>
+                </div>
+                <input 
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={e => setIsAnonymous(e.target.checked)}
+                  className="w-4.5 h-4.5 accent-rose-600 cursor-pointer"
+                />
               </div>
-            </div>
 
-            <p className="text-[9px] text-slate-500 font-semibold leading-relaxed">
-              Register formal complaints or browse resources securely on the official NCW portals inside our secure web sandbox.
-            </p>
+              {formStep === 1 && (
+                <div className="space-y-3 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-bold text-rose-600 uppercase tracking-widest">Step 1 of 3: Complainant Details</span>
+                    <button 
+                      type="button" 
+                      onClick={() => setFormStep(2)}
+                      className="text-[9.5px] font-black text-rose-600 hover:underline cursor-pointer"
+                    >
+                      Next Step &rarr;
+                    </button>
+                  </div>
 
-            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-50 border border-slate-150 rounded-xl">
-              <button 
-                onClick={() => {
-                  setActiveNcwUrl("https://www.ncw.gov.in/");
-                  setNcwLoading(true);
-                }}
-                className={`py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition cursor-pointer text-center ${
-                  activeNcwUrl === "https://www.ncw.gov.in/" 
-                    ? "bg-rose-600 text-white shadow-sm font-bold" 
-                    : "text-slate-550 hover:text-slate-800"
-                }`}
-              >
-                NCW Home Portal
-              </button>
-              <button 
-                onClick={() => {
-                  setActiveNcwUrl("https://ncwapps.nic.in/onlinecomplaintsv2/");
-                  setNcwLoading(true);
-                }}
-                className={`py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition cursor-pointer text-center ${
-                  activeNcwUrl === "https://ncwapps.nic.in/onlinecomplaintsv2/" 
-                    ? "bg-rose-600 text-white shadow-sm font-bold" 
-                    : "text-slate-550 hover:text-slate-800"
-                }`}
-              >
-                Complaints Desk (ComplaintsV2)
-              </button>
-            </div>
+                  {!isAnonymous && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Your Name</label>
+                        <input 
+                          type="text" 
+                          value={complainantName}
+                          onChange={e => setComplainantName(e.target.value)}
+                          required
+                          className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Phone Number</label>
+                        <input 
+                          type="tel" 
+                          value={complainantPhone}
+                          onChange={e => setComplainantPhone(e.target.value)}
+                          required
+                          className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
+                        />
+                      </div>
+                    </div>
+                  )}
 
-            <div className="relative rounded-xl overflow-hidden border border-rose-100 bg-slate-100 min-h-[500px]">
-              {ncwLoading && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 z-10 space-y-2">
-                  <div className="w-7 h-7 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-[10px] font-bold text-slate-500 animate-pulse">Connecting to NCW Portal...</span>
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Select Complaint Category</label>
+                    <select 
+                      value={complaintType}
+                      onChange={e => setComplaintType(e.target.value)}
+                      className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-750 cursor-pointer focus:border-rose-500"
+                    >
+                      <option value="Harassment / Eve Teasing">Harassment / Eve Teasing (Verbal Abuse)</option>
+                      <option value="Domestic Abuse / Violence">Domestic Abuse / Violence</option>
+                      <option value="Cyber Stalking / Blackmail">Cyber Stalking / Blackmail</option>
+                      <option value="Physical Threat / Assault">Physical Threat / Assault</option>
+                      <option value="Stalking in Public Spaces">Stalking in Public Spaces</option>
+                      <option value="Other Crime / Emergency">Other Crime / Emergency</option>
+                    </select>
+                  </div>
                 </div>
               )}
-              <iframe 
-                key={ncwKey}
-                src={activeNcwUrl}
-                onLoad={() => setNcwLoading(false)}
-                className="w-full min-h-[500px] border-0"
-                title="National Commission for Women Portal WebView"
-              />
-            </div>
-            
-            <div className="bg-rose-50/50 p-2.5 rounded-lg border border-rose-100 text-center">
-              <span className="text-[8px] text-slate-400 font-bold block mb-1">CORS & Framing Disclaimer</span>
-              <p className="text-[8.5px] text-slate-550 leading-relaxed font-semibold">
-                If the government portal restricts embedding in standard browser view, click the top right icon to launch it in your phone's native app browser.
+
+              {formStep === 2 && (
+                <div className="space-y-3 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <button 
+                      type="button" 
+                      onClick={() => setFormStep(1)}
+                      className="text-[9.5px] font-black text-slate-500 hover:underline cursor-pointer"
+                    >
+                      &larr; Back
+                    </button>
+                    <span className="text-[9px] font-bold text-rose-600 uppercase tracking-widest">Step 2 of 3: Incident Info</span>
+                    <button 
+                      type="button" 
+                      onClick={() => setFormStep(3)}
+                      className="text-[9.5px] font-black text-rose-600 hover:underline cursor-pointer"
+                    >
+                      Next Step &rarr;
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Incident Date</label>
+                      <input 
+                        type="date" 
+                        value={incidentDate}
+                        onChange={e => setIncidentDate(e.target.value)}
+                        required
+                        className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Incident Location (Area/Pincode)</label>
+                      <input 
+                        type="text" 
+                        value={incidentLocation}
+                        onChange={e => setIncidentLocation(e.target.value)}
+                        required
+                        placeholder="e.g. Karond Chowk, Bhopal"
+                        className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Incident Details (Describe clearly)</label>
+                    <textarea 
+                      value={complaintDesc}
+                      onChange={e => setComplaintDesc(e.target.value)}
+                      required
+                      rows={3}
+                      placeholder="Please enter a detailed description of what occurred..."
+                      className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-slate-800 focus:border-rose-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {formStep === 3 && (
+                <div className="space-y-3 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <button 
+                      type="button" 
+                      onClick={() => setFormStep(2)}
+                      className="text-[9.5px] font-black text-slate-500 hover:underline cursor-pointer"
+                    >
+                      &larr; Back
+                    </button>
+                    <span className="text-[9px] font-bold text-rose-600 uppercase tracking-widest">Step 3 of 3: Suspect details & Submit</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Suspect Description (Optional)</label>
+                    <input 
+                      type="text" 
+                      value={suspectDetails}
+                      onChange={e => setSuspectDetails(e.target.value)}
+                      placeholder="Name, clothing, vehicle details, physical attributes..."
+                      className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={submittingComplaint}
+                    className="w-full mt-2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-lg text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
+                  >
+                    {submittingComplaint ? "Filing Official Report..." : "Submit Complaint Report"}
+                  </button>
+                </div>
+              )}
+            </form>
+          </div>
+
+          {/* Filed Complaints Tracking Board */}
+          <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 shadow-sm">
+            <h4 className="text-xs font-black uppercase tracking-wider border-b border-rose-100 pb-2">
+              {lang === "hi" ? "मेरी दर्ज शिकायतें स्थिति" : "My Filed Complaints (Live Status Tracker)"}
+            </h4>
+
+            {fetchingComplaints ? (
+              <div className="text-center py-6">
+                <div className="w-5 h-5 border-2 border-rose-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider animate-pulse">Syncing logs...</span>
+              </div>
+            ) : complaintsList.length > 0 ? (
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                {complaintsList.map((item, idx) => (
+                  <div key={idx} className="bg-slate-50 border border-slate-150 p-3.5 rounded-xl space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-[10.5px] font-black text-slate-850 block">{item.complaint_type}</span>
+                        <span className="text-[7.5px] font-mono text-slate-400 block mt-0.5">Report ID: RPF-2026-00{item.id}</span>
+                      </div>
+                      <span className={`text-[7.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                        item.status === 'Resolved' 
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
+                          : item.status === 'Under Investigation'
+                          ? 'bg-blue-50 border-blue-200 text-blue-700'
+                          : 'bg-amber-50 border-amber-200 text-amber-700'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </div>
+
+                    <p className="text-[9px] text-slate-500 leading-relaxed font-semibold">{item.description}</p>
+
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-200/50 text-[8px] font-bold text-slate-400">
+                      <span>Location: {item.location}</span>
+                      <span>Date: {item.incident_date}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[9px] text-slate-400 text-center py-4 font-semibold">
+                No incident reports filed yet. Use the desk above to submit a report if needed.
               </p>
-            </div>
+            )}
           </div>
         </div>
       )}

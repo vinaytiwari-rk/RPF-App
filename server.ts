@@ -588,6 +588,70 @@ app.post("/api/locations/street_ratings", async (req, res) => {
   }
 });
 
+app.get("/api/women/complaints", async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) return res.status(400).json({ error: "userId is required" });
+    const result = await pool.query(
+      `SELECT * FROM women_complaints WHERE user_id = $1 ORDER BY "createdAt" DESC`,
+      [userId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/women/complaints", async (req, res) => {
+  try {
+    const { user_id, complainant_name, complainant_phone, complaint_type, incident_date, location, description, suspect_details, is_anonymous } = req.body;
+    
+    // Save to PostgreSQL table
+    await pool.query(
+      `INSERT INTO women_complaints (user_id, complainant_name, complainant_phone, complaint_type, incident_date, location, description, suspect_details, is_anonymous) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        user_id || "guest",
+        complainant_name || "",
+        complainant_phone || "",
+        complaint_type,
+        incident_date,
+        location,
+        description,
+        suspect_details || "",
+        is_anonymous || false
+      ]
+    );
+
+    // Save duplicate to service_submissions for Admin portal unified views
+    const dataString = JSON.stringify({
+      complaintType: complaint_type,
+      incidentDate: incident_date,
+      location,
+      description,
+      suspectDetails: suspect_details,
+      isAnonymous: is_anonymous
+    });
+
+    await pool.query(
+      `INSERT INTO service_submissions ("userId", "citizenName", "citizenPhone", "serviceName", "submissionData", status) 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        user_id || "guest",
+        is_anonymous ? "Anonymous" : (complainant_name || "Citizen"),
+        is_anonymous ? "" : (complainant_phone || ""),
+        "Women Support - Incident Complaint",
+        dataString,
+        "pending"
+      ]
+    );
+
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.put("/api/volunteers/:id/approve", async (req, res) => {
   try {
     const { id } = req.params;
@@ -2253,6 +2317,24 @@ async function initDatabase() {
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "street_ratings table creation");
+
+    // Create women_complaints table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS women_complaints (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        complainant_name TEXT,
+        complainant_phone TEXT,
+        complaint_type TEXT NOT NULL,
+        incident_date TEXT NOT NULL,
+        location TEXT NOT NULL,
+        description TEXT NOT NULL,
+        suspect_details TEXT,
+        is_anonymous BOOLEAN DEFAULT FALSE,
+        status TEXT DEFAULT 'Pending Review',
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "women_complaints table creation");
 
     // Seed default street ratings if empty
     try {
