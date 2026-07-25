@@ -32,6 +32,7 @@ export default function Services() {
 
   const filtered = (Array.isArray(servicesList)
     ? servicesList.filter((s: any) => {
+        if (!s) return false;
         // Exclude donations from services page as it's now on the home page
         if (s.id === "donations") return false;
         
@@ -43,8 +44,8 @@ export default function Services() {
         return enabled && matchesCat && matchesSearch;
       })
     : []).sort((a, b) => {
-    if (a.featured && !b.featured) return -1;
-    if (!a.featured && b.featured) return 1;
+    if (a?.featured && !b?.featured) return -1;
+    if (!a?.featured && b?.featured) return 1;
     return 0;
   });
 
