@@ -565,6 +565,29 @@ app.get("/api/locations/helplines", async (req, res) => {
   });
 });
 
+app.get("/api/locations/street_ratings", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM street_ratings ORDER BY \"createdAt\" DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/locations/street_ratings", async (req, res) => {
+  try {
+    const { location_name, latitude, longitude, rating, notes } = req.body;
+    await pool.query(
+      `INSERT INTO street_ratings (location_name, latitude, longitude, rating, notes) 
+       VALUES ($1, $2, $3, $4, $5)`,
+      [location_name, latitude || 0, longitude || 0, rating || 3, notes || ""]
+    );
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.put("/api/volunteers/:id/approve", async (req, res) => {
   try {
     const { id } = req.params;
@@ -2208,7 +2231,6 @@ async function initDatabase() {
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "volunteer_tasks table creation");
-
     // Create passkeys table (WebAuthn credentials)
     await runQuery(`
       CREATE TABLE IF NOT EXISTS passkeys (
@@ -2218,6 +2240,35 @@ async function initDatabase() {
         "userId" VARCHAR(255) NOT NULL
       )
     `, [], "passkeys table creation");
+
+    // Create street_ratings table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS street_ratings (
+        id SERIAL PRIMARY KEY,
+        location_name TEXT NOT NULL,
+        latitude NUMERIC NOT NULL,
+        longitude NUMERIC NOT NULL,
+        rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+        notes TEXT,
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "street_ratings table creation");
+
+    // Seed default street ratings if empty
+    try {
+      const ratingCount = await client.query("SELECT COUNT(*) FROM street_ratings");
+      if (parseInt(ratingCount.rows[0].count, 10) === 0) {
+        console.log("Seeding default street ratings...");
+        await client.query(`
+          INSERT INTO street_ratings (location_name, latitude, longitude, rating, notes) VALUES
+          ('Karond Chowk, Bhopal', 23.2923, 77.4101, 4, 'Well lit, active CCTV cameras and police checking.'),
+          ('Bus Stand Area, Sehore', 23.2032, 77.0844, 3, 'Busy during day, but poorly lit after 9 PM. Safe but remain cautious.'),
+          ('Station Road, Sehore', 23.2015, 77.0811, 2, 'Very dark stretch, streetlights often broken. Avoid walking alone.')
+        `);
+      }
+    } catch(err) {
+      console.error("Seeding street ratings failed:", err);
+    }
 
     // Seed default social posts if empty
     try {

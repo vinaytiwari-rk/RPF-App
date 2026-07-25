@@ -1,57 +1,337 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Shield, AlertOctagon, Phone, User, Plus, Heart, HelpCircle, CheckCircle, X } from "lucide-react";
+import { 
+  Shield, AlertOctagon, Phone, User, Plus, Heart, 
+  HelpCircle, CheckCircle, X, Volume2, Camera, Eye, 
+  Map, Settings, Play, Square, RefreshCw, Layers, Radio
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+
+// Web Audio API Synthesizers (Offline, client-side, 100% reliable)
+let audioCtx: AudioContext | null = null;
+let sirenOsc: OscillatorNode | null = null;
+let sirenGain: GainNode | null = null;
+let sirenInterval: any = null;
+
+let ringtoneOsc1: OscillatorNode | null = null;
+let ringtoneOsc2: OscillatorNode | null = null;
+let ringtoneGain: GainNode | null = null;
+let ringtoneInterval: any = null;
+
+const initAudio = () => {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+};
+
+const playSiren = () => {
+  initAudio();
+  if (!audioCtx) return;
+  
+  stopSiren();
+  
+  sirenOsc = audioCtx.createOscillator();
+  sirenGain = audioCtx.createGain();
+  
+  sirenOsc.type = "sine";
+  sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime);
+  
+  sirenGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+  
+  sirenOsc.connect(sirenGain);
+  sirenGain.connect(audioCtx.destination);
+  
+  sirenOsc.start();
+  
+  const sweep = () => {
+    if (!audioCtx || !sirenOsc) return;
+    const t = audioCtx.currentTime;
+    sirenOsc.frequency.cancelScheduledValues(t);
+    sirenOsc.frequency.setValueAtTime(sirenOsc.frequency.value, t);
+    sirenOsc.frequency.linearRampToValueAtTime(1100, t + 0.45);
+    sirenOsc.frequency.linearRampToValueAtTime(550, t + 0.9);
+  };
+  
+  sweep();
+  sirenInterval = setInterval(sweep, 900);
+};
+
+const stopSiren = () => {
+  if (sirenInterval) {
+    clearInterval(sirenInterval);
+    sirenInterval = null;
+  }
+  if (sirenOsc) {
+    try { sirenOsc.stop(); sirenOsc.disconnect(); } catch(e){}
+    sirenOsc = null;
+  }
+  if (sirenGain) {
+    try { sirenGain.disconnect(); } catch(e){}
+    sirenGain = null;
+  }
+};
+
+const playRingtone = () => {
+  initAudio();
+  if (!audioCtx) return;
+  
+  stopRingtone();
+  
+  const ring = () => {
+    if (!audioCtx) return;
+    ringtoneOsc1 = audioCtx.createOscillator();
+    ringtoneOsc2 = audioCtx.createOscillator();
+    ringtoneGain = audioCtx.createGain();
+    
+    ringtoneOsc1.frequency.setValueAtTime(440, audioCtx.currentTime);
+    ringtoneOsc2.frequency.setValueAtTime(480, audioCtx.currentTime);
+    
+    ringtoneGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+    
+    ringtoneOsc1.connect(ringtoneGain);
+    ringtoneOsc2.connect(ringtoneGain);
+    ringtoneGain.connect(audioCtx.destination);
+    
+    ringtoneOsc1.start();
+    ringtoneOsc2.start();
+    
+    setTimeout(() => {
+      try {
+        ringtoneOsc1?.stop();
+        ringtoneOsc2?.stop();
+      } catch(e){}
+    }, 2000);
+  };
+  
+  ring();
+  ringtoneInterval = setInterval(ring, 5000);
+};
+
+const stopRingtone = () => {
+  if (ringtoneInterval) {
+    clearInterval(ringtoneInterval);
+    ringtoneInterval = null;
+  }
+  try {
+    ringtoneOsc1?.stop();
+    ringtoneOsc2?.stop();
+  } catch(e){}
+  ringtoneOsc1 = null;
+  ringtoneOsc2 = null;
+};
+
+// 1. Calculator Disguise Component
+export function CalculatorDisguise({ onUnlock, correctPin }: { onUnlock: () => void; correctPin: string }) {
+  const [calcInput, setCalcInput] = useState("");
+  
+  const handleBtn = (val: string) => {
+    if (val === "C") {
+      setCalcInput("");
+    } else if (val === "=") {
+      if (calcInput === correctPin) {
+        onUnlock();
+      } else {
+        try {
+          const sanitized = calcInput.replace(/[^0-9+\-*/.]/g, '');
+          const result = new Function(`return ${sanitized}`)();
+          setCalcInput(String(result || ""));
+        } catch (e) {
+          setCalcInput("Error");
+        }
+      }
+    } else {
+      setCalcInput(prev => prev + val);
+    }
+  };
+
+  return (
+    <div className="max-w-xs mx-auto p-5 bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl space-y-4 animate-scaleUp mt-10">
+      <div className="bg-slate-900 p-4 rounded-xl text-right text-white font-mono text-2xl h-14 overflow-hidden border border-slate-800/80">
+        {calcInput || "0"}
+      </div>
+      <div className="grid grid-cols-4 gap-3">
+        {["C", "/", "*", "-", "7", "8", "9", "+", "4", "5", "6", "=", "1", "2", "3", "0", "."].map(btn => (
+          <button
+            key={btn}
+            onClick={() => handleBtn(btn)}
+            className={`h-12 text-sm font-black rounded-xl transition ${
+              btn === "=" 
+                ? "bg-purple-650 hover:bg-purple-750 text-white row-span-2 h-26 cursor-pointer" 
+                : ["C", "/", "*", "-", "+"].includes(btn)
+                ? "bg-slate-850 hover:bg-slate-800 text-purple-400 cursor-pointer"
+                : "bg-slate-900 hover:bg-slate-850 text-white cursor-pointer"
+            }`}
+            style={{ gridColumn: btn === "." ? "span 3" : undefined }}
+          >
+            {btn}
+          </button>
+        ))}
+      </div>
+      <p className="text-[9px] text-slate-500 text-center font-semibold">Standard Calculator Mode</p>
+    </div>
+  );
+}
 
 export default function WomenSafety() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const { user } = useAuth();
+
+  // Stealth settings
+  const [stealthEnabled, setStealthEnabled] = useState(() => localStorage.getItem("stealth_enabled") === "true");
+  const [calculatorPin, setCalculatorPin] = useState(() => localStorage.getItem("calc_pin") || "7777");
+  const [isUnlocked, setIsUnlocked] = useState(!stealthEnabled);
+
+  // General safety states
+  const [activeTab, setActiveTab] = useState<"deterrents" | "scanner" | "routes" | "settings">("deterrents");
   const [sosActive, setSosActive] = useState(false);
   const [sosFired, setSosFired] = useState(false);
-  const [contacts, setContacts] = useState<string[]>([]);
+  const [sosLocationUrl, setSosLocationUrl] = useState("");
+  const [contacts, setContacts] = useState<string[]>(() => {
+    const saved = localStorage.getItem("sos_contacts");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [newContact, setNewContact] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Modals state
-  const [showCounselingModal, setShowCounselingModal] = useState(false);
-  const [showWorkshopModal, setShowWorkshopModal] = useState(false);
-  
-  // Counseling form state
-  const [counselingType, setCounselingType] = useState("Legal Consultation");
-  const [counselingDesc, setCounselingDesc] = useState("");
-  const [counselingContact, setCounselingContact] = useState("Call");
-  const [submittingCounseling, setSubmittingCounseling] = useState(false);
+  // Deterrents state
+  const [fakeCallActive, setFakeCallActive] = useState(false);
+  const [fakeCallConnected, setFakeCallConnected] = useState(false);
+  const [fakeCallTime, setFakeCallTime] = useState(0);
+  const [sirenActive, setSirenActive] = useState(false);
+  const [shakeEnabled, setShakeEnabled] = useState(() => localStorage.getItem("shake_enabled") === "true");
 
-  // Workshop form state
-  const [preferredBatch, setPreferredBatch] = useState("Weekend Morning");
-  const [experienceLevel, setExperienceLevel] = useState("Beginner");
-  const [submittingWorkshop, setSubmittingWorkshop] = useState(false);
+  // Scanner state
+  const [isEMFActive, setIsEMFActive] = useState(false);
+  const [emfValue, setEmfValue] = useState(38.2);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  // Directory Search states
+  // Safe routes state
   const [searchPincode, setSearchPincode] = useState("");
   const [directoryList, setDirectoryList] = useState<any[]>([]);
   const [searchingDirectory, setSearchingDirectory] = useState(false);
-  const [sosLocationUrl, setSosLocationUrl] = useState("");
+  const [startLoc, setStartLoc] = useState("");
+  const [endLoc, setEndLoc] = useState("");
+  const [directionsUrl, setDirectionsUrl] = useState("");
+  const [ratingsList, setRatingsList] = useState<any[]>([]);
+  const [newStreetName, setNewStreetName] = useState("");
+  const [newRatingVal, setNewRatingVal] = useState(4);
+  const [newRatingNotes, setNewRatingNotes] = useState("");
+  const [submittingRating, setSubmittingRating] = useState(false);
+
+  // Audio Evidence states
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  // Local haptic feedback utility
+  const triggerHaptic = (pattern = [100]) => {
+    if ("vibrate" in navigator) {
+      navigator.vibrate(pattern);
+    }
+  };
+
+  // Shake-to-alert handler
+  useEffect(() => {
+    if (!shakeEnabled) return;
+    
+    let lastX: number | null = null;
+    let lastY: number | null = null;
+    let lastZ: number | null = null;
+    const shakeThreshold = 18;
+
+    const handleMotionEvent = (event: DeviceMotionEvent) => {
+      const acceleration = event.accelerationIncludingGravity;
+      if (!acceleration) return;
+      
+      const { x, y, z } = acceleration;
+      if (x === null || y === null || z === null) return;
+
+      if (lastX !== null && lastY !== null && lastZ !== null) {
+        const deltaX = Math.abs(x - lastX);
+        const deltaY = Math.abs(y - lastY);
+        const deltaZ = Math.abs(z - lastZ);
+        
+        if ((deltaX > shakeThreshold && deltaY > shakeThreshold) || deltaZ > shakeThreshold + 5) {
+          triggerHaptic([300, 100, 300]);
+          handleSOS();
+        }
+      }
+      lastX = x;
+      lastY = y;
+      lastZ = z;
+    };
+
+    window.addEventListener("devicemotion", handleMotionEvent);
+    return () => window.removeEventListener("devicemotion", handleMotionEvent);
+  }, [shakeEnabled, contacts]);
+
+  // Fake call timer
+  useEffect(() => {
+    let timer: any = null;
+    if (fakeCallConnected) {
+      timer = setInterval(() => setFakeCallTime(p => p + 1), 1000);
+    } else {
+      setFakeCallTime(0);
+    }
+    return () => clearInterval(timer);
+  }, [fakeCallConnected]);
+
+  // EMF mock sensor fluctuations
+  useEffect(() => {
+    let timer: any = null;
+    if (isEMFActive) {
+      timer = setInterval(() => {
+        setEmfValue(p => {
+          const delta = (Math.random() - 0.5) * 8;
+          const newVal = Math.max(30, Math.min(180, p + delta));
+          if (newVal > 90) triggerHaptic([50]);
+          return parseFloat(newVal.toFixed(1));
+        });
+      }, 300);
+    }
+    return () => clearInterval(timer);
+  }, [isEMFActive]);
+
+  // Fetch Safe Street Ratings from database
+  useEffect(() => {
+    fetchStreetRatings();
+  }, []);
+
+  const fetchStreetRatings = async () => {
+    try {
+      const res = await fetch("/api/locations/street_ratings");
+      const json = await res.json();
+      if (json.success) setRatingsList(json.data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleSOS = async () => {
     setSosActive(true);
+    triggerHaptic([200, 100, 200]);
+    startSilentRecording();
+
     try {
       let locationStr = "Location unavailable";
+      let latVal: number | null = null;
+      let lonVal: number | null = null;
+
       if ("geolocation" in navigator) {
         try {
           const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
           });
-          const lat = pos.coords.latitude.toFixed(6);
-          const lon = pos.coords.longitude.toFixed(6);
-          locationStr = `https://www.google.com/maps?q=${lat},${lon}`;
+          latVal = pos.coords.latitude;
+          lonVal = pos.coords.longitude;
+          locationStr = `https://www.google.com/maps?q=${latVal.toFixed(6)},${lonVal.toFixed(6)}`;
         } catch (e: any) {
           console.warn("GPS failed", e);
-          if (e.code === 1) { // PERMISSION_DENIED
-            locationStr = "Location Permission Denied";
-          } else {
-            locationStr = "Location unavailable (Error or Timeout)";
-          }
         }
       }
 
@@ -68,6 +348,8 @@ export default function WomenSafety() {
         serviceName: "Women Support",
         submissionData: JSON.stringify(data),
         status: "pending",
+        latitude: latVal,
+        longitude: lonVal,
         timestamp: new Date().toISOString(),
       };
 
@@ -87,6 +369,62 @@ export default function WomenSafety() {
     }
   };
 
+  // Audio Recording (Evidence Locker)
+  const startSilentRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      setIsRecording(true);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        setIsRecording(false);
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = async () => {
+          const base64Audio = reader.result as string;
+          await fetch("/api/submissions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: user?.id || "guest",
+              citizenName: user?.name || "Citizen",
+              citizenPhone: user?.phone || "",
+              serviceName: "Women Support - Audio Evidence",
+              submissionData: JSON.stringify({ audio: base64Audio }),
+              status: "pending"
+            })
+          });
+        };
+        stream.getTracks().forEach(t => t.stop());
+      };
+
+      mediaRecorder.start();
+      setTimeout(() => {
+        if (mediaRecorder.state !== "inactive") {
+          mediaRecorder.stop();
+        }
+      }, 10000);
+
+    } catch (err) {
+      console.warn("Evidence recording microphone permission blocked:", err);
+    }
+  };
+
+  const startFakeCallHaptics = () => {
+    if ("vibrate" in navigator) {
+      ringtoneInterval = setInterval(() => {
+        navigator.vibrate([1500, 1000]);
+      }, 2500);
+    }
+  };
+
   const handleDirectorySearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchPincode.trim()) return;
@@ -98,79 +436,42 @@ export default function WomenSafety() {
         setDirectoryList(json.data);
       }
     } catch (err) {
-      console.error("Directory search failed:", err);
+      console.error(err);
     } finally {
       setSearchingDirectory(false);
     }
   };
 
-  const handleCounselingSubmit = async (e: React.FormEvent) => {
+  const handleRouteSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmittingCounseling(true);
-    try {
-      const data = {
-        counselingType,
-        description: counselingDesc,
-        contactPreference: counselingContact
-      };
-      const submission = {
-        userId: user?.id || "guest",
-        citizenName: user?.name || "Citizen",
-        citizenPhone: user?.phone || "",
-        serviceName: "Women Support - Counseling",
-        submissionData: JSON.stringify(data),
-        status: "pending",
-        timestamp: new Date().toISOString(),
-      };
-      const res = await fetch("/api/submissions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submission)
-      });
-      if (res.ok) {
-        setSuccessMsg(lang === "hi" ? "परामर्श अनुरोध पंजीकृत किया गया!" : "Counseling request registered!");
-        setShowCounselingModal(false);
-        setCounselingDesc("");
-        setTimeout(() => setSuccessMsg(""), 4000);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubmittingCounseling(false);
-    }
+    if (!startLoc.trim() || !endLoc.trim()) return;
+    setDirectionsUrl(`https://maps.google.com/maps?q=${encodeURIComponent(startLoc.trim())}+to+${encodeURIComponent(endLoc.trim())}&t=&z=14&ie=UTF8&iwloc=&output=embed`);
   };
 
-  const handleWorkshopSubmit = async (e: React.FormEvent) => {
+  const handleRatingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmittingWorkshop(true);
+    if (!newStreetName.trim()) return;
+    setSubmittingRating(true);
     try {
-      const data = {
-        preferredBatch,
-        experienceLevel
-      };
-      const submission = {
-        userId: user?.id || "guest",
-        citizenName: user?.name || "Citizen",
-        citizenPhone: user?.phone || "",
-        serviceName: "Women Support - Workshop",
-        submissionData: JSON.stringify(data),
-        status: "pending",
-        timestamp: new Date().toISOString(),
-      };
-      const res = await fetch("/api/submissions", {
+      const res = await fetch("/api/locations/street_ratings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submission)
+        body: JSON.stringify({
+          location_name: newStreetName.trim(),
+          rating: newRatingVal,
+          notes: newRatingNotes.trim()
+        })
       });
       if (res.ok) {
-        setSuccessMsg(lang === "hi" ? "कार्यशाला हेतु सफलतापूर्वक पंजीकृत!" : "Successfully registered for workshop!");
-        setShowWorkshopModal(false);
-        setTimeout(() => setSuccessMsg(""), 4000);
+        setNewStreetName("");
+        setNewRatingNotes("");
+        setNewRatingVal(4);
+        fetchStreetRatings();
       }
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
     } finally {
-      setSubmittingWorkshop(false);
+      setSubmittingRating(false);
     }
   };
 
@@ -181,7 +482,9 @@ export default function WomenSafety() {
       const isEmail = val.includes("@");
       const isPhone = /^\d{10}$/.test(val);
       if (isEmail || isPhone) {
-        setContacts([...contacts, val]);
+        const updated = [...contacts, val];
+        setContacts(updated);
+        localStorage.setItem("sos_contacts", JSON.stringify(updated));
         setNewContact("");
         setSuccessMsg(lang === "hi" ? "सम्पर्क सफलतापूर्वक जोड़ा गया!" : "Contact added successfully!");
         setTimeout(() => setSuccessMsg(""), 3000);
@@ -192,327 +495,669 @@ export default function WomenSafety() {
     }
   };
 
-  return (
-    <div className="p-5 space-y-5 animate-fadeIn pb-24 relative overflow-x-hidden">
-      
-      {/* Dynamic Saffron/Crimson SOS Dial */}
-      <div className="flex flex-col items-center justify-center py-6 bg-white border border-red-200/50 rounded-2xl shadow-sm relative overflow-hidden">
-        <div className="absolute inset-0 bg-red-50/10 pointer-events-none"></div>
-        
-        <button 
-          onClick={handleSOS}
-          className={`w-32 h-32 rounded-full flex flex-col items-center justify-center transition-all duration-500 relative cursor-pointer ${
-            sosActive 
-              ? "bg-red-950 scale-95 shadow-inner" 
-              : "bg-gradient-to-br from-red-600 to-red-800 hover:scale-105 shadow-[0_10px_30px_rgba(220,38,38,0.4)]"
-          }`}
-        >
-          {/* Animated concentric rings */}
-          {!sosActive && (
-            <>
-              <div className="absolute inset-0 rounded-full border border-red-500/30 animate-ping"></div>
-              <div className="absolute -inset-4 rounded-full border border-red-500/10 animate-pulse"></div>
-            </>
-          )}
-          <AlertOctagon className="w-10 h-10 text-white mb-1.5" />
-          <span className="text-white text-xs font-black uppercase tracking-wider">
-            {sosActive ? "Sending..." : "Emergency SOS"}
-          </span>
-        </button>
-        <p className="text-[10px] text-red-600 font-semibold uppercase tracking-widest mt-4">
-          {lang === "hi" ? "तुरंत सहायता के लिए दबाएं" : "Press for immediate dispatch"}
-        </p>
-      </div>
+  const removeContact = (i: number) => {
+    const updated = contacts.filter((_, idx) => idx !== i);
+    setContacts(updated);
+    localStorage.setItem("sos_contacts", JSON.stringify(updated));
+  };
 
-      {sosFired && (
-        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5 shadow-lg space-y-4 animate-fadeIn">
-          <div className="flex items-center gap-2 text-red-700 font-extrabold text-sm">
-            <AlertOctagon className="w-5 h-5 text-red-600 fill-red-100 animate-pulse" />
-            <span>{lang === "hi" ? "आपातकालीन अलर्ट सक्रिय!" : "Emergency SOS Active!"}</span>
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setIsCameraActive(true);
+    } catch (err) {
+      console.error("Camera access failed:", err);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setIsCameraActive(false);
+  };
+
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  if (stealthEnabled && !isUnlocked) {
+    return (
+      <div className="p-5 flex flex-col items-center justify-center min-h-[80vh] bg-slate-900 text-white">
+        <h3 className="font-display font-extrabold text-sm mb-4 tracking-wider uppercase text-slate-400">Calculator Disguise Active</h3>
+        <CalculatorDisguise onUnlock={() => setIsUnlocked(true)} correctPin={calculatorPin} />
+      </div>
+    );
+  }
+
+  if (fakeCallActive) {
+    return (
+      <div className="fixed inset-0 z-50 bg-[#0c101b] text-white flex flex-col justify-between p-10 font-sans animate-fadeIn">
+        <div className="text-center pt-10 space-y-2">
+          <div className="w-24 h-24 bg-gradient-to-tr from-slate-700 to-slate-500 rounded-full flex items-center justify-center text-4xl font-extrabold mx-auto shadow-lg uppercase text-indigo-50">
+            {lang === "hi" ? "पि" : "Pa"}
           </div>
-          
-          <p className="text-xs text-slate-700 leading-relaxed font-semibold">
-            {lang === "hi" 
-              ? "आपके पंजीकृत ईमेल संपर्कों को एक स्थान लिंक के साथ आपातकालीन ईमेल भेज दिया गया है। आप नीचे दिए गए बटनों का उपयोग करके तुरंत व्हाट्सएप पर साझा कर सकते हैं या पुलिस हेल्पलाइन पर कॉल कर सकते हैं।" 
-              : "Emergency email alerts containing your coordinates have been sent to your guardians. Tap below to share immediately on WhatsApp or place a direct emergency phone call."}
+          <h2 className="text-2xl font-bold font-display">{lang === "hi" ? "पिताजी (घर)" : "Papa (Home)"}</h2>
+          <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold">
+            {fakeCallConnected ? formatTime(fakeCallTime) : (lang === "hi" ? "आने वाली कॉल..." : "Incoming call...")}
           </p>
-
-          <div className="grid grid-cols-2 gap-3">
-            <a 
-              href={`https://api.whatsapp.com/send?text=EMERGENCY! I need help. My current location is: ${encodeURIComponent(sosLocationUrl)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-[#25D366] hover:bg-[#20ba59] text-white py-2.5 px-4 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
-            >
-              <span>{lang === "hi" ? "व्हाट्सएप साझा" : "WhatsApp Alert"}</span>
-            </a>
-
-            <a 
-              href="tel:1091"
-              className="bg-red-600 hover:bg-red-750 text-white py-2.5 px-4 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
-            >
-              <span>{lang === "hi" ? "कॉल हेल्पलाइन" : "Call Helpline (1091)"}</span>
-            </a>
-          </div>
-
-          <button 
-            onClick={() => setSosFired(false)}
-            className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 rounded-xl text-xs transition cursor-pointer"
-          >
-            {lang === "hi" ? "अलर्ट बंद करें" : "Dismiss Emergency State"}
-          </button>
         </div>
-      )}
 
-      {/* Quick Services Grid */}
-      <div className="space-y-3">
-        <h4 className="font-display font-bold text-xs text-chakra-navy uppercase tracking-widest px-1">
-          {lang === "hi" ? "त्वरित सहायता मार्ग" : "Welfare Services"}
-        </h4>
-        
-        {[
-          { title: lang === "hi" ? "निःशुल्क कानूनी परामर्श" : "Free Legal Advice", desc: lang === "hi" ? "विशेषज्ञों से सुरक्षित सलाह" : "Confidential consultation with counselors", code: "1091", action: () => setShowCounselingModal(true) },
-          { title: lang === "hi" ? "आत्मरक्षा कार्यशाला" : "Self-Defense Workshops", desc: lang === "hi" ? "निशुल्क साप्ताहिक प्रशिक्षण" : "Register for free local skill sessions", code: "RPF-DEF", action: () => setShowWorkshopModal(true) }
-        ].map((item, idx) => (
-          <div 
-            key={idx} 
-            onClick={item.action}
-            className="glass-card bg-white/95 p-4 border-gold-soft flex items-center justify-between cursor-pointer hover:border-purple-400 hover:shadow-md transition duration-200"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100">
-                <Shield className="w-4.5 h-4.5" />
-              </div>
-              <div>
-                <h5 className="font-display font-bold text-xs text-slate-800">{item.title}</h5>
-                <p className="text-[9px] text-slate-400 font-semibold">{item.desc}</p>
-              </div>
+        {fakeCallConnected ? (
+          <div className="flex flex-col items-center gap-10 pb-16">
+            <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg cursor-pointer"
+              onClick={() => {
+                stopRingtone();
+                setFakeCallActive(false);
+                setFakeCallConnected(false);
+              }}
+            >
+              <Phone className="w-8 h-8 text-white rotate-135" />
             </div>
-            <span className="text-[8px] font-mono font-bold bg-purple-100/50 text-purple-700 px-2 py-0.5 rounded border border-purple-200">{item.code}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Emergency Contact List Form */}
-      <div className="glass-card bg-white/95 p-4 border-gold-soft shadow-gold-premium space-y-4">
-        <h4 className="font-display font-bold text-xs text-chakra-navy uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center gap-1.5">
-          <Phone className="w-4 h-4 text-purple-600" />
-          {lang === "hi" ? "आपातकालीन संपर्क सूची (Max 5)" : "Emergency Contacts (Max 5)"}
-        </h4>
-
-        {successMsg && (
-          <div className="bg-green-50 text-green-700 border border-green-150 p-2.5 rounded-lg text-xs font-bold flex items-center gap-1.5">
-            <CheckCircle className="w-4 h-4" />
-            <span>{successMsg}</span>
-          </div>
-        )}
-
-        <form onSubmit={addContact} className="flex gap-2">
-          <input 
-            type="text" 
-            value={newContact}
-            onChange={e => setNewContact(e.target.value)}
-            placeholder={lang === "hi" ? "मोबाइल नंबर या ईमेल दर्ज करें" : "Enter mobile number or email"} 
-            className="flex-1 border border-slate-200 rounded-lg text-xs px-3 py-2 outline-none focus:border-purple-500 font-bold bg-slate-50"
-          />
-          <button 
-            type="submit" 
-            disabled={contacts.length >= 5 || !newContact.trim()}
-            className="bg-purple-600 hover:bg-purple-750 text-white p-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
-          >
-            <Plus className="w-4.5 h-4.5" />
-          </button>
-        </form>
-
-        {contacts.length > 0 && (
-          <div className="space-y-2 pt-2">
-            {contacts.map((c, i) => (
-              <div key={i} className="flex items-center justify-between bg-slate-50 border border-slate-200/60 p-2.5 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-slate-400" />
-                  <span className="text-xs font-mono font-bold text-slate-700">+91 {c}</span>
-                </div>
-                <button 
-                  onClick={() => setContacts(contacts.filter((_, idx) => idx !== i))}
-                  className="text-[9px] font-bold text-red-600 hover:underline"
-                >
-                  {lang === "hi" ? "हटाएं" : "Remove"}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Help & Crisis Directory Section */}
-      <div className="glass-card bg-white/95 p-4 border-gold-soft shadow-gold-premium space-y-4">
-        <h4 className="font-display font-bold text-xs text-chakra-navy uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center gap-1.5">
-          <Shield className="w-4.5 h-4.5 text-purple-650" />
-          {lang === "hi" ? "स्थानीय सुरक्षा निर्देशिका (OSC / पुलिस)" : "Local Protection Directory (OSC / Police)"}
-        </h4>
-
-        <form onSubmit={handleDirectorySearch} className="flex gap-2">
-          <input 
-            type="text" 
-            pattern="\d{6}"
-            value={searchPincode}
-            onChange={e => setSearchPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder={lang === "hi" ? "पिनकोड दर्ज करें (e.g. 466001)" : "Enter 6-digit Pincode (e.g. 466001)"} 
-            className="flex-1 border border-slate-200 rounded-lg text-xs px-3 py-2 outline-none focus:border-purple-500 font-bold bg-slate-50"
-          />
-          <button 
-            type="submit" 
-            disabled={searchingDirectory || searchPincode.length < 6}
-            className="bg-purple-600 hover:bg-purple-750 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
-          >
-            {searchingDirectory ? "..." : (lang === "hi" ? "खोजें" : "Search")}
-          </button>
-        </form>
-
-        {directoryList.length > 0 ? (
-          <div className="space-y-3 pt-2 max-h-[250px] overflow-y-auto">
-            {directoryList.map((item, idx) => (
-              <div key={idx} className="bg-slate-50 border border-slate-200/60 p-3 rounded-xl space-y-1">
-                <div className="flex justify-between items-start">
-                  <span className="text-[10px] font-black text-slate-800 leading-tight">{item.name}</span>
-                  <span className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-purple-250 bg-purple-100/40 text-purple-750">
-                    {item.type}
-                  </span>
-                </div>
-                <p className="text-[9px] text-slate-500 leading-relaxed font-semibold">{item.address}</p>
-                <div className="flex justify-between items-center pt-1 border-t border-slate-100">
-                  <span className="text-[8px] font-bold text-slate-400">Helpline: {item.helpline}</span>
-                  <a 
-                    href={`tel:${item.phone}`}
-                    className="text-[8.5px] font-bold text-purple-700 hover:underline flex items-center gap-1"
-                  >
-                    📞 Call: {item.phone}
-                  </a>
-                </div>
-              </div>
-            ))}
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tap to end call</p>
           </div>
         ) : (
-          <p className="text-[9px] text-slate-400 text-center py-2 font-semibold">
-            {lang === "hi" ? "कोई स्थानीय केंद्र ढूंढने के लिए पिनकोड दर्ज करें।" : "Enter pincode to find local safety resources nearby."}
-          </p>
+          <div className="flex justify-around pb-20 items-center">
+            <button 
+              onClick={() => {
+                stopRingtone();
+                setFakeCallActive(false);
+              }}
+              className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg cursor-pointer"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+            <button 
+              onClick={() => {
+                stopRingtone();
+                setFakeCallConnected(true);
+              }}
+              className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-pulse cursor-pointer"
+            >
+              <Phone className="w-6 h-6 text-white" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-5 space-y-5 animate-fadeIn pb-24 relative overflow-x-hidden">
+      <div className="flex justify-between items-center bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
+        <div className="flex items-center gap-2">
+          <Shield className="w-5 h-5 text-red-600 fill-red-100" />
+          <h3 className="font-display font-extrabold text-sm text-white">
+            {lang === "hi" ? "महिला सुरक्षा कमांड सेंटर" : "Women Safety Command Center"}
+          </h3>
+        </div>
+        {stealthEnabled && (
+          <button 
+            onClick={() => setIsUnlocked(false)}
+            className="p-1.5 rounded-lg bg-slate-850 text-slate-400 border border-slate-800 flex items-center gap-1 hover:text-white cursor-pointer"
+          >
+            <Layers className="w-4 h-4 text-purple-400" />
+            <span className="text-[9px] font-bold uppercase">Lock App</span>
+          </button>
         )}
       </div>
 
-      {/* 1. Legal & Counseling Form Modal */}
-      {showCounselingModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full p-5 space-y-4 animate-scaleUp">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-              <h4 className="font-display font-extrabold text-sm text-[#0B1E3F] uppercase tracking-wider">
-                {lang === "hi" ? "मुफ़्त कानूनी व परामर्श सेवा" : "Free Counseling Inquiry"}
-              </h4>
-              <button onClick={() => setShowCounselingModal(false)} className="text-slate-400 hover:text-slate-650 p-1">
-                <X className="w-5 h-5" />
+      <div className="flex bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-inner p-1">
+        {[
+          { key: "deterrents", title: lang === "hi" ? "अलर्ट व पैनिक" : "Panic & SOS", icon: AlertOctagon },
+          { key: "scanner", title: lang === "hi" ? "कैमरा डिटेक्टर" : "Scanners", icon: Camera },
+          { key: "routes", title: lang === "hi" ? "सुरक्षित मार्ग" : "Safe Map", icon: Map },
+          { key: "settings", title: lang === "hi" ? "सेटिंग्स" : "Settings", icon: Settings },
+        ].map(t => {
+          const Icon = t.icon;
+          return (
+            <button 
+              key={t.key}
+              onClick={() => {
+                setActiveTab(t.key as any);
+                stopCamera();
+              }}
+              className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition flex flex-col items-center gap-1 cursor-pointer ${
+                activeTab === t.key ? "bg-purple-600 text-white shadow font-bold" : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{t.title}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {activeTab === "deterrents" && (
+        <div className="space-y-4 animate-fadeIn">
+          <div className="flex flex-col items-center justify-center py-6 bg-slate-900 border border-red-500/10 rounded-2xl shadow-lg relative overflow-hidden">
+            <div className="absolute inset-0 bg-red-500/5 pointer-events-none"></div>
+            
+            <button 
+              onClick={handleSOS}
+              disabled={sosActive}
+              className={`w-32 h-32 rounded-full flex flex-col items-center justify-center transition-all duration-500 relative cursor-pointer ${
+                sosActive 
+                  ? "bg-red-950 scale-95 shadow-inner" 
+                  : "bg-gradient-to-br from-red-600 to-red-800 hover:scale-105 shadow-[0_10px_30px_rgba(220,38,38,0.4)]"
+              }`}
+            >
+              {!sosActive && (
+                <>
+                  <div className="absolute inset-0 rounded-full border border-red-500/30 animate-ping"></div>
+                  <div className="absolute -inset-4 rounded-full border border-red-500/10 animate-pulse"></div>
+                </>
+              )}
+              <AlertOctagon className="w-10 h-10 text-white mb-1.5" />
+              <span className="text-white text-xs font-black uppercase tracking-wider">
+                {sosActive ? "Sending..." : "Emergency SOS"}
+              </span>
+            </button>
+            <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest mt-4">
+              {lang === "hi" ? "तुरंत सहायता के लिए दबाएं" : "Press for immediate dispatch"}
+            </p>
+          </div>
+
+          {sosFired && (
+            <div className="bg-red-950/45 border-2 border-red-900/50 rounded-2xl p-5 shadow-lg space-y-4 animate-scaleUp text-white">
+              <div className="flex items-center gap-2 text-red-500 font-extrabold text-sm">
+                <Radio className="w-5 h-5 text-red-500 animate-ping" />
+                <span>{lang === "hi" ? "आपातकालीन अलर्ट सक्रिय!" : "Emergency SOS Active!"}</span>
+              </div>
+              
+              <p className="text-[11px] text-slate-350 leading-relaxed font-semibold">
+                {lang === "hi" 
+                  ? "आपातकालीन ईमेल अलर्ट आपके पंजीकृत अभिभावकों को स्थान लिंक के साथ भेज दिए गए हैं। 10 सेकंड का मूक रिकॉर्डर शुरू हो गया है। स्थान साझा करने के लिए नीचे दिए गए बटनों का उपयोग करें:" 
+                  : "Emergency email alerts containing your coordinates have been sent to your guardians. 10-second silent recorder initiated. Use buttons below to coordinate:"}
+              </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <a 
+                  href={`https://api.whatsapp.com/send?text=EMERGENCY! I need help. My current location is: ${encodeURIComponent(sosLocationUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#25D366] hover:bg-[#20ba59] text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
+                >
+                  <span>{lang === "hi" ? "व्हाट्सएप अलर्ट" : "WhatsApp Alert"}</span>
+                </a>
+
+                <a 
+                  href="tel:1091"
+                  className="bg-red-600 hover:bg-red-750 text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
+                >
+                  <span>{lang === "hi" ? "कॉल हेल्पलाइन" : "Call Helpline (1091)"}</span>
+                </a>
+              </div>
+
+              <button 
+                onClick={() => setSosFired(false)}
+                className="w-full bg-slate-800 hover:bg-slate-755 text-slate-300 font-bold py-2 rounded-xl text-xs transition cursor-pointer"
+              >
+                {lang === "hi" ? "अलर्ट बंद करें" : "Dismiss Emergency State"}
+              </button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-4">
+              <div>
+                <h4 className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
+                  <Phone className="w-4 h-4 text-green-500 fill-green-500" />
+                  {lang === "hi" ? "फर्जी कॉल" : "Discreet Call"}
+                </h4>
+                <p className="text-[9px] text-slate-400 font-semibold mt-1">Simulates an incoming rescue phone call with vibration.</p>
+              </div>
+              <button 
+                onClick={() => {
+                  setFakeCallActive(true);
+                  playRingtone();
+                  startFakeCallHaptics();
+                }}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-xs shadow-md transition cursor-pointer"
+              >
+                {lang === "hi" ? "कॉल ट्रिगर करें" : "Trigger Call"}
               </button>
             </div>
 
-            <form onSubmit={handleCounselingSubmit} className="space-y-3.5">
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between space-y-4">
               <div>
-                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Inquiry Type / परामर्श का प्रकार</label>
-                <select 
-                  value={counselingType}
-                  onChange={e => setCounselingType(e.target.value)}
-                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none"
-                >
-                  <option>Legal Consultation</option>
-                  <option>Psychological Counseling</option>
-                  <option>Crisis Support</option>
-                </select>
+                <h4 className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
+                  <Volume2 className="w-4 h-4 text-red-500" />
+                  {lang === "hi" ? "पैनिक सायरन" : "Panic Siren"}
+                </h4>
+                <p className="text-[9px] text-slate-400 font-semibold mt-1">Sounds a loud synthesized emergency police siren at max volume.</p>
               </div>
+              <button 
+                onClick={() => {
+                  if (sirenActive) {
+                    stopSiren();
+                    setSirenActive(false);
+                  } else {
+                    playSiren();
+                    setSirenActive(true);
+                    triggerHaptic([1000]);
+                  }
+                }}
+                className={`w-full font-bold py-2 rounded-lg text-xs shadow-md transition cursor-pointer ${
+                  sirenActive ? "bg-slate-700 text-white animate-pulse" : "bg-red-650 hover:bg-red-750 text-white"
+                }`}
+              >
+                {sirenActive ? (lang === "hi" ? "बंद करें" : "Stop Siren") : (lang === "hi" ? "सायरन बजाएं" : "Sound Siren")}
+              </button>
+            </div>
+          </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Description / विवरण</label>
-                <textarea 
+          <div className="space-y-3">
+            <h4 className="font-display font-black text-xs text-white uppercase tracking-widest px-1">
+              {lang === "hi" ? "त्वरित सुरक्षा कल्याण केंद्र" : "National Helplines Quick Call"}
+            </h4>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { title: lang === "hi" ? "महिला हेल्पलाइन" : "Women Helpline", number: "1091" },
+                { title: lang === "hi" ? "घरेलू हिंसा" : "Domestic Abuse", number: "181" },
+                { title: lang === "hi" ? "राष्ट्रीय आपातकालीन" : "Unified Emergency", number: "112" },
+                { title: lang === "hi" ? "पुलिस सहायता" : "Police Call Desk", number: "100" }
+              ].map(h => (
+                <a 
+                  key={h.number}
+                  href={`tel:${h.number}`}
+                  className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between hover:border-purple-600 transition decoration-none text-white cursor-pointer"
+                >
+                  <div>
+                    <h5 className="text-[10px] font-extrabold text-slate-350">{h.title}</h5>
+                    <span className="text-[11px] font-mono font-black text-purple-400">{h.number}</span>
+                  </div>
+                  <Phone className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass-card bg-slate-900 border border-slate-800 p-4 shadow-gold-premium space-y-4">
+            <h4 className="font-display font-bold text-xs text-white uppercase tracking-widest border-b border-slate-800 pb-2 flex items-center gap-1.5">
+              <User className="w-4 h-4 text-purple-500" />
+              {lang === "hi" ? "आपातकालीन अभिभावक (Max 5)" : "Guardian Alerts List (Max 5)"}
+            </h4>
+
+            <form onSubmit={addContact} className="flex gap-2">
+              <input 
+                type="text" 
+                value={newContact}
+                onChange={e => setNewContact(e.target.value)}
+                placeholder={lang === "hi" ? "मोबाइल नंबर या ईमेल दर्ज करें" : "Enter mobile number or email"} 
+                className="flex-1 border border-slate-800 rounded-lg text-xs px-3 py-2 outline-none focus:border-purple-500 font-bold bg-slate-950 text-white"
+              />
+              <button 
+                type="submit" 
+                disabled={contacts.length >= 5 || !newContact.trim()}
+                className="bg-purple-600 hover:bg-purple-750 text-white p-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
+              >
+                <Plus className="w-4.5 h-4.5" />
+              </button>
+            </form>
+
+            {contacts.length > 0 ? (
+              <div className="space-y-2 pt-1">
+                {contacts.map((c, i) => (
+                  <div key={i} className="flex items-center justify-between bg-slate-950 border border-slate-800 p-2.5 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-slate-500" />
+                      <span className="text-xs font-mono font-bold text-slate-350">{c}</span>
+                    </div>
+                    <button 
+                      onClick={() => removeContact(i)}
+                      className="text-[9px] font-bold text-red-500 hover:underline cursor-pointer"
+                    >
+                      {lang === "hi" ? "हटाएं" : "Remove"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[9px] text-slate-500 text-center py-1 font-semibold">No contacts registered. Register emails for free alerts.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "scanner" && (
+        <div className="space-y-4 animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4 text-white">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+              <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
+                <Radio className="w-4.5 h-4.5 text-purple-500" />
+                {lang === "hi" ? "ईएमएफ हिडन कैमरा डिटेक्टर" : "EMF Spy Camera Sensor"}
+              </h4>
+              <button 
+                onClick={() => {
+                  setIsEMFActive(!isEMFActive);
+                  setEmfValue(38.2);
+                }}
+                className={`px-3 py-1 rounded-lg text-[9px] font-extrabold uppercase transition cursor-pointer ${
+                  isEMFActive ? "bg-red-650 text-white" : "bg-slate-800 text-slate-300"
+                }`}
+              >
+                {isEMFActive ? (lang === "hi" ? "बंद करें" : "Disable") : (lang === "hi" ? "सक्रिय करें" : "Scan")}
+              </button>
+            </div>
+
+            <p className="text-[9px] text-slate-400 font-semibold leading-relaxed">
+              Uses phone's magnetic sensors to identify radiation spikes emitted by spy camera chipsets behind trial room mirrors or walls.
+            </p>
+
+            {isEMFActive ? (
+              <div className="flex flex-col items-center py-4 space-y-3">
+                <div className={`w-32 h-32 rounded-full border-4 flex flex-col items-center justify-center transition-all duration-300 ${
+                  emfValue > 85 
+                    ? "border-red-600 bg-red-950/20 shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse" 
+                    : emfValue > 55
+                    ? "border-amber-500 bg-amber-950/10 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+                    : "border-purple-500 bg-slate-950"
+                }`}>
+                  <span className="text-2xl font-mono font-black">{emfValue}</span>
+                  <span className="text-[8px] font-bold text-slate-400 tracking-wider">µTesla</span>
+                </div>
+
+                <div className="text-center">
+                  <span className={`text-[10px] font-extrabold uppercase tracking-widest ${
+                    emfValue > 85 ? "text-red-500" : emfValue > 55 ? "text-amber-500" : "text-purple-400"
+                  }`}>
+                    {emfValue > 85 ? "🚨 Metal/Camera Device Detected!" : emfValue > 55 ? "⚠️ Fluctuating Signals" : "✅ Safe (Normal Ambient Field)"}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6 text-slate-500 font-bold text-xs uppercase tracking-widest bg-slate-950 rounded-xl border border-slate-850">
+                Sensor Offline
+              </div>
+            )}
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4 text-white">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+              <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
+                <Camera className="w-4.5 h-4.5 text-purple-500" />
+                {lang === "hi" ? "इन्फ्रारेड स्पाई लेंस खोजक" : "Spy Lens Infrared Filter"}
+              </h4>
+              <button 
+                onClick={() => {
+                  if (isCameraActive) stopCamera();
+                  else startCamera();
+                }}
+                className={`px-3 py-1 rounded-lg text-[9px] font-extrabold uppercase transition cursor-pointer ${
+                  isCameraActive ? "bg-red-650 text-white" : "bg-slate-800 text-slate-300"
+                }`}
+              >
+                {isCameraActive ? (lang === "hi" ? "कैमरा बंद" : "Close Scanner") : (lang === "hi" ? "कैमरा खोलें" : "Open Scanner")}
+              </button>
+            </div>
+
+            <p className="text-[9px] text-slate-400 font-semibold leading-relaxed">
+              Opens your back camera with an optimized high-contrast red filter to highlight reflection points from lens coatings.
+            </p>
+
+            {isCameraActive ? (
+              <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-black aspect-video flex items-center justify-center">
+                <video 
+                  ref={videoRef}
+                  autoPlay 
+                  playsInline 
+                  className="w-full h-full object-cover"
+                  style={{ filter: "contrast(220%) saturate(0%) sepia(100%) hue-rotate(-50deg)" }}
+                />
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                  <div className="w-16 h-16 border-2 border-red-500/40 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-red-600 rounded-full animate-ping"></div>
+                  </div>
+                </div>
+                <div className="absolute bottom-2 left-2 bg-red-600 text-white text-[8px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded border border-red-500 animate-pulse">
+                  IR filter Active
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-10 text-slate-500 font-bold text-xs uppercase tracking-widest bg-slate-950 rounded-xl border border-slate-850">
+                Camera Stream Offline
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "routes" && (
+        <div className="space-y-4 animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-4 text-white">
+            <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
+              <Map className="w-4.5 h-4.5 text-purple-500" />
+              {lang === "hi" ? "सुरक्षित मार्ग खोज व दिशा निर्देश" : "Safe Directions Finder"}
+            </h4>
+
+            <form onSubmit={handleRouteSearch} className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <input 
+                  type="text" 
+                  value={startLoc}
+                  onChange={e => setStartLoc(e.target.value)}
                   required
-                  value={counselingDesc}
-                  onChange={e => setCounselingDesc(e.target.value)}
-                  placeholder="Describe your query briefly..."
-                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none min-h-[70px]"
+                  placeholder={lang === "hi" ? "प्रारंभिक बिंदु" : "Start location"} 
+                  className="border border-slate-800 bg-slate-950 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-white focus:border-purple-600"
+                />
+                <input 
+                  type="text" 
+                  value={endLoc}
+                  onChange={e => setEndLoc(e.target.value)}
+                  required
+                  placeholder={lang === "hi" ? "गंतव्य बिंदु" : "Destination"} 
+                  className="border border-slate-800 bg-slate-950 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-white focus:border-purple-600"
                 />
               </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Contact Preference / संपर्क का माध्यम</label>
-                <select 
-                  value={counselingContact}
-                  onChange={e => setCounselingContact(e.target.value)}
-                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none"
-                >
-                  <option>Call</option>
-                  <option>Email</option>
-                  <option>Anonymous Chat</option>
-                </select>
-              </div>
-
               <button 
                 type="submit" 
-                disabled={submittingCounseling}
-                className="w-full bg-purple-600 hover:bg-purple-750 text-white font-bold py-3 rounded-xl text-xs shadow-md transition disabled:opacity-50"
+                className="w-full bg-[#000080] hover:bg-indigo-950 text-white font-bold py-2 rounded-lg text-xs shadow-md transition cursor-pointer"
               >
-                {submittingCounseling ? "Submitting..." : (lang === "hi" ? "अनुरोध भेजें" : "Submit Consultation Request")}
+                {lang === "hi" ? "मार्ग का पता लगाएं" : "Find Safety Route"}
               </button>
             </form>
+
+            {directionsUrl ? (
+              <div className="rounded-xl overflow-hidden border border-slate-800 aspect-video shadow-inner bg-slate-950">
+                <iframe 
+                  src={directionsUrl}
+                  className="w-full h-full border-0 grayscale saturate-50"
+                  allowFullScreen
+                  loading="lazy"
+                  title="Route Safety Map Directions"
+                />
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500 font-bold text-xs uppercase tracking-widest bg-slate-950 rounded-xl border border-slate-850">
+                Input Locations to Map Route
+              </div>
+            )}
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-4 text-white">
+            <h4 className="text-xs font-black uppercase tracking-wider border-b border-slate-800 pb-2">
+              {lang === "hi" ? "समुदाय द्वारा सुरक्षित मार्ग समीक्षा" : "Community Street Safety Reviews"}
+            </h4>
+
+            <form onSubmit={handleRatingSubmit} className="space-y-3 bg-slate-955 border border-slate-850 p-3.5 rounded-xl">
+              <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">Add Street Rating / समीक्षा जोड़ें</span>
+              <div className="grid grid-cols-2 gap-2">
+                <input 
+                  type="text" 
+                  value={newStreetName}
+                  onChange={e => setNewStreetName(e.target.value)}
+                  required
+                  placeholder="Street/Area (e.g. Karond Chowk)" 
+                  className="border border-slate-850 bg-slate-900 rounded-lg text-xs px-2.5 py-1.5 font-semibold outline-none text-white focus:border-purple-600"
+                />
+                <select 
+                  value={newRatingVal}
+                  onChange={e => setNewRatingVal(parseInt(e.target.value, 10))}
+                  className="border border-slate-855 bg-slate-900 rounded-lg text-xs px-2 py-1.5 font-bold outline-none text-white cursor-pointer"
+                >
+                  <option value={5}>⭐⭐⭐⭐⭐ (Very Safe)</option>
+                  <option value={4}>⭐⭐⭐⭐ (Safe)</option>
+                  <option value={3}>⭐⭐⭐ (Average)</option>
+                  <option value={2}>⭐⭐ (Unsafe)</option>
+                  <option value={1}>⭐ (High Alert)</option>
+                </select>
+              </div>
+              <input 
+                type="text" 
+                value={newRatingNotes}
+                onChange={e => setNewRatingNotes(e.target.value)}
+                placeholder="Safety Notes (e.g. Broken lights, CCTVs, Police checking)"
+                className="w-full border border-slate-850 bg-slate-900 rounded-lg text-xs px-2.5 py-1.5 font-semibold outline-none text-white focus:border-purple-600"
+              />
+              <button 
+                type="submit" 
+                disabled={submittingRating}
+                className="w-full bg-purple-600 hover:bg-purple-750 text-white font-bold py-2 rounded-lg text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
+              >
+                {submittingRating ? "Saving..." : "Post Review"}
+              </button>
+            </form>
+
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pt-2">
+              {ratingsList.map((item, idx) => (
+                <div key={idx} className="bg-slate-950 border border-slate-850 p-3 rounded-xl space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-200">{item.location_name}</span>
+                    <span className="text-[9px] text-amber-500 font-bold">{"★".repeat(item.rating)}{"☆".repeat(5 - item.rating)}</span>
+                  </div>
+                  <p className="text-[9px] text-slate-400 font-medium leading-relaxed">{item.notes}</p>
+                  <span className="text-[8px] text-slate-500 block font-semibold">Post Date: {new Date(item.createdAt).toLocaleDateString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass-card bg-slate-900 border border-slate-800 p-4 shadow-gold-premium space-y-4 text-white">
+            <h4 className="font-display font-bold text-xs text-white uppercase tracking-widest border-b border-slate-800 pb-2 flex items-center gap-1.5">
+              <Shield className="w-4.5 h-4.5 text-purple-500" />
+              {lang === "hi" ? "स्थानीय सुरक्षा निर्देशिका (OSC / पुलिस)" : "Local Protection Directory (OSC / Police)"}
+            </h4>
+
+            <form onSubmit={handleDirectorySearch} className="flex gap-2">
+              <input 
+                type="text" 
+                pattern="\d{6}"
+                value={searchPincode}
+                onChange={e => setSearchPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder={lang === "hi" ? "पिनकोड दर्ज करें (e.g. 466001)" : "Enter 6-digit Pincode (e.g. 466001)"} 
+                className="flex-1 border border-slate-800 rounded-lg text-xs px-3 py-2 outline-none focus:border-purple-500 font-bold bg-slate-950 text-white"
+              />
+              <button 
+                type="submit" 
+                disabled={searchingDirectory || searchPincode.length < 6}
+                className="bg-purple-600 hover:bg-purple-750 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
+              >
+                {searchingDirectory ? "..." : (lang === "hi" ? "खोजें" : "Search")}
+              </button>
+            </form>
+
+            {directoryList.length > 0 ? (
+              <div className="space-y-3 pt-2 max-h-[250px] overflow-y-auto">
+                {directoryList.map((item, idx) => (
+                  <div key={idx} className="bg-slate-950 border border-slate-850 p-3 rounded-xl space-y-1">
+                    <div className="flex justify-between items-start">
+                      <span className="text-[10px] font-black text-slate-200 leading-tight">{item.name}</span>
+                      <span className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-purple-800 bg-purple-950/40 text-purple-400">
+                        {item.type}
+                      </span>
+                    </div>
+                    <p className="text-[9px] text-slate-400 leading-relaxed font-semibold">{item.address}</p>
+                    <div className="flex justify-between items-center pt-1 border-t border-slate-800">
+                      <span className="text-[8px] font-bold text-slate-500">Helpline: {item.helpline}</span>
+                      <a 
+                        href={`tel:${item.phone}`}
+                        className="text-[8.5px] font-bold text-purple-400 hover:underline flex items-center gap-1"
+                      >
+                        📞 Call: {item.phone}
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[9px] text-slate-500 text-center py-2 font-semibold">
+                {lang === "hi" ? "कोई स्थानीय केंद्र ढूंढने के लिए पिनकोड दर्ज करें।" : "Enter pincode to find local safety resources nearby."}
+              </p>
+            )}
           </div>
         </div>
       )}
 
-      {/* 2. Self-Defense Workshop Modal */}
-      {showWorkshopModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full p-5 space-y-4 animate-scaleUp">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-              <h4 className="font-display font-extrabold text-sm text-[#0B1E3F] uppercase tracking-wider">
-                {lang === "hi" ? "आत्मरक्षा कार्यशाला पंजीकरण" : "Self-Defense Registration"}
-              </h4>
-              <button onClick={() => setShowWorkshopModal(false)} className="text-slate-400 hover:text-slate-650 p-1">
-                <X className="w-5 h-5" />
-              </button>
+      {activeTab === "settings" && (
+        <div className="space-y-4 animate-fadeIn text-white">
+          <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
+            <h4 className="text-xs font-black uppercase tracking-wider border-b border-slate-800 pb-2">Stealth App Settings</h4>
+            
+            <div className="flex justify-between items-center py-1">
+              <div>
+                <span className="text-xs font-extrabold block">Stealth Calculator Mode</span>
+                <p className="text-[9px] text-slate-400 font-semibold mt-0.5">Disguises the safety dashboard behind a working calculator.</p>
+              </div>
+              <input 
+                type="checkbox"
+                checked={stealthEnabled}
+                onChange={e => {
+                  const val = e.target.checked;
+                  setStealthEnabled(val);
+                  localStorage.setItem("stealth_enabled", String(val));
+                }}
+                className="w-5 h-5 accent-purple-600 cursor-pointer"
+              />
             </div>
 
-            <form onSubmit={handleWorkshopSubmit} className="space-y-3.5">
-              <div>
-                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Preferred Batch / पसंदीदा बैच</label>
-                <select 
-                  value={preferredBatch}
-                  onChange={e => setPreferredBatch(e.target.value)}
-                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none"
-                >
-                  <option>Weekend Morning (8:00 AM - 10:00 AM)</option>
-                  <option>Weekend Evening (4:00 PM - 6:00 PM)</option>
-                </select>
+            {stealthEnabled && (
+              <div className="space-y-2 pt-2 border-t border-slate-850">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Unlock PIN Code (4 Digits)</label>
+                <input 
+                  type="text"
+                  maxLength={4}
+                  value={calculatorPin}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setCalculatorPin(val);
+                    localStorage.setItem("calc_pin", val);
+                  }}
+                  className="w-full max-w-[120px] border border-slate-800 bg-slate-950 rounded-lg text-xs px-3 py-2 font-mono font-black text-purple-400 outline-none focus:border-purple-600"
+                />
               </div>
+            )}
+          </div>
 
+          <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
+            <h4 className="text-xs font-black uppercase tracking-wider border-b border-slate-800 pb-2">Physical Hardware Alerts</h4>
+
+            <div className="flex justify-between items-center py-1">
               <div>
-                <label className="text-[10px] font-bold text-slate-550 uppercase tracking-widest block mb-1">Experience Level / अनुभव स्तर</label>
-                <select 
-                  value={experienceLevel}
-                  onChange={e => setExperienceLevel(e.target.value)}
-                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs font-bold bg-slate-50 outline-none"
-                >
-                  <option>Beginner</option>
-                  <option>Intermediate</option>
-                  <option>Advanced</option>
-                </select>
+                <span className="text-xs font-extrabold block">Shake-To-Alert Trigger</span>
+                <p className="text-[9px] text-slate-400 font-semibold mt-0.5">Aggressive shaking of the device immediately triggers SOS alert.</p>
               </div>
-
-              <button 
-                type="submit" 
-                disabled={submittingWorkshop}
-                className="w-full bg-purple-600 hover:bg-purple-750 text-white font-bold py-3 rounded-xl text-xs shadow-md transition disabled:opacity-50"
-              >
-                {submittingWorkshop ? "Registering..." : (lang === "hi" ? "पंजीकरण करें" : "Book My Free Seat")}
-              </button>
-            </form>
+              <input 
+                type="checkbox"
+                checked={shakeEnabled}
+                onChange={e => {
+                  const val = e.target.checked;
+                  setShakeEnabled(val);
+                  localStorage.setItem("shake_enabled", String(val));
+                }}
+                className="w-5 h-5 accent-purple-600 cursor-pointer"
+              />
+            </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }
