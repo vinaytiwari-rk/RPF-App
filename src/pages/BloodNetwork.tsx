@@ -847,29 +847,19 @@ export default function BloodNetwork() {
                         </p>
                       </div>
 
-                      {/* Stock Cards Expanded */}
+                      {/* Contact for Stock Inventory */}
                       <div className="border-t pt-3 border-slate-100">
-                        <span className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Live Blood Stock Inventory</span>
-                        <div className="grid grid-cols-4 gap-2">
-                          {[
-                            { name: "A+", qty: bank.stock_a_plus },
-                            { name: "A-", qty: bank.stock_a_minus },
-                            { name: "B+", qty: bank.stock_b_plus },
-                            { name: "B-", qty: bank.stock_b_minus },
-                            { name: "AB+", qty: bank.stock_ab_plus },
-                            { name: "AB-", qty: bank.stock_ab_minus },
-                            { name: "O+", qty: bank.stock_o_plus },
-                            { name: "O-", qty: bank.stock_o_minus }
-                          ].map(stock => (
-                            <div key={stock.name} className={`p-2 rounded-xl text-center border ${
-                              stock.qty > 10 ? 'bg-green-50 border-green-200 text-green-800' :
-                              stock.qty > 3 ? 'bg-amber-50 border-amber-200 text-amber-800' :
-                              'bg-red-50 border-red-200 text-red-800 font-bold animate-pulse'
-                            }`}>
-                              <span className="block text-[9px] font-bold">{stock.name}</span>
-                              <span className="text-xs font-black">{stock.qty} U</span>
-                            </div>
-                          ))}
+                        <span className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Blood Stock Inventory</span>
+                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
+                          <p className="text-[10px] text-slate-600 font-bold">
+                            {lang === "hi" ? "लाइव स्टॉक स्थिति के लिए सीधे कॉल करें या ई-रक्तकोष (eraktkosh.in) पर जाएं।" : "Contact blood bank directly or visit eRaktKosh (eraktkosh.in) for live stock status."}
+                          </p>
+                          <a 
+                            href={`tel:${bank.phone}`}
+                            className="inline-block mt-2 px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-[9px] font-black uppercase tracking-wider hover:bg-red-100 transition decoration-none"
+                          >
+                            📞 Call: {bank.phone}
+                          </a>
                         </div>
                       </div>
 

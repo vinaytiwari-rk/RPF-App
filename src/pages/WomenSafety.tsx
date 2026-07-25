@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { 
   Shield, AlertOctagon, Phone, User, Plus, Heart, 
   HelpCircle, CheckCircle, X, Volume2, Camera, Eye, 
-  Map, Settings, Play, Square, RefreshCw, Layers, Radio
+  Map, Settings, Play, Square, RefreshCw, Layers, Radio, Globe, ExternalLink
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -159,7 +159,7 @@ export function CalculatorDisguise({ onUnlock, correctPin }: { onUnlock: () => v
             onClick={() => handleBtn(btn)}
             className={`h-12 text-sm font-black rounded-xl transition cursor-pointer ${
               btn === "=" 
-                ? "bg-purple-600 hover:bg-purple-750 text-white row-span-2 h-26" 
+                ? "bg-purple-650 hover:bg-purple-750 text-white row-span-2 h-26" 
                 : ["C", "/", "*", "-", "+"].includes(btn)
                 ? "bg-purple-50 hover:bg-purple-100 text-purple-700"
                 : "bg-slate-50 hover:bg-slate-100 text-slate-700"
@@ -185,7 +185,7 @@ export default function WomenSafety() {
   const [isUnlocked, setIsUnlocked] = useState(!stealthEnabled);
 
   // General safety states
-  const [activeTab, setActiveTab] = useState<"deterrents" | "scanner" | "routes" | "settings">("deterrents");
+  const [activeTab, setActiveTab] = useState<"deterrents" | "scanner" | "ncw" | "routes" | "settings">("deterrents");
   const [sosActive, setSosActive] = useState(false);
   const [sosFired, setSosFired] = useState(false);
   const [sosLocationUrl, setSosLocationUrl] = useState("");
@@ -205,10 +205,17 @@ export default function WomenSafety() {
 
   // Scanner state
   const [isEMFActive, setIsEMFActive] = useState(false);
-  const [emfValue, setEmfValue] = useState(38.2);
+  const [emfValue, setEmfValue] = useState(0.0);
+  const [isSensorSupported, setIsSensorSupported] = useState(true);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const sensorRef = useRef<any>(null);
+
+  // NCW Webview states
+  const [activeNcwUrl, setActiveNcwUrl] = useState("https://ncwapps.nic.in/onlinecomplaintsv2/");
+  const [ncwLoading, setNcwLoading] = useState(true);
+  const [ncwKey, setNcwKey] = useState(1);
 
   // Safe routes state
   const [searchPincode, setSearchPincode] = useState("");
@@ -281,20 +288,48 @@ export default function WomenSafety() {
     return () => clearInterval(timer);
   }, [fakeCallConnected]);
 
-  // EMF mock sensor fluctuations
+  // Real Magnetometer Sensor query (No simulation, 100% authentic)
   useEffect(() => {
-    let timer: any = null;
-    if (isEMFActive) {
-      timer = setInterval(() => {
-        setEmfValue(p => {
-          const delta = (Math.random() - 0.5) * 8;
-          const newVal = Math.max(30, Math.min(180, p + delta));
-          if (newVal > 90) triggerHaptic([50]);
-          return parseFloat(newVal.toFixed(1));
-        });
-      }, 300);
+    if (!isEMFActive) {
+      if (sensorRef.current) {
+        try { sensorRef.current.stop(); } catch(e){}
+      }
+      return;
     }
-    return () => clearInterval(timer);
+
+    if ("Magnetometer" in window) {
+      try {
+        const magSensor = new (window as any).Magnetometer({ frequency: 10 });
+        sensorRef.current = magSensor;
+        
+        magSensor.addEventListener("reading", () => {
+          const { x, y, z } = magSensor;
+          const mag = Math.sqrt(x*x + y*y + z*z).toFixed(1);
+          setEmfValue(parseFloat(mag));
+          if (parseFloat(mag) > 100) {
+            triggerHaptic([50]);
+          }
+        });
+
+        magSensor.addEventListener("error", (e: any) => {
+          console.warn("Magnetometer API error:", e);
+          setIsSensorSupported(false);
+        });
+
+        magSensor.start();
+      } catch (err) {
+        console.warn("Magnetometer initialization failed:", err);
+        setIsSensorSupported(false);
+      }
+    } else {
+      setIsSensorSupported(false);
+    }
+
+    return () => {
+      if (sensorRef.current) {
+        try { sensorRef.current.stop(); } catch(e){}
+      }
+    };
   }, [isEMFActive]);
 
   // Fetch Safe Street Ratings from database
@@ -552,7 +587,7 @@ export default function WomenSafety() {
 
         {fakeCallConnected ? (
           <div className="flex flex-col items-center gap-10 pb-16">
-            <div className="w-16 h-16 bg-red-650 rounded-full flex items-center justify-center shadow-lg cursor-pointer"
+            <div className="w-16 h-16 bg-red-650 rounded-full flex items-center justify-center shadow-lg cursor-pointer animate-bounce"
               onClick={() => {
                 stopRingtone();
                 setFakeCallActive(false);
@@ -591,7 +626,7 @@ export default function WomenSafety() {
 
   return (
     <div className="p-5 space-y-5 animate-fadeIn pb-24 relative overflow-x-hidden bg-rose-50/20 min-h-[90vh]">
-      {/* Light Premium Header */}
+      {/* Header */}
       <div className="flex justify-between items-center bg-white border border-rose-100 rounded-2xl p-4 shadow-sm">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-rose-600 fill-rose-100 animate-pulse" />
@@ -610,11 +645,12 @@ export default function WomenSafety() {
         )}
       </div>
 
-      {/* Light tab headers */}
-      <div className="flex bg-white border border-rose-100 rounded-xl p-1 shadow-sm shrink-0">
+      {/* Tabs list (5 columns now) */}
+      <div className="flex bg-white border border-rose-100 rounded-xl p-1 shadow-sm shrink-0 overflow-x-auto gap-0.5">
         {[
           { key: "deterrents", title: lang === "hi" ? "पैनिक व SOS" : "Panic & SOS", icon: AlertOctagon },
           { key: "scanner", title: lang === "hi" ? "स्कैनर्स" : "Scanners", icon: Camera },
+          { key: "ncw", title: lang === "hi" ? "NCW शिकायत" : "NCW Portal", icon: Globe },
           { key: "routes", title: lang === "hi" ? "सुरक्षित मार्ग" : "Safe Map", icon: Map },
           { key: "settings", title: lang === "hi" ? "सेटिंग्स" : "Settings", icon: Settings },
         ].map(t => {
@@ -626,13 +662,13 @@ export default function WomenSafety() {
                 setActiveTab(t.key as any);
                 stopCamera();
               }}
-              className={`flex-1 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition flex flex-col items-center gap-1 cursor-pointer ${
+              className={`flex-1 py-2.5 px-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition flex flex-col items-center gap-1 cursor-pointer whitespace-nowrap min-w-[65px] ${
                 activeTab === t.key 
-                  ? "bg-rose-600 text-white shadow-md shadow-rose-250 font-bold" 
+                  ? "bg-rose-600 text-white shadow-md font-bold" 
                   : "text-slate-450 hover:text-slate-700"
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5" />
               <span>{t.title}</span>
             </button>
           );
@@ -649,7 +685,6 @@ export default function WomenSafety() {
       {/* TAB 1: PANIC & SOS */}
       {activeTab === "deterrents" && (
         <div className="space-y-4 animate-fadeIn">
-          {/* Saffron/Crimson Premium SOS Dial inside Light Box */}
           <div className="flex flex-col items-center justify-center py-7 bg-white border border-rose-150 rounded-2xl shadow-sm relative overflow-hidden">
             <div className="absolute inset-0 bg-rose-50/10 pointer-events-none"></div>
             
@@ -659,13 +694,13 @@ export default function WomenSafety() {
               className={`w-32 h-32 rounded-full flex flex-col items-center justify-center transition-all duration-500 relative cursor-pointer ${
                 sosActive 
                   ? "bg-rose-900 scale-95 shadow-inner" 
-                  : "bg-gradient-to-br from-rose-500 to-red-600 hover:scale-105 shadow-[0_10px_25px_rgba(244,63,94,0.3)]"
+                  : "bg-gradient-to-br from-rose-500 to-red-650 hover:scale-105 shadow-[0_10px_25px_rgba(244,63,94,0.3)]"
               }`}
             >
               {!sosActive && (
                 <>
-                  <div className="absolute inset-0 rounded-full border border-rose-400/30 animate-ping"></div>
-                  <div className="absolute -inset-4 rounded-full border border-rose-400/10 animate-pulse"></div>
+                  <div className="absolute inset-0 rounded-full border border-rose-450/30 animate-ping"></div>
+                  <div className="absolute -inset-4 rounded-full border border-rose-450/10 animate-pulse"></div>
                 </>
               )}
               <AlertOctagon className="w-10 h-10 text-white mb-1.5" />
@@ -685,7 +720,7 @@ export default function WomenSafety() {
                 <span>{lang === "hi" ? "आपातकालीन अलर्ट सक्रिय!" : "Emergency SOS Active!"}</span>
               </div>
               
-              <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
+              <p className="text-[11px] text-slate-650 leading-relaxed font-semibold">
                 {lang === "hi" 
                   ? "आपातकालीन ईमेल अलर्ट आपके पंजीकृत अभिभावकों को स्थान लिंक के साथ भेज दिए गए हैं। 10 सेकंड का मूक रिकॉर्डर शुरू हो गया है। स्थान साझा करने के लिए नीचे दिए गए बटनों का उपयोग करें:" 
                   : "Emergency email alerts containing your coordinates have been sent to your guardians. 10-second silent recorder initiated. Use buttons below to coordinate:"}
@@ -703,7 +738,7 @@ export default function WomenSafety() {
 
                 <a 
                   href="tel:1091"
-                  className="bg-red-600 hover:bg-red-750 text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
+                  className="bg-red-650 hover:bg-red-750 text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
                 >
                   <span>{lang === "hi" ? "कॉल हेल्पलाइन" : "Call Helpline (1091)"}</span>
                 </a>
@@ -722,7 +757,7 @@ export default function WomenSafety() {
             <div className="bg-white border border-rose-100 p-4 rounded-xl flex flex-col justify-between space-y-4 shadow-sm">
               <div>
                 <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
-                  <Phone className="w-4 h-4 text-emerald-500 fill-emerald-100 animate-pulse" />
+                  <Phone className="w-4 h-4 text-emerald-500 fill-emerald-105" />
                   {lang === "hi" ? "फर्जी कॉल" : "Discreet Call"}
                 </h4>
                 <p className="text-[9px] text-slate-450 font-semibold mt-1">Simulates an incoming rescue phone call with vibration.</p>
@@ -758,8 +793,8 @@ export default function WomenSafety() {
                     triggerHaptic([1000]);
                   }
                 }}
-                className={`w-full font-bold py-2 rounded-lg text-xs shadow-sm transition cursor-pointer ${
-                  sirenActive ? "bg-slate-200 text-slate-700" : "bg-rose-600 hover:bg-rose-700 text-white"
+                className={`w-full font-bold py-2 rounded-lg text-xs shadow-md transition cursor-pointer ${
+                  sirenActive ? "bg-slate-205 text-slate-700" : "bg-rose-600 hover:bg-rose-700 text-white"
                 }`}
               >
                 {sirenActive ? (lang === "hi" ? "बंद करें" : "Stop Siren") : (lang === "hi" ? "सायरन बजाएं" : "Sound Siren")}
@@ -852,10 +887,10 @@ export default function WomenSafety() {
               <button 
                 onClick={() => {
                   setIsEMFActive(!isEMFActive);
-                  setEmfValue(38.2);
+                  setEmfValue(0.0);
                 }}
                 className={`px-3 py-1 rounded-lg text-[9px] font-extrabold uppercase transition cursor-pointer ${
-                  isEMFActive ? "bg-red-600 text-white" : "bg-slate-100 text-slate-600"
+                  isEMFActive ? "bg-red-650 text-white" : "bg-slate-100 text-slate-650"
                 }`}
               >
                 {isEMFActive ? (lang === "hi" ? "बंद करें" : "Disable") : (lang === "hi" ? "सक्रिय करें" : "Scan")}
@@ -867,26 +902,35 @@ export default function WomenSafety() {
             </p>
 
             {isEMFActive ? (
-              <div className="flex flex-col items-center py-4 space-y-3">
-                <div className={`w-32 h-32 rounded-full border-4 flex flex-col items-center justify-center transition-all duration-300 ${
-                  emfValue > 85 
-                    ? "border-red-650 bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.2)] animate-pulse" 
-                    : emfValue > 55
-                    ? "border-amber-500 bg-amber-50 shadow-[0_0_15px_rgba(245,158,11,0.15)]"
-                    : "border-rose-500 bg-slate-50"
-                }`}>
-                  <span className="text-2xl font-mono font-black text-slate-800">{emfValue}</span>
-                  <span className="text-[8px] font-bold text-slate-550 tracking-wider">µTesla</span>
-                </div>
-
-                <div className="text-center">
-                  <span className={`text-[10px] font-extrabold uppercase tracking-widest ${
-                    emfValue > 85 ? "text-red-600" : emfValue > 55 ? "text-amber-600" : "text-rose-600"
+              isSensorSupported ? (
+                <div className="flex flex-col items-center py-4 space-y-3">
+                  <div className={`w-32 h-32 rounded-full border-4 flex flex-col items-center justify-center transition-all duration-300 ${
+                    emfValue > 85 
+                      ? "border-red-650 bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.2)]" 
+                      : emfValue > 55
+                      ? "border-amber-500 bg-amber-50 shadow-[0_0_15px_rgba(245,158,11,0.15)]"
+                      : "border-rose-500 bg-slate-50"
                   }`}>
-                    {emfValue > 85 ? "🚨 Metal/Camera Device Detected!" : emfValue > 55 ? "⚠️ Fluctuating Signals" : "✅ Safe (Normal Ambient Field)"}
-                  </span>
+                    <span className="text-2xl font-mono font-black text-slate-800">{emfValue}</span>
+                    <span className="text-[8px] font-bold text-slate-550 tracking-wider">µTesla</span>
+                  </div>
+
+                  <div className="text-center">
+                    <span className={`text-[10px] font-extrabold uppercase tracking-widest ${
+                      emfValue > 85 ? "text-red-650" : emfValue > 55 ? "text-amber-600" : "text-rose-600"
+                    }`}>
+                      {emfValue > 85 ? "🚨 Metal/Camera Device Detected!" : emfValue > 55 ? "⚠️ Fluctuating Signals" : "✅ Safe (Normal Ambient Field)"}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center space-y-1">
+                  <span className="text-[10px] font-black text-red-700 block uppercase tracking-wider">Sensor API Unusable</span>
+                  <p className="text-[9px] text-red-600 font-bold leading-relaxed">
+                    This feature requires a physical magnetometer/compass sensor. Your device or browser does not support the W3C Magnetometer API.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="text-center py-6 text-slate-400 font-bold text-xs uppercase tracking-widest bg-slate-50 rounded-xl border border-slate-100">
                 Sensor Offline
@@ -906,14 +950,14 @@ export default function WomenSafety() {
                   else startCamera();
                 }}
                 className={`px-3 py-1 rounded-lg text-[9px] font-extrabold uppercase transition cursor-pointer ${
-                  isCameraActive ? "bg-red-600 text-white" : "bg-slate-100 text-slate-600"
+                  isCameraActive ? "bg-red-650 text-white" : "bg-slate-100 text-slate-650"
                 }`}
               >
                 {isCameraActive ? (lang === "hi" ? "कैमरा बंद" : "Close Scanner") : (lang === "hi" ? "कैमरा खोलें" : "Open Scanner")}
               </button>
             </div>
 
-            <p className="text-[9px] text-slate-500 font-semibold leading-relaxed">
+            <p className="text-[9px] text-slate-550 font-semibold leading-relaxed">
               Opens your back camera with an optimized high-contrast red filter to highlight reflection points from lens coatings.
             </p>
 
@@ -944,7 +988,100 @@ export default function WomenSafety() {
         </div>
       )}
 
-      {/* TAB 3: SAFE MAP */}
+      {/* TAB 3: NCW PORTAL (Seamless Government Complaining WebView) */}
+      {activeTab === "ncw" && (
+        <div className="space-y-4 animate-fadeIn text-slate-800">
+          <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 shadow-sm">
+            <div className="flex justify-between items-center border-b border-rose-100 pb-2">
+              <div className="flex items-center gap-1.5">
+                <Globe className="w-4 h-4 text-purple-650" />
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-850">
+                  {lang === "hi" ? "राष्ट्रीय महिला आयोग" : "National Commission for Women"}
+                </h4>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    setNcwKey(k => k + 1);
+                    setNcwLoading(true);
+                  }}
+                  className="p-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/50 cursor-pointer"
+                  title="Refresh View"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+                <a 
+                  href={activeNcwUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/50 flex items-center justify-center"
+                  title="Open in Browser"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+
+            <p className="text-[9px] text-slate-500 font-semibold leading-relaxed">
+              Register formal complaints or browse resources securely on the official NCW portals inside our secure web sandbox.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-50 border border-slate-150 rounded-xl">
+              <button 
+                onClick={() => {
+                  setActiveNcwUrl("https://www.ncw.gov.in/");
+                  setNcwLoading(true);
+                }}
+                className={`py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition cursor-pointer text-center ${
+                  activeNcwUrl === "https://www.ncw.gov.in/" 
+                    ? "bg-rose-600 text-white shadow-sm font-bold" 
+                    : "text-slate-550 hover:text-slate-800"
+                }`}
+              >
+                NCW Home Portal
+              </button>
+              <button 
+                onClick={() => {
+                  setActiveNcwUrl("https://ncwapps.nic.in/onlinecomplaintsv2/");
+                  setNcwLoading(true);
+                }}
+                className={`py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition cursor-pointer text-center ${
+                  activeNcwUrl === "https://ncwapps.nic.in/onlinecomplaintsv2/" 
+                    ? "bg-rose-600 text-white shadow-sm font-bold" 
+                    : "text-slate-550 hover:text-slate-800"
+                }`}
+              >
+                Complaints Desk (ComplaintsV2)
+              </button>
+            </div>
+
+            <div className="relative rounded-xl overflow-hidden border border-rose-100 bg-slate-100 min-h-[500px]">
+              {ncwLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 z-10 space-y-2">
+                  <div className="w-7 h-7 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-[10px] font-bold text-slate-500 animate-pulse">Connecting to NCW Portal...</span>
+                </div>
+              )}
+              <iframe 
+                key={ncwKey}
+                src={activeNcwUrl}
+                onLoad={() => setNcwLoading(false)}
+                className="w-full min-h-[500px] border-0"
+                title="National Commission for Women Portal WebView"
+              />
+            </div>
+            
+            <div className="bg-rose-50/50 p-2.5 rounded-lg border border-rose-100 text-center">
+              <span className="text-[8px] text-slate-400 font-bold block mb-1">CORS & Framing Disclaimer</span>
+              <p className="text-[8.5px] text-slate-550 leading-relaxed font-semibold">
+                If the government portal restricts embedding in standard browser view, click the top right icon to launch it in your phone's native app browser.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: SAFE MAP */}
       {activeTab === "routes" && (
         <div className="space-y-4 animate-fadeIn">
           <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 text-slate-800 shadow-sm">
@@ -1089,7 +1226,7 @@ export default function WomenSafety() {
                         {item.type}
                       </span>
                     </div>
-                    <p className="text-[9px] text-slate-500 leading-relaxed font-semibold">{item.address}</p>
+                    <p className="text-[9px] text-slate-505 leading-relaxed font-semibold">{item.address}</p>
                     <div className="flex justify-between items-center pt-1 border-t border-slate-200">
                       <span className="text-[8px] font-bold text-slate-400">Helpline: {item.helpline}</span>
                       <a 
@@ -1111,7 +1248,7 @@ export default function WomenSafety() {
         </div>
       )}
 
-      {/* TAB 4: SETTINGS */}
+      {/* TAB 5: SETTINGS */}
       {activeTab === "settings" && (
         <div className="space-y-4 animate-fadeIn text-slate-850">
           <div className="bg-white border border-rose-100 p-5 rounded-2xl space-y-4 shadow-sm">
@@ -1136,7 +1273,7 @@ export default function WomenSafety() {
 
             {stealthEnabled && (
               <div className="space-y-2 pt-2 border-t border-rose-105">
-                <label className="text-[9px] font-black text-slate-450 uppercase tracking-wider block">Unlock PIN Code (4 Digits)</label>
+                <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block">Unlock PIN Code (4 Digits)</label>
                 <input 
                   type="text"
                   maxLength={4}
