@@ -200,6 +200,7 @@ export default function WomenSafety() {
   const [fakeCallActive, setFakeCallActive] = useState(false);
   const [fakeCallConnected, setFakeCallConnected] = useState(false);
   const [fakeCallTime, setFakeCallTime] = useState(0);
+  const [fakeCallerName, setFakeCallerName] = useState(() => localStorage.getItem("fake_caller_name") || (lang === "hi" ? "पिताजी (घर)" : "Papa (Home)"));
   const [sirenActive, setSirenActive] = useState(false);
   const [shakeEnabled, setShakeEnabled] = useState(() => localStorage.getItem("shake_enabled") === "true");
 
@@ -642,9 +643,9 @@ export default function WomenSafety() {
       <div className="fixed inset-0 z-50 bg-[#0f1422] text-white flex flex-col justify-between p-10 font-sans animate-fadeIn">
         <div className="text-center pt-10 space-y-2">
           <div className="w-24 h-24 bg-gradient-to-tr from-slate-600 to-slate-400 rounded-full flex items-center justify-center text-4xl font-extrabold mx-auto shadow-lg uppercase text-indigo-50">
-            {lang === "hi" ? "पि" : "Pa"}
+            {fakeCallerName.slice(0, 2)}
           </div>
-          <h2 className="text-2xl font-bold font-display">{lang === "hi" ? "पिताजी (घर)" : "Papa (Home)"}</h2>
+          <h2 className="text-2xl font-bold font-display">{fakeCallerName}</h2>
           <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold">
             {fakeCallConnected ? formatTime(fakeCallTime) : (lang === "hi" ? "आने वाली कॉल..." : "Incoming call...")}
           </p>
@@ -713,11 +714,11 @@ export default function WomenSafety() {
       {/* Tabs list (5 columns now) */}
       <div className="flex bg-white border border-rose-100 rounded-xl p-1 shadow-sm shrink-0 overflow-x-auto gap-0.5">
         {[
-          { key: "deterrents", title: lang === "hi" ? "पैनिक व SOS" : "Panic & SOS", icon: AlertOctagon },
-          { key: "scanner", title: lang === "hi" ? "स्कैनर्स" : "Scanners", icon: Camera },
-          { key: "ncw", title: lang === "hi" ? "NCW शिकायत" : "NCW Portal", icon: Globe },
-          { key: "routes", title: lang === "hi" ? "सुरक्षित मार्ग" : "Safe Map", icon: Map },
-          { key: "settings", title: lang === "hi" ? "सेटिंग्स" : "Settings", icon: Settings },
+          { key: "deterrents", title: lang === "hi" ? "🚨 मदद और पैनिक" : "🚨 Help & Alarm", icon: AlertOctagon },
+          { key: "scanner", title: lang === "hi" ? "🔍 हिडन कैमरा खोजें" : "🔍 Camera Detector", icon: Camera },
+          { key: "ncw", title: lang === "hi" ? "📝 शिकायत दर्ज करें" : "📝 File Complaint", icon: Globe },
+          { key: "routes", title: lang === "hi" ? "🗺️ सुरक्षित मार्ग" : "🗺️ Safe Map", icon: Map },
+          { key: "settings", title: lang === "hi" ? "⚙️ सेटिंग्स" : "⚙️ Settings", icon: Settings },
         ].map(t => {
           const Icon = t.icon;
           return (
@@ -770,11 +771,11 @@ export default function WomenSafety() {
               )}
               <AlertOctagon className="w-10 h-10 text-white mb-1.5" />
               <span className="text-white text-xs font-black uppercase tracking-wider">
-                {sosActive ? "Sending..." : "Emergency SOS"}
+                {sosActive ? (lang === "hi" ? "भेज रहे हैं..." : "Sending...") : (lang === "hi" ? "🚨 मदद बटन" : "🚨 Help Button")}
               </span>
             </button>
-            <p className="text-[10px] text-rose-600 font-bold uppercase tracking-widest mt-4">
-              {lang === "hi" ? "तुरंत सहायता के लिए दबाएं" : "Press for immediate dispatch"}
+            <p className="text-[10px] text-rose-600 font-bold uppercase tracking-widest mt-4 text-center px-4 leading-relaxed">
+              {lang === "hi" ? "इसे दबाते ही परिवार को आपकी लोकेशन और ईमेल अलर्ट मिल जाएगा।" : "Press this to send your live location and email alert to your family."}
             </p>
           </div>
 
@@ -782,13 +783,13 @@ export default function WomenSafety() {
             <div className="bg-red-50 border-2 border-red-200/80 rounded-2xl p-5 shadow-sm space-y-4 animate-scaleUp text-slate-800">
               <div className="flex items-center gap-2 text-red-600 font-extrabold text-sm">
                 <Radio className="w-5 h-5 text-red-650 animate-ping" />
-                <span>{lang === "hi" ? "आपातकालीन अलर्ट सक्रिय!" : "Emergency SOS Active!"}</span>
+                <span>{lang === "hi" ? "🚨 अलर्ट शुरू हो गया है!" : "🚨 Alert Active!"}</span>
               </div>
               
               <p className="text-[11px] text-slate-650 leading-relaxed font-semibold">
                 {lang === "hi" 
-                  ? "आपातकालीन ईमेल अलर्ट आपके पंजीकृत अभिभावकों को स्थान लिंक के साथ भेज दिए गए हैं। 10 सेकंड का मूक रिकॉर्डर शुरू हो गया है। स्थान साझा करने के लिए नीचे दिए गए बटनों का उपयोग करें:" 
-                  : "Emergency email alerts containing your coordinates have been sent to your guardians. 10-second silent recorder initiated. Use buttons below to coordinate:"}
+                  ? "आपके परिवार को आपकी लोकेशन ईमेल कर दी गई है। साथ ही सुरक्षा के लिए 10 सेकंड का बैकग्राउंड रिकॉर्डर शुरू हो गया है। नीचे दिए बटनों से मदद लें:" 
+                  : "Your family has been emailed your live location. A 10-second security voice recorder has also started. Use the buttons below for help:"}
               </p>
 
               <div className="grid grid-cols-2 gap-3">
@@ -798,14 +799,14 @@ export default function WomenSafety() {
                   rel="noopener noreferrer"
                   className="bg-[#25D366] hover:bg-[#20ba59] text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
                 >
-                  <span>{lang === "hi" ? "व्हाट्सएप अलर्ट" : "WhatsApp Alert"}</span>
+                  <span>{lang === "hi" ? "व्हाट्सएप पर भेजें" : "Send WhatsApp"}</span>
                 </a>
 
                 <a 
                   href="tel:1091"
                   className="bg-red-650 hover:bg-red-750 text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
                 >
-                  <span>{lang === "hi" ? "कॉल हेल्पलाइन" : "Call Helpline (1091)"}</span>
+                  <span>{lang === "hi" ? "हेल्पलाइन कॉल (1091)" : "Call Helpline (1091)"}</span>
                 </a>
               </div>
 
@@ -813,7 +814,7 @@ export default function WomenSafety() {
                 onClick={() => setSosFired(false)}
                 className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs transition cursor-pointer"
               >
-                {lang === "hi" ? "अलर्ट बंद करें" : "Dismiss Emergency State"}
+                {lang === "hi" ? "अलर्ट बंद करें" : "Turn off Alert"}
               </button>
             </div>
           )}
@@ -823,9 +824,11 @@ export default function WomenSafety() {
               <div>
                 <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
                   <Phone className="w-4 h-4 text-emerald-500 fill-emerald-105" />
-                  {lang === "hi" ? "फर्जी कॉल" : "Discreet Call"}
+                  {lang === "hi" ? "📞 बचाव फ़ोन कॉल (Fake)" : "📞 Save Me Call"}
                 </h4>
-                <p className="text-[9px] text-slate-450 font-semibold mt-1">Simulates an incoming rescue phone call with vibration.</p>
+                <p className="text-[9px] text-slate-450 font-semibold mt-1">
+                  {lang === "hi" ? "बातचीत का नाटक करके पीछा करने वाले को डराने के लिए फ़ोन पर घंटी बजाएं।" : "Pretend to speak to family to escape stalkers by ringing your phone."}
+                </p>
               </div>
               <button 
                 onClick={() => {
@@ -835,7 +838,7 @@ export default function WomenSafety() {
                 }}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs shadow-sm transition cursor-pointer"
               >
-                {lang === "hi" ? "कॉल ट्रिगर करें" : "Trigger Call"}
+                {lang === "hi" ? "घंटी बजाएं" : "Ring Phone"}
               </button>
             </div>
 
@@ -843,9 +846,11 @@ export default function WomenSafety() {
               <div>
                 <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
                   <Volume2 className="w-4 h-4 text-rose-500" />
-                  {lang === "hi" ? "पैनिक सायरन" : "Panic Siren"}
+                  {lang === "hi" ? "🔊 तेज़ पुलिस अलार्म" : "🔊 Loud Alarm"}
                 </h4>
-                <p className="text-[9px] text-slate-450 font-semibold mt-1">Sounds a loud synthesized emergency police siren at max volume.</p>
+                <p className="text-[9px] text-slate-450 font-semibold mt-1">
+                  {lang === "hi" ? "हमलावर को डराने और लोगों को सतर्क करने के लिए तेज़ पुलिस सायरन बजाएं।" : "Play a very loud police siren to scare attackers and attract attention."}
+                </p>
               </div>
               <button 
                 onClick={() => {
@@ -859,10 +864,10 @@ export default function WomenSafety() {
                   }
                 }}
                 className={`w-full font-bold py-2 rounded-lg text-xs shadow-md transition cursor-pointer ${
-                  sirenActive ? "bg-slate-205 text-slate-700" : "bg-rose-600 hover:bg-rose-700 text-white"
+                  sirenActive ? "bg-slate-200 text-slate-700" : "bg-rose-600 hover:bg-rose-700 text-white"
                 }`}
               >
-                {sirenActive ? (lang === "hi" ? "बंद करें" : "Stop Siren") : (lang === "hi" ? "सायरन बजाएं" : "Sound Siren")}
+                {sirenActive ? (lang === "hi" ? "अलार्म बंद करें" : "Stop Alarm") : (lang === "hi" ? "अलार्म चालू करें" : "Start Alarm")}
               </button>
             </div>
           </div>
@@ -947,7 +952,7 @@ export default function WomenSafety() {
             <div className="flex justify-between items-center border-b border-rose-100 pb-2">
               <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
                 <Radio className="w-4.5 h-4.5 text-rose-500" />
-                {lang === "hi" ? "ईएमएफ हिडन कैमरा डिटेक्टर" : "EMF Spy Camera Sensor"}
+                {lang === "hi" ? "🔍 शीशा कैमरा खोजक" : "🔍 Mirror Camera Finder"}
               </h4>
               <button 
                 onClick={() => {
@@ -958,12 +963,12 @@ export default function WomenSafety() {
                   isEMFActive ? "bg-red-650 text-white" : "bg-slate-100 text-slate-650"
                 }`}
               >
-                {isEMFActive ? (lang === "hi" ? "बंद करें" : "Disable") : (lang === "hi" ? "सक्रिय करें" : "Scan")}
+                {isEMFActive ? (lang === "hi" ? "बंद करें" : "Disable") : (lang === "hi" ? "स्कैन करें" : "Scan")}
               </button>
             </div>
 
             <p className="text-[9px] text-slate-500 font-semibold leading-relaxed">
-              Uses phone's magnetic sensors to identify radiation spikes emitted by spy camera chipsets behind trial room mirrors or walls.
+              {lang === "hi" ? "ट्रायल रूम के शीशे या दीवारों के पीछे छिपे कैमरों के चुंबकीय सिग्नल्स को ढूँढने में मदद करता है।" : "Finds hidden spy cameras behind mirrors or walls in hotel/trial rooms by detecting magnetic fields."}
             </p>
 
             {isEMFActive ? (
@@ -984,21 +989,21 @@ export default function WomenSafety() {
                     <span className={`text-[10px] font-extrabold uppercase tracking-widest ${
                       emfValue > 85 ? "text-red-650" : emfValue > 55 ? "text-amber-600" : "text-rose-600"
                     }`}>
-                      {emfValue > 85 ? "🚨 Metal/Camera Device Detected!" : emfValue > 55 ? "⚠️ Fluctuating Signals" : "✅ Safe (Normal Ambient Field)"}
+                      {emfValue > 85 ? (lang === "hi" ? "🚨 कैमरा सिग्नल्स का पता चला!" : "🚨 Camera Signals Detected!") : emfValue > 55 ? (lang === "hi" ? "⚠️ सामान्य से अधिक सिग्नल्स" : "⚠️ High Signals") : (lang === "hi" ? "✅ सुरक्षित इलाका" : "✅ Safe Ambient Field")}
                     </span>
                   </div>
                 </div>
               ) : (
                 <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center space-y-1">
-                  <span className="text-[10px] font-black text-red-700 block uppercase tracking-wider">Sensor API Unusable</span>
+                  <span className="text-[10px] font-black text-red-700 block uppercase tracking-wider">{lang === "hi" ? "सेंसर काम नहीं कर रहा" : "Sensor Unavailable"}</span>
                   <p className="text-[9px] text-red-600 font-bold leading-relaxed">
-                    This feature requires a physical magnetometer/compass sensor. Your device or browser does not support the W3C Magnetometer API.
+                    {lang === "hi" ? "इस काम के लिए आपके फ़ोन में दिशा-सूचक (Compass) सेंसर होना ज़रूरी है जो इस फ़ोन में उपलब्ध नहीं है।" : "This feature requires a compass hardware sensor. Your device does not support this sensor API."}
                   </p>
                 </div>
               )
             ) : (
               <div className="text-center py-6 text-slate-400 font-bold text-xs uppercase tracking-widest bg-slate-50 rounded-xl border border-slate-100">
-                Sensor Offline
+                {lang === "hi" ? "स्कैनर बंद है" : "Scanner Off"}
               </div>
             )}
           </div>
@@ -1007,7 +1012,7 @@ export default function WomenSafety() {
             <div className="flex justify-between items-center border-b border-rose-100 pb-2">
               <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
                 <Camera className="w-4.5 h-4.5 text-rose-500" />
-                {lang === "hi" ? "इन्फ्रारेड स्पाई लेंस खोजक" : "Spy Lens Infrared Filter"}
+                {lang === "hi" ? "🔴 लाल बत्ती लेंस स्कैनर" : "🔴 Red Light Lens Scan"}
               </h4>
               <button 
                 onClick={() => {
@@ -1018,12 +1023,12 @@ export default function WomenSafety() {
                   isCameraActive ? "bg-red-650 text-white" : "bg-slate-100 text-slate-650"
                 }`}
               >
-                {isCameraActive ? (lang === "hi" ? "कैमरा बंद" : "Close Scanner") : (lang === "hi" ? "कैमरा खोलें" : "Open Scanner")}
+                {isCameraActive ? (lang === "hi" ? "कैमरा बंद करें" : "Close Camera") : (lang === "hi" ? "कैमरा खोलें" : "Open Camera")}
               </button>
             </div>
 
             <p className="text-[9px] text-slate-550 font-semibold leading-relaxed">
-              Opens your back camera with an optimized high-contrast red filter to highlight reflection points from lens coatings.
+              {lang === "hi" ? "कमरे में अंधेरा करके कैमरे के लेंस की चमक को लाल रंग के फिल्टर में देखें।" : "Opens your back camera with an optimized high-contrast red filter to highlight reflection points from lens coatings."}
             </p>
 
             {isCameraActive ? (
@@ -1041,12 +1046,12 @@ export default function WomenSafety() {
                   </div>
                 </div>
                 <div className="absolute bottom-2 left-2 bg-red-600 text-white text-[8px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded border border-red-500 animate-pulse">
-                  IR filter Active
+                  {lang === "hi" ? "कैमरा सक्रिय" : "Camera Active"}
                 </div>
               </div>
             ) : (
               <div className="text-center py-10 text-slate-400 font-bold text-xs uppercase tracking-widest bg-slate-50 rounded-xl border border-slate-100">
-                Camera Stream Offline
+                {lang === "hi" ? "कैमरा बंद है" : "Camera Offline"}
               </div>
             )}
           </div>
@@ -1544,6 +1549,27 @@ export default function WomenSafety() {
                   localStorage.setItem("shake_enabled", String(val));
                 }}
                 className="w-5 h-5 accent-rose-600 cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <div className="bg-white border border-rose-100 p-5 rounded-2xl space-y-4 shadow-sm">
+            <h4 className="text-xs font-black uppercase tracking-wider border-b border-rose-100 pb-2">
+              {lang === "hi" ? "बचाव फ़ोन कॉल सेटिंग" : "Save Me Call Settings"}
+            </h4>
+
+            <div className="space-y-2">
+              <label className="text-[9px] font-black text-slate-450 uppercase tracking-wider block">
+                {lang === "hi" ? "कॉल करने वाले का नाम (जैसे: पुलिस, पिताजी)" : "Display Name of Caller (e.g. Papa, Police)"}
+              </label>
+              <input 
+                type="text"
+                value={fakeCallerName}
+                onChange={e => {
+                  setFakeCallerName(e.target.value);
+                  localStorage.setItem("fake_caller_name", e.target.value);
+                }}
+                className="w-full max-w-[200px] border border-rose-200 bg-slate-50 rounded-lg text-xs px-3 py-2 font-bold text-slate-800 outline-none focus:border-rose-500"
               />
             </div>
           </div>
