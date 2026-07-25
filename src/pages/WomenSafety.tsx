@@ -241,6 +241,15 @@ export default function WomenSafety() {
   const [submittingRating, setSubmittingRating] = useState(false);
 
   // Audio Evidence states
+  const [helpSubTab, setHelpSubTab] = useState<"panic" | "guardians">("panic");
+  const [ncwSubTab, setNcwSubTab] = useState<"file" | "status">("file");
+  const [routeSubTab, setRouteSubTab] = useState<"nav" | "ratings" | "directory">("nav");
+
+  const [complaintsPage, setComplaintsPage] = useState(1);
+  const [ratingsPage, setRatingsPage] = useState(1);
+  const [directoryPage, setDirectoryPage] = useState(1);
+  const itemsPerPage = 3;
+
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -751,8 +760,34 @@ export default function WomenSafety() {
       {/* TAB 1: PANIC & SOS */}
       {activeTab === "deterrents" && (
         <div className="space-y-4 animate-fadeIn">
-          <div className="flex flex-col items-center justify-center py-7 bg-white border border-rose-150 rounded-2xl shadow-sm relative overflow-hidden">
-            <div className="absolute inset-0 bg-rose-50/10 pointer-events-none"></div>
+          {/* Inner Sub-tab Navigation */}
+          <div className="flex bg-rose-50 border border-rose-100 rounded-xl p-1 shadow-sm shrink-0 gap-1">
+            <button 
+              onClick={() => setHelpSubTab("panic")}
+              className={`flex-1 py-2 rounded-lg text-[10.5px] font-black uppercase tracking-wider transition cursor-pointer text-center ${
+                helpSubTab === "panic" 
+                  ? "bg-rose-600 text-white shadow-md" 
+                  : "text-rose-700 hover:bg-rose-100"
+              }`}
+            >
+              {lang === "hi" ? "🚨 आपातकालीन" : "🚨 Emergency Panel"}
+            </button>
+            <button 
+              onClick={() => setHelpSubTab("guardians")}
+              className={`flex-1 py-2 rounded-lg text-[10.5px] font-black uppercase tracking-wider transition cursor-pointer text-center ${
+                helpSubTab === "guardians" 
+                  ? "bg-rose-600 text-white shadow-md" 
+                  : "text-rose-700 hover:bg-rose-100"
+              }`}
+            >
+              {lang === "hi" ? "👥  अभिभावक" : "👥 Guardians"}
+            </button>
+          </div>
+
+          {helpSubTab === "panic" && (
+            <div className="space-y-4 animate-fadeIn">
+              <div className="flex flex-col items-center justify-center py-7 bg-white border border-rose-150 rounded-2xl shadow-sm relative overflow-hidden">
+                <div className="absolute inset-0 bg-rose-50/10 pointer-events-none"></div>
             
             <button 
               onClick={handleSOS}
@@ -792,19 +827,10 @@ export default function WomenSafety() {
                   : "Your family has been emailed your live location. A 10-second security voice recorder has also started. Use the buttons below for help:"}
               </p>
 
-              <div className="grid grid-cols-2 gap-3">
-                <a 
-                  href={`https://api.whatsapp.com/send?text=EMERGENCY! I need help. My current location is: ${encodeURIComponent(sosLocationUrl)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[#25D366] hover:bg-[#20ba59] text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
-                >
-                  <span>{lang === "hi" ? "व्हाट्सएप पर भेजें" : "Send WhatsApp"}</span>
-                </a>
-
+              <div className="flex justify-center">
                 <a 
                   href="tel:1091"
-                  className="bg-red-650 hover:bg-red-750 text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
+                  className="w-full bg-red-650 hover:bg-red-750 text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none animate-bounce"
                 >
                   <span>{lang === "hi" ? "हेल्पलाइन कॉल (1091)" : "Call Helpline (1091)"}</span>
                 </a>
@@ -898,7 +924,11 @@ export default function WomenSafety() {
             </div>
           </div>
 
-          <div className="bg-white border border-rose-100 p-4 shadow-sm space-y-4 rounded-2xl">
+            </div>
+          )}
+
+          {helpSubTab === "guardians" && (
+            <div className="bg-white border border-rose-100 p-4 shadow-sm space-y-4 rounded-2xl animate-fadeIn">
             <h4 className="font-display font-bold text-xs text-slate-800 uppercase tracking-widest border-b border-rose-100 pb-2 flex items-center gap-1.5">
               <User className="w-4 h-4 text-rose-500" />
               {lang === "hi" ? "आपातकालीन अभिभावक (Max 5)" : "Guardian Alerts List (Max 5)"}
@@ -939,11 +969,14 @@ export default function WomenSafety() {
                 ))}
               </div>
             ) : (
-              <p className="text-[9px] text-slate-400 text-center py-1 font-semibold">No contacts registered. Register emails for free alerts.</p>
+              <p className="text-[9px] text-slate-450 text-center py-4 font-semibold bg-rose-50/30 rounded-xl">
+                {lang === "hi" ? "कोई अभिभावक दर्ज नहीं है। ईमेल या नंबर जोड़ें।" : "No contacts registered. Register emails for free alerts."}
+              </p>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+    )}
 
       {/* TAB 2: SCANNERS */}
       {activeTab === "scanner" && (
@@ -1326,168 +1359,282 @@ export default function WomenSafety() {
 
       {/* TAB 4: SAFE MAP */}
       {activeTab === "routes" && (
-        <div className="space-y-4 animate-fadeIn">
-          <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 text-slate-800 shadow-sm">
-            <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-              <Map className="w-4.5 h-4.5 text-rose-500" />
-              {lang === "hi" ? "सुरक्षित मार्ग खोज व दिशा निर्देश" : "Safe Directions Finder"}
-            </h4>
-
-            <form onSubmit={handleRouteSearch} className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <input 
-                  type="text" 
-                  value={startLoc}
-                  onChange={e => setStartLoc(e.target.value)}
-                  required
-                  placeholder={lang === "hi" ? "प्रारंभिक बिंदु" : "Start location"} 
-                  className="border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-slate-800 focus:border-rose-500"
-                />
-                <input 
-                  type="text" 
-                  value={endLoc}
-                  onChange={e => setEndLoc(e.target.value)}
-                  required
-                  placeholder={lang === "hi" ? "गंतव्य बिंदु" : "Destination"} 
-                  className="border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-slate-800 focus:border-rose-500"
-                />
-              </div>
-              <button 
-                type="submit" 
-                className="w-full bg-[#000080] hover:bg-indigo-950 text-white font-bold py-2 rounded-lg text-xs shadow-md transition cursor-pointer"
-              >
-                {lang === "hi" ? "मार्ग का पता लगाएं" : "Find Safety Route"}
-              </button>
-            </form>
-
-            {directionsUrl ? (
-              <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video shadow-inner bg-slate-100">
-                <iframe 
-                  src={directionsUrl}
-                  className="w-full h-full border-0 grayscale saturate-50"
-                  allowFullScreen
-                  loading="lazy"
-                  title="Route Safety Map Directions"
-                />
-              </div>
-            ) : (
-              <div className="text-center py-8 text-slate-400 font-bold text-xs uppercase tracking-widest bg-slate-50 rounded-xl border border-slate-100">
-                Input Locations to Map Route
-              </div>
-            )}
+        <div className="space-y-4 animate-fadeIn text-slate-800">
+          {/* Inner Sub-tab Navigation */}
+          <div className="flex bg-rose-50 border border-rose-100 rounded-xl p-1 shadow-sm shrink-0 gap-1 overflow-x-auto no-scrollbar">
+            <button 
+              onClick={() => setRouteSubTab("nav")}
+              className={`flex-1 shrink-0 py-2 px-1 rounded-lg text-[9.5px] font-black uppercase tracking-wider transition cursor-pointer text-center min-w-[85px] ${
+                routeSubTab === "nav" 
+                  ? "bg-rose-600 text-white shadow-md" 
+                  : "text-rose-700 hover:bg-rose-100"
+              }`}
+            >
+              {lang === "hi" ? "🗺️ मार्ग खोजें" : "🗺️ Find Route"}
+            </button>
+            <button 
+              onClick={() => setRouteSubTab("ratings")}
+              className={`flex-1 shrink-0 py-2 px-1 rounded-lg text-[9.5px] font-black uppercase tracking-wider transition cursor-pointer text-center min-w-[85px] ${
+                routeSubTab === "ratings" 
+                  ? "bg-rose-600 text-white shadow-md" 
+                  : "text-rose-700 hover:bg-rose-100"
+              }`}
+            >
+              {lang === "hi" ? "⭐ सुरक्षा समीक्षा" : "⭐ Street Reviews"}
+            </button>
+            <button 
+              onClick={() => setRouteSubTab("directory")}
+              className={`flex-1 shrink-0 py-2 px-1 rounded-lg text-[9.5px] font-black uppercase tracking-wider transition cursor-pointer text-center min-w-[85px] ${
+                routeSubTab === "directory" 
+                  ? "bg-rose-600 text-white shadow-md" 
+                  : "text-rose-700 hover:bg-rose-100"
+              }`}
+            >
+              {lang === "hi" ? "🏢 सुरक्षा निर्देशिका" : "🏢 Local Centers"}
+            </button>
           </div>
 
-          <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 text-slate-800 shadow-sm">
-            <h4 className="text-xs font-black uppercase tracking-wider border-b border-rose-100 pb-2">
-              {lang === "hi" ? "समुदाय द्वारा सुरक्षित मार्ग समीक्षा" : "Community Street Safety Reviews"}
-            </h4>
+          {routeSubTab === "nav" && (
+            <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 shadow-sm animate-fadeIn">
+              <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
+                <Map className="w-4.5 h-4.5 text-rose-500" />
+                {lang === "hi" ? "सुरक्षित मार्ग खोज व दिशा निर्देश" : "Safe Directions Finder"}
+              </h4>
 
-            <form onSubmit={handleRatingSubmit} className="space-y-3 bg-slate-50 border border-slate-200/50 p-3.5 rounded-xl">
-              <span className="text-[10px] font-black uppercase tracking-wider text-rose-650 block mb-1">Add Street Rating / समीक्षा जोड़ें</span>
-              <div className="grid grid-cols-2 gap-2">
-                <input 
-                  type="text" 
-                  value={newStreetName}
-                  onChange={e => setNewStreetName(e.target.value)}
-                  required
-                  placeholder="Street/Area (e.g. Karond Chowk)" 
-                  className="border border-slate-200 bg-white rounded-lg text-xs px-2.5 py-1.5 font-semibold outline-none text-slate-800 focus:border-rose-500"
-                />
-                <select 
-                  value={newRatingVal}
-                  onChange={e => setNewRatingVal(parseInt(e.target.value, 10))}
-                  className="border border-slate-200 bg-white rounded-lg text-xs px-2 py-1.5 font-bold outline-none text-slate-700 cursor-pointer"
-                >
-                  <option value={5}>⭐⭐⭐⭐⭐ (Very Safe)</option>
-                  <option value={4}>⭐⭐⭐⭐ (Safe)</option>
-                  <option value={3}>⭐⭐⭐ (Average)</option>
-                  <option value={2}>⭐⭐ (Unsafe)</option>
-                  <option value={1}>⭐ (High Alert)</option>
-                </select>
-              </div>
-              <input 
-                type="text" 
-                value={newRatingNotes}
-                onChange={e => setNewRatingNotes(e.target.value)}
-                placeholder="Safety Notes (e.g. Broken lights, CCTVs, Police checking)"
-                className="w-full border border-slate-200 bg-white rounded-lg text-xs px-2.5 py-1.5 font-semibold outline-none text-slate-800 focus:border-rose-500"
-              />
-              <button 
-                type="submit" 
-                disabled={submittingRating}
-                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-lg text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
-              >
-                {submittingRating ? "Saving..." : "Post Review"}
-              </button>
-            </form>
-
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pt-2">
-              {ratingsList.map((item, idx) => (
-                <div key={idx} className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-1">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black text-slate-700">{item.location_name}</span>
-                    <span className="text-[9px] text-amber-500 font-bold">{"★".repeat(item.rating)}{"☆".repeat(5 - item.rating)}</span>
-                  </div>
-                  <p className="text-[9px] text-slate-500 font-semibold leading-relaxed">{item.notes}</p>
-                  <span className="text-[8px] text-slate-400 block font-semibold">Post Date: {new Date(item.createdAt).toLocaleDateString()}</span>
+              <form onSubmit={handleRouteSearch} className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <input 
+                    type="text" 
+                    value={startLoc}
+                    onChange={e => setStartLoc(e.target.value)}
+                    required
+                    placeholder={lang === "hi" ? "प्रारंभिक बिंदु" : "Start location"} 
+                    className="border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-slate-800 focus:border-rose-500"
+                  />
+                  <input 
+                    type="text" 
+                    value={endLoc}
+                    onChange={e => setEndLoc(e.target.value)}
+                    required
+                    placeholder={lang === "hi" ? "गंतव्य बिंदु" : "Destination"} 
+                    className="border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-slate-800 focus:border-rose-500"
+                  />
                 </div>
-              ))}
+                <button 
+                  type="submit" 
+                  className="w-full bg-[#000080] hover:bg-indigo-950 text-white font-bold py-2 rounded-lg text-xs shadow-md transition cursor-pointer"
+                >
+                  {lang === "hi" ? "मार्ग का पता लगाएं" : "Find Safety Route"}
+                </button>
+              </form>
+
+              {directionsUrl ? (
+                <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video shadow-inner bg-slate-100">
+                  <iframe 
+                    src={directionsUrl}
+                    className="w-full h-full border-0 grayscale saturate-50"
+                    allowFullScreen
+                    loading="lazy"
+                    title="Route Safety Map Directions"
+                  />
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-400 font-bold text-xs uppercase tracking-widest bg-slate-50 rounded-xl border border-slate-100">
+                  Input Locations to Map Route
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
-          <div className="bg-white border border-rose-100 p-4 shadow-sm space-y-4 text-slate-800 rounded-2xl">
-            <h4 className="font-display font-bold text-xs text-slate-800 uppercase tracking-widest border-b border-rose-100 pb-2 flex items-center gap-1.5">
-              <Shield className="w-4.5 h-4.5 text-rose-500" />
-              {lang === "hi" ? "स्थानीय सुरक्षा निर्देशिका (OSC / पुलिस)" : "Local Protection Directory (OSC / Police)"}
-            </h4>
+          {routeSubTab === "ratings" && (
+            <div className="space-y-4 animate-fadeIn">
+              <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 shadow-sm">
+                <h4 className="text-xs font-black uppercase tracking-wider border-b border-rose-100 pb-2">
+                  {lang === "hi" ? "सुरक्षित मार्ग समीक्षा" : "Street Safety Rating"}
+                </h4>
 
-            <form onSubmit={handleDirectorySearch} className="flex gap-2">
-              <input 
-                type="text" 
-                pattern="\d{6}"
-                value={searchPincode}
-                onChange={e => setSearchPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder={lang === "hi" ? "पिनकोड दर्ज करें (e.g. 466001)" : "Enter 6-digit Pincode (e.g. 466001)"} 
-                className="flex-1 border border-rose-150 rounded-lg text-xs px-3 py-2 outline-none focus:border-rose-500 font-bold bg-slate-50 text-slate-850"
-              />
-              <button 
-                type="submit" 
-                disabled={searchingDirectory || searchPincode.length < 6}
-                className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
-              >
-                {searchingDirectory ? "..." : (lang === "hi" ? "खोजें" : "Search")}
-              </button>
-            </form>
-
-            {directoryList.length > 0 ? (
-              <div className="space-y-3 pt-2 max-h-[250px] overflow-y-auto">
-                {directoryList.map((item, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-1">
-                    <div className="flex justify-between items-start">
-                      <span className="text-[10px] font-black text-slate-800 leading-tight">{item.name}</span>
-                      <span className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-rose-250 bg-rose-50 text-rose-700">
-                        {item.type}
-                      </span>
-                    </div>
-                    <p className="text-[9px] text-slate-505 leading-relaxed font-semibold">{item.address}</p>
-                    <div className="flex justify-between items-center pt-1 border-t border-slate-200">
-                      <span className="text-[8px] font-bold text-slate-400">Helpline: {item.helpline}</span>
-                      <a 
-                        href={`tel:${item.phone}`}
-                        className="text-[8.5px] font-bold text-rose-700 hover:underline flex items-center gap-1"
-                      >
-                        📞 Call: {item.phone}
-                      </a>
-                    </div>
+                <form onSubmit={handleRatingSubmit} className="space-y-3 bg-slate-50 border border-slate-200/50 p-3.5 rounded-xl">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-650 block mb-1">Add Street Rating / समीक्षा जोड़ें</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input 
+                      type="text" 
+                      value={newStreetName}
+                      onChange={e => setNewStreetName(e.target.value)}
+                      required
+                      placeholder="Street/Area (e.g. Karond Chowk)" 
+                      className="border border-slate-200 bg-white rounded-lg text-xs px-2.5 py-1.5 font-semibold outline-none text-slate-800 focus:border-rose-500"
+                    />
+                    <select 
+                      value={newRatingVal}
+                      onChange={e => setNewRatingVal(parseInt(e.target.value, 10))}
+                      className="border border-slate-200 bg-white rounded-lg text-xs px-2 py-1.5 font-bold outline-none text-slate-700 cursor-pointer"
+                    >
+                      <option value={5}>⭐⭐⭐⭐⭐ (Very Safe)</option>
+                      <option value={4}>⭐⭐⭐⭐ (Safe)</option>
+                      <option value={3}>⭐⭐⭐ (Average)</option>
+                      <option value={2}>⭐⭐ (Unsafe)</option>
+                      <option value={1}>⭐ (High Alert)</option>
+                    </select>
                   </div>
-                ))}
+                  <input 
+                    type="text" 
+                    value={newRatingNotes}
+                    onChange={e => setNewRatingNotes(e.target.value)}
+                    placeholder="Safety Notes (e.g. Broken lights, CCTVs, Police checking)"
+                    className="w-full border border-slate-200 bg-white rounded-lg text-xs px-2.5 py-1.5 font-semibold outline-none text-slate-800 focus:border-rose-500"
+                  />
+                  <button 
+                    type="submit" 
+                    disabled={submittingRating}
+                    className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-lg text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
+                  >
+                    {submittingRating ? "Saving..." : "Post Review"}
+                  </button>
+                </form>
+
+                {ratingsList.length > 0 ? (
+                  <div className="space-y-3 pt-2">
+                    {(() => {
+                      const idxLast = ratingsPage * itemsPerPage;
+                      const idxFirst = idxLast - itemsPerPage;
+                      const currentList = ratingsList.slice(idxFirst, idxLast);
+                      const totalPages = Math.ceil(ratingsList.length / itemsPerPage);
+
+                      return (
+                        <>
+                          {currentList.map((item, idx) => (
+                            <div key={idx} className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-1">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[10px] font-black text-slate-700">{item.location_name}</span>
+                                <span className="text-[9px] text-amber-500 font-bold">{"★".repeat(item.rating)}{"☆".repeat(5 - item.rating)}</span>
+                              </div>
+                              <p className="text-[9px] text-slate-550 font-semibold leading-relaxed">{item.notes}</p>
+                              <span className="text-[8px] text-slate-450 block font-semibold">Post Date: {new Date(item.createdAt).toLocaleDateString()}</span>
+                            </div>
+                          ))}
+
+                          {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-2.5 pt-3 border-t border-slate-100">
+                              <button 
+                                type="button"
+                                disabled={ratingsPage === 1}
+                                onClick={() => setRatingsPage(prev => Math.max(1, prev - 1))}
+                                className="px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider rounded bg-slate-100 hover:bg-slate-200 text-slate-650 disabled:opacity-40 transition cursor-pointer"
+                              >
+                                &larr; Prev
+                              </button>
+                              <span className="text-[9px] font-black text-slate-500">Page {ratingsPage} of {totalPages}</span>
+                              <button 
+                                type="button"
+                                disabled={ratingsPage === totalPages}
+                                onClick={() => setRatingsPage(prev => Math.min(totalPages, prev + 1))}
+                                className="px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider rounded bg-slate-100 hover:bg-slate-200 text-slate-650 disabled:opacity-40 transition cursor-pointer"
+                              >
+                                Next &rarr;
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                ) : (
+                  <p className="text-[9px] text-slate-450 text-center py-6 bg-slate-50/50 rounded-xl">
+                    No safety reviews posted yet. Feel free to rate a street safety above.
+                  </p>
+                )}
               </div>
-            ) : (
-              <p className="text-[9px] text-slate-400 text-center py-2 font-semibold">
-                {lang === "hi" ? "कोई स्थानीय केंद्र ढूंढने के लिए पिनकोड दर्ज करें।" : "Enter pincode to find local safety resources nearby."}
-              </p>
-            )}
-          </div>
+            </div>
+          )}
+
+          {routeSubTab === "directory" && (
+            <div className="bg-white border border-rose-100 p-4 shadow-sm space-y-4 rounded-2xl animate-fadeIn">
+              <h4 className="font-display font-bold text-xs text-slate-800 uppercase tracking-widest border-b border-rose-100 pb-2 flex items-center gap-1.5">
+                <Shield className="w-4.5 h-4.5 text-rose-500" />
+                {lang === "hi" ? "स्थानीय सुरक्षा निर्देशिका" : "Local Protection Directory"}
+              </h4>
+
+              <form onSubmit={handleDirectorySearch} className="flex gap-2">
+                <input 
+                  type="text" 
+                  pattern="\d{6}"
+                  value={searchPincode}
+                  onChange={e => setSearchPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder={lang === "hi" ? "पिनकोड दर्ज करें (e.g. 466001)" : "Enter 6-digit Pincode (e.g. 466001)"} 
+                  className="flex-1 border border-rose-150 rounded-lg text-xs px-3 py-2 outline-none focus:border-rose-500 font-bold bg-slate-50 text-slate-850"
+                />
+                <button 
+                  type="submit" 
+                  disabled={searchingDirectory || searchPincode.length < 6}
+                  className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
+                >
+                  {searchingDirectory ? "..." : (lang === "hi" ? "खोजें" : "Search")}
+                </button>
+              </form>
+
+              {directoryList.length > 0 ? (
+                <div className="space-y-3 pt-2">
+                  {(() => {
+                    const idxLast = directoryPage * itemsPerPage;
+                    const idxFirst = idxLast - itemsPerPage;
+                    const currentList = directoryList.slice(idxFirst, idxLast);
+                    const totalPages = Math.ceil(directoryList.length / itemsPerPage);
+
+                    return (
+                      <>
+                        {currentList.map((item, idx) => (
+                          <div key={idx} className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-1">
+                            <div className="flex justify-between items-start">
+                              <span className="text-[10px] font-black text-slate-800 leading-tight">{item.name}</span>
+                              <span className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-rose-250 bg-rose-50 text-rose-700">
+                                {item.type}
+                              </span>
+                            </div>
+                            <p className="text-[9px] text-slate-505 leading-relaxed font-semibold">{item.address}</p>
+                            <div className="flex justify-between items-center pt-1 border-t border-slate-200">
+                              <span className="text-[8px] font-bold text-slate-400">Helpline: {item.helpline}</span>
+                              <a 
+                                href={`tel:${item.phone}`}
+                                className="text-[8.5px] font-bold text-rose-700 hover:underline flex items-center gap-1"
+                              >
+                                📞 Call: {item.phone}
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+
+                        {totalPages > 1 && (
+                          <div className="flex justify-center items-center gap-2.5 pt-3 border-t border-slate-100">
+                            <button 
+                              type="button"
+                              disabled={directoryPage === 1}
+                              onClick={() => setDirectoryPage(prev => Math.max(1, prev - 1))}
+                              className="px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider rounded bg-slate-100 hover:bg-slate-200 text-slate-655 disabled:opacity-40 transition cursor-pointer"
+                            >
+                              &larr; Prev
+                            </button>
+                            <span className="text-[9px] font-black text-slate-500">Page {directoryPage} of {totalPages}</span>
+                            <button 
+                              type="button"
+                              disabled={directoryPage === totalPages}
+                              onClick={() => setDirectoryPage(prev => Math.min(totalPages, prev + 1))}
+                              className="px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider rounded bg-slate-100 hover:bg-slate-200 text-slate-655 disabled:opacity-40 transition cursor-pointer"
+                            >
+                              Next &rarr;
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <p className="text-[9px] text-slate-450 text-center py-6 bg-slate-50/50 rounded-xl">
+                  {lang === "hi" ? "कोई स्थानीय केंद्र ढूंढने के लिए पिनकोड दर्ज करें।" : "Enter pincode to find local safety resources nearby."}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
 

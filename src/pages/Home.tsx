@@ -251,27 +251,31 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-8 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm min-h-[90px] max-w-[320px] mx-auto justify-items-center">
           {quickActions.map((action, idx) => {
             const isBlood = action.id === "blood";
-            const gradientBg = isBlood 
-              ? "from-red-500 via-rose-600 to-red-750" 
-              : "from-rose-500 via-pink-600 to-purple-650";
-            const glowShadow = isBlood 
-              ? "shadow-[0_0_15px_rgba(239,68,68,0.7)] group-hover:shadow-[0_0_25px_rgba(239,68,68,0.95)]" 
-              : "shadow-[0_0_15px_rgba(244,63,94,0.7)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.95)]";
-            
-            const IconComponent = isBlood ? Heart : Shield;
             const route = isBlood ? '/blood-network' : '/women';
+            const glowGradient = isBlood 
+              ? "from-red-500 via-rose-500 to-red-700" 
+              : "from-[#00B4D8] via-[#FF007F] to-[#7B2CBF]";
             
             return (
               <button 
                 key={idx}
                 onClick={() => navigate(route)}
-                className="flex flex-col items-center justify-center p-1.5 transition text-center gap-2 active:scale-95 duration-300 cursor-pointer group relative w-full"
+                className="flex flex-col items-center justify-center p-1.5 transition text-center gap-2.5 active:scale-95 duration-300 cursor-pointer group relative w-full"
               >
-                <div className="relative w-14 h-14 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${gradientBg} rounded-2xl ${glowShadow} transition-all duration-300`}></div>
-                  <IconComponent className="w-7 h-7 text-white relative z-10 drop-shadow-[0_2px_5px_rgba(0,0,0,0.2)]" />
+                <div className="relative w-16 h-16 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
+                  {/* Breathing glowing outer ring */}
+                  <div className={`absolute -inset-1 rounded-full blur-md opacity-75 group-hover:opacity-100 transition-all duration-300 animate-pulse bg-gradient-to-r ${glowGradient}`}></div>
+                  
+                  {/* Logo container */}
+                  <div className="relative w-14 h-14 bg-white rounded-full p-1.5 flex items-center justify-center border border-slate-100 shadow-md z-10 overflow-hidden">
+                    <img 
+                      src={isBlood ? "/assets/blood_donation_icon.png" : "/assets/women_safety_icon.png"} 
+                      alt={action.titleEn} 
+                      className="w-full h-full object-contain rounded-full"
+                    />
+                  </div>
                 </div>
-                <span className="text-[10px] font-black text-slate-700 leading-tight w-full">
+                <span className="text-[10.5px] font-black text-slate-700 leading-tight w-full">
                   {lang === "hi" ? action.titleHi : action.titleEn}
                 </span>
               </button>
