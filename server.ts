@@ -298,40 +298,41 @@ function resolveConstituency(pincode: string, district: string, areas: string[])
     if (areaString.includes("narela") || areaString.includes("m.l. nagar") || areaString.includes("ml nagar") || areaString.includes("eintkhedi")) {
       return {
         vidhan_sabha: "Narela",
-        vidhan_sabhas: ["Narela", "Bhopal Uttar", "Govindpura"],
+        vidhan_sabhas: ["Narela", "Bhopal Uttar", "Govindpura", "Bhopal Madhya", "Bhopal Dakshin-Pashchim", "Huzur"],
         sansad_kshetra: "Bhopal"
       };
     }
     if (areaString.includes("govindpura") || areaString.includes("piplani") || areaString.includes("industrial area") || areaString.includes("bhel")) {
       return {
         vidhan_sabha: "Govindpura",
-        vidhan_sabhas: ["Govindpura", "Narela"],
+        vidhan_sabhas: ["Govindpura", "Narela", "Bhopal Uttar", "Bhopal Madhya", "Bhopal Dakshin-Pashchim", "Huzur"],
         sansad_kshetra: "Bhopal"
       };
     }
     if (areaString.includes("huzur") || areaString.includes("bairagarh") || areaString.includes("lalghati") || areaString.includes("gandhi nagar")) {
       return {
         vidhan_sabha: "Huzur",
-        vidhan_sabhas: ["Huzur", "Bhopal Dakshin-Pashchim"],
+        vidhan_sabhas: ["Huzur", "Bhopal Dakshin-Pashchim", "Bhopal Uttar", "Bhopal Madhya", "Govindpura", "Narela"],
         sansad_kshetra: "Bhopal"
       };
     }
     if (areaString.includes("dakshin") || areaString.includes("pashchim") || areaString.includes("tt nagar") || areaString.includes("new market") || areaString.includes("arera")) {
       return {
         vidhan_sabha: "Bhopal Dakshin-Pashchim",
-        vidhan_sabhas: ["Bhopal Dakshin-Pashchim", "Bhopal Madhya", "Huzur"],
+        vidhan_sabhas: ["Bhopal Dakshin-Pashchim", "Bhopal Madhya", "Huzur", "Bhopal Uttar", "Govindpura", "Narela"],
         sansad_kshetra: "Bhopal"
       };
     }
     if (areaString.includes("madhya") || areaString.includes("jehangirabad") || areaString.includes("chola") || areaString.includes("aishbagh")) {
       return {
         vidhan_sabha: "Bhopal Madhya",
-        vidhan_sabhas: ["Bhopal Madhya", "Bhopal Uttar", "Bhopal Dakshin-Pashchim"],
+        vidhan_sabhas: ["Bhopal Madhya", "Bhopal Uttar", "Bhopal Dakshin-Pashchim", "Narela", "Govindpura", "Huzur"],
         sansad_kshetra: "Bhopal"
       };
     }
+    // Default to empty to enforce select dropdown selection if multiple options exist
     return {
-      vidhan_sabha: "Bhopal Uttar",
+      vidhan_sabha: "",
       vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya", "Bhopal Dakshin-Pashchim", "Narela", "Govindpura", "Huzur"],
       sansad_kshetra: "Bhopal"
     };
@@ -341,33 +342,32 @@ function resolveConstituency(pincode: string, district: string, areas: string[])
     if (areaString.includes("mhow")) {
       return {
         vidhan_sabha: "Mhow",
-        vidhan_sabhas: ["Mhow", "Rau"],
+        vidhan_sabhas: ["Mhow", "Rau", "Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5"],
         sansad_kshetra: "Dhar"
       };
     }
     if (areaString.includes("rau") || areaString.includes("rajendra nagar")) {
       return {
         vidhan_sabha: "Rau",
-        vidhan_sabhas: ["Rau", "Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5"],
+        vidhan_sabhas: ["Rau", "Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Mhow"],
         sansad_kshetra: "Indore"
       };
     }
     return {
-      vidhan_sabha: "Indore-1",
-      vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
+      vidhan_sabha: "",
+      vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau", "Mhow"],
       sansad_kshetra: "Indore"
     };
   }
 
   // 3. Fallback to generic district matching
   const matches = MP_CONSTITUENCIES_MOCK.filter(c => c.district.toLowerCase() === district.toLowerCase());
-  const vidhan_sabha = matches.length > 0 ? matches[0].vidhan_sabha : (district + " Assembly Constituency");
   const sansad_kshetra = matches.length > 0 ? matches[0].sansad_kshetra : (district + " Lok Sabha constituency");
   const vidhan_sabhas = matches.map(c => c.vidhan_sabha);
 
   return {
-    vidhan_sabha,
-    vidhan_sabhas: vidhan_sabhas.length > 0 ? vidhan_sabhas : [vidhan_sabha],
+    vidhan_sabha: vidhan_sabhas.length === 1 ? vidhan_sabhas[0] : "",
+    vidhan_sabhas: vidhan_sabhas.length > 0 ? vidhan_sabhas : [district + " Assembly Constituency"],
     sansad_kshetra
   };
 }

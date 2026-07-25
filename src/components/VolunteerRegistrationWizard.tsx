@@ -62,7 +62,18 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
   const [sansad, setSansad] = useState("");
   const [vidhan, setVidhan] = useState("");
   const [vidhanSabhas, setVidhanSabhas] = useState<string[]>([]);
+  const [isCustomVidhan, setIsCustomVidhan] = useState(false);
   const [ward, setWard] = useState("");
+
+  const handleVidhanChange = (val: string) => {
+    if (val === "__custom__") {
+      setIsCustomVidhan(true);
+      setVidhan("");
+    } else {
+      setIsCustomVidhan(false);
+      setVidhan(val);
+    }
+  };
 
   // Password
   const [password, setPassword] = useState("");
@@ -375,14 +386,35 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
               </div>
               <div>
                 <label className="text-[8px] text-slate-400 font-bold uppercase mb-0.5 block">Vidhan Sabha</label>
-                {vidhanSabhas && vidhanSabhas.length > 0 ? (
+                {isCustomVidhan ? (
+                  <div className="flex gap-1">
+                    <input 
+                      type="text" 
+                      value={vidhan} 
+                      onChange={e => setVidhan(e.target.value)} 
+                      className="flex-1 bg-slate-700 text-[10px] text-white font-bold p-1.5 rounded outline-none border border-slate-600 focus:border-[#FF9933]" 
+                      placeholder="Type Constituency..." 
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setIsCustomVidhan(false);
+                        setVidhan("");
+                      }} 
+                      className="bg-slate-600 hover:bg-slate-500 text-white text-[8px] font-bold px-1.5 py-1 rounded"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                ) : vidhanSabhas && vidhanSabhas.length > 0 ? (
                   <select 
                     value={vidhan} 
-                    onChange={e => setVidhan(e.target.value)} 
+                    onChange={e => handleVidhanChange(e.target.value)} 
                     className="w-full bg-slate-700 text-[10px] text-white font-bold p-1.5 rounded outline-none border border-slate-600 focus:border-[#FF9933]"
                   >
                     <option value="">Select Assembly</option>
                     {vidhanSabhas.map(v => <option key={v} value={v}>{v}</option>)}
+                    <option value="__custom__">✎ Other (Type manually)...</option>
                   </select>
                 ) : (
                   <input type="text" value={vidhan} onChange={e=>setVidhan(e.target.value)} className="w-full bg-slate-700 text-[10px] text-white font-bold p-1.5 rounded outline-none border border-slate-600 focus:border-[#FF9933]" placeholder="Auto" />
