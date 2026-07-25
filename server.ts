@@ -2336,21 +2336,7 @@ async function initDatabase() {
       )
     `, [], "women_complaints table creation");
 
-    // Seed default street ratings if empty
-    try {
-      const ratingCount = await client.query("SELECT COUNT(*) FROM street_ratings");
-      if (parseInt(ratingCount.rows[0].count, 10) === 0) {
-        console.log("Seeding default street ratings...");
-        await client.query(`
-          INSERT INTO street_ratings (location_name, latitude, longitude, rating, notes) VALUES
-          ('Karond Chowk, Bhopal', 23.2923, 77.4101, 4, 'Well lit, active CCTV cameras and police checking.'),
-          ('Bus Stand Area, Sehore', 23.2032, 77.0844, 3, 'Busy during day, but poorly lit after 9 PM. Safe but remain cautious.'),
-          ('Station Road, Sehore', 23.2015, 77.0811, 2, 'Very dark stretch, streetlights often broken. Avoid walking alone.')
-        `);
-      }
-    } catch(err) {
-      console.error("Seeding street ratings failed:", err);
-    }
+
 
     // Seed default social posts if empty
     try {
