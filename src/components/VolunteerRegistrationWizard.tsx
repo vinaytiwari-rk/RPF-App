@@ -61,6 +61,7 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
   // Auto-filled CRM Fields (India Only)
   const [sansad, setSansad] = useState("");
   const [vidhan, setVidhan] = useState("");
+  const [vidhanSabhas, setVidhanSabhas] = useState<string[]>([]);
   const [ward, setWard] = useState("");
 
   // Password
@@ -80,6 +81,7 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
             if (data.city) setCity(data.city);
             if (data.sansad_kshetra) setSansad(data.sansad_kshetra);
             if (data.vidhan_sabha) setVidhan(data.vidhan_sabha);
+            if (data.vidhan_sabhas) setVidhanSabhas(data.vidhan_sabhas);
             if (data.areas && data.areas.length > 0) {
               setAreaSuggestions(data.areas);
               setShowSuggestions(true);
@@ -373,7 +375,18 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
               </div>
               <div>
                 <label className="text-[8px] text-slate-400 font-bold uppercase mb-0.5 block">Vidhan Sabha</label>
-                <input type="text" value={vidhan} onChange={e=>setVidhan(e.target.value)} className="w-full bg-slate-700 text-[10px] text-white font-bold p-1.5 rounded outline-none border border-slate-600 focus:border-[#FF9933]" placeholder="Auto" />
+                {vidhanSabhas && vidhanSabhas.length > 0 ? (
+                  <select 
+                    value={vidhan} 
+                    onChange={e => setVidhan(e.target.value)} 
+                    className="w-full bg-slate-700 text-[10px] text-white font-bold p-1.5 rounded outline-none border border-slate-600 focus:border-[#FF9933]"
+                  >
+                    <option value="">Select Assembly</option>
+                    {vidhanSabhas.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                ) : (
+                  <input type="text" value={vidhan} onChange={e=>setVidhan(e.target.value)} className="w-full bg-slate-700 text-[10px] text-white font-bold p-1.5 rounded outline-none border border-slate-600 focus:border-[#FF9933]" placeholder="Auto" />
+                )}
               </div>
               <div>
                 <label className="text-[8px] text-slate-400 font-bold uppercase mb-0.5 block">Ward No.</label>

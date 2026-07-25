@@ -258,7 +258,57 @@ app.get("/api/locations/pincode", async (req, res) => {
   if (!pincode || pincode.length !== 6) {
     return res.status(400).json({ success: false, error: "Invalid pincode" });
   }
-  
+
+  const apiKey = process.env.DATAGOV_API_KEY || "579b464db66ec23bdd000001ba8300370e6842e1770b301544186f0f";
+  const resourceId = process.env.DATAGOV_RESOURCE_ID_PINCODE || "5c2f62fe-5afa-4119-a499-fec9d604d5bd";
+
+  if (apiKey) {
+    try {
+      // Query the official OGD Pincode Directory API
+      const url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&filters[pincode]=${pincode}`;
+      const response = await axios.get(url);
+      
+      if (response.data && response.data.records && Array.isArray(response.data.records) && response.data.records.length > 0) {
+        const records = response.data.records;
+        const first = records[0];
+        
+        // Extract all post offices/local areas for this pincode
+        const areas = records.map((r: any) => r.officename);
+        
+        // Capitalize names properly
+        const state = first.statename.toLowerCase().split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        const district = first.district.toLowerCase().split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        const city = first.divisionname ? first.divisionname.replace(" Division", "") : district;
+
+        // Resolve Sansad and Vidhan Sabha from our constituency lists for this district
+        const matches = MP_CONSTITUENCIES_MOCK.filter(c => c.district.toLowerCase() === district.toLowerCase());
+        
+        const vidhan_sabha = matches.length > 0 ? matches[0].vidhan_sabha : (district + " Assembly Constituency");
+        const sansad_kshetra = matches.length > 0 ? matches[0].sansad_kshetra : (district + " Lok Sabha constituency");
+
+        // Suggest vidhan sabha list so the UI can allow selecting if multiple exist
+        const vidhan_sabhas = matches.map(c => c.vidhan_sabha);
+
+        const liveData = {
+          pincode,
+          state,
+          district,
+          city,
+          vidhan_sabha,
+          vidhan_sabhas: vidhan_sabhas.length > 0 ? vidhan_sabhas : [vidhan_sabha],
+          sansad_kshetra,
+          areas,
+          latitude: first.latitude,
+          longitude: first.longitude
+        };
+
+        return res.json({ success: true, data: liveData });
+      }
+    } catch (error: any) {
+      console.error("OGD Pincode Directory API failed, trying fallback:", error.message);
+    }
+  }
+
   try {
     const response = await axios.get("https://api.postalpincode.in/pincode/" + pincode, { timeout: 4000 });
     const data = response.data;
@@ -266,13 +316,21 @@ app.get("/api/locations/pincode", async (req, res) => {
       const office = data[0].PostOffice[0];
       const areas = data[0].PostOffice.map((po: any) => po.Name);
       
+      const district = office.District;
+      const matches = MP_CONSTITUENCIES_MOCK.filter(c => c.district.toLowerCase() === district.toLowerCase());
+      
+      const vidhan_sabha = matches.length > 0 ? matches[0].vidhan_sabha : (district + " Assembly Constituency");
+      const sansad_kshetra = matches.length > 0 ? matches[0].sansad_kshetra : (district + " Lok Sabha constituency");
+      const vidhan_sabhas = matches.map(c => c.vidhan_sabha);
+
       const liveData = {
         pincode,
         state: office.State,
-        district: office.District,
-        city: office.Block && office.Block !== "NA" ? office.Block : office.District,
-        vidhan_sabha: office.District + " Assembly Constituency",
-        sansad_kshetra: office.District + " Lok Sabha constituency",
+        district,
+        city: office.Block && office.Block !== "NA" ? office.Block : district,
+        vidhan_sabha,
+        vidhan_sabhas: vidhan_sabhas.length > 0 ? vidhan_sabhas : [vidhan_sabha],
+        sansad_kshetra,
         areas: areas
       };
       return res.json({ success: true, data: liveData });
@@ -288,8 +346,9 @@ app.get("/api/locations/pincode", async (req, res) => {
     district: "Indore",
     city: "Indore",
     vidhan_sabha: "Indore-1",
+    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau", "Mhow"],
     sansad_kshetra: "Indore",
-    areas: ["Vijay Nagar", "Palasia", "Bhawarkuan", "Rajwada"]
+    areas: ["Vijay Nagar BO", "Palasia BO", "Bhawarkuan BO", "Rajwada SO"]
   };
   
   res.json({ success: true, data: mockData });
