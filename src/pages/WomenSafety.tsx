@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
-import { 
-  Shield, AlertOctagon, Phone, User, Plus, Heart, 
-  HelpCircle, CheckCircle, X, Volume2, Camera, Eye, 
-  Map, Settings, Play, Square, RefreshCw, Layers, Radio, Globe, ExternalLink
+import {
+  Shield, AlertOctagon, Phone, User, Plus, Heart,
+  HelpCircle, CheckCircle, X, Volume2, Camera, Eye,
+  Map, Settings, Play, Square, RefreshCw, Layers, Radio, Globe, ExternalLink,
+  Lock, ChevronRight, ChevronLeft, MapPin, Star, Sparkles, FileText, Activity
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -30,22 +31,22 @@ const initAudio = () => {
 const playSiren = () => {
   initAudio();
   if (!audioCtx) return;
-  
+
   stopSiren();
-  
+
   sirenOsc = audioCtx.createOscillator();
   sirenGain = audioCtx.createGain();
-  
+
   sirenOsc.type = "triangle";
   sirenOsc.frequency.setValueAtTime(650, audioCtx.currentTime);
-  
+
   sirenGain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-  
+
   sirenOsc.connect(sirenGain);
   sirenGain.connect(audioCtx.destination);
-  
+
   sirenOsc.start();
-  
+
   const sweep = () => {
     if (!audioCtx || !sirenOsc) return;
     const t = audioCtx.currentTime;
@@ -54,7 +55,7 @@ const playSiren = () => {
     sirenOsc.frequency.linearRampToValueAtTime(1350, t + 0.25);
     sirenOsc.frequency.linearRampToValueAtTime(650, t + 0.5);
   };
-  
+
   sweep();
   sirenInterval = setInterval(sweep, 500);
 };
@@ -77,27 +78,27 @@ const stopSiren = () => {
 const playRingtone = () => {
   initAudio();
   if (!audioCtx) return;
-  
+
   stopRingtone();
-  
+
   const ring = () => {
     if (!audioCtx) return;
     ringtoneOsc1 = audioCtx.createOscillator();
     ringtoneOsc2 = audioCtx.createOscillator();
     ringtoneGain = audioCtx.createGain();
-    
+
     ringtoneOsc1.frequency.setValueAtTime(440, audioCtx.currentTime);
     ringtoneOsc2.frequency.setValueAtTime(480, audioCtx.currentTime);
-    
+
     ringtoneGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-    
+
     ringtoneOsc1.connect(ringtoneGain);
     ringtoneOsc2.connect(ringtoneGain);
     ringtoneGain.connect(audioCtx.destination);
-    
+
     ringtoneOsc1.start();
     ringtoneOsc2.start();
-    
+
     setTimeout(() => {
       try {
         ringtoneOsc1?.stop();
@@ -105,7 +106,7 @@ const playRingtone = () => {
       } catch(e){}
     }, 2000);
   };
-  
+
   ring();
   ringtoneInterval = setInterval(ring, 5000);
 };
@@ -123,10 +124,10 @@ const stopRingtone = () => {
   ringtoneOsc2 = null;
 };
 
-// 1. Calculator Disguise Component (Light/Silver premium design)
+// 1. Calculator Disguise Component (Professional standard design)
 export function CalculatorDisguise({ onUnlock, correctPin }: { onUnlock: () => void; correctPin: string }) {
   const [calcInput, setCalcInput] = useState("");
-  
+
   const handleBtn = (val: string) => {
     if (val === "C") {
       setCalcInput("");
@@ -148,21 +149,21 @@ export function CalculatorDisguise({ onUnlock, correctPin }: { onUnlock: () => v
   };
 
   return (
-    <div className="max-w-xs mx-auto p-5 bg-white border border-rose-200/80 rounded-3xl shadow-xl space-y-4 animate-scaleUp mt-10">
-      <div className="bg-slate-100 p-4 rounded-xl text-right text-slate-800 font-mono text-2xl h-14 overflow-hidden border border-slate-200/80">
+    <div className="max-w-xs mx-auto p-4 bg-gray-100 border border-gray-300 rounded-lg shadow-lg space-y-3 mt-10">
+      <div className="bg-white border border-gray-300 p-3 rounded text-right text-gray-800 font-mono text-2xl h-14 overflow-hidden flex items-center justify-end">
         {calcInput || "0"}
       </div>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-2">
         {["C", "/", "*", "-", "7", "8", "9", "+", "4", "5", "6", "=", "1", "2", "3", "0", "."].map(btn => (
           <button
             key={btn}
             onClick={() => handleBtn(btn)}
-            className={`h-12 text-sm font-black rounded-xl transition cursor-pointer ${
-              btn === "=" 
-                ? "bg-purple-650 hover:bg-purple-750 text-white row-span-2 h-26" 
+            className={`h-12 text-sm font-semibold rounded transition cursor-pointer ${
+              btn === "="
+                ? "bg-blue-600 hover:bg-blue-700 text-white row-span-2 h-full"
                 : ["C", "/", "*", "-", "+"].includes(btn)
-                ? "bg-purple-50 hover:bg-purple-100 text-purple-700"
-                : "bg-slate-50 hover:bg-slate-100 text-slate-700"
+                ? "bg-gray-300 hover:bg-gray-400 text-gray-800"
+                : "bg-gray-200 hover:bg-gray-300 text-gray-800"
             }`}
             style={{ gridColumn: btn === "." ? "span 3" : undefined }}
           >
@@ -170,7 +171,7 @@ export function CalculatorDisguise({ onUnlock, correctPin }: { onUnlock: () => v
           </button>
         ))}
       </div>
-      <p className="text-[9px] text-slate-400 text-center font-bold uppercase tracking-wider">Standard Calculator Mode</p>
+      <p className="text-[10px] text-gray-500 text-center uppercase tracking-widest pt-1">Standard Calculator</p>
     </div>
   );
 }
@@ -200,7 +201,7 @@ export default function WomenSafety() {
   const [fakeCallActive, setFakeCallActive] = useState(false);
   const [fakeCallConnected, setFakeCallConnected] = useState(false);
   const [fakeCallTime, setFakeCallTime] = useState(0);
-  const [fakeCallerName, setFakeCallerName] = useState(() => localStorage.getItem("fake_caller_name") || (lang === "hi" ? "पिताजी (घर)" : "Papa (Home)"));
+  const [fakeCallerName, setFakeCallerName] = useState(() => localStorage.getItem("fake_caller_name") || (lang === "hi" ? "पिताजी" : "Home"));
   const [sirenActive, setSirenActive] = useState(false);
   const [shakeEnabled, setShakeEnabled] = useState(() => localStorage.getItem("shake_enabled") === "true");
 
@@ -233,22 +234,14 @@ export default function WomenSafety() {
   const [searchingDirectory, setSearchingDirectory] = useState(false);
   const [startLoc, setStartLoc] = useState("");
   const [endLoc, setEndLoc] = useState("");
-  const [directionsUrl, setDirectionsUrl] = useState("");
   const [ratingsList, setRatingsList] = useState<any[]>([]);
   const [newStreetName, setNewStreetName] = useState("");
   const [newRatingVal, setNewRatingVal] = useState(4);
   const [newRatingNotes, setNewRatingNotes] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
 
-  // Audio Evidence states
+  // Sub-tabs
   const [helpSubTab, setHelpSubTab] = useState<"panic" | "guardians">("panic");
-  const [ncwSubTab, setNcwSubTab] = useState<"file" | "status">("file");
-  const [routeSubTab, setRouteSubTab] = useState<"nav" | "ratings" | "directory">("nav");
-
-  const [complaintsPage, setComplaintsPage] = useState(1);
-  const [ratingsPage, setRatingsPage] = useState(1);
-  const [directoryPage, setDirectoryPage] = useState(1);
-  const itemsPerPage = 3;
 
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -264,7 +257,7 @@ export default function WomenSafety() {
   // Shake-to-alert handler
   useEffect(() => {
     if (!shakeEnabled) return;
-    
+
     let lastX: number | null = null;
     let lastY: number | null = null;
     let lastZ: number | null = null;
@@ -273,7 +266,7 @@ export default function WomenSafety() {
     const handleMotionEvent = (event: DeviceMotionEvent) => {
       const acceleration = event.accelerationIncludingGravity;
       if (!acceleration) return;
-      
+
       const { x, y, z } = acceleration;
       if (x === null || y === null || z === null) return;
 
@@ -281,7 +274,7 @@ export default function WomenSafety() {
         const deltaX = Math.abs(x - lastX);
         const deltaY = Math.abs(y - lastY);
         const deltaZ = Math.abs(z - lastZ);
-        
+
         if ((deltaX > shakeThreshold && deltaY > shakeThreshold) || deltaZ > shakeThreshold + 5) {
           triggerHaptic([300, 100, 300]);
           handleSOS();
@@ -307,7 +300,7 @@ export default function WomenSafety() {
     return () => clearInterval(timer);
   }, [fakeCallConnected]);
 
-  // Real Magnetometer Sensor query (No simulation, 100% authentic)
+  // Real Magnetometer Sensor query
   useEffect(() => {
     if (!isEMFActive) {
       if (sensorRef.current) {
@@ -320,7 +313,7 @@ export default function WomenSafety() {
       try {
         const magSensor = new (window as any).Magnetometer({ frequency: 10 });
         sensorRef.current = magSensor;
-        
+
         magSensor.addEventListener("reading", () => {
           const { x, y, z } = magSensor;
           const mag = Math.sqrt(x*x + y*y + z*z).toFixed(1);
@@ -351,7 +344,7 @@ export default function WomenSafety() {
     };
   }, [isEMFActive]);
 
-  // Fetch Safe Street Ratings from database
+  // Fetch Safe Street Ratings
   useEffect(() => {
     fetchStreetRatings();
   }, []);
@@ -366,7 +359,7 @@ export default function WomenSafety() {
     }
   };
 
-  // Fetch filed complaints when tab becomes active
+  // Fetch filed complaints
   useEffect(() => {
     if (activeTab === "ncw") {
       fetchComplaints();
@@ -407,7 +400,7 @@ export default function WomenSafety() {
         })
       });
       if (res.ok) {
-        setSuccessMsg(lang === "hi" ? "शिकायत सफलतापूर्वक दर्ज की गई!" : "Complaint submitted successfully!");
+        setSuccessMsg(lang === "hi" ? "शिकायत दर्ज की गई।" : "Complaint filed successfully.");
         setComplaintDesc("");
         setIncidentLocation("");
         setSuspectDetails("");
@@ -429,8 +422,8 @@ export default function WomenSafety() {
 
     try {
       let locationStr = "Location unavailable";
-      let latVal: number | null = null;
-      let lonVal: number | null = null;
+      let latVal = null;
+      let lonVal = null;
 
       if ("geolocation" in navigator) {
         try {
@@ -440,7 +433,7 @@ export default function WomenSafety() {
           latVal = pos.coords.latitude;
           lonVal = pos.coords.longitude;
           locationStr = `https://www.google.com/maps?q=${latVal.toFixed(6)},${lonVal.toFixed(6)}`;
-        } catch (e: any) {
+        } catch (e) {
           console.warn("GPS failed", e);
         }
       }
@@ -469,7 +462,7 @@ export default function WomenSafety() {
         body: JSON.stringify(submission)
       });
       if (!res.ok) throw new Error("Failed to submit SOS report");
-      
+
       setSosLocationUrl(locationStr);
       setSosFired(true);
     } catch (err) {
@@ -498,7 +491,7 @@ export default function WomenSafety() {
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = async () => {
-          const base64Audio = reader.result as string;
+          const base64Audio = reader.result;
           await fetch("/api/submissions", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -555,34 +548,9 @@ export default function WomenSafety() {
   const handleRouteSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!startLoc.trim() || !endLoc.trim()) return;
-    setDirectionsUrl(`https://maps.google.com/maps?q=${encodeURIComponent(startLoc.trim())}+to+${encodeURIComponent(endLoc.trim())}&t=&z=14&ie=UTF8&iwloc=&output=embed`);
-  };
-
-  const handleRatingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newStreetName.trim()) return;
-    setSubmittingRating(true);
-    try {
-      const res = await fetch("/api/locations/street_ratings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location_name: newStreetName.trim(),
-          rating: newRatingVal,
-          notes: newRatingNotes.trim()
-        })
-      });
-      if (res.ok) {
-        setNewStreetName("");
-        setNewRatingNotes("");
-        setNewRatingVal(4);
-        fetchStreetRatings();
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSubmittingRating(false);
-    }
+    // Fix: Open real google maps for directions instead of an iframe which is broken without API keys.
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(startLoc.trim())}&destination=${encodeURIComponent(endLoc.trim())}`;
+    window.open(url, "_blank");
   };
 
   const addContact = (e: React.FormEvent) => {
@@ -596,10 +564,10 @@ export default function WomenSafety() {
         setContacts(updated);
         localStorage.setItem("sos_contacts", JSON.stringify(updated));
         setNewContact("");
-        setSuccessMsg(lang === "hi" ? "सम्पर्क सफलतापूर्वक जोड़ा गया!" : "Contact added successfully!");
+        setSuccessMsg(lang === "hi" ? "सम्पर्क जोड़ा गया।" : "Contact added.");
         setTimeout(() => setSuccessMsg(""), 3000);
       } else {
-        setSuccessMsg(lang === "hi" ? "वैध मोबाइल नंबर या ईमेल दर्ज करें" : "Enter a valid 10-digit mobile or email");
+        setSuccessMsg(lang === "hi" ? "वैध जानकारी दर्ज करें" : "Enter valid info");
         setTimeout(() => setSuccessMsg(""), 3000);
       }
     }
@@ -638,58 +606,56 @@ export default function WomenSafety() {
     return `${m}:${s}`;
   };
 
+  // ---------- STEALTH LOCK SCREEN ----------
   if (stealthEnabled && !isUnlocked) {
     return (
-      <div className="p-5 flex flex-col items-center justify-center min-h-[85vh] bg-rose-50/20 text-slate-800">
-        <h3 className="font-display font-extrabold text-xs mb-4 tracking-widest uppercase text-rose-600/70">Calculator Disguise Active</h3>
+      <div className="p-5 flex flex-col items-center justify-center min-h-[85vh] bg-gray-50 text-gray-800">
         <CalculatorDisguise onUnlock={() => setIsUnlocked(true)} correctPin={calculatorPin} />
       </div>
     );
   }
 
+  // ---------- FAKE CALL FULL SCREEN ----------
   if (fakeCallActive) {
     return (
-      <div className="fixed inset-0 z-50 bg-[#0f1422] text-white flex flex-col justify-between p-10 font-sans animate-fadeIn">
-        <div className="text-center pt-10 space-y-2">
-          <div className="w-24 h-24 bg-gradient-to-tr from-slate-600 to-slate-400 rounded-full flex items-center justify-center text-4xl font-extrabold mx-auto shadow-lg uppercase text-indigo-50">
-            {fakeCallerName.slice(0, 2)}
-          </div>
-          <h2 className="text-2xl font-bold font-display">{fakeCallerName}</h2>
-          <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold">
-            {fakeCallConnected ? formatTime(fakeCallTime) : (lang === "hi" ? "आने वाली कॉल..." : "Incoming call...")}
+      <div className="fixed inset-0 z-50 bg-black text-white flex flex-col justify-between p-10 font-sans">
+        <div className="text-center pt-14 space-y-4">
+          <div className="text-3xl font-normal">{fakeCallerName}</div>
+          <p className="text-sm text-gray-300">
+            {fakeCallConnected ? formatTime(fakeCallTime) : (lang === "hi" ? "इनकमिंग कॉल" : "Incoming call")}
           </p>
         </div>
 
         {fakeCallConnected ? (
-          <div className="flex flex-col items-center gap-10 pb-16">
-            <div className="w-16 h-16 bg-red-650 rounded-full flex items-center justify-center shadow-lg cursor-pointer animate-bounce"
+          <div className="flex flex-col items-center pb-16">
+            <button
+              className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center cursor-pointer"
               onClick={() => {
                 stopRingtone();
                 setFakeCallActive(false);
                 setFakeCallConnected(false);
               }}
             >
-              <Phone className="w-8 h-8 text-white rotate-135" />
-            </div>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tap to end call</p>
+              <Phone className="w-6 h-6 text-white rotate-[135deg]" />
+            </button>
           </div>
         ) : (
           <div className="flex justify-around pb-20 items-center">
-            <button 
+            <button
               onClick={() => {
                 stopRingtone();
                 setFakeCallActive(false);
               }}
-              className="w-16 h-16 bg-red-650 rounded-full flex items-center justify-center shadow-lg cursor-pointer"
+              className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center cursor-pointer"
             >
               <X className="w-6 h-6 text-white" />
             </button>
-            <button 
+            <button
               onClick={() => {
                 stopRingtone();
                 setFakeCallConnected(true);
               }}
-              className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-pulse cursor-pointer"
+              className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center cursor-pointer"
             >
               <Phone className="w-6 h-6 text-white" />
             </button>
@@ -699,1029 +665,482 @@ export default function WomenSafety() {
     );
   }
 
+  // ---------- MAIN DASHBOARD ----------
+  const TABS = [
+    { key: "deterrents", label: lang === "hi" ? "SOS" : "SOS", icon: AlertOctagon },
+    { key: "scanner", label: lang === "hi" ? "स्कैनर" : "Scan", icon: Camera },
+    { key: "ncw", label: lang === "hi" ? "रिपोर्ट" : "Report", icon: FileText },
+    { key: "routes", label: lang === "hi" ? "नेविगेशन" : "Routes", icon: Map },
+    { key: "settings", label: lang === "hi" ? "सेटिंग" : "Settings", icon: Settings },
+  ] as const;
+
   return (
-    <div className="p-5 space-y-5 animate-fadeIn pb-24 relative overflow-x-hidden bg-rose-50/20 min-h-[90vh]">
-      {/* Header */}
-      <div className="flex justify-between items-center bg-white border border-rose-100 rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-rose-600 fill-rose-100 animate-pulse" />
-          <h3 className="font-display font-extrabold text-xs text-slate-800 uppercase tracking-wider">
-            {lang === "hi" ? "महिला सुरक्षा कमांड सेंटर" : "Women Safety Command"}
-          </h3>
+    <div className="min-h-screen bg-gray-50 text-gray-800 pb-20">
+
+      {/* Professional Header */}
+      <div className="bg-slate-900 text-white px-5 py-4 shadow-md flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-semibold tracking-wide flex items-center gap-2">
+            <Shield className="w-5 h-5 text-red-500" />
+            {lang === "hi" ? "महिला सुरक्षा केंद्र" : "Women Safety Command"}
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {lang === "hi" ? "आपातकालीन एवं सहायता सेवा" : "Emergency & Support Services"}
+          </p>
         </div>
         {stealthEnabled && (
-          <button 
+          <button
             onClick={() => setIsUnlocked(false)}
-            className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/50 flex items-center gap-1 cursor-pointer transition text-[9px] font-black uppercase tracking-wider"
+            className="p-2 rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 transition"
           >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Lock</span>
+            <Lock className="w-4 h-4 text-gray-300" />
           </button>
         )}
       </div>
 
-      {/* Tabs list (5 columns now) */}
-      <div className="flex bg-white border border-rose-100 rounded-xl p-1 shadow-sm shrink-0 overflow-x-auto gap-0.5 no-scrollbar">
-        {[
-          { key: "deterrents", title: lang === "hi" ? "🚨 पैनिक & SOS" : "🚨 Help Button", icon: AlertOctagon },
-          { key: "scanner", title: lang === "hi" ? "🔍 कैमरा स्कैनर" : "🔍 Lens Scan", icon: Camera },
-          { key: "ncw", title: lang === "hi" ? "📝 शिकायत डेस्क" : "📝 Complaint", icon: Globe },
-          { key: "routes", title: lang === "hi" ? "🗺️ सुरक्षित मार्ग" : "🗺️ Safe Route", icon: Map },
-          { key: "settings", title: lang === "hi" ? "⚙️ सेटिंग्स" : "⚙️ Settings", icon: Settings },
-        ].map(t => {
-          const Icon = t.icon;
-          return (
-            <button 
-              key={t.key}
-              onClick={() => {
-                setActiveTab(t.key as any);
-                stopCamera();
-              }}
-              className={`flex-1 shrink-0 py-2 px-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider transition flex flex-col items-center gap-1 cursor-pointer min-w-[70px] text-center leading-tight ${
-                activeTab === t.key 
-                  ? "bg-rose-600 text-white shadow-md font-bold" 
-                  : "text-slate-450 hover:text-slate-700"
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{t.title}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {successMsg && (
-        <div className="bg-emerald-50 text-emerald-800 border border-emerald-150 p-3 rounded-xl text-xs font-bold flex items-center gap-2 animate-scaleUp">
-          <CheckCircle className="w-4.5 h-4.5" />
-          <span>{successMsg}</span>
-        </div>
-      )}
-
-      {/* TAB 1: PANIC & SOS */}
-      {activeTab === "deterrents" && (
-        <div className="space-y-4 animate-fadeIn">
-          {/* Inner Sub-tab Navigation */}
-          <div className="flex bg-rose-50 border border-rose-100 rounded-xl p-1 shadow-sm shrink-0 gap-1">
-            <button 
-              onClick={() => setHelpSubTab("panic")}
-              className={`flex-1 py-2 rounded-lg text-[10.5px] font-black uppercase tracking-wider transition cursor-pointer text-center ${
-                helpSubTab === "panic" 
-                  ? "bg-rose-600 text-white shadow-md" 
-                  : "text-rose-700 hover:bg-rose-100"
-              }`}
-            >
-              {lang === "hi" ? "🚨 आपातकालीन" : "🚨 Emergency Panel"}
-            </button>
-            <button 
-              onClick={() => setHelpSubTab("guardians")}
-              className={`flex-1 py-2 rounded-lg text-[10.5px] font-black uppercase tracking-wider transition cursor-pointer text-center ${
-                helpSubTab === "guardians" 
-                  ? "bg-rose-600 text-white shadow-md" 
-                  : "text-rose-700 hover:bg-rose-100"
-              }`}
-            >
-              {lang === "hi" ? "👥  अभिभावक" : "👥 Guardians"}
-            </button>
-          </div>
-
-          {helpSubTab === "panic" && (
-            <div className="space-y-4 animate-fadeIn">
-              <div className="flex flex-col items-center justify-center py-7 bg-white border border-rose-150 rounded-2xl shadow-sm relative overflow-hidden">
-                <div className="absolute inset-0 bg-rose-50/10 pointer-events-none"></div>
-            
-            <button 
-              onClick={handleSOS}
-              disabled={sosActive}
-              className={`w-32 h-32 rounded-full flex flex-col items-center justify-center transition-all duration-500 relative cursor-pointer ${
-                sosActive 
-                  ? "bg-rose-900 scale-95 shadow-inner" 
-                  : "bg-gradient-to-br from-rose-500 to-red-650 hover:scale-105 shadow-[0_10px_25px_rgba(244,63,94,0.3)]"
-              }`}
-            >
-              {!sosActive && (
-                <>
-                  <div className="absolute inset-0 rounded-full border border-rose-450/30 animate-ping"></div>
-                  <div className="absolute -inset-4 rounded-full border border-rose-450/10 animate-pulse"></div>
-                </>
-              )}
-              <AlertOctagon className="w-10 h-10 text-white mb-1.5" />
-              <span className="text-white text-xs font-black uppercase tracking-wider">
-                {sosActive ? (lang === "hi" ? "भेज रहे हैं..." : "Sending...") : (lang === "hi" ? "🚨 मदद बटन" : "🚨 Help Button")}
-              </span>
-            </button>
-            <p className="text-[10px] text-rose-600 font-bold uppercase tracking-widest mt-4 text-center px-4 leading-relaxed">
-              {lang === "hi" ? "इसे दबाते ही परिवार को आपकी लोकेशन और ईमेल अलर्ट मिल जाएगा।" : "Press this to send your live location and email alert to your family."}
-            </p>
-          </div>
-
-          {sosFired && (
-            <div className="bg-red-50 border-2 border-red-200/80 rounded-2xl p-5 shadow-sm space-y-4 animate-scaleUp text-slate-800">
-              <div className="flex items-center gap-2 text-red-600 font-extrabold text-sm">
-                <Radio className="w-5 h-5 text-red-650 animate-ping" />
-                <span>{lang === "hi" ? "🚨 अलर्ट शुरू हो गया है!" : "🚨 Alert Active!"}</span>
-              </div>
-              
-              <p className="text-[11px] text-slate-650 leading-relaxed font-semibold">
-                {lang === "hi" 
-                  ? "आपके परिवार को आपकी लोकेशन ईमेल कर दी गई है। साथ ही सुरक्षा के लिए 10 सेकंड का बैकग्राउंड रिकॉर्डर शुरू हो गया है। नीचे दिए बटनों से मदद लें:" 
-                  : "Your family has been emailed your live location. A 10-second security voice recorder has also started. Use the buttons below for help:"}
-              </p>
-
-              <div className="flex justify-center">
-                <a 
-                  href="tel:1091"
-                  className="w-full bg-red-650 hover:bg-red-750 text-white py-2.5 px-4 rounded-xl text-xs font-black text-center flex items-center justify-center gap-2 shadow-md transition decoration-none animate-bounce"
-                >
-                  <span>{lang === "hi" ? "हेल्पलाइन कॉल (1091)" : "Call Helpline (1091)"}</span>
-                </a>
-              </div>
-
-              <button 
-                onClick={() => setSosFired(false)}
-                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs transition cursor-pointer"
-              >
-                {lang === "hi" ? "अलर्ट बंद करें" : "Turn off Alert"}
-              </button>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white border border-rose-100 p-4 rounded-xl flex flex-col justify-between space-y-4 shadow-sm">
-              <div>
-                <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
-                  <Phone className="w-4 h-4 text-emerald-500 fill-emerald-105" />
-                  {lang === "hi" ? "📞 बचाव फ़ोन कॉल (Fake)" : "📞 Save Me Call"}
-                </h4>
-                <p className="text-[9px] text-slate-450 font-semibold mt-1">
-                  {lang === "hi" ? "बातचीत का नाटक करके पीछा करने वाले को डराने के लिए फ़ोन पर घंटी बजाएं।" : "Pretend to speak to family to escape stalkers by ringing your phone."}
-                </p>
-              </div>
-              <button 
+      <div className="px-4 mt-4 space-y-4 max-w-2xl mx-auto">
+        {/* Tab Navigation */}
+        <div className="flex bg-white rounded border border-gray-300 shadow-sm overflow-hidden">
+          {TABS.map(t => {
+            const Icon = t.icon;
+            const active = activeTab === t.key;
+            return (
+              <button
+                key={t.key}
                 onClick={() => {
-                  setFakeCallActive(true);
-                  playRingtone();
-                  startFakeCallHaptics();
+                  setActiveTab(t.key as any);
+                  stopCamera();
                 }}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs shadow-sm transition cursor-pointer"
-              >
-                {lang === "hi" ? "घंटी बजाएं" : "Ring Phone"}
-              </button>
-            </div>
-
-            <div className="bg-white border border-rose-100 p-4 rounded-xl flex flex-col justify-between space-y-4 shadow-sm">
-              <div>
-                <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
-                  <Volume2 className="w-4 h-4 text-rose-500" />
-                  {lang === "hi" ? "🔊 तेज़ पुलिस अलार्म" : "🔊 Loud Alarm"}
-                </h4>
-                <p className="text-[9px] text-slate-450 font-semibold mt-1">
-                  {lang === "hi" ? "हमलावर को डराने और लोगों को सतर्क करने के लिए तेज़ पुलिस सायरन बजाएं।" : "Play a very loud police siren to scare attackers and attract attention."}
-                </p>
-              </div>
-              <button 
-                onClick={() => {
-                  if (sirenActive) {
-                    stopSiren();
-                    setSirenActive(false);
-                  } else {
-                    playSiren();
-                    setSirenActive(true);
-                    triggerHaptic([1000]);
-                  }
-                }}
-                className={`w-full font-bold py-2 rounded-lg text-xs shadow-md transition cursor-pointer ${
-                  sirenActive ? "bg-slate-200 text-slate-700" : "bg-rose-600 hover:bg-rose-700 text-white"
+                className={`flex-1 py-3 px-1 text-xs font-semibold flex flex-col md:flex-row items-center justify-center gap-1.5 transition ${
+                  active ? "bg-slate-800 text-white" : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                {sirenActive ? (lang === "hi" ? "अलार्म बंद करें" : "Stop Alarm") : (lang === "hi" ? "अलार्म चालू करें" : "Start Alarm")}
+                <Icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{t.label}</span>
               </button>
-            </div>
-          </div>
+            );
+          })}
+        </div>
 
-          <div className="space-y-3">
-            <h4 className="font-display font-black text-xs text-slate-750 uppercase tracking-widest px-1">
-              {lang === "hi" ? "त्वरित सुरक्षा कल्याण केंद्र" : "National Helplines Quick Call"}
-            </h4>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { title: lang === "hi" ? "महिला हेल्पलाइन" : "Women Helpline", number: "1091" },
-                { title: lang === "hi" ? "घरेलू हिंसा" : "Domestic Abuse", number: "181" },
-                { title: lang === "hi" ? "राष्ट्रीय आपातकालीन" : "Unified Emergency", number: "112" },
-                { title: lang === "hi" ? "पुलिस सहायता" : "Police Call Desk", number: "100" }
-              ].map(h => (
-                <a 
-                  key={h.number}
-                  href={`tel:${h.number}`}
-                  className="bg-white border border-rose-100/70 p-3.5 rounded-xl flex items-center justify-between hover:border-rose-400 transition decoration-none text-slate-800 shadow-sm cursor-pointer"
-                >
-                  <div>
-                    <h5 className="text-[10px] font-extrabold text-slate-700">{h.title}</h5>
-                    <span className="text-[11px] font-mono font-black text-rose-650">{h.number}</span>
-                  </div>
-                  <Phone className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
-                </a>
-              ))}
-            </div>
-          </div>
-
-            </div>
-          )}
-
-          {helpSubTab === "guardians" && (
-            <div className="bg-white border border-rose-100 p-4 shadow-sm space-y-4 rounded-2xl animate-fadeIn">
-            <h4 className="font-display font-bold text-xs text-slate-800 uppercase tracking-widest border-b border-rose-100 pb-2 flex items-center gap-1.5">
-              <User className="w-4 h-4 text-rose-500" />
-              {lang === "hi" ? "आपातकालीन अभिभावक (Max 5)" : "Guardian Alerts List (Max 5)"}
-            </h4>
-
-            <form onSubmit={addContact} className="flex gap-2">
-              <input 
-                type="text" 
-                value={newContact}
-                onChange={e => setNewContact(e.target.value)}
-                placeholder={lang === "hi" ? "मोबाइल नंबर या ईमेल दर्ज करें" : "Enter mobile number or email"} 
-                className="flex-1 border border-rose-150 rounded-lg text-xs px-3 py-2 outline-none focus:border-rose-500 font-bold bg-slate-50 text-slate-800"
-              />
-              <button 
-                type="submit" 
-                disabled={contacts.length >= 5 || !newContact.trim()}
-                className="bg-rose-600 hover:bg-rose-700 text-white p-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
-              >
-                <Plus className="w-4.5 h-4.5" />
-              </button>
-            </form>
-
-            {contacts.length > 0 ? (
-              <div className="space-y-2 pt-1">
-                {contacts.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between bg-slate-50 border border-slate-200/50 p-2.5 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-slate-400" />
-                      <span className="text-xs font-mono font-bold text-slate-700">{c}</span>
-                    </div>
-                    <button 
-                      onClick={() => removeContact(i)}
-                      className="text-[9px] font-bold text-red-500 hover:underline cursor-pointer"
-                    >
-                      {lang === "hi" ? "हटाएं" : "Remove"}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-[9px] text-slate-450 text-center py-4 font-semibold bg-rose-50/30 rounded-xl">
-                {lang === "hi" ? "कोई अभिभावक दर्ज नहीं है। ईमेल या नंबर जोड़ें।" : "No contacts registered. Register emails for free alerts."}
-              </p>
-            )}
+        {successMsg && (
+          <div className="bg-green-100 text-green-800 border border-green-300 p-3 rounded text-sm font-medium flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" />
+            <span>{successMsg}</span>
           </div>
         )}
-      </div>
-    )}
 
-      {/* TAB 2: SCANNERS */}
-      {activeTab === "scanner" && (
-        <div className="space-y-4 animate-fadeIn">
-          <div className="bg-white border border-rose-100 p-5 rounded-2xl space-y-4 text-slate-800 shadow-sm">
-            <div className="flex justify-between items-center border-b border-rose-100 pb-2">
-              <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                <Radio className="w-4.5 h-4.5 text-rose-500" />
-                {lang === "hi" ? "🔍 शीशा कैमरा खोजक" : "🔍 Mirror Camera Finder"}
-              </h4>
-              <button 
-                onClick={() => {
-                  setIsEMFActive(!isEMFActive);
-                  setEmfValue(0.0);
-                }}
-                className={`px-3 py-1 rounded-lg text-[9px] font-extrabold uppercase transition cursor-pointer ${
-                  isEMFActive ? "bg-red-650 text-white" : "bg-slate-100 text-slate-650"
+        {/* ================= TAB 1: PANIC & SOS ================= */}
+        {activeTab === "deterrents" && (
+          <div className="space-y-4">
+            <div className="flex bg-white border border-gray-300 rounded overflow-hidden">
+              <button
+                onClick={() => setHelpSubTab("panic")}
+                className={`flex-1 py-2 text-sm font-semibold transition ${
+                  helpSubTab === "panic" ? "bg-gray-200 text-gray-800" : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                {isEMFActive ? (lang === "hi" ? "बंद करें" : "Disable") : (lang === "hi" ? "स्कैन करें" : "Scan")}
+                {lang === "hi" ? "आपातकालीन" : "Emergency"}
+              </button>
+              <button
+                onClick={() => setHelpSubTab("guardians")}
+                className={`flex-1 py-2 text-sm font-semibold transition ${
+                  helpSubTab === "guardians" ? "bg-gray-200 text-gray-800" : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {lang === "hi" ? "अभिभावक (Guardians)" : "Guardians"}
               </button>
             </div>
 
-            <p className="text-[9px] text-slate-500 font-semibold leading-relaxed">
-              {lang === "hi" ? "ट्रायल रूम के शीशे या दीवारों के पीछे छिपे कैमरों के चुंबकीय सिग्नल्स को ढूँढने में मदद करता है।" : "Finds hidden spy cameras behind mirrors or walls in hotel/trial rooms by detecting magnetic fields."}
-            </p>
-
-            {isEMFActive ? (
-              isSensorSupported ? (
-                <div className="flex flex-col items-center py-4 space-y-3">
-                  <div className={`w-32 h-32 rounded-full border-4 flex flex-col items-center justify-center transition-all duration-300 ${
-                    emfValue > 85 
-                      ? "border-red-650 bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.2)]" 
-                      : emfValue > 55
-                      ? "border-amber-500 bg-amber-50 shadow-[0_0_15px_rgba(245,158,11,0.15)]"
-                      : "border-rose-500 bg-slate-50"
-                  }`}>
-                    <span className="text-2xl font-mono font-black text-slate-800">{emfValue}</span>
-                    <span className="text-[8px] font-bold text-slate-550 tracking-wider">µTesla</span>
-                  </div>
-
-                  <div className="text-center">
-                    <span className={`text-[10px] font-extrabold uppercase tracking-widest ${
-                      emfValue > 85 ? "text-red-650" : emfValue > 55 ? "text-amber-600" : "text-rose-600"
-                    }`}>
-                      {emfValue > 85 ? (lang === "hi" ? "🚨 कैमरा सिग्नल्स का पता चला!" : "🚨 Camera Signals Detected!") : emfValue > 55 ? (lang === "hi" ? "⚠️ सामान्य से अधिक सिग्नल्स" : "⚠️ High Signals") : (lang === "hi" ? "✅ सुरक्षित इलाका" : "✅ Safe Ambient Field")}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center space-y-1">
-                  <span className="text-[10px] font-black text-red-700 block uppercase tracking-wider">{lang === "hi" ? "सेंसर काम नहीं कर रहा" : "Sensor Unavailable"}</span>
-                  <p className="text-[9px] text-red-600 font-bold leading-relaxed">
-                    {lang === "hi" ? "इस काम के लिए आपके फ़ोन में दिशा-सूचक (Compass) सेंसर होना ज़रूरी है जो इस फ़ोन में उपलब्ध नहीं है।" : "This feature requires a compass hardware sensor. Your device does not support this sensor API."}
+            {helpSubTab === "panic" && (
+              <div className="space-y-4">
+                {/* Professional SOS Button */}
+                <div className="bg-white border border-red-300 p-6 rounded-lg text-center shadow-sm">
+                  <h3 className="text-sm font-semibold text-red-700 mb-4 uppercase tracking-wider">
+                    {lang === "hi" ? "आपातकालीन अलर्ट" : "Emergency SOS Alert"}
+                  </h3>
+                  <button
+                    onClick={handleSOS}
+                    disabled={sosActive}
+                    className={`w-full max-w-sm mx-auto py-5 rounded-md font-bold text-lg flex items-center justify-center gap-3 transition ${
+                      sosActive
+                        ? "bg-red-800 text-white"
+                        : "bg-red-600 hover:bg-red-700 text-white shadow-md"
+                    }`}
+                  >
+                    <AlertOctagon className="w-6 h-6" />
+                    {sosActive ? (lang === "hi" ? "अलर्ट भेजा जा रहा है..." : "Sending Alert...") : (lang === "hi" ? "मदद के लिए टैप करें" : "TAP FOR HELP")}
+                  </button>
+                  <p className="text-xs text-gray-500 mt-4 max-w-sm mx-auto">
+                    {lang === "hi" ? "इसे दबाने से आपकी लाइव लोकेशन आपके रजिस्टर्ड अभिभावकों को भेज दी जाएगी।" : "Pressing this will instantly transmit your live location to registered guardians."}
                   </p>
                 </div>
-              )
-            ) : (
-              <div className="text-center py-6 text-slate-400 font-bold text-xs uppercase tracking-widest bg-slate-50 rounded-xl border border-slate-100">
-                {lang === "hi" ? "स्कैनर बंद है" : "Scanner Off"}
-              </div>
-            )}
-          </div>
 
-          <div className="bg-white border border-rose-100 p-5 rounded-2xl space-y-4 text-slate-800 shadow-sm">
-            <div className="flex justify-between items-center border-b border-rose-100 pb-2">
-              <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                <Camera className="w-4.5 h-4.5 text-rose-500" />
-                {lang === "hi" ? "🔴 लाल बत्ती लेंस स्कैनर" : "🔴 Red Light Lens Scan"}
-              </h4>
-              <button 
-                onClick={() => {
-                  if (isCameraActive) stopCamera();
-                  else startCamera();
-                }}
-                className={`px-3 py-1 rounded-lg text-[9px] font-extrabold uppercase transition cursor-pointer ${
-                  isCameraActive ? "bg-red-650 text-white" : "bg-slate-100 text-slate-650"
-                }`}
-              >
-                {isCameraActive ? (lang === "hi" ? "कैमरा बंद करें" : "Close Camera") : (lang === "hi" ? "कैमरा खोलें" : "Open Camera")}
-              </button>
-            </div>
+                {sosFired && (
+                  <div className="bg-red-50 border border-red-200 p-4 rounded-lg space-y-3 text-sm">
+                    <div className="flex items-center gap-2 text-red-700 font-bold">
+                      <Activity className="w-5 h-5 animate-pulse" />
+                      <span>{lang === "hi" ? "अलर्ट सक्रिय है!" : "Alert Active!"}</span>
+                    </div>
+                    <p className="text-gray-700">
+                      {lang === "hi"
+                        ? "आपके संपर्कों को लोकेशन भेज दी गई है। एक 10-सेकंड का ऑडियो रिकॉर्ड भी सुरक्षित किया जा रहा है।"
+                        : "Location transmitted to contacts. A 10-second ambient audio recording has commenced."}
+                    </p>
+                    <a
+                      href="tel:1091"
+                      className="inline-flex items-center justify-center w-full bg-slate-800 text-white py-2.5 rounded font-semibold gap-2 hover:bg-slate-900 transition"
+                    >
+                      <Phone className="w-4 h-4" />
+                      {lang === "hi" ? "पुलिस (1091) को कॉल करें" : "Call Police (1091)"}
+                    </a>
+                    <button
+                      onClick={() => setSosFired(false)}
+                      className="w-full text-center text-gray-500 text-xs font-semibold py-2 hover:text-gray-800"
+                    >
+                      {lang === "hi" ? "अलर्ट बंद करें" : "Dismiss Alert"}
+                    </button>
+                  </div>
+                )}
 
-            <p className="text-[9px] text-slate-550 font-semibold leading-relaxed">
-              {lang === "hi" ? "कमरे में अंधेरा करके कैमरे के लेंस की चमक को लाल रंग के फिल्टर में देखें।" : "Opens your back camera with an optimized high-contrast red filter to highlight reflection points from lens coatings."}
-            </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white border border-gray-300 p-4 rounded-lg flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                        <Phone className="w-4 h-4" />
+                        {lang === "hi" ? "फ़ेक कॉल" : "Simulate Call"}
+                      </h4>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {lang === "hi" ? "फ़ोन पर घंटी बजाएं" : "Trigger a simulated incoming call."}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setFakeCallActive(true);
+                        playRingtone();
+                        startFakeCallHaptics();
+                      }}
+                      className="mt-4 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-xs font-semibold transition"
+                    >
+                      {lang === "hi" ? "शुरू करें" : "Activate"}
+                    </button>
+                  </div>
 
-            {isCameraActive ? (
-              <div className="relative rounded-xl overflow-hidden border border-rose-150 bg-black aspect-video flex items-center justify-center">
-                <video 
-                  ref={videoRef}
-                  autoPlay 
-                  playsInline 
-                  className="w-full h-full object-cover"
-                  style={{ filter: "contrast(220%) saturate(0%) sepia(100%) hue-rotate(-50deg)" }}
-                />
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                  <div className="w-16 h-16 border-2 border-red-500/40 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-red-650 rounded-full animate-ping"></div>
+                  <div className="bg-white border border-gray-300 p-4 rounded-lg flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                        <Volume2 className="w-4 h-4" />
+                        {lang === "hi" ? "सायरन" : "Loud Siren"}
+                      </h4>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {lang === "hi" ? "तेज़ अलार्म बजाएं" : "Play a high-decibel alarm."}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (sirenActive) {
+                          stopSiren();
+                          setSirenActive(false);
+                        } else {
+                          playSiren();
+                          setSirenActive(true);
+                          triggerHaptic([1000]);
+                        }
+                      }}
+                      className={`mt-4 w-full py-2 rounded text-xs font-semibold transition ${
+                        sirenActive ? "bg-gray-300 text-gray-800" : "bg-slate-800 hover:bg-slate-900 text-white"
+                      }`}
+                    >
+                      {sirenActive ? (lang === "hi" ? "रोकें" : "Stop") : (lang === "hi" ? "शुरू करें" : "Activate")}
+                    </button>
                   </div>
                 </div>
-                <div className="absolute bottom-2 left-2 bg-red-600 text-white text-[8px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded border border-red-500 animate-pulse">
-                  {lang === "hi" ? "कैमरा सक्रिय" : "Camera Active"}
+
+                <div className="bg-white border border-gray-300 p-4 rounded-lg">
+                  <h4 className="text-sm font-semibold text-gray-800 mb-3">
+                    {lang === "hi" ? "राष्ट्रीय हेल्पलाइन" : "National Helplines"}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { title: "Women Helpline", number: "1091" },
+                      { title: "Domestic Abuse", number: "181" },
+                      { title: "Emergency", number: "112" },
+                      { title: "Police", number: "100" }
+                    ].map(h => (
+                      <a
+                        key={h.number}
+                        href={`tel:${h.number}`}
+                        className="flex flex-col p-2 border border-gray-200 rounded hover:bg-gray-50 transition decoration-none text-gray-800"
+                      >
+                        <span className="text-[10px] text-gray-500 uppercase">{h.title}</span>
+                        <span className="text-sm font-bold">{h.number}</span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-10 text-slate-400 font-bold text-xs uppercase tracking-widest bg-slate-50 rounded-xl border border-slate-100">
-                {lang === "hi" ? "कैमरा बंद है" : "Camera Offline"}
-              </div>
             )}
-          </div>
-        </div>
-      )}
 
-      {/* TAB 3: NCW PORTAL & INCIDENT REPORTING DESK */}
-      {activeTab === "ncw" && (
-        <div className="space-y-4 animate-fadeIn text-slate-800">
-          {/* Quick Access to Official Portals (Browser Launch) */}
-          <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-3 shadow-sm">
-            <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5 border-b border-rose-100 pb-2">
-              <Globe className="w-4 h-4 text-rose-550" />
-              {lang === "hi" ? "महिला आयोग आधिकारिक लिंक" : "Official Women Commission Portals"}
-            </h4>
-            <p className="text-[9px] text-slate-450 font-semibold leading-relaxed">
-              If you wish to file a report directly with the National Commission for Women, click the buttons below to open the official portals in your phone browser:
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <a 
-                href="https://www.ncw.gov.in/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-2.5 px-3 bg-rose-50 text-rose-700 border border-rose-200/50 hover:bg-rose-100 rounded-xl text-[9px] font-black uppercase tracking-wider text-center decoration-none flex items-center justify-center gap-1 cursor-pointer"
-              >
-                <span>NCW Website</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-              <a 
-                href="https://ncwapps.nic.in/onlinecomplaintsv2/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-2.5 px-3 bg-rose-50 text-rose-700 border border-rose-200/50 hover:bg-rose-100 rounded-xl text-[9px] font-black uppercase tracking-wider text-center decoration-none flex items-center justify-center gap-1 cursor-pointer"
-              >
-                <span>NCW Complaints</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
-          </div>
-
-          {/* RPF Internal Complaint Lodging Desk */}
-          <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 shadow-sm">
-            <div className="flex justify-between items-center border-b border-rose-100 pb-2">
-              <div className="flex items-center gap-1.5">
-                <Shield className="w-4.5 h-4.5 text-rose-600 fill-rose-100" />
-                <h4 className="text-xs font-black uppercase tracking-wider text-slate-850">
-                  {lang === "hi" ? "आरपीएफ अपराध एवं शिकायत डेस्क" : "RPF Crime & Complaint Desk"}
+            {helpSubTab === "guardians" && (
+              <div className="bg-white border border-gray-300 p-5 rounded-lg space-y-4">
+                <h4 className="text-sm font-semibold text-gray-800">
+                  {lang === "hi" ? "आपातकालीन संपर्क" : "Emergency Contacts"}
                 </h4>
-              </div>
-              <span className="text-[8px] font-mono font-black uppercase tracking-wider bg-rose-50 border border-rose-200 text-rose-750 px-2 py-0.5 rounded-full">
-                {lang === "hi" ? "सक्रिय डेस्क" : "Active Desk"}
-              </span>
-            </div>
+                <p className="text-xs text-gray-500">
+                  {lang === "hi" ? "अधिकतम 5 नंबर या ईमेल जोड़ें।" : "Add up to 5 mobile numbers or emails."}
+                </p>
 
-            <form onSubmit={handleComplaintSubmit} className="space-y-4">
-              {/* Anonymous Report Toggle */}
-              <div className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                <div>
-                  <span className="text-[10px] font-black block text-slate-800">
-                    {lang === "hi" ? "गुमनाम शिकायत (Anonymous)" : "File Anonymously"}
-                  </span>
-                  <span className="text-[8px] text-slate-450 font-semibold block mt-0.5">
-                    Hides your name and phone number from the report logs.
-                  </span>
-                </div>
-                <input 
-                  type="checkbox"
-                  checked={isAnonymous}
-                  onChange={e => setIsAnonymous(e.target.checked)}
-                  className="w-4.5 h-4.5 accent-rose-600 cursor-pointer"
-                />
-              </div>
-
-              {formStep === 1 && (
-                <div className="space-y-3 animate-fadeIn">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold text-rose-600 uppercase tracking-widest">Step 1 of 3: Complainant Details</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setFormStep(2)}
-                      className="text-[9.5px] font-black text-rose-600 hover:underline cursor-pointer"
-                    >
-                      Next Step &rarr;
-                    </button>
-                  </div>
-
-                  {!isAnonymous && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Your Name</label>
-                        <input 
-                          type="text" 
-                          value={complainantName}
-                          onChange={e => setComplainantName(e.target.value)}
-                          required
-                          className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Phone Number</label>
-                        <input 
-                          type="tel" 
-                          value={complainantPhone}
-                          onChange={e => setComplainantPhone(e.target.value)}
-                          required
-                          className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Select Complaint Category</label>
-                    <select 
-                      value={complaintType}
-                      onChange={e => setComplaintType(e.target.value)}
-                      className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-750 cursor-pointer focus:border-rose-500"
-                    >
-                      <option value="Harassment / Eve Teasing">Harassment / Eve Teasing (Verbal Abuse)</option>
-                      <option value="Domestic Abuse / Violence">Domestic Abuse / Violence</option>
-                      <option value="Cyber Stalking / Blackmail">Cyber Stalking / Blackmail</option>
-                      <option value="Physical Threat / Assault">Physical Threat / Assault</option>
-                      <option value="Stalking in Public Spaces">Stalking in Public Spaces</option>
-                      <option value="Other Crime / Emergency">Other Crime / Emergency</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              {formStep === 2 && (
-                <div className="space-y-3 animate-fadeIn">
-                  <div className="flex items-center justify-between">
-                    <button 
-                      type="button" 
-                      onClick={() => setFormStep(1)}
-                      className="text-[9.5px] font-black text-slate-500 hover:underline cursor-pointer"
-                    >
-                      &larr; Back
-                    </button>
-                    <span className="text-[9px] font-bold text-rose-600 uppercase tracking-widest">Step 2 of 3: Incident Info</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setFormStep(3)}
-                      className="text-[9.5px] font-black text-rose-600 hover:underline cursor-pointer"
-                    >
-                      Next Step &rarr;
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Incident Date</label>
-                      <input 
-                        type="date" 
-                        value={incidentDate}
-                        onChange={e => setIncidentDate(e.target.value)}
-                        required
-                        className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Incident Location (Area/Pincode)</label>
-                      <input 
-                        type="text" 
-                        value={incidentLocation}
-                        onChange={e => setIncidentLocation(e.target.value)}
-                        required
-                        placeholder="e.g. Karond Chowk, Bhopal"
-                        className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Incident Details (Describe clearly)</label>
-                    <textarea 
-                      value={complaintDesc}
-                      onChange={e => setComplaintDesc(e.target.value)}
-                      required
-                      rows={3}
-                      placeholder="Please enter a detailed description of what occurred..."
-                      className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-slate-800 focus:border-rose-500"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {formStep === 3 && (
-                <div className="space-y-3 animate-fadeIn">
-                  <div className="flex items-center justify-between">
-                    <button 
-                      type="button" 
-                      onClick={() => setFormStep(2)}
-                      className="text-[9.5px] font-black text-slate-500 hover:underline cursor-pointer"
-                    >
-                      &larr; Back
-                    </button>
-                    <span className="text-[9px] font-bold text-rose-600 uppercase tracking-widest">Step 3 of 3: Suspect details & Submit</span>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black text-slate-450 uppercase tracking-wider block">Suspect Description (Optional)</label>
-                    <input 
-                      type="text" 
-                      value={suspectDetails}
-                      onChange={e => setSuspectDetails(e.target.value)}
-                      placeholder="Name, clothing, vehicle details, physical attributes..."
-                      className="w-full border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-1.5 font-bold outline-none text-slate-800 focus:border-rose-500"
-                    />
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    disabled={submittingComplaint}
-                    className="w-full mt-2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-lg text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
+                <form onSubmit={addContact} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newContact}
+                    onChange={e => setNewContact(e.target.value)}
+                    placeholder="Email / Phone"
+                    className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:border-slate-500 outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={contacts.length >= 5 || !newContact.trim()}
+                    className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded text-sm font-semibold transition disabled:opacity-50"
                   >
-                    {submittingComplaint ? "Filing Official Report..." : "Submit Complaint Report"}
-                  </button>
-                </div>
-              )}
-            </form>
-          </div>
-
-          {/* Filed Complaints Tracking Board */}
-          <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 shadow-sm">
-            <h4 className="text-xs font-black uppercase tracking-wider border-b border-rose-100 pb-2">
-              {lang === "hi" ? "मेरी दर्ज शिकायतें स्थिति" : "My Filed Complaints (Live Status Tracker)"}
-            </h4>
-
-            {fetchingComplaints ? (
-              <div className="text-center py-6">
-                <div className="w-5 h-5 border-2 border-rose-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider animate-pulse">Syncing logs...</span>
-              </div>
-            ) : complaintsList.length > 0 ? (
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                {complaintsList.map((item, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-150 p-3.5 rounded-xl space-y-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="text-[10.5px] font-black text-slate-850 block">{item.complaint_type}</span>
-                        <span className="text-[7.5px] font-mono text-slate-400 block mt-0.5">Report ID: RPF-2026-00{item.id}</span>
-                      </div>
-                      <span className={`text-[7.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                        item.status === 'Resolved' 
-                          ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
-                          : item.status === 'Under Investigation'
-                          ? 'bg-blue-50 border-blue-200 text-blue-700'
-                          : 'bg-amber-50 border-amber-200 text-amber-700'
-                      }`}>
-                        {item.status}
-                      </span>
-                    </div>
-
-                    <p className="text-[9px] text-slate-500 leading-relaxed font-semibold">{item.description}</p>
-
-                    <div className="flex justify-between items-center pt-2 border-t border-slate-200/50 text-[8px] font-bold text-slate-400">
-                      <span>Location: {item.location}</span>
-                      <span>Date: {item.incident_date}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-[9px] text-slate-400 text-center py-4 font-semibold">
-                No incident reports filed yet. Use the desk above to submit a report if needed.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 4: SAFE MAP */}
-      {activeTab === "routes" && (
-        <div className="space-y-4 animate-fadeIn text-slate-800">
-          {/* Inner Sub-tab Navigation */}
-          <div className="flex bg-rose-50 border border-rose-100 rounded-xl p-1 shadow-sm shrink-0 gap-1 overflow-x-auto no-scrollbar">
-            <button 
-              onClick={() => setRouteSubTab("nav")}
-              className={`flex-1 shrink-0 py-2 px-1 rounded-lg text-[9.5px] font-black uppercase tracking-wider transition cursor-pointer text-center min-w-[85px] ${
-                routeSubTab === "nav" 
-                  ? "bg-rose-600 text-white shadow-md" 
-                  : "text-rose-700 hover:bg-rose-100"
-              }`}
-            >
-              {lang === "hi" ? "🗺️ मार्ग खोजें" : "🗺️ Find Route"}
-            </button>
-            <button 
-              onClick={() => setRouteSubTab("ratings")}
-              className={`flex-1 shrink-0 py-2 px-1 rounded-lg text-[9.5px] font-black uppercase tracking-wider transition cursor-pointer text-center min-w-[85px] ${
-                routeSubTab === "ratings" 
-                  ? "bg-rose-600 text-white shadow-md" 
-                  : "text-rose-700 hover:bg-rose-100"
-              }`}
-            >
-              {lang === "hi" ? "⭐ सुरक्षा समीक्षा" : "⭐ Street Reviews"}
-            </button>
-            <button 
-              onClick={() => setRouteSubTab("directory")}
-              className={`flex-1 shrink-0 py-2 px-1 rounded-lg text-[9.5px] font-black uppercase tracking-wider transition cursor-pointer text-center min-w-[85px] ${
-                routeSubTab === "directory" 
-                  ? "bg-rose-600 text-white shadow-md" 
-                  : "text-rose-700 hover:bg-rose-100"
-              }`}
-            >
-              {lang === "hi" ? "🏢 सुरक्षा निर्देशिका" : "🏢 Local Centers"}
-            </button>
-          </div>
-
-          {routeSubTab === "nav" && (
-            <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 shadow-sm animate-fadeIn">
-              <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                <Map className="w-4.5 h-4.5 text-rose-500" />
-                {lang === "hi" ? "सुरक्षित मार्ग खोज व दिशा निर्देश" : "Safe Directions Finder"}
-              </h4>
-
-              <form onSubmit={handleRouteSearch} className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <input 
-                    type="text" 
-                    value={startLoc}
-                    onChange={e => setStartLoc(e.target.value)}
-                    required
-                    placeholder={lang === "hi" ? "प्रारंभिक बिंदु" : "Start location"} 
-                    className="border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-slate-800 focus:border-rose-500"
-                  />
-                  <input 
-                    type="text" 
-                    value={endLoc}
-                    onChange={e => setEndLoc(e.target.value)}
-                    required
-                    placeholder={lang === "hi" ? "गंतव्य बिंदु" : "Destination"} 
-                    className="border border-rose-150 bg-slate-50 rounded-lg text-xs px-2.5 py-2 font-bold outline-none text-slate-800 focus:border-rose-500"
-                  />
-                </div>
-                <button 
-                  type="submit" 
-                  className="w-full bg-[#000080] hover:bg-indigo-950 text-white font-bold py-2 rounded-lg text-xs shadow-md transition cursor-pointer"
-                >
-                  {lang === "hi" ? "मार्ग का पता लगाएं" : "Find Safety Route"}
-                </button>
-              </form>
-
-              {directionsUrl ? (
-                <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video shadow-inner bg-slate-100">
-                  <iframe 
-                    src={directionsUrl}
-                    className="w-full h-full border-0 grayscale saturate-50"
-                    allowFullScreen
-                    loading="lazy"
-                    title="Route Safety Map Directions"
-                  />
-                </div>
-              ) : (
-                <div className="text-center py-8 text-slate-400 font-bold text-xs uppercase tracking-widest bg-slate-50 rounded-xl border border-slate-100">
-                  Input Locations to Map Route
-                </div>
-              )}
-            </div>
-          )}
-
-          {routeSubTab === "ratings" && (
-            <div className="space-y-4 animate-fadeIn">
-              <div className="bg-white border border-rose-100 p-4 rounded-2xl space-y-4 shadow-sm">
-                <h4 className="text-xs font-black uppercase tracking-wider border-b border-rose-100 pb-2">
-                  {lang === "hi" ? "सुरक्षित मार्ग समीक्षा" : "Street Safety Rating"}
-                </h4>
-
-                <form onSubmit={handleRatingSubmit} className="space-y-3 bg-slate-50 border border-slate-200/50 p-3.5 rounded-xl">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-650 block mb-1">Add Street Rating / समीक्षा जोड़ें</span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input 
-                      type="text" 
-                      value={newStreetName}
-                      onChange={e => setNewStreetName(e.target.value)}
-                      required
-                      placeholder="Street/Area (e.g. Karond Chowk)" 
-                      className="border border-slate-200 bg-white rounded-lg text-xs px-2.5 py-1.5 font-semibold outline-none text-slate-800 focus:border-rose-500"
-                    />
-                    <select 
-                      value={newRatingVal}
-                      onChange={e => setNewRatingVal(parseInt(e.target.value, 10))}
-                      className="border border-slate-200 bg-white rounded-lg text-xs px-2 py-1.5 font-bold outline-none text-slate-700 cursor-pointer"
-                    >
-                      <option value={5}>⭐⭐⭐⭐⭐ (Very Safe)</option>
-                      <option value={4}>⭐⭐⭐⭐ (Safe)</option>
-                      <option value={3}>⭐⭐⭐ (Average)</option>
-                      <option value={2}>⭐⭐ (Unsafe)</option>
-                      <option value={1}>⭐ (High Alert)</option>
-                    </select>
-                  </div>
-                  <input 
-                    type="text" 
-                    value={newRatingNotes}
-                    onChange={e => setNewRatingNotes(e.target.value)}
-                    placeholder="Safety Notes (e.g. Broken lights, CCTVs, Police checking)"
-                    className="w-full border border-slate-200 bg-white rounded-lg text-xs px-2.5 py-1.5 font-semibold outline-none text-slate-800 focus:border-rose-500"
-                  />
-                  <button 
-                    type="submit" 
-                    disabled={submittingRating}
-                    className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-lg text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
-                  >
-                    {submittingRating ? "Saving..." : "Post Review"}
+                    Add
                   </button>
                 </form>
 
-                {ratingsList.length > 0 ? (
-                  <div className="space-y-3 pt-2">
-                    {(() => {
-                      const idxLast = ratingsPage * itemsPerPage;
-                      const idxFirst = idxLast - itemsPerPage;
-                      const currentList = ratingsList.slice(idxFirst, idxLast);
-                      const totalPages = Math.ceil(ratingsList.length / itemsPerPage);
-
-                      return (
-                        <>
-                          {currentList.map((item, idx) => (
-                            <div key={idx} className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-1">
-                              <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-black text-slate-700">{item.location_name}</span>
-                                <span className="text-[9px] text-amber-500 font-bold">{"★".repeat(item.rating)}{"☆".repeat(5 - item.rating)}</span>
-                              </div>
-                              <p className="text-[9px] text-slate-550 font-semibold leading-relaxed">{item.notes}</p>
-                              <span className="text-[8px] text-slate-450 block font-semibold">Post Date: {new Date(item.createdAt).toLocaleDateString()}</span>
-                            </div>
-                          ))}
-
-                          {totalPages > 1 && (
-                            <div className="flex justify-center items-center gap-2.5 pt-3 border-t border-slate-100">
-                              <button 
-                                type="button"
-                                disabled={ratingsPage === 1}
-                                onClick={() => setRatingsPage(prev => Math.max(1, prev - 1))}
-                                className="px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider rounded bg-slate-100 hover:bg-slate-200 text-slate-650 disabled:opacity-40 transition cursor-pointer"
-                              >
-                                &larr; Prev
-                              </button>
-                              <span className="text-[9px] font-black text-slate-500">Page {ratingsPage} of {totalPages}</span>
-                              <button 
-                                type="button"
-                                disabled={ratingsPage === totalPages}
-                                onClick={() => setRatingsPage(prev => Math.min(totalPages, prev + 1))}
-                                className="px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider rounded bg-slate-100 hover:bg-slate-200 text-slate-650 disabled:opacity-40 transition cursor-pointer"
-                              >
-                                Next &rarr;
-                              </button>
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
-                ) : (
-                  <p className="text-[9px] text-slate-450 text-center py-6 bg-slate-50/50 rounded-xl">
-                    No safety reviews posted yet. Feel free to rate a street safety above.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {routeSubTab === "directory" && (
-            <div className="bg-white border border-rose-100 p-4 shadow-sm space-y-4 rounded-2xl animate-fadeIn">
-              <h4 className="font-display font-bold text-xs text-slate-800 uppercase tracking-widest border-b border-rose-100 pb-2 flex items-center gap-1.5">
-                <Shield className="w-4.5 h-4.5 text-rose-500" />
-                {lang === "hi" ? "स्थानीय सुरक्षा निर्देशिका" : "Local Protection Directory"}
-              </h4>
-
-              <form onSubmit={handleDirectorySearch} className="flex gap-2">
-                <input 
-                  type="text" 
-                  pattern="\d{6}"
-                  value={searchPincode}
-                  onChange={e => setSearchPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder={lang === "hi" ? "पिनकोड दर्ज करें (e.g. 466001)" : "Enter 6-digit Pincode (e.g. 466001)"} 
-                  className="flex-1 border border-rose-150 rounded-lg text-xs px-3 py-2 outline-none focus:border-rose-500 font-bold bg-slate-50 text-slate-850"
-                />
-                <button 
-                  type="submit" 
-                  disabled={searchingDirectory || searchPincode.length < 6}
-                  className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
-                >
-                  {searchingDirectory ? "..." : (lang === "hi" ? "खोजें" : "Search")}
-                </button>
-              </form>
-
-              {directoryList.length > 0 ? (
-                <div className="space-y-3 pt-2">
-                  {(() => {
-                    const idxLast = directoryPage * itemsPerPage;
-                    const idxFirst = idxLast - itemsPerPage;
-                    const currentList = directoryList.slice(idxFirst, idxLast);
-                    const totalPages = Math.ceil(directoryList.length / itemsPerPage);
-
-                    return (
-                      <>
-                        {currentList.map((item, idx) => (
-                          <div key={idx} className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-1">
-                            <div className="flex justify-between items-start">
-                              <span className="text-[10px] font-black text-slate-800 leading-tight">{item.name}</span>
-                              <span className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-rose-250 bg-rose-50 text-rose-700">
-                                {item.type}
-                              </span>
-                            </div>
-                            <p className="text-[9px] text-slate-505 leading-relaxed font-semibold">{item.address}</p>
-                            <div className="flex justify-between items-center pt-1 border-t border-slate-200">
-                              <span className="text-[8px] font-bold text-slate-400">Helpline: {item.helpline}</span>
-                              <a 
-                                href={`tel:${item.phone}`}
-                                className="text-[8.5px] font-bold text-rose-700 hover:underline flex items-center gap-1"
-                              >
-                                📞 Call: {item.phone}
-                              </a>
-                            </div>
-                          </div>
-                        ))}
-
-                        {totalPages > 1 && (
-                          <div className="flex justify-center items-center gap-2.5 pt-3 border-t border-slate-100">
-                            <button 
-                              type="button"
-                              disabled={directoryPage === 1}
-                              onClick={() => setDirectoryPage(prev => Math.max(1, prev - 1))}
-                              className="px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider rounded bg-slate-100 hover:bg-slate-200 text-slate-655 disabled:opacity-40 transition cursor-pointer"
-                            >
-                              &larr; Prev
-                            </button>
-                            <span className="text-[9px] font-black text-slate-500">Page {directoryPage} of {totalPages}</span>
-                            <button 
-                              type="button"
-                              disabled={directoryPage === totalPages}
-                              onClick={() => setDirectoryPage(prev => Math.min(totalPages, prev + 1))}
-                              className="px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider rounded bg-slate-100 hover:bg-slate-200 text-slate-655 disabled:opacity-40 transition cursor-pointer"
-                            >
-                              Next &rarr;
-                            </button>
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
+                <div className="space-y-2 mt-4">
+                  {contacts.length > 0 ? contacts.map((c, i) => (
+                    <div key={i} className="flex items-center justify-between bg-gray-50 p-2.5 border border-gray-200 rounded">
+                      <span className="text-sm text-gray-700 font-mono">{c}</span>
+                      <button onClick={() => removeContact(i)} className="text-red-600 text-xs font-semibold hover:underline">
+                        Remove
+                      </button>
+                    </div>
+                  )) : (
+                    <div className="text-center py-4 text-xs text-gray-400">No contacts added.</div>
+                  )}
                 </div>
-              ) : (
-                <p className="text-[9px] text-slate-450 text-center py-6 bg-slate-50/50 rounded-xl">
-                  {lang === "hi" ? "कोई स्थानीय केंद्र ढूंढने के लिए पिनकोड दर्ज करें।" : "Enter pincode to find local safety resources nearby."}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 5: SETTINGS */}
-      {activeTab === "settings" && (
-        <div className="space-y-4 animate-fadeIn text-slate-850">
-          <div className="bg-white border border-rose-100 p-5 rounded-2xl space-y-4 shadow-sm">
-            <h4 className="text-xs font-black uppercase tracking-wider border-b border-rose-100 pb-2">Stealth App Settings</h4>
-            
-            <div className="flex justify-between items-center py-1">
-              <div>
-                <span className="text-xs font-extrabold block">Stealth Calculator Mode</span>
-                <p className="text-[9px] text-slate-450 font-semibold mt-0.5">Disguises the safety dashboard behind a working calculator.</p>
-              </div>
-              <input 
-                type="checkbox"
-                checked={stealthEnabled}
-                onChange={e => {
-                  const val = e.target.checked;
-                  setStealthEnabled(val);
-                  localStorage.setItem("stealth_enabled", String(val));
-                }}
-                className="w-5 h-5 accent-rose-600 cursor-pointer"
-              />
-            </div>
-
-            {stealthEnabled && (
-              <div className="space-y-2 pt-2 border-t border-rose-105">
-                <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block">Unlock PIN Code (4 Digits)</label>
-                <input 
-                  type="text"
-                  maxLength={4}
-                  value={calculatorPin}
-                  onChange={e => {
-                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                    setCalculatorPin(val);
-                    localStorage.setItem("calc_pin", val);
-                  }}
-                  className="w-full max-w-[120px] border border-rose-200 bg-slate-50 rounded-lg text-xs px-3 py-2 font-mono font-black text-rose-700 outline-none focus:border-rose-500"
-                />
               </div>
             )}
           </div>
+        )}
 
-          <div className="bg-white border border-rose-100 p-5 rounded-2xl space-y-4 shadow-sm">
-            <h4 className="text-xs font-black uppercase tracking-wider border-b border-rose-100 pb-2">Physical Hardware Alerts</h4>
-
-            <div className="flex justify-between items-center py-1">
-              <div>
-                <span className="text-xs font-extrabold block">Shake-To-Alert Trigger</span>
-                <p className="text-[9px] text-slate-450 font-semibold mt-0.5">Aggressive shaking of the device immediately triggers SOS alert.</p>
+        {/* ================= TAB 2: SCANNERS ================= */}
+        {activeTab === "scanner" && (
+          <div className="space-y-4">
+            <div className="bg-white border border-gray-300 p-5 rounded-lg space-y-3">
+              <div className="flex justify-between items-center">
+                <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  <Radio className="w-4 h-4" />
+                  {lang === "hi" ? "छिपा हुआ कैमरा स्कैनर (EMF)" : "Hidden Camera Scanner (EMF)"}
+                </h4>
+                <button
+                  onClick={() => {
+                    setIsEMFActive(!isEMFActive);
+                    setEmfValue(0.0);
+                  }}
+                  className={`px-3 py-1.5 rounded text-xs font-semibold transition ${
+                    isEMFActive ? "bg-gray-200 text-gray-800" : "bg-slate-800 text-white"
+                  }`}
+                >
+                  {isEMFActive ? "Stop" : "Scan"}
+                </button>
               </div>
-              <input 
-                type="checkbox"
-                checked={shakeEnabled}
-                onChange={e => {
+              <p className="text-xs text-gray-500">
+                {lang === "hi" ? "दीवारों के पीछे इलेक्ट्रॉनिक उपकरणों का पता लगाएं।" : "Detects electromagnetic fields from hidden devices."}
+              </p>
+
+              {isEMFActive && isSensorSupported && (
+                <div className="py-6 text-center">
+                  <div className="text-4xl font-mono font-bold text-gray-800">{emfValue} <span className="text-sm text-gray-500">µT</span></div>
+                  <div className={`mt-2 text-sm font-semibold ${emfValue > 85 ? "text-red-600" : "text-green-600"}`}>
+                    {emfValue > 85 ? "High Signal Detected!" : "Normal Signal"}
+                  </div>
+                </div>
+              )}
+              {isEMFActive && !isSensorSupported && (
+                <div className="p-3 bg-red-50 text-red-700 text-xs border border-red-200 rounded mt-3">
+                  Hardware Magnetometer not supported or permission denied.
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white border border-gray-300 p-5 rounded-lg space-y-3">
+              <div className="flex justify-between items-center">
+                <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  <Camera className="w-4 h-4" />
+                  {lang === "hi" ? "लेंस खोजक" : "Lens Finder (Red Filter)"}
+                </h4>
+                <button
+                  onClick={() => {
+                    if (isCameraActive) stopCamera();
+                    else startCamera();
+                  }}
+                  className={`px-3 py-1.5 rounded text-xs font-semibold transition ${
+                    isCameraActive ? "bg-gray-200 text-gray-800" : "bg-slate-800 text-white"
+                  }`}
+                >
+                  {isCameraActive ? "Close" : "Open"}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                {lang === "hi" ? "कैमरे के लेंस को देखने के लिए लाल फ़िल्टर।" : "Uses high contrast red filter to spot camera lenses."}
+              </p>
+
+              {isCameraActive && (
+                <div className="mt-3 bg-black rounded overflow-hidden relative aspect-video">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    className="w-full h-full object-cover"
+                    style={{ filter: "contrast(200%) saturate(0%) sepia(100%) hue-rotate(-50deg)" }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 3: NCW ================= */}
+        {activeTab === "ncw" && (
+          <div className="space-y-4">
+            <div className="bg-white border border-gray-300 p-5 rounded-lg">
+              <h4 className="text-sm font-semibold text-gray-800 mb-3">Official NCW Portals</h4>
+              <div className="flex gap-3">
+                <a href="https://www.ncw.gov.in/" target="_blank" rel="noopener noreferrer" className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded text-xs font-semibold text-center flex items-center justify-center gap-1">
+                  NCW Website <ExternalLink className="w-3 h-3" />
+                </a>
+                <a href="https://ncwapps.nic.in/onlinecomplaintsv2/" target="_blank" rel="noopener noreferrer" className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded text-xs font-semibold text-center flex items-center justify-center gap-1">
+                  File Complaint <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-300 p-5 rounded-lg space-y-4">
+              <h4 className="text-sm font-semibold text-gray-800">Incident Reporting Desk</h4>
+              <form onSubmit={handleComplaintSubmit} className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <input type="checkbox" id="anon" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} className="w-4 h-4" />
+                  <label htmlFor="anon" className="text-xs font-medium text-gray-700">File Anonymously</label>
+                </div>
+                {!isAnonymous && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="text" placeholder="Name" value={complainantName} onChange={e => setComplainantName(e.target.value)} required className="border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500" />
+                    <input type="text" placeholder="Phone" value={complainantPhone} onChange={e => setComplainantPhone(e.target.value)} required className="border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500" />
+                  </div>
+                )}
+                <select value={complaintType} onChange={e => setComplaintType(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500">
+                  <option>Harassment / Eve Teasing</option>
+                  <option>Domestic Abuse / Violence</option>
+                  <option>Cyber Stalking / Blackmail</option>
+                  <option>Physical Threat / Assault</option>
+                  <option>Other</option>
+                </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <input type="date" value={incidentDate} onChange={e => setIncidentDate(e.target.value)} required className="border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500" />
+                  <input type="text" placeholder="Location" value={incidentLocation} onChange={e => setIncidentLocation(e.target.value)} required className="border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500" />
+                </div>
+                <textarea placeholder="Description of incident" rows={3} value={complaintDesc} onChange={e => setComplaintDesc(e.target.value)} required className="w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500"></textarea>
+                <button type="submit" disabled={submittingComplaint} className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-sm font-semibold transition">
+                  {submittingComplaint ? "Submitting..." : "Submit Report"}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 4: ROUTES ================= */}
+        {activeTab === "routes" && (
+          <div className="space-y-4">
+            <div className="bg-white border border-gray-300 p-5 rounded-lg space-y-4">
+              <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <Map className="w-4 h-4" /> Safe Route Navigation
+              </h4>
+              <form onSubmit={handleRouteSearch} className="space-y-3">
+                <input type="text" placeholder="Start Location" value={startLoc} onChange={e => setStartLoc(e.target.value)} required className="w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500" />
+                <input type="text" placeholder="Destination" value={endLoc} onChange={e => setEndLoc(e.target.value)} required className="w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500" />
+                <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded text-sm font-semibold transition">
+                  Open Route in Maps
+                </button>
+              </form>
+            </div>
+
+            <div className="bg-white border border-gray-300 p-5 rounded-lg space-y-4">
+              <h4 className="text-sm font-semibold text-gray-800">Directory (Local Helplines)</h4>
+              <form onSubmit={handleDirectorySearch} className="flex gap-2">
+                <input type="text" placeholder="Pincode (e.g. 462001)" value={searchPincode} onChange={e => setSearchPincode(e.target.value.replace(/\D/g, '').slice(0, 6))} className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500" />
+                <button type="submit" disabled={searchingDirectory || searchPincode.length < 6} className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded text-sm font-semibold transition disabled:opacity-50">
+                  Search
+                </button>
+              </form>
+              <div className="space-y-2">
+                {directoryList.map((item, i) => (
+                  <div key={i} className="bg-gray-50 border border-gray-200 p-3 rounded space-y-1">
+                    <div className="font-semibold text-sm">{item.name}</div>
+                    <div className="text-xs text-gray-600">{item.address}</div>
+                    <div className="text-xs font-bold text-gray-800">Phone: {item.phone}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 5: SETTINGS ================= */}
+        {activeTab === "settings" && (
+          <div className="space-y-4">
+            <div className="bg-white border border-gray-300 p-5 rounded-lg space-y-4">
+              <h4 className="text-sm font-semibold text-gray-800">Application Settings</h4>
+
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="text-sm font-semibold text-gray-800">Stealth Mode (Calculator)</div>
+                  <div className="text-xs text-gray-500">Hides app behind a calculator interface</div>
+                </div>
+                <input type="checkbox" checked={stealthEnabled} onChange={e => {
+                  const val = e.target.checked;
+                  setStealthEnabled(val);
+                  localStorage.setItem("stealth_enabled", String(val));
+                }} className="w-4 h-4" />
+              </div>
+
+              {stealthEnabled && (
+                <div className="space-y-1 pt-2">
+                  <label className="text-xs font-semibold text-gray-700">Calculator Unlock PIN</label>
+                  <input type="password" maxLength={4} value={calculatorPin} onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setCalculatorPin(val);
+                    localStorage.setItem("calc_pin", val);
+                  }} className="border border-gray-300 rounded px-3 py-1.5 text-sm outline-none focus:border-slate-500 w-24" />
+                </div>
+              )}
+
+              <hr className="border-gray-200" />
+
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="text-sm font-semibold text-gray-800">Shake to Alert</div>
+                  <div className="text-xs text-gray-500">Trigger SOS by shaking device</div>
+                </div>
+                <input type="checkbox" checked={shakeEnabled} onChange={e => {
                   const val = e.target.checked;
                   setShakeEnabled(val);
                   localStorage.setItem("shake_enabled", String(val));
-                }}
-                className="w-5 h-5 accent-rose-600 cursor-pointer"
-              />
-            </div>
-          </div>
+                }} className="w-4 h-4" />
+              </div>
 
-          <div className="bg-white border border-rose-100 p-5 rounded-2xl space-y-4 shadow-sm">
-            <h4 className="text-xs font-black uppercase tracking-wider border-b border-rose-100 pb-2">
-              {lang === "hi" ? "बचाव फ़ोन कॉल सेटिंग" : "Save Me Call Settings"}
-            </h4>
+              <hr className="border-gray-200" />
 
-            <div className="space-y-2">
-              <label className="text-[9px] font-black text-slate-450 uppercase tracking-wider block">
-                {lang === "hi" ? "कॉल करने वाले का नाम (जैसे: पुलिस, पिताजी)" : "Display Name of Caller (e.g. Papa, Police)"}
-              </label>
-              <input 
-                type="text"
-                value={fakeCallerName}
-                onChange={e => {
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-gray-800 block">Fake Call Name</label>
+                <input type="text" value={fakeCallerName} onChange={e => {
                   setFakeCallerName(e.target.value);
                   localStorage.setItem("fake_caller_name", e.target.value);
-                }}
-                className="w-full max-w-[200px] border border-rose-200 bg-slate-50 rounded-lg text-xs px-3 py-2 font-bold text-slate-800 outline-none focus:border-rose-500"
-              />
+                }} className="border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-slate-500 w-full" />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
