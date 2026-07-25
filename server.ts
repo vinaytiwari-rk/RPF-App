@@ -463,6 +463,108 @@ app.get("/api/locations/pincode", async (req, res) => {
   res.json({ success: true, data: mockData });
 });
 
+app.get("/api/locations/helplines", async (req, res) => {
+  const { pincode } = req.query;
+  if (!pincode) {
+    return res.status(400).json({ error: "Pincode is required" });
+  }
+
+  const mpHelplines = [
+    {
+      name: "One Stop Centre (OSC) - Sehore",
+      address: "District Hospital Campus, Sehore, Madhya Pradesh - 466001",
+      phone: "07562224455",
+      type: "One Stop Centre",
+      helpline: "181 / 1091"
+    },
+    {
+      name: "One Stop Centre (OSC) - Bhopal",
+      address: "J.P. Hospital Campus, 1250 Hospital Rd, Tulsi Nagar, Bhopal, MP - 462003",
+      phone: "07552550181",
+      type: "One Stop Centre",
+      helpline: "181 / 1091"
+    },
+    {
+      name: "One Stop Centre (OSC) - Indore",
+      address: "M.Y. Hospital Campus, Indore, Madhya Pradesh - 452001",
+      phone: "07312520181",
+      type: "One Stop Centre",
+      helpline: "181 / 1091"
+    },
+    {
+      name: "Mahila Thana (Women Police Station) - Bhopal",
+      address: "Jahangirabad, Bhopal, Madhya Pradesh - 462008",
+      phone: "07552443801",
+      type: "Police Helpline",
+      helpline: "1091 / 100"
+    },
+    {
+      name: "Mahila Thana (Women Police Station) - Sehore",
+      address: "Kotwali Campus, Sehore, Madhya Pradesh - 466001",
+      phone: "07562227091",
+      type: "Police Helpline",
+      helpline: "1091 / 100"
+    },
+    {
+      name: "District Police Headquarters Helpdesk - Sehore",
+      address: "SP Office, Sehore, Madhya Pradesh - 466001",
+      phone: "07562227202",
+      type: "Police Helpline",
+      helpline: "100 / 112"
+    }
+  ];
+
+  const nationalHelplines = [
+    {
+      name: "National Commission for Women Helpline",
+      address: "New Delhi, India (24/7 National Coverage)",
+      phone: "14490",
+      type: "National Helpline",
+      helpline: "14490"
+    },
+    {
+      name: "Student & Women Helpline (181)",
+      address: "State Capital Helpdesk, India",
+      phone: "181",
+      type: "State Helpline",
+      helpline: "181"
+    },
+    {
+      name: "All India Women Helpline (1091)",
+      address: "National Coverage",
+      phone: "1091",
+      type: "National Helpline",
+      helpline: "1091"
+    },
+    {
+      name: "Emergency Response Support System (112)",
+      address: "National Unified Emergency Response",
+      phone: "112",
+      type: "Unified Helpline",
+      helpline: "112"
+    }
+  ];
+
+  const pinStr = String(pincode);
+  let resolvedLocal = [];
+  if (pinStr.startsWith("466")) {
+    resolvedLocal = mpHelplines.filter(h => h.name.includes("Sehore"));
+  } else if (pinStr.startsWith("462") || pinStr.startsWith("461")) {
+    resolvedLocal = mpHelplines.filter(h => h.name.includes("Bhopal") || h.name.includes("Sehore"));
+  } else if (pinStr.startsWith("452") || pinStr.startsWith("451") || pinStr.startsWith("450")) {
+    resolvedLocal = mpHelplines.filter(h => h.name.includes("Indore"));
+  } else {
+    if (pinStr.startsWith("45") || pinStr.startsWith("46") || pinStr.startsWith("47") || pinStr.startsWith("48")) {
+      resolvedLocal = mpHelplines;
+    }
+  }
+
+  res.json({
+    success: true,
+    data: [...resolvedLocal, ...nationalHelplines]
+  });
+});
+
 app.put("/api/volunteers/:id/approve", async (req, res) => {
   try {
     const { id } = req.params;
@@ -3216,6 +3318,59 @@ app.post("/api/submissions", async (req, res) => {
         timestamp || new Date().toISOString()
       ]
     );
+    // If it's a Women Safety SOS report, dispatch alert emails to saved emergency contacts
+    if (serviceName === "Women Support") {
+      try {
+        const parsedData = JSON.parse(submissionData || "{}");
+        if (parsedData.sosTriggered && Array.isArray(parsedData.designatedContacts)) {
+          const emails = parsedData.designatedContacts.filter((c: string) => c.includes("@"));
+          if (emails.length > 0) {
+            const transporter = nodemailer.createTransport({
+              host: process.env.SMTP_HOST || "appapi.therpfoundation.org",
+              port: 465,
+              secure: true,
+              auth: {
+                user: process.env.SMTP_USER || "no-reply@appapi.therpfoundation.org",
+                pass: process.env.SMTP_PASSWORD || "therpfoundation@321",
+              },
+            });
+
+            const mapsUrl = parsedData.userLocation || "Location unavailable";
+            const emailHtml = `
+              <div style="font-family: Arial, sans-serif; padding: 20px; border: 2px solid #ef4444; border-radius: 12px; max-width: 500px; margin: auto;">
+                <h2 style="color: #dc2626; margin-top: 0;">
+                  🚨 WOMEN EMERGENCY SOS ALERT
+                </h2>
+                <p style="font-size: 14px; color: #374151;">
+                  An emergency SOS distress signal was triggered by <strong>${citizenName || "Citizen"}</strong> (Phone: ${citizenPhone || "N/A"}).
+                </p>
+                <div style="background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                  <p style="margin: 0 0 10px 0; font-weight: bold; color: #991b1b;">Current Location:</p>
+                  <a href="${mapsUrl}" target="_blank" style="background-color: #dc2626; color: white; padding: 10px 15px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                    View Location on Google Maps
+                  </a>
+                  <p style="margin: 10px 0 0 0; font-size: 12px; color: #7f1d1d;">${mapsUrl}</p>
+                </div>
+                <p style="font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 10px;">
+                  Sent automatically by RPF Women Safety System. Time: ${new Date().toLocaleString()}
+                </p>
+              </div>
+            `;
+
+            await transporter.sendMail({
+              from: '"RPF Women Safety" <no-reply@appapi.therpfoundation.org>',
+              to: emails.join(", "),
+              subject: `🚨 EMERGENCY: SOS Alert from ${citizenName || "Citizen"}`,
+              html: emailHtml,
+            });
+            console.log("SOS email alert dispatched successfully to:", emails.join(", "));
+          }
+        }
+      } catch (mailErr) {
+        console.error("Failed to send SOS emails:", mailErr);
+      }
+    }
+
     res.json({ success: true, id: result.rows[0].id });
   } catch (err: any) {
     console.error("Error creating submission:", err);

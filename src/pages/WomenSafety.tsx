@@ -27,6 +27,12 @@ export default function WomenSafety() {
   const [experienceLevel, setExperienceLevel] = useState("Beginner");
   const [submittingWorkshop, setSubmittingWorkshop] = useState(false);
 
+  // Directory Search states
+  const [searchPincode, setSearchPincode] = useState("");
+  const [directoryList, setDirectoryList] = useState<any[]>([]);
+  const [searchingDirectory, setSearchingDirectory] = useState(false);
+  const [sosLocationUrl, setSosLocationUrl] = useState("");
+
   const handleSOS = async () => {
     setSosActive(true);
     try {
@@ -72,14 +78,29 @@ export default function WomenSafety() {
       });
       if (!res.ok) throw new Error("Failed to submit SOS report");
       
+      setSosLocationUrl(locationStr);
       setSosFired(true);
-      setTimeout(() => {
-        setSosFired(false);
-      }, 5000);
     } catch (err) {
-      console.error("Supabase SOS broadcast error:", err);
+      console.error("SOS trigger error:", err);
     } finally {
       setSosActive(false);
+    }
+  };
+
+  const handleDirectorySearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchPincode.trim()) return;
+    setSearchingDirectory(true);
+    try {
+      const res = await fetch(`/api/locations/helplines?pincode=${searchPincode.trim()}`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setDirectoryList(json.data);
+      }
+    } catch (err) {
+      console.error("Directory search failed:", err);
+    } finally {
+      setSearchingDirectory(false);
     }
   };
 
@@ -155,11 +176,19 @@ export default function WomenSafety() {
 
   const addContact = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newContact.trim() && contacts.length < 5) {
-      setContacts([...contacts, newContact.trim()]);
-      setNewContact("");
-      setSuccessMsg(lang === "hi" ? "सम्पर्क सफलतापूर्वक जोड़ा गया!" : "Contact added successfully!");
-      setTimeout(() => setSuccessMsg(""), 3000);
+    const val = newContact.trim();
+    if (val && contacts.length < 5) {
+      const isEmail = val.includes("@");
+      const isPhone = /^\d{10}$/.test(val);
+      if (isEmail || isPhone) {
+        setContacts([...contacts, val]);
+        setNewContact("");
+        setSuccessMsg(lang === "hi" ? "सम्पर्क सफलतापूर्वक जोड़ा गया!" : "Contact added successfully!");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      } else {
+        setSuccessMsg(lang === "hi" ? "वैध मोबाइल नंबर या ईमेल दर्ज करें" : "Enter a valid 10-digit mobile or email");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
     }
   };
 
@@ -194,6 +223,46 @@ export default function WomenSafety() {
           {lang === "hi" ? "तुरंत सहायता के लिए दबाएं" : "Press for immediate dispatch"}
         </p>
       </div>
+
+      {sosFired && (
+        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5 shadow-lg space-y-4 animate-fadeIn">
+          <div className="flex items-center gap-2 text-red-700 font-extrabold text-sm">
+            <AlertOctagon className="w-5 h-5 text-red-600 fill-red-100 animate-pulse" />
+            <span>{lang === "hi" ? "आपातकालीन अलर्ट सक्रिय!" : "Emergency SOS Active!"}</span>
+          </div>
+          
+          <p className="text-xs text-slate-700 leading-relaxed font-semibold">
+            {lang === "hi" 
+              ? "आपके पंजीकृत ईमेल संपर्कों को एक स्थान लिंक के साथ आपातकालीन ईमेल भेज दिया गया है। आप नीचे दिए गए बटनों का उपयोग करके तुरंत व्हाट्सएप पर साझा कर सकते हैं या पुलिस हेल्पलाइन पर कॉल कर सकते हैं।" 
+              : "Emergency email alerts containing your coordinates have been sent to your guardians. Tap below to share immediately on WhatsApp or place a direct emergency phone call."}
+          </p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <a 
+              href={`https://api.whatsapp.com/send?text=EMERGENCY! I need help. My current location is: ${encodeURIComponent(sosLocationUrl)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#25D366] hover:bg-[#20ba59] text-white py-2.5 px-4 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
+            >
+              <span>{lang === "hi" ? "व्हाट्सएप साझा" : "WhatsApp Alert"}</span>
+            </a>
+
+            <a 
+              href="tel:1091"
+              className="bg-red-600 hover:bg-red-750 text-white py-2.5 px-4 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-2 shadow-md transition decoration-none"
+            >
+              <span>{lang === "hi" ? "कॉल हेल्पलाइन" : "Call Helpline (1091)"}</span>
+            </a>
+          </div>
+
+          <button 
+            onClick={() => setSosFired(false)}
+            className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 rounded-xl text-xs transition cursor-pointer"
+          >
+            {lang === "hi" ? "अलर्ट बंद करें" : "Dismiss Emergency State"}
+          </button>
+        </div>
+      )}
 
       {/* Quick Services Grid */}
       <div className="space-y-3">
@@ -240,16 +309,16 @@ export default function WomenSafety() {
 
         <form onSubmit={addContact} className="flex gap-2">
           <input 
-            type="tel" 
+            type="text" 
             value={newContact}
-            onChange={e => setNewContact(e.target.value.replace(/\D/g, '').slice(0, 10))}
-            placeholder={lang === "hi" ? "मोबाइल नंबर दर्ज करें" : "Enter mobile number"} 
-            className="flex-1 border border-slate-200 rounded-lg text-xs px-3 py-2 outline-none focus:border-purple-500 font-bold"
+            onChange={e => setNewContact(e.target.value)}
+            placeholder={lang === "hi" ? "मोबाइल नंबर या ईमेल दर्ज करें" : "Enter mobile number or email"} 
+            className="flex-1 border border-slate-200 rounded-lg text-xs px-3 py-2 outline-none focus:border-purple-500 font-bold bg-slate-50"
           />
           <button 
             type="submit" 
-            disabled={contacts.length >= 5 || newContact.length < 10}
-            className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40"
+            disabled={contacts.length >= 5 || !newContact.trim()}
+            className="bg-purple-600 hover:bg-purple-750 text-white p-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
           >
             <Plus className="w-4.5 h-4.5" />
           </button>
@@ -272,6 +341,61 @@ export default function WomenSafety() {
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      {/* Help & Crisis Directory Section */}
+      <div className="glass-card bg-white/95 p-4 border-gold-soft shadow-gold-premium space-y-4">
+        <h4 className="font-display font-bold text-xs text-chakra-navy uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center gap-1.5">
+          <Shield className="w-4.5 h-4.5 text-purple-650" />
+          {lang === "hi" ? "स्थानीय सुरक्षा निर्देशिका (OSC / पुलिस)" : "Local Protection Directory (OSC / Police)"}
+        </h4>
+
+        <form onSubmit={handleDirectorySearch} className="flex gap-2">
+          <input 
+            type="text" 
+            pattern="\d{6}"
+            value={searchPincode}
+            onChange={e => setSearchPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder={lang === "hi" ? "पिनकोड दर्ज करें (e.g. 466001)" : "Enter 6-digit Pincode (e.g. 466001)"} 
+            className="flex-1 border border-slate-200 rounded-lg text-xs px-3 py-2 outline-none focus:border-purple-500 font-bold bg-slate-50"
+          />
+          <button 
+            type="submit" 
+            disabled={searchingDirectory || searchPincode.length < 6}
+            className="bg-purple-600 hover:bg-purple-750 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-40 cursor-pointer"
+          >
+            {searchingDirectory ? "..." : (lang === "hi" ? "खोजें" : "Search")}
+          </button>
+        </form>
+
+        {directoryList.length > 0 ? (
+          <div className="space-y-3 pt-2 max-h-[250px] overflow-y-auto">
+            {directoryList.map((item, idx) => (
+              <div key={idx} className="bg-slate-50 border border-slate-200/60 p-3 rounded-xl space-y-1">
+                <div className="flex justify-between items-start">
+                  <span className="text-[10px] font-black text-slate-800 leading-tight">{item.name}</span>
+                  <span className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-purple-250 bg-purple-100/40 text-purple-750">
+                    {item.type}
+                  </span>
+                </div>
+                <p className="text-[9px] text-slate-500 leading-relaxed font-semibold">{item.address}</p>
+                <div className="flex justify-between items-center pt-1 border-t border-slate-100">
+                  <span className="text-[8px] font-bold text-slate-400">Helpline: {item.helpline}</span>
+                  <a 
+                    href={`tel:${item.phone}`}
+                    className="text-[8.5px] font-bold text-purple-700 hover:underline flex items-center gap-1"
+                  >
+                    📞 Call: {item.phone}
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[9px] text-slate-400 text-center py-2 font-semibold">
+            {lang === "hi" ? "कोई स्थानीय केंद्र ढूंढने के लिए पिनकोड दर्ज करें।" : "Enter pincode to find local safety resources nearby."}
+          </p>
         )}
       </div>
 
