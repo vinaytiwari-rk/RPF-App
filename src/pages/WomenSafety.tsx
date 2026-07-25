@@ -36,10 +36,10 @@ const playSiren = () => {
   sirenOsc = audioCtx.createOscillator();
   sirenGain = audioCtx.createGain();
   
-  sirenOsc.type = "sine";
-  sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime);
+  sirenOsc.type = "triangle";
+  sirenOsc.frequency.setValueAtTime(650, audioCtx.currentTime);
   
-  sirenGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+  sirenGain.gain.setValueAtTime(0.5, audioCtx.currentTime);
   
   sirenOsc.connect(sirenGain);
   sirenGain.connect(audioCtx.destination);
@@ -50,13 +50,13 @@ const playSiren = () => {
     if (!audioCtx || !sirenOsc) return;
     const t = audioCtx.currentTime;
     sirenOsc.frequency.cancelScheduledValues(t);
-    sirenOsc.frequency.setValueAtTime(sirenOsc.frequency.value, t);
-    sirenOsc.frequency.linearRampToValueAtTime(1100, t + 0.45);
-    sirenOsc.frequency.linearRampToValueAtTime(550, t + 0.9);
+    sirenOsc.frequency.setValueAtTime(650, t);
+    sirenOsc.frequency.linearRampToValueAtTime(1350, t + 0.25);
+    sirenOsc.frequency.linearRampToValueAtTime(650, t + 0.5);
   };
   
   sweep();
-  sirenInterval = setInterval(sweep, 900);
+  sirenInterval = setInterval(sweep, 500);
 };
 
 const stopSiren = () => {
@@ -712,12 +712,12 @@ export default function WomenSafety() {
       </div>
 
       {/* Tabs list (5 columns now) */}
-      <div className="flex bg-white border border-rose-100 rounded-xl p-1 shadow-sm shrink-0 overflow-x-auto gap-0.5">
+      <div className="flex bg-white border border-rose-100 rounded-xl p-1 shadow-sm shrink-0 overflow-x-auto gap-0.5 no-scrollbar">
         {[
-          { key: "deterrents", title: lang === "hi" ? "🚨 मदद और पैनिक" : "🚨 Help & Alarm", icon: AlertOctagon },
-          { key: "scanner", title: lang === "hi" ? "🔍 हिडन कैमरा खोजें" : "🔍 Camera Detector", icon: Camera },
-          { key: "ncw", title: lang === "hi" ? "📝 शिकायत दर्ज करें" : "📝 File Complaint", icon: Globe },
-          { key: "routes", title: lang === "hi" ? "🗺️ सुरक्षित मार्ग" : "🗺️ Safe Map", icon: Map },
+          { key: "deterrents", title: lang === "hi" ? "🚨 पैनिक & SOS" : "🚨 Help Button", icon: AlertOctagon },
+          { key: "scanner", title: lang === "hi" ? "🔍 कैमरा स्कैनर" : "🔍 Lens Scan", icon: Camera },
+          { key: "ncw", title: lang === "hi" ? "📝 शिकायत डेस्क" : "📝 Complaint", icon: Globe },
+          { key: "routes", title: lang === "hi" ? "🗺️ सुरक्षित मार्ग" : "🗺️ Safe Route", icon: Map },
           { key: "settings", title: lang === "hi" ? "⚙️ सेटिंग्स" : "⚙️ Settings", icon: Settings },
         ].map(t => {
           const Icon = t.icon;
@@ -728,7 +728,7 @@ export default function WomenSafety() {
                 setActiveTab(t.key as any);
                 stopCamera();
               }}
-              className={`flex-1 py-2.5 px-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition flex flex-col items-center gap-1 cursor-pointer whitespace-nowrap min-w-[65px] ${
+              className={`flex-1 shrink-0 py-2 px-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider transition flex flex-col items-center gap-1 cursor-pointer min-w-[70px] text-center leading-tight ${
                 activeTab === t.key 
                   ? "bg-rose-600 text-white shadow-md font-bold" 
                   : "text-slate-450 hover:text-slate-700"

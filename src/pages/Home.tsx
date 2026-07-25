@@ -76,11 +76,20 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  const activeActions = (servicesList || []).filter((action) => {
-    return settings?.servicesStatus?.[action.id] !== false;
-  }).filter((action) => action.id !== "donations" && action.id !== "donate");
-
-  const quickActions = activeActions.slice(0, 10);
+  const quickActions = [
+    {
+      id: "blood",
+      iconName: "Heart",
+      titleHi: "रक्तदान (Blood Donation)",
+      titleEn: "Blood Donation"
+    },
+    {
+      id: "women",
+      iconName: "Shield",
+      titleHi: "महिला सुरक्षा (Women Safety)",
+      titleEn: "Women Safety"
+    }
+  ];
 
   return (
     <div className="space-y-5 animate-fadeIn min-h-full pb-16 font-sans relative overflow-x-hidden bg-transparent" id="live-impact-dashboard">
@@ -239,35 +248,30 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-5 gap-2 bg-white border border-slate-200/60 rounded-2xl p-3 shadow-sm min-h-[90px]">
-          {isLoadingServices ? (
-            <div className="col-span-5 flex items-center justify-center text-xs text-slate-400">Loading services...</div>
-          ) : quickActions.length === 0 ? (
-            <div className="col-span-5 flex items-center justify-center text-xs text-slate-400">No active services.</div>
-          ) : quickActions.map((action, idx) => {
-            const gradients = [
-              { bg: "from-amber-400 via-orange-500 to-red-500", shadow: "shadow-[0_0_20px_rgba(249,115,22,0.6)] group-hover:shadow-[0_0_30px_rgba(239,68,68,0.8)]" },
-              { bg: "from-cyan-400 via-teal-500 to-emerald-500", shadow: "shadow-[0_0_20px_rgba(20,184,166,0.6)] group-hover:shadow-[0_0_30px_rgba(16,185,129,0.8)]" },
-              { bg: "from-blue-500 via-indigo-500 to-cyan-500", shadow: "shadow-[0_0_20px_rgba(99,102,241,0.6)] group-hover:shadow-[0_0_30px_rgba(59,130,246,0.8)]" },
-              { bg: "from-fuchsia-500 via-purple-600 to-indigo-600", shadow: "shadow-[0_0_20px_rgba(168,85,247,0.6)] group-hover:shadow-[0_0_30px_rgba(192,38,211,0.8)]" },
-              { bg: "from-pink-500 via-rose-500 to-red-500", shadow: "shadow-[0_0_20px_rgba(244,63,94,0.6)] group-hover:shadow-[0_0_30px_rgba(225,29,72,0.8)]" },
-              { bg: "from-lime-400 via-green-500 to-teal-500", shadow: "shadow-[0_0_20px_rgba(34,197,94,0.6)] group-hover:shadow-[0_0_30px_rgba(20,184,166,0.8)]" },
-            ];
-            const currentGradient = gradients[idx % gradients.length];
-            const IconComponent = (LucideIcons as any)[action.iconName || "Compass"] || Compass;
-            const route = action.id === 'card' ? '/jan-seva-card' : action.id === 'blood' ? '/blood-network' : action.id === 'donations' ? '/donations' : `/services/${action.id}`;
+        <div className="grid grid-cols-2 gap-8 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm min-h-[90px] max-w-[320px] mx-auto justify-items-center">
+          {quickActions.map((action, idx) => {
+            const isBlood = action.id === "blood";
+            const gradientBg = isBlood 
+              ? "from-red-500 via-rose-600 to-red-750" 
+              : "from-rose-500 via-pink-600 to-purple-650";
+            const glowShadow = isBlood 
+              ? "shadow-[0_0_15px_rgba(239,68,68,0.7)] group-hover:shadow-[0_0_25px_rgba(239,68,68,0.95)]" 
+              : "shadow-[0_0_15px_rgba(244,63,94,0.7)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.95)]";
+            
+            const IconComponent = isBlood ? Heart : Shield;
+            const route = isBlood ? '/blood-network' : '/women';
             
             return (
               <button 
                 key={idx}
                 onClick={() => navigate(route)}
-                className="flex flex-col items-center justify-center p-1.5 transition text-center gap-1.5 active:scale-95 duration-100 cursor-pointer group relative"
+                className="flex flex-col items-center justify-center p-1.5 transition text-center gap-2 active:scale-95 duration-300 cursor-pointer group relative w-full"
               >
-                <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 animate-bounce" style={{ animationDuration: '3s' }}>
-                  <div className={`absolute inset-0 bg-gradient-to-br ${currentGradient.bg} rounded-full ${currentGradient.shadow} transition-all duration-500 animate-pulse`}></div>
-                  <IconComponent className="w-6 h-6 text-white relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,1)]" />
+                <div className="relative w-14 h-14 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${gradientBg} rounded-2xl ${glowShadow} transition-all duration-300`}></div>
+                  <IconComponent className="w-7 h-7 text-white relative z-10 drop-shadow-[0_2px_5px_rgba(0,0,0,0.2)]" />
                 </div>
-                <span className="text-[9.5px] font-bold text-slate-600 leading-[1.1] w-full line-clamp-2">
+                <span className="text-[10px] font-black text-slate-700 leading-tight w-full">
                   {lang === "hi" ? action.titleHi : action.titleEn}
                 </span>
               </button>

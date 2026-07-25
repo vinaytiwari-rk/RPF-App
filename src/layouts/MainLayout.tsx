@@ -182,11 +182,12 @@ export default function MainLayout() {
               <h1 className="font-display font-black text-[13px] text-[#000080] tracking-wide leading-none">
                 RP FOUNDATION
               </h1>
-              <span className="font-sans text-[9px] font-bold text-[#000080]/80 mt-0.5 leading-none">
-                Jan Seva Super App
-              </span>
-              <span className="font-sans text-[8px] font-semibold text-[#000080]/70 mt-0.5 leading-none tracking-wide">
-                सेवा • समर्पण • संकल्प
+              <span className="font-sans text-[9px] font-black mt-1 leading-none tracking-wider flex items-center gap-1">
+                <span className="text-[#FF9933]">सेवा</span>
+                <span className="text-[#000080]">•</span>
+                <span className="text-slate-500">समर्पण</span>
+                <span className="text-[#000080]">•</span>
+                <span className="text-[#138808]">संकल्प</span>
               </span>
             </div>
           </div>
