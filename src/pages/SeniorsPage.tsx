@@ -27,7 +27,7 @@ export default function SeniorsPage() {
         citizenName: user?.name || "Citizen",
         citizenPhone: user?.phone || "",
         serviceName: "Senior Support",
-        submissionData: JSON.stringify(data),
+        submissionData: data,
         status: "pending",
         timestamp: new Date().toISOString(),
       };

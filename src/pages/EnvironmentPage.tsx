@@ -21,7 +21,7 @@ export default function EnvironmentPage() {
         citizenName: user?.name || "Citizen",
         citizenPhone: user?.phone || "",
         serviceName: "Environment Support",
-        submissionData: JSON.stringify(data),
+        submissionData: data,
         status: "pending",
         timestamp: new Date().toISOString(),
       };

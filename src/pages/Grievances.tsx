@@ -25,6 +25,7 @@ export default function Grievances() {
         title,
         description,
         category,
+        location,
         urgency: "Medium",
         citizenName: user?.name || "Citizen",
       });

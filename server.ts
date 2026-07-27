@@ -1177,7 +1177,7 @@ app.post('/api/auth/webauthn/login-verify', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 300;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 
 // PostgreSQL Pool Connection
@@ -2250,10 +2250,10 @@ async function initDatabase() {
       )
     `, [], "blood_donors table creation");
 
-    // Create card_applications table
+    // Create card_applications_v2 table
     await runQuery(`
-      CREATE TABLE IF NOT EXISTS card_applications (
-        "userId" VARCHAR(255) PRIMARY KEY,
+      CREATE TABLE IF NOT EXISTS card_applications_v2 (
+        id UUID PRIMARY KEY, "userId" VARCHAR(255),
         name TEXT,
         gender TEXT,
         dob TEXT,
@@ -2264,7 +2264,7 @@ async function initDatabase() {
         "cardNo" TEXT DEFAULT '',
         "submittedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `, [], "card_applications table creation");
+    `, [], "card_applications_v2 table creation");
 
     // Create donations table
     await runQuery(`
@@ -2656,7 +2656,7 @@ app.get("/api/grievances", async (req, res) => {
 
 app.post("/api/grievances", async (req, res) => {
   try {
-    const { title, description, category, urgency, location, reportedBy, status, date, aiSummary } = req.body;
+    const { title, description, category, urgency, location, reportedBy, citizenName, status, date, aiSummary } = req.body;
     const id = crypto.randomUUID();
     const result = await pool.query(
       `INSERT INTO grievances 
@@ -2709,7 +2709,7 @@ app.delete("/api/grievances/:id", async (req, res) => {
 app.get("/api/cards", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications'
+      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2'
     );
     res.json({ applications: result.rows });
   } catch (error: any) {
@@ -2719,26 +2719,26 @@ app.get("/api/cards", async (req, res) => {
 });
 
 app.post("/api/cards", async (req, res) => {
-  try {
-    const { userId, name, gender, dob, address, idType, idNumber, status } = req.body;
-    const submittedAt = new Date().toISOString();
-    await pool.query(
-      `INSERT INTO card_applications 
-       ("userId", name, gender, dob, address, "idType", "idNumber", status, "submittedAt") 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-       ON CONFLICT ("userId") DO UPDATE SET 
-       name = $2, gender = $3, dob = $4, address = $5, "idType" = $6, "idNumber" = $7, status = $8, "submittedAt" = $9`,
-      [
-        userId,
-        name,
-        gender,
-        dob,
-        address,
-        idType,
-        idNumber,
-        status || "pending",
-        submittedAt
-      ]
+    try {
+      const { userId, name, gender, dob, address, idType, idNumber, status } = req.body;
+      const submittedAt = new Date().toISOString();
+      const id = crypto.randomUUID();
+      await pool.query(
+        `INSERT INTO card_applications_v2 
+         (id, "userId", name, gender, dob, address, "idType", "idNumber", status, "submittedAt") 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [
+          id,
+          userId || "guest",
+          name,
+          gender,
+          dob,
+          address,
+          idType,
+          idNumber,
+          status || "pending",
+          submittedAt
+        ]
     );
     res.json({ success: true });
   } catch (error: any) {
@@ -2752,7 +2752,7 @@ app.post("/api/cards/approve", async (req, res) => {
     const { userId } = req.body;
     const cardNo = `JSC-${Math.floor(10000000 + Math.random() * 90000000)}`;
     await pool.query(
-      'UPDATE card_applications SET status = $1, "cardNo" = $2 WHERE "userId" = $3',
+      'UPDATE card_applications_v2 SET status = $1, "cardNo" = $2 WHERE "userId" = $3',
       ["approved", cardNo, userId]
     );
     // update user table janSevaCardStatus
@@ -2770,7 +2770,7 @@ app.post("/api/cards/reject", async (req, res) => {
   try {
     const { userId } = req.body;
     await pool.query(
-      'UPDATE card_applications SET status = $1 WHERE "userId" = $2',
+      'UPDATE card_applications_v2 SET status = $1 WHERE "userId" = $2',
       ["rejected", userId]
     );
     // update user table janSevaCardStatus
@@ -2786,7 +2786,7 @@ app.post("/api/cards/reject", async (req, res) => {
 
 app.delete("/api/cards/:userId", async (req, res) => {
   try {
-    await pool.query('DELETE FROM card_applications WHERE "userId" = $1', [req.params.userId]);
+    await pool.query('DELETE FROM card_applications_v2 WHERE "userId" = $1', [req.params.userId]);
     res.json({ success: true });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -2801,7 +2801,7 @@ app.get("/api/cards/my", async (req, res) => {
       return res.status(400).json({ error: "Missing userId parameter" });
     }
     const result = await pool.query(
-      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications WHERE "userId" = $1',
+      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2 WHERE "userId" = $1',
       [userId]
     );
     res.json({ success: true, application: result.rows[0] || null });
@@ -3429,7 +3429,7 @@ app.post("/api/submissions", async (req, res) => {
         serviceName,
         citizenName || "Citizen",
         citizenPhone || "",
-        submissionData || "{}",
+        typeof submissionData === 'object' ? JSON.stringify(submissionData) : (submissionData || '{}'),
         status || "pending",
         latitude || null,
         longitude || null,
@@ -3440,7 +3440,7 @@ app.post("/api/submissions", async (req, res) => {
     // If it's a Women Safety SOS report, dispatch alert emails to saved emergency contacts
     if (serviceName === "Women Support") {
       try {
-        const parsedData = JSON.parse(submissionData || "{}");
+        const parsedData = JSON.parse(typeof submissionData === 'object' ? JSON.stringify(submissionData) : (submissionData || '{}'));
         if (parsedData.sosTriggered && Array.isArray(parsedData.designatedContacts)) {
           const emails = parsedData.designatedContacts.filter((c: string) => c.includes("@"));
           if (emails.length > 0) {
@@ -3877,7 +3877,7 @@ app.get("/api/stats", async (req, res) => {
   let scholarships = 0;
 
   try {
-    const bRes = await pool.query("SELECT COUNT(*) FROM card_applications");
+    const bRes = await pool.query("SELECT COUNT(*) FROM card_applications_v2");
     beneficiaries = parseInt(bRes.rows[0].count, 10);
   } catch (e) {}
 

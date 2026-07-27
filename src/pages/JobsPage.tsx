@@ -89,7 +89,7 @@ export default function JobsPage() {
         citizenName: user?.name || fullName || "Citizen",
         citizenPhone: user?.phone || phone || "",
         serviceName: "Youth Employment",
-        submissionData: JSON.stringify(appData),
+        submissionData: appData,
         status: "pending",
         timestamp: new Date().toISOString(),
       };

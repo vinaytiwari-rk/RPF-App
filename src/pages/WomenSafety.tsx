@@ -365,7 +365,7 @@ export default function WomenSafety() {
           citizenName: user?.name || "Citizen",
           citizenPhone: user?.phone || "",
           serviceName: "Women Support",
-          submissionData: JSON.stringify({ sosTriggered: true, userLocation: locationStr, designatedContacts: contacts }),
+          submissionData: { sosTriggered: true, userLocation: locationStr, designatedContacts: contacts },
           status: "pending",
           latitude: latVal,
           longitude: lonVal,
@@ -405,7 +405,7 @@ export default function WomenSafety() {
               userId: user?.id || "guest",
               citizenName: user?.name || "Citizen",
               serviceName: "Women Support - Audio Evidence",
-              submissionData: JSON.stringify({ audio: reader.result }),
+              submissionData: { audio: reader.result },
               status: "pending"
             })
           });

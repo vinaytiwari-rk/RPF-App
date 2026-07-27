@@ -49,7 +49,7 @@ export default function EducationSupport() {
         citizenName: user?.name || "Citizen",
         citizenPhone: user?.phone || "",
         serviceName: "Child Support - Book Bank",
-        submissionData: JSON.stringify(data),
+        submissionData: data,
         status: "pending",
         timestamp: new Date().toISOString(),
       };
@@ -87,7 +87,7 @@ export default function EducationSupport() {
         citizenName: user?.name || "Citizen",
         citizenPhone: user?.phone || "",
         serviceName: "Child Support - Tutoring",
-        submissionData: JSON.stringify(data),
+        submissionData: data,
         status: "pending",
         timestamp: new Date().toISOString(),
       };

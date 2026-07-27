@@ -87,7 +87,7 @@ export default function ScholarshipsPage() {
         citizenName: user?.name || fullName || "Citizen",
         citizenPhone: user?.phone || "",
         serviceName: "Scholarships Support",
-        submissionData: JSON.stringify(data),
+        submissionData: data,
         status: "pending",
         timestamp: new Date().toISOString(),
       };

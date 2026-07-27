@@ -69,7 +69,7 @@ export default function FoodSupport() {
         citizenName: user?.name || "Citizen",
         citizenPhone: user?.phone || "",
         serviceName: "Food Support",
-        submissionData: JSON.stringify(data),
+        submissionData: data,
         status: "pending",
         timestamp: new Date().toISOString(),
       };

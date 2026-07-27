@@ -94,27 +94,27 @@ export default function JanSevaCard() {
     
     const fullAddress = `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`;
     
-    if (user) {
-      submitCardApplication({
-        userId: user.id,
-        name: form.name,
-        gender: form.gender,
-        dob: form.dob || "N/A",
-        address: fullAddress,
-        idType: form.idType,
-        idNumber: form.idNumber,
-        status: "pending"
-      });
-    }
-
-    await updateUser({ 
-      janSevaCardStatus: "pending",
+    submitCardApplication({
+      userId: user?.id || "guest",
       name: form.name,
       gender: form.gender,
       dob: form.dob || "N/A",
       address: fullAddress,
-      janSevaCardNo: "0001 " + Math.floor(1000 + Math.random() * 9000) + " 0001 " + Math.floor(1000 + Math.random() * 9000)
+      idType: form.idType,
+      idNumber: form.idNumber,
+      status: "pending"
     });
+
+    if (user) {
+      await updateUser({ 
+        janSevaCardStatus: "pending",
+        name: form.name,
+        gender: form.gender,
+        dob: form.dob || "N/A",
+        address: fullAddress,
+        janSevaCardNo: "0001 " + Math.floor(1000 + Math.random() * 9000) + " 0001 " + Math.floor(1000 + Math.random() * 9000)
+      });
+    }
     
     setSubmitting(false);
     setView("home");
