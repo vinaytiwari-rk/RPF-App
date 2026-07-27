@@ -1,45 +1,45 @@
-name: Deploy Node App to cPanel
+name: Deploy to cPanel
+
 on:
   push:
     branches:
       - main
+      - master
 
 jobs:
-  web-deploy:
-    name: Deploy
+  build-and-deploy:
+    name: Build and Deploy via FTP
     runs-on: ubuntu-latest
+
     steps:
-      - name: Get latest code
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Project
+      - name: Build Application
         run: npm run build
 
-      - name: Allow dist in FTP
-        run: sed -i '/dist\//d' .gitignore || true
+      - name: Trigger cPanel Passenger Restart
+        run: |
+          mkdir -p tmp
+          touch tmp/restart.txt
 
-      - name: Trigger cPanel Node.js Restart
-        run: mkdir -p tmp && echo "App restarted by GitHub Actions on $(date)" > tmp/restart.txt
-
-      - name: Sync files with cPanel
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: Deploy to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ./
-          timeout: 300000
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
-            Seva-Hub/**
-            Seva-Hub
+            .env
