@@ -3,10 +3,12 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const pool = new pg.Pool({
+// Create pool without forcing SSL, since cPanel local Postgres often doesn't use SSL
+const poolConfig = {
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
+};
+
+const pool = new pg.Pool(poolConfig);
 
 async function run() {
   console.log("Connecting to PostgreSQL to run migration.sql...");
