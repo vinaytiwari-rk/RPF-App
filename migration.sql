@@ -55,3 +55,68 @@ CREATE TABLE IF NOT EXISTS service_content (
 INSERT INTO users (id, name, username, password_hash, role)
 VALUES ('admin', 'System Administrator', 'admin', '$2a$10$D/x31v5.7r7j0U.tH1Mv3ui/b0f1UuVfOaB2b9m8mUoU0F3aXF7u6', 'super_admin')
 ON CONFLICT (id) DO UPDATE SET role = 'super_admin';
+
+-- ============================================================================
+-- Blood Donation Network Tables
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS blood_donors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
+    blood_group VARCHAR(10) NOT NULL,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    last_donation_date DATE,
+    is_available BOOLEAN DEFAULT TRUE,
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS blood_requests (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    requester_id VARCHAR(255),
+    patient_name VARCHAR(255) NOT NULL,
+    blood_group VARCHAR(10) NOT NULL,
+    units_required INTEGER DEFAULT 1,
+    hospital_name VARCHAR(255),
+    location_lat DECIMAL(10, 8),
+    location_lng DECIMAL(11, 8),
+    urgency VARCHAR(50) DEFAULT 'normal',
+    contact_phone VARCHAR(50),
+    status VARCHAR(50) DEFAULT 'open',
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================================
+-- Women Safety Tables
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS women_complaints (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id VARCHAR(255),
+    complainant_name VARCHAR(255),
+    complainant_phone VARCHAR(50),
+    complaint_type VARCHAR(100),
+    incident_date TIMESTAMP WITH TIME ZONE,
+    location VARCHAR(255),
+    description TEXT,
+    suspect_details TEXT,
+    is_anonymous BOOLEAN DEFAULT FALSE,
+    status VARCHAR(50) DEFAULT 'pending',
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS service_submissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "userId" VARCHAR(255),
+    "citizenName" VARCHAR(255),
+    "citizenPhone" VARCHAR(50),
+    "serviceName" VARCHAR(255),
+    "submissionData" JSONB,
+    status VARCHAR(50) DEFAULT 'pending',
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
