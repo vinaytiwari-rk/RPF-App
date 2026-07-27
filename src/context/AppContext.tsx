@@ -179,83 +179,12 @@ const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
   { platform: "youtube", label: "YouTube Channel", url: "https://www.youtube.com/@rpfoundationofficial" },
 ];
 
-const DEFAULT_SOCIAL_POSTS: Omit<SocialPost, "id">[] = [
-  {
-    author: "Rohit Pandit",
-    role: "Founder, RP Foundation",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-    time: "2 hours ago",
-    textEn: "Sharing highlights from our weekend tree plantation drive in Karond, Bhopal. Over 500 saplings planted! 🌳 Let's build a greener tomorrow.",
-    textHi: "करौंद, भोपाल में हमारे सप्ताहांत वृक्षारोपण अभियान की कुछ झलकियाँ। 500 से अधिक पौधे लगाए गए! 🌳 आइए एक हरित कल का निर्माण करें।",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80",
-    likes: 412,
-    commentsCount: 18,
-    liked: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-    link: "https://www.instagram.com/therohitpandit/",
-    platform: "instagram"
-  },
-  {
-    author: "RP Foundation",
-    role: "Official Page",
-    avatar: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-    time: "1 day ago",
-    textEn: "Successful free eye checkup camp conducted today at Sehore district. Over 200 patients received free consultations and medicines. 🩺💙",
-    textHi: "सीहोर जिला अस्पताल में आज सफल निःशुल्क नेत्र जांच शिविर आयोजित किया गया। 200 से अधिक मरीजों को निःशुल्क परामर्श और दवाएं दी गईं। 🩺💙",
-    image: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
-    likes: 580,
-    commentsCount: 34,
-    liked: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    link: "https://www.facebook.com/rpfofficial",
-    platform: "facebook"
-  },
-  {
-    author: "RP Foundation Official",
-    role: "YouTube Channel",
-    avatar: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=200&q=80",
-    time: "3 days ago",
-    textEn: "New video out on our channel! Watch how our volunteers mask Aadhaar documents securely for the Jan Seva Card registration drives. 📺",
-    textHi: "हमारे चैनल पर नया वीडियो आ गया है! देखें कि हमारे स्वयंसेवक जन सेवा कार्ड पंजीकरण के लिए आधार दस्तावेजों को कैसे सुरक्षित रखते हैं। 📺",
-    image: "https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&w=800&q=80",
-    likes: 890,
-    commentsCount: 56,
-    liked: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-    link: "https://www.youtube.com/@rpfoundationofficial",
-    platform: "youtube"
-  },
-  {
-    author: "RP Foundation",
-    role: "Official X Page",
-    avatar: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=200&q=80",
-    time: "4 days ago",
-    textEn: "Follow us on X (Twitter) for real-time announcements, emergency relief requests, and community support stories! 🐦",
-    textHi: "वास्तविक समय की घोषणाओं, आपातकालीन राहत अनुरोधों और सामुदायिक सहायता कहानियों के लिए हमें X (ट्विटर) पर फ़ॉलो करें! 🐦",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
-    likes: 312,
-    commentsCount: 15,
-    liked: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
-    link: "https://x.com/rpfoundation15",
-    platform: "x"
-  },
-  {
-    author: "RP Foundation",
-    role: "Instagram Updates",
-    avatar: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80",
-    time: "5 days ago",
-    textEn: "Visual moments of change. Catch all our health camp highlights, volunteer profiles, and stories of impact! 📸",
-    textHi: "बदलाव के दृश्य पल। हमारे सभी स्वास्थ्य शिविर की मुख्य विशेषताएं, स्वयंसेवक प्रोफाइल और प्रभाव की कहानियां देखें! 📸",
-    image: "https://images.unsplash.com/photo-1469571486090-7db333894db6?auto=format&fit=crop&w=800&q=80",
-    likes: 672,
-    commentsCount: 29,
-    liked: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
-    link: "https://www.instagram.com/rpfoundationofficial/",
-    platform: "instagram"
-  }
-];
+// NOTE: A hardcoded DEFAULT_SOCIAL_POSTS array with fabricated posts, fake
+// engagement numbers, and fake timestamps — attributed to the real founder —
+// used to live here. It was never wired into any live state (socialPosts is
+// only ever populated from /api/social), but it was dead-code fake content
+// sitting in the source, so it has been removed entirely. socialPosts now
+// only ever reflects what's actually in the database.
 
 /* ═══════════════════════════════════════════════════════════════
    Context interface

@@ -664,7 +664,7 @@ export default function BloodNetwork() {
                   <div className="bg-green-50 border border-green-200 p-6 rounded-xl text-center space-y-3 shadow-sm">
                     <CheckCircle className="w-8 h-8 text-green-600 mx-auto" />
                     <h4 className="font-bold text-green-800 text-sm">Appointment Booked!</h4>
-                    <p className="text-[11px] text-green-700">Your donation slot has been scheduled. You received +50 points!</p>
+                    <p className="text-[11px] text-green-700">Your donation slot has been scheduled.</p>
                   </div>
                 ) : (
                   <form onSubmit={handleBookAppointment} className="space-y-4">

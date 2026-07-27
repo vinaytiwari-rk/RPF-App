@@ -13,7 +13,6 @@ import pg from "pg";
 import fs from "fs";
 import crypto from "crypto";
 import multer from "multer";
-import nodemailer from "nodemailer";
 import adminHqRoutes from "./src/routes/adminHqRoutes.js";
 import { setDbPool } from "./src/controllers/adminHqController.js";
 
@@ -46,11 +45,53 @@ app.use("/api/auth", limiter);
 app.use("/api/support_requests", limiter);
 app.use("/api/grievances", limiter);
 
+// AI endpoints call the paid Gemini API and previously had no rate limiting
+// at all, so anyone could script requests against them and run up the bill.
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { success: false, error: "Too many AI requests from this IP, please try again later" },
+});
+app.use("/api/ai", aiLimiter);
+
 
 import jwt from "jsonwebtoken";
 
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_development_only";
+
+// ---- Email sending via SMTP2GO API (replaces nodemailer/SMTP) ----
+const SMTP2GO_API_BASE_URL = process.env.SMTP2GO_API_BASE_URL || "https://api.smtp2go.com/v3/";
+const SMTP2GO_API_KEY = process.env.SMTP2GO_API_KEY;
+const DEFAULT_SENDER = process.env.SMTP_USER || "no-reply@appapi.therpfoundation.org";
+
+async function sendEmail({ to, subject, text, html, from }: { to: string | string[], subject: string, text?: string, html?: string, from?: string }) {
+  if (!SMTP2GO_API_KEY) {
+    console.error("SMTP2GO_API_KEY not set in environment — cannot send email");
+    throw new Error("Email service not configured");
+  }
+  const toList = Array.isArray(to) ? to : [to];
+  const payload: any = {
+    sender: from || `RP Foundation <${DEFAULT_SENDER}>`,
+    to: toList,
+    subject,
+  };
+  if (text) payload.text_body = text;
+  if (html) payload.html_body = html;
+
+  const url = new URL("email/send", SMTP2GO_API_BASE_URL).toString();
+  const response = await axios.post(url, payload, {
+    headers: {
+      "Content-Type": "application/json",
+      "X-Smtp2go-Api-Key": SMTP2GO_API_KEY,
+      "Accept": "application/json",
+    },
+  });
+  if (response.data?.data?.failed) {
+    console.error("SMTP2GO send failures:", response.data.data.failures);
+  }
+  return response.data;
+}
 
 // JWT Middleware
 
@@ -153,10 +194,14 @@ app.post("/api/auth/login", async (req, res) => {
       
       console.log(`[SMS] Sending OTP for ${phone} is: ${otp}`);
       try {
-        const MSG91_AUTHKEY = "552233Aul3uTNSZ6a5de34bP1";
-        const MSG91_SENDER = "RPFApp";
-        const url = `https://control.msg91.com/api/v5/otp?authkey=${MSG91_AUTHKEY}&mobile=91${phone}&otp=${otp}&sender=${MSG91_SENDER}`;
-        await axios.get(url);
+        const MSG91_AUTHKEY = process.env.MSG91_AUTHKEY;
+        const MSG91_SENDER = process.env.MSG91_SENDER || "RPFApp";
+        if (!MSG91_AUTHKEY) {
+          console.error("MSG91_AUTHKEY not set in environment — skipping SMS send");
+        } else {
+          const url = `https://control.msg91.com/api/v5/otp?authkey=${MSG91_AUTHKEY}&mobile=91${phone}&otp=${otp}&sender=${MSG91_SENDER}`;
+          await axios.get(url);
+        }
       } catch (smsErr: any) {
         console.error("MSG91 Error:", smsErr?.response?.data || smsErr.message);
       }
@@ -169,11 +214,24 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(400).json({ success: false, error: "Missing identifier/phone or password" });
     }
 
-    // Special hardcoded super_admin
-    if (finalIdentifier === "admin" && password === "admin") {
-      const adminUser = { id: "usr_staff_admin", name: "System Administrator", role: "super_admin" };
-      const token = jwt.sign(adminUser, JWT_SECRET, { expiresIn: '7d' });
-      return res.json({ success: true, user: adminUser, token });
+    // Admin login: single source of truth is admin_credentials table
+    // (kept in sync by PUT /api/admin/hq/credentials — no hardcoded bypass)
+    if (finalIdentifier === "admin") {
+      const adminCredRes = await pool.query(
+        `SELECT * FROM admin_credentials WHERE username = $1`,
+        [finalIdentifier]
+      );
+      if (adminCredRes.rows.length > 0) {
+        const adminRow = adminCredRes.rows[0];
+        const adminPasswordValid = await bcrypt.compare(password, adminRow.password_hash);
+        if (adminPasswordValid) {
+          const adminUser = { id: "usr_staff_admin", name: "System Administrator", role: "super_admin" };
+          const token = jwt.sign(adminUser, JWT_SECRET, { expiresIn: '7d' });
+          return res.json({ success: true, user: adminUser, token });
+        }
+        return res.status(401).json({ success: false, error: "Invalid credentials" });
+      }
+      // No admin_credentials row found — fall through to users table below
     }
 
     let user = null;
@@ -284,16 +342,92 @@ const PINCODE_CONSTITUENCY_MAP: Record<string, { vidhan_sabha: string, vidhan_sa
   "453441": { vidhan_sabha: "Mhow", vidhan_sabhas: ["Mhow", "Rau"], sansad_kshetra: "Dhar" }
 };
 
+// --- Shared, lazily-loaded Assembly Constituency boundary dataset (covers all of India) ---
+let acGeoJsonData: any = null;
+let acGeoJsonLoadAttempted = false;
+
+function loadACGeoJson() {
+  if (acGeoJsonData || acGeoJsonLoadAttempted) return acGeoJsonData;
+  acGeoJsonLoadAttempted = true;
+  try {
+    const geoJsonPath = path.join(process.cwd(), "maps-master", "maps-master", "website", "docs", "data", "geojson", "ac.geojson");
+    if (fs.existsSync(geoJsonPath)) {
+      const fileContent = fs.readFileSync(geoJsonPath, "utf-8");
+      acGeoJsonData = JSON.parse(fileContent);
+      console.log(`[AC GeoJSON] Loaded ${acGeoJsonData?.features?.length || 0} constituency features`);
+    } else {
+      console.warn("[AC GeoJSON] File not found at", geoJsonPath, "- falling back to limited built-in dataset");
+    }
+  } catch (err: any) {
+    console.error("[AC GeoJSON] Failed to load:", err.message);
+  }
+  return acGeoJsonData;
+}
+
+// Find every Assembly Constituency for a given district from the full India dataset.
+// This is what makes Vidhan Sabha resolution work correctly for ANY district/state,
+// not just the handful that used to be hardcoded below.
+function findConstituenciesByDistrict(district: string, state?: string) {
+  const geoJson = loadACGeoJson();
+  if (!geoJson || !Array.isArray(geoJson.features)) return null;
+
+  const targetDistrict = district.trim().toLowerCase();
+  const targetState = state ? state.trim().toLowerCase() : null;
+
+  const seen = new Set<string>();
+  const matches: { vidhan_sabha: string, sansad_kshetra: string }[] = [];
+
+  for (const feature of geoJson.features) {
+    const props = feature.properties;
+    if (!props) continue;
+    const dist = (props.DIST_NAME || "").toLowerCase();
+    const st = (props.ST_NAME || "").toLowerCase();
+
+    if (dist !== targetDistrict) continue;
+    if (targetState && !st.includes(targetState) && !targetState.includes(st)) continue;
+
+    const acName = props.AC_NAME;
+    if (!acName || seen.has(acName)) continue;
+    seen.add(acName);
+    matches.push({ vidhan_sabha: acName, sansad_kshetra: props.PC_NAME || "" });
+  }
+
+  return matches.length > 0 ? matches : null;
+}
+
 // Resolve constituencies from district and office/locality area keywords
-function resolveConstituency(pincode: string, district: string, areas: string[]) {
-  // 1. Check exact pincode map
+function resolveConstituency(pincode: string, district: string, areas: string[], state?: string) {
+  // 1. Check exact pincode map (highest confidence, hand-verified entries)
   if (PINCODE_CONSTITUENCY_MAP[pincode]) {
     return PINCODE_CONSTITUENCY_MAP[pincode];
   }
 
-  // 2. Local heuristic matching by area names
   const areaString = areas.join(" ").toLowerCase();
-  
+
+  // 2. Use the full India AC dataset, matched by district - this covers every
+  // district/state, not just the ones previously hardcoded.
+  const geoMatches = findConstituenciesByDistrict(district, state);
+  if (geoMatches) {
+    const vidhan_sabhas = geoMatches.map(m => m.vidhan_sabha);
+    const sansad_kshetra = geoMatches[0]?.sansad_kshetra || (district + " Lok Sabha constituency");
+
+    // If only one AC exists in this district, it's an exact match
+    if (geoMatches.length === 1) {
+      return { vidhan_sabha: geoMatches[0].vidhan_sabha, vidhan_sabhas, sansad_kshetra };
+    }
+
+    // Try to narrow down using the post-office/area names for this pincode
+    const nameMatch = geoMatches.find(m => areaString.includes(m.vidhan_sabha.toLowerCase()));
+    if (nameMatch) {
+      return { vidhan_sabha: nameMatch.vidhan_sabha, vidhan_sabhas, sansad_kshetra };
+    }
+
+    // Multiple ACs and no confident match - let the user pick from the dropdown
+    return { vidhan_sabha: "", vidhan_sabhas, sansad_kshetra };
+  }
+
+  // 3. Legacy heuristic matching for Bhopal/Indore (kept as a safety net in case
+  // the geojson dataset is unavailable on this server)
   if (district.toLowerCase() === "bhopal") {
     if (areaString.includes("narela") || areaString.includes("m.l. nagar") || areaString.includes("ml nagar") || areaString.includes("eintkhedi")) {
       return {
@@ -330,7 +464,6 @@ function resolveConstituency(pincode: string, district: string, areas: string[])
         sansad_kshetra: "Bhopal"
       };
     }
-    // Default to empty to enforce select dropdown selection if multiple options exist
     return {
       vidhan_sabha: "",
       vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya", "Bhopal Dakshin-Pashchim", "Narela", "Govindpura", "Huzur"],
@@ -360,7 +493,7 @@ function resolveConstituency(pincode: string, district: string, areas: string[])
     };
   }
 
-  // 3. Fallback to generic district matching
+  // 4. Fallback to generic district matching against the small built-in list
   const matches = MP_CONSTITUENCIES_MOCK.filter(c => c.district.toLowerCase() === district.toLowerCase());
   const sansad_kshetra = matches.length > 0 ? matches[0].sansad_kshetra : (district + " Lok Sabha constituency");
   const vidhan_sabhas = matches.map(c => c.vidhan_sabha);
@@ -400,7 +533,7 @@ app.get("/api/locations/pincode", async (req, res) => {
         const city = first.divisionname ? first.divisionname.replace(" Division", "") : district;
 
         // Resolve constituencies accurately
-        const resolution = resolveConstituency(pincode, district, areas);
+        const resolution = resolveConstituency(pincode, district, areas, state);
 
         const liveData = {
           pincode,
@@ -430,7 +563,7 @@ app.get("/api/locations/pincode", async (req, res) => {
       const areas = data[0].PostOffice.map((po: any) => po.Name);
       
       const district = office.District;
-      const resolution = resolveConstituency(pincode, district, areas);
+      const resolution = resolveConstituency(pincode, district, areas, office.State);
 
       const liveData = {
         pincode,
@@ -652,7 +785,7 @@ app.post("/api/women/complaints", async (req, res) => {
   }
 });
 
-app.put("/api/volunteers/:id/approve", async (req, res) => {
+app.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -663,7 +796,7 @@ app.put("/api/volunteers/:id/approve", async (req, res) => {
   }
 });
 
-app.put("/api/volunteers/:id/allocate", async (req, res) => {
+app.put("/api/volunteers/:id/allocate", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { allocation } = req.body;
@@ -674,7 +807,7 @@ app.put("/api/volunteers/:id/allocate", async (req, res) => {
   }
 });
 
-app.post("/api/volunteers/report", async (req, res) => {
+app.post("/api/volunteers/report", authenticateToken, async (req, res) => {
   try {
     const { volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng } = req.body;
     await pool.query(
@@ -783,19 +916,78 @@ const webAuthnChallengeStore = new Map();
 
 // login-multi endpoint removed. Use /api/auth/login directly.
 
+// Basic username format check: 3-20 chars, letters/numbers/underscore/dot only, must start with a letter
+const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
+
+// Reserved usernames that should never be allocatable
+const RESERVED_USERNAMES = new Set(["admin", "root", "superadmin", "super_admin", "rpf", "support"]);
+
+app.get("/api/auth/check-username", async (req, res) => {
+  try {
+    const usernameRaw = (req.query.username as string || "").trim();
+    const username = usernameRaw.toLowerCase();
+
+    if (!username) {
+      return res.status(400).json({ available: false, error: "Username is required" });
+    }
+    if (!USERNAME_REGEX.test(username)) {
+      return res.status(200).json({ available: false, error: "Use 3-20 letters, numbers, . or _, starting with a letter" });
+    }
+    if (RESERVED_USERNAMES.has(username)) {
+      return res.json({ available: false, error: "This username is reserved" });
+    }
+
+    const [volResult, userResult] = await Promise.all([
+      pool.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [username]),
+      pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [username]),
+    ]);
+
+    const available = volResult.rows.length === 0 && userResult.rows.length === 0;
+    res.json({ available });
+  } catch (err: any) {
+    console.error("Check Username Error:", err);
+    res.status(500).json({ available: false, error: "Could not check username right now" });
+  }
+});
+
 app.post("/api/auth/register-volunteer", async (req, res) => {
   try {
     const data = req.body;
+
+    if (!data.full_name || !data.full_name.trim()) {
+      return res.status(400).json({ error: "Full name is required." });
+    }
+    if (!data.mobile || !data.mobile.trim()) {
+      return res.status(400).json({ error: "Mobile number is required." });
+    }
+    if (!data.password || data.password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters." });
+    }
+
+    const usernameRaw = (data.username || "").trim().toLowerCase();
+    if (!usernameRaw) {
+      return res.status(400).json({ error: "Please choose a username." });
+    }
+    if (!USERNAME_REGEX.test(usernameRaw)) {
+      return res.status(400).json({ error: "Username must be 3-20 characters (letters, numbers, . or _), starting with a letter." });
+    }
+    if (RESERVED_USERNAMES.has(usernameRaw)) {
+      return res.status(400).json({ error: "This username is reserved. Please choose another." });
+    }
+
+    const [volCheck, userCheck] = await Promise.all([
+      pool.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [usernameRaw]),
+      pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw]),
+    ]);
+    if (volCheck.rows.length > 0 || userCheck.rows.length > 0) {
+      return res.status(409).json({ error: "This username is already in use. Please choose another." });
+    }
+
     const id = crypto.randomUUID();
     const regNumber = "RPF-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
-    const username = data.full_name.split(" ")[0].toLowerCase() + Math.floor(100 + Math.random() * 900);
-    
-    // Hash the provided password
-    let passwordHash = null;
-    if (data.password) {
-      passwordHash = await bcrypt.hash(data.password, 10);
-    }
-    
+    const passwordHash = await bcrypt.hash(data.password, 10);
+    const safeDob = data.dob && data.dob.trim() ? data.dob : null;
+
     await pool.query(`
       INSERT INTO volunteers (
         id, username, registration_number, full_name, father_husband_name, mother_name, approval_status,
@@ -806,28 +998,71 @@ app.post("/api/auth/register-volunteer", async (req, res) => {
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
       )
     `, [
-      id, username, regNumber, data.full_name, data.father_husband_name, data.mother_name,
-      'pending', data.dob, data.mobile, data.email, JSON.stringify(data.education), data.blood_group, JSON.stringify(data.skills),
-      data.reason_for_joining, data.availability, data.national_id_1, data.national_id_2,
-      data.country, data.state, data.city, data.address, data.pincode, data.area_locality,
+      id, usernameRaw, regNumber, data.full_name, data.father_husband_name, data.mother_name,
+      'pending', safeDob, data.mobile, data.email || null, JSON.stringify(data.education || []), data.blood_group, JSON.stringify(data.skills || []),
+      data.reason_for_joining, data.availability, data.national_id_1 || null, data.national_id_2 || null,
+      data.country, data.state, data.city, data.address, data.pincode, data.area_locality || null,
       data.sansad_kshetra, data.vidhan_sabha, data.ward_no, passwordHash
     ]);
 
-    res.json({ success: true, registration_number: regNumber, username });
+    res.json({ success: true, registration_number: regNumber, username: usernameRaw });
   } catch (err: any) {
     console.error("Register Error:", err);
-    res.status(500).json({ error: err.message });
+
+    if (err.code === '23505') {
+      const constraint = (err.constraint || '').toLowerCase();
+      if (constraint.includes('username')) {
+        return res.status(409).json({ error: "This username is already in use. Please choose another." });
+      }
+      if (constraint.includes('mobile')) {
+        return res.status(409).json({ error: "This mobile number is already registered." });
+      }
+      if (constraint.includes('email')) {
+        return res.status(409).json({ error: "This email is already registered." });
+      }
+      return res.status(409).json({ error: "Some of your details are already registered." });
+    }
+    if (err.code === '22007' || err.code === '22008') {
+      return res.status(400).json({ error: "Date of birth is invalid. Please re-select it." });
+    }
+
+    res.status(500).json({ error: err.message || "Registration failed. Please try again." });
   }
 });
 
+// SECURITY: This endpoint used to accept a bare {username, password} with no
+// verification whatsoever, allowing anyone who knew a username to take over
+// that account. It now requires a valid, unexpired password-reset token
+// (issued only via /api/auth/forgot-password and emailed to the account's
+// registered email address) before any password is changed.
 app.post("/api/auth/set-password", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ error: "Reset token and new password are required" });
+    }
+    if (typeof password !== "string" || password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
+
+    const tokenRes = await pool.query(
+      `SELECT * FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW()`,
+      [token]
+    );
+    if (tokenRes.rows.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired reset token" });
+    }
+    const userId = tokenRes.rows[0].userId;
+
     const hash = await bcrypt.hash(password, 10);
-    const result = await pool.query('UPDATE volunteers SET password_hash = $1 WHERE username = $2 RETURNING *', [hash, username]);
+    const result = await pool.query('UPDATE volunteers SET password_hash = $1 WHERE id = $2 RETURNING id', [hash, userId]);
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    // Consume the token so it cannot be replayed
+    await pool.query(`DELETE FROM password_reset_tokens WHERE token = $1`, [token]);
+
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -850,9 +1085,7 @@ app.post("/api/auth/forgot-password", async (req, res) => {
           `INSERT INTO password_reset_tokens ("userId", token, expires_at) VALUES ($1, $2, $3)`,
           [user.id, token, expiresAt.toISOString()]
         );
-        const transp = nodemailer.createTransport({ host: process.env.SMTP_HOST || "appapi.therpfoundation.org", port: 465, secure: true, auth: { user: process.env.SMTP_USER || "no-reply@appapi.therpfoundation.org", pass: process.env.SMTP_PASSWORD || "therpfoundation@321" } });
-        await transp.sendMail({
-          from: '"RP Foundation" <' + (process.env.SMTP_USER || 'no-reply@appapi.therpfoundation.org') + '>',
+        await sendEmail({
           to: user.email,
           subject: "Password Reset Request",
           text: `Click here to reset: https://${rpID}/reset-password?token=${token}`,
@@ -1643,7 +1876,7 @@ When asked about RP Foundation, guide them about its initiatives (Jan Seva Card,
 Always match the user's language preference (Hindi, English, or Hinglish) and keep responses clear, concise, and helpful.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.-flash",
+      model: "gemini-2.5-flash",
       contents: [
         { role: "user", parts: [{ text: `System instruction: ${systemPrompt}` }] },
         ...history.map((h: any) => ({
@@ -1686,7 +1919,7 @@ app.post("/api/ai/categorize", async (req, res) => {
   try {
     const ai = getGeminiClient();
     const response = await ai.models.generateContent({
-      model: "gemini-2.-flash",
+      model: "gemini-2.5-flash",
       contents: `You are an auto-triage AI for RP Foundation's Grievance Redressal system. Your task is to categorize citizens' complaints.
 Analyze the following title and description of a complaint, and return a JSON object with:
 1. "category": strictly one of ["Water Supply", "Roads & Transit", "Sanitation & Waste", "Education & Schools", "Healthcare Facilities", "Street Lights & Power", "Others"]
@@ -1746,7 +1979,7 @@ Respond with a JSON array of up to 3 highly tailored schemes. Each scheme should
 4. "steps" (Simple steps to apply)`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -1805,33 +2038,19 @@ const MP_CONSTITUENCIES_MOCK = [
   { district: "Dewas", vidhan_sabha: "Dewas", sansad_kshetra: "Dewas" }
 ];
 
-let acGeoJsonData: any = null;
-
 app.get("/api/locations/search", (req, res) => {
   const query = (req.query.q as string)?.trim().toLowerCase();
   if (!query || query.length < 2) {
     return res.json([]);
   }
 
-  if (!acGeoJsonData) {
-    try {
-      const geoJsonPath = path.join(process.cwd(), "maps-master", "maps-master", "website", "docs", "data", "geojson", "ac.geojson");
-      if (fs.existsSync(geoJsonPath)) {
-        const fileContent = fs.readFileSync(geoJsonPath, "utf-8");
-        acGeoJsonData = JSON.parse(fileContent);
-      } else {
-        console.warn("ac.geojson file not found, using memory fallback");
-      }
-    } catch (err) {
-      console.error("Failed to load ac.geojson:", err);
-    }
-  }
+  const geoJson = loadACGeoJson();
 
-  if (acGeoJsonData) {
+  if (geoJson) {
     // Filter features matching District or AC_NAME
     const results = [];
     const seen = new Set();
-    const features = acGeoJsonData.features || [];
+    const features = geoJson.features || [];
     
     for (const feature of features) {
       const props = feature.properties;
@@ -2044,6 +2263,28 @@ async function initDatabase() {
     `, [], "password_reset_tokens table creation");
 
     await runQuery(`
+      CREATE TABLE IF NOT EXISTS admin_credentials (
+        id VARCHAR(255) PRIMARY KEY DEFAULT 'admin',
+        username TEXT NOT NULL DEFAULT 'admin',
+        password_hash TEXT NOT NULL
+      )
+    `, [], "admin_credentials table creation");
+
+    try {
+      const adminCredRes = await pool.query(`SELECT count(*) FROM admin_credentials`);
+      if (parseInt(adminCredRes.rows[0].count) === 0) {
+        const defaultHash = await bcrypt.hash("admin", 10);
+        await pool.query(
+          `INSERT INTO admin_credentials (id, username, password_hash) VALUES ('admin', 'admin', $1)`,
+          [defaultHash]
+        );
+        console.warn("[SECURITY] admin_credentials seeded with default password 'admin' — change this immediately via the Admin Dashboard.");
+      }
+    } catch (e: any) {
+      console.warn("admin_credentials seed check failed:", e.message);
+    }
+
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS service_content (
         id SERIAL PRIMARY KEY,
         service_id VARCHAR(255) UNIQUE,
@@ -2146,6 +2387,8 @@ async function initDatabase() {
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "health_camps table creation");
+
+    await runQuery(`ALTER TABLE health_camps ADD COLUMN IF NOT EXISTS "registeredCount" INTEGER DEFAULT 0`, [], "health_camps registeredCount column");
 
     // Create camps view pointing to health_camps
     await runQuery(`
@@ -2505,16 +2748,6 @@ async function initDatabase() {
 // AUTHENTICATION ENDPOINTS
 // =============================================================================
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'appapi.therpfoundation.org',
-    port: 465,
-    secure: true, // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_USER || 'no-reply@appapi.therpfoundation.org',
-      pass: process.env.SMTP_PASSWORD || 'therpfoundation@321',
-    },
-  });
-
   app.post("/api/auth/login-email", async (req, res) => {
     try {
       const { email } = req.body;
@@ -2538,8 +2771,7 @@ async function initDatabase() {
       
       console.log(`[EMAIL] Sending OTP for ${email} is: ${otp}`);
       
-      await transporter.sendMail({
-        from: '"RP Foundation" <' + (process.env.SMTP_USER || 'no-reply@appapi.therpfoundation.org') + '>',
+      await sendEmail({
         to: email,
         subject: "Your Jan Seva Login OTP",
         text: `Your OTP for RP Foundation Jan Seva is: ${otp}. It is valid for 10 minutes.`,
@@ -2585,7 +2817,7 @@ app.get("/api/jobs", async (req, res) => {
   }
 });
 
-app.post("/api/jobs", async (req, res) => {
+app.post("/api/jobs", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, locEn, locHi, salary, typeEn, typeHi, company } = req.body;
     const id = crypto.randomUUID();
@@ -2614,7 +2846,7 @@ app.post("/api/jobs", async (req, res) => {
   }
 });
 
-app.delete("/api/jobs/:id", async (req, res) => {
+app.delete("/api/jobs/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query('DELETE FROM jobs WHERE id = $1', [req.params.id]);
     res.json({ success: true });
@@ -2623,7 +2855,7 @@ app.delete("/api/jobs/:id", async (req, res) => {
   }
 });
 
-app.post("/api/jobs/:id/edit", async (req, res) => {
+app.post("/api/jobs/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, company, locEn, locHi, salary, typeEn, typeHi } = req.body;
     await pool.query(
@@ -2684,7 +2916,7 @@ app.post("/api/grievances", async (req, res) => {
   }
 });
 
-app.post("/api/grievances/status", async (req, res) => {
+app.post("/api/grievances/status", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id, status } = req.body;
     await pool.query('UPDATE grievances SET status = $1 WHERE id = $2', [status, id]);
@@ -2694,7 +2926,7 @@ app.post("/api/grievances/status", async (req, res) => {
   }
 });
 
-app.delete("/api/grievances/:id", async (req, res) => {
+app.delete("/api/grievances/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query('DELETE FROM grievances WHERE id = $1', [req.params.id]);
     res.json({ success: true });
@@ -2747,7 +2979,7 @@ app.post("/api/cards", async (req, res) => {
   }
 });
 
-app.post("/api/cards/approve", async (req, res) => {
+app.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { userId } = req.body;
     const cardNo = `JSC-${Math.floor(10000000 + Math.random() * 90000000)}`;
@@ -2766,7 +2998,7 @@ app.post("/api/cards/approve", async (req, res) => {
   }
 });
 
-app.post("/api/cards/reject", async (req, res) => {
+app.post("/api/cards/reject", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { userId } = req.body;
     await pool.query(
@@ -2784,7 +3016,7 @@ app.post("/api/cards/reject", async (req, res) => {
   }
 });
 
-app.delete("/api/cards/:userId", async (req, res) => {
+app.delete("/api/cards/:userId", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query('DELETE FROM card_applications_v2 WHERE "userId" = $1', [req.params.userId]);
     res.json({ success: true });
@@ -2853,7 +3085,7 @@ app.post("/api/donations", async (req, res) => {
 });
 
 // Volunteer Task assignment and retrieval APIs
-app.post("/api/volunteer_tasks", async (req, res) => {
+app.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi, points } = req.body;
     await pool.query(
@@ -2882,7 +3114,7 @@ app.get("/api/volunteer_tasks", async (req, res) => {
   }
 });
 
-app.patch("/api/volunteer_tasks/:id/status", async (req, res) => {
+app.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -3171,7 +3403,7 @@ app.get("/api/cms", async (req, res) => {
   }
 });
 
-app.post("/api/cms", async (req, res) => {
+app.post("/api/cms", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query(
       `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
@@ -3205,7 +3437,7 @@ app.get("/api/campaigns", async (req, res) => {
   }
 });
 
-app.post("/api/campaigns", async (req, res) => {
+app.post("/api/campaigns", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, goalAmount, raisedAmount, imageUrl, urgent } = req.body;
     const id = crypto.randomUUID();
@@ -3232,7 +3464,7 @@ app.post("/api/campaigns", async (req, res) => {
   }
 });
 
-app.post("/api/campaigns/:id/edit", async (req, res) => {
+app.post("/api/campaigns/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, goalAmount, raisedAmount, imageUrl, urgent } = req.body;
     await pool.query(
@@ -3258,7 +3490,7 @@ app.post("/api/campaigns/:id/edit", async (req, res) => {
   }
 });
 
-app.delete("/api/campaigns/:id", async (req, res) => {
+app.delete("/api/campaigns/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query("DELETE FROM campaigns WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -3282,7 +3514,7 @@ app.get("/api/social", async (req, res) => {
   }
 });
 
-app.post("/api/social", async (req, res) => {
+app.post("/api/social", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { author, role, avatar, textEn, textHi, image, platform, link } = req.body;
     const id = crypto.randomUUID();
@@ -3329,7 +3561,7 @@ app.post("/api/social/like", async (req, res) => {
   }
 });
 
-app.delete("/api/social/:id", async (req, res) => {
+app.delete("/api/social/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query("DELETE FROM social_posts WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -3338,7 +3570,7 @@ app.delete("/api/social/:id", async (req, res) => {
   }
 });
 
-app.post("/api/social/:id/edit", async (req, res) => {
+app.post("/api/social/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { author, role, avatar, textEn, textHi, image, platform, link } = req.body;
     await pool.query(
@@ -3371,7 +3603,7 @@ app.get("/api/volunteers", async (req, res) => {
   }
 });
 
-app.delete("/api/volunteers/:id", async (req, res) => {
+app.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query("DELETE FROM volunteers WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -3380,7 +3612,7 @@ app.delete("/api/volunteers/:id", async (req, res) => {
   }
 });
 
-app.post("/api/volunteers/:id/points", async (req, res) => {
+app.post("/api/volunteers/:id/points", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { points } = req.body;
     // update points in both users and volunteers tables
@@ -3444,16 +3676,6 @@ app.post("/api/submissions", async (req, res) => {
         if (parsedData.sosTriggered && Array.isArray(parsedData.designatedContacts)) {
           const emails = parsedData.designatedContacts.filter((c: string) => c.includes("@"));
           if (emails.length > 0) {
-            const transporter = nodemailer.createTransport({
-              host: process.env.SMTP_HOST || "appapi.therpfoundation.org",
-              port: 465,
-              secure: true,
-              auth: {
-                user: process.env.SMTP_USER || "no-reply@appapi.therpfoundation.org",
-                pass: process.env.SMTP_PASSWORD || "therpfoundation@321",
-              },
-            });
-
             const mapsUrl = parsedData.userLocation || "Location unavailable";
             const emailHtml = `
               <div style="font-family: Arial, sans-serif; padding: 20px; border: 2px solid #ef4444; border-radius: 12px; max-width: 500px; margin: auto;">
@@ -3476,9 +3698,9 @@ app.post("/api/submissions", async (req, res) => {
               </div>
             `;
 
-            await transporter.sendMail({
+            await sendEmail({
               from: '"RPF Women Safety" <no-reply@appapi.therpfoundation.org>',
-              to: emails.join(", "),
+              to: emails,
               subject: `🚨 EMERGENCY: SOS Alert from ${citizenName || "Citizen"}`,
               html: emailHtml,
             });
@@ -3497,7 +3719,7 @@ app.post("/api/submissions", async (req, res) => {
   }
 });
 
-app.post("/api/submissions/:id/status", async (req, res) => {
+app.post("/api/submissions/:id/status", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     await pool.query('UPDATE service_submissions_v2 SET status = $1 WHERE id = $2', [status, req.params.id]);
@@ -3507,7 +3729,7 @@ app.post("/api/submissions/:id/status", async (req, res) => {
   }
 });
 
-app.delete("/api/submissions/:id", async (req, res) => {
+app.delete("/api/submissions/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query("DELETE FROM service_submissions_v2 WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -3535,9 +3757,23 @@ app.get("/api/users/:id", async (req, res) => {
   }
 });
 
-app.post("/api/users/:id/update", async (req, res) => {
+// SECURITY: previously this had no auth at all and let anyone pass ANY field
+// name (including role, points, janSevaCardStatus) for ANY user id — full
+// account takeover / privilege escalation. Now it requires login, restricts
+// non-admins to editing only their own record, and blocks non-admins from
+// touching privileged fields.
+const USER_PRIVILEGED_FIELDS = new Set(["role", "points", "janSevaCardStatus", "janSevaCardNo", "isVolunteer", "isDonor"]);
+app.post("/api/users/:id/update", authenticateToken, async (req: any, res) => {
   try {
-    const fields = Object.keys(req.body);
+    const isAdmin = req.user && (req.user.role === "admin" || req.user.role === "superadmin" || req.user.role === "super_admin");
+    if (!isAdmin && req.user?.id !== req.params.id) {
+      return res.status(403).json({ success: false, error: "You can only update your own profile" });
+    }
+
+    let fields = Object.keys(req.body);
+    if (!isAdmin) {
+      fields = fields.filter(f => !USER_PRIVILEGED_FIELDS.has(f));
+    }
     if (fields.length === 0) {
       return res.json({ success: true });
     }
@@ -3563,7 +3799,7 @@ app.post("/api/users/:id/update", async (req, res) => {
 app.get("/api/health_camps", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, "titleEn", "titleHi", "dateEn", "dateHi", "locationEn", "locationHi", contact, "createdAt" FROM health_camps ORDER BY "createdAt" DESC'
+      'SELECT id, "titleEn", "titleHi", "dateEn", "dateHi", "locationEn", "locationHi", contact, "registeredCount", "createdAt" FROM health_camps ORDER BY "createdAt" DESC'
     );
     res.json({ camps: result.rows });
   } catch (error: any) {
@@ -3572,7 +3808,24 @@ app.get("/api/health_camps", async (req, res) => {
   }
 });
 
-app.post("/api/health_camps", async (req, res) => {
+// Register/participate in a health camp — increments registeredCount atomically
+app.post("/api/health_camps/:id/register", authenticateToken, async (req: any, res) => {
+  try {
+    const result = await pool.query(
+      `UPDATE health_camps SET "registeredCount" = COALESCE("registeredCount", 0) + 1 WHERE id = $1 RETURNING id, "titleEn", "titleHi", "dateEn", "dateHi", "locationEn", "locationHi", contact, "registeredCount", "createdAt"`,
+      [req.params.id]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, error: "Camp not found" });
+    }
+    res.json({ success: true, camp: result.rows[0] });
+  } catch (error: any) {
+    console.error("Error registering for health camp:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post("/api/health_camps", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, dateEn, dateHi, locationEn, locationHi, contact } = req.body;
     const id = crypto.randomUUID();
@@ -3599,7 +3852,7 @@ app.post("/api/health_camps", async (req, res) => {
   }
 });
 
-app.post("/api/health_camps/:id/edit", async (req, res) => {
+app.post("/api/health_camps/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, dateEn, dateHi, locationEn, locationHi, contact } = req.body;
     await pool.query(
@@ -3616,7 +3869,7 @@ app.post("/api/health_camps/:id/edit", async (req, res) => {
   }
 });
 
-app.delete("/api/health_camps/:id", async (req, res) => {
+app.delete("/api/health_camps/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query("DELETE FROM health_camps WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -3950,7 +4203,7 @@ async function saveFileLocally(file: Express.Multer.File): Promise<string> {
   return `/uploads/${filename}`;
 }
 
-app.post("/api/upload/founder", upload.single("file"), handleUploadErrors, async (req, res) => {
+app.post("/api/upload/founder", authenticateToken, requireAdmin, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -3963,7 +4216,7 @@ app.post("/api/upload/founder", upload.single("file"), handleUploadErrors, async
   }
 });
 
-app.post("/api/upload/broadcast", upload.single("file"), handleUploadErrors, async (req, res) => {
+app.post("/api/upload/broadcast", authenticateToken, requireAdmin, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -3976,7 +4229,7 @@ app.post("/api/upload/broadcast", upload.single("file"), handleUploadErrors, asy
   }
 });
 
-app.post("/api/upload/image", upload.single("file"), handleUploadErrors, async (req, res) => {
+app.post("/api/upload/image", authenticateToken, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
