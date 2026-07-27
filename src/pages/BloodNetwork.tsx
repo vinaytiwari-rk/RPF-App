@@ -532,27 +532,6 @@ export default function BloodNetwork() {
         {/* TAB 2: DONATE & SCHEDULE */}
         {tab === "donate" && (
           <div className="space-y-4 animate-fadeIn max-w-4xl mx-auto">
-            {/* Gamification Card */}
-            <div className="bg-gradient-to-r from-red-800 to-rose-700 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-xl transform translate-x-8 -translate-y-8"></div>
-              <div className="relative z-10 flex items-center justify-between">
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-amber-300" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-red-100">Hero Level Status</span>
-                  </div>
-                  <h3 className="text-xl font-extrabold font-display">
-                    {user?.points && user.points >= 200 ? "Gold Hero" : user?.points && user.points >= 50 ? "Silver Hero" : "Bronze Donor"}
-                  </h3>
-                  <p className="text-[10px] text-red-100/80">Every donation rewards 50 points, saving up to 3 lives.</p>
-                </div>
-                <div className="text-center bg-white/10 px-5 py-3 rounded-xl backdrop-blur-sm border border-white/10">
-                  <span className="block text-[10px] font-bold text-red-100 uppercase tracking-widest">Donation Score</span>
-                  <span className="text-2xl font-black font-display text-amber-300">{user?.points || 0} pts</span>
-                </div>
-              </div>
-            </div>
-
             {/* Donor Portal Flow */}
             {!showQuiz && !isEligible && (
               <div className="bg-white border border-slate-200 shadow-md rounded-2xl p-6 text-center space-y-4">
@@ -771,45 +750,6 @@ export default function BloodNetwork() {
         {tab === "find" && (
           <div className="space-y-4 animate-fadeIn max-w-4xl mx-auto">
             
-            {/* Interactive Map Search Card */}
-            <div className="bg-white border border-slate-200 shadow-md rounded-2xl p-5 space-y-4">
-              <h3 className="font-display font-extrabold text-slate-800 text-sm flex items-center gap-2">
-                <Map className="w-5 h-5 text-red-600" />
-                <span>Search Blood Banks on Live Map</span>
-              </h3>
-              <p className="text-[10px] text-slate-500 font-medium">Enter a city name or pincode to discover matching blood bank centers interactively.</p>
-              
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                if (mapSearchLocation.trim()) {
-                  setGeneralMapUrl(`https://maps.google.com/maps?q=blood%20banks%20in%20${encodeURIComponent(mapSearchLocation.trim())}&t=&z=13&ie=UTF8&iwloc=&output=embed`);
-                }
-              }} className="flex gap-2">
-                <input 
-                  type="text" 
-                  value={mapSearchLocation}
-                  onChange={(e) => setMapSearchLocation(e.target.value)}
-                  placeholder="e.g., Indore, Sehore, Bhopal..." 
-                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs bg-slate-50 font-medium outline-none focus:ring-2 focus:ring-red-500/20"
-                />
-                <button type="submit" className="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-md">
-                  Search Map
-                </button>
-              </form>
-
-              <div className="relative overflow-hidden rounded-xl h-64 shadow-inner border border-slate-200">
-                <iframe
-                  src={generalMapUrl}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  title="Live Blood Bank Map"
-                ></iframe>
-              </div>
-            </div>
-
             {/* List Search location bar */}
             <form onSubmit={(e) => {
               e.preventDefault();
