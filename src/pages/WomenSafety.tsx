@@ -539,7 +539,6 @@ export default function WomenSafety() {
 
   const TABS = [
     { key: "deterrents", label: "SOS", icon: AlertOctagon },
-    { key: "scanner", label: lang === "hi" ? "स्कैन" : "Scan", icon: Crosshair },
     { key: "ncw", label: lang === "hi" ? "रिपोर्ट" : "Report", icon: FileText },
     { key: "routes", label: lang === "hi" ? "रूट्स" : "Routes", icon: Navigation },
     { key: "settings", label: lang === "hi" ? "सेटिंग" : "Settings", icon: Settings },
@@ -715,74 +714,7 @@ export default function WomenSafety() {
           </div>
         )}
 
-        {/* 2. SCANNER TAB */}
-        {activeTab === "scanner" && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                    <Radio className="w-4 h-4 text-emerald-500" />
-                    EMF DETECTOR
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-1">Scan for hidden electronic devices.</p>
-                </div>
-                <button
-                  onClick={() => { setIsEMFActive(!isEMFActive); setEmfValue(0); }}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${
-                    isEMFActive ? "bg-red-950 text-red-500 border border-red-900/50" : "bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700"
-                  }`}
-                >
-                  {isEMFActive ? "Stop" : "Scan"}
-                </button>
-              </div>
-              
-              {isEMFActive && isSensorSupported && (
-                <div className="py-8 text-center bg-slate-950 rounded-lg border border-slate-800">
-                  <div className="text-5xl font-mono font-light text-slate-200">{emfValue} <span className="text-lg text-slate-600">µT</span></div>
-                  <div className={`mt-3 text-xs font-bold tracking-widest uppercase ${emfValue > 85 ? "text-red-500 animate-pulse" : "text-emerald-500"}`}>
-                    {emfValue > 85 ? "ANOMALY DETECTED" : "SIGNAL NORMAL"}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                    <Camera className="w-4 h-4 text-red-500" />
-                    LENS FINDER
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-1">Infrared/Red filter for camera lenses.</p>
-                </div>
-                <button
-                  onClick={() => { isCameraActive ? stopCamera() : startCamera(); }}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${
-                    isCameraActive ? "bg-red-950 text-red-500 border border-red-900/50" : "bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700"
-                  }`}
-                >
-                  {isCameraActive ? "Close" : "Open"}
-                </button>
-              </div>
-              
-              {isCameraActive && (
-                <div className="mt-4 bg-black rounded-lg border border-slate-800 overflow-hidden relative aspect-video">
-                  <video
-                    ref={videoRef} autoPlay playsInline
-                    className="w-full h-full object-cover"
-                    style={{ filter: "contrast(200%) saturate(0%) sepia(100%) hue-rotate(-50deg)" }}
-                  />
-                  <div className="absolute inset-0 border-2 border-red-500/30 pointer-events-none"></div>
-                  <div className="absolute top-4 left-4 flex gap-2 items-center">
-                    <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-                    <span className="text-[10px] font-mono text-red-500 font-bold tracking-widest">REC</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* 2. SCANNER TAB (REMOVED) */}
 
         {/* 3. REPORT TAB */}
         {activeTab === "ncw" && (
@@ -871,49 +803,6 @@ export default function WomenSafety() {
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-6">
               <h4 className="text-sm font-bold text-slate-200 tracking-wide">SYSTEM PREFERENCES</h4>
-
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="text-sm font-bold text-slate-200">Stealth Mode</div>
-                  <div className="text-xs text-slate-500 mt-0.5">Camouflage as calculator</div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked={stealthEnabled} onChange={e => {
-                    setStealthEnabled(e.target.checked);
-                    localStorage.setItem("stealth_enabled", String(e.target.checked));
-                  }} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-
-              {stealthEnabled && (
-                <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-2">Unlock PIN</label>
-                  <input type="password" maxLength={4} value={calculatorPin} onChange={e => {
-                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                    setCalculatorPin(val);
-                    localStorage.setItem("calc_pin", val);
-                  }} className="bg-slate-900 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500 w-full font-mono tracking-widest" />
-                </div>
-              )}
-
-              <hr className="border-slate-800" />
-
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="text-sm font-bold text-slate-200">Motion Trigger</div>
-                  <div className="text-xs text-slate-500 mt-0.5">Shake device for SOS</div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked={shakeEnabled} onChange={e => {
-                    setShakeEnabled(e.target.checked);
-                    localStorage.setItem("shake_enabled", String(e.target.checked));
-                  }} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-
-              <hr className="border-slate-800" />
 
               <div>
                 <label className="text-sm font-bold text-slate-200 block mb-2">Fake Call Identity</label>
