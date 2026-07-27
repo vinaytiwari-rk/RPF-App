@@ -77743,7 +77743,7 @@ app.post("/api/women/complaints", async (req, res) => {
       isAnonymous: is_anonymous
     });
     await pool2.query(
-      `INSERT INTO service_submissions ("userId", "citizenName", "citizenPhone", "serviceName", "submissionData", status) 
+      `INSERT INTO service_submissions_v2 ("userId", "citizenName", "citizenPhone", "serviceName", "submissionData", status) 
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         user_id || "guest",
@@ -79028,7 +79028,7 @@ async function initDatabase() {
       )
     `, [], "grievances table creation");
     await runQuery(`
-      CREATE TABLE IF NOT EXISTS service_submissions (
+      CREATE TABLE IF NOT EXISTS service_submissions_v2 (
         id UUID PRIMARY KEY,
         "userId" TEXT,
         "serviceNameEn" TEXT,
@@ -79042,7 +79042,7 @@ async function initDatabase() {
         timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
-    `, [], "service_submissions table creation");
+    `, [], "service_submissions_v2 table creation");
     await runQuery(`
       CREATE TABLE IF NOT EXISTS volunteers (
         id VARCHAR(255) PRIMARY KEY,
@@ -80149,7 +80149,7 @@ app.get("/api/submissions", async (req, res) => {
   try {
     const result = await pool2.query(
       `SELECT id, "userId", "serviceNameEn", "serviceName", "citizenName", "citizenPhone", "submissionData", status, latitude, longitude, "createdAt", timestamp 
-       FROM service_submissions 
+       FROM service_submissions_v2 
        ORDER BY timestamp DESC`
     );
     res.json({ submissions: result.rows });
@@ -80167,7 +80167,7 @@ app.post("/api/submissions", async (req, res) => {
     const { userId, citizenName, citizenPhone, serviceName, submissionData, status, latitude, longitude, timestamp } = body;
     const id = import_crypto2.default.randomUUID();
     const result = await pool2.query(
-      `INSERT INTO service_submissions 
+      `INSERT INTO service_submissions_v2 
        (id, "userId", "serviceNameEn", "serviceName", "citizenName", "citizenPhone", "submissionData", status, latitude, longitude, "createdAt", timestamp) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
        RETURNING id`,
@@ -80244,7 +80244,7 @@ app.post("/api/submissions", async (req, res) => {
 app.post("/api/submissions/:id/status", async (req, res) => {
   try {
     const { status } = req.body;
-    await pool2.query("UPDATE service_submissions SET status = $1 WHERE id = $2", [status, req.params.id]);
+    await pool2.query("UPDATE service_submissions_v2 SET status = $1 WHERE id = $2", [status, req.params.id]);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -80252,7 +80252,7 @@ app.post("/api/submissions/:id/status", async (req, res) => {
 });
 app.delete("/api/submissions/:id", async (req, res) => {
   try {
-    await pool2.query("DELETE FROM service_submissions WHERE id = $1", [req.params.id]);
+    await pool2.query("DELETE FROM service_submissions_v2 WHERE id = $1", [req.params.id]);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -80577,7 +80577,7 @@ app.get("/api/stats", async (req, res) => {
   }
   try {
     const sRes = await pool2.query(`
-      SELECT COUNT(*) FROM service_submissions 
+      SELECT COUNT(*) FROM service_submissions_v2 
       WHERE "serviceName" = 'Scholarships Support' OR "serviceNameEn" = 'Scholarships Support'
     `);
     scholarships = parseInt(sRes.rows[0].count, 10);
