@@ -1,47 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-const RunningChildWithFlag = ({ style }: { style?: React.CSSProperties }) => (
-  <svg viewBox="0 0 100 80" className="w-20 h-16 pointer-events-none" style={style}>
-    {/* Flag Pole */}
-    <line x1="50" y1="30" x2="65" y2="5" stroke="#5C4033" strokeWidth="1.8" strokeLinecap="round" />
-    
-    {/* Waving Tricolor Flag */}
-    {/* Saffron */}
-    <path d="M 65 5 Q 73 2, 81 5 T 95 5 L 95 14 Q 87 11, 79 14 T 65 14 Z" fill="#FF9933" />
-    {/* White */}
-    <path d="M 65 14 Q 73 11, 81 14 T 95 14 L 95 23 Q 87 20, 79 23 T 65 23 Z" fill="#FFFFFF" />
-    {/* Green */}
-    <path d="M 65 23 Q 73 20, 81 23 T 95 23 L 95 32 Q 87 29, 79 32 T 65 32 Z" fill="#138808" />
-    {/* Chakra on white band */}
-    <circle cx="80" cy="18.5" r="2.5" fill="none" stroke="#000080" strokeWidth="0.4" />
-    {[...Array(12)].map((_, i) => (
-      <line
-        key={i}
-        x1="80"
-        y1="18.5"
-        x2={80 + 2.5 * Math.cos((i * 30 * Math.PI) / 180)}
-        y2={18.5 + 2.5 * Math.sin((i * 30 * Math.PI) / 180)}
-        stroke="#000080"
-        strokeWidth="0.25"
-      />
-    ))}
-    
-    {/* Child Silhouette */}
-    {/* Head */}
-    <circle cx="36" cy="22" r="4.5" fill="#1C2D42" />
-    {/* Back arm */}
-    <path d="M 36 27 L 27 34 L 30 44" stroke="#1C2D42" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-    {/* Torso */}
-    <path d="M 36 26.5 L 32 42" stroke="#1C2D42" strokeWidth="3" strokeLinecap="round" fill="none" />
-    {/* Front arm holding pole */}
-    <path d="M 36 28 L 50 30" stroke="#1C2D42" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-    {/* Back leg (extended) */}
-    <path d="M 32 42 L 20 48 L 14 58" stroke="#1C2D42" strokeWidth="2.8" strokeLinecap="round" fill="none" />
-    {/* Front leg (bent) */}
-    <path d="M 32 42 L 42 50 L 38 62" stroke="#1C2D42" strokeWidth="2.8" strokeLinecap="round" fill="none" />
-  </svg>
-);
-
 export default function SplashScreen() {
   const [opacity, setOpacity] = useState(0);
 
@@ -64,11 +22,7 @@ export default function SplashScreen() {
           75% { transform: scale(0.96); opacity: 1; filter: blur(0); }
           100% { transform: scale(1.0); opacity: 1; }
         }
-        @keyframes run-across {
-          0% { transform: translateX(-120px) translateY(0); }
-          50% { transform: translateX(calc(50vw - 40px)) translateY(-3px); }
-          100% { transform: translateX(100vw) translateY(0); }
-        }
+
         @keyframes float-particle {
           0% { transform: translateY(105vh) translateX(0); opacity: 0; }
           10% { opacity: 0.5; }
@@ -158,17 +112,7 @@ export default function SplashScreen() {
         </div>
       </div>
 
-      {/* Silhouette child running with flag animation */}
-      <div className="absolute bottom-16 left-0 right-0 w-full overflow-hidden h-20">
-        <RunningChildWithFlag 
-          style={{
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-            animation: 'run-across 9s linear infinite'
-          }}
-        />
-      </div>
+
 
       {/* Footer Branding */}
       <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center opacity-85 z-10">
