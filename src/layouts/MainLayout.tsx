@@ -346,26 +346,6 @@ export default function MainLayout() {
           </motion.button>
 
           <motion.button 
-              whileHover={{ scale: 1.15, y: -2 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => handleNav("/notifications")}
-              className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
-                location.pathname === "/notifications" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
-              }`}
-            >
-              {location.pathname === "/notifications" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
-              <div className="relative">
-                <Bell className="w-5 h-5 mt-0.5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center text-white text-[7px] font-black border border-white">
-                    {unreadCount}
-                  </span>
-                )}
-              </div>
-              <span className="text-[9px] font-bold">{language === "hi" ? "अलर्ट" : "Alerts"}</span>
-            </motion.button>
-
-          <motion.button 
             whileHover={{ scale: 1.15, y: -2 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => handleNav("/profile")}

@@ -31,70 +31,13 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
       if (response.data.success && response.data.user) {
         if (response.data.token) localStorage.setItem("@rpf_token", response.data.token);
         const user = response.data.user;
-        setCurrentUserId(user.id);
-        
-        if (user.role === "super_admin") {
-           await finalizeLogin(user);
-        } else if (window.PublicKeyCredential && await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()) {
-           setShowBiometricPrompt(true);
-        } else {
-           await finalizeLogin(user);
-        }
+        await finalizeLogin(user);
       }
     } catch (err: any) {
       console.error("Login Error:", err);
       setError(err.response?.data?.error || "Invalid Identifier or Password.");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleBiometricLogin = async () => {
-    if (!identifier) {
-      setError("Please enter your identifier first to use Biometric Login.");
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-    try {
-      const optResp = await axios.post('/api/auth/webauthn/login-options', { identifier });
-      const { options, userId } = optResp.data;
-      const authResp = await startAuthentication(options);
-      const verifyResp = await axios.post('/api/auth/webauthn/login-verify', {
-        userId,
-        response: authResp
-      });
-      if (verifyResp.data.success && verifyResp.data.user) {
-         await finalizeLogin(verifyResp.data.user);
-      }
-    } catch (err: any) {
-      console.error("Biometric Login Error:", err);
-      setError(err.response?.data?.error || "Biometric authentication failed.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRegisterBiometric = async () => {
-    if (!currentUserId) return;
-    setIsLoading(true);
-    try {
-      const optResp = await axios.get('/api/auth/webauthn/register-options?userId=' + currentUserId);
-      const attResp = await startRegistration(optResp.data);
-      const verifyResp = await axios.post('/api/auth/webauthn/register-verify', {
-        userId: currentUserId,
-        response: attResp
-      });
-      if (verifyResp.data.success) {
-         alert("Biometric Login enabled successfully!");
-      }
-    } catch (err) {
-      console.error("Biometric Setup Error:", err);
-      alert("Failed to setup biometric login.");
-    } finally {
-      setIsLoading(false);
-      setShowBiometricPrompt(false);
-      await finalizeLogin({ id: currentUserId, role: 'volunteer' });
     }
   };
 
@@ -132,7 +75,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
     try {
       await axios.post('/api/auth/reset-ticket', { identifier });
       setSuccessMsg("Admin Reset Ticket created successfully.");
-    } catch (err) {
+    } catch (err: any) {
       setError("Failed to create ticket.");
     } finally {
       setIsLoading(false);
@@ -140,9 +83,9 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 animate-fadeIn relative">
+    <div className="flex flex-col h-full bg-[#FFF9F2] animate-fadeIn relative">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url("/assets/login_bg.png")' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B1E3F]/90 via-[#0B1E3F]/70 to-[#0B1E3F]/95 backdrop-blur-[2px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FF9933]/20 via-[#FFFDFB]/90 to-[#138808]/15 backdrop-blur-[1px]"></div>
       </div>
 
       {/* Dynamic Header Block */}
@@ -151,21 +94,21 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
         <img 
           src="/assets/logo.png" 
           alt="RP Foundation Logo" 
-          className="w-24 h-24 bg-white rounded-full p-1.5 shadow-xl border-2 border-[#D4AF37]/30 mb-3 animate-float"
+          className="w-24 h-24 bg-white rounded-full p-1.5 shadow-xl border-2 border-[#FF9933]/20 mb-3 animate-float"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
         <div className="space-y-1">
-          <h1 className="text-2xl font-display font-black text-white tracking-widest leading-none drop-shadow-md">
+          <h1 className="text-2xl font-display font-black text-[#0B1E3F] tracking-widest leading-none drop-shadow-xs">
             RP FOUNDATION
           </h1>
-          <p className="text-[10px] font-black uppercase tracking-widest text-[#FF9933] drop-shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-widest text-[#FF9933] drop-shadow-xs">
             Rohit Pandit Foundation
           </p>
-          <p className="text-[11px] font-bold text-slate-100 flex items-center justify-center gap-1.5 bg-black/35 backdrop-blur-md px-3.5 py-0.5 rounded-full border border-white/10 w-fit mx-auto mt-2">
+          <p className="text-[11px] font-bold text-slate-700 flex items-center justify-center gap-1.5 bg-white/85 backdrop-blur-md px-3.5 py-0.5 rounded-full border border-slate-200/50 w-fit mx-auto mt-2">
             <span className="text-[#FF9933]">सेवा</span>
-            <span className="text-white">•</span>
-            <span className="text-slate-200">समर्पण</span>
-            <span className="text-white">•</span>
+            <span className="text-slate-400">•</span>
+            <span className="text-slate-600">समर्पण</span>
+            <span className="text-slate-400">•</span>
             <span className="text-[#138808]">संकल्प</span>
           </p>
         </div>
@@ -196,7 +139,6 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                     <KeyRound className="w-4 h-4 text-[#FF9933]" />
                     <span>Login to your account</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
                 
                 <button 
@@ -207,37 +149,12 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                     <UserPlus className="w-4 h-4 text-[#138808]" />
                     <span>Register as Volunteer</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="bg-[#138808]/15 text-[#138808] text-[7.5px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider border border-[#138808]/30">NEW</span>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
-                  </div>
-                </button>
-
-                <button 
-                  onClick={async () => {
-                     setIsLoading(true);
-                     try {
-                       await onLoginSuccess("guest");
-                     } catch (err) {
-                       console.error("Guest Login error:", err);
-                     } finally {
-                       setIsLoading(false);
-                     }
-                   }}
-                   disabled={isLoading}
-                  className="w-full flex items-center justify-between py-3 px-4 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition active:scale-[0.98] cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <Users className="w-4 h-4 text-[#138808]" />
-                    <span>Continue as Guest</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
                 </button>
               </div>
             </div>
           )}
 
-          {mode === "login" && !showBiometricPrompt && (
+          {mode === "login" && (
             <div className="space-y-4 animate-fadeIn">
               <div className="flex items-center gap-2.5 pb-1 border-b border-slate-100">
                 <button onClick={() => setMode("welcome")} className="p-1 rounded-full hover:bg-slate-100 text-slate-700 transition -ml-1">
@@ -307,23 +224,6 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Log In</>}
                 </button>
               </form>
-
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-100"></div>
-                </div>
-                <div className="relative flex justify-center text-[9px] font-black uppercase tracking-widest">
-                  <span className="bg-white px-3 text-slate-300">Biometric Sign In</span>
-                </div>
-              </div>
-
-              <button 
-                type="button" 
-                onClick={handleBiometricLogin} 
-                className="w-full flex justify-center items-center gap-2 py-3 rounded-xl text-xs font-bold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 active:scale-[0.98] transition tracking-wider"
-              >
-                <Fingerprint className="w-4 h-4" /> Use Face ID / Touch ID
-              </button>
             </div>
           )}
 
@@ -419,7 +319,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
 
       {/* Footer Strip */}
       <div className="w-full pb-3 pt-2 text-center shrink-0 z-10 absolute bottom-0">
-        <p className="text-[9px] text-slate-200/70 font-bold uppercase tracking-widest drop-shadow-sm">
+        <p className="text-[9px] text-slate-550 font-bold uppercase tracking-widest drop-shadow-xs">
           Secured by RP Foundation
         </p>
       </div>
