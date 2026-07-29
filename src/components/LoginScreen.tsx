@@ -317,12 +317,6 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
         </div>
       )}
 
-      {/* Footer Strip */}
-      <div className="w-full pb-3 pt-2 text-center shrink-0 z-10 absolute bottom-0">
-        <p className="text-[9px] text-slate-550 font-bold uppercase tracking-widest drop-shadow-xs">
-          Secured by RP Foundation
-        </p>
-      </div>
     </div>
   );
 }

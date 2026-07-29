@@ -91,7 +91,7 @@ export default function SplashScreen() {
 
         {/* Ashoka Chakra Loading Spinner */}
         <div 
-          className="w-12 h-12 text-[#000080] flex items-center justify-center mb-6"
+          className="w-12 h-12 text-[#000080] flex items-center justify-center mb-4"
           style={{ animation: 'spin-chakra 5s linear infinite' }}
         >
           <svg viewBox="0 0 24 24" className="w-full h-full">
@@ -110,15 +110,11 @@ export default function SplashScreen() {
             ))}
           </svg>
         </div>
-      </div>
 
-
-
-      {/* Footer Branding */}
-      <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center opacity-85 z-10">
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-[12px] text-[#000080] font-sans tracking-widest font-black animate-pulse">वंदे मातरम</span>
-        </div>
+        {/* Vande Mataram under the wheel */}
+        <span className="text-[18px] text-[#000080] font-sans tracking-widest font-black uppercase animate-pulse">
+          वंदे मातरम
+        </span>
       </div>
     </div>
   );
