@@ -1607,6 +1607,96 @@ app.delete("/api/blogs/:id", authenticateToken, requireAdmin, async (req, res) =
   }
 });
 
+// --- Social Live Link Previews with Exabase ---
+interface SocialCacheEntry {
+  data: any;
+  timestamp: number;
+}
+
+const socialPreviewsCache: { [url: string]: SocialCacheEntry } = {};
+const SOCIAL_CACHE_TTL = 60 * 60 * 1000; // 1 hour in ms
+
+app.get("/api/social-previews", async (req, res) => {
+  try {
+    const apiKey = process.env.EXABASE_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ success: false, error: "Exabase API key not configured on server" });
+    }
+
+    const targetUrls = [
+      "https://www.instagram.com/rpfoundationofficial/",
+      "https://www.instagram.com/therohitpandit/",
+      "https://www.facebook.com/rpfofficial",
+      "https://x.com/rpfoundation15",
+      "https://www.youtube.com/@rpfoundationofficial"
+    ];
+
+    const results = [];
+
+    for (const url of targetUrls) {
+      const now = Date.now();
+      const cached = socialPreviewsCache[url];
+
+      if (cached && (now - cached.timestamp < SOCIAL_CACHE_TTL)) {
+        results.push(cached.data);
+        continue;
+      }
+
+      try {
+        console.log(`[EXABASE] Fetching live preview for: ${url}`);
+        const response = await axios.post(
+          "https://api.exabase.io/v2/link-preview",
+          new URLSearchParams({ q: url }).toString(),
+          {
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            timeout: 8000
+          }
+        );
+
+        const previewData = response.data;
+        const normalized = {
+          url,
+          title: previewData.title || previewData.Title || url,
+          description: previewData.description || previewData.Description || "",
+          image: previewData.image || previewData.imageUrl || previewData.ImageUrl || "",
+          siteName: previewData.siteName || previewData.SiteName || ""
+        };
+
+        socialPreviewsCache[url] = {
+          data: normalized,
+          timestamp: now
+        };
+
+        results.push(normalized);
+      } catch (err: any) {
+        console.warn(`[EXABASE WARNING] Failed to fetch live preview for ${url}:`, err.message);
+        if (cached) {
+          results.push(cached.data);
+        } else {
+          results.push({
+            url,
+            title: url.includes("instagram") ? (url.includes("therohitpandit") ? "Rohit Pandit Instagram" : "RP Foundation Instagram") : 
+                   url.includes("facebook") ? "RP Foundation Facebook" :
+                   url.includes("youtube") ? "RP Foundation YouTube" : "RP Foundation Twitter/X",
+            description: "Visit our official social media page for live updates, campaigns and community achievements.",
+            image: "",
+            siteName: url.includes("instagram") ? "Instagram" : 
+                      url.includes("facebook") ? "Facebook" :
+                      url.includes("youtube") ? "YouTube" : "Twitter/X"
+          });
+        }
+      }
+    }
+
+    res.json({ success: true, data: results });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // --- support_requests (FoodSupport) ---
 app.post("/api/support_requests", async (req, res) => {
   try {
