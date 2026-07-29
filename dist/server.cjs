@@ -68470,6 +68470,34 @@ app.post("/api/social/:id/edit", authenticateToken, requireAdmin, async (req, re
     res.status(500).json({ error: error.message });
   }
 });
+app.post("/api/volunteers", authenticateToken, async (req, res) => {
+  try {
+    const { name, phone, skills } = req.body;
+    const userId = req.user.id;
+    await pool2.query(`UPDATE users SET "isVolunteer" = true WHERE id = $1`, [userId]);
+    const volCheck = await pool2.query(`SELECT id FROM volunteers WHERE id = $1`, [userId]);
+    if (volCheck.rows.length === 0) {
+      const userRes = await pool2.query(`SELECT username, email FROM users WHERE id = $1`, [userId]);
+      const username = userRes.rows[0]?.username || `user_${userId.slice(-6)}`;
+      const email = userRes.rows[0]?.email || null;
+      const regNumber = "RPF-" + (/* @__PURE__ */ new Date()).getFullYear() + "-" + Math.floor(1e3 + Math.random() * 9e3);
+      await pool2.query(
+        `INSERT INTO volunteers (id, username, registration_number, full_name, mobile, email, skills, approval_status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [userId, username, regNumber, name || "Citizen", phone || "", email, JSON.stringify(skills ? skills.split(", ") : []), "approved"]
+      );
+    } else {
+      await pool2.query(
+        `UPDATE volunteers SET skills = $1, full_name = $2, mobile = $3 WHERE id = $4`,
+        [JSON.stringify(skills ? skills.split(", ") : []), name || "Citizen", phone || "", userId]
+      );
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error creating volunteer record:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 app.get("/api/volunteers", async (req, res) => {
   try {
     const result = await pool2.query(

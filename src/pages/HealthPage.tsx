@@ -16,7 +16,7 @@ export default function HealthPage() {
         if (error) throw error;
         setDonors(data || []);
       } catch (error) {
-        console.error("Error fetching blood donors from Supabase:", error);
+        console.error("Error fetching blood donors from backend:", error);
       } finally {
         setIsLoading(false);
       }
@@ -30,7 +30,7 @@ export default function HealthPage() {
       if (error) throw error;
       setDonors(prev => [newDonor, ...prev]);
     } catch (error) {
-      console.error("Error adding blood donor to Supabase:", error);
+      console.error("Error adding blood donor to backend:", error);
     }
   };
 

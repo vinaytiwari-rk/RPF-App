@@ -42,7 +42,7 @@ export default function JobsPage() {
           throw new Error("Failed to fetch jobs");
         }
       } catch (error) {
-        console.error("Supabase jobs fetch error:", error);
+        console.error("Backend jobs fetch error:", error);
       }
     };
     fetchJobs();
@@ -111,7 +111,7 @@ export default function JobsPage() {
         setFileName(null);
       }, 3000);
     } catch (error) {
-      console.error("Supabase application submission error:", error);
+      console.error("Application submission error:", error);
       setSubmitting(false);
     }
   };

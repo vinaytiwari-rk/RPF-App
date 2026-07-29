@@ -14,11 +14,11 @@ export default function VolunteersPage() {
   useEffect(() => {
     const fetchCamps = async () => {
       try {
-        const response = await axios.get('/api/camps'); const data = response.data.data || response.data.camps; const error = null;
-        if (error) throw error;
+        const response = await axios.get('/api/health_camps');
+        const data = response.data.camps || response.data.data;
         setCamps(data || []);
       } catch (error) {
-        console.error("Supabase camps fetch error:", error);
+        console.error("Health camps fetch error:", error);
       }
     };
     fetchCamps();
@@ -42,31 +42,33 @@ export default function VolunteersPage() {
 
   const handleParticipateCamp = async (campId: string) => {
     try {
-      const camp = camps.find(c => c.id === campId);
-      const nextCount = (camp?.registeredCount || 0) + 1;
-      
-      await axios.put('/api/camps/' + campId, { registeredCount: nextCount }); const error = null;
-      if (error) throw error;
-
-      setCamps(prev => prev.map(c => c.id === campId ? { ...c, registeredCount: nextCount } : c));
+      const token = localStorage.getItem("token");
+      const response = await axios.post('/api/health_camps/' + campId + '/register', {}, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (response.data.success) {
+        setCamps(prev => prev.map(c => c.id === campId ? { ...c, registeredCount: response.data.camp.registeredCount } : c));
+      }
     } catch (error) {
-      console.error("Supabase participate error:", error);
+      console.error("Participate error:", error);
     }
   };
 
   const handleRegisterVolunteer = async (skills: string) => {
     await updateUser({ isVolunteer: true, interests: skills.split(", ") });
     try {
+      const token = localStorage.getItem("token");
       await axios.post('/api/volunteers', {
           userId: user?.id || "guest",
           name: user?.name || "Citizen",
           phone: user?.phone || "9999999999",
           skills: skills,
           registeredAt: new Date().toISOString()
-        }); const error = null;
-      if (error) throw error;
+        }, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
     } catch (error) {
-      console.error("Supabase register volunteer error:", error);
+      console.error("Register volunteer error:", error);
     }
   };
 

@@ -86,7 +86,7 @@ export default function FoodSupport() {
         setRationCard("");
       }, 4000);
     } catch (err) {
-      console.error("Supabase Food Support submission error:", err);
+      console.error("Food Support submission error:", err);
     } finally {
       setSubmitting(false);
     }

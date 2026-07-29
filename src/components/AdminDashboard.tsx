@@ -26,7 +26,6 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-// import { supabase } from "../lib/supabaseClient";
 import { useApp } from "../context/AppContext";
 
 /* ─────────────────────────────────────────────────────────────

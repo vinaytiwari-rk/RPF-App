@@ -3589,6 +3589,42 @@ app.post("/api/social/:id/edit", authenticateToken, requireAdmin, async (req, re
 // =============================================================================
 // VOLUNTEERS ENDPOINTS
 // =============================================================================
+app.post("/api/volunteers", authenticateToken, async (req: any, res) => {
+  try {
+    const { name, phone, skills } = req.body;
+    const userId = req.user.id;
+
+    // Update the user record to reflect they are now a volunteer
+    await pool.query(`UPDATE users SET "isVolunteer" = true WHERE id = $1`, [userId]);
+
+    // Check if they are already in the volunteers table
+    const volCheck = await pool.query(`SELECT id FROM volunteers WHERE id = $1`, [userId]);
+    if (volCheck.rows.length === 0) {
+      // Get user's email and username to copy over
+      const userRes = await pool.query(`SELECT username, email FROM users WHERE id = $1`, [userId]);
+      const username = userRes.rows[0]?.username || `user_${userId.slice(-6)}`;
+      const email = userRes.rows[0]?.email || null;
+      const regNumber = "RPF-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
+
+      await pool.query(
+        `INSERT INTO volunteers (id, username, registration_number, full_name, mobile, email, skills, approval_status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [userId, username, regNumber, name || "Citizen", phone || "", email, JSON.stringify(skills ? skills.split(", ") : []), 'approved']
+      );
+    } else {
+      await pool.query(
+        `UPDATE volunteers SET skills = $1, full_name = $2, mobile = $3 WHERE id = $4`,
+        [JSON.stringify(skills ? skills.split(", ") : []), name || "Citizen", phone || "", userId]
+      );
+    }
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Error creating volunteer record:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.get("/api/volunteers", async (req, res) => {
   try {
     const result = await pool.query(

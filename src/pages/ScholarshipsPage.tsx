@@ -108,7 +108,7 @@ export default function ScholarshipsPage() {
         setFileName(null);
       }, 4000);
     } catch (err) {
-      console.error("Supabase Scholarships submission error:", err);
+      console.error("Scholarships submission error:", err);
     } finally {
       setSubmitting(false);
     }
