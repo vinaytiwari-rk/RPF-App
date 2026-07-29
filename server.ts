@@ -1511,6 +1511,102 @@ app.put("/api/community_posts/:id", async (req, res) => {
   }
 });
 
+// --- success_stories ---
+app.get("/api/success-stories", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM success_stories ORDER BY "createdAt" DESC');
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/api/success-stories", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, content, imageUrl } = req.body;
+    if (!title || !content) return res.status(400).json({ success: false, error: "Title and Content are required" });
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO success_stories (id, title, content, "imageUrl", "createdAt") VALUES ($1, $2, $3, $4, NOW())`,
+      [id, title, content, imageUrl || null]
+    );
+    res.json({ success: true, message: "Success story created successfully" });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete("/api/success-stories/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM success_stories WHERE id = $1', [req.params.id]);
+    res.json({ success: true, message: "Success story deleted successfully" });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- blogs ---
+// Public endpoint - get approved blogs
+app.get("/api/blogs", async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM blogs WHERE approved = true ORDER BY "publishedAt" DESC');
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Admin endpoint - get all blogs (approved & unapproved)
+app.get("/api/blogs/all", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM blogs ORDER BY "createdAt" DESC');
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// User endpoint - post new blog
+app.post("/api/blogs", authenticateToken, async (req: any, res) => {
+  try {
+    const { title, content } = req.body;
+    if (!title || !content) return res.status(400).json({ success: false, error: "Title and Content are required" });
+    const id = crypto.randomUUID();
+    
+    // Author name & ID from request token user
+    const authorName = req.user.displayName || req.user.name || "Anonymous Volunteer";
+    const authorId = req.user.id;
+
+    await pool.query(
+      `INSERT INTO blogs (id, title, content, "authorName", "authorId", approved, "createdAt") VALUES ($1, $2, $3, $4, $5, false, NOW())`,
+      [id, title, content, authorName, authorId]
+    );
+    res.json({ success: true, message: "Blog post submitted for admin approval" });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Admin endpoint - approve blog
+app.put("/api/blogs/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query('UPDATE blogs SET approved = true, "publishedAt" = NOW() WHERE id = $1', [req.params.id]);
+    res.json({ success: true, message: "Blog approved successfully" });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Admin endpoint - delete/reject blog
+app.delete("/api/blogs/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM blogs WHERE id = $1', [req.params.id]);
+    res.json({ success: true, message: "Blog deleted/rejected successfully" });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // --- support_requests (FoodSupport) ---
 app.post("/api/support_requests", async (req, res) => {
   try {
@@ -2578,6 +2674,31 @@ async function initDatabase() {
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "women_complaints table creation");
+
+    // Create success_stories table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS success_stories (
+        id UUID PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        "imageUrl" TEXT,
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "success_stories table creation");
+
+    // Create blogs table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS blogs (
+        id UUID PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        "authorName" TEXT NOT NULL,
+        "authorId" VARCHAR(255) NOT NULL,
+        approved BOOLEAN DEFAULT false,
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        "publishedAt" TIMESTAMP WITH TIME ZONE
+      )
+    `, [], "blogs table creation");
 
 
 

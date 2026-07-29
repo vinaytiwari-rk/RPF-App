@@ -196,6 +196,14 @@ export default function AdminDashboard() {
   const [testQuoteHi, setTestQuoteHi] = useState("");
   const [commsSuccess, setCommsSuccess] = useState(false);
 
+  // DB-Backed Success Stories & Blogs states
+  const [dbStories, setDbStories] = useState<any[]>([]);
+  const [dbBlogs, setDbBlogs] = useState<any[]>([]);
+  const [storyTitle, setStoryTitle] = useState("");
+  const [storyContent, setStoryContent] = useState("");
+  const [storyImageUrl, setStoryImageUrl] = useState("");
+  const [uploadingStoryImg, setUploadingStoryImg] = useState(false);
+
   // FAQ States
   const [faqQuestionEn, setFaqQuestionEn] = useState("");
   const [faqQuestionHi, setFaqQuestionHi] = useState("");
@@ -311,8 +319,31 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchDbStoriesAndBlogs = async () => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const storiesRes = await fetch("/api/success-stories", {
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+      if (storiesRes.ok) {
+        const d = await storiesRes.json();
+        setDbStories(d.data || []);
+      }
+      const blogsRes = await fetch("/api/blogs/all", {
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+      if (blogsRes.ok) {
+        const d = await blogsRes.json();
+        setDbBlogs(d.data || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch stories & blogs in admin:", err);
+    }
+  };
+
   useEffect(() => {
     fetchCampaignsAndVolunteers();
+    fetchDbStoriesAndBlogs();
   }, []);
 
   // Analytics Realtime Aggregators
@@ -672,75 +703,92 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleAddTestimonial = async (e: React.FormEvent) => {
+  const handleAddDbStory = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!testNameEn || !testQuoteEn) return;
+    if (!storyTitle.trim() || !storyContent.trim()) return;
     try {
-      const newTest = {
-        id: `test-${Date.now()}`,
-        nameEn: testNameEn,
-        nameHi: testNameHi || testNameEn,
-        villageEn: testVillageEn,
-        villageHi: testVillageHi || testVillageEn,
-        quoteEn: testQuoteEn,
-        quoteHi: testQuoteHi || testQuoteEn
-      };
-      const updatedTestimonials = [...(cmsConfig?.testimonials || []), newTest];
-      
-      const payload = {
-        founderName,
-        founderDesignation,
-        aboutTextEn: cmsConfig?.aboutTextEn || aboutTextEn,
-        aboutTextHi: cmsConfig?.aboutTextHi || aboutTextHi,
-        logoImgUrl: cmsConfig?.logoImgUrl || logoImgUrl,
-        notifications: cmsConfig?.notifications || [],
-        testimonials: updatedTestimonials,
-        socialDirectory: cmsConfig?.socialDirectory || [],
-        faqs: cmsConfig?.faqs || []
-      };
-      
-      const response = await fetch("/api/cms/config", {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch("/api/success-stories", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify({
+          title: storyTitle.trim(),
+          content: storyContent.trim(),
+          imageUrl: storyImageUrl
+        })
       });
-      
-      if (response.ok) {
+      const data = await res.json();
+      if (data.success) {
+        setStoryTitle("");
+        setStoryContent("");
+        setStoryImageUrl("");
         setCommsSuccess(true);
-        setTestNameEn(""); setTestNameHi(""); setTestVillageEn(""); setTestVillageHi(""); setTestQuoteEn(""); setTestQuoteHi("");
         setTimeout(() => setCommsSuccess(false), 3000);
-        refreshData();
+        fetchDbStoriesAndBlogs();
+      } else {
+        alert(data.error || "Failed to create success story");
       }
     } catch (err) {
-      console.error("Error adding testimonial:", err);
+      console.error("Error creating story:", err);
     }
   };
 
-  const handleDeleteTestimonial = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this testimonial?")) return;
+  const handleDeleteDbStory = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this success story?")) return;
     try {
-      const updatedTestimonials = (cmsConfig?.testimonials || []).filter((t: any) => t.id !== id);
-      const payload = {
-        founderName,
-        founderDesignation,
-        aboutTextEn: cmsConfig?.aboutTextEn || aboutTextEn,
-        aboutTextHi: cmsConfig?.aboutTextHi || aboutTextHi,
-        logoImgUrl: cmsConfig?.logoImgUrl || logoImgUrl,
-        notifications: cmsConfig?.notifications || [],
-        testimonials: updatedTestimonials,
-        socialDirectory: cmsConfig?.socialDirectory || [],
-        faqs: cmsConfig?.faqs || []
-      };
-      const response = await fetch("/api/cms/config", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch(`/api/success-stories/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token || ""}`
+        }
       });
-      if (response.ok) {
-        refreshData();
+      const data = await res.json();
+      if (data.success) {
+        fetchDbStoriesAndBlogs();
       }
     } catch (err) {
-      console.error("Error deleting testimonial:", err);
+      console.error("Error deleting story:", err);
+    }
+  };
+
+  const handleApproveBlog = async (id: string) => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch(`/api/blogs/${id}/approve`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token || ""}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchDbStoriesAndBlogs();
+      }
+    } catch (err) {
+      console.error("Error approving blog:", err);
+    }
+  };
+
+  const handleDeleteBlog = async (id: string) => {
+    if (!confirm("Are you sure you want to delete/reject this blog?")) return;
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch(`/api/blogs/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token || ""}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchDbStoriesAndBlogs();
+      }
+    } catch (err) {
+      console.error("Error deleting blog:", err);
     }
   };
 
@@ -1750,30 +1798,68 @@ export default function AdminDashboard() {
                 <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl uppercase font-black text-[9px] tracking-wider transition">Send Notification Alert</button>
               </form>
 
-              {/* Add Success Story Testimonial */}
-              <form onSubmit={handleAddTestimonial} className="space-y-3 bg-amber-50/50 p-4 rounded-2xl border border-amber-200/50">
-                <span className="text-[9px] font-black text-amber-800 uppercase block tracking-wider">Publish Citizen Success Story</span>
+              {/* Add Database-backed Success Story */}
+              <form onSubmit={handleAddDbStory} className="space-y-3 bg-amber-50/50 p-4 rounded-2xl border border-amber-200/50">
+                <span className="text-[9px] font-black text-amber-800 uppercase block tracking-wider">Publish Success Story (Database-backed)</span>
                 
-                <div className="grid grid-cols-2 gap-2">
-                  <input required type="text" value={testNameEn} onChange={e  => { setTestNameEn(e.target.value); setTestNameHi(e.target.value); }} placeholder="Citizen Name (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
-                  <input required type="text" value={testNameHi} onChange={e => setTestNameHi(e.target.value)} placeholder="नागरिक का नाम (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                <div>
+                  <input required type="text" value={storyTitle} onChange={e => setStoryTitle(e.target.value)} placeholder="Success Story Title" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <input type="text" value={testVillageEn} onChange={e  => { setTestVillageEn(e.target.value); setTestVillageHi(e.target.value); }} placeholder="Village/Ward (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
-                  <input type="text" value={testVillageHi} onChange={e => setTestVillageHi(e.target.value)} placeholder="गाँव/वार्ड (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl text-[11px]" />
+                <div>
+                  <textarea required value={storyContent} onChange={e => setStoryContent(e.target.value)} placeholder="Success Story Content" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[60px] text-[11px]" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <textarea required value={testQuoteEn} onChange={e  => { setTestQuoteEn(e.target.value); setTestQuoteHi(e.target.value); }} placeholder="Success Quote (Multi-Language)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
-                  <textarea required value={testQuoteHi} onChange={e => setTestQuoteHi(e.target.value)} placeholder="सफलता की कहानी (HI)" className="w-full border border-slate-200 bg-white p-2.5 rounded-xl min-h-[45px] text-[11px]" />
+                {/* Attached Image upload */}
+                <div className="space-y-1.5 bg-white p-2.5 rounded-xl border border-slate-200/60">
+                  <label className="text-[9px] font-black text-slate-500 uppercase block">Attached Story Image (Optional)</label>
+                  <div className="flex items-center gap-2">
+                    {storyImageUrl && (
+                      <img src={storyImageUrl} alt="Preview" className="w-10 h-10 rounded-lg object-cover" />
+                    )}
+                    <label className="flex-1 flex flex-col items-center justify-center border border-dashed border-slate-350 rounded-lg p-2 bg-slate-50 hover:bg-slate-100 cursor-pointer">
+                      <span className="text-[9px] font-bold text-[#000080]">
+                        {uploadingStoryImg ? "Uploading..." : "Upload Story Image / गैलरी से चित्र चुनें"}
+                      </span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        disabled={uploadingStoryImg} 
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploadingStoryImg(true);
+                          try {
+                            const formData = new FormData();
+                            formData.append("file", file);
+                            const token = localStorage.getItem("@rpf_token");
+                            const res = await fetch("/api/upload/image", {
+                              method: "POST",
+                              headers: {
+                                "Authorization": `Bearer ${token || ""}`
+                              },
+                              body: formData
+                            });
+                            if (!res.ok) throw new Error();
+                            const data = await res.json();
+                            setStoryImageUrl(data.url);
+                          } catch (err) {
+                            alert("Failed to upload image.");
+                          } finally {
+                            setUploadingStoryImg(false);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
 
-                <button type="submit" className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-xl uppercase font-black text-[9px] tracking-wider transition">Publish Story</button>
+                <button type="submit" className="w-full bg-[#FF9933] hover:bg-orange-600 text-white py-2 rounded-xl uppercase font-black text-[9px] tracking-wider transition">Publish Success Story</button>
               </form>
 
-              {/* Manage Stories and Alerts Lists */}
-              <div className="space-y-4 mt-4">
+              {/* Manage Stories, Blogs and Alerts Lists */}
+              <div className="space-y-5 mt-4">
                 <div>
                   <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider mb-2">Live Notifications ({cmsConfig?.notifications?.length || 0})</span>
                   <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
@@ -1790,17 +1876,72 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider mb-2">Citizen Stories ({cmsConfig?.testimonials?.length || 0})</span>
+                  <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider mb-2">Success Stories ({dbStories.length})</span>
                   <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                    {(cmsConfig?.testimonials || []).map((t: any) => (
-                      <div key={t.id} className="flex justify-between items-center bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
-                        <div>
-                          <span className="font-extrabold text-[11px] text-slate-800 block">{t.nameEn}</span>
-                          <span className="text-[8.5px] text-slate-400 block">{t.villageEn || "Volunteer"}</span>
+                    {dbStories.map((story) => (
+                      <div key={story.id} className="flex justify-between items-center bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
+                        <div className="flex items-center gap-2">
+                          {story.imageUrl && (
+                            <img src={story.imageUrl} alt="story" className="w-8 h-8 rounded object-cover shrink-0" />
+                          )}
+                          <div>
+                            <span className="font-extrabold text-[11px] text-slate-800 block">{story.title}</span>
+                            <span className="text-[8.5px] text-slate-400 block">{new Date(story.createdAt).toLocaleDateString()}</span>
+                          </div>
                         </div>
-                        <button onClick={() => handleDeleteTestimonial(t.id)} className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 transition"><Trash2 className="w-3 h-3" /></button>
+                        <button onClick={() => handleDeleteDbStory(story.id)} className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 transition"><Trash2 className="w-3 h-3" /></button>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 pt-4">
+                  <h5 className="text-[11px] font-black text-indigo-950 uppercase tracking-wider mb-3">Blog Post Moderation</h5>
+                  
+                  {/* Pending Blogs */}
+                  <div className="mb-4">
+                    <span className="text-[9px] font-black uppercase text-amber-600 block tracking-wider mb-2">Pending Blogs ({dbBlogs.filter(b => !b.approved).length})</span>
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {dbBlogs.filter(b => !b.approved).length === 0 ? (
+                        <div className="text-[10px] text-slate-400 py-2 italic font-semibold">No pending blogs to review.</div>
+                      ) : (
+                        dbBlogs.filter(b => !b.approved).map((blog) => (
+                          <div key={blog.id} className="bg-amber-50/40 border border-amber-100 p-3 rounded-2xl space-y-2">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <span className="font-extrabold text-xs text-slate-905 block">{blog.title}</span>
+                                <span className="text-[8.5px] text-slate-400 block">By: {blog.authorName} • {new Date(blog.createdAt).toLocaleString()}</span>
+                              </div>
+                              <div className="flex gap-1.5 shrink-0">
+                                <button onClick={() => handleApproveBlog(blog.id)} className="p-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 transition text-[9px] uppercase font-black">Approve</button>
+                                <button onClick={() => handleDeleteBlog(blog.id)} className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition text-[9px] uppercase font-black">Reject</button>
+                              </div>
+                            </div>
+                            <p className="text-[10.5px] font-medium text-slate-650 leading-relaxed whitespace-pre-line">{blog.content}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Approved Blogs */}
+                  <div>
+                    <span className="text-[9px] font-black uppercase text-green-600 block tracking-wider mb-2">Approved Blogs ({dbBlogs.filter(b => b.approved).length})</span>
+                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                      {dbBlogs.filter(b => b.approved).length === 0 ? (
+                        <div className="text-[10px] text-slate-450 py-2 italic font-semibold">No approved blogs yet.</div>
+                      ) : (
+                        dbBlogs.filter(b => b.approved).map((blog) => (
+                          <div key={blog.id} className="flex justify-between items-center bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
+                            <div>
+                              <span className="font-extrabold text-[11px] text-slate-800 block">{blog.title}</span>
+                              <span className="text-[8.5px] text-slate-400 block">By: {blog.authorName} • Published: {new Date(blog.publishedAt || blog.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <button onClick={() => handleDeleteBlog(blog.id)} className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 transition"><Trash2 className="w-3 h-3" /></button>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

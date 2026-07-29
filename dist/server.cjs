@@ -66652,6 +66652,84 @@ async function queryExternalSearch(searchQuery) {
       res.status(500).json({ error: err.message });
     }
   });
+  app.get("/api/success-stories", async (req, res) => {
+    try {
+      const result = await pool2.query('SELECT * FROM success_stories ORDER BY "createdAt" DESC');
+      res.json({ success: true, data: result.rows });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app.post("/api/success-stories", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const { title, content, imageUrl } = req.body;
+      if (!title || !content) return res.status(400).json({ success: false, error: "Title and Content are required" });
+      const id = import_crypto2.default.randomUUID();
+      await pool2.query(
+        `INSERT INTO success_stories (id, title, content, "imageUrl", "createdAt") VALUES ($1, $2, $3, $4, NOW())`,
+        [id, title, content, imageUrl || null]
+      );
+      res.json({ success: true, message: "Success story created successfully" });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app.delete("/api/success-stories/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await pool2.query("DELETE FROM success_stories WHERE id = $1", [req.params.id]);
+      res.json({ success: true, message: "Success story deleted successfully" });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app.get("/api/blogs", async (req, res) => {
+    try {
+      const result = await pool2.query('SELECT * FROM blogs WHERE approved = true ORDER BY "publishedAt" DESC');
+      res.json({ success: true, data: result.rows });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app.get("/api/blogs/all", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const result = await pool2.query('SELECT * FROM blogs ORDER BY "createdAt" DESC');
+      res.json({ success: true, data: result.rows });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app.post("/api/blogs", authenticateToken, async (req, res) => {
+    try {
+      const { title, content } = req.body;
+      if (!title || !content) return res.status(400).json({ success: false, error: "Title and Content are required" });
+      const id = import_crypto2.default.randomUUID();
+      const authorName = req.user.displayName || req.user.name || "Anonymous Volunteer";
+      const authorId = req.user.id;
+      await pool2.query(
+        `INSERT INTO blogs (id, title, content, "authorName", "authorId", approved, "createdAt") VALUES ($1, $2, $3, $4, $5, false, NOW())`,
+        [id, title, content, authorName, authorId]
+      );
+      res.json({ success: true, message: "Blog post submitted for admin approval" });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app.put("/api/blogs/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await pool2.query('UPDATE blogs SET approved = true, "publishedAt" = NOW() WHERE id = $1', [req.params.id]);
+      res.json({ success: true, message: "Blog approved successfully" });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  app.delete("/api/blogs/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await pool2.query("DELETE FROM blogs WHERE id = $1", [req.params.id]);
+      res.json({ success: true, message: "Blog deleted/rejected successfully" });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
   app.post("/api/support_requests", async (req, res) => {
     try {
       const { citizenName, citizenPhone, requestType, location, description, status, createdAt } = req.body;
@@ -67540,6 +67618,27 @@ async function initDatabase() {
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "women_complaints table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS success_stories (
+        id UUID PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        "imageUrl" TEXT,
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "success_stories table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS blogs (
+        id UUID PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        "authorName" TEXT NOT NULL,
+        "authorId" VARCHAR(255) NOT NULL,
+        approved BOOLEAN DEFAULT false,
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        "publishedAt" TIMESTAMP WITH TIME ZONE
+      )
+    `, [], "blogs table creation");
     try {
       const postsCount = await client.query("SELECT COUNT(*) FROM social_posts");
       if (parseInt(postsCount.rows[0].count, 10) === 0) {
