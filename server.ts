@@ -4578,6 +4578,7 @@ app.put("/api/admin/hq/services/:id/content", async (req, res) => {
 
 // Serve static assets in production or integrate Vite in development
 async function startServer() {
+
   // Initialize Database tables and views
   await initDatabase();
 
