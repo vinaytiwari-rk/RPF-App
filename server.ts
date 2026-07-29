@@ -1623,13 +1623,26 @@ app.get("/api/social-previews", async (req, res) => {
       return res.status(500).json({ success: false, error: "Exabase API key not configured on server" });
     }
 
-    const targetUrls = [
+    let targetUrls = [
       "https://www.instagram.com/rpfoundationofficial/",
       "https://www.instagram.com/therohitpandit/",
       "https://www.facebook.com/rpfofficial",
       "https://x.com/rpfoundation15",
       "https://www.youtube.com/@rpfoundationofficial"
     ];
+
+    // Retrieve live social media links configured in database settings
+    try {
+      const cmsDataRes = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
+      if (cmsDataRes.rows.length > 0 && cmsDataRes.rows[0].founderMessageEn) {
+        const parsed = JSON.parse(cmsDataRes.rows[0].founderMessageEn);
+        if (parsed.socialDirectory && Array.isArray(parsed.socialDirectory) && parsed.socialDirectory.length > 0) {
+          targetUrls = parsed.socialDirectory.map((item: any) => item.url).filter(Boolean);
+        }
+      }
+    } catch (e: any) {
+      console.warn("[EXABASE] Failed to dynamically load social links from DB settings, using defaults:", e.message);
+    }
 
     const results = [];
 
