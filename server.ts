@@ -19,6 +19,7 @@ import { setDbPool } from "./src/controllers/adminHqController.js";
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1);
 
 const apiCache = new Map<string, { data: any, timestamp: number }>();
 const CACHE_TTL = 60000; // 1 minute
