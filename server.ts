@@ -1658,24 +1658,25 @@ app.get("/api/social-previews", async (req, res) => {
 
       try {
         console.log(`[EXABASE] Fetching live preview for: ${url}`);
-        const response = await axios.post(
-          "https://api.exabase.io/v2/link-preview",
-          new URLSearchParams({ q: url }).toString(),
+        const response = await axios.get(
+          `https://api.exabase.io/v2/link?url=${encodeURIComponent(url)}`,
           {
             headers: {
-              "Authorization": `Bearer ${apiKey}`,
-              "Content-Type": "application/x-www-form-urlencoded"
+              "X-Api-Key": apiKey
             },
             timeout: 8000
           }
         );
 
         const previewData = response.data;
+        const imgObj = previewData.image;
+        const imageUrl = (imgObj && typeof imgObj === "object" ? imgObj.url : imgObj) || previewData.imageUrl || previewData.ImageUrl || "";
+        
         const normalized = {
           url,
           title: previewData.title || previewData.Title || url,
           description: previewData.description || previewData.Description || "",
-          image: previewData.image || previewData.imageUrl || previewData.ImageUrl || "",
+          image: imageUrl,
           siteName: previewData.siteName || previewData.SiteName || ""
         };
 
