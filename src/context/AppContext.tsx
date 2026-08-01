@@ -73,6 +73,7 @@ export interface Settings {
   email: string;
   founderMessageEn: string;
   founderMessageHi: string;
+  helplinesMarquee?: string;
 }
 
 export interface SocialLink {
@@ -131,6 +132,7 @@ const DEFAULT_SETTINGS: Settings = {
     "Our mission is simple – to serve humanity with sincerity, build strong communities, and create a better tomorrow for India.",
   founderMessageHi:
     "हमारा उद्देश्य सरल है - निष्ठा के साथ मानवता की सेवा करना, मजबूत समुदायों का निर्माण करना और भारत के प्रत्येक नागरिक के लिए एक बेहतर कल का निर्माण करना।",
+  helplinesMarquee: "RP Foundation Toll Free Number: 1800-569-0991, CM Helpline: 181, Emergency Response Support System: 112, Women Helpline: 1090, Ambulance: 108/102, Police Helpline: 100, Fire Emergency: 101, Child Helpline: 1098, Railway Inqury : 139, Airlines Enquiry : 143, Blood Bank: 1910, Voter Helpline: 1950, Cyber Crime Helpline : 1930, LPG Leak Line Helpline: 1906, Natinal Consumer Helpline: 1915, National Narcotis Helpline: 1933, Natural Calaities Helpline: 1070, Road Accident Helpline: 1073",
 };
 
 const DEFAULT_CMS_CONFIG: CmsConfig = {

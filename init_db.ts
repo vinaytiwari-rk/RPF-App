@@ -45,9 +45,12 @@ async function initDatabase() {
           "tollFree" TEXT,
           "webUrl" TEXT,
           "founderMessageEn" TEXT,
-          "founderMessageHi" TEXT
+          "founderMessageHi" TEXT,
+          "helplinesMarquee" TEXT
         )
       `);
+
+      await client.query('ALTER TABLE settings ADD COLUMN IF NOT EXISTS "helplinesMarquee" TEXT;');
 
       // Ensure otps table has enough space for emails
       try {

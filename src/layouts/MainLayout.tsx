@@ -33,7 +33,7 @@ export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { language, setLanguage, user, logout } = useAuth();
-  const { notifications } = useApp();
+  const { notifications, settings } = useApp();
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
   const [showGuestModal, setShowGuestModal] = useState(false);
 
@@ -220,6 +220,25 @@ export default function MainLayout() {
             </button>
           </div>
         </div>
+
+        {/* Global Helpline Marquee Ticker */}
+        {settings?.helplinesMarquee && (
+          <div className="w-full bg-slate-50 border-b border-slate-200/50 py-1.5 px-3 select-none overflow-hidden shrink-0 z-40 relative flex items-center gap-2">
+            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 shrink-0 font-sans">
+              📞 {language === "hi" ? "हेल्पलाइन" : "Helplines"}:
+            </span>
+            <div className="overflow-hidden w-full relative">
+              <marquee 
+                scrollamount="2"
+                onMouseOver={(e) => (e.currentTarget as any).stop()}
+                onMouseOut={(e) => (e.currentTarget as any).start()}
+                className="text-[10px] font-bold font-mono tracking-wide text-slate-600 whitespace-nowrap block cursor-pointer"
+              >
+                {settings.helplinesMarquee}
+              </marquee>
+            </div>
+          </div>
+        )}
 
         {/* MAIN SCROLLABLE CONTENT */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth bg-white/40" id="main-scroll-container">

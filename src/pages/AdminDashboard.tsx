@@ -48,6 +48,7 @@ export default function AdminDashboard() {
   const [email, setEmail] = useState(settings?.email || "info@therpfoundation.org");
   const [founderEn, setFounderEn] = useState(settings?.founderMessageEn || "");
   const [founderHi, setFounderHi] = useState(settings?.founderMessageHi || "");
+  const [helplinesMarquee, setHelplinesMarquee] = useState(settings?.helplinesMarquee || "");
   const [settingsSuccess, setSettingsSuccess] = useState(false);
 
   // Certificates State
@@ -270,6 +271,7 @@ export default function AdminDashboard() {
       setFounderImgUrl(settings.founderImgUrl || "/assets/founder.png");
       setAlertBannerEn(settings.alertBannerEn || "");
       setAlertBannerHi(settings.alertBannerHi || "");
+      setHelplinesMarquee(settings.helplinesMarquee || "");
       if (settings.carouselSlides) setCmsSlides(settings.carouselSlides);
       if (settings.customServices) setCustomServices(settings.customServices);
       setSettingsLoaded(true);
@@ -361,7 +363,8 @@ export default function AdminDashboard() {
         tollFree, webUrl, email, 
         founderMessageEn: founderEn, founderMessageHi: founderHi,
         founderImgUrl, alertBannerEn, alertBannerHi,
-        carouselSlides: cmsSlides, customServices
+        carouselSlides: cmsSlides, customServices,
+        helplinesMarquee
       };
       
       const cmsPayload = {
@@ -1203,9 +1206,19 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div>
+                 <div>
                   <label className="text-[9px] font-black text-slate-400 uppercase block mb-1">Toll-Free Helpline</label>
                   <input type="text" value={tollFree} onChange={e => setTollFree(e.target.value)} className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl outline-none focus:border-indigo-600" />
+                </div>
+                <div>
+                  <label className="text-[9px] font-black text-slate-400 uppercase block mb-1">Helplines Marquee Ticker / हेल्पलाइन टिकर संदेश</label>
+                  <textarea 
+                    value={helplinesMarquee} 
+                    onChange={e => setHelplinesMarquee(e.target.value)} 
+                    rows={3} 
+                    placeholder="Enter helpline contacts separating with commas..."
+                    className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl outline-none focus:border-indigo-600 font-mono text-xs"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>

@@ -2508,9 +2508,12 @@ async function initDatabase() {
         "tollFree" TEXT,
         "webUrl" TEXT,
         "founderMessageEn" TEXT,
-        "founderMessageHi" TEXT
+        "founderMessageHi" TEXT,
+        "helplinesMarquee" TEXT
       )
     `, [], "settings table creation");
+
+    await runQuery('ALTER TABLE settings ADD COLUMN IF NOT EXISTS "helplinesMarquee" TEXT;', [], "alter settings helplinesMarquee");
 
     // Ensure otps table exists
     await runQuery(`
@@ -3667,11 +3670,12 @@ app.get("/api/settings", async (req, res) => {
         webUrl: "www.therpfoundation.org",
         email: "info@therpfoundation.org",
         founderMessageEn: "Our mission is simple – to serve humanity with sincerity, build strong communities, and create a better tomorrow for India.",
-        founderMessageHi: "हमारा उद्देश्य सरल है - निष्ठा के साथ मानवता की सेवा करना, मजबूत समुदायों का निर्माण करना और भारत के प्रत्येक नागरिक के लिए एक बेहतर कल का निर्माण करना।"
+        founderMessageHi: "हमारा उद्देश्य सरल है - निष्ठा के साथ मानवता की सेवा करना, मजबूत समुदायों का निर्माण करना और भारत के प्रत्येक नागरिक के लिए एक बेहतर कल का निर्माण करना।",
+        helplinesMarquee: "RP Foundation Toll Free Number: 1800-569-0991, CM Helpline: 181, Emergency Response Support System: 112, Women Helpline: 1090, Ambulance: 108/102, Police Helpline: 100, Fire Emergency: 101, Child Helpline: 1098, Railway Inqury : 139, Airlines Enquiry : 143, Blood Bank: 1910, Voter Helpline: 1950, Cyber Crime Helpline : 1930, LPG Leak Line Helpline: 1906, Natinal Consumer Helpline: 1915, National Narcotis Helpline: 1933, Natural Calaities Helpline: 1070, Road Accident Helpline: 1073"
       };
       await pool.query(
-        'INSERT INTO settings (id, "tollFree", "webUrl", email, "founderMessageEn", "founderMessageHi") VALUES ($1, $2, $3, $4, $5, $6)',
-        [defaults.id, defaults.tollFree, defaults.webUrl, defaults.email, defaults.founderMessageEn, defaults.founderMessageHi]
+        'INSERT INTO settings (id, "tollFree", "webUrl", email, "founderMessageEn", "founderMessageHi", "helplinesMarquee") VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        [defaults.id, defaults.tollFree, defaults.webUrl, defaults.email, defaults.founderMessageEn, defaults.founderMessageHi, defaults.helplinesMarquee]
       );
       res.json({ settings: defaults });
     }
@@ -3683,13 +3687,13 @@ app.get("/api/settings", async (req, res) => {
 
 app.post("/api/settings", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
   try {
-    const { tollFree, webUrl, email, founderMessageEn, founderMessageHi } = req.body;
+    const { tollFree, webUrl, email, founderMessageEn, founderMessageHi, helplinesMarquee } = req.body;
     await pool.query(
-      `INSERT INTO settings (id, "tollFree", "webUrl", email, "founderMessageEn", "founderMessageHi") 
-       VALUES ('general', $1, $2, $3, $4, $5) 
+      `INSERT INTO settings (id, "tollFree", "webUrl", email, "founderMessageEn", "founderMessageHi", "helplinesMarquee") 
+       VALUES ('general', $1, $2, $3, $4, $5, $6) 
        ON CONFLICT (id) DO UPDATE SET 
-       "tollFree" = $1, "webUrl" = $2, email = $3, "founderMessageEn" = $4, "founderMessageHi" = $5`,
-      [tollFree, webUrl, email, founderMessageEn, founderMessageHi]
+       "tollFree" = $1, "webUrl" = $2, email = $3, "founderMessageEn" = $4, "founderMessageHi" = $5, "helplinesMarquee" = $6`,
+      [tollFree, webUrl, email, founderMessageEn, founderMessageHi, helplinesMarquee]
     );
     res.json({ success: true });
   } catch (error: any) {
