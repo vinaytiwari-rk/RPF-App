@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { 
   Calendar, BookOpen, Volume2, Download, Play, Eye, Users, 
@@ -10,6 +10,58 @@ export default function ReligiousCulture() {
   const isHi = lang === "hi";
 
   const [activeSubTab, setActiveSubTab] = useState<"festivals" | "texts" | "live">("festivals");
+  const [rsvps, setRsvps] = useState<string[]>([]);
+
+  const fetchRsvps = async () => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch("/api/culture/rsvps", {
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          setRsvps(json.data || []);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading rsvps:", err);
+    }
+  };
+
+  const toggleRsvp = async (eventTitle: string) => {
+    const isRegistered = rsvps.includes(eventTitle);
+    const token = localStorage.getItem("@rpf_token");
+    try {
+      if (isRegistered) {
+        const res = await fetch(`/api/culture/rsvps/${encodeURIComponent(eventTitle)}`, {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${token || ""}` }
+        });
+        if (res.ok) {
+          fetchRsvps();
+        }
+      } else {
+        const res = await fetch("/api/culture/rsvps", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+          },
+          body: JSON.stringify({ event_title: eventTitle })
+        });
+        if (res.ok) {
+          fetchRsvps();
+        }
+      }
+    } catch (err) {
+      console.error("Error toggling RSVP:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRsvps();
+  }, []);
 
   // Local Celebrations feed
   const localFestivals = [
@@ -160,10 +212,16 @@ export default function ReligiousCulture() {
                 </div>
 
                 <button 
-                  onClick={() => alert(`Registered for ${fest.titleEn}!`)}
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-xl text-[10.5px] transition"
+                  onClick={() => toggleRsvp(fest.titleEn)}
+                  className={`w-full font-bold py-2 rounded-xl text-[10.5px] transition ${
+                    rsvps.includes(fest.titleEn) 
+                      ? "bg-green-600 hover:bg-green-700 text-white font-bold" 
+                      : "bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                  }`}
                 >
-                  {isHi ? "मिलन कार्यक्रम में शामिल हों" : "Join Meetup Event"}
+                  {rsvps.includes(fest.titleEn) 
+                    ? (isHi ? "पंजीकृत (पंजीकरण रद्द करें)" : "Registered (Cancel RSVP)") 
+                    : (isHi ? "मिलन कार्यक्रम में शामिल हों" : "Join Meetup Event")}
                 </button>
               </div>
             ))}

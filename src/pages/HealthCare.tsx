@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { 
   Heart, Activity, CheckCircle, Navigation, Award, Calendar, 
   MapPin, Dumbbell, Droplets, Clock, Plus, ShieldAlert, 
-  Smile, User, Zap, BookOpen, Volume2, Search, Bell, AlertCircle
+  Smile, User, Zap, BookOpen, Volume2, Search, Bell, AlertCircle, Loader2, Trash2
 } from "lucide-react";
 
 export default function HealthCare() {
@@ -39,10 +39,7 @@ export default function HealthCare() {
   const [sleepCycle, setSleepCycle] = useState("7h 15m");
 
   // Medication Tracker states
-  const [medicines, setMedicines] = useState([
-    { name: "Metformin 500mg", time: "09:00 AM", taken: false },
-    { name: "Atorvastatin 10mg", time: "09:00 PM", taken: false }
-  ]);
+  const [medicines, setMedicines] = useState<any[]>([]);
   const [newMedName, setNewMedName] = useState("");
   const [newMedTime, setNewMedTime] = useState("08:00 AM");
 
@@ -63,6 +60,186 @@ export default function HealthCare() {
     { name: "MMR Vaccine", date: "Due in 15 days", done: false },
     { name: "DPT Booster", date: "Due in 3 months", done: false }
   ]);
+
+  // Load health data from database
+  const fetchVitals = async () => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch("/api/health-vitals", {
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          const d = json.data;
+          setStepCount(d.steps);
+          setWaterCount(d.water_cups);
+          setCalorieCount(d.calories);
+          setExerciseMinCount(d.exercise_mins);
+          setWeight(d.weight ? d.weight.toString() : "");
+          setHeight(d.height ? d.height.toString() : "");
+          setBmiResult(d.bmi ? Number(d.bmi) : null);
+          setSleepHours(d.sleep_hours ? d.sleep_hours.toString() : "7");
+          setHeartRate(d.heart_rate || 72);
+          setSleepCycle(d.sleep_cycle || "7h 15m");
+          setPeriodDay(d.period_day || 12);
+          setOvulationDay((d.period_day || 12) + 2);
+          setPregnancyWeek(d.pregnancy_week || 8);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading health vitals:", err);
+    }
+  };
+
+  const saveVitals = async (updates: any) => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      await fetch("/api/health-vitals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify(updates)
+      });
+    } catch (err) {
+      console.error("Error saving health vitals:", err);
+    }
+  };
+
+  const fetchMedications = async () => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch("/api/medications", {
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          setMedicines(json.data || []);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading medications:", err);
+    }
+  };
+
+  const addMedication = async () => {
+    if (!newMedName) return;
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch("/api/medications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify({ name: newMedName, alarm_time: newMedTime })
+      });
+      if (res.ok) {
+        fetchMedications();
+        setNewMedName("");
+      }
+    } catch (err) {
+      console.error("Error adding medication:", err);
+    }
+  };
+
+  const toggleMed = async (id: string) => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch(`/api/medications/${id}/toggle`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+      if (res.ok) {
+        fetchMedications();
+      }
+    } catch (err) {
+      console.error("Error toggling medication:", err);
+    }
+  };
+
+  const deleteMedication = async (id: string) => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch(`/api/medications/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+      if (res.ok) {
+        fetchMedications();
+      }
+    } catch (err) {
+      console.error("Error deleting medication:", err);
+    }
+  };
+
+  const fetchPediatric = async () => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch("/api/pediatric", {
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          if (json.profile) {
+            setChildAge(json.profile.child_age || "3");
+            setChildWeight(json.profile.child_weight || "14");
+          }
+          if (json.vaccines) {
+            setVaccineAlerts(prev => prev.map(vacc => {
+              const matches = json.vaccines.find((v: any) => v.vaccine_name === vacc.name);
+              return { ...vacc, done: matches ? matches.done : false };
+            }));
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error loading pediatric data:", err);
+    }
+  };
+
+  const savePediatricProfile = async (age: string, weightVal: string) => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      await fetch("/api/pediatric", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify({ child_age: age, child_weight: weightVal })
+      });
+    } catch (err) {
+      console.error("Error saving pediatric profile:", err);
+    }
+  };
+
+  const toggleVaccine = async (name: string, doneVal: boolean) => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      await fetch("/api/pediatric/vaccine", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify({ vaccine_name: name, done: doneVal })
+      });
+      fetchPediatric();
+    } catch (err) {
+      console.error("Error toggling vaccine:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchVitals();
+    fetchMedications();
+    fetchPediatric();
+  }, []);
 
   // Symptoms submission handler
   const handleAssess = () => {
@@ -85,7 +262,9 @@ export default function HealthCare() {
     const w = parseFloat(weight);
     const h = parseFloat(height) / 100; // to meters
     if (w > 0 && h > 0) {
-      setBmiResult(parseFloat((w / (h * h)).toFixed(1)));
+      const calculated = parseFloat((w / (h * h)).toFixed(1));
+      setBmiResult(calculated);
+      saveVitals({ weight: w, height: parseFloat(height), bmi: calculated });
     }
   };
 
@@ -98,6 +277,7 @@ export default function HealthCare() {
     // Weighted wellness calculation
     let score = (sleep * 5) + (ex * 1.5) + (water * 5);
     setWellnessScore(Math.min(100, Math.round(score)));
+    saveVitals({ sleep_hours: sleep });
   };
 
   // Sync Vitals simulation
@@ -109,24 +289,17 @@ export default function HealthCare() {
       setStepCount(8420);
       setHeartRate(78);
       setSleepCycle("7h 45m (Deep: 2h)");
+      saveVitals({ steps: 8420, heart_rate: 78, sleep_cycle: "7h 45m (Deep: 2h)" });
     }, 2000);
   };
 
   // Log food/calories
   const logMeal = (calories: number) => {
-    setCalorieCount(prev => prev + calories);
-  };
-
-  // Add medication
-  const addMedication = () => {
-    if (!newMedName) return;
-    setMedicines(prev => [...prev, { name: newMedName, time: newMedTime, taken: false }]);
-    setNewMedName("");
-  };
-
-  // Toggle med taken
-  const toggleMed = (idx: number) => {
-    setMedicines(prev => prev.map((med, i) => i === idx ? { ...med, taken: !med.taken } : med));
+    setCalorieCount(prev => {
+      const updated = prev + calories;
+      saveVitals({ calories: updated });
+      return updated;
+    });
   };
 
   // Guided Meditation countdown
@@ -450,13 +623,20 @@ export default function HealthCare() {
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => setWaterCount(prev => Math.min(8, prev + 1))}
+                  onClick={() => {
+                    const val = Math.min(8, waterCount + 1);
+                    setWaterCount(val);
+                    saveVitals({ water_cups: val });
+                  }}
                   className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs transition"
                 >
                   {isHi ? "+1 कप पानी पिएं" : "+1 Cup Water"}
                 </button>
                 <button
-                  onClick={() => setWaterCount(0)}
+                  onClick={() => {
+                    setWaterCount(0);
+                    saveVitals({ water_cups: 0 });
+                  }}
                   className="bg-slate-100 border border-slate-300 hover:bg-slate-200 px-3 py-2.5 rounded-xl text-xs font-bold transition text-slate-600"
                 >
                   {isHi ? "रीसेट" : "Reset"}
@@ -637,6 +817,12 @@ export default function HealthCare() {
                   />
                 </div>
               </div>
+              <button 
+                onClick={() => savePediatricProfile(childAge, childWeight)}
+                className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl text-xs transition mt-2"
+              >
+                {isHi ? "शिशु प्रोफ़ाइल सहेजें" : "Save Child Profile"}
+              </button>
 
               {/* Vaccine Alerts list */}
               <div className="space-y-2">
@@ -648,7 +834,7 @@ export default function HealthCare() {
                       <span className="text-slate-400 font-bold text-[9px] uppercase tracking-wider">{alert.date}</span>
                     </div>
                     <button 
-                      onClick={() => setVaccineAlerts(prev => prev.map((item, i) => i === idx ? { ...item, done: !item.done } : item))}
+                      onClick={() => toggleVaccine(alert.name, !alert.done)}
                       className={`text-[9px] font-black px-2 py-1 rounded-lg border transition ${
                         alert.done 
                           ? "bg-green-100 border-green-200 text-green-700" 
@@ -734,22 +920,30 @@ export default function HealthCare() {
               {/* List of current medicines */}
               <div className="space-y-2 pt-1">
                 {medicines.map((med, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex justify-between items-center text-xs">
+                  <div key={med.id || idx} className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex justify-between items-center text-xs">
                     <div>
                       <span className="font-bold text-slate-800 block">{med.name}</span>
-                      <span className="text-[9.5px] font-bold text-slate-400 block mt-0.5">🔔 Alarm: {med.time}</span>
+                      <span className="text-[9.5px] font-bold text-slate-400 block mt-0.5">🔔 Alarm: {med.time || med.alarm_time}</span>
                     </div>
                     
-                    <button 
-                      onClick={() => toggleMed(idx)}
-                      className={`text-[9.5px] font-black px-2.5 py-1.5 rounded-xl border transition ${
-                        med.taken 
-                          ? "bg-green-100 border-green-200 text-green-700" 
-                          : "bg-white border-slate-200 text-slate-650 hover:bg-slate-100"
-                      }`}
-                    >
-                      {med.taken ? (isHi ? "✓ ले ली गई" : "✓ Taken") : (isHi ? "मार्क करें" : "Mark Taken")}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => toggleMed(med.id)}
+                        className={`text-[9.5px] font-black px-2.5 py-1.5 rounded-xl border transition ${
+                          med.taken 
+                            ? "bg-green-150 border-green-200 text-green-700 font-bold" 
+                            : "bg-white border-slate-200 text-slate-650 hover:bg-slate-100 font-bold"
+                        }`}
+                      >
+                        {med.taken ? (isHi ? "✓ ले ली गई" : "✓ Taken") : (isHi ? "मार्क करें" : "Mark Taken")}
+                      </button>
+                      <button 
+                        onClick={() => deleteMedication(med.id)}
+                        className="bg-red-50 hover:bg-red-100 text-red-650 p-1.5 rounded-xl border border-red-200 transition"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

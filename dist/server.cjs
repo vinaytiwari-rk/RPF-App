@@ -67575,6 +67575,60 @@ async function initDatabase() {
       )
     `, [], "service_submissions_v2 table creation");
     await runQuery(`
+      CREATE TABLE IF NOT EXISTS health_vitals (
+        user_id VARCHAR(255) PRIMARY KEY,
+        steps INTEGER DEFAULT 0,
+        water_cups INTEGER DEFAULT 0,
+        calories INTEGER DEFAULT 0,
+        exercise_mins INTEGER DEFAULT 0,
+        weight NUMERIC DEFAULT 0,
+        height NUMERIC DEFAULT 0,
+        bmi NUMERIC DEFAULT 0,
+        sleep_hours NUMERIC DEFAULT 0,
+        heart_rate INTEGER DEFAULT 72,
+        sleep_cycle VARCHAR(100) DEFAULT '7h 15m',
+        period_day INTEGER DEFAULT 12,
+        pregnancy_week INTEGER DEFAULT 8,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "health_vitals table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS medications (
+        id UUID PRIMARY KEY,
+        user_id VARCHAR(255),
+        name TEXT,
+        alarm_time VARCHAR(50),
+        taken BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "medications table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS pediatric_profile (
+        user_id VARCHAR(255) PRIMARY KEY,
+        child_age VARCHAR(50),
+        child_weight VARCHAR(50),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "pediatric_profile table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS vaccine_status (
+        id UUID PRIMARY KEY,
+        user_id VARCHAR(255),
+        vaccine_name TEXT,
+        done BOOLEAN DEFAULT false,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(user_id, vaccine_name)
+      )
+    `, [], "vaccine_status table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS event_rsvps (
+        user_id VARCHAR(255),
+        event_title TEXT,
+        registered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        PRIMARY KEY (user_id, event_title)
+      )
+    `, [], "event_rsvps table creation");
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS volunteers (
         id VARCHAR(255) PRIMARY KEY,
         username VARCHAR(255) UNIQUE,
@@ -67996,6 +68050,217 @@ app.post("/api/jobs/:id/edit", authenticateToken, requireAdmin, async (req, res)
        WHERE id = $9`,
       [titleEn, titleHi, company, locEn, locHi, salary, typeEn, typeHi, req.params.id]
     );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/health-vitals", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool2.query("SELECT * FROM health_vitals WHERE user_id = $1", [userId]);
+    if (result.rows.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          steps: 4200,
+          water_cups: 4,
+          calories: 1200,
+          exercise_mins: 20,
+          weight: 70,
+          height: 175,
+          bmi: 22.9,
+          sleep_hours: 7,
+          heart_rate: 72,
+          sleep_cycle: "7h 15m",
+          period_day: 12,
+          pregnancy_week: 8
+        }
+      });
+    }
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/health-vitals", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const {
+      steps,
+      water_cups,
+      calories,
+      exercise_mins,
+      weight,
+      height,
+      bmi,
+      sleep_hours,
+      heart_rate,
+      sleep_cycle,
+      period_day,
+      pregnancy_week
+    } = req.body;
+    await pool2.query(
+      `INSERT INTO health_vitals 
+       (user_id, steps, water_cups, calories, exercise_mins, weight, height, bmi, sleep_hours, heart_rate, sleep_cycle, period_day, pregnancy_week, updated_at) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW()) 
+       ON CONFLICT (user_id) DO UPDATE SET 
+         steps = COALESCE($2, health_vitals.steps), 
+         water_cups = COALESCE($3, health_vitals.water_cups), 
+         calories = COALESCE($4, health_vitals.calories), 
+         exercise_mins = COALESCE($5, health_vitals.exercise_mins), 
+         weight = COALESCE($6, health_vitals.weight), 
+         height = COALESCE($7, health_vitals.height), 
+         bmi = COALESCE($8, health_vitals.bmi), 
+         sleep_hours = COALESCE($9, health_vitals.sleep_hours), 
+         heart_rate = COALESCE($10, health_vitals.heart_rate), 
+         sleep_cycle = COALESCE($11, health_vitals.sleep_cycle), 
+         period_day = COALESCE($12, health_vitals.period_day), 
+         pregnancy_week = COALESCE($13, health_vitals.pregnancy_week), 
+         updated_at = NOW()`,
+      [
+        userId,
+        steps,
+        water_cups,
+        calories,
+        exercise_mins,
+        weight,
+        height,
+        bmi,
+        sleep_hours,
+        heart_rate,
+        sleep_cycle,
+        period_day,
+        pregnancy_week
+      ]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/medications", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool2.query("SELECT * FROM medications WHERE user_id = $1 ORDER BY created_at ASC", [userId]);
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/medications", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, alarm_time } = req.body;
+    const id = import_crypto2.default.randomUUID();
+    await pool2.query(
+      `INSERT INTO medications (id, user_id, name, alarm_time, taken) VALUES ($1, $2, $3, $4, false)`,
+      [id, userId, name, alarm_time]
+    );
+    res.json({ success: true, id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/medications/:id/toggle", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    await pool2.query("UPDATE medications SET taken = NOT taken WHERE id = $1 AND user_id = $2", [id, userId]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.delete("/api/medications/:id", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    await pool2.query("DELETE FROM medications WHERE id = $1 AND user_id = $2", [id, userId]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/pediatric", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const profile = await pool2.query("SELECT * FROM pediatric_profile WHERE user_id = $1", [userId]);
+    const vaccines = await pool2.query("SELECT * FROM vaccine_status WHERE user_id = $1", [userId]);
+    res.json({
+      success: true,
+      profile: profile.rows[0] || { child_age: "3", child_weight: "14" },
+      vaccines: vaccines.rows
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/pediatric", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { child_age, child_weight } = req.body;
+    await pool2.query(
+      `INSERT INTO pediatric_profile (user_id, child_age, child_weight, updated_at) 
+       VALUES ($1, $2, $3, NOW()) 
+       ON CONFLICT (user_id) DO UPDATE SET 
+         child_age = $2, 
+         child_weight = $3, 
+         updated_at = NOW()`,
+      [userId, child_age, child_weight]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/pediatric/vaccine", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { vaccine_name, done } = req.body;
+    const id = import_crypto2.default.randomUUID();
+    await pool2.query(
+      `INSERT INTO vaccine_status (id, user_id, vaccine_name, done, updated_at) 
+       VALUES ($1, $2, $3, $4, NOW()) 
+       ON CONFLICT (user_id, vaccine_name) DO UPDATE SET 
+         done = $4, 
+         updated_at = NOW()`,
+      [id, userId, vaccine_name, done]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/culture/rsvps", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool2.query("SELECT event_title FROM event_rsvps WHERE user_id = $1", [userId]);
+    res.json({ success: true, data: result.rows.map((r) => r.event_title) });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.post("/api/culture/rsvps", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { event_title } = req.body;
+    await pool2.query(
+      `INSERT INTO event_rsvps (user_id, event_title, registered_at) 
+       VALUES ($1, $2, NOW()) 
+       ON CONFLICT (user_id, event_title) DO NOTHING`,
+      [userId, event_title]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.delete("/api/culture/rsvps/:eventTitle", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { eventTitle } = req.params;
+    await pool2.query("DELETE FROM event_rsvps WHERE user_id = $1 AND event_title = $2", [userId, eventTitle]);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });

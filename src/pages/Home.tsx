@@ -10,7 +10,8 @@ const {
   ChevronRight, Heart, Calendar, MapPin, QrCode, Activity, 
   BookOpen, Briefcase, Users, Flame, Compass, Award, 
   AlertTriangle, Shield, CheckCircle, PhoneCall, HelpCircle, 
-  GraduationCap, FileText, ArrowRight, ShieldCheck, Play
+  GraduationCap, FileText, ArrowRight, ShieldCheck, Play,
+  Leaf, Instagram, Facebook, Youtube, Twitter, Globe, Info
 } = LucideIcons;
 // Purged Firebase imports for portability
 
@@ -78,16 +79,44 @@ export default function Home() {
 
   const quickActions = [
     {
-      id: "blood",
-      iconName: "Heart",
-      titleHi: "रक्तदान (Blood Donation)",
-      titleEn: "Blood Donation"
+      id: "card",
+      iconName: "ShieldCheck",
+      route: "/jan-seva-card",
+      titleEn: "Jan Seva Card",
+      titleHi: "जन सेवा कार्ड",
+      glowGradient: "from-blue-500 via-indigo-500 to-violet-650"
     },
     {
-      id: "women",
-      iconName: "Shield",
-      titleHi: "महिला सुरक्षा (Women Safety)",
-      titleEn: "Women Safety"
+      id: "blood",
+      iconName: "Heart",
+      route: "/blood-network",
+      titleEn: "Blood Network",
+      titleHi: "रक्तदाता नेटवर्क",
+      glowGradient: "from-red-500 via-rose-500 to-red-700"
+    },
+    {
+      id: "health",
+      iconName: "Activity",
+      route: "/health-care",
+      titleEn: "Health Care",
+      titleHi: "स्वास्थ्य सेवा",
+      glowGradient: "from-emerald-400 via-teal-500 to-green-600"
+    },
+    {
+      id: "environment",
+      iconName: "Leaf",
+      route: "/environment",
+      titleEn: "Environment",
+      titleHi: "पर्यावरण सुरक्षा",
+      glowGradient: "from-green-400 via-emerald-500 to-teal-600"
+    },
+    {
+      id: "culture",
+      iconName: "Landmark",
+      route: "/religious-culture",
+      titleEn: "Culture",
+      titleHi: "धर्म व संस्कृति",
+      glowGradient: "from-amber-400 via-orange-500 to-red-600"
     }
   ];
 
@@ -248,34 +277,26 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-8 bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm min-h-[90px] max-w-[320px] mx-auto justify-items-center">
+        <div className="grid grid-cols-5 gap-2 bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm min-h-[90px] w-full justify-items-center">
           {quickActions.map((action, idx) => {
-            const isBlood = action.id === "blood";
-            const route = isBlood ? '/blood-network' : '/women';
-            const glowGradient = isBlood 
-              ? "from-red-500 via-rose-500 to-red-700" 
-              : "from-[#00B4D8] via-[#FF007F] to-[#7B2CBF]";
+            const IconComponent = (LucideIcons as any)[action.iconName] || Compass;
             
             return (
               <button 
                 key={idx}
-                onClick={() => navigate(route)}
-                className="flex flex-col items-center justify-center p-1.5 transition text-center gap-2.5 active:scale-95 duration-300 cursor-pointer group relative w-full"
+                onClick={() => navigate(action.route)}
+                className="flex flex-col items-center justify-center p-0.5 transition text-center gap-2 active:scale-95 duration-300 cursor-pointer group relative w-full"
               >
-                <div className="relative w-16 h-16 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
+                <div className="relative w-11 h-11 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
                   {/* Breathing glowing outer ring */}
-                  <div className={`absolute -inset-1 rounded-full blur-md opacity-75 group-hover:opacity-100 transition-all duration-300 animate-pulse bg-gradient-to-r ${glowGradient}`}></div>
+                  <div className={`absolute -inset-0.5 rounded-full blur-xs opacity-40 group-hover:opacity-80 transition-all duration-300 animate-pulse bg-gradient-to-r ${action.glowGradient}`}></div>
                   
-                  {/* Logo container */}
-                  <div className="relative w-14 h-14 bg-white rounded-full p-1.5 flex items-center justify-center border border-slate-100 shadow-md z-10 overflow-hidden">
-                    <img 
-                      src={isBlood ? "/assets/blood_donation_icon.png" : "/assets/women_safety_icon.png"} 
-                      alt={action.titleEn} 
-                      className="w-full h-full object-contain rounded-full"
-                    />
+                  {/* Icon container */}
+                  <div className="relative w-9 h-9 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100 shadow-sm z-10">
+                    <IconComponent className="w-4.5 h-4.5 text-slate-800 transition-all duration-500 group-hover:rotate-12" />
                   </div>
                 </div>
-                <span className="text-[10.5px] font-black text-slate-700 leading-tight w-full">
+                <span className="text-[9px] font-black text-slate-700 leading-tight w-full truncate">
                   {lang === "hi" ? action.titleHi : action.titleEn}
                 </span>
               </button>
@@ -392,7 +413,62 @@ export default function Home() {
           </div>
         </div>
       
-      
+        {/* Helplines and Social Media Sections */}
+        <div className="grid grid-cols-1 gap-4 mt-5">
+          {/* Helplines Panel */}
+          <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm space-y-3">
+            <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+              <PhoneCall className="w-4 h-4 text-rose-500" />
+              {lang === "hi" ? "आपातकालीन हेल्पलाइन" : "Emergency Helplines"}
+            </h4>
+            
+            <div className="grid grid-cols-2 gap-2 text-center text-[10px]">
+              <a href="tel:112" className="bg-red-50 hover:bg-red-100 border border-red-100 p-2.5 rounded-xl block transition font-bold text-red-700">
+                🚨 {lang === "hi" ? "आपातकालीन: 112" : "Emergency: 112"}
+              </a>
+              <a href="tel:1091" className="bg-pink-50 hover:bg-pink-100 border border-pink-100 p-2.5 rounded-xl block transition font-bold text-pink-700">
+                🛡️ {lang === "hi" ? "महिला सहायता: 1091" : "Women Help: 1091"}
+              </a>
+              <a href="tel:108" className="bg-orange-50 hover:bg-orange-100 border border-orange-100 p-2.5 rounded-xl block transition font-bold text-orange-700">
+                🚑 {lang === "hi" ? "एम्बुलेंस: 108" : "Ambulance: 108"}
+              </a>
+              <a href={`tel:${settings?.tollFree || "18008893221"}`} className="bg-blue-50 hover:bg-blue-100 border border-blue-100 p-2.5 rounded-xl block transition font-bold text-blue-750">
+                📞 {lang === "hi" ? `टोल-फ्री: ${settings?.tollFree || "1800-889-3221"}` : `Toll-Free: ${settings?.tollFree || "1800-889-3221"}`}
+              </a>
+            </div>
+          </div>
+
+          {/* Social Media Panel */}
+          <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm space-y-3">
+            <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+              <Globe className="w-4 h-4 text-blue-600" />
+              {lang === "hi" ? "आधिकारिक सोशल मीडिया" : "Follow Us"}
+            </h4>
+
+            <div className="flex justify-around items-center px-1 py-1">
+              {[
+                { name: "Facebook", icon: Facebook, color: "text-blue-600 bg-blue-50 hover:bg-blue-100 border-blue-100", url: "https://facebook.com/therpfoundation" },
+                { name: "Instagram", icon: Instagram, color: "text-pink-650 bg-pink-50 hover:bg-pink-100 border-pink-100", url: "https://instagram.com/therpfoundation" },
+                { name: "YouTube", icon: Youtube, color: "text-red-600 bg-red-50 hover:bg-red-100 border-red-100", url: "https://youtube.com/@therpfoundation" },
+                { name: "Twitter", icon: Twitter, color: "text-slate-800 bg-slate-100 hover:bg-slate-200 border-slate-200", url: "https://twitter.com/therpfoundation" }
+              ].map((social, idx) => {
+                const SocialIcon = social.icon;
+                return (
+                  <a 
+                    key={idx}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border transition transform hover:scale-105 active:scale-95 ${social.color}`}
+                    title={social.name}
+                  >
+                    <SocialIcon className="w-4.5 h-4.5" />
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
     </motion.div>
       
