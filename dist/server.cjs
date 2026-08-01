@@ -65408,6 +65408,7 @@ var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 var import_pdf_lib = __toESM(require_cjs12(), 1);
 import_dotenv.default.config();
 var app = (0, import_express2.default)();
+app.set("trust proxy", 1);
 var apiCache = /* @__PURE__ */ new Map();
 var CACHE_TTL = 6e4;
 app.use((0, import_cors.default)());
@@ -66766,23 +66767,23 @@ async function queryExternalSearch(searchQuery) {
         }
         try {
           console.log(`[EXABASE] Fetching live preview for: ${url}`);
-          const response = await import_axios.default.post(
-            "https://api.exabase.io/v2/link-preview",
-            new URLSearchParams({ q: url }).toString(),
+          const response = await import_axios.default.get(
+            `https://api.exabase.io/v2/link?url=${encodeURIComponent(url)}`,
             {
               headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": "application/x-www-form-urlencoded"
+                "X-Api-Key": apiKey
               },
               timeout: 8e3
             }
           );
           const previewData = response.data;
+          const imgObj = previewData.image;
+          const imageUrl = (imgObj && typeof imgObj === "object" ? imgObj.url : imgObj) || previewData.imageUrl || previewData.ImageUrl || "";
           const normalized = {
             url,
             title: previewData.title || previewData.Title || url,
             description: previewData.description || previewData.Description || "",
-            image: previewData.image || previewData.imageUrl || previewData.ImageUrl || "",
+            image: imageUrl,
             siteName: previewData.siteName || previewData.SiteName || ""
           };
           socialPreviewsCache[url] = {
@@ -67548,9 +67549,15 @@ async function initDatabase() {
         status TEXT DEFAULT 'Pending',
         date TEXT,
         "aiSummary" TEXT,
+        "audioUrl" TEXT,
+        "videoUrl" TEXT,
+        "imageUrl" TEXT,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "grievances table creation");
+    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "audioUrl" TEXT', [], "grievance audioUrl migration");
+    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "videoUrl" TEXT', [], "grievance videoUrl migration");
+    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "imageUrl" TEXT', [], "grievance imageUrl migration");
     await runQuery(`
       CREATE TABLE IF NOT EXISTS service_submissions_v2 (
         id UUID PRIMARY KEY,
@@ -67997,7 +68004,7 @@ app.post("/api/jobs/:id/edit", authenticateToken, requireAdmin, async (req, res)
 app.get("/api/grievances", async (req, res) => {
   try {
     const result = await pool2.query(
-      'SELECT id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "createdAt" FROM grievances ORDER BY "createdAt" DESC'
+      'SELECT id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "audioUrl", "videoUrl", "imageUrl", "createdAt" FROM grievances ORDER BY "createdAt" DESC'
     );
     res.json({ grievances: result.rows });
   } catch (error) {
@@ -68007,12 +68014,12 @@ app.get("/api/grievances", async (req, res) => {
 });
 app.post("/api/grievances", async (req, res) => {
   try {
-    const { title, description, category, urgency, location, reportedBy, citizenName, status, date, aiSummary } = req.body;
+    const { title, description, category, urgency, location, reportedBy, citizenName, status, date, aiSummary, audioUrl, videoUrl, imageUrl } = req.body;
     const id = import_crypto2.default.randomUUID();
     const result = await pool2.query(
       `INSERT INTO grievances 
-       (id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "createdAt") 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+       (id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "audioUrl", "videoUrl", "imageUrl", "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
        RETURNING id`,
       [
         id,
@@ -68025,6 +68032,9 @@ app.post("/api/grievances", async (req, res) => {
         status || "Pending",
         date || (/* @__PURE__ */ new Date()).toLocaleDateString(),
         aiSummary || "",
+        audioUrl || "",
+        videoUrl || "",
+        imageUrl || "",
         (/* @__PURE__ */ new Date()).toISOString()
       ]
     );
@@ -69175,10 +69185,10 @@ var upload = (0, import_multer.default)({
     // 5MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedExtensions = [".png", ".jpg", ".jpeg", ".pdf"];
+    const allowedExtensions = [".png", ".jpg", ".jpeg", ".pdf", ".mp3", ".wav", ".m4a", ".ogg", ".webm", ".mp4", ".mov", ".avi", ".mkv", ".3gp"];
     const ext = import_path.default.extname(file.originalname).toLowerCase();
     if (!allowedExtensions.includes(ext)) {
-      return cb(new Error("Only PNG, JPG, JPEG and PDF files are allowed"));
+      return cb(new Error("Only PNG, JPG, JPEG, PDF, MP3, WAV, M4A, OGG, WEBM, MP4, MOV, AVI, and MKV files are allowed"));
     }
     cb(null, true);
   }
@@ -69247,12 +69257,12 @@ var CORE_SERVICES = [
   { id: "donations", category: "involved", iconName: "HandCoins", titleEn: "Donations", titleHi: "\u0926\u093E\u0928", descEn: "Support our causes directly", descHi: "\u0939\u092E\u093E\u0930\u0947 \u0915\u093E\u0930\u0923\u094B\u0902 \u0915\u093E \u0938\u092E\u0930\u094D\u0925\u0928 \u0915\u0930\u0947\u0902" },
   { id: "grievance", category: "civic", iconName: "AlertTriangle", titleEn: "Grievances", titleHi: "\u0936\u093F\u0915\u093E\u092F\u0924\u0947\u0902", descEn: "Report Civic Issues", descHi: "\u0928\u093E\u0917\u0930\u093F\u0915 \u0938\u092E\u0938\u094D\u092F\u093E\u0913\u0902 \u0915\u0940 \u0930\u093F\u092A\u094B\u0930\u094D\u091F" },
   { id: "volunteers", category: "involved", iconName: "Users", titleEn: "Volunteering", titleHi: "\u0938\u094D\u0935\u092F\u0902\u0938\u0947\u0935\u093E", descEn: "Join the RP Force", descHi: "\u0906\u0930\u092A\u0940 \u092B\u094B\u0930\u094D\u0938 \u0938\u0947 \u091C\u0941\u0921\u093C\u0947\u0902" },
-  { id: "health-camps", category: "welfare", iconName: "Stethoscope", titleEn: "Health Camps", titleHi: "\u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0936\u093F\u0935\u093F\u0930", descEn: "Free checkups and drives", descHi: "\u092E\u0941\u092B\u094D\u0924 \u091C\u093E\u0902\u091A \u0914\u0930 \u0905\u092D\u093F\u092F\u093E\u0928" },
+  { id: "health-care", category: "welfare", iconName: "HeartPulse", titleEn: "Health Care", titleHi: "\u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0938\u0947\u0935\u093E", descEn: "Track health metrics & seek care", descHi: "\u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u092E\u093E\u092A\u0928 \u090F\u0935\u0902 \u091A\u093F\u0915\u093F\u0924\u094D\u0938\u093E" },
   // Expanding to full 21...
   { id: "education", category: "welfare", iconName: "GraduationCap", titleEn: "Education Aid", titleHi: "\u0936\u093F\u0915\u094D\u0937\u093E \u0938\u0939\u093E\u092F\u0924\u093E", descEn: "Scholarships and Books", descHi: "\u091B\u093E\u0924\u094D\u0930\u0935\u0943\u0924\u094D\u0924\u093F \u0914\u0930 \u0915\u093F\u0924\u093E\u092C\u0947\u0902" },
   { id: "women-safety", category: "urgent", iconName: "Shield", titleEn: "Women Safety", titleHi: "\u092E\u0939\u093F\u0932\u093E \u0938\u0941\u0930\u0915\u094D\u0937\u093E", descEn: "24/7 Helpline and support", descHi: "24/7 \u0939\u0947\u0932\u094D\u092A\u0932\u093E\u0907\u0928" },
   { id: "environment", category: "involved", iconName: "TreePine", titleEn: "Environment", titleHi: "\u092A\u0930\u094D\u092F\u093E\u0935\u0930\u0923", descEn: "Tree plantation drives", descHi: "\u0935\u0943\u0915\u094D\u0937\u093E\u0930\u094B\u092A\u0923 \u0905\u092D\u093F\u092F\u093E\u0928" },
-  { id: "legal-aid", category: "civic", iconName: "Scale", titleEn: "Free Legal Aid", titleHi: "\u092E\u0941\u092B\u094D\u0924 \u0915\u093E\u0928\u0942\u0928\u0940 \u0938\u0939\u093E\u092F\u0924\u093E", descEn: "Legal counseling for citizens", descHi: "\u0928\u093E\u0917\u0930\u093F\u0915\u094B\u0902 \u0915\u0947 \u0932\u093F\u090F \u0915\u093E\u0928\u0942\u0928\u0940 \u0938\u0932\u093E\u0939" }
+  { id: "culture", category: "civic", iconName: "Landmark", titleEn: "Religious & Culture", titleHi: "\u0927\u0930\u094D\u092E \u0914\u0930 \u0938\u0902\u0938\u094D\u0915\u0943\u0924\u093F", descEn: "Festivals, sacred texts & live feeds", descHi: "\u0924\u094D\u092F\u094C\u0939\u093E\u0930, \u0917\u094D\u0930\u0902\u0925 \u0914\u0930 \u092E\u0902\u0926\u093F\u0930 \u0932\u093E\u0907\u0935" }
 ];
 app.get("/api/public/services", (req, res) => {
   res.json({ success: true, data: CORE_SERVICES });

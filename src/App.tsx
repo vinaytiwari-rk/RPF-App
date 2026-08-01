@@ -28,7 +28,7 @@ import VolunteersPage from "./pages/VolunteersPage";
 const VolunteerDashboard = React.lazy(() => import("./pages/VolunteerDashboard"));
 import DonationsPage from "./pages/DonationsPage";
 import HealthPage from "./pages/HealthPage";
-import HealthCamps from "./pages/HealthCamps";
+import HealthCare from "./pages/HealthCare";
 import SchemesPage from "./pages/SchemesPage";
 import WomenSafety from "./pages/WomenSafety";
 import SeniorsPage from "./pages/SeniorsPage";
@@ -36,6 +36,7 @@ import AnimalsPage from "./pages/AnimalsPage";
 import EnvironmentPage from "./pages/EnvironmentPage";
 import CrowdfundingPage from "./pages/CrowdfundingPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import ReligiousCulture from "./pages/ReligiousCulture";
 
 // Dedicated Pages for Overhauled Service Hub
 import JobsPage from "./pages/JobsPage";
@@ -134,7 +135,7 @@ function AppContent() {
           <Route path="/volunteers" element={<VolunteersPage />} />
           <Route path="/volunteer-dashboard" element={<VolunteerDashboard />} />
           <Route path="/health" element={<HealthPage />} />
-          <Route path="/health-camps" element={<HealthCamps />} />
+          <Route path="/health-care" element={<HealthCare />} />
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/scholarships" element={<ScholarshipsPage />} />
           <Route path="/food" element={<FoodSupport />} />
@@ -146,6 +147,7 @@ function AppContent() {
           <Route path="/animals" element={<AnimalsPage />} />
           <Route path="/environment" element={<EnvironmentPage />} />
           <Route path="/crowdfunding" element={<CrowdfundingPage />} />
+          <Route path="/religious-culture" element={<ReligiousCulture />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

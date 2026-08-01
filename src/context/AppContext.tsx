@@ -168,7 +168,8 @@ const DEFAULT_SERVICES = [
   { id: "donations", category: "involved", iconName: "HandCoins", titleEn: "Donations", titleHi: "दान", descEn: "Support our causes directly", descHi: "हमारे कारणों का समर्थन करें" },
   { id: "grievance", category: "civic", iconName: "AlertTriangle", titleEn: "Grievances", titleHi: "शिकायतें", descEn: "Report Civic Issues", descHi: "नागरिक समस्याओं की रिपोर्ट" },
   { id: "volunteers", category: "involved", iconName: "Users", titleEn: "Volunteering", titleHi: "स्वयंसेवा", descEn: "Join the RP Force", descHi: "आरपी फोर्स से जुड़ें" },
-  { id: "health-camps", category: "welfare", iconName: "Stethoscope", titleEn: "Health Camps", titleHi: "स्वास्थ्य शिविर", descEn: "Free checkups and drives", descHi: "मुफ्त जांच और अभियान" },
+  { id: "health-care", category: "welfare", iconName: "HeartPulse", titleEn: "Health Care", titleHi: "स्वास्थ्य सेवा", descEn: "Track health metrics & seek care", descHi: "स्वास्थ्य मापन एवं चिकित्सा" },
+  { id: "culture", category: "civic", iconName: "Landmark", titleEn: "Religious & Culture", titleHi: "धर्म और संस्कृति", descEn: "Festivals, sacred texts & live feeds", descHi: "त्यौहार, ग्रंथ और मंदिर लाइव" },
 ];
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [

@@ -23,11 +23,11 @@ export default function Services() {
   ───────────────────────────────────── */
   const categories = [
     { id: "all", en: "All Services", hi: "सभी सेवाएं" },
-    { id: "urgent", en: "⚡ Urgent Core", hi: "⚡ महत्वपूर्ण" },
-    { id: "involved", en: "🤝 Involved", hi: "🤝 जुड़ें" },
-    { id: "welfare", en: "🫂 Welfare", hi: "🫂 कल्याण" },
-    { id: "empowerment", en: "📚 Info", hi: "📚 सशक्तिकरण" },
-    { id: "civic", en: "⚖️ Civic", hi: "⚖️ नागरिक" },
+    { id: "urgent", en: "Urgent Core", hi: "महत्वपूर्ण" },
+    { id: "involved", en: "Involved", hi: "जुड़ें" },
+    { id: "welfare", en: "Welfare", hi: "कल्याण" },
+    { id: "empowerment", en: "Info", hi: "सशक्तिकरण" },
+    { id: "civic", en: "Civic", hi: "नागरिक" },
   ];
 
   const filtered = (Array.isArray(servicesList)
@@ -89,7 +89,6 @@ export default function Services() {
         <div>
           <h3 className="font-display font-extrabold text-base text-[#000080] flex items-center gap-1">
             {isHi ? "आरपी नागरिक सेवा संगम" : "RP Civic Services Hub"}
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
           </h3>
           <p className="text-[10px] text-slate-500 font-bold">
             {isHi ? "21 जनकल्याण सेवाएं • एक संकल्प" : "21 Active Welfare Services • Single Platform"}
@@ -128,6 +127,8 @@ export default function Services() {
                           : svc.id === 'seniors' ? '/seniors'
                           : svc.id === 'environment' ? '/environment'
                           : svc.id === 'education' ? '/education'
+                          : svc.id === 'health-care' ? '/health-care'
+                          : svc.id === 'culture' ? '/religious-culture'
                           : `/services/${svc.id}`;
 
               return (

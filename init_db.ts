@@ -141,6 +141,9 @@ async function initDatabase() {
         status TEXT DEFAULT 'Pending',
         date TEXT,
         "aiSummary" TEXT,
+        "audioUrl" TEXT,
+        "videoUrl" TEXT,
+        "imageUrl" TEXT,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `);

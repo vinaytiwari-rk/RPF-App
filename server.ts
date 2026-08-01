@@ -2610,9 +2610,17 @@ async function initDatabase() {
         status TEXT DEFAULT 'Pending',
         date TEXT,
         "aiSummary" TEXT,
+        "audioUrl" TEXT,
+        "videoUrl" TEXT,
+        "imageUrl" TEXT,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "grievances table creation");
+
+    // Add audioUrl, videoUrl, and imageUrl columns to grievances if not exists
+    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "audioUrl" TEXT', [], "grievance audioUrl migration");
+    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "videoUrl" TEXT', [], "grievance videoUrl migration");
+    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "imageUrl" TEXT', [], "grievance imageUrl migration");
 
     // Create service_submissions_v2 table
     await runQuery(`
@@ -3103,7 +3111,7 @@ app.post("/api/jobs/:id/edit", authenticateToken, requireAdmin, async (req, res)
 app.get("/api/grievances", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "createdAt" FROM grievances ORDER BY "createdAt" DESC'
+      'SELECT id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "audioUrl", "videoUrl", "imageUrl", "createdAt" FROM grievances ORDER BY "createdAt" DESC'
     );
     res.json({ grievances: result.rows });
   } catch (error: any) {
@@ -3114,12 +3122,12 @@ app.get("/api/grievances", async (req, res) => {
 
 app.post("/api/grievances", async (req, res) => {
   try {
-    const { title, description, category, urgency, location, reportedBy, citizenName, status, date, aiSummary } = req.body;
+    const { title, description, category, urgency, location, reportedBy, citizenName, status, date, aiSummary, audioUrl, videoUrl, imageUrl } = req.body;
     const id = crypto.randomUUID();
     const result = await pool.query(
       `INSERT INTO grievances 
-       (id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "createdAt") 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+       (id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "audioUrl", "videoUrl", "imageUrl", "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
        RETURNING id`,
       [
         id,
@@ -3132,6 +3140,9 @@ app.post("/api/grievances", async (req, res) => {
         status || "Pending",
         date || new Date().toLocaleDateString(),
         aiSummary || "",
+        audioUrl || "",
+        videoUrl || "",
+        imageUrl || "",
         new Date().toISOString()
       ]
     );
@@ -4433,10 +4444,10 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024 // 5MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.pdf'];
+    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.pdf', '.mp3', '.wav', '.m4a', '.ogg', '.webm', '.mp4', '.mov', '.avi', '.mkv', '.3gp'];
     const ext = path.extname(file.originalname).toLowerCase();
     if (!allowedExtensions.includes(ext)) {
-      return cb(new Error("Only PNG, JPG, JPEG and PDF files are allowed"));
+      return cb(new Error("Only PNG, JPG, JPEG, PDF, MP3, WAV, M4A, OGG, WEBM, MP4, MOV, AVI, and MKV files are allowed"));
     }
     cb(null, true);
   }
@@ -4527,12 +4538,12 @@ const CORE_SERVICES = [
   { id: "donations", category: "involved", iconName: "HandCoins", titleEn: "Donations", titleHi: "दान", descEn: "Support our causes directly", descHi: "हमारे कारणों का समर्थन करें" },
   { id: "grievance", category: "civic", iconName: "AlertTriangle", titleEn: "Grievances", titleHi: "शिकायतें", descEn: "Report Civic Issues", descHi: "नागरिक समस्याओं की रिपोर्ट" },
   { id: "volunteers", category: "involved", iconName: "Users", titleEn: "Volunteering", titleHi: "स्वयंसेवा", descEn: "Join the RP Force", descHi: "आरपी फोर्स से जुड़ें" },
-  { id: "health-camps", category: "welfare", iconName: "Stethoscope", titleEn: "Health Camps", titleHi: "स्वास्थ्य शिविर", descEn: "Free checkups and drives", descHi: "मुफ्त जांच और अभियान" },
+  { id: "health-care", category: "welfare", iconName: "HeartPulse", titleEn: "Health Care", titleHi: "स्वास्थ्य सेवा", descEn: "Track health metrics & seek care", descHi: "स्वास्थ्य मापन एवं चिकित्सा" },
   // Expanding to full 21...
   { id: "education", category: "welfare", iconName: "GraduationCap", titleEn: "Education Aid", titleHi: "शिक्षा सहायता", descEn: "Scholarships and Books", descHi: "छात्रवृत्ति और किताबें" },
   { id: "women-safety", category: "urgent", iconName: "Shield", titleEn: "Women Safety", titleHi: "महिला सुरक्षा", descEn: "24/7 Helpline and support", descHi: "24/7 हेल्पलाइन" },
   { id: "environment", category: "involved", iconName: "TreePine", titleEn: "Environment", titleHi: "पर्यावरण", descEn: "Tree plantation drives", descHi: "वृक्षारोपण अभियान" },
-  { id: "legal-aid", category: "civic", iconName: "Scale", titleEn: "Free Legal Aid", titleHi: "मुफ्त कानूनी सहायता", descEn: "Legal counseling for citizens", descHi: "नागरिकों के लिए कानूनी सलाह" },
+  { id: "culture", category: "civic", iconName: "Landmark", titleEn: "Religious & Culture", titleHi: "धर्म और संस्कृति", descEn: "Festivals, sacred texts & live feeds", descHi: "त्यौहार, ग्रंथ और मंदिर लाइव" },
 ];
 
 app.get("/api/public/services", (req, res) => {

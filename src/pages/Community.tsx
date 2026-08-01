@@ -39,15 +39,7 @@ interface Blog {
   publishedAt?: string;
 }
 
-interface SocialPreview {
-  url: string;
-  title: string;
-  description: string;
-  image: string;
-  siteName: string;
-}
-
-type TabType = "stories" | "blogs" | "social";
+type TabType = "stories" | "blogs";
 
 export default function Community() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -57,7 +49,6 @@ export default function Community() {
   const [activeTab, setActiveTab] = useState<TabType>("stories");
   const [stories, setStories] = useState<SuccessStory[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [socialPreviews, setSocialPreviews] = useState<SocialPreview[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Write Blog Modal states
@@ -88,20 +79,9 @@ export default function Community() {
     }
   };
 
-  const fetchSocialPreviews = async () => {
-    try {
-      const res = await axios.get("/api/social-previews");
-      if (res.data.success) {
-        setSocialPreviews(res.data.data || []);
-      }
-    } catch (err) {
-      console.error("Error fetching social previews:", err);
-    }
-  };
-
   const loadData = async () => {
     setLoading(true);
-    await Promise.all([fetchSuccessStories(), fetchBlogs(), fetchSocialPreviews()]);
+    await Promise.all([fetchSuccessStories(), fetchBlogs()]);
     setLoading(false);
   };
 
@@ -211,31 +191,16 @@ export default function Community() {
             <BookOpen className="w-3.5 h-3.5 text-[#138808]" />
             {isHi ? "नागरिक ब्लॉग" : "Citizen Blogs"}
           </button>
-          <button
-            onClick={() => setActiveTab("social")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold rounded-xl border transition-all duration-200 ${
-              activeTab === "social"
-                ? "bg-[#000080] text-white border-[#000080] shadow-sm"
-                : "bg-white text-slate-500 border-slate-200 hover:text-slate-800"
-            }`}
-          >
-            <Globe className="w-3.5 h-3.5 text-[#FF9933]" />
-            {isHi ? "सोशल मीडिया" : "Social Media"}
-          </button>
         </div>
 
         <p className="text-[10px] text-slate-400 font-semibold px-0.5 leading-snug">
           {activeTab === "stories"
             ? isHi
-              ? "✨ फाउंडेशन के माध्यम से आए बदलाव और जनहित कार्यों की प्रेरक कहानियाँ।"
-              : "✨ Inspiring stories of change and welfare accomplishments driven by the foundation."
-            : activeTab === "blogs"
-            ? isHi
-              ? "📝 नागरिकों और स्वयंसेवकों द्वारा साझा किए गए विचार और ब्लॉग (एडमिन द्वारा स्वीकृत)।"
-              : "📝 Thoughtful articles and blogs shared by citizens & volunteers (approved by admin)."
+              ? "फाउंडेशन के माध्यम से आए बदलाव और जनहित कार्यों की प्रेरक कहानियाँ।"
+              : "Inspiring stories of change and welfare accomplishments driven by the foundation."
             : isHi
-            ? "🌐 हमारे आधिकारिक सोशल मीडिया चैनलों के लाइव प्रीव्यू और ताज़ा अपडेट्स।"
-            : "🌐 Live previews and recent updates from our official social media channels."}
+              ? "नागरिकों और स्वयंसेवकों द्वारा साझा किए गए विचार और ब्लॉग (एडमिन द्वारा स्वीकृत)।"
+              : "Thoughtful articles and blogs shared by citizens & volunteers (approved by admin)."}
         </p>
       </div>
 
@@ -348,79 +313,7 @@ export default function Community() {
               </div>
             )}
 
-            {/* SOCIAL PREVIEWS SECTION */}
-            {activeTab === "social" && (
-              <div className="space-y-4 pt-2 animate-fadeIn">
-                {socialPreviews.length === 0 ? (
-                  <div className="text-center py-14 bg-white border border-slate-200 rounded-2xl space-y-2">
-                    <Globe className="w-10 h-10 text-slate-300 mx-auto animate-pulse" />
-                    <p className="text-xs font-bold text-slate-400">
-                      {isHi ? "कोई लाइव प्रीव्यू लोड नहीं हुआ।" : "No live previews loaded."}
-                    </p>
-                  </div>
-                ) : (
-                  socialPreviews.map((preview, idx) => {
-                    const getIconAndColor = (url: string) => {
-                      if (url.includes("instagram")) return { Icon: Instagram, color: "text-pink-600 bg-pink-50" };
-                      if (url.includes("facebook")) return { Icon: Facebook, color: "text-blue-600 bg-blue-50" };
-                      if (url.includes("youtube")) return { Icon: Youtube, color: "text-red-650 bg-red-50" };
-                      return { Icon: Twitter, color: "text-slate-800 bg-slate-50" };
-                    };
-                    const { Icon, color } = getIconAndColor(preview.url);
-                    return (
-                      <a
-                        href={preview.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        key={idx}
-                        className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:border-slate-300 hover:shadow-md transition-all duration-200 flex flex-col cursor-pointer text-left block"
-                      >
-                        {/* Live Preview Image if available */}
-                        {preview.image && (
-                          <div className="relative h-44 bg-slate-100 overflow-hidden">
-                            <img
-                              src={preview.image}
-                              alt={preview.title}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-xs text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md flex items-center gap-1">
-                              <ExternalLink className="w-2.5 h-2.5" />
-                              {isHi ? "लाइव लिंक" : "Live Link"}
-                            </div>
-                          </div>
-                        )}
-                        
-                        <div className="p-4 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${color} shrink-0`}>
-                              <Icon className="w-3.5 h-3.5" />
-                            </div>
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
-                              {preview.siteName || (preview.url.includes("instagram") ? "Instagram" : "Social Media")}
-                            </span>
-                          </div>
-                          
-                          <h4 className="font-display font-extrabold text-slate-900 text-xs leading-snug">
-                            {preview.title}
-                          </h4>
-                          
-                          {preview.description && (
-                            <p className="text-[11px] text-slate-500 leading-relaxed font-medium line-clamp-2">
-                              {preview.description}
-                            </p>
-                          )}
-                          
-                          <div className="text-[9.5px] text-[#000080] font-bold truncate hover:underline flex items-center gap-1 pt-1.5 border-t border-slate-50">
-                            <span>{preview.url}</span>
-                            <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                          </div>
-                        </div>
-                      </a>
-                    );
-                  })
-                )}
-              </div>
-            )}
+
           </>
         )}
       </div>

@@ -180,17 +180,7 @@ export const coreServices = [
     ],
   },
   /* ── CIVIC ── */
-  {
-    id: "human_rights", titleEn: "Human Rights", titleHi: "मानवाधिकार",
-    descEn: "Legal aid registry & rights guide", descHi: "कानूनी जागरूकता हेल्पलाइन",
-    iconName: "Scale", color: "text-blue-700 bg-blue-50 border-blue-200", category: "civic",
-    template: "TicketingTemplate",
-    features: [
-      { title: "Legal Aid Application", desc: "Apply for wage theft or abuse cases.", type: "form" },
-      { title: "Multilingual Rights Guide", desc: "Know your constitutional guarantees.", type: "list" },
-      { title: "Petition Forum", desc: "Sign collective civic letters.", type: "action" },
-    ],
-  },
+
   {
     id: "consumer", titleEn: "Consumer Protection", titleHi: "उपभोक्ता संरक्षण",
     descEn: "Billing frauds & barcode checks", descHi: "उपभोक्ता शिकायत निवारण",

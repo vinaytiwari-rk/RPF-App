@@ -104,6 +104,8 @@ export default function MainLayout() {
     if (location.pathname.includes("jan-seva-card")) return isHi ? "जन सेवा कार्ड" : "Jan Seva Card";
     if (location.pathname.includes("blood-network")) return isHi ? "रक्त नेटवर्क" : "Blood Network";
     if (location.pathname.includes("grievance")) return isHi ? "शिकायत निवारण" : "Grievance Portal";
+    if (location.pathname.includes("health-care")) return isHi ? "स्वास्थ्य सेवा" : "Health Care Portal";
+    if (location.pathname.includes("religious-culture")) return isHi ? "धर्म और संस्कृति" : "Religious & Culture";
     return "RP Foundation";
   };
 
