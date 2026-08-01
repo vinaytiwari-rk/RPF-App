@@ -415,26 +415,19 @@ export default function Home() {
       
         {/* Helplines and Social Media Sections */}
         <div className="grid grid-cols-1 gap-4 mt-5">
-          {/* Helplines Panel */}
-          <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm space-y-3">
-            <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
-              <PhoneCall className="w-4 h-4 text-rose-500" />
-              {lang === "hi" ? "आपातकालीन हेल्पलाइन" : "Emergency Helplines"}
-            </h4>
-            
-            <div className="grid grid-cols-2 gap-2 text-center text-[10px]">
-              <a href="tel:112" className="bg-red-50 hover:bg-red-100 border border-red-100 p-2.5 rounded-xl block transition font-bold text-red-700">
-                🚨 {lang === "hi" ? "आपातकालीन: 112" : "Emergency: 112"}
-              </a>
-              <a href="tel:1091" className="bg-pink-50 hover:bg-pink-100 border border-pink-100 p-2.5 rounded-xl block transition font-bold text-pink-700">
-                🛡️ {lang === "hi" ? "महिला सहायता: 1091" : "Women Help: 1091"}
-              </a>
-              <a href="tel:108" className="bg-orange-50 hover:bg-orange-100 border border-orange-100 p-2.5 rounded-xl block transition font-bold text-orange-700">
-                🚑 {lang === "hi" ? "एम्बुलेंस: 108" : "Ambulance: 108"}
-              </a>
-              <a href={`tel:${settings?.tollFree || "18008893221"}`} className="bg-blue-50 hover:bg-blue-100 border border-blue-100 p-2.5 rounded-xl block transition font-bold text-blue-750">
-                📞 {lang === "hi" ? `टोल-फ्री: ${settings?.tollFree || "1800-889-3221"}` : `Toll-Free: ${settings?.tollFree || "1800-889-3221"}`}
-              </a>
+          {/* Scrolling Helpline Marquee Card */}
+          <div className="bg-red-600 text-white py-3 px-4.5 rounded-2xl shadow-sm border border-red-500/85 overflow-hidden relative">
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] font-black uppercase tracking-wider bg-white text-red-650 px-2 py-1 rounded-lg shrink-0 animate-pulse flex items-center gap-1">
+                <PhoneCall className="w-3.5 h-3.5" />
+                {lang === "hi" ? "हेल्पलाइन नंबर" : "Helplines"}
+              </span>
+              <div className="overflow-hidden whitespace-nowrap w-full relative">
+                <div className="inline-block animate-marquee-scroll hover:[animation-play-state:paused] cursor-pointer text-[11px] font-bold font-mono">
+                  RP Foundation Toll Free Number: 1800-569-0991, CM Helpline: 181, Emergency Response Support System: 112, Women Helpline: 1090, Ambulance: 108/102, Police Helpline: 100, Fire Emergency: 101, Child Helpline: 1098, Railway Inqury : 139, Airlines Enquiry : 143, Blood Bank: 1910, Voter Helpline: 1950, Cyber Crime Helpline : 1930, LPG Leak Line Helpline: 1906, Natinal Consumer Helpline: 1915, National Narcotis Helpline: 1933, Natural Calaities Helpline: 1070, Road Accident Helpline: 1073 •&nbsp;
+                  RP Foundation Toll Free Number: 1800-569-0991, CM Helpline: 181, Emergency Response Support System: 112, Women Helpline: 1090, Ambulance: 108/102, Police Helpline: 100, Fire Emergency: 101, Child Helpline: 1098, Railway Inqury : 139, Airlines Enquiry : 143, Blood Bank: 1910, Voter Helpline: 1950, Cyber Crime Helpline : 1930, LPG Leak Line Helpline: 1906, Natinal Consumer Helpline: 1915, National Narcotis Helpline: 1933, Natural Calaities Helpline: 1070, Road Accident Helpline: 1073 •&nbsp;
+                </div>
+              </div>
             </div>
           </div>
 

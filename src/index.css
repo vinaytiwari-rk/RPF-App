@@ -28,6 +28,10 @@
     100% { transform: translateX(-100%); }
   }
 
+  .animate-marquee-scroll {
+    animation: marquee 35s linear infinite;
+  }
+
   @keyframes slideUp {
     0% { transform: translateY(24px) scale(0.97); opacity: 0; filter: blur(3px); }
     100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
