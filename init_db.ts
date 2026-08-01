@@ -29,6 +29,8 @@ async function initDatabase() {
         "isVolunteer" BOOLEAN DEFAULT false,
         "isDonor" BOOLEAN DEFAULT false,
         "onboardingCompleted" BOOLEAN DEFAULT false,
+        avatar TEXT,
+        cover TEXT,
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `);
@@ -199,6 +201,8 @@ async function initDatabase() {
         sansad_kshetra VARCHAR(255),
         vidhan_sabha VARCHAR(255),
         ward_no VARCHAR(255),
+        avatar TEXT,
+        cover TEXT,
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `);

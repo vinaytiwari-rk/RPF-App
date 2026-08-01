@@ -226,15 +226,8 @@ export default function JanSevaCard() {
             ))}
           </div>
 
-          {/* Admin Bypass approval Button */}
-          <div className="border-t border-slate-150 pt-5 space-y-2">
-            <button 
-              onClick={handleAdminApprove}
-              className="w-full bg-gradient-to-r from-[#FF9933] to-[#FF7700] text-white py-3 rounded-2xl font-black text-xs shadow-md uppercase tracking-wider hover:opacity-95 transition flex justify-center items-center gap-2 cursor-pointer"
-            >
-              <RefreshCw className="w-4 h-4 animate-spin-slow" />
-              <span>{lang === "hi" ? "त्वरित मंजूरी (एडमिन डेमो)" : "Instant Approve (Admin Demo)"}</span>
-            </button>
+          {/* Cancel & Re-apply button */}
+          <div className="border-t border-slate-150 pt-5">
             <button 
               onClick={handleResetCard}
               className="w-full bg-slate-100 hover:bg-slate-150 border border-slate-200 text-slate-600 py-2.5 rounded-2xl font-bold text-xs transition cursor-pointer"
@@ -813,15 +806,6 @@ export default function JanSevaCard() {
         >
           <span>{lang === "hi" ? "जन सेवा कार्ड के लिए आवेदन करें" : "Apply for Membership Card"}</span>
           <ChevronRight className="w-4 h-4" />
-        </button>
-
-        {/* Demo instant generate to skip form (Great for testing) */}
-        <button 
-          onClick={handleAdminApprove}
-          className="w-full bg-slate-100 hover:bg-slate-150 border border-slate-205 text-slate-700 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition cursor-pointer flex justify-center items-center gap-1.5"
-        >
-          <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
-          <span>{lang === "hi" ? "एडमिन: तुरंत कार्ड जनरेट करें (डेमो)" : "Admin: Auto-Generate Card (Demo)"}</span>
         </button>
       </div>
 

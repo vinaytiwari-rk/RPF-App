@@ -839,11 +839,11 @@ app.post("/api/auth/logout", async (req, res) => {
 app.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
-    let result = await pool.query(`SELECT id, name, role, email, phone, points, badges, avatar FROM users WHERE id = $1`, [userId]);
+    let result = await pool.query(`SELECT id, name, role, email, phone, points, badges, avatar, cover FROM users WHERE id = $1`, [userId]);
     
     if (result.rows.length === 0) {
       // Check volunteers table
-      const volResult = await pool.query(`SELECT id, full_name as name, email, mobile as phone, avatar FROM volunteers WHERE id = $1`, [userId]);
+      const volResult = await pool.query(`SELECT id, full_name as name, email, mobile as phone, avatar, cover FROM volunteers WHERE id = $1`, [userId]);
       if (volResult.rows.length === 0) {
         return res.status(404).json({ success: false, error: "User not found" });
       }
@@ -965,11 +965,15 @@ app.post("/api/auth/register-volunteer", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 6 characters." });
     }
 
-    const usernameRaw = (data.username || "").trim().toLowerCase();
+    let usernameRaw = (data.username || "").trim().toLowerCase();
     if (!usernameRaw) {
-      return res.status(400).json({ error: "Please choose a username." });
+      usernameRaw = (data.mobile || "").trim().toLowerCase();
     }
-    if (!USERNAME_REGEX.test(usernameRaw)) {
+    if (!usernameRaw) {
+      return res.status(400).json({ error: "Please choose a username or provide a mobile number." });
+    }
+    const isPhone = /^[0-9+]{10,15}$/.test(usernameRaw);
+    if (!isPhone && !USERNAME_REGEX.test(usernameRaw)) {
       return res.status(400).json({ error: "Username must be 3-20 characters (letters, numbers, . or _), starting with a letter." });
     }
     if (RESERVED_USERNAMES.has(usernameRaw)) {
@@ -2435,6 +2439,12 @@ async function initDatabase() {
     for (const col of columnsToAlter) {
       await runQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "${col.name}" ${col.type}`, [], `users alter column ${col.name}`);
     }
+
+    // Ensure avatar and cover columns exist on users and volunteers
+    await runQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT`, [], "users add avatar column");
+    await runQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS cover TEXT`, [], "users add cover column");
+    await runQuery(`ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS avatar TEXT`, [], "volunteers add avatar column");
+    await runQuery(`ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS cover TEXT`, [], "volunteers add cover column");
 
     // Ensure default super admin exists
     await runQuery(`
@@ -4790,6 +4800,67 @@ app.post("/api/upload/image", authenticateToken, upload.single("file"), handleUp
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Generic image upload failed:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Profile image management endpoints
+app.post("/api/profile/upload-dp", authenticateToken, upload.single("file"), handleUploadErrors, async (req: any, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const fileUrl = await saveFileLocally(req.file);
+    const userId = req.user.id;
+    
+    await pool.query(`UPDATE users SET avatar = $1 WHERE id = $2`, [fileUrl, userId]);
+    await pool.query(`UPDATE volunteers SET avatar = $1 WHERE id = $2`, [fileUrl, userId]);
+    
+    res.json({ success: true, url: fileUrl });
+  } catch (error: any) {
+    console.error("Upload DP failed:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/profile/upload-cover", authenticateToken, upload.single("file"), handleUploadErrors, async (req: any, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const fileUrl = await saveFileLocally(req.file);
+    const userId = req.user.id;
+    
+    await pool.query(`UPDATE users SET cover = $1 WHERE id = $2`, [fileUrl, userId]);
+    await pool.query(`UPDATE volunteers SET cover = $1 WHERE id = $2`, [fileUrl, userId]);
+    
+    res.json({ success: true, url: fileUrl });
+  } catch (error: any) {
+    console.error("Upload cover failed:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/profile/remove-dp", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    await pool.query(`UPDATE users SET avatar = NULL WHERE id = $1`, [userId]);
+    await pool.query(`UPDATE volunteers SET avatar = NULL WHERE id = $1`, [userId]);
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Remove DP failed:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/profile/remove-cover", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    await pool.query(`UPDATE users SET cover = NULL WHERE id = $1`, [userId]);
+    await pool.query(`UPDATE volunteers SET cover = NULL WHERE id = $1`, [userId]);
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Remove cover failed:", error);
     res.status(500).json({ error: error.message });
   }
 });

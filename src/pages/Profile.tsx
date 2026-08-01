@@ -7,7 +7,8 @@ import { jsPDF } from "jspdf";
 import { 
   User, Shield, Award, MapPin, Languages, BookMarked, 
   Settings, HelpCircle, AlertTriangle, Info, LogOut, CheckCircle2, 
-  ChevronRight, Heart, QrCode, Download, X, ShieldCheck, Target, Edit2, Check, Save, FileText
+  ChevronRight, Heart, QrCode, Download, X, ShieldCheck, Target, Edit2, Check, Save, FileText,
+  Globe, Mail, Twitter, Youtube, Instagram, Facebook
 } from "lucide-react";
 import { translations } from "../translations";
 import { motion } from "motion/react";
@@ -29,26 +30,69 @@ export default function Profile() {
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(user?.name || "");
-  const [editAvatar, setEditAvatar] = useState(user?.avatar || "");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (user) {
       setEditName(user.name);
-      setEditAvatar(user.avatar || "");
     }
   }, [user]);
 
   const handleSaveProfile = async () => {
     try {
       setIsSaving(true);
-      await axios.post("/api/auth/profile/update", { name: editName, avatar: editAvatar });
+      await axios.post("/api/auth/profile/update", { name: editName, avatar: user?.avatar || "" });
       alert("Profile updated successfully!");
       window.location.reload();
     } catch (err) {
       alert("Error updating profile");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>, type: "dp" | "cover") => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    try {
+      const endpoint = type === "dp" ? "/api/profile/upload-dp" : "/api/profile/upload-cover";
+      const token = localStorage.getItem("@rpf_token");
+      const res = await axios.post(endpoint, formData, {
+        headers: { 
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.data.success) {
+        alert(`${type === "dp" ? "Profile picture" : "Cover picture"} uploaded successfully!`);
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to upload ${type}`);
+    }
+  };
+
+  const handleRemoveFile = async (type: "dp" | "cover") => {
+    if (!window.confirm(`Are you sure you want to remove your ${type === "dp" ? "profile picture" : "cover picture"}?`)) return;
+    try {
+      const endpoint = type === "dp" ? "/api/profile/remove-dp" : "/api/profile/remove-cover";
+      const token = localStorage.getItem("@rpf_token");
+      const res = await axios.post(endpoint, {}, {
+        headers: { 
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.data.success) {
+        alert(`${type === "dp" ? "Profile picture" : "Cover picture"} removed successfully!`);
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to remove ${type}`);
     }
   };
 
@@ -96,101 +140,136 @@ export default function Profile() {
       exit={{ opacity: 0 }}
       className="flex flex-col h-full bg-transparent pb-24"
     >
-      {/* Profile Hero section with Tricolour Gradient Header */}
-      <div className="bg-gradient-to-br from-[#FF9933] via-white to-[#138808] pt-8 pb-8 px-5 relative overflow-hidden shrink-0 text-[#000080] shadow-lg border-b border-slate-100 rounded-b-[2.5rem]">
-        {/* Animated Background Ornaments */}
-        <motion.div 
-          animate={{ scale: [1, 1.1, 1], rotate: [0, 90, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-tr from-[#FF9933]/20 to-transparent rounded-full blur-3xl transform translate-x-10 -translate-y-10"
-        />
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1], rotate: [0, -90, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#138808]/20 to-transparent rounded-full blur-3xl transform -translate-x-10 translate-y-10"
-        />
-        
-        <div className="flex items-center gap-5 relative z-10">
-          {/* Avatar Ring & Floating Level */}
+      {/* Profile Hero section with Custom Cover and Centered DP */}
+      <div className="relative w-full h-[200px] bg-white border-b border-slate-200 flex-shrink-0" id="profile-cover-section">
+        {/* Cover Image Background (Default solid white) */}
+        {user.cover ? (
+          <img src={user.cover} alt="Cover" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-white"></div>
+        )}
+
+        {/* Cover Controls (Top Right Overlay) */}
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-30">
+          <label className="w-7 h-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white cursor-pointer transition shadow-md">
+            <Edit2 className="w-3.5 h-3.5" />
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={(e) => handleUploadFile(e, "cover")} 
+              className="hidden" 
+            />
+          </label>
+          {user.cover && (
+            <button 
+              onClick={() => handleRemoveFile("cover")}
+              className="w-7 h-7 bg-red-600/80 hover:bg-red-655 rounded-full flex items-center justify-center text-white transition shadow-md"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Centered Profile Avatar DP Block */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-[-40px] flex flex-col items-center z-20">
           <div className="relative group">
-            <div className="w-24 h-24 rounded-full border-[3px] border-[#D4AF37]/50 p-1 bg-white shadow-sm border border-slate-200 backdrop-blur-md flex items-center justify-center overflow-hidden">
+            <div className="w-24 h-24 rounded-full border-4 border-white p-0 bg-white shadow-md flex items-center justify-center overflow-hidden">
               {user.avatar ? (
-                <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#FF9933] to-[#FF5722] flex items-center justify-center text-[#000080] font-extrabold text-3xl shadow-md">
-                  {initials}
+                <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">
+                  <User className="w-12 h-12" />
                 </div>
               )}
             </div>
-            {!isEditing && (
+
+            {/* DP Controls Overlay (Bottom Right of DP) */}
+            <div className="absolute bottom-0 right-0 flex items-center gap-1">
+              <label className="bg-white hover:bg-slate-50 text-slate-800 p-1.5 rounded-full shadow-lg border border-slate-200 cursor-pointer transition">
+                <Edit2 className="w-3 h-3" />
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => handleUploadFile(e, "dp")} 
+                  className="hidden" 
+                />
+              </label>
+              {user.avatar && (
+                <button 
+                  onClick={() => handleRemoveFile("dp")}
+                  className="bg-white hover:bg-red-50 text-red-600 p-1.5 rounded-full shadow-lg border border-slate-200 transition"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Centered User Details Space */}
+      <div className="pt-12 pb-4 text-center px-5 flex flex-col items-center bg-white border-b border-slate-100 rounded-b-[2.5rem] shadow-sm select-none">
+        {isEditing ? (
+          <div className="space-y-2 w-full max-w-xs mb-2">
+            <input 
+              type="text" 
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-[#000080] placeholder-slate-400 focus:outline-none focus:border-[#FF9933]"
+              placeholder="Full Name"
+            />
+            <div className="flex gap-2 justify-center">
+              <button onClick={handleSaveProfile} disabled={isSaving} className="bg-[#000080] text-white text-[10px] px-3.5 py-1.5 rounded-lg font-bold flex items-center gap-1">
+                {isSaving ? "Saving..." : <><Save className="w-3 h-3" /> Save</>}
+              </button>
+              <button onClick={() => setIsEditing(false)} className="bg-slate-100 text-slate-755 text-[10px] px-3.5 py-1.5 rounded-lg font-bold">Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 justify-center">
+              <h2 className="font-display font-extrabold text-xl text-[#0B1E3F] tracking-tight leading-tight">{user.name}</h2>
               <button 
                 onClick={() => setIsEditing(true)}
-                className="absolute bottom-0 right-0 bg-white text-[#0B1E3F] p-1.5 rounded-full shadow-lg border border-slate-200"
+                className="text-slate-400 hover:text-slate-600 transition"
               >
                 <Edit2 className="w-3.5 h-3.5" />
               </button>
-            )}
-          </div>
-
-          <div className="flex-1 space-y-2">
-            {isEditing ? (
-              <div className="space-y-2 w-full">
-                <input 
-                  type="text" 
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-white shadow-sm border border-slate-200 border border-slate-200 rounded px-2 py-1 text-sm text-[#000080] placeholder-slate-400 focus:outline-none focus:border-[#FF9933]"
-                  placeholder="Full Name"
-                />
-                <input 
-                  type="text" 
-                  value={editAvatar}
-                  onChange={(e) => setEditAvatar(e.target.value)}
-                  className="w-full bg-white shadow-sm border border-slate-200 border border-slate-200 rounded px-2 py-1 text-xs text-[#000080] placeholder-slate-400 focus:outline-none focus:border-[#FF9933]"
-                  placeholder="Avatar Image URL"
-                />
-                <div className="flex gap-2">
-                  <button onClick={handleSaveProfile} disabled={isSaving} className="bg-[#FF9933] text-[#000080] text-[10px] px-3 py-1 rounded font-bold flex items-center gap-1">
-                    {isSaving ? "Saving..." : <><Save className="w-3 h-3" /> Save</>}
-                  </button>
-                  <button onClick={() => setIsEditing(false)} className="bg-white shadow-sm border border-slate-200 text-[#000080] text-[10px] px-3 py-1 rounded font-bold">Cancel</button>
-                </div>
+            </div>
+            
+            <div className="flex items-center gap-2 justify-center mt-1">
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 py-0.5 px-2.5 rounded-full w-fit">
+                <span className="w-1.5 h-1.5 bg-[#138808] rounded-full animate-pulse shadow-[0_0_8px_rgba(19,136,8,0.8)]"></span>
+                <span className="text-[9px] font-black tracking-wider uppercase text-slate-600">{roleLabel[user.role] || user.role}</span>
               </div>
-            ) : (
-              <>
-                <h2 className="font-display font-extrabold text-2xl tracking-tight leading-tight drop-shadow-sm">{user.name}</h2>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex items-center gap-1.5 bg-white shadow-sm border border-slate-200 backdrop-blur-md border border-slate-100 py-1 px-3 rounded-full w-fit">
-                    <span className="w-2 h-2 bg-[#138808] rounded-full animate-pulse shadow-[0_0_8px_rgba(19,136,8,0.8)]"></span>
-                    <span className="text-[10px] font-black tracking-widest uppercase text-slate-700">{roleLabel[user.role] || user.role}</span>
-                  </div>
-                  {user.isVolunteer && user.volunteerData?.registration_number && (
-                    <div className="flex items-center gap-1.5 bg-[#FF9933]/20 backdrop-blur-md border border-[#FF9933]/30 py-1 px-3 rounded-full w-fit">
-                      <ShieldCheck className="w-3 h-3 text-orange-500" />
-                      <span className="text-[10px] font-black tracking-widest uppercase text-orange-500">V-ID: {user.volunteerData.registration_number}</span>
-                    </div>
-                  )}
+              {user.isVolunteer && user.volunteerData?.registration_number && (
+                <div className="flex items-center gap-1.5 bg-[#FF9933]/10 border border-[#FF9933]/25 py-0.5 px-2.5 rounded-full w-fit">
+                  <ShieldCheck className="w-3 h-3 text-[#FF9933]" />
+                  <span className="text-[9px] font-black tracking-wider uppercase text-[#FF9933]">V-ID: {user.volunteerData.registration_number}</span>
                 </div>
-                {user.phone && <p className="text-xs text-slate-600 font-bold tracking-wide font-mono opacity-80">+91 {user.phone}</p>}
-              </>
-            )}
+              )}
+            </div>
+            {user.phone && <p className="text-[10px] text-slate-500 font-bold tracking-wide font-mono mt-1">+91 {user.phone}</p>}
           </div>
-        </div>
+        )}
 
         {/* Stats Strip */}
-        <div className="grid grid-cols-4 gap-2 bg-white/5 backdrop-blur-md border border-slate-100 rounded-xl p-3 mt-5 text-center shadow-inner">
-          
-          
-          <div className="flex flex-col">
-            <span className="text-sm font-extrabold text-[#D4AF37]">
+        <div className="grid grid-cols-4 gap-2 bg-slate-50 border border-slate-200/50 rounded-2xl p-2.5 mt-4 w-full text-center shadow-inner max-w-sm">
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-xs font-black text-slate-800">
               {user.janSevaCardStatus === "approved" ? "Active" : user.janSevaCardStatus === "pending" ? "Pending" : "None"}
             </span>
-            <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">Jan Seva</span>
+            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Jan Seva</span>
           </div>
-          <div className="w-[1px] h-6 bg-white shadow-sm border border-slate-200 self-center"></div>
-          <div className="flex flex-col">
-            <span className="text-sm font-extrabold text-[#D4AF37]">{user.isVolunteer ? "Yes" : "No"}</span>
-            <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">Volunteer</span>
+          <div className="w-[1px] h-6 bg-slate-200 self-center mx-auto"></div>
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-xs font-black text-slate-800">{user.isVolunteer ? "Yes" : "No"}</span>
+            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Volunteer</span>
+          </div>
+          <div className="w-[1px] h-6 bg-slate-200 self-center mx-auto"></div>
+          <div className="flex flex-col items-center justify-center col-span-2">
+            <span className="text-xs font-black text-[#FF9933]">{user.points || 0}</span>
+            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Impact Points</span>
           </div>
         </div>
       </div>
@@ -216,7 +295,7 @@ export default function Profile() {
             <div className="p-4 grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
               <div className="flex flex-col">
                 <span className="text-[9px] font-bold text-slate-600 uppercase">Blood Group</span>
-                <span className="font-extrabold text-amber-900 flex items-center gap-1 text-sm"><Heart className="w-3 h-3 text-red-500" /> {user.volunteerData.blood_group || "N/A"}</span>
+                <span className="font-extrabold text-slate-800 flex items-center gap-1 text-sm"><Heart className="w-3 h-3 text-red-500" /> {user.volunteerData.blood_group || "N/A"}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-[9px] font-bold text-slate-600 uppercase">DOB</span>
@@ -288,59 +367,86 @@ export default function Profile() {
           transition={{ delay: 0.1 }}
           className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
         >
-          <div className="text-[9px] font-black text-slate-600 uppercase tracking-wider bg-transparent/80 border-b border-slate-100 px-4 py-2">
+          <div className="text-[9px] font-black text-slate-650 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100 px-4 py-2.5">
             Support & Info
           </div>
           
           <div 
             onClick={() => setShowFaqModal(true)}
-            className="flex justify-between items-center px-4 py-3 border-b border-slate-100 cursor-pointer hover:bg-transparent/50 transition"
+            className="flex justify-between items-center px-4 py-3.5 border-b border-slate-100 cursor-pointer hover:bg-slate-50/50 transition"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-transparent border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
+              <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
                 <HelpCircle className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-amber-900">Help & FAQs</span>
+              <span className="text-xs font-bold text-slate-800">Help & FAQs</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-600" />
           </div>
 
-
-
           <div 
             onClick={() => setShowAboutModal(true)}
-            className="flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-transparent/50 transition"
+            className="flex justify-between items-center px-4 py-3.5 cursor-pointer hover:bg-slate-50/50 transition"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-transparent border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
+              <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600">
                 <Info className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-amber-900">About RP Foundation</span>
+              <span className="text-xs font-bold text-slate-800">About RP Foundation</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-600" />
           </div>
         </motion.div>
 
-        
-        {/* Support Panel (Helpline, website, email) */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3.5">
+        {/* Help & Contact Panel with Social Media Links */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4">
           <h4 className="font-display font-extrabold text-xs text-[#000080] uppercase tracking-wider">
             {isHi ? "सहायता एवं संपर्क" : "Help & Contact"}
           </h4>
-          <div className="space-y-2 text-xs">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <span className="text-slate-500 font-bold">{isHi ? "टोल-फ्री हेल्पलाइन:" : "Toll-Free Helpline:"}</span>
-              <span className="font-extrabold text-amber-900 font-mono">{settings?.tollFree || "1800-569-0991"}</span>
+          <div className="space-y-2.5 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <span className="text-slate-550 font-semibold">{isHi ? "टोल-फ्री हेल्पलाइन:" : "Toll-Free Helpline:"}</span>
+              <a href={`tel:${settings?.tollFree || "1800-569-0991"}`} className="font-extrabold text-slate-800 hover:text-[#000080] transition font-mono">{settings?.tollFree || "1800-569-0991"}</a>
             </div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <span className="text-slate-500 font-bold">{isHi ? "ईमेल समर्थन:" : "Email Support:"}</span>
-              <span className="font-extrabold text-amber-900">{settings?.email || "info@therpfoundation.org"}</span>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <span className="text-slate-550 font-semibold">{isHi ? "ईमेल समर्थन:" : "Email Support:"}</span>
+              <a href={`mailto:${settings?.email || "info@therpfoundation.org"}`} className="font-extrabold text-slate-800 hover:text-[#000080] transition">{settings?.email || "info@therpfoundation.org"}</a>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-bold">{isHi ? "आधिकारिक वेबसाइट:" : "Official Website:"}</span>
-              <a href={settings?.webUrl ? (settings.webUrl.startsWith("http") ? settings.webUrl : "https://" + settings.webUrl) : "https://therpfoundation.org"} target="_blank" rel="noreferrer" className="font-extrabold text-blue-600 hover:underline">
+              <span className="text-slate-550 font-semibold">{isHi ? "आधिकारिक वेबसाइट:" : "Official Website:"}</span>
+              <a href={settings?.webUrl ? (settings.webUrl.startsWith("http") ? settings.webUrl : "https://" + settings.webUrl) : "https://therpfoundation.org"} target="_blank" rel="noreferrer" className="font-extrabold text-blue-650 hover:underline">
                 {settings?.webUrl || "therpfoundation.org"}
               </a>
+            </div>
+          </div>
+
+          {/* Social Icons Directory with Gradients */}
+          <div className="pt-3.5 border-t border-slate-100">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Connect With Us</p>
+            <div className="flex justify-around items-center">
+              {[
+                { icon: Globe, url: settings?.webUrl ? (settings.webUrl.startsWith("http") ? settings.webUrl : "https://" + settings.webUrl) : "https://therpfoundation.org", grad: "from-blue-500 to-indigo-650" },
+                { icon: Mail, url: `mailto:${settings?.email || "info@therpfoundation.org"}`, grad: "from-amber-500 to-red-500" },
+                { icon: Twitter, url: "https://twitter.com/therpfoundation", grad: "from-slate-700 to-slate-900" },
+                { icon: Youtube, url: "https://youtube.com/@therpfoundation", grad: "from-red-600 to-rose-700" },
+                { icon: Instagram, url: "https://instagram.com/therpfoundation", grad: "from-pink-500 via-purple-550 to-yellow-500" },
+                { icon: Facebook, url: "https://facebook.com/therpfoundation", grad: "from-blue-650 to-blue-800" }
+              ].map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <motion.a
+                    key={idx}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.9 }}
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-white shadow-md bg-gradient-to-tr ${item.grad} transition-transform`}
+                  >
+                    <Icon className="w-4 h-4 text-white" />
+                  </motion.a>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -428,7 +534,7 @@ export default function Profile() {
                   <span className="text-[7px] font-black uppercase text-slate-600 mt-1">Founder</span>
                 </div>
               </div>
-              <h4 className="font-extrabold text-amber-900 text-center leading-none">
+              <h4 className="font-extrabold text-slate-800 text-center leading-none">
                 {cmsConfig?.founderName || "Rohit Pandit"}
               </h4>
               <p className="text-[9.5px] font-black text-orange-500 text-center uppercase tracking-widest leading-none mt-1">
@@ -440,9 +546,9 @@ export default function Profile() {
                   : (cmsConfig?.aboutTextEn || "RP Foundation is a non-profit organization dedicated to grassroot community upliftment, educational scholarships, emergency healthcare support, and smart governance solutions.")}
               </p>
               <div className="bg-transparent p-2.5 rounded-xl border border-slate-150 text-[10px] font-bold text-slate-650 flex flex-col gap-1">
-                <span className="flex justify-between"><span>Toll Free Helpline:</span><span className="font-mono text-amber-900">{settings?.tollFree || "1800-569-0991"}</span></span>
-                <span className="flex justify-between"><span>Email Support:</span><span className="text-amber-900">{settings?.email || "info@therpfoundation.org"}</span></span>
-                <span className="flex justify-between"><span>Official Web:</span><span className="text-amber-900">{settings?.webUrl || "therpfoundation.org"}</span></span>
+                <span className="flex justify-between"><span>Toll Free Helpline:</span><span className="font-mono text-slate-850">{settings?.tollFree || "1800-569-0991"}</span></span>
+                <span className="flex justify-between"><span>Email Support:</span><span className="text-[#000080]">{settings?.email || "info@therpfoundation.org"}</span></span>
+                <span className="flex justify-between"><span>Official Web:</span><span className="text-[#000080]">{settings?.webUrl || "therpfoundation.org"}</span></span>
               </div>
             </div>
           </div>

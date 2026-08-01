@@ -45,6 +45,7 @@ export interface User {
   onboardingCompleted?: boolean;
   points?: number;
   badges?: number;
+  cover?: string;
 }
 
 interface AuthContextType {
@@ -112,6 +113,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 janSevaCardNo: fresh.janSevaCardNo ?? parsed.janSevaCardNo,
                 points: fresh.points ?? parsed.points,
                 badges: fresh.badges ?? parsed.badges,
+                avatar: fresh.avatar ?? parsed.avatar,
+                cover: fresh.cover ?? parsed.cover,
               };
               localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
               setUser(merged);

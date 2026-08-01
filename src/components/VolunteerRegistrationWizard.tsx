@@ -214,16 +214,16 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
             <div className="w-full bg-slate-800 text-white rounded-2xl p-4 shadow-xl border border-slate-700 relative overflow-hidden my-4">
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl translate-x-8 -translate-y-8"></div>
               
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">Generated Username</p>
-              <p className="text-lg font-black text-[#FF9933] font-mono mb-4">{regData.username}</p>
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">Login Username (Mobile)</p>
+              <p className="text-lg font-black text-[#FF9933] font-mono mb-4">{mobile}</p>
 
               <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">Registration No.</p>
               <p className="text-xs font-bold text-white font-mono tracking-wider">{regData.registration_number}</p>
             </div>
             
-            <p className="text-xs font-bold text-slate-500 text-center px-4">Your application is now under review. You can log in using your username and password.</p>
+            <p className="text-xs font-bold text-slate-500 text-center px-4">Your application is now under review. You can log in using your Mobile Number and password.</p>
 
-            <button onClick={() => onComplete(regData.username, password)} className="w-full py-3.5 bg-[#000080] text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 transition shadow-lg mt-2 uppercase tracking-wider">
+            <button onClick={() => onComplete(mobile, password)} className="w-full py-3.5 bg-[#000080] text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 transition shadow-lg mt-2 uppercase tracking-wider">
                Continue to Login
             </button>
           </div>
@@ -303,16 +303,6 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
               <label className="text-[10px] font-bold text-slate-500 uppercase">Email Address</label>
               <input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" placeholder="user@example.com" />
             </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 uppercase">{isIndia ? "Aadhaar Number" : "National ID Number"}</label>
-            <input type="text" value={nationalId1} onChange={e=>setNationalId1(e.target.value)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F] tracking-widest" placeholder={isIndia ? "XXXX-XXXX-XXXX" : "ID Number"} />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 uppercase">{isIndia ? "Voter ID (Optional)" : "Secondary ID (Optional)"}</label>
-            <input type="text" value={nationalId2} onChange={e=>setNationalId2(e.target.value)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F] tracking-widest" placeholder={isIndia ? "ABC1234567" : "ID Number"} />
           </div>
         </section>
 

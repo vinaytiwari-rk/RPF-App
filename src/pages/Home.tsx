@@ -306,71 +306,7 @@ export default function Home() {
 
         </div>
 
-      {/* 5. Latest Campaigns Section (Matches Screenshot 5 Latest Campaigns 3 vertical cards) */}
-      <div className="px-4 relative z-10">
-        <div className="flex justify-between items-center mb-2.5">
-          <h4 className="font-display font-extrabold text-xs text-[#0B1E3F]">
-            {lang === "hi" ? "नवीनतम अभियान" : "Latest Campaigns"}
-          </h4>
-          <button 
-            onClick={() => navigate("/services")}
-            className="text-[9px] font-black text-[#000080] uppercase tracking-wider hover:underline"
-          >
-            {lang === "hi" ? "सभी देखें >" : "See All >"}
-          </button>
-        </div>
 
-        <div className="flex overflow-x-auto gap-3.5 pb-2.5 no-scrollbar snap-x snap-mandatory">
-          {campaigns.length === 0 ? (
-            <div className="w-full text-center py-8 text-slate-400 font-bold border border-slate-100 bg-white rounded-2xl">
-              {lang === "hi" ? "कोई सक्रिय दान अभियान नहीं है" : "No active crowdfunding campaigns"}
-            </div>
-          ) : (
-            campaigns.map((camp: any, idx) => {
-              const progress = Number(camp.goalAmount) > 0 ? Math.min(100, Math.round((Number(camp.raisedAmount || 0) / Number(camp.goalAmount)) * 100)) : 0;
-              const formatRupees = (val: any) => {
-                const num = Number(val) || 0;
-                if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
-                return `₹${num.toLocaleString()}`;
-              };
-              return (
-                <div 
-                  key={camp.id || idx} 
-                  onClick={() => navigate("/donations")}
-                  className="bg-white border border-slate-200/60 rounded-2xl overflow-hidden min-w-[210px] max-w-[210px] snap-center cursor-pointer shadow-sm hover:shadow-md transition transform hover:-translate-y-0.5 duration-250 flex flex-col justify-between"
-                >
-                  <div className="relative h-24 bg-slate-100">
-                    <img src={camp.coverImgUrl || "/assets/mega_camp_banner.png"} alt={camp.titleEn} className="w-full h-full object-cover" />
-                    <span className="absolute top-2 left-2 text-[7.5px] font-black uppercase text-white px-2 py-0.5 rounded bg-[#138808]">
-                      {lang === "hi" ? "लाइव" : "Live"}
-                    </span>
-                  </div>
-                  <div className="p-3.5 space-y-2">
-                    <h5 className="font-display font-extrabold text-[11px] text-slate-800 leading-tight line-clamp-2 min-h-[30px]">
-                      {lang === "hi" ? camp.titleHi : camp.titleEn}
-                    </h5>
-                    <div className="flex items-center gap-1 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
-                      <MapPin className="w-3 h-3 text-slate-400" />
-                      <span>{lang === "hi" ? camp.locationHi || "सीहोर, म.प्र." : camp.locationEn || "Sehore, MP"}</span>
-                    </div>
-                    
-                    {/* Progress bar */}
-                    <div className="space-y-1 pt-1.5 border-t border-slate-100">
-                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-[#FF9933] h-full rounded-full" style={{ width: `${progress}%` }}></div>
-                      </div>
-                      <div className="flex justify-between text-[8px] font-black text-slate-500 uppercase tracking-wide">
-                        <span>{formatRupees(camp.raisedAmount)} / {formatRupees(camp.goalAmount)}</span>
-                        <span>{progress}%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
 
       {/* 6. Message from Founder (Matches Screenshot 5 Founder Msg) */}
       <motion.div 
