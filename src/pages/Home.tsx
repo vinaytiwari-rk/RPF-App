@@ -134,6 +134,26 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Top Helpline Marquee Ticker */}
+      <div className="bg-red-600 text-white py-2 px-3 shadow-md z-45 relative shrink-0 overflow-hidden border-b border-red-750 select-none">
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-black uppercase tracking-wider bg-white text-red-650 px-1.5 py-0.5 rounded-md shrink-0 flex items-center gap-1 font-sans animate-pulse">
+            <PhoneCall className="w-3 h-3 text-red-650" />
+            {lang === "hi" ? "हेल्पलाइन" : "Helplines"}
+          </span>
+          <div className="overflow-hidden w-full relative">
+            <marquee 
+              scrollamount="2"
+              onMouseOver={(e) => (e.currentTarget as any).stop()}
+              onMouseOut={(e) => (e.currentTarget as any).start()}
+              className="text-[10.5px] font-bold font-mono tracking-wide mt-0.5 whitespace-nowrap block cursor-pointer"
+            >
+              RP Foundation Toll Free Number: 1800-569-0991, CM Helpline: 181, Emergency Response Support System: 112, Women Helpline: 1090, Ambulance: 108/102, Police Helpline: 100, Fire Emergency: 101, Child Helpline: 1098, Railway Inqury : 139, Airlines Enquiry : 143, Blood Bank: 1910, Voter Helpline: 1950, Cyber Crime Helpline : 1930, LPG Leak Line Helpline: 1906, Natinal Consumer Helpline: 1915, National Narcotis Helpline: 1933, Natural Calaities Helpline: 1070, Road Accident Helpline: 1073
+            </marquee>
+          </div>
+        </div>
+      </div>
       
       {/* 1. Indian Heritage Mandala Backdrop */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[340px] h-[340px] opacity-[0.03] pointer-events-none z-0">
@@ -415,21 +435,6 @@ export default function Home() {
       
         {/* Helplines and Social Media Sections */}
         <div className="grid grid-cols-1 gap-4 mt-5">
-          {/* Scrolling Helpline Marquee Card */}
-          <div className="bg-red-600 text-white py-3 px-4.5 rounded-2xl shadow-sm border border-red-500/85 overflow-hidden relative">
-            <div className="flex items-center gap-3">
-              <span className="text-[9px] font-black uppercase tracking-wider bg-white text-red-650 px-2 py-1 rounded-lg shrink-0 animate-pulse flex items-center gap-1">
-                <PhoneCall className="w-3.5 h-3.5" />
-                {lang === "hi" ? "हेल्पलाइन नंबर" : "Helplines"}
-              </span>
-              <div className="overflow-hidden whitespace-nowrap w-full relative">
-                <div className="inline-block animate-marquee-scroll hover:[animation-play-state:paused] cursor-pointer text-[11px] font-bold font-mono">
-                  RP Foundation Toll Free Number: 1800-569-0991, CM Helpline: 181, Emergency Response Support System: 112, Women Helpline: 1090, Ambulance: 108/102, Police Helpline: 100, Fire Emergency: 101, Child Helpline: 1098, Railway Inqury : 139, Airlines Enquiry : 143, Blood Bank: 1910, Voter Helpline: 1950, Cyber Crime Helpline : 1930, LPG Leak Line Helpline: 1906, Natinal Consumer Helpline: 1915, National Narcotis Helpline: 1933, Natural Calaities Helpline: 1070, Road Accident Helpline: 1073 •&nbsp;
-                  RP Foundation Toll Free Number: 1800-569-0991, CM Helpline: 181, Emergency Response Support System: 112, Women Helpline: 1090, Ambulance: 108/102, Police Helpline: 100, Fire Emergency: 101, Child Helpline: 1098, Railway Inqury : 139, Airlines Enquiry : 143, Blood Bank: 1910, Voter Helpline: 1950, Cyber Crime Helpline : 1930, LPG Leak Line Helpline: 1906, Natinal Consumer Helpline: 1915, National Narcotis Helpline: 1933, Natural Calaities Helpline: 1070, Road Accident Helpline: 1073 •&nbsp;
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Social Media Panel */}
           <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm space-y-3">
