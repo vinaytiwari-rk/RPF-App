@@ -22,25 +22,39 @@ const joditConfig = {
 };
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center bg-transparent min-h-screen">
+        <h2 className="font-display font-bold text-xl text-red-900 mb-2">Access Denied</h2>
+        <p className="text-xs text-slate-500 mb-4">You do not have administrative privileges to access this area.</p>
+        <button 
+          onClick={() => navigate("/")}
+          className="bg-[#000080] text-white px-4 py-2 rounded-lg text-xs font-bold"
+        >
+          Go to Home
+        </button>
+      </div>
+    );
+  }
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   const [previewItem, setPreviewItem] = useState<any>(null);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
-  const navigate = useNavigate();
   
   const { 
-    settings, updateSettings, cardApplications, grievances, refreshData, addSocialPost, cmsConfig, updateCmsConfig
+    settings, updateSettings, cardApplications, grievances, refreshData, addSocialPost, cmsConfig, updateCmsConfig, servicesList
   } = useApp();
-  
-  const { user } = useAuth();
 
-  // Unified Tabs for Mobile Screen (9 tabs total, forming a clean 3x3 grid)
-  const [activeTab, setActiveTab] = useState<"analytics" | "cms" | "settings" | "cards" | "grievances" | "services" | "campaigns" | "volunteers" | "comms" | "certs">("analytics");
+  const [homeServices, setHomeServices] = useState<string[]>(cmsConfig?.homeServices || ["card", "blood", "health-care", "environment", "culture"]);
+  const [donations, setDonations] = useState<any[]>([]);
+  
+  const [activeTab, setActiveTab] = useState<"analytics" | "cms" | "settings" | "cards" | "grievances" | "services" | "campaigns" | "volunteers" | "comms" | "certs" | "donations">("analytics");
   
   // App Config States
   const [tollFree, setTollFree] = useState(settings?.tollFree || "1800-569-0991");
@@ -300,6 +314,7 @@ export default function AdminDashboard() {
       if (cmsConfig.aboutTextEn) setAboutTextEn(cmsConfig.aboutTextEn);
       if (cmsConfig.aboutTextHi) setAboutTextHi(cmsConfig.aboutTextHi);
       if (cmsConfig.logoImgUrl) setLogoImgUrl(cmsConfig.logoImgUrl);
+      if (cmsConfig.homeServices) setHomeServices(cmsConfig.homeServices);
       setCmsLoaded(true);
     }
   }, [cmsConfig, cmsLoaded]);
@@ -343,9 +358,25 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchDonations = async () => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const res = await fetch("/api/admin/hq/donations", {
+        headers: { "Authorization": `Bearer ${token || ""}` }
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setDonations(d.donations || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch donations in admin:", err);
+    }
+  };
+
   useEffect(() => {
     fetchCampaignsAndVolunteers();
     fetchDbStoriesAndBlogs();
+    fetchDonations();
   }, []);
 
   // Analytics Realtime Aggregators
@@ -376,7 +407,8 @@ export default function AdminDashboard() {
         notifications: cmsConfig?.notifications || [],
         testimonials: cmsConfig?.testimonials || [],
         socialDirectory: cmsConfig?.socialDirectory || [],
-        faqs: cmsConfig?.faqs || []
+        faqs: cmsConfig?.faqs || [],
+        homeServices
       };
 
       const settingsRes = await fetch("/api/settings", {
@@ -935,7 +967,8 @@ export default function AdminDashboard() {
     { key: "campaigns", label: lang === "hi" ? "दान अभियान" : "Campaigns", icon: Heart },
     { key: "volunteers", label: lang === "hi" ? "स्वयंसेवक" : "Volunteers", icon: Award },
     { key: "certs", label: "Certificates", icon: Award },
-    { key: "comms", label: lang === "hi" ? "घोषणाएं" : "Comms & Stories", icon: Bell }
+    { key: "comms", label: lang === "hi" ? "घोषणाएं" : "Comms & Stories", icon: Bell },
+    { key: "donations", label: lang === "hi" ? "दान रिकॉर्ड" : "Donation Ledger", icon: CreditCard }
   ];
 
   return (
@@ -1238,6 +1271,29 @@ export default function AdminDashboard() {
                   <div>
                     <label className="text-[9px] font-black text-slate-400 uppercase block mb-1">Founder Designation / पद</label>
                     <input type="text" value={founderDesignation} onChange={e => setFounderDesignation(e.target.value)} className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl outline-none focus:border-indigo-650" />
+                  </div>
+                </div>
+                {/* Home Screen Pinned Featured Services Config */}
+                <div className="bg-slate-100 p-4 rounded-2xl border border-slate-200 space-y-2">
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block">Home Screen Featured Services (Select Pinned)</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-slate-700 font-bold">
+                    {servicesList.map((s: any) => (
+                      <label key={s.id} className="flex items-center gap-2 text-[10.5px] cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={homeServices.includes(s.id)} 
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setHomeServices(prev => [...prev, s.id]);
+                            } else {
+                              setHomeServices(prev => prev.filter(id => id !== s.id));
+                            }
+                          }}
+                          className="rounded text-indigo-650 focus:ring-indigo-500" 
+                        />
+                        <span>{s.titleEn}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
                 <div>
@@ -2043,6 +2099,90 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: DONATION RECORDS LEDGER */}
+        {activeTab === "donations" && (
+          <div className="space-y-4 animate-fadeIn text-xs font-bold text-slate-700">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-1">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Total Donations Collected</span>
+                <span className="text-xl font-black text-emerald-600">
+                  ₹{donations.reduce((sum, d) => sum + parseFloat(d.amount || "0"), 0).toLocaleString("en-IN")}
+                </span>
+              </div>
+              <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-1">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Total Transactions</span>
+                <span className="text-xl font-black text-slate-800">{donations.length}</span>
+              </div>
+              <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-1">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Average Contribution</span>
+                <span className="text-xl font-black text-indigo-650">
+                  ₹{donations.length > 0 ? Math.round(donations.reduce((sum, d) => sum + parseFloat(d.amount || "0"), 0) / donations.length).toLocaleString("en-IN") : 0}
+                </span>
+              </div>
+            </div>
+
+            {/* Donation Records Ledger Table */}
+            <div className="bg-white p-5 border border-slate-200 rounded-3xl shadow-sm space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h4 className="font-display font-black text-xs text-slate-800 uppercase tracking-wider">
+                  Citizen Donation Ledger / दान लेखा-जोखा
+                </h4>
+                <button
+                  onClick={() => {
+                    if (donations.length === 0) return;
+                    const headers = "Transaction ID,Donor Name,Donor Email,Amount,Campaign ID,Status,Date\n";
+                    const rows = donations.map(d => `"${d.transactionId}","${d.donorName}","${d.donorEmail || ""}","${d.amount}","${d.campaignId || ""}","${d.status}","${d.createdAt}"`).join("\n");
+                    const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.setAttribute("download", `RP_Donations_${new Date().toISOString().slice(0,10)}.csv`);
+                    link.click();
+                  }}
+                  className="bg-slate-900 hover:bg-slate-950 text-white text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1.5 uppercase font-black tracking-wider transition"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Ledger
+                </button>
+              </div>
+
+              {donations.length === 0 ? (
+                <EmptyState title="No transactions recorded yet" desc="All transactions from the Donate button will automatically log here." />
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-slate-100">
+                  <table className="w-full text-left border-collapse text-[11px]">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-black uppercase text-slate-400">
+                        <th className="p-3">Txn ID</th>
+                        <th className="p-3">Donor Name</th>
+                        <th className="p-3">Email</th>
+                        <th className="p-3 text-right">Amount</th>
+                        <th className="p-3">Date & Time</th>
+                        <th className="p-3 text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {donations.map((d: any) => (
+                        <tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50/50">
+                          <td className="p-3 font-mono font-bold text-slate-600">{d.transactionId}</td>
+                          <td className="p-3 font-bold text-slate-800">{d.donorName}</td>
+                          <td className="p-3 text-slate-500 font-medium">{d.donorEmail || "N/A"}</td>
+                          <td className="p-3 font-black text-emerald-600 text-right">₹{parseFloat(d.amount).toLocaleString("en-IN")}</td>
+                          <td className="p-3 text-slate-500">{new Date(d.createdAt).toLocaleString()}</td>
+                          <td className="p-3 text-center">
+                            <span className="px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase bg-green-50 text-green-700 border border-green-200">
+                              {d.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

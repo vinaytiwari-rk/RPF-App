@@ -33,6 +33,22 @@ export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { language, setLanguage, user, logout } = useAuth();
+
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+
+  React.useEffect(() => {
+    if (isAdmin && !location.pathname.startsWith("/admin")) {
+      navigate("/admin");
+    }
+  }, [isAdmin, location.pathname, navigate]);
+
+  if (isAdmin) {
+    return (
+      <div className="w-full min-h-screen bg-slate-50 flex flex-col font-sans">
+        <Outlet />
+      </div>
+    );
+  }
   const { notifications, settings } = useApp();
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
   const [showGuestModal, setShowGuestModal] = useState(false);

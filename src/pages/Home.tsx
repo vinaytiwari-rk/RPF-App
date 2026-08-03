@@ -77,48 +77,72 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  const quickActions = [
-    {
-      id: "card",
-      iconName: "ShieldCheck",
-      route: "/jan-seva-card",
-      titleEn: "Jan Seva Card",
-      titleHi: "जन सेवा कार्ड",
-      glowGradient: "from-blue-500 via-indigo-500 to-violet-650"
-    },
-    {
-      id: "blood",
-      iconName: "Heart",
-      route: "/blood-network",
-      titleEn: "Blood Network",
-      titleHi: "रक्तदाता नेटवर्क",
-      glowGradient: "from-red-500 via-rose-500 to-red-700"
-    },
-    {
-      id: "health",
-      iconName: "Activity",
-      route: "/health-care",
-      titleEn: "Health Care",
-      titleHi: "स्वास्थ्य सेवा",
-      glowGradient: "from-emerald-400 via-teal-500 to-green-600"
-    },
-    {
-      id: "environment",
-      iconName: "Leaf",
-      route: "/environment",
-      titleEn: "Environment",
-      titleHi: "पर्यावरण सुरक्षा",
-      glowGradient: "from-green-400 via-emerald-500 to-teal-600"
-    },
-    {
-      id: "culture",
-      iconName: "Landmark",
-      route: "/religious-culture",
-      titleEn: "Culture",
-      titleHi: "धर्म व संस्कृति",
-      glowGradient: "from-amber-400 via-orange-500 to-red-600"
-    }
-  ];
+  const serviceIdToRoute: Record<string, string> = {
+    card: "/jan-seva-card",
+    blood: "/blood-network",
+    donations: "/donations",
+    grievance: "/grievance",
+    volunteers: "/volunteers",
+    "health-care": "/health-care",
+    jobs: "/jobs",
+    scholarships: "/scholarships",
+    food: "/food",
+    medicine: "/medicine",
+    education: "/education",
+    "women-safety": "/women",
+    seniors: "/seniors",
+    animals: "/animals",
+    environment: "/environment",
+    crowdfunding: "/crowdfunding",
+    culture: "/religious-culture",
+    countries: "/countries"
+  };
+
+  const serviceIdToGradient: Record<string, string> = {
+    card: "from-blue-500 via-indigo-500 to-violet-650",
+    blood: "from-red-500 via-rose-500 to-red-700",
+    "health-care": "from-emerald-400 via-teal-500 to-green-600",
+    environment: "from-green-400 via-emerald-500 to-teal-600",
+    culture: "from-amber-400 via-orange-500 to-red-600",
+  };
+
+  const serviceIdToIcon: Record<string, string> = {
+    card: "ShieldCheck",
+    blood: "Heart",
+    donations: "HandCoins",
+    grievance: "AlertTriangle",
+    volunteers: "Users",
+    "health-care": "Activity",
+    jobs: "Briefcase",
+    scholarships: "GraduationCap",
+    food: "Apple",
+    medicine: "Pill",
+    education: "BookOpen",
+    "women-safety": "Shield",
+    seniors: "HandHelping",
+    animals: "Compass",
+    environment: "Leaf",
+    crowdfunding: "Coins",
+    culture: "Landmark",
+    countries: "Globe"
+  };
+
+  const activeServiceIds = cmsConfig?.homeServices && cmsConfig.homeServices.length > 0
+    ? cmsConfig.homeServices
+    : ["card", "blood", "health-care", "environment", "culture"];
+
+  const quickActions = activeServiceIds.map((id: string) => {
+    const s = servicesList?.find((ds: any) => ds.id === id);
+    if (!s) return null;
+    return {
+      id: s.id,
+      iconName: serviceIdToIcon[s.id] || s.iconName || "Compass",
+      route: serviceIdToRoute[s.id] || `/services`,
+      titleEn: s.titleEn,
+      titleHi: s.titleHi,
+      glowGradient: serviceIdToGradient[s.id] || "from-blue-500 via-indigo-500 to-violet-650"
+    };
+  }).filter(Boolean);
 
   return (
     <div className="space-y-5 animate-fadeIn min-h-full pb-16 font-sans relative overflow-x-hidden bg-transparent" id="live-impact-dashboard">

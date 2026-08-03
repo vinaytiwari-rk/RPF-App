@@ -65469,7 +65469,15 @@ async function sendEmail({ to, subject, text, html, from }) {
 }
 var authorizeRole = (requiredRole) => {
   return (req, res, next) => {
-    if (!req.user || req.user.role !== requiredRole) {
+    if (!req.user) {
+      return res.status(403).json({ success: false, error: "Access Denied" });
+    }
+    const userRole = req.user.role;
+    if (requiredRole === "super_admin" || requiredRole === "admin") {
+      if (userRole !== "super_admin" && userRole !== "admin") {
+        return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
+      }
+    } else if (userRole !== requiredRole) {
       return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
     }
     next();
@@ -69635,6 +69643,14 @@ app.put("/api/admin/hq/services/:id/content", async (req, res) => {
         updated_at = CURRENT_TIMESTAMP
     `, [id, content_en, content_hi, action_label_en, action_label_hi, action_url]);
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+app.get("/api/admin/hq/donations", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
+  try {
+    const result = await pool2.query('SELECT * FROM donations ORDER BY "createdAt" DESC');
+    res.json({ success: true, donations: result.rows });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

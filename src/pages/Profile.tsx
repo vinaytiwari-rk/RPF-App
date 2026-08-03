@@ -142,11 +142,15 @@ export default function Profile() {
     >
       {/* Profile Hero section with Custom Cover and Centered DP */}
       <div className="relative w-full h-[200px] bg-white border-b border-slate-200 flex-shrink-0" id="profile-cover-section">
-        {/* Cover Image Background (Default solid white) */}
+        {/* Cover Image Background (Default solid white replaced with a premium Navy & Gold gradient) */}
         {user.cover ? (
           <img src={user.cover} alt="Cover" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-white"></div>
+          <div className="w-full h-full bg-gradient-to-tr from-[#0B1E3F] via-[#102A6A] to-[#1E3A8A] flex items-center justify-center relative overflow-hidden">
+            {/* Subtle premium geometric lines overlay */}
+            <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+          </div>
         )}
 
         {/* Cover Controls (Top Right Overlay) */}
@@ -332,33 +336,7 @@ export default function Profile() {
           </motion.button>
         )}
 
-        {/* System Administration Control Card (Role-Based Visibility) */}
-        {(user.role === "admin" || user.role === "super_admin" || user.role === "volunteer") && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="glass-card bg-white text-[#000080] border-[#D4AF37]/35 overflow-hidden rounded-2xl border shadow-lg"
-          >
-            <div className="text-[9px] font-black text-slate-600 uppercase tracking-wider bg-slate-900/50 border-b border-white/5 px-4 py-2.5">
-              System Administration
-            </div>
-            <div 
-              onClick={() => navigate("/admin")}
-              className="flex justify-between items-center px-4 py-4 cursor-pointer hover:bg-white/5 transition"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center text-orange-500">
-                  <Shield className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-black uppercase tracking-wider text-[#000080] drop-shadow-sm">Admin Command HQ</span>
-                  <span className="text-[10px] text-slate-350 mt-0.5">Control settings, approve cards, and resolve grievances</span>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-slate-600" />
-            </div>
-          </motion.div>
-        )}
+
 
         {/* Action Menu List */}
         <motion.div 
