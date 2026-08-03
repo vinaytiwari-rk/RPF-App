@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 export default function AnimalsPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const [reported, setReported] = useState(false);
+  const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,95 +40,118 @@ export default function AnimalsPage() {
 
   return (
     <div className="p-5 space-y-5 animate-fadeIn pb-24 max-w-md mx-auto">
-      {/* Overview Card (Removed brown styling to meet clean guidelines) */}
-      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-200/50 rounded-2xl p-5 shadow-sm space-y-2">
-        <h3 className="font-display font-extrabold text-base text-[#000080] flex items-center gap-1.5">
-          <Heart className="w-5 h-5 text-red-500 fill-red-500 animate-pulse" />
-          {lang === "hi" ? "पशु कल्याण और संरक्षण" : "Animal Welfare Services"}
-        </h3>
-        <p className="text-xs text-slate-650 leading-relaxed font-semibold">
-          {lang === "hi" 
-            ? "बेसहारा और घायल पशुओं के उपचार और आश्रय के लिए। आप बीमार या चोटिल आवारा पशुओं की रिपोर्ट कर सकते हैं, हमारी रेस्क्यू टीम तुरंत सहायता करेगी।" 
-            : "Emergency relief, rescue, and shelter assistance for stray or injured animals. File reports to dispatch our veterinary team directly."}
-        </p>
+      {/* Navigation Switcher */}
+      <div className="flex bg-slate-200 p-1 rounded-xl max-w-md mx-auto">
+        <button 
+          onClick={() => setSubPage("portal")}
+          className={`flex-1 py-2 text-xs font-black rounded-lg transition-all uppercase tracking-wider ${subPage === "portal" ? "bg-[#000080] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+        >
+          {lang === "hi" ? "शिकायत" : "Report Rescue"}
+        </button>
+        <button 
+          onClick={() => {
+            setSubPage("tools");
+            if (!activeCalc) setActiveCalc("feed");
+          }}
+          className={`flex-1 py-2 text-xs font-black rounded-lg transition-all uppercase tracking-wider ${subPage === "tools" ? "bg-[#000080] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+        >
+          {lang === "hi" ? "पात्रता एवं टूल्स" : "Calculators"}
+        </button>
       </div>
 
-      {/* Report Stray Form */}
-      <div className="bg-white p-5 border border-slate-200 rounded-2xl shadow-sm space-y-4">
-        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2">
-          {lang === "hi" ? "घायल पशु की रिपोर्ट करें" : "Report Injured Stray"}
-        </h4>
-
-        {reported ? (
-          <div className="bg-green-50 text-green-700 border border-green-150 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 shrink-0" />
-            <div>
-              <p className="font-bold text-green-800">{lang === "hi" ? "शिकायत दर्ज हुई!" : "Incident Reported!"}</p>
-              <p className="text-[10px] text-green-600 font-normal mt-0.5">
-                {lang === "hi" ? "हमारी पशु एम्बुलेंस और रेस्क्यू टीम जल्द ही पहुंचेगी।" : "Our stray rescue ambulance is notified and will dispatch shortly."}
-              </p>
-            </div>
+      {subPage === "portal" ? (
+        <>
+          {/* Overview Card */}
+          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-200/50 rounded-2xl p-5 shadow-sm space-y-2">
+            <h3 className="font-display font-extrabold text-base text-[#000080] flex items-center gap-1.5">
+              <Heart className="w-5 h-5 text-red-500 fill-red-500 animate-pulse" />
+              {lang === "hi" ? "पशु कल्याण और संरक्षण" : "Animal Welfare Services"}
+            </h3>
+            <p className="text-xs text-slate-650 leading-relaxed font-semibold">
+              {lang === "hi" 
+                ? "बेसहारा और घायल पशुओं के उपचार और आश्रय के लिए। आप बीमार या चोटिल आवारा पशुओं की रिपोर्ट कर सकते हैं, हमारी रेस्क्यू टीम तुरंत सहायता करेगी।" 
+                : "Emergency relief, rescue, and shelter assistance for stray or injured animals. File reports to dispatch our veterinary team directly."}
+            </p>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
-                {lang === "hi" ? "पशु का प्रकार" : "Animal Type"}
-              </label>
-              <select className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs outline-none focus:border-indigo-500 font-bold">
-                <option>{lang === "hi" ? "गाय (Cow)" : "Cow"}</option>
-                <option>{lang === "hi" ? "कुत्ता (Dog)" : "Dog"}</option>
-                <option>{lang === "hi" ? "बिल्ली (Cat)" : "Cat"}</option>
-                <option>{lang === "hi" ? "अन्य (Other)" : "Other"}</option>
-              </select>
-            </div>
 
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
-                {lang === "hi" ? "चोट/बीमारी का विवरण" : "Condition Description"}
-              </label>
-              <textarea required placeholder={lang === "hi" ? "जैसे - पैर में फ्रैक्चर है..." : "e.g. fractured leg, bleeding"} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs min-h-[70px] outline-none focus:border-indigo-500 font-bold bg-slate-50" />
-            </div>
+          {/* Report Stray Form */}
+          <div className="bg-white p-5 border border-slate-200 rounded-2xl shadow-sm space-y-4">
+            <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2">
+              {lang === "hi" ? "घायल पशु की रिपोर्ट करें" : "Report Injured Stray"}
+            </h4>
 
-            <div className="border border-dashed border-slate-350 rounded-xl p-4 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition">
-              <Camera className="w-5 h-5 text-slate-400 mb-1" />
-              <span className="text-[10px] font-bold text-slate-500">{lang === "hi" ? "तस्वीर अपलोड करें (वैकल्पिक)" : "Upload Photo (Optional)"}</span>
-            </div>
+            {reported ? (
+              <div className="bg-green-50 text-green-700 border border-green-150 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 shrink-0" />
+                <div>
+                  <p className="font-bold text-green-800">{lang === "hi" ? "शिकायत दर्ज हुई!" : "Incident Reported!"}</p>
+                  <p className="text-[10px] text-green-600 font-normal mt-0.5">
+                    {lang === "hi" ? "हमारी पशु एम्बुलेंस और रेस्क्यू टीम जल्द ही पहुंचेगी।" : "Our stray rescue ambulance is notified and will dispatch shortly."}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
+                    {lang === "hi" ? "पशु का प्रकार" : "Animal Type"}
+                  </label>
+                  <select className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs outline-none focus:border-indigo-500 font-bold">
+                    <option>{lang === "hi" ? "गाय (Cow)" : "Cow"}</option>
+                    <option>{lang === "hi" ? "कुत्ता (Dog)" : "Dog"}</option>
+                    <option>{lang === "hi" ? "बिल्ली (Cat)" : "Cat"}</option>
+                    <option>{lang === "hi" ? "अन्य (Other)" : "Other"}</option>
+                  </select>
+                </div>
 
-            <button type="submit" className="w-full bg-[#000080] hover:bg-indigo-950 text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition uppercase tracking-wider font-display">
-              {lang === "hi" ? "रिपोर्ट भेजें" : "Submit Incident Report"}
-            </button>
-          </form>
-        )}
-      </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
+                    {lang === "hi" ? "चोट/बीमारी का विवरण" : "Condition Description"}
+                  </label>
+                  <textarea required placeholder={lang === "hi" ? "जैसे - पैर में फ्रैक्चर है..." : "e.g. fractured leg, bleeding"} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs min-h-[70px] outline-none focus:border-indigo-500 font-bold bg-slate-50" />
+                </div>
 
-      {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-          <span>{lang === "hi" ? "पशु स्वास्थ्य एवं पोषण टूल्स" : "Animal Care Calculators"}</span>
-          <Calculator className="w-4.5 h-4.5 text-indigo-650" />
-        </h4>
+                <div className="border border-dashed border-slate-300 rounded-xl p-4 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition">
+                  <Camera className="w-5 h-5 text-slate-400 mb-1" />
+                  <span className="text-[10px] font-bold text-slate-500">{lang === "hi" ? "तस्वीर अपलोड करें (वैकल्पिक)" : "Upload Photo (Optional)"}</span>
+                </div>
 
-        {/* Tools Select Grid */}
-        <div className="grid grid-cols-2 gap-2 text-center">
-          {[
-            { key: "feed", title: lang === "hi" ? "पशु आहार कैलकुलेटर" : "Cattle Feed Portions" },
-            { key: "age", title: lang === "hi" ? "पालतू उम्र परिवर्तक" : "Pet Human Age" },
-            { key: "water", title: lang === "hi" ? "पशु पानी आवश्यकता" : "Livestock Water" },
-            { key: "gestation", title: lang === "hi" ? "गर्भाधान कैलेंडर" : "Pregnancy Calendar" },
-            { key: "calories", title: lang === "hi" ? "दैनिक कैलोरी (RER/MER)" : "Pet Daily Calories" }
-          ].map(tool => (
-            <button
-              key={tool.key}
-              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
-              className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
-                activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              {tool.title}
-            </button>
-          ))}
-        </div>
+                <button type="submit" className="w-full bg-[#000080] hover:bg-indigo-950 text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition uppercase tracking-wider font-display">
+                  {lang === "hi" ? "रिपोर्ट भेजें" : "Submit Incident Report"}
+                </button>
+              </form>
+            )}
+          </div>
+        </>
+      ) : (
+        /* --- SMART TOOLS & CALCULATORS PAGE VIEW --- */
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+            <span>{lang === "hi" ? "पशु स्वास्थ्य एवं पोषण टूल्स" : "Animal Care Calculators"}</span>
+            <Calculator className="w-4.5 h-4.5 text-indigo-650" />
+          </h4>
+
+          {/* Tools Select Grid */}
+          <div className="grid grid-cols-2 gap-2 text-center">
+            {[
+              { key: "feed", title: lang === "hi" ? "पशु आहार कैलकुलेटर" : "Cattle Feed Portions" },
+              { key: "age", title: lang === "hi" ? "पालतू उम्र परिवर्तक" : "Pet Human Age" },
+              { key: "water", title: lang === "hi" ? "पशु पानी आवश्यकता" : "Livestock Water" },
+              { key: "gestation", title: lang === "hi" ? "गर्भाधान कैलेंडर" : "Pregnancy Calendar" },
+              { key: "calories", title: lang === "hi" ? "दैनिक कैलोरी (RER/MER)" : "Pet Daily Calories" }
+            ].map(tool => (
+              <button
+                key={tool.key}
+                onClick={() => setActiveCalc(tool.key)}
+                className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                  activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                {tool.title}
+              </button>
+            ))}
+          </div>
+
 
         {/* Calculators Content Container */}
         {activeCalc && (
@@ -296,6 +320,7 @@ export default function AnimalsPage() {
           </div>
         )}
       </div>
+      )}
 
     </div>
   );

@@ -44,6 +44,7 @@ export default function JanSevaCard() {
   
   const [view, setView] = useState<"home" | "apply">("home");
   const [step, setStep] = useState(0);
+  const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
@@ -173,7 +174,8 @@ export default function JanSevaCard() {
   const activeBenefits = lang === "hi" ? BENEFITS_HI : BENEFITS_EN;
 
   // View: Pending Review
-  if (user?.janSevaCardStatus === "pending") {
+  const renderPortalContent = () => {
+    if (user?.janSevaCardStatus === "pending") {
     return (
       <div className="p-5 space-y-6 animate-fadeIn pb-24 max-w-md mx-auto">
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl relative overflow-hidden text-center space-y-4">
@@ -742,7 +744,7 @@ export default function JanSevaCard() {
 
   // View: Card home / Apply portal page (No applied state)
   return (
-    <div className="p-5 space-y-6 animate-fadeIn font-sans pb-24 max-w-md mx-auto relative">
+    <div className="space-y-6 animate-fadeIn font-sans relative">
       
       {/* 3D Gold Accent card mockup */}
       <div className="bg-gradient-to-tr from-[#000080] via-[#102A6A] to-[#1E3A8A] rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden border border-white/5 animate-float">
@@ -818,205 +820,235 @@ export default function JanSevaCard() {
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
+    </div>
+  );
+};
 
-      {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6">
-        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-          <span>{lang === "hi" ? "जन सेवा पात्रता टूल्स" : "Scheme & Card Planners"}</span>
-          <Award className="w-4.5 h-4.5 text-[#FF9933]" />
-        </h4>
-
-        {/* Tools Select Grid */}
-        <div className="grid grid-cols-2 gap-2 text-center">
-          {[
-            { key: "schemes", title: lang === "hi" ? "21-कल्याणकारी योजनाएं" : "21-Schemes Matcher" },
-            { key: "expiry", title: lang === "hi" ? "कार्ड वैधता प्रोग्रेस" : "Card Expiry Tracker" },
-            { key: "luhn", title: lang === "hi" ? "कार्ड नंबर सत्यापन" : "Luhn ID Check" },
-            { key: "poverty", title: lang === "hi" ? "BPL/APL श्रेणी जांच" : "BPL/APL Assessor" },
-            { key: "dependency", title: lang === "hi" ? "आश्रित अनुपात इंडेक्स" : "Dependency Ratio" }
-          ].map(tool => (
-            <button
-              key={tool.key}
-              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
-              className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
-                activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              {tool.title}
-            </button>
-          ))}
-        </div>
-
-        {/* Calculators Content Container */}
-        {activeCalc && (
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
-            
-            {/* 1. 21-Scheme Compatibility Matcher */}
-            {activeCalc === "schemes" && (
-              <div className="space-y-3">
-                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "21-केंद्रीय और राज्य योजनाएं पात्रता जाँच" : "21-Government Welfare Schemes Matcher"}</h5>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `आयु: ${matchAge} वर्ष` : `Age: ${matchAge} yrs`}</label>
-                    <input type="range" min="18" max="80" value={matchAge} onChange={e => setMatchAge(Number(e.target.value))} className="w-full accent-[#000080]" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `वार्षिक आय: ₹${matchIncome.toLocaleString()}` : `Annual Income: ₹${matchIncome.toLocaleString()}`}</label>
-                    <input type="range" min="15000" max="250000" step="5000" value={matchIncome} onChange={e => setMatchIncome(Number(e.target.value))} className="w-full accent-[#000080]" />
-                  </div>
-                </div>
-
-                {(() => {
-                  // Standard Indian Schemes check
-                  const eligibleList = [];
-                  if (matchIncome <= 120000) eligibleList.push("Ayushman Bharat (Free Health Cover)");
-                  if (matchIncome <= 180000 && matchAge >= 60) eligibleList.push("IGNOAPS Old-Age Pension");
-                  if (matchIncome <= 250000) eligibleList.push("PM Kisan Samman Nidhi (Farmer Subsidy)");
-                  if (matchIncome <= 100000) eligibleList.push("Ladli Behna Scheme (Women Cash Grant)");
-                  
-                  return (
-                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5">
-                      <p className="text-[10px] text-slate-400 font-black uppercase">{lang === "hi" ? "योग्य कल्याणकारी योजनाएं" : "Matched Welfare Schemes"}</p>
-                      {eligibleList.length > 0 ? (
-                        eligibleList.map((scheme, idx) => <p key={idx} className="text-green-700 font-extrabold">• {scheme}</p>)
-                      ) : (
-                        <p className="text-red-700">{lang === "hi" ? "कोई योजना मैच नहीं हुई (आय सीमा सीमा से अधिक है)" : "No matching schemes found (Income exceeds limits)"}</p>
-                      )}
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* 2. Card Validity Tracker */}
-            {activeCalc === "expiry" && (
-              <div className="space-y-3">
-                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "जन सेवा कार्ड समाप्ति तिथि प्रोग्रेस" : "Card Expiration Milestones"}</h5>
-                <div>
-                  <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "जारी होने की तारीख" : "Card Issue Date"}</label>
-                  <input type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} className="w-full border border-slate-200 rounded p-2 text-xs font-bold bg-white" />
-                </div>
-
-                {(() => {
-                  if (!issueDate) return <p className="text-slate-400 text-center font-bold">{lang === "hi" ? "जारी करने की तारीख चुनें।" : "Select issue date above."}</p>;
-                  const issue = new Date(issueDate);
-                  const expiry = new Date(issue.getTime() + 5 * 365 * 24 * 60 * 60 * 1000); // 5 year expiration
-                  const diffTime = expiry.getTime() - new Date().getTime();
-                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                  const expired = diffDays <= 0;
-                  
-                  return (
-                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1">
-                      <p className="flex justify-between"><span>{lang === "hi" ? "समाप्ति तिथि (5 वर्ष):" : "Expiry Date (5 yrs):"}</span><span>{expiry.toLocaleDateString()}</span></p>
-                      <p className="flex justify-between border-t border-indigo-200/50 pt-1">
-                        <span>{lang === "hi" ? "वैधता शेष:" : "Validity Remaining:"}</span>
-                        <span className={expired ? "text-red-700" : "text-green-700"}>
-                          {expired ? (lang === "hi" ? "समाप्त" : "Expired") : `${diffDays} ${lang === "hi" ? "दिन" : "days"}`}
-                        </span>
-                      </p>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* 3. Luhn ID Check */}
-            {activeCalc === "luhn" && (
-              <div className="space-y-3">
-                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "जन सेवा कार्ड नंबर सत्यता जांच (Luhn Checksum)" : "Luhn Checksum Card Number Validator"}</h5>
-                <div>
-                  <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "१२-अंकीय कार्ड नंबर दर्ज करें" : "Enter 12-digit Card Number"}</label>
-                  <input type="text" maxLength={12} value={cardCheckNo} onChange={e => setCardCheckNo(e.target.value.replace(/\D/g, ""))} placeholder="e.g. 509284102941" className="w-full border border-slate-200 rounded p-2 text-xs font-bold bg-white outline-none focus:border-indigo-500" />
-                </div>
-
-                {(() => {
-                  if (cardCheckNo.length < 12) return <p className="text-slate-400 text-center font-bold">{lang === "hi" ? "१२ अंक दर्ज करें।" : "Provide exactly 12 digits."}</p>;
-                  
-                  // Luhn algorithm check
-                  let sum = 0;
-                  let shouldDouble = false;
-                  for (let i = cardCheckNo.length - 1; i >= 0; i--) {
-                    let digit = parseInt(cardCheckNo.charAt(i), 10);
-                    if (shouldDouble) {
-                      if ((digit *= 2) > 9) digit -= 9;
-                    }
-                    sum += digit;
-                    shouldDouble = !shouldDouble;
-                  }
-                  const valid = sum % 10 === 0;
-
-                  return (
-                    <div className={`p-3 rounded-lg border font-bold text-center ${valid ? "bg-green-50 text-green-700 border-green-150" : "bg-red-50 text-red-700 border-red-150"}`}>
-                      {valid ? (
-                        <p>{lang === "hi" ? "✓ वैध चेकसम: कार्ड संरचना सही है।" : "✓ Valid Checksum: Card format matches requirements."}</p>
-                      ) : (
-                        <p>{lang === "hi" ? "✗ अमान्य चेकसम: कृपया नंबर दोबारा जांचें।" : "✗ Invalid Checksum: Incorrect card sequence."}</p>
-                      )}
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* 4. BPL/APL Classification Assessor */}
-            {activeCalc === "poverty" && (
-              <div className="space-y-3">
-                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "BPL/APL गरीबी रेखा श्रेणी निर्धारक" : "Poverty Line Assessor"}</h5>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `पारिवारिक मासिक आय: ₹${matchIncome.toLocaleString()}` : `Household Monthly Income: ₹${matchIncome.toLocaleString()}`}</label>
-                    <input type="range" min="5000" max="50000" step="1000" value={matchIncome} onChange={e => setMatchIncome(Number(e.target.value))} className="w-full accent-[#000080]" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `आश्रित सदस्य: ${dependentCount}` : `Dependent Members: ${dependentCount}`}</label>
-                    <input type="range" min="1" max="10" value={dependentCount} onChange={e => setDependentCount(Number(e.target.value))} className="w-full accent-[#000080]" />
-                  </div>
-                </div>
-
-                {(() => {
-                  const bplCap = 15000 + (dependentCount * 2000); // dynamic BPL income standard adjustment
-                  const isBPL = matchIncome <= bplCap;
-                  return (
-                    <div className={`p-3 rounded-lg border font-bold text-center ${isBPL ? "bg-green-50 text-green-700 border-green-150" : "bg-blue-50 text-blue-700 border-blue-150"}`}>
-                      <p className="text-sm font-black">{isBPL ? (lang === "hi" ? "BPL (गरीबी रेखा से नीचे)" : "BPL (Below Poverty Line)") : (lang === "hi" ? "APL (गरीबी रेखा से ऊपर)" : "APL (Above Poverty Line)")}</p>
-                      <p className="text-[9px] text-slate-500 mt-1 font-semibold">{lang === "hi" ? `(इस आकार के परिवार के लिए BPL सीमा: ₹${bplCap.toLocaleString()}/माह)` : `(BPL threshold for this family size: ₹${bplCap.toLocaleString()}/mo)`}</p>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* 5. Dependency Ratio */}
-            {activeCalc === "dependency" && (
-              <div className="space-y-3">
-                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "आश्रित अनुपात वित्तीय सूचकांक" : "Family Financial Dependency Ratio"}</h5>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `कुल आश्रित सदस्य: ${dependentCount}` : `Total Dependents: ${dependentCount}`}</label>
-                    <input type="range" min="1" max="8" value={dependentCount} onChange={e => setDependentCount(Number(e.target.value))} className="w-full accent-[#000080]" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `मासिक खर्च: ₹${monthlyExpense.toLocaleString()}` : `Monthly Expense: ₹${monthlyExpense.toLocaleString()}`}</label>
-                    <input type="range" min="5000" max="50000" step="2500" value={monthlyExpense} onChange={e => setMonthlyExpense(Number(e.target.value))} className="w-full accent-[#000080]" />
-                  </div>
-                </div>
-
-                {(() => {
-                  const shareCost = Math.round(monthlyExpense / (dependentCount + 1));
-                  return (
-                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold text-center">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">{lang === "hi" ? "प्रति व्यक्ति जीवन निर्वाह खर्च" : "Per Capita Share of Cost"}</p>
-                      <p className="text-lg text-[#000080] font-black mt-1">₹{shareCost.toLocaleString()}</p>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-          </div>
-        )}
+  return (
+    <div className="p-5 space-y-6 animate-fadeIn pb-24 max-w-md mx-auto relative min-h-screen bg-slate-50">
+      {/* Top Switcher */}
+      <div className="flex bg-slate-200/80 p-1 rounded-xl shadow-inner border border-slate-200 shrink-0">
+        <button 
+          onClick={() => setSubPage("portal")}
+          className={`flex-1 py-2 text-center rounded-lg text-xs font-black transition cursor-pointer ${
+            subPage === "portal" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {lang === "hi" ? "सेवा पोर्टल" : "Service Portal"}
+        </button>
+        <button 
+          onClick={() => {
+            setSubPage("tools");
+            if (!activeCalc) setActiveCalc("schemes");
+          }}
+          className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
+            subPage === "tools" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {lang === "hi" ? "पात्रता टूल्स" : "Calculators"}
+        </button>
       </div>
 
+      {subPage === "tools" ? (
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 animate-fadeIn">
+          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+            <span>{lang === "hi" ? "जन सेवा पात्रता टूल्स" : "Scheme & Card Planners"}</span>
+            <Award className="w-4.5 h-4.5 text-[#FF9933]" />
+          </h4>
+
+          {/* Tools Select Grid */}
+          <div className="grid grid-cols-2 gap-2 text-center">
+            {[
+              { key: "schemes", title: lang === "hi" ? "21-कल्याणकारी योजनाएं" : "21-Schemes Matcher" },
+              { key: "expiry", title: lang === "hi" ? "कार्ड वैधता प्रोग्रेस" : "Card Expiry Tracker" },
+              { key: "luhn", title: lang === "hi" ? "कार्ड नंबर सत्यापन" : "Luhn ID Check" },
+              { key: "poverty", title: lang === "hi" ? "BPL/APL श्रेणी जांच" : "BPL/APL Assessor" },
+              { key: "dependency", title: lang === "hi" ? "आश्रित अनुपात इंडेक्स" : "Dependency Ratio" }
+            ].map(tool => (
+              <button
+                key={tool.key}
+                onClick={() => setActiveCalc(tool.key)}
+                className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                  activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                {tool.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Calculators Content Container */}
+          {activeCalc && (
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
+              
+              {/* 1. 21-Scheme Compatibility Matcher */}
+              {activeCalc === "schemes" && (
+                <div className="space-y-3">
+                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "21-केंद्रीय और राज्य योजनाएं पात्रता जाँच" : "21-Government Welfare Schemes Matcher"}</h5>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `आयु: ${matchAge} वर्ष` : `Age: ${matchAge} yrs`}</label>
+                      <input type="range" min="18" max="80" value={matchAge} onChange={e => setMatchAge(Number(e.target.value))} className="w-full accent-[#000080]" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `वार्षिक आय: ₹${matchIncome.toLocaleString()}` : `Annual Income: ₹${matchIncome.toLocaleString()}`}</label>
+                      <input type="range" min="15000" max="250000" step="5000" value={matchIncome} onChange={e => setMatchIncome(Number(e.target.value))} className="w-full accent-[#000080]" />
+                    </div>
+                  </div>
+
+                  {(() => {
+                    // Standard Indian Schemes check
+                    const eligibleList = [];
+                    if (matchIncome <= 120000) eligibleList.push("Ayushman Bharat (Free Health Cover)");
+                    if (matchIncome <= 180000 && matchAge >= 60) eligibleList.push("IGNOAPS Old-Age Pension");
+                    if (matchIncome <= 250000) eligibleList.push("PM Kisan Samman Nidhi (Farmer Subsidy)");
+                    if (matchIncome <= 100000) eligibleList.push("Ladli Behna Scheme (Women Cash Grant)");
+                    
+                    return (
+                      <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5">
+                        <p className="text-[10px] text-slate-400 font-black uppercase">{lang === "hi" ? "योग्य कल्याणकारी योजनाएं" : "Matched Welfare Schemes"}</p>
+                        {eligibleList.length > 0 ? (
+                          eligibleList.map((scheme, idx) => <p key={idx} className="text-green-700 font-extrabold">• {scheme}</p>)
+                        ) : (
+                          <p className="text-red-700">{lang === "hi" ? "कोई योजना मैच नहीं हुई (आय सीमा सीमा से अधिक है)" : "No matching schemes found (Income exceeds limits)"}</p>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 2. Card Validity Tracker */}
+              {activeCalc === "expiry" && (
+                <div className="space-y-3">
+                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "जन सेवा कार्ड समाप्ति तिथि प्रोग्रेस" : "Card Expiration Milestones"}</h5>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "जारी होने की तारीख" : "Card Issue Date"}</label>
+                    <input type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} className="w-full border border-slate-200 rounded p-2 text-xs font-bold bg-white" />
+                  </div>
+
+                  {(() => {
+                    if (!issueDate) return <p className="text-slate-400 text-center font-bold">{lang === "hi" ? "जारी करने की तारीख चुनें।" : "Select issue date above."}</p>;
+                    const issue = new Date(issueDate);
+                    const expiry = new Date(issue.getTime() + 5 * 365 * 24 * 60 * 60 * 1000); // 5 year expiration
+                    const diffTime = expiry.getTime() - new Date().getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const expired = diffDays <= 0;
+                    
+                    return (
+                      <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1">
+                        <p className="flex justify-between"><span>{lang === "hi" ? "समाप्ति तिथि (5 वर्ष):" : "Expiry Date (5 yrs):"}</span><span>{expiry.toLocaleDateString()}</span></p>
+                        <p className="flex justify-between border-t border-indigo-200/50 pt-1">
+                          <span>{lang === "hi" ? "वैधता शेष:" : "Validity Remaining:"}</span>
+                          <span className={expired ? "text-red-700" : "text-green-700"}>
+                            {expired ? (lang === "hi" ? "समाप्त" : "Expired") : `${diffDays} ${lang === "hi" ? "दिन" : "days"}`}
+                          </span>
+                        </p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 3. Luhn ID Check */}
+              {activeCalc === "luhn" && (
+                <div className="space-y-3">
+                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "जन सेवा कार्ड नंबर सत्यता जांच (Luhn Checksum)" : "Luhn Checksum Card Number Validator"}</h5>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "१२-अंकीय कार्ड नंबर दर्ज करें" : "Enter 12-digit Card Number"}</label>
+                    <input type="text" maxLength={12} value={cardCheckNo} onChange={e => setCardCheckNo(e.target.value.replace(/\D/g, ""))} placeholder="e.g. 509284102941" className="w-full border border-slate-200 rounded p-2 text-xs font-bold bg-white outline-none focus:border-indigo-500" />
+                  </div>
+
+                  {(() => {
+                    if (cardCheckNo.length < 12) return <p className="text-slate-400 text-center font-bold">{lang === "hi" ? "१२ अंक दर्ज करें।" : "Provide exactly 12 digits."}</p>;
+                    
+                    // Luhn algorithm check
+                    let sum = 0;
+                    let shouldDouble = false;
+                    for (let i = cardCheckNo.length - 1; i >= 0; i--) {
+                      let digit = parseInt(cardCheckNo.charAt(i), 10);
+                      if (shouldDouble) {
+                        if ((digit *= 2) > 9) digit -= 9;
+                      }
+                      sum += digit;
+                      shouldDouble = !shouldDouble;
+                    }
+                    const valid = sum % 10 === 0;
+
+                    return (
+                      <div className={`p-3 rounded-lg border font-bold text-center ${valid ? "bg-green-50 text-green-700 border-green-150" : "bg-red-50 text-red-700 border-red-150"}`}>
+                        {valid ? (
+                          <p>{lang === "hi" ? "✓ वैध चेकसम: कार्ड संरचना सही है।" : "✓ Valid Checksum: Card format matches requirements."}</p>
+                        ) : (
+                          <p>{lang === "hi" ? "✗ अमान्य चेकसम: कृपया नंबर दोबारा जांचें।" : "✗ Invalid Checksum: Incorrect card sequence."}</p>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 4. BPL/APL Classification Assessor */}
+              {activeCalc === "poverty" && (
+                <div className="space-y-3">
+                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "BPL/APL गरीबी रेखा श्रेणी निर्धारक" : "Poverty Line Assessor"}</h5>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `पारिवारिक मासिक आय: ₹${matchIncome.toLocaleString()}` : `Household Monthly Income: ₹${matchIncome.toLocaleString()}`}</label>
+                      <input type="range" min="5000" max="50000" step="1000" value={matchIncome} onChange={e => setMatchIncome(Number(e.target.value))} className="w-full accent-[#000080]" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `आश्रित सदस्य: ${dependentCount}` : `Dependent Members: ${dependentCount}`}</label>
+                      <input type="range" min="1" max="10" value={dependentCount} onChange={e => setDependentCount(Number(e.target.value))} className="w-full accent-[#000080]" />
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const bplCap = 15000 + (dependentCount * 2000); // dynamic BPL income standard adjustment
+                    const isBPL = matchIncome <= bplCap;
+                    return (
+                      <div className={`p-3 rounded-lg border font-bold text-center ${isBPL ? "bg-green-50 text-green-700 border-green-150" : "bg-blue-50 text-blue-700 border-blue-150"}`}>
+                        <p className="text-sm font-black">{isBPL ? (lang === "hi" ? "BPL (गरीबी रेखा से नीचे)" : "BPL (Below Poverty Line)") : (lang === "hi" ? "APL (गरीबी रेखा से ऊपर)" : "APL (Above Poverty Line)")}</p>
+                        <p className="text-[9px] text-slate-500 mt-1 font-semibold">{lang === "hi" ? `(इस आकार के परिवार के लिए BPL सीमा: ₹${bplCap.toLocaleString()}/माह)` : `(BPL threshold for this family size: ₹${bplCap.toLocaleString()}/mo)`}</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 5. Dependency Ratio */}
+              {activeCalc === "dependency" && (
+                <div className="space-y-3">
+                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "आश्रित अनुपात वित्तीय सूचकांक" : "Family Financial Dependency Ratio"}</h5>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `कुल आश्रित सदस्य: ${dependentCount}` : `Total Dependents: ${dependentCount}`}</label>
+                      <input type="range" min="1" max="8" value={dependentCount} onChange={e => setDependentCount(Number(e.target.value))} className="w-full accent-[#000080]" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `मासिक खर्च: ₹${monthlyExpense.toLocaleString()}` : `Monthly Expense: ₹${monthlyExpense.toLocaleString()}`}</label>
+                      <input type="range" min="5000" max="50000" step="2500" value={monthlyExpense} onChange={e => setMonthlyExpense(Number(e.target.value))} className="w-full accent-[#000080]" />
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const shareCost = Math.round(monthlyExpense / (dependentCount + 1));
+                    return (
+                      <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold text-center">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">{lang === "hi" ? "प्रति व्यक्ति जीवन निर्वाह खर्च" : "Per Capita Share of Cost"}</p>
+                        <p className="text-lg text-[#000080] font-black mt-1">₹{shareCost.toLocaleString()}</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+            </div>
+          )}
+        </div>
+      ) : (
+        renderPortalContent()
+      )}
     </div>
   );
 }

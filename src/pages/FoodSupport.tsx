@@ -43,7 +43,7 @@ export default function FoodSupport() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"ration" | "kitchens">("ration");
+  const [activeTab, setActiveTab] = useState<"ration" | "kitchens" | "tools">("ration");
   
   // Ration Form states
   const [rationCard, setRationCard] = useState("");
@@ -141,19 +141,30 @@ export default function FoodSupport() {
         <div className="bg-white border border-slate-200 p-1 rounded-xl flex gap-1 shadow-sm">
           <button 
             onClick={() => setActiveTab("ration")}
-            className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
-              activeTab === "ration" ? "bg-[#000080] text-white" : "text-slate-500 hover:text-slate-800"
+            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+              activeTab === "ration" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            {lang === "hi" ? "सूखा राशन किट" : "Dry Ration Kit"}
+            {lang === "hi" ? "सूखा राशन" : "Dry Ration"}
           </button>
           <button 
             onClick={() => setActiveTab("kitchens")}
-            className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
-              activeTab === "kitchens" ? "bg-[#000080] text-white" : "text-slate-500 hover:text-slate-800"
+            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+              activeTab === "kitchens" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            {lang === "hi" ? "सामुदायिक रसोई" : "Community Kitchens"}
+            {lang === "hi" ? "रसोई केंद्र" : "Kitchens"}
+          </button>
+          <button 
+            onClick={() => {
+              setActiveTab("tools");
+              if (!activeCalc) setActiveCalc("estimator");
+            }}
+            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+              activeTab === "tools" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            {lang === "hi" ? "योजना टूल्स" : "Calculators"}
           </button>
         </div>
       </div>
@@ -300,36 +311,36 @@ export default function FoodSupport() {
           </div>
         )}
 
-        {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-            <span>{lang === "hi" ? "आहार और राशन योजना टूल्स" : "Ration Planning Calculators"}</span>
-            <Calculator className="w-4.5 h-4.5 text-[#FF9933]" />
-          </h4>
+        {activeTab === "tools" && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 animate-fadeIn">
+            <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+              <span>{lang === "hi" ? "आहार और राशन योजना टूल्स" : "Ration Planning Calculators"}</span>
+              <Calculator className="w-4.5 h-4.5 text-[#FF9933]" />
+            </h4>
 
-          {/* Tools Select Grid */}
-          <div className="grid grid-cols-2 gap-2 text-center">
-            {[
-              { key: "estimator", title: lang === "hi" ? "परिवार राशन अनुमान" : "Family Ration Estimator" },
-              { key: "waste", title: lang === "hi" ? "भोजन बर्बादी नुकसान" : "Food Waste Estimator" },
-              { key: "camp", title: lang === "hi" ? "राहत कैंप भंडार सीमा" : "Camp Stock Sustainability" },
-              { key: "footprint", title: lang === "hi" ? "भोजन जल फुटप्रिंट" : "Plate Water Footprint" }
-            ].map(tool => (
-              <button
-                key={tool.key}
-                onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
-                className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
-                  activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                {tool.title}
-              </button>
-            ))}
-          </div>
+            {/* Tools Select Grid */}
+            <div className="grid grid-cols-2 gap-2 text-center">
+              {[
+                { key: "estimator", title: lang === "hi" ? "परिवार राशन अनुमान" : "Family Ration Estimator" },
+                { key: "waste", title: lang === "hi" ? "भोजन बर्बादी नुकसान" : "Food Waste Estimator" },
+                { key: "camp", title: lang === "hi" ? "राहत कैंप भंडार सीमा" : "Camp Stock Sustainability" },
+                { key: "footprint", title: lang === "hi" ? "भोजन जल फुटप्रिंट" : "Plate Water Footprint" }
+              ].map(tool => (
+                <button
+                  key={tool.key}
+                  onClick={() => setActiveCalc(tool.key)}
+                  className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                    activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  {tool.title}
+                </button>
+              ))}
+            </div>
 
-          {/* Calculators Content Container */}
-          {activeCalc && (
-            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
+            {/* Calculators Content Container */}
+            {activeCalc && (
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
               
               {/* 1. Family Ration Estimator */}
               {activeCalc === "estimator" && (
@@ -449,6 +460,7 @@ export default function FoodSupport() {
             </div>
           )}
         </div>
+        )}
 
       </div>
     </div>

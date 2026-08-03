@@ -13,6 +13,7 @@ export default function EnvironmentPage() {
 
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
@@ -112,7 +113,32 @@ export default function EnvironmentPage() {
 
   return (
     <div className="p-4 space-y-5 animate-fadeIn pb-24">
-      {/* Page Heading */}
+      {/* Top Switcher Tab Bar */}
+      <div className="flex bg-slate-100 border border-slate-200 p-1 rounded-xl shadow-inner shrink-0">
+        <button 
+          onClick={() => setSubPage("portal")}
+          className={`flex-1 py-2 text-center rounded-lg text-xs font-black transition cursor-pointer ${
+            subPage === "portal" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {isHi ? "पर्यावरण सेवा" : "Eco Portal"}
+        </button>
+        <button 
+          onClick={() => {
+            setSubPage("tools");
+            if (!activeCalc) setActiveCalc("carbon");
+          }}
+          className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
+            subPage === "tools" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {isHi ? "स्मार्ट पर्यावरण टूल्स" : "Savings Planners"}
+        </button>
+      </div>
+
+      {subPage === "portal" && (
+        <>
+          {/* Page Heading */}
       <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200/50 rounded-2xl p-5 shadow-sm space-y-2">
         <h3 className="font-display font-extrabold text-base text-green-900 flex items-center gap-2">
           <Leaf className="w-5 h-5 text-green-600 fill-green-600" />
@@ -273,15 +299,18 @@ export default function EnvironmentPage() {
           ))}
         </div>
       </div>
-      {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6">
-        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-          <span>{isHi ? "पर्यावरण और कार्बन सुरक्षा टूल्स" : "Eco-Savings & Carbon Tools"}</span>
-          <Leaf className="w-4.5 h-4.5 text-green-600 animate-pulse" />
-        </h4>
+        </>
+      )}
 
-        {/* Tools Grid */}
-        <div className="grid grid-cols-2 gap-2 text-center text-slate-750">
+      {subPage === "tools" && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 animate-fadeIn">
+          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+            <span>{isHi ? "पर्यावरण और कार्बन सुरक्षा टूल्स" : "Eco-Savings & Carbon Tools"}</span>
+            <Leaf className="w-4.5 h-4.5 text-green-600 animate-pulse" />
+          </h4>
+
+          {/* Tools Grid */}
+          <div className="grid grid-cols-2 gap-2 text-center text-slate-750">
           {[
             { key: "carbon", title: isHi ? "कार्बन पदचिह्न गणना" : "Carbon Calculator" },
             { key: "solar", title: isHi ? "सोलर बिजली बचत" : "Solar Estimator" },
@@ -290,7 +319,7 @@ export default function EnvironmentPage() {
           ].map(tool => (
             <button
               key={tool.key}
-              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
+              onClick={() => setActiveCalc(tool.key)}
               className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
                 activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
               }`}
@@ -407,6 +436,7 @@ export default function EnvironmentPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

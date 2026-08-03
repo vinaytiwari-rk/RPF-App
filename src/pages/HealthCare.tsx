@@ -10,7 +10,7 @@ export default function HealthCare() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const isHi = lang === "hi";
 
-  const [activeTab, setActiveTab] = useState<"assess" | "tracker" | "welfare" | "clinical">("assess");
+  const [activeTab, setActiveTab] = useState<"assess" | "tracker" | "welfare" | "clinical" | "tools">("assess");
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
@@ -353,11 +353,17 @@ export default function HealthCare() {
           { id: "assess", en: "Assessments", hi: "स्वास्थ्य मापन" },
           { id: "tracker", en: "Fitness Log", hi: "दैनिक ट्रैकर" },
           { id: "welfare", en: "Family Care", hi: "पारिवारिक सुरक्षा" },
-          { id: "clinical", en: "Clinical Hub", hi: "क्लीनिकल हब" }
+          { id: "clinical", en: "Clinical Hub", hi: "क्लीनिकल हब" },
+          { id: "tools", en: "Calculators", hi: "कैलकुलेटर" }
         ].map(tab => (
           <button 
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => {
+              setActiveTab(tab.id as any);
+              if (tab.id === "tools" && !activeCalc) {
+                setActiveCalc("bp");
+              }
+            }}
             className={`flex-1 py-3.5 px-2 text-[10px] uppercase tracking-wider font-extrabold text-center transition border-b-2 whitespace-nowrap ${
               activeTab === tab.id ? "border-blue-600 text-blue-800" : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
@@ -566,48 +572,82 @@ export default function HealthCare() {
         {/* ==================== TAB 2: DAILY FITNESS LOG ==================== */}
         {activeTab === "tracker" && (
           <div className="space-y-4 animate-fadeIn">
-            {/* Wearable Sync Panel */}
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-4.5 text-white shadow-md space-y-3.5 relative overflow-hidden">
+            {/* Manual Vitals Log Panel */}
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 text-white shadow-md space-y-4 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
               
               <div className="flex justify-between items-center border-b border-white/10 pb-2">
                 <h4 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                  <Zap className="w-4 h-4 text-amber-400" />
-                  {isHi ? "स्मार्ट वियरेबल सिंक" : "Wearable Smart Band Sync"}
+                  <Zap className="w-4 h-4 text-emerald-400" />
+                  {isHi ? "दैनिक स्वास्थ्य वाइटल्स लॉग" : "Daily Health Vitals Log"}
                 </h4>
-                <span className={`text-[8.5px] font-bold px-2 py-0.5 rounded-full ${
-                  deviceConnected ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-slate-700 text-slate-350"
-                }`}>
-                  {deviceConnected ? (isHi ? "सिंक किया गया" : "Synced") : (isHi ? "असंयोजित" : "Not Synced")}
+                <span className="text-[8.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  Manual Entry
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-white/5 rounded-xl p-2 border border-white/5">
-                  <span className="text-[8.5px] text-slate-400 block font-bold uppercase">{isHi ? "कदम" : "Steps"}</span>
-                  <span className="text-sm font-black text-white">{stepCount}</span>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="text-[9.5px] text-slate-400 block font-bold uppercase mb-1">{isHi ? "कदम (Steps)" : "Steps Count"}</label>
+                  <input 
+                    type="number" 
+                    value={stepCount} 
+                    onChange={e => setStepCount(Number(e.target.value))} 
+                    className="w-full bg-white/10 border border-white/10 rounded-xl p-2 text-white font-bold outline-none focus:border-emerald-500" 
+                  />
                 </div>
-                <div className="bg-white/5 rounded-xl p-2 border border-white/5">
-                  <span className="text-[8.5px] text-slate-400 block font-bold uppercase">{isHi ? "हृदय गति" : "Heart Rate"}</span>
-                  <span className="text-sm font-black text-rose-400">{heartRate} bpm</span>
+                <div>
+                  <label className="text-[9.5px] text-slate-400 block font-bold uppercase mb-1">{isHi ? "हृदय गति (HR)" : "Heart Rate (bpm)"}</label>
+                  <input 
+                    type="number" 
+                    value={heartRate} 
+                    onChange={e => setHeartRate(Number(e.target.value))} 
+                    className="w-full bg-white/10 border border-white/10 rounded-xl p-2 text-white font-bold outline-none focus:border-emerald-500" 
+                  />
                 </div>
-                <div className="bg-white/5 rounded-xl p-2 border border-white/5">
-                  <span className="text-[8.5px] text-slate-400 block font-bold uppercase">{isHi ? "नींद" : "Sleep Cycle"}</span>
-                  <span className="text-xs font-black text-blue-400 truncate block mt-0.5">{sleepCycle}</span>
+                <div>
+                  <label className="text-[9.5px] text-slate-400 block font-bold uppercase mb-1">{isHi ? "नींद चक्र" : "Sleep Duration"}</label>
+                  <input 
+                    type="text" 
+                    value={sleepCycle} 
+                    onChange={e => setSleepCycle(e.target.value)} 
+                    className="w-full bg-white/10 border border-white/10 rounded-xl p-2 text-white font-bold outline-none focus:border-emerald-500" 
+                  />
+                </div>
+                <div>
+                  <label className="text-[9.5px] text-slate-400 block font-bold uppercase mb-1">{isHi ? "व्यायाम (मिनट)" : "Exercise (mins)"}</label>
+                  <input 
+                    type="number" 
+                    value={exerciseMinCount} 
+                    onChange={e => setExerciseMinCount(Number(e.target.value))} 
+                    className="w-full bg-white/10 border border-white/10 rounded-xl p-2 text-white font-bold outline-none focus:border-emerald-500" 
+                  />
                 </div>
               </div>
 
               {syncingVitals ? (
                 <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-400 py-1.5">
-                  <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-                  <span>{isHi ? "डिवाइस से डेटा सिंक हो रहा है..." : "Syncing band parameters..."}</span>
+                  <Loader2 className="w-4 h-4 animate-spin text-emerald-450" />
+                  <span>{isHi ? "सुरक्षित किया जा रहा है..." : "Saving health vitals..."}</span>
                 </div>
               ) : (
                 <button
-                  onClick={syncDevice}
+                  onClick={() => {
+                    setSyncingVitals(true);
+                    setTimeout(() => {
+                      setSyncingVitals(false);
+                      saveVitals({ 
+                        steps: stepCount, 
+                        heart_rate: heartRate, 
+                        sleep_cycle: sleepCycle, 
+                        exercise_mins: exerciseMinCount 
+                      });
+                      alert(isHi ? "वाइटल्स सफलतापूर्वक अपडेट किए गए!" : "Vitals saved successfully!");
+                    }, 1000);
+                  }}
                   className="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-2 rounded-xl text-xs shadow-sm transition"
                 >
-                  {isHi ? "वियरेबल डिवाइस से सिंक करें" : "Simulate Wearable Device Sync"}
+                  {isHi ? "वाइटल्स लॉग सुरक्षित करें" : "Save Health Vitals"}
                 </button>
               )}
             </div>
@@ -964,32 +1004,32 @@ export default function HealthCare() {
         )}
 
       </div>
-      {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6">
-        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-          <span>{isHi ? "स्वास्थ्य संकेतक और योजना टूल्स" : "Health Indicators & Care Planners"}</span>
-          <Heart className="w-4.5 h-4.5 text-red-500 animate-pulse" />
-        </h4>
+      {activeTab === "tools" && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+            <span>{isHi ? "स्वास्थ्य संकेतक और योजना टूल्स" : "Health Indicators & Care Planners"}</span>
+            <Heart className="w-4.5 h-4.5 text-red-500 animate-pulse" />
+          </h4>
 
-        {/* Tools Grid */}
-        <div className="grid grid-cols-2 gap-2 text-center text-slate-750">
-          {[
-            { key: "bp", title: isHi ? "ब्लड प्रेशर संकेतक" : "Blood Pressure Risk" },
-            { key: "diabetes", title: isHi ? "ब्लड शुगर जांच" : "Diabetes Risk Check" },
-            { key: "pregnancy", title: isHi ? "गर्भावस्था प्रसव कैलकुलेटर" : "Pregnancy Planner" },
-            { key: "growth", title: isHi ? "बाल विकास वजन इंडेक्स" : "Child Growth Index" }
-          ].map(tool => (
-            <button
-              key={tool.key}
-              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
-              className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
-                activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              {tool.title}
-            </button>
-          ))}
-        </div>
+          {/* Tools Grid */}
+          <div className="grid grid-cols-2 gap-2 text-center text-slate-750">
+            {[
+              { key: "bp", title: isHi ? "ब्लड प्रेशर संकेतक" : "Blood Pressure Risk" },
+              { key: "diabetes", title: isHi ? "ब्लड शुगर जांच" : "Diabetes Risk Check" },
+              { key: "pregnancy", title: isHi ? "गर्भावस्था प्रसव कैलकुलेटर" : "Pregnancy Planner" },
+              { key: "growth", title: isHi ? "बाल विकास वजन इंडेक्स" : "Child Growth Index" }
+            ].map(tool => (
+              <button
+                key={tool.key}
+                onClick={() => setActiveCalc(tool.key)}
+                className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                  activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                {tool.title}
+              </button>
+            ))}
+          </div>
 
         {/* Content Container */}
         {activeCalc && (
@@ -1153,6 +1193,7 @@ export default function HealthCare() {
           </div>
         )}
       </div>
+      )}
 
     </div>
   );

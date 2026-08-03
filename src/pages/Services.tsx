@@ -33,10 +33,7 @@ export default function Services() {
   const filtered = (Array.isArray(servicesList)
     ? servicesList.filter((s: any) => {
         if (!s) return false;
-        // Exclude donations from services page as it's now on the home page
-        if (s.id === "donations") return false;
-        
-        const enabled = s.enabled !== false && settings?.servicesStatus?.[s.id] !== false;
+        const enabled = true;
         const matchesCat = category === "all" || s.category === category;
         const matchesSearch =
           (s.titleEn ?? "").toLowerCase().includes(search.toLowerCase()) ||
@@ -129,6 +126,14 @@ export default function Services() {
                           : svc.id === 'education' ? '/education'
                           : svc.id === 'health-care' ? '/health-care'
                           : svc.id === 'culture' ? '/religious-culture'
+                          : svc.id === 'jobs' ? '/jobs'
+                          : svc.id === 'scholarships' ? '/scholarships'
+                          : svc.id === 'food' ? '/food'
+                          : svc.id === 'medicine' ? '/medicine'
+                          : svc.id === 'grievance' ? '/grievance'
+                          : svc.id === 'volunteers' ? '/volunteers'
+                          : svc.id === 'animals' ? '/animals'
+                          : svc.id === 'crowdfunding' ? '/crowdfunding'
                           : `/services/${svc.id}`;
 
               return (

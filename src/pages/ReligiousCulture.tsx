@@ -10,7 +10,7 @@ export default function ReligiousCulture() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const isHi = lang === "hi";
 
-  const [activeSubTab, setActiveSubTab] = useState<"festivals" | "texts" | "live">("festivals");
+  const [activeSubTab, setActiveSubTab] = useState<"festivals" | "texts" | "live" | "tools">("festivals");
   const [rsvps, setRsvps] = useState<string[]>([]);
   const [isPlayingStream, setIsPlayingStream] = useState(false);
 
@@ -207,27 +207,38 @@ export default function ReligiousCulture() {
         <div className="bg-white border border-slate-200 p-1 rounded-xl flex gap-1 shadow-sm">
           <button 
             onClick={() => setActiveSubTab("festivals")}
-            className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
-              activeSubTab === "festivals" ? "bg-[#000080] text-white" : "text-slate-500 hover:text-slate-800"
+            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+              activeSubTab === "festivals" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            {isHi ? "स्थानीय उत्सव" : "Local Meetups"}
+            {isHi ? "उत्सव" : "Meetups"}
           </button>
           <button 
             onClick={() => setActiveSubTab("texts")}
-            className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
-              activeSubTab === "texts" ? "bg-[#000080] text-white" : "text-slate-500 hover:text-slate-800"
+            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+              activeSubTab === "texts" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            {isHi ? "ग्रंथ व प्रार्थना" : "Devotionals"}
+            {isHi ? "ग्रंथ" : "Devotionals"}
           </button>
           <button 
             onClick={() => setActiveSubTab("live")}
-            className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
-              activeSubTab === "live" ? "bg-[#000080] text-white" : "text-slate-500 hover:text-slate-800"
+            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+              activeSubTab === "live" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            {isHi ? "लाइव दर्शन" : "Live Temple"}
+            {isHi ? "लाइव" : "Live"}
+          </button>
+          <button 
+            onClick={() => {
+              setActiveSubTab("tools");
+              if (!activeCalc) setActiveCalc("chant");
+            }}
+            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+              activeSubTab === "tools" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            {isHi ? "टूल्स" : "Calculators"}
           </button>
         </div>
       </div>
@@ -374,36 +385,36 @@ export default function ReligiousCulture() {
           </div>
         )}
 
-        {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-            <span>{isHi ? "संस्कृति और प्रार्थना स्मार्ट टूल्स" : "Spiritual Calculators"}</span>
-            <Calculator className="w-4.5 h-4.5 text-indigo-600" />
-          </h4>
+        {activeSubTab === "tools" && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 animate-fadeIn">
+            <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+              <span>{isHi ? "संस्कृति और प्रार्थना स्मार्ट टूल्स" : "Spiritual Calculators"}</span>
+              <Calculator className="w-4.5 h-4.5 text-indigo-600" />
+            </h4>
 
-          {/* Tools Select Grid */}
-          <div className="grid grid-cols-2 gap-2 text-center">
-            {[
-              { key: "chant", title: isHi ? "मंत्र जाप काउंटर" : "Chant Metronome" },
-              { key: "pranayama", title: isHi ? "प्राणायाम श्वास पेसर" : "Pranayama Pacer" },
-              { key: "daan", title: isHi ? "दशांश दान कैलकुलेटर" : "Daan Calculator" },
-              { key: "tithi", title: isHi ? "हिंदू तिथि पंचांग" : "Panchang Tithi Math" }
-            ].map(tool => (
-              <button
-                key={tool.key}
-                onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
-                className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
-                  activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                {tool.title}
-              </button>
-            ))}
-          </div>
+            {/* Tools Select Grid */}
+            <div className="grid grid-cols-2 gap-2 text-center">
+              {[
+                { key: "chant", title: isHi ? "मंत्र जाप काउंटर" : "Chant Metronome" },
+                { key: "pranayama", title: isHi ? "प्राणायाम श्वास पेसर" : "Pranayama Pacer" },
+                { key: "daan", title: isHi ? "दशांश दान कैलकुलेटर" : "Daan Calculator" },
+                { key: "tithi", title: isHi ? "हिंदू तिथि पंचांग" : "Panchang Tithi Math" }
+              ].map(tool => (
+                <button
+                  key={tool.key}
+                  onClick={() => setActiveCalc(tool.key)}
+                  className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                    activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  {tool.title}
+                </button>
+              ))}
+            </div>
 
-          {/* Calculators Content Container */}
-          {activeCalc && (
-            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
+            {/* Calculators Content Container */}
+            {activeCalc && (
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
               
               {/* 1. Chant Metronome Counter */}
               {activeCalc === "chant" && (
@@ -518,6 +529,7 @@ export default function ReligiousCulture() {
             </div>
           )}
         </div>
+        )}
 
       </div>
     </div>

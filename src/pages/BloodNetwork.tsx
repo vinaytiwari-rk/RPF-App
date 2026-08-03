@@ -13,7 +13,8 @@ const COMPONENT_TYPES = ["Whole Blood", "Red Blood Cells", "Plasma", "Platelets"
 export default function BloodNetwork() {
   const { user } = useAuth();
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
-  const [tab, setTab] = useState<"request" | "donate" | "find" | "donors">("request");
+  const isHi = lang === "hi";
+  const [tab, setTab] = useState<"request" | "donate" | "find" | "donors" | "tools">("request");
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
@@ -352,40 +353,50 @@ export default function BloodNetwork() {
           </div>
         </div>
       </div>
-
       {/* Tabs */}
       <div className="flex bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm print:hidden">
         <button 
           onClick={() => setTab("request")}
-          className={`flex-1 py-3.5 text-xs font-bold transition-all border-b-2 ${
-            tab === "request" ? "border-red-600 text-red-700 font-extrabold bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
+          className={`flex-1 py-3 text-[10px] font-black transition-all border-b-2 uppercase tracking-wider ${
+            tab === "request" ? "border-red-650 text-red-700 font-black bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          Request Blood
+          {isHi ? "अनुरोध" : "Request"}
         </button>
         <button 
           onClick={() => setTab("donate")}
-          className={`flex-1 py-3.5 text-xs font-bold transition-all border-b-2 ${
-            tab === "donate" ? "border-red-600 text-red-700 font-extrabold bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
+          className={`flex-1 py-3 text-[10px] font-black transition-all border-b-2 uppercase tracking-wider ${
+            tab === "donate" ? "border-red-650 text-red-700 font-black bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          Donate & Schedule
+          {isHi ? "दान" : "Donate"}
         </button>
         <button 
           onClick={() => setTab("find")}
-          className={`flex-1 py-3.5 text-xs font-bold transition-all border-b-2 ${
-            tab === "find" ? "border-red-600 text-red-700 font-extrabold bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
+          className={`flex-1 py-3 text-[10px] font-black transition-all border-b-2 uppercase tracking-wider ${
+            tab === "find" ? "border-red-650 text-red-700 font-black bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          Live Inventories
+          {isHi ? "स्टॉक" : "Stock"}
         </button>
         <button 
           onClick={() => setTab("donors")}
-          className={`flex-1 py-3.5 text-xs font-bold transition-all border-b-2 ${
-            tab === "donors" ? "border-red-600 text-red-700 font-extrabold bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
+          className={`flex-1 py-3 text-[10px] font-black transition-all border-b-2 uppercase tracking-wider ${
+            tab === "donors" ? "border-red-650 text-red-700 font-black bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          Active Donors
+          {isHi ? "दाता" : "Donors"}
+        </button>
+        <button 
+          onClick={() => {
+            setTab("tools");
+            if (!activeCalc) setActiveCalc("compatibility");
+          }}
+          className={`flex-1 py-3 text-[10px] font-black transition-all border-b-2 uppercase tracking-wider ${
+            tab === "tools" ? "border-red-650 text-red-700 font-black bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {isHi ? "टूल्स" : "Calculators"}
         </button>
       </div>
 
@@ -942,48 +953,48 @@ export default function BloodNetwork() {
           </div>
         )}
 
-        {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6 max-w-4xl mx-auto">
-          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-            <span>{lang === "hi" ? "रक्त संचार और जीवन रक्षक टूल्स" : "Blood Network Calculators"}</span>
-            <Droplet className="w-4.5 h-4.5 text-red-650 animate-bounce" />
-          </h4>
+        {tab === "tools" && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6 max-w-4xl mx-auto">
+            <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+              <span>{lang === "hi" ? "रक्त संचार और जीवन रक्षक टूल्स" : "Blood Network Calculators"}</span>
+              <Droplet className="w-4.5 h-4.5 text-red-650 animate-bounce" />
+            </h4>
 
-          {/* Tools Select Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
-            {[
-              { key: "compatibility", title: lang === "hi" ? "रक्त समूह अनुकूलता" : "Compatibility Grid" },
-              { key: "interval", title: lang === "hi" ? "रक्तदान सुरक्षित अंतराल" : "Donation Interval" },
-              { key: "cpr", title: lang === "hi" ? "CPR रिदम पेसर" : "CPR Metronome" },
-              { key: "volume", title: lang === "hi" ? "शरीर कुल रक्त मात्रा" : "Blood Volume Math" },
-              { key: "triage", title: lang === "hi" ? "अस्पताल भर्ती तात्कालिकता" : "Urgency Triage Index" }
-            ].map(tool => (
-              <button
-                key={tool.key}
-                onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
-                className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
-                  activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                {tool.title}
-              </button>
-            ))}
-          </div>
+            {/* Tools Select Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
+              {[
+                { key: "compatibility", title: lang === "hi" ? "रक्त समूह अनुकूलता" : "Compatibility Grid" },
+                { key: "interval", title: lang === "hi" ? "रक्तदान सुरक्षित अंतराल" : "Donation Interval" },
+                { key: "cpr", title: lang === "hi" ? "CPR रिदम पेसर" : "CPR Metronome" },
+                { key: "volume", title: lang === "hi" ? "शरीर कुल रक्त मात्रा" : "Blood Volume Math" },
+                { key: "triage", title: lang === "hi" ? "अस्पताल भर्ती तात्कालिकता" : "Urgency Triage Index" }
+              ].map(tool => (
+                <button
+                  key={tool.key}
+                  onClick={() => setActiveCalc(tool.key)}
+                  className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                    activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  {tool.title}
+                </button>
+              ))}
+            </div>
 
-          {/* Calculators Content Container */}
-          {activeCalc && (
-            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
-              
-              {/* 1. Blood Compatibility Grid */}
-              {activeCalc === "compatibility" && (
-                <div className="space-y-3">
-                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "रक्त समूह अनुकूलता मैपिंग" : "Blood Group Recipient/Donor Compatibility"}</h5>
-                  <div>
-                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "रक्त समूह चुनें" : "Select Blood Group"}</label>
-                    <select value={calcBloodType} onChange={e => setCalcBloodType(e.target.value)} className="w-full border border-slate-200 rounded p-2 text-xs font-bold bg-white">
-                      {BLOOD_TYPES.map(bt => <option key={bt} value={bt}>{bt}</option>)}
-                    </select>
-                  </div>
+            {/* Calculators Content Container */}
+            {activeCalc && (
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
+                
+                {/* 1. Blood Compatibility Grid */}
+                {activeCalc === "compatibility" && (
+                  <div className="space-y-3">
+                    <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "रक्त समूह अनुकूलता मैपिंग" : "Blood Group Recipient/Donor Compatibility"}</h5>
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "रक्त समूह चुनें" : "Select Blood Group"}</label>
+                      <select value={calcBloodType} onChange={e => setCalcBloodType(e.target.value)} className="w-full border border-slate-200 rounded p-2 text-xs font-bold bg-white">
+                        {BLOOD_TYPES.map(bt => <option key={bt} value={bt}>{bt}</option>)}
+                      </select>
+                    </div>
 
                   {(() => {
                     // compatibility lists
@@ -1145,6 +1156,7 @@ export default function BloodNetwork() {
             </div>
           )}
         </div>
+        )}
 
       </div>
     </div>

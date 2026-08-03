@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 export default function CrowdfundingPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const navigate = useNavigate();
+  const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
   const [backed, setBacked] = useState(false);
 
   // --- SMART CALCULATORS STATE ---
@@ -44,92 +45,112 @@ export default function CrowdfundingPage() {
 
   return (
     <div className="p-5 space-y-5 animate-fadeIn pb-24 max-w-md mx-auto">
-      {/* Campaign Details */}
-      <div className="bg-white border border-slate-200 overflow-hidden rounded-2xl shadow-sm">
-        <img 
-          src="/assets/water_pump_camp.png" 
-          alt="Campaign Banner" 
-          className="w-full h-40 object-cover" 
-        />
-        
-        <div className="p-5 space-y-4">
-          <div>
-            <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full inline-block">
-              {lang === "hi" ? "त्वरित आवश्यकता" : "Urgent Fundraiser"}
-            </span>
-            <h3 className="font-display font-extrabold text-base text-[#0B1E3F] mt-2">
-              {lang === "hi" ? "ग्रामीण स्कूलों में पेयजल हेतु ट्यूबवेल बोरिंग" : "Clean Drinking Water Tube Wells in Rural Schools"}
-            </h3>
-            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">
-              By RP Foundation Water Aid
-            </p>
-          </div>
-
-          <p className="text-xs text-slate-600 leading-relaxed font-semibold">
-            {lang === "hi"
-              ? "सीहोर के ५ दूरदराज के सरकारी स्कूलों में पेयजल की भारी किल्लत है। हम वहां ट्यूबवेल और वाटर प्यूरीफायर लगाने के लिए राशि संकलित कर रहे हैं।"
-              : "5 remote government schools in Sehore district have no access to clean drinking water. We are installing borewells and RO purification kits."}
-          </p>
-
-          {/* Progress bar */}
-          <div className="space-y-1.5">
-            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-              <div className="w-[60%] bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full"></div>
-            </div>
-            <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-              <span>₹1.2L Raised (60%)</span>
-              <span>Target: ₹2L</span>
-            </div>
-          </div>
-
-          {backed ? (
-            <div className="bg-green-50 text-green-700 border border-green-150 p-3 rounded-lg text-xs font-bold flex items-center gap-1.5 justify-center">
-              <CheckCircle className="w-4.5 h-4.5" />
-              <span>{lang === "hi" ? "सहयोग देने के लिए धन्यवाद!" : "Thank you for backing this cause!"}</span>
-            </div>
-          ) : (
-            <button 
-              onClick={() => navigate("/donations")}
-              className="w-full bg-[#000080] hover:bg-indigo-950 text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition flex justify-center items-center gap-2 uppercase tracking-wider"
-            >
-              <Heart className="w-4 h-4 text-white fill-white" />
-              <span>{lang === "hi" ? "दान देकर सहायता करें" : "Support Project with Donation"}</span>
-            </button>
-          )}
-        </div>
+      {/* Navigation Switcher */}
+      <div className="flex bg-slate-200 p-1 rounded-xl max-w-md mx-auto">
+        <button 
+          onClick={() => setSubPage("portal")}
+          className={`flex-1 py-2 text-xs font-black rounded-lg transition-all uppercase tracking-wider ${subPage === "portal" ? "bg-[#000080] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+        >
+          {lang === "hi" ? "अभियान" : "Campaign"}
+        </button>
+        <button 
+          onClick={() => {
+            setSubPage("tools");
+            if (!activeCalc) setActiveCalc("multiplier");
+          }}
+          className={`flex-1 py-2 text-xs font-black rounded-lg transition-all uppercase tracking-wider ${subPage === "tools" ? "bg-[#000080] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+        >
+          {lang === "hi" ? "पात्रता एवं टूल्स" : "Calculators"}
+        </button>
       </div>
 
-      {/* --- SMART TOOLS & CALCULATORS DRAWER SECTION --- */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-          <span>{lang === "hi" ? "दान एवं प्रभाव कैलकुलेटर" : "Impact & Tax Planners"}</span>
-          <Calculator className="w-4.5 h-4.5 text-blue-500" />
-        </h4>
+      {subPage === "portal" ? (
+        /* Campaign Details */
+        <div className="bg-white border border-slate-200 overflow-hidden rounded-2xl shadow-sm">
+          <img 
+            src="/assets/water_pump_camp.png" 
+            alt="Campaign Banner" 
+            className="w-full h-40 object-cover" 
+          />
+          
+          <div className="p-5 space-y-4">
+            <div>
+              <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full inline-block">
+                {lang === "hi" ? "त्वरित आवश्यकता" : "Urgent Fundraiser"}
+              </span>
+              <h3 className="font-display font-extrabold text-base text-[#0B1E3F] mt-2">
+                {lang === "hi" ? "ग्रामीण स्कूलों में पेयजल हेतु ट्यूबवेल बोरिंग" : "Clean Drinking Water Tube Wells in Rural Schools"}
+              </h3>
+              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">
+                By RP Foundation Water Aid
+              </p>
+            </div>
 
-        {/* Tools Select Grid */}
-        <div className="grid grid-cols-2 gap-2 text-center">
-          {[
-            { key: "multiplier", title: lang === "hi" ? "दान प्रभाव कैलकुलेटर" : "Impact Multiplier" },
-            { key: "tax", title: lang === "hi" ? "80G टैक्स बचत" : "80G Tax Exemption" },
-            { key: "runrate", title: lang === "hi" ? "अभियान पूर्णता दर" : "Completion Run-rate" },
-            { key: "projector", title: lang === "hi" ? "दीर्घकालिक दान प्लान" : "Cumulative Donation" },
-            { key: "leaderboard", title: lang === "hi" ? "सक्रिय सहयोगी सूची" : "Donors Leaderboard" }
-          ].map(tool => (
-            <button
-              key={tool.key}
-              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
-              className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
-                activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              {tool.title}
-            </button>
-          ))}
+            <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+              {lang === "hi"
+                ? "सीहोर के ५ दूरदराज के सरकारी स्कूलों में पेयजल की भारी किल्लत है। हम वहां ट्यूबवेल और वाटर प्यूरीफायर लगाने के लिए राशि संकलित कर रहे हैं।"
+                : "5 remote government schools in Sehore district have no access to clean drinking water. We are installing borewells and RO purification kits."}
+            </p>
+
+            {/* Progress bar */}
+            <div className="space-y-1.5">
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div className="w-[60%] bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full"></div>
+              </div>
+              <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                <span>₹1.2L Raised (60%)</span>
+                <span>Target: ₹2L</span>
+              </div>
+            </div>
+
+            {backed ? (
+              <div className="bg-green-50 text-green-700 border border-green-150 p-3 rounded-lg text-xs font-bold flex items-center gap-1.5 justify-center">
+                <CheckCircle className="w-4.5 h-4.5" />
+                <span>{lang === "hi" ? "सहयोग देने के लिए धन्यवाद!" : "Thank you for backing this cause!"}</span>
+              </div>
+            ) : (
+              <button 
+                onClick={() => navigate("/donations")}
+                className="w-full bg-[#000080] hover:bg-indigo-950 text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition flex justify-center items-center gap-2 uppercase tracking-wider"
+              >
+                <Heart className="w-4 h-4 text-white fill-white" />
+                <span>{lang === "hi" ? "दान देकर सहायता करें" : "Support Project with Donation"}</span>
+              </button>
+            )}
+          </div>
         </div>
+      ) : (
+        /* --- SMART TOOLS & CALCULATORS PAGE VIEW --- */
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+            <span>{lang === "hi" ? "दान एवं प्रभाव कैलकुलेटर" : "Impact & Tax Planners"}</span>
+            <Calculator className="w-4.5 h-4.5 text-blue-500" />
+          </h4>
 
-        {/* Content Container */}
-        {activeCalc && (
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
+          {/* Tools Select Grid */}
+          <div className="grid grid-cols-2 gap-2 text-center">
+            {[
+              { key: "multiplier", title: lang === "hi" ? "दान प्रभाव कैलकुलेटर" : "Impact Multiplier" },
+              { key: "tax", title: lang === "hi" ? "80G टैक्स बचत" : "80G Tax Exemption" },
+              { key: "runrate", title: lang === "hi" ? "अभियान पूर्णता दर" : "Completion Run-rate" },
+              { key: "projector", title: lang === "hi" ? "दीर्घकालिक दान प्लान" : "Cumulative Donation" },
+              { key: "leaderboard", title: lang === "hi" ? "सक्रिय सहयोगी सूची" : "Donors Leaderboard" }
+            ].map(tool => (
+              <button
+                key={tool.key}
+                onClick={() => setActiveCalc(tool.key)}
+                className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                  activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                {tool.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Content Container */}
+          {activeCalc && (
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
             
             {/* 1. Impact Multiplier */}
             {activeCalc === "multiplier" && (
@@ -273,6 +294,7 @@ export default function CrowdfundingPage() {
           </div>
         )}
       </div>
+      )}
 
     </div>
   );

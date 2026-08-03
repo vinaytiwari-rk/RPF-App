@@ -209,7 +209,7 @@ export default function WomenSafety() {
   const [isUnlocked, setIsUnlocked] = useState(!stealthEnabled);
 
   // States
-  const [activeTab, setActiveTab] = useState<"deterrents" | "scanner" | "ncw" | "routes" | "settings">("deterrents");
+  const [activeTab, setActiveTab] = useState<"deterrents" | "scanner" | "ncw" | "routes" | "settings" | "tools">("deterrents");
   const [sosActive, setSosActive] = useState(false);
   const [sosFired, setSosFired] = useState(false);
   const [contacts, setContacts] = useState<string[]>(() => {
@@ -678,6 +678,7 @@ export default function WomenSafety() {
     { key: "ncw", label: lang === "hi" ? "रिपोर्ट" : "Report", icon: FileText },
     { key: "routes", label: lang === "hi" ? "रूट्स" : "Routes", icon: Navigation },
     { key: "settings", label: lang === "hi" ? "सेटिंग" : "Settings", icon: Settings },
+    { key: "tools", label: lang === "hi" ? "टूल्स" : "Calculators", icon: Shield },
   ] as const;
 
   return (
@@ -950,36 +951,36 @@ export default function WomenSafety() {
             </div>
           </div>
         )}
-        {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4 mt-6">
-          <h4 className="font-display font-bold text-xs text-slate-200 uppercase tracking-widest border-b border-slate-800 pb-2 flex items-center justify-between">
-            <span>{lang === "hi" ? "आपातकालीन सुरक्षा एवं सहायता टूल्स" : "Safety & Distress Tools"}</span>
-            <Shield className="w-4.5 h-4.5 text-red-500 animate-pulse" />
-          </h4>
+        {activeTab === "tools" && (
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h4 className="font-display font-bold text-xs text-slate-200 uppercase tracking-widest border-b border-slate-800 pb-2 flex items-center justify-between">
+              <span>{lang === "hi" ? "आपातकालीन सुरक्षा एवं सहायता टूल्स" : "Safety & Distress Tools"}</span>
+              <Shield className="w-4.5 h-4.5 text-red-500 animate-pulse" />
+            </h4>
 
-          {/* Tools Grid */}
-          <div className="grid grid-cols-2 gap-2 text-center text-slate-350">
-            {[
-              { key: "morse", title: lang === "hi" ? "SOS मॉर्स विजुअल" : "Morse SOS Flash" },
-              { key: "matrix", title: lang === "hi" ? "मार्ग सुरक्षा गुणांक" : "Route Safety Matrix" },
-              { key: "breathing", title: lang === "hi" ? "पैनिक श्वास पेसर" : "Distress Breathing" },
-              { key: "siren", title: lang === "hi" ? "हाई-डेसिबल अलार्म" : "High-Decibel Siren" }
-            ].map(tool => (
-              <button
-                key={tool.key}
-                onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
-                className={`p-2.5 rounded-lg text-[10.5px] font-bold border transition ${
-                  activeCalc === tool.key ? "bg-red-600 text-white border-red-600" : "bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800"
-                }`}
-              >
-                {tool.title}
-              </button>
-            ))}
-          </div>
+            {/* Tools Grid */}
+            <div className="grid grid-cols-2 gap-2 text-center text-slate-350">
+              {[
+                { key: "morse", title: lang === "hi" ? "SOS मॉर्स विजुअल" : "Morse SOS Flash" },
+                { key: "matrix", title: lang === "hi" ? "मार्ग सुरक्षा गुणांक" : "Route Safety Matrix" },
+                { key: "breathing", title: lang === "hi" ? "पैनिक श्वास पेसर" : "Distress Breathing" },
+                { key: "siren", title: lang === "hi" ? "हाई-डेसिबल अलार्म" : "High-Decibel Siren" }
+              ].map(tool => (
+                <button
+                  key={tool.key}
+                  onClick={() => setActiveCalc(tool.key)}
+                  className={`p-2.5 rounded-lg text-[10.5px] font-bold border transition ${
+                    activeCalc === tool.key ? "bg-red-600 text-white border-red-600" : "bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800"
+                  }`}
+                >
+                  {tool.title}
+                </button>
+              ))}
+            </div>
 
-          {/* Content Container */}
-          {activeCalc && (
-            <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 mt-2 space-y-4 animate-fadeIn text-xs text-slate-300">
+            {/* Content Container */}
+            {activeCalc && (
+              <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 mt-2 space-y-4 animate-fadeIn text-xs text-slate-300">
               
               {/* 1. Morse Code SOS */}
               {activeCalc === "morse" && (
@@ -1110,6 +1111,7 @@ export default function WomenSafety() {
             </div>
           )}
         </div>
+        )}
 
       </div>
     </div>

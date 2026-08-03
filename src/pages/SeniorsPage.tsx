@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 export default function SeniorsPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const { user } = useAuth();
+  const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
   const [success, setSuccess] = useState(false);
   const [service, setService] = useState("Companion");
   
@@ -175,115 +176,137 @@ export default function SeniorsPage() {
         </p>
       </div>
 
-      {/* Services Options Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {[
-          { key: "Companion", title: lang === "hi" ? "साथी स्वयंसेवक" : "Call Companion", desc: lang === "hi" ? "बातचीत व मदद हेतु" : "Someone to talk & assist", color: "bg-amber-500 text-white" },
-          { key: "Aid", title: lang === "hi" ? "गृह सहायता" : "Doorstep Aid", desc: lang === "hi" ? "राशन व चिकित्सा आपूर्ति" : "Medical/Food delivery", color: "bg-green-600 text-white" }
-        ].map(s => (
-          <button 
-            key={s.key}
-            onClick={() => setService(s.key)}
-            className={`p-4 rounded-xl border text-left transition flex flex-col gap-1.5 cursor-pointer ${
-              service === s.key ? "border-[#000080] bg-indigo-50/50 shadow-sm" : "border-slate-200 bg-white"
-            }`}
-          >
-            <span className="text-xs font-black text-slate-800">{s.title}</span>
-            <span className="text-[9.5px] text-slate-400 font-bold leading-normal">{s.desc}</span>
-          </button>
-        ))}
+      {/* Navigation Switcher */}
+      <div className="flex bg-slate-200 p-1 rounded-xl max-w-md mx-auto">
+        <button 
+          onClick={() => setSubPage("portal")}
+          className={`flex-1 py-2 text-xs font-black rounded-lg transition-all uppercase tracking-wider ${subPage === "portal" ? "bg-[#000080] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+        >
+          {lang === "hi" ? "सेवा पोर्टल" : "Service Portal"}
+        </button>
+        <button 
+          onClick={() => {
+            setSubPage("tools");
+            if (!activeCalc) setActiveCalc("pension");
+          }}
+          className={`flex-1 py-2 text-xs font-black rounded-lg transition-all uppercase tracking-wider ${subPage === "tools" ? "bg-[#000080] text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+        >
+          {lang === "hi" ? "पात्रता एवं टूल्स" : "Calculators"}
+        </button>
       </div>
 
-      {/* Request Form */}
-      <div className="bg-white p-5 border border-slate-200 rounded-2xl shadow-sm space-y-4">
-        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2">
-          {lang === "hi" ? "सेवा अनुरोध पत्र" : "Request Dispatch Care"}
-        </h4>
-
-        {success ? (
-          <div className="bg-green-50 text-green-700 border border-green-150 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 shrink-0" />
-            <div>
-              <p className="font-bold text-green-800">{lang === "hi" ? "अनुरोध प्राप्त हुआ!" : "Request Registered!"}</p>
-              <p className="text-[10px] text-green-600 font-normal mt-0.5">
-                {lang === "hi" ? "एक स्वयंसेवक अगले २४ घंटों में आपसे संपर्क करेगा।" : "A certified volunteer will reach out to you within 24 hours."}
-              </p>
-            </div>
+      {subPage === "portal" ? (
+        <>
+          {/* Services Options Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { key: "Companion", title: lang === "hi" ? "साथी स्वयंसेवक" : "Call Companion", desc: lang === "hi" ? "बातचीत व मदद हेतु" : "Someone to talk & assist" },
+              { key: "Aid", title: lang === "hi" ? "गृह सहायता" : "Doorstep Aid", desc: lang === "hi" ? "राशन व चिकित्सा आपूर्ति" : "Medical/Food delivery" }
+            ].map(s => (
+              <button 
+                key={s.key}
+                onClick={() => setService(s.key)}
+                className={`p-4 rounded-xl border text-left transition flex flex-col gap-1.5 cursor-pointer ${
+                  service === s.key ? "border-[#000080] bg-indigo-50/50 shadow-sm" : "border-slate-200 bg-white"
+                }`}
+              >
+                <span className="text-xs font-black text-slate-800">{s.title}</span>
+                <span className="text-[9.5px] text-slate-400 font-bold leading-normal">{s.desc}</span>
+              </button>
+            ))}
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
-                {lang === "hi" ? "बुजुर्ग का नाम" : "Elder's Full Name"}
-              </label>
-              <input 
-                type="text" 
-                required 
-                value={elderName}
-                onChange={e => setElderName(e.target.value)}
-                placeholder="e.g. Ram Lal ji" 
-                className="w-full border border-slate-200 rounded-lg p-2.5 text-xs outline-none focus:border-indigo-500 font-bold bg-slate-50" 
-              />
-            </div>
 
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
-                {lang === "hi" ? "आवश्यकता विवरण" : "Details of Request"}
-              </label>
-              <textarea 
-                required
-                value={requestDetails}
-                onChange={e => setRequestDetails(e.target.value)}
-                placeholder={lang === "hi" ? "सहायता का प्रकार..." : "Describe details, e.g. need medicine delivery"} 
-                className="w-full border border-slate-200 rounded-lg p-2.5 text-xs min-h-[70px] outline-none focus:border-indigo-500 font-bold bg-slate-50" 
-              />
-            </div>
+          {/* Request Form */}
+          <div className="bg-white p-5 border border-slate-200 rounded-2xl shadow-sm space-y-4">
+            <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2">
+              {lang === "hi" ? "सेवा अनुरोध पत्र" : "Request Dispatch Care"}
+            </h4>
 
-            <button 
-              type="submit" 
-              disabled={submitting}
-              className="w-full bg-[#000080] text-white font-bold py-3.5 rounded-xl text-xs shadow-md hover:bg-indigo-950 transition disabled:opacity-50 uppercase tracking-wider font-display"
-            >
-              {submitting ? "Submitting..." : (lang === "hi" ? "अनुरोध सबमिट करें" : "Submit Care Request")}
-            </button>
-          </form>
-        )}
-      </div>
+            {success ? (
+              <div className="bg-green-50 text-green-700 border border-green-150 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 shrink-0" />
+                <div>
+                  <p className="font-bold text-green-800">{lang === "hi" ? "अनुरोध प्राप्त हुआ!" : "Request Registered!"}</p>
+                  <p className="text-[10px] text-green-600 font-normal mt-0.5">
+                    {lang === "hi" ? "एक स्वयंसेवक अगले २४ घंटों में आपसे संपर्क करेगा।" : "A certified volunteer will reach out to you within 24 hours."}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
+                    {lang === "hi" ? "बुजुर्ग का नाम" : "Elder's Full Name"}
+                  </label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={elderName}
+                    onChange={e => setElderName(e.target.value)}
+                    placeholder="e.g. Ram Lal ji" 
+                    className="w-full border border-slate-200 rounded-lg p-2.5 text-xs outline-none focus:border-indigo-500 font-bold bg-slate-50" 
+                  />
+                </div>
 
-      {/* --- SMART TOOLS & CALCULATORS DRAWER SECTION --- */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-          <span>{lang === "hi" ? "बुजुर्ग कल्याण स्मार्ट टूल्स" : "Smart Care Calculators"}</span>
-          <Award className="w-4.5 h-4.5 text-amber-500" />
-        </h4>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
+                    {lang === "hi" ? "आवश्यकता विवरण" : "Details of Request"}
+                  </label>
+                  <textarea 
+                    required
+                    value={requestDetails}
+                    onChange={e => setRequestDetails(e.target.value)}
+                    placeholder={lang === "hi" ? "सहायता का प्रकार..." : "Describe details, e.g. need medicine delivery"} 
+                    className="w-full border border-slate-200 rounded-lg p-2.5 text-xs min-h-[70px] outline-none focus:border-indigo-500 font-bold bg-slate-50" 
+                  />
+                </div>
 
-        {/* Tools Select Grid */}
-        <div className="grid grid-cols-2 gap-2 text-center">
-          {[
-            { key: "pension", title: lang === "hi" ? "पेंशन पात्रता" : "Pension Checker" },
-            { key: "fd", title: lang === "hi" ? "FD रिटर्न ब्याज" : "FD Calculator" },
-            { key: "hydration", title: lang === "hi" ? "जल सेवन प्लान" : "Senior Hydration" },
-            { key: "fall", title: lang === "hi" ? "गिरने का जोखिम" : "Fall Risk Index" },
-            { key: "wills", title: lang === "hi" ? "वसीयत संपत्ति बंटवारा" : "Asset Splitter" },
-            { key: "sos", title: lang === "hi" ? "SOS अलार्म डिले" : "Emergency Delay" },
-            { key: "game", title: lang === "hi" ? "याददाश्त रिफ्लेक्स" : "Reflex Trainer" },
-            { key: "steps", title: lang === "hi" ? "गतिशीलता लक्ष्य" : "Mobility Step Tracker" }
-          ].map(tool => (
-            <button
-              key={tool.key}
-              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
-              className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
-                activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              {tool.title}
-            </button>
-          ))}
-        </div>
+                <button 
+                  type="submit" 
+                  disabled={submitting}
+                  className="w-full bg-[#000080] text-white font-bold py-3.5 rounded-xl text-xs shadow-md hover:bg-indigo-950 transition disabled:opacity-50 uppercase tracking-wider font-display"
+                >
+                  {submitting ? "Submitting..." : (lang === "hi" ? "अनुरोध सबमिट करें" : "Submit Care Request")}
+                </button>
+              </form>
+            )}
+          </div>
+        </>
+      ) : (
+        /* --- SMART TOOLS & CALCULATORS PAGE VIEW --- */
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+            <span>{lang === "hi" ? "बुजुर्ग कल्याण स्मार्ट टूल्स" : "Smart Care Calculators"}</span>
+            <Award className="w-4.5 h-4.5 text-[#000080]" />
+          </h4>
 
-        {/* Calculators Content Container */}
-        {activeCalc && (
-          <div className="bg-slate-55/40 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
+          {/* Tools Select Grid */}
+          <div className="grid grid-cols-2 gap-2 text-center">
+            {[
+              { key: "pension", title: lang === "hi" ? "पेंशन पात्रता" : "Pension Checker" },
+              { key: "fd", title: lang === "hi" ? "FD रिटर्न ब्याज" : "FD Calculator" },
+              { key: "hydration", title: lang === "hi" ? "जल सेवन प्लान" : "Senior Hydration" },
+              { key: "fall", title: lang === "hi" ? "गिरने का जोखिम" : "Fall Risk Index" },
+              { key: "wills", title: lang === "hi" ? "वसीयत संपत्ति बंटवारा" : "Asset Splitter" },
+              { key: "sos", title: lang === "hi" ? "SOS अलार्म डिले" : "Emergency Delay" },
+              { key: "game", title: lang === "hi" ? "याददाश्त रिफ्लेक्स" : "Reflex Trainer" },
+              { key: "steps", title: lang === "hi" ? "गतिशीलता लक्ष्य" : "Mobility Step Tracker" }
+            ].map(tool => (
+              <button
+                key={tool.key}
+                onClick={() => setActiveCalc(tool.key)}
+                className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                  activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                {tool.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Calculators Content Container */}
+          {activeCalc && (
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
             
             {/* 1. Pension Checker */}
             {activeCalc === "pension" && (
@@ -525,10 +548,10 @@ export default function SeniorsPage() {
                 })()}
               </div>
             )}
-
           </div>
         )}
       </div>
+      )}
 
     </div>
   );

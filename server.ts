@@ -4889,11 +4889,21 @@ const CORE_SERVICES = [
   { id: "grievance", category: "civic", iconName: "AlertTriangle", titleEn: "Grievances", titleHi: "शिकायतें", descEn: "Report Civic Issues", descHi: "नागरिक समस्याओं की रिपोर्ट" },
   { id: "volunteers", category: "involved", iconName: "Users", titleEn: "Volunteering", titleHi: "स्वयंसेवा", descEn: "Join the RP Force", descHi: "आरपी फोर्स से जुड़ें" },
   { id: "health-care", category: "welfare", iconName: "HeartPulse", titleEn: "Health Care", titleHi: "स्वास्थ्य सेवा", descEn: "Track health metrics & seek care", descHi: "स्वास्थ्य मापन एवं चिकित्सा" },
-  // Expanding to full 21...
-  { id: "education", category: "welfare", iconName: "GraduationCap", titleEn: "Education Aid", titleHi: "शिक्षा सहायता", descEn: "Scholarships and Books", descHi: "छात्रवृत्ति और किताबें" },
+  { id: "jobs", category: "welfare", iconName: "Briefcase", titleEn: "Jobs Portal", titleHi: "रोजगार पोर्टल", descEn: "Find local employment opportunities", descHi: "स्थानीय रोजगार के अवसर खोजें" },
+  { id: "scholarships", category: "welfare", iconName: "GraduationCap", titleEn: "Scholarships", titleHi: "छात्रवृत्ति", descEn: "Apply for educational grants", descHi: "शैक्षणिक अनुदान के लिए आवेदन करें" },
+  { id: "food", category: "welfare", iconName: "Apple", titleEn: "Food Support", titleHi: "आहार सहायता", descEn: "Apply for dry rations or find kitchens", descHi: "सूखा राशन या रसोई केंद्र खोजें" },
+  { id: "medicine", category: "welfare", iconName: "Pill", titleEn: "Medicine Support", titleHi: "चिकित्सा सहायता", descEn: "Request critical medical supplies", descHi: "आवश्यक चिकित्सा आपूर्ति का अनुरोध" },
+  { id: "education", category: "welfare", iconName: "BookOpen", titleEn: "Education Aid", titleHi: "शिक्षा सहायता", descEn: "Scholarships and Books", descHi: "छात्रवृत्ति और किताबें" },
   { id: "women-safety", category: "urgent", iconName: "Shield", titleEn: "Women Safety", titleHi: "महिला सुरक्षा", descEn: "24/7 Helpline and support", descHi: "24/7 हेल्पलाइन" },
+  { id: "seniors", category: "welfare", iconName: "HandHelping", titleEn: "Senior Citizens", titleHi: "वरिष्ठ नागरिक", descEn: "Doorstep checkups & elder care", descHi: "वरिष्ठ नागरिकों के लिए सहायता" },
+  { id: "animals", category: "welfare", iconName: "Compass", titleEn: "Animal Welfare", titleHi: "पशु कल्याण", descEn: "Stray rescue & adoption registry", descHi: "बेसहारा पशुओं की सहायता" },
   { id: "environment", category: "involved", iconName: "TreePine", titleEn: "Environment", titleHi: "पर्यावरण", descEn: "Tree plantation drives", descHi: "वृक्षारोपण अभियान" },
+  { id: "crowdfunding", category: "involved", iconName: "Coins", titleEn: "Crowdfunding", titleHi: "सामुदायिक धन संचय", descEn: "Crowdfunded community projects", descHi: "सामुदायिक परियोजनाओं के लिए धन" },
   { id: "culture", category: "civic", iconName: "Landmark", titleEn: "Religious & Culture", titleHi: "धर्म और संस्कृति", descEn: "Festivals, sacred texts & live feeds", descHi: "त्यौहार, ग्रंथ और मंदिर लाइव" },
+  { id: "disaster", category: "urgent", iconName: "AlertCircle", titleEn: "Disaster Management", titleHi: "आपदा प्रबंधन", descEn: "Emergency relief & rescue mapping", descHi: "आपातकालीन राहत एवं बचाव" },
+  { id: "farmer", category: "welfare", iconName: "Sprout", titleEn: "Farmer Support", titleHi: "किसान सहयोग", descEn: "Crop diagnostic & market pricing", descHi: "कृषि सहायता और प्रशिक्षण" },
+  { id: "schemes", category: "empowerment", iconName: "FileText", titleEn: "Government Schemes", titleHi: "सरकारी योजनाएं", descEn: "Eligibility calculator & guides", descHi: "आधार, राशन एवं PM आवास सहायता" },
+  { id: "skills", category: "empowerment", iconName: "GraduationCap", titleEn: "Skills Training", titleHi: "कौशल प्रशिक्षण", descEn: "Tailoring, coding & courses", descHi: "निशुल्क प्रशिक्षण कोर्स" }
 ];
 
 app.get("/api/public/services", (req, res) => {

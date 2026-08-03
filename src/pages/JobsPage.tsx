@@ -30,6 +30,7 @@ export default function JobsPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
@@ -137,7 +138,32 @@ export default function JobsPage() {
         </svg>
       </div>
 
-      <div className="border-b border-slate-200/80 pb-2.5 relative z-10 flex items-center gap-3">
+      {/* Top Switcher Tab Bar */}
+      <div className="flex bg-slate-100 border border-slate-200 p-1 rounded-xl shadow-inner shrink-0 relative z-10">
+        <button 
+          onClick={() => setSubPage("portal")}
+          className={`flex-1 py-2 text-center rounded-lg text-xs font-black transition cursor-pointer ${
+            subPage === "portal" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {lang === "hi" ? "रोजगार पोर्टल" : "Jobs Portal"}
+        </button>
+        <button 
+          onClick={() => {
+            setSubPage("tools");
+            if (!activeCalc) setActiveCalc("takehome");
+          }}
+          className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
+            subPage === "tools" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {lang === "hi" ? "स्मार्ट रोजगार टूल्स" : "Salary Planners"}
+        </button>
+      </div>
+
+      {subPage === "portal" && (
+        <>
+          <div className="border-b border-slate-200/80 pb-2.5 relative z-10 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-1 rounded-full hover:bg-slate-100/80 transition text-[#000080]">
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -326,17 +352,19 @@ export default function JobsPage() {
           </div>
         </div>
       </div>
+        </>
+      )}
 
-      {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6">
-        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
-          <span>{lang === "hi" ? "आजीविका और वेतन टूल्स" : "Livelihood & Earnings Calculators"}</span>
-          <Briefcase className="w-4.5 h-4.5 text-indigo-650" />
-        </h4>
+      {subPage === "tools" && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 animate-fadeIn relative z-10">
+          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+            <span>{lang === "hi" ? "आजीविका और वेतन टूल्स" : "Livelihood & Earnings Calculators"}</span>
+            <Briefcase className="w-4.5 h-4.5 text-indigo-650" />
+          </h4>
 
-        {/* Tools Grid */}
-        <div className="grid grid-cols-2 gap-2 text-center text-slate-750">
-          {[
+          {/* Tools Grid */}
+          <div className="grid grid-cols-2 gap-2 text-center text-slate-750">
+            {[
             { key: "takehome", title: lang === "hi" ? "इन-हैंड सैलरी" : "Take-Home Salary" },
             { key: "ats", title: lang === "hi" ? "रिज्यूम ATS स्कोर" : "ATS Compatibility" },
             { key: "freelance", title: lang === "hi" ? "प्रति घंटा दर" : "Freelance Rate" },
@@ -344,7 +372,7 @@ export default function JobsPage() {
           ].map(tool => (
             <button
               key={tool.key}
-              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
+              onClick={() => setActiveCalc(tool.key)}
               className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
                 activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
               }`}
@@ -485,6 +513,7 @@ export default function JobsPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
