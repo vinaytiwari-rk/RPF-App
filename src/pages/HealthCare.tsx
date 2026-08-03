@@ -12,6 +12,18 @@ export default function HealthCare() {
 
   const [activeTab, setActiveTab] = useState<"assess" | "tracker" | "welfare" | "clinical">("assess");
 
+  // --- SMART CALCULATORS STATE ---
+  const [activeCalc, setActiveCalc] = useState<string | null>(null);
+  const [systolicBP, setSystolicBP] = useState(120);
+  const [diastolicBP, setDiastolicBP] = useState(80);
+  const [sugarFasting, setSugarFasting] = useState(90);
+  const [pregnancyMonths, setPregnancyMonths] = useState(3);
+  const [dueDateIssueDate, setDueDateIssueDate] = useState("");
+  const [kidAgeYears, setKidAgeYears] = useState(2);
+  const [kidWeightKg, setKidWeightKg] = useState(12);
+  const [dailyCaloriesGoal, setDailyCaloriesGoal] = useState(2000);
+  const [burnActivityMins, setBurnActivityMins] = useState(30);
+
   // Symptoms Assessment states
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [diagnosedDisease, setDiagnosedDisease] = useState("");
@@ -952,6 +964,196 @@ export default function HealthCare() {
         )}
 
       </div>
+      {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6">
+        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+          <span>{isHi ? "स्वास्थ्य संकेतक और योजना टूल्स" : "Health Indicators & Care Planners"}</span>
+          <Heart className="w-4.5 h-4.5 text-red-500 animate-pulse" />
+        </h4>
+
+        {/* Tools Grid */}
+        <div className="grid grid-cols-2 gap-2 text-center text-slate-750">
+          {[
+            { key: "bp", title: isHi ? "ब्लड प्रेशर संकेतक" : "Blood Pressure Risk" },
+            { key: "diabetes", title: isHi ? "ब्लड शुगर जांच" : "Diabetes Risk Check" },
+            { key: "pregnancy", title: isHi ? "गर्भावस्था प्रसव कैलकुलेटर" : "Pregnancy Planner" },
+            { key: "growth", title: isHi ? "बाल विकास वजन इंडेक्स" : "Child Growth Index" }
+          ].map(tool => (
+            <button
+              key={tool.key}
+              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
+              className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              {tool.title}
+            </button>
+          ))}
+        </div>
+
+        {/* Content Container */}
+        {activeCalc && (
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs text-slate-700">
+            
+            {/* 1. Hypertension Risk */}
+            {activeCalc === "bp" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{isHi ? "रक्तचाप (BP) श्रेणी एवं हृदय जोखिम निर्धारक" : "Hypertension (BP) Classification"}</h5>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `सिस्टोलिक (Systolic): ${systolicBP} mmHg` : `Systolic BP: ${systolicBP} mmHg`}</label>
+                    <input type="range" min="90" max="180" value={systolicBP} onChange={e => setSystolicBP(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `डायस्टोलिक (Diastolic): ${diastolicBP} mmHg` : `Diastolic BP: ${diastolicBP} mmHg`}</label>
+                    <input type="range" min="60" max="110" value={diastolicBP} onChange={e => setDiastolicBP(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                </div>
+
+                {(() => {
+                  let status = "";
+                  let advice = "";
+                  let color = "";
+
+                  if (systolicBP >= 140 || diastolicBP >= 90) {
+                    status = isHi ? "🚨 स्टेज 2 उच्च रक्तचाप (Hypertension)" : "🚨 Stage 2 Hypertension";
+                    advice = isHi ? "सलाह: तुरंत चिकित्सक से संपर्क करें और नमक का सेवन कम करें।" : "Advice: Contact a physician immediately and reduce sodium intake.";
+                    color = "bg-red-55 text-red-700 border-red-150";
+                  } else if (systolicBP >= 130 || diastolicBP >= 80) {
+                    status = isHi ? "⚠️ स्टेज 1 उच्च रक्तचाप" : "⚠️ Stage 1 Hypertension";
+                    advice = isHi ? "सलाह: दैनिक व्यायाम शुरू करें और आहार में सुधार करें।" : "Advice: Exercise daily and maintain a healthy diet.";
+                    color = "bg-amber-55 text-amber-700 border-amber-150";
+                  } else if (systolicBP >= 120) {
+                    status = isHi ? "⚡ ऊंचा रक्तचाप (Elevated)" : "⚡ Elevated BP";
+                    advice = isHi ? "सलाह: सक्रिय रहें और तली-भुनी चीजों से परहेज करें।" : "Advice: Keep physically active and monitor monthly.";
+                    color = "bg-blue-55 text-blue-700 border-blue-150";
+                  } else {
+                    status = isHi ? "✅ सामान्य रक्तचाप (Normal)" : "✅ Normal BP";
+                    advice = isHi ? "सलाह: बहुत बढ़िया! इसी स्वस्थ जीवनशैली को बनाए रखें।" : "Advice: Excellent! Maintain your current lifestyle.";
+                    color = "bg-green-55 text-green-700 border-green-150";
+                  }
+
+                  return (
+                    <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
+                      <p className="text-xs font-black">{status}</p>
+                      <p className="text-[9.5px] mt-1 text-slate-500 font-semibold">{advice}</p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 2. Diabetes Risk Check */}
+            {activeCalc === "diabetes" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{isHi ? "फास्टिंग ब्लड ग्लूकोज (शुगर) जाँच" : "Fasting Blood Sugar Risk Assessor"}</h5>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `फास्टिंग शुगर: ${sugarFasting} mg/dL` : `Fasting Glucose: ${sugarFasting} mg/dL`}</label>
+                  <input type="range" min="70" max="250" value={sugarFasting} onChange={e => setSugarFasting(Number(e.target.value))} className="w-full accent-[#000080]" />
+                </div>
+
+                {(() => {
+                  let status = "";
+                  let advice = "";
+                  let color = "";
+
+                  if (sugarFasting >= 126) {
+                    status = isHi ? "🚨 मधुमेह संकेत (Diabetic Range)" : "🚨 Diabetic Range";
+                    advice = isHi ? "सलाह: डॉक्टर से सलाह लें और HbA1c टेस्ट करवाएं।" : "Advice: Consult a doctor and order an HbA1c screening.";
+                    color = "bg-red-55 text-red-700 border-red-150";
+                  } else if (sugarFasting >= 100) {
+                    status = isHi ? "⚠️ प्रीडायबिटीज संकेत (Borderline)" : "⚠️ Pre-Diabetic Range";
+                    advice = isHi ? "सलाह: मीठा कम करें, फाइबर युक्त भोजन बढ़ाएं और टहलें।" : "Advice: Limit sweets, increase dietary fiber, and walk daily.";
+                    color = "bg-amber-55 text-amber-700 border-amber-150";
+                  } else {
+                    status = isHi ? "✅ सामान्य शुगर (Healthy)" : "✅ Normal Glucose";
+                    advice = isHi ? "सलाह: आपका शुगर स्तर स्वस्थ सीमा के अंदर है।" : "Advice: Glucose is within healthy range.";
+                    color = "bg-green-55 text-green-700 border-green-150";
+                  }
+
+                  return (
+                    <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
+                      <p className="text-xs font-black">{status}</p>
+                      <p className="text-[9.5px] mt-1 text-slate-500 font-semibold">{advice}</p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 3. Pregnancy Planner */}
+            {activeCalc === "pregnancy" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{isHi ? "गर्भावस्था प्रसव तिथि और माइलस्टोन कैलकुलेटर" : "Pregnancy Due Date & Milestone Planner"}</h5>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? "अंतिम मासिक धर्म (LMP) की तारीख" : "Last Menstrual Period (LMP) Date"}</label>
+                  <input type="date" value={dueDateIssueDate} onChange={e => setDueDateIssueDate(e.target.value)} className="w-full border border-slate-200 rounded p-2 text-xs font-bold bg-white" />
+                </div>
+
+                {(() => {
+                  if (!dueDateIssueDate) return <p className="text-slate-400 text-center font-bold">{isHi ? "तारीख चुनें।" : "Select date above."}</p>;
+                  const lmp = new Date(dueDateIssueDate);
+                  const edd = new Date(lmp.getTime() + 280 * 24 * 60 * 60 * 1000); // 280 days
+                  const today = new Date();
+                  const diffTime = today.getTime() - lmp.getTime();
+                  const weeks = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000));
+                  
+                  return (
+                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5">
+                      <p className="flex justify-between"><span>{isHi ? "संभावित प्रसव तिथि (EDD):" : "Estimated Due Date:"}</span><span className="text-[#000080]">{edd.toLocaleDateString()}</span></p>
+                      <p className="flex justify-between"><span>{isHi ? "वर्तमान गर्भकाल सप्ताह:" : "Current Gestation:"}</span><span className="text-green-700">{weeks > 0 ? `${weeks} weeks` : "0 weeks"}</span></p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 4. Child Growth Index */}
+            {activeCalc === "growth" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{isHi ? "बाल विकास वजन सूचकांक (WHO मानकों के आधार पर)" : "Pediatric Weight-for-Age Assessor"}</h5>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `बच्चे की आयु: ${kidAgeYears} वर्ष` : `Child Age: ${kidAgeYears} yrs`}</label>
+                    <input type="range" min="1" max="5" value={kidAgeYears} onChange={e => setKidAgeYears(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `बच्चे का वजन: ${kidWeightKg} किलो` : `Child Weight: ${kidWeightKg} kg`}</label>
+                    <input type="range" min="5" max="25" value={kidWeightKg} onChange={e => setKidWeightKg(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                </div>
+
+                {(() => {
+                  // Simple standard weights: 1yr: 9.5kg, 2yr: 12kg, 3yr: 14.5kg, 4yr: 16.5kg, 5yr: 18.5kg
+                  const standardWeight = 9.5 + (kidAgeYears - 1) * 2.25;
+                  const ratio = kidWeightKg / standardWeight;
+                  let status = "";
+                  let color = "";
+                  if (ratio < 0.8) {
+                    status = isHi ? "🚨 कम वजन (Underweight)" : "🚨 Underweight";
+                    color = "text-red-700 bg-red-50 border-red-150";
+                  } else if (ratio > 1.2) {
+                    status = isHi ? "⚠️ अधिक वजन (Overweight)" : "⚠️ Overweight";
+                    color = "text-amber-700 bg-amber-50 border-amber-150";
+                  } else {
+                    status = isHi ? "✅ स्वस्थ वजन (Normal Growth)" : "✅ Healthy Weight";
+                    color = "text-green-700 bg-green-50 border-green-150";
+                  }
+
+                  return (
+                    <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
+                      <p className="text-xs font-black">{status}</p>
+                      <p className="text-[9px] text-slate-500 mt-1 font-semibold">{isHi ? `(इस आयु के लिए मानक वजन: ~${standardWeight.toFixed(1)} किलो)` : `(Standard median weight for this age: ~${standardWeight.toFixed(1)} kg)`}</p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

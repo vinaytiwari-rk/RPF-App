@@ -14,6 +14,14 @@ export default function EnvironmentPage() {
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // --- SMART CALCULATORS STATE ---
+  const [activeCalc, setActiveCalc] = useState<string | null>(null);
+  const [monthlyElectricity, setMonthlyElectricity] = useState(150); // kWh
+  const [lpgCylinders, setLpgCylinders] = useState(1); // count
+  const [solarRoofArea, setSolarRoofArea] = useState(250); // sq ft
+  const [harvestedRoofArea, setHarvestedRoofArea] = useState(500); // sq ft
+  const [plantedSaplings, setPlantedSaplings] = useState(5);
+
   // Simulated AQI details for Sehore
   const aqiData = {
     value: 68,
@@ -264,6 +272,140 @@ export default function EnvironmentPage() {
             </div>
           ))}
         </div>
+      </div>
+      {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6">
+        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+          <span>{isHi ? "पर्यावरण और कार्बन सुरक्षा टूल्स" : "Eco-Savings & Carbon Tools"}</span>
+          <Leaf className="w-4.5 h-4.5 text-green-600 animate-pulse" />
+        </h4>
+
+        {/* Tools Grid */}
+        <div className="grid grid-cols-2 gap-2 text-center text-slate-750">
+          {[
+            { key: "carbon", title: isHi ? "कार्बन पदचिह्न गणना" : "Carbon Calculator" },
+            { key: "solar", title: isHi ? "सोलर बिजली बचत" : "Solar Estimator" },
+            { key: "rainwater", title: isHi ? "वर्षा जल संचयन मात्रा" : "Rainwater Harvester" },
+            { key: "tree", title: isHi ? "वृक्षारोपण CO2 अवशोषण" : "Sapling Benefits" }
+          ].map(tool => (
+            <button
+              key={tool.key}
+              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
+              className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              {tool.title}
+            </button>
+          ))}
+        </div>
+
+        {/* Content Container */}
+        {activeCalc && (
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs text-slate-700">
+            
+            {/* 1. Carbon Footprint */}
+            {activeCalc === "carbon" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{isHi ? "दैनिक घरेलू कार्बन उत्सर्जन गणना" : "Household Carbon Footprint Estimator"}</h5>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `मासिक बिजली: ${monthlyElectricity} kWh` : `Monthly Electricity: ${monthlyElectricity} kWh`}</label>
+                    <input type="range" min="50" max="600" step="10" value={monthlyElectricity} onChange={e => setMonthlyElectricity(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `LPG सिलेंडर/माह: ${lpgCylinders}` : `LPG Cylinders/mo: ${lpgCylinders}`}</label>
+                    <input type="range" min="0" max="4" value={lpgCylinders} onChange={e => setLpgCylinders(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                </div>
+
+                {(() => {
+                  // Standard factors: 1kWh = 0.85kg CO2, 1 LPG cylinder = 42.5kg CO2
+                  const lpgC = typeof lpgCylinders === 'number' ? lpgCylinders : 1;
+                  const totalCO2 = Math.round((monthlyElectricity * 0.85) + (lpgC * 42.5));
+                  return (
+                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold text-center">
+                      <p className="text-[10px] text-slate-450 font-bold uppercase">{isHi ? "अनुमानित मासिक कार्बन उत्सर्जन" : "Projected Monthly CO2 Emissions"}</p>
+                      <p className="text-lg text-[#000080] font-black mt-1">{totalCO2} kg CO2</p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 2. Solar Panel Estimator */}
+            {activeCalc === "solar" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{isHi ? "रूफटॉप सोलर पैनल ऊर्जा और निवेश वापसी" : "Rooftop Solar Output & Payback Estimator"}</h5>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `उपलब्ध छत क्षेत्रफल: ${solarRoofArea} वर्ग फुट` : `Available Roof Area: ${solarRoofArea} sq ft`}</label>
+                  <input type="range" min="100" max="1000" step="50" value={solarRoofArea} onChange={e => setSolarRoofArea(Number(e.target.value))} className="w-full accent-[#000080]" />
+                </div>
+
+                {(() => {
+                  const capacitykW = (solarRoofArea / 100).toFixed(1); // 100 sq ft = 1kW average
+                  const dailyGen = Math.round(Number(capacitykW) * 4); // 4 hours peak sunlight
+                  const cost = Math.round(Number(capacitykW) * 60000); // ₹60,000 per kW avg
+                  return (
+                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5">
+                      <p className="flex justify-between"><span>{isHi ? "सौर ऊर्जा क्षमता (kW):" : "Recommended Solar Size:"}</span><span className="text-[#000080]">{capacitykW} kW</span></p>
+                      <p className="flex justify-between"><span>{isHi ? "दैनिक उत्पादित बिजली:" : "Daily Power Yield:"}</span><span className="text-[#000080]">{dailyGen} kWh (Units)</span></p>
+                      <p className="flex justify-between border-t border-indigo-200/50 pt-1.5"><span>{isHi ? "अनुमानित स्थापना लागत:" : "Estimated Setup Cost:"}</span><span className="text-green-700">₹{cost.toLocaleString()}</span></p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 3. Rainwater Harvester */}
+            {activeCalc === "rainwater" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{isHi ? "वर्षा जल संचयन क्षमता संकेतक" : "Rainwater Harvesting Volume Estimator"}</h5>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `छत का क्षेत्रफल: ${harvestedRoofArea} वर्ग फुट` : `Roof Area: ${harvestedRoofArea} sq ft`}</label>
+                  <input type="range" min="200" max="2500" step="50" value={harvestedRoofArea} onChange={e => setHarvestedRoofArea(Number(e.target.value))} className="w-full accent-[#000080]" />
+                </div>
+
+                {(() => {
+                  // Sehore average annual rainfall = ~40 inches (~1000mm)
+                  // Harvesting Capacity (Gallons) = Area (sq ft) * Rainfall (inches) * 0.623 * Runoff Coeff (0.85 for concrete roof)
+                  const rainInches = 40;
+                  const liters = Math.round(harvestedRoofArea * rainInches * 0.623 * 0.85 * 3.785);
+                  return (
+                    <div className="bg-blue-50 border border-blue-155 p-3 rounded-lg text-blue-800 font-bold text-center">
+                      <p className="text-[10px] text-blue-500 uppercase">{isHi ? "वार्षिक संभावित वर्षा जल संग्रह" : "Estimated Annual Water Saved"}</p>
+                      <p className="text-lg font-black text-[#000080] mt-1">{liters.toLocaleString()} Liters</p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 4. Tree Sapling Benefits */}
+            {activeCalc === "tree" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{isHi ? "वृक्षारोपण पर्यावरण संवर्धन लाभ" : "Sapling Planting Ecological Benefits"}</h5>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-bold block mb-1">{isHi ? `लगाए गए पौधे: ${plantedSaplings}` : `Saplings Planted: ${plantedSaplings}`}</label>
+                  <input type="range" min="1" max="50" value={plantedSaplings} onChange={e => setPlantedSaplings(Number(e.target.value))} className="w-full accent-[#000080]" />
+                </div>
+
+                {(() => {
+                  // Standard mature tree absorbs ~22kg CO2/year and produces oxygen for 2 humans/year
+                  const co2Year = plantedSaplings * 22;
+                  const oxygenHumans = plantedSaplings * 2;
+                  return (
+                    <div className="bg-green-50 border border-green-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5">
+                      <p className="flex justify-between"><span>{isHi ? "सालाना CO2 अवशोषण:" : "CO2 Absorbed / Year:"}</span><span className="text-green-700">~{co2Year} kg</span></p>
+                      <p className="flex justify-between border-t border-green-200/50 pt-1.5"><span>{isHi ? "ऑक्सीजन प्रदाता क्षमता:" : "Oxygen Supported for:"}</span><span className="text-[#000080]">{oxygenHumans} {isHi ? "इंसान" : "humans"}</span></p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+          </div>
+        )}
       </div>
     </div>
   );

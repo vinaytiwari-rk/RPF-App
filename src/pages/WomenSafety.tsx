@@ -187,6 +187,22 @@ export default function WomenSafety() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const { user } = useAuth();
 
+  // --- SMART CALCULATORS STATE ---
+  const [activeCalc, setActiveCalc] = useState<string | null>(null);
+  const [morseActive, setMorseActive] = useState(false);
+  const [morseTimerId, setMorseTimerId] = useState<NodeJS.Timeout | null>(null);
+  const [routeLight, setRouteLight] = useState(2); // 0-3 rating
+  const [routeCrowd, setRouteCrowd] = useState(2); // 0-3 rating
+  const [routeGuard, setRouteGuard] = useState(1); // 0-3 rating
+  const [panicBreathTimer, setPanicBreathTimer] = useState(4);
+  const [panicPhase, setPanicPhase] = useState<"inhale" | "hold" | "exhale">("inhale");
+  const [panicBreathIntervalId, setPanicBreathIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const [alarmActive, setAlarmActive] = useState(false);
+  const [alarmFrequency, setAlarmFrequency] = useState(2500); // 2500Hz
+  const [alarmOsc, setAlarmOsc] = useState<OscillatorNode | null>(null);
+  const [alarmGain, setAlarmGain] = useState<GainNode | null>(null);
+  const [heartbeatTimeout, setHeartbeatTimeout] = useState(10); // minutes
+
   // Settings
   const [stealthEnabled, setStealthEnabled] = useState(() => localStorage.getItem("stealth_enabled") === "true");
   const [calculatorPin, setCalculatorPin] = useState(() => localStorage.getItem("calc_pin") || "7777");
@@ -241,6 +257,126 @@ export default function WomenSafety() {
 
   const triggerHaptic = (pattern = [100]) => {
     if ("vibrate" in navigator) navigator.vibrate(pattern);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (morseTimerId) clearTimeout(morseTimerId);
+      if (panicBreathIntervalId) clearInterval(panicBreathIntervalId);
+      stopAudioAlarm();
+    };
+  }, [morseTimerId, panicBreathIntervalId]);
+
+  const startMorseSOS = () => {
+    if (morseActive) {
+      if (morseTimerId) clearTimeout(morseTimerId);
+      setMorseTimerId(null);
+      setMorseActive(false);
+      const screen = document.getElementById("morse-screen-flash");
+      if (screen) screen.style.backgroundColor = "";
+      return;
+    }
+
+    setMorseActive(true);
+    const sequence = [
+      200, 200, 200, 200, 200, 600,
+      600, 200, 600, 200, 600, 600,
+      200, 200, 200, 200, 200, 1200
+    ];
+
+    let stepIdx = 0;
+    const runSequence = () => {
+      const active = stepIdx % 2 === 0;
+      const duration = sequence[stepIdx % sequence.length];
+      
+      const screen = document.getElementById("morse-screen-flash");
+      if (screen) {
+        screen.style.backgroundColor = active ? "#ffffff" : "#0f172a";
+      }
+
+      stepIdx++;
+      const tId = setTimeout(runSequence, duration);
+      setMorseTimerId(tId);
+    };
+    runSequence();
+  };
+
+  const startPanicBreath = () => {
+    if (panicBreathIntervalId) clearInterval(panicBreathIntervalId);
+    
+    setPanicPhase("inhale");
+    setPanicBreathTimer(4);
+
+    const id = setInterval(() => {
+      setPanicBreathTimer((prev) => {
+        if (prev <= 1) {
+          setPanicPhase((currentPhase) => {
+            if (currentPhase === "inhale") {
+              setPanicBreathTimer(7);
+              return "hold";
+            } else if (currentPhase === "hold") {
+              setPanicBreathTimer(8);
+              return "exhale";
+            } else {
+              setPanicBreathTimer(4);
+              return "inhale";
+            }
+          });
+          return 4;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    setPanicBreathIntervalId(id);
+  };
+
+  const stopPanicBreath = () => {
+    if (panicBreathIntervalId) {
+      clearInterval(panicBreathIntervalId);
+      setPanicBreathIntervalId(null);
+    }
+    setPanicBreathTimer(4);
+    setPanicPhase("inhale");
+  };
+
+  const startAudioAlarm = () => {
+    if (alarmActive) {
+      stopAudioAlarm();
+      return;
+    }
+
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(alarmFrequency, ctx.currentTime);
+      gain.gain.setValueAtTime(0.7, ctx.currentTime);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+
+      setAlarmActive(true);
+      setAlarmOsc(osc);
+      setAlarmGain(gain);
+    } catch (e) {
+      console.error("Failed to start Web Audio alarm:", e);
+    }
+  };
+
+  const stopAudioAlarm = () => {
+    if (alarmOsc) {
+      try { alarmOsc.stop(); alarmOsc.disconnect(); } catch (e){}
+      setAlarmOsc(null);
+    }
+    if (alarmGain) {
+      try { alarmGain.disconnect(); } catch (e){}
+      setAlarmGain(null);
+    }
+    setAlarmActive(false);
   };
 
   useEffect(() => {
@@ -814,6 +950,167 @@ export default function WomenSafety() {
             </div>
           </div>
         )}
+        {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4 mt-6">
+          <h4 className="font-display font-bold text-xs text-slate-200 uppercase tracking-widest border-b border-slate-800 pb-2 flex items-center justify-between">
+            <span>{lang === "hi" ? "आपातकालीन सुरक्षा एवं सहायता टूल्स" : "Safety & Distress Tools"}</span>
+            <Shield className="w-4.5 h-4.5 text-red-500 animate-pulse" />
+          </h4>
+
+          {/* Tools Grid */}
+          <div className="grid grid-cols-2 gap-2 text-center text-slate-350">
+            {[
+              { key: "morse", title: lang === "hi" ? "SOS मॉर्स विजुअल" : "Morse SOS Flash" },
+              { key: "matrix", title: lang === "hi" ? "मार्ग सुरक्षा गुणांक" : "Route Safety Matrix" },
+              { key: "breathing", title: lang === "hi" ? "पैनिक श्वास पेसर" : "Distress Breathing" },
+              { key: "siren", title: lang === "hi" ? "हाई-डेसिबल अलार्म" : "High-Decibel Siren" }
+            ].map(tool => (
+              <button
+                key={tool.key}
+                onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
+                className={`p-2.5 rounded-lg text-[10.5px] font-bold border transition ${
+                  activeCalc === tool.key ? "bg-red-600 text-white border-red-600" : "bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800"
+                }`}
+              >
+                {tool.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Content Container */}
+          {activeCalc && (
+            <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 mt-2 space-y-4 animate-fadeIn text-xs text-slate-300">
+              
+              {/* 1. Morse Code SOS */}
+              {activeCalc === "morse" && (
+                <div className="space-y-3">
+                  <h5 className="font-bold text-slate-200">{lang === "hi" ? "मॉर्स कोड विजुअल फ्लैश (SOS)" : "Visual Morse Code SOS Flasher"}</h5>
+                  <p className="text-[10px] text-slate-450 leading-normal">{lang === "hi" ? "आपातकाल में रात के समय मॉर्स कोड पैटर्न में स्क्रीन को चमकाने के लिए।" : "Flashes the screen in standard SOS Morse code sequence."}</p>
+
+                  <div 
+                    id="morse-screen-flash"
+                    className="w-full h-24 rounded-lg bg-slate-900 border border-slate-850 flex items-center justify-center font-black transition-colors duration-100"
+                  >
+                    <span className="text-xs text-slate-450 tracking-widest">SOS BEACON</span>
+                  </div>
+
+                  <button 
+                    onClick={startMorseSOS}
+                    className={`w-full py-2.5 rounded-lg font-bold text-xs uppercase transition ${
+                      morseActive ? "bg-red-650 text-white" : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                    }`}
+                  >
+                    {morseActive ? (lang === "hi" ? "फ्लैशर बंद करें" : "Stop Morse Flash") : (lang === "hi" ? "फ्लैशर चालू करें" : "Start Morse Flash")}
+                  </button>
+                </div>
+              )}
+
+              {/* 2. Route Safety Matrix */}
+              {activeCalc === "matrix" && (
+                <div className="space-y-3">
+                  <h5 className="font-bold text-slate-200">{lang === "hi" ? "मार्ग सुरक्षा सूचकांक निर्धारक" : "Route Safety Risk Assessor"}</h5>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "प्रकाश (Lighting)" : "Lighting Level"}</label>
+                      <select value={routeLight} onChange={e => setRouteLight(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs font-bold text-slate-200 bg-white">
+                        <option value="3">Brightly Lit (3)</option>
+                        <option value="2">Dimly Lit (2)</option>
+                        <option value="0">Pitch Dark (0)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "भीड़ घनत्व (Crowd Density)" : "Foot Traffic / Crowd"}</label>
+                      <select value={routeCrowd} onChange={e => setRouteCrowd(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs font-bold text-slate-200 bg-white">
+                        <option value="3">High Foot Traffic (3)</option>
+                        <option value="2">Moderate/Normal (2)</option>
+                        <option value="0">Deserted (0)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const score = routeLight + routeCrowd;
+                    let safetyClass = "";
+                    let advice = "";
+                    let color = "";
+                    if (score >= 5) {
+                      safetyClass = lang === "hi" ? "✅ सुरक्षित मार्ग" : "✅ Safe Route";
+                      advice = lang === "hi" ? "सलाह: आगे बढ़ें, मार्ग सुरक्षित है।" : "Advice: Proceed, route has active eyes/lights.";
+                      color = "bg-green-950/30 text-green-400 border-green-900/50";
+                    } else if (score >= 3) {
+                      safetyClass = lang === "hi" ? "⚠️ सामान्य सतर्कता आवश्यक" : "⚠️ Caution Advised";
+                      advice = lang === "hi" ? "सलाह: सतर्क रहें और फोन चालू रखें।" : "Advice: Keep calls active and stay alert.";
+                      color = "bg-amber-950/30 text-amber-400 border-amber-900/50";
+                    } else {
+                      safetyClass = lang === "hi" ? "🚨 उच्च जोखिम मार्ग" : "🚨 High Risk Route";
+                      advice = lang === "hi" ? "सलाह: यदि संभव हो तो दूसरा मार्ग चुनें या साथी के साथ जाएं।" : "Advice: Avoid if possible or travel accompanied.";
+                      color = "bg-red-950/30 text-red-400 border-red-900/50";
+                    }
+
+                    return (
+                      <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
+                        <p className="text-xs font-black">{safetyClass}</p>
+                        <p className="text-[9.5px] mt-1 text-slate-400 font-semibold">{advice}</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 3. Panic/Distress Breathing */}
+              {activeCalc === "breathing" && (
+                <div className="space-y-3">
+                  <h5 className="font-bold text-slate-200">{lang === "hi" ? "घबराहट निवारण श्वास पेसर" : "Panic State Breathing Pacer"}</h5>
+                  <p className="text-[10px] text-slate-450 leading-normal">{lang === "hi" ? "आपातकालीन घबराहट या हाइपरवेंटिलेशन के दौरान श्वास नियंत्रण pacer।" : "Regulates heartbeat and hyperventilation during distress."}</p>
+
+                  <div className="w-full h-24 rounded-lg bg-slate-900 border border-slate-800 flex flex-col items-center justify-center font-black">
+                    <p className="text-[9.5px] text-slate-500 uppercase tracking-widest">{panicPhase.toUpperCase()}</p>
+                    <p className="text-3xl text-red-500 mt-1">{panicBreathTimer}s</p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    {!panicBreathIntervalId ? (
+                      <button onClick={startPanicBreath} className="flex-1 py-2 bg-red-650 hover:bg-red-700 text-white font-bold rounded-lg text-xs uppercase tracking-wide">
+                        {lang === "hi" ? "पेसर शुरू करें" : "Start Breathing"}
+                      </button>
+                    ) : (
+                      <button onClick={stopPanicBreath} className="flex-1 py-2 bg-slate-850 hover:bg-slate-800 text-slate-200 font-bold rounded-lg text-xs uppercase tracking-wide">
+                        {lang === "hi" ? "रोकें" : "Stop Pacer"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. High-Decibel Siren */}
+              {activeCalc === "siren" && (
+                <div className="space-y-3">
+                  <h5 className="font-bold text-slate-200">{lang === "hi" ? "हाई-डेसिबल अलार्म सायरन" : "High-Decibel Sine Alarm"}</h5>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `सायरन फ्रीक्वेंसी: ${alarmFrequency} Hz` : `Siren Pitch: ${alarmFrequency} Hz`}</label>
+                    <input type="range" min="1500" max="3500" step="100" value={alarmFrequency} onChange={e => {
+                      setAlarmFrequency(Number(e.target.value));
+                      if (alarmActive && alarmOsc) {
+                        alarmOsc.frequency.setValueAtTime(Number(e.target.value), 0);
+                      }
+                    }} className="w-full accent-red-650" />
+                  </div>
+
+                  <button 
+                    onClick={startAudioAlarm}
+                    className={`w-full py-2.5 rounded-lg font-bold text-xs uppercase tracking-wide transition ${
+                      alarmActive ? "bg-red-600 text-white hover:bg-red-700 animate-pulse" : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                    }`}
+                  >
+                    {alarmActive ? (lang === "hi" ? "सायरन बंद करें" : "Stop Siren") : (lang === "hi" ? "सायरन चालू करें" : "Activate Siren")}
+                  </button>
+                </div>
+              )}
+
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );

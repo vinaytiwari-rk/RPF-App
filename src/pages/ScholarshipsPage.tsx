@@ -61,6 +61,15 @@ export default function ScholarshipsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // --- SMART CALCULATORS STATE ---
+  const [activeCalc, setActiveCalc] = useState<string | null>(null);
+  const [matchIncome, setMatchIncome] = useState(150000); // INR
+  const [matchMarks, setMatchMarks] = useState(78); // %
+  const [cgpaVal, setCgpaVal] = useState(8.5);
+  const [targetAttendance, setTargetAttendance] = useState(70); // present %
+  const [totalClasses, setTotalClasses] = useState(40);
+  const [admissionAge, setAdmissionAge] = useState(17);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFileName(e.target.files[0].name);
@@ -310,6 +319,151 @@ export default function ScholarshipsPage() {
         </p>
       </div>
 
+      {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6">
+        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+          <span>{lang === "hi" ? "शैक्षणिक और योग्यता टूल्स" : "Academic & Eligibility Planners"}</span>
+          <GraduationCap className="w-4.5 h-4.5 text-indigo-650" />
+        </h4>
+
+        {/* Tools Grid */}
+        <div className="grid grid-cols-2 gap-2 text-center text-slate-755">
+          {[
+            { key: "eligibility", title: lang === "hi" ? "स्कॉलरशिप योग्यता" : "Eligibility Scorer" },
+            { key: "gpa", title: lang === "hi" ? "CGPA प्रतिशत परिवर्तक" : "CGPA Converter" },
+            { key: "attendance", title: lang === "hi" ? "उपस्थिति उपस्थिति लक्ष्य" : "Attendance Tracker" },
+            { key: "age", title: lang === "hi" ? "प्रवेश आयु सीमा जाँच" : "Admission Age Check" }
+          ].map(tool => (
+            <button
+              key={tool.key}
+              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
+              className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              {tool.title}
+            </button>
+          ))}
+        </div>
+
+        {/* Content Container */}
+        {activeCalc && (
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs text-slate-700">
+            
+            {/* 1. Eligibility Scorer */}
+            {activeCalc === "eligibility" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "पारिवारिक आय और शैक्षणिक अंकों का मिलान" : "Scholarship Eligibility Matcher"}</h5>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `शैक्षणिक अंक: ${matchMarks}%` : `Academic Score: ${matchMarks}%`}</label>
+                    <input type="range" min="50" max="100" value={matchMarks} onChange={e => setMatchMarks(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `पारिवारिक आय: ₹${matchIncome.toLocaleString()}` : `Family Income: ₹${matchIncome.toLocaleString()}`}</label>
+                    <input type="range" min="50000" max="400000" step="10000" value={matchIncome} onChange={e => setMatchIncome(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                </div>
+
+                {(() => {
+                  const eligibleList = [];
+                  if (matchMarks >= 75 && matchIncome <= 250000) {
+                    eligibleList.push(lang === "hi" ? "सरस्वती कन्या उच्च शिक्षा प्रोत्साहन" : "Saraswati Girls Higher Education Support");
+                  }
+                  if (matchIncome <= 300000) {
+                    eligibleList.push(lang === "hi" ? "अम्बेडकर तकनीकी एवं आईटी शिक्षा सहायता" : "Ambedkar Technical & IT Education Aid");
+                  }
+                  return (
+                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5">
+                      <p className="text-[10px] text-slate-450 font-black uppercase">{lang === "hi" ? "योग्य छात्रवृत्ति योजनाएं" : "Matched Scholarship Programs"}</p>
+                      {eligibleList.length > 0 ? (
+                        eligibleList.map((sch, i) => <p key={i} className="text-green-700 font-extrabold">• {sch}</p>)
+                      ) : (
+                        <p className="text-red-700">{lang === "hi" ? "कोई छात्रवृत्ति योजना मैच नहीं हुई।" : "No matches found."}</p>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 2. CGPA to Percentile */}
+            {activeCalc === "gpa" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "CGPA से प्रतिशत परिवर्तक (CBSE/State Board)" : "CGPA to Percentage Converter"}</h5>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `CGPA मूल्य: ${cgpaVal}` : `CGPA Value: ${cgpaVal}`}</label>
+                  <input type="range" min="4" max="10" step="0.1" value={cgpaVal} onChange={e => setCgpaVal(Number(e.target.value))} className="w-full accent-[#000080]" />
+                </div>
+
+                {(() => {
+                  const percent = (cgpaVal * 9.5).toFixed(1);
+                  return (
+                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold text-center">
+                      <p className="text-[10px] text-slate-450 font-bold uppercase">{lang === "hi" ? "समतुल्य प्रतिशत (Percentage)" : "Equivalent CBSE Percentage"}</p>
+                      <p className="text-lg text-[#000080] font-black mt-1">{percent}%</p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 3. Attendance Goal Tracker */}
+            {activeCalc === "attendance" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "७५% उपस्थिति लक्ष्य योजना संकेतक" : "Attendance Goal Tracker (75% Minimum)"}</h5>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `वर्तमान उपस्थित कक्षाएं: ${targetAttendance}` : `Present Classes: ${targetAttendance}`}</label>
+                    <input type="range" min="10" max="100" value={targetAttendance} onChange={e => setTargetAttendance(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `कुल संचालित कक्षाएं: ${totalClasses}` : `Total Conducted Classes: ${totalClasses}`}</label>
+                    <input type="range" min="20" max="120" value={totalClasses} onChange={e => setTotalClasses(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                </div>
+
+                {(() => {
+                  const currentRate = Math.round((targetAttendance / totalClasses) * 100);
+                  const isSafe = currentRate >= 75;
+                  const classesNeeded = Math.max(0, Math.ceil((0.75 * totalClasses - targetAttendance) / 0.25));
+                  return (
+                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5 text-center">
+                      <p className="flex justify-between"><span>{lang === "hi" ? "वर्तमान उपस्थिति दर:" : "Current Attendance Rate:"}</span><span className={isSafe ? "text-green-700" : "text-red-700"}>{currentRate}%</span></p>
+                      {!isSafe && <p className="text-[10px] text-red-650 mt-1">{lang === "hi" ? `(७५% प्राप्त करने के लिए अगली ${classesNeeded} कक्षाओं में लगातार उपस्थित होना आवश्यक है)` : `(Must attend next ${classesNeeded} classes straight to cross 75%)`}</p>}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 4. Admission Age Check */}
+            {activeCalc === "age" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "प्रवेश आयु सीमा जाँच (Eligibility Age Limit)" : "Admission Eligibility Age Check"}</h5>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `छात्र की आयु: ${admissionAge} वर्ष` : `Candidate Age: ${admissionAge} years`}</label>
+                  <input type="range" min="10" max="30" value={admissionAge} onChange={e => setAdmissionAge(Number(e.target.value))} className="w-full accent-[#000080]" />
+                </div>
+
+                {(() => {
+                  const isEligible = admissionAge >= 15 && admissionAge <= 23;
+                  return (
+                    <div className={`p-3 rounded-lg border font-bold text-center ${isEligible ? "bg-green-50 text-green-700 border-green-150" : "bg-red-50 text-red-700 border-red-150"}`}>
+                      {isEligible ? (
+                        <p>{lang === "hi" ? "✓ योग्य: आयु सीमा प्रवेश शर्तों के अनुकूल है।" : "✓ Eligible: Age is within standard admission limits."}</p>
+                      ) : (
+                        <p>{lang === "hi" ? "✗ अपात्र: आयु प्रवेश शर्तों के अनुकूल नहीं है।" : "✗ Ineligible: Out of candidate age range."}</p>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+          </div>
+        )}
+      </div>
     </div>
   );
 }

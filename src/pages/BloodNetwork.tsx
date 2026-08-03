@@ -14,6 +14,18 @@ export default function BloodNetwork() {
   const { user } = useAuth();
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const [tab, setTab] = useState<"request" | "donate" | "find" | "donors">("request");
+
+  // --- SMART CALCULATORS STATE ---
+  const [activeCalc, setActiveCalc] = useState<string | null>(null);
+  const [calcBloodType, setCalcBloodType] = useState("O+");
+  const [lastDonationDate, setLastDonationDate] = useState("");
+  const [donorGender, setDonorGender] = useState("male");
+  const [metronomeActive, setMetronomeActive] = useState(false);
+  const [metronomeBpm, setMetronomeBpm] = useState(110);
+  const [metronomeIntervalId, setMetronomeIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const [calcHb, setCalcHb] = useState(13.5);
+  const [patientWeight, setPatientWeight] = useState(70);
+  const [patientHeight, setPatientHeight] = useState(68); // inches
   
   // Requests Tab states
   const [bloodType, setBloodType] = useState("A+");
@@ -126,6 +138,40 @@ export default function BloodNetwork() {
     fetchBloodBanks();
     fetchActiveDonors();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (metronomeIntervalId) clearInterval(metronomeIntervalId);
+    };
+  }, [metronomeIntervalId]);
+
+  const toggleMetronome = () => {
+    if (metronomeActive) {
+      if (metronomeIntervalId) {
+        clearInterval(metronomeIntervalId);
+        setMetronomeIntervalId(null);
+      }
+      setMetronomeActive(false);
+    } else {
+      setMetronomeActive(true);
+      const intervalMs = (60 / metronomeBpm) * 1000;
+      let tick = false;
+      const id = setInterval(() => {
+        tick = !tick;
+        const el = document.getElementById("cpr-pulse-ring");
+        if (el) {
+          if (tick) {
+            el.style.transform = "scale(1.2)";
+            el.style.backgroundColor = "rgba(239, 68, 68, 0.25)";
+          } else {
+            el.style.transform = "scale(1.0)";
+            el.style.backgroundColor = "rgba(239, 68, 68, 0.05)";
+          }
+        }
+      }, intervalMs);
+      setMetronomeIntervalId(id);
+    }
+  };
 
   // Handle Eligibility Quiz
   const handleQuizSubmit = (e: React.FormEvent) => {
@@ -895,6 +941,210 @@ export default function BloodNetwork() {
             )}
           </div>
         )}
+
+        {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6 max-w-4xl mx-auto">
+          <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+            <span>{lang === "hi" ? "रक्त संचार और जीवन रक्षक टूल्स" : "Blood Network Calculators"}</span>
+            <Droplet className="w-4.5 h-4.5 text-red-650 animate-bounce" />
+          </h4>
+
+          {/* Tools Select Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
+            {[
+              { key: "compatibility", title: lang === "hi" ? "रक्त समूह अनुकूलता" : "Compatibility Grid" },
+              { key: "interval", title: lang === "hi" ? "रक्तदान सुरक्षित अंतराल" : "Donation Interval" },
+              { key: "cpr", title: lang === "hi" ? "CPR रिदम पेसर" : "CPR Metronome" },
+              { key: "volume", title: lang === "hi" ? "शरीर कुल रक्त मात्रा" : "Blood Volume Math" },
+              { key: "triage", title: lang === "hi" ? "अस्पताल भर्ती तात्कालिकता" : "Urgency Triage Index" }
+            ].map(tool => (
+              <button
+                key={tool.key}
+                onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
+                className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                  activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                {tool.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Calculators Content Container */}
+          {activeCalc && (
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs">
+              
+              {/* 1. Blood Compatibility Grid */}
+              {activeCalc === "compatibility" && (
+                <div className="space-y-3">
+                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "रक्त समूह अनुकूलता मैपिंग" : "Blood Group Recipient/Donor Compatibility"}</h5>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "रक्त समूह चुनें" : "Select Blood Group"}</label>
+                    <select value={calcBloodType} onChange={e => setCalcBloodType(e.target.value)} className="w-full border border-slate-200 rounded p-2 text-xs font-bold bg-white">
+                      {BLOOD_TYPES.map(bt => <option key={bt} value={bt}>{bt}</option>)}
+                    </select>
+                  </div>
+
+                  {(() => {
+                    // compatibility lists
+                    const compatMap: Record<string, { donors: string[]; recipients: string[] }> = {
+                      "A+": { donors: ["A+", "A-", "O+", "O-"], recipients: ["A+", "AB+"] },
+                      "A-": { donors: ["A-", "O-"], recipients: ["A+", "A-", "AB+", "AB-"] },
+                      "B+": { donors: ["B+", "B-", "O+", "O-"], recipients: ["B+", "AB+"] },
+                      "B-": { donors: ["B-", "O-"], recipients: ["B+", "B-", "AB+", "AB-"] },
+                      "AB+": { donors: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], recipients: ["AB+"] },
+                      "AB-": { donors: ["A-", "B-", "AB-", "O-"], recipients: ["AB+", "AB-"] },
+                      "O+": { donors: ["O+", "O-"], recipients: ["A+", "B+", "AB+", "O+"] },
+                      "O-": { donors: ["O-"], recipients: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] }
+                    };
+                    const match = compatMap[calcBloodType] || { donors: [], recipients: [] };
+                    return (
+                      <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-2">
+                        <p className="flex justify-between"><span>{lang === "hi" ? "आप इनसे रक्त प्राप्त कर सकते हैं (Donors):" : "Can receive blood from:"}</span><span className="text-[#000080]">{match.donors.join(", ")}</span></p>
+                        <p className="flex justify-between border-t border-indigo-200/50 pt-2"><span>{lang === "hi" ? "आप इन्हें रक्त दान कर सकते हैं (Recipients):" : "Can donate blood to:"}</span><span className="text-green-700">{match.recipients.join(", ")}</span></p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 2. Donation Interval Tracker */}
+              {activeCalc === "interval" && (
+                <div className="space-y-3">
+                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "सुरक्षित रक्तदान अंतराल गणना" : "Next Safe Donation Date Estimator"}</h5>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "लिंग" : "Gender"}</label>
+                      <div className="flex gap-2">
+                        <button onClick={() => setDonorGender("male")} className={`px-3 py-1.5 rounded-lg border text-xs font-bold ${donorGender === "male" ? "bg-[#000080] text-white" : "bg-white text-slate-700"}`}>{lang === "hi" ? "पुरुष (90 दिन)" : "Male (90 days)"}</button>
+                        <button onClick={() => setDonorGender("female")} className={`px-3 py-1.5 rounded-lg border text-xs font-bold ${donorGender === "female" ? "bg-[#000080] text-white" : "bg-white text-slate-700"}`}>{lang === "hi" ? "महिला (120 दिन)" : "Female (120 days)"}</button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? "अंतिम रक्तदान की तारीख" : "Last Donation Date"}</label>
+                      <input type="date" value={lastDonationDate} onChange={e => setLastDonationDate(e.target.value)} className="w-full border border-slate-200 rounded p-2 text-xs font-bold bg-white" />
+                    </div>
+                  </div>
+
+                  {(() => {
+                    if (!lastDonationDate) {
+                      return <p className="text-center text-slate-400 font-semibold">{lang === "hi" ? "तारीख दर्ज करें।" : "Select last donation date above."}</p>;
+                    }
+                    const limit = donorGender === "female" ? 120 : 90;
+                    const last = new Date(lastDonationDate);
+                    const diffTime = Math.abs(new Date().getTime() - last.getTime());
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const eligible = diffDays >= limit;
+                    return (
+                      <div className={`p-3 rounded-lg border font-bold text-center ${eligible ? "bg-green-50 text-green-700 border-green-150" : "bg-red-50 text-red-700 border-red-150"}`}>
+                        {eligible ? (
+                          <p>{lang === "hi" ? "✅ आप सुरक्षित रक्तदान के लिए पात्र हैं!" : "✅ You are eligible to donate blood now!"}</p>
+                        ) : (
+                          <p>{lang === "hi" ? `अपात्र: कृपया ${limit - diffDays} दिन और प्रतीक्षा करें।` : `Not eligible: Wait ${limit - diffDays} more days.`}</p>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 3. CPR Metronome Pacer */}
+              {activeCalc === "cpr" && (
+                <div className="space-y-3 text-center">
+                  <h5 className="font-extrabold text-[#000080] text-left">{lang === "hi" ? "CPR छाती संपीड़न रिदम पेसर (100-120 BPM)" : "CPR Compression Chest Metronome (100-120 BPM)"}</h5>
+                  <p className="text-[10px] text-slate-400 font-semibold text-left">{lang === "hi" ? "आपातकालीन स्थिति में सीपीआर देने के लिए निर्देशित धड़कन पल्सर।" : "Visual chest-pumping guide matching AHA recommended CPR rhythms."}</p>
+
+                  <div className="flex flex-col items-center justify-center py-4">
+                    <div 
+                      id="cpr-pulse-ring" 
+                      className="w-16 h-16 rounded-full bg-red-500/5 border border-red-500/20 flex items-center justify-center transition-all duration-100"
+                      style={{ transform: "scale(1)" }}
+                    >
+                      <Heart className="w-8 h-8 text-red-650" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `पेसर स्पीड: ${metronomeBpm} BPM` : `Metronome Speed: ${metronomeBpm} BPM`}</label>
+                    <input type="range" min="90" max="130" value={metronomeBpm} onChange={e => setMetronomeBpm(Number(e.target.value))} className="w-full accent-[#000080]" disabled={metronomeActive} />
+                  </div>
+
+                  <button 
+                    onClick={toggleMetronome}
+                    className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide transition ${
+                      metronomeActive ? "bg-red-600 text-white hover:bg-red-700" : "bg-[#000080] text-white hover:bg-indigo-950"
+                    }`}
+                  >
+                    {metronomeActive ? (lang === "hi" ? "पेसर बंद करें" : "Stop Metronome") : (isHi ? "पेसर शुरू करें" : "Start Metronome")}
+                  </button>
+                </div>
+              )}
+
+              {/* 4. Estimated Blood Volume */}
+              {activeCalc === "volume" && (
+                <div className="space-y-3">
+                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "शरीर कुल रक्त मात्रा कैलकुलेटर" : "Estimated Blood Volume (Nadler's Formula)"}</h5>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `वजन: ${patientWeight} kg` : `Weight: ${patientWeight} kg`}</label>
+                      <input type="range" min="40" max="120" value={patientWeight} onChange={e => setPatientWeight(Number(e.target.value))} className="w-full accent-[#000080]" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `ऊंचाई: ${Math.round(patientHeight * 2.54)} cm` : `Height: ${Math.round(patientHeight * 2.54)} cm`}</label>
+                      <input type="range" min="55" max="80" value={patientHeight} onChange={e => setPatientHeight(Number(e.target.value))} className="w-full accent-[#000080]" />
+                    </div>
+                  </div>
+
+                  {(() => {
+                    // Nadler's formula simplified: (0.3669 * H^3) + (0.03219 * W) + 0.6041 (Male model average)
+                    const hM = patientHeight * 0.0254; // convert inches to meters
+                    const volume = ((0.3669 * Math.pow(hM, 3)) + (0.03219 * patientWeight) + 0.6041).toFixed(2);
+                    return (
+                      <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold text-center">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">{lang === "hi" ? "कुल रक्त मात्रा (लीटर)" : "Calculated Blood Volume"}</p>
+                        <p className="text-lg text-[#000080] font-black mt-1">{volume} Liters</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 5. Request Urgency Triage */}
+              {activeCalc === "triage" && (
+                <div className="space-y-3">
+                  <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "रोगी भर्ती तात्कालिकता वर्गीकरण" : "Clinical Urgency Triage Index"}</h5>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `हीमोग्लोबिन स्तर: ${calcHb} g/dL` : `Hemoglobin Level: ${calcHb} g/dL`}</label>
+                      <input type="range" min="5" max="16" step="0.5" value={calcHb} onChange={e => setCalcHb(Number(e.target.value))} className="w-full accent-[#000080]" />
+                    </div>
+                  </div>
+
+                  {(() => {
+                    let level = "";
+                    let color = "";
+                    if (calcHb < 7) {
+                      level = lang === "hi" ? "🚨 अति गंभीर (Immediate Transfusion Needed)" : "🚨 Critical (Immediate Transfusion Needed)";
+                      color = "bg-red-50 text-red-700 border-red-150";
+                    } else if (calcHb < 10) {
+                      level = lang === "hi" ? "⚠️ मध्यम तात्कालिकता (Moderate Urgency)" : "⚠️ Moderate Urgency";
+                      color = "bg-amber-50 text-amber-700 border-amber-150";
+                    } else {
+                      level = lang === "hi" ? "✅ सामान्य (Standard Request)" : "✅ Normal (Standard Request)";
+                      color = "bg-green-50 text-green-700 border-green-150";
+                    }
+                    return (
+                      <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
+                        <p className="text-xs font-black">{level}</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+            </div>
+          )}
+        </div>
 
       </div>
     </div>

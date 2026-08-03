@@ -31,6 +31,16 @@ export default function JobsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // --- SMART CALCULATORS STATE ---
+  const [activeCalc, setActiveCalc] = useState<string | null>(null);
+  const [monthlySalary, setMonthlySalary] = useState(25000); // INR
+  const [epfRate, setEpfRate] = useState(12); // %
+  const [resumeText, setResumeText] = useState("");
+  const [targetHourlyRate, setTargetHourlyRate] = useState(15000); // monthly budget
+  const [hourlyBillableHours, setHourlyBillableHours] = useState(120); // hours
+  const [gratuityBaseSalary, setGratuityBaseSalary] = useState(20000);
+  const [gratuityYears, setGratuityYears] = useState(5);
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -317,6 +327,164 @@ export default function JobsPage() {
         </div>
       </div>
 
+      {/* --- SMART TOOLS & CALCULATORS SECTION --- */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 mt-6">
+        <h4 className="font-display font-black text-xs text-[#000080] uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+          <span>{lang === "hi" ? "आजीविका और वेतन टूल्स" : "Livelihood & Earnings Calculators"}</span>
+          <Briefcase className="w-4.5 h-4.5 text-indigo-650" />
+        </h4>
+
+        {/* Tools Grid */}
+        <div className="grid grid-cols-2 gap-2 text-center text-slate-750">
+          {[
+            { key: "takehome", title: lang === "hi" ? "इन-हैंड सैलरी" : "Take-Home Salary" },
+            { key: "ats", title: lang === "hi" ? "रिज्यूम ATS स्कोर" : "ATS Compatibility" },
+            { key: "freelance", title: lang === "hi" ? "प्रति घंटा दर" : "Freelance Rate" },
+            { key: "gratuity", title: lang === "hi" ? "ग्रेच्युटी राशि अनुमान" : "Gratuity Estimator" }
+          ].map(tool => (
+            <button
+              key={tool.key}
+              onClick={() => setActiveCalc(activeCalc === tool.key ? null : tool.key)}
+              className={`p-2.5 rounded-xl text-[10.5px] font-bold border transition ${
+                activeCalc === tool.key ? "bg-[#000080] text-white border-[#000080]" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              {tool.title}
+            </button>
+          ))}
+        </div>
+
+        {/* Content Container */}
+        {activeCalc && (
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 mt-2 space-y-4 animate-fadeIn text-xs text-slate-700">
+            
+            {/* 1. Take-home Salary */}
+            {activeCalc === "takehome" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "मासिक इन-हैंड वेतन गणना (टैक्स कटौती सहित)" : "India Take-Home Salary Calculator"}</h5>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `मूल मासिक वेतन (Basic): ₹${monthlySalary.toLocaleString()}` : `Monthly Gross Salary: ₹${monthlySalary.toLocaleString()}`}</label>
+                    <input type="range" min="10000" max="150000" step="2500" value={monthlySalary} onChange={e => setMonthlySalary(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                </div>
+
+                {(() => {
+                  const epfContribution = Math.round(monthlySalary * (epfRate / 100));
+                  const ptDeduction = monthlySalary > 15000 ? 200 : 0; // Professional Tax average
+                  const netTakeHome = monthlySalary - epfContribution - ptDeduction;
+                  return (
+                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5">
+                      <p className="flex justify-between"><span>{lang === "hi" ? "EPF कटौती (12%):" : "EPF Deduction (12%):"}</span><span className="text-red-700">-₹{epfContribution.toLocaleString()}</span></p>
+                      <p className="flex justify-between"><span>{lang === "hi" ? "व्यवसाय कर (Prof Tax):" : "Professional Tax:"}</span><span className="text-red-700">-₹{ptDeduction.toLocaleString()}</span></p>
+                      <p className="flex justify-between border-t border-indigo-200/50 pt-1.5"><span>{lang === "hi" ? "मासिक इन-हैंड वेतन:" : "Net Take-Home / Month:"}</span><span className="text-green-700">₹{netTakeHome.toLocaleString()}</span></p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 2. ATS Compatibility */}
+            {activeCalc === "ats" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "रिज्यूम कीवर्ड मैचिंग (ATS Score)" : "Resume ATS Compatibility Check"}</h5>
+                <p className="text-[10px] text-slate-400 font-bold">{lang === "hi" ? "नौकरी के विवरण और अपने रिज्यूम के कीवर्ड्स का मिलान करें।" : "Upload or paste your resume text to compute compatibility score against job roles."}</p>
+                <div>
+                  <textarea 
+                    value={resumeText} 
+                    onChange={e => setResumeText(e.target.value)} 
+                    placeholder={lang === "hi" ? "अपना रिज्यूम टेक्स्ट या कौशल यहाँ पेस्ट करें..." : "Paste your resume skills or description here..."} 
+                    className="w-full border border-slate-200 bg-white rounded p-2 text-xs font-bold min-h-[60px] outline-none" 
+                  />
+                </div>
+
+                {(() => {
+                  if (resumeText.trim().length === 0) return <p className="text-slate-400 text-center font-bold">{lang === "hi" ? "रिज्यूम टेक्स्ट डालें।" : "Paste details above to check."}</p>;
+                  // Simple mock Jaccard similarity checking for standard skills (Excel, Word, Tally, SQL, React, Node)
+                  const sampleKeywords = ["excel", "tally", "word", "office", "computer", "typing", "management", "administration"];
+                  const userWords = resumeText.toLowerCase().split(/\W+/);
+                  const matched = sampleKeywords.filter(w => userWords.includes(w));
+                  const score = Math.round((matched.length / sampleKeywords.length) * 100);
+                  
+                  return (
+                    <div className={`p-3 rounded-lg border font-bold text-center ${score >= 50 ? "bg-green-50 text-green-700 border-green-150" : "bg-amber-50 text-amber-700 border-amber-150"}`}>
+                      <p className="text-sm font-black">{score}% Match Score</p>
+                      <p className="text-[9px] mt-1 text-slate-500 font-semibold">
+                        {score >= 50 
+                          ? (lang === "hi" ? "✓ बढ़िया! आपका रिज्यूम बुनियादी जरूरतों से मेल खाता है।" : "✓ Looking Good! Core vocabulary matched.")
+                          : (lang === "hi" ? "सुझाव: 'Excel', 'Tally', या 'Office' जैसे बुनियादी कौशल जोड़ें।" : "Advice: Include 'Excel', 'Tally', or 'Office' if applicable.")}
+                      </p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 3. Freelance Billing Rate */}
+            {activeCalc === "freelance" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "लक्षित प्रति घंटा बिलिंग दर प्लानर" : "Freelance Hourly Rate Planner"}</h5>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `लक्षित मासिक आय: ₹${targetHourlyRate.toLocaleString()}` : `Desired Monthly Savings: ₹${targetHourlyRate.toLocaleString()}`}</label>
+                    <input type="range" min="5000" max="100000" step="5000" value={targetHourlyRate} onChange={e => setTargetHourlyRate(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `दैनिक बिलिंग घंटे/माह: ${hourlyBillableHours} घंटे` : `Billable Hours / Month: ${hourlyBillableHours} hrs`}</label>
+                    <input type="range" min="40" max="200" step="10" value={hourlyBillableHours} onChange={e => setHourlyBillableHours(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                </div>
+
+                {(() => {
+                  const rate = Math.round(targetHourlyRate / hourlyBillableHours);
+                  return (
+                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold text-center">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">{lang === "hi" ? "न्यूनतम प्रति घंटा शुल्क दर" : "Minimum Hourly Rate Required"}</p>
+                      <p className="text-lg text-[#000080] font-black mt-1">₹{rate} / hour</p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 4. Gratuity Estimator */}
+            {activeCalc === "gratuity" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "ग्रेच्युटी राशि अनुमान (Payment of Gratuity Act)" : "Payment of Gratuity Act Estimator"}</h5>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `मूल वेतन (Basic + DA): ₹${gratuityBaseSalary.toLocaleString()}` : `Basic + DA Salary: ₹${gratuityBaseSalary.toLocaleString()}`}</label>
+                    <input type="range" min="5000" max="80000" step="2500" value={gratuityBaseSalary} onChange={e => setGratuityBaseSalary(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 font-bold block mb-1">{lang === "hi" ? `कुल सेवा अवधि (वर्ष): ${gratuityYears} वर्ष` : `Service Duration: ${gratuityYears} yrs`}</label>
+                    <input type="range" min="1" max="40" value={gratuityYears} onChange={e => setGratuityYears(Number(e.target.value))} className="w-full accent-[#000080]" />
+                  </div>
+                </div>
+
+                {(() => {
+                  // Formula: Basic * 15 / 26 * Years (eligible if years >= 5)
+                  const isEligible = gratuityYears >= 5;
+                  const gratuity = isEligible ? Math.round((gratuityBaseSalary * 15 / 26) * gratuityYears) : 0;
+                  return (
+                    <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1 text-center">
+                      {!isEligible ? (
+                        <p className="text-red-700">{lang === "hi" ? "अपात्र: न्यूनतम ५ वर्ष की सेवा आवश्यक है।" : "Not eligible: Requires minimum 5 years of service."}</p>
+                      ) : (
+                        <>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase">{lang === "hi" ? "संभावित ग्रेच्युटी राशि:" : "Estimated Gratuity Payable:"}</p>
+                          <p className="text-lg text-green-700 font-black mt-1">₹{gratuity.toLocaleString()}</p>
+                        </>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+          </div>
+        )}
+      </div>
     </div>
   );
 }
