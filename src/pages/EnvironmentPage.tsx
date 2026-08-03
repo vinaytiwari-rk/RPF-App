@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { 
   Leaf, CheckCircle, Wind, Sun, CloudRain, CloudSun, Thermometer, 
@@ -14,6 +14,58 @@ export default function EnvironmentPage() {
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
+  const [dynamicWeather, setDynamicWeather] = useState<{
+    temp: string;
+    condition: string;
+    humidity: string;
+    wind: string;
+    forecast: Array<{ day: string; temp: string; weatherCode: number }>;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=23.2032&longitude=77.0844&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=weather_code,temperature_2m_max&timezone=auto&forecast_days=3");
+        if (res.ok) {
+          const json = await res.json();
+          const current = json.current;
+          const daily = json.daily;
+
+          const getCondition = (code: number) => {
+            if (code === 0) return isHi ? "साफ़ मौसम" : "Clear Sky";
+            if (code >= 1 && code <= 3) return isHi ? "आंशिक रूप से बादल" : "Partly Cloudy";
+            if (code >= 51 && code <= 65) return isHi ? "बारिश" : "Rainy";
+            if (code >= 80 && code <= 82) return isHi ? "बौछारें" : "Showers";
+            return isHi ? "बादल छाए रहेंगे" : "Overcast";
+          };
+
+          const days = [isHi ? "सोम" : "Mon", isHi ? "मंगल" : "Tue", isHi ? "बुध" : "Wed", isHi ? "गुरु" : "Thu", isHi ? "शुक्र" : "Fri", isHi ? "शनि" : "Sat", isHi ? "रवि" : "Sun"];
+          const todayIndex = new Date().getDay();
+
+          const forecastData = (daily.time || []).map((t: string, idx: number) => {
+            const dayNum = (todayIndex + idx) % 7;
+            const dayLabel = days[dayNum === 0 ? 6 : dayNum - 1];
+            return {
+              day: dayLabel,
+              temp: `${Math.round(daily.temperature_2m_max[idx])}°C`,
+              weatherCode: daily.weather_code[idx]
+            };
+          });
+
+          setDynamicWeather({
+            temp: `${Math.round(current.temperature_2m)}°C`,
+            condition: getCondition(current.weather_code),
+            humidity: `${current.relative_humidity_2m}%`,
+            wind: `${Math.round(current.wind_speed_10m)} km/h`,
+            forecast: forecastData
+          });
+        }
+      } catch (err) {
+        console.error("Open-Meteo API error", err);
+      }
+    };
+    fetchWeather();
+  }, [isHi]);
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
@@ -195,28 +247,34 @@ export default function EnvironmentPage() {
               <Sun className="w-4 h-4 text-amber-500" />
               {isHi ? "मौसम व तापमान" : "Local Weather Forecast"}
             </h4>
-            <span className="text-[10px] font-mono text-slate-400">Live • 31°C</span>
+            <span className="text-[10px] font-mono text-slate-400">Live • {dynamicWeather ? dynamicWeather.temp : "31°C"}</span>
           </div>
 
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <Thermometer className="w-8 h-8 text-orange-500" />
               <div>
-                <span className="text-xl font-black text-slate-800">{weatherData.temp}</span>
-                <p className="text-[10.5px] text-slate-500 font-bold mt-0.5">{weatherData.condition}</p>
+                <span className="text-xl font-black text-slate-800">{dynamicWeather ? dynamicWeather.temp : weatherData.temp}</span>
+                <p className="text-[10.5px] text-slate-500 font-bold mt-0.5">{dynamicWeather ? dynamicWeather.condition : weatherData.condition}</p>
               </div>
             </div>
 
             <div className="text-[10px] text-slate-500 font-bold text-right space-y-1">
-              <p className="flex items-center justify-end gap-1"><Droplets className="w-3.5 h-3.5 text-blue-500" /> {isHi ? "आर्द्रता" : "Humidity"}: {weatherData.humidity}</p>
-              <p className="flex items-center justify-end gap-1"><Wind className="w-3.5 h-3.5 text-emerald-500" /> {isHi ? "हवा" : "Wind"}: {weatherData.wind}</p>
+              <p className="flex items-center justify-end gap-1"><Droplets className="w-3.5 h-3.5 text-blue-500" /> {isHi ? "आर्द्रता" : "Humidity"}: {dynamicWeather ? dynamicWeather.humidity : weatherData.humidity}</p>
+              <p className="flex items-center justify-end gap-1"><Wind className="w-3.5 h-3.5 text-emerald-500" /> {isHi ? "हवा" : "Wind"}: {dynamicWeather ? dynamicWeather.wind : weatherData.wind}</p>
             </div>
           </div>
 
           {/* 3-day forecast */}
           <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
-            {weatherData.forecast.map((fc, i) => {
-              const FcIcon = fc.icon;
+            {(dynamicWeather ? dynamicWeather.forecast : [
+              { day: isHi ? "सोम" : "Mon", temp: "30°C", weatherCode: 51 },
+              { day: isHi ? "मंगल" : "Tue", temp: "32°C", weatherCode: 1 },
+              { day: isHi ? "बुध" : "Wed", temp: "33°C", weatherCode: 0 }
+            ]).map((fc, i) => {
+              const FcIcon = fc.weatherCode === 0 ? Sun 
+                           : (fc.weatherCode >= 1 && fc.weatherCode <= 3) ? CloudSun 
+                           : CloudRain;
               return (
                 <div key={i} className="bg-slate-50/50 rounded-xl p-1.5 border border-slate-200/50">
                   <span className="text-[10px] font-bold text-slate-500">{fc.day}</span>
