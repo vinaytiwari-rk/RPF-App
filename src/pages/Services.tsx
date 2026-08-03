@@ -134,6 +134,7 @@ export default function Services() {
                           : svc.id === 'volunteers' ? '/volunteers'
                           : svc.id === 'animals' ? '/animals'
                           : svc.id === 'crowdfunding' ? '/crowdfunding'
+                          : svc.id === 'countries' ? '/countries'
                           : `/services/${svc.id}`;
 
               return (

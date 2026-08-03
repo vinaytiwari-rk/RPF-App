@@ -4903,7 +4903,8 @@ const CORE_SERVICES = [
   { id: "disaster", category: "urgent", iconName: "AlertCircle", titleEn: "Disaster Management", titleHi: "आपदा प्रबंधन", descEn: "Emergency relief & rescue mapping", descHi: "आपातकालीन राहत एवं बचाव" },
   { id: "farmer", category: "welfare", iconName: "Sprout", titleEn: "Farmer Support", titleHi: "किसान सहयोग", descEn: "Crop diagnostic & market pricing", descHi: "कृषि सहायता और प्रशिक्षण" },
   { id: "schemes", category: "empowerment", iconName: "FileText", titleEn: "Government Schemes", titleHi: "सरकारी योजनाएं", descEn: "Eligibility calculator & guides", descHi: "आधार, राशन एवं PM आवास सहायता" },
-  { id: "skills", category: "empowerment", iconName: "GraduationCap", titleEn: "Skills Training", titleHi: "कौशल प्रशिक्षण", descEn: "Tailoring, coding & courses", descHi: "निशुल्क प्रशिक्षण कोर्स" }
+  { id: "skills", category: "empowerment", iconName: "GraduationCap", titleEn: "Skills Training", titleHi: "कौशल प्रशिक्षण", descEn: "Tailoring, coding & courses", descHi: "निशुल्क प्रशिक्षण कोर्स" },
+  { id: "countries", category: "civic", iconName: "Globe", titleEn: "Global Guide", titleHi: "वैश्विक निर्देशिका", descEn: "Look up nation currencies, timezones & details", descHi: "विश्व मुद्रा, समय और देशों की जानकारी" }
 ];
 
 app.get("/api/public/services", (req, res) => {

@@ -44,6 +44,7 @@ import ScholarshipsPage from "./pages/ScholarshipsPage";
 import FoodSupport from "./pages/FoodSupport";
 import MedicineSupport from "./pages/MedicineSupport";
 import EducationSupport from "./pages/EducationSupport";
+import CountriesPage from "./pages/CountriesPage";
 const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard"));
 import { AppProvider } from "./context/AppContext";
 
@@ -148,6 +149,7 @@ function AppContent() {
           <Route path="/environment" element={<EnvironmentPage />} />
           <Route path="/crowdfunding" element={<CrowdfundingPage />} />
           <Route path="/religious-culture" element={<ReligiousCulture />} />
+          <Route path="/countries" element={<CountriesPage />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
