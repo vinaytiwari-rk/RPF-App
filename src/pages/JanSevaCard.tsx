@@ -8,6 +8,7 @@ import {
   Shield, Check, ChevronRight, Facebook, Instagram, Twitter, 
   Send, Printer, Download, RefreshCw, AlertCircle 
 } from "lucide-react";
+import { getEligibleSchemes, getCardExpiryTracker, validateLuhn, getPovertyLineStatus, getDependencyRatio } from "../utils/janSevaCalculators";
 
 // Slogan/Tagline on Logo
 // सेवा • समर्पण • संकल्प
@@ -897,13 +898,7 @@ export default function JanSevaCard() {
                   </div>
 
                   {(() => {
-                    // Standard Indian Schemes check
-                    const eligibleList = [];
-                    if (matchIncome <= 120000) eligibleList.push("Ayushman Bharat (Free Health Cover)");
-                    if (matchIncome <= 180000 && matchAge >= 60) eligibleList.push("IGNOAPS Old-Age Pension");
-                    if (matchIncome <= 250000) eligibleList.push("PM Kisan Samman Nidhi (Farmer Subsidy)");
-                    if (matchIncome <= 100000) eligibleList.push("Ladli Behna Scheme (Women Cash Grant)");
-                    
+                    const eligibleList = getEligibleSchemes(matchAge, matchIncome);
                     return (
                       <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5">
                         <p className="text-[10px] text-slate-400 font-black uppercase">{lang === "hi" ? "योग्य कल्याणकारी योजनाएं" : "Matched Welfare Schemes"}</p>
@@ -928,20 +923,15 @@ export default function JanSevaCard() {
                   </div>
 
                   {(() => {
-                    if (!issueDate) return <p className="text-slate-400 text-center font-bold">{lang === "hi" ? "जारी करने की तारीख चुनें।" : "Select issue date above."}</p>;
-                    const issue = new Date(issueDate);
-                    const expiry = new Date(issue.getTime() + 5 * 365 * 24 * 60 * 60 * 1000); // 5 year expiration
-                    const diffTime = expiry.getTime() - new Date().getTime();
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    const expired = diffDays <= 0;
-                    
+                    const result = getCardExpiryTracker(issueDate);
+                    if (!result) return <p className="text-slate-400 text-center font-bold">{lang === "hi" ? "जारी करने की तारीख चुनें।" : "Select issue date above."}</p>;
                     return (
                       <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1">
-                        <p className="flex justify-between"><span>{lang === "hi" ? "समाप्ति तिथि (5 वर्ष):" : "Expiry Date (5 yrs):"}</span><span>{expiry.toLocaleDateString()}</span></p>
+                        <p className="flex justify-between"><span>{lang === "hi" ? "समाप्ति तिथि (5 वर्ष):" : "Expiry Date (5 yrs):"}</span><span>{result.expiryDateStr}</span></p>
                         <p className="flex justify-between border-t border-indigo-200/50 pt-1">
                           <span>{lang === "hi" ? "वैधता शेष:" : "Validity Remaining:"}</span>
-                          <span className={expired ? "text-red-700" : "text-green-700"}>
-                            {expired ? (lang === "hi" ? "समाप्त" : "Expired") : `${diffDays} ${lang === "hi" ? "दिन" : "days"}`}
+                          <span className={result.expired ? "text-red-700" : "text-green-700"}>
+                            {result.expired ? (lang === "hi" ? "समाप्त" : "Expired") : `${result.diffDays} ${lang === "hi" ? "दिन" : "days"}`}
                           </span>
                         </p>
                       </div>
@@ -961,20 +951,7 @@ export default function JanSevaCard() {
 
                   {(() => {
                     if (cardCheckNo.length < 12) return <p className="text-slate-400 text-center font-bold">{lang === "hi" ? "१२ अंक दर्ज करें।" : "Provide exactly 12 digits."}</p>;
-                    
-                    // Luhn algorithm check
-                    let sum = 0;
-                    let shouldDouble = false;
-                    for (let i = cardCheckNo.length - 1; i >= 0; i--) {
-                      let digit = parseInt(cardCheckNo.charAt(i), 10);
-                      if (shouldDouble) {
-                        if ((digit *= 2) > 9) digit -= 9;
-                      }
-                      sum += digit;
-                      shouldDouble = !shouldDouble;
-                    }
-                    const valid = sum % 10 === 0;
-
+                    const valid = validateLuhn(cardCheckNo);
                     return (
                       <div className={`p-3 rounded-lg border font-bold text-center ${valid ? "bg-green-50 text-green-700 border-green-150" : "bg-red-50 text-red-700 border-red-150"}`}>
                         {valid ? (
@@ -1004,8 +981,7 @@ export default function JanSevaCard() {
                   </div>
 
                   {(() => {
-                    const bplCap = 15000 + (dependentCount * 2000); // dynamic BPL income standard adjustment
-                    const isBPL = matchIncome <= bplCap;
+                    const { isBPL, bplCap } = getPovertyLineStatus(matchIncome, dependentCount);
                     return (
                       <div className={`p-3 rounded-lg border font-bold text-center ${isBPL ? "bg-green-50 text-green-700 border-green-150" : "bg-blue-50 text-blue-700 border-blue-150"}`}>
                         <p className="text-sm font-black">{isBPL ? (lang === "hi" ? "BPL (गरीबी रेखा से नीचे)" : "BPL (Below Poverty Line)") : (lang === "hi" ? "APL (गरीबी रेखा से ऊपर)" : "APL (Above Poverty Line)")}</p>
@@ -1032,7 +1008,7 @@ export default function JanSevaCard() {
                   </div>
 
                   {(() => {
-                    const shareCost = Math.round(monthlyExpense / (dependentCount + 1));
+                    const shareCost = getDependencyRatio(monthlyExpense, dependentCount);
                     return (
                       <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold text-center">
                         <p className="text-[10px] text-slate-400 font-bold uppercase">{lang === "hi" ? "प्रति व्यक्ति जीवन निर्वाह खर्च" : "Per Capita Share of Cost"}</p>

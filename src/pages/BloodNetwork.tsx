@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useOutletContext } from "react-router-dom";
+import { getBloodCompatibility, getDonationIntervalEligiblity, getEstimatedBloodVolume, getUrgencyTriageIndex } from "../utils/bloodCalculators";
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const COMPONENT_TYPES = ["Whole Blood", "Red Blood Cells", "Plasma", "Platelets", "Cryoprecipitate"];
@@ -997,18 +998,7 @@ export default function BloodNetwork() {
                     </div>
 
                   {(() => {
-                    // compatibility lists
-                    const compatMap: Record<string, { donors: string[]; recipients: string[] }> = {
-                      "A+": { donors: ["A+", "A-", "O+", "O-"], recipients: ["A+", "AB+"] },
-                      "A-": { donors: ["A-", "O-"], recipients: ["A+", "A-", "AB+", "AB-"] },
-                      "B+": { donors: ["B+", "B-", "O+", "O-"], recipients: ["B+", "AB+"] },
-                      "B-": { donors: ["B-", "O-"], recipients: ["B+", "B-", "AB+", "AB-"] },
-                      "AB+": { donors: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], recipients: ["AB+"] },
-                      "AB-": { donors: ["A-", "B-", "AB-", "O-"], recipients: ["AB+", "AB-"] },
-                      "O+": { donors: ["O+", "O-"], recipients: ["A+", "B+", "AB+", "O+"] },
-                      "O-": { donors: ["O-"], recipients: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] }
-                    };
-                    const match = compatMap[calcBloodType] || { donors: [], recipients: [] };
+                    const match = getBloodCompatibility(calcBloodType);
                     return (
                       <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-2">
                         <p className="flex justify-between"><span>{lang === "hi" ? "आप इनसे रक्त प्राप्त कर सकते हैं (Donors):" : "Can receive blood from:"}</span><span className="text-[#000080]">{match.donors.join(", ")}</span></p>
@@ -1038,20 +1028,16 @@ export default function BloodNetwork() {
                   </div>
 
                   {(() => {
-                    if (!lastDonationDate) {
+                    const result = getDonationIntervalEligiblity(lastDonationDate, donorGender);
+                    if (!result) {
                       return <p className="text-center text-slate-400 font-semibold">{lang === "hi" ? "तारीख दर्ज करें।" : "Select last donation date above."}</p>;
                     }
-                    const limit = donorGender === "female" ? 120 : 90;
-                    const last = new Date(lastDonationDate);
-                    const diffTime = Math.abs(new Date().getTime() - last.getTime());
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    const eligible = diffDays >= limit;
                     return (
-                      <div className={`p-3 rounded-lg border font-bold text-center ${eligible ? "bg-green-50 text-green-700 border-green-150" : "bg-red-50 text-red-700 border-red-150"}`}>
-                        {eligible ? (
+                      <div className={`p-3 rounded-lg border font-bold text-center ${result.eligible ? "bg-green-50 text-green-700 border-green-150" : "bg-red-50 text-red-700 border-red-150"}`}>
+                        {result.eligible ? (
                           <p>{lang === "hi" ? "✅ आप सुरक्षित रक्तदान के लिए पात्र हैं!" : "✅ You are eligible to donate blood now!"}</p>
                         ) : (
-                          <p>{lang === "hi" ? `अपात्र: कृपया ${limit - diffDays} दिन और प्रतीक्षा करें।` : `Not eligible: Wait ${limit - diffDays} more days.`}</p>
+                          <p>{lang === "hi" ? `अपात्र: कृपया ${result.daysLeft} दिन और प्रतीक्षा करें।` : `Not eligible: Wait ${result.daysLeft} more days.`}</p>
                         )}
                       </div>
                     );
@@ -1107,9 +1093,7 @@ export default function BloodNetwork() {
                   </div>
 
                   {(() => {
-                    // Nadler's formula simplified: (0.3669 * H^3) + (0.03219 * W) + 0.6041 (Male model average)
-                    const hM = patientHeight * 0.0254; // convert inches to meters
-                    const volume = ((0.3669 * Math.pow(hM, 3)) + (0.03219 * patientWeight) + 0.6041).toFixed(2);
+                    const volume = getEstimatedBloodVolume(patientWeight, patientHeight);
                     return (
                       <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold text-center">
                         <p className="text-[10px] text-slate-400 font-bold uppercase">{lang === "hi" ? "कुल रक्त मात्रा (लीटर)" : "Calculated Blood Volume"}</p>
@@ -1132,18 +1116,7 @@ export default function BloodNetwork() {
                   </div>
 
                   {(() => {
-                    let level = "";
-                    let color = "";
-                    if (calcHb < 7) {
-                      level = lang === "hi" ? "🚨 अति गंभीर (Immediate Transfusion Needed)" : "🚨 Critical (Immediate Transfusion Needed)";
-                      color = "bg-red-50 text-red-700 border-red-150";
-                    } else if (calcHb < 10) {
-                      level = lang === "hi" ? "⚠️ मध्यम तात्कालिकता (Moderate Urgency)" : "⚠️ Moderate Urgency";
-                      color = "bg-amber-50 text-amber-700 border-amber-150";
-                    } else {
-                      level = lang === "hi" ? "✅ सामान्य (Standard Request)" : "✅ Normal (Standard Request)";
-                      color = "bg-green-50 text-green-700 border-green-150";
-                    }
+                    const { level, color } = getUrgencyTriageIndex(calcHb, isHi);
                     return (
                       <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
                         <p className="text-xs font-black">{level}</p>

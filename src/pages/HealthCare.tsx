@@ -5,6 +5,10 @@ import {
   MapPin, Dumbbell, Droplets, Clock, Plus, ShieldAlert, 
   Smile, User, Zap, BookOpen, Volume2, Search, Bell, AlertCircle, Loader2, Trash2
 } from "lucide-react";
+import { 
+  assessSymptoms, calculateBmiValue, calculateWellnessValue, 
+  getBpStatus, getSugarStatus, getPregnancyGestation, getChildGrowthStatus 
+} from "../utils/healthCalculators";
 
 export default function HealthCare() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -259,37 +263,24 @@ export default function HealthCare() {
     setAssessing(true);
     setTimeout(() => {
       setAssessing(false);
-      if (symptoms.includes("fever") && symptoms.includes("cough")) {
-        setDiagnosedDisease(isHi ? "सामान्य इन्फ्लुएंजा / फ्लू (आराम करें और तरल पदार्थ लें)" : "Mild Influenza / Flu (Rest & Stay Hydrated)");
-      } else if (symptoms.includes("headache") && symptoms.includes("fatigue")) {
-        setDiagnosedDisease(isHi ? "तनाव जनित सिरदर्द (हाइड्रेटेड रहें, विश्राम करें)" : "Tension Headache / Fatigue (Dehydration/Stress)");
-      } else {
-        setDiagnosedDisease(isHi ? "हल्के लक्षण (चिकित्सक से परामर्श लें)" : "Mild Symptoms (Monitor & Consult Seva center doctor)");
-      }
+      setDiagnosedDisease(assessSymptoms(symptoms, isHi));
     }, 1500);
   };
 
   // BMI calculator
   const calculateBmi = () => {
-    const w = parseFloat(weight);
-    const h = parseFloat(height) / 100; // to meters
-    if (w > 0 && h > 0) {
-      const calculated = parseFloat((w / (h * h)).toFixed(1));
+    const calculated = calculateBmiValue(weight, height);
+    if (calculated !== null) {
       setBmiResult(calculated);
-      saveVitals({ weight: w, height: parseFloat(height), bmi: calculated });
+      saveVitals({ weight: parseFloat(weight), height: parseFloat(height), bmi: calculated });
     }
   };
 
   // Fitness score calculator
   const calculateWellnessScore = () => {
-    const sleep = parseFloat(sleepHours) || 0;
-    const ex = parseFloat(exerciseMin) || 0;
-    const water = parseFloat(waterCups) || 0;
-    
-    // Weighted wellness calculation
-    let score = (sleep * 5) + (ex * 1.5) + (water * 5);
-    setWellnessScore(Math.min(100, Math.round(score)));
-    saveVitals({ sleep_hours: sleep });
+    const score = calculateWellnessValue(sleepHours, exerciseMin, waterCups);
+    setWellnessScore(score);
+    saveVitals({ sleep_hours: parseFloat(sleepHours) || 0 });
   };
 
   // Sync Vitals simulation
@@ -1051,28 +1042,7 @@ export default function HealthCare() {
                 </div>
 
                 {(() => {
-                  let status = "";
-                  let advice = "";
-                  let color = "";
-
-                  if (systolicBP >= 140 || diastolicBP >= 90) {
-                    status = isHi ? "🚨 स्टेज 2 उच्च रक्तचाप (Hypertension)" : "🚨 Stage 2 Hypertension";
-                    advice = isHi ? "सलाह: तुरंत चिकित्सक से संपर्क करें और नमक का सेवन कम करें।" : "Advice: Contact a physician immediately and reduce sodium intake.";
-                    color = "bg-red-55 text-red-700 border-red-150";
-                  } else if (systolicBP >= 130 || diastolicBP >= 80) {
-                    status = isHi ? "⚠️ स्टेज 1 उच्च रक्तचाप" : "⚠️ Stage 1 Hypertension";
-                    advice = isHi ? "सलाह: दैनिक व्यायाम शुरू करें और आहार में सुधार करें।" : "Advice: Exercise daily and maintain a healthy diet.";
-                    color = "bg-amber-55 text-amber-700 border-amber-150";
-                  } else if (systolicBP >= 120) {
-                    status = isHi ? "⚡ ऊंचा रक्तचाप (Elevated)" : "⚡ Elevated BP";
-                    advice = isHi ? "सलाह: सक्रिय रहें और तली-भुनी चीजों से परहेज करें।" : "Advice: Keep physically active and monitor monthly.";
-                    color = "bg-blue-55 text-blue-700 border-blue-150";
-                  } else {
-                    status = isHi ? "✅ सामान्य रक्तचाप (Normal)" : "✅ Normal BP";
-                    advice = isHi ? "सलाह: बहुत बढ़िया! इसी स्वस्थ जीवनशैली को बनाए रखें।" : "Advice: Excellent! Maintain your current lifestyle.";
-                    color = "bg-green-55 text-green-700 border-green-150";
-                  }
-
+                  const { status, advice, color } = getBpStatus(systolicBP, diastolicBP, isHi);
                   return (
                     <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
                       <p className="text-xs font-black">{status}</p>
@@ -1093,24 +1063,7 @@ export default function HealthCare() {
                 </div>
 
                 {(() => {
-                  let status = "";
-                  let advice = "";
-                  let color = "";
-
-                  if (sugarFasting >= 126) {
-                    status = isHi ? "🚨 मधुमेह संकेत (Diabetic Range)" : "🚨 Diabetic Range";
-                    advice = isHi ? "सलाह: डॉक्टर से सलाह लें और HbA1c टेस्ट करवाएं।" : "Advice: Consult a doctor and order an HbA1c screening.";
-                    color = "bg-red-55 text-red-700 border-red-150";
-                  } else if (sugarFasting >= 100) {
-                    status = isHi ? "⚠️ प्रीडायबिटीज संकेत (Borderline)" : "⚠️ Pre-Diabetic Range";
-                    advice = isHi ? "सलाह: मीठा कम करें, फाइबर युक्त भोजन बढ़ाएं और टहलें।" : "Advice: Limit sweets, increase dietary fiber, and walk daily.";
-                    color = "bg-amber-55 text-amber-700 border-amber-150";
-                  } else {
-                    status = isHi ? "✅ सामान्य शुगर (Healthy)" : "✅ Normal Glucose";
-                    advice = isHi ? "सलाह: आपका शुगर स्तर स्वस्थ सीमा के अंदर है।" : "Advice: Glucose is within healthy range.";
-                    color = "bg-green-55 text-green-700 border-green-150";
-                  }
-
+                  const { status, advice, color } = getSugarStatus(sugarFasting, isHi);
                   return (
                     <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
                       <p className="text-xs font-black">{status}</p>
@@ -1131,17 +1084,13 @@ export default function HealthCare() {
                 </div>
 
                 {(() => {
-                  if (!dueDateIssueDate) return <p className="text-slate-400 text-center font-bold">{isHi ? "तारीख चुनें।" : "Select date above."}</p>;
-                  const lmp = new Date(dueDateIssueDate);
-                  const edd = new Date(lmp.getTime() + 280 * 24 * 60 * 60 * 1000); // 280 days
-                  const today = new Date();
-                  const diffTime = today.getTime() - lmp.getTime();
-                  const weeks = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000));
+                  const data = getPregnancyGestation(dueDateIssueDate);
+                  if (!data) return <p className="text-slate-400 text-center font-bold">{isHi ? "तारीख चुनें।" : "Select date above."}</p>;
                   
                   return (
                     <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 font-bold space-y-1.5">
-                      <p className="flex justify-between"><span>{isHi ? "संभावित प्रसव तिथि (EDD):" : "Estimated Due Date:"}</span><span className="text-[#000080]">{edd.toLocaleDateString()}</span></p>
-                      <p className="flex justify-between"><span>{isHi ? "वर्तमान गर्भकाल सप्ताह:" : "Current Gestation:"}</span><span className="text-green-700">{weeks > 0 ? `${weeks} weeks` : "0 weeks"}</span></p>
+                      <p className="flex justify-between"><span>{isHi ? "संभावित प्रसव तिथि (EDD):" : "Estimated Due Date:"}</span><span className="text-[#000080]">{data.edd}</span></p>
+                      <p className="flex justify-between"><span>{isHi ? "वर्तमान गर्भकाल सप्ताह:" : "Current Gestation:"}</span><span className="text-green-700">{data.weeks} weeks</span></p>
                     </div>
                   );
                 })()}
@@ -1164,22 +1113,7 @@ export default function HealthCare() {
                 </div>
 
                 {(() => {
-                  // Simple standard weights: 1yr: 9.5kg, 2yr: 12kg, 3yr: 14.5kg, 4yr: 16.5kg, 5yr: 18.5kg
-                  const standardWeight = 9.5 + (kidAgeYears - 1) * 2.25;
-                  const ratio = kidWeightKg / standardWeight;
-                  let status = "";
-                  let color = "";
-                  if (ratio < 0.8) {
-                    status = isHi ? "🚨 कम वजन (Underweight)" : "🚨 Underweight";
-                    color = "text-red-700 bg-red-50 border-red-150";
-                  } else if (ratio > 1.2) {
-                    status = isHi ? "⚠️ अधिक वजन (Overweight)" : "⚠️ Overweight";
-                    color = "text-amber-700 bg-amber-50 border-amber-150";
-                  } else {
-                    status = isHi ? "✅ स्वस्थ वजन (Normal Growth)" : "✅ Healthy Weight";
-                    color = "text-green-700 bg-green-50 border-green-150";
-                  }
-
+                  const { status, color, standardWeight } = getChildGrowthStatus(kidAgeYears, kidWeightKg, isHi);
                   return (
                     <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
                       <p className="text-xs font-black">{status}</p>

@@ -1,0 +1,182 @@
+import express from 'express';
+import { pool } from '../db/dbPool.js';
+import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import axios from 'axios';
+import multer from 'multer';
+
+const router = express.Router();
+
+router.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await pool.query(`UPDATE volunteers SET approval_status = $1 WHERE id = $2`, [status, id]);
+    res.json({ success: true, message: "Volunteer status updated" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.put("/api/volunteers/:id/allocate", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { allocation } = req.body;
+    await pool.query(`UPDATE volunteers SET constituency_allocation = $1 WHERE id = $2`, [allocation, id]);
+    res.json({ success: true, message: "Volunteer allocated" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post("/api/volunteers/report", authenticateToken, async (req, res) => {
+  try {
+    const { volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng } = req.body;
+    await pool.query(
+      `INSERT INTO volunteer_reports (id, volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [crypto.randomUUID(), volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng]
+    );
+    res.json({ success: true, message: "Report submitted" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.get("/api/volunteers/me/certificates", async (req, res) => {
+  try {
+    const { volunteer_id } = req.query;
+    const result = await pool.query(`SELECT * FROM certificates WHERE volunteer_id = $1 ORDER BY issue_date DESC`, [volunteer_id]);
+    res.json({ success: true, certificates: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi, points } = req.body;
+    await pool.query(
+      'INSERT INTO volunteer_tasks ("volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", points, status) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [volunteerId, titleEn, titleHi, descriptionEn, descriptionHi, points || 10, 'assigned']
+    );
+    res.json({ success: true, message: "Task assigned successfully" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/api/volunteer_tasks", async (req, res) => {
+  try {
+    const volunteerId = req.query.volunteerId as string;
+    if (!volunteerId) {
+      return res.status(400).json({ error: "Missing volunteerId parameter" });
+    }
+    const result = await pool.query(
+      'SELECT id, "volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", points, status, "createdAt" FROM volunteer_tasks WHERE "volunteerId" = $1',
+      [volunteerId]
+    );
+    res.json({ success: true, tasks: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const taskRes = await pool.query(
+      'UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId", points',
+      [status, id]
+    );
+    
+    if (taskRes.rows.length > 0 && status === "completed") {
+      const { volunteerId, points } = taskRes.rows[0];
+      await pool.query(
+        'UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2',
+        [points, volunteerId]
+      );
+    }
+    
+    res.json({ success: true, message: "Task status updated" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/api/volunteers", authenticateToken, async (req: any, res) => {
+  try {
+    const { name, phone, skills } = req.body;
+    const userId = req.user.id;
+
+    // Update the user record to reflect they are now a volunteer
+    await pool.query(`UPDATE users SET "isVolunteer" = true WHERE id = $1`, [userId]);
+
+    // Check if they are already in the volunteers table
+    const volCheck = await pool.query(`SELECT id FROM volunteers WHERE id = $1`, [userId]);
+    if (volCheck.rows.length === 0) {
+      // Get user's email and username to copy over
+      const userRes = await pool.query(`SELECT username, email FROM users WHERE id = $1`, [userId]);
+      const username = userRes.rows[0]?.username || `user_${userId.slice(-6)}`;
+      const email = userRes.rows[0]?.email || null;
+      const regNumber = "RPF-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
+
+      await pool.query(
+        `INSERT INTO volunteers (id, username, registration_number, full_name, mobile, email, skills, approval_status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [userId, username, regNumber, name || "Citizen", phone || "", email, JSON.stringify(skills ? skills.split(", ") : []), 'approved']
+      );
+    } else {
+      await pool.query(
+        `UPDATE volunteers SET skills = $1, full_name = $2, mobile = $3 WHERE id = $4`,
+        [JSON.stringify(skills ? skills.split(", ") : []), name || "Citizen", phone || "", userId]
+      );
+    }
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Error creating volunteer record:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.get("/api/volunteers", async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, full_name as name, email, mobile as phone, approval_status as status, "registeredAt" FROM volunteers ORDER BY "registeredAt" DESC'
+    );
+    // Add points as 0 for now since it's missing from volunteers schema
+    const volunteers = result.rows.map(v => ({ ...v, points: 0 }));
+    res.json({ volunteers });
+  } catch (error: any) {
+    console.error("Error fetching volunteers:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM volunteers WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/api/volunteers/:id/points", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { points } = req.body;
+    // update points in both users and volunteers tables
+    await pool.query('UPDATE users SET points = $1 WHERE id = $2', [points, req.params.id]);
+    await pool.query('UPDATE volunteers SET points = $1 WHERE id = $2', [points, req.params.id]);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export default router;
