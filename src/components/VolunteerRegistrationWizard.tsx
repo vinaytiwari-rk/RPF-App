@@ -108,32 +108,37 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
   const statesList = State.getStatesOfCountry(countryIso);
   const citiesList = City.getCitiesOfState(countryIso, stateIso);
 
-  // CRM Search States
-  const [areaSuggestions, setAreaSuggestions] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [searchTimer, setSearchTimer] = useState<any>(null);
-  const [isSearchingArea, setIsSearchingArea] = useState(false);
-
-  // Debounced Search function
-  const searchArea = (query: string) => {
-    setArea(query);
-    setShowSuggestions(true);
-    if (query.length < 2) {
-      setAreaSuggestions([]);
+  // Username & Security States
+  const [username, setUsername] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState<"idle"|"checking"|"available"|"taken">("idle");
+  const [usernameError, setUsernameError] = useState("");
+  
+  const checkUsername = async () => {
+    if (username.length < 3) {
+      setUsernameError("Username must be at least 3 characters");
       return;
     }
-    if (searchTimer) clearTimeout(searchTimer);
-    setIsSearchingArea(true);
-    setSearchTimer(setTimeout(async () => {
-      try {
-        const res = await axios.get(`/api/locations/search?q=${encodeURIComponent(query)}`);
-        setAreaSuggestions(res.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsSearchingArea(false);
+    setUsernameStatus("checking");
+    try {
+      const res = await axios.get(`/api/auth/check-username?username=${encodeURIComponent(username)}`);
+      if (res.data.available) {
+        setUsernameStatus("available");
+        setUsernameError("");
+      } else {
+        setUsernameStatus("taken");
+        setUsernameError(res.data.error || "Not available");
       }
-    }, 400));
+    } catch (err: any) {
+      setUsernameStatus("taken");
+      setUsernameError(err.response?.data?.error || "Error checking availability");
+    }
+  };
+
+  const getPasswordStrength = () => {
+    if (!password) return { label: "", color: "" };
+    if (password.length < 6) return { label: "Weak", color: "text-red-500" };
+    if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) return { label: "Strong", color: "text-green-500" };
+    return { label: "Medium", color: "text-yellow-500" };
   };
 
   const handleSelectArea = (loc: any) => {
@@ -144,7 +149,6 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
       setSansad(loc.sansad_kshetra);
       setVidhan(loc.vidhan_sabha);
     }
-    setShowSuggestions(false);
   };
 
   const handleCountryChange = (iso: string) => {
@@ -176,6 +180,7 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
       const stateName = State.getStateByCodeAndCountry(stateIso, countryIso)?.name || stateIso;
 
       const res = await axios.post("/api/auth/register-volunteer", {
+        username,
         full_name: fullName, father_husband_name: fatherName, mother_name: motherName, dob,
         mobile, email, education, blood_group: bloodGroup, skills, reason_for_joining: reason,
         availability, 
@@ -337,34 +342,9 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
               <label className="text-[10px] font-bold text-slate-500 uppercase">Zip/Postal Code</label>
               <input type="text" maxLength={10} value={pincode} onChange={e=>setPincode(e.target.value)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" placeholder="Pincode" />
             </div>
-            <div className="space-y-1 relative">
-              <label className={"text-[10px] font-bold uppercase " + (isIndia ? "text-[#FF9933]" : "text-slate-500")}>{isIndia ? "Area Search (Auto-fetch CRM)" : "Area/Locality"}</label>
-              <input type="text" value={area} onChange={e=>isIndia ? searchArea(e.target.value) : setArea(e.target.value)} onFocus={() => isIndia && setShowSuggestions(true)} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" placeholder="E.g. Bhopal" />
-              
-              {isIndia && showSuggestions && area.length >= 2 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto">
-                  {isSearchingArea ? (
-                    <div className="p-3 text-xs text-slate-500 text-center flex items-center justify-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" /> Searching...
-                    </div>
-                  ) : areaSuggestions.length > 0 ? (
-                    areaSuggestions.map((loc, idx) => (
-                      <div key={idx} onClick={() => handleSelectArea(loc)} className="p-3 border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition">
-                        {typeof loc === "string" ? (
-                          <p className="text-xs font-black text-slate-800">{loc}</p>
-                        ) : (
-                          <>
-                            <p className="text-xs font-black text-slate-800">{loc.vidhan_sabha} <span className="text-[10px] text-slate-500 font-normal">({loc.district})</span></p>
-                            <p className="text-[9px] font-bold text-[#FF9933] uppercase mt-0.5">Sansad: {loc.sansad_kshetra}</p>
-                          </>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-3 text-xs text-slate-500 text-center">No locations found.</div>
-                  )}
-                </div>
-              )}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-500 uppercase">Area/Locality</label>
+              <input type="text" value={area} onChange={e=>setArea(e.target.value)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" placeholder="E.g. Bhopal" />
             </div>
           </div>
 
@@ -418,11 +398,27 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
           )}
         </section>
 
-        {/* --- Setup Password --- */}
+        {/* --- Setup Password & User ID --- */}
         <section className="space-y-4">
-          <h3 className="text-sm font-black text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2"><Lock className="w-4 h-4 text-[#0B1E3F]" /> Security</h3>
+          <h3 className="text-sm font-black text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2"><Lock className="w-4 h-4 text-[#0B1E3F]" /> Account Details</h3>
+          
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 uppercase">Create Password</label>
+            <label className="text-[10px] font-bold text-slate-500 uppercase">User ID</label>
+            <div className="flex gap-2">
+              <input type="text" value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ''))} className="flex-1 p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" placeholder="e.g. john_doe" />
+              <button type="button" onClick={checkUsername} disabled={!username || usernameStatus === 'checking'} className="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg whitespace-nowrap hover:bg-slate-200 disabled:opacity-50">
+                {usernameStatus === 'checking' ? <Loader2 className="w-4 h-4 animate-spin" /> : "Check"}
+              </button>
+            </div>
+            {usernameStatus === 'available' && <p className="text-[10px] font-bold text-green-600">User ID is available!</p>}
+            {usernameStatus === 'taken' && <p className="text-[10px] font-bold text-red-500">{usernameError}</p>}
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] font-bold text-slate-500 uppercase">Create Password</label>
+              <span className={`text-[10px] font-bold ${getPasswordStrength().color}`}>{getPasswordStrength().label}</span>
+            </div>
             <input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" placeholder="At least 6 characters" />
           </div>
         </section>

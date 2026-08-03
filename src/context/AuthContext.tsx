@@ -29,12 +29,14 @@ export type UserRole =
 export interface User {
   id: string;
   name: string;
+  username?: string;
   phone?: string;
   email?: string;
   avatar?: string;
   role: UserRole;
   displayName?: string;          // alias for name, used by Community feed
   janSevaCardNo?: string;
+  registration_number?: string;
   janSevaCardStatus?: "none" | "pending" | "approved" | "rejected";
   gender?: string;
   dob?: string;

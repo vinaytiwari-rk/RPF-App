@@ -10,6 +10,17 @@ import { GoogleGenAI } from '@google/genai';
 
 const router = express.Router();
 
+const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
+const RESERVED_USERNAMES = new Set(["admin", "root", "superuser", "system", "moderator", "guest", "anonymous"]);
+const rpName = 'RP Foundation';
+const rpID = 'localhost'; // Should use env var in prod
+const originUrl = 'http://localhost:5173';
+const webAuthnChallengeStore = new Map();
+
+// Stub for sendEmail if not imported
+const sendEmail = async (to: string, subject: string, html: string) => { console.log("Email stub:", to); };
+
+
 router.post("/api/auth/register", async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
@@ -186,11 +197,11 @@ router.post("/api/auth/logout", async (req, res) => {
 router.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
-    let result = await pool.query(`SELECT id, name, role, email, phone, points, badges, avatar, cover FROM users WHERE id = $1`, [userId]);
-    
+    let result = await pool.query(`SELECT id, username, name, role, email, phone, points, badges, avatar, cover FROM users WHERE id = $1`, [userId]);
+      
     if (result.rows.length === 0) {
       // Check volunteers table
-      const volResult = await pool.query(`SELECT id, full_name as name, email, mobile as phone, avatar, cover FROM volunteers WHERE id = $1`, [userId]);
+      const volResult = await pool.query(`SELECT id, username, registration_number, full_name as name, email, mobile as phone, avatar, cover FROM volunteers WHERE id = $1`, [userId]);
       if (volResult.rows.length === 0) {
         return res.status(404).json({ success: false, error: "User not found" });
       }
@@ -308,14 +319,16 @@ router.post("/api/auth/register-volunteer", async (req, res) => {
 
     const [volCheck, userCheck] = await Promise.all([
       pool.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [usernameRaw]),
-      pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw]),
+      pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw])
     ]);
     if (volCheck.rows.length > 0 || userCheck.rows.length > 0) {
       return res.status(409).json({ error: "This username is already in use. Please choose another." });
     }
 
     const id = crypto.randomUUID();
-    const regNumber = "RPF-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
+    const yearStr = new Date().getFullYear().toString().slice(-2);
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const regNumber = `RPF/VOL/${yearStr}/${randomNum}`;
     const passwordHash = await bcrypt.hash(data.password, 10);
     const safeDob = data.dob && data.dob.trim() ? data.dob : null;
 

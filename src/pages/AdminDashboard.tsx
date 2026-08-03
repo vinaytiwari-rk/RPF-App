@@ -419,7 +419,7 @@ export default function AdminDashboard() {
 
       const cmsRes = await fetch("/api/cms/config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
         body: JSON.stringify(cmsPayload)
       });
 
@@ -695,7 +695,7 @@ export default function AdminDashboard() {
       
       const response = await fetch("/api/cms/config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
         body: JSON.stringify(payload)
       });
       
@@ -727,7 +727,7 @@ export default function AdminDashboard() {
       };
       const response = await fetch("/api/cms/config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
         body: JSON.stringify(payload)
       });
       if (response.ok) {
@@ -844,7 +844,7 @@ export default function AdminDashboard() {
       };
       const response = await fetch("/api/cms/config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
         body: JSON.stringify(payload)
       });
       if (response.ok) {
@@ -884,7 +884,7 @@ export default function AdminDashboard() {
       };
       const response = await fetch("/api/cms/config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
         body: JSON.stringify(payload)
       });
       if (response.ok) {
@@ -915,7 +915,7 @@ export default function AdminDashboard() {
       };
       const response = await fetch("/api/cms/config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
         body: JSON.stringify(payload)
       });
       if (response.ok) {
@@ -1222,6 +1222,7 @@ export default function AdminDashboard() {
                             formData.append("file", file);
                             const res = await fetch("/api/upload/founder", {
                               method: "POST",
+                              headers: { "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
                               body: formData
                             });
                             if (!res.ok) throw new Error("Upload failed");
@@ -1483,9 +1484,10 @@ export default function AdminDashboard() {
                                       const formData = new FormData();
                                       formData.append("file", file);
                                       const res = await fetch("/api/upload/broadcast", {
-                                        method: "POST",
-                                        body: formData
-                                      });
+                              method: "POST",
+                              headers: { "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
+                              body: formData
+                            });
                                       if (!res.ok) throw new Error();
                                       const data = await res.json();
                                       const updated = [...cmsSlides];
@@ -1622,6 +1624,7 @@ export default function AdminDashboard() {
                             formData.append("file", file);
                             const res = await fetch("/api/upload/broadcast", {
                               method: "POST",
+                              headers: { "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
                               body: formData
                             });
                             if (!res.ok) throw new Error();
@@ -1717,6 +1720,7 @@ export default function AdminDashboard() {
                             formData.append("file", file);
                             const res = await fetch("/api/upload/broadcast", {
                               method: "POST",
+                              headers: { "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
                               body: formData
                             });
                             if (!res.ok) throw new Error();
@@ -2043,6 +2047,7 @@ export default function AdminDashboard() {
                             formData.append("file", file);
                             const res = await fetch("/api/upload/image", {
                               method: "POST",
+                              headers: { "Authorization": `Bearer ${localStorage.getItem("@rpf_token") || ""}` },
                               body: formData
                             });
                             if (!res.ok) throw new Error();

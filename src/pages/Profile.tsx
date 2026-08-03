@@ -241,6 +241,10 @@ export default function Profile() {
               </button>
             </div>
             
+            {user.username && (
+              <p className="text-sm font-bold text-slate-500 text-center">@{user.username}</p>
+            )}
+            
             <div className="flex items-center gap-2 justify-center mt-1">
               <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 py-0.5 px-2.5 rounded-full w-fit">
                 <span className="w-1.5 h-1.5 bg-[#138808] rounded-full animate-pulse shadow-[0_0_8px_rgba(19,136,8,0.8)]"></span>
