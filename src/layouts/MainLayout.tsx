@@ -45,7 +45,7 @@ export default function MainLayout() {
   if (isAdmin) {
     return (
       <div className="w-full min-h-screen bg-slate-50 flex flex-col font-sans">
-        <Outlet />
+        <Outlet context={{ lang: language }} />
       </div>
     );
   }
