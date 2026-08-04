@@ -65741,20 +65741,28 @@ router2.get("/api/auth/check-username", async (req, res) => {
     if (RESERVED_USERNAMES.has(username)) {
       return res.json({ available: false, error: "This username is reserved" });
     }
-    let volResult, userResult;
+    let volResult = { rows: [] };
+    let userResult = { rows: [] };
     try {
-      [volResult, userResult] = await Promise.all([
-        pool2.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [username]),
-        pool2.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [username])
-      ]);
+      volResult = await pool2.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [username]);
     } catch (e) {
       if (e.code === "42703" || e.message.includes('column "username" does not exist')) {
         await pool2.query("ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
-        await pool2.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
-        [volResult, userResult] = await Promise.all([
-          pool2.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [username]),
-          pool2.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [username])
-        ]);
+        volResult = await pool2.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [username]);
+      } else {
+        throw e;
+      }
+    }
+    try {
+      userResult = await pool2.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [username]);
+    } catch (e) {
+      if (e.code === "42703" || e.message.includes('column "username" does not exist')) {
+        try {
+          await pool2.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
+          userResult = await pool2.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [username]);
+        } catch (alterErr) {
+          console.warn("Could not patch users table, skipping user check:", alterErr.message);
+        }
       } else {
         throw e;
       }
@@ -65792,20 +65800,28 @@ router2.post("/api/auth/register-volunteer", async (req, res) => {
     if (RESERVED_USERNAMES.has(usernameRaw)) {
       return res.status(400).json({ error: "This username is reserved. Please choose another." });
     }
-    let volCheck, userCheck;
+    let volCheck = { rows: [] };
+    let userCheck = { rows: [] };
     try {
-      [volCheck, userCheck] = await Promise.all([
-        pool2.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [usernameRaw]),
-        pool2.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw])
-      ]);
+      volCheck = await pool2.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [usernameRaw]);
     } catch (e) {
       if (e.code === "42703" || e.message.includes('column "username" does not exist')) {
         await pool2.query("ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
-        await pool2.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
-        [volCheck, userCheck] = await Promise.all([
-          pool2.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [usernameRaw]),
-          pool2.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw])
-        ]);
+        volCheck = await pool2.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [usernameRaw]);
+      } else {
+        throw e;
+      }
+    }
+    try {
+      userCheck = await pool2.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw]);
+    } catch (e) {
+      if (e.code === "42703" || e.message.includes('column "username" does not exist')) {
+        try {
+          await pool2.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
+          userCheck = await pool2.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw]);
+        } catch (alterErr) {
+          console.warn("Could not patch users table, skipping user check:", alterErr.message);
+        }
       } else {
         throw e;
       }
