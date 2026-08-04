@@ -65771,7 +65771,7 @@ router2.get("/api/auth/check-username", async (req, res) => {
     res.json({ available });
   } catch (err) {
     console.error("Check Username Error:", err);
-    res.status(500).json({ available: false, error: "Could not check username right now" });
+    res.status(500).json({ available: false, error: `DB Error: ${err.message}` });
   }
 });
 router2.post("/api/auth/register-volunteer", async (req, res) => {

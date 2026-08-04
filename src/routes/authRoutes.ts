@@ -353,7 +353,7 @@ router.get("/api/auth/check-username", async (req, res) => {
     res.json({ available });
   } catch (err: any) {
     console.error("Check Username Error:", err);
-    res.status(500).json({ available: false, error: "Could not check username right now" });
+    res.status(500).json({ available: false, error: `DB Error: ${err.message}` });
   }
 });
 
