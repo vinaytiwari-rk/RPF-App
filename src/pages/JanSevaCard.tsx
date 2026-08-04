@@ -91,14 +91,28 @@ export default function JanSevaCard() {
     }
   }, [form.pincode]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setUploading(true);
-      const filename = e.target.files[0].name;
-      setTimeout(() => {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await axios.post("/api/upload/image", formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        if (res.data.success && res.data.url) {
+          setUploadedFile(res.data.url);
+        } else {
+          setUploadedFile(file.name);
+        }
+      } catch (error) {
+        console.error("Upload failed", error);
+        setUploadedFile(file.name);
+      } finally {
         setUploading(false);
-        setUploadedFile(filename);
-      }, 1200);
+      }
     }
   };
 
@@ -124,8 +138,7 @@ export default function JanSevaCard() {
         name: form.name,
         gender: form.gender,
         dob: form.dob || "N/A",
-        address: fullAddress,
-        janSevaCardNo: "0001 " + Math.floor(1000 + Math.random() * 9000) + " 0001 " + Math.floor(1000 + Math.random() * 9000)
+        address: fullAddress
       });
     }
     
@@ -134,14 +147,13 @@ export default function JanSevaCard() {
   };
 
   const handleAdminApprove = async () => {
+    const year = new Date().getFullYear();
+    const sequence = Math.floor(100000 + Math.random() * 900000);
+    const newCardNo = `JSC-${year}-${sequence}`;
+
     await updateUser({ 
       janSevaCardStatus: "approved",
-      // Set default Vinay Kumar details if not applied through form yet
-      name: user?.name === "Guest" || !user?.name ? "Vinay Kumar" : user.name,
-      gender: user?.gender || "Male",
-      dob: user?.dob && user.dob !== "N/A" ? user.dob : "N/A",
-      address: user?.address || "Raj Colony Karond, Bhopal, Madhya Pradesh",
-      janSevaCardNo: user?.janSevaCardNo || "0001 0151 0001 9244"
+      janSevaCardNo: user?.janSevaCardNo || newCardNo
     });
   };
 
@@ -157,8 +169,29 @@ export default function JanSevaCard() {
     }
   };
 
-  const handleSimulateDownload = () => {
-    alert(lang === "hi" ? "जन सेवा कार्ड का डाउनलोड शुरू हो गया है (PDF/Image)!" : "Jan Seva Card download started (PDF/Image format)!");
+  const handleSimulateDownload = async () => {
+    try {
+      const { jsPDF } = await import("jspdf");
+      const html2canvas = (await import("html2canvas")).default;
+      
+      const cardElement = document.getElementById("jan-seva-card-front");
+      if (!cardElement) return;
+
+      const canvas = await html2canvas(cardElement, { scale: 2 });
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: [canvas.width * 0.264583, canvas.height * 0.264583]
+      });
+      
+      pdf.addImage(imgData, "JPEG", 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+      pdf.save(`JanSevaCard_${cardName.replace(/\s+/g, '_')}.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      alert("Failed to generate PDF. Please try again.");
+    }
   };
 
   const handleSimulatePrint = () => {
@@ -271,7 +304,7 @@ export default function JanSevaCard() {
         </div>
 
         {/* 1. FRONT SIDE OF THE CARD */}
-        <div className="w-full bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200 relative flex flex-col justify-between" style={{ minHeight: '275px' }}>
+        <div id="jan-seva-card-front" className="w-full bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200 relative flex flex-col justify-between" style={{ minHeight: '275px' }}>
           
           {/* Orange Header Accent */}
           <div className="bg-[#FF9933] px-4 py-3.5 flex items-center gap-3 relative">
