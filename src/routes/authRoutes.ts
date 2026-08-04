@@ -12,6 +12,16 @@ import { GoogleGenAI } from '@google/genai';
 
 const router = express.Router();
 
+router.get("/api/auth/fix-db", async (req, res) => {
+  try {
+    await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
+    await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT \'pending\'');
+    res.send("<h1>Database Patched Successfully!</h1><p>You can now go back and register volunteers.</p>");
+  } catch (err: any) {
+    res.status(500).send("Error patching db: " + err.message);
+  }
+});
+
 const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
 const RESERVED_USERNAMES = new Set(["admin", "root", "superuser", "system", "moderator", "guest", "anonymous"]);
 const rpName = 'RP Foundation';
