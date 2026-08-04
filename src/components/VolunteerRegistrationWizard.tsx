@@ -193,7 +193,7 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
       setRegData(res.data);
       setSubmitted(true);
     } catch (err: any) {
-      setError("Failed to register. Please check all fields.");
+      setError(err.response?.data?.error || "Failed to register. Please check all fields.");
     } finally {
       setLoading(false);
     }

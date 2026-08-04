@@ -230,12 +230,32 @@ function resolveConstituency(pincode: string, district: string, areas: string[],
 
   // 4. Fallback to generic district matching against the small built-in list
   const matches = MP_CONSTITUENCIES_MOCK.filter(c => c.district.toLowerCase() === district.toLowerCase());
-  const sansad_kshetra = matches.length > 0 ? matches[0].sansad_kshetra : (district + " Lok Sabha constituency");
+  if (matches.length === 0) {
+    return {
+      vidhan_sabha: "",
+      vidhan_sabhas: [district + " Assembly Constituency"],
+      sansad_kshetra: district + " Lok Sabha constituency"
+    };
+  }
+
+  // If there's exactly one match, we know it's that one.
+  if (matches.length === 1) {
+    return {
+      vidhan_sabha: matches[0].vidhan_sabha,
+      vidhan_sabhas: [matches[0].vidhan_sabha],
+      sansad_kshetra: matches[0].sansad_kshetra
+    };
+  }
+
+  // Otherwise, return all possible vidhan sabhas for the district,
+  // but leave vidhan_sabha blank so user has to choose.
+  const sansad_kshetras = Array.from(new Set(matches.map(c => c.sansad_kshetra)));
+  const sansad_kshetra = sansad_kshetras.length === 1 ? sansad_kshetras[0] : (district + " Lok Sabha constituency");
   const vidhan_sabhas = matches.map(c => c.vidhan_sabha);
 
   return {
-    vidhan_sabha: vidhan_sabhas.length === 1 ? vidhan_sabhas[0] : "",
-    vidhan_sabhas: vidhan_sabhas.length > 0 ? vidhan_sabhas : [district + " Assembly Constituency"],
+    vidhan_sabha: "",
+    vidhan_sabhas: vidhan_sabhas,
     sansad_kshetra
   };
 }
