@@ -25,9 +25,31 @@ router.get("/api/auth/fix-db", async (req, res) => {
 
 router.get("/api/auth/debug-db", async (req, res) => {
   try {
-    const vol = await pool.query('SELECT id FROM volunteers WHERE LOWER(username) = $1', ['test']);
-    const usr = await pool.query('SELECT id FROM users WHERE LOWER(username) = $1', ['test']);
-    res.json({ success: true, vol: vol.rows, usr: usr.rows });
+    let result: any = {};
+    try {
+      await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
+      result.users_alter = "Success";
+    } catch(e:any) {
+      result.users_alter_error = e.message;
+    }
+    
+    try {
+      await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
+      result.vol_alter = "Success";
+    } catch(e:any) {
+      result.vol_alter_error = e.message;
+    }
+
+    try {
+      const vol = await pool.query('SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1', ['volunteers']);
+      result.vol_columns = vol.rows;
+      const usr = await pool.query('SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1', ['users']);
+      result.usr_columns = usr.rows;
+    } catch(e:any) {
+      result.schema_error = e.message;
+    }
+    
+    res.json({ success: true, result });
   } catch (err: any) {
     res.json({ success: false, code: err.code, message: err.message, stack: err.stack });
   }
