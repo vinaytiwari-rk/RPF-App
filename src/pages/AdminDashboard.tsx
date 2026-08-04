@@ -381,10 +381,10 @@ export default function AdminDashboard() {
 
   // Analytics Realtime Aggregators
   const totalGrievances = grievances?.length || 0;
-  const pendingGrievances = grievances?.filter(g => g.status === "Pending" || g.status === "pending")?.length || 0;
-  const progressGrievances = grievances?.filter(g => g.status === "In Progress" || g.status === "in-progress")?.length || 0;
-  const resolvedGrievances = grievances?.filter(g => g.status === "Resolved" || g.status === "resolved")?.length || 0;
-  const pendingCards = cardApplications?.filter(c => c.status === "pending" || c.status === "Pending")?.length || 0;
+  const pendingGrievances = grievances?.filter(g => g.status === "Pending" || g.status === "Pending")?.length || 0;
+  const progressGrievances = grievances?.filter(g => g.status === "In Progress" || g.status === "In Progress")?.length || 0;
+  const resolvedGrievances = grievances?.filter(g => g.status === "Resolved" || g.status === "Resolved")?.length || 0;
+  const pendingCards = cardApplications?.filter(c => c.status === "Pending" || c.status === "Pending")?.length || 0;
 
   // 1. SAVE COMPREHENSIVE CONFIG & ADVANCED SETTINGS
   const handleSaveSettings = async (e: React.FormEvent) => {
@@ -1517,13 +1517,13 @@ export default function AdminDashboard() {
         {/* TAB: JAN SEVA CARD REGISTER (KYC APPR) */}
         {activeTab === "cards" && (
           <div className="space-y-3 animate-fadeIn">
-            {cardApplications?.filter(a => a.status === "pending" || a.status === "Pending")?.length === 0 ? (
+            {cardApplications?.filter(a => a.status === "Pending" || a.status === "Pending")?.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center text-slate-400 py-10">
                 <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-1.5 opacity-50" />
                 <EmptyState icon={CreditCard} title="All Caught Up" message="No pending card registrations found." />
               </div>
             ) : (
-              cardApplications?.filter(a => a.status === "pending" || a.status === "Pending")?.map(app => (
+              cardApplications?.filter(a => a.status === "Pending" || a.status === "Pending")?.map(app => (
                 <div key={app.userId} className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-3">
                   <div className="flex justify-between items-start border-b border-slate-100 pb-2">
                     <div>
@@ -1557,7 +1557,7 @@ export default function AdminDashboard() {
                   <div className="flex justify-between items-start border-b border-slate-100 pb-2">
                     <h5 className="font-black text-xs text-slate-800 leading-tight pr-2">{g.title}</h5>
                     <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border shrink-0 ${
-                      g.status === "Resolved" || g.status === "resolved" ? "bg-green-50 border-green-200 text-green-700" : g.status === "In Progress" || g.status === "in-progress" ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-amber-50 border-amber-200 text-amber-700"
+                      g.status === "Resolved" || g.status === "Resolved" ? "bg-green-50 border-green-200 text-green-700" : g.status === "In Progress" || g.status === "In Progress" ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-amber-50 border-amber-200 text-amber-700"
                     }`}>{g.status}</span>
                   </div>
                   <p className="text-[10.5px] text-slate-600 leading-relaxed font-medium bg-slate-50 p-2 rounded-xl">"{g.description}"</p>
@@ -1565,7 +1565,7 @@ export default function AdminDashboard() {
                     <span>Citizen: {g.citizenName || "Anonymous"}</span>
                     {(g.status !== "Resolved" && g.status !== "resolved") && (
                       <div className="flex gap-1">
-                        {(g.status === "Pending" || g.status === "pending") && (
+                        {(g.status === "Pending" || g.status === "Pending") && (
                           <button onClick={() => handleUpdateGrievance(g.id, "In Progress")} className="bg-blue-600 text-white px-2 py-0.5 rounded font-black">Triage</button>
                         )}
                         <button onClick={() => handleUpdateGrievance(g.id, "Resolved")} className="bg-green-600 text-white px-2 py-0.5 rounded font-black">Resolve</button>

@@ -603,7 +603,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ servicesStatus: newStatus })
       });
       showNotification(`✅ Toggle updated!`);
-      fetchAllData();
+      // refreshData removed;
     } catch (e) {
       console.error(e);
     }

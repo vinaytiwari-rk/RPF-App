@@ -1,4 +1,6 @@
 import express from 'express';
+import { sendEmail } from '../lib/mailer';
+
 import { pool } from '../db/dbPool.js';
 import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
 import jwt from 'jsonwebtoken';
@@ -17,8 +19,7 @@ const rpID = 'localhost'; // Should use env var in prod
 const originUrl = 'http://localhost:5173';
 const webAuthnChallengeStore = new Map();
 
-// Stub for sendEmail if not imported
-const sendEmail = async (to: string, subject: string, html: string) => { console.log("Email stub:", to); };
+
 
 
 router.post("/api/auth/register", async (req, res) => {
@@ -472,7 +473,7 @@ router.post('/api/auth/webauthn/register-verify', async (req, res) => {
       expectedRPID: rpID,
     });
     if (verification.verified && verification.registrationInfo) {
-      const { credentialID, credentialPublicKey, counter } = verification.registrationInfo;
+      const { id: credentialID, publicKey: credentialPublicKey, counter } = verification.registrationInfo.credential;
       const base64CredID = Buffer.from(credentialID).toString('base64');
       const base64PubKey = Buffer.from(credentialPublicKey).toString('base64');
       await pool.query(
@@ -497,9 +498,9 @@ router.post('/api/auth/webauthn/login-options', async (req, res) => {
   
   const passkeysResult = await pool.query(`SELECT "credentialID" FROM passkeys WHERE "userId" = $1`, [userId]);
   const allowCredentials = passkeysResult.rows.map((row: any) => ({
-    id: new Uint8Array(Buffer.from(row.credentialID, 'base64')),
+    id: row.credentialID,
     type: 'public-key' as const,
-    transports: ['internal', 'hybrid'] as AuthenticatorTransportFuture[],
+    transports: ['internal', 'hybrid'] as AuthenticatorTransport[],
   }));
   
   const options = await generateAuthenticationOptions({
@@ -525,9 +526,9 @@ router.post('/api/auth/webauthn/login-verify', async (req, res) => {
       expectedChallenge,
       expectedOrigin: originUrl,
       expectedRPID: rpID,
-      authenticator: {
-        credentialID: new Uint8Array(Buffer.from(passkey.credentialID, 'base64')),
-        credentialPublicKey: new Uint8Array(Buffer.from(passkey.publicKey, 'base64')),
+      credential: {
+        id: passkey.credentialID,
+        publicKey: new Uint8Array(Buffer.from(passkey.publicKey, 'base64')),
         counter: Number(passkey.counter),
       },
     });

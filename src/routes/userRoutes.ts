@@ -1,4 +1,6 @@
 import express from 'express';
+import { USER_PRIVILEGED_FIELDS } from '../lib/userFields';
+
 import { pool } from '../db/dbPool.js';
 import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
 import jwt from 'jsonwebtoken';

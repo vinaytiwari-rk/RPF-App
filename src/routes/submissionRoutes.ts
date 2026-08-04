@@ -1,4 +1,6 @@
 import express from 'express';
+import { sendEmail } from '../lib/mailer';
+
 import { pool } from '../db/dbPool.js';
 import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
 import jwt from 'jsonwebtoken';

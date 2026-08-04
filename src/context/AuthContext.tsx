@@ -43,6 +43,8 @@ export interface User {
   address?: string;
   isVolunteer?: boolean;
   isDonor?: boolean;
+  volunteerData?: any;
+  blood_group?: string;
   interests?: string[];
   onboardingCompleted?: boolean;
   points?: number;

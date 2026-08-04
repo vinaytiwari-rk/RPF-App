@@ -1,4 +1,6 @@
 import express from 'express';
+import { resolveConstituency, loadACGeoJson, MP_CONSTITUENCIES_MOCK } from '../lib/constituency';
+
 import { pool } from '../db/dbPool.js';
 import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
 import jwt from 'jsonwebtoken';

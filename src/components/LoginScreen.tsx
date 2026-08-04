@@ -82,6 +82,26 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
     }
   };
 
+
+  const handleRegisterBiometric = async () => {
+    try {
+      setIsLoading(true);
+      const optRes = await axios.get(`/api/auth/webauthn/register-options?userId=${currentUserId}`);
+      const attResp = await startRegistration(optRes.data);
+      await axios.post('/api/auth/webauthn/register-verify', { userId: currentUserId, response: attResp });
+      setSuccessMsg("Biometrics registered successfully!");
+      setShowBiometricPrompt(false);
+      // Wait a moment before redirecting
+      setTimeout(async () => {
+        const userResult = await axios.get(`/api/users/${currentUserId}`, { headers: { Authorization: `Bearer ${localStorage.getItem('@rpf_token')}` }});
+        await finalizeLogin(userResult.data);
+      }, 1500);
+    } catch (err: any) {
+      setError(err.message || "Failed to register biometrics.");
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-[#FFF9F2] animate-fadeIn relative">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url("/assets/login_bg.png")' }}>

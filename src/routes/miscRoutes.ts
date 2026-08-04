@@ -1,4 +1,7 @@
 import express from 'express';
+import { queryExternalSearch } from '../lib/externalSearch';
+import { apiCache, CACHE_TTL } from '../lib/apiCache';
+
 import { pool } from '../db/dbPool.js';
 import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
 import jwt from 'jsonwebtoken';

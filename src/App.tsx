@@ -101,7 +101,7 @@ function AppContent() {
           } else {
             await login({ 
               id: details?.id,
-              role: details?.role || (role === "volunteer" ? "volunteer" : "citizen"), 
+              role: (details?.role || (role === "volunteer" ? "volunteer" : "citizen")) as any, 
               name: details?.name ?? "Citizen", 
               phone: details?.phone,
               isVolunteer: role === "volunteer",

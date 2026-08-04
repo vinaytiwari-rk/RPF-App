@@ -65,6 +65,7 @@ export interface CmsConfig {
   aboutTextEn?: string;
   aboutTextHi?: string;
   logoImgUrl?: string;
+  homeServices?: any[];
 }
 
 export interface Settings {
@@ -74,6 +75,11 @@ export interface Settings {
   founderMessageEn: string;
   founderMessageHi: string;
   helplinesMarquee?: string;
+  founderImgUrl?: string;
+  alertBannerEn?: string;
+  alertBannerHi?: string;
+  carouselSlides?: any[];
+  customServices?: any[];
 }
 
 export interface SocialLink {

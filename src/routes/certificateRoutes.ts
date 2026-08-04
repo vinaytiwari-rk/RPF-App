@@ -1,4 +1,7 @@
 import express from 'express';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import path from 'path';
+
 import { pool } from '../db/dbPool.js';
 import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
 import jwt from 'jsonwebtoken';
