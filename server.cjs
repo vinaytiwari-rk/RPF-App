@@ -38347,6 +38347,7 @@ async function initDatabase() {
     ];
     for (const col of columnsToAlter) {
       await runQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "${col.name}" ${col.type}`, [], `users alter column ${col.name}`);
+      await runQuery(`ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS "${col.name}" ${col.type}`, [], `volunteers alter column ${col.name}`);
     }
     await runQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT`, [], "users add avatar column");
     await runQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS cover TEXT`, [], "users add cover column");
@@ -38421,6 +38422,23 @@ async function initDatabase() {
       )
     `, [], "settings table creation");
     await runQuery('ALTER TABLE settings ADD COLUMN IF NOT EXISTS "helplinesMarquee" TEXT;', [], "alter settings helplinesMarquee");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS dynamic_settings (
+        key VARCHAR(255) PRIMARY KEY,
+        value JSONB,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "dynamic_settings table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id SERIAL PRIMARY KEY,
+        admin_id VARCHAR(255),
+        admin_name VARCHAR(255),
+        action VARCHAR(255),
+        details JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "audit_logs table creation");
     await runQuery(`
       CREATE TABLE IF NOT EXISTS otps (
         phone VARCHAR(255) PRIMARY KEY,

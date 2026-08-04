@@ -615,8 +615,8 @@ export default function WomenSafety() {
                   active ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:text-slate-300"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${active ? "text-red-500" : ""}`} />
-                <span className="hidden sm:inline">{t.label}</span>
+                <Icon className={`w-4 h-4 shrink-0 ${active ? "text-red-500" : ""}`} />
+                <span className="text-[9px] sm:text-xs text-center leading-tight sm:leading-normal break-words px-1">{t.label}</span>
               </button>
             );
           })}
