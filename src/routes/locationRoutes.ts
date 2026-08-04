@@ -23,109 +23,67 @@ router.get("/api/locations/pincode", async (req, res) => {
     return res.status(400).json({ success: false, error: "Invalid pincode" });
   }
 
-  // ---------- 1. Local exact map first (never invent Indore) ----------
-  // resolveConstituency already checks PINCODE_CONSTITUENCY_MAP first
-  const localHit = resolveConstituency(pincode, "", [], undefined);
-  const hasExactMap =
-    localHit &&
-    localHit.vidhan_sabha &&
-    // only treat as exact if it came from the map (we can check by presence of known keys)
-    // safer: check the map directly
-    (require("../lib/constituency").PINCODE_CONSTITUENCY_MAP?.[pincode] != null);
-
-  // cleaner way without require:
-  // we'll just always prefer map via resolveConstituency after we have district,
-  // but for pure map hits we can short-circuit early.
-
+  // ---------- 1. Exact local map (always preferred for constituency) ----------
   if (PINCODE_CONSTITUENCY_MAP[pincode]) {
     const resolution = PINCODE_CONSTITUENCY_MAP[pincode];
-    // Best-effort district/state for mapped pincodes
-    const isBhopal = pincode.startsWith("462");
-    const isIndore = pincode.startsWith("452") || pincode.startsWith("453");
-    const isSehore = pincode.startsWith("466");
+
+    // Best-effort district from known ranges (can be refined later)
+    let district = "";
+    let city = "";
+    if (pincode.startsWith("462")) {
+      district = city = "Bhopal";
+    } else if (pincode.startsWith("452") || pincode.startsWith("453")) {
+      district = city = "Indore";
+    } else if (pincode.startsWith("466")) {
+      district = city = "Sehore";
+    }
+
+    // Still try India Post API for accurate office/area names (non-blocking)
+    let areas: string[] = [];
+    try {
+      const postRes = await axios.get(
+        `https://api.postalpincode.in/pincode/${pincode}`,
+        { timeout: 4000 }
+      );
+      if (
+        postRes.data?.[0]?.Status === "Success" &&
+        Array.isArray(postRes.data[0].PostOffice)
+      ) {
+        areas = postRes.data[0].PostOffice.map((po: any) => po.Name);
+        const office = postRes.data[0].PostOffice[0];
+        district = office.District || district;
+        city =
+          office.Block && office.Block !== "NA"
+            ? office.Block
+            : office.District || city;
+      }
+    } catch (err) {
+      // ignore – we already have constituency from local map
+    }
 
     return res.json({
       success: true,
       data: {
         pincode,
         state: "Madhya Pradesh",
-        district: isBhopal ? "Bhopal" : isIndore ? "Indore" : isSehore ? "Sehore" : "",
-        city: isBhopal ? "Bhopal" : isIndore ? "Indore" : isSehore ? "Sehore" : "",
+        district,
+        city,
         vidhan_sabha: resolution.vidhan_sabha,
         vidhan_sabhas: resolution.vidhan_sabhas,
         sansad_kshetra: resolution.sansad_kshetra,
-        areas: [],
-        source: "local_map",
+        areas,
+        source: "local_map + india_post",
       },
     });
   }
 
-  // ---------- 2. data.gov.in ----------
-  const apiKey =
-    process.env.DATAGOV_API_KEY ||
-    "579b464db66ec23bdd000001ba8300370e6842e1770b301544186f0f";
-  const resourceId =
-    process.env.DATAGOV_RESOURCE_ID_PINCODE ||
-    "5c2f62fe-5afa-4119-a499-fec9d604d5bd";
-
-  if (apiKey) {
-    try {
-      const url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&filters[pincode]=${pincode}`;
-      const response = await axios.get(url, { timeout: 6000 });
-
-      if (
-        response.data?.records &&
-        Array.isArray(response.data.records) &&
-        response.data.records.length > 0
-      ) {
-        const records = response.data.records;
-        const first = records[0];
-        const areas = records.map((r: any) => r.officename || r.officeName || "");
-
-        const state = (first.statename || first.stateName || "")
-          .toLowerCase()
-          .split(" ")
-          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(" ");
-        const district = (first.district || "")
-          .toLowerCase()
-          .split(" ")
-          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(" ");
-        const city = first.divisionname
-          ? String(first.divisionname).replace(/ Division$/i, "")
-          : district;
-
-        const resolution = resolveConstituency(pincode, district, areas, state);
-
-        return res.json({
-          success: true,
-          data: {
-            pincode,
-            state,
-            district,
-            city,
-            vidhan_sabha: resolution.vidhan_sabha,
-            vidhan_sabhas: resolution.vidhan_sabhas,
-            sansad_kshetra: resolution.sansad_kshetra,
-            areas,
-            latitude: first.latitude,
-            longitude: first.longitude,
-            source: "data.gov.in",
-          },
-        });
-      }
-    } catch (error: any) {
-      console.error("OGD Pincode Directory API failed:", error.message);
-    }
-  }
-
-  // ---------- 3. postalpincode.in ----------
+  // ---------- 2. India Post API (primary live source) ----------
   try {
     const response = await axios.get(
       `https://api.postalpincode.in/pincode/${pincode}`,
-      { timeout: 4000 }
+      { timeout: 5000 }
     );
+
     const data = response.data;
 
     if (
@@ -133,12 +91,22 @@ router.get("/api/locations/pincode", async (req, res) => {
       Array.isArray(data[0].PostOffice) &&
       data[0].PostOffice.length > 0
     ) {
-      const office = data[0].PostOffice[0];
-      const areas = data[0].PostOffice.map((po: any) => po.Name);
+      const offices = data[0].PostOffice;
+      const office = offices[0];
+      const areas = offices.map((po: any) => po.Name);
+
       const district = office.District || "";
       const state = office.State || "";
+      const city =
+        office.Block && office.Block !== "NA" ? office.Block : district;
 
-      const resolution = resolveConstituency(pincode, district, areas, state);
+      // Resolve Vidhan Sabha + Sansad Kshetra from district + area names
+      const resolution = resolveConstituency(
+        pincode,
+        district,
+        areas,
+        state
+      );
 
       return res.json({
         success: true,
@@ -146,21 +114,26 @@ router.get("/api/locations/pincode", async (req, res) => {
           pincode,
           state,
           district,
-          city:
-            office.Block && office.Block !== "NA" ? office.Block : district,
+          city,
           vidhan_sabha: resolution.vidhan_sabha,
           vidhan_sabhas: resolution.vidhan_sabhas,
           sansad_kshetra: resolution.sansad_kshetra,
           areas,
-          source: "postalpincode.in",
+          source: "india_post",
         },
       });
     }
+
+    // Invalid / not found
+    return res.status(404).json({
+      success: false,
+      error: "Pincode not found in India Post directory",
+    });
   } catch (error: any) {
-    console.error("postalpincode.in failed:", error.message);
+    console.error("India Post API failed:", error.message);
   }
 
-  // ---------- 4. Safe fallback (NO more fake Indore) ----------
+  // ---------- 3. Safe local fallback (no fake Indore) ----------
   const resolution = resolveConstituency(pincode, "", [], undefined);
 
   return res.json({
@@ -176,7 +149,7 @@ router.get("/api/locations/pincode", async (req, res) => {
       areas: [],
       source: "fallback",
       message:
-        "Live pincode services unavailable. Showing best local match if available.",
+        "India Post API unavailable. Showing best local match if available.",
     },
   });
 });
