@@ -67540,7 +67540,7 @@ function resolveConstituency(pincode, district, areas = [], state) {
     return {
       vidhan_sabha: "",
       vidhan_sabhas,
-      sansad_kshetra: sansad_kshetra2
+      sansad_kshetra: ""
     };
   }
   if (distLower === "bhopal") {

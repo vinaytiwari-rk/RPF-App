@@ -292,11 +292,12 @@ export function resolveConstituency(
       };
     }
 
-    // Multiple ACs – leave primary blank so UI can show a dropdown
+    // Multiple ACs and no exact match – leave primary blank so UI can show a dropdown
+    // Also leave sansad_kshetra blank so it doesn't auto-fill the wrong one
     return {
       vidhan_sabha: "",
       vidhan_sabhas,
-      sansad_kshetra,
+      sansad_kshetra: "",
     };
   }
 
