@@ -27426,6 +27426,9 @@ var import_express = require("express");
 
 // src/controllers/adminHqController.ts
 var pool;
+var setDbPool = (dbPool) => {
+  pool = dbPool;
+};
 var getServiceContent = async (req, res) => {
   const { serviceId } = req.params;
   try {
@@ -37921,6 +37924,34 @@ var uploadRoutes_default = router19;
 // src/routes/publicGovRoutes.ts
 var import_express20 = __toESM(require("express"), 1);
 var import_axios5 = __toESM(require("axios"), 1);
+
+// src/data/coreServices.ts
+var CORE_SERVICES = [
+  { id: "card", category: "welfare", iconName: "ShieldCheck", titleEn: "Jan Seva Card", titleHi: "\u091C\u0928 \u0938\u0947\u0935\u093E \u0915\u093E\u0930\u094D\u0921", descEn: "Apply for Foundational ID", descHi: "\u092C\u0941\u0928\u093F\u092F\u093E\u0926\u0940 \u0906\u0908\u0921\u0940 \u0915\u0947 \u0932\u093F\u090F \u0906\u0935\u0947\u0926\u0928" },
+  { id: "blood", category: "urgent", iconName: "Heart", titleEn: "Blood Network", titleHi: "\u0930\u0915\u094D\u0924 \u0928\u0947\u091F\u0935\u0930\u094D\u0915", descEn: "Emergency Blood Donor Requests", descHi: "\u0906\u092A\u093E\u0924\u0915\u093E\u0932\u0940\u0928 \u0930\u0915\u094D\u0924\u0926\u093E\u0924\u093E \u0905\u0928\u0941\u0930\u094B\u0927" },
+  { id: "donations", category: "involved", iconName: "HandCoins", titleEn: "Donations", titleHi: "\u0926\u093E\u0928", descEn: "Support our causes directly", descHi: "\u0939\u092E\u093E\u0930\u0947 \u0915\u093E\u0930\u0923\u094B\u0902 \u0915\u093E \u0938\u092E\u0930\u094D\u0925\u0928 \u0915\u0930\u0947\u0902" },
+  { id: "grievance", category: "civic", iconName: "AlertTriangle", titleEn: "Grievances", titleHi: "\u0936\u093F\u0915\u093E\u092F\u0924\u0947\u0902", descEn: "Report Civic Issues", descHi: "\u0928\u093E\u0917\u0930\u093F\u0915 \u0938\u092E\u0938\u094D\u092F\u093E\u0913\u0902 \u0915\u0940 \u0930\u093F\u092A\u094B\u0930\u094D\u091F" },
+  { id: "volunteers", category: "involved", iconName: "Users", titleEn: "Volunteering", titleHi: "\u0938\u094D\u0935\u092F\u0902\u0938\u0947\u0935\u093E", descEn: "Join the RP Force", descHi: "\u0906\u0930\u092A\u0940 \u092B\u094B\u0930\u094D\u0938 \u0938\u0947 \u091C\u0941\u0921\u093C\u0947\u0902" },
+  { id: "health-care", category: "welfare", iconName: "HeartPulse", titleEn: "Health Care", titleHi: "\u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0938\u0947\u0935\u093E", descEn: "Track health metrics & seek care", descHi: "\u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u092E\u093E\u092A\u0928 \u090F\u0935\u0902 \u091A\u093F\u0915\u093F\u0924\u094D\u0938\u093E" },
+  { id: "jobs", category: "welfare", iconName: "Briefcase", titleEn: "Jobs Portal", titleHi: "\u0930\u094B\u091C\u0917\u093E\u0930 \u092A\u094B\u0930\u094D\u091F\u0932", descEn: "Find local employment opportunities", descHi: "\u0938\u094D\u0925\u093E\u0928\u0940\u092F \u0930\u094B\u091C\u0917\u093E\u0930 \u0915\u0947 \u0905\u0935\u0938\u0930 \u0916\u094B\u091C\u0947\u0902" },
+  { id: "scholarships", category: "welfare", iconName: "GraduationCap", titleEn: "Scholarships", titleHi: "\u091B\u093E\u0924\u094D\u0930\u0935\u0943\u0924\u094D\u0924\u093F", descEn: "Apply for educational grants", descHi: "\u0936\u0948\u0915\u094D\u0937\u0923\u093F\u0915 \u0905\u0928\u0941\u0926\u093E\u0928 \u0915\u0947 \u0932\u093F\u090F \u0906\u0935\u0947\u0926\u0928 \u0915\u0930\u0947\u0902" },
+  { id: "food", category: "welfare", iconName: "Apple", titleEn: "Food Support", titleHi: "\u0906\u0939\u093E\u0930 \u0938\u0939\u093E\u092F\u0924\u093E", descEn: "Apply for dry rations or find kitchens", descHi: "\u0938\u0942\u0916\u093E \u0930\u093E\u0936\u0928 \u092F\u093E \u0930\u0938\u094B\u0908 \u0915\u0947\u0902\u0926\u094D\u0930 \u0916\u094B\u091C\u0947\u0902" },
+  { id: "medicine", category: "welfare", iconName: "Pill", titleEn: "Medicine Support", titleHi: "\u091A\u093F\u0915\u093F\u0924\u094D\u0938\u093E \u0938\u0939\u093E\u092F\u0924\u093E", descEn: "Request critical medical supplies", descHi: "\u0906\u0935\u0936\u094D\u092F\u0915 \u091A\u093F\u0915\u093F\u0924\u094D\u0938\u093E \u0906\u092A\u0942\u0930\u094D\u0924\u093F \u0915\u093E \u0905\u0928\u0941\u0930\u094B\u0927" },
+  { id: "education", category: "welfare", iconName: "BookOpen", titleEn: "Education Aid", titleHi: "\u0936\u093F\u0915\u094D\u0937\u093E \u0938\u0939\u093E\u092F\u0924\u093E", descEn: "Scholarships and Books", descHi: "\u091B\u093E\u0924\u094D\u0930\u0935\u0943\u0924\u094D\u0924\u093F \u0914\u0930 \u0915\u093F\u0924\u093E\u092C\u0947\u0902" },
+  { id: "women-safety", category: "urgent", iconName: "Shield", titleEn: "Women Safety", titleHi: "\u092E\u0939\u093F\u0932\u093E \u0938\u0941\u0930\u0915\u094D\u0937\u093E", descEn: "24/7 Helpline and support", descHi: "24/7 \u0939\u0947\u0932\u094D\u092A\u0932\u093E\u0907\u0928" },
+  { id: "seniors", category: "welfare", iconName: "HandHelping", titleEn: "Senior Citizens", titleHi: "\u0935\u0930\u093F\u0937\u094D\u0920 \u0928\u093E\u0917\u0930\u093F\u0915", descEn: "Doorstep checkups & elder care", descHi: "\u0935\u0930\u093F\u0937\u094D\u0920 \u0928\u093E\u0917\u0930\u093F\u0915\u094B\u0902 \u0915\u0947 \u0932\u093F\u090F \u0938\u0939\u093E\u092F\u0924\u093E" },
+  { id: "animals", category: "welfare", iconName: "Compass", titleEn: "Animal Welfare", titleHi: "\u092A\u0936\u0941 \u0915\u0932\u094D\u092F\u093E\u0923", descEn: "Stray rescue & adoption registry", descHi: "\u092C\u0947\u0938\u0939\u093E\u0930\u093E \u092A\u0936\u0941\u0913\u0902 \u0915\u0940 \u0938\u0939\u093E\u092F\u0924\u093E" },
+  { id: "environment", category: "involved", iconName: "TreePine", titleEn: "Environment", titleHi: "\u092A\u0930\u094D\u092F\u093E\u0935\u0930\u0923", descEn: "Tree plantation drives", descHi: "\u0935\u0943\u0915\u094D\u0937\u093E\u0930\u094B\u092A\u0923 \u0905\u092D\u093F\u092F\u093E\u0928" },
+  { id: "crowdfunding", category: "involved", iconName: "Coins", titleEn: "Crowdfunding", titleHi: "\u0938\u093E\u092E\u0941\u0926\u093E\u092F\u093F\u0915 \u0927\u0928 \u0938\u0902\u091A\u092F", descEn: "Crowdfunded community projects", descHi: "\u0938\u093E\u092E\u0941\u0926\u093E\u092F\u093F\u0915 \u092A\u0930\u093F\u092F\u094B\u091C\u0928\u093E\u0913\u0902 \u0915\u0947 \u0932\u093F\u090F \u0927\u0928" },
+  { id: "culture", category: "civic", iconName: "Landmark", titleEn: "Religious & Culture", titleHi: "\u0927\u0930\u094D\u092E \u0914\u0930 \u0938\u0902\u0938\u094D\u0915\u0943\u0924\u093F", descEn: "Festivals, sacred texts & live feeds", descHi: "\u0924\u094D\u092F\u094C\u0939\u093E\u0930, \u0917\u094D\u0930\u0902\u0925 \u0914\u0930 \u092E\u0902\u0926\u093F\u0930 \u0932\u093E\u0907\u0935" },
+  { id: "disaster", category: "urgent", iconName: "AlertCircle", titleEn: "Disaster Management", titleHi: "\u0906\u092A\u0926\u093E \u092A\u094D\u0930\u092C\u0902\u0927\u0928", descEn: "Emergency relief & rescue mapping", descHi: "\u0906\u092A\u093E\u0924\u0915\u093E\u0932\u0940\u0928 \u0930\u093E\u0939\u0924 \u090F\u0935\u0902 \u092C\u091A\u093E\u0935" },
+  { id: "farmer", category: "welfare", iconName: "Sprout", titleEn: "Farmer Support", titleHi: "\u0915\u093F\u0938\u093E\u0928 \u0938\u0939\u092F\u094B\u0917", descEn: "Crop diagnostic & market pricing", descHi: "\u0915\u0943\u0937\u093F \u0938\u0939\u093E\u092F\u0924\u093E \u0914\u0930 \u092A\u094D\u0930\u0936\u093F\u0915\u094D\u0937\u0923" },
+  { id: "schemes", category: "empowerment", iconName: "FileText", titleEn: "Government Schemes", titleHi: "\u0938\u0930\u0915\u093E\u0930\u0940 \u092F\u094B\u091C\u0928\u093E\u090F\u0902", descEn: "Eligibility calculator & guides", descHi: "\u0906\u0927\u093E\u0930, \u0930\u093E\u0936\u0928 \u090F\u0935\u0902 PM \u0906\u0935\u093E\u0938 \u0938\u0939\u093E\u092F\u0924\u093E" },
+  { id: "skills", category: "empowerment", iconName: "GraduationCap", titleEn: "Skills Training", titleHi: "\u0915\u094C\u0936\u0932 \u092A\u094D\u0930\u0936\u093F\u0915\u094D\u0937\u0923", descEn: "Tailoring, coding & courses", descHi: "\u0928\u093F\u0936\u0941\u0932\u094D\u0915 \u092A\u094D\u0930\u0936\u093F\u0915\u094D\u0937\u0923 \u0915\u094B\u0930\u094D\u0938" },
+  { id: "countries", category: "civic", iconName: "Globe", titleEn: "Global Guide", titleHi: "\u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0928\u093F\u0930\u094D\u0926\u0947\u0936\u093F\u0915\u093E", descEn: "Look up nation currencies, timezones & details", descHi: "\u0935\u093F\u0936\u094D\u0935 \u092E\u0941\u0926\u094D\u0930\u093E, \u0938\u092E\u092F \u0914\u0930 \u0926\u0947\u0936\u094B\u0902 \u0915\u0940 \u091C\u093E\u0928\u0915\u093E\u0930\u0940" }
+];
+
+// src/routes/publicGovRoutes.ts
 var router20 = import_express20.default.Router();
 router20.get("/api/gov/mandi-prices", async (req, res) => {
   const { state, commodity } = req.query;
@@ -38255,6 +38286,7 @@ var pool3 = new import_pg2.default.Pool({
   connectionString: dbUrl2,
   ssl: dbUrl2.includes("localhost") || dbUrl2.includes("127.0.0.") ? false : { rejectUnauthorized: false }
 });
+setDbPool(pool3);
 pool3.query(`
   ALTER TABLE volunteers 
   ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'pending',
@@ -38530,9 +38562,11 @@ async function initDatabase() {
     await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "audioUrl" TEXT', [], "grievance audioUrl migration");
     await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "videoUrl" TEXT', [], "grievance videoUrl migration");
     await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "imageUrl" TEXT', [], "grievance imageUrl migration");
+    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "date" TEXT', [], "grievance date migration");
+    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "aiSummary" TEXT', [], "grievance aiSummary migration");
     await runQuery(`
       CREATE TABLE IF NOT EXISTS service_submissions_v2 (
-        id UUID PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         "userId" TEXT,
         "serviceNameEn" TEXT,
         "serviceName" TEXT,

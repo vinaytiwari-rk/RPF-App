@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import axios from 'axios';
 import multer from 'multer';
+import { CORE_SERVICES } from '../data/coreServices.js';
 
 const router = express.Router();
 

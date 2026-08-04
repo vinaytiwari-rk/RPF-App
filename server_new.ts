@@ -22,23 +22,6 @@ import aiRoutes from './src/routes/aiRoutes.js';
 import cultureRoutes from './src/routes/cultureRoutes.js';
 import janSevaRoutes from './src/routes/janSevaRoutes.js';
 
-import locationRoutes from './src/routes/locationRoutes.js';
-import womenRoutes from './src/routes/womenRoutes.js';
-import volunteerRoutes from './src/routes/volunteerRoutes.js';
-import certificateRoutes from './src/routes/certificateRoutes.js';
-import communityRoutes from './src/routes/communityRoutes.js';
-import jobRoutes from './src/routes/jobRoutes.js';
-import donationRoutes from './src/routes/donationRoutes.js';
-import cmsRoutes from './src/routes/cmsRoutes.js';
-import campaignRoutes from './src/routes/campaignRoutes.js';
-import submissionRoutes from './src/routes/submissionRoutes.js';
-import userRoutes from './src/routes/userRoutes.js';
-import uploadRoutes from './src/routes/uploadRoutes.js';
-import publicGovRoutes from './src/routes/publicGovRoutes.js';
-import miscRoutes from './src/routes/miscRoutes.js';
-import adminHqExtraRoutes from './src/routes/adminHqExtraRoutes.js';
-
-
 import { setDbPool } from "./src/controllers/adminHqController.js";
 
 dotenv.config();
@@ -177,23 +160,6 @@ app.use('/', grievanceRoutes);
 app.use('/', aiRoutes);
 app.use('/', cultureRoutes);
 app.use('/', janSevaRoutes);
-
-app.use('/', locationRoutes);
-app.use('/', womenRoutes);
-app.use('/', volunteerRoutes);
-app.use('/', certificateRoutes);
-app.use('/', communityRoutes);
-app.use('/', jobRoutes);
-app.use('/', donationRoutes);
-app.use('/', cmsRoutes);
-app.use('/', campaignRoutes);
-app.use('/', submissionRoutes);
-app.use('/', userRoutes);
-app.use('/', uploadRoutes);
-app.use('/', publicGovRoutes);
-app.use('/', miscRoutes);
-app.use('/', adminHqExtraRoutes);
-
 
 
 // Phase 3: Unified JWT Auth Endpoints
@@ -488,6 +454,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 
 
+
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 
@@ -497,18 +464,6 @@ const pool = new pg.Pool({
     connectionString: dbUrl,
     ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized: false }
 });
-
-setDbPool(pool);
-
-// Auto-migrate missing columns for Volunteers Table
-pool.query(`
-  ALTER TABLE volunteers 
-  ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'pending',
-  ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE,
-  ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
-  ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE
-`).then(() => console.log('Volunteers table migrated automatically'))
-  .catch(err => console.error('Auto-migration error:', err));
 
 app.get("/api/health", async (req, res) => {
   try {
@@ -1062,7 +1017,6 @@ async function initDatabase() {
 
     for (const col of columnsToAlter) {
       await runQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "${col.name}" ${col.type}`, [], `users alter column ${col.name}`);
-      await runQuery(`ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS "${col.name}" ${col.type}`, [], `volunteers alter column ${col.name}`);
     }
 
     // Ensure avatar and cover columns exist on users and volunteers
@@ -1149,25 +1103,6 @@ async function initDatabase() {
     `, [], "settings table creation");
 
     await runQuery('ALTER TABLE settings ADD COLUMN IF NOT EXISTS "helplinesMarquee" TEXT;', [], "alter settings helplinesMarquee");
-
-    await runQuery(`
-      CREATE TABLE IF NOT EXISTS dynamic_settings (
-        key VARCHAR(255) PRIMARY KEY,
-        value JSONB,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
-    `, [], "dynamic_settings table creation");
-
-    await runQuery(`
-      CREATE TABLE IF NOT EXISTS audit_logs (
-        id SERIAL PRIMARY KEY,
-        admin_id VARCHAR(255),
-        admin_name VARCHAR(255),
-        action VARCHAR(255),
-        details JSONB,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
-    `, [], "audit_logs table creation");
 
     // Ensure otps table exists
     await runQuery(`
@@ -1278,13 +1213,11 @@ async function initDatabase() {
     await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "audioUrl" TEXT', [], "grievance audioUrl migration");
     await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "videoUrl" TEXT', [], "grievance videoUrl migration");
     await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "imageUrl" TEXT', [], "grievance imageUrl migration");
-    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "date" TEXT', [], "grievance date migration");
-    await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "aiSummary" TEXT', [], "grievance aiSummary migration");
 
     // Create service_submissions_v2 table
     await runQuery(`
       CREATE TABLE IF NOT EXISTS service_submissions_v2 (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY,
         "userId" TEXT,
         "serviceNameEn" TEXT,
         "serviceName" TEXT,
@@ -1993,7 +1926,30 @@ app.get("/app", (req, res) => {
 // PHASE 6: 21 SERVICES APIs
 // =============================================================================
 
-import { CORE_SERVICES } from "./src/data/coreServices.js";
+const CORE_SERVICES = [
+  { id: "card", category: "welfare", iconName: "ShieldCheck", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Apply for Foundational ID", descHi: "बुनियादी आईडी के लिए आवेदन" },
+  { id: "blood", category: "urgent", iconName: "Heart", titleEn: "Blood Network", titleHi: "रक्त नेटवर्क", descEn: "Emergency Blood Donor Requests", descHi: "आपातकालीन रक्तदाता अनुरोध" },
+  { id: "donations", category: "involved", iconName: "HandCoins", titleEn: "Donations", titleHi: "दान", descEn: "Support our causes directly", descHi: "हमारे कारणों का समर्थन करें" },
+  { id: "grievance", category: "civic", iconName: "AlertTriangle", titleEn: "Grievances", titleHi: "शिकायतें", descEn: "Report Civic Issues", descHi: "नागरिक समस्याओं की रिपोर्ट" },
+  { id: "volunteers", category: "involved", iconName: "Users", titleEn: "Volunteering", titleHi: "स्वयंसेवा", descEn: "Join the RP Force", descHi: "आरपी फोर्स से जुड़ें" },
+  { id: "health-care", category: "welfare", iconName: "HeartPulse", titleEn: "Health Care", titleHi: "स्वास्थ्य सेवा", descEn: "Track health metrics & seek care", descHi: "स्वास्थ्य मापन एवं चिकित्सा" },
+  { id: "jobs", category: "welfare", iconName: "Briefcase", titleEn: "Jobs Portal", titleHi: "रोजगार पोर्टल", descEn: "Find local employment opportunities", descHi: "स्थानीय रोजगार के अवसर खोजें" },
+  { id: "scholarships", category: "welfare", iconName: "GraduationCap", titleEn: "Scholarships", titleHi: "छात्रवृत्ति", descEn: "Apply for educational grants", descHi: "शैक्षणिक अनुदान के लिए आवेदन करें" },
+  { id: "food", category: "welfare", iconName: "Apple", titleEn: "Food Support", titleHi: "आहार सहायता", descEn: "Apply for dry rations or find kitchens", descHi: "सूखा राशन या रसोई केंद्र खोजें" },
+  { id: "medicine", category: "welfare", iconName: "Pill", titleEn: "Medicine Support", titleHi: "चिकित्सा सहायता", descEn: "Request critical medical supplies", descHi: "आवश्यक चिकित्सा आपूर्ति का अनुरोध" },
+  { id: "education", category: "welfare", iconName: "BookOpen", titleEn: "Education Aid", titleHi: "शिक्षा सहायता", descEn: "Scholarships and Books", descHi: "छात्रवृत्ति और किताबें" },
+  { id: "women-safety", category: "urgent", iconName: "Shield", titleEn: "Women Safety", titleHi: "महिला सुरक्षा", descEn: "24/7 Helpline and support", descHi: "24/7 हेल्पलाइन" },
+  { id: "seniors", category: "welfare", iconName: "HandHelping", titleEn: "Senior Citizens", titleHi: "वरिष्ठ नागरिक", descEn: "Doorstep checkups & elder care", descHi: "वरिष्ठ नागरिकों के लिए सहायता" },
+  { id: "animals", category: "welfare", iconName: "Compass", titleEn: "Animal Welfare", titleHi: "पशु कल्याण", descEn: "Stray rescue & adoption registry", descHi: "बेसहारा पशुओं की सहायता" },
+  { id: "environment", category: "involved", iconName: "TreePine", titleEn: "Environment", titleHi: "पर्यावरण", descEn: "Tree plantation drives", descHi: "वृक्षारोपण अभियान" },
+  { id: "crowdfunding", category: "involved", iconName: "Coins", titleEn: "Crowdfunding", titleHi: "सामुदायिक धन संचय", descEn: "Crowdfunded community projects", descHi: "सामुदायिक परियोजनाओं के लिए धन" },
+  { id: "culture", category: "civic", iconName: "Landmark", titleEn: "Religious & Culture", titleHi: "धर्म और संस्कृति", descEn: "Festivals, sacred texts & live feeds", descHi: "त्यौहार, ग्रंथ और मंदिर लाइव" },
+  { id: "disaster", category: "urgent", iconName: "AlertCircle", titleEn: "Disaster Management", titleHi: "आपदा प्रबंधन", descEn: "Emergency relief & rescue mapping", descHi: "आपातकालीन राहत एवं बचाव" },
+  { id: "farmer", category: "welfare", iconName: "Sprout", titleEn: "Farmer Support", titleHi: "किसान सहयोग", descEn: "Crop diagnostic & market pricing", descHi: "कृषि सहायता और प्रशिक्षण" },
+  { id: "schemes", category: "empowerment", iconName: "FileText", titleEn: "Government Schemes", titleHi: "सरकारी योजनाएं", descEn: "Eligibility calculator & guides", descHi: "आधार, राशन एवं PM आवास सहायता" },
+  { id: "skills", category: "empowerment", iconName: "GraduationCap", titleEn: "Skills Training", titleHi: "कौशल प्रशिक्षण", descEn: "Tailoring, coding & courses", descHi: "निशुल्क प्रशिक्षण कोर्स" },
+  { id: "countries", category: "civic", iconName: "Globe", titleEn: "Global Guide", titleHi: "वैश्विक निर्देशिका", descEn: "Look up nation currencies, timezones & details", descHi: "विश्व मुद्रा, समय और देशों की जानकारी" }
+];
 
 
 
