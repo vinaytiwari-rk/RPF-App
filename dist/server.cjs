@@ -67485,11 +67485,8 @@ function loadACGeoJson() {
   try {
     const geoJsonPath = import_path.default.join(
       process.cwd(),
-      "maps-master",
-      "maps-master",
-      "docs",
+      "src",
       "data",
-      "geojson",
       "ac.geojson"
     );
     if (import_fs.default.existsSync(geoJsonPath)) {

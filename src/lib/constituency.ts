@@ -212,14 +212,10 @@ export function loadACGeoJson() {
   acGeoJsonLoadAttempted = true;
 
   try {
-    // Correct path (no "website/")
     const geoJsonPath = path.join(
       process.cwd(),
-      "maps-master",
-      "maps-master",
-      "docs",
+      "src",
       "data",
-      "geojson",
       "ac.geojson"
     );
 
