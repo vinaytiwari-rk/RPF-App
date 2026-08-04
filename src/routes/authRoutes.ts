@@ -286,10 +286,24 @@ router.get("/api/auth/check-username", async (req, res) => {
       return res.json({ available: false, error: "This username is reserved" });
     }
 
-    const [volResult, userResult] = await Promise.all([
-      pool.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [username]),
-      pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [username]),
-    ]);
+    let volResult, userResult;
+    try {
+      [volResult, userResult] = await Promise.all([
+        pool.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [username]),
+        pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [username]),
+      ]);
+    } catch (e: any) {
+      if (e.code === '42703' || e.message.includes('column "username" does not exist')) {
+        await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
+        await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
+        [volResult, userResult] = await Promise.all([
+          pool.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [username]),
+          pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [username]),
+        ]);
+      } else {
+        throw e;
+      }
+    }
 
     const available = volResult.rows.length === 0 && userResult.rows.length === 0;
     res.json({ available });
@@ -328,10 +342,24 @@ router.post("/api/auth/register-volunteer", async (req, res) => {
       return res.status(400).json({ error: "This username is reserved. Please choose another." });
     }
 
-    const [volCheck, userCheck] = await Promise.all([
-      pool.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [usernameRaw]),
-      pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw])
-    ]);
+    let volCheck, userCheck;
+    try {
+      [volCheck, userCheck] = await Promise.all([
+        pool.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [usernameRaw]),
+        pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw])
+      ]);
+    } catch (e: any) {
+      if (e.code === '42703' || e.message.includes('column "username" does not exist')) {
+        await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
+        await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
+        [volCheck, userCheck] = await Promise.all([
+          pool.query(`SELECT id FROM volunteers WHERE LOWER(username) = $1`, [usernameRaw]),
+          pool.query(`SELECT id FROM users WHERE LOWER(username) = $1`, [usernameRaw])
+        ]);
+      } else {
+        throw e;
+      }
+    }
     if (volCheck.rows.length > 0 || userCheck.rows.length > 0) {
       return res.status(409).json({ error: "This username is already in use. Please choose another." });
     }

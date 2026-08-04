@@ -108,31 +108,36 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
   const statesList = State.getStatesOfCountry(countryIso);
   const citiesList = City.getCitiesOfState(countryIso, stateIso);
 
-  // Username & Security States
   const [username, setUsername] = useState("");
   const [usernameStatus, setUsernameStatus] = useState<"idle"|"checking"|"available"|"taken">("idle");
   const [usernameError, setUsernameError] = useState("");
   
-  const checkUsername = async () => {
+  useEffect(() => {
     if (username.length < 3) {
-      setUsernameError("Username must be at least 3 characters");
+      setUsernameStatus("idle");
+      setUsernameError("");
       return;
     }
+    
     setUsernameStatus("checking");
-    try {
-      const res = await axios.get(`/api/auth/check-username?username=${encodeURIComponent(username)}`);
-      if (res.data.available) {
-        setUsernameStatus("available");
-        setUsernameError("");
-      } else {
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await axios.get(`/api/auth/check-username?username=${encodeURIComponent(username)}`);
+        if (res.data.available) {
+          setUsernameStatus("available");
+          setUsernameError("");
+        } else {
+          setUsernameStatus("taken");
+          setUsernameError(res.data.error || "Not available");
+        }
+      } catch (err: any) {
         setUsernameStatus("taken");
-        setUsernameError(res.data.error || "Not available");
+        setUsernameError(err.response?.data?.error || "Error checking availability");
       }
-    } catch (err: any) {
-      setUsernameStatus("taken");
-      setUsernameError(err.response?.data?.error || "Error checking availability");
-    }
-  };
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [username]);
 
   const getPasswordStrength = () => {
     if (!password) return { label: "", color: "" };
@@ -406,9 +411,10 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
             <label className="text-[10px] font-bold text-slate-500 uppercase">User ID</label>
             <div className="flex gap-2">
               <input type="text" value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ''))} className="flex-1 p-2.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 outline-none focus:border-[#0B1E3F]" placeholder="e.g. john_doe" />
-              <button type="button" onClick={checkUsername} disabled={!username || usernameStatus === 'checking'} className="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg whitespace-nowrap hover:bg-slate-200 disabled:opacity-50">
-                {usernameStatus === 'checking' ? <Loader2 className="w-4 h-4 animate-spin" /> : "Check"}
-              </button>
+              <div className="w-12 flex items-center justify-center">
+                {usernameStatus === 'checking' && <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />}
+                {usernameStatus === 'available' && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+              </div>
             </div>
             {usernameStatus === 'available' && <p className="text-[10px] font-bold text-green-600">User ID is available!</p>}
             {usernameStatus === 'taken' && <p className="text-[10px] font-bold text-red-500">{usernameError}</p>}
