@@ -1326,6 +1326,8 @@ async function initDatabase() {
         sansad_kshetra VARCHAR(255),
         vidhan_sabha VARCHAR(255),
         ward_no VARCHAR(255),
+        approval_status VARCHAR(50) DEFAULT 'pending',
+        points INTEGER DEFAULT 0,
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "volunteers table creation");

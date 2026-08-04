@@ -271,7 +271,8 @@ pool.query(`
   ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'pending',
   ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE,
   ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
-  ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE
+  ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE,
+  ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0
 `).then(() => console.log('Volunteers table migrated automatically'))
   .catch(err => console.error('Auto-migration error:', err));
 
@@ -727,6 +728,8 @@ async function initDatabase() {
         sansad_kshetra VARCHAR(255),
         vidhan_sabha VARCHAR(255),
         ward_no VARCHAR(255),
+        approval_status VARCHAR(50) DEFAULT 'pending',
+        points INTEGER DEFAULT 0,
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "volunteers table creation");

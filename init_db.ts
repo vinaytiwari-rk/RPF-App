@@ -203,6 +203,8 @@ async function initDatabase() {
         ward_no VARCHAR(255),
         avatar TEXT,
         cover TEXT,
+        approval_status VARCHAR(50) DEFAULT 'pending',
+        points INTEGER DEFAULT 0,
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `);
