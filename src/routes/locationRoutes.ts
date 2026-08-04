@@ -323,4 +323,19 @@ router.get("/api/locations/search", (req, res) => {
   }
 });
 
+router.get("/api/countries", async (_req, res) => {
+  try {
+    const fields =
+      "name,cca2,flags,capital,population,region,subregion,languages,currencies,maps,timezones";
+    const response = await axios.get(
+      `https://restcountries.com/v3.1/all?fields=${fields}`,
+      { timeout: 12000 }
+    );
+    res.json({ success: true, data: response.data });
+  } catch (err: any) {
+    console.error("Countries proxy failed:", err.message);
+    res.status(502).json({ success: false, error: "Failed to load countries" });
+  }
+});
+
 export default router;

@@ -39,50 +39,211 @@ export default function CountriesPage() {
   const [passportScore, setPassportScore] = useState(80); // India passport rank index
 
   useEffect(() => {
+    const FALLBACK_COUNTRIES: Country[] = [
+      {
+        name: "India",
+        officialName: "Republic of India",
+        cca2: "IN",
+        flag: "https://flagcdn.com/in.svg",
+        capital: "New Delhi",
+        population: 1380004385,
+        region: "Asia",
+        subregion: "Southern Asia",
+        languages: ["Hindi", "English"],
+        currencies: [{ code: "INR", name: "Indian rupee", symbol: "₹" }],
+        googleMaps: "https://goo.gl/maps/WSk3fVCr1bP9cqT7",
+        timezone: "UTC+05:30",
+      },
+      {
+        name: "United States",
+        officialName: "United States of America",
+        cca2: "US",
+        flag: "https://flagcdn.com/us.svg",
+        capital: "Washington, D.C.",
+        population: 329484123,
+        region: "Americas",
+        subregion: "North America",
+        languages: ["English"],
+        currencies: [{ code: "USD", name: "United States dollar", symbol: "$" }],
+        googleMaps: "https://goo.gl/maps/e8MHsFUqxA4",
+        timezone: "UTC-12:00",
+      },
+      {
+        name: "United Kingdom",
+        officialName: "United Kingdom of Great Britain and Northern Ireland",
+        cca2: "GB",
+        flag: "https://flagcdn.com/gb.svg",
+        capital: "London",
+        population: 67215293,
+        region: "Europe",
+        subregion: "Northern Europe",
+        languages: ["English"],
+        currencies: [{ code: "GBP", name: "British pound", symbol: "£" }],
+        googleMaps: "https://goo.gl/maps/FoDtc3UKMkFsXAJC7",
+        timezone: "UTC+00:00",
+      },
+      {
+        name: "United Arab Emirates",
+        officialName: "United Arab Emirates",
+        cca2: "AE",
+        flag: "https://flagcdn.com/ae.svg",
+        capital: "Abu Dhabi",
+        population: 9890400,
+        region: "Asia",
+        subregion: "Western Asia",
+        languages: ["Arabic"],
+        currencies: [{ code: "AED", name: "United Arab Emirates dirham", symbol: "د.إ" }],
+        googleMaps: "https://goo.gl/maps/AZZTDA6GzVAnGMV",
+        timezone: "UTC+04:00",
+      },
+      {
+        name: "Canada",
+        officialName: "Canada",
+        cca2: "CA",
+        flag: "https://flagcdn.com/ca.svg",
+        capital: "Ottawa",
+        population: 38005238,
+        region: "Americas",
+        subregion: "North America",
+        languages: ["English", "French"],
+        currencies: [{ code: "CAD", name: "Canadian dollar", symbol: "$" }],
+        googleMaps: "https://goo.gl/maps/jP8V1gE1",
+        timezone: "UTC-08:00",
+      },
+      {
+        name: "Australia",
+        officialName: "Commonwealth of Australia",
+        cca2: "AU",
+        flag: "https://flagcdn.com/au.svg",
+        capital: "Canberra",
+        population: 25687041,
+        region: "Oceania",
+        subregion: "Australia and New Zealand",
+        languages: ["English"],
+        currencies: [{ code: "AUD", name: "Australian dollar", symbol: "$" }],
+        googleMaps: "https://goo.gl/maps/DcjaDa7UbhnZTmUR8",
+        timezone: "UTC+05:00",
+      },
+      {
+        name: "Japan",
+        officialName: "Japan",
+        cca2: "JP",
+        flag: "https://flagcdn.com/jp.svg",
+        capital: "Tokyo",
+        population: 125836021,
+        region: "Asia",
+        subregion: "Eastern Asia",
+        languages: ["Japanese"],
+        currencies: [{ code: "JPY", name: "Japanese yen", symbol: "¥" }],
+        googleMaps: "https://goo.gl/maps/NGTLSCSrA8bMrvnX9",
+        timezone: "UTC+09:00",
+      },
+      {
+        name: "Germany",
+        officialName: "Federal Republic of Germany",
+        cca2: "DE",
+        flag: "https://flagcdn.com/de.svg",
+        capital: "Berlin",
+        population: 83240525,
+        region: "Europe",
+        subregion: "Western Europe",
+        languages: ["German"],
+        currencies: [{ code: "EUR", name: "Euro", symbol: "€" }],
+        googleMaps: "https://goo.gl/maps/mD9FBMq1mvFAxo4",
+        timezone: "UTC+01:00",
+      },
+      {
+        name: "Singapore",
+        officialName: "Republic of Singapore",
+        cca2: "SG",
+        flag: "https://flagcdn.com/sg.svg",
+        capital: "Singapore",
+        population: 5685807,
+        region: "Asia",
+        subregion: "South-Eastern Asia",
+        languages: ["English", "Malay", "Tamil", "Chinese"],
+        currencies: [{ code: "SGD", name: "Singapore dollar", symbol: "$" }],
+        googleMaps: "https://goo.gl/maps/Tnzrq3e5b1gC4m2",
+        timezone: "UTC+08:00",
+      },
+      {
+        name: "Saudi Arabia",
+        officialName: "Kingdom of Saudi Arabia",
+        cca2: "SA",
+        flag: "https://flagcdn.com/sa.svg",
+        capital: "Riyadh",
+        population: 34813867,
+        region: "Asia",
+        subregion: "Western Asia",
+        languages: ["Arabic"],
+        currencies: [{ code: "SAR", name: "Saudi riyal", symbol: "ر.س" }],
+        googleMaps: "https://goo.gl/maps/5PSjvdJ1aUbvjV",
+        timezone: "UTC+03:00",
+      },
+    ];
+
+    const mapApiCountry = (c: any): Country => {
+      const languages = c.languages ? (Object.values(c.languages) as string[]) : [];
+      const currencies = c.currencies
+        ? Object.entries(c.currencies).map(([code, cur]: [string, any]) => ({
+            code,
+            name: cur.name || "",
+            symbol: cur.symbol || "",
+          }))
+        : [];
+
+      return {
+        name: c.name?.common || "",
+        officialName: c.name?.official || "",
+        cca2: c.cca2 || "",
+        flag: c.flags?.svg || c.flags?.png || `https://flagcdn.com/${(c.cca2 || "").toLowerCase()}.svg`,
+        capital: c.capital?.[0] || "N/A",
+        population: c.population || 0,
+        region: c.region || "",
+        subregion: c.subregion || "",
+        languages,
+        currencies,
+        googleMaps: c.maps?.googleMaps || "",
+        timezone: c.timezones?.[0] || "UTC+00:00",
+      };
+    };
+
     const fetchCountries = async () => {
+      setLoading(true);
       try {
-        const res = await fetch("https://restcountries.com/v3.1/all");
+        let res = await fetch("/api/countries");
+        let data: any;
+
         if (res.ok) {
-          const data = await res.json();
-          const mapped: Country[] = data.map((c: any) => {
-            const languages = c.languages ? Object.values(c.languages) as string[] : [];
-            const currencies = c.currencies 
-              ? Object.entries(c.currencies).map(([code, cur]: [string, any]) => ({
-                  code,
-                  name: cur.name || "",
-                  symbol: cur.symbol || ""
-                }))
-              : [];
-            return {
-              name: c.name.common || "",
-              officialName: c.name.official || "",
-              cca2: c.cca2 || "",
-              flag: c.flags.svg || c.flags.png || "",
-              capital: c.capital ? c.capital[0] : "N/A",
-              population: c.population || 0,
-              region: c.region || "",
-              subregion: c.subregion || "",
-              languages,
-              currencies,
-              googleMaps: c.maps.googleMaps || "",
-              timezone: c.timezones ? c.timezones[0] : "UTC+00:00"
-            };
-          });
-          // Sort alphabetically
-          mapped.sort((a, b) => a.name.localeCompare(b.name));
-          setCountries(mapped);
-          
-          // Select India by default if found
-          const india = mapped.find(c => c.name.toLowerCase() === "india");
-          if (india) setSelectedCountry(india);
-          else if (mapped.length > 0) setSelectedCountry(mapped[0]);
+          const json = await res.json();
+          data = json.data || json;
+        } else {
+          const fields =
+            "name,cca2,flags,capital,population,region,subregion,languages,currencies,maps,timezones";
+          res = await fetch(`https://restcountries.com/v3.1/all?fields=${fields}`);
+          if (!res.ok) throw new Error("Both APIs failed");
+          data = await res.json();
         }
+
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error("Empty response");
+        }
+
+        const mapped: Country[] = data.map(mapApiCountry);
+        mapped.sort((a, b) => a.name.localeCompare(b.name));
+        setCountries(mapped);
+
+        const india = mapped.find((c) => c.name.toLowerCase() === "india");
+        setSelectedCountry(india || mapped[0] || null);
       } catch (err) {
-        console.error("REST Countries API error", err);
+        console.error("REST Countries API error, using fallback:", err);
+        setCountries(FALLBACK_COUNTRIES);
+        setSelectedCountry(FALLBACK_COUNTRIES[0]); // India
       } finally {
         setLoading(false);
       }
     };
+
     fetchCountries();
   }, []);
 
