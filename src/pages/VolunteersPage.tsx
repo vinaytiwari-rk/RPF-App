@@ -42,10 +42,7 @@ export default function VolunteersPage() {
 
   const handleParticipateCamp = async (campId: string) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post('/api/health_camps/' + campId + '/register', {}, {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
+      const response = await axios.post('/api/health_camps/' + campId + '/register', {});
       if (response.data.success) {
         setCamps(prev => prev.map(c => c.id === campId ? { ...c, registeredCount: response.data.camp.registeredCount } : c));
       }
@@ -57,15 +54,12 @@ export default function VolunteersPage() {
   const handleRegisterVolunteer = async (skills: string) => {
     await updateUser({ isVolunteer: true, interests: skills.split(", ") });
     try {
-      const token = localStorage.getItem("token");
       await axios.post('/api/volunteers', {
           userId: user?.id || "guest",
           name: user?.name || "Citizen",
           phone: user?.phone || "9999999999",
           skills: skills,
           registeredAt: new Date().toISOString()
-        }, {
-          headers: { "Authorization": `Bearer ${token}` }
         });
     } catch (error) {
       console.error("Register volunteer error:", error);
