@@ -6,6 +6,34 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
+// Open-Meteo weather code → short label
+function getCondition(code: number, isHi: boolean): string {
+  if (code === 0) return isHi ? "साफ आसमान" : "Clear sky";
+  if (code <= 3) return isHi ? "आंशिक बादल" : "Partly cloudy";
+  if (code <= 48) return isHi ? "कोहरा" : "Foggy";
+  if (code <= 67) return isHi ? "बारिश" : "Rain";
+  if (code <= 77) return isHi ? "बर्फ" : "Snow";
+  if (code <= 82) return isHi ? "मूसलाधार बारिश" : "Heavy rain";
+  if (code <= 99) return isHi ? "आंधी-तूफान" : "Thunderstorm";
+  return isHi ? "परिवर्तनशील" : "Variable";
+}
+
+function weatherIcon(code: number) {
+  if (code === 0) return Sun;
+  if (code <= 3) return CloudSun;
+  return CloudRain;
+}
+
+// Approximate lat/lon for common MP pincodes (extend as needed)
+const PINCODE_COORDS: Record<string, { lat: number; lon: number; name: string }> = {
+  "462038": { lat: 23.2950, lon: 77.4040, name: "Bhopal (Karond/Narela)" },
+  "462001": { lat: 23.2599, lon: 77.4126, name: "Bhopal" },
+  "462002": { lat: 23.2599, lon: 77.4126, name: "Bhopal" },
+  "462003": { lat: 23.2599, lon: 77.4126, name: "Bhopal" },
+  "452001": { lat: 22.7196, lon: 75.8577, name: "Indore" },
+  "466001": { lat: 23.2032, lon: 77.0844, name: "Sehore" },
+};
+
 export default function EnvironmentPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const { user } = useAuth();
@@ -19,52 +47,104 @@ export default function EnvironmentPage() {
     condition: string;
     humidity: string;
     wind: string;
+    locationLabel: string;
     forecast: Array<{ day: string; temp: string; weatherCode: number }>;
   } | null>(null);
 
+  const [weatherLoading, setWeatherLoading] = useState(true);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+
   useEffect(() => {
-    const fetchWeather = async () => {
+    let cancelled = false;
+
+    const loadWeather = async (lat: number, lon: number, label: string) => {
       try {
-        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=23.2032&longitude=77.0844&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=weather_code,temperature_2m_max&timezone=auto&forecast_days=3");
-        if (res.ok) {
-          const json = await res.json();
-          const current = json.current;
-          const daily = json.daily;
+        const url =
+          `https://api.open-meteo.com/v1/forecast` +
+          `?latitude=${lat}&longitude=${lon}` +
+          `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code` +
+          `&daily=weather_code,temperature_2m_max` +
+          `&timezone=auto&forecast_days=3`;
 
-          const getCondition = (code: number) => {
-            if (code === 0) return isHi ? "साफ़ मौसम" : "Clear Sky";
-            if (code >= 1 && code <= 3) return isHi ? "आंशिक रूप से बादल" : "Partly Cloudy";
-            if (code >= 51 && code <= 65) return isHi ? "बारिश" : "Rainy";
-            if (code >= 80 && code <= 82) return isHi ? "बौछारें" : "Showers";
-            return isHi ? "बादल छाए रहेंगे" : "Overcast";
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Weather API failed");
+
+        const data = await res.json();
+        const current = data.current;
+        const daily = data.daily;
+
+        const dayNamesEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const dayNamesHi = ["रवि", "सोम", "मंगल", "बुध", "गुरु", "शुक्र", "शनि"];
+
+        const forecastData = (daily.time || []).map((t: string, idx: number) => {
+          const d = new Date(t);
+          const day = isHi ? dayNamesHi[d.getDay()] : dayNamesEn[d.getDay()];
+          return {
+            day,
+            temp: `${Math.round(daily.temperature_2m_max[idx])}°C`,
+            weatherCode: daily.weather_code[idx],
           };
+        });
 
-          const days = [isHi ? "सोम" : "Mon", isHi ? "मंगल" : "Tue", isHi ? "बुध" : "Wed", isHi ? "गुरु" : "Thu", isHi ? "शुक्र" : "Fri", isHi ? "शनि" : "Sat", isHi ? "रवि" : "Sun"];
-          const todayIndex = new Date().getDay();
-
-          const forecastData = (daily.time || []).map((t: string, idx: number) => {
-            const dayNum = (todayIndex + idx) % 7;
-            const dayLabel = days[dayNum === 0 ? 6 : dayNum - 1];
-            return {
-              day: dayLabel,
-              temp: `${Math.round(daily.temperature_2m_max[idx])}°C`,
-              weatherCode: daily.weather_code[idx]
-            };
-          });
-
+        if (!cancelled) {
           setDynamicWeather({
             temp: `${Math.round(current.temperature_2m)}°C`,
-            condition: getCondition(current.weather_code),
+            condition: getCondition(current.weather_code, isHi),
             humidity: `${current.relative_humidity_2m}%`,
             wind: `${Math.round(current.wind_speed_10m)} km/h`,
-            forecast: forecastData
+            locationLabel: label,
+            forecast: forecastData,
           });
+          setWeatherError(null);
         }
       } catch (err) {
-        console.error("Open-Meteo API error", err);
+        console.error("Open-Meteo error", err);
+        if (!cancelled) setWeatherError("Could not load weather");
+      } finally {
+        if (!cancelled) setWeatherLoading(false);
       }
     };
-    fetchWeather();
+
+    const resolveAndFetch = async () => {
+      setWeatherLoading(true);
+
+      // 1) Try browser GPS
+      if (typeof navigator !== "undefined" && "geolocation" in navigator) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              timeout: 8000,
+              maximumAge: 5 * 60 * 1000,
+            });
+          });
+          const { latitude, longitude } = pos.coords;
+          await loadWeather(latitude, longitude, isHi ? "आपका स्थान" : "Your location");
+          return;
+        } catch {
+          // GPS denied / failed → fall through
+        }
+      }
+
+      // 2) Try pincode from profile / localStorage (if your app stores it)
+      const savedPin =
+        localStorage.getItem("user_pincode") ||
+        localStorage.getItem("@rpf_pincode") ||
+        "";
+
+      if (savedPin && PINCODE_COORDS[savedPin]) {
+        const c = PINCODE_COORDS[savedPin];
+        await loadWeather(c.lat, c.lon, c.name);
+        return;
+      }
+
+      // 3) Fallback: Bhopal (better default than only Sehore for this app)
+      await loadWeather(23.2599, 77.4126, "Bhopal");
+    };
+
+    resolveAndFetch();
+    return () => {
+      cancelled = true;
+    };
   }, [isHi]);
 
   // --- SMART CALCULATORS STATE ---
@@ -241,49 +321,64 @@ export default function EnvironmentPage() {
         </div>
 
         {/* Weather Widget */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm space-y-3.5">
-          <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
             <h4 className="font-display font-bold text-xs text-slate-700 flex items-center gap-1.5">
               <Sun className="w-4 h-4 text-amber-500" />
               {isHi ? "मौसम व तापमान" : "Local Weather Forecast"}
             </h4>
-            <span className="text-[10px] font-mono text-slate-400">Live • {dynamicWeather ? dynamicWeather.temp : "31°C"}</span>
+            <span className="text-[10px] font-mono text-slate-400">
+              {weatherLoading
+                ? "..."
+                : dynamicWeather
+                ? `Live • ${dynamicWeather.locationLabel}`
+                : "—"}
+            </span>
           </div>
 
-          <div className="flex justify-between items-center">
+          {weatherError && (
+            <p className="text-[11px] text-red-500 mb-2">{weatherError}</p>
+          )}
+
+          <div className="flex justify-between items-start">
             <div className="flex items-center gap-3">
               <Thermometer className="w-8 h-8 text-orange-500" />
               <div>
-                <span className="text-xl font-black text-slate-800">{dynamicWeather ? dynamicWeather.temp : weatherData.temp}</span>
-                <p className="text-[10.5px] text-slate-500 font-bold mt-0.5">{dynamicWeather ? dynamicWeather.condition : weatherData.condition}</p>
+                <span className="text-xl font-black text-slate-800">
+                  {dynamicWeather?.temp ?? "—"}
+                </span>
+                <p className="text-[10.5px] text-slate-500 font-bold mt-0.5">
+                  {dynamicWeather?.condition ?? (isHi ? "लोड हो रहा है..." : "Loading...")}
+                </p>
               </div>
             </div>
-
-            <div className="text-[10px] text-slate-500 font-bold text-right space-y-1">
-              <p className="flex items-center justify-end gap-1"><Droplets className="w-3.5 h-3.5 text-blue-500" /> {isHi ? "आर्द्रता" : "Humidity"}: {dynamicWeather ? dynamicWeather.humidity : weatherData.humidity}</p>
-              <p className="flex items-center justify-end gap-1"><Wind className="w-3.5 h-3.5 text-emerald-500" /> {isHi ? "हवा" : "Wind"}: {dynamicWeather ? dynamicWeather.wind : weatherData.wind}</p>
+            <div className="text-right text-[10px] text-slate-600 font-bold space-y-1 mt-1">
+              <p className="flex items-center justify-end gap-1">
+                <Droplets className="w-3.5 h-3.5 text-blue-500" />
+                {isHi ? "आर्द्रता" : "Humidity"}: {dynamicWeather?.humidity ?? "—"}
+              </p>
+              <p className="flex items-center justify-end gap-1">
+                <Wind className="w-3.5 h-3.5 text-emerald-500" />
+                {isHi ? "हवा" : "Wind"}: {dynamicWeather?.wind ?? "—"}
+              </p>
             </div>
           </div>
 
           {/* 3-day forecast */}
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
-            {(dynamicWeather ? dynamicWeather.forecast : [
-              { day: isHi ? "सोम" : "Mon", temp: "30°C", weatherCode: 51 },
-              { day: isHi ? "मंगल" : "Tue", temp: "32°C", weatherCode: 1 },
-              { day: isHi ? "बुध" : "Wed", temp: "33°C", weatherCode: 0 }
-            ]).map((fc, i) => {
-              const FcIcon = fc.weatherCode === 0 ? Sun 
-                           : (fc.weatherCode >= 1 && fc.weatherCode <= 3) ? CloudSun 
-                           : CloudRain;
-              return (
-                <div key={i} className="bg-slate-50/50 rounded-xl p-1.5 border border-slate-200/50">
-                  <span className="text-[10px] font-bold text-slate-500">{fc.day}</span>
-                  <FcIcon className="w-4 h-4 mx-auto my-1 text-slate-650" />
-                  <span className="text-[10px] font-black text-slate-700">{fc.temp}</span>
-                </div>
-              );
-            })}
-          </div>
+          {dynamicWeather?.forecast && (
+            <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3">
+              {dynamicWeather.forecast.map((f, i) => {
+                const Icon = weatherIcon(f.weatherCode);
+                return (
+                  <div key={i} className="text-center bg-slate-50/50 rounded-xl p-1.5 border border-slate-200/50">
+                    <p className="text-[10px] font-bold text-slate-500">{f.day}</p>
+                    <Icon className="w-4 h-4 mx-auto my-1 text-slate-600" />
+                    <p className="text-[11px] font-black text-slate-800">{f.temp}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
