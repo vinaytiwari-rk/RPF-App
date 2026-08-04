@@ -1,5 +1,10 @@
 import express from 'express';
-import { resolveConstituency, loadACGeoJson, MP_CONSTITUENCIES_MOCK } from '../lib/constituency';
+import {
+  resolveConstituency,
+  loadACGeoJson,
+  MP_CONSTITUENCIES_MOCK,
+  PINCODE_CONSTITUENCY_MAP,
+} from "../lib/constituency";
 
 import { pool } from '../db/dbPool.js';
 import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
@@ -12,94 +17,168 @@ import multer from 'multer';
 const router = express.Router();
 
 router.get("/api/locations/pincode", async (req, res) => {
-  const pincode = req.query.p as string;
-  if (!pincode || pincode.length !== 6) {
+  const pincode = String(req.query.p || "").trim();
+
+  if (!pincode || pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
     return res.status(400).json({ success: false, error: "Invalid pincode" });
   }
 
-  const apiKey = process.env.DATAGOV_API_KEY || "579b464db66ec23bdd000001ba8300370e6842e1770b301544186f0f";
-  const resourceId = process.env.DATAGOV_RESOURCE_ID_PINCODE || "5c2f62fe-5afa-4119-a499-fec9d604d5bd";
+  // ---------- 1. Local exact map first (never invent Indore) ----------
+  // resolveConstituency already checks PINCODE_CONSTITUENCY_MAP first
+  const localHit = resolveConstituency(pincode, "", [], undefined);
+  const hasExactMap =
+    localHit &&
+    localHit.vidhan_sabha &&
+    // only treat as exact if it came from the map (we can check by presence of known keys)
+    // safer: check the map directly
+    (require("../lib/constituency").PINCODE_CONSTITUENCY_MAP?.[pincode] != null);
+
+  // cleaner way without require:
+  // we'll just always prefer map via resolveConstituency after we have district,
+  // but for pure map hits we can short-circuit early.
+
+  if (PINCODE_CONSTITUENCY_MAP[pincode]) {
+    const resolution = PINCODE_CONSTITUENCY_MAP[pincode];
+    // Best-effort district/state for mapped pincodes
+    const isBhopal = pincode.startsWith("462");
+    const isIndore = pincode.startsWith("452") || pincode.startsWith("453");
+    const isSehore = pincode.startsWith("466");
+
+    return res.json({
+      success: true,
+      data: {
+        pincode,
+        state: "Madhya Pradesh",
+        district: isBhopal ? "Bhopal" : isIndore ? "Indore" : isSehore ? "Sehore" : "",
+        city: isBhopal ? "Bhopal" : isIndore ? "Indore" : isSehore ? "Sehore" : "",
+        vidhan_sabha: resolution.vidhan_sabha,
+        vidhan_sabhas: resolution.vidhan_sabhas,
+        sansad_kshetra: resolution.sansad_kshetra,
+        areas: [],
+        source: "local_map",
+      },
+    });
+  }
+
+  // ---------- 2. data.gov.in ----------
+  const apiKey =
+    process.env.DATAGOV_API_KEY ||
+    "579b464db66ec23bdd000001ba8300370e6842e1770b301544186f0f";
+  const resourceId =
+    process.env.DATAGOV_RESOURCE_ID_PINCODE ||
+    "5c2f62fe-5afa-4119-a499-fec9d604d5bd";
 
   if (apiKey) {
     try {
-      // Query the official OGD Pincode Directory API
       const url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&filters[pincode]=${pincode}`;
-      const response = await axios.get(url);
-      
-      if (response.data && response.data.records && Array.isArray(response.data.records) && response.data.records.length > 0) {
+      const response = await axios.get(url, { timeout: 6000 });
+
+      if (
+        response.data?.records &&
+        Array.isArray(response.data.records) &&
+        response.data.records.length > 0
+      ) {
         const records = response.data.records;
         const first = records[0];
-        
-        // Extract all post offices/local areas for this pincode
-        const areas = records.map((r: any) => r.officename);
-        
-        // Capitalize names properly
-        const state = first.statename.toLowerCase().split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-        const district = first.district.toLowerCase().split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-        const city = first.divisionname ? first.divisionname.replace(" Division", "") : district;
+        const areas = records.map((r: any) => r.officename || r.officeName || "");
 
-        // Resolve constituencies accurately
+        const state = (first.statename || first.stateName || "")
+          .toLowerCase()
+          .split(" ")
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
+        const district = (first.district || "")
+          .toLowerCase()
+          .split(" ")
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
+        const city = first.divisionname
+          ? String(first.divisionname).replace(/ Division$/i, "")
+          : district;
+
         const resolution = resolveConstituency(pincode, district, areas, state);
 
-        const liveData = {
+        return res.json({
+          success: true,
+          data: {
+            pincode,
+            state,
+            district,
+            city,
+            vidhan_sabha: resolution.vidhan_sabha,
+            vidhan_sabhas: resolution.vidhan_sabhas,
+            sansad_kshetra: resolution.sansad_kshetra,
+            areas,
+            latitude: first.latitude,
+            longitude: first.longitude,
+            source: "data.gov.in",
+          },
+        });
+      }
+    } catch (error: any) {
+      console.error("OGD Pincode Directory API failed:", error.message);
+    }
+  }
+
+  // ---------- 3. postalpincode.in ----------
+  try {
+    const response = await axios.get(
+      `https://api.postalpincode.in/pincode/${pincode}`,
+      { timeout: 4000 }
+    );
+    const data = response.data;
+
+    if (
+      data?.[0]?.Status === "Success" &&
+      Array.isArray(data[0].PostOffice) &&
+      data[0].PostOffice.length > 0
+    ) {
+      const office = data[0].PostOffice[0];
+      const areas = data[0].PostOffice.map((po: any) => po.Name);
+      const district = office.District || "";
+      const state = office.State || "";
+
+      const resolution = resolveConstituency(pincode, district, areas, state);
+
+      return res.json({
+        success: true,
+        data: {
           pincode,
           state,
           district,
-          city,
+          city:
+            office.Block && office.Block !== "NA" ? office.Block : district,
           vidhan_sabha: resolution.vidhan_sabha,
           vidhan_sabhas: resolution.vidhan_sabhas,
           sansad_kshetra: resolution.sansad_kshetra,
           areas,
-          latitude: first.latitude,
-          longitude: first.longitude
-        };
-
-        return res.json({ success: true, data: liveData });
-      }
-    } catch (error: any) {
-      console.error("OGD Pincode Directory API failed, trying fallback:", error.message);
+          source: "postalpincode.in",
+        },
+      });
     }
+  } catch (error: any) {
+    console.error("postalpincode.in failed:", error.message);
   }
 
-  try {
-    const response = await axios.get("https://api.postalpincode.in/pincode/" + pincode, { timeout: 4000 });
-    const data = response.data;
-    if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice) {
-      const office = data[0].PostOffice[0];
-      const areas = data[0].PostOffice.map((po: any) => po.Name);
-      
-      const district = office.District;
-      const resolution = resolveConstituency(pincode, district, areas, office.State);
+  // ---------- 4. Safe fallback (NO more fake Indore) ----------
+  const resolution = resolveConstituency(pincode, "", [], undefined);
 
-      const liveData = {
-        pincode,
-        state: office.State,
-        district,
-        city: office.Block && office.Block !== "NA" ? office.Block : district,
-        vidhan_sabha: resolution.vidhan_sabha,
-        vidhan_sabhas: resolution.vidhan_sabhas,
-        sansad_kshetra: resolution.sansad_kshetra,
-        areas: areas
-      };
-      return res.json({ success: true, data: liveData });
-    }
-  } catch (error) {
-    console.error("Live postal API query failed, falling back to mock:", error.message);
-  }
-  
-  // Fallback mock
-  const mockData = {
-    pincode,
-    state: "Madhya Pradesh",
-    district: "Indore",
-    city: "Indore",
-    vidhan_sabha: "Indore-1",
-    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau", "Mhow"],
-    sansad_kshetra: "Indore",
-    areas: ["Vijay Nagar BO", "Palasia BO", "Bhawarkuan BO", "Rajwada SO"]
-  };
-  
-  res.json({ success: true, data: mockData });
+  return res.json({
+    success: true,
+    data: {
+      pincode,
+      state: "",
+      district: "",
+      city: "",
+      vidhan_sabha: resolution.vidhan_sabha || "",
+      vidhan_sabhas: resolution.vidhan_sabhas || [],
+      sansad_kshetra: resolution.sansad_kshetra || "",
+      areas: [],
+      source: "fallback",
+      message:
+        "Live pincode services unavailable. Showing best local match if available.",
+    },
+  });
 });
 
 router.get("/api/locations/helplines", async (req, res) => {
