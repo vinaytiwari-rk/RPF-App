@@ -16,11 +16,23 @@ router.get("/api/auth/fix-db", async (req, res) => {
   try {
     await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
     await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT \'pending\'');
+    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
     res.send("<h1>Database Patched Successfully!</h1><p>You can now go back and register volunteers.</p>");
   } catch (err: any) {
     res.status(500).send("Error patching db: " + err.message);
   }
 });
+
+router.get("/api/auth/debug-db", async (req, res) => {
+  try {
+    const vol = await pool.query('SELECT id FROM volunteers WHERE LOWER(username) = $1', ['test']);
+    const usr = await pool.query('SELECT id FROM users WHERE LOWER(username) = $1', ['test']);
+    res.json({ success: true, vol: vol.rows, usr: usr.rows });
+  } catch (err: any) {
+    res.json({ success: false, code: err.code, message: err.message, stack: err.stack });
+  }
+});
+
 
 const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
 const RESERVED_USERNAMES = new Set(["admin", "root", "superuser", "system", "moderator", "guest", "anonymous"]);
