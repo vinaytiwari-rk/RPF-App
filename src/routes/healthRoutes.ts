@@ -429,11 +429,7 @@ router.post("/api/appointments", authenticateToken, async (req: any, res) => {
       [id, req.user.id, bloodBankId, appointmentDate, bloodGroup || "", "Scheduled", notes || ""]
     );
     
-    // Reward donation points to user
-    await pool.query(
-      `UPDATE users SET points = points + 50 WHERE id = $1`,
-      [req.user.id]
-    );
+    
 
     res.json({ success: true, id });
   } catch (error: any) {

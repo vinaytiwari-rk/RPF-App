@@ -57,10 +57,10 @@ router.get("/api/volunteers/me/certificates", async (req, res) => {
 
 router.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi, points } = req.body;
+    const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi } = req.body;
     await pool.query(
-      'INSERT INTO volunteer_tasks ("volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", points, status) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      [volunteerId, titleEn, titleHi, descriptionEn, descriptionHi, points || 10, 'assigned']
+      'INSERT INTO volunteer_tasks ("volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", status) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [volunteerId, titleEn, titleHi, descriptionEn, descriptionHi || 10, 'assigned']
     );
     res.json({ success: true, message: "Task assigned successfully" });
   } catch (error: any) {
@@ -75,7 +75,7 @@ router.get("/api/volunteer_tasks", async (req, res) => {
       return res.status(400).json({ error: "Missing volunteerId parameter" });
     }
     const result = await pool.query(
-      'SELECT id, "volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", points, status, "createdAt" FROM volunteer_tasks WHERE "volunteerId" = $1',
+      'SELECT id, "volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", status, "createdAt" FROM volunteer_tasks WHERE "volunteerId" = $1',
       [volunteerId]
     );
     res.json({ success: true, tasks: result.rows });
@@ -90,12 +90,12 @@ router.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin,
     const { status } = req.body;
     
     const taskRes = await pool.query(
-      'UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId", points',
+      'UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId"',
       [status, id]
     );
     
     if (taskRes.rows.length > 0 && status === "completed") {
-      const { volunteerId, points } = taskRes.rows[0];
+      const { volunteerId } = taskRes.rows[0];
       await pool.query(
         'UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2',
         [points, volunteerId]
@@ -149,8 +149,7 @@ router.get("/api/volunteers", async (req, res) => {
     const result = await pool.query(
       'SELECT id, full_name as name, email, mobile as phone, approval_status as status, "registeredAt" FROM volunteers ORDER BY "registeredAt" DESC'
     );
-    // Add points as 0 for now since it's missing from volunteers schema
-    const volunteers = result.rows.map(v => ({ ...v, points: 0 }));
+    const volunteers = result.rows;
     res.json({ volunteers });
   } catch (error: any) {
     console.error("Error fetching volunteers:", error);
@@ -167,16 +166,5 @@ router.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req
   }
 });
 
-router.post("/api/volunteers/:id/points", authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const { points } = req.body;
-    // update points in both users and volunteers tables
-    await pool.query('UPDATE users SET points = $1 WHERE id = $2', [points, req.params.id]);
-    await pool.query('UPDATE volunteers SET points = $1 WHERE id = $2', [points, req.params.id]);
-    res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 export default router;

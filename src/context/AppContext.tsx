@@ -216,6 +216,8 @@ const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
 interface AppContextType {
   loading: boolean;
   settings: Settings;
+  globalSettings: any;
+  announcements: any[];
   cmsConfig: CmsConfig;
   servicesList: any[];
   isLoadingServices: boolean;
@@ -247,6 +249,8 @@ const AppContext = createContext<AppContextType | null>(null);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [globalSettings, setGlobalSettings] = useState<any>({});
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [cmsConfig, setCmsConfig] = useState<CmsConfig>(DEFAULT_CMS_CONFIG);
   const [servicesList, setServicesList] = useState<any[]>(DEFAULT_SERVICES);
   const [isLoadingServices, setIsLoadingServices] = useState<boolean>(false);
@@ -257,6 +261,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const fetchAllData = async () => {
     try {
+      // Fetch dynamic global settings
+      try {
+        const res = await fetch("/api/admin/settings");
+        if (res.ok) {
+          const d = await res.json();
+          if (d.data) {
+            setGlobalSettings(d.data);
+            // Apply CSS Variables
+            const root = document.documentElement;
+            if (d.data.primary_color) root.style.setProperty('--color-primary', d.data.primary_color);
+            if (d.data.secondary_color) root.style.setProperty('--color-secondary', d.data.secondary_color);
+            if (d.data.font_family) root.style.setProperty('--font-primary', d.data.font_family);
+          }
+        }
+      } catch(e) {}
+
+      // Fetch announcements
+      try {
+        const res = await fetch("/api/admin/announcements");
+        if (res.ok) {
+          const d = await res.json();
+          if (d.data) setAnnouncements(d.data);
+        }
+      } catch(e) {}
+
       // 1. Settings
       const settingsRes = await fetch("/api/settings");
       if (settingsRes.ok) {
@@ -463,6 +492,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         loading,
         settings,
+        globalSettings,
+        announcements,
         cmsConfig,
         servicesList,
         isLoadingServices,

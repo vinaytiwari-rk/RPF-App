@@ -18,7 +18,7 @@ const {
 export default function Home() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const { user } = useAuth();
-  const { settings, cmsConfig, servicesList, isLoadingServices } = useApp();
+  const { settings, globalSettings, announcements, cmsConfig, servicesList, isLoadingServices } = useApp();
   const navigate = useNavigate();
   const t = translations[lang];
 
@@ -228,7 +228,39 @@ export default function Home() {
         </div>
       )}
 
+      {/* Dynamic Important Notices */}
+      {(globalSettings?.show_notices !== false && announcements && announcements.length > 0) && (
+        <div className="px-4 relative z-10">
+          <div className="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-amber-500 to-orange-400 px-4 py-2 flex items-center justify-between">
+              <h3 className="font-display font-extrabold text-white text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4" /> 
+                {lang === "hi" ? "महत्वपूर्ण सूचनाएं" : "Important Notices"}
+              </h3>
+            </div>
+            <div className="p-3 space-y-3 max-h-48 overflow-y-auto">
+              {announcements.map((ann: any, i: number) => (
+                <div key={i} className="flex gap-3 items-start border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-slate-800 text-[11px] leading-tight mb-0.5">{ann.title}</h4>
+                    <p className="text-[10px] text-slate-600 leading-snug">{ann.content}</p>
+                    {ann.link_url && (
+                      <a href={ann.link_url} target="_blank" rel="noopener noreferrer" className="text-[9px] text-blue-600 font-semibold mt-1 inline-flex items-center hover:underline">
+                        {lang === "hi" ? "अधिक पढ़ें" : "Read More"} <ChevronRight className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 3. Our Impact Section (Matches Screenshot 5 Our Impact Grid) */}
+      {(globalSettings?.show_widgets !== false) && (
+      <>
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -329,8 +361,8 @@ export default function Home() {
         </div>
 
         </div>
-
-
+      </>
+      )}
 
       {/* 6. Message from Founder (Matches Screenshot 5 Founder Msg) */}
       <motion.div 
@@ -347,7 +379,7 @@ export default function Home() {
             {/* Founder avatar with golden ring */}
             <div className="relative shrink-0 mt-1">
               <img 
-                src={cmsConfig.founderImgUrl || "/assets/founder.png"} 
+                src={globalSettings?.founder_image || cmsConfig.founderImgUrl || "/assets/founder.png"} 
                 alt="Founder Message Avatar" 
                 className="w-16 h-16 rounded-full object-cover border-2 border-[#D4AF37]/50 shadow-sm"
               />
@@ -359,7 +391,7 @@ export default function Home() {
                 {lang === "hi" ? "संस्थापक का संदेश" : "Message from Founder"}
               </h4>
               <p className="text-[10px] text-slate-600 leading-relaxed italic font-medium">
-                "{lang === "hi" ? settings.founderMessageHi : settings.founderMessageEn}"
+                "{globalSettings?.founder_message || (lang === "hi" ? settings.founderMessageHi : settings.founderMessageEn)}"
               </p>
               <div className="pt-1.5 border-t border-slate-100">
                 <p className="font-display font-black text-[10.5px] text-[#000080] leading-none">

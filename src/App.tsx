@@ -45,7 +45,7 @@ import FoodSupport from "./pages/FoodSupport";
 import MedicineSupport from "./pages/MedicineSupport";
 import EducationSupport from "./pages/EducationSupport";
 import CountriesPage from "./pages/CountriesPage";
-const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard"));
+const GodAdminPanel = React.lazy(() => import("./pages/GodAdminPanel"));
 import { AppProvider } from "./context/AppContext";
 
 import SplashScreen from "./components/SplashScreen";
@@ -142,7 +142,7 @@ function AppContent() {
           <Route path="/food" element={<FoodSupport />} />
           <Route path="/medicine" element={<MedicineSupport />} />
           <Route path="/education" element={<EducationSupport />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<GodAdminPanel />} />
           <Route path="/women" element={<WomenSafety />} />
           <Route path="/seniors" element={<SeniorsPage />} />
           <Route path="/animals" element={<AnimalsPage />} />

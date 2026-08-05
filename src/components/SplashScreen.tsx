@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from "react";
+import { useApp } from "../context/AppContext";
+//, { useEffect, useState } from 'react';
 
 export default function SplashScreen() {
   const [opacity, setOpacity] = useState(0);
@@ -70,7 +72,7 @@ export default function SplashScreen() {
           }}
         >
           <img 
-            src="/assets/logo.png" 
+            src={globalSettings?.logo_image || "/assets/logo.png"} 
             alt="RP Foundation Official Logo" 
             className="w-full h-full object-contain bg-white rounded-full"
           />

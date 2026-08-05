@@ -11,7 +11,7 @@ interface VolunteerTask {
   descriptionEn: string;
   descriptionHi: string;
   status: "pending" | "in-progress" | "completed";
-  points: number;
+  
   createdAt: string;
   completedAt?: string;
 }
@@ -321,7 +321,7 @@ export default function VolunteerDashboard() {
                     <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider">
                       <Clock className="w-3 h-3" /> {task.status === "in-progress" ? (isHi ? "प्रगति पर" : "In Progress") : (isHi ? "लंबित" : "Pending")}
                     </span>
-                    <span className="text-[10px] font-black text-slate-400">+{task.points} Pts</span>
+                    
                   </div>
                   
                   <h4 className="font-bold text-sm text-slate-800 mb-1 leading-snug">

@@ -45,6 +45,7 @@ import uploadRoutes from './src/routes/uploadRoutes.js';
 import publicGovRoutes from './src/routes/publicGovRoutes.js';
 import miscRoutes from './src/routes/miscRoutes.js';
 import adminHqExtraRoutes from './src/routes/adminHqExtraRoutes.js';
+import adminDynamicRoutes from './src/routes/adminDynamicRoutes.js';
 
 
 import { setDbPool } from "./src/controllers/adminHqController.js";
@@ -166,9 +167,11 @@ app.use('/', campaignRoutes);
 app.use('/', submissionRoutes);
 app.use('/', userRoutes);
 app.use('/', uploadRoutes);
-app.use('/', publicGovRoutes);
-app.use('/', miscRoutes);
-app.use('/', adminHqExtraRoutes);
+app.use(publicGovRoutes);
+app.use(miscRoutes);
+app.use(adminHqRoutes);
+app.use(adminHqExtraRoutes);
+app.use(adminDynamicRoutes);
 
 
 
@@ -272,7 +275,7 @@ pool.query(`
   ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE,
   ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
   ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE,
-  ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0
+  ADD COLUMN IF NOT EXISTS 
 `).then(() => console.log('Volunteers table migrated automatically'))
   .catch(err => console.error('Auto-migration error:', err));
 
@@ -336,7 +339,7 @@ async function initDatabase() {
         email TEXT,
         phone TEXT,
         role TEXT DEFAULT 'citizen',
-        points INTEGER DEFAULT 0,
+        
         badges INTEGER DEFAULT 0,
         "janSevaCardStatus" TEXT DEFAULT 'none',
         "janSevaCardNo" TEXT DEFAULT '',
@@ -729,7 +732,7 @@ async function initDatabase() {
         vidhan_sabha VARCHAR(255),
         ward_no VARCHAR(255),
         approval_status VARCHAR(50) DEFAULT 'pending',
-        points INTEGER DEFAULT 0,
+        
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "volunteers table creation");
@@ -848,6 +851,47 @@ async function initDatabase() {
       )
     `, [], "women_complaints table creation");
 
+    // Create app_settings table (Single Row Config)
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        splash_animation TEXT DEFAULT 'fade',
+        splash_logo TEXT DEFAULT '/assets/logo.png',
+        splash_duration INTEGER DEFAULT 2000,
+        login_bg_image TEXT DEFAULT '/assets/login-bg.jpg',
+        social_login_enabled BOOLEAN DEFAULT false,
+        marquee_text TEXT DEFAULT 'Welcome to RP Foundation Jan Seva App',
+        marquee_speed INTEGER DEFAULT 2,
+        marquee_color TEXT DEFAULT '#ffffff',
+        marquee_bg_color TEXT DEFAULT '#000080',
+        primary_color TEXT DEFAULT '#000080',
+        secondary_color TEXT DEFAULT '#ff9933',
+        font_family TEXT DEFAULT 'Inter',
+        hero_type TEXT DEFAULT 'carousel',
+        hero_media_url TEXT DEFAULT '',
+        show_widgets BOOLEAN DEFAULT true,
+        show_notices BOOLEAN DEFAULT true,
+        founder_image TEXT DEFAULT '/assets/founder.jpg',
+        founder_message TEXT DEFAULT 'Together we can make a difference.'
+      )
+    `, [], "app_settings table creation");
+    
+    // Seed default settings row if it doesn't exist
+    await runQuery(`
+      INSERT INTO app_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+    `, [], "app_settings default seed");
+
+    // Create announcements table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS announcements (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "announcements table creation");
+
     // Create success_stories table
     await runQuery(`
       CREATE TABLE IF NOT EXISTS success_stories (
@@ -855,7 +899,8 @@ async function initDatabase() {
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         "imageUrl" TEXT,
-        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        status VARCHAR(50) DEFAULT 'pending'
       )
     `, [], "success_stories table creation");
 

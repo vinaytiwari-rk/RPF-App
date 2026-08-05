@@ -10,8 +10,6 @@ export interface UserProfile {
   division: string; // ward/assembly/district
   janSevaId: string;
   role: "Citizen" | "Active Volunteer" | "Donor";
-  points: number;
-  badge: "None" | "Bronze" | "Silver" | "Gold" | "Platinum";
 }
 
 export interface Grievance {
@@ -55,7 +53,6 @@ export interface Camp {
   date: string;
   type: "Health" | "Blood Donation" | "Food Dist" | "Education" | "Afforestation";
   location: string;
-  pointsReward: number;
   registeredCount: number;
 }
 

@@ -55535,7 +55535,7 @@ function resolveConstituency(pincode, district, areas = [], state) {
 }
 
 // server.ts
-var import_express23 = __toESM(require("express"), 1);
+var import_express24 = __toESM(require("express"), 1);
 var import_cors = __toESM(require_lib(), 1);
 
 // node_modules/express-rate-limit/dist/index.mjs
@@ -66084,7 +66084,7 @@ router2.post("/api/auth/logout", async (req, res) => {
 router2.get("/api/auth/me", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    let result = await pool2.query(`SELECT id, username, name, role, email, phone, points, badges, avatar, cover FROM users WHERE id = $1`, [userId]);
+    let result = await pool2.query(`SELECT id, username, name, role, email, phone, avatar, cover FROM users WHERE id = $1`, [userId]);
     if (result.rows.length === 0) {
       const volResult = await pool2.query(`SELECT id, username, registration_number, full_name as name, email, mobile as phone, avatar, cover FROM volunteers WHERE id = $1`, [userId]);
       if (volResult.rows.length === 0) {
@@ -66097,9 +66097,7 @@ router2.get("/api/auth/me", authenticateToken, async (req, res) => {
           ...vol,
           role: "volunteer",
           isVolunteer: true,
-          volunteerData: vol,
-          points: 0,
-          badges: []
+          volunteerData: vol
         }
       });
     }
@@ -66922,10 +66920,6 @@ router3.post("/api/appointments", authenticateToken, async (req, res) => {
        (id, user_id, blood_bank_id, appointment_date, blood_group, status, notes, created_at) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
       [id, req.user.id, bloodBankId, appointmentDate, bloodGroup || "", "Scheduled", notes || ""]
-    );
-    await pool2.query(
-      `UPDATE users SET points = points + 50 WHERE id = $1`,
-      [req.user.id]
     );
     res.json({ success: true, id });
   } catch (error) {
@@ -68088,10 +68082,10 @@ router10.get("/api/volunteers/me/certificates", async (req, res) => {
 });
 router10.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi, points } = req.body;
+    const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi } = req.body;
     await pool2.query(
-      'INSERT INTO volunteer_tasks ("volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", points, status) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      [volunteerId, titleEn, titleHi, descriptionEn, descriptionHi, points || 10, "assigned"]
+      'INSERT INTO volunteer_tasks ("volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", status) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [volunteerId, titleEn, titleHi, descriptionEn, descriptionHi || 10, "assigned"]
     );
     res.json({ success: true, message: "Task assigned successfully" });
   } catch (error) {
@@ -68105,7 +68099,7 @@ router10.get("/api/volunteer_tasks", async (req, res) => {
       return res.status(400).json({ error: "Missing volunteerId parameter" });
     }
     const result = await pool2.query(
-      'SELECT id, "volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", points, status, "createdAt" FROM volunteer_tasks WHERE "volunteerId" = $1',
+      'SELECT id, "volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", status, "createdAt" FROM volunteer_tasks WHERE "volunteerId" = $1',
       [volunteerId]
     );
     res.json({ success: true, tasks: result.rows });
@@ -68118,11 +68112,11 @@ router10.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmi
     const { id } = req.params;
     const { status } = req.body;
     const taskRes = await pool2.query(
-      'UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId", points',
+      'UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId"',
       [status, id]
     );
     if (taskRes.rows.length > 0 && status === "completed") {
-      const { volunteerId, points } = taskRes.rows[0];
+      const { volunteerId } = taskRes.rows[0];
       await pool2.query(
         "UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2",
         [points, volunteerId]
@@ -68166,7 +68160,7 @@ router10.get("/api/volunteers", async (req, res) => {
     const result = await pool2.query(
       'SELECT id, full_name as name, email, mobile as phone, approval_status as status, "registeredAt" FROM volunteers ORDER BY "registeredAt" DESC'
     );
-    const volunteers = result.rows.map((v) => ({ ...v, points: 0 }));
+    const volunteers = result.rows;
     res.json({ volunteers });
   } catch (error) {
     console.error("Error fetching volunteers:", error);
@@ -68176,16 +68170,6 @@ router10.get("/api/volunteers", async (req, res) => {
 router10.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM volunteers WHERE id = $1", [req.params.id]);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-router10.post("/api/volunteers/:id/points", authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const { points } = req.body;
-    await pool2.query("UPDATE users SET points = $1 WHERE id = $2", [points, req.params.id]);
-    await pool2.query("UPDATE volunteers SET points = $1 WHERE id = $2", [points, req.params.id]);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -69043,7 +69027,7 @@ var router18 = import_express18.default.Router();
 router18.get("/api/users/:id", async (req, res) => {
   try {
     const result = await pool2.query(
-      'SELECT id, name, email, phone, role, points, badges, "janSevaCardStatus", "janSevaCardNo", "isVolunteer", "isDonor", "onboardingCompleted", "registeredAt" FROM users WHERE id = $1',
+      'SELECT id, name, email, phone, role, "janSevaCardStatus", "janSevaCardNo", "isVolunteer", "isDonor", "onboardingCompleted", "registeredAt" FROM users WHERE id = $1',
       [req.params.id]
     );
     if (result.rows.length > 0) {
@@ -69487,14 +69471,105 @@ router22.get("/api/admin/hq/donations", authenticateToken, authorizeRole("super_
 });
 var adminHqExtraRoutes_default = router22;
 
+// src/routes/adminDynamicRoutes.ts
+var import_express23 = __toESM(require("express"), 1);
+var router23 = import_express23.default.Router();
+router23.get("/api/admin/settings", async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM app_settings WHERE id = 1");
+    if (result.rows.length === 0) {
+      return res.json({ success: true, data: {} });
+    }
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error("Error fetching settings:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch settings" });
+  }
+});
+router23.post("/api/admin/settings", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const updates = req.body;
+    let setClause = [];
+    let values = [];
+    let index = 1;
+    for (const [key, value] of Object.entries(updates)) {
+      setClause.push(`"${key}" = $${index}`);
+      values.push(value);
+      index++;
+    }
+    if (setClause.length === 0) return res.json({ success: true });
+    const query = `UPDATE app_settings SET ${setClause.join(", ")} WHERE id = 1 RETURNING *`;
+    const result = await pool2.query(query, values);
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error("Error updating settings:", error);
+    res.status(500).json({ success: false, error: "Failed to update settings" });
+  }
+});
+router23.get("/api/admin/announcements", async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM announcements ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Failed to fetch announcements" });
+  }
+});
+router23.post("/api/admin/announcements", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, content, is_active } = req.body;
+    const result = await pool2.query(
+      "INSERT INTO announcements (title, content, is_active) VALUES ($1, $2, $3) RETURNING *",
+      [title, content, is_active ?? true]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Failed to create announcement" });
+  }
+});
+router23.delete("/api/admin/announcements/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM announcements WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Failed to delete announcement" });
+  }
+});
+router23.put("/api/admin/stories/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!["pending", "approved", "rejected"].includes(status)) {
+      return res.status(400).json({ success: false, error: "Invalid status" });
+    }
+    const result = await pool2.query("UPDATE success_stories SET status = $1 WHERE id = $2 RETURNING *", [status, req.params.id]);
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Failed to update story status" });
+  }
+});
+router23.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { name, role, email, phone, isVolunteer, isDonor } = req.body;
+    const result = await pool2.query(
+      `UPDATE users 
+       SET name = $1, role = $2, email = $3, phone = $4, "isVolunteer" = $5, "isDonor" = $6
+       WHERE id = $7 RETURNING id, name, role, email, phone`,
+      [name, role, email, phone, isVolunteer, isDonor, req.params.id]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Failed to update user profile" });
+  }
+});
+var adminDynamicRoutes_default = router23;
+
 // server.ts
 var import_jsonwebtoken3 = __toESM(require_jsonwebtoken(), 1);
 import_dotenv2.default.config();
-var app = (0, import_express23.default)();
+var app = (0, import_express24.default)();
 app.set("trust proxy", 1);
 app.use((0, import_cors.default)());
-app.use(import_express23.default.json({ limit: "50mb" }));
-app.use(import_express23.default.urlencoded({ limit: "50mb", extended: true }));
+app.use(import_express24.default.json({ limit: "50mb" }));
+app.use(import_express24.default.urlencoded({ limit: "50mb", extended: true }));
 var limiter = rate_limit_default({
   windowMs: 15 * 60 * 1e3,
   max: 500,
@@ -69565,9 +69640,11 @@ app.use("/", campaignRoutes_default);
 app.use("/", submissionRoutes_default);
 app.use("/", userRoutes_default);
 app.use("/", uploadRoutes_default);
-app.use("/", publicGovRoutes_default);
-app.use("/", miscRoutes_default);
-app.use("/", adminHqExtraRoutes_default);
+app.use(publicGovRoutes_default);
+app.use(miscRoutes_default);
+app.use(adminHqRoutes_default);
+app.use(adminHqExtraRoutes_default);
+app.use(adminDynamicRoutes_default);
 var rpID2 = process.env.WEBAUTHN_RP_ID || "localhost";
 var originUrl2 = `https://${rpID2}`;
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
@@ -69583,7 +69660,7 @@ pool3.query(`
   ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE,
   ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
   ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE,
-  ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0
+  ADD COLUMN IF NOT EXISTS 
 `).then(() => console.log("Volunteers table migrated automatically")).catch((err) => console.error("Auto-migration error:", err));
 app.get("/api/health", async (req, res) => {
   try {
@@ -69612,7 +69689,7 @@ async function initDatabase() {
         email TEXT,
         phone TEXT,
         role TEXT DEFAULT 'citizen',
-        points INTEGER DEFAULT 0,
+        
         badges INTEGER DEFAULT 0,
         "janSevaCardStatus" TEXT DEFAULT 'none',
         "janSevaCardNo" TEXT DEFAULT '',
@@ -69955,7 +70032,7 @@ async function initDatabase() {
         vidhan_sabha VARCHAR(255),
         ward_no VARCHAR(255),
         approval_status VARCHAR(50) DEFAULT 'pending',
-        points INTEGER DEFAULT 0,
+        
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "volunteers table creation");
@@ -70059,12 +70136,48 @@ async function initDatabase() {
       )
     `, [], "women_complaints table creation");
     await runQuery(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        splash_animation TEXT DEFAULT 'fade',
+        splash_logo TEXT DEFAULT '/assets/logo.png',
+        splash_duration INTEGER DEFAULT 2000,
+        login_bg_image TEXT DEFAULT '/assets/login-bg.jpg',
+        social_login_enabled BOOLEAN DEFAULT false,
+        marquee_text TEXT DEFAULT 'Welcome to RP Foundation Jan Seva App',
+        marquee_speed INTEGER DEFAULT 2,
+        marquee_color TEXT DEFAULT '#ffffff',
+        marquee_bg_color TEXT DEFAULT '#000080',
+        primary_color TEXT DEFAULT '#000080',
+        secondary_color TEXT DEFAULT '#ff9933',
+        font_family TEXT DEFAULT 'Inter',
+        hero_type TEXT DEFAULT 'carousel',
+        hero_media_url TEXT DEFAULT '',
+        show_widgets BOOLEAN DEFAULT true,
+        show_notices BOOLEAN DEFAULT true,
+        founder_image TEXT DEFAULT '/assets/founder.jpg',
+        founder_message TEXT DEFAULT 'Together we can make a difference.'
+      )
+    `, [], "app_settings table creation");
+    await runQuery(`
+      INSERT INTO app_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+    `, [], "app_settings default seed");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS announcements (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "announcements table creation");
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS success_stories (
         id UUID PRIMARY KEY,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         "imageUrl" TEXT,
-        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        status VARCHAR(50) DEFAULT 'pending'
       )
     `, [], "success_stories table creation");
     await runQuery(`
@@ -70264,8 +70377,8 @@ var upload2 = (0, import_multer2.default)({
     cb(null, true);
   }
 });
-app.use("/uploads", import_express23.default.static(import_path4.default.join(process.cwd(), "uploads")));
-app.use("/app", import_express23.default.static(import_path4.default.join(process.cwd(), "public", "app")));
+app.use("/uploads", import_express24.default.static(import_path4.default.join(process.cwd(), "uploads")));
+app.use("/app", import_express24.default.static(import_path4.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req, res) => {
   res.redirect("/app/");
 });
@@ -70281,7 +70394,7 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = import_path4.default.join(process.cwd(), "dist");
-    app.use(import_express23.default.static(distPath));
+    app.use(import_express24.default.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(import_path4.default.join(distPath, "index.html"));
     });

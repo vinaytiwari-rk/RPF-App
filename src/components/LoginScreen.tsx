@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
+import { useApp } from "../context/AppContext";
+//, { useState } from "react";
 import VolunteerRegistrationWizard from "./VolunteerRegistrationWizard";
 import { ArrowLeft, Loader2, Phone, UserPlus, KeyRound, Smartphone, Mail, ShieldCheck, Heart, Users, ChevronRight, Lock, AlertTriangle, Fingerprint } from "lucide-react";
 import axios from "axios";
@@ -112,7 +114,7 @@ export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) 
       <div className="w-full pt-16 pb-4 px-6 flex flex-col items-center text-center z-10 shrink-0">
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-tricolour"></div>
         <img 
-          src="/assets/logo.png" 
+          src={globalSettings?.logo_image || "/assets/logo.png"} 
           alt="RP Foundation Logo" 
           className="w-24 h-24 bg-white rounded-full p-1.5 shadow-xl border-2 border-[#FF9933]/20 mb-3 animate-float"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}

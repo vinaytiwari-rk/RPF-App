@@ -14,7 +14,7 @@ const router = express.Router();
 router.get("/api/users/:id", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, name, email, phone, role, points, badges, "janSevaCardStatus", "janSevaCardNo", "isVolunteer", "isDonor", "onboardingCompleted", "registeredAt" FROM users WHERE id = $1',
+      'SELECT id, name, email, phone, role, "janSevaCardStatus", "janSevaCardNo", "isVolunteer", "isDonor", "onboardingCompleted", "registeredAt" FROM users WHERE id = $1',
       [req.params.id]
     );
     if (result.rows.length > 0) {

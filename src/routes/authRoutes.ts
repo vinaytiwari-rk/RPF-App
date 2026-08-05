@@ -222,7 +222,7 @@ router.post("/api/auth/logout", async (req, res) => {
 router.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
-    let result = await pool.query(`SELECT id, username, name, role, email, phone, points, badges, avatar, cover FROM users WHERE id = $1`, [userId]);
+    let result = await pool.query(`SELECT id, username, name, role, email, phone, avatar, cover FROM users WHERE id = $1`, [userId]);
       
     if (result.rows.length === 0) {
       // Check volunteers table
@@ -239,8 +239,7 @@ router.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
           role: "volunteer",
           isVolunteer: true,
           volunteerData: vol,
-          points: 0,
-          badges: []
+          
         }
       });
     }

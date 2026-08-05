@@ -49,7 +49,7 @@ export default function MainLayout() {
       </div>
     );
   }
-  const { notifications, settings } = useApp();
+  const { notifications, settings, globalSettings } = useApp();
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
   const [showGuestModal, setShowGuestModal] = useState(false);
 
@@ -194,7 +194,7 @@ export default function MainLayout() {
                 <ArrowLeft className="w-5 h-5" />
               </button>
             ) : (
-              <img src="/assets/logo.png" alt="RP Foundation" className="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200/50 relative" />
+              <img src={globalSettings?.logo_image || "/assets/logo.png"} alt="RP Foundation" className="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200/50 relative" />
             )}
             <div className="flex flex-col justify-center">
               <h1 className="font-display font-black text-[13px] text-[#000080] tracking-wide leading-none">
@@ -238,17 +238,20 @@ export default function MainLayout() {
         </div>
 
         {/* Global Helpline Marquee Ticker */}
-        {settings?.helplinesMarquee && (
-          <div className="w-full bg-slate-50 border-b border-slate-200/50 py-1.5 px-3 select-none overflow-hidden shrink-0 z-40 relative flex items-center gap-2">
-            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 shrink-0 font-sans">
+        {globalSettings?.marquee_text && (
+          <div 
+            className="w-full border-b py-1.5 px-3 select-none overflow-hidden shrink-0 z-40 relative flex items-center gap-2"
+            style={{ backgroundColor: globalSettings.marquee_bg_color || '#f8fafc', borderColor: globalSettings.marquee_bg_color ? 'transparent' : '#e2e8f0' }}
+          >
+            <span className="text-[9px] font-black uppercase tracking-wider shrink-0 font-sans" style={{ color: globalSettings.marquee_color || '#64748b' }}>
               📞 {language === "hi" ? "हेल्पलाइन" : "Helplines"}:
             </span>
             <div className="overflow-hidden w-full relative">
               <div
-                data-scrollamount="2"
-                className="animate-marquee text-[10px] font-bold font-mono tracking-wide text-slate-600 whitespace-nowrap block cursor-pointer hover:[animation-play-state:paused]"
+                style={{ color: globalSettings.marquee_color || '#475569' }}
+                className="animate-marquee text-[10px] font-bold font-mono tracking-wide whitespace-nowrap block cursor-pointer hover:[animation-play-state:paused]"
               >
-                {settings.helplinesMarquee}
+                {globalSettings.marquee_text}
               </div>
             </div>
           </div>
