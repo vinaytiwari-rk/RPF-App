@@ -11023,13 +11023,13 @@ function __disposeResources(env) {
   }
   return next();
 }
-function __rewriteRelativeImportExtension(path4, preserveJsx) {
-  if (typeof path4 === "string" && /^\.\.?\//.test(path4)) {
-    return path4.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function(m, tsx, d, ext, cm) {
+function __rewriteRelativeImportExtension(path5, preserveJsx) {
+  if (typeof path5 === "string" && /^\.\.?\//.test(path5)) {
+    return path5.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function(m, tsx, d, ext, cm) {
       return tsx ? preserveJsx ? ".jsx" : ".js" : d && (!ext || !cm) ? m : d + ext + "." + cm.toLowerCase() + "js";
     });
   }
-  return path4;
+  return path5;
 }
 var extendStatics, __assign, __createBinding, __setModuleDefault, ownKeys, _SuppressedError, tslib_es6_default;
 var init_tslib_es6 = __esm({
@@ -19877,14 +19877,14 @@ var require_dependency_container = __commonJS({
           provider = providerOrConstructor;
         }
         if (providers_1.isTokenProvider(provider)) {
-          const path4 = [token];
+          const path5 = [token];
           let tokenProvider = provider;
           while (tokenProvider != null) {
             const currentToken = tokenProvider.useToken;
-            if (path4.includes(currentToken)) {
-              throw new Error(`Token registration cycle detected! ${[...path4, currentToken].join(" -> ")}`);
+            if (path5.includes(currentToken)) {
+              throw new Error(`Token registration cycle detected! ${[...path5, currentToken].join(" -> ")}`);
             }
-            path4.push(currentToken);
+            path5.push(currentToken);
             const registration = this._registry.get(currentToken);
             if (registration && providers_1.isTokenProvider(registration.provider)) {
               tokenProvider = registration.provider;
@@ -49770,14 +49770,14 @@ var require_svgPath = __commonJS({
       ["Z", 0],
       ["z", 0]
     ]);
-    var parse2 = function(path4) {
+    var parse2 = function(path5) {
       var cmd;
       var ret = [];
       var args = [];
       var curArg = "";
       var foundDecimal = false;
       var params = 0;
-      for (var _i = 0, path_1 = path4; _i < path_1.length; _i++) {
+      for (var _i = 0, path_1 = path5; _i < path_1.length; _i++) {
         var c = path_1[_i];
         if (parameters.has(c)) {
           params = parameters.get(c);
@@ -50091,8 +50091,8 @@ var require_svgPath = __commonJS({
       ];
       return result;
     };
-    exports2.svgPathToOperators = function(path4) {
-      return apply(parse2(path4));
+    exports2.svgPathToOperators = function(path5) {
+      return apply(parse2(path5));
     };
   }
 });
@@ -50275,7 +50275,7 @@ var require_operations = __commonJS({
         operators_1.popGraphicsState()
       ]).filter(Boolean);
     };
-    exports2.drawSvgPath = function(path4, options) {
+    exports2.drawSvgPath = function(path5, options) {
       var _a, _b, _c;
       return tslib_1.__spreadArrays([
         operators_1.pushGraphicsState(),
@@ -50289,7 +50289,7 @@ var require_operations = __commonJS({
         options.borderWidth && operators_1.setLineWidth(options.borderWidth),
         options.borderLineCap && operators_1.setLineCap(options.borderLineCap),
         operators_1.setDashPattern((_b = options.borderDashArray) !== null && _b !== void 0 ? _b : [], (_c = options.borderDashPhase) !== null && _c !== void 0 ? _c : 0)
-      ], svgPath_1.svgPathToOperators(path4), [
+      ], svgPath_1.svgPathToOperators(path5), [
         // prettier-ignore
         options.color && options.borderWidth ? operators_1.fillAndStroke() : options.color ? operators_1.fill() : options.borderColor ? operators_1.stroke() : operators_1.closePath(),
         operators_1.popGraphicsState()
@@ -54587,12 +54587,12 @@ var require_PDFPage = __commonJS({
             graphicsState: graphicsStateKey
           }));
         };
-        PDFPage2.prototype.drawSvgPath = function(path4, options) {
+        PDFPage2.prototype.drawSvgPath = function(path5, options) {
           var _a, _b, _c, _d, _e, _f, _g, _h, _j;
           if (options === void 0) {
             options = {};
           }
-          utils_1.assertIs(path4, "path", ["string"]);
+          utils_1.assertIs(path5, "path", ["string"]);
           utils_1.assertOrUndefined(options.x, "options.x", ["number"]);
           utils_1.assertOrUndefined(options.y, "options.y", ["number"]);
           utils_1.assertOrUndefined(options.scale, "options.scale", ["number"]);
@@ -54621,7 +54621,7 @@ var require_PDFPage = __commonJS({
             options.borderColor = colors_1.rgb(0, 0, 0);
           }
           var contentStream = this.getContentStream();
-          contentStream.push.apply(contentStream, operations_1.drawSvgPath(path4, {
+          contentStream.push.apply(contentStream, operations_1.drawSvgPath(path5, {
             x: (_a = options.x) !== null && _a !== void 0 ? _a : this.x,
             y: (_b = options.y) !== null && _b !== void 0 ? _b : this.y,
             scale: options.scale,
@@ -55115,6 +55115,8 @@ var require_cjs12 = __commonJS({
 });
 
 // src/lib/constituency.ts
+var import_fs = __toESM(require("fs"), 1);
+var import_path = __toESM(require("path"), 1);
 var import_axios = __toESM(require("axios"), 1);
 var acGeoJsonData = null;
 var acGeoJsonLoadAttempted = false;
@@ -55317,10 +55319,24 @@ async function loadACGeoJsonAsync() {
   if (acGeoJsonLoadAttempted) return acGeoJsonData;
   acGeoJsonLoadAttempted = true;
   try {
-    console.log("[AC GeoJSON] Fetching constituency data from remote...");
-    const res = await import_axios.default.get("https://yashveeeeeeer.github.io/india-geodata/ac.geojson", { timeout: 15e3 });
+    const cachePath = import_path.default.join(process.cwd(), "ac_cache.json");
+    if (import_fs.default.existsSync(cachePath)) {
+      console.log("[AC GeoJSON] Loading constituency data from local cache...");
+      const raw = import_fs.default.readFileSync(cachePath, "utf8");
+      acGeoJsonData = JSON.parse(raw);
+      console.log(`[AC GeoJSON] Successfully loaded ${acGeoJsonData.features?.length} constituency features from cache.`);
+      return acGeoJsonData;
+    }
+    console.log("[AC GeoJSON] Fetching constituency data from remote (60s timeout)...");
+    const res = await import_axios.default.get("https://yashveeeeeeer.github.io/india-geodata/ac.geojson", { timeout: 6e4 });
     if (res.data && Array.isArray(res.data.features)) {
       acGeoJsonData = res.data;
+      try {
+        import_fs.default.writeFileSync(cachePath, JSON.stringify(res.data));
+        console.log("[AC GeoJSON] Saved to local cache.");
+      } catch (writeErr) {
+        console.error("[AC GeoJSON] Failed to write cache:", writeErr.message);
+      }
       console.log(`[AC GeoJSON] Successfully loaded ${acGeoJsonData.features.length} constituency features.`);
     }
   } catch (err) {
@@ -58243,7 +58259,7 @@ var bcryptjs_default = {
 };
 
 // server.ts
-var import_path3 = __toESM(require("path"), 1);
+var import_path4 = __toESM(require("path"), 1);
 var import_dotenv2 = __toESM(require("dotenv"), 1);
 var import_pg2 = __toESM(require("pg"), 1);
 var import_crypto13 = __toESM(require("crypto"), 1);
@@ -68180,7 +68196,7 @@ var volunteerRoutes_default = router10;
 // src/routes/certificateRoutes.ts
 var import_express11 = __toESM(require("express"), 1);
 var import_pdf_lib = __toESM(require_cjs12(), 1);
-var import_path = __toESM(require("path"), 1);
+var import_path2 = __toESM(require("path"), 1);
 var router11 = import_express11.default.Router();
 router11.get("/api/certificates/verify/:certificate_id", async (req, res) => {
   try {
@@ -68226,7 +68242,7 @@ router11.get("/api/certificates/download/:id", async (req, res) => {
     const fontItalic = await pdfDoc.embedFont(import_pdf_lib.StandardFonts.HelveticaOblique);
     page.drawRectangle({ x: 20, y: 20, width: width - 40, height: height - 40, borderColor: (0, import_pdf_lib.rgb)(0.1, 0.3, 0.6), borderWidth: 4 });
     page.drawRectangle({ x: 25, y: 25, width: width - 50, height: height - 50, borderColor: (0, import_pdf_lib.rgb)(0.8, 0.6, 0.2), borderWidth: 2 });
-    const logoPath = import_path.default.join(process.cwd(), "public", "assets", "logo.png");
+    const logoPath = import_path2.default.join(process.cwd(), "public", "assets", "logo.png");
     if (require("fs").existsSync(logoPath)) {
       const logoImageBytes = require("fs").readFileSync(logoPath);
       const logoImage = await pdfDoc.embedPng(logoImageBytes);
@@ -69070,8 +69086,8 @@ var userRoutes_default = router18;
 var import_express19 = __toESM(require("express"), 1);
 var import_crypto12 = __toESM(require("crypto"), 1);
 var import_multer = __toESM(require("multer"), 1);
-var import_path2 = __toESM(require("path"), 1);
-var import_fs = __toESM(require("fs"), 1);
+var import_path3 = __toESM(require("path"), 1);
+var import_fs2 = __toESM(require("fs"), 1);
 var storage = import_multer.default.memoryStorage();
 var upload = (0, import_multer.default)({
   storage,
@@ -69094,14 +69110,14 @@ var handleUploadErrors = (err, req, res, next) => {
   next();
 };
 var saveFileLocally = async (file) => {
-  const ext = import_path2.default.extname(file.originalname);
+  const ext = import_path3.default.extname(file.originalname);
   const filename = import_crypto12.default.randomUUID() + ext;
-  const uploadDir = import_path2.default.join(process.cwd(), "uploads");
-  if (!import_fs.default.existsSync(uploadDir)) {
-    import_fs.default.mkdirSync(uploadDir, { recursive: true });
+  const uploadDir = import_path3.default.join(process.cwd(), "uploads");
+  if (!import_fs2.default.existsSync(uploadDir)) {
+    import_fs2.default.mkdirSync(uploadDir, { recursive: true });
   }
-  const filepath = import_path2.default.join(uploadDir, filename);
-  import_fs.default.writeFileSync(filepath, file.buffer);
+  const filepath = import_path3.default.join(uploadDir, filename);
+  import_fs2.default.writeFileSync(filepath, file.buffer);
   return "/uploads/" + filename;
 };
 var router19 = import_express19.default.Router();
@@ -70241,15 +70257,15 @@ var upload2 = (0, import_multer2.default)({
   },
   fileFilter: (req, file, cb) => {
     const allowedExtensions = [".png", ".jpg", ".jpeg", ".pdf", ".mp3", ".wav", ".m4a", ".ogg", ".webm", ".mp4", ".mov", ".avi", ".mkv", ".3gp"];
-    const ext = import_path3.default.extname(file.originalname).toLowerCase();
+    const ext = import_path4.default.extname(file.originalname).toLowerCase();
     if (!allowedExtensions.includes(ext)) {
       return cb(new Error("Only PNG, JPG, JPEG, PDF, MP3, WAV, M4A, OGG, WEBM, MP4, MOV, AVI, and MKV files are allowed"));
     }
     cb(null, true);
   }
 });
-app.use("/uploads", import_express23.default.static(import_path3.default.join(process.cwd(), "uploads")));
-app.use("/app", import_express23.default.static(import_path3.default.join(process.cwd(), "public", "app")));
+app.use("/uploads", import_express23.default.static(import_path4.default.join(process.cwd(), "uploads")));
+app.use("/app", import_express23.default.static(import_path4.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req, res) => {
   res.redirect("/app/");
 });
@@ -70264,10 +70280,10 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = import_path3.default.join(process.cwd(), "dist");
+    const distPath = import_path4.default.join(process.cwd(), "dist");
     app.use(import_express23.default.static(distPath));
     app.get("*", (req, res) => {
-      res.sendFile(import_path3.default.join(distPath, "index.html"));
+      res.sendFile(import_path4.default.join(distPath, "index.html"));
     });
   }
   process.on("uncaughtException", (err) => {

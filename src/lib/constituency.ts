@@ -224,10 +224,25 @@ export async function loadACGeoJsonAsync() {
   acGeoJsonLoadAttempted = true;
 
   try {
-    console.log("[AC GeoJSON] Fetching constituency data from remote...");
-    const res = await axios.get("https://yashveeeeeeer.github.io/india-geodata/ac.geojson", { timeout: 15000 });
+    const cachePath = path.join(process.cwd(), "ac_cache.json");
+    if (fs.existsSync(cachePath)) {
+      console.log("[AC GeoJSON] Loading constituency data from local cache...");
+      const raw = fs.readFileSync(cachePath, "utf8");
+      acGeoJsonData = JSON.parse(raw);
+      console.log(`[AC GeoJSON] Successfully loaded ${acGeoJsonData.features?.length} constituency features from cache.`);
+      return acGeoJsonData;
+    }
+
+    console.log("[AC GeoJSON] Fetching constituency data from remote (60s timeout)...");
+    const res = await axios.get("https://yashveeeeeeer.github.io/india-geodata/ac.geojson", { timeout: 60000 });
     if (res.data && Array.isArray(res.data.features)) {
       acGeoJsonData = res.data;
+      try {
+        fs.writeFileSync(cachePath, JSON.stringify(res.data));
+        console.log("[AC GeoJSON] Saved to local cache.");
+      } catch (writeErr: any) {
+        console.error("[AC GeoJSON] Failed to write cache:", writeErr.message);
+      }
       console.log(`[AC GeoJSON] Successfully loaded ${acGeoJsonData.features.length} constituency features.`);
     }
   } catch (err: any) {
