@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import axios from "axios";
 
 let acGeoJsonData: any = null;
 let acGeoJsonLoadAttempted = false;
@@ -214,32 +215,23 @@ function findConstituenciesByDistrict(district: string, state?: string) {
 }
 
 export function loadACGeoJson() {
-  if (acGeoJsonData || acGeoJsonLoadAttempted) return acGeoJsonData;
+  return acGeoJsonData;
+}
+
+export async function loadACGeoJsonAsync() {
+  if (acGeoJsonData) return acGeoJsonData;
+  if (acGeoJsonLoadAttempted) return acGeoJsonData;
   acGeoJsonLoadAttempted = true;
 
   try {
-    const geoJsonPath = path.join(
-      process.cwd(),
-      "src",
-      "data",
-      "ac.geojson"
-    );
-
-    if (fs.existsSync(geoJsonPath)) {
-      const fileContent = fs.readFileSync(geoJsonPath, "utf-8");
-      acGeoJsonData = JSON.parse(fileContent);
-      console.log(
-        `[AC GeoJSON] Loaded ${acGeoJsonData?.features?.length || 0} constituency features`
-      );
-    } else {
-      console.warn(
-        "[AC GeoJSON] File not found at",
-        geoJsonPath,
-        "- falling back to limited built-in dataset"
-      );
+    console.log("[AC GeoJSON] Fetching constituency data from remote...");
+    const res = await axios.get("https://yashveeeeeeer.github.io/india-geodata/ac.geojson", { timeout: 15000 });
+    if (res.data && Array.isArray(res.data.features)) {
+      acGeoJsonData = res.data;
+      console.log(`[AC GeoJSON] Successfully loaded ${acGeoJsonData.features.length} constituency features.`);
     }
   } catch (err: any) {
-    console.error("[AC GeoJSON] Failed to load:", err.message);
+    console.error("[AC GeoJSON] Failed to load from remote:", err.message);
   }
 
   return acGeoJsonData;

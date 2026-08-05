@@ -4,7 +4,7 @@ import { apiCache, CACHE_TTL } from './src/lib/apiCache';
 import { queryExternalSearch } from './src/lib/externalSearch';
 import { getGeminiClient, handleOfflineFallback } from './src/lib/gemini';
 import { socialPreviewsCache, SOCIAL_CACHE_TTL } from './src/lib/socialCache';
-import { resolveConstituency, loadACGeoJson, MP_CONSTITUENCIES_MOCK } from './src/lib/constituency';
+import { resolveConstituency, loadACGeoJson, loadACGeoJsonAsync, MP_CONSTITUENCIES_MOCK } from './src/lib/constituency';
 import { USER_PRIVILEGED_FIELDS } from './src/lib/userFields';
 import express from "express";
 import cors from "cors";
@@ -1342,6 +1342,9 @@ async function startServer() {
 
   // Initialize Database tables and views
   await initDatabase();
+
+  // Load GeoJSON data in the background
+  loadACGeoJsonAsync().catch(err => console.error("Error loading GeoJSON in background", err));
 
   if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import("vite");

@@ -11023,13 +11023,13 @@ function __disposeResources(env) {
   }
   return next();
 }
-function __rewriteRelativeImportExtension(path5, preserveJsx) {
-  if (typeof path5 === "string" && /^\.\.?\//.test(path5)) {
-    return path5.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function(m, tsx, d, ext, cm) {
+function __rewriteRelativeImportExtension(path4, preserveJsx) {
+  if (typeof path4 === "string" && /^\.\.?\//.test(path4)) {
+    return path4.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function(m, tsx, d, ext, cm) {
       return tsx ? preserveJsx ? ".jsx" : ".js" : d && (!ext || !cm) ? m : d + ext + "." + cm.toLowerCase() + "js";
     });
   }
-  return path5;
+  return path4;
 }
 var extendStatics, __assign, __createBinding, __setModuleDefault, ownKeys, _SuppressedError, tslib_es6_default;
 var init_tslib_es6 = __esm({
@@ -19877,14 +19877,14 @@ var require_dependency_container = __commonJS({
           provider = providerOrConstructor;
         }
         if (providers_1.isTokenProvider(provider)) {
-          const path5 = [token];
+          const path4 = [token];
           let tokenProvider = provider;
           while (tokenProvider != null) {
             const currentToken = tokenProvider.useToken;
-            if (path5.includes(currentToken)) {
-              throw new Error(`Token registration cycle detected! ${[...path5, currentToken].join(" -> ")}`);
+            if (path4.includes(currentToken)) {
+              throw new Error(`Token registration cycle detected! ${[...path4, currentToken].join(" -> ")}`);
             }
-            path5.push(currentToken);
+            path4.push(currentToken);
             const registration = this._registry.get(currentToken);
             if (registration && providers_1.isTokenProvider(registration.provider)) {
               tokenProvider = registration.provider;
@@ -49770,14 +49770,14 @@ var require_svgPath = __commonJS({
       ["Z", 0],
       ["z", 0]
     ]);
-    var parse2 = function(path5) {
+    var parse2 = function(path4) {
       var cmd;
       var ret = [];
       var args = [];
       var curArg = "";
       var foundDecimal = false;
       var params = 0;
-      for (var _i = 0, path_1 = path5; _i < path_1.length; _i++) {
+      for (var _i = 0, path_1 = path4; _i < path_1.length; _i++) {
         var c = path_1[_i];
         if (parameters.has(c)) {
           params = parameters.get(c);
@@ -50091,8 +50091,8 @@ var require_svgPath = __commonJS({
       ];
       return result;
     };
-    exports2.svgPathToOperators = function(path5) {
-      return apply(parse2(path5));
+    exports2.svgPathToOperators = function(path4) {
+      return apply(parse2(path4));
     };
   }
 });
@@ -50275,7 +50275,7 @@ var require_operations = __commonJS({
         operators_1.popGraphicsState()
       ]).filter(Boolean);
     };
-    exports2.drawSvgPath = function(path5, options) {
+    exports2.drawSvgPath = function(path4, options) {
       var _a, _b, _c;
       return tslib_1.__spreadArrays([
         operators_1.pushGraphicsState(),
@@ -50289,7 +50289,7 @@ var require_operations = __commonJS({
         options.borderWidth && operators_1.setLineWidth(options.borderWidth),
         options.borderLineCap && operators_1.setLineCap(options.borderLineCap),
         operators_1.setDashPattern((_b = options.borderDashArray) !== null && _b !== void 0 ? _b : [], (_c = options.borderDashPhase) !== null && _c !== void 0 ? _c : 0)
-      ], svgPath_1.svgPathToOperators(path5), [
+      ], svgPath_1.svgPathToOperators(path4), [
         // prettier-ignore
         options.color && options.borderWidth ? operators_1.fillAndStroke() : options.color ? operators_1.fill() : options.borderColor ? operators_1.stroke() : operators_1.closePath(),
         operators_1.popGraphicsState()
@@ -54587,12 +54587,12 @@ var require_PDFPage = __commonJS({
             graphicsState: graphicsStateKey
           }));
         };
-        PDFPage2.prototype.drawSvgPath = function(path5, options) {
+        PDFPage2.prototype.drawSvgPath = function(path4, options) {
           var _a, _b, _c, _d, _e, _f, _g, _h, _j;
           if (options === void 0) {
             options = {};
           }
-          utils_1.assertIs(path5, "path", ["string"]);
+          utils_1.assertIs(path4, "path", ["string"]);
           utils_1.assertOrUndefined(options.x, "options.x", ["number"]);
           utils_1.assertOrUndefined(options.y, "options.y", ["number"]);
           utils_1.assertOrUndefined(options.scale, "options.scale", ["number"]);
@@ -54621,7 +54621,7 @@ var require_PDFPage = __commonJS({
             options.borderColor = colors_1.rgb(0, 0, 0);
           }
           var contentStream = this.getContentStream();
-          contentStream.push.apply(contentStream, operations_1.drawSvgPath(path5, {
+          contentStream.push.apply(contentStream, operations_1.drawSvgPath(path4, {
             x: (_a = options.x) !== null && _a !== void 0 ? _a : this.x,
             y: (_b = options.y) !== null && _b !== void 0 ? _b : this.y,
             scale: options.scale,
@@ -55113,6 +55113,410 @@ var require_cjs12 = __commonJS({
     tslib_1.__exportStar(require_utils3(), exports2);
   }
 });
+
+// src/lib/constituency.ts
+var import_axios = __toESM(require("axios"), 1);
+var acGeoJsonData = null;
+var acGeoJsonLoadAttempted = false;
+var MP_CONSTITUENCIES_MOCK = [
+  { district: "Bhopal", vidhan_sabha: "Bhopal Uttar", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Bhopal Madhya", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Bhopal Dakshin-Pashchim", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Narela", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Govindpura", sansad_kshetra: "Bhopal" },
+  { district: "Bhopal", vidhan_sabha: "Huzur", sansad_kshetra: "Bhopal" },
+  { district: "Sehore", vidhan_sabha: "Budhni", sansad_kshetra: "Vidisha" },
+  { district: "Sehore", vidhan_sabha: "Ichhawar", sansad_kshetra: "Vidisha" },
+  { district: "Sehore", vidhan_sabha: "Ashta", sansad_kshetra: "Dewas" },
+  { district: "Indore", vidhan_sabha: "Indore-1", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Indore-2", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Indore-3", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Indore-4", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Indore-5", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Rau", sansad_kshetra: "Indore" },
+  { district: "Indore", vidhan_sabha: "Mhow", sansad_kshetra: "Dhar" },
+  { district: "Gwalior", vidhan_sabha: "Gwalior East", sansad_kshetra: "Gwalior" },
+  { district: "Gwalior", vidhan_sabha: "Gwalior South", sansad_kshetra: "Gwalior" },
+  { district: "Jabalpur", vidhan_sabha: "Jabalpur Cantt", sansad_kshetra: "Jabalpur" },
+  { district: "Jabalpur", vidhan_sabha: "Jabalpur East", sansad_kshetra: "Jabalpur" },
+  { district: "Vidisha", vidhan_sabha: "Vidisha", sansad_kshetra: "Vidisha" },
+  { district: "Sagar", vidhan_sabha: "Sagar", sansad_kshetra: "Sagar" },
+  { district: "Ujjain", vidhan_sabha: "Ujjain North", sansad_kshetra: "Ujjain" },
+  { district: "Ujjain", vidhan_sabha: "Ujjain South", sansad_kshetra: "Ujjain" },
+  { district: "Dewas", vidhan_sabha: "Dewas", sansad_kshetra: "Dewas" }
+];
+var PINCODE_CONSTITUENCY_MAP = {
+  "462038": {
+    vidhan_sabha: "Narela",
+    vidhan_sabhas: ["Narela", "Bhopal Uttar", "Govindpura"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462001": {
+    vidhan_sabha: "Bhopal Uttar",
+    vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462002": {
+    vidhan_sabha: "Bhopal Uttar",
+    vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462003": {
+    vidhan_sabha: "Bhopal Uttar",
+    vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462008": {
+    vidhan_sabha: "Bhopal Uttar",
+    vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462010": {
+    vidhan_sabha: "Narela",
+    vidhan_sabhas: ["Narela", "Govindpura"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462011": {
+    vidhan_sabha: "Narela",
+    vidhan_sabhas: ["Narela", "Govindpura"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462018": {
+    vidhan_sabha: "Narela",
+    vidhan_sabhas: ["Narela", "Govindpura"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462021": {
+    vidhan_sabha: "Govindpura",
+    vidhan_sabhas: ["Govindpura", "Narela"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462022": {
+    vidhan_sabha: "Govindpura",
+    vidhan_sabhas: ["Govindpura", "Narela"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462023": {
+    vidhan_sabha: "Govindpura",
+    vidhan_sabhas: ["Govindpura", "Narela"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462024": {
+    vidhan_sabha: "Govindpura",
+    vidhan_sabhas: ["Govindpura", "Narela"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462026": {
+    vidhan_sabha: "Bhopal Madhya",
+    vidhan_sabhas: ["Bhopal Madhya", "Bhopal Uttar", "Bhopal Dakshin-Pashchim"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462004": {
+    vidhan_sabha: "Bhopal Madhya",
+    vidhan_sabhas: ["Bhopal Madhya", "Bhopal Uttar", "Bhopal Dakshin-Pashchim"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462007": {
+    vidhan_sabha: "Bhopal Madhya",
+    vidhan_sabhas: ["Bhopal Madhya", "Bhopal Uttar", "Bhopal Dakshin-Pashchim"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462016": {
+    vidhan_sabha: "Bhopal Dakshin-Pashchim",
+    vidhan_sabhas: ["Bhopal Dakshin-Pashchim", "Bhopal Madhya", "Huzur"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462030": {
+    vidhan_sabha: "Bhopal Dakshin-Pashchim",
+    vidhan_sabhas: ["Bhopal Dakshin-Pashchim", "Bhopal Madhya", "Huzur"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462009": {
+    vidhan_sabha: "Huzur",
+    vidhan_sabhas: ["Huzur", "Bhopal Dakshin-Pashchim"],
+    sansad_kshetra: "Bhopal"
+  },
+  "462042": {
+    vidhan_sabha: "Huzur",
+    vidhan_sabhas: ["Huzur", "Bhopal Dakshin-Pashchim"],
+    sansad_kshetra: "Bhopal"
+  },
+  "466001": {
+    vidhan_sabha: "Budhni",
+    vidhan_sabhas: ["Budhni", "Ichhawar"],
+    sansad_kshetra: "Vidisha"
+  },
+  "452001": {
+    vidhan_sabha: "Indore-1",
+    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
+    sansad_kshetra: "Indore"
+  },
+  "452002": {
+    vidhan_sabha: "Indore-2",
+    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
+    sansad_kshetra: "Indore"
+  },
+  "452003": {
+    vidhan_sabha: "Indore-3",
+    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
+    sansad_kshetra: "Indore"
+  },
+  "452004": {
+    vidhan_sabha: "Indore-4",
+    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
+    sansad_kshetra: "Indore"
+  },
+  "452010": {
+    vidhan_sabha: "Indore-5",
+    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
+    sansad_kshetra: "Indore"
+  },
+  "452011": {
+    vidhan_sabha: "Rau",
+    vidhan_sabhas: ["Rau", "Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5"],
+    sansad_kshetra: "Indore"
+  },
+  "453441": {
+    vidhan_sabha: "Mhow",
+    vidhan_sabhas: ["Mhow", "Rau"],
+    sansad_kshetra: "Dhar"
+  }
+};
+function findConstituenciesByDistrict(district, state) {
+  const geoJson = loadACGeoJson();
+  if (!geoJson || !Array.isArray(geoJson.features)) return null;
+  const targetDistrict = district.trim().toLowerCase();
+  const targetState = state ? state.trim().toLowerCase() : null;
+  const seen = /* @__PURE__ */ new Set();
+  const matches = [];
+  for (const feature of geoJson.features) {
+    const props = feature.properties;
+    if (!props) continue;
+    const distRaw = (props.DIST_NAME || "").toLowerCase();
+    const st = (props.ST_NAME || "").toLowerCase();
+    const cleanDist = distRaw.replace(/\b(district|m corp|municipal corporation|city)\b/g, "").replace(/[^a-z]/g, "");
+    const cleanTargetDist = targetDistrict.replace(/\b(district|m corp|municipal corporation|city)\b/g, "").replace(/[^a-z]/g, "");
+    if (!cleanDist || !cleanTargetDist) continue;
+    if (!cleanDist.includes(cleanTargetDist) && !cleanTargetDist.includes(cleanDist)) continue;
+    if (targetState && !st.includes(targetState) && !targetState.includes(st)) continue;
+    const acName = props.AC_NAME;
+    if (!acName || seen.has(acName)) continue;
+    seen.add(acName);
+    matches.push({
+      vidhan_sabha: acName,
+      sansad_kshetra: props.PC_NAME || ""
+    });
+  }
+  return matches.length > 0 ? matches : null;
+}
+function loadACGeoJson() {
+  return acGeoJsonData;
+}
+async function loadACGeoJsonAsync() {
+  if (acGeoJsonData) return acGeoJsonData;
+  if (acGeoJsonLoadAttempted) return acGeoJsonData;
+  acGeoJsonLoadAttempted = true;
+  try {
+    console.log("[AC GeoJSON] Fetching constituency data from remote...");
+    const res = await import_axios.default.get("https://yashveeeeeeer.github.io/india-geodata/ac.geojson", { timeout: 15e3 });
+    if (res.data && Array.isArray(res.data.features)) {
+      acGeoJsonData = res.data;
+      console.log(`[AC GeoJSON] Successfully loaded ${acGeoJsonData.features.length} constituency features.`);
+    }
+  } catch (err) {
+    console.error("[AC GeoJSON] Failed to load from remote:", err.message);
+  }
+  return acGeoJsonData;
+}
+function resolveConstituency(pincode, district, areas = [], state) {
+  if (PINCODE_CONSTITUENCY_MAP[pincode]) {
+    return PINCODE_CONSTITUENCY_MAP[pincode];
+  }
+  const areaString = (areas || []).join(" ").toLowerCase();
+  const distLower = (district || "").toLowerCase();
+  const geoMatches = findConstituenciesByDistrict(district, state);
+  if (geoMatches) {
+    const vidhan_sabhas = geoMatches.map((m) => m.vidhan_sabha);
+    let sansad_kshetra2 = geoMatches[0]?.sansad_kshetra || `${district} Lok Sabha constituency`;
+    if (geoMatches.length === 1) {
+      return {
+        vidhan_sabha: geoMatches[0].vidhan_sabha,
+        vidhan_sabhas,
+        sansad_kshetra: geoMatches[0].sansad_kshetra || sansad_kshetra2
+      };
+    }
+    const nameMatch = geoMatches.find(
+      (m) => areaString.includes(m.vidhan_sabha.toLowerCase())
+    );
+    if (nameMatch) {
+      return {
+        vidhan_sabha: nameMatch.vidhan_sabha,
+        vidhan_sabhas,
+        sansad_kshetra: nameMatch.sansad_kshetra || sansad_kshetra2
+      };
+    }
+    return {
+      vidhan_sabha: "",
+      vidhan_sabhas,
+      sansad_kshetra: ""
+    };
+  }
+  if (distLower === "bhopal") {
+    if (areaString.includes("narela") || areaString.includes("m.l. nagar") || areaString.includes("ml nagar") || areaString.includes("eintkhedi") || areaString.includes("karond")) {
+      return {
+        vidhan_sabha: "Narela",
+        vidhan_sabhas: [
+          "Narela",
+          "Bhopal Uttar",
+          "Govindpura",
+          "Bhopal Madhya",
+          "Bhopal Dakshin-Pashchim",
+          "Huzur"
+        ],
+        sansad_kshetra: "Bhopal"
+      };
+    }
+    if (areaString.includes("govindpura") || areaString.includes("piplani") || areaString.includes("industrial area") || areaString.includes("bhel")) {
+      return {
+        vidhan_sabha: "Govindpura",
+        vidhan_sabhas: [
+          "Govindpura",
+          "Narela",
+          "Bhopal Uttar",
+          "Bhopal Madhya",
+          "Bhopal Dakshin-Pashchim",
+          "Huzur"
+        ],
+        sansad_kshetra: "Bhopal"
+      };
+    }
+    if (areaString.includes("huzur") || areaString.includes("bairagarh") || areaString.includes("lalghati") || areaString.includes("gandhi nagar")) {
+      return {
+        vidhan_sabha: "Huzur",
+        vidhan_sabhas: [
+          "Huzur",
+          "Bhopal Dakshin-Pashchim",
+          "Bhopal Uttar",
+          "Bhopal Madhya",
+          "Govindpura",
+          "Narela"
+        ],
+        sansad_kshetra: "Bhopal"
+      };
+    }
+    if (areaString.includes("dakshin") || areaString.includes("pashchim") || areaString.includes("tt nagar") || areaString.includes("new market") || areaString.includes("arera")) {
+      return {
+        vidhan_sabha: "Bhopal Dakshin-Pashchim",
+        vidhan_sabhas: [
+          "Bhopal Dakshin-Pashchim",
+          "Bhopal Madhya",
+          "Huzur",
+          "Bhopal Uttar",
+          "Govindpura",
+          "Narela"
+        ],
+        sansad_kshetra: "Bhopal"
+      };
+    }
+    if (areaString.includes("madhya") || areaString.includes("jehangirabad") || areaString.includes("chola") || areaString.includes("aishbagh")) {
+      return {
+        vidhan_sabha: "Bhopal Madhya",
+        vidhan_sabhas: [
+          "Bhopal Madhya",
+          "Bhopal Uttar",
+          "Bhopal Dakshin-Pashchim",
+          "Narela",
+          "Govindpura",
+          "Huzur"
+        ],
+        sansad_kshetra: "Bhopal"
+      };
+    }
+    return {
+      vidhan_sabha: "",
+      vidhan_sabhas: [
+        "Bhopal Uttar",
+        "Bhopal Madhya",
+        "Bhopal Dakshin-Pashchim",
+        "Narela",
+        "Govindpura",
+        "Huzur"
+      ],
+      sansad_kshetra: "Bhopal"
+    };
+  }
+  if (distLower === "indore") {
+    if (areaString.includes("mhow")) {
+      return {
+        vidhan_sabha: "Mhow",
+        vidhan_sabhas: [
+          "Mhow",
+          "Rau",
+          "Indore-1",
+          "Indore-2",
+          "Indore-3",
+          "Indore-4",
+          "Indore-5"
+        ],
+        sansad_kshetra: "Dhar"
+      };
+    }
+    if (areaString.includes("rau") || areaString.includes("rajendra nagar")) {
+      return {
+        vidhan_sabha: "Rau",
+        vidhan_sabhas: [
+          "Rau",
+          "Indore-1",
+          "Indore-2",
+          "Indore-3",
+          "Indore-4",
+          "Indore-5",
+          "Mhow"
+        ],
+        sansad_kshetra: "Indore"
+      };
+    }
+    return {
+      vidhan_sabha: "",
+      vidhan_sabhas: [
+        "Indore-1",
+        "Indore-2",
+        "Indore-3",
+        "Indore-4",
+        "Indore-5",
+        "Rau",
+        "Mhow"
+      ],
+      sansad_kshetra: "Indore"
+    };
+  }
+  const matches = MP_CONSTITUENCIES_MOCK.filter(
+    (c) => c.district.toLowerCase() === distLower
+  );
+  if (matches.length === 0) {
+    return {
+      vidhan_sabha: "",
+      vidhan_sabhas: district ? [`${district} Assembly Constituency`] : [],
+      sansad_kshetra: district ? `${district} Lok Sabha constituency` : ""
+    };
+  }
+  if (matches.length === 1) {
+    return {
+      vidhan_sabha: matches[0].vidhan_sabha,
+      vidhan_sabhas: [matches[0].vidhan_sabha],
+      sansad_kshetra: matches[0].sansad_kshetra
+    };
+  }
+  const sansad_kshetras = Array.from(
+    new Set(matches.map((c) => c.sansad_kshetra))
+  );
+  const sansad_kshetra = sansad_kshetras.length === 1 ? sansad_kshetras[0] : `${district} Lok Sabha constituency`;
+  return {
+    vidhan_sabha: "",
+    vidhan_sabhas: matches.map((c) => c.vidhan_sabha),
+    sansad_kshetra
+  };
+}
 
 // server.ts
 var import_express23 = __toESM(require("express"), 1);
@@ -57839,7 +58243,7 @@ var bcryptjs_default = {
 };
 
 // server.ts
-var import_path4 = __toESM(require("path"), 1);
+var import_path3 = __toESM(require("path"), 1);
 var import_dotenv2 = __toESM(require("dotenv"), 1);
 var import_pg2 = __toESM(require("pg"), 1);
 var import_crypto13 = __toESM(require("crypto"), 1);
@@ -57904,7 +58308,7 @@ var adminHqRoutes_default = router;
 var import_express2 = __toESM(require("express"), 1);
 
 // src/lib/mailer.ts
-var import_axios = __toESM(require("axios"), 1);
+var import_axios2 = __toESM(require("axios"), 1);
 var SMTP2GO_API_BASE_URL = "https://api.smtp2go.com/v3/";
 var SMTP2GO_API_KEY = process.env.SMTP2GO_API_KEY;
 var DEFAULT_SENDER = process.env.SMTP_USER || "no-reply@appapi.therpfoundation.org";
@@ -57922,7 +58326,7 @@ async function sendEmail({ to, subject, text, html, from }) {
   if (text) payload.text_body = text;
   if (html) payload.html_body = html;
   const url = new URL("email/send", SMTP2GO_API_BASE_URL).toString();
-  const response = await import_axios.default.post(url, payload, {
+  const response = await import_axios2.default.post(url, payload, {
     headers: {
       "Content-Type": "application/json",
       "X-Smtp2go-Api-Key": SMTP2GO_API_KEY,
@@ -57992,7 +58396,7 @@ var requireAdmin = (req, res, next) => {
 // src/routes/authRoutes.ts
 var import_jsonwebtoken2 = __toESM(require_jsonwebtoken(), 1);
 var import_crypto2 = __toESM(require("crypto"), 1);
-var import_axios2 = __toESM(require("axios"), 1);
+var import_axios3 = __toESM(require("axios"), 1);
 
 // node_modules/@simplewebauthn/server/esm/helpers/iso/isoBase64URL.js
 var isoBase64URL_exports = {};
@@ -65588,7 +65992,7 @@ router2.post("/api/auth/login", async (req, res) => {
           console.error("MSG91_AUTHKEY not set in environment \u2014 skipping SMS send");
         } else {
           const url = `https://control.msg91.com/api/v5/otp?authkey=${MSG91_AUTHKEY}&mobile=91${phone}&otp=${otp}&sender=${MSG91_SENDER}`;
-          await import_axios2.default.get(url);
+          await import_axios3.default.get(url);
         }
       } catch (smsErr) {
         console.error("MSG91 Error:", smsErr?.response?.data || smsErr.message);
@@ -66099,7 +66503,7 @@ var authRoutes_default = router2;
 // src/routes/healthRoutes.ts
 var import_express3 = __toESM(require("express"), 1);
 var import_crypto3 = __toESM(require("crypto"), 1);
-var import_axios3 = __toESM(require("axios"), 1);
+var import_axios4 = __toESM(require("axios"), 1);
 var router3 = import_express3.default.Router();
 router3.get("/api/health-vitals", authenticateToken, async (req, res) => {
   try {
@@ -66399,7 +66803,7 @@ router3.get("/api/blood-banks", async (req, res) => {
   if (apiKey) {
     try {
       const url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=250&filters[_state]=Madhya%20Pradesh`;
-      const response = await import_axios3.default.get(url);
+      const response = await import_axios4.default.get(url);
       if (response.data && response.data.records && Array.isArray(response.data.records)) {
         let records = response.data.records;
         let mapped = records.map((item) => ({
@@ -66614,7 +67018,7 @@ var grievanceRoutes_default = router4;
 var import_express5 = __toESM(require("express"), 1);
 
 // src/lib/externalSearch.ts
-var import_axios4 = __toESM(require("axios"), 1);
+var import_axios5 = __toESM(require("axios"), 1);
 var cheerio = __toESM(require("cheerio"), 1);
 async function queryExternalSearch(searchQuery) {
   const tavilyKey = process.env.TAVILY_API_KEY;
@@ -66638,7 +67042,7 @@ async function queryExternalSearch(searchQuery) {
   if (tavilyKey) {
     try {
       console.log(`[Search/Tier-1/Tavily] Querying: "${searchQuery}"`);
-      const response = await import_axios4.default.post(
+      const response = await import_axios5.default.post(
         "https://api.tavily.com/search",
         {
           api_key: tavilyKey,
@@ -66678,7 +67082,7 @@ async function queryExternalSearch(searchQuery) {
     const constrainedQuery = `${searchQuery} site:gov.in`;
     console.log(`[Search/Tier-2/DDG-Scraper] Querying: "${constrainedQuery}"`);
     const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(constrainedQuery)}`;
-    const response = await import_axios4.default.get(ddgUrl, {
+    const response = await import_axios5.default.get(ddgUrl, {
       headers: browserHeaders,
       timeout: 4500
     });
@@ -66726,7 +67130,7 @@ async function queryExternalSearch(searchQuery) {
   }
   try {
     console.log(`[Search/Tier-3/SearXNG] Dynamic instance lookup...`);
-    const spaceRes = await import_axios4.default.get("https://searx.space/data/instances.json", {
+    const spaceRes = await import_axios5.default.get("https://searx.space/data/instances.json", {
       timeout: 3e3
     });
     const instances = spaceRes.data?.instances || {};
@@ -66743,7 +67147,7 @@ async function queryExternalSearch(searchQuery) {
         const searchUrl = `${instanceUrl}search`;
         try {
           console.log(`[Search/Tier-3/SearXNG] Trying instance: ${searchUrl}`);
-          const res = await import_axios4.default.get(searchUrl, {
+          const res = await import_axios5.default.get(searchUrl, {
             params: {
               q: `${searchQuery} site:gov.in`,
               format: "json"
@@ -66782,7 +67186,7 @@ async function queryExternalSearch(searchQuery) {
   try {
     console.log(`[Search/Tier-4/Wikipedia] Querying: "${searchQuery}"`);
     const wikiUrl = "https://en.wikipedia.org/w/api.php";
-    const res = await import_axios4.default.get(wikiUrl, {
+    const res = await import_axios5.default.get(wikiUrl, {
       params: {
         action: "query",
         list: "search",
@@ -67027,7 +67431,7 @@ var SOCIAL_CACHE_TTL = 60 * 60 * 1e3;
 
 // src/routes/cultureRoutes.ts
 var import_crypto5 = __toESM(require("crypto"), 1);
-var import_axios5 = __toESM(require("axios"), 1);
+var import_axios6 = __toESM(require("axios"), 1);
 var router6 = import_express6.default.Router();
 router6.get("/api/success-stories", async (req, res) => {
   try {
@@ -67093,7 +67497,7 @@ router6.get("/api/social-previews", async (req, res) => {
       }
       try {
         console.log(`[EXABASE] Fetching live preview for: ${url}`);
-        const response = await import_axios5.default.get(
+        const response = await import_axios6.default.get(
           `https://api.exabase.io/v2/link?url=${encodeURIComponent(url)}`,
           {
             headers: {
@@ -67285,423 +67689,7 @@ var janSevaRoutes_default = router7;
 
 // src/routes/locationRoutes.ts
 var import_express8 = __toESM(require("express"), 1);
-
-// src/lib/constituency.ts
-var import_fs = __toESM(require("fs"), 1);
-var import_path = __toESM(require("path"), 1);
-var acGeoJsonData = null;
-var acGeoJsonLoadAttempted = false;
-var MP_CONSTITUENCIES_MOCK = [
-  { district: "Bhopal", vidhan_sabha: "Bhopal Uttar", sansad_kshetra: "Bhopal" },
-  { district: "Bhopal", vidhan_sabha: "Bhopal Madhya", sansad_kshetra: "Bhopal" },
-  { district: "Bhopal", vidhan_sabha: "Bhopal Dakshin-Pashchim", sansad_kshetra: "Bhopal" },
-  { district: "Bhopal", vidhan_sabha: "Narela", sansad_kshetra: "Bhopal" },
-  { district: "Bhopal", vidhan_sabha: "Govindpura", sansad_kshetra: "Bhopal" },
-  { district: "Bhopal", vidhan_sabha: "Huzur", sansad_kshetra: "Bhopal" },
-  { district: "Sehore", vidhan_sabha: "Budhni", sansad_kshetra: "Vidisha" },
-  { district: "Sehore", vidhan_sabha: "Ichhawar", sansad_kshetra: "Vidisha" },
-  { district: "Sehore", vidhan_sabha: "Ashta", sansad_kshetra: "Dewas" },
-  { district: "Indore", vidhan_sabha: "Indore-1", sansad_kshetra: "Indore" },
-  { district: "Indore", vidhan_sabha: "Indore-2", sansad_kshetra: "Indore" },
-  { district: "Indore", vidhan_sabha: "Indore-3", sansad_kshetra: "Indore" },
-  { district: "Indore", vidhan_sabha: "Indore-4", sansad_kshetra: "Indore" },
-  { district: "Indore", vidhan_sabha: "Indore-5", sansad_kshetra: "Indore" },
-  { district: "Indore", vidhan_sabha: "Rau", sansad_kshetra: "Indore" },
-  { district: "Indore", vidhan_sabha: "Mhow", sansad_kshetra: "Dhar" },
-  { district: "Gwalior", vidhan_sabha: "Gwalior East", sansad_kshetra: "Gwalior" },
-  { district: "Gwalior", vidhan_sabha: "Gwalior South", sansad_kshetra: "Gwalior" },
-  { district: "Jabalpur", vidhan_sabha: "Jabalpur Cantt", sansad_kshetra: "Jabalpur" },
-  { district: "Jabalpur", vidhan_sabha: "Jabalpur East", sansad_kshetra: "Jabalpur" },
-  { district: "Vidisha", vidhan_sabha: "Vidisha", sansad_kshetra: "Vidisha" },
-  { district: "Sagar", vidhan_sabha: "Sagar", sansad_kshetra: "Sagar" },
-  { district: "Ujjain", vidhan_sabha: "Ujjain North", sansad_kshetra: "Ujjain" },
-  { district: "Ujjain", vidhan_sabha: "Ujjain South", sansad_kshetra: "Ujjain" },
-  { district: "Dewas", vidhan_sabha: "Dewas", sansad_kshetra: "Dewas" }
-];
-var PINCODE_CONSTITUENCY_MAP = {
-  "462038": {
-    vidhan_sabha: "Narela",
-    vidhan_sabhas: ["Narela", "Bhopal Uttar", "Govindpura"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462001": {
-    vidhan_sabha: "Bhopal Uttar",
-    vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462002": {
-    vidhan_sabha: "Bhopal Uttar",
-    vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462003": {
-    vidhan_sabha: "Bhopal Uttar",
-    vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462008": {
-    vidhan_sabha: "Bhopal Uttar",
-    vidhan_sabhas: ["Bhopal Uttar", "Bhopal Madhya"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462010": {
-    vidhan_sabha: "Narela",
-    vidhan_sabhas: ["Narela", "Govindpura"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462011": {
-    vidhan_sabha: "Narela",
-    vidhan_sabhas: ["Narela", "Govindpura"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462018": {
-    vidhan_sabha: "Narela",
-    vidhan_sabhas: ["Narela", "Govindpura"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462021": {
-    vidhan_sabha: "Govindpura",
-    vidhan_sabhas: ["Govindpura", "Narela"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462022": {
-    vidhan_sabha: "Govindpura",
-    vidhan_sabhas: ["Govindpura", "Narela"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462023": {
-    vidhan_sabha: "Govindpura",
-    vidhan_sabhas: ["Govindpura", "Narela"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462024": {
-    vidhan_sabha: "Govindpura",
-    vidhan_sabhas: ["Govindpura", "Narela"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462026": {
-    vidhan_sabha: "Bhopal Madhya",
-    vidhan_sabhas: ["Bhopal Madhya", "Bhopal Uttar", "Bhopal Dakshin-Pashchim"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462004": {
-    vidhan_sabha: "Bhopal Madhya",
-    vidhan_sabhas: ["Bhopal Madhya", "Bhopal Uttar", "Bhopal Dakshin-Pashchim"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462007": {
-    vidhan_sabha: "Bhopal Madhya",
-    vidhan_sabhas: ["Bhopal Madhya", "Bhopal Uttar", "Bhopal Dakshin-Pashchim"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462016": {
-    vidhan_sabha: "Bhopal Dakshin-Pashchim",
-    vidhan_sabhas: ["Bhopal Dakshin-Pashchim", "Bhopal Madhya", "Huzur"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462030": {
-    vidhan_sabha: "Bhopal Dakshin-Pashchim",
-    vidhan_sabhas: ["Bhopal Dakshin-Pashchim", "Bhopal Madhya", "Huzur"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462009": {
-    vidhan_sabha: "Huzur",
-    vidhan_sabhas: ["Huzur", "Bhopal Dakshin-Pashchim"],
-    sansad_kshetra: "Bhopal"
-  },
-  "462042": {
-    vidhan_sabha: "Huzur",
-    vidhan_sabhas: ["Huzur", "Bhopal Dakshin-Pashchim"],
-    sansad_kshetra: "Bhopal"
-  },
-  "466001": {
-    vidhan_sabha: "Budhni",
-    vidhan_sabhas: ["Budhni", "Ichhawar"],
-    sansad_kshetra: "Vidisha"
-  },
-  "452001": {
-    vidhan_sabha: "Indore-1",
-    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
-    sansad_kshetra: "Indore"
-  },
-  "452002": {
-    vidhan_sabha: "Indore-2",
-    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
-    sansad_kshetra: "Indore"
-  },
-  "452003": {
-    vidhan_sabha: "Indore-3",
-    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
-    sansad_kshetra: "Indore"
-  },
-  "452004": {
-    vidhan_sabha: "Indore-4",
-    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
-    sansad_kshetra: "Indore"
-  },
-  "452010": {
-    vidhan_sabha: "Indore-5",
-    vidhan_sabhas: ["Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5", "Rau"],
-    sansad_kshetra: "Indore"
-  },
-  "452011": {
-    vidhan_sabha: "Rau",
-    vidhan_sabhas: ["Rau", "Indore-1", "Indore-2", "Indore-3", "Indore-4", "Indore-5"],
-    sansad_kshetra: "Indore"
-  },
-  "453441": {
-    vidhan_sabha: "Mhow",
-    vidhan_sabhas: ["Mhow", "Rau"],
-    sansad_kshetra: "Dhar"
-  }
-};
-function findConstituenciesByDistrict(district, state) {
-  const geoJson = loadACGeoJson();
-  if (!geoJson || !Array.isArray(geoJson.features)) return null;
-  const targetDistrict = district.trim().toLowerCase();
-  const targetState = state ? state.trim().toLowerCase() : null;
-  const seen = /* @__PURE__ */ new Set();
-  const matches = [];
-  for (const feature of geoJson.features) {
-    const props = feature.properties;
-    if (!props) continue;
-    const distRaw = (props.DIST_NAME || "").toLowerCase();
-    const st = (props.ST_NAME || "").toLowerCase();
-    const cleanDist = distRaw.replace(/\b(district|m corp|municipal corporation|city)\b/g, "").replace(/[^a-z]/g, "");
-    const cleanTargetDist = targetDistrict.replace(/\b(district|m corp|municipal corporation|city)\b/g, "").replace(/[^a-z]/g, "");
-    if (!cleanDist || !cleanTargetDist) continue;
-    if (!cleanDist.includes(cleanTargetDist) && !cleanTargetDist.includes(cleanDist)) continue;
-    if (targetState && !st.includes(targetState) && !targetState.includes(st)) continue;
-    const acName = props.AC_NAME;
-    if (!acName || seen.has(acName)) continue;
-    seen.add(acName);
-    matches.push({
-      vidhan_sabha: acName,
-      sansad_kshetra: props.PC_NAME || ""
-    });
-  }
-  return matches.length > 0 ? matches : null;
-}
-function loadACGeoJson() {
-  if (acGeoJsonData || acGeoJsonLoadAttempted) return acGeoJsonData;
-  acGeoJsonLoadAttempted = true;
-  try {
-    const geoJsonPath = import_path.default.join(
-      process.cwd(),
-      "src",
-      "data",
-      "ac.geojson"
-    );
-    if (import_fs.default.existsSync(geoJsonPath)) {
-      const fileContent = import_fs.default.readFileSync(geoJsonPath, "utf-8");
-      acGeoJsonData = JSON.parse(fileContent);
-      console.log(
-        `[AC GeoJSON] Loaded ${acGeoJsonData?.features?.length || 0} constituency features`
-      );
-    } else {
-      console.warn(
-        "[AC GeoJSON] File not found at",
-        geoJsonPath,
-        "- falling back to limited built-in dataset"
-      );
-    }
-  } catch (err) {
-    console.error("[AC GeoJSON] Failed to load:", err.message);
-  }
-  return acGeoJsonData;
-}
-function resolveConstituency(pincode, district, areas = [], state) {
-  if (PINCODE_CONSTITUENCY_MAP[pincode]) {
-    return PINCODE_CONSTITUENCY_MAP[pincode];
-  }
-  const areaString = (areas || []).join(" ").toLowerCase();
-  const distLower = (district || "").toLowerCase();
-  const geoMatches = findConstituenciesByDistrict(district, state);
-  if (geoMatches) {
-    const vidhan_sabhas = geoMatches.map((m) => m.vidhan_sabha);
-    let sansad_kshetra2 = geoMatches[0]?.sansad_kshetra || `${district} Lok Sabha constituency`;
-    if (geoMatches.length === 1) {
-      return {
-        vidhan_sabha: geoMatches[0].vidhan_sabha,
-        vidhan_sabhas,
-        sansad_kshetra: geoMatches[0].sansad_kshetra || sansad_kshetra2
-      };
-    }
-    const nameMatch = geoMatches.find(
-      (m) => areaString.includes(m.vidhan_sabha.toLowerCase())
-    );
-    if (nameMatch) {
-      return {
-        vidhan_sabha: nameMatch.vidhan_sabha,
-        vidhan_sabhas,
-        sansad_kshetra: nameMatch.sansad_kshetra || sansad_kshetra2
-      };
-    }
-    return {
-      vidhan_sabha: "",
-      vidhan_sabhas,
-      sansad_kshetra: ""
-    };
-  }
-  if (distLower === "bhopal") {
-    if (areaString.includes("narela") || areaString.includes("m.l. nagar") || areaString.includes("ml nagar") || areaString.includes("eintkhedi") || areaString.includes("karond")) {
-      return {
-        vidhan_sabha: "Narela",
-        vidhan_sabhas: [
-          "Narela",
-          "Bhopal Uttar",
-          "Govindpura",
-          "Bhopal Madhya",
-          "Bhopal Dakshin-Pashchim",
-          "Huzur"
-        ],
-        sansad_kshetra: "Bhopal"
-      };
-    }
-    if (areaString.includes("govindpura") || areaString.includes("piplani") || areaString.includes("industrial area") || areaString.includes("bhel")) {
-      return {
-        vidhan_sabha: "Govindpura",
-        vidhan_sabhas: [
-          "Govindpura",
-          "Narela",
-          "Bhopal Uttar",
-          "Bhopal Madhya",
-          "Bhopal Dakshin-Pashchim",
-          "Huzur"
-        ],
-        sansad_kshetra: "Bhopal"
-      };
-    }
-    if (areaString.includes("huzur") || areaString.includes("bairagarh") || areaString.includes("lalghati") || areaString.includes("gandhi nagar")) {
-      return {
-        vidhan_sabha: "Huzur",
-        vidhan_sabhas: [
-          "Huzur",
-          "Bhopal Dakshin-Pashchim",
-          "Bhopal Uttar",
-          "Bhopal Madhya",
-          "Govindpura",
-          "Narela"
-        ],
-        sansad_kshetra: "Bhopal"
-      };
-    }
-    if (areaString.includes("dakshin") || areaString.includes("pashchim") || areaString.includes("tt nagar") || areaString.includes("new market") || areaString.includes("arera")) {
-      return {
-        vidhan_sabha: "Bhopal Dakshin-Pashchim",
-        vidhan_sabhas: [
-          "Bhopal Dakshin-Pashchim",
-          "Bhopal Madhya",
-          "Huzur",
-          "Bhopal Uttar",
-          "Govindpura",
-          "Narela"
-        ],
-        sansad_kshetra: "Bhopal"
-      };
-    }
-    if (areaString.includes("madhya") || areaString.includes("jehangirabad") || areaString.includes("chola") || areaString.includes("aishbagh")) {
-      return {
-        vidhan_sabha: "Bhopal Madhya",
-        vidhan_sabhas: [
-          "Bhopal Madhya",
-          "Bhopal Uttar",
-          "Bhopal Dakshin-Pashchim",
-          "Narela",
-          "Govindpura",
-          "Huzur"
-        ],
-        sansad_kshetra: "Bhopal"
-      };
-    }
-    return {
-      vidhan_sabha: "",
-      vidhan_sabhas: [
-        "Bhopal Uttar",
-        "Bhopal Madhya",
-        "Bhopal Dakshin-Pashchim",
-        "Narela",
-        "Govindpura",
-        "Huzur"
-      ],
-      sansad_kshetra: "Bhopal"
-    };
-  }
-  if (distLower === "indore") {
-    if (areaString.includes("mhow")) {
-      return {
-        vidhan_sabha: "Mhow",
-        vidhan_sabhas: [
-          "Mhow",
-          "Rau",
-          "Indore-1",
-          "Indore-2",
-          "Indore-3",
-          "Indore-4",
-          "Indore-5"
-        ],
-        sansad_kshetra: "Dhar"
-      };
-    }
-    if (areaString.includes("rau") || areaString.includes("rajendra nagar")) {
-      return {
-        vidhan_sabha: "Rau",
-        vidhan_sabhas: [
-          "Rau",
-          "Indore-1",
-          "Indore-2",
-          "Indore-3",
-          "Indore-4",
-          "Indore-5",
-          "Mhow"
-        ],
-        sansad_kshetra: "Indore"
-      };
-    }
-    return {
-      vidhan_sabha: "",
-      vidhan_sabhas: [
-        "Indore-1",
-        "Indore-2",
-        "Indore-3",
-        "Indore-4",
-        "Indore-5",
-        "Rau",
-        "Mhow"
-      ],
-      sansad_kshetra: "Indore"
-    };
-  }
-  const matches = MP_CONSTITUENCIES_MOCK.filter(
-    (c) => c.district.toLowerCase() === distLower
-  );
-  if (matches.length === 0) {
-    return {
-      vidhan_sabha: "",
-      vidhan_sabhas: district ? [`${district} Assembly Constituency`] : [],
-      sansad_kshetra: district ? `${district} Lok Sabha constituency` : ""
-    };
-  }
-  if (matches.length === 1) {
-    return {
-      vidhan_sabha: matches[0].vidhan_sabha,
-      vidhan_sabhas: [matches[0].vidhan_sabha],
-      sansad_kshetra: matches[0].sansad_kshetra
-    };
-  }
-  const sansad_kshetras = Array.from(
-    new Set(matches.map((c) => c.sansad_kshetra))
-  );
-  const sansad_kshetra = sansad_kshetras.length === 1 ? sansad_kshetras[0] : `${district} Lok Sabha constituency`;
-  return {
-    vidhan_sabha: "",
-    vidhan_sabhas: matches.map((c) => c.vidhan_sabha),
-    sansad_kshetra
-  };
-}
-
-// src/routes/locationRoutes.ts
-var import_axios6 = __toESM(require("axios"), 1);
+var import_axios7 = __toESM(require("axios"), 1);
 var router8 = import_express8.default.Router();
 router8.get("/api/locations/pincode", async (req, res) => {
   const pincode = String(req.query.p || "").trim();
@@ -67721,7 +67709,7 @@ router8.get("/api/locations/pincode", async (req, res) => {
     }
     let areas = [];
     try {
-      const postRes = await import_axios6.default.get(
+      const postRes = await import_axios7.default.get(
         `https://api.postalpincode.in/pincode/${pincode}`,
         { timeout: 4e3 }
       );
@@ -67749,7 +67737,7 @@ router8.get("/api/locations/pincode", async (req, res) => {
     });
   }
   try {
-    const response = await import_axios6.default.get(
+    const response = await import_axios7.default.get(
       `https://api.postalpincode.in/pincode/${pincode}`,
       { timeout: 5e3 }
     );
@@ -67964,7 +67952,7 @@ router8.get("/api/locations/search", (req, res) => {
 router8.get("/api/countries", async (_req, res) => {
   try {
     const fields = "name,cca2,flags,capital,population,region,subregion,languages,currencies,maps,timezones";
-    const response = await import_axios6.default.get(
+    const response = await import_axios7.default.get(
       `https://restcountries.com/v3.1/all?fields=${fields}`,
       { timeout: 12e3 }
     );
@@ -68193,7 +68181,7 @@ var volunteerRoutes_default = router10;
 // src/routes/certificateRoutes.ts
 var import_express11 = __toESM(require("express"), 1);
 var import_pdf_lib = __toESM(require_cjs12(), 1);
-var import_path2 = __toESM(require("path"), 1);
+var import_path = __toESM(require("path"), 1);
 var router11 = import_express11.default.Router();
 router11.get("/api/certificates/verify/:certificate_id", async (req, res) => {
   try {
@@ -68239,7 +68227,7 @@ router11.get("/api/certificates/download/:id", async (req, res) => {
     const fontItalic = await pdfDoc.embedFont(import_pdf_lib.StandardFonts.HelveticaOblique);
     page.drawRectangle({ x: 20, y: 20, width: width - 40, height: height - 40, borderColor: (0, import_pdf_lib.rgb)(0.1, 0.3, 0.6), borderWidth: 4 });
     page.drawRectangle({ x: 25, y: 25, width: width - 50, height: height - 50, borderColor: (0, import_pdf_lib.rgb)(0.8, 0.6, 0.2), borderWidth: 2 });
-    const logoPath = import_path2.default.join(process.cwd(), "public", "assets", "logo.png");
+    const logoPath = import_path.default.join(process.cwd(), "public", "assets", "logo.png");
     if (require("fs").existsSync(logoPath)) {
       const logoImageBytes = require("fs").readFileSync(logoPath);
       const logoImage = await pdfDoc.embedPng(logoImageBytes);
@@ -69083,8 +69071,8 @@ var userRoutes_default = router18;
 var import_express19 = __toESM(require("express"), 1);
 var import_crypto12 = __toESM(require("crypto"), 1);
 var import_multer = __toESM(require("multer"), 1);
-var import_path3 = __toESM(require("path"), 1);
-var import_fs2 = __toESM(require("fs"), 1);
+var import_path2 = __toESM(require("path"), 1);
+var import_fs = __toESM(require("fs"), 1);
 var storage = import_multer.default.memoryStorage();
 var upload = (0, import_multer.default)({
   storage,
@@ -69107,14 +69095,14 @@ var handleUploadErrors = (err, req, res, next) => {
   next();
 };
 var saveFileLocally = async (file) => {
-  const ext = import_path3.default.extname(file.originalname);
+  const ext = import_path2.default.extname(file.originalname);
   const filename = import_crypto12.default.randomUUID() + ext;
-  const uploadDir = import_path3.default.join(process.cwd(), "uploads");
-  if (!import_fs2.default.existsSync(uploadDir)) {
-    import_fs2.default.mkdirSync(uploadDir, { recursive: true });
+  const uploadDir = import_path2.default.join(process.cwd(), "uploads");
+  if (!import_fs.default.existsSync(uploadDir)) {
+    import_fs.default.mkdirSync(uploadDir, { recursive: true });
   }
-  const filepath = import_path3.default.join(uploadDir, filename);
-  import_fs2.default.writeFileSync(filepath, file.buffer);
+  const filepath = import_path2.default.join(uploadDir, filename);
+  import_fs.default.writeFileSync(filepath, file.buffer);
   return "/uploads/" + filename;
 };
 var router19 = import_express19.default.Router();
@@ -69210,7 +69198,7 @@ var uploadRoutes_default = router19;
 
 // src/routes/publicGovRoutes.ts
 var import_express20 = __toESM(require("express"), 1);
-var import_axios7 = __toESM(require("axios"), 1);
+var import_axios8 = __toESM(require("axios"), 1);
 
 // src/data/coreServices.ts
 var CORE_SERVICES = [
@@ -69249,7 +69237,7 @@ router20.get("/api/gov/mandi-prices", async (req, res) => {
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state)}`;
       if (commodity) url += `&filters[commodity]=${encodeURIComponent(commodity)}`;
-      const response = await import_axios7.default.get(url, { timeout: 5e3 });
+      const response = await import_axios8.default.get(url, { timeout: 5e3 });
       return res.json(response.data);
     } catch (err) {
       console.error("Mandi Prices API failed, falling back to mock");
@@ -69273,7 +69261,7 @@ router20.get("/api/gov/hospitals", async (req, res) => {
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state)}`;
       if (district) url += `&filters[district]=${encodeURIComponent(district)}`;
-      const response = await import_axios7.default.get(url, { timeout: 5e3 });
+      const response = await import_axios8.default.get(url, { timeout: 5e3 });
       return res.json(response.data);
     } catch (err) {
       console.error("Hospitals API failed, falling back to mock");
@@ -70254,20 +70242,21 @@ var upload2 = (0, import_multer2.default)({
   },
   fileFilter: (req, file, cb) => {
     const allowedExtensions = [".png", ".jpg", ".jpeg", ".pdf", ".mp3", ".wav", ".m4a", ".ogg", ".webm", ".mp4", ".mov", ".avi", ".mkv", ".3gp"];
-    const ext = import_path4.default.extname(file.originalname).toLowerCase();
+    const ext = import_path3.default.extname(file.originalname).toLowerCase();
     if (!allowedExtensions.includes(ext)) {
       return cb(new Error("Only PNG, JPG, JPEG, PDF, MP3, WAV, M4A, OGG, WEBM, MP4, MOV, AVI, and MKV files are allowed"));
     }
     cb(null, true);
   }
 });
-app.use("/uploads", import_express23.default.static(import_path4.default.join(process.cwd(), "uploads")));
-app.use("/app", import_express23.default.static(import_path4.default.join(process.cwd(), "public", "app")));
+app.use("/uploads", import_express23.default.static(import_path3.default.join(process.cwd(), "uploads")));
+app.use("/app", import_express23.default.static(import_path3.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req, res) => {
   res.redirect("/app/");
 });
 async function startServer() {
   await initDatabase();
+  loadACGeoJsonAsync().catch((err) => console.error("Error loading GeoJSON in background", err));
   if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
@@ -70276,10 +70265,10 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = import_path4.default.join(process.cwd(), "dist");
+    const distPath = import_path3.default.join(process.cwd(), "dist");
     app.use(import_express23.default.static(distPath));
     app.get("*", (req, res) => {
-      res.sendFile(import_path4.default.join(distPath, "index.html"));
+      res.sendFile(import_path3.default.join(distPath, "index.html"));
     });
   }
   process.on("uncaughtException", (err) => {
