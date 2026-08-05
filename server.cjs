@@ -66023,17 +66023,19 @@ router2.post("/api/auth/login", async (req, res) => {
     let isVolunteer = false;
     let validPassword = false;
     const volResult = await pool2.query(
-      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1`,
+      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1 OR registration_number = $1`,
       [finalIdentifier]
     );
     if (volResult.rows.length > 0) {
       user = volResult.rows[0];
       isVolunteer = true;
-      if (user.password_hash.startsWith("$2")) {
-        validPassword = await bcryptjs_default.compare(password, user.password_hash);
-      } else {
-        const oldHash = import_crypto2.default.createHash("sha256").update(password).digest("hex");
-        validPassword = oldHash === user.password_hash;
+      if (user.password_hash) {
+        if (user.password_hash.startsWith("$2")) {
+          validPassword = await bcryptjs_default.compare(password, user.password_hash);
+        } else {
+          const oldHash = import_crypto2.default.createHash("sha256").update(password).digest("hex");
+          validPassword = oldHash === user.password_hash;
+        }
       }
     } else {
       const userResult = await pool2.query(
@@ -66042,7 +66044,9 @@ router2.post("/api/auth/login", async (req, res) => {
       );
       if (userResult.rows.length > 0) {
         user = userResult.rows[0];
-        validPassword = await bcryptjs_default.compare(password, user.password_hash);
+        if (user.password_hash) {
+          validPassword = await bcryptjs_default.compare(password, user.password_hash);
+        }
       }
     }
     if (!user) {
@@ -66331,7 +66335,7 @@ router2.post("/api/auth/forgot-password", async (req, res) => {
   try {
     const { identifier } = req.body;
     const result = await pool2.query(
-      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1`,
+      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1 OR registration_number = $1`,
       [identifier]
     );
     if (result.rows.length > 0) {
@@ -66356,7 +66360,21 @@ router2.post("/api/auth/forgot-password", async (req, res) => {
   }
 });
 router2.post("/api/auth/reset-ticket", async (req, res) => {
-  res.json({ success: true, message: "Admin reset ticket created" });
+  try {
+    const { identifier } = req.body;
+    await pool2.query(`
+      CREATE TABLE IF NOT EXISTS admin_reset_tickets (
+        id SERIAL PRIMARY KEY,
+        identifier VARCHAR(255) NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+    await pool2.query(`INSERT INTO admin_reset_tickets (identifier) VALUES ($1)`, [identifier]);
+    res.json({ success: true, message: "Admin reset ticket created" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 router2.get("/api/auth/webauthn/register-options", async (req, res) => {
   const userId = req.query.userId;

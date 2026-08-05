@@ -168,18 +168,20 @@ router.post("/api/auth/login", async (req, res) => {
 
     // Check volunteers table first
     const volResult = await pool.query(
-      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1`,
+      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1 OR registration_number = $1`,
       [finalIdentifier]
     );
 
     if (volResult.rows.length > 0) {
       user = volResult.rows[0];
       isVolunteer = true;
-      if (user.password_hash.startsWith('$2')) {
-        validPassword = await bcrypt.compare(password, user.password_hash);
-      } else {
-        const oldHash = crypto.createHash('sha256').update(password).digest('hex');
-        validPassword = (oldHash === user.password_hash);
+      if (user.password_hash) {
+        if (user.password_hash.startsWith('$2')) {
+          validPassword = await bcrypt.compare(password, user.password_hash);
+        } else {
+          const oldHash = crypto.createHash('sha256').update(password).digest('hex');
+          validPassword = (oldHash === user.password_hash);
+        }
       }
     } else {
       // Check users table
@@ -189,7 +191,9 @@ router.post("/api/auth/login", async (req, res) => {
       );
       if (userResult.rows.length > 0) {
         user = userResult.rows[0];
-        validPassword = await bcrypt.compare(password, user.password_hash);
+        if (user.password_hash) {
+          validPassword = await bcrypt.compare(password, user.password_hash);
+        }
       }
     }
 
@@ -505,7 +509,7 @@ router.post("/api/auth/forgot-password", async (req, res) => {
   try {
     const { identifier } = req.body;
     const result = await pool.query(
-      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1`,
+      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1 OR registration_number = $1`,
       [identifier]
     );
     if (result.rows.length > 0) {
@@ -531,7 +535,21 @@ router.post("/api/auth/forgot-password", async (req, res) => {
 });
 
 router.post("/api/auth/reset-ticket", async (req, res) => {
-  res.json({ success: true, message: "Admin reset ticket created" });
+  try {
+    const { identifier } = req.body;
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admin_reset_tickets (
+        id SERIAL PRIMARY KEY,
+        identifier VARCHAR(255) NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+    await pool.query(`INSERT INTO admin_reset_tickets (identifier) VALUES ($1)`, [identifier]);
+    res.json({ success: true, message: "Admin reset ticket created" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 router.get('/api/auth/webauthn/register-options', async (req, res) => {
