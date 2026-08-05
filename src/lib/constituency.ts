@@ -189,10 +189,16 @@ function findConstituenciesByDistrict(district: string, state?: string) {
     const props = feature.properties;
     if (!props) continue;
 
-    const dist = (props.DIST_NAME || "").toLowerCase();
+    const distRaw = (props.DIST_NAME || "").toLowerCase();
     const st = (props.ST_NAME || "").toLowerCase();
 
-    if (dist !== targetDistrict) continue;
+    // Clean up district names by removing common suffixes and non-alphabet chars
+    const cleanDist = distRaw.replace(/\b(district|m corp|municipal corporation|city)\b/g, '').replace(/[^a-z]/g, '');
+    const cleanTargetDist = targetDistrict.replace(/\b(district|m corp|municipal corporation|city)\b/g, '').replace(/[^a-z]/g, '');
+
+    if (!cleanDist || !cleanTargetDist) continue;
+    if (!cleanDist.includes(cleanTargetDist) && !cleanTargetDist.includes(cleanDist)) continue;
+
     if (targetState && !st.includes(targetState) && !targetState.includes(st)) continue;
 
     const acName = props.AC_NAME;

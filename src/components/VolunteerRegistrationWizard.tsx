@@ -438,9 +438,14 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
             </span>
           </label>
 
-          <button disabled={!agreed || loading || !password} onClick={submitForm} className="w-full py-4 bg-gradient-to-r from-[#138808] to-green-700 text-white rounded-xl text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50 transition shadow-lg shadow-green-900/20 uppercase tracking-widest">
+          <button disabled={!agreed || loading || !password} onClick={submitForm} className="w-full py-4 bg-gradient-to-r from-[#138808] to-green-700 text-white rounded-xl text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50 transition shadow-lg shadow-green-900/20 uppercase tracking-widest relative group">
             {loading ? <Loader2 className="w-5 h-5 animate-spin"/> : "Submit Application"}
           </button>
+          {(!agreed || !password) && (
+            <p className="text-center text-xs text-orange-600 mt-2 font-medium">
+              * Please set a password and agree to the terms to submit.
+            </p>
+          )}
         </section>
 
       </div>
