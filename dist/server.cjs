@@ -58396,7 +58396,6 @@ var requireAdmin = (req, res, next) => {
 // src/routes/authRoutes.ts
 var import_jsonwebtoken2 = __toESM(require_jsonwebtoken(), 1);
 var import_crypto2 = __toESM(require("crypto"), 1);
-var import_axios3 = __toESM(require("axios"), 1);
 
 // node_modules/@simplewebauthn/server/esm/helpers/iso/isoBase64URL.js
 var isoBase64URL_exports = {};
@@ -65976,29 +65975,6 @@ router2.post("/api/auth/login", async (req, res) => {
       const token2 = import_jsonwebtoken2.default.sign(guestUser, JWT_SECRET, { expiresIn: "7d" });
       return res.json({ success: true, user: guestUser, token: token2 });
     }
-    if (phone && !password) {
-      if (phone.length !== 10) return res.status(400).json({ error: "Invalid phone number" });
-      const otp = Math.floor(1e5 + Math.random() * 9e5).toString();
-      await pool2.query(
-        `INSERT INTO otps (phone, otp, "createdAt") VALUES ($1, $2, CURRENT_TIMESTAMP) 
-         ON CONFLICT (phone) DO UPDATE SET otp = EXCLUDED.otp, "createdAt" = CURRENT_TIMESTAMP`,
-        [phone, otp]
-      );
-      console.log(`[SMS] Sending OTP for ${phone} is: ${otp}`);
-      try {
-        const MSG91_AUTHKEY = process.env.MSG91_AUTHKEY;
-        const MSG91_SENDER = process.env.MSG91_SENDER || "RPFApp";
-        if (!MSG91_AUTHKEY) {
-          console.error("MSG91_AUTHKEY not set in environment \u2014 skipping SMS send");
-        } else {
-          const url = `https://control.msg91.com/api/v5/otp?authkey=${MSG91_AUTHKEY}&mobile=91${phone}&otp=${otp}&sender=${MSG91_SENDER}`;
-          await import_axios3.default.get(url);
-        }
-      } catch (smsErr) {
-        console.error("MSG91 Error:", smsErr?.response?.data || smsErr.message);
-      }
-      return res.json({ success: true, message: "OTP sent" });
-    }
     const finalIdentifier = identifier || phone;
     if (!finalIdentifier || !password) {
       return res.status(400).json({ success: false, error: "Missing identifier/phone or password" });
@@ -66023,7 +65999,7 @@ router2.post("/api/auth/login", async (req, res) => {
     let isVolunteer = false;
     let validPassword = false;
     const volResult = await pool2.query(
-      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1 OR registration_number = $1`,
+      `SELECT * FROM volunteers WHERE mobile = $1 OR LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1) OR LOWER(registration_number) = LOWER($1)`,
       [finalIdentifier]
     );
     if (volResult.rows.length > 0) {
@@ -66036,10 +66012,15 @@ router2.post("/api/auth/login", async (req, res) => {
           const oldHash = import_crypto2.default.createHash("sha256").update(password).digest("hex");
           validPassword = oldHash === user.password_hash;
         }
+      } else {
+        const userResult = await pool2.query(`SELECT password_hash FROM users WHERE id = $1`, [user.id]);
+        if (userResult.rows.length > 0 && userResult.rows[0].password_hash) {
+          validPassword = await bcryptjs_default.compare(password, userResult.rows[0].password_hash);
+        }
       }
     } else {
       const userResult = await pool2.query(
-        `SELECT * FROM users WHERE email = $1 OR phone = $1 OR username = $1`,
+        `SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR phone = $1 OR LOWER(username) = LOWER($1)`,
         [finalIdentifier]
       );
       if (userResult.rows.length > 0) {
@@ -66521,7 +66502,7 @@ var authRoutes_default = router2;
 // src/routes/healthRoutes.ts
 var import_express3 = __toESM(require("express"), 1);
 var import_crypto3 = __toESM(require("crypto"), 1);
-var import_axios4 = __toESM(require("axios"), 1);
+var import_axios3 = __toESM(require("axios"), 1);
 var router3 = import_express3.default.Router();
 router3.get("/api/health-vitals", authenticateToken, async (req, res) => {
   try {
@@ -66821,7 +66802,7 @@ router3.get("/api/blood-banks", async (req, res) => {
   if (apiKey) {
     try {
       const url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=250&filters[_state]=Madhya%20Pradesh`;
-      const response = await import_axios4.default.get(url);
+      const response = await import_axios3.default.get(url);
       if (response.data && response.data.records && Array.isArray(response.data.records)) {
         let records = response.data.records;
         let mapped = records.map((item) => ({
@@ -67036,7 +67017,7 @@ var grievanceRoutes_default = router4;
 var import_express5 = __toESM(require("express"), 1);
 
 // src/lib/externalSearch.ts
-var import_axios5 = __toESM(require("axios"), 1);
+var import_axios4 = __toESM(require("axios"), 1);
 var cheerio = __toESM(require("cheerio"), 1);
 async function queryExternalSearch(searchQuery) {
   const tavilyKey = process.env.TAVILY_API_KEY;
@@ -67060,7 +67041,7 @@ async function queryExternalSearch(searchQuery) {
   if (tavilyKey) {
     try {
       console.log(`[Search/Tier-1/Tavily] Querying: "${searchQuery}"`);
-      const response = await import_axios5.default.post(
+      const response = await import_axios4.default.post(
         "https://api.tavily.com/search",
         {
           api_key: tavilyKey,
@@ -67100,7 +67081,7 @@ async function queryExternalSearch(searchQuery) {
     const constrainedQuery = `${searchQuery} site:gov.in`;
     console.log(`[Search/Tier-2/DDG-Scraper] Querying: "${constrainedQuery}"`);
     const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(constrainedQuery)}`;
-    const response = await import_axios5.default.get(ddgUrl, {
+    const response = await import_axios4.default.get(ddgUrl, {
       headers: browserHeaders,
       timeout: 4500
     });
@@ -67148,7 +67129,7 @@ async function queryExternalSearch(searchQuery) {
   }
   try {
     console.log(`[Search/Tier-3/SearXNG] Dynamic instance lookup...`);
-    const spaceRes = await import_axios5.default.get("https://searx.space/data/instances.json", {
+    const spaceRes = await import_axios4.default.get("https://searx.space/data/instances.json", {
       timeout: 3e3
     });
     const instances = spaceRes.data?.instances || {};
@@ -67165,7 +67146,7 @@ async function queryExternalSearch(searchQuery) {
         const searchUrl = `${instanceUrl}search`;
         try {
           console.log(`[Search/Tier-3/SearXNG] Trying instance: ${searchUrl}`);
-          const res = await import_axios5.default.get(searchUrl, {
+          const res = await import_axios4.default.get(searchUrl, {
             params: {
               q: `${searchQuery} site:gov.in`,
               format: "json"
@@ -67204,7 +67185,7 @@ async function queryExternalSearch(searchQuery) {
   try {
     console.log(`[Search/Tier-4/Wikipedia] Querying: "${searchQuery}"`);
     const wikiUrl = "https://en.wikipedia.org/w/api.php";
-    const res = await import_axios5.default.get(wikiUrl, {
+    const res = await import_axios4.default.get(wikiUrl, {
       params: {
         action: "query",
         list: "search",
@@ -67449,7 +67430,7 @@ var SOCIAL_CACHE_TTL = 60 * 60 * 1e3;
 
 // src/routes/cultureRoutes.ts
 var import_crypto5 = __toESM(require("crypto"), 1);
-var import_axios6 = __toESM(require("axios"), 1);
+var import_axios5 = __toESM(require("axios"), 1);
 var router6 = import_express6.default.Router();
 router6.get("/api/success-stories", async (req, res) => {
   try {
@@ -67515,7 +67496,7 @@ router6.get("/api/social-previews", async (req, res) => {
       }
       try {
         console.log(`[EXABASE] Fetching live preview for: ${url}`);
-        const response = await import_axios6.default.get(
+        const response = await import_axios5.default.get(
           `https://api.exabase.io/v2/link?url=${encodeURIComponent(url)}`,
           {
             headers: {
@@ -67707,7 +67688,7 @@ var janSevaRoutes_default = router7;
 
 // src/routes/locationRoutes.ts
 var import_express8 = __toESM(require("express"), 1);
-var import_axios7 = __toESM(require("axios"), 1);
+var import_axios6 = __toESM(require("axios"), 1);
 var router8 = import_express8.default.Router();
 router8.get("/api/locations/pincode", async (req, res) => {
   const pincode = String(req.query.p || "").trim();
@@ -67727,7 +67708,7 @@ router8.get("/api/locations/pincode", async (req, res) => {
     }
     let areas = [];
     try {
-      const postRes = await import_axios7.default.get(
+      const postRes = await import_axios6.default.get(
         `https://api.postalpincode.in/pincode/${pincode}`,
         { timeout: 4e3 }
       );
@@ -67755,7 +67736,7 @@ router8.get("/api/locations/pincode", async (req, res) => {
     });
   }
   try {
-    const response = await import_axios7.default.get(
+    const response = await import_axios6.default.get(
       `https://api.postalpincode.in/pincode/${pincode}`,
       { timeout: 5e3 }
     );
@@ -67970,7 +67951,7 @@ router8.get("/api/locations/search", (req, res) => {
 router8.get("/api/countries", async (_req, res) => {
   try {
     const fields = "name,cca2,flags,capital,population,region,subregion,languages,currencies,maps,timezones";
-    const response = await import_axios7.default.get(
+    const response = await import_axios6.default.get(
       `https://restcountries.com/v3.1/all?fields=${fields}`,
       { timeout: 12e3 }
     );
@@ -69216,7 +69197,7 @@ var uploadRoutes_default = router19;
 
 // src/routes/publicGovRoutes.ts
 var import_express20 = __toESM(require("express"), 1);
-var import_axios8 = __toESM(require("axios"), 1);
+var import_axios7 = __toESM(require("axios"), 1);
 
 // src/data/coreServices.ts
 var CORE_SERVICES = [
@@ -69255,7 +69236,7 @@ router20.get("/api/gov/mandi-prices", async (req, res) => {
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state)}`;
       if (commodity) url += `&filters[commodity]=${encodeURIComponent(commodity)}`;
-      const response = await import_axios8.default.get(url, { timeout: 5e3 });
+      const response = await import_axios7.default.get(url, { timeout: 5e3 });
       return res.json(response.data);
     } catch (err) {
       console.error("Mandi Prices API failed, falling back to mock");
@@ -69279,7 +69260,7 @@ router20.get("/api/gov/hospitals", async (req, res) => {
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state)}`;
       if (district) url += `&filters[district]=${encodeURIComponent(district)}`;
-      const response = await import_axios8.default.get(url, { timeout: 5e3 });
+      const response = await import_axios7.default.get(url, { timeout: 5e3 });
       return res.json(response.data);
     } catch (err) {
       console.error("Hospitals API failed, falling back to mock");

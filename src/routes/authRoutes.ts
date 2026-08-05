@@ -106,36 +106,6 @@ router.post("/api/auth/login", async (req, res) => {
       const token = jwt.sign(guestUser, JWT_SECRET, { expiresIn: '7d' });
       return res.json({ success: true, user: guestUser, token });
     }
-    
-    // Mode B: OTP Request (if phone is present and password is not)
-    if (phone && !password) {
-      if (phone.length !== 10) return res.status(400).json({ error: "Invalid phone number" });
-      
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // Save/UPSERT OTP
-      await pool.query(
-        `INSERT INTO otps (phone, otp, "createdAt") VALUES ($1, $2, CURRENT_TIMESTAMP) 
-         ON CONFLICT (phone) DO UPDATE SET otp = EXCLUDED.otp, "createdAt" = CURRENT_TIMESTAMP`,
-        [phone, otp]
-      );
-      
-      console.log(`[SMS] Sending OTP for ${phone} is: ${otp}`);
-      try {
-        const MSG91_AUTHKEY = process.env.MSG91_AUTHKEY;
-        const MSG91_SENDER = process.env.MSG91_SENDER || "RPFApp";
-        if (!MSG91_AUTHKEY) {
-          console.error("MSG91_AUTHKEY not set in environment — skipping SMS send");
-        } else {
-          const url = `https://control.msg91.com/api/v5/otp?authkey=${MSG91_AUTHKEY}&mobile=91${phone}&otp=${otp}&sender=${MSG91_SENDER}`;
-          await axios.get(url);
-        }
-      } catch (smsErr: any) {
-        console.error("MSG91 Error:", smsErr?.response?.data || smsErr.message);
-      }
-      return res.json({ success: true, message: "OTP sent" });
-    }
-    
     // Mode C: Password Auth
     const finalIdentifier = identifier || phone;
     if (!finalIdentifier || !password) {
@@ -168,7 +138,7 @@ router.post("/api/auth/login", async (req, res) => {
 
     // Check volunteers table first
     const volResult = await pool.query(
-      `SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1 OR registration_number = $1`,
+      `SELECT * FROM volunteers WHERE mobile = $1 OR LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1) OR LOWER(registration_number) = LOWER($1)`,
       [finalIdentifier]
     );
 
@@ -182,11 +152,17 @@ router.post("/api/auth/login", async (req, res) => {
           const oldHash = crypto.createHash('sha256').update(password).digest('hex');
           validPassword = (oldHash === user.password_hash);
         }
+      } else {
+        // Fallback to checking users table if volunteer has no password set (they registered as user first)
+        const userResult = await pool.query(`SELECT password_hash FROM users WHERE id = $1`, [user.id]);
+        if (userResult.rows.length > 0 && userResult.rows[0].password_hash) {
+           validPassword = await bcrypt.compare(password, userResult.rows[0].password_hash);
+        }
       }
     } else {
       // Check users table
       const userResult = await pool.query(
-        `SELECT * FROM users WHERE email = $1 OR phone = $1 OR username = $1`,
+        `SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR phone = $1 OR LOWER(username) = LOWER($1)`,
         [finalIdentifier]
       );
       if (userResult.rows.length > 0) {

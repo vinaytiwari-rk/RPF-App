@@ -244,11 +244,11 @@ export default function MainLayout() {
               📞 {language === "hi" ? "हेल्पलाइन" : "Helplines"}:
             </span>
             <div className="overflow-hidden w-full relative">
-              <div className="animate-marquee whitespace-nowrap" 
+              <div
                 data-scrollamount="2"
                 onMouseEnter={(e) => (e.currentTarget as any).stop()}
                 onMouseLeave={(e) => (e.currentTarget as any).start()}
-                className="text-[10px] font-bold font-mono tracking-wide text-slate-600 whitespace-nowrap block cursor-pointer"
+                className="animate-marquee text-[10px] font-bold font-mono tracking-wide text-slate-600 whitespace-nowrap block cursor-pointer"
               >
                 {settings.helplinesMarquee}
               </div>
