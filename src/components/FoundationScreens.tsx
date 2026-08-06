@@ -100,7 +100,7 @@ export default function FoundationScreens({ lang, activeScreen, onSelectScreen }
               <p>
                 {lang === "hi"
                   ? "फाउंडेशन मुख्य रूप से मध्य प्रदेश के भोपाल और सीहोर ग्रामीण क्षेत्रों में अपनी कल्याणकारी गतिविधियों का संचालन करता है। हम सामाजिक उन्नति और सतत विकास के लक्ष्यों को प्राप्त करने के लिए समाज के अंतिम व्यक्ति तक पहुँचने के लिए कटिबद्ध हैं।"
-                  : "The foundation primarily operates its welfare initiatives across Bhopal and Sehore rural sectors in Madhya Pradesh. We are committed to reaching the last mile of society to enable continuous social upliftment and achieve key sustainable community goals."}
+                  : "The foundation primarily operates its welfare initiatives across Bhopal and Bhopal rural sectors in Madhya Pradesh. We are committed to reaching the last mile of society to enable continuous social upliftment and achieve key sustainable community goals."}
               </p>
               <div className="bg-slate-50/60 rounded-md p-4 border border-slate-100/70 space-y-2">
                 <h4 className="font-bold text-xs text-[#0f4c81] flex items-center gap-1">
@@ -400,7 +400,7 @@ export default function FoundationScreens({ lang, activeScreen, onSelectScreen }
                     {lang === "hi" ? "केंद्रीय कार्यालय पता" : "Central Office Address"}
                   </p>
                   <p className="font-bold text-slate-800 text-[11px] mt-0.5">
-                    {lang === "hi" ? "आरपी फाउंडेशन कल्याण प्रभाग, भोपाल / सीहोर क्षेत्र, मध्य प्रदेश, भारत" : "RP Foundation Welfare Division, Bhopal / Sehore Block, Madhya Pradesh, India"}
+                    {lang === "hi" ? "आरपी फाउंडेशन कल्याण प्रभाग, भोपाल / सीहोर क्षेत्र, मध्य प्रदेश, भारत" : "RP Foundation Welfare Division, Bhopal / Bhopal Block, Madhya Pradesh, India"}
                   </p>
                 </div>
 

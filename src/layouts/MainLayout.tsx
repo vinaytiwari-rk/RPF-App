@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Users, Bell, Activity, Globe, Search, MessageSquare, Bot, X, Send, Mic, Shield, Heart } from "lucide-react";
+import { ArrowLeft, User, Compass, Users, Bell, Activity, Globe, Search, MessageSquare, Bot, X, Send, Mic, Shield, Heart, Share2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import AIAssistant from "../components/AIAssistant";
 import { useApp } from "../context/AppContext";
@@ -45,6 +45,23 @@ export default function MainLayout() {
   const { notifications, settings, globalSettings } = useApp();
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
   const [showGuestModal, setShowGuestModal] = useState(false);
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'RP Foundation',
+          text: 'Check out RP Foundation - Digital NGO Platform!',
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      alert(language === "hi" ? "यह डिवाइस शेयरिंग सपोर्ट नहीं करता" : "Sharing not supported on this device.");
+    }
+  };
+
 
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "bot"; text: string }[]>([

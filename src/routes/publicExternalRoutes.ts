@@ -9,8 +9,8 @@ const rssParser = new Parser();
 // 1. Weather API (Open-Meteo - Free, No API Key)
 router.get("/api/public/weather", async (req, res) => {
   try {
-    const lat = req.query.lat || "28.6139"; // Default New Delhi
-    const lon = req.query.lon || "77.2090";
+    const lat = req.query.lat || "23.2599"; // Default Bhopal
+    const lon = req.query.lon || "77.4126";
     const cacheKey = `weather_${lat}_${lon}`;
     
     const cached = apiCache.get(cacheKey);
@@ -134,3 +134,4 @@ router.get("/api/public/nearby", async (req, res) => {
 });
 
 export default router;
+

@@ -23,7 +23,7 @@ export default function JobsPage() {
   
   const [jobs, setJobs] = useState<Job[]>([]);
   const [rssJobs, setRssJobs] = useState<any[]>([]);
-  const [filterCity, setFilterCity] = useState<"all" | "bhopal" | "sehore">("all");
+  const [filterCity, setFilterCity] = useState<"all" | "bhopal" | "bhopal">("all");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   
   const [fullName, setFullName] = useState("");
@@ -77,7 +77,7 @@ export default function JobsPage() {
   const filteredJobs = jobs.filter(job => {
     if (filterCity === "all") return true;
     if (filterCity === "bhopal") return job.locEn.toLowerCase().includes("bhopal");
-    if (filterCity === "sehore") return job.locEn.toLowerCase().includes("sehore");
+    if (filterCity === "bhopal") return job.locEn.toLowerCase().includes("bhopal");
     return true;
   });
 
@@ -194,7 +194,7 @@ export default function JobsPage() {
 
       {/* Filter Tabs */}
       <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/60 relative z-10">
-        {(["all", "bhopal", "sehore"] as const).map(city => (
+        {(["all", "bhopal", "bhopal"] as const).map(city => (
           <button 
             key={city}
             onClick={() => setFilterCity(city)}
@@ -204,7 +204,7 @@ export default function JobsPage() {
                 : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            {city === "all" ? (lang === "hi" ? "सभी" : "All") : city === "bhopal" ? (lang === "hi" ? "भोपाल" : "Bhopal") : (lang === "hi" ? "सीहोर" : "Sehore")}
+            {city === "all" ? (lang === "hi" ? "सभी" : "All") : city === "bhopal" ? (lang === "hi" ? "भोपाल" : "Bhopal") : (lang === "hi" ? "सीहोर" : "Bhopal")}
           </button>
         ))}
       </div>

@@ -167,7 +167,7 @@ export default function Home() {
         <div className="bg-red-600 text-white px-4 py-2 text-[10.5px] font-black flex items-center gap-2 animate-pulse shadow-sm z-50 relative shrink-0">
           <AlertTriangle className="w-4 h-4 text-white fill-white shrink-0" />
           <div className="overflow-hidden whitespace-nowrap w-full relative">
-            <div className="inline-block animate-marquee uppercase tracking-wide">
+            <div className="inline-block animate-marquee-scroll uppercase tracking-wide">
               {lang === "hi" ? cmsConfig.alertBannerHi : cmsConfig.alertBannerEn}
             </div>
           </div>
@@ -358,9 +358,10 @@ export default function Home() {
                 onClick={() => navigate(action.route)}
                 className="flex flex-col items-center justify-center p-0.5 transition text-center gap-2 active:scale-95 duration-300 cursor-pointer group relative w-full"
               >
-                <div className="relative w-11 h-11 bg-slate-50 border border-slate-200 rounded-lg shadow-sm flex items-center justify-center transition-all duration-300 group-hover:bg-slate-100 group-hover:scale-105">
-                  <IconComponent className="w-5 h-5 text-[#000080]" />
-                </div>
+                <div className="relative w-11 h-11 bg-gradient-to-br from-[#000080] via-indigo-600 to-blue-500 border border-indigo-200 rounded-lg shadow-md flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-105 overflow-hidden">
+                      <div className="absolute inset-0 bg-white/20 mix-blend-overlay rounded-lg"></div>
+                      <IconComponent className="w-6 h-6 text-white drop-shadow-md z-10" />
+                    </div>
                 <span className="text-[9px] font-black text-slate-700 leading-tight w-full truncate">
                   {lang === "hi" ? action.titleHi : action.titleEn}
                 </span>
@@ -454,5 +455,7 @@ export default function Home() {
     </div>
   );
 }
+
+
 
 

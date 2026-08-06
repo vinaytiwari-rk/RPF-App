@@ -15,9 +15,9 @@ interface Dispensary {
 const DISPENSARIES: Dispensary[] = [
   {
     id: "1",
-    nameEn: "Sehore Civic Dispensary Center",
+    nameEn: "Bhopal Civic Dispensary Center",
     nameHi: "सीहोर नागरिक औषधालय केंद्र",
-    locEn: "District Hospital campus, Sehore",
+    locEn: "District Hospital campus, Bhopal",
     locHi: "जिला अस्पताल परिसर, सीहोर",
     timingEn: "10:00 AM - 1:00 PM (Mon-Sat)",
     timingHi: "सुबह 10:00 से दोपहर 1:00 बजे (सोम-शनि)"
@@ -178,7 +178,7 @@ export default function MedicineSupport() {
                       required 
                       value={hospital}
                       onChange={e => setHospital(e.target.value)}
-                      placeholder="e.g. District Hospital, Sehore" 
+                      placeholder="e.g. District Hospital, Bhopal" 
                       className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-red-500" 
                     />
                   </div>

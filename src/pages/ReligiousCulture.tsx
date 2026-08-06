@@ -71,7 +71,7 @@ export default function ReligiousCulture() {
       titleEn: "Shravan Shivratri Celebration & Bhandara",
       titleHi: "श्रावण शिवरात्रि उत्सव एवं भंडारा",
       date: "August 15, 2026",
-      locationEn: "Sehore Bada Mahadev Temple",
+      locationEn: "Bhopal Bada Mahadev Temple",
       locationHi: "सीहोर बड़ा महादेव मंदिर",
       detailsEn: "Community meetup, evening bhajan sandhya, and mass distribution of prasadam.",
       detailsHi: "सामुदायिक मिलन, शाम की भजन संध्या, और महाप्रसाद का सामूहिक वितरण।"
@@ -80,7 +80,7 @@ export default function ReligiousCulture() {
       titleEn: "Janmashtami Meetup & Dahi Handi",
       titleHi: "कृष्ण जन्माष्टमी मिलन व दही हांडी",
       date: "September 4, 2026",
-      locationEn: "Town Hall Square, Sehore",
+      locationEn: "Town Hall Square, Bhopal",
       locationHi: "टाउन हॉल चौराहा, सीहोर",
       detailsEn: "Cross-faith cultural values exhibition, kids costume contest, and sports event.",
       detailsHi: "अंतर-धार्मिक सांस्कृतिक मूल्य प्रदर्शनी, बाल पोशाक प्रतियोगिता, और खेल उत्सव।"
@@ -89,7 +89,7 @@ export default function ReligiousCulture() {
       titleEn: "Eid-e-Milad Interfaith Peace Assembly",
       titleHi: "ईद-ए-मिलाद अंतर-धार्मिक शांति सभा",
       date: "September 16, 2026",
-      locationEn: "Community Center Hall, Sehore",
+      locationEn: "Community Center Hall, Bhopal",
       locationHi: "कम्युनिटी सेंटर हॉल, सीहोर",
       detailsEn: "Linking diverse faith groups over shared social causes and cultural harmony.",
       detailsHi: "विविध धार्मिक समूहों को साझा सामाजिक कारणों और सांस्कृतिक सद्भाव से जोड़ना।"
@@ -379,7 +379,7 @@ export default function ReligiousCulture() {
               <div className="bg-slate-50 border border-slate-150 rounded-xl p-3 text-[10.5px] text-slate-650 leading-relaxed font-bold">
                 {isHi 
                   ? "विशेष धार्मिक उत्सवों के दौरान सीहोर के विभिन्न मंदिरों से सुबह 6:00 बजे और शाम 7:00 बजे की लाइव आरती का सीधा प्रसारण।"
-                  : "Watch live morning and evening aarti broadcasts from local Sehore temples during major festivals."}
+                  : "Watch live morning and evening aarti broadcasts from local Bhopal temples during major festivals."}
               </div>
             </div>
           </div>

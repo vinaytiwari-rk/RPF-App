@@ -35,7 +35,7 @@ router.get("/api/locations/pincode", async (req, res) => {
     } else if (pincode.startsWith("452") || pincode.startsWith("453")) {
       district = city = "Indore";
     } else if (pincode.startsWith("466")) {
-      district = city = "Sehore";
+      district = city = "Bhopal";
     }
 
     // Still try India Post API for accurate office/area names (non-blocking)
@@ -162,8 +162,8 @@ router.get("/api/locations/helplines", async (req, res) => {
 
   const mpHelplines = [
     {
-      name: "One Stop Centre (OSC) - Sehore",
-      address: "District Hospital Campus, Sehore, Madhya Pradesh - 466001",
+      name: "One Stop Centre (OSC) - Bhopal",
+      address: "District Hospital Campus, Bhopal, Madhya Pradesh - 466001",
       phone: "07562224455",
       type: "One Stop Centre",
       helpline: "181 / 1091"
@@ -190,15 +190,15 @@ router.get("/api/locations/helplines", async (req, res) => {
       helpline: "1091 / 100"
     },
     {
-      name: "Mahila Thana (Women Police Station) - Sehore",
-      address: "Kotwali Campus, Sehore, Madhya Pradesh - 466001",
+      name: "Mahila Thana (Women Police Station) - Bhopal",
+      address: "Kotwali Campus, Bhopal, Madhya Pradesh - 466001",
       phone: "07562227091",
       type: "Police Helpline",
       helpline: "1091 / 100"
     },
     {
-      name: "District Police Headquarters Helpdesk - Sehore",
-      address: "SP Office, Sehore, Madhya Pradesh - 466001",
+      name: "District Police Headquarters Helpdesk - Bhopal",
+      address: "SP Office, Bhopal, Madhya Pradesh - 466001",
       phone: "07562227202",
       type: "Police Helpline",
       helpline: "100 / 112"
@@ -239,9 +239,9 @@ router.get("/api/locations/helplines", async (req, res) => {
   const pinStr = String(pincode);
   let resolvedLocal = [];
   if (pinStr.startsWith("466")) {
-    resolvedLocal = mpHelplines.filter(h => h.name.includes("Sehore"));
+    resolvedLocal = mpHelplines.filter(h => h.name.includes("Bhopal"));
   } else if (pinStr.startsWith("462") || pinStr.startsWith("461")) {
-    resolvedLocal = mpHelplines.filter(h => h.name.includes("Bhopal") || h.name.includes("Sehore"));
+    resolvedLocal = mpHelplines.filter(h => h.name.includes("Bhopal") || h.name.includes("Bhopal"));
   } else if (pinStr.startsWith("452") || pinStr.startsWith("451") || pinStr.startsWith("450")) {
     resolvedLocal = mpHelplines.filter(h => h.name.includes("Indore"));
   } else {

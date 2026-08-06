@@ -33,7 +33,7 @@ export default function VolunteersPage() {
     income: "150000",
     occupation: "Student",
     category: "General",
-    division: "Sehore Ward 5",
+    division: "Bhopal Ward 5",
     janSevaId: user?.id ? `JSC-${user.id.slice(-8).toUpperCase()}` : "GUEST-001",
     role: user?.isVolunteer ? "Active Volunteer" : "Citizen",
     points: 150,

@@ -905,7 +905,7 @@ export default function HealthCare() {
 
               <div className="space-y-3">
                 {[
-                  { name: "Sehore District General Hospital", spec: "General Medicine, Emergency, Surgery", dist: "1.2 km" },
+                  { name: "Bhopal District General Hospital", spec: "General Medicine, Emergency, Surgery", dist: "1.2 km" },
                   { name: "People's Seva Health Center", spec: "Diagnostics, Pediatric care, Dental", dist: "3.5 km" },
                   { name: "Apex Trauma Care & Cardiac Center", spec: "Specialist Surgery, Cardiology", dist: "4.8 km" }
                 ].map((hosp, idx) => (

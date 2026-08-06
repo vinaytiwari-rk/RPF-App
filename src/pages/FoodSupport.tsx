@@ -18,9 +18,9 @@ interface KitchenCenter {
 const CENTERS: KitchenCenter[] = [
   {
     id: "1",
-    nameEn: "Sehore Community Kitchen (Rasoi 1)",
+    nameEn: "Bhopal Community Kitchen (Rasoi 1)",
     nameHi: "सीहोर सामुदायिक रसोई (रसोई 1)",
-    addressEn: "Near Bus Stand, Sehore",
+    addressEn: "Near Bus Stand, Bhopal",
     addressHi: "बस स्टैंड के पास, सीहोर",
     timingEn: "11:30 AM - 2:30 PM Daily",
     timingHi: "दोपहर 11:30 से 2:30 बजे (रोजाना)",

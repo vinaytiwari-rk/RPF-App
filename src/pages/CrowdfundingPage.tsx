@@ -89,7 +89,7 @@ export default function CrowdfundingPage() {
             <p className="text-xs text-slate-600 leading-relaxed font-semibold">
               {lang === "hi"
                 ? "सीहोर के ५ दूरदराज के सरकारी स्कूलों में पेयजल की भारी किल्लत है। हम वहां ट्यूबवेल और वाटर प्यूरीफायर लगाने के लिए राशि संकलित कर रहे हैं।"
-                : "5 remote government schools in Sehore district have no access to clean drinking water. We are installing borewells and RO purification kits."}
+                : "5 remote government schools in Bhopal district have no access to clean drinking water. We are installing borewells and RO purification kits."}
             </p>
 
             {/* Progress bar */}

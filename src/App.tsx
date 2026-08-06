@@ -31,6 +31,9 @@ import DonationsPage from "./pages/DonationsPage";
 import HealthPage from "./pages/HealthPage";
 import HealthCare from "./pages/HealthCare";
 import SchemesPage from "./pages/SchemesPage";
+import DisasterManagement from "./pages/DisasterManagement";
+import FarmerSupport from "./pages/FarmerSupport";
+import SkillsTraining from "./pages/SkillsTraining";
 import WomenSafety from "./pages/WomenSafety";
 import SeniorsPage from "./pages/SeniorsPage";
 import AnimalsPage from "./pages/AnimalsPage";
@@ -175,3 +178,4 @@ export default function App() {
     </AuthProvider>
   );
 }
+

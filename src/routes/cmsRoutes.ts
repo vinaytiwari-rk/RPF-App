@@ -221,7 +221,7 @@ router.get("/api/cms", async (req, res) => {
             type: "urgent",
             titleEn: "Urgent Blood Need: O+",
             titleHi: "आपातकालीन रक्त आवश्यकता: O+",
-            bodyEn: "Critical patient at Sehore Hospital requires 2 units of O+ blood.",
+            bodyEn: "Critical patient at Bhopal Hospital requires 2 units of O+ blood.",
             bodyHi: "सीहोर अस्पताल में गंभीर मरीज को O+ रक्त की 2 यूनिट की आवश्यकता है।",
             createdAt: new Date().toISOString(),
             read: false
@@ -251,7 +251,7 @@ router.get("/api/cms", async (req, res) => {
             id: "t2",
             nameEn: "Shanti Devi",
             nameHi: "शान्ति देवी",
-            villageEn: "Sehore Block, MP",
+            villageEn: "Bhopal Block, MP",
             villageHi: "सीहोर ब्लॉक, म.प्र.",
             quoteEn: "During my husband's eye surgery, RP Foundation volunteers did everything from hospital registration to arranging blood donors. They treated us like family members.",
             quoteHi: "मेरे पति के नेत्र ऑपरेशन के दौरान, आरपी फाउंडेशन के स्वयंसेवकों ने अस्पताल पंजीकरण से लेकर रक्तदाताओं की व्यवस्था करने तक सब कुछ किया। उन्होंने हमारे साथ परिवार के सदस्यों जैसा व्यवहार किया।"

@@ -31,7 +31,7 @@ const PINCODE_COORDS: Record<string, { lat: number; lon: number; name: string }>
   "462002": { lat: 23.2599, lon: 77.4126, name: "Bhopal" },
   "462003": { lat: 23.2599, lon: 77.4126, name: "Bhopal" },
   "452001": { lat: 22.7196, lon: 75.8577, name: "Indore" },
-  "466001": { lat: 23.2032, lon: 77.0844, name: "Sehore" },
+  "466001": { lat: 23.2032, lon: 77.0844, name: "Bhopal" },
 };
 
 export default function EnvironmentPage() {
@@ -137,7 +137,7 @@ export default function EnvironmentPage() {
         return;
       }
 
-      // 3) Fallback: Bhopal (better default than only Sehore for this app)
+      // 3) Fallback: Bhopal (better default than only Bhopal for this app)
       await loadWeather(23.2599, 77.4126, "Bhopal");
     };
 
@@ -155,7 +155,7 @@ export default function EnvironmentPage() {
   const [harvestedRoofArea, setHarvestedRoofArea] = useState(500); // sq ft
   const [plantedSaplings, setPlantedSaplings] = useState(5);
 
-  // Simulated AQI details for Sehore
+  // Simulated AQI details for Bhopal
   const aqiData = {
     value: 68,
     status: isHi ? "संतोषजनक" : "Moderate",
@@ -193,9 +193,9 @@ export default function EnvironmentPage() {
     },
     {
       id: 2,
-      titleEn: "Sehore Afforestation campaign restores local ground water levels",
+      titleEn: "Bhopal Afforestation campaign restores local ground water levels",
       titleHi: "सीहोर वृक्षारोपण अभियान से भूजल स्तर में हुआ सुधार",
-      snippetEn: "A 5,000 tree plantation drive led by volunteers improves water tables across Sehore villages.",
+      snippetEn: "A 5,000 tree plantation drive led by volunteers improves water tables across Bhopal villages.",
       snippetHi: "स्वयंसेवकों के नेतृत्व में 5,000 वृक्षारोपण अभियान से सीहोर के गांवों में जल स्तर में सुधार हुआ है।",
       source: "State Green Board",
       date: "Jul 28, 2026"
@@ -215,7 +215,7 @@ export default function EnvironmentPage() {
     setSubmitting(true);
     try {
       const data = {
-        campaignName: "Green Sehore Afforestation 2026",
+        campaignName: "Green Bhopal Afforestation 2026",
         joinedAsVolunteer: true
       };
       const submission = {
@@ -279,7 +279,7 @@ export default function EnvironmentPage() {
         <p className="text-xs text-slate-650 leading-relaxed">
           {isHi 
             ? "स्वच्छ जल और हरित भारत के लिए सामूहिक प्रयास। हवा की गुणवत्ता और स्थानीय पर्यावरण अपडेट्स ट्रैक करें।" 
-            : "Track air quality indices, temperature forecasting, and take active part in Sehore plantation campaigns."}
+            : "Track air quality indices, temperature forecasting, and take active part in Bhopal plantation campaigns."}
         </p>
       </div>
 
@@ -292,7 +292,7 @@ export default function EnvironmentPage() {
               <Wind className="w-4 h-4 text-emerald-600" />
               {isHi ? "वायु गुणवत्ता सूचकांक (AQI)" : "Air Quality Index (AQI)"}
             </h4>
-            <span className="text-[10px] font-mono text-slate-400">Live • Sehore</span>
+            <span className="text-[10px] font-mono text-slate-400">Live • Bhopal</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -386,7 +386,7 @@ export default function EnvironmentPage() {
       <div className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm space-y-3.5">
         <div className="flex justify-between items-start border-b border-slate-100 pb-2">
           <div>
-            <h4 className="font-display font-bold text-xs text-slate-800">{isHi ? "हरित सीहोर वृक्षारोपण २०२६" : "Green Sehore Afforestation 2026"}</h4>
+            <h4 className="font-display font-bold text-xs text-slate-800">{isHi ? "हरित सीहोर वृक्षारोपण २०२६" : "Green Bhopal Afforestation 2026"}</h4>
             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{isHi ? "सक्रिय अभियान" : "Active Campaign"}</p>
           </div>
           <span className="text-[8px] font-bold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">+50 Points</span>
@@ -395,7 +395,7 @@ export default function EnvironmentPage() {
         <p className="text-xs text-slate-600 leading-relaxed">
           {isHi
             ? "सीहोर जिले के १० विभिन्न ग्रामों में ५००० छायादार वृक्ष लगाने का लक्ष्य। जल संचयन के लिए स्वयंसेवा करें।"
-            : "Targeting 5,000 shade-giving local saplings across 10 rural wards of Sehore. Click below to volunteer."}
+            : "Targeting 5,000 shade-giving local saplings across 10 rural wards of Bhopal. Click below to volunteer."}
         </p>
 
         {success ? (
@@ -549,7 +549,7 @@ export default function EnvironmentPage() {
                 </div>
 
                 {(() => {
-                  // Sehore average annual rainfall = ~40 inches (~1000mm)
+                  // Bhopal average annual rainfall = ~40 inches (~1000mm)
                   // Harvesting Capacity (Gallons) = Area (sq ft) * Rainfall (inches) * 0.623 * Runoff Coeff (0.85 for concrete roof)
                   const rainInches = 40;
                   const liters = Math.round(harvestedRoofArea * rainInches * 0.623 * 0.85 * 3.785);
