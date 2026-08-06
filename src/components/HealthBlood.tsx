@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BloodDonor } from "../types";
-import { Search, Heart, Phone, ShieldCheck, AlertCircle, Sparkles, Plus, CheckCircle, Navigation } from "lucide-react";
+import { Search, Heart, Phone, ShieldCheck, AlertCircle, Sparkles, Plus, CheckCircle, Navigation, MapPin } from "lucide-react";
+import LocationPicker from "./LocationPicker";
 
 interface HealthBloodProps {
   lang: "hi" | "en";
@@ -197,13 +198,7 @@ export default function HealthBlood({ lang, donors, onAddDonor }: HealthBloodPro
 
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-0.5">{lang === "hi" ? "वार्ड / जिला" : "Ward / District"}</label>
-              <input
-                type="text"
-                value={regLoc}
-                onChange={(e) => setRegLoc(e.target.value)}
-                required
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:ring-1 focus:ring-[#FF9933] outline-none"
-              />
+              <LocationPicker onLocationSelect={(loc) => setRegLoc(loc)} defaultLocation={regLoc} />
             </div>
 
             <button
@@ -265,15 +260,9 @@ export default function HealthBlood({ lang, donors, onAddDonor }: HealthBloodPro
                 {bloodGroups.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
-            <div>
+            <div className="col-span-2">
               <label className="text-xs font-semibold text-slate-700 block mb-0.5">{lang === "hi" ? "अस्पताल का स्थान / प्रभाग" : "Hospital Location"}</label>
-              <input
-                type="text"
-                value={emergLocation}
-                onChange={(e) => setEmergLocation(e.target.value)}
-                required
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-red-400"
-              />
+              <LocationPicker onLocationSelect={(loc) => setEmergLocation(loc)} defaultLocation={emergLocation} />
             </div>
           </div>
 

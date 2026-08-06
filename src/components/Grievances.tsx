@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Grievance } from "../types";
 import { AlertTriangle, Tag, Clock, CheckCircle2, ChevronRight, Activity, MapPin, Sparkles, PieChart, Loader2, Image as ImageIcon } from "lucide-react";
+import LocationPicker from "./LocationPicker";
 
 interface GrievancesProps {
   lang: "hi" | "en";
@@ -177,7 +178,7 @@ export default function Grievances({ lang, grievances, onAddGrievance }: Grievan
           </h4>
 
           <form onSubmit={handleCreateGrievance} className="space-y-3.5">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-0.5">{lang === "hi" ? "शिकायत का विषय" : "Complaint Title"}</label>
                 <input
@@ -192,14 +193,7 @@ export default function Grievances({ lang, grievances, onAddGrievance }: Grievan
               
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-0.5">{lang === "hi" ? "वार्ड नंबर / जिला" : "Location / Ward"}</label>
-                <input
-                  type="text"
-                  value={formLoc}
-                  onChange={(e) => setFormLoc(e.target.value)}
-                  placeholder={lang === "hi" ? "उदा. वार्ड 12, भोपाल" : "e.g. Ward 3, Indore"}
-                  required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-red-400"
-                />
+                <LocationPicker onLocationSelect={(loc) => setFormLoc(loc)} defaultLocation={formLoc} />
               </div>
             </div>
 

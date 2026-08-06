@@ -177,3 +177,5 @@
     color: #DC2626;
   }
 }
+
+@import 'leaflet/dist/leaflet.css';

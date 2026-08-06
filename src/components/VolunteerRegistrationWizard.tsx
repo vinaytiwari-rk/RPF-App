@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, CheckCircle2, ShieldCheck, Globe, Loader2, User, Phone, MapPin, FileText, Lock } from "lucide-react";
 import axios from "axios";
 import { Country, State, City } from "country-state-city";
+import LocationPicker from "./LocationPicker";
 
 interface VolunteerRegistrationWizardProps {
   onBack: () => void;
@@ -320,6 +321,15 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
         <section className="space-y-4">
           <h3 className="text-sm font-black text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2"><MapPin className="w-4 h-4 text-[#0B1E3F]" /> Location & Address</h3>
           
+          <div className="space-y-1">
+             <label className="text-[10px] font-bold text-slate-500 uppercase">GPS Location (Recommended)</label>
+             <LocationPicker onLocationSelect={(loc) => {
+               if(loc && loc !== "") {
+                 // You could auto-fill or just attach to address
+               }
+             }} defaultLocation={""} />
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-500 uppercase">State</label>

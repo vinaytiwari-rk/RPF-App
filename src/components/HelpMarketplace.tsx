@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { HelpPost } from "../types";
 import { PlusCircle, Search, MessageCircle, MapPin, Phone, Info, Check, Sparkles, Filter } from "lucide-react";
+import LocationPicker from "./LocationPicker";
 
 interface HelpMarketplaceProps {
   lang: "hi" | "en";
@@ -191,13 +192,7 @@ export default function HelpMarketplace({ lang, posts, onAddPost, onFulfillPost 
             </div>
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">{lang === "hi" ? "वार्ड / जिला" : "Ward / District"}</label>
-              <input
-                type="text"
-                value={formLocation}
-                onChange={(e) => setFormLocation(e.target.value)}
-                required
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-[#FF9933] outline-none"
-              />
+              <LocationPicker onLocationSelect={(loc) => setFormLocation(loc)} defaultLocation={formLocation} />
             </div>
           </div>
 
