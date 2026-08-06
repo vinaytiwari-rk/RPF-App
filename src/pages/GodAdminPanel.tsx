@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import GenericAdminTab from '../components/GenericAdminTab';
+import FileUpload from '../components/FileUpload';
+import { GraduationCap, Utensils, Pill, BookOpen, UserPlus, Dog, Leaf, Church, Tractor, Landmark, Hammer, Globe2 } from 'lucide-react';
 import {
   Settings, Monitor, Home, Users, Shield, Bell, CheckCircle,
   XCircle, Image as ImageIcon, MessageSquare, LayoutTemplate,
@@ -732,3 +735,5 @@ export default function GodAdminPanel() {
     </div>
   );
 }
+
+

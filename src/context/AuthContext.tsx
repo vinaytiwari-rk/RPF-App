@@ -54,6 +54,7 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   language: "en" | "hi";
@@ -79,6 +80,7 @@ const LANG_KEY = "@rpf_lang";
 ═══════════════════════════════════════════════════════════════ */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem("@rpf_token"));
   const [language, setLanguageState] = useState<"en" | "hi">("en");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -126,12 +128,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                // Invalid token or user not found
                localStorage.removeItem(STORAGE_KEY);
                localStorage.removeItem("@rpf_token");
+    setToken(null);
                setUser(null);
             }
           } else {
              // Expired token or auth error
              localStorage.removeItem(STORAGE_KEY);
              localStorage.removeItem("@rpf_token");
+    setToken(null);
              setUser(null);
           }
         } catch {
@@ -142,11 +146,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem("@rpf_token");
+    setToken(null);
       }
     } catch {
       // Corrupted storage - clear it
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem("@rpf_token");
+    setToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -308,3 +314,7 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
   return ctx;
 }
+
+
+
+
