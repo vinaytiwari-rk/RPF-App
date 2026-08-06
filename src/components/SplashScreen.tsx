@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
-//, { useEffect, useState } from 'react';
 
 export default function SplashScreen() {
   const [opacity, setOpacity] = useState(0);
