@@ -138,7 +138,7 @@ export default function Profile() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full bg-transparent pb-24"
+      className="flex flex-col min-h-screen bg-slate-50 pb-24"
     >
       {/* Profile Hero section with Custom Cover and Centered DP */}
       <div className="relative w-full h-[200px] bg-white border-b border-slate-200 flex-shrink-0" id="profile-cover-section">
@@ -275,14 +275,11 @@ export default function Profile() {
             <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Volunteer</span>
           </div>
           <div className="w-[1px] h-6 bg-slate-200 self-center mx-auto"></div>
-          <div className="flex flex-col items-center justify-center col-span-2">
-            <span className="text-xs font-black text-[#FF9933]">{user.points || 0}</span>
-            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Impact Points</span>
-          </div>
+          <div onClick={() => user.isVolunteer ? navigate("/volunteer-dashboard") : alert(isHi ? "स्वयंसेवक के रूप में पंजीकरण करें" : "Register as volunteer to earn certificates!")} className="flex flex-col items-center justify-center col-span-2 cursor-pointer hover:bg-slate-100 rounded-lg p-1 transition"><div className="flex items-center gap-1 text-[#FF9933]"><Award className="w-4 h-4" /><span className="text-xs font-black">View</span></div><span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Certificates</span></div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 relative -mt-6 z-20">
+      <div className="flex-1 p-4 space-y-4 relative -mt-6 z-20">
 
         {/* Volunteer Identity Card */}
         {user.isVolunteer && user.volunteerData && (
@@ -541,3 +538,6 @@ export default function Profile() {
     </motion.div>
   );
 }
+
+
+

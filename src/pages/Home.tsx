@@ -343,14 +343,8 @@ export default function Home() {
                 onClick={() => navigate(action.route)}
                 className="flex flex-col items-center justify-center p-0.5 transition text-center gap-2 active:scale-95 duration-300 cursor-pointer group relative w-full"
               >
-                <div className="relative w-11 h-11 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
-                  {/* Breathing glowing outer ring */}
-                  <div className={`absolute -inset-0.5 rounded-full blur-xs opacity-40 group-hover:opacity-80 transition-all duration-300 animate-pulse bg-gradient-to-r ${action.glowGradient}`}></div>
-                  
-                  {/* Icon container */}
-                  <div className="relative w-9 h-9 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100 shadow-sm z-10">
-                    <IconComponent className="w-4.5 h-4.5 text-slate-800 transition-all duration-500 group-hover:rotate-12" />
-                  </div>
+                <div className="relative w-11 h-11 bg-slate-50 border border-slate-200 rounded-lg shadow-sm flex items-center justify-center transition-all duration-300 group-hover:bg-slate-100 group-hover:scale-105">
+                  <IconComponent className="w-5 h-5 text-[#000080]" />
                 </div>
                 <span className="text-[9px] font-black text-slate-700 leading-tight w-full truncate">
                   {lang === "hi" ? action.titleHi : action.titleEn}
@@ -445,3 +439,5 @@ export default function Home() {
     </div>
   );
 }
+
+

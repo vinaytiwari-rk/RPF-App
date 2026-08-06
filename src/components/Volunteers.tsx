@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Target, ChevronRight } from "lucide-react";
 import { Camp, UserProfile } from "../types";
 import { Award, Users, BookOpen, Clock, Heart, Calendar, Plus, CheckCircle, ShieldAlert, Sparkles, Navigation } from "lucide-react";
 
@@ -11,6 +13,7 @@ interface VolunteersProps {
 }
 
 export default function Volunteers({ lang, profile, camps, onParticipateCamp, onRegisterVolunteer }: VolunteersProps) {
+  const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
   const [skillsSelected, setSkillsSelected] = useState<string[]>([]);
   const [custSkills, setCustSkills] = useState("");
@@ -215,3 +218,6 @@ export default function Volunteers({ lang, profile, camps, onParticipateCamp, on
     </div>
   );
 }
+
+
+

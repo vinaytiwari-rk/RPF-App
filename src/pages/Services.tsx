@@ -142,9 +142,8 @@ export default function Services() {
                   className={`bg-white/95 border border-slate-200/70 shadow-sm p-3 text-center flex flex-col items-center justify-center gap-2 h-28 rounded-2xl transition-all duration-700 ease-in-out hover:border-indigo-400 hover:shadow-indigo-500/20 hover:shadow-lg translate-y-0 rotate-0 opacity-100 group`}
                   style={{ transitionDelay: `${idx * 25}ms` }}
                 >
-                  <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 animate-bounce" style={{ animationDuration: '3s' }}>
-                  <div className={`absolute inset-0 bg-gradient-to-br ${currentGradient.bg} rounded-full ${currentGradient.shadow} transition-all duration-500 animate-pulse`}></div>
-                  <IconComponent className="w-6 h-6 text-white relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,1)]" />
+                  <div className="w-12 h-12 bg-slate-50 border border-slate-200 rounded-xl shadow-sm flex items-center justify-center group-hover:bg-slate-100 group-hover:scale-110 transition-all duration-300">
+                  <IconComponent className="w-6 h-6 text-[#000080]" />
                 </div>
                     <h4 className="font-bold text-[9px] text-slate-800 leading-tight line-clamp-2 px-0.5">
                     {isHi ? svc.titleHi : svc.titleEn}
@@ -229,3 +228,5 @@ export default function Services() {
     </div>
   );
 }
+
+
