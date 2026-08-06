@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Settings, Monitor, Home, Users, Shield, Bell, CheckCircle,
   XCircle, Image as ImageIcon, MessageSquare, LayoutTemplate,
-  Loader2, LogOut, Check, ChevronRight, Activity, Database, Menu, X, Heart, CreditCard, Stethoscope
+  Loader2, LogOut, Check, ChevronRight, Activity, Database, Menu, X, Heart, CreditCard, Stethoscope, Briefcase, FileText, ActivitySquare, AlertTriangle, Droplet
 } from 'lucide-react';
 
 export default function GodAdminPanel() {
@@ -22,6 +22,12 @@ export default function GodAdminPanel() {
   const [donations, setDonations] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
   const [camps, setCamps] = useState<any[]>([]);
+  const [grievances, setGrievances] = useState<any[]>([]);
+  const [womenComplaints, setWomenComplaints] = useState<any[]>([]);
+  const [bloodDonors, setBloodDonors] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
   const [newAnnouncement, setNewAnnouncement] = useState({ title: '', content: '' });
 
   useEffect(() => {
@@ -49,6 +55,24 @@ export default function GodAdminPanel() {
       } else if (activeTab === 'camps') {
         const res = await axios.get('/api/admin/health-camps', { headers: { Authorization: `Bearer ${token}` } });
         setCamps(res.data.data || []);
+      } else if (activeTab === 'grievances') {
+        const res = await axios.get('/api/admin/grievances', { headers: { Authorization: `Bearer ${token}` } });
+        setGrievances(res.data.data || []);
+      } else if (activeTab === 'women') {
+        const res = await axios.get('/api/admin/women_complaints', { headers: { Authorization: `Bearer ${token}` } });
+        setWomenComplaints(res.data.data || []);
+      } else if (activeTab === 'blood') {
+        const res = await axios.get('/api/admin/blood_donors', { headers: { Authorization: `Bearer ${token}` } });
+        setBloodDonors(res.data.data || []);
+      } else if (activeTab === 'blogs') {
+        const res = await axios.get('/api/admin/blogs', { headers: { Authorization: `Bearer ${token}` } });
+        setBlogs(res.data.data || []);
+      } else if (activeTab === 'jobs') {
+        const res = await axios.get('/api/admin/jobs', { headers: { Authorization: `Bearer ${token}` } });
+        setJobs(res.data.data || []);
+      } else if (activeTab === 'campaigns') {
+        const res = await axios.get('/api/admin/campaigns', { headers: { Authorization: `Bearer ${token}` } });
+        setCampaigns(res.data.data || []);
       }
     } catch (error) {
       console.error('Error fetching tab data:', error);
@@ -131,13 +155,30 @@ export default function GodAdminPanel() {
     }
   };
 
+  const updateGrievanceStatus = async (id: string, status: string) => {
+    try {
+      await axios.put(`/api/admin/grievances/${id}/status`, { status }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchData();
+    } catch (error) {
+      console.error('Error updating grievance:', error);
+    }
+  };
+
   const tabs = [
     { id: 'users', label: 'Users Directory', icon: <Users size={20} /> },
     { id: 'volunteers', label: 'Volunteers', icon: <Shield size={20} /> },
     { id: 'donations', label: 'Donations', icon: <Heart size={20} /> },
+    { id: 'grievances', label: 'Grievance Portal', icon: <AlertTriangle size={20} /> },
+    { id: 'women', label: 'Women Empowerment', icon: <ActivitySquare size={20} /> },
+    { id: 'blood', label: 'Blood Donation', icon: <Droplet size={20} /> },
     { id: 'cards', label: 'Jan Seva Cards', icon: <CreditCard size={20} /> },
     { id: 'camps', label: 'Health Camps', icon: <Stethoscope size={20} /> },
-    { id: 'visual', label: 'App Settings', icon: <Monitor size={20} /> },
+    { id: 'blogs', label: 'Articles & Blogs', icon: <FileText size={20} /> },
+    { id: 'jobs', label: 'Jobs', icon: <Briefcase size={20} /> },
+    { id: 'campaigns', label: 'Campaigns', icon: <MessageSquare size={20} /> },
+    { id: 'visual', label: 'Home Screen / App Settings', icon: <Monitor size={20} /> },
     { id: 'announcements', label: 'Announcements', icon: <Bell size={20} /> },
   ];
 
@@ -348,6 +389,210 @@ export default function GodAdminPanel() {
                   ))}
                   {camps.length === 0 && (
                     <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No health camps found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'grievances':
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-gray-50 text-gray-700 uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">User</th>
+                    <th className="px-6 py-4 font-semibold">Category</th>
+                    <th className="px-6 py-4 font-semibold">Description</th>
+                    <th className="px-6 py-4 font-semibold">Status</th>
+                    <th className="px-6 py-4 font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {grievances.map(g => (
+                    <tr key={g.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900">{g.user_id}</td>
+                      <td className="px-6 py-4">{g.category}</td>
+                      <td className="px-6 py-4 max-w-xs truncate">{g.description}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${g.status === 'Resolved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                          {g.status || 'Pending'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {g.status !== 'Resolved' && (
+                          <button onClick={() => updateGrievanceStatus(g.id, 'Resolved')} className="text-indigo-600 hover:text-indigo-900 font-medium text-xs">
+                            Mark Resolved
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {grievances.length === 0 && (
+                    <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">No grievances found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'women':
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-gray-50 text-gray-700 uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Date</th>
+                    <th className="px-6 py-4 font-semibold">Submitter</th>
+                    <th className="px-6 py-4 font-semibold">Subject</th>
+                    <th className="px-6 py-4 font-semibold">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {womenComplaints.map(w => (
+                    <tr key={w.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">{new Date(w.created_at).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">{w.user_id}</td>
+                      <td className="px-6 py-4">{w.subject}</td>
+                      <td className="px-6 py-4 max-w-xs truncate">{w.description}</td>
+                    </tr>
+                  ))}
+                  {womenComplaints.length === 0 && (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No complaints found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'blood':
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-gray-50 text-gray-700 uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Name</th>
+                    <th className="px-6 py-4 font-semibold">Blood Group</th>
+                    <th className="px-6 py-4 font-semibold">Location</th>
+                    <th className="px-6 py-4 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {bloodDonors.map(b => (
+                    <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900">{b.name}</td>
+                      <td className="px-6 py-4 font-bold text-red-600">{b.blood_group}</td>
+                      <td className="px-6 py-4">{b.location}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${b.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {b.is_active ? 'Available' : 'Inactive'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {bloodDonors.length === 0 && (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No blood donors found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'blogs':
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-gray-50 text-gray-700 uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Date</th>
+                    <th className="px-6 py-4 font-semibold">Title</th>
+                    <th className="px-6 py-4 font-semibold">Author</th>
+                    <th className="px-6 py-4 font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {blogs.map(b => (
+                    <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">{new Date(b.created_at).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">{b.title}</td>
+                      <td className="px-6 py-4">{b.author}</td>
+                      <td className="px-6 py-4">
+                        <button className="text-red-600 hover:text-red-900 font-medium text-xs">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {blogs.length === 0 && (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No blogs found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'jobs':
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-gray-50 text-gray-700 uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Title</th>
+                    <th className="px-6 py-4 font-semibold">Company</th>
+                    <th className="px-6 py-4 font-semibold">Location</th>
+                    <th className="px-6 py-4 font-semibold">Posted</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {jobs.map(j => (
+                    <tr key={j.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900">{j.title}</td>
+                      <td className="px-6 py-4">{j.company}</td>
+                      <td className="px-6 py-4">{j.location}</td>
+                      <td className="px-6 py-4">{new Date(j.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                  {jobs.length === 0 && (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No jobs found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'campaigns':
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-gray-50 text-gray-700 uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Title</th>
+                    <th className="px-6 py-4 font-semibold">Goal</th>
+                    <th className="px-6 py-4 font-semibold">Raised</th>
+                    <th className="px-6 py-4 font-semibold">End Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {campaigns.map(c => (
+                    <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900">{c.title}</td>
+                      <td className="px-6 py-4">₹{c.goal_amount}</td>
+                      <td className="px-6 py-4 text-emerald-600 font-bold">₹{c.raised_amount}</td>
+                      <td className="px-6 py-4">{new Date(c.end_date).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                  {campaigns.length === 0 && (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No campaigns found.</td></tr>
                   )}
                 </tbody>
               </table>

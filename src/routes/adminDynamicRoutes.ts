@@ -211,4 +211,95 @@ router.get("/api/admin/health-camps", authenticateToken, requireAdmin, async (re
   }
 });
 
+// GET all grievances
+router.get("/api/admin/grievances", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM grievances ORDER BY created_at DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch grievances" });
+  }
+});
+
+// PUT update grievance status
+router.put("/api/admin/grievances/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const result = await pool.query("UPDATE grievances SET status = $1 WHERE id = $2 RETURNING *", [status, req.params.id]);
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to update grievance" });
+  }
+});
+
+// GET women complaints
+router.get("/api/admin/women_complaints", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM women_complaints ORDER BY created_at DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch women complaints" });
+  }
+});
+
+// GET blood donors
+router.get("/api/admin/blood_donors", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM blood_donors ORDER BY created_at DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch blood donors" });
+  }
+});
+
+// GET blood requests
+router.get("/api/admin/blood_requests", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM blood_requests ORDER BY created_at DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch blood requests" });
+  }
+});
+
+// GET blogs
+router.get("/api/admin/blogs", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM blogs ORDER BY created_at DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch blogs" });
+  }
+});
+
+// DELETE blog
+router.delete("/api/admin/blogs/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM blogs WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to delete blog" });
+  }
+});
+
+// GET jobs
+router.get("/api/admin/jobs", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM jobs ORDER BY created_at DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch jobs" });
+  }
+});
+
+// GET campaigns
+router.get("/api/admin/campaigns", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM campaigns ORDER BY created_at DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch campaigns" });
+  }
+});
+
 export default router;
