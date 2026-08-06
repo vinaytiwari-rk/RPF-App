@@ -98,7 +98,7 @@ router.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin,
       const { volunteerId } = taskRes.rows[0];
       await pool.query(
         'UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2',
-        [points, volunteerId]
+        [10, volunteerId]
       );
     }
     
@@ -168,3 +168,4 @@ router.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req
 
 
 export default router;
+

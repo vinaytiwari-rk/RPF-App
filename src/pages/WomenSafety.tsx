@@ -923,7 +923,7 @@ export default function WomenSafety() {
                   </div>
 
                   {(() => {
-                    const { safetyClass, advice, color } = getRouteSafetyIndex(routeLight, routeCrowd, isHi);
+                    const { safetyClass, advice, color } = getRouteSafetyIndex(routeLight, routeCrowd, lang === 'hi');
                     return (
                       <div className={`p-3 rounded-lg border font-bold text-center ${color}`}>
                         <p className="text-xs font-black">{safetyClass}</p>

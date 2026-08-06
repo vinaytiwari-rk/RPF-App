@@ -3,6 +3,7 @@ import axios from 'axios';
 import ErrorBoundary from "./components/ErrorBoundary";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { Toaster } from "react-hot-toast";
 import MainLayout from "./layouts/MainLayout";
 
 // Configure Axios Defaults
@@ -167,6 +168,7 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
+      <Toaster position="top-right" />
       <AppProvider>
         <AppContent />
       </AppProvider>

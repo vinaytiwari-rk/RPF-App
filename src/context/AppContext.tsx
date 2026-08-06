@@ -218,6 +218,7 @@ interface AppContextType {
   settings: Settings;
   globalSettings: any;
   announcements: any[];
+  notifications: any[];
   cmsConfig: CmsConfig;
   servicesList: any[];
   isLoadingServices: boolean;
@@ -511,6 +512,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         approveCardApplication,
         rejectCardApplication,
         refreshData: fetchAllData,
+        notifications: [],
       }}
     >
       {children}
@@ -523,3 +525,6 @@ export function useApp() {
   if (!context) throw new Error("useApp must be used within an AppProvider");
   return context;
 }
+
+
+

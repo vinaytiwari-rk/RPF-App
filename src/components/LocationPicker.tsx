@@ -4,8 +4,11 @@ import { MapPin, Navigation, Loader2 } from 'lucide-react';
 import L from 'leaflet';
 
 // Fix Leaflet's default icon issue with React
+// @ts-ignore
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+// @ts-ignore
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
+// @ts-ignore
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -122,3 +125,4 @@ export default function LocationPicker({ onLocationSelect, defaultLocation }: Lo
     </div>
   );
 }
+

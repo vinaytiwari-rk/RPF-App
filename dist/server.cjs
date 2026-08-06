@@ -68120,7 +68120,7 @@ router10.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmi
       const { volunteerId } = taskRes.rows[0];
       await pool2.query(
         "UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2",
-        [points, volunteerId]
+        [10, volunteerId]
       );
     }
     res.json({ success: true, message: "Task status updated" });

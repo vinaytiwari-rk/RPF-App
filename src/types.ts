@@ -10,6 +10,8 @@ export interface UserProfile {
   division: string; // ward/assembly/district
   janSevaId: string;
   role: "Citizen" | "Active Volunteer" | "Donor";
+  points?: number;
+  badge?: string;
 }
 
 export interface Grievance {
@@ -54,6 +56,7 @@ export interface Camp {
   type: "Health" | "Blood Donation" | "Food Dist" | "Education" | "Afforestation";
   location: string;
   registeredCount: number;
+  pointsReward?: number;
 }
 
 export interface SocialPost {
@@ -65,3 +68,18 @@ export interface SocialPost {
   date: string;
   link: string;
 }
+
+export interface AppSettings {
+  splash_animation?: string;
+  splash_duration?: number;
+  splash_logo?: string;
+  login_bg_image?: string;
+  marquee_text_en?: string;
+  marquee_text_hi?: string;
+  marquee_enabled?: boolean;
+  [key: string]: any;
+}
+
+export type DbRecord = Record<string, any>;
+
+

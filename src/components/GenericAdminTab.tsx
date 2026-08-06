@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Trash2, Plus, Loader2 } from "lucide-react";
+import { Trash2, Plus } from "lucide-react";
+import toast from "react-hot-toast";
+import { Skeleton } from "./ui/Skeleton";
 import { useAuth } from "../context/AuthContext";
 import FileUpload from "./FileUpload";
 
@@ -62,10 +64,11 @@ export default function GenericAdminTab({ endpoint, title, columns = ["title", "
       );
       setFormData({});
       setImageUrl("");
+      toast.success(`${title} added successfully!`);
       fetchData();
     } catch (error) {
       console.error(`Error creating ${title}:`, error);
-      alert("Failed to add record.");
+      toast.error("Failed to add record.");
     } finally {
       setSubmitting(false);
     }
@@ -122,7 +125,7 @@ export default function GenericAdminTab({ endpoint, title, columns = ["title", "
             disabled={submitting}
             className="px-4 py-2 bg-[#FF9933] hover:bg-[#e68a2e] text-white text-xs font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
           >
-            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+            {submitting ? <Skeleton className="w-4 h-4 rounded-full" /> : <Plus className="w-4 h-4" />}
             Add {title}
           </button>
         </form>
@@ -134,7 +137,11 @@ export default function GenericAdminTab({ endpoint, title, columns = ["title", "
         </div>
         <div className="p-0">
           {loading ? (
-            <div className="p-8 text-center text-slate-500"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+            <div className="p-6 space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
           ) : data.length === 0 ? (
             <div className="p-8 text-center text-slate-500 text-xs">No records found.</div>
           ) : (

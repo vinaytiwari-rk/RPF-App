@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import GenericAdminTab from '../components/GenericAdminTab';
-import FileUpload from '../components/FileUpload';
-import { AppSettings, DbRecord } from '../types';
-import { Skeleton } from '../components/ui/Skeleton';
-import { VisualSettings } from '../components/admin/VisualSettings';
-import { GraduationCap, Utensils, Pill, BookOpen, UserPlus, Dog, Leaf, Church, Tractor, Landmark, Hammer, Globe2 } from 'lucide-react';
 import {
   Settings, Monitor, Home, Users, Shield, Bell, CheckCircle,
   XCircle, Image as ImageIcon, MessageSquare, LayoutTemplate,
@@ -21,26 +15,26 @@ export default function GodAdminPanel() {
   const [saving, setSaving] = useState(false);
   
   // Data states
-  const [settings, setSettings] = useState<AppSettings>({});
-  const [announcements, setAnnouncements] = useState<DbRecord[]>([]);
-  const [users, setUsers] = useState<DbRecord[]>([]);
-  const [volunteers, setVolunteers] = useState<DbRecord[]>([]);
-  const [donations, setDonations] = useState<DbRecord[]>([]);
-  const [cards, setCards] = useState<DbRecord[]>([]);
-  const [camps, setCamps] = useState<DbRecord[]>([]);
-  const [grievances, setGrievances] = useState<DbRecord[]>([]);
-  const [womenComplaints, setWomenComplaints] = useState<DbRecord[]>([]);
-  const [bloodDonors, setBloodDonors] = useState<DbRecord[]>([]);
-  const [blogs, setBlogs] = useState<DbRecord[]>([]);
-  const [jobs, setJobs] = useState<DbRecord[]>([]);
-  const [campaigns, setCampaigns] = useState<DbRecord[]>([]);
+  const [settings, setSettings] = useState<any>({});
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [volunteers, setVolunteers] = useState<any[]>([]);
+  const [donations, setDonations] = useState<any[]>([]);
+  const [cards, setCards] = useState<any[]>([]);
+  const [camps, setCamps] = useState<any[]>([]);
+  const [grievances, setGrievances] = useState<any[]>([]);
+  const [womenComplaints, setWomenComplaints] = useState<any[]>([]);
+  const [bloodDonors, setBloodDonors] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
   const [newAnnouncement, setNewAnnouncement] = useState({ title: '', content: '' });
 
   useEffect(() => {
     fetchSettings();
     fetchAnnouncements();
     fetchData();
-  }, [activeTab, token]);
+  }, [activeTab]);
 
   const fetchData = async () => {
     if (!token) return;
@@ -108,7 +102,7 @@ export default function GodAdminPanel() {
     }
   };
 
-  const saveSettings = async (updates: Partial<AppSettings>) => {
+  const saveSettings = async (updates: any) => {
     setSaving(true);
     try {
       const res = await axios.post('/api/admin/settings', updates, {
@@ -186,23 +180,9 @@ export default function GodAdminPanel() {
     { id: 'campaigns', label: 'Campaigns', icon: <MessageSquare size={20} /> },
     { id: 'visual', label: 'Home Screen / App Settings', icon: <Monitor size={20} /> },
     { id: 'announcements', label: 'Announcements', icon: <Bell size={20} /> },
-    { id: 'scholarships', label: 'Scholarships', icon: <GraduationCap size={20} /> },
-    { id: 'food_support', label: 'Food Support', icon: <Utensils size={20} /> },
-    { id: 'medicine_support', label: 'Medicine Support', icon: <Pill size={20} /> },
-    { id: 'education_aid', label: 'Education Aid', icon: <BookOpen size={20} /> },
-    { id: 'senior_citizens', label: 'Senior Citizens', icon: <UserPlus size={20} /> },
-    { id: 'animal_welfare', label: 'Animal Welfare', icon: <Dog size={20} /> },
-    { id: 'environment', label: 'Environment', icon: <Leaf size={20} /> },
-    { id: 'religious_culture', label: 'Religious & Culture', icon: <Church size={20} /> },
-    { id: 'disaster_management', label: 'Disaster Management', icon: <AlertTriangle size={20} /> },
-    { id: 'farmer_support', label: 'Farmer Support', icon: <Tractor size={20} /> },
-    { id: 'government_schemes', label: 'Government Schemes', icon: <Landmark size={20} /> },
-    { id: 'skills_training', label: 'Skills Training', icon: <Hammer size={20} /> },
-    { id: 'global_guide', label: 'Global Guide', icon: <Globe2 size={20} /> },
-
   ];
 
-  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin' && user.role !== 'super_admin')) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 text-gray-900">
         <div className="text-center space-y-4">
@@ -215,12 +195,10 @@ export default function GodAdminPanel() {
   }
 
   const renderContent = () => {
-    const customLoadingTabs = ['users', 'volunteers', 'donations', 'cards', 'grievances', 'women', 'blood', 'jobs'];
-    if (loading && customLoadingTabs.includes(activeTab)) {
+    if (loading && activeTab !== 'visual' && activeTab !== 'announcements') {
       return (
-                <div className="p-6 space-y-6">
-          <Skeleton className="h-10 w-1/4" />
-          <Skeleton className="h-[400px] w-full" />
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
         </div>
       );
     }
@@ -388,7 +366,35 @@ export default function GodAdminPanel() {
         );
 
       case 'camps':
-        return <GenericAdminTab endpoint="/api/admin/health-camps" title="Health Camps" columns={["title", "description", "date", "location"]} />;
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-gray-50 text-gray-700 uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Camp Name</th>
+                    <th className="px-6 py-4 font-semibold">Date</th>
+                    <th className="px-6 py-4 font-semibold">Location</th>
+                    <th className="px-6 py-4 font-semibold">Beneficiaries</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {camps.map(c => (
+                    <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900">{c.title || c.name}</td>
+                      <td className="px-6 py-4">{new Date(c.date).toLocaleDateString()}</td>
+                      <td className="px-6 py-4">{c.location}</td>
+                      <td className="px-6 py-4">{c.beneficiaries_count || 0}</td>
+                    </tr>
+                  ))}
+                  {camps.length === 0 && (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No health camps found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
 
       case 'grievances':
         return (
@@ -500,7 +506,37 @@ export default function GodAdminPanel() {
         );
 
       case 'blogs':
-        return <GenericAdminTab endpoint="/api/admin/blogs" title="Articles & Blogs" columns={["title", "description", "author"]} />;
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-gray-50 text-gray-700 uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Date</th>
+                    <th className="px-6 py-4 font-semibold">Title</th>
+                    <th className="px-6 py-4 font-semibold">Author</th>
+                    <th className="px-6 py-4 font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {blogs.map(b => (
+                    <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">{new Date(b.created_at).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">{b.title}</td>
+                      <td className="px-6 py-4">{b.author}</td>
+                      <td className="px-6 py-4">
+                        <button className="text-red-600 hover:text-red-900 font-medium text-xs">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {blogs.length === 0 && (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No blogs found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
 
       case 'jobs':
         return (
@@ -534,25 +570,199 @@ export default function GodAdminPanel() {
         );
 
       case 'campaigns':
-        return <GenericAdminTab endpoint="/api/admin/campaigns" title="Campaigns" columns={["title", "description", "goalAmount", "raisedAmount"]} />;
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-500">
+                <thead className="bg-gray-50 text-gray-700 uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Title</th>
+                    <th className="px-6 py-4 font-semibold">Goal</th>
+                    <th className="px-6 py-4 font-semibold">Raised</th>
+                    <th className="px-6 py-4 font-semibold">End Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {campaigns.map(c => (
+                    <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900">{c.title}</td>
+                      <td className="px-6 py-4">₹{c.goal_amount}</td>
+                      <td className="px-6 py-4 text-emerald-600 font-bold">₹{c.raised_amount}</td>
+                      <td className="px-6 py-4">{new Date(c.end_date).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                  {campaigns.length === 0 && (
+                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No campaigns found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
 
       case 'visual':
-        return <VisualSettings settings={settings} saveSettings={saveSettings} />;
+        return (
+          <div className="max-w-4xl space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <Monitor className="text-indigo-600" size={20} />
+                Splash Screen Settings
+              </h3>
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Splash Animation Type</label>
+                  <select
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow"
+                    value={settings.splash_animation || 'fade'}
+                    onChange={(e) => saveSettings({ splash_animation: e.target.value })}
+                  >
+                    <option value="fade">Fade In</option>
+                    <option value="slide">Slide Up</option>
+                    <option value="zoom">Zoom Out</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Splash Duration (ms)</label>
+                  <input
+                    type="number"
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    value={settings.splash_duration || 2000}
+                    onChange={(e) => saveSettings({ splash_duration: parseInt(e.target.value) })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">App Logo URL</label>
+                  <input
+                    type="text"
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    value={settings.splash_logo || ''}
+                    onChange={(e) => saveSettings({ splash_logo: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <ImageIcon className="text-indigo-600" size={20} />
+                Login Background Image
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Enter image URL..."
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    value={settings.login_bg_image || ''}
+                    onChange={(e) => saveSettings({ login_bg_image: e.target.value })}
+                  />
+                </div>
+                {settings.login_bg_image && (
+                  <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-200 shadow-inner">
+                    <img src={settings.login_bg_image} alt="Login background" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <MessageSquare className="text-indigo-600" size={20} />
+                Marquee Notice Configuration
+              </h3>
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Notice Text (English)</label>
+                  <textarea
+                    rows={3}
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    value={settings.marquee_text_en || ''}
+                    onChange={(e) => saveSettings({ marquee_text_en: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Notice Text (Hindi)</label>
+                  <textarea
+                    rows={3}
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    value={settings.marquee_text_hi || ''}
+                    onChange={(e) => saveSettings({ marquee_text_hi: e.target.value })}
+                  />
+                </div>
+                <div className="flex items-center gap-3 bg-indigo-50 text-indigo-800 p-4 rounded-lg border border-indigo-100">
+                  <input
+                    type="checkbox"
+                    id="marqueeEnabled"
+                    checked={settings.marquee_enabled ?? true}
+                    onChange={(e) => saveSettings({ marquee_enabled: e.target.checked })}
+                    className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                  />
+                  <label htmlFor="marqueeEnabled" className="font-medium">Enable Marquee Notice on Home Screen</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
       case 'announcements':
-        return <GenericAdminTab endpoint="/api/admin/announcements" title="Announcements" />;
-      case 'scholarships': return <GenericAdminTab endpoint="/api/admin/scholarships" title="Scholarships" columns={['title', 'description']} />;
-      case 'food_support': return <GenericAdminTab endpoint="/api/admin/food_support" title="Food Support" columns={['title', 'description']} />;
-      case 'medicine_support': return <GenericAdminTab endpoint="/api/admin/medicine_support" title="Medicine Support" columns={['title', 'description']} />;
-      case 'education_aid': return <GenericAdminTab endpoint="/api/admin/education_aid" title="Education Aid" columns={['title', 'description']} />;
-      case 'senior_citizens': return <GenericAdminTab endpoint="/api/admin/senior_citizens" title="Senior Citizens" columns={['title', 'description']} />;
-      case 'animal_welfare': return <GenericAdminTab endpoint="/api/admin/animal_welfare" title="Animal Welfare" columns={['title', 'description']} />;
-      case 'environment': return <GenericAdminTab endpoint="/api/admin/environment" title="Environment" columns={['title', 'description']} />;
-      case 'religious_culture': return <GenericAdminTab endpoint="/api/admin/religious_culture" title="Religious & Culture" columns={['title', 'description']} />;
-      case 'disaster_management': return <GenericAdminTab endpoint="/api/admin/disaster_management" title="Disaster Management" columns={['title', 'description']} />;
-      case 'farmer_support': return <GenericAdminTab endpoint="/api/admin/farmer_support" title="Farmer Support" columns={['title', 'description']} />;
-      case 'government_schemes': return <GenericAdminTab endpoint="/api/admin/government_schemes" title="Government Schemes" columns={['title', 'description']} />;
-      case 'skills_training': return <GenericAdminTab endpoint="/api/admin/skills_training" title="Skills Training" columns={['title', 'description']} />;
-      case 'global_guide': return <GenericAdminTab endpoint="/api/admin/global_guide" title="Global Guide" columns={['title', 'description']} />;
+        return (
+          <div className="max-w-4xl space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <Bell className="text-indigo-600" size={20} />
+                Create New Announcement
+              </h3>
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Announcement Title"
+                  className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={newAnnouncement.title}
+                  onChange={e => setNewAnnouncement(prev => ({ ...prev, title: e.target.value }))}
+                />
+                <textarea
+                  placeholder="Announcement Content"
+                  rows={4}
+                  className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={newAnnouncement.content}
+                  onChange={e => setNewAnnouncement(prev => ({ ...prev, content: e.target.value }))}
+                />
+                <button
+                  onClick={createAnnouncement}
+                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                >
+                  Publish Announcement
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-gray-900 px-1">Active Announcements</h3>
+              {announcements.map(ann => (
+                <div key={ann.id} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex items-start justify-between">
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{ann.title}</h4>
+                    <p className="text-gray-600 mt-1.5 text-sm">{ann.content}</p>
+                    <p className="text-xs text-gray-400 mt-3 font-medium">{new Date(ann.created_at).toLocaleString()}</p>
+                  </div>
+                  <button
+                    onClick={() => deleteAnnouncement(ann.id)}
+                    className="text-gray-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete"
+                  >
+                    <XCircle size={20} />
+                  </button>
+                </div>
+              ))}
+              {announcements.length === 0 && (
+                <div className="text-center py-10 bg-white border border-gray-200 rounded-xl">
+                  <Bell className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+                  <p className="text-gray-500">No active announcements</p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
 
       default:
         return null;
@@ -662,9 +872,6 @@ export default function GodAdminPanel() {
     </div>
   );
 }
-
-
-
 
 
 
