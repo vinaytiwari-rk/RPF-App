@@ -42,24 +42,9 @@ export default function MainLayout() {
     }
   }, [isAdmin, location.pathname, navigate]);
 
-  if (isAdmin) {
-    return (
-      <div className="w-full min-h-screen bg-slate-50 flex flex-col font-sans">
-        <Outlet context={{ lang: language }} />
-      </div>
-    );
-  }
   const { notifications, settings, globalSettings } = useApp();
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
   const [showGuestModal, setShowGuestModal] = useState(false);
-
-  const handleNav = (path) => {
-    if (user?.role === "guest" && (path === "/services" || path === "/community" || path === "/notifications")) {
-      setShowGuestModal(true);
-      return;
-    }
-    navigate(path);
-  };
 
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "bot"; text: string }[]>([
@@ -68,6 +53,22 @@ export default function MainLayout() {
   const [inputText, setInputText] = useState("");
   const [botLoading, setBotLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+
+  if (isAdmin) {
+    return (
+      <div className="w-full min-h-screen bg-slate-50 flex flex-col font-sans">
+        <Outlet context={{ lang: language }} />
+      </div>
+    );
+  }
+
+  const handleNav = (path) => {
+    if (user?.role === "guest" && (path === "/services" || path === "/community" || path === "/notifications")) {
+      setShowGuestModal(true);
+      return;
+    }
+    navigate(path);
+  };
 
   const handleSend = async (messageText = inputText) => {
     const text = messageText.trim();
