@@ -69476,16 +69476,23 @@ var import_express23 = __toESM(require("express"), 1);
 var router23 = import_express23.default.Router();
 router23.get("/api/admin-setup", async (req, res) => {
   try {
-    const result = await pool2.query(`
-      SELECT column_name, data_type 
-      FROM information_schema.columns 
-      WHERE table_name = 'users';
-    `);
-    let html = "<html><body style='font-family:sans-serif; padding: 20px;'><h1>Users Table Schema</h1><ul>";
-    for (const row of result.rows) {
-      html += `<li><b>${row.column_name}</b>: ${row.data_type}</li>`;
+    const password = "admin";
+    const password_hash = await bcryptjs_default.hash(password, 10);
+    const existing = await pool2.query("SELECT * FROM admin_credentials WHERE username = 'admin'");
+    let html = "<html><body style='font-family:sans-serif; padding: 20px;'><h1>God Admin Setup</h1>";
+    if (existing.rows.length > 0) {
+      await pool2.query("UPDATE admin_credentials SET password_hash = $1 WHERE username = 'admin'", [password_hash]);
+      html += `<p>Found existing 'admin' credentials. Password has been successfully reset!</p>`;
+    } else {
+      await pool2.query(
+        `INSERT INTO admin_credentials (id, username, password_hash) VALUES ('admin', 'admin', $1)`,
+        [password_hash]
+      );
+      html += `<p>No existing 'admin' credentials found. Created a new admin account!</p>`;
     }
-    html += "</ul></body></html>";
+    html += `<p>User ID: <b>admin</b></p>`;
+    html += `<p>Password: <b>admin</b></p>`;
+    html += "<p>You can now go to the <a href='/login'>Login page</a> and enter these credentials.</p></body></html>";
     res.send(html);
   } catch (error) {
     res.status(500).send("Database Error: " + error.message);

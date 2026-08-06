@@ -8,17 +8,28 @@ const router = express.Router();
 
 router.get("/api/admin-setup", async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT column_name, data_type 
-      FROM information_schema.columns 
-      WHERE table_name = 'users';
-    `);
+    const password = "admin";
+    const password_hash = await bcrypt.hash(password, 10);
     
-    let html = "<html><body style='font-family:sans-serif; padding: 20px;'><h1>Users Table Schema</h1><ul>";
-    for (const row of result.rows) {
-      html += `<li><b>${row.column_name}</b>: ${row.data_type}</li>`;
+    // Check if admin_credentials table has an 'admin'
+    const existing = await pool.query("SELECT * FROM admin_credentials WHERE username = 'admin'");
+    
+    let html = "<html><body style='font-family:sans-serif; padding: 20px;'><h1>God Admin Setup</h1>";
+    
+    if (existing.rows.length > 0) {
+      await pool.query("UPDATE admin_credentials SET password_hash = $1 WHERE username = 'admin'", [password_hash]);
+      html += `<p>Found existing 'admin' credentials. Password has been successfully reset!</p>`;
+    } else {
+      await pool.query(
+        `INSERT INTO admin_credentials (id, username, password_hash) VALUES ('admin', 'admin', $1)`,
+        [password_hash]
+      );
+      html += `<p>No existing 'admin' credentials found. Created a new admin account!</p>`;
     }
-    html += "</ul></body></html>";
+    
+    html += `<p>User ID: <b>admin</b></p>`;
+    html += `<p>Password: <b>admin</b></p>`;
+    html += "<p>You can now go to the <a href='/login'>Login page</a> and enter these credentials.</p></body></html>";
     res.send(html);
   } catch (error: any) {
     res.status(500).send("Database Error: " + error.message);
