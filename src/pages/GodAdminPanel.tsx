@@ -37,7 +37,7 @@ export default function GodAdminPanel() {
     fetchSettings();
     fetchAnnouncements();
     fetchData();
-  }, [activeTab]);
+  }, [activeTab, token]);
 
   const fetchData = async () => {
     if (!token) return;
@@ -749,6 +749,7 @@ export default function GodAdminPanel() {
     </div>
   );
 }
+
 
 
 
