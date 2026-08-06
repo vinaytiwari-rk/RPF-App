@@ -58262,6 +58262,7 @@ var bcryptjs_default = {
 var import_path4 = __toESM(require("path"), 1);
 var import_dotenv2 = __toESM(require("dotenv"), 1);
 var import_pg2 = __toESM(require("pg"), 1);
+var import_fs3 = __toESM(require("fs"), 1);
 var import_crypto13 = __toESM(require("crypto"), 1);
 var import_multer2 = __toESM(require("multer"), 1);
 
@@ -69714,6 +69715,370 @@ router23.get("/api/admin/campaigns", authenticateToken, requireAdmin, async (req
     res.status(500).json({ success: false, error: "Failed to fetch campaigns" });
   }
 });
+router23.get("/api/admin/scholarships", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM scholarships ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/scholarships", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO scholarships (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/scholarships/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM scholarships WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/food_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM food_support ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/food_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO food_support (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/food_support/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM food_support WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/medicine_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM medicine_support ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/medicine_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO medicine_support (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/medicine_support/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM medicine_support WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/education_aid", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM education_aid ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/education_aid", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO education_aid (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/education_aid/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM education_aid WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/senior_citizens", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM senior_citizens ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/senior_citizens", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO senior_citizens (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/senior_citizens/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM senior_citizens WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/animal_welfare", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM animal_welfare ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/animal_welfare", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO animal_welfare (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/animal_welfare/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM animal_welfare WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/environment", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM environment ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/environment", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO environment (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/environment/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM environment WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/religious_culture", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM religious_culture ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/religious_culture", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO religious_culture (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/religious_culture/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM religious_culture WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/disaster_management", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM disaster_management ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/disaster_management", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO disaster_management (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/disaster_management/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM disaster_management WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/farmer_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM farmer_support ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/farmer_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO farmer_support (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/farmer_support/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM farmer_support WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/government_schemes", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM government_schemes ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/government_schemes", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO government_schemes (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/government_schemes/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM government_schemes WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/skills_training", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM skills_training ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/skills_training", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO skills_training (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/skills_training/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM skills_training WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.get("/api/admin/global_guide", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM global_guide ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.post("/api/admin/global_guide", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool2.query(
+      'INSERT INTO global_guide (title, description, "imageUrl") VALUES ($1, $2, $3) RETURNING *',
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+router23.delete("/api/admin/global_guide/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool2.query("DELETE FROM global_guide WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 var adminDynamicRoutes_default = router23;
 
 // server.ts
@@ -70335,6 +70700,123 @@ async function initDatabase() {
       )
     `, [], "success_stories table creation");
     await runQuery(`
+      CREATE TABLE IF NOT EXISTS scholarships (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "scholarships table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS food_support (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "food_support table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS medicine_support (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "medicine_support table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS education_aid (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "education_aid table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS senior_citizens (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "senior_citizens table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS animal_welfare (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "animal_welfare table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS environment (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "environment table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS religious_culture (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "religious_culture table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS disaster_management (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "disaster_management table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS farmer_support (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "farmer_support table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS government_schemes (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "government_schemes table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS skills_training (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "skills_training table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS global_guide (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "global_guide table creation");
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS blogs (
         id UUID PRIMARY KEY,
         title TEXT NOT NULL,
@@ -70529,6 +71011,35 @@ var upload2 = (0, import_multer2.default)({
       return cb(new Error("Only PNG, JPG, JPEG, PDF, MP3, WAV, M4A, OGG, WEBM, MP4, MOV, AVI, and MKV files are allowed"));
     }
     cb(null, true);
+  }
+});
+var handleUploadErrors2 = (err, req, res, next) => {
+  if (err) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+  next();
+};
+async function saveFileLocally2(file) {
+  const fileExt = import_path4.default.extname(file.originalname) || ".jpg";
+  const filename = `${Date.now()}-${Math.round(Math.random() * 1e5)}${fileExt}`;
+  const destDir = import_path4.default.join(process.cwd(), "uploads");
+  if (!import_fs3.default.existsSync(destDir)) {
+    import_fs3.default.mkdirSync(destDir, { recursive: true });
+  }
+  const destFilePath = import_path4.default.join(destDir, filename);
+  await import_fs3.default.promises.writeFile(destFilePath, file.buffer);
+  return `/uploads/${filename}`;
+}
+app.post("/api/admin/upload", authenticateToken2, requireAdmin5, upload2.single("image"), handleUploadErrors2, async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+    const localUrl = await saveFileLocally2(req.file);
+    res.json({ success: true, url: localUrl });
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 app.use("/uploads", import_express24.default.static(import_path4.default.join(process.cwd(), "uploads")));

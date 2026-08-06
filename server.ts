@@ -904,6 +904,150 @@ async function initDatabase() {
       )
     `, [], "success_stories table creation");
 
+    
+    // Create scholarships table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS scholarships (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "scholarships table creation");
+
+    // Create food_support table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS food_support (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "food_support table creation");
+
+    // Create medicine_support table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS medicine_support (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "medicine_support table creation");
+
+    // Create education_aid table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS education_aid (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "education_aid table creation");
+
+    // Create senior_citizens table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS senior_citizens (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "senior_citizens table creation");
+
+    // Create animal_welfare table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS animal_welfare (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "animal_welfare table creation");
+
+    // Create environment table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS environment (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "environment table creation");
+
+    // Create religious_culture table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS religious_culture (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "religious_culture table creation");
+
+    // Create disaster_management table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS disaster_management (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "disaster_management table creation");
+
+    // Create farmer_support table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS farmer_support (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "farmer_support table creation");
+
+    // Create government_schemes table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS government_schemes (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "government_schemes table creation");
+
+    // Create skills_training table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS skills_training (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "skills_training table creation");
+
+    // Create global_guide table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS global_guide (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        "imageUrl" TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "global_guide table creation");
+
     // Create blogs table
     await runQuery(`
       CREATE TABLE IF NOT EXISTS blogs (
@@ -1340,13 +1484,19 @@ async function saveFileLocally(file: Express.Multer.File): Promise<string> {
   return `/uploads/${filename}`;
 }
 
-
-
-
-
-
-
-// Profile image management endpoints
+// General upload endpoint for Admin Panel
+app.post("/api/admin/upload", authenticateToken, requireAdmin, upload.single("image"), handleUploadErrors, async (req: any, res: any) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+    const localUrl = await saveFileLocally(req.file);
+    res.json({ success: true, url: localUrl });
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});// Profile image management endpoints
 
 
 

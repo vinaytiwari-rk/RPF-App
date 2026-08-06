@@ -180,6 +180,20 @@ export default function GodAdminPanel() {
     { id: 'campaigns', label: 'Campaigns', icon: <MessageSquare size={20} /> },
     { id: 'visual', label: 'Home Screen / App Settings', icon: <Monitor size={20} /> },
     { id: 'announcements', label: 'Announcements', icon: <Bell size={20} /> },
+    { id: 'scholarships', label: 'Scholarships', icon: <GraduationCap size={20} /> },
+    { id: 'food_support', label: 'Food Support', icon: <Utensils size={20} /> },
+    { id: 'medicine_support', label: 'Medicine Support', icon: <Pill size={20} /> },
+    { id: 'education_aid', label: 'Education Aid', icon: <BookOpen size={20} /> },
+    { id: 'senior_citizens', label: 'Senior Citizens', icon: <UserPlus size={20} /> },
+    { id: 'animal_welfare', label: 'Animal Welfare', icon: <Dog size={20} /> },
+    { id: 'environment', label: 'Environment', icon: <Leaf size={20} /> },
+    { id: 'religious_culture', label: 'Religious & Culture', icon: <Church size={20} /> },
+    { id: 'disaster_management', label: 'Disaster Management', icon: <AlertTriangle size={20} /> },
+    { id: 'farmer_support', label: 'Farmer Support', icon: <Tractor size={20} /> },
+    { id: 'government_schemes', label: 'Government Schemes', icon: <Landmark size={20} /> },
+    { id: 'skills_training', label: 'Skills Training', icon: <Hammer size={20} /> },
+    { id: 'global_guide', label: 'Global Guide', icon: <Globe2 size={20} /> },
+
   ];
 
   if (!user || (user.role !== 'admin' && user.role !== 'super_admin' && user.role !== 'superadmin')) {
@@ -366,35 +380,7 @@ export default function GodAdminPanel() {
         );
 
       case 'camps':
-        return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-gray-500">
-                <thead className="bg-gray-50 text-gray-700 uppercase">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold">Camp Name</th>
-                    <th className="px-6 py-4 font-semibold">Date</th>
-                    <th className="px-6 py-4 font-semibold">Location</th>
-                    <th className="px-6 py-4 font-semibold">Beneficiaries</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {camps.map(c => (
-                    <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-gray-900">{c.title || c.name}</td>
-                      <td className="px-6 py-4">{new Date(c.date).toLocaleDateString()}</td>
-                      <td className="px-6 py-4">{c.location}</td>
-                      <td className="px-6 py-4">{c.beneficiaries_count || 0}</td>
-                    </tr>
-                  ))}
-                  {camps.length === 0 && (
-                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No health camps found.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <GenericAdminTab endpoint="/api/admin/health-camps" title="Health Camps" columns={["title", "description", "date", "location"]} />;
 
       case 'grievances':
         return (
@@ -506,37 +492,7 @@ export default function GodAdminPanel() {
         );
 
       case 'blogs':
-        return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-gray-500">
-                <thead className="bg-gray-50 text-gray-700 uppercase">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold">Date</th>
-                    <th className="px-6 py-4 font-semibold">Title</th>
-                    <th className="px-6 py-4 font-semibold">Author</th>
-                    <th className="px-6 py-4 font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {blogs.map(b => (
-                    <tr key={b.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4">{new Date(b.created_at).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 font-medium text-gray-900">{b.title}</td>
-                      <td className="px-6 py-4">{b.author}</td>
-                      <td className="px-6 py-4">
-                        <button className="text-red-600 hover:text-red-900 font-medium text-xs">Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                  {blogs.length === 0 && (
-                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No blogs found.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <GenericAdminTab endpoint="/api/admin/blogs" title="Articles & Blogs" columns={["title", "description", "author"]} />;
 
       case 'jobs':
         return (
@@ -570,35 +526,7 @@ export default function GodAdminPanel() {
         );
 
       case 'campaigns':
-        return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-gray-500">
-                <thead className="bg-gray-50 text-gray-700 uppercase">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold">Title</th>
-                    <th className="px-6 py-4 font-semibold">Goal</th>
-                    <th className="px-6 py-4 font-semibold">Raised</th>
-                    <th className="px-6 py-4 font-semibold">End Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {campaigns.map(c => (
-                    <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-gray-900">{c.title}</td>
-                      <td className="px-6 py-4">₹{c.goal_amount}</td>
-                      <td className="px-6 py-4 text-emerald-600 font-bold">₹{c.raised_amount}</td>
-                      <td className="px-6 py-4">{new Date(c.end_date).toLocaleDateString()}</td>
-                    </tr>
-                  ))}
-                  {campaigns.length === 0 && (
-                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No campaigns found.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <GenericAdminTab endpoint="/api/admin/campaigns" title="Campaigns" columns={["title", "description", "goalAmount", "raisedAmount"]} />;
 
       case 'visual':
         return (
@@ -631,12 +559,10 @@ export default function GodAdminPanel() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">App Logo URL</label>
-                  <input
-                    type="text"
-                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    value={settings.splash_logo || ''}
-                    onChange={(e) => saveSettings({ splash_logo: e.target.value })}
+                  <FileUpload 
+                    label="App Logo URL"
+                    defaultUrl={settings.splash_logo || ''}
+                    onUploadSuccess={(url) => saveSettings({ splash_logo: url })}
                   />
                 </div>
               </div>
@@ -648,20 +574,11 @@ export default function GodAdminPanel() {
                 Login Background Image
               </h3>
               <div className="space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Enter image URL..."
-                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    value={settings.login_bg_image || ''}
-                    onChange={(e) => saveSettings({ login_bg_image: e.target.value })}
-                  />
-                </div>
-                {settings.login_bg_image && (
-                  <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-200 shadow-inner">
-                    <img src={settings.login_bg_image} alt="Login background" className="w-full h-full object-cover" />
-                  </div>
-                )}
+                <FileUpload 
+                  label="Login Background Image"
+                  defaultUrl={settings.login_bg_image || ''}
+                  onUploadSuccess={(url) => saveSettings({ login_bg_image: url })}
+                />
               </div>
             </div>
             
@@ -705,64 +622,7 @@ export default function GodAdminPanel() {
         );
 
       case 'announcements':
-        return (
-          <div className="max-w-4xl space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <Bell className="text-indigo-600" size={20} />
-                Create New Announcement
-              </h3>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Announcement Title"
-                  className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={newAnnouncement.title}
-                  onChange={e => setNewAnnouncement(prev => ({ ...prev, title: e.target.value }))}
-                />
-                <textarea
-                  placeholder="Announcement Content"
-                  rows={4}
-                  className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={newAnnouncement.content}
-                  onChange={e => setNewAnnouncement(prev => ({ ...prev, content: e.target.value }))}
-                />
-                <button
-                  onClick={createAnnouncement}
-                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors flex items-center gap-2"
-                >
-                  Publish Announcement
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-gray-900 px-1">Active Announcements</h3>
-              {announcements.map(ann => (
-                <div key={ann.id} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex items-start justify-between">
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{ann.title}</h4>
-                    <p className="text-gray-600 mt-1.5 text-sm">{ann.content}</p>
-                    <p className="text-xs text-gray-400 mt-3 font-medium">{new Date(ann.created_at).toLocaleString()}</p>
-                  </div>
-                  <button
-                    onClick={() => deleteAnnouncement(ann.id)}
-                    className="text-gray-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete"
-                  >
-                    <XCircle size={20} />
-                  </button>
-                </div>
-              ))}
-              {announcements.length === 0 && (
-                <div className="text-center py-10 bg-white border border-gray-200 rounded-xl">
-                  <Bell className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-                  <p className="text-gray-500">No active announcements</p>
-                </div>
-              )}
-            </div>
-          </div>
-        );
+        return <GenericAdminTab endpoint="/api/admin/announcements" title="Announcements" />;
 
       default:
         return null;

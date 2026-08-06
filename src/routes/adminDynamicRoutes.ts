@@ -302,4 +302,421 @@ router.get("/api/admin/campaigns", authenticateToken, requireAdmin, async (req, 
   }
 });
 
+
+// --- SCHOLARSHIPS ROUTES ---
+router.get("/api/admin/scholarships", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM scholarships ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/scholarships", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO scholarships (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/scholarships/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM scholarships WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- FOOD_SUPPORT ROUTES ---
+router.get("/api/admin/food_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM food_support ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/food_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO food_support (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/food_support/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM food_support WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- MEDICINE_SUPPORT ROUTES ---
+router.get("/api/admin/medicine_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM medicine_support ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/medicine_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO medicine_support (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/medicine_support/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM medicine_support WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- EDUCATION_AID ROUTES ---
+router.get("/api/admin/education_aid", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM education_aid ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/education_aid", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO education_aid (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/education_aid/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM education_aid WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- SENIOR_CITIZENS ROUTES ---
+router.get("/api/admin/senior_citizens", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM senior_citizens ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/senior_citizens", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO senior_citizens (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/senior_citizens/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM senior_citizens WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- ANIMAL_WELFARE ROUTES ---
+router.get("/api/admin/animal_welfare", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM animal_welfare ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/animal_welfare", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO animal_welfare (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/animal_welfare/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM animal_welfare WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- ENVIRONMENT ROUTES ---
+router.get("/api/admin/environment", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM environment ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/environment", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO environment (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/environment/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM environment WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- RELIGIOUS_CULTURE ROUTES ---
+router.get("/api/admin/religious_culture", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM religious_culture ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/religious_culture", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO religious_culture (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/religious_culture/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM religious_culture WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- DISASTER_MANAGEMENT ROUTES ---
+router.get("/api/admin/disaster_management", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM disaster_management ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/disaster_management", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO disaster_management (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/disaster_management/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM disaster_management WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- FARMER_SUPPORT ROUTES ---
+router.get("/api/admin/farmer_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM farmer_support ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/farmer_support", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO farmer_support (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/farmer_support/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM farmer_support WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- GOVERNMENT_SCHEMES ROUTES ---
+router.get("/api/admin/government_schemes", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM government_schemes ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/government_schemes", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO government_schemes (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/government_schemes/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM government_schemes WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- SKILLS_TRAINING ROUTES ---
+router.get("/api/admin/skills_training", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM skills_training ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/skills_training", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO skills_training (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/skills_training/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM skills_training WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- GLOBAL_GUIDE ROUTES ---
+router.get("/api/admin/global_guide", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM global_guide ORDER BY created_at DESC");
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post("/api/admin/global_guide", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, imageUrl } = req.body;
+    const result = await pool.query(
+      "INSERT INTO global_guide (title, description, \"imageUrl\") VALUES ($1, $2, $3) RETURNING *",
+      [title, description, imageUrl]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete("/api/admin/global_guide/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM global_guide WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 export default router;
