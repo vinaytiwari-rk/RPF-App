@@ -149,9 +149,7 @@ export default function Home() {
     countries: "Globe"
   };
 
-  const activeServiceIds = cmsConfig?.homeServices && cmsConfig.homeServices.length > 0
-    ? cmsConfig.homeServices
-    : ["card", "blood", "health-care", "environment", "culture"];
+  const activeServiceIds = ["card", "blood", "health-care", "disaster", "farmer", "skills", "schemes", "jobs", "environment", "culture"];
 
   const quickActions = activeServiceIds.map((id: string) => {
     const s = servicesList?.find((ds: any) => ds.id === id);
@@ -468,6 +466,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 
