@@ -15,6 +15,8 @@ interface GenericAdminTabProps {
 export default function GenericAdminTab({ endpoint, title, columns = ["title", "description"] }: GenericAdminTabProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const { token } = useAuth();
 
@@ -24,10 +26,11 @@ export default function GenericAdminTab({ endpoint, title, columns = ["title", "
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(endpoint, {
+      const res = await axios.get(`${endpoint}?page=${page}&limit=50`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setData(res.data.data || []);
+        if (res.data.totalPages) setTotalPages(res.data.totalPages);
     } catch (err) {
       console.error(`Error fetching ${title}:`, err);
     } finally {
@@ -37,7 +40,7 @@ export default function GenericAdminTab({ endpoint, title, columns = ["title", "
 
   useEffect(() => {
     if (token) fetchData();
-  }, [token, endpoint]);
+  }, [token, endpoint, page]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,3 +180,4 @@ export default function GenericAdminTab({ endpoint, title, columns = ["title", "
     </div>
   );
 }
+
