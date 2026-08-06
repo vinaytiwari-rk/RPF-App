@@ -212,7 +212,8 @@ export default function GodAdminPanel() {
   }
 
   const renderContent = () => {
-    if (loading && activeTab !== 'visual' && activeTab !== 'announcements') {
+    const customLoadingTabs = ['users', 'volunteers', 'donations', 'cards', 'grievances', 'women', 'blood', 'jobs'];
+    if (loading && customLoadingTabs.includes(activeTab)) {
       return (
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
@@ -626,6 +627,19 @@ export default function GodAdminPanel() {
 
       case 'announcements':
         return <GenericAdminTab endpoint="/api/admin/announcements" title="Announcements" />;
+      case 'scholarships': return <GenericAdminTab endpoint="/api/admin/scholarships" title="Scholarships" columns={['title', 'description']} />;
+      case 'food_support': return <GenericAdminTab endpoint="/api/admin/food_support" title="Food Support" columns={['title', 'description']} />;
+      case 'medicine_support': return <GenericAdminTab endpoint="/api/admin/medicine_support" title="Medicine Support" columns={['title', 'description']} />;
+      case 'education_aid': return <GenericAdminTab endpoint="/api/admin/education_aid" title="Education Aid" columns={['title', 'description']} />;
+      case 'senior_citizens': return <GenericAdminTab endpoint="/api/admin/senior_citizens" title="Senior Citizens" columns={['title', 'description']} />;
+      case 'animal_welfare': return <GenericAdminTab endpoint="/api/admin/animal_welfare" title="Animal Welfare" columns={['title', 'description']} />;
+      case 'environment': return <GenericAdminTab endpoint="/api/admin/environment" title="Environment" columns={['title', 'description']} />;
+      case 'religious_culture': return <GenericAdminTab endpoint="/api/admin/religious_culture" title="Religious & Culture" columns={['title', 'description']} />;
+      case 'disaster_management': return <GenericAdminTab endpoint="/api/admin/disaster_management" title="Disaster Management" columns={['title', 'description']} />;
+      case 'farmer_support': return <GenericAdminTab endpoint="/api/admin/farmer_support" title="Farmer Support" columns={['title', 'description']} />;
+      case 'government_schemes': return <GenericAdminTab endpoint="/api/admin/government_schemes" title="Government Schemes" columns={['title', 'description']} />;
+      case 'skills_training': return <GenericAdminTab endpoint="/api/admin/skills_training" title="Skills Training" columns={['title', 'description']} />;
+      case 'global_guide': return <GenericAdminTab endpoint="/api/admin/global_guide" title="Global Guide" columns={['title', 'description']} />;
 
       default:
         return null;
@@ -735,5 +749,7 @@ export default function GodAdminPanel() {
     </div>
   );
 }
+
+
 
 
