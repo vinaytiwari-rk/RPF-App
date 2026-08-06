@@ -92,6 +92,13 @@ export default function Home() {
   return () => clearInterval(timer);
   }, [slides.length]);
 
+  
+  const serviceIdToEmoji: Record<string, string> = {
+    card: "🪪", blood: "🩸", grievance: "📝", disaster: "🚨", 
+    farmer: "🌾", schemes: "📜", skills: "🎓", "health-care": "🏥", 
+    jobs: "💼", environment: "🌳", culture: "🕉️", donations: "💖"
+  };
+
   const serviceIdToRoute: Record<string, string> = {
     card: "/jan-seva-card",
     blood: "/blood-network",
@@ -360,7 +367,13 @@ export default function Home() {
               >
                 <div className="relative w-11 h-11 bg-gradient-to-br from-[#000080] via-indigo-600 to-blue-500 border border-indigo-200 rounded-lg shadow-md flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-105 overflow-hidden">
                       <div className="absolute inset-0 bg-white/20 mix-blend-overlay rounded-lg"></div>
-                      <IconComponent className="w-6 h-6 text-white drop-shadow-md z-10" />
+                      
+                        {serviceIdToEmoji[action.id] ? (
+                          <span className="text-2xl z-10 drop-shadow-md">{serviceIdToEmoji[action.id]}</span>
+                        ) : (
+                          <IconComponent className="w-6 h-6 text-white drop-shadow-md z-10" />
+                        )}
+
                     </div>
                 <span className="text-[9px] font-black text-slate-700 leading-tight w-full truncate">
                   {lang === "hi" ? action.titleHi : action.titleEn}

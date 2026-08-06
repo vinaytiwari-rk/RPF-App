@@ -14,6 +14,13 @@ export default function Services() {
   const isHi = lang === "hi";
 
   const [category, setCategory] = useState("all");
+  
+  const serviceIdToEmoji: Record<string, string> = {
+    card: "🪪", blood: "🩸", grievance: "📝", disaster: "🚨", 
+    farmer: "🌾", schemes: "📜", skills: "🎓", "health-care": "🏥", 
+    jobs: "💼", environment: "🌳", culture: "🕉️", donations: "💖"
+  };
+
   const [search, setSearch] = useState("");
     const [webResults, setWebResults] = useState<any[]>([]);
   const [webLoading, setWebLoading] = useState(false);
