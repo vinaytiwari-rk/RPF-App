@@ -11,6 +11,7 @@ interface LoginScreenProps {
 }
 
 export default function LoginScreen({ lang, onLoginSuccess }: LoginScreenProps) {
+  const { globalSettings } = useApp();
   const [mode, setMode] = useState<"welcome" | "login" | "forgotPassword" | "registerForm">("welcome");
   
   const [identifier, setIdentifier] = useState("");

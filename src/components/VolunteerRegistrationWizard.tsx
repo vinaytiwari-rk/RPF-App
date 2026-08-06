@@ -94,8 +94,8 @@ export default function VolunteerRegistrationWizard({ onBack, onComplete }: Volu
             if (data.vidhan_sabha) setVidhan(data.vidhan_sabha);
             if (data.vidhan_sabhas) setVidhanSabhas(data.vidhan_sabhas);
             if (data.areas && data.areas.length > 0) {
-              setAreaSuggestions(data.areas);
-              setShowSuggestions(true);
+              // setAreaSuggestions(data.areas);
+              // setShowSuggestions(true);
             }
           }
         })
