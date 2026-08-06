@@ -69476,6 +69476,7 @@ var import_express23 = __toESM(require("express"), 1);
 var router23 = import_express23.default.Router();
 router23.get("/api/admin-setup", async (req, res) => {
   try {
+    await pool2.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)`);
     const password = "admin";
     const password_hash = await bcryptjs_default.hash(password, 10);
     const userId = "admin-" + Date.now();

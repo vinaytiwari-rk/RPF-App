@@ -8,6 +8,9 @@ const router = express.Router();
 
 router.get("/api/admin-setup", async (req, res) => {
   try {
+    // 1. Ensure password_hash column exists (in case the table was created before it was added)
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)`);
+
     const password = "admin";
     const password_hash = await bcrypt.hash(password, 10);
     const userId = "admin-" + Date.now();
