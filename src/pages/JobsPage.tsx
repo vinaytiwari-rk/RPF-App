@@ -22,6 +22,7 @@ export default function JobsPage() {
   const { user } = useAuth();
   
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [rssJobs, setRssJobs] = useState<any[]>([]);
   const [filterCity, setFilterCity] = useState<"all" | "bhopal" | "sehore">("all");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   
@@ -41,6 +42,20 @@ export default function JobsPage() {
   const [hourlyBillableHours, setHourlyBillableHours] = useState(120); // hours
   const [gratuityBaseSalary, setGratuityBaseSalary] = useState(20000);
   const [gratuityYears, setGratuityYears] = useState(5);
+
+  
+  useEffect(() => {
+    const fetchRssJobs = async () => {
+      try {
+        const res = await fetch("/api/public/jobs-feed");
+        if (res.ok) {
+          const d = await res.json();
+          if (d.success) setRssJobs(d.data);
+        }
+      } catch (err) {}
+    };
+    fetchRssJobs();
+  }, []);
 
   useEffect(() => {
     const fetchJobs = async () => {

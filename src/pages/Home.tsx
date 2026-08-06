@@ -18,6 +18,8 @@ const {
 export default function Home() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const { user } = useAuth();
+  const [weather, setWeather] = useState<any>(null);
+  const [news, setNews] = useState<any[]>([]);
   const { settings, globalSettings, announcements, cmsConfig, servicesList, isLoadingServices } = useApp();
   const navigate = useNavigate();
   const t = translations[lang];
@@ -74,7 +76,20 @@ export default function Home() {
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
-    return () => clearInterval(timer);
+    
+  useEffect(() => {
+    fetch("/api/public/weather")
+      .then(r => r.json())
+      .then(d => { if(d.success) setWeather(d.data); })
+      .catch(e => console.error("Weather fetch err", e));
+      
+    fetch("/api/public/news")
+      .then(r => r.json())
+      .then(d => { if(d.success) setNews(d.data); })
+      .catch(e => console.error("News fetch err", e));
+  }, []);
+
+  return () => clearInterval(timer);
   }, [slides.length]);
 
   const serviceIdToRoute: Record<string, string> = {

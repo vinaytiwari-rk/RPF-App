@@ -31,12 +31,27 @@ export default function CountriesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
+  const [forexRates, setForexRates] = useState<any>(null);
 
   // --- SMART CALCULATORS STATE ---
   const [inrAmount, setInrAmount] = useState(10000);
   const [travelDays, setTravelDays] = useState(7);
   const [dailyBudget, setDailyBudget] = useState(5000); // INR
   const [passportScore, setPassportScore] = useState(80); // India passport rank index
+
+  
+  useEffect(() => {
+    if (subPage === "tools") {
+      fetch("/api/public/forex")
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data && data.data.rates) {
+            setForexRates(data.data.rates);
+          }
+        })
+        .catch(err => console.error("Forex fetch error:", err));
+    }
+  }, [subPage]);
 
   useEffect(() => {
     const FALLBACK_COUNTRIES: Country[] = [

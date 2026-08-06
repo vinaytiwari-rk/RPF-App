@@ -43,6 +43,7 @@ import submissionRoutes from './src/routes/submissionRoutes.js';
 import userRoutes from './src/routes/userRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
 import publicGovRoutes from './src/routes/publicGovRoutes.js';
+import publicExternalRoutes from './src/routes/publicExternalRoutes.js';
 import miscRoutes from './src/routes/miscRoutes.js';
 import adminHqExtraRoutes from './src/routes/adminHqExtraRoutes.js';
 import adminDynamicRoutes from './src/routes/adminDynamicRoutes.js';
@@ -168,6 +169,7 @@ app.use('/', submissionRoutes);
 app.use('/', userRoutes);
 app.use('/', uploadRoutes);
 app.use(publicGovRoutes);
+app.use(publicExternalRoutes);
 app.use(miscRoutes);
 app.use(adminHqRoutes);
 app.use(adminHqExtraRoutes);
@@ -1573,6 +1575,7 @@ process.on('unhandledRejection', (reason, promise) => {
 }
 
 startServer();
+
 
 
 

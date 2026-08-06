@@ -82,6 +82,8 @@ export default function WomenSafety() {
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
+  const [nearbyPolice, setNearbyPolice] = useState<any[]>([]);
+  const [locating, setLocating] = useState(false);
   const [morseActive, setMorseActive] = useState(false);
   const [morseTimerId, setMorseTimerId] = useState<NodeJS.Timeout | null>(null);
   const [routeLight, setRouteLight] = useState(2); // 0-3 rating
@@ -160,6 +162,27 @@ export default function WomenSafety() {
     };
   }, [morseTimerId, panicBreathIntervalId]);
 
+  
+  const findNearbyPolice = () => {
+    setLocating(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          fetch(`/api/public/nearby?type=police&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
+            .then(res => res.json())
+            .then(d => {
+              setLocating(false);
+              if (d.success) setNearbyPolice(d.data);
+            })
+            .catch(() => setLocating(false));
+        },
+        () => setLocating(false)
+      );
+    } else {
+      setLocating(false);
+    }
+  };
+  
   const startMorseSOS = () => {
     if (morseActive) {
       if (morseTimerId) clearTimeout(morseTimerId);
@@ -959,7 +982,32 @@ export default function WomenSafety() {
                 </div>
               )}
 
-              {/* 4. High-Decibel Siren */}
+              
+                {/* 5. Nearby Police Locator */}
+                {activeCalc === "locator" && (
+                  <div className="space-y-3">
+                    <h5 className="font-bold text-slate-200">{lang === "hi" ? "????? ????? ??????" : "Find Nearby Police Stations"}</h5>
+                    <button 
+                      onClick={findNearbyPolice}
+                      disabled={locating}
+                      className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs tracking-wide transition"
+                    >
+                      {locating ? (lang === "hi" ? "???? ?? ??? ??..." : "Locating...") : (lang === "hi" ? "????? ?????? ??????" : "Locate Nearby Police")}
+                    </button>
+                    {nearbyPolice.length > 0 && (
+                      <div className="space-y-2 mt-2">
+                        {nearbyPolice.map((st, i) => (
+                          <div key={i} className="bg-slate-900 border border-slate-800 p-2 rounded flex justify-between items-center">
+                            <span className="font-semibold text-slate-300 text-[10px]">{st.name}</span>
+                            <a href={`https://www.google.com/maps/search/?api=1&query=${st.lat},${st.lon}`} target="_blank" rel="noreferrer" className="text-[#00ffff] text-[10px] underline">Map</a>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+  
+                {/* 4. High-Decibel Siren */}
               {activeCalc === "siren" && (
                 <div className="space-y-3">
                   <h5 className="font-bold text-slate-200">{lang === "hi" ? "हाई-डेसिबल अलार्म सायरन" : "High-Decibel Sine Alarm"}</h5>
