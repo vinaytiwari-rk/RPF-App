@@ -140,4 +140,75 @@ router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, 
   }
 });
 
+// GET all users
+router.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT id, name, role, email, phone, \"isVolunteer\", \"isDonor\", \"onboardingCompleted\" FROM users ORDER BY id DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch users" });
+  }
+});
+
+// DELETE a user
+router.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM users WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to delete user" });
+  }
+});
+
+// GET all volunteers
+router.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT id, name, username, mobile, email, status, registration_number, \"createdAt\" FROM volunteers ORDER BY \"createdAt\" DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch volunteers" });
+  }
+});
+
+// PUT volunteer status
+router.put("/api/admin/volunteers/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const result = await pool.query("UPDATE volunteers SET status = $1 WHERE id = $2 RETURNING *", [status, req.params.id]);
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to update volunteer status" });
+  }
+});
+
+// GET all donations
+router.get("/api/admin/donations", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM donations ORDER BY created_at DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch donations" });
+  }
+});
+
+// GET all jan seva cards
+router.get("/api/admin/jan-seva-cards", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM card_applications ORDER BY created_at DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch jan seva cards" });
+  }
+});
+
+// GET all health camps
+router.get("/api/admin/health-camps", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM health_camps ORDER BY date DESC LIMIT 500");
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch health camps" });
+  }
+});
+
 export default router;
