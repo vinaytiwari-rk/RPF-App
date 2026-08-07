@@ -76,7 +76,9 @@ export default function Home() {
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
-    
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
   useEffect(() => {
     fetch("/api/public/weather")
       .then(r => r.json())
@@ -88,9 +90,6 @@ export default function Home() {
       .then(d => { if(d.success) setNews(d.data); })
       .catch(e => console.error("News fetch err", e));
   }, []);
-
-  return () => clearInterval(timer);
-  }, [slides.length]);
 
   
   const serviceIdToEmoji: Record<string, string> = {
