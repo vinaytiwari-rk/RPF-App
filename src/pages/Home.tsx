@@ -92,12 +92,6 @@ export default function Home() {
   }, []);
 
   
-  const serviceIdToEmoji: Record<string, string> = {
-    card: "🪪", blood: "🩸", grievance: "📝", disaster: "🚨", 
-    farmer: "🌾", schemes: "📜", skills: "🎓", "health-care": "🏥", 
-    jobs: "💼", environment: "🌳", culture: "🕉️", donations: "💖"
-  };
-
   const serviceIdToRoute: Record<string, string> = {
     card: "/jan-seva-card",
     blood: "/blood-network",
@@ -120,11 +114,16 @@ export default function Home() {
   };
 
   const serviceIdToGradient: Record<string, string> = {
-    card: "from-blue-500 via-indigo-500 to-violet-650",
-    blood: "from-red-500 via-rose-500 to-red-700",
-    "health-care": "from-emerald-400 via-teal-500 to-green-600",
-    environment: "from-green-400 via-emerald-500 to-teal-600",
-    culture: "from-amber-400 via-orange-500 to-red-600",
+    card: "from-orange-500 via-amber-500 to-yellow-500", // Saffron
+    blood: "from-red-600 via-rose-500 to-red-700", // Red
+    "health-care": "from-green-500 via-emerald-500 to-teal-500", // Green
+    environment: "from-green-600 via-emerald-600 to-green-700", // Green
+    culture: "from-[#FF9933] via-orange-500 to-amber-600", // Saffron
+    schemes: "from-[#000080] via-blue-700 to-indigo-800", // Navy Blue
+    skills: "from-slate-100 via-slate-200 to-slate-300", // White/Silver
+    farmer: "from-green-500 via-emerald-600 to-green-700", // Green
+    disaster: "from-[#FF9933] via-orange-600 to-red-500", // Saffron/Red
+    jobs: "from-[#000080] via-indigo-600 to-blue-600", // Navy Blue
   };
 
   const serviceIdToIcon: Record<string, string> = {
@@ -362,14 +361,10 @@ export default function Home() {
                 onClick={() => navigate(action.route)}
                 className="flex flex-col items-center justify-center p-0.5 transition text-center gap-2 active:scale-95 duration-300 cursor-pointer group relative w-full"
               >
-                <div className="relative w-11 h-11 bg-gradient-to-br from-[#000080] via-indigo-600 to-blue-500 border border-indigo-200 rounded-lg shadow-md flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-105 overflow-hidden">
+                <div className={`relative w-11 h-11 bg-gradient-to-br ${action.glowGradient || 'from-slate-200 to-slate-300'} border border-slate-200/50 rounded-lg shadow-sm flex items-center justify-center transition-all duration-300 group-hover:shadow-md group-hover:scale-105 overflow-hidden`}>
                       <div className="absolute inset-0 bg-white/20 mix-blend-overlay rounded-lg"></div>
                       
-                        {serviceIdToEmoji[action.id] ? (
-                          <span className="text-2xl z-10 drop-shadow-md">{serviceIdToEmoji[action.id]}</span>
-                        ) : (
-                          <IconComponent className="w-6 h-6 text-white drop-shadow-md z-10" />
-                        )}
+                      <IconComponent className={`w-6 h-6 z-10 ${action.glowGradient?.includes('slate-100') ? 'text-[#000080]' : 'text-white drop-shadow-sm'}`} />
 
                     </div>
                 <span className="text-[9px] font-black text-slate-700 leading-tight w-full truncate">

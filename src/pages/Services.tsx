@@ -95,7 +95,7 @@ export default function Services() {
             {isHi ? "आरपी नागरिक सेवा संगम" : "RP Civic Services Hub"}
           </h3>
           <p className="text-[10px] text-slate-500 font-bold">
-            {isHi ? "21 जनकल्याण सेवाएं • एक संकल्प" : "21 Active Welfare Services • Single Platform"}
+            {isHi ? "RP Civic Services Hub" : "Single Platform"}
           </p>
         </div>
         
@@ -114,13 +114,11 @@ export default function Services() {
           <div className="grid grid-cols-3 gap-2.5">
             {filtered.map((svc, idx) => {
               const gradients = [
-              { bg: "from-amber-400 via-orange-500 to-red-500", shadow: "shadow-[0_0_20px_rgba(249,115,22,0.6)] group-hover:shadow-[0_0_30px_rgba(239,68,68,0.8)]" },
-              { bg: "from-cyan-400 via-teal-500 to-emerald-500", shadow: "shadow-[0_0_20px_rgba(20,184,166,0.6)] group-hover:shadow-[0_0_30px_rgba(16,185,129,0.8)]" },
-              { bg: "from-blue-500 via-indigo-500 to-cyan-500", shadow: "shadow-[0_0_20px_rgba(99,102,241,0.6)] group-hover:shadow-[0_0_30px_rgba(59,130,246,0.8)]" },
-              { bg: "from-fuchsia-500 via-purple-600 to-indigo-600", shadow: "shadow-[0_0_20px_rgba(168,85,247,0.6)] group-hover:shadow-[0_0_30px_rgba(192,38,211,0.8)]" },
-              { bg: "from-pink-500 via-rose-500 to-red-500", shadow: "shadow-[0_0_20px_rgba(244,63,94,0.6)] group-hover:shadow-[0_0_30px_rgba(225,29,72,0.8)]" },
-              { bg: "from-lime-400 via-green-500 to-teal-500", shadow: "shadow-[0_0_20px_rgba(34,197,94,0.6)] group-hover:shadow-[0_0_30px_rgba(20,184,166,0.8)]" },
-            ];
+                { bg: "from-[#FF9933] via-orange-500 to-amber-500", shadow: "shadow-[0_0_20px_rgba(255,153,51,0.4)] group-hover:shadow-[0_0_30px_rgba(255,153,51,0.6)]" },
+                { bg: "from-slate-50 via-slate-100 to-slate-200", shadow: "shadow-[0_0_20px_rgba(226,232,240,0.6)] group-hover:shadow-[0_0_30px_rgba(203,213,225,0.8)]" },
+                { bg: "from-[#138808] via-green-600 to-emerald-600", shadow: "shadow-[0_0_20px_rgba(19,136,8,0.4)] group-hover:shadow-[0_0_30px_rgba(19,136,8,0.6)]" },
+                { bg: "from-[#000080] via-blue-800 to-indigo-800", shadow: "shadow-[0_0_20px_rgba(0,0,128,0.4)] group-hover:shadow-[0_0_30px_rgba(0,0,128,0.6)]" },
+              ];
             const currentGradient = gradients[idx % gradients.length];
                 const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;
               
@@ -149,9 +147,10 @@ export default function Services() {
                   className={`bg-white/95 border border-slate-200/70 shadow-sm p-3 text-center flex flex-col items-center justify-center gap-2 h-28 rounded-2xl transition-all duration-700 ease-in-out hover:border-indigo-400 hover:shadow-indigo-500/20 hover:shadow-lg translate-y-0 rotate-0 opacity-100 group`}
                   style={{ transitionDelay: `${idx * 25}ms` }}
                 >
-                  <div className="w-12 h-12 bg-slate-50 border border-slate-200 rounded-xl shadow-sm flex items-center justify-center group-hover:bg-slate-100 group-hover:scale-110 transition-all duration-300">
-                  <IconComponent className="w-6 h-6 text-[#000080]" />
-                </div>
+                  <div className={`w-12 h-12 bg-gradient-to-br ${currentGradient.bg} border border-slate-200/50 rounded-xl shadow-sm flex items-center justify-center transition-all duration-300 overflow-hidden relative group-hover:scale-110 ${currentGradient.shadow}`}>
+    <div className="absolute inset-0 bg-white/20 mix-blend-overlay"></div>
+    <IconComponent className={`w-6 h-6 z-10 ${currentGradient.bg.includes('slate-50') ? 'text-[#000080]' : 'text-white'}`} />
+</div>
                     <h4 className="font-bold text-[9px] text-slate-800 leading-tight line-clamp-2 px-0.5">
                     {isHi ? svc.titleHi : svc.titleEn}
                   </h4>
