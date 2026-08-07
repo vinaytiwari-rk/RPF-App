@@ -329,69 +329,69 @@ export default function JanSevaCard() {
             </div>
 
             {/* Title & Card Number */}
-            <div className="relative z-10 flex justify-between items-start mb-3.5 border-b border-slate-100 pb-1.5">
-              <h4 className="font-sans font-black text-[16px] text-[#000080] leading-none tracking-wide">
-                जनसेवा कार्ड
-              </h4>
-              <span className="font-mono font-black text-[15px] text-[#000080] tracking-wide leading-none">
-                {cardNumber}
-              </span>
-            </div>
+            <div className="relative z-10 flex items-center justify-between gap-2 mb-4 px-2">
+  <h4 className="font-sans font-black text-[22px] text-[#000080] leading-none tracking-wide">
+    जनसेवा कार्ड
+  </h4>
+  <span className="font-mono font-black text-[18px] text-[#000080] tracking-wide leading-none">
+    {cardNumber}
+  </span>
+</div>
 
             {/* Info Grid */}
-            <div className="relative z-10 space-y-2.5 text-[11.5px] text-slate-800 font-semibold mb-4 pl-0.5">
-              <div className="flex items-baseline">
-                <span className="text-slate-450 w-24 shrink-0 font-bold">नाम / Name :</span>
-                <span className="text-slate-900 font-extrabold text-[12.5px]">{cardName}</span>
-              </div>
-              <div className="flex justify-between items-baseline gap-2">
-                <div className="flex items-baseline flex-1">
-                  <span className="text-slate-450 w-24 shrink-0 font-bold">लिंग / Gender :</span>
-                  <span className="text-slate-900 font-extrabold">{cardGender}</span>
-                </div>
-                <div className="flex items-baseline flex-1">
-                  <span className="text-slate-450 w-20 shrink-0 font-bold">जन्म तिथि / DOB :</span>
-                  <span className="text-slate-900 font-extrabold">{cardDob}</span>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <span className="text-slate-450 w-24 shrink-0 mt-0.5 font-bold">पता / Address :</span>
-                <span className="text-slate-900 font-extrabold leading-normal flex-1 text-[11px]">{cardAddress}</span>
-              </div>
-            </div>
+            <div className="relative z-10 space-y-3 text-[12px] text-[#000080] mb-5 px-2">
+  <div className="flex items-baseline">
+    <span className="w-[120px] shrink-0 font-medium">नाम / Name :</span>
+    <span className="font-medium text-[13px]">{cardName}</span>
+  </div>
+  <div className="flex justify-between items-baseline pr-4">
+    <div className="flex items-baseline">
+      <span className="w-[120px] shrink-0 font-medium">लिंग / Gender :</span>
+      <span className="font-medium">{cardGender}</span>
+    </div>
+    <div className="flex items-baseline">
+      <span className="shrink-0 font-medium mr-2">जन्म तिथि / DOB :</span>
+      <span className="font-medium">{cardDob}</span>
+    </div>
+  </div>
+  <div className="flex items-start">
+    <span className="w-[120px] shrink-0 mt-0.5 font-medium">पता / Address :</span>
+    <span className="font-medium leading-snug flex-1 text-[12px] pr-2">{cardAddress}</span>
+  </div>
+</div>
 
-            {/* Toll-Free Section */}
-            <div className="relative z-10 text-center border-t border-slate-100 pt-2.5 pb-1">
-              <p className="font-sans font-black text-[14px] text-[#000080] tracking-wide leading-none">
-                Toll Free Number : {settings.tollFree}
-              </p>
-              <p className="text-[8.5px] text-slate-500 font-bold tracking-wide mt-1.5 leading-none">
-                Web - {settings.webUrl} | Email - {settings.email}
-              </p>
-            </div>
+{/* Toll-Free Section */}
+            <div className="relative z-10 text-center pt-1 pb-1">
+  <p className="font-sans font-black text-[22px] text-[#000080] tracking-wider leading-none mb-2">
+    Toll Free Number : 1800 - 569 - 0991
+  </p>
+  <p className="text-[12px] text-slate-600 font-medium tracking-wide leading-none font-serif">
+    Web - www.therpfoundation.org <span className="font-bold text-[#000080] mx-1">|</span> Email - info@therpfoundation.org
+  </p>
+</div>
 
-            {/* Social Links Row */}
-            <div className="relative z-10 flex justify-center items-center gap-3.5 text-[7.5px] font-black text-slate-700 mt-2 border-t border-slate-100/50 pt-2 pb-0.5">
-              <div className="flex items-center gap-0.5">
-                <Facebook className="w-3 h-3 text-blue-600 fill-blue-600" />
-                <span>rpfoundationofficial</span>
-              </div>
-              <div className="flex items-center gap-0.5">
-                <Instagram className="w-3 h-3 text-pink-600" />
-                <span>rpfoundationofficial</span>
-              </div>
-              <div className="flex items-center gap-0.5">
-                <Twitter className="w-3 h-3 text-sky-500 fill-sky-500" />
-                <span>rpfoundation15</span>
-              </div>
-              <div className="flex items-center gap-0.5">
-                <Send className="w-3 h-3 text-blue-400 fill-blue-400" />
-                <span>@rpfoundationofficial</span>
-              </div>
-            </div>
-          </div>
+{/* Social Links Row */}
+<div className="relative z-10 flex justify-center items-center gap-4 text-[9.5px] font-bold text-slate-600 mt-1 pb-2">
+  <div className="flex items-center gap-1">
+    <Facebook className="w-3.5 h-3.5 text-[#000080] fill-[#000080]" />
+    <span>rpfoundationofficial</span>
+  </div>
+  <div className="flex items-center gap-1">
+    <Instagram className="w-3.5 h-3.5 text-[#000080]" />
+    <span>rpfoundationofficial</span>
+  </div>
+  <div className="flex items-center gap-1">
+    <Twitter className="w-3.5 h-3.5 text-[#000080] fill-[#000080]" />
+    <span>rpfoundation15</span>
+  </div>
+  <div className="flex items-center gap-1">
+    <span className="text-[12px] text-[#000080]">@</span>
+    <span>rpfoundationofficial</span>
+  </div>
+</div>
+</div>
 
-          {/* Green Bottom Border */}
+{/* Green Bottom Border */}
           <div className="bg-[#138808] h-2.5 w-full"></div>
         </div>
 
@@ -411,29 +411,26 @@ export default function JanSevaCard() {
             </div>
 
             {/* Card Benefits Heading */}
-            <div className="relative z-10 text-center mb-3 flex justify-center items-center">
-              <div className="w-6 h-0.5 bg-orange-400 opacity-60"></div>
-              <h4 className="font-sans font-black text-[15px] text-[#000080] mx-3 leading-none uppercase tracking-wide">
-                जनसेवा कार्ड के फायदे :
-              </h4>
-              <div className="w-6 h-0.5 bg-orange-400 opacity-60"></div>
-            </div>
+            <div className="relative z-10 text-center mb-4 mt-2">
+  <h4 className="font-sans font-black text-[22px] text-[#000080] leading-none tracking-wide">
+    जनसेवा कार्ड के फायदे :
+  </h4>
+</div>
 
-            {/* Benefits List (Styled with absolute corner brackets on sides) */}
+{/* Benefits List (Styled with absolute corner brackets on sides) */}
             <div className="relative z-10 px-3.5 py-1 flex items-center justify-center my-1.5">
               {/* Left bracket */}
               <div className="absolute left-1 top-0 bottom-0 w-2.5 border-l-2 border-t-2 border-b-2 border-orange-400/80 rounded-l-xs"></div>
               
-              <ul className="text-[10.5px] text-slate-800 font-extrabold space-y-1.5 w-full pl-1 leading-snug">
-                {activeBenefits.map((b, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <span className="text-[#000080] font-black mr-2 shrink-0">{idx + 1}.</span>
-                    <span className="leading-tight">
-                      <span className="text-[#000080] font-extrabold">{b.label}</span> – {b.desc}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <ul className="text-[12px] text-slate-700 font-medium space-y-2 w-full px-2 leading-relaxed">
+  {activeBenefits.map((b, idx) => (
+    <li key={idx} className="flex items-start">
+      <span className="leading-tight">
+        <span className="text-[#000080] font-black text-[13px]">{b.label}</span> <span className="text-slate-500 mx-1">–</span> {b.desc}
+      </span>
+    </li>
+  ))}
+</ul>
 
               {/* Right bracket */}
               <div className="absolute right-1 top-0 bottom-0 w-2.5 border-r-2 border-t-2 border-b-2 border-orange-400/80 rounded-r-xs"></div>
@@ -441,11 +438,11 @@ export default function JanSevaCard() {
 
             {/* Disclaimer Footer Text */}
             <div className="relative z-10 text-center border-t border-slate-100 pt-3 pb-0.5">
-              <p className="text-[10px] font-black text-slate-800 leading-tight">
-                {lang === "hi" 
-                  ? "नोट: यह सभी सुविधाएं जन सेवा कार्ड धारकों के लिए निःशुल्क होगा।" 
-                  : "Note: All these facilities will be free of charge for Jan Seva Card holders."}
-              </p>
+              <p className="text-[13px] font-semibold text-slate-600 leading-tight pb-1">
+  {lang === "hi" 
+    ? "नोट: यह सभी सुविधाएं जन सेवा कार्ड धारकों के लिए निःशुल्क होगा।" 
+    : "Note: All these facilities will be free of charge for Jan Seva Card holders."}
+</p>
             </div>
           </div>
 
