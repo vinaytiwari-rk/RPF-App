@@ -46,10 +46,7 @@ import ReligiousCulture from "./pages/ReligiousCulture";
 import JobsPage from "./pages/JobsPage";
 import ScholarshipsPage from "./pages/ScholarshipsPage";
 import FoodSupport from "./pages/FoodSupport";
-import DisasterManagement from "./pages/DisasterManagement";
-import FarmerSupport from "./pages/FarmerSupport";
-import SkillsTraining from "./pages/SkillsTraining";
-import SchemesPage from "./pages/SchemesPage";
+
 import MedicineSupport from "./pages/MedicineSupport";
 import EducationSupport from "./pages/EducationSupport";
 import CountriesPage from "./pages/CountriesPage";
