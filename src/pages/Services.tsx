@@ -143,18 +143,17 @@ export default function Services() {
                           : `/services/${svc.id}`;
 
               return (
-                <button key={svc.id} onClick={() => navigate(route)}
-                  className={`bg-white/95 border border-slate-200/70 shadow-sm p-3 text-center flex flex-col items-center justify-center gap-2 h-28 rounded-2xl transition-all duration-700 ease-in-out hover:border-indigo-400 hover:shadow-indigo-500/20 hover:shadow-lg translate-y-0 rotate-0 opacity-100 group`}
-                  style={{ transitionDelay: `${idx * 25}ms` }}
-                >
-                  <div className={`w-12 h-12 bg-gradient-to-br ${currentGradient.bg} border border-slate-200/50 rounded-xl shadow-sm flex items-center justify-center transition-all duration-300 overflow-hidden relative group-hover:scale-110 ${currentGradient.shadow}`}>
-    <div className="absolute inset-0 bg-white/20 mix-blend-overlay"></div>
-    <IconComponent className={`w-6 h-6 z-10 ${currentGradient.bg.includes('slate-50') ? 'text-[#000080]' : 'text-white'}`} />
-</div>
-                    <h4 className="font-bold text-[9px] text-slate-800 leading-tight line-clamp-2 px-0.5">
-                    {isHi ? svc.titleHi : svc.titleEn}
-                  </h4>
-                </button>
+                 <button key={svc.id} onClick={() => navigate(route)}
+                    className={`bg-white border-2 ${serviceIdToBorder[svc.id] || 'border-slate-300'} shadow-sm p-2.5 text-center flex flex-col items-center justify-center gap-2 h-28 rounded-xl transition-all duration-300 ease-in-out hover:shadow-md hover:scale-105 group`}
+                    style={{ transitionDelay: `${idx * 25}ms` }}
+                  >
+                    <div className="w-14 h-14 flex items-center justify-center overflow-hidden">
+                      <img src={serviceIdToImage[svc.id] || '/assets/logo.png'} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300" alt="" />
+                    </div>
+                    <h4 className="font-bold text-[10.5px] text-slate-800 leading-tight line-clamp-2 px-0.5 w-full text-center">
+                      {isHi ? svc.titleHi : svc.titleEn}
+                    </h4>
+                  </button>
               );
             })}
           </div>

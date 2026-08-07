@@ -113,17 +113,52 @@ export default function Home() {
     countries: "/countries"
   };
 
-  const serviceIdToGradient: Record<string, string> = {
-    card: "from-orange-500 via-amber-500 to-yellow-500", // Saffron
-    blood: "from-red-600 via-rose-500 to-red-700", // Red
-    "health-care": "from-green-500 via-emerald-500 to-teal-500", // Green
-    environment: "from-green-600 via-emerald-600 to-green-700", // Green
-    culture: "from-[#FF9933] via-orange-500 to-amber-600", // Saffron
-    schemes: "from-[#000080] via-blue-700 to-indigo-800", // Navy Blue
-    skills: "from-slate-100 via-slate-200 to-slate-300", // White/Silver
-    farmer: "from-green-500 via-emerald-600 to-green-700", // Green
-    disaster: "from-[#FF9933] via-orange-600 to-red-500", // Saffron/Red
-    jobs: "from-[#000080] via-indigo-600 to-blue-600", // Navy Blue
+  const serviceIdToImage: Record<string, string> = {
+    card: "/assets/icons/icon_card_1786081347500.jpg",
+    blood: "/assets/icons/icon_blood_1786081356967.jpg",
+    "health-care": "/assets/logo.png", 
+    environment: "/assets/icons/icon_environment_1786081257147.jpg",
+    culture: "/assets/icons/icon_culture_1786081280063.jpg",
+    schemes: "/assets/icons/icon_schemes_1786081320637.jpg",
+    skills: "/assets/icons/icon_skills_1786081334087.jpg",
+    farmer: "/assets/icons/icon_farmer_1786081176892.jpg",
+    disaster: "/assets/icons/icon_disaster_1786081291322.jpg",
+    jobs: "/assets/logo.png", 
+    donations: "/assets/icons/icon_crowdfunding_1786081270454.jpg",
+    volunteers: "/assets/logo.png", 
+    animals: "/assets/icons/icon_animal_1786081244906.jpg",
+    food: "/assets/icons/icon_food_1786081367715.jpg",
+    medicine: "/assets/logo.png", 
+    "women-safety": "/assets/logo.png", 
+    seniors: "/assets/icons/icon_senior_1786081168198.jpg",
+    education: "/assets/logo.png", 
+    scholarships: "/assets/logo.png", 
+    grievance: "/assets/logo.png", 
+    countries: "/assets/logo.png", 
+  };
+
+  const serviceIdToBorder: Record<string, string> = {
+    card: "border-green-600",
+    blood: "border-red-600",
+    "health-care": "border-green-600",
+    environment: "border-green-600",
+    culture: "border-amber-600",
+    schemes: "border-[#000080]",
+    skills: "border-orange-500",
+    farmer: "border-green-600",
+    disaster: "border-red-600",
+    jobs: "border-[#000080]",
+    donations: "border-[#000080]",
+    volunteers: "border-orange-500",
+    animals: "border-[#000080]",
+    food: "border-orange-500",
+    medicine: "border-[#000080]",
+    "women-safety": "border-[#000080]",
+    seniors: "border-orange-500",
+    education: "border-orange-500",
+    scholarships: "border-[#000080]",
+    grievance: "border-[#000080]",
+    countries: "border-[#000080]"
   };
 
   const serviceIdToIcon: Record<string, string> = {
@@ -158,7 +193,7 @@ export default function Home() {
       route: serviceIdToRoute[s.id] || `/services`,
       titleEn: s.titleEn,
       titleHi: s.titleHi,
-      glowGradient: serviceIdToGradient[s.id] || "from-blue-500 via-indigo-500 to-violet-650"
+      imgSrc: serviceIdToImage[s.id] || "/assets/logo.png", borderColor: serviceIdToBorder[s.id] || "border-slate-300"
     };
   }).filter(Boolean);
 
@@ -352,27 +387,20 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-5 gap-2 bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm min-h-[90px] w-full justify-items-center">
-          {quickActions.map((action, idx) => {
-            const IconComponent = (LucideIcons as any)[action.iconName] || Compass;
-            
-            return (
-              <button 
-                key={idx}
-                onClick={() => navigate(action.route)}
-                className="flex flex-col items-center justify-center p-0.5 transition text-center gap-2 active:scale-95 duration-300 cursor-pointer group relative w-full"
-              >
-                <div className={`relative w-11 h-11 bg-gradient-to-br ${action.glowGradient || 'from-slate-200 to-slate-300'} border border-slate-200/50 rounded-lg shadow-sm flex items-center justify-center transition-all duration-300 group-hover:shadow-md group-hover:scale-105 overflow-hidden`}>
-                      <div className="absolute inset-0 bg-white/20 mix-blend-overlay rounded-lg"></div>
-                      
-                      <IconComponent className={`w-6 h-6 z-10 ${action.glowGradient?.includes('slate-100') ? 'text-[#000080]' : 'text-white drop-shadow-sm'}`} />
-
-                    </div>
-                <span className="text-[9px] font-black text-slate-700 leading-tight w-full truncate">
-                  {lang === "hi" ? action.titleHi : action.titleEn}
-                </span>
-              </button>
-            );
-          })}
+          {quickActions.map((action, idx) => (
+            <button 
+              key={action.id}
+              onClick={() => navigate(action.route)}
+              className={`flex flex-col items-center justify-center p-2 bg-white border-2 ${action.borderColor} rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group relative w-full h-full gap-1.5`}
+            >
+              <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
+                <img src={action.imgSrc} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300" alt="" />
+              </div>
+              <span className="text-[10px] font-black text-slate-800 leading-tight w-full truncate text-center">
+                {lang === "hi" ? action.titleHi : action.titleEn}
+              </span>
+            </button>
+          ))}
         </div>
 
         </div>
