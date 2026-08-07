@@ -17,6 +17,7 @@ const serviceIdToImage: Record<string, string> = {
     disaster: "/assets/icons/icon_disaster_1786081291322.jpg",
     jobs: "/assets/icons/icon_jobs_new.jpg",
     donations: "/assets/icons/icon_crowdfunding_1786081270454.jpg",
+  crowdfunding: "/assets/icons/icon_crowdfunding_1786081270454.jpg",
     volunteers: "/assets/icons/icon_volunteers_new.jpg",
     animals: "/assets/icons/icon_animal_1786081244906.jpg",
     food: "/assets/icons/icon_food_1786081367715.jpg",
@@ -172,8 +173,12 @@ export default function Services() {
               
               const route = svc.id === 'card' ? '/jan-seva-card' 
                           : svc.id === 'blood' ? '/blood-network' 
-                          : svc.id === 'donations' ? '/donations' 
-                          : svc.id === 'women-safety' ? '/women'
+                          : svc.id === 'donations' ? '/donations'
+                            : svc.id === 'farmer' ? '/farmer'
+                            : svc.id === 'schemes' ? '/schemes'
+                            : svc.id === 'skills' ? '/skills'
+                            : svc.id === 'disaster' ? '/disaster'
+: svc.id === 'women-safety' ? '/women'
                           : svc.id === 'seniors' ? '/seniors'
                           : svc.id === 'environment' ? '/environment'
                           : svc.id === 'education' ? '/education'
