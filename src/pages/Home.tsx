@@ -182,7 +182,7 @@ export default function Home() {
     countries: "Globe"
   };
 
-  const activeServiceIds = ["card", "blood", "health-care", "disaster", "farmer", "skills", "schemes", "jobs", "environment", "culture"];
+  const activeServiceIds = ["women-safety", "blood", "grievance", "environment", "volunteers"];
 
   const quickActions = activeServiceIds.map((id: string) => {
     const s = servicesList?.find((ds: any) => ds.id === id);
@@ -396,9 +396,6 @@ export default function Home() {
               <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
                 <img src={action.imgSrc} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300" alt="" />
               </div>
-              <span className="text-[10px] font-black text-slate-800 leading-tight w-full truncate text-center">
-                {lang === "hi" ? action.titleHi : action.titleEn}
-              </span>
             </button>
           ))}
         </div>
