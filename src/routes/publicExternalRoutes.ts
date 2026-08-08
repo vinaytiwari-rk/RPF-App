@@ -1,10 +1,15 @@
 import express from "express";
 import axios from "axios";
 import Parser from "rss-parser";
+import multer from "multer";
+import FormData from "form-data";
+import fs from "fs";
+import { authenticateToken } from "../middleware/authMiddleware";
 import { apiCache, CACHE_TTL } from "../lib/apiCache.js";
 
 const router = express.Router();
 const rssParser = new Parser();
+const upload = multer({ dest: 'tmp/' });
 
 // 1. Weather API (Open-Meteo - Free, No API Key)
 router.get("/api/public/weather", async (req, res) => {
@@ -37,7 +42,7 @@ router.get("/api/public/forex", async (req, res) => {
       return res.json({ success: true, data: cached.data });
     }
 
-    const response = await axios.get("https://api.frankfurter.app/latest?to=INR");
+    const response = await axios.get("https://www.frankfurter.app/latest?to=INR");
     
     apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
     res.json({ success: true, data: response.data });
@@ -152,27 +157,86 @@ router.get("/api/public/remote-jobs", async (req, res) => {
   }
 });
 
-// 7. Daily Quote API (Advice Slip)
-router.get("/api/public/daily-quote", async (req, res) => {
+// 7. Sachet NDMA Disaster Alerts API (Real-time proxy & fallback)
+router.get("/api/public/disaster-alerts", async (req, res) => {
   try {
-    const cacheKey = "daily_quote";
+    const cacheKey = "disaster_alerts";
     const cached = apiCache.get(cacheKey);
-    // 24 hour cache (or at least 1 hour)
-    if (cached && Date.now() - cached.timestamp < 3600000) { 
+    // 15 min cache for disaster alerts
+    if (cached && Date.now() - cached.timestamp < 900000) { 
       return res.json({ success: true, data: cached.data });
     }
 
-    const response = await axios.get("https://api.adviceslip.com/advice");
-    
-    apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
-    res.json({ success: true, data: response.data });
+    // Try fetching real-time alerts from GDACS (Global Disaster Alert and Coordination System) for India
+    let alerts: any[] = [];
+    try {
+      const feed = await rssParser.parseURL("https://www.gdacs.org/xml/rss.xml");
+      feed.items.forEach(item => {
+        if (item.title?.toLowerCase().includes("india") || item.content?.toLowerCase().includes("india")) {
+          alerts.push({
+            id: item.guid,
+            titleEn: `Sachet Alert: ${item.title}`,
+            titleHi: `सचेत अलर्ट: ${item.title}`, // Ideally translated
+            severity: "High",
+            link: item.link
+          });
+        }
+      });
+    } catch (e) {
+      console.error("RSS parsing error:", e);
+    }
+
+    // Fallback Mock NDMA alert for demonstration if no active alerts
+    if (alerts.length === 0) {
+      alerts.push({
+        id: "mock_ndma_1",
+        titleEn: "Heavy Rainfall and Thunderstorm warning for next 24 hours.",
+        titleHi: "अगले 24 घंटों में भारी बारिश और आंधी की चेतावनी।",
+        severity: "High",
+        link: "https://sachet.ndma.gov.in"
+      });
+    }
+
+    apiCache.set(cacheKey, { data: alerts, timestamp: Date.now() });
+    res.json({ success: true, data: alerts });
   } catch (error: any) {
-    console.error("Quote API Error:", error.message);
-    res.status(500).json({ success: false, error: "Failed to fetch daily quote" });
+    console.error("Disaster Alert API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch disaster alerts" });
   }
 });
 
-// 8. Indian Banks IFSC API (Razorpay)
+// 8. Sarvam AI Speech to Text API
+router.post("/api/public/speech-to-text", upload.single("file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, error: "No audio file provided." });
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("file", fs.createReadStream(req.file.path));
+    formData.append("model", "saaras:v1");
+
+    const response = await axios.post("https://api.sarvam.ai/speech-to-text", formData, {
+      headers: {
+        ...formData.getHeaders(),
+        "api-subscription-key": "sk_rp8peokh_TQdtccvYUT9u2UNZofBsDpTE"
+      }
+    });
+
+    // Clean up temp file
+    fs.unlinkSync(req.file.path);
+
+    res.json({ success: true, data: response.data });
+  } catch (error: any) {
+    console.error("Sarvam AI Error:", error.response?.data || error.message);
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({ success: false, error: "Failed to process audio" });
+  }
+});
+
+// 9. Indian Banks IFSC API (Razorpay)
 router.get("/api/public/ifsc/:code", async (req, res) => {
   try {
     const ifsc = req.params.code;

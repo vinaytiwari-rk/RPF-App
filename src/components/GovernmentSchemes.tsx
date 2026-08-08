@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Search, Loader2, Sparkles, BookOpen, UserCheck, ShieldCheck, ArrowRight, BookMarked, HelpCircle } from "lucide-react";
+import { VoiceSearch } from "./VoiceSearch";
 
 interface Scheme {
   name: string;
@@ -20,6 +21,7 @@ export default function GovernmentSchemes({ lang }: GovernmentSchemesProps) {
   const [occupation, setOccupation] = useState("Student");
   const [state, setState] = useState("Madhya Pradesh");
   const [category, setCategory] = useState("General");
+  const [searchQuery, setSearchQuery] = useState("");
   
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [loading, setLoading] = useState(false);
@@ -81,7 +83,8 @@ export default function GovernmentSchemes({ lang }: GovernmentSchemesProps) {
           annualIncome,
           occupation,
           state,
-          category
+          category,
+          searchQuery
         })
       });
 
@@ -112,6 +115,19 @@ export default function GovernmentSchemes({ lang }: GovernmentSchemesProps) {
 
         {/* Profile Matcher Form */}
         <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="col-span-1 sm:col-span-3 mb-2">
+            <label className="text-xs font-bold text-slate-700 block mb-1">{lang === "hi" ? "खोजें (आवाज़ या टाइप द्वारा)" : "Search (Voice or Type)"}</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder={lang === "hi" ? "योजनाओं के बारे में बोलें या टाइप करें..." : "Speak or type about schemes..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:ring-1 focus:ring-[#FF9933] outline-none"
+              />
+              <VoiceSearch onResult={(text) => setSearchQuery(text)} />
+            </div>
+          </div>
           <div>
             <label className="text-xs font-bold text-slate-700 block mb-1">{lang === "hi" ? "आपकी आयु (वर्ष)" : "Your Age"}</label>
             <input

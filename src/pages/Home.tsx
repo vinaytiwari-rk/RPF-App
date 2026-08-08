@@ -20,9 +20,7 @@ export default function Home() {
   const { user } = useAuth();
   const [weather, setWeather] = useState<any>(null);
   const [news, setNews] = useState<any[]>([]);
-  const [quote, setQuote] = useState<string>("");
-  const { settings, globalSettings, announcements, cmsConfig, servicesList, isLoadingServices } = useApp();
-  const navigate = useNavigate();
+  const [ndmaAlert, setNdmaAlert] = useState<any>(null);
   const t = translations[lang];
 
   const [activeSlide, setActiveSlide] = useState(0);
@@ -30,10 +28,10 @@ export default function Home() {
     beneficiaries: 0,
     volunteers: 0,
     healthCamps: 0,
-    scholarships: 0
+    campaigns: 0
   });
   const [statsLoading, setStatsLoading] = useState(true);
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaignsList, setCampaignsList] = useState<any[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
 
   useEffect(() => {
@@ -46,7 +44,7 @@ export default function Home() {
             beneficiaries: data.beneficiaries || 0,
             volunteers: data.volunteers || 0,
             healthCamps: data.healthCamps || 0,
-            scholarships: data.scholarships || 0
+            campaigns: data.campaigns || 0
           });
         }
       } catch (err) {
@@ -59,7 +57,7 @@ export default function Home() {
         const campRes = await fetch("/api/campaigns");
         if (campRes.ok) {
           const data = await campRes.json();
-          setCampaigns(data.campaigns || []);
+          setCampaignsList(data.campaigns || []);
         }
       } catch (err) {
         console.error("Error fetching live campaigns:", err);
@@ -91,14 +89,14 @@ export default function Home() {
       .then(d => { if(d.success) setNews(d.data); })
       .catch(e => console.error("News fetch err", e));
       
-    fetch("/api/public/daily-quote")
+    fetch("/api/public/disaster-alerts")
       .then(r => r.json())
-      .then(d => {
-        if(d.success && d.data?.slip?.advice) {
-          setQuote(d.data.slip.advice);
+      .then(d => { 
+        if(d.success && d.data?.length > 0) {
+          setNdmaAlert(d.data[0]); 
         }
       })
-      .catch(e => console.error("Quote fetch err", e));
+      .catch(e => console.error("NDMA Alert fetch err", e));
   }, []);
 
   
@@ -215,13 +213,15 @@ export default function Home() {
   return (
     <div className="space-y-5 animate-fadeIn min-h-full pb-16 font-sans relative overflow-x-hidden bg-transparent" id="live-impact-dashboard">
       
-      {/* Dynamic Global Emergency Banner */}
-      {(lang === "hi" ? cmsConfig.alertBannerHi : cmsConfig.alertBannerEn) && (
+      {/* Dynamic Global Emergency Banner (Sachet NDMA Priority) */}
+      {(ndmaAlert || (lang === "hi" ? cmsConfig.alertBannerHi : cmsConfig.alertBannerEn)) && (
         <div className="bg-red-600 text-white px-4 py-2 text-[10.5px] font-black flex items-center gap-2 animate-pulse shadow-sm z-50 relative shrink-0">
           <AlertTriangle className="w-4 h-4 text-white fill-white shrink-0" />
           <div className="overflow-hidden whitespace-nowrap w-full relative">
             <div className="inline-block animate-marquee-scroll uppercase tracking-wide">
-              {lang === "hi" ? cmsConfig.alertBannerHi : cmsConfig.alertBannerEn}
+              {ndmaAlert ? 
+                  (lang === "hi" ? ndmaAlert.titleHi : ndmaAlert.titleEn) 
+                  : (lang === "hi" ? cmsConfig.alertBannerHi : cmsConfig.alertBannerEn)}
             </div>
           </div>
         </div>
@@ -408,12 +408,17 @@ export default function Home() {
           </div>
           <div className="text-center space-y-1 border-l border-slate-100">
             <span className="text-[14px] font-black text-slate-900 tracking-tight block">
-              {stats.scholarships === 0 ? "0" : stats.scholarships >= 1000 ? `${(stats.scholarships / 1000).toFixed(1)}K+` : stats.scholarships}
+              {stats.campaigns === 0 ? "0" : stats.campaigns >= 1000 ? `${(stats.campaigns / 1000).toFixed(1)}K+` : stats.campaigns}
             </span>
             <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
-              {lang === "hi" ? "छात्रवृत्ति" : "Scholarships"}
+              {lang === "hi" ? "अभियान" : "Campaigns"}
             </span>
           </div>
+        </div>
+        
+        {/* Impact Bottom Text */}
+        <div className="mt-2 text-center text-[10px] text-slate-500 font-medium italic px-2">
+          {lang === "hi" ? cmsConfig.impactBottomTextHi : cmsConfig.impactBottomTextEn}
         </div>
       
       
@@ -434,19 +439,35 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-5 gap-2 bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm min-h-[90px] w-full justify-items-center">
+        <motion.div 
+          className="grid grid-cols-5 gap-2 bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm min-h-[90px] w-full justify-items-center"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.1 }
+            }
+          }}
+        >
           {quickActions.map((action, idx) => (
-            <button 
+            <motion.button 
               key={action.id}
+              variants={{
+                hidden: { opacity: 0, scale: 0.8 },
+                show: { opacity: 1, scale: 1 }
+              }}
               onClick={() => navigate(action.route)}
               className={`flex flex-col items-center justify-center p-2 bg-white border-2 ${action.borderColor} rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group relative w-full h-full gap-1.5`}
             >
               <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
                 <img src={action.imgSrc} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300" alt="" />
               </div>
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
 
         </div>
       </>
@@ -468,7 +489,9 @@ export default function Home() {
              <Info className="w-3.5 h-3.5 text-amber-500" />
           </div>
           <p className="text-[11px] text-slate-700 italic font-medium leading-relaxed bg-amber-50/50 p-3 rounded-xl border border-amber-100/50">
-            "{quote || (lang === "hi" ? "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।" : "Work is worship, and service is the greatest religion.")}"
+            "{lang === "hi" 
+                ? (cmsConfig.quoteOfTheDayHi || "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।") 
+                : (cmsConfig.quoteOfTheDayEn || "Work is worship, and service is the greatest religion.")}"
           </p>
         </div>
       </motion.div>
@@ -488,7 +511,7 @@ export default function Home() {
             {/* Founder avatar with golden ring */}
             <div className="relative shrink-0 mt-1">
               <img 
-                src={globalSettings?.founder_image || cmsConfig.founderImgUrl || "/assets/founder.png"} 
+                src={cmsConfig.founderImgUrl || globalSettings?.founder_image || "/assets/founder.png"} 
                 alt="Founder Message Avatar" 
                 className="w-16 h-16 rounded-full object-cover border-2 border-[#D4AF37]/50 shadow-sm"
               />
@@ -500,7 +523,7 @@ export default function Home() {
                 {lang === "hi" ? "संस्थापक का संदेश" : "Message from Founder"}
               </h4>
               <p className="text-[10px] text-slate-600 leading-relaxed italic font-medium">
-                "{globalSettings?.founder_message || (lang === "hi" ? settings.founderMessageHi : settings.founderMessageEn)}"
+                "{(lang === "hi" ? settings.founderMessageHi : settings.founderMessageEn) || globalSettings?.founder_message}"
               </p>
               <div className="pt-1.5 border-t border-slate-100">
                 <p className="font-display font-black text-[10.5px] text-[#000080] leading-none">

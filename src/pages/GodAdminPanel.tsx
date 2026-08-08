@@ -12,6 +12,7 @@ import {
   XCircle, Image as ImageIcon, MessageSquare, LayoutTemplate,
   Loader2, LogOut, Check, ChevronRight, Activity, Database, Menu, X, Heart, CreditCard, Stethoscope, Briefcase, FileText, ActivitySquare, AlertTriangle, Droplet
 } from 'lucide-react';
+import { CmsSettings } from '../components/admin/CmsSettings';
 
 export default function GodAdminPanel() {
   const { user, token, logout } = useAuth();
@@ -185,7 +186,8 @@ export default function GodAdminPanel() {
     { id: 'blogs', label: 'Articles & Blogs', icon: <FileText size={20} /> },
     { id: 'jobs', label: 'Jobs', icon: <Briefcase size={20} /> },
     { id: 'campaigns', label: 'Campaigns', icon: <MessageSquare size={20} /> },
-    { id: 'visual', label: 'Home Screen / App Settings', icon: <Monitor size={20} /> },
+    { id: 'cms', label: 'Global Profile & Content', icon: <LayoutTemplate size={20} /> },
+    { id: 'visual', label: 'App Settings', icon: <Monitor size={20} /> },
     { id: 'announcements', label: 'Announcements', icon: <Bell size={20} /> },
     { id: 'scholarships', label: 'Scholarships', icon: <GraduationCap size={20} /> },
     { id: 'food_support', label: 'Food Support', icon: <Utensils size={20} /> },
@@ -539,6 +541,8 @@ export default function GodAdminPanel() {
       case 'campaigns':
         return <GenericAdminTab endpoint="/api/admin/campaigns" title="Campaigns" columns={["title", "description", "goalAmount", "raisedAmount"]} />;
 
+      case 'cms':
+        return <CmsSettings />;
       case 'visual':
         return <VisualSettings settings={settings} saveSettings={saveSettings} />;
       case 'announcements':

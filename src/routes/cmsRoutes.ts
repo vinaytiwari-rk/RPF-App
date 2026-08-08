@@ -116,6 +116,14 @@ router.get("/api/cms", async (req, res) => {
         parsed.logoImgUrl = "/assets/logo.png";
         modified = true;
       }
+      if (parsed.quoteOfTheDayEn === undefined) {
+        parsed.quoteOfTheDayEn = "Work is worship, and service is the greatest religion.";
+        parsed.quoteOfTheDayHi = "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।";
+        parsed.impactBottomTextEn = "Together, we are making a real difference in people's lives.";
+        parsed.impactBottomTextHi = "हम सब मिलकर लोगों के जीवन में वास्तविक बदलाव ला रहे हैं।";
+        parsed.statsOffsets = { beneficiaries: 0, volunteers: 0, healthCamps: 0, campaigns: 0 };
+        modified = true;
+      }
       if (modified) {
         await pool.query(
           'UPDATE settings SET "founderMessageEn" = $1 WHERE id = $2',
@@ -172,6 +180,16 @@ router.get("/api/cms", async (req, res) => {
             image: "/assets/water_pump_camp.png"
           }
         ],
+        quoteOfTheDayEn: "Work is worship, and service is the greatest religion.",
+        quoteOfTheDayHi: "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।",
+        impactBottomTextEn: "Together, we are making a real difference in people's lives.",
+        impactBottomTextHi: "हम सब मिलकर लोगों के जीवन में वास्तविक बदलाव ला रहे हैं।",
+        statsOffsets: {
+          beneficiaries: 0,
+          volunteers: 0,
+          healthCamps: 0,
+          campaigns: 0
+        },
         customServices: [],
         socialDirectory: [
           {

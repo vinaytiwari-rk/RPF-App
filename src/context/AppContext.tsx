@@ -66,6 +66,16 @@ export interface CmsConfig {
   aboutTextHi?: string;
   logoImgUrl?: string;
   homeServices?: any[];
+  quoteOfTheDayEn?: string;
+  quoteOfTheDayHi?: string;
+  impactBottomTextEn?: string;
+  impactBottomTextHi?: string;
+  statsOffsets?: {
+    beneficiaries: number;
+    volunteers: number;
+    healthCamps: number;
+    campaigns: number;
+  };
 }
 
 export interface Settings {
@@ -163,6 +173,11 @@ const DEFAULT_CMS_CONFIG: CmsConfig = {
       image: "/assets/water_pump_camp.png"
     }
   ],
+  quoteOfTheDayEn: "Work is worship, and service is the greatest religion.",
+  quoteOfTheDayHi: "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।",
+  impactBottomTextEn: "Together, we are making a real difference in people's lives.",
+  impactBottomTextHi: "हम सब मिलकर लोगों के जीवन में वास्तविक बदलाव ला रहे हैं।",
+  statsOffsets: { beneficiaries: 0, volunteers: 0, healthCamps: 0, campaigns: 0 },
   customServices: [],
   socialDirectory: [],
   notifications: [],

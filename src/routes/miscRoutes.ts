@@ -61,7 +61,16 @@ router.get("/api/stats", async (req, res) => {
   let beneficiaries = 0;
   let volunteers = 0;
   let healthCamps = 0;
-  let scholarships = 0;
+  let campaigns = 0;
+
+  let offsets = { beneficiaries: 0, volunteers: 0, healthCamps: 0, campaigns: 0 };
+  try {
+    const cmsRes = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
+    if (cmsRes.rows.length > 0 && cmsRes.rows[0].founderMessageEn) {
+      const parsed = JSON.parse(cmsRes.rows[0].founderMessageEn);
+      if (parsed.statsOffsets) offsets = parsed.statsOffsets;
+    }
+  } catch (e) {}
 
   try {
     const bRes = await pool.query("SELECT COUNT(*) FROM card_applications_v2");
@@ -81,16 +90,16 @@ router.get("/api/stats", async (req, res) => {
   try {
     const sRes = await pool.query(`
       SELECT COUNT(*) FROM service_submissions_v2 
-      WHERE "serviceName" = 'Scholarships Support' OR "serviceNameEn" = 'Scholarships Support'
+      WHERE "serviceName" = 'Scholarships Support' OR "serviceNameEn" = 'Scholarships Support' OR "serviceName" = 'Campaigns'
     `);
-    scholarships = parseInt(sRes.rows[0].count, 10);
+    campaigns = parseInt(sRes.rows[0].count, 10);
   } catch (e) {}
 
   const data = {
-    beneficiaries,
-    volunteers,
-    healthCamps,
-    scholarships
+    beneficiaries: beneficiaries + (offsets.beneficiaries || 0),
+    volunteers: volunteers + (offsets.volunteers || 0),
+    healthCamps: healthCamps + (offsets.healthCamps || 0),
+    campaigns: campaigns + (offsets.campaigns || 0)
   };
   apiCache.set("/api/stats", { data, timestamp: Date.now() });
   res.json(data);

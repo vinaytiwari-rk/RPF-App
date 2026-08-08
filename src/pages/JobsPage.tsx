@@ -3,6 +3,7 @@ import { useOutletContext, useNavigate } from "react-router-dom";
 import { Briefcase, MapPin, DollarSign, UploadCloud, CheckCircle, ArrowLeft, Info, Calendar } from "lucide-react";
 // import axios from 'axios';
 import { useAuth } from "../context/AuthContext";
+import { VoiceSearch } from "../components/VoiceSearch";
 
 interface Job {
   id: string;
@@ -26,6 +27,7 @@ export default function JobsPage() {
   const [remoteJobs, setRemoteJobs] = useState<any[]>([]);
   const [rssJobs, setRssJobs] = useState<any[]>([]);
   const [filterCity, setFilterCity] = useState<"all" | "bhopal" | "bhopal">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   
   const [fullName, setFullName] = useState("");
@@ -99,9 +101,13 @@ export default function JobsPage() {
   }, []);
 
   const filteredJobs = jobs.filter(job => {
-    if (filterCity === "all") return true;
-    if (filterCity === "bhopal") return job.locEn.toLowerCase().includes("bhopal");
-    if (filterCity === "bhopal") return job.locEn.toLowerCase().includes("bhopal");
+    if (filterCity !== "all" && !job.locEn.toLowerCase().includes(filterCity)) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return job.titleEn.toLowerCase().includes(q) || 
+             job.titleHi.toLowerCase().includes(q) || 
+             job.company.toLowerCase().includes(q);
+    }
     return true;
   });
 
@@ -224,6 +230,18 @@ export default function JobsPage() {
         </div>
       </div>
 
+      {/* Global Search */}
+      <div className="flex gap-2 relative z-10 bg-white p-2 rounded-xl shadow-sm border border-slate-200">
+        <input
+          type="text"
+          placeholder={isHi ? "नौकरी खोजें (आवाज़ या टाइप द्वारा)..." : "Search jobs (Speak or type)..."}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-[#FF9933] outline-none"
+        />
+        <VoiceSearch onResult={(text) => setSearchQuery(text)} />
+      </div>
+
       {/* Filter Tabs */}
       <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/60 relative z-10">
         {(["all", "bhopal", "bhopal"] as const).map(city => (
@@ -243,10 +261,16 @@ export default function JobsPage() {
 
       {/* Jobs Listing */}
       <div className="space-y-4 relative z-10">
-        {filteredJobs.map(job => (
-          <div 
-            key={job.id} 
-            className="glass-card bg-white/95 p-4.5 border-gold-soft shadow-gold-premium space-y-3"
+        {filteredJobs.length === 0 ? (
+          <div className="bg-white border border-slate-200/60 rounded-2xl p-6 text-center text-slate-500 shadow-sm relative z-10">
+            <Briefcase className="w-8 h-8 mx-auto mb-2 opacity-20" />
+            <p className="text-sm font-bold">{lang === "hi" ? "कोई नौकरी नहीं मिली" : "No jobs found"}</p>
+          </div>
+        ) : (
+          filteredJobs.map(job => (
+            <div 
+              key={job.id} 
+              className="glass-card bg-white/95 p-4.5 border-gold-soft shadow-gold-premium space-y-3"
           >
             <div className="flex justify-between items-start border-b border-slate-100 pb-2">
               <div>
@@ -272,7 +296,7 @@ export default function JobsPage() {
               <span>{lang === "hi" ? "नौकरी के लिए आवेदन करें >" : "Apply for Job >"}</span>
             </button>
           </div>
-        ))}
+        )))}
       </div>
 
       {/* Application Sheet / Modal Overlay */}

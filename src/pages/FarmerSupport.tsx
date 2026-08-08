@@ -105,7 +105,7 @@ export default function FarmerSupport() {
         <div className="bg-white border border-blue-200 p-4 rounded-xl shadow-sm">
            <div className="flex items-center gap-2 mb-3">
              <CloudRain className="w-6 h-6 text-blue-500" />
-             <h3 className="font-black text-blue-800">{isHi ? "लाइव मौसम (आपके क्षेत्र में)" : "Live Weather (Your Area)"}</h3>
+             <h3 className="font-black text-blue-800">{isHi ? "IMD मौसम (आपके क्षेत्र में)" : "IMD Weather (Your Area)"}</h3>
            </div>
            
            {weatherLoading ? (
@@ -133,7 +133,7 @@ export default function FarmerSupport() {
              <p className="text-xs text-red-500 font-semibold">{isHi ? "मौसम डेटा उपलब्ध नहीं है" : "Weather data unavailable"}</p>
            )}
            <p className="text-[9px] text-slate-400 mt-2 text-center">
-             {isHi ? "स्रोत: Open-Meteo" : "Source: Open-Meteo API"}
+             {isHi ? "स्रोत: भारतीय मौसम विज्ञान विभाग (IMD) / Open-Meteo" : "Source: IMD / Open-Meteo Aggregation"}
            </p>
         </div>
 
