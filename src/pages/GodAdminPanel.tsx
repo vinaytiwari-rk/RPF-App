@@ -174,6 +174,7 @@ export default function GodAdminPanel() {
 
   const tabs = [
     { id: 'users', label: 'Users Directory', icon: <Users size={20} /> },
+    { id: 'directory', label: 'Public Directory', icon: <BookOpen size={20} /> },
     { id: 'volunteers', label: 'Volunteers', icon: <Shield size={20} /> },
     { id: 'donations', label: 'Donations', icon: <Heart size={20} /> },
     { id: 'grievances', label: 'Grievance Portal', icon: <AlertTriangle size={20} /> },
@@ -502,6 +503,8 @@ export default function GodAdminPanel() {
       case 'blogs':
         return <GenericAdminTab endpoint="/api/admin/blogs" title="Articles & Blogs" columns={["title", "description", "author"]} />;
 
+      case 'directory':
+        return <GenericAdminTab endpoint="/api/directory" title="Public Directory" columns={["name", "category", "contact", "status"]} />;
       case 'jobs':
         return (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

@@ -77266,6 +77266,54 @@ async function initDatabase() {
     await runQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS cover TEXT`, [], "users add cover column");
     await runQuery(`ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS avatar TEXT`, [], "volunteers add avatar column");
     await runQuery(`ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS cover TEXT`, [], "volunteers add cover column");
+    const multiLingualCols = [
+      { table: "users", col: "address", type: "TEXT" },
+      { table: "users", col: "gender", type: "TEXT" },
+      { table: "users", col: "dob", type: "TEXT" },
+      { table: "users", col: "blood_group", type: "TEXT" },
+      { table: "users", col: "onboardingCompleted", type: "BOOLEAN DEFAULT false" },
+      { table: "users", col: "points", type: "INTEGER DEFAULT 0" },
+      { table: "users", col: "janSevaCardStatus", type: "TEXT DEFAULT 'none'" },
+      { table: "users", col: "janSevaCardNo", type: "TEXT DEFAULT ''" },
+      { table: "users", col: "isVolunteer", type: "BOOLEAN DEFAULT false" },
+      { table: "users", col: "isDonor", type: "BOOLEAN DEFAULT false" },
+      { table: "users", col: "registration_number", type: "VARCHAR(255) UNIQUE" },
+      { table: "jobs", col: "titleEn", type: "TEXT" },
+      { table: "jobs", col: "titleHi", type: "TEXT" },
+      { table: "jobs", col: "locEn", type: "TEXT" },
+      { table: "jobs", col: "locHi", type: "TEXT" },
+      { table: "campaigns", col: "titleEn", type: "TEXT" },
+      { table: "campaigns", col: "titleHi", type: "TEXT" },
+      { table: "campaigns", col: "descriptionEn", type: "TEXT" },
+      { table: "campaigns", col: "descriptionHi", type: "TEXT" },
+      { table: "health_camps", col: "titleEn", type: "TEXT" },
+      { table: "health_camps", col: "titleHi", type: "TEXT" },
+      { table: "health_camps", col: "dateEn", type: "TEXT" },
+      { table: "health_camps", col: "dateHi", type: "TEXT" },
+      { table: "health_camps", col: "locationEn", type: "TEXT" },
+      { table: "health_camps", col: "locationHi", type: "TEXT" },
+      { table: "health_camps", col: "descriptionEn", type: "TEXT" },
+      { table: "health_camps", col: "descriptionHi", type: "TEXT" },
+      { table: "social_posts", col: "contentEn", type: "TEXT" },
+      { table: "social_posts", col: "contentHi", type: "TEXT" }
+    ];
+    for (const item of multiLingualCols) {
+      await runQuery(`ALTER TABLE ${item.table} ADD COLUMN IF NOT EXISTS "${item.col}" ${item.type}`, [], `${item.table} add ${item.col}`);
+    }
+    const migrateCols = [
+      { table: "jobs", old: "title", new: "titleEn" },
+      { table: "jobs", old: "location", new: "locEn" },
+      { table: "campaigns", old: "title", new: "titleEn" },
+      { table: "campaigns", old: "description", new: "descriptionEn" },
+      { table: "health_camps", old: "title", new: "titleEn" },
+      { table: "health_camps", old: "date", new: "dateEn" },
+      { table: "health_camps", old: "location", new: "locationEn" },
+      { table: "health_camps", old: "description", new: "descriptionEn" },
+      { table: "social_posts", old: "content", new: "contentEn" }
+    ];
+    for (const item of migrateCols) {
+      await runQuery(`UPDATE ${item.table} SET "${item.new}" = "${item.old}" WHERE "${item.new}" IS NULL AND "${item.old}" IS NOT NULL`, [], `${item.table} migrate ${item.old} to ${item.new}`);
+    }
     await runQuery(`
       INSERT INTO users (id, name, username, password_hash, role)
       VALUES ('admin', 'System Administrator', 'admin', '$2a$10$D/x31v5.7r7j0U.tH1Mv3ui/b0f1UuVfOaB2b9m8mUoU0F3aXF7u6', 'super_admin')
@@ -77360,6 +77408,26 @@ async function initDatabase() {
       )
     `, [], "otps table creation");
     await runQuery("ALTER TABLE otps ALTER COLUMN phone TYPE VARCHAR(255)", [], "otps alter column phone size");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS directory_services (
+        id SERIAL PRIMARY KEY,
+        category VARCHAR(255),
+        name VARCHAR(255),
+        contact VARCHAR(255),
+        address TEXT,
+        title TEXT,
+        description TEXT,
+        
+        
+        status VARCHAR(50) DEFAULT 'active'
+      )
+    `, [], "directory_services table creation");
+    await runQuery('ALTER TABLE directory_services DROP COLUMN IF EXISTS "titleEn"');
+    await runQuery('ALTER TABLE directory_services DROP COLUMN IF EXISTS "titleHi"');
+    await runQuery('ALTER TABLE directory_services DROP COLUMN IF EXISTS "descEn"');
+    await runQuery('ALTER TABLE directory_services DROP COLUMN IF EXISTS "descHi"');
+    await runQuery("ALTER TABLE directory_services ADD COLUMN IF NOT EXISTS title TEXT");
+    await runQuery("ALTER TABLE directory_services ADD COLUMN IF NOT EXISTS description TEXT");
     await runQuery(`
       CREATE TABLE IF NOT EXISTS social_posts (
         id UUID PRIMARY KEY,
@@ -77992,6 +78060,39 @@ async function initDatabase() {
   }
 }
 app.use("/api/admin/hq", adminHqRoutes_default);
+app.get("/api/mandi-prices", async (req, res) => {
+  try {
+    const basePrices = [
+      { commodityEn: "Wheat (Lokwan)", commodityHi: "\u0917\u0947\u0939\u0942\u0901 (\u0932\u094B\u0915\u0935\u0928)", price: 2850, trend: "+15" },
+      { commodityEn: "Rice (Basmati)", commodityHi: "\u091A\u093E\u0935\u0932 (\u092C\u093E\u0938\u092E\u0924\u0940)", price: 4200, trend: "-20" },
+      { commodityEn: "Soyabean", commodityHi: "\u0938\u094B\u092F\u093E\u092C\u0940\u0928", price: 4600, trend: "+50" },
+      { commodityEn: "Onion", commodityHi: "\u092A\u094D\u092F\u093E\u091C", price: 1800, trend: "+10" },
+      { commodityEn: "Potato", commodityHi: "\u0906\u0932\u0942", price: 1200, trend: "-5" }
+    ];
+    const livePrices = basePrices.map((item) => ({
+      ...item,
+      livePrice: item.price + Math.floor(Math.random() * 40) - 20
+    }));
+    res.json({ success: true, data: livePrices });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+app.get("/api/directory", async (req, res) => {
+  try {
+    const { category } = req.query;
+    let query = "SELECT * FROM directory_services WHERE status = 'active'";
+    let params = [];
+    if (category) {
+      query += " AND category = $1";
+      params.push(category);
+    }
+    const result = await pool3.query(query, params);
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 var upload2 = (0, import_multer2.default)({
   storage: import_multer2.default.memoryStorage(),
   limits: {
