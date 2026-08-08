@@ -20,6 +20,7 @@ export default function Home() {
   const { user } = useAuth();
   const [weather, setWeather] = useState<any>(null);
   const [news, setNews] = useState<any[]>([]);
+  const [quote, setQuote] = useState<string>("");
   const { settings, globalSettings, announcements, cmsConfig, servicesList, isLoadingServices } = useApp();
   const navigate = useNavigate();
   const t = translations[lang];
@@ -89,6 +90,15 @@ export default function Home() {
       .then(r => r.json())
       .then(d => { if(d.success) setNews(d.data); })
       .catch(e => console.error("News fetch err", e));
+      
+    fetch("/api/public/daily-quote")
+      .then(r => r.json())
+      .then(d => {
+        if(d.success && d.data?.slip?.advice) {
+          setQuote(d.data.slip.advice);
+        }
+      })
+      .catch(e => console.error("Quote fetch err", e));
   }, []);
 
   
@@ -408,6 +418,27 @@ export default function Home() {
         </div>
       </>
       )}
+
+      {/* 5. Daily Quote (AdviceSlip) */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.6 }}
+        className="px-4 relative z-10"
+      >
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm relative overflow-hidden flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+             <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider">
+               {lang === "hi" ? "आज का सुविचार" : "Quote of the Day"}
+             </h4>
+             <Info className="w-3.5 h-3.5 text-amber-500" />
+          </div>
+          <p className="text-[11px] text-slate-700 italic font-medium leading-relaxed bg-amber-50/50 p-3 rounded-xl border border-amber-100/50">
+            "{quote || (lang === "hi" ? "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।" : "Work is worship, and service is the greatest religion.")}"
+          </p>
+        </div>
+      </motion.div>
 
       {/* 6. Message from Founder (Matches Screenshot 5 Founder Msg) */}
       <motion.div 

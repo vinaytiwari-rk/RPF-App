@@ -240,6 +240,7 @@ interface AppContextType {
   approveCardApplication: (userId: string) => string;
   rejectCardApplication: (userId: string) => void;
   refreshData: () => Promise<void>;
+  userLocation: { city?: string; region?: string; country?: string; latitude?: string; longitude?: string } | null;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -259,6 +260,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
   const [grievances, setGrievances] = useState<Grievance[]>([]);
   const [cardApplications, setCardApplications] = useState<CardApplication[]>([]);
+  const [userLocation, setUserLocation] = useState<any>(null);
 
   const fetchAllData = async () => {
     try {
@@ -352,6 +354,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetchAllData();
     const interval = setInterval(fetchAllData, 60000);
+    
+    // Fetch user location silently via free GeoJS API
+    fetch("https://get.geojs.io/v1/ip/geo.json")
+      .then(res => res.json())
+      .then(data => {
+        setUserLocation(data);
+      })
+      .catch(err => console.error("GeoJS error:", err));
+      
     return () => clearInterval(interval);
   }, []);
 
@@ -512,6 +523,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         approveCardApplication,
         rejectCardApplication,
         refreshData: fetchAllData,
+        userLocation,
         notifications: [],
       }}
     >

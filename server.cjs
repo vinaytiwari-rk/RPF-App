@@ -76206,6 +76206,36 @@ router21.get("/api/public/nearby", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch nearby locations" });
   }
 });
+router21.get("/api/public/remote-jobs", async (req, res) => {
+  try {
+    const cacheKey = "remote_jobs_india";
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 36e5) {
+      return res.json({ success: true, data: cached.data });
+    }
+    const response = await import_axios8.default.get("https://jobicy.com/api/v2/remote-jobs?count=20&geo=india");
+    apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
+    res.json({ success: true, data: response.data });
+  } catch (error) {
+    console.error("Jobs API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch remote jobs" });
+  }
+});
+router21.get("/api/public/daily-quote", async (req, res) => {
+  try {
+    const cacheKey = "daily_quote";
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 36e5) {
+      return res.json({ success: true, data: cached.data });
+    }
+    const response = await import_axios8.default.get("https://api.adviceslip.com/advice");
+    apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
+    res.json({ success: true, data: response.data });
+  } catch (error) {
+    console.error("Quote API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch daily quote" });
+  }
+});
 var publicExternalRoutes_default = router21;
 
 // src/routes/miscRoutes.ts

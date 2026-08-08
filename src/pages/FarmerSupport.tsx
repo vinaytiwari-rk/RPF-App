@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { ArrowLeft, Sprout, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowLeft, Sprout, TrendingUp, TrendingDown, CloudRain } from "lucide-react";
+import { useApp } from "../context/AppContext";
 
 export default function FarmerSupport() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -8,6 +9,9 @@ export default function FarmerSupport() {
   const isHi = lang === "hi";
   const [prices, setPrices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { userLocation } = useApp();
+  const [weather, setWeather] = useState<any>(null);
+  const [weatherLoading, setWeatherLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/mandi-prices")
@@ -22,7 +26,23 @@ export default function FarmerSupport() {
         console.error(err);
         setLoading(false);
       });
-  }, []);
+      
+    // Fetch Weather
+    const lat = userLocation?.latitude || "23.2599";
+    const lon = userLocation?.longitude || "77.4126";
+    fetch(`/api/public/weather?lat=${lat}&lon=${lon}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setWeather(data.data);
+        }
+        setWeatherLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setWeatherLoading(false);
+      });
+  }, [userLocation]);
 
   return (
     <div className="bg-slate-50 min-h-screen pb-24 font-sans text-slate-800 animate-fadeIn">
@@ -63,6 +83,42 @@ export default function FarmerSupport() {
                </p>
              </div>
            )}
+        </div>
+
+        {/* Live Weather Forecast */}
+        <div className="bg-white border border-blue-200 p-4 rounded-xl shadow-sm">
+           <div className="flex items-center gap-2 mb-3">
+             <CloudRain className="w-6 h-6 text-blue-500" />
+             <h3 className="font-black text-blue-800">{isHi ? "लाइव मौसम (आपके क्षेत्र में)" : "Live Weather (Your Area)"}</h3>
+           </div>
+           
+           {weatherLoading ? (
+             <p className="text-xs text-slate-500 font-semibold animate-pulse">{isHi ? "मौसम की जानकारी लोड हो रही है..." : "Loading weather info..."}</p>
+           ) : weather ? (
+             <div className="flex items-center justify-between p-3 bg-blue-50/50 rounded-lg border border-blue-100">
+               <div>
+                 <p className="text-2xl font-black text-slate-800">
+                   {weather.current_weather?.temperature}°C
+                 </p>
+                 <p className="text-[10px] font-bold text-slate-500">
+                   {userLocation?.city ? `${userLocation.city}, ${userLocation.region}` : (isHi ? "भोपाल, मध्य प्रदेश" : "Bhopal, MP")}
+                 </p>
+               </div>
+               <div className="text-right">
+                 <p className="text-[11px] font-bold text-slate-700">
+                   {isHi ? "हवा की गति:" : "Wind:"} {weather.current_weather?.windspeed} km/h
+                 </p>
+                 <p className="text-[11px] font-bold text-blue-600 mt-0.5">
+                   {isHi ? "वर्षा:" : "Precipitation:"} {weather.daily?.precipitation_sum?.[0] || 0} mm
+                 </p>
+               </div>
+             </div>
+           ) : (
+             <p className="text-xs text-red-500 font-semibold">{isHi ? "मौसम डेटा उपलब्ध नहीं है" : "Weather data unavailable"}</p>
+           )}
+           <p className="text-[9px] text-slate-400 mt-2 text-center">
+             {isHi ? "स्रोत: Open-Meteo" : "Source: Open-Meteo API"}
+           </p>
         </div>
       </div>
     </div>

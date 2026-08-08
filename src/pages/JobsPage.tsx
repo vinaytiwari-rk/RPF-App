@@ -22,6 +22,7 @@ export default function JobsPage() {
   const { user } = useAuth();
   
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [remoteJobs, setRemoteJobs] = useState<any[]>([]);
   const [rssJobs, setRssJobs] = useState<any[]>([]);
   const [filterCity, setFilterCity] = useState<"all" | "bhopal" | "bhopal">("all");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -31,7 +32,7 @@ export default function JobsPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
+  const [subPage, setSubPage] = useState<"portal" | "remote" | "tools">("portal");
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
@@ -55,6 +56,17 @@ export default function JobsPage() {
       } catch (err) {}
     };
     fetchRssJobs();
+
+    const fetchRemoteJobs = async () => {
+      try {
+        const res = await fetch("/api/public/remote-jobs");
+        if (res.ok) {
+          const d = await res.json();
+          if (d.success && d.data?.jobs) setRemoteJobs(d.data.jobs);
+        }
+      } catch (err) {}
+    };
+    fetchRemoteJobs();
   }, []);
 
   useEffect(() => {
@@ -157,22 +169,30 @@ export default function JobsPage() {
       <div className="flex bg-slate-100 border border-slate-200 p-1 rounded-xl shadow-inner shrink-0 relative z-10">
         <button 
           onClick={() => setSubPage("portal")}
-          className={`flex-1 py-2 text-center rounded-lg text-xs font-black transition cursor-pointer ${
+          className={`flex-1 py-2 text-center rounded-lg text-[10px] font-black transition cursor-pointer ${
             subPage === "portal" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
           }`}
         >
-          {lang === "hi" ? "रोजगार पोर्टल" : "Jobs Portal"}
+          {lang === "hi" ? "लोकल जॉब्स" : "Local Jobs"}
+        </button>
+        <button 
+          onClick={() => setSubPage("remote")}
+          className={`flex-1 py-2 text-center rounded-lg text-[10px] font-black transition cursor-pointer ${
+            subPage === "remote" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {lang === "hi" ? "रिमोट (WFH)" : "Remote Jobs"}
         </button>
         <button 
           onClick={() => {
             setSubPage("tools");
             if (!activeCalc) setActiveCalc("takehome");
           }}
-          className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
+          className={`flex-1 text-center py-2 rounded-lg text-[10px] font-black transition cursor-pointer ${
             subPage === "tools" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
           }`}
         >
-          {lang === "hi" ? "स्मार्ट रोजगार टूल्स" : "Salary Planners"}
+          {lang === "hi" ? "स्मार्ट टूल्स" : "Smart Tools"}
         </button>
       </div>
 
@@ -368,6 +388,55 @@ export default function JobsPage() {
         </div>
       </div>
         </>
+      )}
+
+      {subPage === "remote" && (
+        <div className="space-y-4 relative z-10">
+          <div className="border-b border-slate-200/80 pb-2.5 flex items-center gap-3">
+            <div>
+              <h3 className="font-display font-extrabold text-base text-slate-900">
+                {lang === "hi" ? "रिमोट नौकरियां (वर्क फ्रॉम होम)" : "Remote Jobs (Work From Home)"}
+              </h3>
+              <p className="text-[10px] text-slate-500 font-bold">
+                {lang === "hi" ? "जॉबिसी (Jobicy) द्वारा प्रमाणित नौकरियां" : "Verified jobs by Jobicy API"}
+              </p>
+            </div>
+          </div>
+          {remoteJobs.length === 0 ? (
+            <p className="text-xs text-slate-500 font-bold text-center animate-pulse">{lang === "hi" ? "रिमोट जॉब्स लोड हो रही हैं..." : "Loading remote jobs..."}</p>
+          ) : (
+            remoteJobs.map((job: any) => (
+              <div 
+                key={job.id} 
+                className="bg-white p-4 border border-slate-200/60 rounded-xl shadow-sm space-y-2"
+              >
+                <div className="flex justify-between items-start border-b border-slate-100 pb-2">
+                  <div>
+                    <h4 className="font-display font-extrabold text-sm text-[#0B1E3F]">
+                      {job.jobTitle}
+                    </h4>
+                    <p className="text-[10px] text-[#FF9933] font-black uppercase tracking-wider mt-0.5">{job.companyName}</p>
+                  </div>
+                  <span className="text-[8.5px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap">
+                    {job.jobType}
+                  </span>
+                </div>
+                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex flex-wrap gap-2">
+                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-slate-400" /> {job.jobGeo}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-slate-400" /> {new Date(job.pubDate).toLocaleDateString()}</span>
+                </div>
+                <a 
+                  href={job.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block w-full text-center bg-[#FF9933] hover:bg-[#e68a2e] text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition cursor-pointer mt-2"
+                >
+                  {lang === "hi" ? "जॉबिसी पर अप्लाई करें >" : "Apply on Jobicy >"}
+                </a>
+              </div>
+            ))
+          )}
+        </div>
       )}
 
       {subPage === "tools" && (

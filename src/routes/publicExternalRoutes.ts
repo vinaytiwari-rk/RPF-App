@@ -133,5 +133,44 @@ router.get("/api/public/nearby", async (req, res) => {
   }
 });
 
+// 6. Remote Jobs API (Jobicy)
+router.get("/api/public/remote-jobs", async (req, res) => {
+  try {
+    const cacheKey = "remote_jobs_india";
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour cache
+      return res.json({ success: true, data: cached.data });
+    }
+
+    const response = await axios.get("https://jobicy.com/api/v2/remote-jobs?count=20&geo=india");
+    
+    apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
+    res.json({ success: true, data: response.data });
+  } catch (error: any) {
+    console.error("Jobs API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch remote jobs" });
+  }
+});
+
+// 7. Daily Quote API (Advice Slip)
+router.get("/api/public/daily-quote", async (req, res) => {
+  try {
+    const cacheKey = "daily_quote";
+    const cached = apiCache.get(cacheKey);
+    // 24 hour cache (or at least 1 hour)
+    if (cached && Date.now() - cached.timestamp < 3600000) { 
+      return res.json({ success: true, data: cached.data });
+    }
+
+    const response = await axios.get("https://api.adviceslip.com/advice");
+    
+    apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
+    res.json({ success: true, data: response.data });
+  } catch (error: any) {
+    console.error("Quote API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch daily quote" });
+  }
+});
+
 export default router;
 
