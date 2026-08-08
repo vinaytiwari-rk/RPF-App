@@ -3,7 +3,6 @@ require('dotenv').config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/rp_foundation',
-  ssl: { rejectUnauthorized: false }
 });
 
 // A robust initial dataset of Government and Emergency Directories
