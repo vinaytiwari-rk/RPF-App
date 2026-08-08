@@ -232,5 +232,35 @@ router.get("/api/public/fuel-prices", async (req, res) => {
   }
 });
 
+// 11. Archive.org Search API (Digital Library)
+router.get("/api/public/archive-search", async (req, res) => {
+  try {
+    const q = (req.query.q as string) || "india";
+    const cacheKey = `archive_${q}`;
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 3600000 * 24) {
+      return res.json({ success: true, data: cached.data });
+    }
+
+    const response = await axios.get(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}+AND+mediatype:(texts)&output=json&rows=15&page=1`);
+    
+    if (response.data?.response?.docs) {
+      const docs = response.data.response.docs.map((d: any) => ({
+        identifier: d.identifier,
+        title: d.title,
+        creator: d.creator,
+        year: d.year,
+        downloads: d.downloads
+      }));
+      apiCache.set(cacheKey, { data: docs, timestamp: Date.now() });
+      return res.json({ success: true, data: docs });
+    }
+    res.json({ success: true, data: [] });
+  } catch (error: any) {
+    console.error("Archive API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to search archives" });
+  }
+});
+
 export default router;
 

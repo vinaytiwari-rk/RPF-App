@@ -76283,6 +76283,32 @@ router21.get("/api/public/fuel-prices", async (req, res) => {
     res.json({ success: true, data: { petrol: "106.47", diesel: "91.84", city: "Bhopal (Approx)" } });
   }
 });
+router21.get("/api/public/archive-search", async (req, res) => {
+  try {
+    const q = req.query.q || "india";
+    const cacheKey = `archive_${q}`;
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 36e5 * 24) {
+      return res.json({ success: true, data: cached.data });
+    }
+    const response = await import_axios8.default.get(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}+AND+mediatype:(texts)&output=json&rows=15&page=1`);
+    if (response.data?.response?.docs) {
+      const docs = response.data.response.docs.map((d) => ({
+        identifier: d.identifier,
+        title: d.title,
+        creator: d.creator,
+        year: d.year,
+        downloads: d.downloads
+      }));
+      apiCache.set(cacheKey, { data: docs, timestamp: Date.now() });
+      return res.json({ success: true, data: docs });
+    }
+    res.json({ success: true, data: [] });
+  } catch (error) {
+    console.error("Archive API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to search archives" });
+  }
+});
 var publicExternalRoutes_default = router21;
 
 // src/routes/miscRoutes.ts

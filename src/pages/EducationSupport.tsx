@@ -8,7 +8,12 @@ export default function EducationSupport() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<"books" | "tutoring">("books");
+  const [activeTab, setActiveTab] = useState<"books" | "tutoring" | "elibrary">("books");
+
+  // Digital Library states
+  const [libQuery, setLibQuery] = useState("");
+  const [libResults, setLibResults] = useState<any[]>([]);
+  const [libLoading, setLibLoading] = useState(false);
   
   // Book form states
   const [studentName, setStudentName] = useState("");
@@ -147,7 +152,15 @@ export default function EducationSupport() {
             activeTab === "tutoring" ? "border-indigo-600 text-indigo-700" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          {lang === "hi" ? "निःशुल्क ट्यूशन / कोचिंग" : "Free Tutoring"}
+          {lang === "hi" ? "निःशुल्क ट्यूशन" : "Free Tutoring"}
+        </button>
+        <button 
+          onClick={() => setActiveTab("elibrary")}
+          className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition border-b-2 cursor-pointer ${
+            activeTab === "elibrary" ? "border-indigo-600 text-indigo-700" : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {lang === "hi" ? "ई-लाइब्रेरी" : "E-Library"}
         </button>
       </div>
 
@@ -258,6 +271,98 @@ export default function EducationSupport() {
                     : "The Book Bank is powered by community book donations. You can also drop by our center to donate old textbooks."}
                 </p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* E-Library Tab */}
+        {activeTab === "elibrary" && (
+          <div className="space-y-4 animate-fadeIn">
+            <div className="glass-card bg-white/95 p-5 border-indigo-100 shadow-sm space-y-4 rounded-2xl">
+              <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+                <BookOpen className="w-5 h-5 text-indigo-600" />
+                <h4 className="font-display font-extrabold text-xs text-indigo-900 uppercase tracking-widest">
+                  {lang === "hi" ? "फ्री डिजिटल लाइब्रेरी" : "Global Digital Library"}
+                </h4>
+              </div>
+              <p className="text-[10px] text-slate-500 font-bold leading-relaxed">
+                {lang === "hi" 
+                  ? "लाखों मुफ्त किताबें, रिसर्च पेपर, और नोट्स खोजें। (Powered by Internet Archive)" 
+                  : "Search millions of free books, historical texts, and notes. (Powered by Internet Archive)"}
+              </p>
+              
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder={lang === "hi" ? "विषय या किताब का नाम (e.g. Mathematics, History)..." : "Subject or Book name..."}
+                  value={libQuery}
+                  onChange={e => setLibQuery(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && libQuery) {
+                      setLibLoading(true);
+                      fetch(`/api/public/archive-search?q=${libQuery}`)
+                        .then(r => r.json())
+                        .then(d => {
+                          if(d.success) setLibResults(d.data);
+                          setLibLoading(false);
+                        }).catch(() => setLibLoading(false));
+                    }
+                  }}
+                  className="flex-1 border border-slate-200 bg-slate-50 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-indigo-500"
+                />
+                <button 
+                  disabled={libLoading || !libQuery}
+                  onClick={() => {
+                    setLibLoading(true);
+                    fetch(`/api/public/archive-search?q=${libQuery}`)
+                      .then(r => r.json())
+                      .then(d => {
+                        if(d.success) setLibResults(d.data);
+                        setLibLoading(false);
+                      }).catch(() => setLibLoading(false));
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-black text-xs disabled:opacity-50"
+                >
+                  {lang === "hi" ? "खोजें" : "Search"}
+                </button>
+              </div>
+
+              {libLoading && (
+                <div className="text-center py-4">
+                  <div className="w-5 h-5 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-[10px] text-slate-500 font-bold animate-pulse">{lang === "hi" ? "किताबें ढूंढी जा रही हैं..." : "Searching library..."}</p>
+                </div>
+              )}
+
+              {!libLoading && libResults.length > 0 && (
+                <div className="space-y-3 mt-4">
+                  {libResults.map((book: any, idx) => (
+                    <div key={idx} className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl relative">
+                      <h5 className="font-extrabold text-xs text-indigo-950 leading-tight pr-6">{book.title}</h5>
+                      <p className="text-[9px] text-slate-500 font-bold mt-1">
+                        {book.creator ? `By: ${Array.isArray(book.creator) ? book.creator[0] : book.creator}` : "Unknown Author"} 
+                        {book.year && ` • ${book.year}`}
+                      </p>
+                      
+                      <a 
+                        href={`https://archive.org/details/${book.identifier}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-block text-[9.5px] font-black bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded hover:bg-indigo-200 transition"
+                      >
+                        {lang === "hi" ? "किताब खोलें / पढ़ें" : "Read Book"}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {!libLoading && libQuery && libResults.length === 0 && (
+                <p className="text-xs text-slate-500 font-bold text-center mt-4">
+                  {lang === "hi" ? "कोई किताब नहीं मिली। कृपया अंग्रेजी में या दूसरा नाम खोजें।" : "No books found. Try a different query."}
+                </p>
+              )}
+
             </div>
           </div>
         )}
