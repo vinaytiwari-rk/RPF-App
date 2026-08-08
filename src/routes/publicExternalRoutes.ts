@@ -262,5 +262,30 @@ router.get("/api/public/archive-search", async (req, res) => {
   }
 });
 
+// 12. Wayback Machine API
+router.get("/api/public/wayback", async (req, res) => {
+  try {
+    const url = req.query.url as string;
+    if (!url) return res.json({ success: false, error: "URL is required" });
+    
+    const cacheKey = `wayback_${url}`;
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 3600000 * 24) {
+      return res.json({ success: true, data: cached.data });
+    }
+
+    const response = await axios.get(`https://archive.org/wayback/available?url=${encodeURIComponent(url)}`);
+    
+    if (response.data?.archived_snapshots?.closest) {
+      apiCache.set(cacheKey, { data: response.data.archived_snapshots.closest, timestamp: Date.now() });
+      return res.json({ success: true, data: response.data.archived_snapshots.closest });
+    }
+    res.json({ success: true, data: null });
+  } catch (error: any) {
+    console.error("Wayback API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to check wayback machine" });
+  }
+});
+
 export default router;
 

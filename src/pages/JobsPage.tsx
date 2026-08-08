@@ -53,7 +53,9 @@ export default function JobsPage() {
   const [collegeResults, setCollegeResults] = useState<any[]>([]);
   const [collegeLoading, setCollegeLoading] = useState(false);
 
-
+  const [waybackQuery, setWaybackQuery] = useState("");
+  const [waybackResult, setWaybackResult] = useState<any>(null);
+  const [waybackLoading, setWaybackLoading] = useState(false);
   
   useEffect(() => {
     const fetchRssJobs = async () => {
@@ -463,6 +465,7 @@ export default function JobsPage() {
             { key: "ats", title: lang === "hi" ? "रिज्यूम ATS स्कोर" : "ATS Compatibility" },
             { key: "ifsc", title: lang === "hi" ? "बैंक IFSC खोज" : "Bank IFSC Finder" },
             { key: "college", title: lang === "hi" ? "कॉलेज डायरेक्टरी" : "College Finder" },
+            { key: "wayback", title: lang === "hi" ? "वेबसाइट आर्काइव" : "Web Archive" },
             { key: "freelance", title: lang === "hi" ? "प्रति घंटा दर" : "Freelance Rate" },
             { key: "gratuity", title: lang === "hi" ? "ग्रेच्युटी राशि अनुमान" : "Gratuity Estimator" }
           ].map(tool => (
@@ -710,6 +713,81 @@ export default function JobsPage() {
                 )}
                 {!collegeLoading && collegeQuery && collegeResults.length === 0 && (
                   <p className="text-slate-400 font-bold text-xs mt-2">{isHi ? "कोई विश्वविद्यालय नहीं मिला" : "No universities found"}</p>
+                )}
+              </div>
+            )}
+
+            {/* 7. Wayback Machine */}
+            {activeCalc === "wayback" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "वेबसाइट आर्काइव (Wayback Machine)" : "Web Archive Viewer"}</h5>
+                <p className="text-[10px] text-slate-500 font-bold mb-2">
+                  {lang === "hi" ? "पुरानी या बंद हो चुकी वेबसाइट का स्नैपशॉट खोजें।" : "Find historical snapshots of old or deleted websites."}
+                </p>
+                <div className="flex gap-2">
+                  <input 
+                    type="url" 
+                    placeholder="https://example.gov.in" 
+                    value={waybackQuery}
+                    onChange={(e) => setWaybackQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && waybackQuery) {
+                        setWaybackLoading(true);
+                        setWaybackResult(null);
+                        fetch(`/api/public/wayback?url=${encodeURIComponent(waybackQuery)}`)
+                          .then(r => r.json())
+                          .then(d => {
+                            if (d.success && d.data) setWaybackResult(d.data);
+                            else setWaybackResult({ error: true });
+                            setWaybackLoading(false);
+                          }).catch(() => {
+                            setWaybackResult({ error: true });
+                            setWaybackLoading(false);
+                          });
+                      }
+                    }}
+                    className="flex-1 border border-slate-200 bg-white rounded-lg p-2.5 text-xs font-bold outline-none"
+                  />
+                  <button 
+                    disabled={waybackLoading || !waybackQuery}
+                    onClick={() => {
+                      setWaybackLoading(true);
+                      setWaybackResult(null);
+                      fetch(`/api/public/wayback?url=${encodeURIComponent(waybackQuery)}`)
+                        .then(r => r.json())
+                        .then(d => {
+                          if (d.success && d.data) setWaybackResult(d.data);
+                          else setWaybackResult({ error: true });
+                          setWaybackLoading(false);
+                        }).catch(() => {
+                          setWaybackResult({ error: true });
+                          setWaybackLoading(false);
+                        });
+                    }}
+                    className="bg-[#000080] text-white px-4 py-2.5 rounded-lg font-black text-xs disabled:opacity-50"
+                  >
+                    {isHi ? "खोजें" : "Search"}
+                  </button>
+                </div>
+                {waybackLoading && <p className="text-slate-500 font-bold text-xs mt-2 animate-pulse">{isHi ? "खोज रहा है..." : "Searching archives..."}</p>}
+                
+                {waybackResult && !waybackResult.error && (
+                  <div className="bg-green-50 border border-green-150 p-3 rounded-lg text-slate-800 space-y-1.5 text-left mt-2">
+                    <p className="font-black text-green-900 text-sm">{isHi ? "स्नैपशॉट मिल गया!" : "Snapshot Found!"}</p>
+                    <p className="text-[10px] font-bold text-slate-600"><span className="text-slate-400">Date:</span> {waybackResult.timestamp.replace(/(\d{4})(\d{2})(\d{2}).*/, '$1-$2-$3')}</p>
+                    <a 
+                      href={waybackResult.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-block text-[10px] font-black bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition"
+                    >
+                      {isHi ? "स्नैपशॉट देखें" : "View Snapshot"}
+                    </a>
+                  </div>
+                )}
+                
+                {waybackResult?.error && (
+                  <p className="text-red-500 font-bold text-xs mt-2">{isHi ? "इस लिंक का कोई पुराना रिकॉर्ड नहीं मिला।" : "No historical snapshot found for this URL."}</p>
                 )}
               </div>
             )}
