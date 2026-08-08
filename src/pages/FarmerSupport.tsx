@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { ArrowLeft, Sprout, TrendingUp, TrendingDown, CloudRain } from "lucide-react";
+import { ArrowLeft, Sprout, TrendingUp, TrendingDown, CloudRain, Droplet } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 export default function FarmerSupport() {
@@ -12,6 +12,8 @@ export default function FarmerSupport() {
   const { userLocation } = useApp();
   const [weather, setWeather] = useState<any>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
+  const [fuel, setFuel] = useState<any>(null);
+  const [fuelLoading, setFuelLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/mandi-prices")
@@ -41,6 +43,20 @@ export default function FarmerSupport() {
       .catch(err => {
         console.error(err);
         setWeatherLoading(false);
+      });
+
+    // Fetch Fuel Prices
+    fetch("/api/public/fuel-prices")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setFuel(data.data);
+        }
+        setFuelLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setFuelLoading(false);
       });
   }, [userLocation]);
 
@@ -120,6 +136,33 @@ export default function FarmerSupport() {
              {isHi ? "स्रोत: Open-Meteo" : "Source: Open-Meteo API"}
            </p>
         </div>
+
+         {/* Fuel Prices Widget */}
+         <div className="bg-white border border-amber-200 p-4 rounded-xl shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <Droplet className="w-6 h-6 text-amber-500" />
+              <h3 className="font-black text-amber-800">{isHi ? "आज के ईंधन भाव (पेट्रोल/डीजल)" : "Today's Fuel Prices"}</h3>
+            </div>
+            
+            {fuelLoading ? (
+              <p className="text-xs text-slate-500 font-semibold animate-pulse">{isHi ? "ईंधन के भाव लोड हो रहे हैं..." : "Loading fuel prices..."}</p>
+            ) : fuel ? (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-amber-50 border border-amber-100 p-3 rounded-lg text-center">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{isHi ? "पेट्रोल (Petrol)" : "Petrol"}</p>
+                  <p className="text-xl font-black text-slate-800 mt-1">₹{fuel.petrol}</p>
+                  <p className="text-[9px] text-slate-400 font-semibold mt-0.5">{fuel.city}</p>
+                </div>
+                <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg text-center">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{isHi ? "डीजल (Diesel)" : "Diesel"}</p>
+                  <p className="text-xl font-black text-slate-800 mt-1">₹{fuel.diesel}</p>
+                  <p className="text-[9px] text-slate-400 font-semibold mt-0.5">{fuel.city}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-red-500 font-semibold">{isHi ? "ईंधन भाव उपलब्ध नहीं हैं" : "Fuel prices unavailable"}</p>
+            )}
+         </div>
       </div>
     </div>
   );

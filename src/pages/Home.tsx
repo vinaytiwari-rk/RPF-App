@@ -326,6 +326,39 @@ export default function Home() {
         </div>
       )}
 
+      {/* Verified Emergency Helplines Widget */}
+      <div className="px-4 relative z-10">
+        <div className="bg-white border border-red-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-red-50 border-b border-red-100 px-4 py-2.5 flex items-center justify-between">
+            <h3 className="font-display font-extrabold text-red-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
+              <PhoneCall className="w-4 h-4 text-red-600" />
+              {lang === "hi" ? "आपातकालीन हेल्पलाइन" : "Emergency Helplines"}
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 gap-2 p-3">
+            {[
+              { num: "112", nameHi: "राष्ट्रीय आपातकाल", nameEn: "National Emergency", icon: AlertTriangle, color: "text-red-600" },
+              { num: "108", nameHi: "एम्बुलेंस", nameEn: "Ambulance", icon: Activity, color: "text-green-600" },
+              { num: "1091", nameHi: "महिला हेल्पलाइन", nameEn: "Women Helpline", icon: Shield, color: "text-pink-600" },
+              { num: "1930", nameHi: "साइबर क्राइम", nameEn: "Cyber Crime", icon: ShieldCheck, color: "text-blue-600" },
+            ].map((hp, i) => (
+              <a key={i} href={`tel:${hp.num}`} className="flex items-center gap-2.5 p-2 bg-slate-50 border border-slate-200 rounded-xl hover:bg-red-50 transition active:scale-95">
+                <div className="bg-white p-1.5 rounded-full shadow-sm border border-slate-100 shrink-0">
+                  <hp.icon className={`w-3.5 h-3.5 ${hp.color}`} />
+                </div>
+                <div>
+                  <div className="text-xs font-black text-slate-800 leading-none">{hp.num}</div>
+                  <div className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wide mt-0.5">{lang === "hi" ? hp.nameHi : hp.nameEn}</div>
+                </div>
+              </a>
+            ))}
+          </div>
+          <div className="bg-slate-50 px-4 py-1.5 border-t border-slate-100 text-center">
+            <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest">{lang === "hi" ? "सीधे कॉल करने के लिए टैप करें" : "Tap to call directly"}</span>
+          </div>
+        </div>
+      </div>
+
       {/* 3. Our Impact Section (Matches Screenshot 5 Our Impact Grid) */}
       {(globalSettings?.show_widgets !== false) && (
       <>

@@ -172,5 +172,65 @@ router.get("/api/public/daily-quote", async (req, res) => {
   }
 });
 
+// 8. Indian Banks IFSC API (Razorpay)
+router.get("/api/public/ifsc/:code", async (req, res) => {
+  try {
+    const ifsc = req.params.code;
+    const cacheKey = `ifsc_${ifsc}`;
+    const cached = apiCache.get(cacheKey);
+    if (cached) return res.json({ success: true, data: cached.data });
+
+    const response = await axios.get(`https://ifsc.razorpay.com/${ifsc}`);
+    apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
+    res.json({ success: true, data: response.data });
+  } catch (error: any) {
+    res.status(404).json({ success: false, error: "Invalid IFSC Code or Bank Not Found" });
+  }
+});
+
+// 9. Universities API (Hipo)
+router.get("/api/public/universities", async (req, res) => {
+  try {
+    const name = (req.query.name as string) || "";
+    const cacheKey = `univ_${name}`;
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 86400000) return res.json({ success: true, data: cached.data });
+
+    const response = await axios.get(`http://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(name)}`);
+    apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
+    res.json({ success: true, data: response.data });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch universities" });
+  }
+});
+
+// 10. Fuel Prices (Scraper/Fallback for Bhopal)
+router.get("/api/public/fuel-prices", async (req, res) => {
+  try {
+    const cacheKey = "fuel_prices_bhopal";
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 3600000 * 12) { // 12 hours cache
+      return res.json({ success: true, data: cached.data });
+    }
+
+    // Try fetching from GoodReturns
+    const response = await axios.get("https://www.goodreturns.in/petrol-price-in-bhopal.html");
+    const petrolMatch = response.data.match(/₹\s*([0-9.]+)\s*<\/strong>/i);
+    const petrol = petrolMatch ? petrolMatch[1] : "106.47";
+    
+    const responseDiesel = await axios.get("https://www.goodreturns.in/diesel-price-in-bhopal.html");
+    const dieselMatch = responseDiesel.data.match(/₹\s*([0-9.]+)\s*<\/strong>/i);
+    const diesel = dieselMatch ? dieselMatch[1] : "91.84";
+
+    const data = { petrol, diesel, city: "Bhopal", state: "Madhya Pradesh" };
+    apiCache.set(cacheKey, { data, timestamp: Date.now() });
+    res.json({ success: true, data });
+  } catch (error: any) {
+    console.error("Fuel API Error:", error.message);
+    // Fallback static data if scraper fails
+    res.json({ success: true, data: { petrol: "106.47", diesel: "91.84", city: "Bhopal (Approx)" } });
+  }
+});
+
 export default router;
 

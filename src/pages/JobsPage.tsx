@@ -18,6 +18,7 @@ interface Job {
 
 export default function JobsPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
+  const isHi = lang === "hi";
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -43,6 +44,15 @@ export default function JobsPage() {
   const [hourlyBillableHours, setHourlyBillableHours] = useState(120); // hours
   const [gratuityBaseSalary, setGratuityBaseSalary] = useState(20000);
   const [gratuityYears, setGratuityYears] = useState(5);
+
+  const [ifscCode, setIfscCode] = useState("");
+  const [ifscResult, setIfscResult] = useState<any>(null);
+  const [ifscLoading, setIfscLoading] = useState(false);
+
+  const [collegeQuery, setCollegeQuery] = useState("");
+  const [collegeResults, setCollegeResults] = useState<any[]>([]);
+  const [collegeLoading, setCollegeLoading] = useState(false);
+
 
   
   useEffect(() => {
@@ -451,6 +461,8 @@ export default function JobsPage() {
             {[
             { key: "takehome", title: lang === "hi" ? "इन-हैंड सैलरी" : "Take-Home Salary" },
             { key: "ats", title: lang === "hi" ? "रिज्यूम ATS स्कोर" : "ATS Compatibility" },
+            { key: "ifsc", title: lang === "hi" ? "बैंक IFSC खोज" : "Bank IFSC Finder" },
+            { key: "college", title: lang === "hi" ? "कॉलेज डायरेक्टरी" : "College Finder" },
             { key: "freelance", title: lang === "hi" ? "प्रति घंटा दर" : "Freelance Rate" },
             { key: "gratuity", title: lang === "hi" ? "ग्रेच्युटी राशि अनुमान" : "Gratuity Estimator" }
           ].map(tool => (
@@ -591,6 +603,114 @@ export default function JobsPage() {
                     </div>
                   );
                 })()}
+              </div>
+            )}
+
+            {/* 5. Bank IFSC Finder */}
+            {activeCalc === "ifsc" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "बैंक IFSC और ब्रांच खोज" : "Bank IFSC & Branch Finder"}</h5>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="Enter IFSC (e.g. SBIN0000001)" 
+                    value={ifscCode}
+                    onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
+                    className="flex-1 border border-slate-200 bg-white rounded-lg p-2.5 text-xs font-bold outline-none uppercase"
+                  />
+                  <button 
+                    disabled={ifscLoading || ifscCode.length < 4}
+                    onClick={() => {
+                      setIfscLoading(true);
+                      fetch(`/api/public/ifsc/${ifscCode}`)
+                        .then(r => r.json())
+                        .then(d => {
+                          if (d.success) setIfscResult(d.data);
+                          else setIfscResult({ error: true });
+                          setIfscLoading(false);
+                        }).catch(() => {
+                          setIfscResult({ error: true });
+                          setIfscLoading(false);
+                        });
+                    }}
+                    className="bg-[#FF9933] text-white px-4 py-2.5 rounded-lg font-black text-xs disabled:opacity-50"
+                  >
+                    {isHi ? "खोजें" : "Search"}
+                  </button>
+                </div>
+                {ifscResult && !ifscResult.error && (
+                  <div className="bg-indigo-50 border border-indigo-150 p-3 rounded-lg text-slate-800 space-y-1.5 text-left">
+                    <p className="font-black text-indigo-900 text-sm">{ifscResult.BANK}</p>
+                    <p className="text-[10px] font-bold text-slate-600"><span className="text-slate-400">Branch:</span> {ifscResult.BRANCH}</p>
+                    <p className="text-[10px] font-bold text-slate-600"><span className="text-slate-400">Address:</span> {ifscResult.ADDRESS}</p>
+                    <p className="text-[10px] font-bold text-slate-600"><span className="text-slate-400">City/State:</span> {ifscResult.CITY}, {ifscResult.STATE}</p>
+                    <p className="text-[10px] font-bold text-green-700 mt-2 bg-green-100 inline-block px-2 py-0.5 rounded">IFSC: {ifscResult.IFSC}</p>
+                  </div>
+                )}
+                {ifscResult?.error && (
+                  <p className="text-red-500 font-bold text-xs mt-2">{isHi ? "अमान्य IFSC कोड या बैंक नहीं मिला" : "Invalid IFSC Code or Bank Not Found"}</p>
+                )}
+              </div>
+            )}
+
+            {/* 6. College Finder */}
+            {activeCalc === "college" && (
+              <div className="space-y-3">
+                <h5 className="font-extrabold text-[#000080]">{lang === "hi" ? "विश्वविद्यालय एवं कॉलेज डायरेक्टरी" : "Indian Universities Directory"}</h5>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="Search by name (e.g. Delhi)" 
+                    value={collegeQuery}
+                    onChange={(e) => setCollegeQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setCollegeLoading(true);
+                        fetch(`/api/public/universities?name=${collegeQuery}`)
+                          .then(r => r.json())
+                          .then(d => {
+                            if (d.success) setCollegeResults(d.data.slice(0, 10)); // max 10
+                            setCollegeLoading(false);
+                          }).catch(() => setCollegeLoading(false));
+                      }
+                    }}
+                    className="flex-1 border border-slate-200 bg-white rounded-lg p-2.5 text-xs font-bold outline-none"
+                  />
+                  <button 
+                    disabled={collegeLoading}
+                    onClick={() => {
+                      setCollegeLoading(true);
+                      fetch(`/api/public/universities?name=${collegeQuery}`)
+                        .then(r => r.json())
+                        .then(d => {
+                          if (d.success) setCollegeResults(d.data.slice(0, 10)); // max 10
+                          setCollegeLoading(false);
+                        }).catch(() => setCollegeLoading(false));
+                    }}
+                    className="bg-[#FF9933] text-white px-4 py-2.5 rounded-lg font-black text-xs disabled:opacity-50"
+                  >
+                    {isHi ? "खोजें" : "Search"}
+                  </button>
+                </div>
+                {collegeLoading && <p className="text-slate-500 font-bold text-xs mt-2 animate-pulse">{isHi ? "खोज रहा है..." : "Searching..."}</p>}
+                {!collegeLoading && collegeResults.length > 0 && (
+                  <div className="space-y-2 mt-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                    {collegeResults.map((col, idx) => (
+                      <div key={idx} className="bg-white border border-slate-200 p-3 rounded-lg text-left">
+                        <p className="font-extrabold text-sm text-[#0B1E3F]">{col.name}</p>
+                        <p className="text-[10px] text-slate-500 font-bold mb-1">{col["state-province"] || "India"}</p>
+                        {col.web_pages && col.web_pages[0] && (
+                          <a href={col.web_pages[0]} target="_blank" rel="noreferrer" className="text-[10px] text-blue-600 font-black hover:underline">
+                            {col.web_pages[0]}
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {!collegeLoading && collegeQuery && collegeResults.length === 0 && (
+                  <p className="text-slate-400 font-bold text-xs mt-2">{isHi ? "कोई विश्वविद्यालय नहीं मिला" : "No universities found"}</p>
+                )}
               </div>
             )}
 
