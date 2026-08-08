@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/rp_foundation',
+  ssl: { rejectUnauthorized: false }
 });
 
 // A robust initial dataset of Government and Emergency Directories
@@ -37,6 +38,22 @@ async function seedDirectory() {
   let inserted = 0;
   
   try {
+    // Create the table if it doesn't exist
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS directory_services (
+        id SERIAL PRIMARY KEY,
+        category VARCHAR(100),
+        name VARCHAR(255),
+        contact VARCHAR(255),
+        address TEXT,
+        title TEXT,
+        description TEXT,
+        status VARCHAR(50) DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("Verified database table exists.");
+    
     for (const item of SEED_DATA) {
       // Check if it already exists to avoid duplicates
       const check = await pool.query('SELECT id FROM directory_services WHERE name = $1 AND contact = $2', [item.name, item.contact]);
