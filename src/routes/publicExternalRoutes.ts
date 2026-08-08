@@ -4,7 +4,6 @@ import Parser from "rss-parser";
 import multer from "multer";
 import FormData from "form-data";
 import fs from "fs";
-import { authenticateToken } from "../middleware/authMiddleware";
 import { apiCache, CACHE_TTL } from "../lib/apiCache.js";
 
 const router = express.Router();

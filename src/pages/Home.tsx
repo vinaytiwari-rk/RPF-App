@@ -17,7 +17,10 @@ const {
 
 export default function Home() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const { settings, cmsConfig, globalSettings, announcements, servicesList } = useApp();
+  
   const [weather, setWeather] = useState<any>(null);
   const [news, setNews] = useState<any[]>([]);
   const [ndmaAlert, setNdmaAlert] = useState<any>(null);
@@ -522,9 +525,9 @@ export default function Home() {
               <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider">
                 {lang === "hi" ? "संस्थापक का संदेश" : "Message from Founder"}
               </h4>
-              <p className="text-[10px] text-slate-600 leading-relaxed italic font-medium">
-                "{(lang === "hi" ? settings.founderMessageHi : settings.founderMessageEn) || globalSettings?.founder_message}"
-              </p>
+                <p className="text-[10px] text-slate-600 leading-relaxed italic font-medium">
+                  "{globalSettings?.founder_message || (lang === "hi" ? settings.founderMessageHi : settings.founderMessageEn)}"
+                </p>
               <div className="pt-1.5 border-t border-slate-100">
                 <p className="font-display font-black text-[10.5px] text-[#000080] leading-none">
                   {cmsConfig.founderName || "Rohit Pandit"}
