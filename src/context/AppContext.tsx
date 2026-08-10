@@ -207,7 +207,10 @@ const DEFAULT_SERVICES = [
   { id: "farmer", category: "welfare", iconName: "Sprout", titleEn: "Farmer Support", titleHi: "किसान सहयोग", descEn: "Crop diagnostic & market pricing", descHi: "कृषि सहायता और प्रशिक्षण" },
   { id: "schemes", category: "empowerment", iconName: "FileText", titleEn: "Government Schemes", titleHi: "सरकारी योजनाएं", descEn: "Eligibility calculator & guides", descHi: "आधार, राशन एवं PM आवास सहायता" },
   { id: "skills", category: "empowerment", iconName: "GraduationCap", titleEn: "Skills Training", titleHi: "कौशल प्रशिक्षण", descEn: "Tailoring, coding & courses", descHi: "निशुल्क प्रशिक्षण कोर्स" },
-  { id: "countries", category: "civic", iconName: "Globe", titleEn: "Global Guide", titleHi: "वैश्विक निर्देशिका", descEn: "Look up nation currencies, timezones & details", descHi: "विश्व मुद्रा, समय और देशों की जानकारी" }
+  { id: "countries", category: "civic", iconName: "Globe", titleEn: "Global Guide", titleHi: "वैश्विक निर्देशिका", descEn: "Look up nation currencies, timezones & details", descHi: "विश्व मुद्रा, समय और देशों की जानकारी" },
+  { id: "earthquakes", category: "civic", iconName: "AlertTriangle", titleEn: "Earthquakes", titleHi: "भूकंप", descEn: "Live USGS Alerts", descHi: "लाइव भूकंप अलर्ट" },
+  { id: "fuel-tracker", category: "welfare", iconName: "Fuel", titleEn: "Fuel Tracker", titleHi: "ईंधन ट्रैकर", descEn: "Track mileage & cost", descHi: "माइलेज और लागत" },
+  { id: "gps-toolkit", category: "civic", iconName: "Compass", titleEn: "GPS Toolkit", titleHi: "जीपीएस टूलकिट", descEn: "Speedometer & Parking", descHi: "स्पीडोमीटर और पार्किंग" }
 ];
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [

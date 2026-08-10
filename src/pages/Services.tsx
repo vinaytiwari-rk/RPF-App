@@ -27,7 +27,10 @@ const serviceIdToImage: Record<string, string> = {
   "scholarships": "/assets/icons/icon_scholarships_updated_1786163279154.jpg",
   "grievance": "/assets/icons/icon_grievance_updated_1786163210095.jpg",
   "countries": "/assets/icons/icon_global_guide_updated_1786163358416.jpg",
-  "crowdfunding": "/assets/icons/icon_crowdfunding_updated_1786163344247.jpg"
+  "crowdfunding": "/assets/icons/icon_crowdfunding_updated_1786163344247.jpg",
+  "earthquakes": "/assets/icons/icon_disaster_1786081291322.jpg",
+  "fuel-tracker": "/assets/icons/icon_jobs_updated_1786163264789.jpg",
+  "gps-toolkit": "/assets/icons/icon_environment_1786081257147.jpg"
 };
 
 const serviceIdToBorder: Record<string, string> = {
@@ -51,7 +54,10 @@ const serviceIdToBorder: Record<string, string> = {
   education: "border-orange-500",
   scholarships: "border-[#000080]",
   grievance: "border-[#000080]",
-  countries: "border-[#000080]"
+  countries: "border-[#000080]",
+  earthquakes: "border-red-600",
+  "fuel-tracker": "border-amber-600",
+  "gps-toolkit": "border-[#000080]"
 };
 
 export default function Services() {
@@ -193,6 +199,9 @@ export default function Services() {
                           : svc.id === 'animals' ? '/animals'
                           : svc.id === 'crowdfunding' ? '/crowdfunding'
                           : svc.id === 'countries' ? '/countries'
+                          : svc.id === 'earthquakes' ? '/earthquakes'
+                          : svc.id === 'fuel-tracker' ? '/fuel-tracker'
+                          : svc.id === 'gps-toolkit' ? '/gps-toolkit'
                           : `/services/${svc.id}`;
 
               return (
