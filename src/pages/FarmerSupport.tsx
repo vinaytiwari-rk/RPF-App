@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { ArrowLeft, Sprout, TrendingUp, TrendingDown, CloudRain, Droplet } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import DynamicWeather from "../components/DynamicWeather";
 
 export default function FarmerSupport() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -111,24 +112,7 @@ export default function FarmerSupport() {
            {weatherLoading ? (
              <p className="text-xs text-slate-500 font-semibold animate-pulse">{isHi ? "मौसम की जानकारी लोड हो रही है..." : "Loading weather info..."}</p>
            ) : weather ? (
-             <div className="flex items-center justify-between p-3 bg-blue-50/50 rounded-lg border border-blue-100">
-               <div>
-                 <p className="text-2xl font-black text-slate-800">
-                   {weather.current_weather?.temperature}°C
-                 </p>
-                 <p className="text-[10px] font-bold text-slate-500">
-                   {userLocation?.city ? `${userLocation.city}, ${userLocation.region}` : (isHi ? "भोपाल, मध्य प्रदेश" : "Bhopal, MP")}
-                 </p>
-               </div>
-               <div className="text-right">
-                 <p className="text-[11px] font-bold text-slate-700">
-                   {isHi ? "हवा की गति:" : "Wind:"} {weather.current_weather?.windspeed} km/h
-                 </p>
-                 <p className="text-[11px] font-bold text-blue-600 mt-0.5">
-                   {isHi ? "वर्षा:" : "Precipitation:"} {weather.daily?.precipitation_sum?.[0] || 0} mm
-                 </p>
-               </div>
-             </div>
+             <DynamicWeather weather={weather} lang={lang} />
            ) : (
              <p className="text-xs text-red-500 font-semibold">{isHi ? "मौसम डेटा उपलब्ध नहीं है" : "Weather data unavailable"}</p>
            )}

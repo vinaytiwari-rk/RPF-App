@@ -62,6 +62,396 @@ export default function MainLayout() {
       alert(language === "hi" ? "यह डिवाइस शेयरिंग सपोर्ट नहीं करता" : "Sharing not supported on this device.");
     }
   };
+
+
+  const [isAiOpen, setIsAiOpen] = useState(false);
+  const [isSosOpen, setIsSosOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "bot"; text: string }[]>([
+    { role: "bot", text: language === "hi" ? "नमस्ते! मैं RP Foundation एआई मित्र हूँ। मैं आपकी क्या सहायता कर सकता हूँ?" : "Hello! I am your RP Foundation AI Mitr. How can I help you today?" }
+  ]);
+  const [inputText, setInputText] = useState("");
+  const [botLoading, setBotLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+
+  if (isAdmin) {
+    return (
+      <div className="w-full min-h-screen bg-slate-50 flex flex-col font-sans">
+        <Outlet context={{ lang: language }} />
+      </div>
+    );
+  }
+
+  const handleNav = (path) => {
+    if (user?.role === "guest" && (path === "/services" || path === "/community" || path === "/notifications")) {
+      setShowGuestModal(true);
+      return;
+    }
+    navigate(path);
+  };
+
+  const handleSend = async (messageText = inputText) => {
+    const text = messageText.trim();
+    if (!text) return;
+    
+    setChatMessages(prev => [...prev, { role: "user", text }]);
+    setInputText("");
+    setBotLoading(true);
+
+    try {
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, language })
+      });
+      
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      setChatMessages(prev => [...prev, { role: "bot", text: data.response }]);
+    } catch {
+      setTimeout(() => {
+        const reply = language === "hi" 
+          ? "यह एक डेमो प्रक्रिया है। अधिक जानकारी के लिए जन सेवा कार्ड या राहत शिविरों की जांच करें!"
+          : "This is a demo process. Check out our Jan Seva Card or active relief camps for more details!";
+        setChatMessages(prev => [...prev, { role: "bot", text: reply }]);
+      }, 1000);
+    } finally {
+      setBotLoading(false);
+    }
+  };
+
+  const handleMicClick = () => {
+    setIsListening(true);
+    setTimeout(() => {
+      setIsListening(false);
+      setInputText(language === "hi" ? "जन सेवा कार्ड कैसे बनेगा?" : "How do I apply for a Jan Seva Card?");
+    }, 2000);
+  };
+
+  // Determine if we show the back button based on route
+  const isRoot = ["/", "/services", "/community", "/notifications", "/profile"].includes(location.pathname);
+  
+  const getPageTitle = () => {
+    const isHi = language === "hi";
+    if (location.pathname === "/") return isHi ? "नागरिक पोर्टल" : "Citizen Portal";
+    if (location.pathname === "/services") return isHi ? "सेवाएं" : "Services";
+    if (location.pathname === "/community") return isHi ? "समुदाय" : "Community";
+    if (location.pathname === "/notifications") return isHi ? "नवीनतम सूचनाएं" : "Alerts";
+    if (location.pathname === "/profile") return isHi ? "प्रोफ़ाइल" : "Profile";
+    if (location.pathname.includes("jan-seva-card")) return isHi ? "जन सेवा कार्ड" : "Jan Seva Card";
+    if (location.pathname.includes("blood-network")) return isHi ? "रक्त नेटवर्क" : "Blood Network";
+    if (location.pathname.includes("grievance")) return isHi ? "शिकायत निवारण" : "Grievance Portal";
+    if (location.pathname.includes("health-care")) return isHi ? "स्वास्थ्य सेवा" : "Health Care Portal";
+    if (location.pathname.includes("religious-culture")) return isHi ? "धर्म और संस्कृति" : "Religious & Culture";
+    return "RP Foundation";
+  };
+
+  return (
+    <div className="w-full min-h-screen bg-slate-900 flex flex-col items-center justify-center font-sans p-0 sm:p-4">
+      
+      {/* Desktop Header info panel */}
+      <div className="hidden sm:flex w-full max-w-[420px] justify-between items-center px-4 py-2 mb-2 select-none">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+          <span className="font-bold text-slate-300 text-xs tracking-wide">RP Super App v4.2</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setLanguage(language === "hi" ? "en" : "hi")}
+            className="flex items-center gap-1 bg-white/10 hover:bg-white/20 border border-slate-700 text-white transition px-2.5 py-1 rounded-full text-[10px]"
+          >
+            <Globe className="w-3 h-3 text-[#FF9933]" />
+            <span>{language === "hi" ? "English" : "हिन्दी"}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Primary Mobile Container Frame */}
+      <div className="relative w-full sm:w-[410px] h-screen sm:h-[840px] bg-heritage-base flex flex-col overflow-hidden sm:rounded-[3.2rem] sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] sm:border-[12px] sm:border-slate-950 animate-fadeIn" id="mobile-viewport-shell">
+        
+        {/* Notch / Dynamic Island Simulator (for desktop styling) */}
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-full z-[60] pointer-events-none hidden sm:flex items-center justify-between px-3">
+          <div className="w-1.5 h-1.5 bg-slate-900 rounded-full"></div>
+          <div className="w-3 h-1 bg-slate-900 rounded-full"></div>
+        </div>
+
+        {/* Simulated Mobile Status Bar (Visible only on desktop preview, hidden on mobile/production device) */}
+        <div className="hidden sm:flex w-full bg-white/95 backdrop-blur-xl px-6 pt-3 pb-1 justify-between items-center text-[10px] font-black text-slate-800 select-none z-[50] sticky top-0 border-b border-slate-100 shrink-0">
+          <span>9:41</span>
+          <div className="flex items-center gap-1.5">
+            {/* Signal Strength */}
+            <svg className="w-3 h-3 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M2 22h20V2z" />
+            </svg>
+            {/* WiFi */}
+            <svg className="w-3.5 h-3.5 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 21l-12-14c4-3 8-4.5 12-4.5s8 1.5 12 4.5z" />
+            </svg>
+            {/* Battery */}
+            <div className="w-5 h-2.5 border border-slate-800 rounded-xs p-[1px] flex items-center justify-start shrink-0">
+              <div className="h-full w-3 bg-slate-800 rounded-2xs"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Header & Identity Clean-off */}
+        <div className="w-full bg-white/95 backdrop-blur-xl border-b border-slate-200/50 px-4 py-2.5 flex justify-between items-center select-none z-45 relative overflow-hidden shrink-0" id="app-navigation-header">
+          {/* Abstract Ashoka Chakra Background */}
+          <div className="absolute inset-0 flex justify-center items-center opacity-[0.03] pointer-events-none">
+            <svg viewBox="0 0 100 100" className="w-48 h-48 text-[#000080] mix-blend-multiply" fill="currentColor">
+              <path d="M50 0a50 50 0 1 0 0 100A50 50 0 0 0 50 0zm0 95a45 45 0 1 1 0-90 45 45 0 0 1 0 90z"/>
+              <circle cx="50" cy="50" r="8" />
+              <path d="M50 42L48 5l2-5 2 5zm-4 3l-18-35 4-3 14 38zm-3 5L8 31l5-2 30 16zM42 50L5 48l-5-2 5 2zM45 54l-35 18-3-4 38-14zm5 3l-31 28-2-5 33-23zm4 3l-18 35-3-4 21-31zm5 3L52 95l-5-2 16-30zm3-4l35 18-2 5-33-23zm4-3l28 31-4 3-24-34zm3-5l38-14-5-2-33 16zm2-5l37 2-5-2-32 0zm-2-5l35-18 2 5-37 13zm-4-3l28-31 4 3-32 28zm-4-4l18-35 3 4-21 31z"/>
+            </svg>
+          </div>
+          
+          {/* Top Thin Border */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#000080] opacity-90"></div>
+          
+          {/* Left: Brand Identity */}
+          <div className="flex items-center gap-2.5 relative z-10">
+            {!isRoot ? (
+              <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-slate-100/80 transition text-[#000080]">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            ) : (
+              <img src={globalSettings?.logo_image || "/assets/logo.png"} alt="RP Foundation" className="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200/50 relative" />
+            )}
+            <div className="flex flex-col justify-center">
+              <h1 className="font-display font-black text-[13px] text-[#000080] tracking-wide leading-none">
+                RP FOUNDATION
+              </h1>
+              <span className="font-sans text-[9px] font-black mt-1 leading-none tracking-wider flex items-center gap-1">
+                <span className="text-[#FF9933]">सेवा</span>
+                <span className="text-[#000080]">•</span>
+                <span className="text-slate-500">समर्पण</span>
+                <span className="text-[#000080]">•</span>
+                <span className="text-[#138808]">संकल्प</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Right: Actions (Search, Notification Bell with red badge, and Profile) */}
+          <div className="flex items-center gap-3 relative z-10">
+            <button 
+              onClick={() => handleNav("/services")}
+              className="p-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 hover:shadow-xs transition"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+            <div className="relative">
+                <button onClick={() => handleNav("/notifications")} className="p-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 hover:shadow-xs transition relative">
+                  <Bell className="w-4 h-4" />
+                </button>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[8px] font-black border border-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+            <button 
+              className="w-8 h-8 rounded-full border border-[#D4AF37]/50 overflow-hidden shadow-sm transition hover:scale-105 active:scale-95 cursor-pointer bg-slate-100 flex items-center justify-center text-slate-500 text-xs font-black" 
+              onClick={() => handleNav("/profile")}
+            >
+              <User className="w-5 h-5 text-slate-400" />
+            </button>
+          </div>
+        </div>
+
+        {/* Global Helpline Marquee Ticker */}
+        {globalSettings?.marquee_text && (
+          <div 
+            className="w-full border-b py-1.5 px-3 select-none overflow-hidden shrink-0 z-40 relative flex items-center gap-2"
+            style={{ backgroundColor: globalSettings.marquee_bg_color || '#f8fafc', borderColor: globalSettings.marquee_bg_color ? 'transparent' : '#e2e8f0' }}
+          >
+            <span className="text-[9px] font-black uppercase tracking-wider shrink-0 font-sans" style={{ color: globalSettings.marquee_color || '#64748b' }}>
+              📞 {language === "hi" ? "हेल्पलाइन" : "Helplines"}:
+            </span>
+            <div className="overflow-hidden w-full relative">
+              <div
+                style={{ color: globalSettings.marquee_color || '#475569' }}
+                className="animate-marquee text-[10px] font-bold font-mono tracking-wide whitespace-nowrap block cursor-pointer hover:[animation-play-state:paused]"
+              >
+                {globalSettings.marquee_text}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MAIN SCROLLABLE CONTENT */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth bg-white/40" id="main-scroll-container">
+          <Outlet context={{ lang: language }} />
+        </div>
+
+        {/* FIXED BOTTOM NAVIGATION BAR */}
+        <motion.div initial={{ y: 100 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }} className="w-full bg-white/95 border-t border-slate-200/60 rounded-t-[28px] shadow-[0_-8px_30px_rgba(28,45,66,0.08)] flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0"
+        >
+          
+          <motion.button 
+            whileHover={{ scale: 1.15, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleNav("/")}
+            className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
+              location.pathname === "/" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            {location.pathname === "/" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
+            <Compass className="w-5 h-5 mt-0.5" />
+            <span className="text-[9px] font-bold">{language === "hi" ? "होम" : "Home"}</span>
+          </motion.button>
+
+          <motion.button 
+            whileHover={{ scale: 1.15, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleNav("/services")}
+            className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
+              location.pathname === "/services" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            {location.pathname === "/services" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
+            <GridIcon className="w-5 h-5 mt-0.5" />
+            <span className="text-[9px] font-bold">{language === "hi" ? "सेवाएं" : "Services"}</span>
+          </motion.button>
+
+          
+          
+          
+          
+          
+          {/* Central elevated Daan Peti (Donation Box) Button */}
+          <motion.div className="relative -top-8">
+            <motion.button 
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleNav("/donations")}
+              className="flex flex-col items-center justify-center cursor-pointer p-0 bg-transparent border-0 outline-none relative"
+            >
+              <svg 
+                viewBox="0 0 100 100" 
+                className="w-18 h-18 filter drop-shadow-[0_0_15px_rgba(242,101,34,0.95)]"
+              >
+                <defs>
+                  <linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FF9933" />
+                    <stop offset="100%" stopColor="#F26522" />
+                  </linearGradient>
+                  <linearGradient id="lidGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#FFE000" />
+                    <stop offset="100%" stopColor="#FF9933" />
+                  </linearGradient>
+                </defs>
+
+                {/* Animated Gold Coin 1 (Falling) */}
+                <motion.g
+                  animate={{ y: [0, 24], opacity: [0, 1, 1, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeIn" }}
+                >
+                  <circle cx="50" cy="12" r="4.5" fill="#FFE000" stroke="#FFFFFF" strokeWidth="1" />
+                  <path d="M50 9v6 M47.5 12h5" stroke="#FF9933" strokeWidth="0.8" />
+                </motion.g>
+
+                {/* Animated Gold Coin 2 (Falling with 0.8s offset) */}
+                <motion.g
+                  animate={{ y: [0, 24], opacity: [0, 1, 1, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeIn", delay: 0.8 }}
+                >
+                  <circle cx="50" cy="12" r="4.5" fill="#FFE000" stroke="#FFFFFF" strokeWidth="1" />
+                  <path d="M50 9v6 M47.5 12h5" stroke="#FF9933" strokeWidth="0.8" />
+                </motion.g>
+
+                {/* Donation Box Lid */}
+                <polygon points="20,38 80,38 75,32 25,32" fill="url(#lidGrad)" stroke="#FFFFFF" strokeWidth="1" />
+                <rect x="42" y="34" width="16" height="2" rx="1" fill="#1C2D42" />
+
+                {/* Donation Box Body */}
+                <rect x="23" y="38" width="54" height="44" rx="6" fill="url(#boxGrad)" stroke="#FFFFFF" strokeWidth="1.5" />
+                
+                {/* Front panel glass highlight */}
+                <rect x="27" y="42" width="46" height="36" rx="4" fill="#FFFFFF" fillOpacity="0.1" />
+
+                {/* Static Text: Hindi "दान पेटी" */}
+                <text 
+                  x="50" 
+                  y="60" 
+                  textAnchor="middle" 
+                  fill="#FFFFFF" 
+                  fontFamily="sans-serif" 
+                  fontWeight="900" 
+                  fontSize="9.5" 
+                  letterSpacing="0.5"
+                >
+                  दान पेटी
+                </text>
+              </svg>
+              <span className="absolute -bottom-4 text-[8px] font-black text-[#1C2D42] tracking-widest uppercase">DONATE</span>
+            </motion.button>
+          </motion.div>
+
+
+
+
+
+          <motion.button 
+            whileHover={{ scale: 1.15, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleNav("/community")}
+            className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
+              location.pathname === "/community" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            {location.pathname === "/community" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
+            <Users className="w-5 h-5 mt-0.5" />
+            <span className="text-[9px] font-bold">{language === "hi" ? "समुदाय" : "Community"}</span>
+          </motion.button>
+
+          <motion.button 
+            whileHover={{ scale: 1.15, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleNav("/profile")}
+            className={`flex flex-col items-center gap-1 text-center transition py-1.5 cursor-pointer w-14 relative ${
+              location.pathname === "/profile" ? "text-[#000080]" : "text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            {location.pathname === "/profile" && <motion.div layoutId="nav-indicator" className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#FF9933] rounded-b-sm"></motion.div>}
+            <User className="w-5 h-5 mt-0.5" />
+            <span className="text-[9px] font-bold">{language === "hi" ? "प्रोफ़ाइल" : "Profile"}</span>
+          </motion.button>
+
+        </motion.div>
+
+        {/* Global Floating AI Sahayak Button */}
+        {!isAiOpen && (
+          <button 
+            onClick={() => setIsAiOpen(true)}
+            className="absolute bottom-20 right-4 z-40 bg-white p-1 rounded-full shadow-2xl flex items-center justify-center transition hover:scale-105 active:scale-95 cursor-pointer border border-white/20 animate-bounce"
+            style={{ boxShadow: '0 8px 30px rgba(255, 153, 51, 0.4)' }}
+          >
+            <img src="/assets/chatbot.jpg" alt="AI Chatbot" className="w-10 h-10 rounded-full object-cover" />
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-450 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            </span>
+          </button>
+        )}
+
+        {/* Global Emergency SOS Button */}
+        <button
+          onClick={() => setIsSosOpen(true)}
+          className="absolute bottom-20 left-4 z-40 bg-red-600 p-3 rounded-full shadow-2xl flex items-center justify-center transition hover:scale-105 active:scale-95 cursor-pointer border-2 border-white animate-pulse"
+          style={{ boxShadow: '0 8px 30px rgba(220, 38, 38, 0.6)' }}
+        >
+          <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
+          <Shield className="w-6 h-6 text-white relative z-10" />
+        </button>
+
+        {isSosOpen && <SosModal onClose={() => setIsSosOpen(false)} lang={language as any} />}
+
+        {/* Slide-up AI Mitr Modal Sheet */}
+        {isAiOpen && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-xs z-50 flex flex-col justify-end animate-fadeIn">
+            <div className="absolute inset-0 z-0" onClick={() => setIsAiOpen(false)}></div>
+            <div className="bg-white rounded-t-3xl w-full h-[80%] flex flex-col shadow-2xl overflow-hidden relative z-10 animate-slideUp">
+              {/* Close button wrapper */}
+              <div className="absolute top-4 right-4 z-50">
                 <button 
                   onClick={() => setIsAiOpen(false)}
                   className="p-1.5 rounded-full bg-black/20 hover:bg-black/45 text-white transition cursor-pointer"

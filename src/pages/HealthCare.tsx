@@ -9,6 +9,7 @@ import {
   assessSymptoms, calculateBmiValue, calculateWellnessValue, 
   getBpStatus, getSugarStatus, getPregnancyGestation, getChildGrowthStatus 
 } from "../utils/healthCalculators";
+import PrescriptionScanner from "../components/PrescriptionScanner";
 
 export default function HealthCare() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -926,6 +927,33 @@ export default function HealthCare() {
                 ))}
               </div>
             </div>
+
+            {/* Smart Prescription Scanner */}
+            <PrescriptionScanner 
+              lang={lang} 
+              onMedsExtracted={(meds) => {
+                const token = localStorage.getItem("@rpf_token");
+                meds.forEach(async (medName, index) => {
+                  const times = ["08:00 AM", "02:00 PM", "09:00 PM"];
+                  const time = times[index % times.length];
+                  
+                  try {
+                    const res = await fetch("/api/medications", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token || ""}`
+                      },
+                      body: JSON.stringify({ name: medName, alarm_time: time })
+                    });
+                    if (res.ok) fetchMedications();
+                  } catch (e) {
+                    console.error(e);
+                  }
+                });
+                alert(isHi ? "दवाइयाँ ट्रैकर में जोड़ दी गई हैं!" : "Medicines added to tracker!");
+              }} 
+            />
 
             {/* Medication & Drugs Compliance Tracker */}
             <div className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm space-y-4">
