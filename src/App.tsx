@@ -78,7 +78,7 @@ const Placeholder = ({ title }: { title: string }) => (
 );
 
 function AppContent() {
-  const { isAuthenticated, isLoading, login, loginAsGuest, language } = useAuth();
+  const { isAuthenticated, isLoading, login, loginAsGuest, language, user } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
   const [onboardingCompleted, setOnboardingCompleted] = useState(
     () => localStorage.getItem("onboarding_completed") === "true"
