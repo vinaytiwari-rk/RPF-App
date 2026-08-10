@@ -210,7 +210,10 @@ const DEFAULT_SERVICES = [
   { id: "countries", category: "civic", iconName: "Globe", titleEn: "Global Guide", titleHi: "वैश्विक निर्देशिका", descEn: "Look up nation currencies, timezones & details", descHi: "विश्व मुद्रा, समय और देशों की जानकारी" },
   { id: "earthquakes", category: "civic", iconName: "AlertTriangle", titleEn: "Earthquakes", titleHi: "भूकंप", descEn: "Live USGS Alerts", descHi: "लाइव भूकंप अलर्ट" },
   { id: "fuel-tracker", category: "welfare", iconName: "Fuel", titleEn: "Fuel Tracker", titleHi: "ईंधन ट्रैकर", descEn: "Track mileage & cost", descHi: "माइलेज और लागत" },
-  { id: "gps-toolkit", category: "civic", iconName: "Compass", titleEn: "GPS Toolkit", titleHi: "जीपीएस टूलकिट", descEn: "Speedometer & Parking", descHi: "स्पीडोमीटर और पार्किंग" }
+  { id: "gps-toolkit", category: "civic", iconName: "Compass", titleEn: "GPS Toolkit", titleHi: "जीपीएस टूलकिट", descEn: "Speedometer & Parking", descHi: "स्पीडोमीटर और पार्किंग" },
+  { id: "vitals", category: "welfare", iconName: "Activity", titleEn: "Vitals Dashboard", titleHi: "विटल्स डैशबोर्ड", descEn: "Track BP, steps & BMI", descHi: "बीपी, कदम और बीएमआई" },
+  { id: "medications", category: "welfare", iconName: "Pill", titleEn: "Med Reminder", titleHi: "दवा अनुस्मारक", descEn: "Pill schedule alerts", descHi: "दवा कार्यक्रम अलर्ट" },
+  { id: "medical-dict", category: "welfare", iconName: "BookOpen", titleEn: "Medical Dict", titleHi: "चिकित्सा शब्दकोश", descEn: "Glossary & first aid", descHi: "शब्दावली और प्राथमिक उपचार" }
 ];
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [

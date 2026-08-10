@@ -49,7 +49,9 @@ import GPSToolkit from "./pages/GPSToolkit";
 import JobsPage from "./pages/JobsPage";
 import ScholarshipsPage from "./pages/ScholarshipsPage";
 import FoodSupport from "./pages/FoodSupport";
-
+import VitalsDashboard from "./pages/VitalsDashboard";
+import MedicationReminder from "./pages/MedicationReminder";
+import MedicalDictionary from "./pages/MedicalDictionary";
 import MedicineSupport from "./pages/MedicineSupport";
 import EducationSupport from "./pages/EducationSupport";
 import CountriesPage from "./pages/CountriesPage";
@@ -165,6 +167,9 @@ function AppContent() {
           <Route path="/crowdfunding" element={<CrowdfundingPage />} />
           <Route path="/religious-culture" element={<ReligiousCulture />} />
           <Route path="/countries" element={<CountriesPage />} />
+          <Route path="/vitals" element={<VitalsDashboard />} />
+          <Route path="/medications" element={<MedicationReminder />} />
+          <Route path="/medical-dict" element={<MedicalDictionary />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

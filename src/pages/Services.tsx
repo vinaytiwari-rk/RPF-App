@@ -30,7 +30,10 @@ const serviceIdToImage: Record<string, string> = {
   "crowdfunding": "/assets/icons/icon_crowdfunding_updated_1786163344247.jpg",
   "earthquakes": "/assets/icons/icon_disaster_1786081291322.jpg",
   "fuel-tracker": "/assets/icons/icon_jobs_updated_1786163264789.jpg",
-  "gps-toolkit": "/assets/icons/icon_environment_1786081257147.jpg"
+  "gps-toolkit": "/assets/icons/icon_environment_1786081257147.jpg",
+  "vitals": "/assets/icons/icon_health_updated_1786163249856.jpg",
+  "medications": "/assets/icons/icon_medicine_updated_1786163301118.jpg",
+  "medical-dict": "/assets/icons/icon_schemes_updated_1786163186070.jpg"
 };
 
 const serviceIdToBorder: Record<string, string> = {
@@ -57,7 +60,10 @@ const serviceIdToBorder: Record<string, string> = {
   countries: "border-[#000080]",
   earthquakes: "border-red-600",
   "fuel-tracker": "border-amber-600",
-  "gps-toolkit": "border-[#000080]"
+  "gps-toolkit": "border-[#000080]",
+  "vitals": "border-emerald-600",
+  "medications": "border-blue-600",
+  "medical-dict": "border-green-600"
 };
 
 export default function Services() {
@@ -202,6 +208,9 @@ export default function Services() {
                           : svc.id === 'earthquakes' ? '/earthquakes'
                           : svc.id === 'fuel-tracker' ? '/fuel-tracker'
                           : svc.id === 'gps-toolkit' ? '/gps-toolkit'
+                          : svc.id === 'vitals' ? '/vitals'
+                          : svc.id === 'medications' ? '/medications'
+                          : svc.id === 'medical-dict' ? '/medical-dict'
                           : `/services/${svc.id}`;
 
               return (
