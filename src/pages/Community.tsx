@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import ReelsFeed from "../components/ReelsFeed";
 
 interface SuccessStory {
   id: string;
@@ -56,6 +57,8 @@ export default function Community() {
   const [blogTitle, setBlogTitle] = useState("");
   const [blogContent, setBlogContent] = useState("");
   const [isSubmittingBlog, setIsSubmittingBlog] = useState(false);
+
+  const [showReels, setShowReels] = useState(false);
 
   const fetchSuccessStories = async () => {
     try {
@@ -156,15 +159,24 @@ export default function Community() {
               {isHi ? "सफलता की कहानियाँ एवं नागरिकों के विचार" : "Success stories & citizen insights"}
             </p>
           </div>
-          {activeTab === "blogs" && user && (
+          <div className="flex gap-2">
             <button
-              onClick={() => setShowBlogModal(true)}
-              className="flex items-center gap-1 bg-[#000080] text-white text-[10px] font-bold px-3 py-2 rounded-xl shadow-md hover:bg-indigo-900 transition shrink-0"
+              onClick={() => setShowReels(true)}
+              className="flex items-center gap-1 bg-gradient-to-r from-pink-500 to-orange-400 text-white text-[10px] font-bold px-3 py-2 rounded-xl shadow-md hover:from-pink-600 hover:to-orange-500 transition shrink-0"
             >
-              <Plus className="w-3.5 h-3.5" />
-              {isHi ? "ब्लॉग लिखें" : "Write Blog"}
+              <Instagram className="w-3.5 h-3.5" />
+              {isHi ? "रील्स देखें" : "Watch Reels"}
             </button>
-          )}
+            {activeTab === "blogs" && user && (
+              <button
+                onClick={() => setShowBlogModal(true)}
+                className="flex items-center gap-1 bg-[#000080] text-white text-[10px] font-bold px-3 py-2 rounded-xl shadow-md hover:bg-indigo-900 transition shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                {isHi ? "ब्लॉग लिखें" : "Write Blog"}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Tab Selection pills */}
@@ -388,6 +400,22 @@ export default function Community() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* ── REELS FEED OVERLAY ── */}
+      {showReels && (
+        <ReelsFeed 
+          lang={lang} 
+          onClose={() => setShowReels(false)} 
+          items={[...stories, ...blogs].map(item => ({
+            id: item.id,
+            title: item.title,
+            content: item.content,
+            authorName: 'authorName' in item ? item.authorName : 'RP Foundation',
+            imageUrl: 'imageUrl' in item ? item.imageUrl : undefined,
+            likes: Math.floor(Math.random() * 500) + 50
+          }))} 
+        />
       )}
     </div>
   );
