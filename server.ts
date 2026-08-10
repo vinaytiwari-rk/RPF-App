@@ -280,8 +280,7 @@ pool.query(`
   ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'pending',
   ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE,
   ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
-  ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE,
-  ADD COLUMN IF NOT EXISTS 
+  ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE
 `).then(() => console.log('Volunteers table migrated automatically'))
   .catch(err => console.error('Auto-migration error:', err));
 

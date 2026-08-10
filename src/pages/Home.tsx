@@ -125,7 +125,10 @@ export default function Home() {
     environment: "/environment",
     crowdfunding: "/crowdfunding",
     culture: "/religious-culture",
-    countries: "/countries"
+    countries: "/countries",
+    sos: "/sos",
+    "transit-planner": "/transit-planner",
+    "ai-chat": "/ai-chat"
   };
 
   const serviceIdToImage: Record<string, string> = {
@@ -150,7 +153,10 @@ export default function Home() {
   "scholarships": "/assets/icons/icon_scholarships_updated_1786163279154.jpg",
   "grievance": "/assets/icons/icon_grievance_updated_1786163210095.jpg",
   "countries": "/assets/icons/icon_global_guide_updated_1786163358416.jpg",
-  "crowdfunding": "/assets/icons/icon_crowdfunding_updated_1786163344247.jpg"
+  "crowdfunding": "/assets/icons/icon_crowdfunding_updated_1786163344247.jpg",
+  "sos": "/assets/icons/icon_disaster_1786081291322.jpg",
+  "transit-planner": "/assets/icons/icon_environment_1786081257147.jpg",
+  "ai-chat": "/assets/icons/icon_jobs_updated_1786163264789.jpg"
 };
 
   const serviceIdToBorder: Record<string, string> = {
@@ -174,7 +180,10 @@ export default function Home() {
     education: "border-orange-500",
     scholarships: "border-[#000080]",
     grievance: "border-[#000080]",
-    countries: "border-[#000080]"
+    countries: "border-[#000080]",
+    sos: "border-red-600",
+    "transit-planner": "border-blue-500",
+    "ai-chat": "border-purple-500"
   };
 
   const serviceIdToIcon: Record<string, string> = {
@@ -195,10 +204,13 @@ export default function Home() {
     environment: "Leaf",
     crowdfunding: "Coins",
     culture: "Landmark",
-    countries: "Globe"
+    countries: "Globe",
+    sos: "ShieldAlert",
+    "transit-planner": "Map",
+    "ai-chat": "Bot"
   };
 
-  const activeServiceIds = ["women-safety", "blood", "grievance", "environment", "volunteers"];
+  const activeServiceIds = ["women-safety", "sos", "blood", "grievance", "environment", "volunteers", "transit-planner", "ai-chat"];
 
   const quickActions = activeServiceIds.map((id: string) => {
     const s = servicesList?.find((ds: any) => ds.id === id);

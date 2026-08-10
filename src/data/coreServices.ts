@@ -20,5 +20,22 @@ export const CORE_SERVICES = [
   { id: "farmer", category: "welfare", iconName: "Sprout", titleEn: "Farmer Support", titleHi: "किसान सहयोग", descEn: "Crop diagnostic & market pricing", descHi: "कृषि सहायता और प्रशिक्षण" },
   { id: "schemes", category: "empowerment", iconName: "FileText", titleEn: "Government Schemes", titleHi: "सरकारी योजनाएं", descEn: "Eligibility calculator & guides", descHi: "आधार, राशन एवं PM आवास सहायता" },
   { id: "skills", category: "empowerment", iconName: "GraduationCap", titleEn: "Skills Training", titleHi: "कौशल प्रशिक्षण", descEn: "Tailoring, coding & courses", descHi: "निशुल्क प्रशिक्षण कोर्स" },
-  { id: "countries", category: "civic", iconName: "Globe", titleEn: "Global Guide", titleHi: "वैश्विक निर्देशिका", descEn: "Look up nation currencies, timezones & details", descHi: "विश्व मुद्रा, समय और देशों की जानकारी" }
+  { id: "countries", category: "civic", iconName: "Globe", titleEn: "Global Guide", titleHi: "वैश्विक निर्देशिका", descEn: "Look up nation currencies, timezones & details", descHi: "विश्व मुद्रा, समय और देशों की जानकारी" },
+  { id: "earthquakes", category: "civic", iconName: "AlertTriangle", titleEn: "Earthquakes", titleHi: "भूकंप", descEn: "Live USGS Alerts", descHi: "लाइव भूकंप अलर्ट" },
+  { id: "fuel-tracker", category: "welfare", iconName: "Fuel", titleEn: "Fuel Tracker", titleHi: "ईंधन ट्रैकर", descEn: "Track mileage & cost", descHi: "माइलेज और लागत" },
+  { id: "gps-toolkit", category: "civic", iconName: "Compass", titleEn: "GPS Toolkit", titleHi: "जीपीएस टूलकिट", descEn: "Speedometer & Parking", descHi: "स्पीडोमीटर और पार्किंग" },
+  { id: "vitals", category: "welfare", iconName: "Activity", titleEn: "Vitals Dashboard", titleHi: "विटल्स डैशबोर्ड", descEn: "Track BP, steps & BMI", descHi: "बीपी, कदम और बीएमआई" },
+  { id: "medications", category: "welfare", iconName: "Pill", titleEn: "Med Reminder", titleHi: "दवा अनुस्मारक", descEn: "Pill schedule alerts", descHi: "दवा कार्यक्रम अलर्ट" },
+  { id: "medical-dict", category: "welfare", iconName: "BookOpen", titleEn: "Medical Dict", titleHi: "चिकित्सा शब्दकोश", descEn: "Glossary & first aid", descHi: "शब्दावली और प्राथमिक उपचार" },
+  { id: "sos", category: "urgent", iconName: "ShieldAlert", titleEn: "SOS System", titleHi: "एसओएस सिस्टम", descEn: "Emergency panic & location", descHi: "आपातकालीन पैनिक और स्थान" },
+  { id: "period-tracker", category: "welfare", iconName: "Heart", titleEn: "Period Tracker", titleHi: "माहवारी ट्रैकर", descEn: "Cycle calendar & symptoms", descHi: "मासिक धर्म कैलेंडर" },
+  { id: "child-tracker", category: "welfare", iconName: "Baby", titleEn: "Child Tracker", titleHi: "शिशु ट्रैकर", descEn: "Developmental milestones", descHi: "विकास के मील के पत्थर" },
+  { id: "resume-builder", category: "empowerment", iconName: "FileText", titleEn: "Resume Builder", titleHi: "बायोडाटा निर्माता", descEn: "AI resume generation", descHi: "एआई बायोडाटा निर्माण" },
+  { id: "doc-scanner", category: "empowerment", iconName: "Camera", titleEn: "Doc Scanner", titleHi: "दस्तावेज़ स्कैनर", descEn: "Scan and save PDFs", descHi: "पीडीएफ स्कैन करें" },
+  { id: "ai-chat", category: "empowerment", iconName: "Bot", titleEn: "AI Assistant", titleHi: "एआई सहायक", descEn: "Ask Gemini anything", descHi: "जेमिनी से कुछ भी पूछें" },
+  { id: "story-library", category: "empowerment", iconName: "BookOpen", titleEn: "Audiobooks", titleHi: "ऑडियो पुस्तकें", descEn: "Read and listen to stories", descHi: "कहानियां पढ़ें और सुनें" },
+  { id: "hindu-calendar", category: "culture", iconName: "Calendar", titleEn: "Hindu Calendar", titleHi: "हिंदू पंचांग", descEn: "Tithis & Festivals", descHi: "तिथियां और त्योहार" },
+  { id: "news-feed", category: "culture", iconName: "Newspaper", titleEn: "News Feed", titleHi: "समाचार", descEn: "Top headlines & stories", descHi: "प्रमुख खबरें" },
+  { id: "internet-radio", category: "culture", iconName: "Radio", titleEn: "Internet Radio", titleHi: "इंटरनेट रेडियो", descEn: "Live radio stations", descHi: "लाइव रेडियो स्टेशन" },
+  { id: "transit-planner", category: "civic", iconName: "Map", titleEn: "Transit Planner", titleHi: "पारगमन योजनाकार", descEn: "Bus & Metro Routes", descHi: "बस और मेट्रो मार्ग" }
 ];
