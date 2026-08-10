@@ -15,7 +15,7 @@ export default function BloodNetwork() {
   const { user } = useAuth();
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const isHi = lang === "hi";
-  const [tab, setTab] = useState<"request" | "donate" | "find" | "donors" | "tools">("request");
+  const [tab, setTab] = useState<"request" | "donate" | "find" | "donors" | "tracking" | "tools">("tracking");
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
@@ -381,8 +381,17 @@ export default function BloodNetwork() {
           {isHi ? "स्टॉक" : "Stock"}
         </button>
         <button 
+          onClick={() => setTab("tracking")}
+          className={`flex-1 py-3 text-[10px] font-black transition-all border-b-2 uppercase tracking-wider flex items-center justify-center gap-1 ${
+            tab === "tracking" ? "border-red-650 text-red-700 font-black bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          <Activity className="w-3.5 h-3.5" />
+          {isHi ? "लाइव ट्रैक" : "Live Track"}
+        </button>
+        <button 
           onClick={() => setTab("donors")}
-          className={`flex-1 py-3 text-[10px] font-black transition-all border-b-2 uppercase tracking-wider ${
+          className={`flex-1 py-3 text-[10px] font-black transition-all border-b-2 uppercase tracking-wider hidden sm:block ${
             tab === "donors" ? "border-red-650 text-red-700 font-black bg-red-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
@@ -951,6 +960,54 @@ export default function BloodNetwork() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB 4.5: LIVE TRACKING (UBER STYLE) */}
+        {tab === "tracking" && (
+          <div className="space-y-4 animate-fadeIn max-w-4xl mx-auto h-[65vh] relative rounded-3xl overflow-hidden border border-slate-200 shadow-xl bg-slate-900">
+            {/* Fake Map Background */}
+            <div className="absolute inset-0 opacity-40 mix-blend-screen" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/cartographer.png")', backgroundSize: '200px' }}></div>
+            
+            {/* Radar Animation */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full border-4 border-red-500/30 animate-ping"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full border border-red-500/20 animate-pulse"></div>
+
+            {/* Pins */}
+            <div className="absolute top-[30%] left-[40%] flex flex-col items-center animate-bounce delay-100">
+              <div className="bg-white px-2 py-1 rounded shadow text-[10px] font-black text-red-600 mb-1">A+ Donor (2km)</div>
+              <MapPin className="w-8 h-8 text-red-500 fill-red-500" />
+            </div>
+            <div className="absolute top-[50%] left-[65%] flex flex-col items-center animate-bounce delay-300">
+              <div className="bg-white px-2 py-1 rounded shadow text-[10px] font-black text-red-600 mb-1">O- Donor (3.5km)</div>
+              <MapPin className="w-8 h-8 text-red-500 fill-red-500" />
+            </div>
+            <div className="absolute top-[60%] left-[25%] flex flex-col items-center animate-pulse">
+              <div className="bg-white px-2 py-1 rounded shadow text-[10px] font-black text-blue-600 mb-1">Ambulance (1km)</div>
+              <MapPin className="w-8 h-8 text-blue-500 fill-blue-500" />
+            </div>
+
+            {/* Bottom Overlay Panel */}
+            <div className="absolute bottom-0 inset-x-0 bg-white/10 backdrop-blur-xl border-t border-white/20 p-5 pb-8 rounded-t-3xl text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)]">
+              <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-5"></div>
+              <h3 className="font-display font-black text-xl flex items-center gap-2">
+                <Activity className="w-5 h-5 text-red-400 animate-pulse" />
+                {isHi ? "लाइव डोनर रडार" : "Live Donor Radar"}
+              </h3>
+              <p className="text-xs text-white/70 mt-1 mb-5">
+                {isHi ? "आपके 5 किमी के दायरे में 2 डोनर और 1 एम्बुलेंस उपलब्ध हैं।" : "Found 2 active donors and 1 ambulance within 5km radius."}
+              </p>
+              
+              <div className="flex gap-3">
+                <button className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg flex items-center justify-center gap-2 text-sm">
+                  <Activity className="w-4 h-4" />
+                  {isHi ? "आपातकालीन अलर्ट भेजें" : "Send Emergency Alert"}
+                </button>
+                <button className="w-12 h-12 bg-white/20 hover:bg-white/30 rounded-2xl flex items-center justify-center transition border border-white/10">
+                  <Map className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

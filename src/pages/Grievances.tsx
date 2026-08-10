@@ -13,7 +13,7 @@ export default function Grievances() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const isHi = lang === "hi";
 
-  const [tab, setTab] = useState<"file" | "track">("file");
+  const [tab, setTab] = useState<"file" | "track" | "community">("community");
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -160,11 +160,19 @@ export default function Grievances() {
         </button>
         <button 
           onClick={() => setTab("track")}
-          className={`flex-1 py-3 text-xs font-bold transition border-b-2 ${
-            tab === "track" ? "border-orange-500 text-orange-700" : "border-transparent text-slate-500 hover:text-slate-800"
+          className={`flex-1 py-3 text-[10px] font-bold transition border-b-2 uppercase tracking-wider ${
+            tab === "track" ? "border-orange-500 text-orange-700 bg-orange-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          {isHi ? `स्थिति ट्रैक करें (${grievances.length})` : `Track Status (${grievances.length})`}
+          {isHi ? `मेरे ट्रैक (${grievances.length})` : `My Track (${grievances.length})`}
+        </button>
+        <button 
+          onClick={() => setTab("community")}
+          className={`flex-1 py-3 text-[10px] font-bold transition border-b-2 uppercase tracking-wider ${
+            tab === "community" ? "border-orange-500 text-orange-700 bg-orange-50/20" : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {isHi ? "समुदाय मुद्दे" : "Community"}
         </button>
       </div>
 
@@ -524,6 +532,49 @@ export default function Grievances() {
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {tab === "community" && (
+          <div className="space-y-4 animate-fadeIn">
+            {/* Mock Community Grievances for Demonstration */}
+            {[
+              { id: "COM-101", title: isHi ? "वार्ड 15 में पानी की लाइन टूटी" : "Broken water line in Ward 15", desc: isHi ? "पिछले 3 दिन से पानी सड़क पर बह रहा है।" : "Water has been leaking on the main road for 3 days.", author: "Rajesh K.", votes: 145, time: "2h ago", urgent: true },
+              { id: "COM-102", title: isHi ? "स्ट्रीट लाइट खराब" : "Street lights not working", desc: isHi ? "मेन मार्केट रोड पर रात में बहुत अंधेरा रहता है।" : "Main market road is completely dark at night.", author: "Priya S.", votes: 89, time: "5h ago", urgent: false },
+              { id: "COM-103", title: isHi ? "कचरा गाड़ी नहीं आ रही" : "Garbage truck missing", desc: isHi ? "सेक्टर ए में कचरा नहीं उठ रहा है।" : "Garbage hasn't been collected in Sector A.", author: "Amit P.", votes: 42, time: "1d ago", urgent: false }
+            ].map(item => (
+              <div key={item.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex gap-4">
+                {/* Voting Column */}
+                <div className="flex flex-col items-center gap-1 shrink-0">
+                  <button className="p-1 rounded hover:bg-orange-50 text-slate-400 hover:text-orange-600 transition">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 15l7-7 7 7" /></svg>
+                  </button>
+                  <span className={`font-black text-xs ${item.urgent ? 'text-red-600' : 'text-slate-700'}`}>{item.votes}</span>
+                  <button className="p-1 rounded hover:bg-orange-50 text-slate-400 hover:text-orange-600 transition">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                      {item.author} • {item.time}
+                    </span>
+                    {item.urgent && (
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider bg-red-100 text-red-700 animate-pulse">
+                        {isHi ? "तत्काल" : "Urgent"}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-display font-bold text-slate-900 text-sm leading-snug">{item.title}</h4>
+                    <p className="text-[11px] text-slate-600 mt-1">{item.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

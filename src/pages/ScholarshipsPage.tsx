@@ -62,6 +62,16 @@ export default function ScholarshipsPage() {
   const [success, setSuccess] = useState(false);
   const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
 
+  // --- WIZARD STATE ---
+  const [showWizard, setShowWizard] = useState(true);
+  const [wizardData, setWizardData] = useState({
+    category: "General",
+    income: 250000,
+    marks: 80,
+    gender: "Male"
+  });
+  const [matchedScholarships, setMatchedScholarships] = useState<Scholarship[] | null>(null);
+
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
   const [matchIncome, setMatchIncome] = useState(150000); // INR
@@ -70,6 +80,17 @@ export default function ScholarshipsPage() {
   const [targetAttendance, setTargetAttendance] = useState(70); // present %
   const [totalClasses, setTotalClasses] = useState(40);
   const [admissionAge, setAdmissionAge] = useState(17);
+
+  const runMatcher = () => {
+    // Simple mock logic for matching
+    const matches = SCHOLARSHIPS.filter(s => {
+      if (s.id === "1" && (wizardData.gender !== "Female" || wizardData.marks < 75 || wizardData.income > 250000)) return false;
+      if (s.id === "2" && wizardData.income > 300000) return false;
+      return true;
+    });
+    setMatchedScholarships(matches);
+    setShowWizard(false);
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -175,7 +196,93 @@ export default function ScholarshipsPage() {
 
       {/* Scholarships list */}
       <div className="space-y-4 relative z-10">
-        {SCHOLARSHIPS.map(sch => (
+        
+        {/* WIZARD CARD */}
+        {showWizard ? (
+          <div className="bg-gradient-to-br from-[#000080] to-indigo-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+            <h4 className="font-display font-black text-lg flex items-center gap-2 mb-4">
+              <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">✨</span>
+              {lang === "hi" ? "स्मार्ट स्कॉलरशिप मैच" : "Smart Scholarship Match"}
+            </h4>
+            <p className="text-xs text-blue-100 mb-5">
+              {lang === "hi" ? "अपना विवरण दर्ज करें और जानें कि आप किन योजनाओं के लिए 100% योग्य हैं।" : "Enter your details to instantly find schemes you have a 100% match for."}
+            </p>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-blue-200 uppercase mb-1 block">Gender / लिंग</label>
+                  <select 
+                    value={wizardData.gender} onChange={e => setWizardData(prev => ({...prev, gender: e.target.value}))}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-xs outline-none text-white focus:bg-white/20"
+                  >
+                    <option className="text-slate-800">Male</option>
+                    <option className="text-slate-800">Female</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-blue-200 uppercase mb-1 block">Category / वर्ग</label>
+                  <select 
+                    value={wizardData.category} onChange={e => setWizardData(prev => ({...prev, category: e.target.value}))}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-xs outline-none text-white focus:bg-white/20"
+                  >
+                    <option className="text-slate-800">General</option>
+                    <option className="text-slate-800">OBC</option>
+                    <option className="text-slate-800">SC/ST</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-blue-200 uppercase mb-1 flex justify-between">
+                  <span>Family Income / पारिवारिक आय</span>
+                  <span className="font-black text-white">₹{wizardData.income.toLocaleString()}</span>
+                </label>
+                <input 
+                  type="range" min="50000" max="1000000" step="50000" 
+                  value={wizardData.income} onChange={e => setWizardData(prev => ({...prev, income: Number(e.target.value)}))}
+                  className="w-full accent-[#FF9933]" 
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-blue-200 uppercase mb-1 flex justify-between">
+                  <span>Previous Year Marks / पिछले वर्ष के अंक</span>
+                  <span className="font-black text-white">{wizardData.marks}%</span>
+                </label>
+                <input 
+                  type="range" min="40" max="100" 
+                  value={wizardData.marks} onChange={e => setWizardData(prev => ({...prev, marks: Number(e.target.value)}))}
+                  className="w-full accent-[#FF9933]" 
+                />
+              </div>
+
+              <button 
+                onClick={runMatcher}
+                className="w-full bg-[#FF9933] hover:bg-[#e68a2e] text-white py-3.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg shadow-[#FF9933]/30 transition"
+              >
+                {lang === "hi" ? "स्कॉलरशिप खोजें" : "Find My Matches"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center justify-between shadow-sm animate-fadeIn">
+            <div>
+              <h4 className="font-display font-extrabold text-green-800 text-sm">
+                {lang === "hi" ? "आपके लिए उपयुक्त योजनाएं" : "Matched For You"}
+              </h4>
+              <p className="text-[10px] text-green-700 font-medium">
+                {lang === "hi" ? `${matchedScholarships?.length || 0} स्कॉलरशिप मिली हैं।` : `Found ${matchedScholarships?.length || 0} eligible schemes.`}
+              </p>
+            </div>
+            <button onClick={() => setShowWizard(true)} className="text-[10px] bg-white border border-green-200 px-3 py-1.5 rounded-lg font-bold text-green-700 hover:bg-green-100 transition">
+              {lang === "hi" ? "बदलें" : "Edit Filter"}
+            </button>
+          </div>
+        )}
+
+        {(matchedScholarships || SCHOLARSHIPS).map(sch => (
           <div 
             key={sch.id} 
             className="glass-card bg-white/95 p-5 border-gold-soft shadow-gold-premium space-y-3.5"
