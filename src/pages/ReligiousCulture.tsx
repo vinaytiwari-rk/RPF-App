@@ -5,12 +5,14 @@ import {
   MapPin, Landmark, Award, ChevronRight, HelpCircle, Calculator, Heart, RefreshCw
 } from "lucide-react";
 import { motion } from "motion/react";
+import DrikPanchang from "../components/DrikPanchang";
+import SanatanMedia from "../components/SanatanMedia";
 
 export default function ReligiousCulture() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const isHi = lang === "hi";
 
-  const [activeSubTab, setActiveSubTab] = useState<"festivals" | "texts" | "live" | "tools">("festivals");
+  const [activeSubTab, setActiveSubTab] = useState<"festivals" | "texts" | "live" | "tools" | "panchang" | "media">("panchang");
   const [rsvps, setRsvps] = useState<string[]>([]);
   const [isPlayingStream, setIsPlayingStream] = useState(false);
 
@@ -204,10 +206,26 @@ export default function ReligiousCulture() {
 
       {/* Tab Select Area */}
       <div className="p-5 pb-0 shrink-0">
-        <div className="bg-white border border-slate-200 p-1 rounded-xl flex gap-1 shadow-sm">
+        <div className="bg-white border border-slate-200 p-1 rounded-xl flex gap-1 shadow-sm overflow-x-auto no-scrollbar">
+          <button 
+            onClick={() => setActiveSubTab("panchang")}
+            className={`shrink-0 px-3 py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+              activeSubTab === "panchang" ? "bg-orange-500 text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            {isHi ? "पंचांग" : "Panchang"}
+          </button>
+          <button 
+            onClick={() => setActiveSubTab("media")}
+            className={`shrink-0 px-3 py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+              activeSubTab === "media" ? "bg-orange-500 text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            {isHi ? "भजन व वॉलपेपर" : "Media"}
+          </button>
           <button 
             onClick={() => setActiveSubTab("festivals")}
-            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+            className={`shrink-0 px-3 py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
               activeSubTab === "festivals" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -215,7 +233,7 @@ export default function ReligiousCulture() {
           </button>
           <button 
             onClick={() => setActiveSubTab("texts")}
-            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+            className={`shrink-0 px-3 py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
               activeSubTab === "texts" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -223,7 +241,7 @@ export default function ReligiousCulture() {
           </button>
           <button 
             onClick={() => setActiveSubTab("live")}
-            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+            className={`shrink-0 px-3 py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
               activeSubTab === "live" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -234,7 +252,7 @@ export default function ReligiousCulture() {
               setActiveSubTab("tools");
               if (!activeCalc) setActiveCalc("chant");
             }}
-            className={`flex-1 text-center py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
+            className={`shrink-0 px-3 py-2 rounded-lg text-[10.5px] font-black transition cursor-pointer ${
               activeSubTab === "tools" ? "bg-[#000080] text-white animate-fadeIn" : "text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -246,6 +264,12 @@ export default function ReligiousCulture() {
       {/* Content Area */}
       <div className="p-5 flex-1 space-y-5">
         
+        {/* ==================== SUB-TAB 0: PANCHANG ==================== */}
+        {activeSubTab === "panchang" && <DrikPanchang lang={lang} />}
+
+        {/* ==================== SUB-TAB 0.5: MEDIA ==================== */}
+        {activeSubTab === "media" && <SanatanMedia lang={lang} />}
+
         {/* ==================== SUB-TAB 1: FESTIVALS ==================== */}
         {activeSubTab === "festivals" && (
           <div className="space-y-4 animate-fadeIn">
