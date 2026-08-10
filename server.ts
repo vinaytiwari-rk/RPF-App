@@ -176,8 +176,6 @@ app.use('/', userRoutes);
 app.use('/', uploadRoutes);
 app.use(publicGovRoutes);
 app.use(publicExternalRoutes);
-app.use(miscRoutes);
-app.use(adminHqRoutes);
 app.use(adminHqExtraRoutes);
 app.use(adminDynamicRoutes);
 
