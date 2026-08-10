@@ -52,6 +52,9 @@ import FoodSupport from "./pages/FoodSupport";
 import VitalsDashboard from "./pages/VitalsDashboard";
 import MedicationReminder from "./pages/MedicationReminder";
 import MedicalDictionary from "./pages/MedicalDictionary";
+import SOSSystem from "./pages/SOSSystem";
+import PeriodTracker from "./pages/PeriodTracker";
+import ChildTracker from "./pages/ChildTracker";
 import MedicineSupport from "./pages/MedicineSupport";
 import EducationSupport from "./pages/EducationSupport";
 import CountriesPage from "./pages/CountriesPage";
@@ -170,6 +173,9 @@ function AppContent() {
           <Route path="/vitals" element={<VitalsDashboard />} />
           <Route path="/medications" element={<MedicationReminder />} />
           <Route path="/medical-dict" element={<MedicalDictionary />} />
+          <Route path="/sos" element={<SOSSystem />} />
+          <Route path="/period-tracker" element={<PeriodTracker />} />
+          <Route path="/child-tracker" element={<ChildTracker />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

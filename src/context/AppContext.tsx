@@ -213,7 +213,10 @@ const DEFAULT_SERVICES = [
   { id: "gps-toolkit", category: "civic", iconName: "Compass", titleEn: "GPS Toolkit", titleHi: "जीपीएस टूलकिट", descEn: "Speedometer & Parking", descHi: "स्पीडोमीटर और पार्किंग" },
   { id: "vitals", category: "welfare", iconName: "Activity", titleEn: "Vitals Dashboard", titleHi: "विटल्स डैशबोर्ड", descEn: "Track BP, steps & BMI", descHi: "बीपी, कदम और बीएमआई" },
   { id: "medications", category: "welfare", iconName: "Pill", titleEn: "Med Reminder", titleHi: "दवा अनुस्मारक", descEn: "Pill schedule alerts", descHi: "दवा कार्यक्रम अलर्ट" },
-  { id: "medical-dict", category: "welfare", iconName: "BookOpen", titleEn: "Medical Dict", titleHi: "चिकित्सा शब्दकोश", descEn: "Glossary & first aid", descHi: "शब्दावली और प्राथमिक उपचार" }
+  { id: "medical-dict", category: "welfare", iconName: "BookOpen", titleEn: "Medical Dict", titleHi: "चिकित्सा शब्दकोश", descEn: "Glossary & first aid", descHi: "शब्दावली और प्राथमिक उपचार" },
+  { id: "sos", category: "urgent", iconName: "ShieldAlert", titleEn: "SOS System", titleHi: "एसओएस सिस्टम", descEn: "Emergency panic & location", descHi: "आपातकालीन पैनिक और स्थान" },
+  { id: "period-tracker", category: "welfare", iconName: "Heart", titleEn: "Period Tracker", titleHi: "माहवारी ट्रैकर", descEn: "Cycle calendar & symptoms", descHi: "मासिक धर्म कैलेंडर" },
+  { id: "child-tracker", category: "welfare", iconName: "Baby", titleEn: "Child Tracker", titleHi: "शिशु ट्रैकर", descEn: "Developmental milestones", descHi: "विकास के मील के पत्थर" }
 ];
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
