@@ -46,6 +46,7 @@ import ReligiousCulture from "./pages/ReligiousCulture";
 import Earthquakes from "./pages/Earthquakes";
 import FuelTracker from "./pages/FuelTracker";
 import GPSToolkit from "./pages/GPSToolkit";
+import TransitPlanner from "./pages/TransitPlanner";
 import JobsPage from "./pages/JobsPage";
 import ScholarshipsPage from "./pages/ScholarshipsPage";
 import FoodSupport from "./pages/FoodSupport";
@@ -174,6 +175,7 @@ function AppContent() {
           <Route path="/earthquakes" element={<Earthquakes />} />
           <Route path="/fuel-tracker" element={<FuelTracker />} />
           <Route path="/gps-toolkit" element={<GPSToolkit />} />
+          <Route path="/transit-planner" element={<TransitPlanner />} />
           <Route path="/crowdfunding" element={<CrowdfundingPage />} />
           <Route path="/religious-culture" element={<ReligiousCulture />} />
           <Route path="/countries" element={<CountriesPage />} />

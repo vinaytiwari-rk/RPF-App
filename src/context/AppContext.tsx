@@ -223,7 +223,8 @@ const DEFAULT_SERVICES = [
   { id: "story-library", category: "empowerment", iconName: "BookOpen", titleEn: "Audiobooks", titleHi: "ऑडियो पुस्तकें", descEn: "Read and listen to stories", descHi: "कहानियां पढ़ें और सुनें" },
   { id: "hindu-calendar", category: "culture", iconName: "Calendar", titleEn: "Hindu Calendar", titleHi: "हिंदू पंचांग", descEn: "Tithis & Festivals", descHi: "तिथियां और त्योहार" },
   { id: "news-feed", category: "culture", iconName: "Newspaper", titleEn: "News Feed", titleHi: "समाचार", descEn: "Top headlines & stories", descHi: "प्रमुख खबरें" },
-  { id: "internet-radio", category: "culture", iconName: "Radio", titleEn: "Internet Radio", titleHi: "इंटरनेट रेडियो", descEn: "Live radio stations", descHi: "लाइव रेडियो स्टेशन" }
+  { id: "internet-radio", category: "culture", iconName: "Radio", titleEn: "Internet Radio", titleHi: "इंटरनेट रेडियो", descEn: "Live radio stations", descHi: "लाइव रेडियो स्टेशन" },
+  { id: "transit-planner", category: "civic", iconName: "Map", titleEn: "Transit Planner", titleHi: "पारगमन योजनाकार", descEn: "Bus & Metro Routes", descHi: "बस और मेट्रो मार्ग" }
 ];
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [

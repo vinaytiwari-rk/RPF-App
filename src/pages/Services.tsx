@@ -40,7 +40,8 @@ const serviceIdToImage: Record<string, string> = {
   "story-library": "/assets/icons/icon_culture_1786081280063.jpg",
   "hindu-calendar": "/assets/icons/icon_culture_1786081280063.jpg",
   "news-feed": "/assets/icons/icon_jobs_updated_1786163264789.jpg",
-  "internet-radio": "/assets/icons/icon_culture_1786081280063.jpg"
+  "internet-radio": "/assets/icons/icon_culture_1786081280063.jpg",
+  "transit-planner": "/assets/icons/icon_environment_1786081257147.jpg"
 };
 
 const serviceIdToBorder: Record<string, string> = {
@@ -77,7 +78,8 @@ const serviceIdToBorder: Record<string, string> = {
   "story-library": "border-l-[6px] border-amber-600 shadow-sm hover:border-amber-700",
   "hindu-calendar": "border-l-[6px] border-orange-500 shadow-sm hover:border-orange-600",
   "news-feed": "border-l-[6px] border-blue-500 shadow-sm hover:border-blue-600",
-  "internet-radio": "border-l-[6px] border-purple-500 shadow-sm hover:border-purple-600"
+  "internet-radio": "border-l-[6px] border-purple-500 shadow-sm hover:border-purple-600",
+  "transit-planner": "border-l-[6px] border-blue-500 shadow-sm hover:border-blue-600"
 };
 
 export default function Services() {
@@ -225,6 +227,7 @@ export default function Services() {
                           : svc.id === 'vitals' ? '/vitals'
                           : svc.id === 'medications' ? '/medications'
                           : svc.id === 'medical-dict' ? '/medical-dict'
+                          : svc.id === 'transit-planner' ? '/transit-planner'
                           : svc.id === 'resume-builder' ? '/resume-builder'
                           : svc.id === 'doc-scanner' ? '/doc-scanner'
                           : svc.id === 'ai-chat' ? '/ai-chat'
