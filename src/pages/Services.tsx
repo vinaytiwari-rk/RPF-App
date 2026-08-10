@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
-import { Search, Compass, Phone, Globe, Mail, Sparkles } from "lucide-react";
+import { Search, Compass, Phone, Globe, Mail, Sparkles, Briefcase, Tractor, Thermometer, ShieldAlert, MapPin, Heart, Baby, FileText, Camera, Bot } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 
@@ -33,7 +33,11 @@ const serviceIdToImage: Record<string, string> = {
   "gps-toolkit": "/assets/icons/icon_environment_1786081257147.jpg",
   "vitals": "/assets/icons/icon_health_updated_1786163249856.jpg",
   "medications": "/assets/icons/icon_medicine_updated_1786163301118.jpg",
-  "medical-dict": "/assets/icons/icon_schemes_updated_1786163186070.jpg"
+  "medical-dict": "/assets/icons/icon_schemes_updated_1786163186070.jpg",
+  "resume-builder": "/assets/icons/icon_skills_1786081334087.jpg",
+  "doc-scanner": "/assets/icons/icon_grievance_updated_1786163210095.jpg",
+  "ai-chat": "/assets/icons/icon_schemes_updated_1786163186070.jpg",
+  "story-library": "/assets/icons/icon_culture_1786081280063.jpg"
 };
 
 const serviceIdToBorder: Record<string, string> = {
@@ -63,7 +67,11 @@ const serviceIdToBorder: Record<string, string> = {
   "gps-toolkit": "border-[#000080]",
   "vitals": "border-emerald-600",
   "medications": "border-blue-600",
-  "medical-dict": "border-green-600"
+  "medical-dict": "border-green-600",
+  "resume-builder": "border-l-[6px] border-blue-600 shadow-sm hover:border-blue-700",
+  "doc-scanner": "border-l-[6px] border-gray-800 shadow-sm hover:border-gray-900",
+  "ai-chat": "border-l-[6px] border-indigo-500 shadow-sm hover:border-indigo-600",
+  "story-library": "border-l-[6px] border-amber-600 shadow-sm hover:border-amber-700"
 };
 
 export default function Services() {
@@ -211,6 +219,10 @@ export default function Services() {
                           : svc.id === 'vitals' ? '/vitals'
                           : svc.id === 'medications' ? '/medications'
                           : svc.id === 'medical-dict' ? '/medical-dict'
+                          : svc.id === 'resume-builder' ? '/resume-builder'
+                          : svc.id === 'doc-scanner' ? '/doc-scanner'
+                          : svc.id === 'ai-chat' ? '/ai-chat'
+                          : svc.id === 'story-library' ? '/story-library'
                           : `/services/${svc.id}`;
 
               return (

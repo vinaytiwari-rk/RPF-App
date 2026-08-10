@@ -55,6 +55,10 @@ import MedicalDictionary from "./pages/MedicalDictionary";
 import SOSSystem from "./pages/SOSSystem";
 import PeriodTracker from "./pages/PeriodTracker";
 import ChildTracker from "./pages/ChildTracker";
+import ResumeBuilder from "./pages/ResumeBuilder";
+import DocScanner from "./pages/DocScanner";
+import AIChat from "./pages/AIChat";
+import StoryLibrary from "./pages/StoryLibrary";
 import MedicineSupport from "./pages/MedicineSupport";
 import EducationSupport from "./pages/EducationSupport";
 import CountriesPage from "./pages/CountriesPage";
@@ -176,6 +180,10 @@ function AppContent() {
           <Route path="/sos" element={<SOSSystem />} />
           <Route path="/period-tracker" element={<PeriodTracker />} />
           <Route path="/child-tracker" element={<ChildTracker />} />
+          <Route path="/resume-builder" element={<ResumeBuilder />} />
+          <Route path="/doc-scanner" element={<DocScanner />} />
+          <Route path="/ai-chat" element={<AIChat />} />
+          <Route path="/story-library" element={<StoryLibrary />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

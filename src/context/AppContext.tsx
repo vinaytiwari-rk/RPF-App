@@ -216,7 +216,11 @@ const DEFAULT_SERVICES = [
   { id: "medical-dict", category: "welfare", iconName: "BookOpen", titleEn: "Medical Dict", titleHi: "चिकित्सा शब्दकोश", descEn: "Glossary & first aid", descHi: "शब्दावली और प्राथमिक उपचार" },
   { id: "sos", category: "urgent", iconName: "ShieldAlert", titleEn: "SOS System", titleHi: "एसओएस सिस्टम", descEn: "Emergency panic & location", descHi: "आपातकालीन पैनिक और स्थान" },
   { id: "period-tracker", category: "welfare", iconName: "Heart", titleEn: "Period Tracker", titleHi: "माहवारी ट्रैकर", descEn: "Cycle calendar & symptoms", descHi: "मासिक धर्म कैलेंडर" },
-  { id: "child-tracker", category: "welfare", iconName: "Baby", titleEn: "Child Tracker", titleHi: "शिशु ट्रैकर", descEn: "Developmental milestones", descHi: "विकास के मील के पत्थर" }
+  { id: "child-tracker", category: "welfare", iconName: "Baby", titleEn: "Child Tracker", titleHi: "शिशु ट्रैकर", descEn: "Developmental milestones", descHi: "विकास के मील के पत्थर" },
+  { id: "resume-builder", category: "empowerment", iconName: "FileText", titleEn: "Resume Builder", titleHi: "बायोडाटा निर्माता", descEn: "AI resume generation", descHi: "एआई बायोडाटा निर्माण" },
+  { id: "doc-scanner", category: "empowerment", iconName: "Camera", titleEn: "Doc Scanner", titleHi: "दस्तावेज़ स्कैनर", descEn: "Scan and save PDFs", descHi: "पीडीएफ स्कैन करें" },
+  { id: "ai-chat", category: "empowerment", iconName: "Bot", titleEn: "AI Assistant", titleHi: "एआई सहायक", descEn: "Ask Gemini anything", descHi: "जेमिनी से कुछ भी पूछें" },
+  { id: "story-library", category: "empowerment", iconName: "BookOpen", titleEn: "Audiobooks", titleHi: "ऑडियो पुस्तकें", descEn: "Read and listen to stories", descHi: "कहानियां पढ़ें और सुनें" }
 ];
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
