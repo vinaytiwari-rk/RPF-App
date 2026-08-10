@@ -3257,14 +3257,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer3 = require_safe_buffer().Buffer;
-    var crypto14 = require("crypto");
+    var crypto17 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto14.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto17.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -3354,17 +3354,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto14.createHmac("sha" + bits, secret);
+        var hmac = crypto17.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto14 ? function timingSafeEqual2(a, b) {
+    var timingSafeEqual = "timingSafeEqual" in crypto17 ? function timingSafeEqual2(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
-      return crypto14.timingSafeEqual(a, b);
+      return crypto17.timingSafeEqual(a, b);
     } : function timingSafeEqual2(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -3381,7 +3381,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto14.createSign("RSA-SHA" + bits);
+        var signer = crypto17.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -3391,7 +3391,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase642(signature);
-        var verifier = crypto14.createVerify("RSA-SHA" + bits);
+        var verifier = crypto17.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -3400,11 +3400,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto14.createSign("RSA-SHA" + bits);
+        var signer = crypto17.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto14.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto14.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto17.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto17.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -3414,12 +3414,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase642(signature);
-        var verifier = crypto14.createVerify("RSA-SHA" + bits);
+        var verifier = crypto17.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto14.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto14.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto17.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto17.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -22006,11 +22006,11 @@ var require_x509_cjs = __commonJS({
         return this.items[Symbol.iterator]();
       }
       get(key = _CryptoProvider.DEFAULT) {
-        const crypto14 = this.items.get(key.toLowerCase());
-        if (!crypto14) {
+        const crypto17 = this.items.get(key.toLowerCase());
+        if (!crypto17) {
           throw new Error(`Cannot get Crypto by name '${key}'`);
         }
-        return crypto14;
+        return crypto17;
       }
       set(key, value) {
         if (typeof key === "string") {
@@ -22238,15 +22238,15 @@ var require_x509_cjs = __commonJS({
       }
       async getThumbprint(...args) {
         var _a2;
-        let crypto14;
+        let crypto17;
         let algorithm = "SHA-1";
         if (args.length >= 1 && !((_a2 = args[0]) === null || _a2 === void 0 ? void 0 : _a2.subtle)) {
           algorithm = args[0] || algorithm;
-          crypto14 = args[1] || cryptoProvider.get();
+          crypto17 = args[1] || cryptoProvider.get();
         } else {
-          crypto14 = args[0] || cryptoProvider.get();
+          crypto17 = args[0] || cryptoProvider.get();
         }
-        return await crypto14.subtle.digest(algorithm, this.toArrayBuffer());
+        return await crypto17.subtle.digest(algorithm, this.toArrayBuffer());
       }
     };
     var ERR_GN_CONSTRUCTOR = "Cannot initialize GeneralName from ASN.1 data.";
@@ -22647,14 +22647,14 @@ var require_x509_cjs = __commonJS({
       }
     };
     var PublicKey = class _PublicKey extends PemData {
-      static async create(data, crypto14 = cryptoProvider.get()) {
+      static async create(data, crypto17 = cryptoProvider.get()) {
         if (data instanceof _PublicKey) {
           return data;
         } else if (CryptoProvider.isCryptoKey(data)) {
           if (data.type !== "public") {
             throw new TypeError("Public key is required");
           }
-          const spki = await crypto14.subtle.exportKey("spki", data);
+          const spki = await crypto17.subtle.exportKey("spki", data);
           return new _PublicKey(spki);
         } else if (data.publicKey) {
           return data.publicKey;
@@ -22673,7 +22673,7 @@ var require_x509_cjs = __commonJS({
         this.tag = PemConverter.PublicKeyTag;
       }
       async export(...args) {
-        let crypto14;
+        let crypto17;
         let keyUsages = ["verify"];
         let algorithm = {
           hash: "SHA-256",
@@ -22682,16 +22682,16 @@ var require_x509_cjs = __commonJS({
         if (args.length > 1) {
           algorithm = args[0] || algorithm;
           keyUsages = args[1] || keyUsages;
-          crypto14 = args[2] || cryptoProvider.get();
+          crypto17 = args[2] || cryptoProvider.get();
         } else {
-          crypto14 = args[0] || cryptoProvider.get();
+          crypto17 = args[0] || cryptoProvider.get();
         }
         let raw = this.rawData;
         const asnSpki = asn1Schema.AsnConvert.parse(this.rawData, asn1X509.SubjectPublicKeyInfo);
         if (asnSpki.algorithm.algorithm === asn1Rsa.id_RSASSA_PSS) {
           raw = convertSpkiToRsaPkcs1(asnSpki, raw);
         }
-        return crypto14.subtle.importKey("spki", raw, algorithm, true, keyUsages);
+        return crypto17.subtle.importKey("spki", raw, algorithm, true, keyUsages);
       }
       onInit(asn) {
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
@@ -22708,34 +22708,34 @@ var require_x509_cjs = __commonJS({
       }
       async getThumbprint(...args) {
         var _a2;
-        let crypto14;
+        let crypto17;
         let algorithm = "SHA-1";
         if (args.length >= 1 && !((_a2 = args[0]) === null || _a2 === void 0 ? void 0 : _a2.subtle)) {
           algorithm = args[0] || algorithm;
-          crypto14 = args[1] || cryptoProvider.get();
+          crypto17 = args[1] || cryptoProvider.get();
         } else {
-          crypto14 = args[0] || cryptoProvider.get();
+          crypto17 = args[0] || cryptoProvider.get();
         }
-        return await crypto14.subtle.digest(algorithm, this.rawData);
+        return await crypto17.subtle.digest(algorithm, this.rawData);
       }
       async getKeyIdentifier(...args) {
-        let crypto14;
+        let crypto17;
         let algorithm = "SHA-1";
         if (args.length === 1) {
           if (typeof args[0] === "string") {
             algorithm = args[0];
-            crypto14 = cryptoProvider.get();
+            crypto17 = cryptoProvider.get();
           } else {
-            crypto14 = args[0];
+            crypto17 = args[0];
           }
         } else if (args.length === 2) {
           algorithm = args[0];
-          crypto14 = args[1];
+          crypto17 = args[1];
         } else {
-          crypto14 = cryptoProvider.get();
+          crypto17 = cryptoProvider.get();
         }
         const asn = asn1Schema.AsnConvert.parse(this.rawData, asn1X509.SubjectPublicKeyInfo);
-        return await crypto14.subtle.digest(algorithm, asn.subjectPublicKey);
+        return await crypto17.subtle.digest(algorithm, asn.subjectPublicKey);
       }
       toTextObject() {
         const obj = this.toTextObjectEmpty();
@@ -22761,12 +22761,12 @@ var require_x509_cjs = __commonJS({
       return raw;
     }
     var AuthorityKeyIdentifierExtension2 = class _AuthorityKeyIdentifierExtension extends Extension2 {
-      static async create(param, critical = false, crypto14 = cryptoProvider.get()) {
+      static async create(param, critical = false, crypto17 = cryptoProvider.get()) {
         if ("name" in param && "serialNumber" in param) {
           return new _AuthorityKeyIdentifierExtension(param, critical);
         }
-        const key = await PublicKey.create(param, crypto14);
-        const id = await key.getKeyIdentifier(crypto14);
+        const key = await PublicKey.create(param, crypto17);
+        const id = await key.getKeyIdentifier(crypto17);
         return new _AuthorityKeyIdentifierExtension(pvtsutils.Convert.ToHex(id), critical);
       }
       constructor(...args) {
@@ -22904,9 +22904,9 @@ var require_x509_cjs = __commonJS({
     };
     KeyUsagesExtension.NAME = "Key Usages";
     var SubjectKeyIdentifierExtension2 = class _SubjectKeyIdentifierExtension extends Extension2 {
-      static async create(publicKey, critical = false, crypto14 = cryptoProvider.get()) {
-        const key = await PublicKey.create(publicKey, crypto14);
-        const id = await key.getKeyIdentifier(crypto14);
+      static async create(publicKey, critical = false, crypto17 = cryptoProvider.get()) {
+        const key = await PublicKey.create(publicKey, crypto17);
+        const id = await key.getKeyIdentifier(crypto17);
         return new _SubjectKeyIdentifierExtension(pvtsutils.Convert.ToHex(id), critical);
       }
       constructor(...args) {
@@ -23644,12 +23644,12 @@ var require_x509_cjs = __commonJS({
       getExtensions(type) {
         return this.extensions.filter((o) => o.type === type);
       }
-      async verify(crypto14 = cryptoProvider.get()) {
+      async verify(crypto17 = cryptoProvider.get()) {
         const algorithm = {
           ...this.publicKey.algorithm,
           ...this.signatureAlgorithm
         };
-        const publicKey = await this.publicKey.export(algorithm, ["verify"], crypto14);
+        const publicKey = await this.publicKey.export(algorithm, ["verify"], crypto17);
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let signature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -23661,7 +23661,7 @@ var require_x509_cjs = __commonJS({
         if (!signature) {
           throw Error("Cannot convert WebCrypto signature value to ASN.1 format");
         }
-        const ok = await crypto14.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
+        const ok = await crypto17.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
         return ok;
       }
       toTextObject() {
@@ -23692,14 +23692,14 @@ var require_x509_cjs = __commonJS({
     _Pkcs10CertificateRequest_tbs = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_subjectName = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_subject = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_signatureAlgorithm = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_signature = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_publicKey = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_attributes = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_extensions = /* @__PURE__ */ new WeakMap();
     Pkcs10CertificateRequest.NAME = "PKCS#10 Certificate Request";
     var Pkcs10CertificateRequestGenerator = class {
-      static async create(params, crypto14 = cryptoProvider.get()) {
+      static async create(params, crypto17 = cryptoProvider.get()) {
         if (!params.keys.privateKey) {
           throw new Error("Bad field 'keys' in 'params' argument. 'privateKey' is empty");
         }
         if (!params.keys.publicKey) {
           throw new Error("Bad field 'keys' in 'params' argument. 'publicKey' is empty");
         }
-        const spki = await crypto14.subtle.exportKey("spki", params.keys.publicKey);
+        const spki = await crypto17.subtle.exportKey("spki", params.keys.publicKey);
         const asnReq = new asn1Csr.CertificationRequest({
           certificationRequestInfo: new asn1Csr.CertificationRequestInfo({ subjectPKInfo: asn1Schema.AsnConvert.parse(spki, asn1X509.SubjectPublicKeyInfo) })
         });
@@ -23728,7 +23728,7 @@ var require_x509_cjs = __commonJS({
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
         asnReq.signatureAlgorithm = algProv.toAsnAlgorithm(signingAlgorithm);
         const tbs = asn1Schema.AsnConvert.serialize(asnReq.certificationRequestInfo);
-        const signature = await crypto14.subtle.sign(signingAlgorithm, params.keys.privateKey, tbs);
+        const signature = await crypto17.subtle.sign(signingAlgorithm, params.keys.privateKey, tbs);
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let asnSignature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -23888,7 +23888,7 @@ var require_x509_cjs = __commonJS({
           }
         });
       }
-      async verify(params = {}, crypto14 = cryptoProvider.get()) {
+      async verify(params = {}, crypto17 = cryptoProvider.get()) {
         let keyAlgorithm;
         let publicKey;
         const paramsKey = params.publicKey;
@@ -23898,26 +23898,26 @@ var require_x509_cjs = __commonJS({
               ...this.publicKey.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await this.publicKey.export(keyAlgorithm, ["verify"], crypto14);
+            publicKey = await this.publicKey.export(keyAlgorithm, ["verify"], crypto17);
           } else if ("publicKey" in paramsKey) {
             keyAlgorithm = {
               ...paramsKey.publicKey.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await paramsKey.publicKey.export(keyAlgorithm, ["verify"], crypto14);
+            publicKey = await paramsKey.publicKey.export(keyAlgorithm, ["verify"], crypto17);
           } else if (paramsKey instanceof PublicKey) {
             keyAlgorithm = {
               ...paramsKey.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await paramsKey.export(keyAlgorithm, ["verify"], crypto14);
+            publicKey = await paramsKey.export(keyAlgorithm, ["verify"], crypto17);
           } else if (pvtsutils.BufferSourceConverter.isBufferSource(paramsKey)) {
             const key = new PublicKey(paramsKey);
             keyAlgorithm = {
               ...key.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await key.export(keyAlgorithm, ["verify"], crypto14);
+            publicKey = await key.export(keyAlgorithm, ["verify"], crypto17);
           } else {
             keyAlgorithm = {
               ...paramsKey.algorithm,
@@ -23939,7 +23939,7 @@ var require_x509_cjs = __commonJS({
         if (!signature) {
           throw Error("Cannot convert ASN.1 signature value to WebCrypto format");
         }
-        const ok = await crypto14.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
+        const ok = await crypto17.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
         if (params.signatureOnly) {
           return ok;
         } else {
@@ -23949,21 +23949,21 @@ var require_x509_cjs = __commonJS({
         }
       }
       async getThumbprint(...args) {
-        let crypto14;
+        let crypto17;
         let algorithm = "SHA-1";
         if (args[0]) {
           if (!args[0].subtle) {
             algorithm = args[0] || algorithm;
-            crypto14 = args[1];
+            crypto17 = args[1];
           } else {
-            crypto14 = args[0];
+            crypto17 = args[0];
           }
         }
-        crypto14 !== null && crypto14 !== void 0 ? crypto14 : crypto14 = cryptoProvider.get();
-        return await crypto14.subtle.digest(algorithm, this.rawData);
+        crypto17 !== null && crypto17 !== void 0 ? crypto17 : crypto17 = cryptoProvider.get();
+        return await crypto17.subtle.digest(algorithm, this.rawData);
       }
-      async isSelfSigned(crypto14 = cryptoProvider.get()) {
-        return this.subject === this.issuer && await this.verify({ signatureOnly: true }, crypto14);
+      async isSelfSigned(crypto17 = cryptoProvider.get()) {
+        return this.subject === this.issuer && await this.verify({ signatureOnly: true }, crypto17);
       }
       toTextObject() {
         const obj = this.toTextObjectEmpty();
@@ -24093,13 +24093,13 @@ var require_x509_cjs = __commonJS({
           this.certificates = params.certificates;
         }
       }
-      async build(cert, crypto14 = cryptoProvider.get()) {
+      async build(cert, crypto17 = cryptoProvider.get()) {
         const chain = new X509Certificates(cert);
         let current = cert;
-        while (current = await this.findIssuer(current, crypto14)) {
-          const thumbprint = await current.getThumbprint(crypto14);
+        while (current = await this.findIssuer(current, crypto17)) {
+          const thumbprint = await current.getThumbprint(crypto17);
           for (const item of chain) {
-            const thumbprint2 = await item.getThumbprint(crypto14);
+            const thumbprint2 = await item.getThumbprint(crypto17);
             if (pvtsutils.isEqual(thumbprint, thumbprint2)) {
               throw new Error("Cannot build a certificate chain. Circular dependency.");
             }
@@ -24108,8 +24108,8 @@ var require_x509_cjs = __commonJS({
         }
         return chain;
       }
-      async findIssuer(cert, crypto14 = cryptoProvider.get()) {
-        if (!await cert.isSelfSigned(crypto14)) {
+      async findIssuer(cert, crypto17 = cryptoProvider.get()) {
+        if (!await cert.isSelfSigned(crypto17)) {
           const akiExt = cert.getExtension(asn1X509__namespace.id_ce_authorityKeyIdentifier);
           for (const item of this.certificates) {
             if (item.subject !== cert.issuer) {
@@ -24133,11 +24133,11 @@ var require_x509_cjs = __commonJS({
                 ...item.publicKey.algorithm,
                 ...cert.signatureAlgorithm
               };
-              const publicKey = await item.publicKey.export(algorithm, ["verify"], crypto14);
+              const publicKey = await item.publicKey.export(algorithm, ["verify"], crypto17);
               const ok = await cert.verify({
                 publicKey,
                 signatureOnly: true
-              }, crypto14);
+              }, crypto17);
               if (!ok) {
                 continue;
               }
@@ -24150,11 +24150,11 @@ var require_x509_cjs = __commonJS({
         return null;
       }
     };
-    function generateCertificateSerialNumber(input, crypto14 = cryptoProvider.get()) {
+    function generateCertificateSerialNumber(input, crypto17 = cryptoProvider.get()) {
       const inputView = pvtsutils.BufferSourceConverter.toUint8Array(pvtsutils.Convert.FromHex(input || ""));
       let serialNumber = inputView && inputView.length && inputView.some((o) => o > 0) ? new Uint8Array(inputView) : void 0;
       if (!serialNumber) {
-        serialNumber = crypto14.getRandomValues(new Uint8Array(16));
+        serialNumber = crypto17.getRandomValues(new Uint8Array(16));
       }
       let firstNonZero = 0;
       while (firstNonZero < serialNumber.length - 1 && serialNumber[firstNonZero] === 0) {
@@ -24170,7 +24170,7 @@ var require_x509_cjs = __commonJS({
       return serialNumber.buffer;
     }
     var X509CertificateGenerator = class {
-      static async createSelfSigned(params, crypto14 = cryptoProvider.get()) {
+      static async createSelfSigned(params, crypto17 = cryptoProvider.get()) {
         if (!params.keys.privateKey) {
           throw new Error("Bad field 'keys' in 'params' argument. 'privateKey' is empty");
         }
@@ -24187,9 +24187,9 @@ var require_x509_cjs = __commonJS({
           signingKey: params.keys.privateKey,
           signingAlgorithm: params.signingAlgorithm,
           extensions: params.extensions
-        }, crypto14);
+        }, crypto17);
       }
-      static async create(params, crypto14 = cryptoProvider.get()) {
+      static async create(params, crypto17 = cryptoProvider.get()) {
         var _a2;
         let spki;
         if (params.publicKey instanceof PublicKey) {
@@ -24199,9 +24199,9 @@ var require_x509_cjs = __commonJS({
         } else if (pvtsutils.BufferSourceConverter.isBufferSource(params.publicKey)) {
           spki = params.publicKey;
         } else {
-          spki = await crypto14.subtle.exportKey("spki", params.publicKey);
+          spki = await crypto17.subtle.exportKey("spki", params.publicKey);
         }
-        const serialNumber = generateCertificateSerialNumber(params.serialNumber, crypto14);
+        const serialNumber = generateCertificateSerialNumber(params.serialNumber, crypto17);
         const notBefore = params.notBefore || /* @__PURE__ */ new Date();
         const notAfter = params.notAfter || new Date(notBefore.getTime() + 31536e6);
         const asnX509 = new asn1X509__namespace.Certificate({
@@ -24236,7 +24236,7 @@ var require_x509_cjs = __commonJS({
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
         asnX509.tbsCertificate.signature = asnX509.signatureAlgorithm = algProv.toAsnAlgorithm(signatureAlgorithm);
         const tbs = asn1Schema.AsnConvert.serialize(asnX509.tbsCertificate);
-        const signatureValue = "signingKey" in params ? await crypto14.subtle.sign(signatureAlgorithm, params.signingKey, tbs) : params.signature;
+        const signatureValue = "signingKey" in params ? await crypto17.subtle.sign(signatureAlgorithm, params.signingKey, tbs) : params.signature;
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let asnSignature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -24457,7 +24457,7 @@ var require_x509_cjs = __commonJS({
           }
         });
       }
-      async verify(params, crypto14 = cryptoProvider.get()) {
+      async verify(params, crypto17 = cryptoProvider.get()) {
         if (!this.certListSignatureAlgorithm.isEqual(this.tbsCertListSignatureAlgorithm)) {
           throw new Error("algorithm identifier in the sequence tbsCertList and CertificateList mismatch");
         }
@@ -24498,21 +24498,21 @@ var require_x509_cjs = __commonJS({
         if (!signature) {
           throw Error("Cannot convert ASN.1 signature value to WebCrypto format");
         }
-        return await crypto14.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
+        return await crypto17.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
       }
       async getThumbprint(...args) {
-        let crypto14;
+        let crypto17;
         let algorithm = "SHA-1";
         if (args[0]) {
           if (!args[0].subtle) {
             algorithm = args[0] || algorithm;
-            crypto14 = args[1];
+            crypto17 = args[1];
           } else {
-            crypto14 = args[0];
+            crypto17 = args[0];
           }
         }
-        crypto14 !== null && crypto14 !== void 0 ? crypto14 : crypto14 = cryptoProvider.get();
-        return await crypto14.subtle.digest(algorithm, this.rawData);
+        crypto17 !== null && crypto17 !== void 0 ? crypto17 : crypto17 = cryptoProvider.get();
+        return await crypto17.subtle.digest(algorithm, this.rawData);
       }
       findRevoked(certOrSerialNumber) {
         const serialNumber = typeof certOrSerialNumber === "string" ? certOrSerialNumber : certOrSerialNumber.serialNumber;
@@ -24527,7 +24527,7 @@ var require_x509_cjs = __commonJS({
     };
     _X509Crl_tbs = /* @__PURE__ */ new WeakMap(), _X509Crl_signatureAlgorithm = /* @__PURE__ */ new WeakMap(), _X509Crl_issuerName = /* @__PURE__ */ new WeakMap(), _X509Crl_thisUpdate = /* @__PURE__ */ new WeakMap(), _X509Crl_nextUpdate = /* @__PURE__ */ new WeakMap(), _X509Crl_entries = /* @__PURE__ */ new WeakMap(), _X509Crl_extensions = /* @__PURE__ */ new WeakMap();
     var X509CrlGenerator = class {
-      static async create(params, crypto14 = cryptoProvider.get()) {
+      static async create(params, crypto17 = cryptoProvider.get()) {
         var _a2;
         const name = params.issuer instanceof Name3 ? params.issuer : new Name3(params.issuer);
         const asnX509Crl = new asn1X509__namespace.CertificateList({
@@ -24594,7 +24594,7 @@ var require_x509_cjs = __commonJS({
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
         asnX509Crl.tbsCertList.signature = asnX509Crl.signatureAlgorithm = algProv.toAsnAlgorithm(signingAlgorithm);
         const tbs = asn1Schema.AsnConvert.serialize(asnX509Crl.tbsCertList);
-        const signature = await crypto14.subtle.sign(signingAlgorithm, params.signingKey, tbs);
+        const signature = await crypto17.subtle.sign(signingAlgorithm, params.signingKey, tbs);
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let asnSignature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -71881,7 +71881,7 @@ var require_form_data = __commonJS({
     var parseUrl = require("url").parse;
     var fs4 = require("fs");
     var Stream = require("stream").Stream;
-    var crypto14 = require("crypto");
+    var crypto17 = require("crypto");
     var mime = require_mime_types();
     var asynckit = require_asynckit();
     var setToStringTag = require_es_set_tostringtag();
@@ -72090,7 +72090,7 @@ var require_form_data = __commonJS({
       return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
     };
     FormData2.prototype._generateBoundary = function() {
-      this._boundary = "--------------------------" + crypto14.randomBytes(12).toString("hex");
+      this._boundary = "--------------------------" + crypto17.randomBytes(12).toString("hex");
     };
     FormData2.prototype.getLengthSync = function() {
       var knownLength = this._overheadLength + this._valueLength;
@@ -72612,7 +72612,7 @@ function resolveConstituency(pincode, district, areas = [], state) {
 }
 
 // server.ts
-var import_express25 = __toESM(require("express"), 1);
+var import_express27 = __toESM(require("express"), 1);
 var import_cors = __toESM(require_lib(), 1);
 
 // node_modules/express-rate-limit/dist/index.mjs
@@ -75340,7 +75340,7 @@ var import_path4 = __toESM(require("path"), 1);
 var import_dotenv2 = __toESM(require("dotenv"), 1);
 var import_pg2 = __toESM(require("pg"), 1);
 var import_fs4 = __toESM(require("fs"), 1);
-var import_crypto13 = __toESM(require("crypto"), 1);
+var import_crypto16 = __toESM(require("crypto"), 1);
 var import_multer3 = __toESM(require("multer"), 1);
 
 // src/routes/adminHqRoutes.ts
@@ -83595,6 +83595,7 @@ var authRoutes_default = router2;
 var import_express3 = __toESM(require("express"), 1);
 var import_crypto3 = __toESM(require("crypto"), 1);
 var import_axios3 = __toESM(require("axios"), 1);
+var import_genai = require("@google/genai");
 var router3 = import_express3.default.Router();
 router3.get("/api/health-vitals", authenticateToken, async (req, res) => {
   try {
@@ -84005,6 +84006,37 @@ router3.post("/api/appointments", authenticateToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+router3.get("/api/health/dictionary", async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) return res.status(400).json({ error: "Query is required" });
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.json({
+        success: true,
+        data: {
+          term: query,
+          definition: "Information for this medical term is currently limited in offline mode.",
+          symptoms: ["Varies by case"],
+          treatments: ["Consult a physician"]
+        }
+      });
+    }
+    const ai = new import_genai.GoogleGenAI({ apiKey });
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `You are a medical dictionary. Provide a brief overview for the medical term: "${query}". Return the output strictly as JSON with keys: "term", "definition", "symptoms" (array of strings), "treatments" (array of strings). Do not include markdown formatting or backticks.`
+    });
+    let rawText = response.text?.trim() || "{}";
+    if (rawText.startsWith("```json")) rawText = rawText.substring(7);
+    if (rawText.endsWith("```")) rawText = rawText.substring(0, rawText.length - 3);
+    const parsed = JSON.parse(rawText.trim());
+    res.json({ success: true, data: parsed });
+  } catch (error) {
+    console.error("Dictionary error:", error);
+    res.status(500).json({ error: "Failed to fetch dictionary data" });
+  }
+});
 var healthRoutes_default = router3;
 
 // src/routes/grievanceRoutes.ts
@@ -84304,7 +84336,7 @@ async function queryExternalSearch(searchQuery) {
 }
 
 // src/lib/gemini.ts
-var import_genai = require("@google/genai");
+var import_genai2 = require("@google/genai");
 var aiClient = null;
 function getGeminiClient() {
   if (!aiClient) {
@@ -84312,7 +84344,7 @@ function getGeminiClient() {
     if (!apiKey) {
       console.warn("WARNING: GEMINI_API_KEY or GOOGLE_SEARCH_API_KEY environment variable is not set. AI Features will use mock mode.");
     }
-    aiClient = new import_genai.GoogleGenAI({
+    aiClient = new import_genai2.GoogleGenAI({
       apiKey: apiKey || "MOCK_KEY",
       httpOptions: {
         headers: {
@@ -84440,11 +84472,11 @@ Complaint Description: "${description}"`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: import_genai.Type.OBJECT,
+          type: import_genai2.Type.OBJECT,
           properties: {
-            category: { type: import_genai.Type.STRING },
-            urgency: { type: import_genai.Type.STRING },
-            summary: { type: import_genai.Type.STRING }
+            category: { type: import_genai2.Type.STRING },
+            urgency: { type: import_genai2.Type.STRING },
+            summary: { type: import_genai2.Type.STRING }
           },
           required: ["category", "urgency", "summary"]
         }
@@ -84486,14 +84518,14 @@ Respond with a JSON array of up to 3 highly tailored schemes. Each scheme should
       config: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: import_genai.Type.ARRAY,
+          type: import_genai2.Type.ARRAY,
           items: {
-            type: import_genai.Type.OBJECT,
+            type: import_genai2.Type.OBJECT,
             properties: {
-              name: { type: import_genai.Type.STRING },
-              eligibility: { type: import_genai.Type.STRING },
-              benefits: { type: import_genai.Type.STRING },
-              steps: { type: import_genai.Type.STRING }
+              name: { type: import_genai2.Type.STRING },
+              eligibility: { type: import_genai2.Type.STRING },
+              benefits: { type: import_genai2.Type.STRING },
+              steps: { type: import_genai2.Type.STRING }
             },
             required: ["name", "eligibility", "benefits", "steps"]
           }
@@ -85053,6 +85085,7 @@ var locationRoutes_default = router8;
 
 // src/routes/womenRoutes.ts
 var import_express9 = __toESM(require("express"), 1);
+var import_crypto7 = __toESM(require("crypto"), 1);
 var router9 = import_express9.default.Router();
 router9.get("/api/women/complaints", async (req, res) => {
   try {
@@ -85110,13 +85143,279 @@ router9.post("/api/women/complaints", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+router9.get("/api/rto/vehicle/:plate", async (req, res) => {
+  try {
+    const { plate } = req.params;
+    if (!plate) return res.status(400).json({ error: "Plate number is required" });
+    const formattedPlate = plate.replace(/\s+/g, "").toUpperCase();
+    const result = await pool2.query(
+      `SELECT * FROM rto_vehicles WHERE REPLACE(UPPER(plate_number), ' ', '') = $1`,
+      [formattedPlate]
+    );
+    if (result.rows.length > 0) {
+      return res.json({ success: true, data: result.rows[0] });
+    }
+    if (!/^[A-Z]{2}[0-9]{1,2}[A-Z]{0,3}[0-9]{4}$/.test(formattedPlate)) {
+      return res.status(404).json({ success: false, error: "Vehicle not found. Please check plate number format." });
+    }
+    let hash2 = 0;
+    for (let i = 0; i < formattedPlate.length; i++) {
+      hash2 = formattedPlate.charCodeAt(i) + ((hash2 << 5) - hash2);
+    }
+    const models = ["Maruti Suzuki Swift", "Hyundai Creta", "Honda City", "Tata Nexon", "Mahindra Scorpio", "Toyota Innova", "Kia Seltos", "Royal Enfield Classic 350", "Honda Activa 6G"];
+    const names = ["Rakesh Kumar", "Priya Singh", "Amit Sharma", "Deepak Verma", "Neha Gupta", "Vikram Rathore", "Suresh Patel"];
+    const fuelTypes = ["PETROL", "DIESEL", "CNG", "ELECTRIC"];
+    const model = models[Math.abs(hash2) % models.length];
+    const nameStr = names[Math.abs(hash2) % names.length];
+    const maskedName = nameStr.split(" ").map((n) => n[0] + "*".repeat(n.length - 1)).join(" ");
+    const regYear = 2010 + Math.abs(hash2) % 14;
+    const regDate = new Date(regYear, Math.abs(hash2) % 12, Math.abs(hash2) % 28 + 1);
+    const insYear = regYear + 15;
+    const insDate = new Date(insYear, Math.abs(hash2) % 12, Math.abs(hash2) % 28 + 1);
+    const mockVehicle = {
+      plate_number: plate.toUpperCase(),
+      owner_name: maskedName,
+      vehicle_model: model,
+      registration_date: regDate.toISOString().split("T")[0],
+      insurance_validity: insDate.toISOString().split("T")[0],
+      fitness_validity: insDate.toISOString().split("T")[0],
+      fuel_type: fuelTypes[Math.abs(hash2) % fuelTypes.length],
+      status: "ACTIVE",
+      rto_code: formattedPlate.substring(0, 4)
+    };
+    await pool2.query(
+      `INSERT INTO rto_vehicles (plate_number, owner_name, vehicle_model, registration_date, insurance_validity, fitness_validity, fuel_type, rto_code, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [mockVehicle.plate_number, mockVehicle.owner_name, mockVehicle.vehicle_model, mockVehicle.registration_date, mockVehicle.insurance_validity, mockVehicle.fitness_validity, mockVehicle.fuel_type, mockVehicle.rto_code, mockVehicle.status]
+    );
+    res.json({ success: true, data: mockVehicle });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router9.post("/api/family/group", async (req, res) => {
+  try {
+    const { name, userId } = req.body;
+    if (!name || !userId) return res.status(400).json({ error: "Missing fields" });
+    const groupId = import_crypto7.default.randomUUID();
+    const inviteCode = import_crypto7.default.randomBytes(3).toString("hex").toUpperCase();
+    await pool2.query(
+      `INSERT INTO family_groups (id, name, invite_code, created_by) VALUES ($1, $2, $3, $4)`,
+      [groupId, name, inviteCode, userId]
+    );
+    await pool2.query(
+      `INSERT INTO family_members (id, group_id, user_id, role) VALUES ($1, $2, $3, $4)`,
+      [import_crypto7.default.randomUUID(), groupId, userId, "admin"]
+    );
+    res.json({ success: true, data: { groupId, inviteCode } });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router9.post("/api/family/join", async (req, res) => {
+  try {
+    const { inviteCode, userId } = req.body;
+    if (!inviteCode || !userId) return res.status(400).json({ error: "Missing fields" });
+    const groupRes = await pool2.query(`SELECT id FROM family_groups WHERE invite_code = $1`, [inviteCode]);
+    if (groupRes.rows.length === 0) return res.status(404).json({ error: "Invalid invite code" });
+    const groupId = groupRes.rows[0].id;
+    const memberRes = await pool2.query(`SELECT id FROM family_members WHERE group_id = $1 AND user_id = $2`, [groupId, userId]);
+    if (memberRes.rows.length === 0) {
+      await pool2.query(
+        `INSERT INTO family_members (id, group_id, user_id, role) VALUES ($1, $2, $3, $4)`,
+        [import_crypto7.default.randomUUID(), groupId, userId, "member"]
+      );
+    }
+    res.json({ success: true, data: { groupId } });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router9.get("/api/family/groups", async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const result = await pool2.query(
+      `SELECT g.* FROM family_groups g 
+       JOIN family_members m ON g.id = m.group_id 
+       WHERE m.user_id = $1`,
+      [userId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router9.post("/api/family/location", async (req, res) => {
+  try {
+    const { userId, latitude, longitude, battery_level, is_charging } = req.body;
+    if (!userId || !latitude || !longitude) return res.status(400).json({ error: "Missing fields" });
+    await pool2.query(
+      `INSERT INTO member_locations (id, user_id, latitude, longitude, battery_level, is_charging) 
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (id) DO NOTHING`,
+      [import_crypto7.default.randomUUID(), userId, latitude, longitude, battery_level || null, is_charging || false]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router9.get("/api/family/locations/:groupId", async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const result = await pool2.query(
+      `SELECT m.user_id, u.name as user_name, u.phone, l.latitude, l.longitude, l.battery_level, l.is_charging, l.timestamp 
+       FROM family_members m
+       LEFT JOIN users u ON m.user_id = u.id
+       LEFT JOIN LATERAL (
+         SELECT latitude, longitude, battery_level, is_charging, timestamp 
+         FROM member_locations 
+         WHERE user_id = m.user_id 
+         ORDER BY timestamp DESC 
+         LIMIT 1
+       ) l ON true
+       WHERE m.group_id = $1`,
+      [groupId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 var womenRoutes_default = router9;
 
-// src/routes/volunteerRoutes.ts
+// src/routes/environmentRoutes.ts
 var import_express10 = __toESM(require("express"), 1);
-var import_crypto7 = __toESM(require("crypto"), 1);
+var import_crypto8 = __toESM(require("crypto"), 1);
+var import_axios7 = __toESM(require("axios"), 1);
 var router10 = import_express10.default.Router();
-router10.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
+router10.get("/api/env/fuel", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool2.query(
+      "SELECT * FROM fuel_logs WHERE user_id = $1 ORDER BY fill_date DESC",
+      [userId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router10.post("/api/env/fuel", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { odometer, liters, price_per_liter } = req.body;
+    if (!odometer || !liters || !price_per_liter) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    const total_cost = Number(liters) * Number(price_per_liter);
+    const id = import_crypto8.default.randomUUID();
+    await pool2.query(
+      `INSERT INTO fuel_logs (id, user_id, odometer, liters, price_per_liter, total_cost) 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, userId, odometer, liters, price_per_liter, total_cost]
+    );
+    res.json({ success: true, id, total_cost });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router10.delete("/api/env/fuel/:id", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    await pool2.query("DELETE FROM fuel_logs WHERE id = $1 AND user_id = $2", [id, userId]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router10.get("/api/env/earthquakes", async (req, res) => {
+  try {
+    const response = await import_axios7.default.get("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson");
+    res.json({ success: true, data: response.data });
+  } catch (error) {
+    console.error("Error fetching earthquake data:", error.message);
+    res.status(500).json({ error: "Failed to fetch earthquake data" });
+  }
+});
+var environmentRoutes_default = router10;
+
+// src/routes/educationRoutes.ts
+var import_express11 = __toESM(require("express"), 1);
+var import_crypto9 = __toESM(require("crypto"), 1);
+var router11 = import_express11.default.Router();
+var MOCK_COURSES = [
+  { id: "c1", title: "Introduction to Digital Literacy", category: "Technology", instructor: "Govt. IT Initiative", youtube_id: "7_eM0_tF6xM", duration: "1.5 Hours", views: 1205 },
+  { id: "c2", title: "Financial Independence for Women", category: "Finance", instructor: "State Bank Literacy Program", youtube_id: "L1_N3R6a1fU", duration: "2 Hours", views: 3400 },
+  { id: "c3", title: "Agriculture Best Practices 2026", category: "Agriculture", instructor: "Kisan Suvidha", youtube_id: "5B-G2mUfHkI", duration: "45 Mins", views: 980 }
+];
+var MOCK_QUESTIONS = [
+  { id: 1, text: "What is the capital of Madhya Pradesh?", options: ["Indore", "Bhopal", "Gwalior", "Jabalpur"], answer: 1 },
+  { id: 2, text: "Which gas is primarily responsible for the greenhouse effect?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Helium"], answer: 1 },
+  { id: 3, text: "Who was the first woman Prime Minister of India?", options: ["Indira Gandhi", "Sarojini Naidu", "Pratibha Patil", "Sushma Swaraj"], answer: 0 }
+];
+var MOCK_BOOKS = [
+  { id: "b1", title: "The Discovery of India", author: "Jawaharlal Nehru", category: "History", content: "The Discovery of India was written by India's first Prime Minister Jawaharlal Nehru during his imprisonment in 1942\u20131945... (This is a short sample text for demonstration of the digital reader). It gives a broad view of Indian history, philosophy and culture." },
+  { id: "b2", title: "Godan (The Gift of a Cow)", author: "Munshi Premchand", category: "Literature", content: "Godan is a famous Hindi novel by Munshi Premchand, first published in 1936. The story revolves around the socio-economic deprivation as well as the exploitation of the village poor... (This is a short sample text for demonstration)." }
+];
+router11.get("/api/edu/courses", async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM courses ORDER BY views DESC");
+    let courses = result.rows;
+    if (courses.length === 0) {
+      courses = MOCK_COURSES;
+    }
+    res.json({ success: true, data: courses });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router11.get("/api/edu/tests/questions", async (req, res) => {
+  res.json({ success: true, data: MOCK_QUESTIONS });
+});
+router11.post("/api/edu/tests/submit", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { category, score, total } = req.body;
+    const id = import_crypto9.default.randomUUID();
+    await pool2.query(
+      `INSERT INTO mock_test_scores (id, user_id, test_category, score, total) VALUES ($1, $2, $3, $4, $5)`,
+      [id, userId, category, score, total]
+    );
+    res.json({ success: true, message: "Score saved successfully." });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router11.get("/api/edu/tests/scores", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool2.query("SELECT * FROM mock_test_scores WHERE user_id = $1 ORDER BY date_taken DESC", [userId]);
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router11.get("/api/edu/library", async (req, res) => {
+  try {
+    const result = await pool2.query("SELECT * FROM library_books ORDER BY views DESC");
+    let books = result.rows;
+    if (books.length === 0) {
+      books = MOCK_BOOKS;
+    }
+    res.json({ success: true, data: books });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+var educationRoutes_default = router11;
+
+// src/routes/volunteerRoutes.ts
+var import_express12 = __toESM(require("express"), 1);
+var import_crypto10 = __toESM(require("crypto"), 1);
+var router12 = import_express12.default.Router();
+router12.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -85126,7 +85425,7 @@ router10.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, asy
     res.status(500).json({ success: false, error: error.message });
   }
 });
-router10.put("/api/volunteers/:id/allocate", authenticateToken, requireAdmin, async (req, res) => {
+router12.put("/api/volunteers/:id/allocate", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { allocation } = req.body;
@@ -85136,20 +85435,20 @@ router10.put("/api/volunteers/:id/allocate", authenticateToken, requireAdmin, as
     res.status(500).json({ success: false, error: error.message });
   }
 });
-router10.post("/api/volunteers/report", authenticateToken, async (req, res) => {
+router12.post("/api/volunteers/report", authenticateToken, async (req, res) => {
   try {
     const { volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng } = req.body;
     await pool2.query(
       `INSERT INTO volunteer_reports (id, volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [import_crypto7.default.randomUUID(), volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng]
+      [import_crypto10.default.randomUUID(), volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng]
     );
     res.json({ success: true, message: "Report submitted" });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-router10.get("/api/volunteers/me/certificates", async (req, res) => {
+router12.get("/api/volunteers/me/certificates", async (req, res) => {
   try {
     const { volunteer_id } = req.query;
     const result = await pool2.query(`SELECT * FROM certificates WHERE volunteer_id = $1 ORDER BY issue_date DESC`, [volunteer_id]);
@@ -85158,7 +85457,7 @@ router10.get("/api/volunteers/me/certificates", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router10.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (req, res) => {
+router12.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi } = req.body;
     await pool2.query(
@@ -85170,7 +85469,7 @@ router10.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (re
     res.status(500).json({ error: error.message });
   }
 });
-router10.get("/api/volunteer_tasks", async (req, res) => {
+router12.get("/api/volunteer_tasks", async (req, res) => {
   try {
     const volunteerId = req.query.volunteerId;
     if (!volunteerId) {
@@ -85185,7 +85484,7 @@ router10.get("/api/volunteer_tasks", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router10.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+router12.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -85205,7 +85504,7 @@ router10.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmi
     res.status(500).json({ error: error.message });
   }
 });
-router10.post("/api/volunteers", authenticateToken, async (req, res) => {
+router12.post("/api/volunteers", authenticateToken, async (req, res) => {
   try {
     const { name, phone, skills } = req.body;
     const userId = req.user.id;
@@ -85233,7 +85532,7 @@ router10.post("/api/volunteers", authenticateToken, async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-router10.get("/api/volunteers", async (req, res) => {
+router12.get("/api/volunteers", async (req, res) => {
   try {
     const result = await pool2.query(
       'SELECT id, full_name as name, email, mobile as phone, approval_status as status, "registeredAt" FROM volunteers ORDER BY "registeredAt" DESC'
@@ -85245,7 +85544,7 @@ router10.get("/api/volunteers", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router10.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => {
+router12.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM volunteers WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -85253,14 +85552,14 @@ router10.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (r
     res.status(500).json({ error: error.message });
   }
 });
-var volunteerRoutes_default = router10;
+var volunteerRoutes_default = router12;
 
 // src/routes/certificateRoutes.ts
-var import_express11 = __toESM(require("express"), 1);
+var import_express13 = __toESM(require("express"), 1);
 var import_pdf_lib = __toESM(require_cjs12(), 1);
 var import_path2 = __toESM(require("path"), 1);
-var router11 = import_express11.default.Router();
-router11.get("/api/certificates/verify/:certificate_id", async (req, res) => {
+var router13 = import_express13.default.Router();
+router13.get("/api/certificates/verify/:certificate_id", async (req, res) => {
   try {
     const certId = req.params.certificate_id;
     const certRes = await pool2.query(`SELECT * FROM certificates WHERE certificate_id = $1`, [certId]);
@@ -85284,7 +85583,7 @@ router11.get("/api/certificates/verify/:certificate_id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router11.get("/api/certificates/download/:id", async (req, res) => {
+router13.get("/api/certificates/download/:id", async (req, res) => {
   try {
     const certId = req.params.id;
     const certRes = await pool2.query(`SELECT * FROM certificates WHERE id = $1 OR certificate_id = $1`, [certId]);
@@ -85345,13 +85644,13 @@ router11.get("/api/certificates/download/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-var certificateRoutes_default = router11;
+var certificateRoutes_default = router13;
 
 // src/routes/communityRoutes.ts
-var import_express12 = __toESM(require("express"), 1);
-var import_crypto8 = __toESM(require("crypto"), 1);
-var router12 = import_express12.default.Router();
-router12.get("/api/community_posts", async (req, res) => {
+var import_express14 = __toESM(require("express"), 1);
+var import_crypto11 = __toESM(require("crypto"), 1);
+var router14 = import_express14.default.Router();
+router14.get("/api/community_posts", async (req, res) => {
   try {
     const result = await pool2.query('SELECT * FROM community_posts ORDER BY "createdAt" DESC');
     res.json({ data: result.rows });
@@ -85359,10 +85658,10 @@ router12.get("/api/community_posts", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router12.post("/api/community_posts", async (req, res) => {
+router14.post("/api/community_posts", async (req, res) => {
   try {
     const { authorName, authorPhone, authorRole, textEn, textHi, segment, location, imageUrl, likes, likedByMe, createdAt } = req.body;
-    const id = import_crypto8.default.randomUUID();
+    const id = import_crypto11.default.randomUUID();
     await pool2.query(
       `INSERT INTO community_posts (id, "authorName", "authorPhone", "authorRole", "textEn", "textHi", segment, location, "imageUrl", likes, "likedByMe", "createdAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
@@ -85373,7 +85672,7 @@ router12.post("/api/community_posts", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router12.put("/api/community_posts/:id", async (req, res) => {
+router14.put("/api/community_posts/:id", async (req, res) => {
   try {
     const { likes, likedByMe } = req.body;
     await pool2.query('UPDATE community_posts SET likes = $1, "likedByMe" = $2 WHERE id = $3', [likes, likedByMe, req.params.id]);
@@ -85382,7 +85681,7 @@ router12.put("/api/community_posts/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router12.get("/api/blogs", async (req, res) => {
+router14.get("/api/blogs", async (req, res) => {
   try {
     const result = await pool2.query('SELECT * FROM blogs WHERE approved = true ORDER BY "publishedAt" DESC');
     res.json({ success: true, data: result.rows });
@@ -85390,7 +85689,7 @@ router12.get("/api/blogs", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router12.get("/api/blogs/all", authenticateToken, requireAdmin, async (req, res) => {
+router14.get("/api/blogs/all", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query('SELECT * FROM blogs ORDER BY "createdAt" DESC');
     res.json({ success: true, data: result.rows });
@@ -85398,11 +85697,11 @@ router12.get("/api/blogs/all", authenticateToken, requireAdmin, async (req, res)
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router12.post("/api/blogs", authenticateToken, async (req, res) => {
+router14.post("/api/blogs", authenticateToken, async (req, res) => {
   try {
     const { title, content } = req.body;
     if (!title || !content) return res.status(400).json({ success: false, error: "Title and Content are required" });
-    const id = import_crypto8.default.randomUUID();
+    const id = import_crypto11.default.randomUUID();
     const authorName = req.user.displayName || req.user.name || "Anonymous Volunteer";
     const authorId = req.user.id;
     await pool2.query(
@@ -85414,7 +85713,7 @@ router12.post("/api/blogs", authenticateToken, async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router12.put("/api/blogs/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
+router14.put("/api/blogs/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query('UPDATE blogs SET approved = true, "publishedAt" = NOW() WHERE id = $1', [req.params.id]);
     res.json({ success: true, message: "Blog approved successfully" });
@@ -85422,7 +85721,7 @@ router12.put("/api/blogs/:id/approve", authenticateToken, requireAdmin, async (r
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router12.delete("/api/blogs/:id", authenticateToken, requireAdmin, async (req, res) => {
+router14.delete("/api/blogs/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM blogs WHERE id = $1", [req.params.id]);
     res.json({ success: true, message: "Blog deleted/rejected successfully" });
@@ -85430,7 +85729,7 @@ router12.delete("/api/blogs/:id", authenticateToken, requireAdmin, async (req, r
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router12.get("/api/social", async (req, res) => {
+router14.get("/api/social", async (req, res) => {
   try {
     const result = await pool2.query(
       'SELECT id, author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link, "createdAt" FROM social_posts ORDER BY "createdAt" DESC'
@@ -85441,10 +85740,10 @@ router12.get("/api/social", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router12.post("/api/social", authenticateToken, requireAdmin, async (req, res) => {
+router14.post("/api/social", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { author, role, avatar, textEn, textHi, image, platform, link } = req.body;
-    const id = import_crypto8.default.randomUUID();
+    const id = import_crypto11.default.randomUUID();
     await pool2.query(
       `INSERT INTO social_posts 
        (id, author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link, "createdAt") 
@@ -85468,7 +85767,7 @@ router12.post("/api/social", authenticateToken, requireAdmin, async (req, res) =
     res.status(500).json({ error: error.message });
   }
 });
-router12.post("/api/social/like", async (req, res) => {
+router14.post("/api/social/like", async (req, res) => {
   try {
     const { id } = req.body;
     const result = await pool2.query("SELECT liked, likes FROM social_posts WHERE id = $1", [id]);
@@ -85486,7 +85785,7 @@ router12.post("/api/social/like", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router12.delete("/api/social/:id", authenticateToken, requireAdmin, async (req, res) => {
+router14.delete("/api/social/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM social_posts WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -85494,7 +85793,7 @@ router12.delete("/api/social/:id", authenticateToken, requireAdmin, async (req, 
     res.status(500).json({ error: error.message });
   }
 });
-router12.post("/api/social/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
+router14.post("/api/social/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { author, role, avatar, textEn, textHi, image, platform, link } = req.body;
     await pool2.query(
@@ -85509,13 +85808,13 @@ router12.post("/api/social/:id/edit", authenticateToken, requireAdmin, async (re
     res.status(500).json({ error: error.message });
   }
 });
-var communityRoutes_default = router12;
+var communityRoutes_default = router14;
 
 // src/routes/jobRoutes.ts
-var import_express13 = __toESM(require("express"), 1);
-var import_crypto9 = __toESM(require("crypto"), 1);
-var router13 = import_express13.default.Router();
-router13.get("/api/jobs", async (req, res) => {
+var import_express15 = __toESM(require("express"), 1);
+var import_crypto12 = __toESM(require("crypto"), 1);
+var router15 = import_express15.default.Router();
+router15.get("/api/jobs", async (req, res) => {
   try {
     const result = await pool2.query(
       'SELECT id, "titleEn", "titleHi", "company", "locEn", "locHi", "salary", "typeEn", "typeHi", "postedAt" FROM jobs ORDER BY "postedAt" DESC'
@@ -85526,10 +85825,10 @@ router13.get("/api/jobs", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router13.post("/api/jobs", authenticateToken, requireAdmin, async (req, res) => {
+router15.post("/api/jobs", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, locEn, locHi, salary, typeEn, typeHi, company } = req.body;
-    const id = import_crypto9.default.randomUUID();
+    const id = import_crypto12.default.randomUUID();
     const result = await pool2.query(
       `INSERT INTO jobs 
        (id, "titleEn", "titleHi", "company", "locEn", "locHi", "salary", "typeEn", "typeHi", "postedAt") 
@@ -85554,7 +85853,7 @@ router13.post("/api/jobs", authenticateToken, requireAdmin, async (req, res) => 
     res.status(500).json({ error: error.message });
   }
 });
-router13.delete("/api/jobs/:id", authenticateToken, requireAdmin, async (req, res) => {
+router15.delete("/api/jobs/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM jobs WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -85562,7 +85861,7 @@ router13.delete("/api/jobs/:id", authenticateToken, requireAdmin, async (req, re
     res.status(500).json({ error: error.message });
   }
 });
-router13.post("/api/jobs/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
+router15.post("/api/jobs/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, company, locEn, locHi, salary, typeEn, typeHi } = req.body;
     await pool2.query(
@@ -85577,10 +85876,10 @@ router13.post("/api/jobs/:id/edit", authenticateToken, requireAdmin, async (req,
     res.status(500).json({ error: error.message });
   }
 });
-router13.post("/api/job_applications", async (req, res) => {
+router15.post("/api/job_applications", async (req, res) => {
   try {
     const { jobId, jobTitle, fullName, phone, resume } = req.body;
-    const id = import_crypto9.default.randomUUID();
+    const id = import_crypto12.default.randomUUID();
     await pool2.query(
       `INSERT INTO job_applications (id, "jobId", "jobTitle", "fullName", phone, resume, "createdAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
@@ -85592,12 +85891,12 @@ router13.post("/api/job_applications", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-var jobRoutes_default = router13;
+var jobRoutes_default = router15;
 
 // src/routes/donationRoutes.ts
-var import_express14 = __toESM(require("express"), 1);
-var router14 = import_express14.default.Router();
-router14.post("/api/donations", async (req, res) => {
+var import_express16 = __toESM(require("express"), 1);
+var router16 = import_express16.default.Router();
+router16.post("/api/donations", async (req, res) => {
   try {
     const { userId, donorName, donorEmail, amount, campaignId } = req.body;
     const transactionId = `TXN-${Math.floor(1e7 + Math.random() * 9e7)}`;
@@ -85622,12 +85921,12 @@ router14.post("/api/donations", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-var donationRoutes_default = router14;
+var donationRoutes_default = router16;
 
 // src/routes/cmsRoutes.ts
-var import_express15 = __toESM(require("express"), 1);
-var router15 = import_express15.default.Router();
-router15.get("/api/settings", async (req, res) => {
+var import_express17 = __toESM(require("express"), 1);
+var router17 = import_express17.default.Router();
+router17.get("/api/settings", async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM settings WHERE id = $1", ["general"]);
     if (result.rows.length > 0) {
@@ -85653,7 +85952,7 @@ router15.get("/api/settings", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router15.post("/api/settings", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
+router17.post("/api/settings", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
   try {
     const { tollFree, webUrl, email, founderMessageEn, founderMessageHi, helplinesMarquee } = req.body;
     await pool2.query(
@@ -85668,7 +85967,7 @@ router15.post("/api/settings", authenticateToken, authorizeRole("super_admin"), 
     res.status(500).json({ error: error.message });
   }
 });
-router15.get("/api/cms/config", async (req, res) => {
+router17.get("/api/cms/config", async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
     if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
@@ -85680,7 +85979,7 @@ router15.get("/api/cms/config", async (req, res) => {
     res.json({ success: true, data: {} });
   }
 });
-router15.post("/api/cms/config", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
+router17.post("/api/cms/config", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
   try {
     await pool2.query(
       `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
@@ -85692,7 +85991,7 @@ router15.post("/api/cms/config", authenticateToken, authorizeRole("super_admin")
     res.status(500).json({ success: false, error: error.message });
   }
 });
-router15.get("/api/cms", async (req, res) => {
+router17.get("/api/cms", async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
     if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
@@ -85900,7 +86199,7 @@ router15.get("/api/cms", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router15.post("/api/cms", authenticateToken, requireAdmin, async (req, res) => {
+router17.post("/api/cms", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query(
       `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
@@ -85912,19 +86211,19 @@ router15.post("/api/cms", authenticateToken, requireAdmin, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-var cmsRoutes_default = router15;
+var cmsRoutes_default = router17;
 
 // src/routes/campaignRoutes.ts
-var import_express16 = __toESM(require("express"), 1);
+var import_express18 = __toESM(require("express"), 1);
 
 // src/lib/apiCache.ts
 var apiCache = /* @__PURE__ */ new Map();
 var CACHE_TTL = 6e4;
 
 // src/routes/campaignRoutes.ts
-var import_crypto10 = __toESM(require("crypto"), 1);
-var router16 = import_express16.default.Router();
-router16.get("/api/campaigns", async (req, res) => {
+var import_crypto13 = __toESM(require("crypto"), 1);
+var router18 = import_express18.default.Router();
+router18.get("/api/campaigns", async (req, res) => {
   const cached = apiCache.get("/api/campaigns");
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return res.json(cached.data);
@@ -85941,10 +86240,10 @@ router16.get("/api/campaigns", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router16.post("/api/campaigns", authenticateToken, requireAdmin, async (req, res) => {
+router18.post("/api/campaigns", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, goalAmount, raisedAmount, imageUrl, urgent } = req.body;
-    const id = import_crypto10.default.randomUUID();
+    const id = import_crypto13.default.randomUUID();
     await pool2.query(
       `INSERT INTO campaigns 
        (id, "titleEn", "titleHi", "goalAmount", "raisedAmount", "imageUrl", "coverImgUrl", urgent, "createdAt") 
@@ -85967,7 +86266,7 @@ router16.post("/api/campaigns", authenticateToken, requireAdmin, async (req, res
     res.status(500).json({ error: error.message });
   }
 });
-router16.post("/api/campaigns/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
+router18.post("/api/campaigns/:id/edit", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { titleEn, titleHi, goalAmount, raisedAmount, imageUrl, urgent } = req.body;
     await pool2.query(
@@ -85992,7 +86291,7 @@ router16.post("/api/campaigns/:id/edit", authenticateToken, requireAdmin, async 
     res.status(500).json({ error: error.message });
   }
 });
-router16.delete("/api/campaigns/:id", authenticateToken, requireAdmin, async (req, res) => {
+router18.delete("/api/campaigns/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM campaigns WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -86000,13 +86299,13 @@ router16.delete("/api/campaigns/:id", authenticateToken, requireAdmin, async (re
     res.status(500).json({ error: error.message });
   }
 });
-var campaignRoutes_default = router16;
+var campaignRoutes_default = router18;
 
 // src/routes/submissionRoutes.ts
-var import_express17 = __toESM(require("express"), 1);
-var import_crypto11 = __toESM(require("crypto"), 1);
-var router17 = import_express17.default.Router();
-router17.get("/api/submissions", async (req, res) => {
+var import_express19 = __toESM(require("express"), 1);
+var import_crypto14 = __toESM(require("crypto"), 1);
+var router19 = import_express19.default.Router();
+router19.get("/api/submissions", async (req, res) => {
   try {
     const result = await pool2.query(
       `SELECT id, "userId", "serviceNameEn", "serviceName", "citizenName", "citizenPhone", "submissionData", status, latitude, longitude, "createdAt", timestamp 
@@ -86019,14 +86318,14 @@ router17.get("/api/submissions", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router17.post("/api/submissions", async (req, res) => {
+router19.post("/api/submissions", async (req, res) => {
   try {
     let body = req.body;
     if (Array.isArray(body)) {
       body = body[0];
     }
     const { userId, citizenName, citizenPhone, serviceName, submissionData, status, latitude, longitude, timestamp } = body;
-    const id = import_crypto11.default.randomUUID();
+    const id = import_crypto14.default.randomUUID();
     const result = await pool2.query(
       `INSERT INTO service_submissions_v2 
        (id, "userId", "serviceNameEn", "serviceName", "citizenName", "citizenPhone", "submissionData", status, latitude, longitude, "createdAt", timestamp) 
@@ -86093,7 +86392,7 @@ router17.post("/api/submissions", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router17.post("/api/submissions/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+router19.post("/api/submissions/:id/status", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     await pool2.query("UPDATE service_submissions_v2 SET status = $1 WHERE id = $2", [status, req.params.id]);
@@ -86102,7 +86401,7 @@ router17.post("/api/submissions/:id/status", authenticateToken, requireAdmin, as
     res.status(500).json({ error: error.message });
   }
 });
-router17.delete("/api/submissions/:id", authenticateToken, requireAdmin, async (req, res) => {
+router19.delete("/api/submissions/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM service_submissions_v2 WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -86110,17 +86409,17 @@ router17.delete("/api/submissions/:id", authenticateToken, requireAdmin, async (
     res.status(500).json({ error: error.message });
   }
 });
-var submissionRoutes_default = router17;
+var submissionRoutes_default = router19;
 
 // src/routes/userRoutes.ts
-var import_express18 = __toESM(require("express"), 1);
+var import_express20 = __toESM(require("express"), 1);
 
 // src/lib/userFields.ts
 var USER_PRIVILEGED_FIELDS = /* @__PURE__ */ new Set(["role", "points", "janSevaCardStatus", "janSevaCardNo", "isVolunteer", "isDonor"]);
 
 // src/routes/userRoutes.ts
-var router18 = import_express18.default.Router();
-router18.get("/api/users/:id", async (req, res) => {
+var router20 = import_express20.default.Router();
+router20.get("/api/users/:id", async (req, res) => {
   try {
     const result = await pool2.query(
       'SELECT id, name, email, phone, role, "janSevaCardStatus", "janSevaCardNo", "isVolunteer", "isDonor", "onboardingCompleted", "registeredAt" FROM users WHERE id = $1',
@@ -86135,7 +86434,7 @@ router18.get("/api/users/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router18.post("/api/users/:id/update", authenticateToken, async (req, res) => {
+router20.post("/api/users/:id/update", authenticateToken, async (req, res) => {
   try {
     const isAdmin = req.user && (req.user.role === "admin" || req.user.role === "superadmin" || req.user.role === "super_admin");
     if (!isAdmin && req.user?.id !== req.params.id) {
@@ -86160,11 +86459,11 @@ router18.post("/api/users/:id/update", authenticateToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-var userRoutes_default = router18;
+var userRoutes_default = router20;
 
 // src/routes/uploadRoutes.ts
-var import_express19 = __toESM(require("express"), 1);
-var import_crypto12 = __toESM(require("crypto"), 1);
+var import_express21 = __toESM(require("express"), 1);
+var import_crypto15 = __toESM(require("crypto"), 1);
 var import_multer = __toESM(require("multer"), 1);
 var import_path3 = __toESM(require("path"), 1);
 var import_fs2 = __toESM(require("fs"), 1);
@@ -86191,7 +86490,7 @@ var handleUploadErrors = (err, req, res, next) => {
 };
 var saveFileLocally = async (file) => {
   const ext = import_path3.default.extname(file.originalname);
-  const filename = import_crypto12.default.randomUUID() + ext;
+  const filename = import_crypto15.default.randomUUID() + ext;
   const uploadDir = import_path3.default.join(process.cwd(), "uploads");
   if (!import_fs2.default.existsSync(uploadDir)) {
     import_fs2.default.mkdirSync(uploadDir, { recursive: true });
@@ -86200,8 +86499,8 @@ var saveFileLocally = async (file) => {
   import_fs2.default.writeFileSync(filepath, file.buffer);
   return "/uploads/" + filename;
 };
-var router19 = import_express19.default.Router();
-router19.post("/api/upload/founder", authenticateToken, requireAdmin, upload.single("file"), handleUploadErrors, async (req, res) => {
+var router21 = import_express21.default.Router();
+router21.post("/api/upload/founder", authenticateToken, requireAdmin, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -86213,7 +86512,7 @@ router19.post("/api/upload/founder", authenticateToken, requireAdmin, upload.sin
     res.status(500).json({ error: error.message });
   }
 });
-router19.post("/api/upload/broadcast", authenticateToken, requireAdmin, upload.single("file"), handleUploadErrors, async (req, res) => {
+router21.post("/api/upload/broadcast", authenticateToken, requireAdmin, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -86225,7 +86524,7 @@ router19.post("/api/upload/broadcast", authenticateToken, requireAdmin, upload.s
     res.status(500).json({ error: error.message });
   }
 });
-router19.post("/api/upload/image", authenticateToken, upload.single("file"), handleUploadErrors, async (req, res) => {
+router21.post("/api/upload/image", authenticateToken, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -86237,7 +86536,7 @@ router19.post("/api/upload/image", authenticateToken, upload.single("file"), han
     res.status(500).json({ error: error.message });
   }
 });
-router19.post("/api/profile/upload-dp", authenticateToken, upload.single("file"), handleUploadErrors, async (req, res) => {
+router21.post("/api/profile/upload-dp", authenticateToken, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -86252,7 +86551,7 @@ router19.post("/api/profile/upload-dp", authenticateToken, upload.single("file")
     res.status(500).json({ error: error.message });
   }
 });
-router19.post("/api/profile/upload-cover", authenticateToken, upload.single("file"), handleUploadErrors, async (req, res) => {
+router21.post("/api/profile/upload-cover", authenticateToken, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -86267,7 +86566,7 @@ router19.post("/api/profile/upload-cover", authenticateToken, upload.single("fil
     res.status(500).json({ error: error.message });
   }
 });
-router19.post("/api/profile/remove-dp", authenticateToken, async (req, res) => {
+router21.post("/api/profile/remove-dp", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     await pool2.query(`UPDATE users SET avatar = NULL WHERE id = $1`, [userId]);
@@ -86278,7 +86577,7 @@ router19.post("/api/profile/remove-dp", authenticateToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router19.post("/api/profile/remove-cover", authenticateToken, async (req, res) => {
+router21.post("/api/profile/remove-cover", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     await pool2.query(`UPDATE users SET cover = NULL WHERE id = $1`, [userId]);
@@ -86289,11 +86588,11 @@ router19.post("/api/profile/remove-cover", authenticateToken, async (req, res) =
     res.status(500).json({ error: error.message });
   }
 });
-var uploadRoutes_default = router19;
+var uploadRoutes_default = router21;
 
 // src/routes/publicGovRoutes.ts
-var import_express20 = __toESM(require("express"), 1);
-var import_axios7 = __toESM(require("axios"), 1);
+var import_express22 = __toESM(require("express"), 1);
+var import_axios8 = __toESM(require("axios"), 1);
 
 // src/data/coreServices.ts
 var CORE_SERVICES = [
@@ -86322,8 +86621,8 @@ var CORE_SERVICES = [
 ];
 
 // src/routes/publicGovRoutes.ts
-var router20 = import_express20.default.Router();
-router20.get("/api/gov/mandi-prices", async (req, res) => {
+var router22 = import_express22.default.Router();
+router22.get("/api/gov/mandi-prices", async (req, res) => {
   const { state, commodity } = req.query;
   const apiKey = process.env.DATAGOV_API_KEY || "579b464db66ec23bdd000001b3bed380e8e94e615b9d89710cdd46f0";
   const resourceId = "9ef84268-d588-465a-a308-a864a43d0070";
@@ -86332,7 +86631,7 @@ router20.get("/api/gov/mandi-prices", async (req, res) => {
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state)}`;
       if (commodity) url += `&filters[commodity]=${encodeURIComponent(commodity)}`;
-      const response = await import_axios7.default.get(url, { timeout: 5e3 });
+      const response = await import_axios8.default.get(url, { timeout: 5e3 });
       return res.json(response.data);
     } catch (err) {
       console.error("Mandi Prices API failed, falling back to mock");
@@ -86347,7 +86646,7 @@ router20.get("/api/gov/mandi-prices", async (req, res) => {
     ]
   });
 });
-router20.get("/api/gov/hospitals", async (req, res) => {
+router22.get("/api/gov/hospitals", async (req, res) => {
   const { state, district } = req.query;
   const apiKey = process.env.DATAGOV_API_KEY || "579b464db66ec23bdd000001b3bed380e8e94e615b9d89710cdd46f0";
   const resourceId = "7924619d-71b5-4b47-b861-12c823055428";
@@ -86356,7 +86655,7 @@ router20.get("/api/gov/hospitals", async (req, res) => {
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state)}`;
       if (district) url += `&filters[district]=${encodeURIComponent(district)}`;
-      const response = await import_axios7.default.get(url, { timeout: 5e3 });
+      const response = await import_axios8.default.get(url, { timeout: 5e3 });
       return res.json(response.data);
     } catch (err) {
       console.error("Hospitals API failed, falling back to mock");
@@ -86371,10 +86670,10 @@ router20.get("/api/gov/hospitals", async (req, res) => {
     ]
   });
 });
-router20.get("/api/public/services", (req, res) => {
+router22.get("/api/public/services", (req, res) => {
   res.json({ success: true, data: CORE_SERVICES });
 });
-router20.get("/api/public/services/:id/content", async (req, res) => {
+router22.get("/api/public/services/:id/content", async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool2.query(`SELECT * FROM service_content WHERE service_id = $1`, [id]);
@@ -86386,19 +86685,19 @@ router20.get("/api/public/services/:id/content", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-var publicGovRoutes_default = router20;
+var publicGovRoutes_default = router22;
 
 // src/routes/publicExternalRoutes.ts
-var import_express21 = __toESM(require("express"), 1);
-var import_axios8 = __toESM(require("axios"), 1);
+var import_express23 = __toESM(require("express"), 1);
+var import_axios9 = __toESM(require("axios"), 1);
 var import_rss_parser = __toESM(require_rss_parser(), 1);
 var import_multer2 = __toESM(require("multer"), 1);
 var import_form_data = __toESM(require_form_data(), 1);
 var import_fs3 = __toESM(require("fs"), 1);
-var router21 = import_express21.default.Router();
+var router23 = import_express23.default.Router();
 var rssParser = new import_rss_parser.default();
 var upload2 = (0, import_multer2.default)({ dest: "tmp/" });
-router21.get("/api/public/weather", async (req, res) => {
+router23.get("/api/public/weather", async (req, res) => {
   try {
     const lat = req.query.lat || "23.2599";
     const lon = req.query.lon || "77.4126";
@@ -86407,7 +86706,7 @@ router21.get("/api/public/weather", async (req, res) => {
     if (cached && Date.now() - cached.timestamp < CACHE_TTL * 15) {
       return res.json({ success: true, data: cached.data });
     }
-    const response = await import_axios8.default.get(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`);
+    const response = await import_axios9.default.get(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`);
     apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
     res.json({ success: true, data: response.data });
   } catch (error) {
@@ -86415,14 +86714,14 @@ router21.get("/api/public/weather", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch weather data" });
   }
 });
-router21.get("/api/public/forex", async (req, res) => {
+router23.get("/api/public/forex", async (req, res) => {
   try {
     const cacheKey = "forex_rates";
     const cached = apiCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < 36e5) {
       return res.json({ success: true, data: cached.data });
     }
-    const response = await import_axios8.default.get("https://www.frankfurter.app/latest?to=INR");
+    const response = await import_axios9.default.get("https://www.frankfurter.app/latest?to=INR");
     apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
     res.json({ success: true, data: response.data });
   } catch (error) {
@@ -86430,7 +86729,7 @@ router21.get("/api/public/forex", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch forex data" });
   }
 });
-router21.get("/api/public/news", async (req, res) => {
+router23.get("/api/public/news", async (req, res) => {
   try {
     const cacheKey = "google_news_india_ngo";
     const cached = apiCache.get(cacheKey);
@@ -86451,7 +86750,7 @@ router21.get("/api/public/news", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch news data" });
   }
 });
-router21.get("/api/public/jobs-feed", async (req, res) => {
+router23.get("/api/public/jobs-feed", async (req, res) => {
   try {
     const cacheKey = "jobs_rss_feed";
     const cached = apiCache.get(cacheKey);
@@ -86471,7 +86770,7 @@ router21.get("/api/public/jobs-feed", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch jobs data" });
   }
 });
-router21.get("/api/public/nearby", async (req, res) => {
+router23.get("/api/public/nearby", async (req, res) => {
   try {
     const { lat, lon, type } = req.query;
     if (!lat || !lon || !type) {
@@ -86486,7 +86785,7 @@ router21.get("/api/public/nearby", async (req, res) => {
     const radius = 5e3;
     const overpassQuery = `[out:json];node[${nodeType}](around:${radius},${lat},${lon});out 5;`;
     const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
-    const response = await import_axios8.default.get(overpassUrl);
+    const response = await import_axios9.default.get(overpassUrl);
     const locations = response.data.elements.map((el) => ({
       name: el.tags.name || `Unnamed ${type}`,
       lat: el.lat,
@@ -86500,14 +86799,14 @@ router21.get("/api/public/nearby", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch nearby locations" });
   }
 });
-router21.get("/api/public/remote-jobs", async (req, res) => {
+router23.get("/api/public/remote-jobs", async (req, res) => {
   try {
     const cacheKey = "remote_jobs_india";
     const cached = apiCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < 36e5) {
       return res.json({ success: true, data: cached.data });
     }
-    const response = await import_axios8.default.get("https://jobicy.com/api/v2/remote-jobs?count=20&geo=india");
+    const response = await import_axios9.default.get("https://jobicy.com/api/v2/remote-jobs?count=20&geo=india");
     apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
     res.json({ success: true, data: response.data });
   } catch (error) {
@@ -86515,7 +86814,7 @@ router21.get("/api/public/remote-jobs", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch remote jobs" });
   }
 });
-router21.get("/api/public/disaster-alerts", async (req, res) => {
+router23.get("/api/public/disaster-alerts", async (req, res) => {
   try {
     const cacheKey = "disaster_alerts";
     const cached = apiCache.get(cacheKey);
@@ -86556,7 +86855,7 @@ router21.get("/api/public/disaster-alerts", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch disaster alerts" });
   }
 });
-router21.post("/api/public/speech-to-text", upload2.single("file"), async (req, res) => {
+router23.post("/api/public/speech-to-text", upload2.single("file"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, error: "No audio file provided." });
   }
@@ -86564,7 +86863,7 @@ router21.post("/api/public/speech-to-text", upload2.single("file"), async (req, 
     const formData = new import_form_data.default();
     formData.append("file", import_fs3.default.createReadStream(req.file.path));
     formData.append("model", "saaras:v1");
-    const response = await import_axios8.default.post("https://api.sarvam.ai/speech-to-text", formData, {
+    const response = await import_axios9.default.post("https://api.sarvam.ai/speech-to-text", formData, {
       headers: {
         ...formData.getHeaders(),
         "api-subscription-key": "sk_rp8peokh_TQdtccvYUT9u2UNZofBsDpTE"
@@ -86580,43 +86879,43 @@ router21.post("/api/public/speech-to-text", upload2.single("file"), async (req, 
     res.status(500).json({ success: false, error: "Failed to process audio" });
   }
 });
-router21.get("/api/public/ifsc/:code", async (req, res) => {
+router23.get("/api/public/ifsc/:code", async (req, res) => {
   try {
     const ifsc = req.params.code;
     const cacheKey = `ifsc_${ifsc}`;
     const cached = apiCache.get(cacheKey);
     if (cached) return res.json({ success: true, data: cached.data });
-    const response = await import_axios8.default.get(`https://ifsc.razorpay.com/${ifsc}`);
+    const response = await import_axios9.default.get(`https://ifsc.razorpay.com/${ifsc}`);
     apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
     res.json({ success: true, data: response.data });
   } catch (error) {
     res.status(404).json({ success: false, error: "Invalid IFSC Code or Bank Not Found" });
   }
 });
-router21.get("/api/public/universities", async (req, res) => {
+router23.get("/api/public/universities", async (req, res) => {
   try {
     const name = req.query.name || "";
     const cacheKey = `univ_${name}`;
     const cached = apiCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < 864e5) return res.json({ success: true, data: cached.data });
-    const response = await import_axios8.default.get(`http://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(name)}`);
+    const response = await import_axios9.default.get(`http://universities.hipolabs.com/search?country=India&name=${encodeURIComponent(name)}`);
     apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
     res.json({ success: true, data: response.data });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to fetch universities" });
   }
 });
-router21.get("/api/public/fuel-prices", async (req, res) => {
+router23.get("/api/public/fuel-prices", async (req, res) => {
   try {
     const cacheKey = "fuel_prices_bhopal";
     const cached = apiCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < 36e5 * 12) {
       return res.json({ success: true, data: cached.data });
     }
-    const response = await import_axios8.default.get("https://www.goodreturns.in/petrol-price-in-bhopal.html");
+    const response = await import_axios9.default.get("https://www.goodreturns.in/petrol-price-in-bhopal.html");
     const petrolMatch = response.data.match(/₹\s*([0-9.]+)\s*<\/strong>/i);
     const petrol = petrolMatch ? petrolMatch[1] : "106.47";
-    const responseDiesel = await import_axios8.default.get("https://www.goodreturns.in/diesel-price-in-bhopal.html");
+    const responseDiesel = await import_axios9.default.get("https://www.goodreturns.in/diesel-price-in-bhopal.html");
     const dieselMatch = responseDiesel.data.match(/₹\s*([0-9.]+)\s*<\/strong>/i);
     const diesel = dieselMatch ? dieselMatch[1] : "91.84";
     const data = { petrol, diesel, city: "Bhopal", state: "Madhya Pradesh" };
@@ -86627,7 +86926,7 @@ router21.get("/api/public/fuel-prices", async (req, res) => {
     res.json({ success: true, data: { petrol: "106.47", diesel: "91.84", city: "Bhopal (Approx)" } });
   }
 });
-router21.get("/api/public/archive-search", async (req, res) => {
+router23.get("/api/public/archive-search", async (req, res) => {
   try {
     const q = req.query.q || "india";
     const cacheKey = `archive_${q}`;
@@ -86635,7 +86934,7 @@ router21.get("/api/public/archive-search", async (req, res) => {
     if (cached && Date.now() - cached.timestamp < 36e5 * 24) {
       return res.json({ success: true, data: cached.data });
     }
-    const response = await import_axios8.default.get(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}+AND+mediatype:(texts)&output=json&rows=15&page=1`);
+    const response = await import_axios9.default.get(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}+AND+mediatype:(texts)&output=json&rows=15&page=1`);
     if (response.data?.response?.docs) {
       const docs = response.data.response.docs.map((d) => ({
         identifier: d.identifier,
@@ -86653,7 +86952,7 @@ router21.get("/api/public/archive-search", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to search archives" });
   }
 });
-router21.get("/api/public/wayback", async (req, res) => {
+router23.get("/api/public/wayback", async (req, res) => {
   try {
     const url = req.query.url;
     if (!url) return res.json({ success: false, error: "URL is required" });
@@ -86662,7 +86961,7 @@ router21.get("/api/public/wayback", async (req, res) => {
     if (cached && Date.now() - cached.timestamp < 36e5 * 24) {
       return res.json({ success: true, data: cached.data });
     }
-    const response = await import_axios8.default.get(`https://archive.org/wayback/available?url=${encodeURIComponent(url)}`);
+    const response = await import_axios9.default.get(`https://archive.org/wayback/available?url=${encodeURIComponent(url)}`);
     if (response.data?.archived_snapshots?.closest) {
       apiCache.set(cacheKey, { data: response.data.archived_snapshots.closest, timestamp: Date.now() });
       return res.json({ success: true, data: response.data.archived_snapshots.closest });
@@ -86673,12 +86972,12 @@ router21.get("/api/public/wayback", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to check wayback machine" });
   }
 });
-var publicExternalRoutes_default = router21;
+var publicExternalRoutes_default = router23;
 
 // src/routes/miscRoutes.ts
-var import_express22 = __toESM(require("express"), 1);
-var router22 = import_express22.default.Router();
-router22.get("/api/search/external", async (req, res) => {
+var import_express24 = __toESM(require("express"), 1);
+var router24 = import_express24.default.Router();
+router24.get("/api/search/external", async (req, res) => {
   try {
     const q = req.query.q || req.query.query;
     if (!q) {
@@ -86691,7 +86990,7 @@ router22.get("/api/search/external", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-router22.get("/api/notifications", async (req, res) => {
+router24.get("/api/notifications", async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
     if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
@@ -86703,7 +87002,7 @@ router22.get("/api/notifications", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router22.get("/api/testimonials", async (req, res) => {
+router24.get("/api/testimonials", async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
     if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
@@ -86715,7 +87014,7 @@ router22.get("/api/testimonials", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router22.get("/api/stats", async (req, res) => {
+router24.get("/api/stats", async (req, res) => {
   const cached = apiCache.get("/api/stats");
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return res.json(cached.data);
@@ -86765,12 +87064,142 @@ router22.get("/api/stats", async (req, res) => {
   apiCache.set("/api/stats", { data, timestamp: Date.now() });
   res.json(data);
 });
-var miscRoutes_default = router22;
+var MOCK_JOBS = [
+  {
+    id: "job_01",
+    title: "Primary School Teacher",
+    company: "Bhopal District Schools",
+    location: "Bhopal, MP",
+    type: "Full-Time",
+    salary: "\u20B918,000 - \u20B925,000 / month",
+    description: "Looking for dedicated teachers for local government primary schools."
+  },
+  {
+    id: "job_02",
+    title: "Data Entry Operator",
+    company: "Smart City Org",
+    location: "Indore, MP",
+    type: "Contract",
+    salary: "\u20B912,000 / month",
+    description: "Requires basic computer skills and Hindi typing."
+  },
+  {
+    id: "job_03",
+    title: "Nursing Staff",
+    company: "Apollo Seva Hospital",
+    location: "Jabalpur, MP",
+    type: "Full-Time",
+    salary: "\u20B922,000 - \u20B930,000 / month",
+    description: "Urgent hiring for registered nurses for the emergency ward."
+  },
+  {
+    id: "job_04",
+    title: "Delivery Executive",
+    company: "Kisan Fresh",
+    location: "Multiple Locations",
+    type: "Part-Time",
+    salary: "\u20B915,000 + Fuel",
+    description: "Deliver fresh produce directly from farmers to city markets."
+  }
+];
+router24.get("/api/jobs", async (req, res) => {
+  try {
+    let result = await pool2.query("SELECT * FROM job_listings ORDER BY posted_at DESC");
+    if (result.rows.length === 0) {
+      for (const job of MOCK_JOBS) {
+        await pool2.query(
+          "INSERT INTO job_listings (id, title, company, location, type, salary, description) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+          [job.id, job.title, job.company, job.location, job.type, job.salary, job.description]
+        );
+      }
+      result = await pool2.query("SELECT * FROM job_listings ORDER BY posted_at DESC");
+    }
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching jobs:", err);
+    res.status(500).json({ error: "Failed to fetch jobs" });
+  }
+});
+router24.get("/api/culture/panchang", async (req, res) => {
+  try {
+    const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    let result = await pool2.query("SELECT * FROM panchang_calendar WHERE date = $1", [today]);
+    if (result.rows.length === 0) {
+      const mockPanchang = {
+        date: today,
+        tithi: "Shukla Paksha Ekadashi",
+        nakshatra: "Rohini",
+        sunrise: "05:42 AM",
+        sunset: "07:11 PM",
+        moonrise: "03:15 PM",
+        moonset: "02:10 AM",
+        festivals: "Nirjala Ekadashi"
+      };
+      await pool2.query(
+        "INSERT INTO panchang_calendar (date, tithi, nakshatra, sunrise, sunset, moonrise, moonset, festivals) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+        [today, mockPanchang.tithi, mockPanchang.nakshatra, mockPanchang.sunrise, mockPanchang.sunset, mockPanchang.moonrise, mockPanchang.moonset, mockPanchang.festivals]
+      );
+      result = await pool2.query("SELECT * FROM panchang_calendar WHERE date = $1", [today]);
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error fetching panchang:", err);
+    res.status(500).json({ error: "Failed to fetch panchang" });
+  }
+});
+router24.post("/api/ai/chat", async (req, res) => {
+  try {
+    const { message, sessionId = "default" } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+    await pool2.query(
+      "INSERT INTO chat_history (session_id, role, content) VALUES ($1, $2, $3)",
+      [sessionId, "user", message]
+    );
+    let responseText = "I'm a helpful AI assistant. I can help you navigate the platform, translate text, or answer basic questions.";
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
+      responseText = "Namaste! How can I assist you today? You can ask me about Jobs, Panchang, or how to use the RPF platform.";
+    } else if (lowerMessage.includes("job") || lowerMessage.includes("work")) {
+      responseText = "We have several job listings available! You can find them under the 'Jobs & Internships' section. I can also help you build your resume.";
+    } else if (lowerMessage.includes("panchang") || lowerMessage.includes("calendar") || lowerMessage.includes("festival")) {
+      responseText = "You can view today's Tithi, Nakshatra, and auspicious timings in the 'Culture & Heritage' section.";
+    } else if (lowerMessage.includes("thank")) {
+      responseText = "You're welcome! Let me know if you need anything else.";
+    } else if (lowerMessage.includes("translate")) {
+      responseText = "I can translate text between English and Hindi for you. Just type the phrase and ask me to translate it!";
+    }
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    await pool2.query(
+      "INSERT INTO chat_history (session_id, role, content) VALUES ($1, $2, $3)",
+      [sessionId, "assistant", responseText]
+    );
+    res.json({ reply: responseText });
+  } catch (err) {
+    console.error("Error in AI chat:", err);
+    res.status(500).json({ error: "Failed to process chat" });
+  }
+});
+router24.get("/api/ai/chat/history", async (req, res) => {
+  try {
+    const { sessionId = "default" } = req.query;
+    const result = await pool2.query(
+      "SELECT role, content FROM chat_history WHERE session_id = $1 ORDER BY timestamp ASC LIMIT 50",
+      [sessionId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching chat history:", err);
+    res.status(500).json({ error: "Failed to fetch chat history" });
+  }
+});
+var miscRoutes_default = router24;
 
 // src/routes/adminHqExtraRoutes.ts
-var import_express23 = __toESM(require("express"), 1);
-var router23 = import_express23.default.Router();
-router23.put("/api/admin/hq/credentials", async (req, res) => {
+var import_express25 = __toESM(require("express"), 1);
+var router25 = import_express25.default.Router();
+router25.put("/api/admin/hq/credentials", async (req, res) => {
   try {
     const body = req.body || {};
     const { username, newPassword } = body;
@@ -86785,7 +87214,7 @@ router23.put("/api/admin/hq/credentials", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router23.get("/api/admin/hq/certificates/signatures/:service_id", async (req, res) => {
+router25.get("/api/admin/hq/certificates/signatures/:service_id", async (req, res) => {
   try {
     const { service_id } = req.params;
     const result = await pool2.query(`SELECT * FROM service_signatures WHERE service_id = $1`, [service_id]);
@@ -86797,7 +87226,7 @@ router23.get("/api/admin/hq/certificates/signatures/:service_id", async (req, re
     res.status(500).json({ error: err.message });
   }
 });
-router23.put("/api/admin/hq/certificates/signatures", async (req, res) => {
+router25.put("/api/admin/hq/certificates/signatures", async (req, res) => {
   try {
     const { service_id, signatory_1_name, signatory_1_designation, signatory_2_name, signatory_2_designation } = req.body;
     await pool2.query(`
@@ -86814,7 +87243,7 @@ router23.put("/api/admin/hq/certificates/signatures", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router23.post("/api/admin/hq/certificates/issue", async (req, res) => {
+router25.post("/api/admin/hq/certificates/issue", async (req, res) => {
   try {
     const { volunteer_id, service_id } = req.body;
     const certId = "RP-" + (/* @__PURE__ */ new Date()).getFullYear() + "-" + Math.floor(1e3 + Math.random() * 9e3);
@@ -86832,7 +87261,7 @@ router23.post("/api/admin/hq/certificates/issue", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router23.put("/api/admin/hq/services/:id/content", async (req, res) => {
+router25.put("/api/admin/hq/services/:id/content", async (req, res) => {
   try {
     const body = req.body || {};
     const { id } = req.params;
@@ -86853,7 +87282,7 @@ router23.put("/api/admin/hq/services/:id/content", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router23.get("/api/admin/hq/donations", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
+router25.get("/api/admin/hq/donations", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
   try {
     const result = await pool2.query('SELECT * FROM donations ORDER BY "createdAt" DESC');
     res.json({ success: true, donations: result.rows });
@@ -86861,12 +87290,12 @@ router23.get("/api/admin/hq/donations", authenticateToken, authorizeRole("super_
     res.status(500).json({ success: false, error: err.message });
   }
 });
-var adminHqExtraRoutes_default = router23;
+var adminHqExtraRoutes_default = router25;
 
 // src/routes/adminDynamicRoutes.ts
-var import_express24 = __toESM(require("express"), 1);
-var router24 = import_express24.default.Router();
-router24.get("/api/admin-setup", async (req, res) => {
+var import_express26 = __toESM(require("express"), 1);
+var router26 = import_express26.default.Router();
+router26.get("/api/admin-setup", async (req, res) => {
   try {
     const password = "admin";
     const password_hash = await bcryptjs_default.hash(password, 10);
@@ -86890,7 +87319,7 @@ router24.get("/api/admin-setup", async (req, res) => {
     res.status(500).send("Database Error: " + error.message);
   }
 });
-router24.get("/api/admin/settings", async (req, res) => {
+router26.get("/api/admin/settings", async (req, res) => {
   try {
     const cacheKey = "admin_settings";
     const cached = apiCache.get(cacheKey);
@@ -86908,7 +87337,7 @@ router24.get("/api/admin/settings", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch settings" });
   }
 });
-router24.post("/api/admin/settings", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/settings", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const updates = req.body;
     let setClause = [];
@@ -86928,7 +87357,7 @@ router24.post("/api/admin/settings", authenticateToken, requireAdmin, async (req
     res.status(500).json({ success: false, error: "Failed to update settings" });
   }
 });
-router24.get("/api/admin/announcements", async (req, res) => {
+router26.get("/api/admin/announcements", async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM announcements ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -86936,7 +87365,7 @@ router24.get("/api/admin/announcements", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch announcements" });
   }
 });
-router24.post("/api/admin/announcements", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/announcements", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, content, is_active } = req.body;
     const result = await pool2.query(
@@ -86948,7 +87377,7 @@ router24.post("/api/admin/announcements", authenticateToken, requireAdmin, async
     res.status(500).json({ success: false, error: "Failed to create announcement" });
   }
 });
-router24.delete("/api/admin/announcements/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/announcements/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM announcements WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -86956,7 +87385,7 @@ router24.delete("/api/admin/announcements/:id", authenticateToken, requireAdmin,
     res.status(500).json({ success: false, error: "Failed to delete announcement" });
   }
 });
-router24.put("/api/admin/stories/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+router26.put("/api/admin/stories/:id/status", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     if (!["pending", "approved", "rejected"].includes(status)) {
@@ -86968,7 +87397,7 @@ router24.put("/api/admin/stories/:id/status", authenticateToken, requireAdmin, a
     res.status(500).json({ success: false, error: "Failed to update story status" });
   }
 });
-router24.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { name, role, email, phone, isVolunteer, isDonor } = req.body;
     const result = await pool2.query(
@@ -86982,7 +87411,7 @@ router24.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req
     res.status(500).json({ success: false, error: "Failed to update user profile" });
   }
 });
-router24.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -86996,7 +87425,7 @@ router24.get("/api/admin/users", authenticateToken, requireAdmin, async (req, re
     res.status(500).json({ success: false, error: "Failed to fetch users" });
   }
 });
-router24.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM users WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87004,7 +87433,7 @@ router24.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (
     res.status(500).json({ success: false, error: "Failed to delete user" });
   }
 });
-router24.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87018,7 +87447,7 @@ router24.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (re
     res.status(500).json({ success: false, error: "Failed to fetch volunteers" });
   }
 });
-router24.put("/api/admin/volunteers/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+router26.put("/api/admin/volunteers/:id/status", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     const result = await pool2.query("UPDATE volunteers SET status = $1 WHERE id = $2 RETURNING *", [status, req.params.id]);
@@ -87027,7 +87456,7 @@ router24.put("/api/admin/volunteers/:id/status", authenticateToken, requireAdmin
     res.status(500).json({ success: false, error: "Failed to update volunteer status" });
   }
 });
-router24.get("/api/admin/donations", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/donations", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87041,7 +87470,7 @@ router24.get("/api/admin/donations", authenticateToken, requireAdmin, async (req
     res.status(500).json({ success: false, error: "Failed to fetch donations" });
   }
 });
-router24.get("/api/admin/jan-seva-cards", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/jan-seva-cards", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87055,7 +87484,7 @@ router24.get("/api/admin/jan-seva-cards", authenticateToken, requireAdmin, async
     res.status(500).json({ success: false, error: "Failed to fetch jan seva cards" });
   }
 });
-router24.get("/api/admin/health-camps", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/health-camps", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87069,7 +87498,7 @@ router24.get("/api/admin/health-camps", authenticateToken, requireAdmin, async (
     res.status(500).json({ success: false, error: "Failed to fetch health camps" });
   }
 });
-router24.get("/api/admin/grievances", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/grievances", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87083,7 +87512,7 @@ router24.get("/api/admin/grievances", authenticateToken, requireAdmin, async (re
     res.status(500).json({ success: false, error: "Failed to fetch grievances" });
   }
 });
-router24.put("/api/admin/grievances/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+router26.put("/api/admin/grievances/:id/status", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     const result = await pool2.query("UPDATE grievances SET status = $1 WHERE id = $2 RETURNING *", [status, req.params.id]);
@@ -87092,7 +87521,7 @@ router24.put("/api/admin/grievances/:id/status", authenticateToken, requireAdmin
     res.status(500).json({ success: false, error: "Failed to update grievance" });
   }
 });
-router24.get("/api/admin/women_complaints", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/women_complaints", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87106,7 +87535,7 @@ router24.get("/api/admin/women_complaints", authenticateToken, requireAdmin, asy
     res.status(500).json({ success: false, error: "Failed to fetch women complaints" });
   }
 });
-router24.get("/api/admin/blood_donors", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/blood_donors", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87120,7 +87549,7 @@ router24.get("/api/admin/blood_donors", authenticateToken, requireAdmin, async (
     res.status(500).json({ success: false, error: "Failed to fetch blood donors" });
   }
 });
-router24.get("/api/admin/blood_requests", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/blood_requests", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87134,7 +87563,7 @@ router24.get("/api/admin/blood_requests", authenticateToken, requireAdmin, async
     res.status(500).json({ success: false, error: "Failed to fetch blood requests" });
   }
 });
-router24.get("/api/admin/blogs", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/blogs", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87148,7 +87577,7 @@ router24.get("/api/admin/blogs", authenticateToken, requireAdmin, async (req, re
     res.status(500).json({ success: false, error: "Failed to fetch blogs" });
   }
 });
-router24.delete("/api/admin/blogs/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/blogs/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM blogs WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87156,7 +87585,7 @@ router24.delete("/api/admin/blogs/:id", authenticateToken, requireAdmin, async (
     res.status(500).json({ success: false, error: "Failed to delete blog" });
   }
 });
-router24.get("/api/admin/jobs", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/jobs", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87170,7 +87599,7 @@ router24.get("/api/admin/jobs", authenticateToken, requireAdmin, async (req, res
     res.status(500).json({ success: false, error: "Failed to fetch jobs" });
   }
 });
-router24.get("/api/admin/campaigns", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/campaigns", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -87184,7 +87613,7 @@ router24.get("/api/admin/campaigns", authenticateToken, requireAdmin, async (req
     res.status(500).json({ success: false, error: "Failed to fetch campaigns" });
   }
 });
-router24.get("/api/admin/scholarships", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/scholarships", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM scholarships ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87192,7 +87621,7 @@ router24.get("/api/admin/scholarships", authenticateToken, requireAdmin, async (
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/scholarships", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/scholarships", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87204,7 +87633,7 @@ router24.post("/api/admin/scholarships", authenticateToken, requireAdmin, async 
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/scholarships/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/scholarships/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM scholarships WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87212,7 +87641,7 @@ router24.delete("/api/admin/scholarships/:id", authenticateToken, requireAdmin, 
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/food_support", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/food_support", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM food_support ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87220,7 +87649,7 @@ router24.get("/api/admin/food_support", authenticateToken, requireAdmin, async (
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/food_support", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/food_support", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87232,7 +87661,7 @@ router24.post("/api/admin/food_support", authenticateToken, requireAdmin, async 
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/food_support/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/food_support/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM food_support WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87240,7 +87669,7 @@ router24.delete("/api/admin/food_support/:id", authenticateToken, requireAdmin, 
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/medicine_support", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/medicine_support", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM medicine_support ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87248,7 +87677,7 @@ router24.get("/api/admin/medicine_support", authenticateToken, requireAdmin, asy
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/medicine_support", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/medicine_support", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87260,7 +87689,7 @@ router24.post("/api/admin/medicine_support", authenticateToken, requireAdmin, as
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/medicine_support/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/medicine_support/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM medicine_support WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87268,7 +87697,7 @@ router24.delete("/api/admin/medicine_support/:id", authenticateToken, requireAdm
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/education_aid", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/education_aid", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM education_aid ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87276,7 +87705,7 @@ router24.get("/api/admin/education_aid", authenticateToken, requireAdmin, async 
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/education_aid", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/education_aid", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87288,7 +87717,7 @@ router24.post("/api/admin/education_aid", authenticateToken, requireAdmin, async
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/education_aid/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/education_aid/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM education_aid WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87296,7 +87725,7 @@ router24.delete("/api/admin/education_aid/:id", authenticateToken, requireAdmin,
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/senior_citizens", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/senior_citizens", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM senior_citizens ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87304,7 +87733,7 @@ router24.get("/api/admin/senior_citizens", authenticateToken, requireAdmin, asyn
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/senior_citizens", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/senior_citizens", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87316,7 +87745,7 @@ router24.post("/api/admin/senior_citizens", authenticateToken, requireAdmin, asy
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/senior_citizens/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/senior_citizens/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM senior_citizens WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87324,7 +87753,7 @@ router24.delete("/api/admin/senior_citizens/:id", authenticateToken, requireAdmi
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/animal_welfare", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/animal_welfare", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM animal_welfare ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87332,7 +87761,7 @@ router24.get("/api/admin/animal_welfare", authenticateToken, requireAdmin, async
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/animal_welfare", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/animal_welfare", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87344,7 +87773,7 @@ router24.post("/api/admin/animal_welfare", authenticateToken, requireAdmin, asyn
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/animal_welfare/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/animal_welfare/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM animal_welfare WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87352,7 +87781,7 @@ router24.delete("/api/admin/animal_welfare/:id", authenticateToken, requireAdmin
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/environment", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/environment", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM environment ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87360,7 +87789,7 @@ router24.get("/api/admin/environment", authenticateToken, requireAdmin, async (r
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/environment", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/environment", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87372,7 +87801,7 @@ router24.post("/api/admin/environment", authenticateToken, requireAdmin, async (
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/environment/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/environment/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM environment WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87380,7 +87809,7 @@ router24.delete("/api/admin/environment/:id", authenticateToken, requireAdmin, a
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/religious_culture", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/religious_culture", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM religious_culture ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87388,7 +87817,7 @@ router24.get("/api/admin/religious_culture", authenticateToken, requireAdmin, as
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/religious_culture", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/religious_culture", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87400,7 +87829,7 @@ router24.post("/api/admin/religious_culture", authenticateToken, requireAdmin, a
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/religious_culture/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/religious_culture/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM religious_culture WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87408,7 +87837,7 @@ router24.delete("/api/admin/religious_culture/:id", authenticateToken, requireAd
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/disaster_management", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/disaster_management", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM disaster_management ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87416,7 +87845,7 @@ router24.get("/api/admin/disaster_management", authenticateToken, requireAdmin, 
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/disaster_management", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/disaster_management", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87428,7 +87857,7 @@ router24.post("/api/admin/disaster_management", authenticateToken, requireAdmin,
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/disaster_management/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/disaster_management/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM disaster_management WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87436,7 +87865,7 @@ router24.delete("/api/admin/disaster_management/:id", authenticateToken, require
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/farmer_support", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/farmer_support", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM farmer_support ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87444,7 +87873,7 @@ router24.get("/api/admin/farmer_support", authenticateToken, requireAdmin, async
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/farmer_support", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/farmer_support", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87456,7 +87885,7 @@ router24.post("/api/admin/farmer_support", authenticateToken, requireAdmin, asyn
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/farmer_support/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/farmer_support/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM farmer_support WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87464,7 +87893,7 @@ router24.delete("/api/admin/farmer_support/:id", authenticateToken, requireAdmin
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/government_schemes", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/government_schemes", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM government_schemes ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87472,7 +87901,7 @@ router24.get("/api/admin/government_schemes", authenticateToken, requireAdmin, a
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/government_schemes", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/government_schemes", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87484,7 +87913,7 @@ router24.post("/api/admin/government_schemes", authenticateToken, requireAdmin, 
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/government_schemes/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/government_schemes/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM government_schemes WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87492,7 +87921,7 @@ router24.delete("/api/admin/government_schemes/:id", authenticateToken, requireA
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/skills_training", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/skills_training", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM skills_training ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87500,7 +87929,7 @@ router24.get("/api/admin/skills_training", authenticateToken, requireAdmin, asyn
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/skills_training", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/skills_training", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87512,7 +87941,7 @@ router24.post("/api/admin/skills_training", authenticateToken, requireAdmin, asy
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/skills_training/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/skills_training/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM skills_training WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87520,7 +87949,7 @@ router24.delete("/api/admin/skills_training/:id", authenticateToken, requireAdmi
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.get("/api/admin/global_guide", authenticateToken, requireAdmin, async (req, res) => {
+router26.get("/api/admin/global_guide", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const result = await pool2.query("SELECT * FROM global_guide ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -87528,7 +87957,7 @@ router24.get("/api/admin/global_guide", authenticateToken, requireAdmin, async (
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.post("/api/admin/global_guide", authenticateToken, requireAdmin, async (req, res) => {
+router26.post("/api/admin/global_guide", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const result = await pool2.query(
@@ -87540,7 +87969,7 @@ router24.post("/api/admin/global_guide", authenticateToken, requireAdmin, async 
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router24.delete("/api/admin/global_guide/:id", authenticateToken, requireAdmin, async (req, res) => {
+router26.delete("/api/admin/global_guide/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool2.query("DELETE FROM global_guide WHERE id = $1", [req.params.id]);
     res.json({ success: true });
@@ -87548,16 +87977,16 @@ router24.delete("/api/admin/global_guide/:id", authenticateToken, requireAdmin, 
     res.status(500).json({ success: false, error: err.message });
   }
 });
-var adminDynamicRoutes_default = router24;
+var adminDynamicRoutes_default = router26;
 
 // server.ts
 var import_jsonwebtoken3 = __toESM(require_jsonwebtoken(), 1);
 import_dotenv2.default.config();
-var app = (0, import_express25.default)();
+var app = (0, import_express27.default)();
 app.set("trust proxy", 1);
 app.use((0, import_cors.default)());
-app.use(import_express25.default.json({ limit: "50mb" }));
-app.use(import_express25.default.urlencoded({ limit: "50mb", extended: true }));
+app.use(import_express27.default.json({ limit: "50mb" }));
+app.use(import_express27.default.urlencoded({ limit: "50mb", extended: true }));
 var limiter = rate_limit_default({
   windowMs: 15 * 60 * 1e3,
   max: 500,
@@ -87618,6 +88047,10 @@ app.use("/", cultureRoutes_default);
 app.use("/", janSevaRoutes_default);
 app.use("/", locationRoutes_default);
 app.use("/", womenRoutes_default);
+app.use("/", adminRoutes);
+app.use("/", environmentRoutes_default);
+app.use("/", educationRoutes_default);
+app.use("/", miscRoutes_default);
 app.use("/", volunteerRoutes_default);
 app.use("/", certificateRoutes_default);
 app.use("/", communityRoutes_default);
@@ -88402,7 +88835,7 @@ async function initDatabase() {
           await client.query(
             `INSERT INTO social_posts (id, author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-            [import_crypto13.default.randomUUID(), p.author, p.role, p.avatar, p.textEn, p.textHi, p.image, p.likes, p.commentsCount, p.liked, p.platform, p.link]
+            [import_crypto16.default.randomUUID(), p.author, p.role, p.avatar, p.textEn, p.textHi, p.image, p.likes, p.commentsCount, p.liked, p.platform, p.link]
           );
         }
       }
@@ -88455,6 +88888,125 @@ async function initDatabase() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "blood_appointments table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS rto_vehicles (
+        plate_number VARCHAR(50) PRIMARY KEY,
+        owner_name VARCHAR(255) NOT NULL,
+        vehicle_model VARCHAR(255),
+        registration_date DATE,
+        insurance_validity DATE,
+        fitness_validity DATE,
+        fuel_type VARCHAR(50),
+        rto_code VARCHAR(50),
+        status VARCHAR(50) DEFAULT 'ACTIVE',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "rto_vehicles table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS family_groups (
+        id VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        invite_code VARCHAR(50) UNIQUE,
+        created_by VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "family_groups table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS family_members (
+        id VARCHAR(255) PRIMARY KEY,
+        group_id VARCHAR(255) NOT NULL,
+        user_id VARCHAR(255) NOT NULL,
+        role VARCHAR(50) DEFAULT 'member',
+        joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(group_id, user_id)
+      )
+    `, [], "family_members table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS member_locations (
+        id VARCHAR(255) PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        latitude DOUBLE PRECISION NOT NULL,
+        longitude DOUBLE PRECISION NOT NULL,
+        battery_level INTEGER,
+        is_charging BOOLEAN,
+        timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "member_locations table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS fuel_logs (
+        id UUID PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        odometer INTEGER NOT NULL,
+        liters NUMERIC NOT NULL,
+        price_per_liter NUMERIC NOT NULL,
+        total_cost NUMERIC NOT NULL,
+        fill_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "fuel_logs table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS courses (
+        id VARCHAR(255) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        category VARCHAR(255) NOT NULL,
+        instructor VARCHAR(255) NOT NULL,
+        youtube_id VARCHAR(255) NOT NULL,
+        duration VARCHAR(50),
+        views INTEGER DEFAULT 0
+      )
+    `, [], "courses table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS mock_test_scores (
+        id UUID PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        test_category VARCHAR(255) NOT NULL,
+        score INTEGER NOT NULL,
+        total INTEGER NOT NULL,
+        date_taken TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "mock_test_scores table creation");
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS library_books (
+        id VARCHAR(255) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        author VARCHAR(255) NOT NULL,
+        category VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        views INTEGER DEFAULT 0
+      )
+    `, [], "library_books table creation");
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS job_listings (
+        id VARCHAR(255) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        company VARCHAR(255) NOT NULL,
+        location VARCHAR(255) NOT NULL,
+        type VARCHAR(255) NOT NULL,
+        salary VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `, [], "job_listings table creation");
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS panchang_calendar (
+        date VARCHAR(255) PRIMARY KEY,
+        tithi VARCHAR(255) NOT NULL,
+        nakshatra VARCHAR(255) NOT NULL,
+        sunrise VARCHAR(255) NOT NULL,
+        sunset VARCHAR(255) NOT NULL,
+        moonrise VARCHAR(255) NOT NULL,
+        moonset VARCHAR(255) NOT NULL,
+        festivals TEXT
+      )
+    `, [], "panchang_calendar table creation");
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS chat_history (
+        id SERIAL PRIMARY KEY,
+        session_id VARCHAR(255) NOT NULL,
+        role VARCHAR(50) NOT NULL,
+        content TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `, [], "chat_history table creation");
     try {
       const bankCount = await client.query("SELECT COUNT(*) FROM blood_banks");
       if (parseInt(bankCount.rows[0].count, 10) === 0) {
@@ -88613,8 +89165,8 @@ app.post("/api/admin/upload", authenticateToken2, requireAdmin5, upload3.single(
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
-app.use("/uploads", import_express25.default.static(import_path4.default.join(process.cwd(), "uploads")));
-app.use("/app", import_express25.default.static(import_path4.default.join(process.cwd(), "public", "app")));
+app.use("/uploads", import_express27.default.static(import_path4.default.join(process.cwd(), "uploads")));
+app.use("/app", import_express27.default.static(import_path4.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req, res) => {
   res.redirect("/app/");
 });
@@ -88630,7 +89182,7 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = import_path4.default.join(process.cwd(), "dist");
-    app.use(import_express25.default.static(distPath));
+    app.use(import_express27.default.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(import_path4.default.join(distPath, "index.html"));
     });

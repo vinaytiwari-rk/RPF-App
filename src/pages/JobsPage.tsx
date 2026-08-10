@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { Briefcase, MapPin, DollarSign, UploadCloud, CheckCircle, ArrowLeft, Info, Calendar } from "lucide-react";
+import { Briefcase, MapPin, DollarSign, UploadCloud, CheckCircle, ArrowLeft, Info, Calendar, FileText, Download } from "lucide-react";
+import { jsPDF } from "jspdf";
 // import axios from 'axios';
 import { useAuth } from "../context/AuthContext";
 import { VoiceSearch } from "../components/VoiceSearch";
@@ -35,7 +36,15 @@ export default function JobsPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [subPage, setSubPage] = useState<"portal" | "remote" | "tools">("portal");
+  const [subPage, setSubPage] = useState<"portal" | "remote" | "resume" | "tools">("portal");
+
+  // --- RESUME BUILDER STATE ---
+  const [resumeName, setResumeName] = useState("");
+  const [resumeEmail, setResumeEmail] = useState("");
+  const [resumePhone, setResumePhone] = useState("");
+  const [resumeSkills, setResumeSkills] = useState("");
+  const [resumeExp, setResumeExp] = useState("");
+  const [resumeEdu, setResumeEdu] = useState("");
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
@@ -200,6 +209,14 @@ export default function JobsPage() {
           }`}
         >
           {lang === "hi" ? "रिमोट (WFH)" : "Remote Jobs"}
+        </button>
+        <button 
+          onClick={() => setSubPage("resume")}
+          className={`flex-1 py-2 text-center rounded-lg text-[10px] font-black transition cursor-pointer ${
+            subPage === "resume" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {lang === "hi" ? "रिज्यूम मेकर" : "CV Maker"}
         </button>
         <button 
           onClick={() => {
@@ -424,6 +441,98 @@ export default function JobsPage() {
         </div>
       </div>
         </>
+      )}
+
+      {subPage === "resume" && (
+        <div className="space-y-4 relative z-10 animate-fadeIn">
+          <div className="border-b border-slate-200/80 pb-2.5 flex items-center gap-3">
+            <div className="p-2 bg-indigo-50 text-indigo-700 rounded-lg">
+              <FileText className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-display font-extrabold text-base text-slate-900">
+                {lang === "hi" ? "स्मार्ट रिज्यूम मेकर" : "Smart Resume Builder"}
+              </h3>
+              <p className="text-[10px] text-slate-500 font-bold">
+                {lang === "hi" ? "मुफ़्त में अपना पेशेवर बायोडाटा बनाएँ" : "Generate your professional CV for free"}
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-white p-5 border border-slate-200 rounded-2xl shadow-sm space-y-4">
+            <div>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Full Name / पूरा नाम</label>
+              <input type="text" value={resumeName} onChange={e => setResumeName(e.target.value)} placeholder="Rahul Kumar" className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-[#000080]" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Email / ईमेल</label>
+                <input type="email" value={resumeEmail} onChange={e => setResumeEmail(e.target.value)} placeholder="rahul@email.com" className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-[#000080]" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Phone / फोन</label>
+                <input type="tel" value={resumePhone} onChange={e => setResumePhone(e.target.value)} placeholder="9999999999" className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-[#000080]" />
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Skills / कौशल (Comma separated)</label>
+              <input type="text" value={resumeSkills} onChange={e => setResumeSkills(e.target.value)} placeholder="MS Word, Tally, Hindi Typing" className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-[#000080]" />
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Experience / अनुभव</label>
+              <textarea value={resumeExp} onChange={e => setResumeExp(e.target.value)} placeholder="2 years at XYZ Store as Cashier..." className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-[#000080] min-h-[60px]" />
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Education / शिक्षा</label>
+              <textarea value={resumeEdu} onChange={e => setResumeEdu(e.target.value)} placeholder="12th Pass from MP Board, 2021..." className="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-[#000080] min-h-[60px]" />
+            </div>
+            
+            <button 
+              onClick={() => {
+                const doc = new jsPDF();
+                doc.setFont("helvetica");
+                doc.setFontSize(22);
+                doc.text(resumeName || "Your Name", 20, 20);
+                
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text(`${resumeEmail} | ${resumePhone}`, 20, 28);
+                
+                doc.setTextColor(0);
+                doc.setFontSize(14);
+                doc.text("SKILLS", 20, 45);
+                doc.setLineWidth(0.5);
+                doc.line(20, 47, 190, 47);
+                doc.setFontSize(11);
+                doc.text(resumeSkills || "No skills listed", 20, 55);
+                
+                doc.setFontSize(14);
+                doc.text("EXPERIENCE", 20, 75);
+                doc.line(20, 77, 190, 77);
+                doc.setFontSize(11);
+                const splitExp = doc.splitTextToSize(resumeExp || "No experience listed", 170);
+                doc.text(splitExp, 20, 85);
+                
+                const expHeight = splitExp.length * 5;
+                const nextY = 85 + expHeight + 15;
+                
+                doc.setFontSize(14);
+                doc.text("EDUCATION", 20, nextY);
+                doc.line(20, nextY + 2, 190, nextY + 2);
+                doc.setFontSize(11);
+                const splitEdu = doc.splitTextToSize(resumeEdu || "No education listed", 170);
+                doc.text(splitEdu, 20, nextY + 10);
+                
+                doc.save(`${resumeName.replace(/\s+/g, '_') || 'Resume'}_CV.pdf`);
+              }}
+              disabled={!resumeName || !resumePhone}
+              className="w-full bg-[#000080] hover:bg-indigo-950 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              {lang === "hi" ? "पीडीएफ डाउनलोड करें" : "Download PDF Resume"}
+            </button>
+          </div>
+        </div>
       )}
 
       {subPage === "remote" && (

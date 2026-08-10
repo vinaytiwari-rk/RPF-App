@@ -283,7 +283,7 @@ export default function MainLayout() {
         </div>
 
         {/* FIXED BOTTOM NAVIGATION BAR */}
-        <motion.div initial={{ y: 100 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }} className="w-full bg-white/95 border-t border-slate-200/60 rounded-t-[28px] shadow-[0_-8px_30px_rgba(28,45,66,0.08)] flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0"
+        <motion.div initial={{ y: 100 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }} className="w-full glass-card rounded-t-[28px] rounded-b-none border-b-0 flex justify-around items-center px-1 pb-safe select-none z-50 shrink-0"
         >
           
           <motion.button 

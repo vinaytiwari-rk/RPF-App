@@ -91,7 +91,7 @@ export default function GenericAdminTab({ endpoint, title, columns = ["title", "
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="glass-card overflow-hidden">
         <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-sm font-bold text-slate-800">Add New {title}</h2>
         </div>
@@ -134,7 +134,7 @@ export default function GenericAdminTab({ endpoint, title, columns = ["title", "
         </form>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="glass-card overflow-hidden">
         <div className="bg-slate-50 px-6 py-4 border-b border-slate-100">
           <h2 className="text-sm font-bold text-slate-800">Manage {title}</h2>
         </div>

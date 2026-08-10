@@ -2,9 +2,21 @@ import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { 
   Leaf, CheckCircle, Wind, Sun, CloudRain, CloudSun, Thermometer, 
-  Droplets, ShieldAlert, Award, FileText, ChevronRight, Share2 
+  Droplets, ShieldAlert, Award, FileText, ChevronRight, Share2, 
+  Fuel, Map, Activity, Compass, Target, Navigation
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+// Leaflet icon fix
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
 
 // Open-Meteo weather code → short label
 function getCondition(code: number, isHi: boolean): string {
@@ -41,7 +53,15 @@ export default function EnvironmentPage() {
 
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
+  const [subPage, setSubPage] = useState<"portal" | "tools" | "fuel" | "maps">("portal");
+  
+  // Fuel & Earthquake States
+  const [fuelLogs, setFuelLogs] = useState<any[]>([]);
+  const [earthquakes, setEarthquakes] = useState<any[]>([]);
+  
+  // GPS State
+  const [gpsData, setGpsData] = useState({ speed: 0, heading: 0, altitude: 0 });
+  const [gpsActive, setGpsActive] = useState(false);
   const [dynamicWeather, setDynamicWeather] = useState<{
     temp: string;
     condition: string;
@@ -147,6 +167,108 @@ export default function EnvironmentPage() {
     };
   }, [isHi]);
 
+  // --- MAPS & FUEL DATA EFFECTS ---
+  useEffect(() => {
+    if (subPage === "maps") {
+      fetch("/api/env/earthquakes")
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data.features) {
+            setEarthquakes(data.data.features);
+          }
+        })
+        .catch(console.error);
+
+      // Start GPS
+      setGpsActive(true);
+      let watchId: number;
+      if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            setGpsData({
+              speed: pos.coords.speed || 0,
+              heading: pos.coords.heading || 0,
+              altitude: pos.coords.altitude || 0
+            });
+          },
+          console.error,
+          { enableHighAccuracy: true }
+        );
+      }
+      return () => {
+        setGpsActive(false);
+        if (watchId) navigator.geolocation.clearWatch(watchId);
+      };
+    }
+  }, [subPage]);
+
+  const loadFuelLogs = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const res = await fetch("/api/env/fuel", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFuelLogs(data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (subPage === "fuel") {
+      loadFuelLogs();
+    }
+  }, [subPage]);
+
+  // --- FUEL INPUT STATES ---
+  const [fuelForm, setFuelForm] = useState({ odometer: "", liters: "", price: "" });
+  const [fuelLoading, setFuelLoading] = useState(false);
+
+  const addFuelLog = async () => {
+    if (!fuelForm.odometer || !fuelForm.liters || !fuelForm.price) return;
+    setFuelLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      await fetch("/api/env/fuel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          odometer: Number(fuelForm.odometer),
+          liters: Number(fuelForm.liters),
+          price_per_liter: Number(fuelForm.price)
+        })
+      });
+      setFuelForm({ odometer: "", liters: "", price: "" });
+      loadFuelLogs();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFuelLoading(false);
+    }
+  };
+
+  const deleteFuelLog = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      await fetch(`/api/env/fuel/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      loadFuelLogs();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
   const [monthlyElectricity, setMonthlyElectricity] = useState(150); // kWh
@@ -246,11 +368,11 @@ export default function EnvironmentPage() {
   return (
     <div className="p-4 space-y-5 animate-fadeIn pb-24">
       {/* Top Switcher Tab Bar */}
-      <div className="flex bg-slate-100 border border-slate-200 p-1 rounded-xl shadow-inner shrink-0">
+      <div className="flex flex-wrap gap-2 bg-slate-100 border border-slate-200 p-1.5 rounded-xl shadow-inner shrink-0">
         <button 
           onClick={() => setSubPage("portal")}
-          className={`flex-1 py-2 text-center rounded-lg text-xs font-black transition cursor-pointer ${
-            subPage === "portal" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          className={`flex-1 min-w-[80px] py-2 text-center rounded-lg text-xs font-black transition cursor-pointer ${
+            subPage === "portal" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800 hover:bg-slate-200"
           }`}
         >
           {isHi ? "पर्यावरण सेवा" : "Eco Portal"}
@@ -260,11 +382,29 @@ export default function EnvironmentPage() {
             setSubPage("tools");
             if (!activeCalc) setActiveCalc("carbon");
           }}
-          className={`flex-1 text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
-            subPage === "tools" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800"
+          className={`flex-1 min-w-[80px] text-center py-2 rounded-lg text-xs font-black transition cursor-pointer ${
+            subPage === "tools" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800 hover:bg-slate-200"
           }`}
         >
-          {isHi ? "स्मार्ट पर्यावरण टूल्स" : "Savings Planners"}
+          {isHi ? "स्मार्ट टूल्स" : "Savings Planners"}
+        </button>
+        <button 
+          onClick={() => setSubPage("fuel")}
+          className={`flex-1 min-w-[80px] text-center py-2 rounded-lg text-xs font-black transition cursor-pointer flex justify-center items-center gap-1.5 ${
+            subPage === "fuel" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800 hover:bg-slate-200"
+          }`}
+        >
+          <Fuel className="w-3.5 h-3.5" />
+          {isHi ? "ईंधन लॉग" : "Fuel Logs"}
+        </button>
+        <button 
+          onClick={() => setSubPage("maps")}
+          className={`flex-1 min-w-[80px] text-center py-2 rounded-lg text-xs font-black transition cursor-pointer flex justify-center items-center gap-1.5 ${
+            subPage === "maps" ? "bg-[#000080] text-white shadow" : "text-slate-500 hover:text-slate-800 hover:bg-slate-200"
+          }`}
+        >
+          <Map className="w-3.5 h-3.5" />
+          {isHi ? "लाइव मैप" : "Earthquakes & GPS"}
         </button>
       </div>
 
@@ -590,6 +730,177 @@ export default function EnvironmentPage() {
         )}
       </div>
       )}
+
+      {/* --- FUEL LOGS TAB (FUELIO CLONE) --- */}
+      {subPage === "fuel" && (
+        <div className="space-y-4 animate-fadeIn">
+          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-5 shadow-sm space-y-2">
+            <h3 className="font-display font-extrabold text-base text-indigo-900 flex items-center gap-2">
+              <Fuel className="w-5 h-5 text-indigo-600 fill-indigo-600" />
+              {isHi ? "वाहन ईंधन व खर्च ट्रैकर" : "Vehicle Fuel & Expense Tracker"}
+            </h3>
+            <p className="text-xs text-slate-650 leading-relaxed">
+              {isHi ? "अपने वाहन के माइलेज और ईंधन खर्च का हिसाब रखें।" : "Log your fill-ups to calculate average mileage and track monthly costs."}
+            </p>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-4">
+            <h4 className="font-display font-bold text-xs text-slate-700">{isHi ? "नया रिकॉर्ड जोड़ें" : "Log Fill-up"}</h4>
+            
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 mb-1 block">Odometer (km)</label>
+                <input 
+                  type="number"
+                  value={fuelForm.odometer}
+                  onChange={(e) => setFuelForm({ ...fuelForm, odometer: e.target.value })}
+                  placeholder="e.g. 15400"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 mb-1 block">Liters</label>
+                <input 
+                  type="number"
+                  value={fuelForm.liters}
+                  onChange={(e) => setFuelForm({ ...fuelForm, liters: e.target.value })}
+                  placeholder="e.g. 5.5"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 mb-1 block">₹ / Liter</label>
+                <input 
+                  type="number"
+                  value={fuelForm.price}
+                  onChange={(e) => setFuelForm({ ...fuelForm, price: e.target.value })}
+                  placeholder="e.g. 102"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+            
+            <button
+              onClick={addFuelLog}
+              disabled={fuelLoading}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-3 text-xs font-bold transition disabled:opacity-50"
+            >
+              {fuelLoading ? "Saving..." : (isHi ? "लॉग सेव करें" : "Save Log")}
+            </button>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+            <h4 className="font-display font-bold text-xs text-slate-700">{isHi ? "हाल के ईंधन लॉग" : "Recent Logs"}</h4>
+            {fuelLogs.length === 0 ? (
+              <p className="text-xs text-slate-400 italic text-center py-4">{isHi ? "कोई रिकॉर्ड नहीं मिला" : "No logs found."}</p>
+            ) : (
+              <div className="space-y-2">
+                {fuelLogs.map((log) => (
+                  <div key={log.id} className="flex justify-between items-center bg-slate-50 border border-slate-100 rounded-xl p-3">
+                    <div>
+                      <p className="text-xs font-black text-slate-800">{Number(log.total_cost).toFixed(2)} ₹</p>
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        {log.liters} L @ ₹{log.price_per_liter} / L • ODO: {log.odometer} km
+                      </p>
+                      <p className="text-[9px] text-slate-400 mt-1">{new Date(log.fill_date).toLocaleString()}</p>
+                    </div>
+                    <button onClick={() => deleteFuelLog(log.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg">
+                      <ShieldAlert className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* --- MAPS & GPS TAB (EARTHQUAKES PRO & GPS TOOLKIT) --- */}
+      {subPage === "maps" && (
+        <div className="space-y-4 animate-fadeIn">
+          {/* GPS Toolkit */}
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 shadow-sm text-white">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-display font-bold text-xs flex items-center gap-2">
+                <Navigation className="w-4 h-4 text-sky-400" />
+                {isHi ? "लाइव जीपीएस टूलकिट" : "Live GPS Toolkit"}
+              </h4>
+              <div className="flex items-center gap-1.5 text-[9px] font-bold bg-slate-800 px-2 py-1 rounded-full text-green-400">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                ACTIVE
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-slate-800 rounded-xl p-3 text-center border border-slate-700">
+                <Activity className="w-5 h-5 text-rose-400 mx-auto mb-1" />
+                <span className="block text-lg font-black">{Math.round(gpsData.speed * 3.6)}</span>
+                <span className="block text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1">Speed (km/h)</span>
+              </div>
+              <div className="bg-slate-800 rounded-xl p-3 text-center border border-slate-700">
+                <Compass className="w-5 h-5 text-amber-400 mx-auto mb-1" />
+                <span className="block text-lg font-black">{Math.round(gpsData.heading)}°</span>
+                <span className="block text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1">Heading</span>
+              </div>
+              <div className="bg-slate-800 rounded-xl p-3 text-center border border-slate-700">
+                <Target className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
+                <span className="block text-lg font-black">{Math.round(gpsData.altitude)}</span>
+                <span className="block text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1">Altitude (m)</span>
+              </div>
+            </div>
+            <p className="text-[9px] text-slate-500 text-center mt-3 flex items-center justify-center gap-1">
+              <ShieldAlert className="w-3 h-3" />
+              Values may be 0 if tested on desktop without hardware sensors.
+            </p>
+          </div>
+
+          {/* Earthquake Radar */}
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[400px]">
+            <div className="p-4 bg-red-50 border-b border-red-100 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-red-600 animate-pulse" />
+              <div>
+                <h4 className="font-display font-bold text-xs text-red-900 leading-tight">
+                  {isHi ? "ग्लोबल भूकंप रडार" : "Global Earthquake Radar"}
+                </h4>
+                <p className="text-[9px] text-red-700 font-semibold uppercase tracking-widest mt-0.5">Live USGS Data • M2.5+</p>
+              </div>
+            </div>
+            <div className="flex-1 relative z-0">
+              <MapContainer 
+                center={[20, 78]} 
+                zoom={3} 
+                style={{ height: "100%", width: "100%" }}
+                zoomControl={false}
+              >
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                />
+                {earthquakes.map((eq, i) => {
+                  const mag = eq.properties.mag;
+                  const color = mag >= 6 ? "#ef4444" : mag >= 4.5 ? "#f97316" : "#eab308";
+                  return (
+                    <CircleMarker
+                      key={i}
+                      center={[eq.geometry.coordinates[1], eq.geometry.coordinates[0]]}
+                      radius={Math.max(mag * 2, 4)}
+                      pathOptions={{ color, fillColor: color, fillOpacity: 0.6, weight: 1 }}
+                    >
+                      <Popup>
+                        <div className="text-center font-sans">
+                          <strong className="block text-sm text-slate-800">M {mag}</strong>
+                          <span className="text-[10px] text-slate-500">{eq.properties.place}</span>
+                          <span className="block text-[9px] text-slate-400 mt-1">{new Date(eq.properties.time).toLocaleString()}</span>
+                        </div>
+                      </Popup>
+                    </CircleMarker>
+                  );
+                })}
+              </MapContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

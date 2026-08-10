@@ -302,7 +302,7 @@ export default function Home() {
       {/* Dynamic Important Notices */}
       {(globalSettings?.show_notices !== false && announcements && announcements.length > 0) && (
         <div className="px-4 relative z-10">
-          <div className="bg-white border border-amber-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="glass-card overflow-hidden !border-amber-200">
             <div className="bg-gradient-to-r from-amber-500 to-orange-400 px-4 py-2 flex items-center justify-between">
               <h3 className="font-display font-extrabold text-white text-xs uppercase tracking-wider flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4" /> 
@@ -331,7 +331,7 @@ export default function Home() {
 
       {/* Verified Emergency Helplines Widget */}
       <div className="px-4 relative z-10">
-        <div className="bg-white border border-red-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="glass-card overflow-hidden !border-red-200">
           <div className="bg-red-50 border-b border-red-100 px-4 py-2.5 flex items-center justify-between">
             <h3 className="font-display font-extrabold text-red-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
               <PhoneCall className="w-4 h-4 text-red-600" />
@@ -384,7 +384,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 bg-white border border-slate-200/60 rounded-2xl p-3.5 shadow-sm">
+        <div className="grid grid-cols-4 gap-2 glass-card p-3.5">
           <div className="text-center space-y-1">
             <span className="text-[14px] font-black text-slate-900 tracking-tight block">
               {stats.beneficiaries === 0 ? "0" : stats.beneficiaries >= 1000 ? `${(stats.beneficiaries / 1000).toFixed(1)}K+` : stats.beneficiaries}
@@ -443,7 +443,7 @@ export default function Home() {
         </div>
 
         <motion.div 
-          className="grid grid-cols-5 gap-2 bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm min-h-[90px] w-full justify-items-center"
+          className="grid grid-cols-5 gap-2 glass-card p-4 min-h-[90px] w-full justify-items-center"
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-50px" }}
@@ -484,7 +484,7 @@ export default function Home() {
         transition={{ duration: 0.6 }}
         className="px-4 relative z-10"
       >
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm relative overflow-hidden flex flex-col gap-2">
+        <div className="glass-card p-4 relative overflow-hidden flex flex-col gap-2">
           <div className="flex justify-between items-center">
              <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider">
                {lang === "hi" ? "आज का सुविचार" : "Quote of the Day"}
@@ -507,7 +507,7 @@ export default function Home() {
         transition={{ duration: 0.6 }}
         className="px-4 relative z-10"
       >
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+        <div className="glass-card p-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF9933]/5 rounded-full blur-xl"></div>
           
           <div className="flex items-start gap-4">
@@ -544,7 +544,7 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-4 mt-5">
 
           {/* Social Media Panel */}
-          <div className="bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="glass-card p-4 space-y-3">
             <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
               <Globe className="w-4 h-4 text-blue-600" />
               {lang === "hi" ? "आधिकारिक सोशल मीडिया" : "Follow Us"}

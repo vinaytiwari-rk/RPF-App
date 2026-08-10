@@ -286,7 +286,7 @@ export default function Profile() {
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden"
+            className="glass-card overflow-hidden"
           >
             <div className="bg-gradient-to-r from-emerald-500 to-emerald-700 px-4 py-3 flex items-center justify-between text-[#000080]">
               <div className="flex items-center gap-2">
@@ -344,7 +344,7 @@ export default function Profile() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+          className="glass-card overflow-hidden"
         >
           <div className="text-[9px] font-black text-slate-650 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100 px-4 py-2.5">
             Support & Info
@@ -378,7 +378,7 @@ export default function Profile() {
         </motion.div>
 
         {/* Help & Contact Panel with Social Media Links */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4">
+        <div className="glass-card p-4 space-y-4">
           <h4 className="font-display font-extrabold text-xs text-[#000080] uppercase tracking-wider">
             {isHi ? "सहायता एवं संपर्क" : "Help & Contact"}
           </h4>

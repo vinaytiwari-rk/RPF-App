@@ -8,9 +8,41 @@ export default function EducationSupport() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<"books" | "tutoring" | "elibrary">("books");
+  const [activeTab, setActiveTab] = useState<"books" | "tutoring" | "elibrary" | "courses" | "tests">("courses");
 
-  // Digital Library states
+  // E-Learning & Library States
+  const [courses, setCourses] = useState<any[]>([]);
+  const [libraryBooks, setLibraryBooks] = useState<any[]>([]);
+  const [activeBook, setActiveBook] = useState<any | null>(null);
+
+  // Mock Tests States
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [score, setScore] = useState(0);
+  const [testComplete, setTestComplete] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+
+  // UseEffect for data fetching
+  React.useEffect(() => {
+    if (activeTab === "courses" && courses.length === 0) {
+      fetch("/api/edu/courses")
+        .then(res => res.json())
+        .then(data => { if (data.success) setCourses(data.data); })
+        .catch(console.error);
+    } else if (activeTab === "tests" && questions.length === 0) {
+      fetch("/api/edu/tests/questions")
+        .then(res => res.json())
+        .then(data => { if (data.success) setQuestions(data.data); })
+        .catch(console.error);
+    } else if (activeTab === "elibrary" && libraryBooks.length === 0) {
+      fetch("/api/edu/library")
+        .then(res => res.json())
+        .then(data => { if (data.success) setLibraryBooks(data.data); })
+        .catch(console.error);
+    }
+  }, [activeTab]);
+
+  // Digital Library external search states
   const [libQuery, setLibQuery] = useState("");
   const [libResults, setLibResults] = useState<any[]>([]);
   const [libLoading, setLibLoading] = useState(false);
@@ -137,34 +169,171 @@ export default function EducationSupport() {
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm shrink-0">
+      <div className="flex bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm shrink-0 overflow-x-auto scrollbar-hide">
         <button 
-          onClick={() => setActiveTab("books")}
-          className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition border-b-2 cursor-pointer ${
-            activeTab === "books" ? "border-indigo-600 text-indigo-700" : "border-transparent text-slate-500 hover:text-slate-800"
+          onClick={() => setActiveTab("courses")}
+          className={`shrink-0 px-4 py-3 text-[11px] font-black uppercase tracking-wider transition border-b-2 cursor-pointer ${
+            activeTab === "courses" ? "border-indigo-600 text-indigo-700 bg-indigo-50/30" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          {lang === "hi" ? "पुस्तक बैंक व स्टेशनरी" : "Book Bank & Kits"}
+          {lang === "hi" ? "वीडियो कक्षाएं" : "E-Learning"}
         </button>
         <button 
-          onClick={() => setActiveTab("tutoring")}
-          className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition border-b-2 cursor-pointer ${
-            activeTab === "tutoring" ? "border-indigo-600 text-indigo-700" : "border-transparent text-slate-500 hover:text-slate-800"
+          onClick={() => setActiveTab("tests")}
+          className={`shrink-0 px-4 py-3 text-[11px] font-black uppercase tracking-wider transition border-b-2 cursor-pointer ${
+            activeTab === "tests" ? "border-indigo-600 text-indigo-700 bg-indigo-50/30" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          {lang === "hi" ? "निःशुल्क ट्यूशन" : "Free Tutoring"}
+          {lang === "hi" ? "मॉक टेस्ट" : "Mock Tests"}
         </button>
         <button 
           onClick={() => setActiveTab("elibrary")}
-          className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition border-b-2 cursor-pointer ${
-            activeTab === "elibrary" ? "border-indigo-600 text-indigo-700" : "border-transparent text-slate-500 hover:text-slate-800"
+          className={`shrink-0 px-4 py-3 text-[11px] font-black uppercase tracking-wider transition border-b-2 cursor-pointer ${
+            activeTab === "elibrary" ? "border-indigo-600 text-indigo-700 bg-indigo-50/30" : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          {lang === "hi" ? "ई-लाइब्रेरी" : "E-Library"}
+          {lang === "hi" ? "ई-लाइब्रेरी" : "Digital Library"}
+        </button>
+        <button 
+          onClick={() => setActiveTab("books")}
+          className={`shrink-0 px-4 py-3 text-[11px] font-black uppercase tracking-wider transition border-b-2 cursor-pointer ${
+            activeTab === "books" ? "border-indigo-600 text-indigo-700 bg-indigo-50/30" : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          {lang === "hi" ? "पुस्तक बैंक" : "Book Bank"}
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 pb-24 space-y-4">
+
+        {/* E-Learning (Unacademy Clone) */}
+        {activeTab === "courses" && (
+          <div className="space-y-4 animate-fadeIn">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-display font-extrabold text-[#000080] text-sm flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-indigo-600" />
+                {lang === "hi" ? "ई-लर्निंग पोर्टल" : "E-Learning Hub"}
+              </h3>
+            </div>
+            
+            <div className="grid gap-4">
+              {courses.map(course => (
+                <div key={course.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="aspect-video w-full bg-slate-900 relative">
+                    <iframe 
+                      className="w-full h-full absolute inset-0"
+                      src={`https://www.youtube.com/embed/${course.youtube_id}?rel=0`} 
+                      title={course.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                  <div className="p-4 space-y-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[9px] font-bold uppercase tracking-widest bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
+                        {course.category}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-semibold">{course.duration}</span>
+                    </div>
+                    <h4 className="font-display font-bold text-sm text-slate-800 leading-tight">
+                      {course.title}
+                    </h4>
+                    <p className="text-[11px] text-slate-600 flex items-center justify-between">
+                      <span>By {course.instructor}</span>
+                      <span className="text-slate-400">{course.views.toLocaleString()} views</span>
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Mock Tests (Testbook Clone) */}
+        {activeTab === "tests" && (
+          <div className="space-y-4 animate-fadeIn">
+            <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl p-5 text-white shadow-md">
+              <h3 className="font-display font-extrabold text-base flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                {lang === "hi" ? "मॉक टेस्ट प्रैक्टिस" : "Mock Test Practice"}
+              </h3>
+              <p className="text-xs text-indigo-100 mt-1 opacity-90">
+                {lang === "hi" ? "परीक्षाओं की तैयारी के लिए निःशुल्क अभ्यास करें।" : "Practice for exams with free mock tests."}
+              </p>
+            </div>
+
+            {testComplete ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-4">
+                <div className="w-20 h-20 bg-green-50 rounded-full flex flex-col items-center justify-center mx-auto border-4 border-green-100">
+                  <span className="text-2xl font-black text-green-600">{score}/{questions.length}</span>
+                </div>
+                <h4 className="font-display font-extrabold text-slate-800 text-lg">Test Completed!</h4>
+                <button 
+                  onClick={() => {
+                    setCurrentQuestion(0);
+                    setScore(0);
+                    setTestComplete(false);
+                    setSelectedAnswer(null);
+                  }}
+                  className="bg-[#000080] text-white px-6 py-2.5 rounded-xl font-bold text-xs"
+                >
+                  Retake Test
+                </button>
+              </div>
+            ) : questions.length > 0 ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">
+                  <span>Question {currentQuestion + 1} of {questions.length}</span>
+                  <span className="text-indigo-600 bg-indigo-50 px-2 py-1 rounded">Score: {score}</span>
+                </div>
+                
+                <h4 className="text-sm font-bold text-slate-800 leading-snug">
+                  {questions[currentQuestion].text}
+                </h4>
+
+                <div className="space-y-2 mt-4">
+                  {questions[currentQuestion].options.map((opt: string, idx: number) => (
+                    <div 
+                      key={idx}
+                      onClick={() => setSelectedAnswer(idx)}
+                      className={`p-3.5 rounded-xl border-2 cursor-pointer transition flex items-center gap-3 ${
+                        selectedAnswer === idx 
+                          ? "border-indigo-600 bg-indigo-50 text-indigo-900" 
+                          : "border-slate-100 bg-slate-50 hover:bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center ${selectedAnswer === idx ? 'border-indigo-600' : 'border-slate-400'}`}>
+                        {selectedAnswer === idx && <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full"></div>}
+                      </div>
+                      <span className="text-xs font-semibold">{opt}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button 
+                  disabled={selectedAnswer === null}
+                  onClick={() => {
+                    if (selectedAnswer === questions[currentQuestion].answer) {
+                      setScore(s => s + 1);
+                    }
+                    if (currentQuestion < questions.length - 1) {
+                      setCurrentQuestion(c => c + 1);
+                      setSelectedAnswer(null);
+                    } else {
+                      setTestComplete(true);
+                    }
+                  }}
+                  className="w-full bg-[#000080] hover:bg-indigo-950 text-white py-3 rounded-xl font-bold text-xs transition disabled:opacity-50 mt-4"
+                >
+                  {currentQuestion === questions.length - 1 ? "Submit Test" : "Next Question"}
+                </button>
+              </div>
+            ) : (
+              <div className="p-8 text-center text-slate-500">Loading tests...</div>
+            )}
+          </div>
+        )}
         
         {activeTab === "books" && (
           <div className="space-y-4 animate-fadeIn">
@@ -278,7 +447,61 @@ export default function EducationSupport() {
         {/* E-Library Tab */}
         {activeTab === "elibrary" && (
           <div className="space-y-4 animate-fadeIn">
-            <div className="glass-card bg-white/95 p-5 border-indigo-100 shadow-sm space-y-4 rounded-2xl">
+            {activeBook ? (
+              <div className="fixed inset-0 z-50 bg-[#F4ECD8] flex flex-col h-[100dvh] animate-slideUp overflow-hidden">
+                <div className="bg-[#EBE0C5] border-b border-[#D8C9A3] px-4 py-3 flex items-center justify-between shrink-0 shadow-sm">
+                  <button onClick={() => setActiveBook(null)} className="p-1.5 bg-[#D8C9A3]/50 rounded hover:bg-[#D8C9A3] transition text-[#5A4D32]">
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <h3 className="font-serif font-bold text-sm text-[#5A4D32] truncate max-w-[200px]">{activeBook.title}</h3>
+                  <button className="p-1.5 text-[#5A4D32]">
+                    <span className="font-bold text-lg leading-none">Aa</span>
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                  <div className="max-w-2xl mx-auto space-y-4 font-serif text-[#3E3524] text-lg leading-relaxed">
+                    <h1 className="text-2xl font-black mb-2">{activeBook.title}</h1>
+                    <h2 className="text-base text-[#756445] italic mb-6">By {activeBook.author}</h2>
+                    {activeBook.content.split('\n').map((paragraph: string, i: number) => (
+                      <p key={i}>{paragraph}</p>
+                    ))}
+                    <p className="text-center italic text-[#756445] mt-12 py-8 border-t border-[#D8C9A3]">~ End of Preview ~</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Platform Books (Wattpad clone) */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-display font-extrabold text-sm text-[#000080]">RPF Library Originals</h4>
+                  </div>
+                  {libraryBooks.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      {libraryBooks.map(book => (
+                        <div 
+                          key={book.id} 
+                          onClick={() => setActiveBook(book)}
+                          className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm cursor-pointer hover:border-indigo-400 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center mb-2">
+                              <BookOpen className="w-4 h-4 text-indigo-600" />
+                            </div>
+                            <h5 className="font-display font-bold text-xs text-slate-800 leading-tight mb-1">{book.title}</h5>
+                            <p className="text-[10px] text-slate-500 italic">{book.author}</p>
+                          </div>
+                          <span className="text-[9px] font-bold text-slate-400 mt-3">{book.views} Reads</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">Loading catalog...</p>
+                  )}
+                </div>
+
+                {/* External Archive Search */}
+                <div className="glass-card bg-white/95 p-5 border-indigo-100 shadow-sm space-y-4 rounded-2xl mt-6">
               <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
                 <BookOpen className="w-5 h-5 text-indigo-600" />
                 <h4 className="font-display font-extrabold text-xs text-indigo-900 uppercase tracking-widest">
@@ -364,7 +587,9 @@ export default function EducationSupport() {
               )}
 
             </div>
-          </div>
+          </>
+          )}
+        </div>
         )}
 
         {activeTab === "tutoring" && (

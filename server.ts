@@ -32,6 +32,9 @@ import janSevaRoutes from './src/routes/janSevaRoutes.js';
 
 import locationRoutes from './src/routes/locationRoutes.js';
 import womenRoutes from './src/routes/womenRoutes.js';
+import environmentRoutes from './src/routes/environmentRoutes.js';
+import educationRoutes from './src/routes/educationRoutes.js';
+import miscRoutes from './src/routes/miscRoutes.js';
 import volunteerRoutes from './src/routes/volunteerRoutes.js';
 import certificateRoutes from './src/routes/certificateRoutes.js';
 import communityRoutes from './src/routes/communityRoutes.js';
@@ -158,6 +161,10 @@ app.use('/', janSevaRoutes);
 
 app.use('/', locationRoutes);
 app.use('/', womenRoutes);
+app.use('/', adminRoutes);
+app.use('/', environmentRoutes);
+app.use('/', educationRoutes);
+app.use('/', miscRoutes);
 app.use('/', volunteerRoutes);
 app.use('/', certificateRoutes);
 app.use('/', communityRoutes);
@@ -1245,6 +1252,139 @@ async function initDatabase() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `, [], "blood_appointments table creation");
+
+    // Create rto_vehicles table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS rto_vehicles (
+        plate_number VARCHAR(50) PRIMARY KEY,
+        owner_name VARCHAR(255) NOT NULL,
+        vehicle_model VARCHAR(255),
+        registration_date DATE,
+        insurance_validity DATE,
+        fitness_validity DATE,
+        fuel_type VARCHAR(50),
+        rto_code VARCHAR(50),
+        status VARCHAR(50) DEFAULT 'ACTIVE',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "rto_vehicles table creation");
+
+    // Create family tracking tables
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS family_groups (
+        id VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        invite_code VARCHAR(50) UNIQUE,
+        created_by VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "family_groups table creation");
+
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS family_members (
+        id VARCHAR(255) PRIMARY KEY,
+        group_id VARCHAR(255) NOT NULL,
+        user_id VARCHAR(255) NOT NULL,
+        role VARCHAR(50) DEFAULT 'member',
+        joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(group_id, user_id)
+      )
+    `, [], "family_members table creation");
+
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS member_locations (
+        id VARCHAR(255) PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        latitude DOUBLE PRECISION NOT NULL,
+        longitude DOUBLE PRECISION NOT NULL,
+        battery_level INTEGER,
+        is_charging BOOLEAN,
+        timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "member_locations table creation");
+
+    // Create fuel_logs table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS fuel_logs (
+        id UUID PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        odometer INTEGER NOT NULL,
+        liters NUMERIC NOT NULL,
+        price_per_liter NUMERIC NOT NULL,
+        total_cost NUMERIC NOT NULL,
+        fill_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "fuel_logs table creation");
+
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS courses (
+        id VARCHAR(255) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        category VARCHAR(255) NOT NULL,
+        instructor VARCHAR(255) NOT NULL,
+        youtube_id VARCHAR(255) NOT NULL,
+        duration VARCHAR(50),
+        views INTEGER DEFAULT 0
+      )
+    `, [], "courses table creation");
+
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS mock_test_scores (
+        id UUID PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        test_category VARCHAR(255) NOT NULL,
+        score INTEGER NOT NULL,
+        total INTEGER NOT NULL,
+        date_taken TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "mock_test_scores table creation");
+
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS library_books (
+        id VARCHAR(255) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        author VARCHAR(255) NOT NULL,
+        category VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        views INTEGER DEFAULT 0
+      )
+    `, [], "library_books table creation");
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS job_listings (
+        id VARCHAR(255) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        company VARCHAR(255) NOT NULL,
+        location VARCHAR(255) NOT NULL,
+        type VARCHAR(255) NOT NULL,
+        salary VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `, [], "job_listings table creation");
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS panchang_calendar (
+        date VARCHAR(255) PRIMARY KEY,
+        tithi VARCHAR(255) NOT NULL,
+        nakshatra VARCHAR(255) NOT NULL,
+        sunrise VARCHAR(255) NOT NULL,
+        sunset VARCHAR(255) NOT NULL,
+        moonrise VARCHAR(255) NOT NULL,
+        moonset VARCHAR(255) NOT NULL,
+        festivals TEXT
+      )
+    `, [], "panchang_calendar table creation");
+    
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS chat_history (
+        id SERIAL PRIMARY KEY,
+        session_id VARCHAR(255) NOT NULL,
+        role VARCHAR(50) NOT NULL,
+        content TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `, [], "chat_history table creation");
 
     // Seed default blood banks if table is empty
     try {

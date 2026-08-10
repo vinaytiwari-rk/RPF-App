@@ -78,6 +78,11 @@ export default function HealthCare() {
     { name: "DPT Booster", date: "Due in 3 months", done: false }
   ]);
 
+  // Medical Dictionary states
+  const [dictQuery, setDictQuery] = useState("");
+  const [dictResult, setDictResult] = useState<any>(null);
+  const [dictLoading, setDictLoading] = useState(false);
+
   // Load health data from database
   const fetchVitals = async () => {
     try {
@@ -257,6 +262,20 @@ export default function HealthCare() {
     fetchMedications();
     fetchPediatric();
   }, []);
+
+  const searchDictionary = async () => {
+    if (!dictQuery.trim()) return;
+    setDictLoading(true);
+    try {
+      const res = await fetch(`/api/health/dictionary?query=${encodeURIComponent(dictQuery)}`);
+      const json = await res.json();
+      if (json.success) setDictResult(json.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDictLoading(false);
+    }
+  };
 
   // Symptoms submission handler
   const handleAssess = () => {
@@ -1019,9 +1038,70 @@ export default function HealthCare() {
                 ))}
               </div>
             </div>
+            {/* Medical Dictionary Search */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm space-y-4">
+              <h4 className="font-display font-bold text-xs text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-1.5">
+                <BookOpen className="w-4.5 h-4.5 text-indigo-600" />
+                {isHi ? "मेडिकल डिक्शनरी" : "AI Medical Dictionary"}
+              </h4>
+              <p className="text-[10px] text-slate-500">
+                {isHi ? "बीमारियों, दवाओं और लक्षणों के बारे में खोजें" : "Search for diseases, drugs, or medical terminology."}
+              </p>
+              
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={dictQuery}
+                  onChange={(e) => setDictQuery(e.target.value)}
+                  placeholder={isHi ? "उदा. Diabetes, Paracetamol..." : "e.g. Hypertension, Paracetamol..."} 
+                  className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 font-medium bg-slate-50"
+                  onKeyDown={(e) => e.key === 'Enter' && searchDictionary()}
+                />
+                <button 
+                  onClick={searchDictionary}
+                  disabled={dictLoading || !dictQuery.trim()}
+                  className="bg-indigo-600 text-white rounded-xl px-4 py-3 font-bold hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  {dictLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {dictResult && (
+                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 space-y-3 mt-4 animate-fadeIn">
+                  <h5 className="font-black text-indigo-900 text-sm uppercase tracking-wide">{dictResult.term}</h5>
+                  <p className="text-xs text-slate-700 leading-relaxed bg-white p-3 rounded-lg border border-indigo-100 shadow-sm">
+                    {dictResult.definition}
+                  </p>
+                  
+                  {dictResult.symptoms && dictResult.symptoms.length > 0 && (
+                    <div className="pt-2">
+                      <span className="text-[10px] font-bold text-indigo-800 uppercase block mb-1">Common Symptoms</span>
+                      <ul className="list-disc pl-5 text-[11px] text-slate-700 space-y-0.5">
+                        {dictResult.symptoms.map((sym: string, i: number) => <li key={i}>{sym}</li>)}
+                      </ul>
+                    </div>
+                  )}
+
+                  {dictResult.treatments && dictResult.treatments.length > 0 && (
+                    <div className="pt-1">
+                      <span className="text-[10px] font-bold text-indigo-800 uppercase block mb-1">General Treatments</span>
+                      <ul className="list-disc pl-5 text-[11px] text-slate-700 space-y-0.5">
+                        {dictResult.treatments.map((trt: string, i: number) => <li key={i}>{trt}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  <div className="bg-amber-50 border border-amber-200 p-2 rounded flex gap-2 items-start mt-3">
+                    <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-[9px] text-amber-800 font-bold leading-tight">
+                      Disclaimer: This information is AI-generated for educational purposes only and is not medical advice.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
-
       </div>
       {activeTab === "tools" && (
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">

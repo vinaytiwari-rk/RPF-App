@@ -231,7 +231,7 @@ export default function GodAdminPanel() {
     switch (activeTab) {
       case 'users':
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-gray-500">
                 <thead className="bg-gray-50 text-gray-700 uppercase">
@@ -269,7 +269,7 @@ export default function GodAdminPanel() {
 
       case 'volunteers':
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-gray-500">
                 <thead className="bg-gray-50 text-gray-700 uppercase">
@@ -320,7 +320,7 @@ export default function GodAdminPanel() {
 
       case 'donations':
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-gray-500">
                 <thead className="bg-gray-50 text-gray-700 uppercase">
@@ -357,7 +357,7 @@ export default function GodAdminPanel() {
         
       case 'cards':
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-gray-500">
                 <thead className="bg-gray-50 text-gray-700 uppercase">
@@ -395,7 +395,7 @@ export default function GodAdminPanel() {
 
       case 'grievances':
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-gray-500">
                 <thead className="bg-gray-50 text-gray-700 uppercase">
@@ -438,7 +438,7 @@ export default function GodAdminPanel() {
 
       case 'women':
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-gray-500">
                 <thead className="bg-gray-50 text-gray-700 uppercase">
@@ -469,7 +469,7 @@ export default function GodAdminPanel() {
 
       case 'blood':
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-gray-500">
                 <thead className="bg-gray-50 text-gray-700 uppercase">
@@ -509,7 +509,7 @@ export default function GodAdminPanel() {
         return <GenericAdminTab endpoint="/api/directory" title="Public Directory" columns={["name", "category", "contact", "status"]} />;
       case 'jobs':
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-gray-500">
                 <thead className="bg-gray-50 text-gray-700 uppercase">

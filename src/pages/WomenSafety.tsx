@@ -3,8 +3,11 @@ import { useOutletContext } from "react-router-dom";
 import {
   Shield, AlertOctagon, Phone, Camera, Map, Settings, 
   Lock, X, Volume2, CheckCircle, Activity, FileText, Radio, 
-  ExternalLink, Crosshair, Navigation, AlertTriangle
+  ExternalLink, Crosshair, Navigation, AlertTriangle, Users, Car, MapPin, Search, Battery, Share2
 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import { useAuth } from "../context/AuthContext";
 import { 
   initAudio, playSiren, stopSiren, 
@@ -104,7 +107,7 @@ export default function WomenSafety() {
   const [isUnlocked, setIsUnlocked] = useState(!stealthEnabled);
 
   // States
-  const [activeTab, setActiveTab] = useState<"deterrents" | "scanner" | "ncw" | "routes" | "settings" | "tools">("deterrents");
+  const [activeTab, setActiveTab] = useState<"deterrents" | "scanner" | "ncw" | "routes" | "settings" | "tools" | "rto" | "family">("deterrents");
   const [sosActive, setSosActive] = useState(false);
   const [sosFired, setSosFired] = useState(false);
   const [contacts, setContacts] = useState<string[]>(() => {
@@ -150,6 +153,21 @@ export default function WomenSafety() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
+  // --- RTO Vahan Trace State ---
+  const [rtoPlate, setRtoPlate] = useState("");
+  const [rtoResult, setRtoResult] = useState<any>(null);
+  const [rtoLoading, setRtoLoading] = useState(false);
+  const [rtoError, setRtoError] = useState("");
+
+  // --- Family GPS State ---
+  const [familyGroups, setFamilyGroups] = useState<any[]>([]);
+  const [currentGroupId, setCurrentGroupId] = useState<string | null>(null);
+  const [familyLocations, setFamilyLocations] = useState<any[]>([]);
+  const [inviteCodeInput, setInviteCodeInput] = useState("");
+  const [newGroupName, setNewGroupName] = useState("");
+  const [familyLoading, setFamilyLoading] = useState(false);
+
+
   const triggerHaptic = (pattern = [100]) => {
     if ("vibrate" in navigator) navigator.vibrate(pattern);
   };
@@ -163,6 +181,145 @@ export default function WomenSafety() {
   }, [morseTimerId, panicBreathIntervalId]);
 
   
+  // --- RTO Vahan Trace Functions ---
+  const searchRTOVehicle = async () => {
+    if (!rtoPlate.trim()) return;
+    setRtoLoading(true);
+    setRtoError("");
+    try {
+      const res = await fetch(`/api/rto/vehicle/${encodeURIComponent(rtoPlate)}`);
+      const data = await res.json();
+      if (data.success) {
+        setRtoResult(data.data);
+      } else {
+        setRtoError(data.error || "Vehicle not found");
+        setRtoResult(null);
+      }
+    } catch (e: any) {
+      setRtoError("Error connecting to server");
+    } finally {
+      setRtoLoading(false);
+    }
+  };
+
+  // --- Family GPS Functions ---
+  const fetchFamilyGroups = async () => {
+    if (!user) return;
+    try {
+      const res = await fetch(`/api/family/groups?userId=${user.id}`);
+      const data = await res.json();
+      if (data.success) {
+        setFamilyGroups(data.data);
+        if (data.data.length > 0 && !currentGroupId) {
+          setCurrentGroupId(data.data[0].id);
+        }
+      }
+    } catch (e) {}
+  };
+
+  const createFamilyGroup = async () => {
+    if (!user || !newGroupName.trim()) return;
+    setFamilyLoading(true);
+    try {
+      const res = await fetch('/api/family/group', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newGroupName, userId: user.id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNewGroupName("");
+        await fetchFamilyGroups();
+        setCurrentGroupId(data.data.groupId);
+      }
+    } catch (e) {}
+    setFamilyLoading(false);
+  };
+
+  const joinFamilyGroup = async () => {
+    if (!user || !inviteCodeInput.trim()) return;
+    setFamilyLoading(true);
+    try {
+      const res = await fetch('/api/family/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inviteCode: inviteCodeInput, userId: user.id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setInviteCodeInput("");
+        await fetchFamilyGroups();
+        setCurrentGroupId(data.data.groupId);
+      } else {
+        alert(data.error || "Invalid invite code");
+      }
+    } catch (e) {}
+    setFamilyLoading(false);
+  };
+
+  const fetchFamilyLocations = async () => {
+    if (!currentGroupId) return;
+    try {
+      const res = await fetch(`/api/family/locations/${currentGroupId}`);
+      const data = await res.json();
+      if (data.success) {
+        setFamilyLocations(data.data);
+      }
+    } catch (e) {}
+  };
+
+  // Periodic location sync
+  useEffect(() => {
+    if (activeTab === "family") {
+      fetchFamilyGroups();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== "family" || !currentGroupId) return;
+    fetchFamilyLocations();
+    const interval = setInterval(fetchFamilyLocations, 10000); // Every 10s
+    return () => clearInterval(interval);
+  }, [activeTab, currentGroupId]);
+
+  useEffect(() => {
+    if (activeTab !== "family" || !user) return;
+    
+    let watchId: number;
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        async (pos) => {
+          let batteryLevel = 100;
+          let isCharging = false;
+          try {
+            if ('getBattery' in navigator) {
+              const battery: any = await (navigator as any).getBattery();
+              batteryLevel = Math.round(battery.level * 100);
+              isCharging = battery.charging;
+            }
+          } catch (e) {}
+
+          fetch('/api/family/location', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+              battery_level: batteryLevel,
+              is_charging: isCharging
+            })
+          }).catch(() => {});
+        },
+        (err) => console.log(err),
+        { enableHighAccuracy: true, maximumAge: 10000 }
+      );
+    }
+    return () => {
+      if (watchId && navigator.geolocation) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [activeTab]);
+
   const findNearbyPolice = () => {
     setLocating(true);
     if (navigator.geolocation) {
@@ -592,6 +749,8 @@ export default function WomenSafety() {
   const TABS = [
     { key: "deterrents", label: "SOS", icon: AlertOctagon },
     { key: "ncw", label: lang === "hi" ? "रिपोर्ट" : "Report", icon: FileText },
+    { key: "family", label: lang === "hi" ? "परिवार ट्रैकर" : "Family GPS", icon: Users },
+    { key: "rto", label: lang === "hi" ? "वाहन ट्रेस" : "RTO Trace", icon: Car },
     { key: "routes", label: lang === "hi" ? "रूट्स" : "Routes", icon: Navigation },
     { key: "settings", label: lang === "hi" ? "सेटिंग" : "Settings", icon: Settings },
     { key: "tools", label: lang === "hi" ? "टूल्स" : "Calculators", icon: Shield },
@@ -1037,6 +1196,234 @@ export default function WomenSafety() {
         </div>
         )}
 
+        {/* RTO Vehicle Trace Tab */}
+        {activeTab === "rto" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+              <div className="flex items-center gap-3 mb-4 border-b border-slate-800 pb-3">
+                <div className="w-10 h-10 rounded-full bg-blue-900/50 flex items-center justify-center">
+                  <Car className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-100 uppercase tracking-wide">RTO Vehicle Trace</h3>
+                  <p className="text-xs text-slate-400">Search vehicle registration details instantly</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={rtoPlate}
+                  onChange={(e) => setRtoPlate(e.target.value.toUpperCase())}
+                  placeholder="e.g. UP 14 BX 0000" 
+                  className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-200 outline-none focus:border-blue-500 font-mono tracking-widest uppercase"
+                />
+                <button 
+                  onClick={searchRTOVehicle}
+                  disabled={rtoLoading || !rtoPlate.trim()}
+                  className="bg-blue-600 hover:bg-blue-500 px-5 rounded-lg font-bold text-white transition-colors disabled:opacity-50"
+                >
+                  {rtoLoading ? <Activity className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                </button>
+              </div>
+              {rtoError && <p className="text-red-400 text-xs mt-3">{rtoError}</p>}
+            </div>
+
+            {rtoResult && (
+              <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="text-2xl font-bold font-mono tracking-widest text-slate-100">{rtoResult.plate_number}</h4>
+                    <p className="text-sm font-bold text-emerald-400 flex items-center gap-1 mt-1">
+                      <CheckCircle className="w-3 h-3" /> STATUS: {rtoResult.status}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold">RTO Code</p>
+                    <p className="text-sm font-mono text-slate-300">{rtoResult.rto_code}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-800">
+                  <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/50">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold">Owner Name</p>
+                    <p className="text-sm font-bold text-slate-200 truncate">{rtoResult.owner_name}</p>
+                  </div>
+                  <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/50">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold">Vehicle Model</p>
+                    <p className="text-sm font-bold text-slate-200 truncate">{rtoResult.vehicle_model}</p>
+                  </div>
+                  <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/50">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold">Fuel Type</p>
+                    <p className="text-sm font-bold text-slate-200">{rtoResult.fuel_type}</p>
+                  </div>
+                  <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/50">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold">Reg. Date</p>
+                    <p className="text-sm font-bold text-slate-200">{new Date(rtoResult.registration_date).toLocaleDateString()}</p>
+                  </div>
+                  <div className="col-span-2 bg-slate-950 p-3 rounded-lg border border-slate-800/50 flex justify-between">
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Insurance Valid Upto</p>
+                      <p className="text-sm font-bold text-slate-200">{new Date(rtoResult.insurance_validity).toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] text-slate-500 uppercase font-bold">Fitness Valid Upto</p>
+                      <p className="text-sm font-bold text-slate-200">{new Date(rtoResult.fitness_validity).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => { setActiveTab("ncw"); setSuspectDetails(`Vehicle: ${rtoResult.plate_number}\nModel: ${rtoResult.vehicle_model}`); }}
+                  className="w-full bg-red-950/50 hover:bg-red-900/50 border border-red-900/50 text-red-400 font-bold py-3 rounded-lg flex items-center justify-center gap-2 mt-4"
+                >
+                  <AlertTriangle className="w-4 h-4" />
+                  Report Suspicious Vehicle
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Family GPS Locator Tab */}
+        {activeTab === "family" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {!currentGroupId ? (
+              <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-5">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-900/50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Users className="w-8 h-8 text-blue-400" />
+                  </div>
+                  <h3 className="font-bold text-lg text-slate-100">Family GPS Locator</h3>
+                  <p className="text-xs text-slate-400 mt-1">Keep your loved ones safe with real-time tracking.</p>
+                </div>
+                
+                <div className="pt-4 border-t border-slate-800 space-y-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Create a New Circle</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)}
+                        placeholder="e.g. My Family" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none"
+                      />
+                      <button onClick={createFamilyGroup} disabled={familyLoading || !newGroupName.trim()} className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold text-xs">Create</button>
+                    </div>
+                  </div>
+                  <div className="relative flex items-center py-2">
+                    <div className="flex-grow border-t border-slate-800"></div>
+                    <span className="flex-shrink-0 mx-4 text-slate-600 text-xs font-bold uppercase">Or</span>
+                    <div className="flex-grow border-t border-slate-800"></div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Join with Invite Code</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" value={inviteCodeInput} onChange={(e) => setInviteCodeInput(e.target.value.toUpperCase())}
+                        placeholder="Enter 6-digit code" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none font-mono tracking-widest uppercase"
+                      />
+                      <button onClick={joinFamilyGroup} disabled={familyLoading || !inviteCodeInput.trim()} className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold text-xs">Join</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col h-[500px]">
+                {/* Header */}
+                <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center z-10 relative">
+                  <div>
+                    <h3 className="font-bold text-slate-100 flex items-center gap-2">
+                      <Users className="w-4 h-4 text-blue-400" />
+                      {familyGroups.find(g => g.id === currentGroupId)?.name || "Family Circle"}
+                    </h3>
+                    <p className="text-[10px] text-slate-400 font-mono mt-0.5 tracking-widest">
+                      INVITE CODE: <span className="font-bold text-slate-200">{familyGroups.find(g => g.id === currentGroupId)?.invite_code}</span>
+                    </p>
+                  </div>
+                  <button onClick={() => {
+                     if (navigator.share) {
+                        navigator.share({
+                          title: 'Join my family circle',
+                          text: `Join my family safety circle using invite code: ${familyGroups.find(g => g.id === currentGroupId)?.invite_code}`,
+                        });
+                     } else {
+                        alert(`Share this code with family: ${familyGroups.find(g => g.id === currentGroupId)?.invite_code}`);
+                     }
+                  }} className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-slate-700">
+                    <Share2 className="w-4 h-4 text-slate-300" />
+                  </button>
+                </div>
+                
+                {/* Map */}
+                <div className="flex-1 relative bg-slate-950">
+                  {familyLocations.length > 0 ? (
+                    <MapContainer center={[familyLocations[0].latitude, familyLocations[0].longitude]} zoom={13} className="w-full h-full z-0">
+                      <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+                      />
+                      {familyLocations.map((member, idx) => (
+                        <Marker 
+                          key={member.user_id} 
+                          position={[member.latitude, member.longitude]}
+                          icon={L.divIcon({
+                            className: 'custom-icon',
+                            html: `<div style="background-color: #3b82f6; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(0,0,0,0.3);"><span style="color: white; font-weight: bold; font-size: 10px;">${member.user_name?.charAt(0) || '?'}</span></div>`,
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                          })}
+                        >
+                          <Popup>
+                            <div className="text-center font-sans">
+                              <strong className="block text-sm text-slate-900">{member.user_name || member.phone}</strong>
+                              <span className="text-xs text-slate-500">
+                                {member.battery_level !== null ? `🔋 ${member.battery_level}% ${member.is_charging ? '⚡' : ''}` : ''}
+                              </span>
+                            </div>
+                          </Popup>
+                        </Marker>
+                      ))}
+                    </MapContainer>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-5 text-center">
+                      <MapPin className="w-10 h-10 text-slate-700 mb-3" />
+                      <p className="text-sm font-bold text-slate-400">Waiting for GPS signals...</p>
+                      <p className="text-xs text-slate-600 mt-1">Make sure location permissions are enabled.</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Member List Panel */}
+                <div className="bg-slate-900 border-t border-slate-800 p-4 max-h-48 overflow-y-auto">
+                  <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Members ({familyLocations.length})</h4>
+                  <div className="space-y-3">
+                    {familyLocations.map(member => (
+                      <div key={member.user_id} className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-blue-400 uppercase">
+                            {member.user_name?.charAt(0) || '?'}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-200">{member.user_name || member.phone}</p>
+                            <p className="text-[10px] text-slate-500">
+                              {new Date(member.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800/50">
+                          <Battery className={`w-3.5 h-3.5 ${member.battery_level > 20 ? 'text-green-500' : 'text-red-500'}`} />
+                          <span className="text-xs font-bold font-mono text-slate-300">
+                            {member.battery_level !== null ? `${member.battery_level}%` : '--'}
+                            {member.is_charging && <span className="text-yellow-400 ml-0.5">⚡</span>}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

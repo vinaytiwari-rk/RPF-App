@@ -437,5 +437,44 @@ router.post("/api/appointments", authenticateToken, async (req: any, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// --- Medical Dictionary (Gemini API Powered) ---
+router.get("/api/health/dictionary", async (req: any, res: any) => {
+  try {
+    const { query } = req.query;
+    if (!query) return res.status(400).json({ error: "Query is required" });
+
+    // Try to connect to Gemini API if configured
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      // Fallback mock for demo purposes if no API key
+      return res.json({
+        success: true,
+        data: {
+          term: query,
+          definition: "Information for this medical term is currently limited in offline mode.",
+          symptoms: ["Varies by case"],
+          treatments: ["Consult a physician"]
+        }
+      });
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `You are a medical dictionary. Provide a brief overview for the medical term: "${query}". Return the output strictly as JSON with keys: "term", "definition", "symptoms" (array of strings), "treatments" (array of strings). Do not include markdown formatting or backticks.`
+    });
+
+    let rawText = response.text?.trim() || "{}";
+    if (rawText.startsWith('```json')) rawText = rawText.substring(7);
+    if (rawText.endsWith('```')) rawText = rawText.substring(0, rawText.length - 3);
+
+    const parsed = JSON.parse(rawText.trim());
+    res.json({ success: true, data: parsed });
+
+  } catch (error: any) {
+    console.error("Dictionary error:", error);
+    res.status(500).json({ error: "Failed to fetch dictionary data" });
+  }
+});
 
 export default router;
