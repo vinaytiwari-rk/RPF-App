@@ -7,7 +7,8 @@ async function main() {
       host: 'ftp.therpfoundation.org',
       user: 'RPF_App@appapi.therpfoundation.org',
       password: 'therpfoundation@321',
-      secure: false
+      secure: true,
+      secureOptions: { rejectUnauthorized: false }
     });
     console.log('Connected to FTP server!');
     await client.uploadFrom('server.cjs', 'server.cjs');
@@ -21,6 +22,7 @@ async function main() {
     console.log('Server restarted via restart.txt');
   } catch (err) {
     console.error('FTP Error:', err);
+    process.exitCode = 1;
   } finally {
     client.close();
   }
