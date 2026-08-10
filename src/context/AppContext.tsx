@@ -220,7 +220,10 @@ const DEFAULT_SERVICES = [
   { id: "resume-builder", category: "empowerment", iconName: "FileText", titleEn: "Resume Builder", titleHi: "बायोडाटा निर्माता", descEn: "AI resume generation", descHi: "एआई बायोडाटा निर्माण" },
   { id: "doc-scanner", category: "empowerment", iconName: "Camera", titleEn: "Doc Scanner", titleHi: "दस्तावेज़ स्कैनर", descEn: "Scan and save PDFs", descHi: "पीडीएफ स्कैन करें" },
   { id: "ai-chat", category: "empowerment", iconName: "Bot", titleEn: "AI Assistant", titleHi: "एआई सहायक", descEn: "Ask Gemini anything", descHi: "जेमिनी से कुछ भी पूछें" },
-  { id: "story-library", category: "empowerment", iconName: "BookOpen", titleEn: "Audiobooks", titleHi: "ऑडियो पुस्तकें", descEn: "Read and listen to stories", descHi: "कहानियां पढ़ें और सुनें" }
+  { id: "story-library", category: "empowerment", iconName: "BookOpen", titleEn: "Audiobooks", titleHi: "ऑडियो पुस्तकें", descEn: "Read and listen to stories", descHi: "कहानियां पढ़ें और सुनें" },
+  { id: "hindu-calendar", category: "culture", iconName: "Calendar", titleEn: "Hindu Calendar", titleHi: "हिंदू पंचांग", descEn: "Tithis & Festivals", descHi: "तिथियां और त्योहार" },
+  { id: "news-feed", category: "culture", iconName: "Newspaper", titleEn: "News Feed", titleHi: "समाचार", descEn: "Top headlines & stories", descHi: "प्रमुख खबरें" },
+  { id: "internet-radio", category: "culture", iconName: "Radio", titleEn: "Internet Radio", titleHi: "इंटरनेट रेडियो", descEn: "Live radio stations", descHi: "लाइव रेडियो स्टेशन" }
 ];
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [

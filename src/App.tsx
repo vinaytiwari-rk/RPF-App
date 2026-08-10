@@ -59,6 +59,9 @@ import ResumeBuilder from "./pages/ResumeBuilder";
 import DocScanner from "./pages/DocScanner";
 import AIChat from "./pages/AIChat";
 import StoryLibrary from "./pages/StoryLibrary";
+import HinduCalendar from "./pages/HinduCalendar";
+import NewsFeed from "./pages/NewsFeed";
+import InternetRadio from "./pages/InternetRadio";
 import MedicineSupport from "./pages/MedicineSupport";
 import EducationSupport from "./pages/EducationSupport";
 import CountriesPage from "./pages/CountriesPage";
@@ -184,6 +187,9 @@ function AppContent() {
           <Route path="/doc-scanner" element={<DocScanner />} />
           <Route path="/ai-chat" element={<AIChat />} />
           <Route path="/story-library" element={<StoryLibrary />} />
+          <Route path="/hindu-calendar" element={<HinduCalendar />} />
+          <Route path="/news-feed" element={<NewsFeed />} />
+          <Route path="/internet-radio" element={<InternetRadio />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

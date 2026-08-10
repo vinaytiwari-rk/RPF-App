@@ -37,7 +37,10 @@ const serviceIdToImage: Record<string, string> = {
   "resume-builder": "/assets/icons/icon_skills_1786081334087.jpg",
   "doc-scanner": "/assets/icons/icon_grievance_updated_1786163210095.jpg",
   "ai-chat": "/assets/icons/icon_schemes_updated_1786163186070.jpg",
-  "story-library": "/assets/icons/icon_culture_1786081280063.jpg"
+  "story-library": "/assets/icons/icon_culture_1786081280063.jpg",
+  "hindu-calendar": "/assets/icons/icon_culture_1786081280063.jpg",
+  "news-feed": "/assets/icons/icon_jobs_updated_1786163264789.jpg",
+  "internet-radio": "/assets/icons/icon_culture_1786081280063.jpg"
 };
 
 const serviceIdToBorder: Record<string, string> = {
@@ -71,7 +74,10 @@ const serviceIdToBorder: Record<string, string> = {
   "resume-builder": "border-l-[6px] border-blue-600 shadow-sm hover:border-blue-700",
   "doc-scanner": "border-l-[6px] border-gray-800 shadow-sm hover:border-gray-900",
   "ai-chat": "border-l-[6px] border-indigo-500 shadow-sm hover:border-indigo-600",
-  "story-library": "border-l-[6px] border-amber-600 shadow-sm hover:border-amber-700"
+  "story-library": "border-l-[6px] border-amber-600 shadow-sm hover:border-amber-700",
+  "hindu-calendar": "border-l-[6px] border-orange-500 shadow-sm hover:border-orange-600",
+  "news-feed": "border-l-[6px] border-blue-500 shadow-sm hover:border-blue-600",
+  "internet-radio": "border-l-[6px] border-purple-500 shadow-sm hover:border-purple-600"
 };
 
 export default function Services() {
@@ -223,6 +229,9 @@ export default function Services() {
                           : svc.id === 'doc-scanner' ? '/doc-scanner'
                           : svc.id === 'ai-chat' ? '/ai-chat'
                           : svc.id === 'story-library' ? '/story-library'
+                          : svc.id === 'hindu-calendar' ? '/hindu-calendar'
+                          : svc.id === 'news-feed' ? '/news-feed'
+                          : svc.id === 'internet-radio' ? '/internet-radio'
                           : `/services/${svc.id}`;
 
               return (
