@@ -47,7 +47,6 @@ import userRoutes from './src/routes/userRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
 import publicGovRoutes from './src/routes/publicGovRoutes.js';
 import publicExternalRoutes from './src/routes/publicExternalRoutes.js';
-import miscRoutes from './src/routes/miscRoutes.js';
 import adminHqExtraRoutes from './src/routes/adminHqExtraRoutes.js';
 import adminDynamicRoutes from './src/routes/adminDynamicRoutes.js';
 
@@ -161,7 +160,7 @@ app.use('/', janSevaRoutes);
 
 app.use('/', locationRoutes);
 app.use('/', womenRoutes);
-app.use('/', adminRoutes);
+app.use('/', adminHqRoutes);
 app.use('/', environmentRoutes);
 app.use('/', educationRoutes);
 app.use('/', miscRoutes);
