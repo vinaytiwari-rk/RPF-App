@@ -128,6 +128,65 @@ router.get("/api/public/news", async (req, res) => {
   }
 });
 
+// 4. Hindu Calendar APIs (XML feeds proxy)
+router.get("/api/public/calendar/panchang", async (req, res) => {
+  try {
+    const cacheKey = "hindu_calendar_panchang";
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour cache
+      return res.json({ success: true, data: cached.data });
+    }
+    
+    // Using rssParser which is already imported for Google News
+    const feed = await rssParser.parseURL("https://hinducalendar.app/feed/panchang.xml");
+    const items = feed.items.map(item => ({
+      title: item.title,
+      description: item.contentSnippet || item.content || "",
+      pubDate: item.pubDate,
+      category: item.categories?.[0] || ""
+    }));
+    
+    apiCache.set(cacheKey, { data: items, timestamp: Date.now() });
+    res.json({ success: true, data: items });
+  } catch (error: any) {
+    console.error("Panchang API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch panchang data" });
+  }
+});
+
+router.get("/api/public/calendar/highlights", async (req, res) => {
+  try {
+    const cacheKey = "hindu_calendar_highlights";
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour cache
+      return res.json({ success: true, data: cached.data });
+    }
+    
+    const feed = await rssParser.parseURL("https://hinducalendar.app/feed/highlights.xml");
+    const items = feed.items.map(item => ({
+      title: item.title,
+      description: item.contentSnippet || item.content || "",
+      pubDate: item.pubDate
+    }));
+    
+    apiCache.set(cacheKey, { data: items, timestamp: Date.now() });
+    res.json({ success: true, data: items });
+  } catch (error: any) {
+    console.error("Highlights API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch highlights data" });
+  }
+});
+
+router.get("/api/public/calendar/digest", async (req, res) => {
+  try {
+    const response = await axios.get("https://hinducalendar.app/feed/digest.txt", { responseType: 'text' });
+    res.send(response.data);
+  } catch (error: any) {
+    console.error("Digest API Error:", error.message);
+    res.status(500).send("Failed to fetch digest text");
+  }
+});
+
 // 4. Jobs RSS API
 router.get("/api/public/jobs-feed", async (req, res) => {
   try {

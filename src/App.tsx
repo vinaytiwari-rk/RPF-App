@@ -31,6 +31,7 @@ const ResumeBuilder = React.lazy(() => import('./pages/ResumeBuilder'));
 const DocScanner = React.lazy(() => import("./pages/DocScanner"));
 const InternetRadio = React.lazy(() => import("./pages/InternetRadio"));
 const NewsFeed = React.lazy(() => import("./pages/NewsFeed"));
+const HinduCalendar = React.lazy(() => import("./pages/HinduCalendar"));
 
 import { AppProvider } from "./context/AppContext";
 
@@ -113,6 +114,7 @@ function AppContent() {
           <Route path="/doc-scanner" element={<DocScanner />} />
           <Route path="/internet-radio" element={<InternetRadio />} />
           <Route path="/news" element={<NewsFeed />} />
+          <Route path="/hindu-calendar" element={<HinduCalendar />} />
           <Route path="/admin" element={<GodAdminPanel />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />

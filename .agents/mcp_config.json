@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "hinducalendar": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-everything"]
+    },
+    "hinducalendar_http": {
+      "type": "http",
+      "url": "https://hinducalendar.app/mcp"
+    }
+  }
+}
