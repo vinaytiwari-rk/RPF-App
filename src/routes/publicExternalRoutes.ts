@@ -187,6 +187,39 @@ router.get("/api/public/calendar/digest", async (req, res) => {
   }
 });
 
+// 5. Kundli & Astrology API (FreeAstrologyAPI)
+router.post("/api/public/calendar/astrology/planets", express.json(), async (req, res) => {
+  try {
+    const ASTRO_API_KEY = "xPGAPbo7v82qDZMHX7gH04ouFggaJD8NamSrLQw1";
+    const { year, month, date, hours, minutes, seconds, latitude, longitude, timezone } = req.body;
+    
+    // Default coordinates to New Delhi if missing
+    const payload = {
+      year: year || new Date().getFullYear(),
+      month: month || new Date().getMonth() + 1,
+      date: date || new Date().getDate(),
+      hours: hours !== undefined ? hours : 12,
+      minutes: minutes || 0,
+      seconds: seconds || 0,
+      latitude: latitude || 28.6139,
+      longitude: longitude || 77.2090,
+      timezone: timezone || 5.5
+    };
+
+    const response = await axios.post("https://json.freeastrologyapi.com/planets", payload, {
+      headers: {
+        "x-api-key": ASTRO_API_KEY,
+        "Content-Type": "application/json"
+      }
+    });
+
+    res.json({ success: true, data: response.data });
+  } catch (error: any) {
+    console.error("Astrology API Error:", error?.response?.data || error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch astrology data" });
+  }
+});
+
 // 4. Jobs RSS API
 router.get("/api/public/jobs-feed", async (req, res) => {
   try {
