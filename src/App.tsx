@@ -112,6 +112,7 @@ function AppContent() {
           <Route path="/grievance" element={<Grievances />} />
           <Route path="/donations" element={<DonationsPage />} />
           <Route path="/health-care" element={<HealthCare />} />
+          <Route path="/medicine" element={<Navigate to="/health-care?tab=clinical" replace />} />
           <Route path="/resume-builder" element={<ResumeBuilder />} />
           <Route path="/doc-scanner" element={<DocScanner />} />
           <Route path="/internet-radio" element={<InternetRadio />} />

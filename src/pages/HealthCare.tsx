@@ -15,7 +15,13 @@ export default function HealthCare() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const isHi = lang === "hi";
 
-  const [activeTab, setActiveTab] = useState<"assess" | "tracker" | "welfare" | "clinical" | "tools">("assess");
+  const [activeTab, setActiveTab] = useState<"assess" | "tracker" | "welfare" | "tools" | "vitals" | "clinical">(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return (params.get("tab") as any) || "assess";
+    }
+    return "assess";
+  });
 
   // --- SMART CALCULATORS STATE ---
   const [activeCalc, setActiveCalc] = useState<string | null>(null);
