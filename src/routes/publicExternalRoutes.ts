@@ -61,11 +61,12 @@ router.get("/api/public/news", async (req, res) => {
     }
 
     let articles: any[] = [];
+    let errors: string[] = [];
     
     // Primary: NewsData.io (Hindi, India, Top priority)
     try {
       const newsDataUrl = "https://newsdata.io/api/1/latest?apikey=pub_447fb0beb8dd430fb1eca7ae52e603d9&country=in&language=hi&category=breaking,education,environment,health,world&timezone=asia/kolkata&prioritydomain=top";
-      const response = await axios.get(newsDataUrl);
+      const response = await axios.get(newsDataUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } });
       if (response.data && response.data.results) {
         articles = response.data.results.map((item: any) => ({
           title: item.title,
@@ -78,13 +79,14 @@ router.get("/api/public/news", async (req, res) => {
       }
     } catch (e: any) {
       console.error("NewsData API Error:", e.message);
+      errors.push(`NewsData: ${e.message}`);
     }
 
     // Fallback/Secondary: NewsAPI.org (English, India)
     if (articles.length === 0) {
       try {
         const newsApiUrl = "https://newsapi.org/v2/top-headlines?country=in&apiKey=c55809c9edd541cab9c23fc5144db5c7";
-        const response = await axios.get(newsApiUrl);
+        const response = await axios.get(newsApiUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } });
         if (response.data && response.data.articles) {
           articles = response.data.articles.map((item: any) => ({
             title: item.title,
@@ -97,6 +99,7 @@ router.get("/api/public/news", async (req, res) => {
         }
       } catch (e: any) {
         console.error("NewsAPI Error:", e.message);
+        errors.push(`NewsAPI: ${e.message}`);
       }
     }
 
@@ -105,7 +108,7 @@ router.get("/api/public/news", async (req, res) => {
       try {
         const feed = await rssParser.parseURL("https://news.google.com/rss/search?q=NGO+India&hl=en-IN&gl=IN&ceid=IN:en");
         articles = feed.items.slice(0, 15).map(item => ({
-          title: item.title,
+          title: item.title + (errors.length > 0 ? ` (Failed to load new API: ${errors.join(", ")})` : ""),
           link: item.link,
           pubDate: item.pubDate,
           source: item.source || "Google News",
