@@ -522,5 +522,30 @@ router.get("/api/public/culture/temples", async (req, res) => {
   }
 });
 
+// 7. MedlinePlus Medical News RSS Feed
+router.get("/api/public/medical-news", async (req, res) => {
+  try {
+    const cacheKey = "medical_news_feed";
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour cache
+      return res.json({ success: true, data: cached.data });
+    }
+
+    const feed = await rssParser.parseURL("https://medlineplus.gov/feeds/whatsnew.xml");
+    const news = feed.items.slice(0, 15).map(item => ({
+      title: item.title,
+      link: item.link,
+      pubDate: item.pubDate,
+      description: item.contentSnippet || item.content || ""
+    }));
+    
+    apiCache.set(cacheKey, { data: news, timestamp: Date.now() });
+    res.json({ success: true, data: news });
+  } catch (error: any) {
+    console.error("Medical News API Error:", error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch medical news" });
+  }
+});
+
 export default router;
 

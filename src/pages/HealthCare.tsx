@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { 
   Heart, Activity, CheckCircle, Navigation, Award, Calendar, 
   MapPin, Dumbbell, Droplets, Clock, Plus, ShieldAlert, 
-  Smile, User, Zap, BookOpen, Volume2, Search, Bell, AlertCircle, Loader2, Trash2
+  Smile, User, Zap, BookOpen, Volume2, Search, Bell, AlertCircle, Loader2, Trash2, Newspaper
 } from "lucide-react";
 import { 
   assessSymptoms, calculateBmiValue, calculateWellnessValue, 
@@ -82,6 +82,10 @@ export default function HealthCare() {
   const [dictQuery, setDictQuery] = useState("");
   const [dictResult, setDictResult] = useState<any>(null);
   const [dictLoading, setDictLoading] = useState(false);
+
+  // Medical News states
+  const [medicalNews, setMedicalNews] = useState<any[]>([]);
+  const [medicalNewsLoading, setMedicalNewsLoading] = useState(false);
 
   // Load health data from database
   const fetchVitals = async () => {
@@ -257,10 +261,26 @@ export default function HealthCare() {
     }
   };
 
+  const fetchMedicalNews = async () => {
+    setMedicalNewsLoading(true);
+    try {
+      const res = await fetch("/api/public/medical-news");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) setMedicalNews(json.data);
+      }
+    } catch (e) {
+      console.error("Error fetching medical news", e);
+    } finally {
+      setMedicalNewsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchVitals();
     fetchMedications();
     fetchPediatric();
+    fetchMedicalNews();
   }, []);
 
   const searchDictionary = async () => {
@@ -1048,6 +1068,16 @@ export default function HealthCare() {
                 {isHi ? "बीमारियों, दवाओं और लक्षणों के बारे में खोजें" : "Search for diseases, drugs, or medical terminology."}
               </p>
               
+              <div className="flex items-center gap-2 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100">
+                <div className="flex-1">
+                  <span className="block text-[9.5px] font-bold text-indigo-800 uppercase tracking-wider">{isHi ? "चिकित्सा शब्दावली प्रणाली (UMLS)" : "Unified Medical Language System"}</span>
+                  <span className="text-[9px] text-slate-500 font-medium">{isHi ? "गहन नैदानिक कोड के लिए आधिकारिक UTS पोर्टल का अन्वेषण करें।" : "Explore the official UTS portal for deep clinical codes."}</span>
+                </div>
+                <a href="https://uts.nlm.nih.gov/uts/" target="_blank" rel="noopener noreferrer" className="bg-white border border-indigo-200 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-md hover:bg-indigo-50 transition shrink-0">
+                  Open UTS
+                </a>
+              </div>
+
               <div className="flex gap-2">
                 <input 
                   type="text" 
@@ -1099,6 +1129,41 @@ export default function HealthCare() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* NIH Health Bulletins */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm space-y-4">
+              <h4 className="font-display font-bold text-xs text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-1.5">
+                <Newspaper className="w-4.5 h-4.5 text-blue-600" />
+                {isHi ? "राष्ट्रीय स्वास्थ्य संस्थान बुलेटिन" : "NIH Health Bulletins"}
+              </h4>
+              
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                {medicalNewsLoading ? (
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                  </div>
+                ) : medicalNews.length === 0 ? (
+                  <p className="text-[10px] text-slate-500 text-center py-4">{isHi ? "कोई समाचार नहीं मिला।" : "No news found."}</p>
+                ) : (
+                  medicalNews.map((news, idx) => (
+                    <a key={idx} href={news.link} target="_blank" rel="noopener noreferrer" className="block bg-slate-50 hover:bg-blue-50/50 border border-slate-200 hover:border-blue-200 rounded-xl p-3 transition group">
+                      <div className="flex items-center space-x-2 mb-1.5">
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-[8.5px] font-bold rounded flex items-center">
+                          MedlinePlus
+                        </span>
+                        <span className="text-[9px] text-slate-400 font-semibold flex items-center">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          {new Date(news.pubDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <h5 className="text-[11px] font-bold text-slate-800 leading-snug group-hover:text-blue-700 transition">
+                        {news.title}
+                      </h5>
+                    </a>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         )}
