@@ -494,5 +494,33 @@ router.get("/api/public/wayback", async (req, res) => {
   }
 });
 
+// 6. Hindu Temples API (RapidAPI)
+router.get("/api/public/culture/temples", async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const cacheKey = `hindu_temples_page_${page}`;
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 3600000 * 24) { // 24 hour cache
+      return res.json({ success: true, data: cached.data });
+    }
+    
+    const RAPIDAPI_KEY = "3fb27f7764msha340adc983db030p1dba43jsnc590ab7b4dac";
+    
+    const response = await axios.get(`https://hindu-temples-api.p.rapidapi.com/?limit=10&page=${page}`, {
+      headers: {
+        "x-rapidapi-host": "hindu-temples-api.p.rapidapi.com",
+        "x-rapidapi-key": RAPIDAPI_KEY,
+        "Content-Type": "application/json"
+      }
+    });
+
+    apiCache.set(cacheKey, { data: response.data, timestamp: Date.now() });
+    res.json({ success: true, data: response.data });
+  } catch (error: any) {
+    console.error("Temples API Error:", error?.response?.data || error.message);
+    res.status(500).json({ success: false, error: "Failed to fetch temples data" });
+  }
+});
+
 export default router;
 

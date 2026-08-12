@@ -1,0 +1,206 @@
+import React, { useState, useEffect } from "react";
+import { ArrowLeft, Landmark, BookOpen, ChevronRight, Loader2, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { motion } from "motion/react";
+
+interface Temple {
+  id: number;
+  temple_name: string;
+  description: string;
+  architecture: string;
+  temple_image: string;
+  basic_details: {
+    state: string;
+    location: string;
+    god: string;
+  };
+}
+
+const sacredTexts = [
+  { title: "Bhagavad Gita", desc: "The Song of God, a 700-verse Hindu scripture.", link: "https://www.holy-bhagavad-gita.org/" },
+  { title: "Rigveda", desc: "An ancient Indian collection of Vedic Sanskrit hymns.", link: "https://www.sacred-texts.com/hin/rigveda/" },
+  { title: "Upanishads", desc: "Late Vedic Sanskrit texts of religious teaching.", link: "https://www.sacred-texts.com/hin/upan/" },
+  { title: "Ramayana", desc: "One of the two major Sanskrit epics of ancient India.", link: "https://www.sacred-texts.com/hin/rama/" },
+  { title: "Mahabharata", desc: "The longest epic poem known and has been described as the longest poem ever written.", link: "https://www.sacred-texts.com/hin/maha/" },
+  { title: "Puranas", desc: "Ancient Hindu texts eulogizing various deities.", link: "https://www.sacred-texts.com/hin/purana.htm" }
+];
+
+const Culture: React.FC = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"temples" | "shastras">("temples");
+  const [temples, setTemples] = useState<Temple[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const fetchTemples = async (pageNum: number) => {
+    try {
+      const res = await axios.get(`/api/public/culture/temples?page=${pageNum}`);
+      if (res.data.success && res.data.data.data) {
+        if (pageNum === 1) {
+          setTemples(res.data.data.data);
+        } else {
+          setTemples(prev => [...prev, ...res.data.data.data]);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch temples", err);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTemples(1);
+  }, []);
+
+  const handleLoadMore = () => {
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchTemples(nextPage);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 pb-20 font-sans">
+      {/* Header */}
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-red-600 to-orange-500 shadow-md">
+        <div className="flex items-center px-4 h-16 max-w-3xl mx-auto text-white">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-white/20 transition-colors">
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div className="flex items-center space-x-2 ml-2">
+            <Landmark className="w-6 h-6" />
+            <h1 className="text-xl font-bold">Religion & Culture</h1>
+          </div>
+        </div>
+        
+        {/* Tabs */}
+        <div className="flex max-w-3xl mx-auto px-4 mt-2 mb-1 gap-2">
+          <button 
+            onClick={() => setActiveTab("temples")}
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-t-xl transition-colors ${
+              activeTab === "temples" ? "bg-white text-orange-600" : "text-white/80 hover:bg-white/10"
+            }`}
+          >
+            Temples of India
+          </button>
+          <button 
+            onClick={() => setActiveTab("shastras")}
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-t-xl transition-colors ${
+              activeTab === "shastras" ? "bg-white text-orange-600" : "text-white/80 hover:bg-white/10"
+            }`}
+          >
+            Sacred Texts
+          </button>
+        </div>
+      </div>
+
+      <div className="p-4 max-w-3xl mx-auto space-y-6">
+        
+        {activeTab === "temples" ? (
+          <div className="space-y-6">
+            <div className="bg-orange-50 p-4 rounded-xl border border-orange-100 flex items-center gap-3">
+              <Landmark className="w-8 h-8 text-orange-500 shrink-0" />
+              <p className="text-sm text-orange-800">
+                Discover the architectural marvels and rich spiritual history of India's most famous temples.
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {temples.map((temple, idx) => (
+                  <motion.div 
+                    key={`${temple.id}-${idx}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
+                  >
+                    <div 
+                      className="h-48 w-full bg-slate-200 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${temple.temple_image})` }}
+                    />
+                    <div className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <h2 className="text-xl font-bold text-slate-800 leading-tight">
+                          {temple.temple_name}
+                        </h2>
+                        {temple.basic_details && temple.basic_details.god && (
+                          <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-md text-xs font-bold shrink-0">
+                            {temple.basic_details.god}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {temple.basic_details && (
+                        <div className="flex items-center gap-1 text-slate-500 text-sm mt-2 font-medium">
+                          <MapPin className="w-4 h-4 text-rose-500" />
+                          {temple.basic_details.location}, {temple.basic_details.state}
+                        </div>
+                      )}
+                      
+                      <div className="mt-4 text-sm text-slate-600 line-clamp-4 leading-relaxed prose prose-sm prose-p:my-1" 
+                           dangerouslySetInnerHTML={{ __html: temple.description }} />
+                    </div>
+                  </motion.div>
+                ))}
+                
+                <button 
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="w-full py-3 bg-white border-2 border-orange-200 text-orange-600 font-bold rounded-xl hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  {loadingMore ? <Loader2 className="w-5 h-5 animate-spin" /> : "Load More Temples"}
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-6">
+             <div className="bg-rose-50 p-4 rounded-xl border border-rose-100 flex items-center gap-3">
+              <BookOpen className="w-8 h-8 text-rose-500 shrink-0" />
+              <p className="text-sm text-rose-800">
+                Explore the vast repository of ancient knowledge, philosophy, and spirituality found in the Shastras.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {sacredTexts.map((text, idx) => (
+                <motion.a 
+                  href={text.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={idx}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-rose-200 hover:shadow-md transition-all flex flex-col group block"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-bold text-slate-800 group-hover:text-rose-600 transition-colors">
+                      {text.title}
+                    </h3>
+                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-rose-50 transition-colors">
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-rose-500" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    {text.desc}
+                  </p>
+                </motion.a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Culture;

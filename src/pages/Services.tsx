@@ -145,6 +145,7 @@ export default function Services() {
                           : svc.id === 'internet-radio' ? '/internet-radio'
                           : svc.id === 'news-feed' ? '/news'
                           : svc.id === 'hindu-calendar' ? '/hindu-calendar'
+                          : svc.id === 'culture' ? '/culture'
                           : `/services/${svc.id}`; // Everything else uses dynamic details
 
               const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;
