@@ -8,12 +8,20 @@ async function initDatabase() {
     client = await pool.connect();
     // gen_random_uuid() is built-in since PG 13 — no extension needed
     
-    // Drop tables that may have wrong column casing from previous failed init
-    const tablesToRecreate = ["social_posts", "campaigns", "jobs", "health_camps", "grievances", "service_submissions", "job_applications", "blood_donors", "card_applications"];
-    for (const table of tablesToRecreate) {
-      await client.query(`DROP TABLE IF EXISTS "${table}" CASCADE`);
-    }
-    
+    // NOTE: This used to unconditionally DROP and recreate these tables on
+    // every single server start/restart — meaning every real citizen
+    // submission (job postings, grievances/Jan Sunwai reports, health camp
+    // records, campaigns, blood donor registrations, Jan Seva Card
+    // applications, volunteer registrations, and community posts) was
+    // permanently destroyed on every deploy or crash-recovery restart. The
+    // only reason it looked like the app always showed the same "fake"
+    // social posts is that the seed data below re-inserted itself into a
+    // freshly emptied table every time. We now only create these tables if
+    // they don't already exist — real data persists across restarts, and
+    // schema changes should go through additive `ALTER TABLE ... ADD COLUMN
+    // IF NOT EXISTS` migrations (as already done elsewhere in this file)
+    // instead of a destructive drop-and-recreate.
+
     // Create users table
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
@@ -96,6 +104,29 @@ async function initDatabase() {
       )
     `);
 
+    // Create directory_services table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS directory_services (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name TEXT,
+        category TEXT,
+        contact TEXT,
+        status TEXT DEFAULT 'active',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    // Create blogs table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS blogs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        title TEXT,
+        description TEXT,
+        author TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
     // Create jobs table
     await client.query(`
       CREATE TABLE IF NOT EXISTS jobs (
@@ -171,9 +202,9 @@ async function initDatabase() {
       )
     `);
 
-    // Create volunteers table
+    // Create volunteers table (see note above — never DROP this on startup,
+    // or every volunteer's registration gets wiped on every restart)
     await client.query(`
-      DROP TABLE IF EXISTS volunteers CASCADE;
       CREATE TABLE IF NOT EXISTS volunteers (
         id VARCHAR(255) PRIMARY KEY,
         username VARCHAR(255) UNIQUE,
@@ -206,6 +237,32 @@ async function initDatabase() {
         approval_status VARCHAR(50) DEFAULT 'pending',
         points INTEGER DEFAULT 0,
         "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    // Volunteer network fields: `role` (e.g. coordinator/member, admin
+    // assignable) and `constituency_allocation` (already referenced by
+    // /api/volunteers/:id/allocate, but the column never actually existed —
+    // that endpoint has been failing silently on every use).
+    try {
+      await client.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS role VARCHAR(100);');
+      await client.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS constituency_allocation TEXT;');
+    } catch (e: any) {
+      console.warn("[DB INIT WARNING] Could not add volunteer network columns:", e.message);
+    }
+
+    // Create community_chat_messages table (the public group chat used to
+    // have no persistence at all — every message vanished on refresh — and
+    // no server-side identity check, so any client could claim to be
+    // anyone by just sending a different authorName in the payload).
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS community_chat_messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "userId" VARCHAR(255) NOT NULL,
+        "authorName" TEXT NOT NULL,
+        "authorAvatar" TEXT,
+        text TEXT NOT NULL,
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `);
 

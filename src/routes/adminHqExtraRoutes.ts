@@ -9,7 +9,7 @@ import multer from 'multer';
 
 const router = express.Router();
 
-router.put("/api/admin/hq/credentials", async (req, res) => {
+router.put("/api/admin/hq/credentials", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
   try {
     const body = req.body || {};
     const { username, newPassword } = body;
@@ -26,6 +26,10 @@ router.put("/api/admin/hq/credentials", async (req, res) => {
   }
 });
 
+// This GET is intentionally left public: it only reveals a certificate's
+// signatory name/designation (already-public information printed on any
+// issued certificate), never anything sensitive, and public certificate
+// verification pages need to read it without a login.
 router.get("/api/admin/hq/certificates/signatures/:service_id", async (req, res) => {
   try {
     const { service_id } = req.params;
@@ -39,7 +43,7 @@ router.get("/api/admin/hq/certificates/signatures/:service_id", async (req, res)
   }
 });
 
-router.put("/api/admin/hq/certificates/signatures", async (req, res) => {
+router.put("/api/admin/hq/certificates/signatures", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { service_id, signatory_1_name, signatory_1_designation, signatory_2_name, signatory_2_designation } = req.body;
     await pool.query(`
@@ -57,7 +61,7 @@ router.put("/api/admin/hq/certificates/signatures", async (req, res) => {
   }
 });
 
-router.post("/api/admin/hq/certificates/issue", async (req, res) => {
+router.post("/api/admin/hq/certificates/issue", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { volunteer_id, service_id } = req.body;
     const certId = "RP-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
@@ -81,7 +85,7 @@ router.post("/api/admin/hq/certificates/issue", async (req, res) => {
   }
 });
 
-router.put("/api/admin/hq/services/:id/content", async (req, res) => {
+router.put("/api/admin/hq/services/:id/content", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const body = req.body || {};
     const { id } = req.params;

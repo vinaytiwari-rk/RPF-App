@@ -22,22 +22,15 @@ export default function ServiceDetails() {
   useEffect(() => {
     if (!id) return;
 
-    if (id === "women-safety") {
-      navigate("/women", { replace: true });
-      return;
-    }
-    if (id === "seniors") {
-      navigate("/seniors", { replace: true });
-      return;
-    }
-    if (id === "environment") {
-      navigate("/environment", { replace: true });
-      return;
-    }
-    if (id === "education") {
-      navigate("/education", { replace: true });
-      return;
-    }
+    // NOTE: This used to redirect women-safety/seniors/environment/education
+    // to dedicated routes (/women, /seniors, /environment, /education).
+    // Those routes were never registered in App.tsx, so every visitor
+    // clicking those four services was bounced straight to Home via the
+    // catch-all "*" route. All services (including these) already have a
+    // working generic detail view below, backed by
+    // /api/public/services/:id/content and the matching admin content tabs,
+    // so we just let them render normally here instead of redirecting into
+    // a dead route.
 
     const fetchContent = async () => {
       setIsLoadingContent(true);

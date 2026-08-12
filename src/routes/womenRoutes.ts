@@ -130,14 +130,9 @@ router.get("/api/rto/vehicle/:plate", async (req, res) => {
       rto_code: formattedPlate.substring(0, 4)
     };
 
-    // Save this mock to DB so future queries return the exact same data
-    await pool.query(
-      `INSERT INTO rto_vehicles (plate_number, owner_name, vehicle_model, registration_date, insurance_validity, fitness_validity, fuel_type, rto_code, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [mockVehicle.plate_number, mockVehicle.owner_name, mockVehicle.vehicle_model, mockVehicle.registration_date, mockVehicle.insurance_validity, mockVehicle.fitness_validity, mockVehicle.fuel_type, mockVehicle.rto_code, mockVehicle.status]
-    );
-
-    res.json({ success: true, data: mockVehicle });
+    // Add a demo flag so the frontend knows this is simulated
+    const responseData = { ...mockVehicle, is_demo_data: true, status: "DEMO MODE (NOT REAL)" };
+    res.json({ success: true, data: responseData });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

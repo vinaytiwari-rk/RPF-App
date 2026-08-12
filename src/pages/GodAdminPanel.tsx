@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import GenericAdminTab from '../components/GenericAdminTab';
+import ServicesManager from '../components/ServicesManager';
+import ServiceContentManager from '../components/ServiceContentManager';
 import FileUpload from '../components/FileUpload';
 import { AppSettings, DbRecord } from '../types';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -10,7 +12,7 @@ import { GraduationCap, Utensils, Pill, BookOpen, UserPlus, Dog, Leaf, Church, T
 import {
   Settings, Monitor, Home, Users, Shield, Bell, CheckCircle,
   XCircle, Image as ImageIcon, MessageSquare, LayoutTemplate,
-  Loader2, LogOut, Check, ChevronRight, Activity, Database, Menu, X, Heart, CreditCard, Stethoscope, Briefcase, FileText, ActivitySquare, AlertTriangle, Droplet
+  Loader2, LogOut, Check, ChevronRight, Activity, Database, Menu, X, Heart, CreditCard, Stethoscope, Briefcase, FileText, ActivitySquare, AlertTriangle, Droplet, LayoutGrid
 } from 'lucide-react';
 import { CmsSettings } from '../components/admin/CmsSettings';
 
@@ -175,6 +177,8 @@ export default function GodAdminPanel() {
 
   const tabs = [
     { id: 'users', label: 'Users Directory', icon: <Users size={20} /> },
+    { id: 'services', label: 'Core Services', icon: <LayoutGrid size={20} /> },
+    { id: 'service_content', label: 'Service Page Content', icon: <FileText size={20} /> },
     { id: 'directory', label: 'Public Directory', icon: <BookOpen size={20} /> },
     { id: 'volunteers', label: 'Volunteers', icon: <Shield size={20} /> },
     { id: 'donations', label: 'Donations', icon: <Heart size={20} /> },
@@ -229,6 +233,10 @@ export default function GodAdminPanel() {
     }
 
     switch (activeTab) {
+      case 'services':
+        return <ServicesManager />;
+      case 'service_content':
+        return <ServiceContentManager />;
       case 'users':
         return (
           <div className="glass-card overflow-hidden">
@@ -506,7 +514,7 @@ export default function GodAdminPanel() {
         return <GenericAdminTab endpoint="/api/admin/blogs" title="Articles & Blogs" columns={["title", "description", "author"]} />;
 
       case 'directory':
-        return <GenericAdminTab endpoint="/api/directory" title="Public Directory" columns={["name", "category", "contact", "status"]} />;
+        return <GenericAdminTab endpoint="/api/admin/directory" title="Public Directory" columns={["name", "category", "contact", "status"]} />;
       case 'jobs':
         return (
           <div className="glass-card overflow-hidden">

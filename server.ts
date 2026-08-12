@@ -1,3 +1,5 @@
+import { Server as SocketIOServer } from 'socket.io';
+import http from 'http';
 
 import { sendEmail } from './src/lib/mailer';
 import { apiCache, CACHE_TTL } from './src/lib/apiCache';
@@ -1346,7 +1348,7 @@ async function initDatabase() {
       )
     `, [], "library_books table creation");
 
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS job_listings (
         id VARCHAR(255) PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
@@ -1359,7 +1361,7 @@ async function initDatabase() {
       )
     `, [], "job_listings table creation");
 
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS panchang_calendar (
         date VARCHAR(255) PRIMARY KEY,
         tithi VARCHAR(255) NOT NULL,
@@ -1372,7 +1374,7 @@ async function initDatabase() {
       )
     `, [], "panchang_calendar table creation");
     
-    await client.query(`
+    await runQuery(`
       CREATE TABLE IF NOT EXISTS chat_history (
         id SERIAL PRIMARY KEY,
         session_id VARCHAR(255) NOT NULL,
@@ -1834,9 +1836,56 @@ process.on('unhandledRejection', (reason, promise) => {
   // Do not exit the process, just log it
 });
 
-  app.listen(PORT, "0.0.0.0", () => {
+  
+  const server = http.createServer(app);
+  const io = new SocketIOServer(server, {
+    cors: { origin: "*", methods: ["GET", "POST"] }
+  });
+
+  // The public group chat used to trust whatever `authorName` the client
+  // sent with each message — meaning anyone could type any name and
+  // impersonate any other volunteer/citizen in the chat, and nothing was
+  // ever saved (a page refresh wiped the whole conversation). We now
+  // require a valid login token on connection and derive the sender's
+  // identity server-side from that token, and persist every message so
+  // history survives refreshes/restarts.
+  io.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error("Authentication required to join chat"));
+    jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
+      if (err || !decoded?.id) return next(new Error("Invalid or expired session"));
+      (socket as any).userId = decoded.id;
+      (socket as any).userName = decoded.name || "Citizen";
+      next();
+    });
+  });
+
+  io.on("connection", (socket) => {
+    socket.on("chat_message", async (msg) => {
+      const userId = (socket as any).userId;
+      const authorName = (socket as any).userName;
+      const text = typeof msg?.text === "string" ? msg.text.trim().slice(0, 2000) : "";
+      if (!text) return;
+
+      try {
+        const result = await pool.query(
+          `INSERT INTO community_chat_messages (id, "userId", "authorName", "authorAvatar", text)
+           VALUES (gen_random_uuid(), $1, $2, $3, $4)
+           RETURNING id, "authorName", "authorAvatar", text, "createdAt"`,
+          [userId, authorName, msg?.authorAvatar || null, text]
+        );
+        io.emit("chat_message", result.rows[0]);
+      } catch (e: any) {
+        console.error("Failed to persist chat message:", e.message);
+      }
+    });
+    socket.on("disconnect", () => {});
+  });
+
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
+
 }
 
 startServer();

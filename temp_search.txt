@@ -1,0 +1,163 @@
+705: await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "audioUrl" TEXT', [], "grievance audioUrl migration");
+706: await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "videoUrl" TEXT', [], "grievance videoUrl migration");
+707: await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "imageUrl" TEXT', [], "grievance imageUrl migration");
+708: await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "date" TEXT', [], "grievance date migration");
+709: await runQuery('ALTER TABLE grievances ADD COLUMN IF NOT EXISTS "aiSummary" TEXT', [], "grievance aiSummary migration");
+714: id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+724: timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+725: "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+732: user_id VARCHAR(255) PRIMARY KEY,
+742: sleep_cycle VARCHAR(100) DEFAULT '7h 15m',
+745: updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+753: user_id VARCHAR(255),
+755: alarm_time VARCHAR(50),
+757: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+764: user_id VARCHAR(255) PRIMARY KEY,
+765: child_age VARCHAR(50),
+766: child_weight VARCHAR(50),
+767: updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+775: user_id VARCHAR(255),
+778: updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+779: UNIQUE(user_id, vaccine_name)
+786: user_id VARCHAR(255),
+788: registered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+789: PRIMARY KEY (user_id, event_title)
+796: id VARCHAR(255) PRIMARY KEY,
+797: username VARCHAR(255) UNIQUE,
+798: registration_number VARCHAR(255) UNIQUE,
+799: password_hash VARCHAR(255),
+805: mobile VARCHAR(20) UNIQUE,
+806: email VARCHAR(255) UNIQUE,
+808: blood_group VARCHAR(10),
+811: availability VARCHAR(100),
+812: national_id_1 VARCHAR(50),
+813: national_id_2 VARCHAR(50),
+814: country VARCHAR(100),
+815: state VARCHAR(100),
+816: city VARCHAR(100),
+818: pincode VARCHAR(20),
+819: area_locality VARCHAR(255),
+820: sansad_kshetra VARCHAR(255),
+821: vidhan_sabha VARCHAR(255),
+822: ward_no VARCHAR(255),
+823: approval_status VARCHAR(50) DEFAULT 'pending',
+825: "registeredAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+838: "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+853: "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+860: id UUID PRIMARY KEY, "userId" VARCHAR(255),
+869: "submittedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+877: "userId" VARCHAR(255),
+880: amount DECIMAL(10, 2) NOT NULL,
+882: "transactionId" VARCHAR(255) UNIQUE,
+884: "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+892: "volunteerId" VARCHAR(255) NOT NULL,
+899: "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+902: // Create passkeys table (WebAuthn credentials)
+908: "userId" VARCHAR(255) NOT NULL
+919: rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+921: "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+929: user_id VARCHAR(255) NOT NULL,
+939: "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+943: // Create app_settings table (Single Row Config)
+946: id INTEGER PRIMARY KEY CHECK (id = 1),
+970: INSERT INTO app_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+980: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+991: "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+992: status VARCHAR(50) DEFAULT 'pending'
+1004: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1015: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1026: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1037: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1048: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1059: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1070: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1081: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1092: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1103: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1114: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1125: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1136: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1147: "authorId" VARCHAR(255) NOT NULL,
+1149: "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+1158: const postsCount = await client.query("SELECT COUNT(*) FROM social_posts");
+1159: if (parseInt(postsCount.rows[0].count, 10) === 0) {
+1160: console.log("Seeding default social_posts into PostgreSQL...");
+1189: for (const p of DEFAULT_POSTS) {
+1191: `INSERT INTO social_posts (id, author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link)
+1192: VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+1193: [crypto.randomUUID(), p.author, p.role, p.avatar, p.textEn, p.textHi, p.image, p.likes, p.commentsCount, p.liked, p.platform, p.link]
+1197: } catch (e) {
+1198: console.warn("Seeding social posts failed:", e);
+1204: id VARCHAR(255) PRIMARY KEY,
+1226: id VARCHAR(255) PRIMARY KEY,
+1227: user_id VARCHAR(255),
+1228: blood_group VARCHAR(10) NOT NULL,
+1229: component_type VARCHAR(50) NOT NULL,
+1231: urgency VARCHAR(20) NOT NULL,
+1232: status VARCHAR(20) DEFAULT 'Pending',
+1235: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1242: id VARCHAR(255) PRIMARY KEY,
+1243: user_id VARCHAR(255) NOT NULL,
+1244: blood_bank_id VARCHAR(255) NOT NULL,
+1246: blood_group VARCHAR(10),
+1247: status VARCHAR(20) DEFAULT 'Scheduled',
+1249: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1256: plate_number VARCHAR(50) PRIMARY KEY,
+1257: owner_name VARCHAR(255) NOT NULL,
+1258: vehicle_model VARCHAR(255),
+1262: fuel_type VARCHAR(50),
+1263: rto_code VARCHAR(50),
+1264: status VARCHAR(50) DEFAULT 'ACTIVE',
+1265: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1272: id VARCHAR(255) PRIMARY KEY,
+1273: name VARCHAR(255) NOT NULL,
+1274: invite_code VARCHAR(50) UNIQUE,
+1275: created_by VARCHAR(255) NOT NULL,
+1276: created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1282: id VARCHAR(255) PRIMARY KEY,
+1283: group_id VARCHAR(255) NOT NULL,
+1284: user_id VARCHAR(255) NOT NULL,
+1285: role VARCHAR(50) DEFAULT 'member',
+1286: joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+1287: UNIQUE(group_id, user_id)
+1293: id VARCHAR(255) PRIMARY KEY,
+1294: user_id VARCHAR(255) NOT NULL,
+1299: timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1307: user_id VARCHAR(255) NOT NULL,
+1312: fill_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1318: id VARCHAR(255) PRIMARY KEY,
+1319: title VARCHAR(255) NOT NULL,
+1320: category VARCHAR(255) NOT NULL,
+1321: instructor VARCHAR(255) NOT NULL,
+1322: youtube_id VARCHAR(255) NOT NULL,
+1323: duration VARCHAR(50),
+1331: user_id VARCHAR(255) NOT NULL,
+1332: test_category VARCHAR(255) NOT NULL,
+1335: date_taken TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+1341: id VARCHAR(255) PRIMARY KEY,
+1342: title VARCHAR(255) NOT NULL,
+1343: author VARCHAR(255) NOT NULL,
+1344: category VARCHAR(255) NOT NULL,
+1352: id VARCHAR(255) PRIMARY KEY,
+1353: title VARCHAR(255) NOT NULL,
+1354: company VARCHAR(255) NOT NULL,
+1355: location VARCHAR(255) NOT NULL,
+1356: type VARCHAR(255) NOT NULL,
+1357: salary VARCHAR(255) NOT NULL,
+1365: date VARCHAR(255) PRIMARY KEY,
+1366: tithi VARCHAR(255) NOT NULL,
+1367: nakshatra VARCHAR(255) NOT NULL,
+1368: sunrise VARCHAR(255) NOT NULL,
+1369: sunset VARCHAR(255) NOT NULL,
+1370: moonrise VARCHAR(255) NOT NULL,
+1371: moonset VARCHAR(255) NOT NULL,
+1379: session_id VARCHAR(255) NOT NULL,
+1380: role VARCHAR(50) NOT NULL,
+1388: const bankCount = await client.query("SELECT COUNT(*) FROM blood_banks");
+1389: if (parseInt(bankCount.rows[0].count, 10) === 0) {
+1390: console.log("Seeding default blood banks...");
+1429: for (const b of DEFAULT_BANKS) {
+1431: `INSERT INTO blood_banks (id, name, email, phone, address, city, state, pincode, stock_a_plus, stock_a_minus, stock_b_plus, stock_b_minus, stock_ab_plus, stock_ab_minus, stock_o_plus, stock_o_minus)
+1432: VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+1437: } catch (e) {
+1438: console.warn("Seeding blood banks failed:", e);

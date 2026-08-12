@@ -269,13 +269,6 @@ export default function Grievances() {
                       placeholder={isHi ? "पता या लैंडमार्क दर्ज करें..." : "Address or landmark"} 
                       className="flex-1 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition"
                     />
-                    <button 
-                      onClick={() => setLocation("Bhopal City Ward 15")}
-                      className="bg-slate-100 border border-slate-300 px-3.5 rounded-lg hover:bg-slate-200 transition"
-                      title={isHi ? "वर्तमान स्थान चुनें" : "Select current location"}
-                    >
-                      <MapPin className="w-5 h-5 text-slate-600" />
-                    </button>
                   </div>
                 </div>
 

@@ -52,6 +52,59 @@ router.post("/api/settings", authenticateToken, authorizeRole("super_admin"), as
   }
 });
 
+// ─── Core Services visibility (admin) ──────────────────────────────────
+// Lets an admin actually hide/"delete" one of the built-in service tiles
+// that power the Home quick actions and the Services grid. Previously
+// there was no working way to do this at all: an orphaned ServicesManager
+// component posted to /api/settings (a table row that doesn't even have a
+// servicesStatus column), and the admin "directory" delete button operated
+// on a totally unrelated directory_services table. This reads/writes the
+// same cms_data JSON blob the rest of the CMS already uses, touching only
+// the hiddenServiceIds field so it never clobbers other CMS content.
+router.get("/api/admin/services", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { CORE_SERVICES } = await import("../data/coreServices.js");
+    const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
+    let hiddenServiceIds: string[] = [];
+    if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
+      try {
+        const parsed = JSON.parse(result.rows[0].founderMessageEn);
+        if (Array.isArray(parsed.hiddenServiceIds)) hiddenServiceIds = parsed.hiddenServiceIds;
+      } catch (e) {}
+    }
+    const data = CORE_SERVICES.map((s: any) => ({ ...s, hidden: hiddenServiceIds.includes(s.id) }));
+    res.json({ success: true, data });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post("/api/admin/services/:id/visibility", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { hidden } = req.body;
+    const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
+    let cmsData: any = {};
+    if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
+      try { cmsData = JSON.parse(result.rows[0].founderMessageEn); } catch (e) { cmsData = {}; }
+    }
+    const current: string[] = Array.isArray(cmsData.hiddenServiceIds) ? cmsData.hiddenServiceIds : [];
+    const next = hidden
+      ? Array.from(new Set([...current, id]))
+      : current.filter((sid: string) => sid !== id);
+    cmsData.hiddenServiceIds = next;
+
+    await pool.query(
+      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1)
+       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" = $1`,
+      [JSON.stringify(cmsData)]
+    );
+    res.json({ success: true, hiddenServiceIds: next });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get("/api/cms/config", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);

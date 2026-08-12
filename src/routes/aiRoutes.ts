@@ -163,4 +163,49 @@ Respond with a JSON array of up to 3 highly tailored schemes. Each scheme should
   }
 });
 
+router.post("/api/ai/resume", async (req, res) => {
+  const { fullName, title, experience, skills } = req.body;
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: "AI service unavailable (No API Key)" });
+  }
+
+  try {
+    const ai = getGeminiClient();
+    const prompt = `You are an expert career coach. Based on the following user details, generate a professional resume summary and a short, impactful cover letter.
+- Name: ${fullName}
+- Title: ${title}
+- Skills: ${skills}
+- Experience Context: ${experience}
+
+Format the response strictly as a JSON object with:
+1. "summary" (A 2-3 sentence professional summary)
+2. "coverLetter" (A 3-paragraph cover letter)
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            summary: { type: Type.STRING },
+            coverLetter: { type: Type.STRING }
+          },
+          required: ["summary", "coverLetter"]
+        }
+      }
+    });
+
+    const result = JSON.parse(response.text || "{}");
+    res.json(result);
+  } catch (error: any) {
+    console.error("AI Resume Error:", error);
+    res.status(500).json({ error: error.message || "Failed to generate resume content" });
+  }
+});
+
 export default router;

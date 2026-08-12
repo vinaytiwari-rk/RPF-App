@@ -260,6 +260,30 @@ router.get("/api/admin/health-camps", authenticateToken, requireAdmin, async (re
   }
 });
 
+// POST health camp
+router.post("/api/admin/health-camps", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, date, location } = req.body;
+    const result = await pool.query(
+      `INSERT INTO health_camps ("titleEn", "titleHi", "dateEn", "dateHi", "locationEn", "locationHi") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [title, title, date, date, location, location]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to create health camp" });
+  }
+});
+
+// DELETE health camp
+router.delete("/api/admin/health-camps/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM health_camps WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to delete health camp" });
+  }
+});
+
 // GET all grievances
 router.get("/api/admin/grievances", authenticateToken, requireAdmin, async (req, res) => {
   try {
@@ -361,6 +385,20 @@ router.get("/api/admin/blogs", authenticateToken, requireAdmin, async (req, res)
   }
 });
 
+// POST blog
+router.post("/api/admin/blogs", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, author } = req.body;
+    const result = await pool.query(
+      "INSERT INTO blogs (title, description, author) VALUES ($1, $2, $3) RETURNING *",
+      [title, description, author]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to create blog" });
+  }
+});
+
 // DELETE blog
 router.delete("/api/admin/blogs/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
@@ -407,6 +445,72 @@ router.get("/api/admin/campaigns", authenticateToken, requireAdmin, async (req, 
   }
 });
 
+// POST campaign
+router.post("/api/admin/campaigns", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, goalAmount, raisedAmount } = req.body;
+    const result = await pool.query(
+      `INSERT INTO campaigns ("titleEn", "titleHi", "goalAmount", "raisedAmount") VALUES ($1, $2, $3, $4) RETURNING *`,
+      [title, title, goalAmount || 0, raisedAmount || 0]
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to create campaign" });
+  }
+});
+
+// DELETE campaign
+router.delete("/api/admin/campaigns/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM campaigns WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to delete campaign" });
+  }
+});
+
+
+// GET directory
+router.get("/api/admin/directory", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = (page - 1) * limit;
+
+    const countResult = await pool.query("SELECT COUNT(*) FROM directory_services");
+    const totalCount = parseInt(countResult.rows[0].count);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    const result = await pool.query(`SELECT * FROM directory_services ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    res.json({ success: true, data: result.rows, totalPages, currentPage: page });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to fetch directory" });
+  }
+});
+
+// POST directory
+router.post("/api/admin/directory", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { name, category, contact, status } = req.body;
+    const result = await pool.query(
+      `INSERT INTO directory_services (name, category, contact, status) VALUES ($1, $2, $3, $4) RETURNING *`,
+      [name, category, contact, status || 'active']
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to create directory entry" });
+  }
+});
+
+// DELETE directory
+router.delete("/api/admin/directory/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM directory_services WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to delete directory entry" });
+  }
+});
 
 // --- SCHOLARSHIPS ROUTES ---
 router.get("/api/admin/scholarships", authenticateToken, requireAdmin, async (req, res) => {

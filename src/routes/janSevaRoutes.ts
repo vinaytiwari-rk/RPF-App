@@ -112,15 +112,4 @@ router.get("/api/cards/my", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-router.get("/api/cards/download/:id", async (req, res) => {
-  try {
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=JanSevaCard_${req.params.id}.pdf`);
-    res.send(Buffer.from("%PDF-1.4 ... MOCK JAN SEVA CARD PDF FOR ID " + req.params.id));
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 export default router;

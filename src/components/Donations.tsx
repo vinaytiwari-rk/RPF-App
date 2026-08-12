@@ -18,25 +18,7 @@ export default function Donations({ lang, onDonationComplete }: DonationsProps) 
 
   const handlePay = (e: React.FormEvent) => {
     e.preventDefault();
-    const donorVal = donorName.trim() || (lang === "hi" ? "गुमनाम दानदाता" : "Anonymous Patron");
-    const numAmt = parseFloat(amount);
-    if (!numAmt || numAmt <= 0) return;
-
-    // Simulate Payment completion
-    const txId = `TXN-${Math.floor(Math.random() * 90000000 + 10000000)}`;
-    const newReceipt = {
-      txId,
-      name: donorVal,
-      amount: numAmt,
-      cause: selectedCause,
-      date: new Date().toLocaleDateString(),
-    };
-
-    setReceipt(newReceipt);
-    onDonationComplete(numAmt);
-    // Reset form fields
-    setAmount("");
-    setDonorName("");
+    alert(lang === "hi" ? "पेमेंट गेटवे जल्द ही आ रहा है।" : "Payment Gateway is coming soon.");
   };
 
   return (

@@ -326,15 +326,15 @@ router.get("/api/blood-banks", async (req, res) => {
           longitude: item._longitude,
           category: item._category || "General",
           service_time: item._service_time || "24x7",
-          // Generate realistic stocks dynamically
-          stock_a_plus: Math.floor(Math.random() * 20) + 2,
-          stock_a_minus: Math.floor(Math.random() * 5) + 1,
-          stock_b_plus: Math.floor(Math.random() * 20) + 2,
-          stock_b_minus: Math.floor(Math.random() * 5) + 1,
-          stock_ab_plus: Math.floor(Math.random() * 10) + 1,
-          stock_ab_minus: Math.floor(Math.random() * 3) + 0,
-          stock_o_plus: Math.floor(Math.random() * 25) + 5,
-          stock_o_minus: Math.floor(Math.random() * 8) + 1
+          // Stock data is not provided by this data source. Frontend should direct users to eRaktKosh.
+          stock_a_plus: null,
+          stock_a_minus: null,
+          stock_b_plus: null,
+          stock_b_minus: null,
+          stock_ab_plus: null,
+          stock_ab_minus: null,
+          stock_o_plus: null,
+          stock_o_minus: null
         }));
 
         // Apply server-side search filter if query is present

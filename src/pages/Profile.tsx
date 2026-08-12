@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
+
 import { 
   User, Shield, Award, MapPin, Languages, BookMarked, 
   Settings, HelpCircle, AlertTriangle, Info, LogOut, CheckCircle2, 
@@ -41,7 +40,10 @@ export default function Profile() {
   const handleSaveProfile = async () => {
     try {
       setIsSaving(true);
-      await axios.post("/api/auth/profile/update", { name: editName, avatar: user?.avatar || "" });
+      const token = localStorage.getItem("token");
+      await axios.post("/api/auth/profile/update", { name: editName, avatar: user?.avatar || "" }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       alert("Profile updated successfully!");
       window.location.reload();
     } catch (err) {
@@ -275,7 +277,7 @@ export default function Profile() {
             <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Volunteer</span>
           </div>
           <div className="w-[1px] h-6 bg-slate-200 self-center mx-auto"></div>
-          <div onClick={() => user.isVolunteer ? navigate("/volunteer-dashboard") : alert(isHi ? "स्वयंसेवक के रूप में पंजीकरण करें" : "Register as volunteer to earn certificates!")} className="flex flex-col items-center justify-center col-span-2 cursor-pointer hover:bg-slate-100 rounded-lg p-1 transition"><div className="flex items-center gap-1 text-[#FF9933]"><Award className="w-4 h-4" /><span className="text-xs font-black">View</span></div><span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Certificates</span></div>
+          <div onClick={() => alert(isHi ? "प्रमाणपत्र जल्द ही उपलब्ध होंगे" : "Certificates will be available soon.")} className="flex flex-col items-center justify-center col-span-2 cursor-pointer hover:bg-slate-100 rounded-lg p-1 transition"><div className="flex items-center gap-1 text-[#FF9933]"><Award className="w-4 h-4" /><span className="text-xs font-black">View</span></div><span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Certificates</span></div>
         </div>
       </div>
 
@@ -316,25 +318,6 @@ export default function Profile() {
               </div>
             </div>
           </motion.div>
-        )}
-
-        {user.isVolunteer && (
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate("/volunteer-dashboard")}
-            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-[#000080] rounded-2xl p-4 flex items-center justify-between shadow-md transition"
-          >
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
-                <Target className="w-6 h-6 shadow-sm" />
-              </div>
-              <div className="text-left">
-                <p className="font-black text-sm">{isHi ? "स्वयंसेवक डैशबोर्ड" : "Volunteer Dashboard"}</p>
-                <p className="text-[10.5px] text-amber-100 font-bold mt-0.5">{isHi ? "कार्यों और गतिविधियों को प्रबंधित करें" : "Manage tasks & field activities"}</p>
-              </div>
-            </div>
-            <ChevronRight className="w-6 h-6 text-amber-200" />
-          </motion.button>
         )}
 
 
@@ -406,10 +389,10 @@ export default function Profile() {
               {[
                 { icon: Globe, url: settings?.webUrl ? (settings.webUrl.startsWith("http") ? settings.webUrl : "https://" + settings.webUrl) : "https://therpfoundation.org", grad: "from-blue-500 to-indigo-650" },
                 { icon: Mail, url: `mailto:${settings?.email || "info@therpfoundation.org"}`, grad: "from-amber-500 to-red-500" },
-                { icon: Twitter, url: "https://twitter.com/therpfoundation", grad: "from-slate-700 to-slate-900" },
-                { icon: Youtube, url: "https://youtube.com/@therpfoundation", grad: "from-red-600 to-rose-700" },
-                { icon: Instagram, url: "https://instagram.com/therpfoundation", grad: "from-pink-500 via-purple-550 to-yellow-500" },
-                { icon: Facebook, url: "https://facebook.com/therpfoundation", grad: "from-blue-650 to-blue-800" }
+                { icon: Twitter, url: "https://x.com/rpfoundation15", grad: "from-slate-700 to-slate-900" },
+                { icon: Youtube, url: "https://www.youtube.com/@rpfoundationofficial", grad: "from-red-600 to-rose-700" },
+                { icon: Instagram, url: "https://www.instagram.com/rpfoundationofficial/", grad: "from-pink-500 via-purple-550 to-yellow-500" },
+                { icon: Facebook, url: "https://www.facebook.com/rpfofficial", grad: "from-blue-650 to-blue-800" }
               ].map((item, idx) => {
                 const Icon = item.icon;
                 return (

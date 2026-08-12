@@ -1,25 +1,9 @@
-// src/pages/Community.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
-import {
-  Sparkles,
-  BookOpen,
-  Plus,
-  X,
-  Send,
-  Loader2,
-  Calendar,
-  User,
-  Instagram,
-  Facebook,
-  Youtube,
-  Twitter,
-  Globe,
-  ExternalLink,
-} from "lucide-react";
+import { Sparkles, BookOpen, Plus, X, Send, Loader2, Calendar, User, MessageCircle } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
-import ReelsFeed from "../components/ReelsFeed";
+import { io, Socket } from "socket.io-client";
 
 interface SuccessStory {
   id: string;
@@ -40,16 +24,39 @@ interface Blog {
   publishedAt?: string;
 }
 
-type TabType = "stories" | "blogs";
+interface ChatMessage {
+  id: string;
+  authorName: string;
+  authorAvatar?: string;
+  text: string;
+  createdAt?: string;
+  time?: string;
+}
+
+interface Volunteer {
+  id: string;
+  name: string;
+  avatar?: string;
+  role?: string;
+  city?: string;
+  area_locality?: string;
+  skills?: string[] | string;
+  availability?: string;
+  constituency_allocation?: string;
+}
+
+type TabType = "stories" | "blogs" | "volunteers" | "chat";
 
 export default function Community() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isHi = lang === "hi";
 
   const [activeTab, setActiveTab] = useState<TabType>("stories");
   const [stories, setStories] = useState<SuccessStory[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+  const [volunteerCityFilter, setVolunteerCityFilter] = useState("");
   const [loading, setLoading] = useState(true);
 
   // Write Blog Modal states
@@ -58,7 +65,11 @@ export default function Community() {
   const [blogContent, setBlogContent] = useState("");
   const [isSubmittingBlog, setIsSubmittingBlog] = useState(false);
 
-  const [showReels, setShowReels] = useState(false);
+  // Socket chat states
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const socketRef = useRef<Socket | null>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const fetchSuccessStories = async () => {
     try {
@@ -66,9 +77,7 @@ export default function Community() {
       if (res.data.success) {
         setStories(res.data.data || []);
       }
-    } catch (err) {
-      console.error("Error fetching success stories:", err);
-    }
+    } catch (err) {}
   };
 
   const fetchBlogs = async () => {
@@ -77,20 +86,64 @@ export default function Community() {
       if (res.data.success) {
         setBlogs(res.data.data || []);
       }
-    } catch (err) {
-      console.error("Error fetching blogs:", err);
-    }
+    } catch (err) {}
+  };
+
+  const fetchVolunteers = async (city?: string) => {
+    try {
+      const res = await axios.get("/api/public/volunteers", {
+        params: city ? { city } : {},
+      });
+      if (res.data.success) {
+        setVolunteers(res.data.data || []);
+      }
+    } catch (err) {}
+  };
+
+  const fetchChatHistory = async () => {
+    try {
+      const res = await axios.get("/api/community/chat/messages");
+      if (res.data.success) {
+        setChatMessages(res.data.data || []);
+      }
+    } catch (err) {}
   };
 
   const loadData = async () => {
     setLoading(true);
-    await Promise.all([fetchSuccessStories(), fetchBlogs()]);
+    await Promise.all([fetchSuccessStories(), fetchBlogs(), fetchVolunteers(), fetchChatHistory()]);
     setLoading(false);
   };
 
   useEffect(() => {
     loadData();
-  }, []);
+
+    // Chat requires being logged in now — the server verifies the
+    // connection's token and derives the sender's name from it, so nobody
+    // can impersonate another volunteer/citizen in the chat anymore.
+    if (!token) return;
+
+    const socketURL = window.location.origin;
+    socketRef.current = io(socketURL, { auth: { token } });
+
+    socketRef.current.on("chat_message", (msg: ChatMessage) => {
+      setChatMessages((prev) => [...prev, msg]);
+    });
+
+    socketRef.current.on("connect_error", (err) => {
+      console.warn("Chat connection failed:", err.message);
+    });
+
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, [token]);
+
+  useEffect(() => {
+    if (activeTab === "chat" && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages, activeTab]);
 
   const handleWriteBlogSubmit = async () => {
     if (!blogTitle.trim() || !blogContent.trim()) return;
@@ -101,36 +154,41 @@ export default function Community() {
         title: blogTitle.trim(),
         content: blogContent.trim(),
       }, {
-        headers: {
-          'Authorization': `Bearer ${token || ""}`
-        }
+        headers: { 'Authorization': `Bearer ${token || ""}` }
       });
       if (res.data.success) {
-        alert(
-          isHi
-            ? "आपका ब्लॉग समीक्षा के लिए जमा कर दिया गया है। एडमिन द्वारा स्वीकृत होने पर यह प्रकाशित होगा।"
-            : "Your blog has been submitted for review. It will be published once approved by the admin."
-        );
+        alert(isHi ? "आपका ब्लॉग समीक्षा के लिए जमा कर दिया गया है।" : "Your blog has been submitted for review.");
         setBlogTitle("");
         setBlogContent("");
         setShowBlogModal(false);
         fetchBlogs();
       }
     } catch (err: any) {
-      console.error("Error submitting blog:", err);
-      alert(err.response?.data?.error || "Error submitting blog.");
+      alert(err.response?.data?.error || "Error");
     } finally {
       setIsSubmittingBlog(false);
     }
+  };
+
+  const sendChatMessage = () => {
+    if (!chatInput.trim() || !user) return;
+
+    // authorName/authorId are no longer sent from the client — the server
+    // verifies the connection's login token and fills in the real sender
+    // identity itself, so messages can no longer be sent under someone
+    // else's name.
+    socketRef.current?.emit("chat_message", {
+      text: chatInput.trim(),
+      authorAvatar: (user as any).avatar || null,
+    });
+    setChatInput("");
   };
 
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
       return date.toLocaleDateString(isHi ? "hi-IN" : "en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
+        day: "numeric", month: "short", year: "numeric",
       });
     } catch (e) {
       return dateStr;
@@ -139,17 +197,8 @@ export default function Community() {
 
   return (
     <div className="flex flex-col h-full relative animate-fadeIn">
-      {/* ── Mandala backdrop ── */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[340px] h-[340px] opacity-[0.03] pointer-events-none z-0">
-        <svg viewBox="0 0 100 100" className="w-full h-full text-[#D4AF37]" fill="currentColor">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5" />
-          <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5" />
-          <path d="M50 5l2 15 15-15-5 25 15-5-25 5 15 15-25-2 5 25-15-15-5 15-15-15-5 15-5-25-25 2 15-15-25-5 15-5-15-25 15 15z" />
-        </svg>
-      </div>
-
       {/* ── Header ── */}
-      <div className="p-5 pb-3 space-y-3 shrink-0 relative z-10">
+      <div className="p-5 pb-3 space-y-3 shrink-0 relative z-10 bg-white shadow-sm border-b border-slate-100">
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-display font-extrabold text-base text-slate-900">
@@ -160,17 +209,10 @@ export default function Community() {
             </p>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={() => setShowReels(true)}
-              className="flex items-center gap-1 bg-gradient-to-r from-pink-500 to-orange-400 text-white text-[10px] font-bold px-3 py-2 rounded-xl shadow-md hover:from-pink-600 hover:to-orange-500 transition shrink-0"
-            >
-              <Instagram className="w-3.5 h-3.5" />
-              {isHi ? "रील्स देखें" : "Watch Reels"}
-            </button>
             {activeTab === "blogs" && user && (
               <button
                 onClick={() => setShowBlogModal(true)}
-                className="flex items-center gap-1 bg-[#000080] text-white text-[10px] font-bold px-3 py-2 rounded-xl shadow-md hover:bg-indigo-900 transition shrink-0"
+                className="flex items-center gap-1 bg-blue-600 text-white text-[10px] font-bold px-3 py-2 rounded-xl shadow-md hover:bg-blue-700 transition shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 {isHi ? "ब्लॉग लिखें" : "Write Blog"}
@@ -180,45 +222,57 @@ export default function Community() {
         </div>
 
         {/* Tab Selection pills */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 pb-2">
           <button
             onClick={() => setActiveTab("stories")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold rounded-xl border transition-all duration-200 ${
+            className={`flex items-center gap-2 px-3 py-2 text-[11px] font-bold rounded-lg border transition-all duration-200 ${
               activeTab === "stories"
-                ? "bg-[#000080] text-white border-[#000080] shadow-sm"
+                ? "bg-blue-600 text-white border-blue-600 shadow-sm"
                 : "bg-white text-slate-500 border-slate-200 hover:text-slate-800"
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
-            {isHi ? "सफलता गाथा" : "Success Stories"}
+            <Sparkles className={`w-3.5 h-3.5 ${activeTab === "stories" ? "text-white" : "text-orange-500"}`} />
+            {isHi ? "सफलता गाथा" : "Stories"}
           </button>
           <button
             onClick={() => setActiveTab("blogs")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold rounded-xl border transition-all duration-200 ${
+            className={`flex items-center gap-2 px-3 py-2 text-[11px] font-bold rounded-lg border transition-all duration-200 ${
               activeTab === "blogs"
-                ? "bg-[#000080] text-white border-[#000080] shadow-sm"
+                ? "bg-blue-600 text-white border-blue-600 shadow-sm"
                 : "bg-white text-slate-500 border-slate-200 hover:text-slate-800"
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5 text-[#138808]" />
-            {isHi ? "नागरिक ब्लॉग" : "Citizen Blogs"}
+            <BookOpen className={`w-3.5 h-3.5 ${activeTab === "blogs" ? "text-white" : "text-green-600"}`} />
+            {isHi ? "ब्लॉग" : "Blogs"}
+          </button>
+          <button
+            onClick={() => setActiveTab("volunteers")}
+            className={`flex items-center gap-2 px-3 py-2 text-[11px] font-bold rounded-lg border transition-all duration-200 ${
+              activeTab === "volunteers"
+                ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                : "bg-white text-slate-500 border-slate-200 hover:text-slate-800"
+            }`}
+          >
+            <User className={`w-3.5 h-3.5 ${activeTab === "volunteers" ? "text-white" : "text-indigo-500"}`} />
+            {isHi ? "वॉलंटियर नेटवर्क" : "Volunteer Network"}
+          </button>
+          <button
+            onClick={() => setActiveTab("chat")}
+            className={`flex items-center gap-2 px-3 py-2 text-[11px] font-bold rounded-lg border transition-all duration-200 ${
+              activeTab === "chat"
+                ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                : "bg-white text-slate-500 border-slate-200 hover:text-slate-800"
+            }`}
+          >
+            <MessageCircle className={`w-3.5 h-3.5 ${activeTab === "chat" ? "text-white" : "text-purple-500"}`} />
+            {isHi ? "लाइव चैट" : "Live Chat"}
           </button>
         </div>
-
-        <p className="text-[10px] text-slate-400 font-semibold px-0.5 leading-snug">
-          {activeTab === "stories"
-            ? isHi
-              ? "फाउंडेशन के माध्यम से आए बदलाव और जनहित कार्यों की प्रेरक कहानियाँ।"
-              : "Inspiring stories of change and welfare accomplishments driven by the foundation."
-            : isHi
-              ? "नागरिकों और स्वयंसेवकों द्वारा साझा किए गए विचार और ब्लॉग (एडमिन द्वारा स्वीकृत)।"
-              : "Thoughtful articles and blogs shared by citizens & volunteers (approved by admin)."}
-        </p>
       </div>
 
       {/* ── Content Feed ── */}
       <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-24 relative z-10">
-        {loading ? (
+        {loading && activeTab !== "chat" ? (
           <div className="flex justify-center py-12">
             <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
           </div>
@@ -226,46 +280,24 @@ export default function Community() {
           <>
             {/* SUCCESS STORIES SECTION */}
             {activeTab === "stories" && (
-              <div className="space-y-4 pt-2">
+              <div className="space-y-4 pt-4">
                 {stories.length === 0 ? (
-                  <div className="text-center py-14 bg-white border border-slate-200 rounded-2xl space-y-2">
-                    <Sparkles className="w-10 h-10 text-slate-300 mx-auto animate-pulse" />
+                  <div className="text-center py-14 bg-white border border-slate-200 rounded-xl space-y-2">
                     <p className="text-xs font-bold text-slate-400">
                       {isHi ? "अभी कोई सफलता गाथा उपलब्ध नहीं है।" : "No success stories posted yet."}
                     </p>
                   </div>
                 ) : (
                   stories.map((story) => (
-                    <div
-                      key={story.id}
-                      className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition duration-200 flex flex-col"
-                    >
+                    <div key={story.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
                       {story.imageUrl && (
                         <div className="relative h-48 bg-slate-100 overflow-hidden">
-                          <img
-                            src={story.imageUrl}
-                            alt={story.title}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute top-3 right-3 bg-[#FF9933] text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md shadow-sm">
-                            {isHi ? "सफलता गाथा" : "Success Story"}
-                          </div>
+                          <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
                         </div>
                       )}
                       <div className="p-4 space-y-2">
-                        {!story.imageUrl && (
-                          <div className="flex items-center gap-1.5">
-                            <span className="bg-amber-50 text-[#FF9933] border border-amber-200/50 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">
-                              {isHi ? "सफलता गाथा" : "Success Story"}
-                            </span>
-                          </div>
-                        )}
-                        <h4 className="font-display font-extrabold text-slate-900 text-sm leading-snug">
-                          {story.title}
-                        </h4>
-                        <p className="text-xs text-slate-650 leading-relaxed whitespace-pre-line font-medium">
-                          {story.content}
-                        </p>
+                        <h4 className="font-bold text-slate-900 text-sm">{story.title}</h4>
+                        <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">{story.content}</p>
                         <div className="flex items-center gap-1.5 pt-2 text-[9px] font-bold text-slate-400">
                           <Calendar className="w-3 h-3" />
                           <span>{formatDate(story.createdAt)}</span>
@@ -279,45 +311,28 @@ export default function Community() {
 
             {/* CITIZEN BLOGS SECTION */}
             {activeTab === "blogs" && (
-              <div className="space-y-4 pt-2">
+              <div className="space-y-4 pt-4">
                 {blogs.length === 0 ? (
-                  <div className="text-center py-14 bg-white border border-slate-200 rounded-2xl space-y-2">
-                    <BookOpen className="w-10 h-10 text-slate-300 mx-auto" />
+                  <div className="text-center py-14 bg-white border border-slate-200 rounded-xl space-y-2">
                     <p className="text-xs font-bold text-slate-400">
                       {isHi ? "अभी कोई ब्लॉग उपलब्ध नहीं है।" : "No blogs published yet."}
                     </p>
                   </div>
                 ) : (
                   blogs.map((blog) => (
-                    <div
-                      key={blog.id}
-                      className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm hover:border-slate-300 transition duration-200 space-y-3"
-                    >
+                    <div key={blog.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-[#138808]/10 text-[#138808] flex items-center justify-center text-xs font-black shadow-xs">
-                            <User className="w-3.5 h-3.5" />
-                          </div>
+                          <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><User className="w-3.5 h-3.5" /></div>
                           <div>
-                            <h5 className="text-[11px] font-extrabold text-slate-800">{blog.authorName}</h5>
-                            <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block mt-0.5">
-                              {isHi ? "स्वयंसेवक / नागरिक" : "Volunteer / Citizen"}
-                            </span>
+                            <h5 className="text-[11px] font-bold text-slate-800">{blog.authorName}</h5>
                           </div>
                         </div>
-                        <div className="text-right text-[8.5px] font-bold text-slate-400 flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-slate-350" />
-                          <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
-                        </div>
+                        <div className="text-[9px] font-medium text-slate-400">{formatDate(blog.publishedAt || blog.createdAt)}</div>
                       </div>
-                      
-                      <div className="space-y-1.5 border-t border-slate-50 pt-2.5">
-                        <h4 className="font-display font-extrabold text-slate-900 text-xs">
-                          {blog.title}
-                        </h4>
-                        <p className="text-xs text-slate-650 leading-relaxed whitespace-pre-line font-medium">
-                          {blog.content}
-                        </p>
+                      <div className="space-y-1.5 border-t border-slate-100 pt-2.5">
+                        <h4 className="font-bold text-slate-900 text-xs">{blog.title}</h4>
+                        <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">{blog.content}</p>
                       </div>
                     </div>
                   ))
@@ -325,97 +340,201 @@ export default function Community() {
               </div>
             )}
 
+            {/* VOLUNTEER NETWORK SECTION */}
+            {activeTab === "volunteers" && (
+              <div className="space-y-4 pt-4">
+                <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm">
+                  <p className="text-[10px] font-bold text-slate-500 mb-2">
+                    {isHi
+                      ? "शहर के नाम से वॉलंटियर खोजें"
+                      : "Search volunteers by city"}
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={volunteerCityFilter}
+                      onChange={(e) => setVolunteerCityFilter(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && fetchVolunteers(volunteerCityFilter.trim() || undefined)}
+                      placeholder={isHi ? "जैसे: सीहोर" : "e.g. Sehore"}
+                      className="flex-1 text-xs px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:border-blue-400"
+                    />
+                    <button
+                      onClick={() => fetchVolunteers(volunteerCityFilter.trim() || undefined)}
+                      className="px-3 py-2 bg-blue-600 text-white text-[10px] font-bold rounded-lg shrink-0"
+                    >
+                      {isHi ? "खोजें" : "Search"}
+                    </button>
+                    {volunteerCityFilter && (
+                      <button
+                        onClick={() => { setVolunteerCityFilter(""); fetchVolunteers(); }}
+                        className="px-3 py-2 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg shrink-0"
+                      >
+                        {isHi ? "हटाएं" : "Clear"}
+                      </button>
+                    )}
+                  </div>
+                </div>
 
+                {volunteers.length === 0 ? (
+                  <div className="text-center py-14 bg-white border border-slate-200 rounded-xl space-y-2">
+                    <p className="text-xs font-bold text-slate-400">
+                      {isHi ? "कोई वॉलंटियर नहीं मिला।" : "No volunteers found."}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {volunteers.map((vol) => {
+                      const skillsList = Array.isArray(vol.skills)
+                        ? vol.skills
+                        : typeof vol.skills === "string"
+                        ? (() => { try { return JSON.parse(vol.skills as string); } catch { return []; } })()
+                        : [];
+                      return (
+                        <div key={vol.id} className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center overflow-hidden shrink-0">
+                              {vol.avatar ? (
+                                <img src={vol.avatar} alt={vol.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <User className="w-4 h-4 text-blue-600" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-slate-800 truncate">{vol.name}</p>
+                              {(vol.city || vol.area_locality) && (
+                                <p className="text-[9px] text-slate-400 truncate">
+                                  {[vol.area_locality, vol.city].filter(Boolean).join(", ")}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          {vol.role && (
+                            <span className="inline-block text-[8px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded px-1.5 py-0.5">
+                              {vol.role}
+                            </span>
+                          )}
+                          {skillsList.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {skillsList.slice(0, 3).map((s: string, i: number) => (
+                                <span key={i} className="text-[8px] font-medium text-slate-500 bg-slate-50 border border-slate-100 rounded px-1.5 py-0.5">
+                                  {s}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* LIVE CHAT SECTION */}
+            {activeTab === "chat" && (
+              <div className="flex flex-col h-full pt-4">
+                <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                  <div className="bg-blue-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4 text-blue-600" />
+                    <h4 className="text-xs font-bold text-blue-900">{isHi ? "सार्वजनिक चैट" : "Public Chat"}</h4>
+                  </div>
+                  
+                  {/* Volunteers List */}
+                  {volunteers.length > 0 && (
+                    <div className="border-b border-slate-100 bg-slate-50/50 p-3">
+                      <p className="text-[10px] font-bold text-slate-500 mb-2 uppercase">{isHi ? "हमारे स्वयंसेवक" : "Our Volunteers"}</p>
+                      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                        {volunteers.map(vol => (
+                          <div key={vol.id} className="flex flex-col items-center gap-1 min-w-[50px]">
+                            <div className="w-9 h-9 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                              {vol.avatar ? (
+                                <img src={vol.avatar} alt={vol.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <User className="w-4 h-4 text-blue-600" />
+                              )}
+                            </div>
+                            <span className="text-[9px] font-medium text-slate-700 text-center leading-tight line-clamp-1 w-full px-1">{vol.name.split(' ')[0]}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {chatMessages.length === 0 ? (
+                      <div className="text-center text-xs text-slate-400 py-10">
+                        {isHi ? "बातचीत शुरू करें..." : "Start the conversation..."}
+                      </div>
+                    ) : (
+                      chatMessages.map((msg, idx) => (
+                        <div key={idx} className={`flex flex-col ${msg.authorName === user?.name ? 'items-end' : 'items-start'}`}>
+                          <span className="text-[9px] text-slate-500 font-medium mb-1 px-1">{msg.authorName}</span>
+                          <div className={`px-3 py-2 rounded-lg text-xs max-w-[85%] shadow-sm ${msg.authorName === user?.name ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-100 text-slate-800 rounded-tl-none'}`}>
+                            {msg.text}
+                          </div>
+                          <span className="text-[8px] text-slate-400 mt-1 px-1">
+                            {msg.createdAt
+                              ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                              : msg.time}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                    <div ref={chatEndRef} />
+                  </div>
+
+                  <div className="p-3 border-t border-slate-200 bg-slate-50 flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && sendChatMessage()}
+                      disabled={!user}
+                      placeholder={user ? (isHi ? "संदेश लिखें..." : "Type a message...") : (isHi ? "चैट करने के लिए लॉगिन करें" : "Login to chat")}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-slate-100"
+                    />
+                    <button 
+                      onClick={sendChatMessage}
+                      disabled={!user || !chatInput.trim()}
+                      className="w-9 h-9 flex items-center justify-center bg-blue-600 text-white rounded-lg disabled:opacity-50 transition"
+                    >
+                      <Send className="w-4 h-4 -ml-0.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
 
       {/* ── WRITE BLOG MODAL ── */}
       {showBlogModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end justify-center">
-          <div className="bg-white w-full max-w-lg rounded-t-3xl p-6 space-y-4.5 shadow-2xl animate-slideUp">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
+          <div className="bg-white w-full rounded-t-2xl p-6 space-y-4 shadow-xl">
             <div className="flex justify-between items-center">
               <div>
-                <h4 className="font-bold text-base text-slate-900">
-                  {isHi ? "नया ब्लॉग लिखें" : "Write a Blog Post"}
-                </h4>
-                <p className="text-[10px] text-slate-450 mt-0.5">
-                  {isHi
-                    ? "आपका ब्लॉग केवल एडमिन द्वारा स्वीकृत होने के बाद ही प्रकाशित किया जाएगा।"
-                    : "Your post will be publicly visible after admin review and approval."}
-                </p>
+                <h4 className="font-bold text-base text-slate-900">{isHi ? "नया ब्लॉग लिखें" : "Write a Blog Post"}</h4>
               </div>
-              <button
-                onClick={() => setShowBlogModal(false)}
-                className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center shrink-0"
-              >
-                <X className="w-4 h-4 text-slate-600" />
-              </button>
+              <button onClick={() => setShowBlogModal(false)} className="p-2 bg-slate-100 rounded-full"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-[9px] font-black text-slate-500 uppercase tracking-wider block mb-1">
-                  {isHi ? "ब्लॉग शीर्षक" : "Blog Title"}
-                </label>
-                <input
-                  type="text"
-                  placeholder={isHi ? "शीर्षक यहाँ दर्ज करें..." : "Enter blog title..."}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold focus:border-[#000080] outline-none"
-                  value={blogTitle}
-                  onChange={(e) => setBlogTitle(e.target.value)}
-                />
+                <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Title</label>
+                <input type="text" className="w-full p-2 border border-slate-300 rounded-lg text-sm" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} />
               </div>
-
               <div>
-                <label className="text-[9px] font-black text-slate-500 uppercase tracking-wider block mb-1">
-                  {isHi ? "ब्लॉग सामग्री" : "Blog Content"}
-                </label>
-                <textarea
-                  className="w-full border border-slate-200 rounded-2xl p-3 text-xs font-semibold resize-none h-32 focus:border-[#000080] outline-none"
-                  placeholder={isHi ? "अपनी कहानी या विचार यहाँ लिखें..." : "Share your thoughts, experiences, or success details..."}
-                  value={blogContent}
-                  onChange={(e) => setBlogContent(e.target.value)}
-                />
+                <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Content</label>
+                <textarea className="w-full border border-slate-300 rounded-lg p-2 text-sm h-32" value={blogContent} onChange={(e) => setBlogContent(e.target.value)} />
               </div>
             </div>
 
-            <button
-              onClick={handleWriteBlogSubmit}
-              disabled={isSubmittingBlog || !blogTitle.trim() || !blogContent.trim()}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#000080] text-white font-bold rounded-xl text-sm shadow-md hover:bg-indigo-900 transition disabled:opacity-50"
-            >
-              {isSubmittingBlog ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-              {isSubmittingBlog
-                ? isHi
-                  ? "ब्लॉग जमा हो रहा है..."
-                  : "Submitting..."
-                : isHi
-                ? "समीक्षा के लिए जमा करें"
-                : "Submit for Review"}
+            <button onClick={handleWriteBlogSubmit} disabled={isSubmittingBlog || !blogTitle.trim() || !blogContent.trim()} className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg text-sm">
+              {isSubmittingBlog ? "Submitting..." : "Submit for Review"}
             </button>
           </div>
         </div>
-      )}
-
-      {/* ── REELS FEED OVERLAY ── */}
-      {showReels && (
-        <ReelsFeed 
-          lang={lang} 
-          onClose={() => setShowReels(false)} 
-          items={[...stories, ...blogs].map(item => ({
-            id: item.id,
-            title: item.title,
-            content: item.content,
-            authorName: 'authorName' in item ? item.authorName : 'RP Foundation',
-            imageUrl: 'imageUrl' in item ? item.imageUrl : undefined,
-            likes: Math.floor(Math.random() * 500) + 50
-          }))} 
-        />
       )}
     </div>
   );

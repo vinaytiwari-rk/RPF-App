@@ -24,8 +24,11 @@ const ResumeBuilder: React.FC = () => {
     phone: '',
     location: '',
     summary: '',
+    coverLetter: '',
     title: ''
   });
+
+  const [template, setTemplate] = useState<'default' | 'modern' | 'corporate'>('default');
 
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
@@ -73,41 +76,73 @@ const ResumeBuilder: React.FC = () => {
     setEducation(education.filter(edu => edu.id !== id));
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    try {
+      const { jsPDF } = await import("jspdf");
+      const html2canvas = (await import("html2canvas")).default;
+      
+      const resumeElement = document.getElementById("resume-preview");
+      if (!resumeElement) return;
+
+      const canvas = await html2canvas(resumeElement, { scale: 2 });
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Resume_${personalInfo.fullName.replace(/\s+/g, '_') || 'Generated'}.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      alert("Failed to generate PDF. Please try again.");
+    }
   };
 
-  const generateAiSummary = () => {
+  const generateAiSummary = async () => {
     if (!personalInfo.title) {
-      alert("Please enter a Professional Title first to generate a summary.");
+      alert("Please enter a Professional Title first to generate a summary and cover letter.");
       return;
     }
     
     setIsGeneratingAi(true);
     
-    // Simulate AI delay
-    setTimeout(() => {
-      const templates: Record<string, string> = {
-        'default': `Dedicated and results-driven ${personalInfo.title} with a proven track record of delivering high-quality work. Adept at problem-solving, team collaboration, and continuously learning new skills to drive business success.`,
-        'developer': `Innovative Software Developer with experience in building scalable web applications. Strong proficiency in modern JavaScript frameworks, responsive design, and RESTful API integration. Passionate about writing clean, maintainable code.`,
-        'manager': `Experienced Manager with a strong background in leading cross-functional teams, optimizing operational workflows, and driving strategic initiatives. Proven ability to meet complex project deadlines while maintaining high team morale.`,
-        'designer': `Creative Designer specializing in user-centric interfaces and compelling visual narratives. Expertise in turning complex requirements into intuitive, elegant designs that enhance user engagement and brand identity.`
-      };
+    try {
+      const expContext = experiences.map(e => `${e.title} at ${e.company}`).join(', ');
       
-      const titleLower = personalInfo.title.toLowerCase();
-      let matchedSummary = templates['default'];
-      
-      if (titleLower.includes('develop') || titleLower.includes('engineer') || titleLower.includes('programmer')) {
-        matchedSummary = templates['developer'];
-      } else if (titleLower.includes('manag') || titleLower.includes('lead') || titleLower.includes('director')) {
-        matchedSummary = templates['manager'];
-      } else if (titleLower.includes('design') || titleLower.includes('art') || titleLower.includes('ui/ux')) {
-        matchedSummary = templates['designer'];
+      const response = await fetch('/api/ai/resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: personalInfo.fullName || 'Candidate',
+          title: personalInfo.title,
+          experience: expContext || 'Entry level',
+          skills: skills || 'General professional skills'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch from AI service');
       }
+
+      const data = await response.json();
       
-      setPersonalInfo(prev => ({ ...prev, summary: matchedSummary }));
+      setPersonalInfo(prev => ({ 
+        ...prev, 
+        summary: data.summary || prev.summary,
+        coverLetter: data.coverLetter || prev.coverLetter
+      }));
+    } catch (err) {
+      console.error(err);
+      alert("AI generation failed. Please try again or check your API key.");
+    } finally {
       setIsGeneratingAi(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -137,6 +172,50 @@ const ResumeBuilder: React.FC = () => {
           
           <div className="glass-card p-6 rounded-2xl">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-500" /> Premium Templates
+            </h2>
+            <div className="grid grid-cols-3 gap-3 mb-2">
+              <button 
+                onClick={() => setTemplate('default')} 
+                className={`p-3 rounded-xl border-2 transition-all ${template === 'default' ? 'border-[var(--rp-primary)] bg-blue-50/50' : 'border-transparent bg-gray-50 hover:bg-gray-100'}`}
+              >
+                <div className="h-16 bg-white border border-gray-200 rounded mb-2 flex flex-col p-1 gap-1">
+                  <div className="h-2 bg-gray-300 w-1/2 rounded" />
+                  <div className="h-1 bg-gray-200 w-full rounded" />
+                  <div className="h-1 bg-gray-200 w-full rounded" />
+                </div>
+                <p className="text-xs font-bold text-center text-gray-700">Classic</p>
+              </button>
+              
+              <button 
+                onClick={() => setTemplate('modern')} 
+                className={`p-3 rounded-xl border-2 transition-all ${template === 'modern' ? 'border-[var(--rp-primary)] bg-blue-50/50' : 'border-transparent bg-gray-50 hover:bg-gray-100'}`}
+              >
+                <div className="h-16 bg-white border border-gray-200 rounded mb-2 flex p-1 gap-1">
+                  <div className="w-1/3 h-full bg-blue-100 rounded" />
+                  <div className="w-2/3 h-full flex flex-col gap-1">
+                    <div className="h-2 bg-gray-300 w-3/4 rounded" />
+                    <div className="h-1 bg-gray-200 w-full rounded" />
+                  </div>
+                </div>
+                <p className="text-xs font-bold text-center text-gray-700">Modern</p>
+              </button>
+              
+              <button 
+                onClick={() => setTemplate('corporate')} 
+                className={`p-3 rounded-xl border-2 transition-all ${template === 'corporate' ? 'border-[var(--rp-primary)] bg-blue-50/50' : 'border-transparent bg-gray-50 hover:bg-gray-100'}`}
+              >
+                <div className="h-16 bg-gray-900 border border-gray-800 rounded mb-2 flex flex-col p-1 gap-1 items-center justify-center">
+                  <div className="h-2 bg-gray-300 w-1/2 rounded" />
+                  <div className="h-1 bg-gray-500 w-3/4 rounded" />
+                </div>
+                <p className="text-xs font-bold text-center text-gray-700">Corporate</p>
+              </button>
+            </div>
+          </div>
+
+          <div className="glass-card p-6 rounded-2xl">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <User className="w-5 h-5 text-gray-500" /> Personal Info
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -152,15 +231,26 @@ const ResumeBuilder: React.FC = () => {
                   placeholder="Professional Summary" 
                   value={personalInfo.summary} 
                   onChange={handlePersonalInfoChange} 
-                  rows={4}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rp-primary)] resize-none" 
+                />
+              </div>
+
+              <div className="sm:col-span-2 relative">
+                <textarea 
+                  name="coverLetter" 
+                  placeholder="AI Cover Letter (Auto-generated)" 
+                  value={personalInfo.coverLetter} 
+                  onChange={handlePersonalInfoChange} 
+                  rows={6}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--rp-primary)] resize-none" 
                 />
                 <button 
                   onClick={generateAiSummary}
                   disabled={isGeneratingAi}
-                  className="absolute bottom-3 right-3 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-md text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
+                  className="absolute bottom-3 right-3 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:shadow-lg transition-all disabled:opacity-50"
                 >
-                  <Sparkles className="w-4 h-4" /> {isGeneratingAi ? 'Generating...' : 'AI Suggest'}
+                  <Sparkles className="w-4 h-4" /> {isGeneratingAi ? 'Generating AI Profile...' : 'AI Generate Profile'}
                 </button>
               </div>
             </div>
@@ -241,31 +331,61 @@ const ResumeBuilder: React.FC = () => {
         {/* We use an explicit width for the preview to mimic an A4 page, scaling it down on small screens via container */}
         <div className="lg:sticky lg:top-24 h-auto lg:h-[calc(100vh-8rem)] overflow-y-auto print:h-auto print:overflow-visible no-scrollbar">
           
-          <div className="bg-white shadow-xl rounded-sm p-8 min-h-[1056px] w-full max-w-[816px] mx-auto print:shadow-none print:min-h-0 print:p-0">
+          <div id="resume-preview" className={`bg-white shadow-xl rounded-sm min-h-[1056px] w-full max-w-[816px] mx-auto print:shadow-none print:min-h-0 print:max-w-full print:w-full ${template === 'modern' ? 'flex' : 'p-8 print:p-0'}`}>
             
-            {/* Resume Header */}
-            <div className="border-b-2 border-gray-800 pb-6 mb-6">
-              <h1 className="text-3xl font-serif font-bold text-gray-900 uppercase tracking-widest">{personalInfo.fullName || 'YOUR NAME'}</h1>
-              <p className="text-lg text-gray-600 mt-1 font-medium">{personalInfo.title || 'Professional Title'}</p>
-              
-              <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm text-gray-700">
-                {personalInfo.email && <span className="flex items-center gap-1.5"><Mail className="w-4 h-4" /> {personalInfo.email}</span>}
-                {personalInfo.phone && <span className="flex items-center gap-1.5"><Phone className="w-4 h-4" /> {personalInfo.phone}</span>}
-                {personalInfo.location && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {personalInfo.location}</span>}
+            {template === 'modern' && (
+              <div className="w-1/3 bg-gray-100 p-8 border-r border-gray-200 min-h-full">
+                <h1 className="text-3xl font-bold text-gray-900 leading-tight mb-2">{personalInfo.fullName || 'YOUR NAME'}</h1>
+                <p className="text-md text-[var(--rp-primary)] font-semibold mb-6">{personalInfo.title || 'Professional Title'}</p>
+                
+                <div className="space-y-3 text-sm text-gray-700 mb-8">
+                  {personalInfo.email && <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-gray-400" /> <span className="break-all">{personalInfo.email}</span></div>}
+                  {personalInfo.phone && <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-gray-400" /> <span>{personalInfo.phone}</span></div>}
+                  {personalInfo.location && <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400" /> <span>{personalInfo.location}</span></div>}
+                </div>
+
+                {skills && (
+                  <div>
+                    <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-3">Skills</h3>
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{skills}</p>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
+
+            <div className={`${template === 'modern' ? 'w-2/3 p-8' : ''} ${template === 'corporate' ? 'bg-gray-50 min-h-full' : ''}`}>
+              
+              {template !== 'modern' && (
+                <div className={`${template === 'corporate' ? 'bg-gray-900 text-white p-8 -mx-8 -mt-8 mb-8' : 'border-b-2 border-gray-800 pb-6 mb-6'}`}>
+                  <h1 className={`text-3xl font-bold uppercase tracking-widest ${template === 'corporate' ? 'text-white' : 'text-gray-900 font-serif'}`}>
+                    {personalInfo.fullName || 'YOUR NAME'}
+                  </h1>
+                  <p className={`text-lg mt-1 font-medium ${template === 'corporate' ? 'text-gray-300' : 'text-gray-600'}`}>
+                    {personalInfo.title || 'Professional Title'}
+                  </p>
+                  
+                  <div className={`flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm ${template === 'corporate' ? 'text-gray-400' : 'text-gray-700'}`}>
+                    {personalInfo.email && <span className="flex items-center gap-1.5"><Mail className="w-4 h-4" /> {personalInfo.email}</span>}
+                    {personalInfo.phone && <span className="flex items-center gap-1.5"><Phone className="w-4 h-4" /> {personalInfo.phone}</span>}
+                    {personalInfo.location && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {personalInfo.location}</span>}
+                  </div>
+                </div>
+              )}
             
             {/* Resume Summary */}
             {personalInfo.summary && (
-              <div className="mb-6">
-                <p className="text-sm text-gray-800 leading-relaxed text-justify">{personalInfo.summary}</p>
+              <div className="mb-8">
+                {template === 'modern' && <h3 className="text-xs font-bold text-[var(--rp-primary)] uppercase tracking-widest mb-3">Profile</h3>}
+                <p className={`text-sm leading-relaxed text-justify ${template === 'corporate' ? 'text-gray-700' : 'text-gray-800'}`}>{personalInfo.summary}</p>
               </div>
             )}
             
             {/* Experience Section */}
             {experiences.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-300 pb-1 mb-4">Professional Experience</h3>
+              <div className="mb-8">
+                <h3 className={`text-sm font-bold uppercase tracking-widest pb-1 mb-4 border-b ${template === 'modern' ? 'text-[var(--rp-primary)] border-gray-200' : 'text-gray-900 border-gray-300'}`}>
+                  Professional Experience
+                </h3>
                 <div className="space-y-5">
                   {experiences.map(exp => (
                     <div key={exp.id}>
@@ -285,8 +405,10 @@ const ResumeBuilder: React.FC = () => {
             
             {/* Education Section */}
             {education.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-300 pb-1 mb-4">Education</h3>
+              <div className="mb-8">
+                <h3 className={`text-sm font-bold uppercase tracking-widest pb-1 mb-4 border-b ${template === 'modern' ? 'text-[var(--rp-primary)] border-gray-200' : 'text-gray-900 border-gray-300'}`}>
+                  Education
+                </h3>
                 <div className="space-y-4">
                   {education.map(edu => (
                     <div key={edu.id} className="flex justify-between items-baseline">
@@ -302,12 +424,28 @@ const ResumeBuilder: React.FC = () => {
             )}
             
             {/* Skills Section */}
-            {skills && (
-              <div>
-                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-300 pb-1 mb-4">Skills</h3>
-                <p className="text-sm text-gray-800 leading-relaxed">{skills}</p>
+            {skills && template !== 'modern' && (
+              <div className="mb-8">
+                <h3 className={`text-sm font-bold uppercase tracking-widest pb-1 mb-4 border-b ${template === 'corporate' ? 'text-gray-900 border-gray-300' : 'text-gray-900 border-gray-300'}`}>
+                  Skills
+                </h3>
+                <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{skills}</p>
               </div>
             )}
+
+            {/* Cover Letter Section (Page Break for Print) */}
+            {personalInfo.coverLetter && (
+              <div className="print:break-before-page mt-12 pt-12 border-t border-gray-200">
+                <h3 className={`text-sm font-bold uppercase tracking-widest pb-1 mb-6 border-b ${template === 'modern' ? 'text-[var(--rp-primary)] border-gray-200' : 'text-gray-900 border-gray-300'}`}>
+                  Cover Letter
+                </h3>
+                <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap text-justify">
+                  {personalInfo.coverLetter}
+                </p>
+              </div>
+            )}
+            
+            </div> {/* End of dynamic content wrapper */}
             
           </div>
           

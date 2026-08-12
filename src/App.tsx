@@ -17,56 +17,20 @@ if (window.location.hostname !== 'localhost' && window.location.hostname !== '12
 
 import Home from "./pages/Home";
 const JanSevaCard = React.lazy(() => import("./pages/JanSevaCard"));
-import BloodNetwork from "./pages/BloodNetwork";
-import Grievances from "./pages/Grievances";
-import Services from "./pages/Services";
-import ServiceDetails from "./pages/ServiceDetails";
-const Community = React.lazy(() => import("./pages/Community"));
-import Profile from "./pages/Profile";
-
-// Wired Workflows
-import VolunteersPage from "./pages/VolunteersPage";
-const VolunteerDashboard = React.lazy(() => import("./pages/VolunteerDashboard"));
-import DonationsPage from "./pages/DonationsPage";
-import HealthPage from "./pages/HealthPage";
-import HealthCare from "./pages/HealthCare";
-import SchemesPage from "./pages/SchemesPage";
-import DisasterManagement from "./pages/DisasterManagement";
-import FarmerSupport from "./pages/FarmerSupport";
-import SkillsTraining from "./pages/SkillsTraining";
-import WomenSafety from "./pages/WomenSafety";
-import SeniorsPage from "./pages/SeniorsPage";
-import AnimalsPage from "./pages/AnimalsPage";
-import EnvironmentPage from "./pages/EnvironmentPage";
-import CrowdfundingPage from "./pages/CrowdfundingPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import ReligiousCulture from "./pages/ReligiousCulture";
-
-// Dedicated Pages for Overhauled Service Hub
-import Earthquakes from "./pages/Earthquakes";
-import FuelTracker from "./pages/FuelTracker";
-import GPSToolkit from "./pages/GPSToolkit";
-import TransitPlanner from "./pages/TransitPlanner";
-import JobsPage from "./pages/JobsPage";
-import ScholarshipsPage from "./pages/ScholarshipsPage";
-import FoodSupport from "./pages/FoodSupport";
-import VitalsDashboard from "./pages/VitalsDashboard";
-import MedicationReminder from "./pages/MedicationReminder";
-import MedicalDictionary from "./pages/MedicalDictionary";
-import SOSSystem from "./pages/SOSSystem";
-import PeriodTracker from "./pages/PeriodTracker";
-import ChildTracker from "./pages/ChildTracker";
-import ResumeBuilder from "./pages/ResumeBuilder";
-import DocScanner from "./pages/DocScanner";
-import AIChat from "./pages/AIChat";
-import StoryLibrary from "./pages/StoryLibrary";
-import HinduCalendar from "./pages/HinduCalendar";
-import NewsFeed from "./pages/NewsFeed";
-import InternetRadio from "./pages/InternetRadio";
-import MedicineSupport from "./pages/MedicineSupport";
-import EducationSupport from "./pages/EducationSupport";
-import CountriesPage from "./pages/CountriesPage";
+const BloodNetwork = React.lazy(() => import('./pages/BloodNetwork'));
+const Grievances = React.lazy(() => import('./pages/Grievances'));
+const Community = React.lazy(() => import('./pages/Community'));
+const Services = React.lazy(() => import('./pages/Services'));
+const ServiceDetails = React.lazy(() => import('./pages/ServiceDetails'));
+const NotificationsPage = React.lazy(() => import('./pages/NotificationsPage'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const DonationsPage = React.lazy(() => import('./pages/DonationsPage'));
+const HealthCare = React.lazy(() => import('./pages/HealthCare'));
 const GodAdminPanel = React.lazy(() => import("./pages/GodAdminPanel"));
+const ResumeBuilder = React.lazy(() => import('./pages/ResumeBuilder'));
+const DocScanner = React.lazy(() => import('./pages/DocScanner'));
+const InternetRadio = React.lazy(() => import('./pages/InternetRadio'));
+
 import { AppProvider } from "./context/AppContext";
 
 import SplashScreen from "./components/SplashScreen";
@@ -75,21 +39,10 @@ import OnboardingModal from "./components/OnboardingModal";
 
 import { Settings } from "lucide-react";
 
-
 const PageLoader = () => (
   <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-slate-50">
     <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
     <p className="text-xs font-bold text-slate-500 uppercase tracking-widest animate-pulse">Loading Module...</p>
-  </div>
-);
-// Placeholder pages for remaining incomplete routes
-const Placeholder = ({ title }: { title: string }) => (
-  <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 min-h-full pb-24">
-    <div className="w-16 h-16 bg-[#000080]/10 rounded-full flex items-center justify-center mb-4">
-      <Settings className="w-8 h-8 text-[#000080] opacity-50" />
-    </div>
-    <h2 className="font-display font-bold text-xl text-[#000080] mb-2">{title}</h2>
-    <p className="text-xs text-slate-500">This module is being ported from the Seva-Hub workflow.</p>
   </div>
 );
 
@@ -149,53 +102,20 @@ function AppContent() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/profile" element={<Profile />} />
           
-          {/* Service Workflows */}
+          {/* Core Features */}
           <Route path="/jan-seva-card" element={<JanSevaCard />} />
           <Route path="/blood-network" element={<BloodNetwork />} />
           <Route path="/grievance" element={<Grievances />} />
           <Route path="/donations" element={<DonationsPage />} />
-          <Route path="/volunteers" element={<VolunteersPage />} />
-          <Route path="/volunteer-dashboard" element={<VolunteerDashboard />} />
-          <Route path="/health" element={<HealthPage />} />
           <Route path="/health-care" element={<HealthCare />} />
-          <Route path="/jobs" element={<JobsPage />} />
-          <Route path="/scholarships" element={<ScholarshipsPage />} />
-          <Route path="/food" element={<FoodSupport />} />
-          <Route path="/farmer" element={<FarmerSupport />} />
-          <Route path="/schemes" element={<SchemesPage />} />
-          <Route path="/skills" element={<SkillsTraining />} />
-          <Route path="/disaster" element={<DisasterManagement />} />
-          <Route path="/medicine" element={<MedicineSupport />} />
-          <Route path="/education" element={<EducationSupport />} />
-          <Route path="/admin" element={<GodAdminPanel />} />
-          <Route path="/women" element={<WomenSafety />} />
-          <Route path="/seniors" element={<SeniorsPage />} />
-          <Route path="/animals" element={<AnimalsPage />} />
-          <Route path="/environment" element={<EnvironmentPage />} />
-          <Route path="/earthquakes" element={<Earthquakes />} />
-          <Route path="/fuel-tracker" element={<FuelTracker />} />
-          <Route path="/gps-toolkit" element={<GPSToolkit />} />
-          <Route path="/transit-planner" element={<TransitPlanner />} />
-          <Route path="/crowdfunding" element={<CrowdfundingPage />} />
-          <Route path="/religious-culture" element={<ReligiousCulture />} />
-          <Route path="/countries" element={<CountriesPage />} />
-          <Route path="/vitals" element={<VitalsDashboard />} />
-          <Route path="/medications" element={<MedicationReminder />} />
-          <Route path="/medical-dict" element={<MedicalDictionary />} />
-          <Route path="/sos" element={<SOSSystem />} />
-          <Route path="/period-tracker" element={<PeriodTracker />} />
-          <Route path="/child-tracker" element={<ChildTracker />} />
           <Route path="/resume-builder" element={<ResumeBuilder />} />
           <Route path="/doc-scanner" element={<DocScanner />} />
-          <Route path="/ai-chat" element={<AIChat />} />
-          <Route path="/story-library" element={<StoryLibrary />} />
-          <Route path="/hindu-calendar" element={<HinduCalendar />} />
-          <Route path="/news-feed" element={<NewsFeed />} />
           <Route path="/internet-radio" element={<InternetRadio />} />
+          <Route path="/admin" element={<GodAdminPanel />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
-</Routes>
+      </Routes>
       </Suspense>
     </BrowserRouter>
     </ErrorBoundary>
@@ -216,4 +136,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-

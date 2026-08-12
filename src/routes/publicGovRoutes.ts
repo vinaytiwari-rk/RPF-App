@@ -68,8 +68,32 @@ router.get("/api/gov/hospitals", async (req, res) => {
   });
 });
 
-router.get("/api/public/services", (req, res) => {
-  res.json({ success: true, data: CORE_SERVICES });
+router.get("/api/public/services", async (req, res) => {
+  // Previously this always returned the full hardcoded CORE_SERVICES list,
+  // with no way for an admin's "delete" action to actually take it out of
+  // circulation — so removed services kept showing up as live icons on
+  // Home/Services. We now honour a `hiddenServiceIds` list persisted in the
+  // cms_data settings row (the same store the rest of the admin CMS already
+  // uses) so a deleted/hidden service is genuinely filtered out for every
+  // client.
+  try {
+    const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
+    let hiddenServiceIds: string[] = [];
+    if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
+      try {
+        const parsed = JSON.parse(result.rows[0].founderMessageEn);
+        if (Array.isArray(parsed.hiddenServiceIds)) hiddenServiceIds = parsed.hiddenServiceIds;
+      } catch (e) {
+        // ignore malformed cms_data, fall back to showing everything
+      }
+    }
+    const visible = CORE_SERVICES.filter((s) => !hiddenServiceIds.includes(s.id));
+    res.json({ success: true, data: visible });
+  } catch (err: any) {
+    // If anything goes wrong reading visibility settings, fail open with
+    // the full list rather than breaking Home/Services entirely.
+    res.json({ success: true, data: CORE_SERVICES });
+  }
 });
 
 router.get("/api/public/services/:id/content", async (req, res) => {

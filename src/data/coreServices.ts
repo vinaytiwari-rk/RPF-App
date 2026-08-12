@@ -37,5 +37,7 @@ export const CORE_SERVICES = [
   { id: "hindu-calendar", category: "culture", iconName: "Calendar", titleEn: "Hindu Calendar", titleHi: "हिंदू पंचांग", descEn: "Tithis & Festivals", descHi: "तिथियां और त्योहार" },
   { id: "news-feed", category: "culture", iconName: "Newspaper", titleEn: "News Feed", titleHi: "समाचार", descEn: "Top headlines & stories", descHi: "प्रमुख खबरें" },
   { id: "internet-radio", category: "culture", iconName: "Radio", titleEn: "Internet Radio", titleHi: "इंटरनेट रेडियो", descEn: "Live radio stations", descHi: "लाइव रेडियो स्टेशन" },
-  { id: "transit-planner", category: "civic", iconName: "Map", titleEn: "Transit Planner", titleHi: "पारगमन योजनाकार", descEn: "Bus & Metro Routes", descHi: "बस और मेट्रो मार्ग" }
+  { id: "transit-planner", category: "civic", iconName: "Map", titleEn: "Transit Planner", titleHi: "पारगमन योजनाकार", descEn: "Bus & Metro Routes", descHi: "बस और मेट्रो मार्ग" },
+  { id: "youth", category: "empowerment", iconName: "Rocket", titleEn: "Youth Empowerment", titleHi: "युवा सशक्तिकरण", descEn: "Leadership, sports & career guidance for youth", descHi: "युवाओं के लिए नेतृत्व, खेल एवं करियर मार्गदर्शन" },
+  { id: "nation", category: "civic", iconName: "Flag", titleEn: "Nation Building", titleHi: "राष्ट्र निर्माण", descEn: "National programs, civic duty & patriotic initiatives", descHi: "राष्ट्रीय कार्यक्रम, नागरिक कर्तव्य एवं राष्ट्रभक्ति पहल" }
 ];

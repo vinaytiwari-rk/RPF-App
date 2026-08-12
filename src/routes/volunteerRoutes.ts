@@ -166,6 +166,58 @@ router.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req
   }
 });
 
+// Recent public chat history, so refreshing the page doesn't lose the
+// conversation (previously there was no persistence at all).
+router.get("/api/community/chat/messages", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, "authorName", "authorAvatar", text, "createdAt"
+       FROM community_chat_messages
+       ORDER BY "createdAt" DESC
+       LIMIT 50`
+    );
+    res.json({ success: true, data: result.rows.reverse() });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Fetch approved volunteers for the public directory/network + chat sidebar.
+// NOTE: this used to join on `v.user_id = u.id` and select `v.role`,
+// `v.constituency_allocation` — none of which existed on the volunteers
+// table, so this endpoint has been throwing a SQL error (and silently
+// returning nothing to the app) since it was written. It's rewritten here
+// to read directly from the volunteers table (which already has the
+// volunteer's own name/avatar/city/skills — no join needed), and only
+// exposes public-safe fields — never phone, email, address, DOB, or
+// national ID numbers.
+router.get("/api/public/volunteers", async (req, res) => {
+  try {
+    const { city, skill } = req.query;
+    const conditions: string[] = [`approval_status = 'approved'`];
+    const params: any[] = [];
+
+    if (city) {
+      params.push(`%${city}%`);
+      conditions.push(`city ILIKE $${params.length}`);
+    }
+    if (skill) {
+      params.push(`%${skill}%`);
+      conditions.push(`skills::text ILIKE $${params.length}`);
+    }
+
+    const result = await pool.query(
+      `SELECT id, full_name AS name, avatar, city, area_locality, skills, availability, role, constituency_allocation, "registeredAt"
+       FROM volunteers
+       WHERE ${conditions.join(" AND ")}
+       ORDER BY full_name ASC`,
+      params
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 export default router;
 

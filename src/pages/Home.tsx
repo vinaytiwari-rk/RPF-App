@@ -7,13 +7,11 @@ import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 
 const { 
-  ChevronRight, Heart, Calendar, MapPin, QrCode, Activity, 
-  BookOpen, Briefcase, Users, Flame, Compass, Award, 
-  AlertTriangle, Shield, CheckCircle, PhoneCall, HelpCircle, 
-  GraduationCap, FileText, ArrowRight, ShieldCheck, Play,
-  Leaf, Instagram, Facebook, Youtube, Twitter, Globe, Info
+  ChevronRight, AlertTriangle, PhoneCall, Shield, Activity, ShieldCheck,
+  Heart, HandCoins, Users, Briefcase, GraduationCap, Apple, Pill, BookOpen,
+  HandHelping, Compass, Leaf, Coins, Landmark, Globe, ShieldAlert, Map, Bot, Info,
+  Facebook, Instagram, Youtube, Twitter, FileEdit, Camera, Radio
 } = LucideIcons;
-// Purged Firebase imports for portability
 
 export default function Home() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -33,12 +31,9 @@ export default function Home() {
     healthCamps: 0,
     campaigns: 0
   });
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [campaignsList, setCampaignsList] = useState<any[]>([]);
-  const [campaignsLoading, setCampaignsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStatsAndCampaigns = async () => {
+    const fetchStats = async () => {
       try {
         const statsRes = await fetch("/api/stats");
         if (statsRes.ok) {
@@ -50,25 +45,9 @@ export default function Home() {
             campaigns: data.campaigns || 0
           });
         }
-      } catch (err) {
-        console.error("Error fetching live stats:", err);
-      } finally {
-        setStatsLoading(false);
-      }
-
-      try {
-        const campRes = await fetch("/api/campaigns");
-        if (campRes.ok) {
-          const data = await campRes.json();
-          setCampaignsList(data.campaigns || []);
-        }
-      } catch (err) {
-        console.error("Error fetching live campaigns:", err);
-      } finally {
-        setCampaignsLoading(false);
-      }
+      } catch (err) {}
     };
-    fetchStatsAndCampaigns();
+    fetchStats();
   }, []);
 
   const slides = cmsConfig.carouselSlides || [];
@@ -81,36 +60,14 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  useEffect(() => {
-    fetch("/api/public/weather")
-      .then(r => r.json())
-      .then(d => { if(d.success) setWeather(d.data); })
-      .catch(e => console.error("Weather fetch err", e));
-      
-    fetch("/api/public/news")
-      .then(r => r.json())
-      .then(d => { if(d.success) setNews(d.data); })
-      .catch(e => console.error("News fetch err", e));
-      
-    fetch("/api/public/disaster-alerts")
-      .then(r => r.json())
-      .then(d => { 
-        if(d.success && d.data?.length > 0) {
-          setNdmaAlert(d.data[0]); 
-        }
-      })
-      .catch(e => console.error("NDMA Alert fetch err", e));
-  }, []);
-
-  
   const serviceIdToRoute: Record<string, string> = {
     card: "/jan-seva-card",
     blood: "/blood-network",
     donations: "/donations",
-      farmer: "/farmer",
-      schemes: "/schemes",
-      skills: "/skills",
-      disaster: "/disaster",
+    farmer: "/farmer",
+    schemes: "/schemes",
+    skills: "/skills",
+    disaster: "/disaster",
     grievance: "/grievance",
     volunteers: "/volunteers",
     "health-care": "/health-care",
@@ -128,62 +85,10 @@ export default function Home() {
     countries: "/countries",
     sos: "/sos",
     "transit-planner": "/transit-planner",
-    "ai-chat": "/ai-chat"
-  };
-
-  const serviceIdToImage: Record<string, string> = {
-  "card": "/assets/icons/icon_card_updated_1786163163115.jpg",
-  "blood": "/assets/icons/icon_blood_1786081356967.jpg",
-  "health-care": "/assets/icons/icon_health_updated_1786163249856.jpg",
-  "donations": "/assets/icons/icon_donations.jpg",
-  "volunteers": "/assets/icons/icon_volunteers_updated_1786163233069.jpg",
-  "environment": "/assets/icons/icon_environment_1786081257147.jpg",
-  "culture": "/assets/icons/icon_culture_1786081280063.jpg",
-  "schemes": "/assets/icons/icon_schemes_updated_1786163186070.jpg",
-  "skills": "/assets/icons/icon_skills_1786081334087.jpg",
-  "farmer": "/assets/icons/icon_farmer_updated_1786163373604.jpg",
-  "disaster": "/assets/icons/icon_disaster_1786081291322.jpg",
-  "jobs": "/assets/icons/icon_jobs_updated_1786163264789.jpg",
-  "animals": "/assets/icons/icon_animal_1786081244906.jpg",
-  "food": "/assets/icons/icon_food_1786081367715.jpg",
-  "medicine": "/assets/icons/icon_medicine_updated_1786163301118.jpg",
-  "women-safety": "/assets/icons/icon_women_updated_1786163329515.jpg",
-  "seniors": "/assets/icons/icon_senior_1786081168198.jpg",
-  "education": "/assets/icons/icon_education_updated_1786163314837.jpg",
-  "scholarships": "/assets/icons/icon_scholarships_updated_1786163279154.jpg",
-  "grievance": "/assets/icons/icon_grievance_updated_1786163210095.jpg",
-  "countries": "/assets/icons/icon_global_guide_updated_1786163358416.jpg",
-  "crowdfunding": "/assets/icons/icon_crowdfunding_updated_1786163344247.jpg",
-  "sos": "/assets/icons/icon_disaster_1786081291322.jpg",
-  "transit-planner": "/assets/icons/icon_environment_1786081257147.jpg",
-  "ai-chat": "/assets/icons/icon_jobs_updated_1786163264789.jpg"
-};
-
-  const serviceIdToBorder: Record<string, string> = {
-    card: "border-green-600",
-    blood: "border-red-600",
-    "health-care": "border-green-600",
-    environment: "border-green-600",
-    culture: "border-amber-600",
-    schemes: "border-[#000080]",
-    skills: "border-orange-500",
-    farmer: "border-green-600",
-    disaster: "border-red-600",
-    jobs: "border-[#000080]",
-    donations: "border-[#000080]",
-    volunteers: "border-orange-500",
-    animals: "border-[#000080]",
-    food: "border-orange-500",
-    medicine: "border-[#000080]",
-    "women-safety": "border-[#000080]",
-    seniors: "border-orange-500",
-    education: "border-orange-500",
-    scholarships: "border-[#000080]",
-    grievance: "border-[#000080]",
-    countries: "border-[#000080]",
-    sos: "border-red-600",
-    "transit-planner": "border-blue-500",
-    "ai-chat": "border-purple-500"
+    "ai-chat": "/ai-chat",
+    "resume-builder": "/resume-builder",
+    "doc-scanner": "/doc-scanner",
+    "internet-radio": "/internet-radio"
   };
 
   const serviceIdToIcon: Record<string, string> = {
@@ -207,32 +112,45 @@ export default function Home() {
     countries: "Globe",
     sos: "ShieldAlert",
     "transit-planner": "Map",
-    "ai-chat": "Bot"
+    "ai-chat": "Bot",
+    "resume-builder": "FileEdit",
+    "doc-scanner": "Camera",
+    "internet-radio": "Radio"
   };
 
-  const activeServiceIds = ["women-safety", "sos", "blood", "grievance", "environment", "volunteers", "transit-planner", "ai-chat"];
+  // We want a cleaner grid (maybe 4x2 instead of 5x2)
+  // NOTE: these ids must match the real service ids returned by
+  // /api/public/services (see src/data/coreServices.ts / DEFAULT_SERVICES).
+  // This list previously used made-up ids ("jan-seva", "health", "resume",
+  // "scanner", "radio") that didn't match anything, so 5 of these 7 quick
+  // actions silently disappeared from the grid.
+  const activeServiceIds = ["card", "blood", "health-care", "grievance", "resume-builder", "doc-scanner", "internet-radio"];
 
   const quickActions = activeServiceIds.map((id: string) => {
     const s = servicesList?.find((ds: any) => ds.id === id);
     if (!s) return null;
+    
+    // Dynamic Icon matching
+    const IconName = serviceIdToIcon[s.id] || "Compass";
+    const IconComponent = LucideIcons[IconName as keyof typeof LucideIcons] as any;
+    
     return {
       id: s.id,
-      iconName: serviceIdToIcon[s.id] || s.iconName || "Compass",
+      Icon: IconComponent || LucideIcons.Compass,
       route: serviceIdToRoute[s.id] || `/services`,
       titleEn: s.titleEn,
       titleHi: s.titleHi,
-      imgSrc: serviceIdToImage[s.id] || "/assets/logo.png", borderColor: serviceIdToBorder[s.id] || "border-slate-300"
     };
   }).filter(Boolean);
 
   return (
-    <div className="space-y-5 animate-fadeIn min-h-full pb-16 font-sans relative overflow-x-hidden bg-transparent" id="live-impact-dashboard">
+    <div className="space-y-6 min-h-full pb-8 font-sans bg-slate-50 animate-fadeIn">
       
-      {/* Dynamic Global Emergency Banner (Sachet NDMA Priority) */}
+      {/* Alert Banner */}
       {(ndmaAlert || (lang === "hi" ? cmsConfig.alertBannerHi : cmsConfig.alertBannerEn)) && (
-        <div className="bg-red-600 text-white px-4 py-2 text-[10.5px] font-black flex items-center gap-2 animate-pulse shadow-sm z-50 relative shrink-0">
-          <AlertTriangle className="w-4 h-4 text-white fill-white shrink-0" />
-          <div className="overflow-hidden whitespace-nowrap w-full relative">
+        <div className="bg-red-600 text-white px-4 py-2.5 text-xs font-bold flex items-center gap-2 shadow-sm">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <div className="overflow-hidden whitespace-nowrap w-full">
             <div className="inline-block animate-marquee-scroll uppercase tracking-wide">
               {ndmaAlert ? 
                   (lang === "hi" ? ndmaAlert.titleHi : ndmaAlert.titleEn) 
@@ -242,68 +160,50 @@ export default function Home() {
         </div>
       )}
 
-      {/* 1. Indian Heritage Mandala Backdrop */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[340px] h-[340px] opacity-[0.03] pointer-events-none z-0">
-        <svg viewBox="0 0 100 100" className="w-full h-full text-[#D4AF37]" fill="currentColor">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-          <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-          <path d="M50 5l2 15 15-15-5 25 15-5-25 5 15 15-25-2 5 25-15-15-5 15-15-15-5 15-5-25-25 2 15-15-25-5 15-5-15-25 15 15z"/>
-        </svg>
-      </div>
-
-      {/* 2. Top Carousel Banner (Matches Screenshot 4/5 Carousel Banner) */}
+      {/* Hero Banner Carousel */}
       {slides.length > 0 && (
-        <div className="px-4 pt-4 relative z-10">
-          <div className="relative rounded-3xl overflow-hidden h-48 shadow-lg border border-slate-200/50 bg-slate-900 text-white">
+        <div className="px-4 mt-4">
+          <div className="relative rounded-2xl overflow-hidden h-[220px] shadow-sm bg-slate-900 group">
             <AnimatePresence mode="wait">
               <motion.img 
                 key={activeSlide}
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 0.35, scale: 1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.8 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.8 }}
+                transition={{ duration: 0.5 }}
                 src={slides[activeSlide]?.image} 
-                alt="Carousel Banner" 
+                alt="Banner" 
                 className="absolute inset-0 w-full h-full object-cover" 
               />
             </AnimatePresence>
-            {/* Saffron & Green Waves gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             
-            {/* Subtle Tricolour Bottom Trim */}
-            <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-tricolour"></div>
-            
-            <div className="relative z-10 p-5 flex flex-col justify-between h-full pointer-events-none">
+            <div className="absolute bottom-0 left-0 p-5 w-full">
               <AnimatePresence mode="wait">
                 <motion.div 
                   key={activeSlide}
-                  initial={{ y: 20, opacity: 0 }}
+                  initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -20, opacity: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="space-y-1.5 max-w-[240px]"
+                  exit={{ y: -10, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <h3 className="font-display font-extrabold text-base leading-tight tracking-wide text-white drop-shadow-md">
+                  <h3 className="font-bold text-xl text-white leading-tight mb-1">
                     {lang === "hi" ? slides[activeSlide]?.titleHi : slides[activeSlide]?.titleEn}
                   </h3>
-                  <p className="text-[10px] text-slate-200 font-semibold drop-shadow-xs">
+                  <p className="text-sm text-slate-200">
                     {lang === "hi" ? slides[activeSlide]?.subHi : slides[activeSlide]?.subEn}
                   </p>
-                
-      
-
-    </motion.div>
+                </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* Dots Indicator */}
-            <div className="absolute bottom-3 right-4 flex gap-1 z-10">
+            {/* Dots */}
+            <div className="absolute bottom-5 right-5 flex gap-1.5">
               {slides.map((_, i) => (
                 <button 
                   key={i} 
                   onClick={() => setActiveSlide(i)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${activeSlide === i ? "bg-[#FF9933] w-4" : "bg-white/40 w-1.5 hover:bg-white/60"}`}
-                  aria-label={`Go to slide ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${activeSlide === i ? "bg-[#FF9933] w-5" : "bg-white/50 w-1.5"}`}
                 />
               ))}
             </div>
@@ -311,26 +211,26 @@ export default function Home() {
         </div>
       )}
 
-      {/* Dynamic Important Notices */}
+      {/* Important Notices */}
       {(globalSettings?.show_notices !== false && announcements && announcements.length > 0) && (
-        <div className="px-4 relative z-10">
-          <div className="glass-card overflow-hidden !border-amber-200">
-            <div className="bg-gradient-to-r from-amber-500 to-orange-400 px-4 py-2 flex items-center justify-between">
-              <h3 className="font-display font-extrabold text-white text-xs uppercase tracking-wider flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4" /> 
+        <div className="px-4">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-amber-50 px-4 py-3 flex items-center gap-2 border-b border-amber-100">
+              <AlertTriangle className="w-5 h-5 text-amber-600" /> 
+              <h3 className="font-bold text-amber-900 text-sm">
                 {lang === "hi" ? "महत्वपूर्ण सूचनाएं" : "Important Notices"}
               </h3>
             </div>
-            <div className="p-3 space-y-3 max-h-48 overflow-y-auto">
+            <div className="p-4 space-y-3 max-h-[200px] overflow-y-auto">
               {announcements.map((ann: any, i: number) => (
-                <div key={i} className="flex gap-3 items-start border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                <div key={i} className="flex gap-3 items-start pb-3 border-b border-slate-100 last:border-0 last:pb-0">
                   <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
                   <div>
-                    <h4 className="font-bold text-slate-800 text-[11px] leading-tight mb-0.5">{ann.title}</h4>
-                    <p className="text-[10px] text-slate-600 leading-snug">{ann.content}</p>
+                    <h4 className="font-bold text-slate-800 text-sm mb-1">{ann.title}</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">{ann.content}</p>
                     {ann.link_url && (
-                      <a href={ann.link_url} target="_blank" rel="noopener noreferrer" className="text-[9px] text-blue-600 font-semibold mt-1 inline-flex items-center hover:underline">
-                        {lang === "hi" ? "अधिक पढ़ें" : "Read More"} <ChevronRight className="w-3 h-3" />
+                      <a href={ann.link_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 font-semibold mt-1.5 inline-flex items-center hover:underline">
+                        {lang === "hi" ? "अधिक पढ़ें" : "Read More"} <ChevronRight className="w-4 h-4" />
                       </a>
                     )}
                   </div>
@@ -341,259 +241,121 @@ export default function Home() {
         </div>
       )}
 
-      {/* Verified Emergency Helplines Widget */}
-      <div className="px-4 relative z-10">
-        <div className="glass-card overflow-hidden !border-red-200">
-          <div className="bg-red-50 border-b border-red-100 px-4 py-2.5 flex items-center justify-between">
-            <h3 className="font-display font-extrabold text-red-700 text-xs uppercase tracking-wider flex items-center gap-1.5">
-              <PhoneCall className="w-4 h-4 text-red-600" />
-              {lang === "hi" ? "आपातकालीन हेल्पलाइन" : "Emergency Helplines"}
-            </h3>
-          </div>
-          <div className="grid grid-cols-2 gap-2 p-3">
-            {[
-              { num: "112", nameHi: "राष्ट्रीय आपातकाल", nameEn: "National Emergency", icon: AlertTriangle, color: "text-red-600" },
-              { num: "108", nameHi: "एम्बुलेंस", nameEn: "Ambulance", icon: Activity, color: "text-green-600" },
-              { num: "1091", nameHi: "महिला हेल्पलाइन", nameEn: "Women Helpline", icon: Shield, color: "text-pink-600" },
-              { num: "1930", nameHi: "साइबर क्राइम", nameEn: "Cyber Crime", icon: ShieldCheck, color: "text-blue-600" },
-            ].map((hp, i) => (
-              <a key={i} href={`tel:${hp.num}`} className="flex items-center gap-2.5 p-2 bg-slate-50 border border-slate-200 rounded-xl hover:bg-red-50 transition active:scale-95">
-                <div className="bg-white p-1.5 rounded-full shadow-sm border border-slate-100 shrink-0">
-                  <hp.icon className={`w-3.5 h-3.5 ${hp.color}`} />
-                </div>
-                <div>
-                  <div className="text-xs font-black text-slate-800 leading-none">{hp.num}</div>
-                  <div className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wide mt-0.5">{lang === "hi" ? hp.nameHi : hp.nameEn}</div>
-                </div>
-              </a>
-            ))}
-          </div>
-          <div className="bg-slate-50 px-4 py-1.5 border-t border-slate-100 text-center">
-            <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest">{lang === "hi" ? "सीधे कॉल करने के लिए टैप करें" : "Tap to call directly"}</span>
-          </div>
+      {/* Quick Actions Grid */}
+      <div className="px-4">
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="font-bold text-lg text-slate-900">
+            {lang === "hi" ? "त्वरित सेवाएं" : "Quick Actions"}
+          </h4>
+          <button onClick={() => navigate("/services")} className="text-sm font-semibold text-blue-600 hover:underline">
+            {lang === "hi" ? "सभी देखें" : "View All"}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-4 gap-3">
+          {quickActions.map((action: any, idx: number) => (
+            <button 
+              key={action.id}
+              onClick={() => navigate(action.route)}
+              className="flex flex-col items-center justify-center p-3 bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-300 transition-all active:scale-95 gap-2"
+            >
+              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-[#000080]">
+                <action.Icon className="w-6 h-6" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-700 text-center leading-tight">
+                {lang === "hi" ? action.titleHi : action.titleEn}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* 3. Our Impact Section (Matches Screenshot 5 Our Impact Grid) */}
+      {/* Impact Stats */}
       {(globalSettings?.show_widgets !== false) && (
-      <>
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6 }}
-        className="px-4 relative z-10"
-      >
-        <div className="flex justify-between items-center mb-2.5">
-          <h4 className="font-display font-extrabold text-xs text-[#0B1E3F]">
+        <div className="px-4 mt-2">
+          <h4 className="font-bold text-lg text-slate-900 mb-4">
             {lang === "hi" ? "हमारा प्रभाव" : "Our Impact"}
           </h4>
-          <button 
-            onClick={() => navigate("/services")}
-            className="text-[9px] font-black text-[#000080] uppercase tracking-wider hover:underline"
-          >
-            {lang === "hi" ? "सभी देखें >" : "See All >"}
-          </button>
-        </div>
-
-        <div className="grid grid-cols-4 gap-2 glass-card p-3.5">
-          <div className="text-center space-y-1">
-            <span className="text-[14px] font-black text-slate-900 tracking-tight block">
-              {stats.beneficiaries === 0 ? "0" : stats.beneficiaries >= 1000 ? `${(stats.beneficiaries / 1000).toFixed(1)}K+` : stats.beneficiaries}
-            </span>
-            <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
-              {lang === "hi" ? "लाभार्थी" : "Beneficiaries"}
-            </span>
-          </div>
-          <div className="text-center space-y-1 border-l border-slate-100">
-            <span className="text-[14px] font-black text-slate-900 tracking-tight block">
-              {stats.volunteers === 0 ? "0" : stats.volunteers >= 1000 ? `${(stats.volunteers / 1000).toFixed(1)}K+` : stats.volunteers}
-            </span>
-            <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
-              {lang === "hi" ? "स्वयंसेवक" : "Volunteers"}
-            </span>
-          </div>
-          <div className="text-center space-y-1 border-l border-slate-100">
-            <span className="text-[14px] font-black text-slate-900 tracking-tight block">
-              {stats.healthCamps === 0 ? "0" : stats.healthCamps >= 1000 ? `${(stats.healthCamps / 1000).toFixed(1)}K+` : stats.healthCamps}
-            </span>
-            <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
-              {lang === "hi" ? "स्वास्थ्य शिविर" : "Health Camps"}
-            </span>
-          </div>
-          <div className="text-center space-y-1 border-l border-slate-100">
-            <span className="text-[14px] font-black text-slate-900 tracking-tight block">
-              {stats.campaigns === 0 ? "0" : stats.campaigns >= 1000 ? `${(stats.campaigns / 1000).toFixed(1)}K+` : stats.campaigns}
-            </span>
-            <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block leading-tight">
-              {lang === "hi" ? "अभियान" : "Campaigns"}
-            </span>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="text-center">
+              <span className="text-2xl font-black text-[#000080] block mb-1">
+                {stats.beneficiaries === 0 ? "0" : stats.beneficiaries >= 1000 ? `${(stats.beneficiaries / 1000).toFixed(1)}K+` : stats.beneficiaries}
+              </span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                {lang === "hi" ? "लाभार्थी" : "Beneficiaries"}
+              </span>
+            </div>
+            <div className="text-center sm:border-l border-slate-100">
+              <span className="text-2xl font-black text-[#FF9933] block mb-1">
+                {stats.volunteers === 0 ? "0" : stats.volunteers >= 1000 ? `${(stats.volunteers / 1000).toFixed(1)}K+` : stats.volunteers}
+              </span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                {lang === "hi" ? "स्वयंसेवक" : "Volunteers"}
+              </span>
+            </div>
+            <div className="text-center sm:border-l border-slate-100">
+              <span className="text-2xl font-black text-[#138808] block mb-1">
+                {stats.healthCamps === 0 ? "0" : stats.healthCamps >= 1000 ? `${(stats.healthCamps / 1000).toFixed(1)}K+` : stats.healthCamps}
+              </span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                {lang === "hi" ? "स्वास्थ्य शिविर" : "Health Camps"}
+              </span>
+            </div>
+            <div className="text-center sm:border-l border-slate-100">
+              <span className="text-2xl font-black text-blue-500 block mb-1">
+                {stats.campaigns === 0 ? "0" : stats.campaigns >= 1000 ? `${(stats.campaigns / 1000).toFixed(1)}K+` : stats.campaigns}
+              </span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                {lang === "hi" ? "अभियान" : "Campaigns"}
+              </span>
+            </div>
           </div>
         </div>
-        
-        {/* Impact Bottom Text */}
-        <div className="mt-2 text-center text-[10px] text-slate-500 font-medium italic px-2">
-          {lang === "hi" ? cmsConfig.impactBottomTextHi : cmsConfig.impactBottomTextEn}
-        </div>
-      
-      
-
-    </motion.div>
-
-      {/* 4. Quick Actions (Matches Screenshot 5 View All Services Grid - 5 columns x 2 rows) */}
-      <div className="px-4 relative z-10">
-        <div className="flex justify-between items-center mb-2.5">
-          <h4 className="font-display font-extrabold text-xs text-[#0B1E3F]">
-            {lang === "hi" ? "त्वरित सेवाएं" : "Quick Actions"}
-          </h4>
-          <button 
-            onClick={() => navigate("/services")}
-            className="text-[9px] font-black text-[#000080] uppercase tracking-wider hover:underline"
-          >
-            {lang === "hi" ? "सभी सेवाएं देखें >" : "View All Services >"}
-          </button>
-        </div>
-
-        <motion.div 
-          className="grid grid-cols-5 gap-2 glass-card p-4 min-h-[90px] w-full justify-items-center"
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: { staggerChildren: 0.1 }
-            }
-          }}
-        >
-          {quickActions.map((action, idx) => (
-            <motion.button 
-              key={action.id}
-              variants={{
-                hidden: { opacity: 0, scale: 0.8 },
-                show: { opacity: 1, scale: 1 }
-              }}
-              onClick={() => navigate(action.route)}
-              className={`flex flex-col items-center justify-center p-2 bg-white border-2 ${action.borderColor} rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group relative w-full h-full gap-1.5`}
-            >
-              <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
-                <img src={action.imgSrc} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300" alt="" />
-              </div>
-            </motion.button>
-          ))}
-        </motion.div>
-
-        </div>
-      </>
       )}
 
-      {/* 5. Daily Quote (AdviceSlip) */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6 }}
-        className="px-4 relative z-10"
-      >
-        <div className="glass-card p-4 relative overflow-hidden flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-             <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider">
+
+      {/* Quote & Founder Message */}
+      <div className="px-4 space-y-4">
+        <div className="bg-blue-50/50 rounded-xl p-5 border border-blue-100/50">
+          <div className="flex justify-between items-center mb-3">
+             <h4 className="font-bold text-sm text-blue-900">
                {lang === "hi" ? "आज का सुविचार" : "Quote of the Day"}
              </h4>
-             <Info className="w-3.5 h-3.5 text-amber-500" />
+             <Info className="w-4 h-4 text-blue-400" />
           </div>
-          <p className="text-[11px] text-slate-700 italic font-medium leading-relaxed bg-amber-50/50 p-3 rounded-xl border border-amber-100/50">
+          <p className="text-sm text-slate-700 italic font-medium leading-relaxed">
             "{lang === "hi" 
                 ? (cmsConfig.quoteOfTheDayHi || "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।") 
                 : (cmsConfig.quoteOfTheDayEn || "Work is worship, and service is the greatest religion.")}"
           </p>
         </div>
-      </motion.div>
 
-      {/* 6. Message from Founder (Matches Screenshot 5 Founder Msg) */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6 }}
-        className="px-4 relative z-10"
-      >
-        <div className="glass-card p-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF9933]/5 rounded-full blur-xl"></div>
-          
-          <div className="flex items-start gap-4">
-            {/* Founder avatar with golden ring */}
-            <div className="relative shrink-0 mt-1">
-              <img 
-                src={cmsConfig.founderImgUrl || globalSettings?.founder_image || "/assets/founder.png"} 
-                alt="Founder Message Avatar" 
-                className="w-16 h-16 rounded-full object-cover border-2 border-[#D4AF37]/50 shadow-sm"
-              />
-            </div>
-            
-            {/* Message details */}
-            <div className="space-y-2">
-              <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider">
-                {lang === "hi" ? "संस्थापक का संदेश" : "Message from Founder"}
-              </h4>
-                <p className="text-[10px] text-slate-600 leading-relaxed italic font-medium">
-                  "{globalSettings?.founder_message || (lang === "hi" ? settings.founderMessageHi : settings.founderMessageEn)}"
-                </p>
-              <div className="pt-1.5 border-t border-slate-100">
-                <p className="font-display font-black text-[10.5px] text-[#000080] leading-none">
-                  {cmsConfig.founderName || "Rohit Pandit"}
-                </p>
-                <p className="text-[8px] text-[#D4AF37] font-black uppercase tracking-wider mt-1">
-                  {cmsConfig.founderDesignation || "Founder, RP Foundation"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      
-        {/* Helplines and Social Media Sections */}
-        <div className="grid grid-cols-1 gap-4 mt-5">
-
-          {/* Social Media Panel */}
-          <div className="glass-card p-4 space-y-3">
-            <h4 className="font-display font-extrabold text-xs text-[#0B1E3F] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
-              <Globe className="w-4 h-4 text-blue-600" />
-              {lang === "hi" ? "आधिकारिक सोशल मीडिया" : "Follow Us"}
+        <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex items-start gap-4">
+          <img 
+            src={cmsConfig.founderImgUrl || globalSettings?.founder_image || "/assets/founder.png"} 
+            alt="Founder" 
+            className="w-16 h-16 rounded-full object-cover shadow-sm border border-slate-200 shrink-0"
+          />
+          <div>
+            <h4 className="font-bold text-sm text-slate-900 mb-1">
+              {lang === "hi" ? "संस्थापक का संदेश" : "Message from Founder"}
             </h4>
-
-            <div className="flex justify-around items-center px-1 py-1">
-              {[
-                { name: "Facebook", icon: Facebook, color: "text-blue-600 bg-blue-50 hover:bg-blue-100 border-blue-100", url: "https://facebook.com/therpfoundation" },
-                { name: "Instagram", icon: Instagram, color: "text-pink-650 bg-pink-50 hover:bg-pink-100 border-pink-100", url: "https://instagram.com/therpfoundation" },
-                { name: "YouTube", icon: Youtube, color: "text-red-600 bg-red-50 hover:bg-red-100 border-red-100", url: "https://youtube.com/@therpfoundation" },
-                { name: "Twitter", icon: Twitter, color: "text-slate-800 bg-slate-100 hover:bg-slate-200 border-slate-200", url: "https://twitter.com/therpfoundation" }
-              ].map((social, idx) => {
-                const SocialIcon = social.icon;
-                return (
-                  <a 
-                    key={idx}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`w-10 h-10 rounded-full flex items-center justify-center border transition transform hover:scale-105 active:scale-95 ${social.color}`}
-                    title={social.name}
-                  >
-                    <SocialIcon className="w-4.5 h-4.5" />
-                  </a>
-                );
-              })}
+            <p className="text-xs text-slate-600 leading-relaxed italic mb-3">
+              "{globalSettings?.founder_message || (lang === "hi" ? settings.founderMessageHi : settings.founderMessageEn)}"
+            </p>
+            <div>
+              <p className="font-bold text-sm text-[#000080]">
+                {cmsConfig.founderName || "Rohit Pandit"}
+              </p>
+              <p className="text-[10px] text-slate-500 font-semibold uppercase mt-0.5 tracking-wider">
+                {cmsConfig.founderDesignation || "Founder, RP Foundation"}
+              </p>
             </div>
           </div>
         </div>
 
-    </motion.div>
+      </div>
       
     </div>
   );
 }
-
-
-
-
-

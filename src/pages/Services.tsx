@@ -1,86 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
-import { Search, Compass, Phone, Globe, Mail, Sparkles, Briefcase, Tractor, Thermometer, ShieldAlert, MapPin, Heart, Baby, FileText, Camera, Bot } from "lucide-react";
+import { Search, Compass, Phone, Globe, Mail } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
-
-const serviceIdToImage: Record<string, string> = {
-  "card": "/assets/icons/icon_card_updated_1786163163115.jpg",
-  "blood": "/assets/icons/icon_blood_1786081356967.jpg",
-  "health-care": "/assets/icons/icon_health_updated_1786163249856.jpg",
-  "donations": "/assets/icons/icon_donations.jpg",
-  "volunteers": "/assets/icons/icon_volunteers_updated_1786163233069.jpg",
-  "environment": "/assets/icons/icon_environment_1786081257147.jpg",
-  "culture": "/assets/icons/icon_culture_1786081280063.jpg",
-  "schemes": "/assets/icons/icon_schemes_updated_1786163186070.jpg",
-  "skills": "/assets/icons/icon_skills_1786081334087.jpg",
-  "farmer": "/assets/icons/icon_farmer_updated_1786163373604.jpg",
-  "disaster": "/assets/icons/icon_disaster_1786081291322.jpg",
-  "jobs": "/assets/icons/icon_jobs_updated_1786163264789.jpg",
-  "animals": "/assets/icons/icon_animal_1786081244906.jpg",
-  "food": "/assets/icons/icon_food_1786081367715.jpg",
-  "medicine": "/assets/icons/icon_medicine_updated_1786163301118.jpg",
-  "women-safety": "/assets/icons/icon_women_updated_1786163329515.jpg",
-  "seniors": "/assets/icons/icon_senior_1786081168198.jpg",
-  "education": "/assets/icons/icon_education_updated_1786163314837.jpg",
-  "scholarships": "/assets/icons/icon_scholarships_updated_1786163279154.jpg",
-  "grievance": "/assets/icons/icon_grievance_updated_1786163210095.jpg",
-  "countries": "/assets/icons/icon_global_guide_updated_1786163358416.jpg",
-  "crowdfunding": "/assets/icons/icon_crowdfunding_updated_1786163344247.jpg",
-  "earthquakes": "/assets/icons/icon_disaster_1786081291322.jpg",
-  "fuel-tracker": "/assets/icons/icon_jobs_updated_1786163264789.jpg",
-  "gps-toolkit": "/assets/icons/icon_environment_1786081257147.jpg",
-  "vitals": "/assets/icons/icon_health_updated_1786163249856.jpg",
-  "medications": "/assets/icons/icon_medicine_updated_1786163301118.jpg",
-  "medical-dict": "/assets/icons/icon_schemes_updated_1786163186070.jpg",
-  "resume-builder": "/assets/icons/icon_skills_1786081334087.jpg",
-  "doc-scanner": "/assets/icons/icon_grievance_updated_1786163210095.jpg",
-  "ai-chat": "/assets/icons/icon_schemes_updated_1786163186070.jpg",
-  "story-library": "/assets/icons/icon_culture_1786081280063.jpg",
-  "hindu-calendar": "/assets/icons/icon_culture_1786081280063.jpg",
-  "news-feed": "/assets/icons/icon_jobs_updated_1786163264789.jpg",
-  "internet-radio": "/assets/icons/icon_culture_1786081280063.jpg",
-  "transit-planner": "/assets/icons/icon_environment_1786081257147.jpg"
-};
-
-const serviceIdToBorder: Record<string, string> = {
-  card: "border-green-600",
-  blood: "border-red-600",
-  "health-care": "border-green-600",
-  environment: "border-green-600",
-  culture: "border-amber-600",
-  schemes: "border-[#000080]",
-  skills: "border-orange-500",
-  farmer: "border-green-600",
-  disaster: "border-red-600",
-  jobs: "border-[#000080]",
-  donations: "border-[#000080]",
-  volunteers: "border-orange-500",
-  animals: "border-[#000080]",
-  food: "border-orange-500",
-  medicine: "border-[#000080]",
-  "women-safety": "border-[#000080]",
-  seniors: "border-orange-500",
-  education: "border-orange-500",
-  scholarships: "border-[#000080]",
-  grievance: "border-[#000080]",
-  countries: "border-[#000080]",
-  earthquakes: "border-red-600",
-  "fuel-tracker": "border-amber-600",
-  "gps-toolkit": "border-[#000080]",
-  "vitals": "border-emerald-600",
-  "medications": "border-blue-600",
-  "medical-dict": "border-green-600",
-  "resume-builder": "border-l-[6px] border-blue-600 shadow-sm hover:border-blue-700",
-  "doc-scanner": "border-l-[6px] border-gray-800 shadow-sm hover:border-gray-900",
-  "ai-chat": "border-l-[6px] border-indigo-500 shadow-sm hover:border-indigo-600",
-  "story-library": "border-l-[6px] border-amber-600 shadow-sm hover:border-amber-700",
-  "hindu-calendar": "border-l-[6px] border-orange-500 shadow-sm hover:border-orange-600",
-  "news-feed": "border-l-[6px] border-blue-500 shadow-sm hover:border-blue-600",
-  "internet-radio": "border-l-[6px] border-purple-500 shadow-sm hover:border-purple-600",
-  "transit-planner": "border-l-[6px] border-blue-500 shadow-sm hover:border-blue-600"
-};
 
 export default function Services() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -92,14 +15,8 @@ export default function Services() {
 
   const [category, setCategory] = useState("all");
   
-  const serviceIdToEmoji: Record<string, string> = {
-    card: "🪪", blood: "🩸", grievance: "📝", disaster: "🚨", 
-    farmer: "🌾", schemes: "📜", skills: "🎓", "health-care": "🏥", 
-    jobs: "💼", environment: "🌳", culture: "🕉️", donations: "💖"
-  };
-
   const [search, setSearch] = useState("");
-    const [webResults, setWebResults] = useState<any[]>([]);
+  const [webResults, setWebResults] = useState<any[]>([]);
   const [webLoading, setWebLoading] = useState(false);
 
   /* ─────────────────────────────────────
@@ -112,6 +29,7 @@ export default function Services() {
     { id: "welfare", en: "Welfare", hi: "कल्याण" },
     { id: "empowerment", en: "Info", hi: "सशक्तिकरण" },
     { id: "civic", en: "Civic", hi: "नागरिक" },
+    { id: "local", en: "Local Tools", hi: "ऑफ़लाइन टूल्स" },
   ];
 
   const filtered = (Array.isArray(servicesList)
@@ -155,99 +73,112 @@ export default function Services() {
   }, [search]);
 
   return (
-    <div className="p-5 flex-1 flex flex-col min-h-screen bg-transparent pb-24 relative overflow-hidden">
+    <div className="p-4 flex-1 flex flex-col min-h-screen bg-slate-50/50 pb-28 relative overflow-hidden">
       {/* ── Decorative backdrop ── */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[340px] h-[340px] opacity-[0.03] pointer-events-none z-0">
-        <svg viewBox="0 0 100 100" className="w-full h-full text-[#D4AF37]" fill="currentColor">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5" />
-          <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5" />
-          <path d="M50 5l2 15 15-15-5 25 15-5-25 5 15 15-25-2 5 25-15-15-5 15-15-15-5 15-5-25-25 2 15-15-25-5 15-5-15-25 15 15z" />
-        </svg>
-      </div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-br from-[#000080]/5 to-[#FF9933]/5 blur-[80px] pointer-events-none z-0 rounded-full" />
 
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-4 relative z-10">
-        <div>
-          <h3 className="font-display font-extrabold text-base text-[#000080] flex items-center gap-1">
-            {isHi ? "आरपी नागरिक सेवा संगम" : "RP Civic Services Hub"}
-          </h3>
-          <p className="text-[10px] text-slate-500 font-bold">
-            {isHi ? "RP Civic Services Hub" : "Single Platform"}
-          </p>
+      <div className="relative z-10 space-y-5">
+        {/* ── Header & Search ── */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-display font-extrabold text-2xl text-[#000080] tracking-tight">
+                {isHi ? "नागरिक सेवाएं" : "Civic Services"}
+              </h3>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
+                {isHi ? "आरपी फाउंडेशन डिजिटल संगम" : "RP Foundation Digital Hub"}
+              </p>
+            </div>
+          </div>
+
+          {/* Search Bar (Glassmorphic) */}
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400 group-focus-within:text-[#000080] transition-colors" />
+            </div>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={isHi ? "सेवाएं, योजनाएं या टूल्स खोजें..." : "Search services, schemes or tools..."}
+              className="w-full pl-11 pr-4 py-3.5 bg-white/70 backdrop-blur-md border border-slate-200/80 rounded-2xl text-sm shadow-[0_2px_10px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-[#000080]/20 focus:border-[#000080]/30 transition-all placeholder:text-slate-400 font-medium"
+            />
+          </div>
         </div>
-        
-      </div>
 
-      {/* ══════════════════════════════════════
-          SERVICE GRID VIEW
-      ══════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col space-y-4 relative z-10">
-        {/* 21 service cards */}
+        {/* ── Categories (Horizontally Scrollable) ── */}
+        <div className="flex overflow-x-auto gap-2.5 pb-2 -mx-4 px-4 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {categories.map((c) => {
+            const isActive = category === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setCategory(c.id)}
+                className={`snap-start whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 ${
+                  isActive
+                    ? "bg-[#000080] text-white shadow-md shadow-[#000080]/20 scale-100"
+                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 active:scale-95"
+                }`}
+              >
+                {isHi ? c.hi : c.en}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Service Grid ── */}
         {isLoadingServices ? (
-          <div className="py-12 flex justify-center items-center text-slate-400 text-xs font-bold">
-            {isHi ? "सेवाएं लोड हो रही हैं..." : "Loading services..."}
+          <div className="py-12 flex justify-center items-center">
+             <div className="w-6 h-6 border-2 border-[#000080] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 pt-1">
             {filtered.map((svc, idx) => {
-              const gradients = [
-                { bg: "from-[#FF9933] via-orange-500 to-amber-500", shadow: "shadow-[0_0_20px_rgba(255,153,51,0.4)] group-hover:shadow-[0_0_30px_rgba(255,153,51,0.6)]" },
-                { bg: "from-slate-50 via-slate-100 to-slate-200", shadow: "shadow-[0_0_20px_rgba(226,232,240,0.6)] group-hover:shadow-[0_0_30px_rgba(203,213,225,0.8)]" },
-                { bg: "from-[#138808] via-green-600 to-emerald-600", shadow: "shadow-[0_0_20px_rgba(19,136,8,0.4)] group-hover:shadow-[0_0_30px_rgba(19,136,8,0.6)]" },
-                { bg: "from-[#000080] via-blue-800 to-indigo-800", shadow: "shadow-[0_0_20px_rgba(0,0,128,0.4)] group-hover:shadow-[0_0_30px_rgba(0,0,128,0.6)]" },
-              ];
-            const currentGradient = gradients[idx % gradients.length];
-                const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;
-              
+              // Exact routes available in App.tsx
               const route = svc.id === 'card' ? '/jan-seva-card' 
                           : svc.id === 'blood' ? '/blood-network' 
                           : svc.id === 'donations' ? '/donations'
-                            : svc.id === 'farmer' ? '/farmer'
-                            : svc.id === 'schemes' ? '/schemes'
-                            : svc.id === 'skills' ? '/skills'
-                            : svc.id === 'disaster' ? '/disaster'
-: svc.id === 'women-safety' ? '/women'
-                          : svc.id === 'seniors' ? '/seniors'
-                          : svc.id === 'environment' ? '/environment'
-                          : svc.id === 'education' ? '/education'
                           : svc.id === 'health-care' ? '/health-care'
-                          : svc.id === 'culture' ? '/religious-culture'
-                          : svc.id === 'jobs' ? '/jobs'
-                          : svc.id === 'scholarships' ? '/scholarships'
-                          : svc.id === 'food' ? '/food'
-                          : svc.id === 'medicine' ? '/medicine'
                           : svc.id === 'grievance' ? '/grievance'
-                          : svc.id === 'volunteers' ? '/volunteers'
-                          : svc.id === 'animals' ? '/animals'
-                          : svc.id === 'crowdfunding' ? '/crowdfunding'
-                          : svc.id === 'countries' ? '/countries'
-                          : svc.id === 'earthquakes' ? '/earthquakes'
-                          : svc.id === 'fuel-tracker' ? '/fuel-tracker'
-                          : svc.id === 'gps-toolkit' ? '/gps-toolkit'
-                          : svc.id === 'vitals' ? '/vitals'
-                          : svc.id === 'medications' ? '/medications'
-                          : svc.id === 'medical-dict' ? '/medical-dict'
-                          : svc.id === 'transit-planner' ? '/transit-planner'
                           : svc.id === 'resume-builder' ? '/resume-builder'
                           : svc.id === 'doc-scanner' ? '/doc-scanner'
-                          : svc.id === 'ai-chat' ? '/ai-chat'
-                          : svc.id === 'story-library' ? '/story-library'
-                          : svc.id === 'hindu-calendar' ? '/hindu-calendar'
-                          : svc.id === 'news-feed' ? '/news-feed'
                           : svc.id === 'internet-radio' ? '/internet-radio'
-                          : `/services/${svc.id}`;
+                          : `/services/${svc.id}`; // Everything else uses dynamic details
+
+              const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;
+              
+              const gradients = [
+                "bg-blue-50 text-blue-600 border-blue-100 group-hover:border-blue-200",
+                "bg-orange-50 text-orange-600 border-orange-100 group-hover:border-orange-200",
+                "bg-green-50 text-green-600 border-green-100 group-hover:border-green-200",
+                "bg-purple-50 text-purple-600 border-purple-100 group-hover:border-purple-200",
+                "bg-amber-50 text-amber-600 border-amber-100 group-hover:border-amber-200",
+                "bg-rose-50 text-rose-600 border-rose-100 group-hover:border-rose-200",
+                "bg-emerald-50 text-emerald-600 border-emerald-100 group-hover:border-emerald-200",
+                "bg-indigo-50 text-indigo-600 border-indigo-100 group-hover:border-indigo-200"
+              ];
+              const colorClass = gradients[idx % gradients.length];
 
               return (
-                 <button key={svc.id} onClick={() => navigate(route)}
-                    className={`bg-white border-2 ${serviceIdToBorder[svc.id] || 'border-slate-300'} shadow-sm p-2.5 text-center flex flex-col items-center justify-center gap-2 h-28 rounded-xl transition-all duration-300 ease-in-out hover:shadow-md hover:scale-105 group`}
-                    style={{ transitionDelay: `${idx * 25}ms` }}
+                 <button 
+                    key={svc.id} 
+                    onClick={() => navigate(route)}
+                    className="relative bg-white rounded-2xl p-4 flex flex-col items-center gap-3 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-100/80 transition-all duration-300 active:scale-[0.97] hover:shadow-[0_8px_25px_-5px_rgba(0,0,128,0.1)] hover:border-[#000080]/20 group overflow-hidden"
                   >
-                    <div className="w-14 h-14 flex items-center justify-center overflow-hidden">
-                      <img src={serviceIdToImage[svc.id] || '/assets/logo.png'} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300" alt="" />
+                    <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 opacity-50 group-hover:scale-150 transition-transform duration-500 ease-out" />
+                    
+                    <div className={`w-14 h-14 relative flex items-center justify-center rounded-xl shadow-inner border group-hover:shadow-md transition-all ${colorClass}`}>
+                      <IconComponent className="w-7 h-7" />
                     </div>
-                    <h4 className="font-bold text-[10.5px] text-slate-800 leading-tight line-clamp-2 px-0.5 w-full text-center">
-                      {isHi ? svc.titleHi : svc.titleEn}
-                    </h4>
+                    
+                    <div className="w-full text-center relative z-10">
+                      <h4 className="font-extrabold text-[12px] text-slate-800 leading-tight line-clamp-1 group-hover:text-[#000080] transition-colors">
+                        {isHi ? svc.titleHi : svc.titleEn}
+                      </h4>
+                      <p className="text-[9px] font-medium text-slate-400 mt-0.5 line-clamp-1 px-1">
+                        {isHi ? svc.descHi : svc.descEn}
+                      </p>
+                    </div>
                   </button>
               );
             })}
@@ -255,45 +186,53 @@ export default function Services() {
         )}
 
         {!isLoadingServices && filtered.length === 0 && (
-          <div className="space-y-3 py-4">
-            <p className="text-center text-xs font-bold text-slate-400">
-              {isHi ? "कोई स्थानीय सेवा नहीं मिली।" : "No local service matched."}
+          <div className="py-12 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+              <Search className="h-6 w-6 text-slate-400" />
+            </div>
+            <p className="text-sm font-bold text-slate-600">
+              {isHi ? "कोई सेवा नहीं मिली" : "No services found"}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              {isHi ? "कृपया कुछ और खोजें" : "Try searching for something else"}
             </p>
           </div>
         )}
 
-        {/* Web Search results shown below services when searching */}
+        {/* ── Web Search Results (Fallback) ── */}
         {search.trim().length > 0 && (
-          <div className="space-y-3 py-2 border-t border-slate-100 mt-2">
-            {webLoading && (
-              <div className="flex justify-center py-4">
-                <div className="w-5 h-5 border-2 border-[#000080] border-t-transparent rounded-full animate-spin" />
+          <div className="pt-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {webLoading ? (
+              <div className="flex justify-center py-6">
+                <div className="w-6 h-6 border-2 border-[#FF9933] border-t-transparent rounded-full animate-spin" />
               </div>
-            )}
-
-            {!webLoading && webResults.length > 0 && (
-              <div className="space-y-2 text-left">
-                <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-1.5 h-3 bg-[#FF9933] rounded-xs"></span>
-                  {isHi ? "🌐 इंटरनेट से योजनाएं और समाचार" : "🌐 Related Schemes & Web Info"}
+            ) : webResults.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-100 p-4">
+                <p className="text-[11px] font-extrabold text-[#000080] uppercase tracking-wider flex items-center gap-2 mb-3">
+                  <Globe className="w-3.5 h-3.5 text-[#FF9933]" />
+                  {isHi ? "वेब परिणाम" : "Web Results"}
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {webResults.map((r, i) => (
                     <a key={i} href={r.link} target="_blank" rel="noreferrer"
-                      className="flex items-start gap-2.5 bg-white border border-slate-200 rounded-2xl p-3 hover:border-[#FF9933] hover:shadow-sm transition group"
+                      className="flex gap-3 group"
                     >
-                      <img
-                        src={`https://www.google.com/s2/favicons?sz=16&domain_url=${r.link}`}
-                        alt=""
-                        className="w-4 h-4 rounded-sm shrink-0 mt-0.5"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-bold text-[#000080] group-hover:underline leading-snug line-clamp-2">{r.title}</p>
-                        <p className="text-[8.5px] text-slate-500 mt-0.5 line-clamp-2">{r.snippet}</p>
-                        <p className="text-[8px] text-[#FF9933] font-semibold mt-1 truncate">{r.displayLink || r.link}</p>
+                      <div className="mt-1 w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 group-hover:border-[#FF9933]/30 transition-colors">
+                        <img
+                          src={`https://www.google.com/s2/favicons?sz=32&domain_url=${r.link}`}
+                          alt=""
+                          className="w-3.5 h-3.5 rounded-sm"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        />
                       </div>
-                      <svg className="w-3 h-3 text-slate-400 group-hover:text-[#FF9933] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-bold text-slate-800 group-hover:text-[#000080] leading-snug line-clamp-2 transition-colors">
+                          {r.title}
+                        </p>
+                        <p className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                          {r.snippet}
+                        </p>
+                      </div>
                     </a>
                   ))}
                 </div>
@@ -301,29 +240,6 @@ export default function Services() {
             )}
           </div>
         )}
-      </div>
-
-      {/* ── Footer support bar ── */}
-      <div className="mt-4 p-3 bg-slate-900 text-white rounded-2xl flex items-center justify-between shadow-lg relative z-10">
-        <div className="flex items-center gap-2">
-          <Phone className="w-4 h-4 text-green-400" />
-          <div>
-            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">
-              {isHi ? "टोल-फ्री नागरिक सहायता" : "Toll-Free Helpline"}
-            </p>
-            <p className="text-[10px] font-bold font-mono">{settings?.tollFree || "1800-569-0991"}</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <a href={settings?.webUrl ? (settings.webUrl.startsWith("http") ? settings.webUrl : `https://${settings.webUrl}`) : "https://therpfoundation.org"} target="_blank" rel="noreferrer"
-            className="w-7 h-7 bg-white/10 rounded-full flex items-center justify-center">
-            <Globe className="w-3.5 h-3.5" />
-          </a>
-          <a href={`mailto:${settings?.email || "info@therpfoundation.org"}`}
-            className="w-7 h-7 bg-white/10 rounded-full flex items-center justify-center">
-            <Mail className="w-3.5 h-3.5" />
-          </a>
-        </div>
       </div>
     </div>
   );

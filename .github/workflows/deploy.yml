@@ -30,7 +30,6 @@ jobs:
       - name: Build Application
         run: npm run build
 
-      # Add deployment steps here, e.g., to Vercel, AWS, DigitalOcean, etc.
-      # - name: Deploy
-      #   run: |
-      #     echo "Deploy script goes here"
+      - name: Deploy to cPanel
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: node deploy.cjs

@@ -988,26 +988,7 @@ export default function BloodNetwork() {
             </div>
 
             {/* Bottom Overlay Panel */}
-            <div className="absolute bottom-0 inset-x-0 bg-white/10 backdrop-blur-xl border-t border-white/20 p-5 pb-8 rounded-t-3xl text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)]">
-              <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-5"></div>
-              <h3 className="font-display font-black text-xl flex items-center gap-2">
-                <Activity className="w-5 h-5 text-red-400 animate-pulse" />
-                {isHi ? "लाइव डोनर रडार" : "Live Donor Radar"}
-              </h3>
-              <p className="text-xs text-white/70 mt-1 mb-5">
-                {isHi ? "आपके 5 किमी के दायरे में 2 डोनर और 1 एम्बुलेंस उपलब्ध हैं।" : "Found 2 active donors and 1 ambulance within 5km radius."}
-              </p>
-              
-              <div className="flex gap-3">
-                <button className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg flex items-center justify-center gap-2 text-sm">
-                  <Activity className="w-4 h-4" />
-                  {isHi ? "आपातकालीन अलर्ट भेजें" : "Send Emergency Alert"}
-                </button>
-                <button className="w-12 h-12 bg-white/20 hover:bg-white/30 rounded-2xl flex items-center justify-center transition border border-white/10">
-                  <Map className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
+
           </div>
         )}
 

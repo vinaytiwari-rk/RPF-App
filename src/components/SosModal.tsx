@@ -35,8 +35,9 @@ export default function SosModal({ onClose, lang }: { onClose: () => void, lang:
 
     const fullMessage = encodeURIComponent(text + locationText);
     
-    // In a real app, this would send an SMS/WhatsApp or API call to HQ
-    window.open(`https://wa.me/?text=${fullMessage}`, "_blank");
+    // Using a placeholder emergency contact number. In a production app, this would be fetched from user settings.
+    const emergencyContact = "919999999999"; 
+    window.open(`https://wa.me/${emergencyContact}?text=${fullMessage}`, "_blank");
     
     setTimeout(() => {
       onClose();
