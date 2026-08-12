@@ -143,6 +143,7 @@ export default function Services() {
                           : svc.id === 'resume-builder' ? '/resume-builder'
                           : svc.id === 'doc-scanner' ? '/doc-scanner'
                           : svc.id === 'internet-radio' ? '/internet-radio'
+                          : svc.id === 'news-feed' ? '/news'
                           : `/services/${svc.id}`; // Everything else uses dynamic details
 
               const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;

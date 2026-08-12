@@ -51,27 +51,76 @@ router.get("/api/public/forex", async (req, res) => {
   }
 });
 
-// 3. News RSS API
+// 3. News API (NewsData.io & NewsAPI.org)
 router.get("/api/public/news", async (req, res) => {
   try {
-    const cacheKey = "google_news_india_ngo";
+    const cacheKey = "news_india_premium";
     const cached = apiCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour cache
+    if (cached && Date.now() - cached.timestamp < 1800000) { // 30 min cache
       return res.json({ success: true, data: cached.data });
     }
 
-    const feed = await rssParser.parseURL("https://news.google.com/rss/search?q=NGO+India&hl=en-IN&gl=IN&ceid=IN:en");
-    const articles = feed.items.slice(0, 10).map(item => ({
-      title: item.title,
-      link: item.link,
-      pubDate: item.pubDate,
-      source: item.source
-    }));
+    let articles: any[] = [];
+    
+    // Primary: NewsData.io (Hindi, India, Top priority)
+    try {
+      const newsDataUrl = "https://newsdata.io/api/1/latest?apikey=pub_447fb0beb8dd430fb1eca7ae52e603d9&country=in&language=hi&category=breaking,education,environment,health,world&timezone=asia/kolkata&prioritydomain=top";
+      const response = await axios.get(newsDataUrl);
+      if (response.data && response.data.results) {
+        articles = response.data.results.map((item: any) => ({
+          title: item.title,
+          link: item.link,
+          pubDate: item.pubDate,
+          source: item.source_name || "NewsData",
+          image_url: item.image_url || null,
+          description: item.description || null
+        }));
+      }
+    } catch (e: any) {
+      console.error("NewsData API Error:", e.message);
+    }
+
+    // Fallback/Secondary: NewsAPI.org (English, India)
+    if (articles.length === 0) {
+      try {
+        const newsApiUrl = "https://newsapi.org/v2/top-headlines?country=in&apiKey=c55809c9edd541cab9c23fc5144db5c7";
+        const response = await axios.get(newsApiUrl);
+        if (response.data && response.data.articles) {
+          articles = response.data.articles.map((item: any) => ({
+            title: item.title,
+            link: item.url,
+            pubDate: item.publishedAt,
+            source: item.source?.name || "NewsAPI",
+            image_url: item.urlToImage || null,
+            description: item.description || null
+          }));
+        }
+      } catch (e: any) {
+        console.error("NewsAPI Error:", e.message);
+      }
+    }
+
+    // Ultimate Fallback: Google News RSS
+    if (articles.length === 0) {
+      try {
+        const feed = await rssParser.parseURL("https://news.google.com/rss/search?q=NGO+India&hl=en-IN&gl=IN&ceid=IN:en");
+        articles = feed.items.slice(0, 15).map(item => ({
+          title: item.title,
+          link: item.link,
+          pubDate: item.pubDate,
+          source: item.source || "Google News",
+          image_url: null,
+          description: null
+        }));
+      } catch (e: any) {
+        console.error("RSS Fallback Error:", e.message);
+      }
+    }
     
     apiCache.set(cacheKey, { data: articles, timestamp: Date.now() });
     res.json({ success: true, data: articles });
   } catch (error: any) {
-    console.error("News API Error:", error.message);
+    console.error("News API General Error:", error.message);
     res.status(500).json({ success: false, error: "Failed to fetch news data" });
   }
 });

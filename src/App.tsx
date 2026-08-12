@@ -28,8 +28,9 @@ const DonationsPage = React.lazy(() => import('./pages/DonationsPage'));
 const HealthCare = React.lazy(() => import('./pages/HealthCare'));
 const GodAdminPanel = React.lazy(() => import("./pages/GodAdminPanel"));
 const ResumeBuilder = React.lazy(() => import('./pages/ResumeBuilder'));
-const DocScanner = React.lazy(() => import('./pages/DocScanner'));
-const InternetRadio = React.lazy(() => import('./pages/InternetRadio'));
+const DocScanner = React.lazy(() => import("./pages/DocScanner"));
+const InternetRadio = React.lazy(() => import("./pages/InternetRadio"));
+const NewsFeed = React.lazy(() => import("./pages/NewsFeed"));
 
 import { AppProvider } from "./context/AppContext";
 
@@ -111,6 +112,7 @@ function AppContent() {
           <Route path="/resume-builder" element={<ResumeBuilder />} />
           <Route path="/doc-scanner" element={<DocScanner />} />
           <Route path="/internet-radio" element={<InternetRadio />} />
+          <Route path="/news" element={<NewsFeed />} />
           <Route path="/admin" element={<GodAdminPanel />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
