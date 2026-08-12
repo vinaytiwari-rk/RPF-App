@@ -9,6 +9,7 @@ interface FeedItem {
   description: string;
   pubDate: string;
   category?: string;
+  type?: "xml" | "json";
 }
 
 const HinduCalendar: React.FC = () => {
@@ -60,15 +61,57 @@ const HinduCalendar: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [panchangRes, highlightsRes, digestRes] = await Promise.all([
+        const currentYear = new Date().getFullYear();
+        const [panchangRes, highlightsRes, digestRes, bharatRes] = await Promise.allSettled([
           axios.get("/api/public/calendar/panchang"),
           axios.get("/api/public/calendar/highlights"),
-          axios.get("/api/public/calendar/digest")
+          axios.get("/api/public/calendar/digest"),
+          axios.get(`https://jayantur13.github.io/calendar-bharat/calendar/${currentYear}.json`)
         ]);
         
-        if (panchangRes.data.success) setPanchang(panchangRes.data.data);
-        if (highlightsRes.data.success) setHighlights(highlightsRes.data.data);
-        setDigest(digestRes.data);
+        if (panchangRes.status === "fulfilled" && panchangRes.value.data.success) {
+          setPanchang(panchangRes.value.data.data);
+        }
+        
+        let allHighlights: FeedItem[] = [];
+        if (highlightsRes.status === "fulfilled" && highlightsRes.value.data.success) {
+          allHighlights = [...highlightsRes.value.data.data.map((h: any) => ({ ...h, type: "xml" }))];
+        }
+
+        if (bharatRes.status === "fulfilled" && bharatRes.value.data) {
+          const yearData = bharatRes.value.data[currentYear];
+          if (yearData) {
+            Object.keys(yearData).forEach(monthKey => {
+              const monthData = yearData[monthKey];
+              Object.keys(monthData).forEach(dateKey => {
+                const event = monthData[dateKey];
+                // parse dateKey like "January 1, 2026, Thursday" to valid Date string
+                const parts = dateKey.split(',').map(s => s.trim());
+                if (parts.length >= 2) {
+                  const dateStr = parts[0] + ", " + parts[1]; // "January 1, 2026"
+                  const eventDate = new Date(dateStr);
+                  // Only add future or current events
+                  if (eventDate >= new Date(new Date().setHours(0,0,0,0))) {
+                    allHighlights.push({
+                      title: event.event,
+                      description: `${event.type}${event.extras ? ` • ${event.extras}` : ''}`,
+                      pubDate: eventDate.toISOString(),
+                      type: "json"
+                    });
+                  }
+                }
+              });
+            });
+          }
+        }
+        
+        // Sort highlights by date
+        allHighlights.sort((a, b) => new Date(a.pubDate).getTime() - new Date(b.pubDate).getTime());
+        setHighlights(allHighlights);
+
+        if (digestRes.status === "fulfilled") {
+          setDigest(digestRes.value.data);
+        }
       } catch (err) {
         console.error("Failed to load Hindu Calendar feeds", err);
       } finally {
