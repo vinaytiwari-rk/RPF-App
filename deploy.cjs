@@ -18,8 +18,14 @@ async function main() {
     // restart the server by touching restart.txt
     const fs = require('fs'); 
     fs.writeFileSync('restart.txt', new Date().toISOString());
-    await client.uploadFrom('restart.txt', 'restart.txt');
-    console.log('Server restarted via restart.txt');
+    try {
+      await client.ensureDir('tmp'); // Creates and navigates into tmp
+      await client.uploadFrom('restart.txt', 'restart.txt'); // Upload inside tmp
+      await client.cd('..'); // Navigate back to root
+    } catch (e) {
+      console.log('Failed to restart via tmp/restart.txt:', e);
+    }
+    console.log('Server restarted via tmp/restart.txt');
   } catch (err) {
     console.error('FTP Error:', err);
     process.exitCode = 1;
