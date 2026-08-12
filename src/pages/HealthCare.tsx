@@ -85,13 +85,9 @@ export default function HealthCare() {
   ]);
 
   // Medical Dictionary states
-  const [dictQuery, setDictQuery] = useState("");
-  const [dictResult, setDictResult] = useState<any>(null);
-  const [dictLoading, setDictLoading] = useState(false);
-
-  // Medical News states
-  const [medicalNews, setMedicalNews] = useState<any[]>([]);
-  const [medicalNewsLoading, setMedicalNewsLoading] = useState(false);
+  const [fdaQuery, setFdaQuery] = useState("");
+  const [fdaResult, setFdaResult] = useState<any[] | null>(null);
+  const [fdaLoading, setFdaLoading] = useState(false);
 
   // Load health data from database
   const fetchVitals = async () => {
@@ -267,18 +263,23 @@ export default function HealthCare() {
     }
   };
 
-  const fetchMedicalNews = async () => {
-    setMedicalNewsLoading(true);
+  const searchFDA = async () => {
+    if (!fdaQuery.trim()) return;
+    setFdaLoading(true);
     try {
-      const res = await fetch("/api/public/medical-news");
+      // Direct client-side fetch to openFDA API (No backend load, CORS enabled, NO auth key needed)
+      const res = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:${encodeURIComponent(fdaQuery)}+openfda.generic_name:${encodeURIComponent(fdaQuery)}&limit=5`);
       if (res.ok) {
         const json = await res.json();
-        if (json.success) setMedicalNews(json.data);
+        setFdaResult(json.results || []);
+      } else {
+        setFdaResult([]);
       }
     } catch (e) {
-      console.error("Error fetching medical news", e);
+      console.error(e);
+      setFdaResult([]);
     } finally {
-      setMedicalNewsLoading(false);
+      setFdaLoading(false);
     }
   };
 
@@ -286,22 +287,7 @@ export default function HealthCare() {
     fetchVitals();
     fetchMedications();
     fetchPediatric();
-    fetchMedicalNews();
   }, []);
-
-  const searchDictionary = async () => {
-    if (!dictQuery.trim()) return;
-    setDictLoading(true);
-    try {
-      const res = await fetch(`/api/health/dictionary?query=${encodeURIComponent(dictQuery)}`);
-      const json = await res.json();
-      if (json.success) setDictResult(json.data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setDictLoading(false);
-    }
-  };
 
   // Symptoms submission handler
   const handleAssess = () => {
@@ -1064,98 +1050,72 @@ export default function HealthCare() {
                 ))}
               </div>
             </div>
-            {/* WHO ICD-11 Search */}
+            {/* openFDA Medicine Lookup */}
             <div className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm space-y-4">
               <h4 className="font-display font-bold text-xs text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-1.5">
-                <BookOpen className="w-4.5 h-4.5 text-indigo-600" />
-                {isHi ? "WHO ICD-11 डायरेक्टरी" : "WHO ICD-11 Directory"}
+                <BookOpen className="w-4.5 h-4.5 text-emerald-600" />
+                {isHi ? "दवा और ड्रग लेबल खोज (openFDA)" : "Medicine & Drug Label Lookup"}
               </h4>
               <p className="text-[10px] text-slate-500">
-                {isHi ? "आधिकारिक WHO ICD-11 डेटाबेस में रोगों और नैदानिक कोडों की खोज करें।" : "Search for diseases and clinical codes in the official WHO ICD-11 database."}
+                {isHi ? "आधिकारिक openFDA डेटाबेस से सीधे दवा की जानकारी, उपयोग और चेतावनी प्राप्त करें।" : "Get medicine info, usage, and warnings directly from the official openFDA database."}
               </p>
 
               <div className="flex gap-2">
                 <input 
                   type="text" 
-                  value={dictQuery}
-                  onChange={(e) => setDictQuery(e.target.value)}
-                  placeholder={isHi ? "उदा. Diabetes, Paracetamol..." : "e.g. Hypertension, Paracetamol..."} 
-                  className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 font-medium bg-slate-50"
-                  onKeyDown={(e) => e.key === 'Enter' && searchDictionary()}
+                  value={fdaQuery}
+                  onChange={(e) => setFdaQuery(e.target.value)}
+                  placeholder={isHi ? "उदा. Paracetamol, Aspirin..." : "e.g. Paracetamol, Aspirin..."} 
+                  className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500 font-medium bg-slate-50"
+                  onKeyDown={(e) => e.key === 'Enter' && searchFDA()}
                 />
                 <button 
-                  onClick={searchDictionary}
-                  disabled={dictLoading || !dictQuery.trim()}
-                  className="bg-indigo-600 text-white rounded-xl px-4 py-3 font-bold hover:bg-indigo-700 transition disabled:opacity-50"
+                  onClick={searchFDA}
+                  disabled={fdaLoading || !fdaQuery.trim()}
+                  className="bg-emerald-600 text-white rounded-xl px-4 py-3 font-bold hover:bg-emerald-700 transition disabled:opacity-50"
                 >
-                  {dictLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                  {fdaLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
                 </button>
               </div>
 
-              {dictResult && Array.isArray(dictResult) && (
-                <div className="space-y-2 mt-4 animate-fadeIn max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                  {dictResult.length === 0 ? (
-                    <p className="text-[10px] text-slate-500 text-center py-4">{isHi ? "कोई परिणाम नहीं मिला।" : "No results found."}</p>
+              {fdaResult && (
+                <div className="space-y-3 mt-4 animate-fadeIn max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
+                  {fdaResult.length === 0 ? (
+                    <p className="text-[10px] text-slate-500 text-center py-4">{isHi ? "कोई दवा नहीं मिली।" : "No medicines found."}</p>
                   ) : (
-                    dictResult.map((entity: any, idx: number) => (
-                      <a key={idx} href={entity.id} target="_blank" rel="noopener noreferrer" className="block bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 rounded-xl p-3 transition text-left group">
+                    fdaResult.map((drug: any, idx: number) => (
+                      <div key={idx} className="bg-emerald-50/30 border border-emerald-100 rounded-xl p-3.5 space-y-2">
                         <div className="flex justify-between items-start">
-                          <h5 
-                            className="font-bold text-indigo-900 text-[11px] leading-tight flex-1 group-hover:text-indigo-600 transition"
-                            dangerouslySetInnerHTML={{ __html: entity.title }}
-                          />
-                          {entity.theCode && (
-                            <span className="ml-2 bg-indigo-100 text-indigo-800 text-[9px] font-black px-2 py-0.5 rounded shrink-0">
-                              ICD-11: {entity.theCode}
+                          <h5 className="font-bold text-emerald-900 text-xs leading-tight">
+                            {drug.openfda?.brand_name?.[0] || drug.openfda?.generic_name?.[0] || "Unknown Drug"}
+                          </h5>
+                          {drug.openfda?.product_type?.[0] && (
+                            <span className="ml-2 bg-emerald-100 text-emerald-800 text-[9px] font-black px-2 py-0.5 rounded shrink-0">
+                              {drug.openfda.product_type[0]}
                             </span>
                           )}
                         </div>
-                      </a>
+                        {drug.indications_and_usage && (
+                          <p className="text-[10px] text-slate-700 line-clamp-3 leading-snug">
+                            <strong className="text-slate-900">Uses:</strong> {drug.indications_and_usage[0]}
+                          </p>
+                        )}
+                        {drug.warnings && (
+                          <p className="text-[10px] text-red-600 line-clamp-2 leading-snug font-medium">
+                            <strong className="text-red-700">Warning:</strong> {drug.warnings[0]}
+                          </p>
+                        )}
+                      </div>
                     ))
                   )}
-                  <div className="bg-indigo-50 border border-indigo-200 p-2 rounded flex gap-2 items-start mt-3">
-                    <BookOpen className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-                    <p className="text-[9px] text-indigo-800 font-bold leading-tight">
-                      Powered by the official WHO International Classification of Diseases (ICD-11) API.
+                  <div className="bg-emerald-50 border border-emerald-200 p-2 rounded flex gap-2 items-start mt-3">
+                    <BookOpen className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <p className="text-[9px] text-emerald-800 font-bold leading-tight">
+                      Results provided directly by the U.S. Food and Drug Administration (openFDA) API.
                     </p>
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* NIH Health Bulletins */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm space-y-4">
-              <h4 className="font-display font-bold text-xs text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-1.5">
-                <Newspaper className="w-4.5 h-4.5 text-blue-600" />
-                {isHi ? "राष्ट्रीय स्वास्थ्य संस्थान बुलेटिन" : "NIH Health Bulletins"}
-              </h4>
-              
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                {medicalNewsLoading ? (
-                  <div className="flex justify-center py-4">
-                    <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
-                  </div>
-                ) : medicalNews.length === 0 ? (
-                  <p className="text-[10px] text-slate-500 text-center py-4">{isHi ? "कोई समाचार नहीं मिला।" : "No news found."}</p>
-                ) : (
-                  medicalNews.map((news, idx) => (
-                    <a key={idx} href={news.link} target="_blank" rel="noopener noreferrer" className="block bg-slate-50 hover:bg-blue-50/50 border border-slate-200 hover:border-blue-200 rounded-xl p-3 transition group">
-                      <div className="flex items-center space-x-2 mb-1.5">
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-[8.5px] font-bold rounded flex items-center">
-                          MedlinePlus
-                        </span>
-                        <span className="text-[9px] text-slate-400 font-semibold flex items-center">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          {new Date(news.pubDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <h5 className="text-[11px] font-bold text-slate-800 leading-snug group-hover:text-blue-700 transition">
-                        {news.title}
-                      </h5>
-                    </a>
-                  ))
-                )}
-              </div>
             </div>
           </div>
         )}
