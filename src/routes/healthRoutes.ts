@@ -437,43 +437,34 @@ router.post("/api/appointments", authenticateToken, async (req: any, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// --- Medical Dictionary (Gemini API Powered) ---
+// --- WHO ICD-11 API Search ---
 router.get("/api/health/dictionary", async (req: any, res: any) => {
   try {
     const { query } = req.query;
     if (!query) return res.status(400).json({ error: "Query is required" });
 
-    // Try to connect to Gemini API if configured
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      // Fallback mock for demo purposes if no API key
-      return res.json({
-        success: true,
-        data: {
-          term: query,
-          definition: "Information for this medical term is currently limited in offline mode.",
-          symptoms: ["Varies by case"],
-          treatments: ["Consult a physician"]
-        }
-      });
-    }
-
-    const ai = new GoogleGenAI({ apiKey });
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `You are a medical dictionary. Provide a brief overview for the medical term: "${query}". Return the output strictly as JSON with keys: "term", "definition", "symptoms" (array of strings), "treatments" (array of strings). Do not include markdown formatting or backticks.`
+    const authString = Buffer.from('d9386103-0bd1-4bb9-b93c-5a2bdc7b8741_7a7adba7-1883-4761-9822-be685731e6b6:F8JSpbQDrqRKLkOW0WNrvEA8fQGdkBHFvMi4vfDLwEA=').toString('base64');
+    const tokenRes = await axios.post('https://icdaccessmanagement.who.int/connect/token', 'grant_type=client_credentials&scope=icdapi_access', {
+      headers: {
+        'Authorization': 'Basic ' + authString,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     });
 
-    let rawText = response.text?.trim() || "{}";
-    if (rawText.startsWith('```json')) rawText = rawText.substring(7);
-    if (rawText.endsWith('```')) rawText = rawText.substring(0, rawText.length - 3);
+    const searchRes = await axios.get(`https://id.who.int/icd/release/11/2024-01/mms/search?q=${encodeURIComponent(query)}`, {
+      headers: {
+        'Authorization': 'Bearer ' + tokenRes.data.access_token,
+        'Accept': 'application/json',
+        'API-Version': 'v2',
+        'Accept-Language': 'en'
+      }
+    });
 
-    const parsed = JSON.parse(rawText.trim());
-    res.json({ success: true, data: parsed });
+    res.json({ success: true, data: searchRes.data.destinationEntities.slice(0, 10) });
 
   } catch (error: any) {
-    console.error("Dictionary error:", error);
-    res.status(500).json({ error: "Failed to fetch dictionary data" });
+    console.error("ICD API error:", error?.response?.data || error.message);
+    res.status(500).json({ error: "Failed to fetch ICD data" });
   }
 });
 

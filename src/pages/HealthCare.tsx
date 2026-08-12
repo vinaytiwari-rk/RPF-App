@@ -1058,25 +1058,15 @@ export default function HealthCare() {
                 ))}
               </div>
             </div>
-            {/* Medical Dictionary Search */}
+            {/* WHO ICD-11 Search */}
             <div className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm space-y-4">
               <h4 className="font-display font-bold text-xs text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-1.5">
                 <BookOpen className="w-4.5 h-4.5 text-indigo-600" />
-                {isHi ? "मेडिकल डिक्शनरी" : "AI Medical Dictionary"}
+                {isHi ? "WHO ICD-11 डायरेक्टरी" : "WHO ICD-11 Directory"}
               </h4>
               <p className="text-[10px] text-slate-500">
-                {isHi ? "बीमारियों, दवाओं और लक्षणों के बारे में खोजें" : "Search for diseases, drugs, or medical terminology."}
+                {isHi ? "आधिकारिक WHO ICD-11 डेटाबेस में रोगों और नैदानिक कोडों की खोज करें।" : "Search for diseases and clinical codes in the official WHO ICD-11 database."}
               </p>
-              
-              <div className="flex items-center gap-2 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100">
-                <div className="flex-1">
-                  <span className="block text-[9.5px] font-bold text-indigo-800 uppercase tracking-wider">{isHi ? "चिकित्सा शब्दावली प्रणाली (UMLS)" : "Unified Medical Language System"}</span>
-                  <span className="text-[9px] text-slate-500 font-medium">{isHi ? "गहन नैदानिक कोड के लिए आधिकारिक UTS पोर्टल का अन्वेषण करें।" : "Explore the official UTS portal for deep clinical codes."}</span>
-                </div>
-                <a href="https://uts.nlm.nih.gov/uts/" target="_blank" rel="noopener noreferrer" className="bg-white border border-indigo-200 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-md hover:bg-indigo-50 transition shrink-0">
-                  Open UTS
-                </a>
-              </div>
 
               <div className="flex gap-2">
                 <input 
@@ -1096,35 +1086,31 @@ export default function HealthCare() {
                 </button>
               </div>
 
-              {dictResult && (
-                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 space-y-3 mt-4 animate-fadeIn">
-                  <h5 className="font-black text-indigo-900 text-sm uppercase tracking-wide">{dictResult.term}</h5>
-                  <p className="text-xs text-slate-700 leading-relaxed bg-white p-3 rounded-lg border border-indigo-100 shadow-sm">
-                    {dictResult.definition}
-                  </p>
-                  
-                  {dictResult.symptoms && dictResult.symptoms.length > 0 && (
-                    <div className="pt-2">
-                      <span className="text-[10px] font-bold text-indigo-800 uppercase block mb-1">Common Symptoms</span>
-                      <ul className="list-disc pl-5 text-[11px] text-slate-700 space-y-0.5">
-                        {dictResult.symptoms.map((sym: string, i: number) => <li key={i}>{sym}</li>)}
-                      </ul>
-                    </div>
+              {dictResult && Array.isArray(dictResult) && (
+                <div className="space-y-2 mt-4 animate-fadeIn max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                  {dictResult.length === 0 ? (
+                    <p className="text-[10px] text-slate-500 text-center py-4">{isHi ? "कोई परिणाम नहीं मिला।" : "No results found."}</p>
+                  ) : (
+                    dictResult.map((entity: any, idx: number) => (
+                      <a key={idx} href={entity.id} target="_blank" rel="noopener noreferrer" className="block bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 rounded-xl p-3 transition text-left group">
+                        <div className="flex justify-between items-start">
+                          <h5 
+                            className="font-bold text-indigo-900 text-[11px] leading-tight flex-1 group-hover:text-indigo-600 transition"
+                            dangerouslySetInnerHTML={{ __html: entity.title }}
+                          />
+                          {entity.theCode && (
+                            <span className="ml-2 bg-indigo-100 text-indigo-800 text-[9px] font-black px-2 py-0.5 rounded shrink-0">
+                              ICD-11: {entity.theCode}
+                            </span>
+                          )}
+                        </div>
+                      </a>
+                    ))
                   )}
-
-                  {dictResult.treatments && dictResult.treatments.length > 0 && (
-                    <div className="pt-1">
-                      <span className="text-[10px] font-bold text-indigo-800 uppercase block mb-1">General Treatments</span>
-                      <ul className="list-disc pl-5 text-[11px] text-slate-700 space-y-0.5">
-                        {dictResult.treatments.map((trt: string, i: number) => <li key={i}>{trt}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  <div className="bg-amber-50 border border-amber-200 p-2 rounded flex gap-2 items-start mt-3">
-                    <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                    <p className="text-[9px] text-amber-800 font-bold leading-tight">
-                      Disclaimer: This information is AI-generated for educational purposes only and is not medical advice.
+                  <div className="bg-indigo-50 border border-indigo-200 p-2 rounded flex gap-2 items-start mt-3">
+                    <BookOpen className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                    <p className="text-[9px] text-indigo-800 font-bold leading-tight">
+                      Powered by the official WHO International Classification of Diseases (ICD-11) API.
                     </p>
                   </div>
                 </div>
