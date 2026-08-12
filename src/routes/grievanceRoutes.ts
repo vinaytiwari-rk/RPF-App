@@ -43,7 +43,7 @@ router.post("/api/sos_alerts", async (req, res) => {
 router.get("/api/grievances", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "audioUrl", "videoUrl", "imageUrl", "createdAt" FROM grievances ORDER BY "createdAt" DESC'
+      'SELECT id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "audioUrl", "videoUrl", "imageUrl", created_at AS "createdAt" FROM grievances ORDER BY created_at DESC'
     );
     res.json({ grievances: result.rows });
   } catch (error: any) {
@@ -58,8 +58,8 @@ router.post("/api/grievances", async (req, res) => {
     const id = crypto.randomUUID();
     const result = await pool.query(
       `INSERT INTO grievances 
-       (id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "audioUrl", "videoUrl", "imageUrl", "createdAt") 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+       (id, title, description, category, urgency, location, "reportedBy", status, date, "aiSummary", "audioUrl", "videoUrl", "imageUrl") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
        RETURNING id`,
       [
         id,
@@ -74,8 +74,7 @@ router.post("/api/grievances", async (req, res) => {
         aiSummary || "",
         audioUrl || "",
         videoUrl || "",
-        imageUrl || "",
-        new Date().toISOString()
+        imageUrl || ""
       ]
     );
     res.json({ success: true, id: result.rows[0].id });

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "cross-env GOMAXPROCS=1 RAYON_NUM_THREADS=1 UV_THREADPOOL_SIZE=1 NODE_OPTIONS=\"--max-old-space-size=2048\" vite build && esbuild server.ts --bundle --platform=node --format=cjs --external:express --external:dotenv --external:pg --external:multer --external:axios --external:cheerio --external:@google/genai --external:vite --sourcemap --outfile=dist/server.cjs && node -e \"require('fs').copyFileSync('dist/server.cjs', 'server.cjs')\"",
+    "build": "GOMAXPROCS=1 RAYON_NUM_THREADS=1 UV_THREADPOOL_SIZE=1 NODE_OPTIONS=\"--max-old-space-size=2048\" vite build && esbuild server.ts --bundle --platform=node --format=cjs --external:express --external:dotenv --external:pg --external:multer --external:axios --external:cheerio --external:@google/genai --external:vite --sourcemap --outfile=dist/server.cjs && node -e \"require('fs').copyFileSync('dist/server.cjs', 'server.cjs')\"",
     "start": "node server.cjs",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"
@@ -70,7 +70,6 @@
     "@types/react-dom": "^19.2.4",
     "@types/xml2js": "^0.4.14",
     "autoprefixer": "^10.4.21",
-    "cross-env": "^10.1.0",
     "esbuild": "^0.25.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
