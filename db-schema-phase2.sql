@@ -36,6 +36,11 @@ CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_active
   ON password_reset_tokens(token_hash, expires_at)
   WHERE used_at IS NULL;
 
+-- Token hashes are random 256-bit values and must never collide.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_password_reset_tokens_token_hash
+  ON password_reset_tokens(token_hash)
+  WHERE token_hash IS NOT NULL;
+
 -- Remove only tokens that are already unusable. Active tokens are preserved.
 DELETE FROM password_reset_tokens
 WHERE expires_at IS NOT NULL
