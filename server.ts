@@ -15,18 +15,36 @@ import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthen
 import bcrypt from 'bcryptjs';
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import path from "path";
+
+import { sendEmail } from './src/lib/mailer';
+import { apiCache, CACHE_TTL } from './src/lib/apiCache';
+import { queryExternalSearch } from './src/lib/externalSearch';
+import { getGeminiClient, handleOfflineFallback } from './src/lib/gemini';
+import { socialPreviewsCache, SOCIAL_CACHE_TTL } from './src/lib/socialCache';
+import { resolveConstituency, loadACGeoJson, loadACGeoJsonAsync, MP_CONSTITUENCIES_MOCK } from './src/lib/constituency';
+import { USER_PRIVILEGED_FIELDS } from './src/lib/userFields';
+import express from "express";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
+import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
+import bcrypt from 'bcryptjs';
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
+import path from "path";
 import axios from "axios";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import * as cheerio from "cheerio";
 import pg from "pg";
+import { authenticateToken, requireAdmin, authorizeRole } from "./src/db/middleware.js";
 import fs from "fs";
 import crypto from "crypto";
 import multer from "multer";
 import adminHqRoutes from "./src/routes/adminHqRoutes.js";
 
 import authRoutes from './src/routes/authRoutes.js';
+import passwordResetSecure from './src/routes/passwordResetSecure.js';
 import healthRoutes from './src/routes/healthRoutes.js';
+import livenessRoutes from './src/routes/livenessRoutes.js';
 import grievanceRoutes from './src/routes/grievanceRoutes.js';
 import aiRoutes from './src/routes/aiRoutes.js';
 import cultureRoutes from './src/routes/cultureRoutes.js';
@@ -59,9 +77,22 @@ dotenv.config();
 
 const app = express();
 app.set('trust proxy', 1);
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:4173').split(',').map(o => o.trim());
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -69,15 +100,7 @@ const limiter = rateLimit({
   message: { success: false, error: "Too many requests from this IP, please try again after 15 minutes" },
 });
 
-const sanitizePayload = (req: any, res: any, next: any) => {
-  const payloadStr = JSON.stringify(req.body);
-  if (payloadStr && (payloadStr.includes("DROP TABLE") || payloadStr.includes("SELECT * FROM") || payloadStr.includes("UNION SELECT"))) {
-    return res.status(403).json({ success: false, error: "Suspicious payload detected." });
-  }
-  next();
-};
 
-app.use(sanitizePayload);
 app.use("/api/auth", limiter);
 app.use("/api/support_requests", limiter);
 app.use("/api/grievances", limiter);
@@ -95,65 +118,18 @@ app.use("/api/ai", aiLimiter);
 import jwt from "jsonwebtoken";
 
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_development_only";
 
 // ---- Email sending via SMTP2GO API (replaces nodemailer/SMTP) ----
 const SMTP2GO_API_BASE_URL = process.env.SMTP2GO_API_BASE_URL || "https://api.smtp2go.com/v3/";
 const SMTP2GO_API_KEY = process.env.SMTP2GO_API_KEY;
 const DEFAULT_SENDER = process.env.SMTP_USER || "no-reply@appapi.therpfoundation.org";
-// JWT Middleware
 
-const authorizeRole = (requiredRole: string) => {
-  return (req: any, res: any, next: any) => {
-    if (!req.user) {
-      return res.status(403).json({ success: false, error: "Access Denied" });
-    }
-    const userRole = req.user.role;
-    if (requiredRole === "super_admin" || requiredRole === "admin") {
-      if (userRole !== "super_admin" && userRole !== "admin") {
-        return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
-      }
-    } else if (userRole !== requiredRole) {
-      return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
-    }
-    next();
-  };
-};
-
-const authenticateToken = (req: any, res: any, next: any) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  
-  if (token == null) return res.status(401).json({ success: false, error: "No token provided" });
-
-  jwt.verify(token, JWT_SECRET, async (err: any, user: any) => {
-    if (err) return res.status(403).json({ success: false, error: "Invalid token" });
-    
-    // Validate session in DB to prevent reuse of logged-out tokens
-    try {
-      const sessionRes = await pool.query('SELECT * FROM sessions WHERE token = $1', [token]);
-      if (sessionRes.rows.length === 0 && user.role !== 'super_admin' && user.role !== 'guest') {
-        return res.status(401).json({ success: false, error: "Session expired or logged out" });
-      }
-    } catch (e: any) {
-      console.warn("Session validation warning:", e.message);
-    }
-    
-    req.user = user;
-    next();
-  });
-};
-
-const requireAdmin = (req: any, res: any, next: any) => {
-  if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin' && req.user.role !== 'super_admin')) {
-    return res.status(403).json({ success: false, error: "Access Denied: Admin role required" });
-  }
-  next();
-};
 
 app.use("/api/admin/hq", authenticateToken, requireAdmin);
 
 app.use('/', authRoutes);
+app.use('/', passwordResetSecure);
+app.use('/', livenessRoutes);
 app.use('/', healthRoutes);
 app.use('/', grievanceRoutes);
 app.use('/', aiRoutes);
@@ -1803,52 +1779,22 @@ import { CORE_SERVICES } from "./src/data/coreServices.js";
 
 // Serve static assets in production or integrate Vite in development
 async function startServer() {
-
-  // Initialize Database tables and views
-  await initDatabase();
-
-  // Load GeoJSON data in the background
-  loadACGeoJsonAsync().catch(err => console.error("Error loading GeoJSON in background", err));
-
-  if (process.env.NODE_ENV !== "production") {
-    const { createServer: createViteServer } = await import("vite");
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
-
   
-process.on('uncaughtException', (err) => {
-  console.error('CRITICAL: Uncaught Exception:', err);
-  // Do not exit the process, just log it
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('CRITICAL: Unhandled Rejection at:', promise, 'reason:', reason);
-  // Do not exit the process, just log it
-});
-
+  process.on('uncaughtException', (err) => {
+    console.error('CRITICAL: Uncaught Exception:', err);
+    // Do not exit the process, just log it
+  });
+  
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('CRITICAL: Unhandled Rejection at:', promise, 'reason:', reason);
+    // Do not exit the process, just log it
+  });
   
   const server = http.createServer(app);
   const io = new SocketIOServer(server, {
-    cors: { origin: "*", methods: ["GET", "POST"] }
+    cors: corsOptions
   });
-
-  // The public group chat used to trust whatever `authorName` the client
-  // sent with each message — meaning anyone could type any name and
-  // impersonate any other volunteer/citizen in the chat, and nothing was
-  // ever saved (a page refresh wiped the whole conversation). We now
-  // require a valid login token on connection and derive the sender's
-  // identity server-side from that token, and persist every message so
-  // history survives refreshes/restarts.
+  
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error("Authentication required to join chat"));
@@ -1859,14 +1805,14 @@ process.on('unhandledRejection', (reason, promise) => {
       next();
     });
   });
-
+  
   io.on("connection", (socket) => {
     socket.on("chat_message", async (msg) => {
       const userId = (socket as any).userId;
       const authorName = (socket as any).userName;
       const text = typeof msg?.text === "string" ? msg.text.trim().slice(0, 2000) : "";
       if (!text) return;
-
+  
       try {
         const result = await pool.query(
           `INSERT INTO community_chat_messages (id, "userId", "authorName", "authorAvatar", text)
@@ -1881,15 +1827,10 @@ process.on('unhandledRejection', (reason, promise) => {
     });
     socket.on("disconnect", () => {});
   });
-
+  
   server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
-
-}
+};
 
 startServer();
-
-
-
-

@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { pool } from '../db/dbPool.js';
 import { sendEmail } from '../lib/mailer';
+import { auditEvent } from '../db/middleware.js';
 
 const router = express.Router();
 
@@ -155,6 +156,12 @@ router.post('/api/auth/set-password', async (req, res) => {
 
       // Password reset invalidates existing authenticated sessions for the account.
       await client.query('DELETE FROM sessions WHERE user_id = $1', [resetToken.user_id]);
+
+      await auditEvent({
+        userId: resetToken.user_id,
+        action: "password_reset_completed",
+        req
+      });
 
       await client.query('COMMIT');
     } catch (transactionError) {

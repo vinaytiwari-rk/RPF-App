@@ -2,7 +2,7 @@ import express from 'express';
 import { sendEmail } from '../lib/mailer';
 
 import { pool } from '../db/dbPool.js';
-import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
+import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET, auditEvent } from '../db/middleware.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -165,7 +165,14 @@ router.post("/api/auth/login", async (req, res) => {
         `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days') ON CONFLICT (id) DO NOTHING`,
         ["sess-" + Date.now(), user.id, token]
       );
-    } catch (e) {
+      
+      await auditEvent({
+        userId: user.id,
+        action: "login_success",
+        req,
+        metadata: { role: userPayload.role, identifier: finalIdentifier }
+      });
+    } catch (e: any) {
       console.warn("Session tracking failed (ignoring):", e.message);
     }
 
@@ -180,7 +187,17 @@ router.post("/api/auth/logout", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    if (token) await pool.query(`DELETE FROM sessions WHERE token = $1`, [token]);
+    if (token) {
+      const decoded: any = jwt.decode(token);
+      if (decoded && decoded.id) {
+         await auditEvent({
+           userId: decoded.id,
+           action: "logout",
+           req
+         });
+      }
+      await pool.query(`DELETE FROM sessions WHERE token = $1`, [token]);
+    }
     res.json({ success: true, message: "Logged out" });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
@@ -297,47 +314,6 @@ router.post("/api/auth/register-volunteer", async (req, res) => {
   }
 });
 
-router.post("/api/auth/set-password", async (req, res) => {
-  try {
-    const { token, password } = req.body;
-    if (!token || !password) return res.status(400).json({ error: "Reset token and new password are required" });
-    if (typeof password !== "string" || password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
-
-    const tokenRes = await pool.query(`SELECT * FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW()`, [token]);
-    if (tokenRes.rows.length === 0) return res.status(400).json({ error: "Invalid or expired reset token" });
-    const userId = tokenRes.rows[0].userId;
-    const hash = await bcrypt.hash(password, 10);
-    const result = await pool.query('UPDATE volunteers SET password_hash = $1 WHERE id = $2 RETURNING id', [hash, userId]);
-    if (result.rowCount === 0) return res.status(404).json({ error: "User not found" });
-    await pool.query(`DELETE FROM password_reset_tokens WHERE token = $1`, [token]);
-    res.json({ success: true });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.post("/api/auth/forgot-password", async (req, res) => {
-  try {
-    const { identifier } = req.body;
-    const result = await pool.query(`SELECT * FROM volunteers WHERE mobile = $1 OR email = $1 OR username = $1 OR registration_number = $1`, [identifier]);
-    if (result.rows.length > 0) {
-      const user = result.rows[0];
-      if (user.email) {
-        const token = crypto.randomBytes(32).toString('hex');
-        const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-        await pool.query(`INSERT INTO password_reset_tokens ("userId", token, expires_at) VALUES ($1, $2, $3)`, [user.id, token, expiresAt.toISOString()]);
-        await sendEmail({
-          to: user.email,
-          subject: "Password Reset Request",
-          text: `Click here to reset: ${publicAppUrl}/reset-password?token=${encodeURIComponent(token)}`,
-        });
-      }
-    }
-    res.json({ success: true });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 router.post("/api/auth/reset-ticket", async (req, res) => {
   try {

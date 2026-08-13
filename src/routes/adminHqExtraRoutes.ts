@@ -1,6 +1,6 @@
 import express from 'express';
 import { pool } from '../db/dbPool.js';
-import { authenticateToken, requireAdmin, authorizeRole } from '../db/middleware.js';
+import { authenticateToken, requireAdmin, authorizeRole, auditEvent } from '../db/middleware.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
@@ -13,6 +13,14 @@ router.put("/api/admin/hq/credentials", authenticateToken, authorizeRole("super_
     if (!username || !newPassword) return res.status(400).json({ error: "Missing username or password" });
     const hash = await bcrypt.hash(newPassword, 10);
     await pool.query(`UPDATE admin_credentials SET username = $1, password_hash = $2 WHERE id = 'admin'`, [username, hash]);
+    
+    await auditEvent({
+      userId: req.user.id,
+      action: "admin_credentials_updated",
+      resource: "admin_credentials",
+      req
+    });
+
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -140,6 +148,15 @@ router.post("/api/admin/settings", authenticateToken, requireAdmin, async (req, 
       `UPDATE app_settings SET ${setClause.join(', ')} WHERE id = $${values.length} RETURNING *`,
       values
     );
+
+    await auditEvent({
+      userId: req.user.id,
+      action: "admin_settings_updated",
+      resource: "app_settings",
+      req,
+      metadata: { fields_updated: Object.keys(updates) }
+    });
+
     return res.json({ success: true, data: result.rows[0] || {} });
   } catch (err: any) {
     console.error('Admin settings update error:', err);
