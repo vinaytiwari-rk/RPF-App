@@ -58,9 +58,9 @@ router.get("/api/auth/debug-db", async (req, res) => {
 const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
 const RESERVED_USERNAMES = new Set(["admin", "root", "superuser", "system", "moderator", "guest", "anonymous"]);
 const rpName = 'RP Foundation';
-const rpID = process.env.WEBAUTHN_RP_ID?.trim() || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('WEBAUTHN_RP_ID must be configured in production.'); })() : 'localhost');
-const originUrl = process.env.WEBAUTHN_ORIGIN?.trim() || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('WEBAUTHN_ORIGIN must be configured in production.'); })() : 'http://localhost:5173');
-const publicAppUrl = process.env.PUBLIC_APP_URL?.trim() || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('PUBLIC_APP_URL must be configured in production.'); })() : 'http://localhost:5173');
+const rpID = process.env.WEBAUTHN_RP_ID?.trim() || (() => { if (process.env.NODE_ENV === 'production') console.error('CRITICAL WARNING: WEBAUTHN_RP_ID missing in production.'); return 'localhost'; })();
+const originUrl = process.env.WEBAUTHN_ORIGIN?.trim() || (() => { if (process.env.NODE_ENV === 'production') console.error('CRITICAL WARNING: WEBAUTHN_ORIGIN missing in production.'); return 'http://localhost:5173'; })();
+const publicAppUrl = process.env.PUBLIC_APP_URL?.trim() || (() => { if (process.env.NODE_ENV === 'production') console.error('CRITICAL WARNING: PUBLIC_APP_URL missing in production.'); return 'http://localhost:5173'; })();
 const webAuthnChallengeStore = new Map();
 
 router.post("/api/auth/register", async (req, res) => {
