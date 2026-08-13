@@ -1,6 +1,8 @@
 -- Persistent administrator audit trail.
 -- Keep actor, action and entity information in one canonical record so every
 -- administrative mutation can be traced without duplicating data structures.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE IF NOT EXISTS administrator_audit_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   actor_user_id VARCHAR(255) NOT NULL,
