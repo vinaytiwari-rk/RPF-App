@@ -1,14 +1,22 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { pool } from '../db/dbPool.js';
-import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import { authenticateToken, requireAdmin } from '../db/middleware.js';
 import crypto from 'crypto';
-import axios from 'axios';
 import multer from 'multer';
 
 import path from 'path';
 import fs_node from 'fs';
+
+// Uploaded files are stored on local disk, so an authenticated client could
+// otherwise exhaust storage by repeatedly uploading 5MB files.
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many file uploads. Please try again later.' },
+});
 
 // Setup multer
 const storage = multer.memoryStorage();
@@ -34,7 +42,7 @@ const handleUploadErrors = (err: any, req: any, res: any, next: any) => {
 };
 
 const saveFileLocally = async (file: Express.Multer.File): Promise<string> => {
-  const ext = path.extname(file.originalname);
+  const ext = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '');
   const filename = crypto.randomUUID() + ext;
   const uploadDir = path.join(process.cwd(), 'uploads');
   if (!fs_node.existsSync(uploadDir)) {
@@ -47,7 +55,7 @@ const saveFileLocally = async (file: Express.Multer.File): Promise<string> => {
 
 const router = express.Router();
 
-router.post("/api/upload/founder", authenticateToken, requireAdmin, upload.single("file"), handleUploadErrors, async (req, res) => {
+router.post("/api/upload/founder", authenticateToken, requireAdmin, uploadLimiter, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -60,7 +68,7 @@ router.post("/api/upload/founder", authenticateToken, requireAdmin, upload.singl
   }
 });
 
-router.post("/api/upload/broadcast", authenticateToken, requireAdmin, upload.single("file"), handleUploadErrors, async (req, res) => {
+router.post("/api/upload/broadcast", authenticateToken, requireAdmin, uploadLimiter, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -73,7 +81,7 @@ router.post("/api/upload/broadcast", authenticateToken, requireAdmin, upload.sin
   }
 });
 
-router.post("/api/upload/image", authenticateToken, upload.single("file"), handleUploadErrors, async (req, res) => {
+router.post("/api/upload/image", authenticateToken, uploadLimiter, upload.single("file"), handleUploadErrors, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -86,17 +94,17 @@ router.post("/api/upload/image", authenticateToken, upload.single("file"), handl
   }
 });
 
-router.post("/api/profile/upload-dp", authenticateToken, upload.single("file"), handleUploadErrors, async (req: any, res) => {
+router.post("/api/profile/upload-dp", authenticateToken, uploadLimiter, upload.single("file"), handleUploadErrors, async (req: any, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
     const fileUrl = await saveFileLocally(req.file);
     const userId = req.user.id;
-    
+
     await pool.query(`UPDATE users SET avatar = $1 WHERE id = $2`, [fileUrl, userId]);
     await pool.query(`UPDATE volunteers SET avatar = $1 WHERE id = $2`, [fileUrl, userId]);
-    
+
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Upload DP failed:", error);
@@ -104,17 +112,17 @@ router.post("/api/profile/upload-dp", authenticateToken, upload.single("file"), 
   }
 });
 
-router.post("/api/profile/upload-cover", authenticateToken, upload.single("file"), handleUploadErrors, async (req: any, res) => {
+router.post("/api/profile/upload-cover", authenticateToken, uploadLimiter, upload.single("file"), handleUploadErrors, async (req: any, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
     const fileUrl = await saveFileLocally(req.file);
     const userId = req.user.id;
-    
+
     await pool.query(`UPDATE users SET cover = $1 WHERE id = $2`, [fileUrl, userId]);
     await pool.query(`UPDATE volunteers SET cover = $1 WHERE id = $2`, [fileUrl, userId]);
-    
+
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Upload cover failed:", error);
