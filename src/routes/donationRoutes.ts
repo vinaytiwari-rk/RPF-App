@@ -13,7 +13,7 @@ let schemaReady: Promise<void> | null = null;
 
 const ensureBloodSchema = async () => {
   if (!schemaReady) schemaReady = (async () => {
-    await pool.query(`CREATE EXTENSION IF NOT EXISTS pgcrypto`);
+// pgcrypto extension creation removed to avoid cPanel superuser permission errors
     await pool.query(`
       ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255);
       CREATE UNIQUE INDEX IF NOT EXISTS uq_volunteers_username_lower ON volunteers (LOWER(username)) WHERE username IS NOT NULL;
