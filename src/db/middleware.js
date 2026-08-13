@@ -44,8 +44,19 @@ export const authenticateToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = { ...decoded, role: normalizeRole(decoded.role) };
+    if (!decoded || typeof decoded !== "object") {
+      return res.status(403).json({ success: false, error: "Invalid token" });
+    }
 
+    const normalizedRole = normalizeRole(decoded.role);
+    if (!normalizedRole || !decoded.id) {
+      return res.status(403).json({ success: false, error: "Invalid token claims" });
+    }
+
+    const user = { ...decoded, role: normalizedRole };
+
+    // Every non-guest token must have a live database session. If the session
+    // store cannot be checked, fail closed instead of allowing the JWT alone.
     if (user.role !== "guest") {
       const sessionRes = await pool.query(
         "SELECT 1 FROM sessions WHERE token = $1 AND expires_at > NOW() LIMIT 1",
@@ -70,7 +81,10 @@ export const authenticateToken = async (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  if (normalizeRole(req.user?.role) !== CANONICAL_ADMIN_ROLE) {
+  if (!req.user) {
+    return res.status(401).json({ success: false, error: "Authentication required" });
+  }
+  if (normalizeRole(req.user.role) !== CANONICAL_ADMIN_ROLE) {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
   req.user.role = CANONICAL_ADMIN_ROLE;
@@ -94,10 +108,6 @@ export const auditEvent = async ({
       : String(forwarded || req?.ip || "").split(",")[0].trim() || null;
     const userAgent = req?.headers?.["user-agent"] || null;
 
-    // Keep the audit writer aligned with the audit_logs schema created by the
-    // application bootstrap: admin_id, admin_name, action and details.
-    // Sensitive values such as passwords, tokens and credentials are never
-    // included in the persisted metadata by this helper.
     const details = {
       resource,
       resourceId,
