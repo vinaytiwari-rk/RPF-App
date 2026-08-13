@@ -10,6 +10,13 @@ import { GoogleGenAI } from '@google/genai';
 
 const router = express.Router();
 
+// These legacy endpoints were capable of modifying the production schema and
+// exposing database structure without authentication. They are intentionally
+// retired at the router layer because authRoutes is mounted after this router.
+router.use(['/api/auth/fix-db', '/api/auth/debug-db'], (_req, res) => {
+  return res.status(410).json({ success: false, error: 'This database maintenance endpoint has been retired.' });
+});
+
 router.get("/api/health-vitals", authenticateToken, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
@@ -392,7 +399,7 @@ router.post("/api/blood-requests", authenticateToken, async (req: any, res) => {
       `INSERT INTO blood_requests 
        (id, user_id, blood_group, component_type, quantity, urgency, status, doctor_name, notes, created_at) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
-      [id, req.user.id, bloodGroup, componentType, parseInt(quantity, 10) || 1, urgency || "Normal", "Pending", doctorName || "", notes || ""]
+      [req.user.id, id, bloodGroup, componentType, parseInt(quantity, 10) || 1, urgency || "Normal", "Pending", doctorName || "", notes || ""]
     );
     res.json({ success: true, id });
   } catch (error: any) {
