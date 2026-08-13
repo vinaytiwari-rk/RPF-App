@@ -10,17 +10,22 @@ export const JWT_SECRET = configuredSecret || "development_only_change_me_please
 const LEGACY_ADMIN_ROLES = new Set(["admin", "super_admin", "superadmin"]);
 const CANONICAL_ADMIN_ROLE = "admin";
 
+export const normalizeRole = (role) => {
+  const value = String(role || "").trim().toLowerCase();
+  return LEGACY_ADMIN_ROLES.has(value) ? CANONICAL_ADMIN_ROLE : value;
+};
+
 export const authorizeRole = (requiredRole) => (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
 
-  const userRole = String(req.user.role || "").trim().toLowerCase();
-  const wantedRole = String(requiredRole || "").trim().toLowerCase();
+  const userRole = normalizeRole(req.user.role);
+  const wantedRole = normalizeRole(requiredRole);
 
   if (!wantedRole) {
     return res.status(500).json({ success: false, error: "Authorization policy is not configured" });
   }
 
-  if (["admin", "super_admin", "superadmin"].includes(wantedRole)) {
+  if (wantedRole === CANONICAL_ADMIN_ROLE) {
     if (userRole !== CANONICAL_ADMIN_ROLE) {
       return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
     }
@@ -28,6 +33,7 @@ export const authorizeRole = (requiredRole) => (req, res, next) => {
     return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
   }
 
+  req.user.role = userRole;
   next();
 };
 
@@ -38,7 +44,7 @@ export const authenticateToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = { ...decoded };
+    const user = { ...decoded, role: normalizeRole(decoded.role) };
 
     if (user.role !== "guest") {
       const sessionRes = await pool.query(
@@ -48,12 +54,6 @@ export const authenticateToken = async (req, res, next) => {
       if (sessionRes.rows.length === 0) {
         return res.status(401).json({ success: false, error: "Session expired or logged out" });
       }
-    }
-
-    // Compatibility for existing tokens: legacy administrator roles are
-    // normalized to the single canonical Administrator role for this request.
-    if (LEGACY_ADMIN_ROLES.has(String(user.role || "").trim().toLowerCase())) {
-      user.role = CANONICAL_ADMIN_ROLE;
     }
 
     req.user = user;
@@ -70,10 +70,10 @@ export const authenticateToken = async (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  const role = String(req.user?.role || "").trim().toLowerCase();
-  if (role !== CANONICAL_ADMIN_ROLE) {
+  if (normalizeRole(req.user?.role) !== CANONICAL_ADMIN_ROLE) {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
+  req.user.role = CANONICAL_ADMIN_ROLE;
   next();
 };
 
