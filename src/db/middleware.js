@@ -11,13 +11,22 @@ const ADMIN_ROLES = new Set(["admin", "super_admin", "superadmin"]);
 
 export const authorizeRole = (requiredRole) => (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
-  const userRole = String(req.user.role || "").toLowerCase();
-  const wantedRole = String(requiredRole || "").toLowerCase();
+
+  const userRole = String(req.user.role || "").trim().toLowerCase();
+  const wantedRole = String(requiredRole || "").trim().toLowerCase();
+
+  if (!wantedRole) {
+    return res.status(500).json({ success: false, error: "Authorization policy is not configured" });
+  }
+
   if (["admin", "super_admin", "superadmin"].includes(wantedRole)) {
-    if (!ADMIN_ROLES.has(userRole)) return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
+    if (!ADMIN_ROLES.has(userRole)) {
+      return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
+    }
   } else if (userRole !== wantedRole) {
     return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
   }
+
   next();
 };
 
@@ -53,9 +62,39 @@ export const authenticateToken = async (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  const role = String(req.user?.role || "").toLowerCase();
+  const role = String(req.user?.role || "").trim().toLowerCase();
   if (!ADMIN_ROLES.has(role)) {
     return res.status(403).json({ success: false, error: "Access Denied: Admin role required" });
   }
   next();
+};
+
+// Central audit writer for security-sensitive actions.
+// Audit failures are logged but never allowed to break the protected request.
+export const auditEvent = async ({
+  userId = null,
+  action,
+  resource = null,
+  resourceId = null,
+  req = null,
+  metadata = {},
+}) => {
+  if (!action) return;
+
+  try {
+    const forwarded = req?.headers?.["x-forwarded-for"];
+    const ipAddress = Array.isArray(forwarded)
+      ? forwarded[0]
+      : String(forwarded || req?.ip || "").split(",")[0].trim() || null;
+    const userAgent = req?.headers?.["user-agent"] || null;
+
+    await pool.query(
+      `INSERT INTO audit_logs
+        (user_id, action, resource, resource_id, ip_address, user_agent, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
+      [userId, action, resource, resourceId, ipAddress, userAgent, JSON.stringify(metadata)]
+    );
+  } catch (error) {
+    console.error("Audit log write failed:", error);
+  }
 };
