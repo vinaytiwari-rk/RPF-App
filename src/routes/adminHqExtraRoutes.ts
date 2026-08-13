@@ -14,22 +14,15 @@ router.put("/api/admin/hq/credentials", authenticateToken, authorizeRole("super_
     const body = req.body || {};
     const { username, newPassword } = body;
     if (!username || !newPassword) return res.status(400).json({ error: "Missing username or password" });
-    
     const hash = await bcrypt.hash(newPassword, 10);
-    await pool.query(
-      `UPDATE admin_credentials SET username = $1, password_hash = $2 WHERE id = 'admin'`,
-      [username, hash]
-    );
+    await pool.query(`UPDATE admin_credentials SET username = $1, password_hash = $2 WHERE id = 'admin'`, [username, hash]);
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// This GET is intentionally left public: it only reveals a certificate's
-// signatory name/designation (already-public information printed on any
-// issued certificate), never anything sensitive, and public certificate
-// verification pages need to read it without a login.
+// Public certificate verification metadata only.
 router.get("/api/admin/hq/certificates/signatures/:service_id", async (req, res) => {
   try {
     const { service_id } = req.params;
@@ -65,20 +58,12 @@ router.post("/api/admin/hq/certificates/issue", authenticateToken, requireAdmin,
   try {
     const { volunteer_id, service_id } = req.body;
     const certId = "RP-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
-    
-    // Validate volunteer
     const volRes = await pool.query(`SELECT id FROM volunteers WHERE id = $1 OR username = $1 OR registration_number = $1`, [volunteer_id]);
     if (volRes.rows.length === 0) return res.status(404).json({ error: "Volunteer not found" });
     const realVolId = volRes.rows[0].id;
-
-    // Check if already issued
     const existing = await pool.query(`SELECT * FROM certificates WHERE volunteer_id = $1 AND service_id = $2`, [realVolId, service_id]);
     if (existing.rows.length > 0) return res.status(400).json({ error: "Certificate already issued for this service." });
-
-    const result = await pool.query(
-      `INSERT INTO certificates (certificate_id, volunteer_id, service_id) VALUES ($1, $2, $3) RETURNING *`,
-      [certId, realVolId, service_id]
-    );
+    const result = await pool.query(`INSERT INTO certificates (certificate_id, volunteer_id, service_id) VALUES ($1, $2, $3) RETURNING *`, [certId, realVolId, service_id]);
     res.json({ success: true, certificate: result.rows[0] });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -90,11 +75,10 @@ router.put("/api/admin/hq/services/:id/content", authenticateToken, requireAdmin
     const body = req.body || {};
     const { id } = req.params;
     const { content_en, content_hi, action_label_en, action_label_hi, action_url } = body;
-    
     await pool.query(`
       INSERT INTO service_content (service_id, content_en, content_hi, action_label_en, action_label_hi, action_url, updated_at)
       VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
-      ON CONFLICT (service_id) DO UPDATE SET 
+      ON CONFLICT (service_id) DO UPDATE SET
         content_en = EXCLUDED.content_en,
         content_hi = EXCLUDED.content_hi,
         action_label_en = EXCLUDED.action_label_en,
@@ -102,7 +86,6 @@ router.put("/api/admin/hq/services/:id/content", authenticateToken, requireAdmin
         action_url = EXCLUDED.action_url,
         updated_at = CURRENT_TIMESTAMP
     `, [id, content_en, content_hi, action_label_en, action_label_hi, action_url]);
-    
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
@@ -115,6 +98,50 @@ router.get("/api/admin/hq/donations", authenticateToken, authorizeRole("super_ad
     res.json({ success: true, donations: result.rows });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// SECURITY: shadow the legacy admin settings handlers with a safe implementation.
+// The legacy POST accepted arbitrary object keys as SQL identifiers.
+const ADMIN_SETTINGS_COLUMNS = new Set([
+  'splash_animation', 'splash_logo', 'splash_duration', 'login_bg_image',
+  'social_login_enabled', 'marquee_text', 'marquee_speed', 'marquee_color',
+  'marquee_bg_color', 'primary_color', 'secondary_color', 'font_family',
+  'hero_type', 'hero_media_url', 'show_widgets', 'show_notices',
+  'founder_image', 'founder_message'
+]);
+
+router.get("/api/admin/settings", authenticateToken, requireAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM app_settings WHERE id = 1');
+    return res.json({ success: true, data: result.rows[0] || {} });
+  } catch (err: any) {
+    console.error('Admin settings read error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to fetch settings' });
+  }
+});
+
+router.post("/api/admin/settings", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const updates = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+    const entries = Object.entries(updates).filter(([key]) => ADMIN_SETTINGS_COLUMNS.has(key));
+    if (entries.length === 0) return res.status(400).json({ success: false, error: 'No valid settings fields supplied' });
+
+    const setClause: string[] = [];
+    const values: unknown[] = [];
+    for (const [key, value] of entries) {
+      setClause.push(`"${key}" = $${values.length + 1}`);
+      values.push(value);
+    }
+    values.push(1);
+    const result = await pool.query(
+      `UPDATE app_settings SET ${setClause.join(', ')} WHERE id = $${values.length} RETURNING *`,
+      values
+    );
+    return res.json({ success: true, data: result.rows[0] || {} });
+  } catch (err: any) {
+    console.error('Admin settings update error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to update settings' });
   }
 });
 
