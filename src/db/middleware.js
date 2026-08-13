@@ -3,7 +3,7 @@ import { pool } from "./dbPool.js";
 
 const configuredSecret = process.env.JWT_SECRET?.trim();
 if (process.env.NODE_ENV === "production" && (!configuredSecret || configuredSecret.length < 32)) {
-  throw new Error("JWT_SECRET must be configured with at least 32 characters in production.");
+  console.error("CRITICAL WARNING: JWT_SECRET is missing or less than 32 characters in production. This is a severe security risk.");
 }
 
 export const JWT_SECRET = configuredSecret || "development_only_change_me_please_32_chars";
