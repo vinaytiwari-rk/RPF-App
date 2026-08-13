@@ -1,11 +1,6 @@
 import express from 'express';
-import { pool } from '../db/dbPool.js';
-import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 import axios from 'axios';
-import multer from 'multer';
+import { pool } from '../db/dbPool.js';
 import { CORE_SERVICES } from '../data/coreServices.js';
 
 const router = express.Router();
@@ -13,22 +8,20 @@ const router = express.Router();
 router.get("/api/gov/mandi-prices", async (req, res) => {
   const { state, commodity } = req.query;
   const apiKey = process.env.DATAGOV_API_KEY || "579b464db66ec23bdd000001b3bed380e8e94e615b9d89710cdd46f0";
-  const resourceId = "9ef84268-d588-465a-a308-a864a43d0070"; 
-  
+  const resourceId = "9ef84268-d588-465a-a308-a864a43d0070";
+
   if (apiKey && apiKey !== "MOCK_KEY") {
     try {
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state as string)}`;
       if (commodity) url += `&filters[commodity]=${encodeURIComponent(commodity as string)}`;
-      
       const response = await axios.get(url, { timeout: 5000 });
       return res.json(response.data);
     } catch (err) {
       console.error("Mandi Prices API failed, falling back to mock");
     }
   }
-  
-  // Fallback Mock Data
+
   res.json({
     status: "ok",
     total: 3,
@@ -42,22 +35,20 @@ router.get("/api/gov/mandi-prices", async (req, res) => {
 router.get("/api/gov/hospitals", async (req, res) => {
   const { state, district } = req.query;
   const apiKey = process.env.DATAGOV_API_KEY || "579b464db66ec23bdd000001b3bed380e8e94e615b9d89710cdd46f0";
-  const resourceId = "7924619d-71b5-4b47-b861-12c823055428"; 
-  
+  const resourceId = "7924619d-71b5-4b47-b861-12c823055428";
+
   if (apiKey && apiKey !== "MOCK_KEY") {
     try {
       let url = `https://api.data.gov.in/resource/${resourceId}?api-key=${apiKey}&format=json&limit=10`;
       if (state) url += `&filters[state]=${encodeURIComponent(state as string)}`;
       if (district) url += `&filters[district]=${encodeURIComponent(district as string)}`;
-      
       const response = await axios.get(url, { timeout: 5000 });
       return res.json(response.data);
     } catch (err) {
       console.error("Hospitals API failed, falling back to mock");
     }
   }
-  
-  // Fallback Mock Data
+
   res.json({
     status: "ok",
     total: 2,
@@ -68,14 +59,7 @@ router.get("/api/gov/hospitals", async (req, res) => {
   });
 });
 
-router.get("/api/public/services", async (req, res) => {
-  // Previously this always returned the full hardcoded CORE_SERVICES list,
-  // with no way for an admin's "delete" action to actually take it out of
-  // circulation — so removed services kept showing up as live icons on
-  // Home/Services. We now honour a `hiddenServiceIds` list persisted in the
-  // cms_data settings row (the same store the rest of the admin CMS already
-  // uses) so a deleted/hidden service is genuinely filtered out for every
-  // client.
+router.get("/api/public/services", async (_req, res) => {
   try {
     const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
     let hiddenServiceIds: string[] = [];
@@ -83,15 +67,13 @@ router.get("/api/public/services", async (req, res) => {
       try {
         const parsed = JSON.parse(result.rows[0].founderMessageEn);
         if (Array.isArray(parsed.hiddenServiceIds)) hiddenServiceIds = parsed.hiddenServiceIds;
-      } catch (e) {
-        // ignore malformed cms_data, fall back to showing everything
+      } catch {
+        // Ignore malformed visibility data and keep services visible.
       }
     }
-    const visible = CORE_SERVICES.filter((s) => !hiddenServiceIds.includes(s.id));
+    const visible = CORE_SERVICES.filter((service) => !hiddenServiceIds.includes(service.id));
     res.json({ success: true, data: visible });
-  } catch (err: any) {
-    // If anything goes wrong reading visibility settings, fail open with
-    // the full list rather than breaking Home/Services entirely.
+  } catch {
     res.json({ success: true, data: CORE_SERVICES });
   }
 });
@@ -99,12 +81,15 @@ router.get("/api/public/services", async (req, res) => {
 router.get("/api/public/services/:id/content", async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query(`SELECT * FROM service_content WHERE service_id = $1`, [id]);
-    
+    const result = await pool.query(
+      `SELECT service_id, content, action_url, updated_at FROM service_content WHERE service_id = $1`,
+      [id]
+    );
+
     if (result.rows.length === 0) {
-      // Return a 200 with success true, but data null so the frontend handles it properly without throwing error
       return res.json({ success: true, data: null });
     }
+
     res.json({ success: true, data: result.rows[0] });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
