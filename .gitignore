@@ -10,3 +10,5 @@ android/
 APK+/
 scratch/
 
+
+!.env.production
