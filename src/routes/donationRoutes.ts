@@ -17,6 +17,7 @@ const ensureBloodSchema = async () => {
 // pgcrypto extension creation removed to avoid cPanel superuser permission errors
     await pool.query(`
       ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255);
+      ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS fcm_token VARCHAR(500);
       CREATE UNIQUE INDEX IF NOT EXISTS uq_volunteers_username_lower ON volunteers (LOWER(username)) WHERE username IS NOT NULL;
       CREATE TABLE IF NOT EXISTS volunteer_blood_memberships (volunteer_id VARCHAR(255) PRIMARY KEY,blood_group VARCHAR(10) NOT NULL,is_active BOOLEAN NOT NULL DEFAULT TRUE,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
       CREATE TABLE IF NOT EXISTS blood_request_acceptances (id VARCHAR(36) PRIMARY KEY,request_id UUID NOT NULL,volunteer_id VARCHAR(255) NOT NULL,status VARCHAR(30) NOT NULL DEFAULT 'accepted',expires_at TIMESTAMPTZ NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),UNIQUE(request_id,volunteer_id));
@@ -45,23 +46,24 @@ router.post('/api/blood-network/requests',async(req,res)=>{try{await ensureBlood
     const title = 'Urgent: Blood Request (' + group + ')';
     const body = group + ' blood is required at ' + request.hospital_name + '. Tap to Accept.';
     await pool.query(`INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_request',$5)`, [crypto.randomUUID(), match.volunteer_id, title, body, request.id]);
-    
-    // Check if user has fcm_token
-    const t = await pool.query('SELECT fcm_token FROM volunteers WHERE id=$1', [match.volunteer_id]);
-    if (t.rows[0]?.fcm_token) {
-      await sendPushNotification(t.rows[0].fcm_token, title, body);
+    try {
+      const t = await pool.query('SELECT fcm_token FROM volunteers WHERE id=$1', [match.volunteer_id]);
+      if (t.rows[0]?.fcm_token) await sendPushNotification(t.rows[0].fcm_token, title, body);
+    } catch (notificationError) {
+      console.warn('FCM notification lookup failed; blood request remains successful:', notificationError);
     }
   }res.json({success:true,request,matchedVolunteers:matches.rowCount});}catch(error:any){console.error('Blood request error:',error);res.status(500).json({success:false,error:'Unable to submit blood requisition.'});}});
 router.get('/api/blood-network/requests',async(req,res)=>{try{await ensureBloodSchema();await pool.query('DELETE FROM blood_request_acceptances WHERE expires_at<=NOW()');const volunteer=await resolveVolunteer(String(req.query.volunteerId||''));if(!volunteer)return res.status(404).json({success:false,error:'Volunteer account not found.'});const result=await pool.query(`SELECT r.*,COALESCE(json_agg(json_build_object('volunteer_id',a.volunteer_id,'volunteer_name',v.full_name,'status',a.status,'accepted_at',a.created_at,'expires_at',a.expires_at) ORDER BY a.created_at DESC) FILTER(WHERE a.id IS NOT NULL),'[]') AS acceptances FROM blood_requests r LEFT JOIN blood_request_acceptances a ON a.request_id=r.id AND a.expires_at>NOW() AND a.status='accepted' LEFT JOIN volunteers v ON v.id=a.volunteer_id WHERE r.status='open' AND (r.expires_at IS NULL OR r.expires_at>NOW()) GROUP BY r.id ORDER BY r.created_at DESC LIMIT 100`);const m=await pool.query('SELECT blood_group FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE',[volunteer.id]);const group=m.rows[0]?.blood_group;const filtered=group?result.rows.filter((r:any)=>r.blood_group===group||r.requester_id===volunteer.id):result.rows.filter((r:any)=>r.requester_id===volunteer.id);res.json({success:true,requests:filtered});}catch(error:any){res.status(500).json({success:false,error:'Unable to load blood requisitions.'});}});
 router.post('/api/blood-network/requests/:id/accept',async(req,res)=>{try{await ensureBloodSchema();const volunteer=await resolveVolunteer(String(req.body?.volunteerId||''));if(!volunteer)return res.status(404).json({success:false,error:'Volunteer account not found.'});const rr=await pool.query(`SELECT * FROM blood_requests WHERE id=$1 AND status='open' AND (expires_at IS NULL OR expires_at>NOW())`,[String(req.params.id)]);if(!rr.rows.length)return res.status(404).json({success:false,error:'This requisition is no longer active.'});const request=rr.rows[0];const member=await pool.query('SELECT blood_group FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE',[volunteer.id]);if(!member.rows.length)return res.status(403).json({success:false,error:'You are not part of the Blood Donation Network.'});if(member.rows[0].blood_group!==request.blood_group)return res.status(403).json({success:false,error:'Only matching blood-group volunteers can accept this request.'});if(request.requester_id===volunteer.id)return res.status(400).json({success:false,error:'You cannot accept your own requisition.'});await pool.query(`INSERT INTO blood_request_acceptances(id,request_id,volunteer_id,status,expires_at) VALUES($1,$2,$3,'accepted',NOW()+INTERVAL '24 hours') ON CONFLICT(request_id,volunteer_id) DO UPDATE SET status='accepted',expires_at=NOW()+INTERVAL '24 hours'`,[crypto.randomUUID(),request.id,volunteer.id]);const title = 'Blood Request Accepted';
    const body = (volunteer.full_name || 'A volunteer') + ' has accepted your ' + request.blood_group + ' blood request.';
    await pool.query(`INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_acceptance',$5)`, [crypto.randomUUID(), request.requester_id, title, body, String(request.id)]);
-   
-   // Check if user has fcm_token
-   const t2 = await pool.query('SELECT fcm_token FROM volunteers WHERE id=$1', [request.requester_id]);
-   if (t2.rows[0]?.fcm_token) {
-     await sendPushNotification(t2.rows[0].fcm_token, title, body);
-   }res.json({success:true});}catch(error:any){res.status(500).json({success:false,error:'Unable to accept this request.'});}});
+   try {
+     const t2 = await pool.query('SELECT fcm_token FROM volunteers WHERE id=$1', [request.requester_id]);
+     if (t2.rows[0]?.fcm_token) await sendPushNotification(t2.rows[0].fcm_token, title, body);
+   } catch (notificationError) {
+     console.warn('FCM notification lookup failed; acceptance remains successful:', notificationError);
+   }
+   res.json({success:true});}catch(error:any){res.status(500).json({success:false,error:'Unable to accept this request.'});}});
 router.post('/api/blood-network/requests/:id/cancel',async(req,res)=>{try{await ensureBloodSchema();const volunteer=await resolveVolunteer(String(req.body?.actorId||''));if(!volunteer)return res.status(404).json({success:false,error:'Volunteer account not found.'});const rr=await pool.query('SELECT requester_id FROM blood_requests WHERE id=$1',[String(req.params.id)]);if(!rr.rows.length)return res.status(404).json({success:false,error:'Request not found.'});if(rr.rows[0].requester_id===volunteer.id){await pool.query(`UPDATE blood_requests SET status='cancelled' WHERE id=$1`,[String(req.params.id)]);await pool.query(`UPDATE blood_request_acceptances SET status='cancelled' WHERE request_id=$1`,[String(req.params.id)]);}else await pool.query(`UPDATE blood_request_acceptances SET status='cancelled' WHERE request_id=$1 AND volunteer_id=$2`,[String(req.params.id),volunteer.id]);res.json({success:true});}catch(error:any){res.status(500).json({success:false,error:'Unable to cancel this request.'});}});
 
 
