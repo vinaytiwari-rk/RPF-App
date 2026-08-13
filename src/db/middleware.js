@@ -1,0 +1,61 @@
+import jwt from "jsonwebtoken";
+import { pool } from "./dbPool.js";
+
+const configuredSecret = process.env.JWT_SECRET?.trim();
+if (process.env.NODE_ENV === "production" && (!configuredSecret || configuredSecret.length < 32)) {
+  throw new Error("JWT_SECRET must be configured with at least 32 characters in production.");
+}
+
+export const JWT_SECRET = configuredSecret || "development_only_change_me_please_32_chars";
+const ADMIN_ROLES = new Set(["admin", "super_admin", "superadmin"]);
+
+export const authorizeRole = (requiredRole) => (req, res, next) => {
+  if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
+  const userRole = String(req.user.role || "").toLowerCase();
+  const wantedRole = String(requiredRole || "").toLowerCase();
+  if (["admin", "super_admin", "superadmin"].includes(wantedRole)) {
+    if (!ADMIN_ROLES.has(userRole)) return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
+  } else if (userRole !== wantedRole) {
+    return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
+  }
+  next();
+};
+
+export const authenticateToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
+  if (!token) return res.status(401).json({ success: false, error: "No token provided" });
+
+  try {
+    const user = jwt.verify(token, JWT_SECRET);
+
+    if (user.role !== "guest") {
+      const sessionRes = await pool.query(
+        "SELECT 1 FROM sessions WHERE token = $1 AND expires_at > NOW() LIMIT 1",
+        [token]
+      );
+      if (sessionRes.rows.length === 0) {
+        return res.status(401).json({ success: false, error: "Session expired or logged out" });
+      }
+    }
+
+    req.user = user;
+    req.authToken = token;
+    next();
+  } catch (error) {
+    if (error?.name === "TokenExpiredError") return res.status(401).json({ success: false, error: "Token expired" });
+    if (error?.code || error?.message?.includes("sessions")) {
+      console.error("Authentication session validation failed:", error);
+      return res.status(503).json({ success: false, error: "Authentication service temporarily unavailable" });
+    }
+    return res.status(403).json({ success: false, error: "Invalid token" });
+  }
+};
+
+export const requireAdmin = (req, res, next) => {
+  const role = String(req.user?.role || "").toLowerCase();
+  if (!ADMIN_ROLES.has(role)) {
+    return res.status(403).json({ success: false, error: "Access Denied: Admin role required" });
+  }
+  next();
+};
