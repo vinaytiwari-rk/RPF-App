@@ -1,11 +1,8 @@
 import express from 'express';
 import { pool } from '../db/dbPool.js';
-import { authenticateToken, requireAdmin, authorizeRole, JWT_SECRET } from '../db/middleware.js';
-import jwt from 'jsonwebtoken';
+import { authenticateToken, requireAdmin, authorizeRole } from '../db/middleware.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import axios from 'axios';
-import multer from 'multer';
 
 const router = express.Router();
 
@@ -57,7 +54,12 @@ router.put("/api/admin/hq/certificates/signatures", authenticateToken, requireAd
 router.post("/api/admin/hq/certificates/issue", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { volunteer_id, service_id } = req.body;
-    const certId = "RP-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
+    if (!volunteer_id || !service_id) return res.status(400).json({ error: "Volunteer and service are required." });
+
+    // Use a cryptographically random identifier instead of a 4-digit Math.random()
+    // value, which made certificate IDs easy to enumerate.
+    const certId = `RP-${new Date().getFullYear()}-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+
     const volRes = await pool.query(`SELECT id FROM volunteers WHERE id = $1 OR username = $1 OR registration_number = $1`, [volunteer_id]);
     if (volRes.rows.length === 0) return res.status(404).json({ error: "Volunteer not found" });
     const realVolId = volRes.rows[0].id;
