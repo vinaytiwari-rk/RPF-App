@@ -1,57 +1,53 @@
-// src/components/ServiceContentManager.tsx
-//
-// This is the missing link that used to make Education/Environment/Senior
-// Citizens/Women/Religious & Culture (and every other service) look
-// "frozen": there was no admin UI at all for the `service_content` table
-// that the public service detail page (ServiceDetails.tsx) actually reads
-// from. Admins were instead editing separate list tables (education_aid,
-// environment, etc.) that the public page never looked at. This edits the
-// real thing, through the now-authenticated
-// PUT /api/admin/hq/services/:id/content endpoint.
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Save, Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const SERVICE_OPTIONS = [
-  { id: "nation", label: "Nation Building / राष्ट्र निर्माण" },
-  { id: "culture", label: "Religious & Culture / धर्म और संस्कृति" },
-  { id: "jobs", label: "Jobs Portal / रोजगार पोर्टल" },
-  { id: "women-safety", label: "Women Safety / महिला सुरक्षा" },
-  { id: "youth", label: "Youth Empowerment / युवा सशक्तिकरण" },
-  { id: "health-care", label: "Health Care / स्वास्थ्य सेवा" },
-  { id: "grievance", label: "Grievances (Jan Sunwai) / जन सुनवाई" },
-  { id: "education", label: "Education Aid / शिक्षा सहायता" },
-  { id: "environment", label: "Environment / पर्यावरण" },
-  { id: "seniors", label: "Senior Citizens / वरिष्ठ नागरिक" },
-  { id: "countries", label: "Global Guide / वैश्विक निर्देशिका" },
-  { id: "skills", label: "Skills Training / कौशल प्रशिक्षण" },
+  { id: "nation", label: "Nation Building" },
+  { id: "culture", label: "Religious & Culture" },
+  { id: "jobs", label: "Jobs Portal" },
+  { id: "women-safety", label: "Women Safety" },
+  { id: "youth", label: "Youth Empowerment" },
+  { id: "health-care", label: "Health Care" },
+  { id: "grievance", label: "Grievances" },
+  { id: "education", label: "Education Aid" },
+  { id: "environment", label: "Environment" },
+  { id: "seniors", label: "Senior Citizens" },
+  { id: "countries", label: "Global Guide" },
+  { id: "skills", label: "Skills Training" },
 ];
+
+const SUPPORTED_LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "Hindi" },
+];
+
+type LocalizedValue = Record<string, string>;
+type LocalizedContent = Record<string, { body?: string; actionLabel?: string }>;
 
 export default function ServiceContentManager() {
   const { token } = useAuth();
   const [serviceId, setServiceId] = useState(SERVICE_OPTIONS[0].id);
+  const [language, setLanguage] = useState("en");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [contentEn, setContentEn] = useState("");
-  const [contentHi, setContentHi] = useState("");
-  const [actionLabelEn, setActionLabelEn] = useState("");
-  const [actionLabelHi, setActionLabelHi] = useState("");
+  const [content, setContent] = useState<LocalizedContent>({});
   const [actionUrl, setActionUrl] = useState("");
 
+  const current = useMemo(() => content[language] || {}, [content, language]);
+
   const load = async (id: string) => {
+    if (!token) return;
     setLoading(true);
     try {
       const res = await axios.get(`/api/public/services/${id}/content`);
-      const d = res.data?.data;
-      setContentEn(d?.content_en || "");
-      setContentHi(d?.content_hi || "");
-      setActionLabelEn(d?.action_label_en || "");
-      setActionLabelHi(d?.action_label_hi || "");
-      setActionUrl(d?.action_url || "");
-    } catch (e) {
-      toast.error("Failed to load current content");
+      const stored = res.data?.data?.content;
+      setContent(stored && typeof stored === "object" ? stored : {});
+      setActionUrl(res.data?.data?.action_url || "");
+    } catch (e: any) {
+      toast.error(e.response?.data?.error || "Failed to load current content");
     } finally {
       setLoading(false);
     }
@@ -59,25 +55,44 @@ export default function ServiceContentManager() {
 
   useEffect(() => {
     load(serviceId);
-  }, [serviceId]);
+  }, [serviceId, token]);
+
+  const updateCurrent = (patch: Partial<LocalizedContent[string]>) => {
+    setContent((previous) => ({
+      ...previous,
+      [language]: {
+        ...(previous[language] || {}),
+        ...patch,
+      },
+    }));
+  };
 
   const save = async () => {
+    if (!token) {
+      toast.error("Administrator session expired. Please log in again.");
+      return;
+    }
     setSaving(true);
     try {
-      await axios.put(
+      const res = await axios.put(
         `/api/admin/hq/services/${serviceId}/content`,
         {
-          content_en: contentEn,
-          content_hi: contentHi,
-          action_label_en: actionLabelEn,
-          action_label_hi: actionLabelHi,
+          content,
           action_url: actionUrl,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Live page updated — citizens will see this immediately");
-    } catch (e) {
-      toast.error("Save failed");
+
+      if (!res.data?.success) {
+        throw new Error(res.data?.error || "Save failed");
+      }
+
+      // Always use the persisted representation returned by the server.
+      if (res.data.data?.content) setContent(res.data.data.content);
+      if (res.data.data?.action_url !== undefined) setActionUrl(res.data.data.action_url || "");
+      toast.success("Service content saved successfully.");
+    } catch (e: any) {
+      toast.error(e.response?.data?.error || e.message || "Save failed");
     } finally {
       setSaving(false);
     }
@@ -88,22 +103,36 @@ export default function ServiceContentManager() {
       <div>
         <h2 className="text-sm font-bold text-slate-800">Service Page Content</h2>
         <p className="text-xs text-slate-500 mt-1">
-          This is the actual content citizens see when they open a service. Editing and saving here updates
-          the live page immediately — this was previously disconnected from the app.
+          One canonical content field is stored for each service. Choose the language you want to edit; the
+          application resolves the matching value when the page is displayed.
         </p>
       </div>
 
-      <div>
-        <label className="text-xs font-semibold text-slate-600 block mb-1">Service</label>
-        <select
-          value={serviceId}
-          onChange={(e) => setServiceId(e.target.value)}
-          className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200"
-        >
-          {SERVICE_OPTIONS.map((s) => (
-            <option key={s.id} value={s.id}>{s.label}</option>
-          ))}
-        </select>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-semibold text-slate-600 block mb-1">Service</label>
+          <select
+            value={serviceId}
+            onChange={(e) => setServiceId(e.target.value)}
+            className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200"
+          >
+            {SERVICE_OPTIONS.map((s) => (
+              <option key={s.id} value={s.id}>{s.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 block mb-1">Language</label>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200"
+          >
+            {SUPPORTED_LANGUAGES.map((item) => (
+              <option key={item.code} value={item.code}>{item.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {loading ? (
@@ -113,45 +142,26 @@ export default function ServiceContentManager() {
       ) : (
         <>
           <div>
-            <label className="text-xs font-semibold text-slate-600 block mb-1">Content (English, HTML allowed)</label>
+            <label className="text-xs font-semibold text-slate-600 block mb-1">Content</label>
             <textarea
-              value={contentEn}
-              onChange={(e) => setContentEn(e.target.value)}
-              rows={6}
+              value={current.body || ""}
+              onChange={(e) => updateCurrent({ body: e.target.value })}
+              rows={8}
               className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 font-mono"
-              placeholder="<p>Details citizens see for this service...</p>"
+              placeholder="Enter the content for the selected language..."
             />
           </div>
+
           <div>
-            <label className="text-xs font-semibold text-slate-600 block mb-1">सामग्री (हिंदी, HTML मान्य)</label>
-            <textarea
-              value={contentHi}
-              onChange={(e) => setContentHi(e.target.value)}
-              rows={6}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 font-mono"
-              placeholder="<p>इस सेवा के लिए विवरण...</p>"
+            <label className="text-xs font-semibold text-slate-600 block mb-1">Action Button Label</label>
+            <input
+              value={current.actionLabel || ""}
+              onChange={(e) => updateCurrent({ actionLabel: e.target.value })}
+              className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200"
+              placeholder="Apply Now"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1">Action Button Label (EN)</label>
-              <input
-                value={actionLabelEn}
-                onChange={(e) => setActionLabelEn(e.target.value)}
-                className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200"
-                placeholder="Apply Now"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1">बटन लेबल (HI)</label>
-              <input
-                value={actionLabelHi}
-                onChange={(e) => setActionLabelHi(e.target.value)}
-                className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200"
-                placeholder="अभी आवेदन करें"
-              />
-            </div>
-          </div>
+
           <div>
             <label className="text-xs font-semibold text-slate-600 block mb-1">Action URL</label>
             <input
@@ -163,12 +173,13 @@ export default function ServiceContentManager() {
           </div>
 
           <button
+            type="button"
             onClick={save}
             disabled={saving}
             className="flex items-center gap-2 px-4 py-2.5 bg-[#000080] text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-60"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save & Publish
+            {saving ? "Saving…" : "Save & Publish"}
           </button>
         </>
       )}
