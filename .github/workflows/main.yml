@@ -1,0 +1,17 @@
+name: Gemini Issue Triage
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run Gemini CLI
+        uses: google-github-actions/run-gemini-cli@v1
+        with:
+          gemini_api_key: ${{ secrets.AQ.Ab8RN6IQSVKWeT_K_Az0-CV_8bWG7HiEmPqVZGigjpA16RgHWA }}
+          prompt: "Please review this new issue and suggest appropriate labels or immediate troubleshooting steps."
