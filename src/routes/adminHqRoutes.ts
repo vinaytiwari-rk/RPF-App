@@ -40,7 +40,7 @@ router.put("/api/admin/volunteers/:id/status", ...admin, async (req,res)=>{
   try{
     const status=String(req.body?.status||'').toLowerCase();
     if(!['pending','approved','rejected','inactive'].includes(status))return res.status(400).json({success:false,error:"Invalid volunteer status."});
-    const result=await pool.query(`UPDATE volunteers SET approval_status=$1 WHERE id=$2 RETURNING id,username,registration_number,full_name AS name,approval_status AS status`,[status,req.params.id]);
+    const result=await pool.query(`UPDATE volunteers SET approval_status=$1,updated_at=CURRENT_TIMESTAMP WHERE id=$2 RETURNING id,username,registration_number,full_name AS name,approval_status AS status`,[status,req.params.id]);
     if(!result.rows.length)return res.status(404).json({success:false,error:"Volunteer not found."});
     return res.json({success:true,data:result.rows[0]});
   }catch(error){console.error("Admin volunteer status error:",error);return res.status(500).json({success:false,error:"Failed to update volunteer status."});}
@@ -69,6 +69,40 @@ router.get("/api/admin/blood-network/summary", ...admin, async (_req,res)=>{
     ]);
     return res.json({success:true,data:{members:members.rows[0],groups:groups.rows,requests:requests.rows[0]}});
   }catch(error){return res.status(500).json({success:false,error:"Failed to load Blood Network summary."});}
+});
+
+router.get("/api/admin/system/diagnostics", ...admin, async (_req,res)=>{
+  try{
+    const required: Record<string,string[]> = {
+      volunteers:["id","username","full_name","password_hash","approval_status","mobile","email","blood_group","created_at","updated_at"],
+      users:["id","username","name","email","phone","role"],
+      service_content:["service_id","content","action_url","updated_at"],
+      app_settings:["id"],
+      admin_credentials:["id","username","password_hash"],
+      sessions:["id","user_id","token","expires_at"],
+      volunteer_blood_memberships:["volunteer_id","blood_group","is_active"],
+      blood_requests:["id","requester_id","blood_group","status","created_at"],
+      grievances:["id","status","created_at"],
+      donations:["created_at"],
+      card_applications:["created_at"],
+      health_camps:["date"]
+    };
+    const tables=Object.keys(required);
+    const tableRows=await pool.query(`SELECT table_name FROM information_schema.tables WHERE table_schema=current_schema() AND table_name = ANY($1::text[])`,[tables]);
+    const presentTables=new Set(tableRows.rows.map((r:any)=>r.table_name));
+    const columnRows=await pool.query(`SELECT table_name,column_name FROM information_schema.columns WHERE table_schema=current_schema() AND table_name = ANY($1::text[])`,[tables]);
+    const columnsByTable: Record<string,Set<string>>={};
+    for(const row of columnRows.rows){(columnsByTable[row.table_name] ||= new Set()).add(row.column_name);}
+    const checks=tables.map(table=>{
+      const missing=required[table].filter(column=>!columnsByTable[table]?.has(column));
+      return {table,present:presentTables.has(table),missing};
+    });
+    const failed=checks.filter(check=>!check.present || check.missing.length>0);
+    return res.json({success:failed.length===0,data:{status:failed.length===0?"healthy":"attention_required",checks,checkedAt:new Date().toISOString()}});
+  }catch(error){
+    console.error("Admin diagnostics error:",error);
+    return res.status(500).json({success:false,error:"Unable to run system diagnostics."});
+  }
 });
 
 router.get("/services/:serviceId/content", getServiceContent);
