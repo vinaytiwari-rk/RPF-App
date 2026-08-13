@@ -99,6 +99,7 @@ router.get("/api/admin/blood-network/summary", ...admin, async (_req,res)=>{
 });
 
 router.get("/services/:serviceId/content", getServiceContent);
-router.post("/services/:serviceId/content", updateServiceContent);
+// Content reads remain public for service pages; mutations require Administrator authentication.
+router.post("/services/:serviceId/content", ...admin, updateServiceContent);
 
 export default router;
