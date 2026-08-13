@@ -19,7 +19,8 @@ router.put("/api/admin/hq/credentials", authenticateToken, requireAdmin, async (
   }
 });
 
-// These canonical endpoints are registered before the legacy dynamic admin routes.
+// Canonical settings endpoints are registered before the legacy dynamic routes.
+// Column names are read from PostgreSQL instead of trusting arbitrary request keys.
 router.get("/api/admin/settings", authenticateToken, requireAdmin, async (_req, res) => {
   try {
     const result = await pool.query("SELECT * FROM app_settings WHERE id = 1");
@@ -32,17 +33,20 @@ router.get("/api/admin/settings", authenticateToken, requireAdmin, async (_req, 
 router.post("/api/admin/settings", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const updates = req.body || {};
-    const allowedColumns = new Set([
-      "tollFree", "webUrl", "email", "founderMessageEn", "founderMessageHi",
-      "helplinesMarquee", "founderImgUrl", "alertBannerEn", "alertBannerHi",
-      "carouselSlides", "customServices", "logo_image", "logoImgUrl"
-    ]);
-    const entries = Object.entries(updates).filter(([key]) => allowedColumns.has(key));
+    const schema = await pool.query(`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema = current_schema() AND table_name = 'app_settings'
+    `);
+    const realColumns = new Set(schema.rows.map((row: any) => row.column_name));
+    const entries = Object.entries(updates).filter(([key]) => key !== 'id' && realColumns.has(key));
     if (entries.length === 0) return res.status(400).json({ success: false, error: "No valid settings supplied." });
+
     const setClause = entries.map(([key], index) => `"${key}" = $${index + 1}`).join(', ');
     const values = entries.map(([, value]) => value);
     const result = await pool.query(`UPDATE app_settings SET ${setClause} WHERE id = 1 RETURNING *`, values);
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: "Settings row not found." });
+
     apiCache.delete("admin_settings");
     res.json({ success: true, data: result.rows[0] });
   } catch (err: any) {
@@ -58,11 +62,10 @@ router.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req,
     const offset = (page - 1) * limit;
     const countResult = await pool.query(`SELECT COUNT(*)::int AS count FROM volunteers`);
     const totalCount = countResult.rows[0]?.count || 0;
-    const result = await pool.query(
-      `SELECT id, full_name AS name, username, mobile, email, approval_status AS status, registration_number, created_at
-       FROM volunteers ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
-      [limit, offset]
-    );
+    const result = await pool.query(`
+      SELECT id, full_name AS name, username, mobile, email, approval_status AS status,
+             registration_number, created_at
+      FROM volunteers ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages: Math.max(1, Math.ceil(totalCount / limit)), currentPage: page });
   } catch (err: any) {
     console.error("Admin volunteers fetch error:", err);
@@ -75,11 +78,10 @@ router.put("/api/admin/volunteers/:id/status", authenticateToken, requireAdmin, 
     const status = String(req.body?.status || '').trim().toLowerCase();
     const allowed = new Set(["pending", "approved", "rejected", "active", "inactive"]);
     if (!allowed.has(status)) return res.status(400).json({ success: false, error: "Invalid volunteer status." });
-    const result = await pool.query(
-      `UPDATE volunteers SET approval_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2
-       RETURNING id, full_name AS name, username, mobile, email, approval_status AS status, registration_number, created_at`,
-      [status, req.params.id]
-    );
+    const result = await pool.query(`
+      UPDATE volunteers SET approval_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2
+      RETURNING id, full_name AS name, username, mobile, email, approval_status AS status, registration_number, created_at`,
+      [status, req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: "Volunteer not found." });
     res.json({ success: true, data: result.rows[0] });
   } catch (err: any) {
