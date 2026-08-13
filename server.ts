@@ -62,15 +62,8 @@ dotenv.config();
 
 const app = express();
 app.set('trust proxy', 1);
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:4173').split(',').map(o => o.trim());
 const corsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true, // Automatically allow the requesting origin to support web and mobile apps
   credentials: true,
 };
 
