@@ -3,23 +3,49 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { getServiceContent, updateServiceContent } from "../controllers/adminHqController.js";
 import { pool } from "../db/dbPool.js";
-import { authenticateToken, requireAdmin, JWT_SECRET } from "../db/middleware.js";
+import { authenticateToken, requireAdmin, JWT_SECRET, auditEvent } from "../db/middleware.js";
 
 const router = Router();
 
 router.post("/api/auth/admin-login", async (req, res) => {
   try {
     const { identifier, password } = req.body || {};
-    if (String(identifier || "").trim().toLowerCase() !== "admin" || !password) return res.status(401).json({ success:false,error:"Invalid administrator credentials." });
+    if (String(identifier || "").trim().toLowerCase() !== "admin" || !password) {
+      await auditEvent({ action: "admin_login_failed", resource: "administrator", req, metadata: { reason: "invalid_credentials_format" } });
+      return res.status(401).json({ success:false,error:"Invalid administrator credentials." });
+    }
     const result = await pool.query(`SELECT * FROM admin_credentials WHERE LOWER(username)=LOWER($1) LIMIT 1`, ["admin"]);
-    if (!result.rows.length) return res.status(401).json({ success:false,error:"Administrator account is not configured." });
+    if (!result.rows.length) {
+      await auditEvent({ action: "admin_login_failed", resource: "administrator", req, metadata: { reason: "account_not_configured" } });
+      return res.status(401).json({ success:false,error:"Administrator account is not configured." });
+    }
     const valid = await bcrypt.compare(String(password), result.rows[0].password_hash);
-    if (!valid) return res.status(401).json({ success:false,error:"Invalid administrator credentials." });
+    if (!valid) {
+      await auditEvent({ action: "admin_login_failed", resource: "administrator", req, metadata: { reason: "invalid_password" } });
+      return res.status(401).json({ success:false,error:"Invalid administrator credentials." });
+    }
+
+    // Single canonical Administrator role. Legacy super-admin names are not issued by this login path.
     const user={id:"usr_staff_admin",name:"System Administrator",role:"admin"};
     const token=jwt.sign(user,JWT_SECRET,{expiresIn:"7d"});
-    try{await pool.query(`INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '7 days') ON CONFLICT(id) DO NOTHING`,[`admin-${Date.now()}`,user.id,token]);}catch(e){console.warn("Administrator session tracking failed:",e);}
+    try {
+      await pool.query(
+        `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '7 days') ON CONFLICT(id) DO NOTHING`,
+        [`admin-${Date.now()}`,user.id,token]
+      );
+    } catch (e) {
+      console.error("Administrator session tracking failed:",e);
+      await auditEvent({ action: "admin_login_failed", resource: "administrator", userId: user.id, req, metadata: { reason: "session_persistence_failed" } });
+      return res.status(503).json({success:false,error:"Administrator session service is temporarily unavailable."});
+    }
+
+    await auditEvent({ action: "admin_login_success", resource: "administrator", userId: user.id, req });
     return res.json({success:true,user,token});
-  }catch(error){console.error("Administrator login error:",error);return res.status(500).json({success:false,error:"Administrator login failed."});}
+  } catch(error) {
+    console.error("Administrator login error:",error);
+    await auditEvent({ action: "admin_login_failed", resource: "administrator", req, metadata: { reason: "server_error" } });
+    return res.status(500).json({success:false,error:"Administrator login failed."});
+  }
 });
 
 router.all("/api/admin-setup", (_req,res)=>res.status(410).json({success:false,error:"Administrator setup endpoint has been retired."}));
@@ -42,6 +68,7 @@ router.put("/api/admin/volunteers/:id/status", ...admin, async (req,res)=>{
     if(!['pending','approved','rejected','inactive'].includes(status))return res.status(400).json({success:false,error:"Invalid volunteer status."});
     const result=await pool.query(`UPDATE volunteers SET approval_status=$1 WHERE id=$2 RETURNING id,username,registration_number,full_name AS name,approval_status AS status`,[status,req.params.id]);
     if(!result.rows.length)return res.status(404).json({success:false,error:"Volunteer not found."});
+    await auditEvent({ action: "volunteer_status_updated", resource: "volunteer", resourceId: String(req.params.id), userId: String(req.user?.id || ""), req, metadata: { status } });
     return res.json({success:true,data:result.rows[0]});
   }catch(error){console.error("Admin volunteer status error:",error);return res.status(500).json({success:false,error:"Failed to update volunteer status."});}
 });
