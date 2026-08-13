@@ -1,0 +1,10 @@
+ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_volunteers_username_lower ON volunteers (LOWER(username)) WHERE username IS NOT NULL;
+CREATE TABLE IF NOT EXISTS volunteer_blood_memberships (volunteer_id VARCHAR(255) PRIMARY KEY,blood_group VARCHAR(10) NOT NULL,is_active BOOLEAN NOT NULL DEFAULT TRUE,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
+CREATE TABLE IF NOT EXISTS blood_request_acceptances (id UUID PRIMARY KEY DEFAULT gen_random_uuid(),request_id UUID NOT NULL,volunteer_id VARCHAR(255) NOT NULL,status VARCHAR(30) NOT NULL DEFAULT 'accepted',expires_at TIMESTAMPTZ NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),UNIQUE(request_id,volunteer_id));
+CREATE TABLE IF NOT EXISTS app_notifications (id UUID PRIMARY KEY DEFAULT gen_random_uuid(),recipient_id VARCHAR(255) NOT NULL,title TEXT NOT NULL,message TEXT NOT NULL,type VARCHAR(50) NOT NULL DEFAULT 'general',reference_id VARCHAR(255),is_read BOOLEAN NOT NULL DEFAULT FALSE,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
+ALTER TABLE blood_requests ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE blood_requests ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS idx_blood_request_group_status ON blood_requests(blood_group,status);
+CREATE INDEX IF NOT EXISTS idx_blood_acceptance_expiry ON blood_request_acceptances(expires_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON app_notifications(recipient_id,created_at DESC);
