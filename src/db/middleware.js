@@ -94,11 +94,23 @@ export const auditEvent = async ({
       : String(forwarded || req?.ip || "").split(",")[0].trim() || null;
     const userAgent = req?.headers?.["user-agent"] || null;
 
+    // Keep the audit writer aligned with the audit_logs schema created by the
+    // application bootstrap: admin_id, admin_name, action and details.
+    // Sensitive values such as passwords, tokens and credentials are never
+    // included in the persisted metadata by this helper.
+    const details = {
+      resource,
+      resourceId,
+      ipAddress,
+      userAgent,
+      ...metadata,
+    };
+
     await pool.query(
       `INSERT INTO audit_logs
-        (user_id, action, resource, resource_id, ip_address, user_agent, metadata)
-       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
-      [userId, action, resource, resourceId, ipAddress, userAgent, JSON.stringify(metadata)]
+        (admin_id, admin_name, action, details)
+       VALUES ($1, $2, $3, $4::jsonb)`,
+      [userId, null, action, JSON.stringify(details)]
     );
   } catch (error) {
     console.error("Audit log write failed:", error);
