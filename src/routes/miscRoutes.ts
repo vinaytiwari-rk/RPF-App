@@ -15,9 +15,7 @@ const router = express.Router();
 router.get("/api/search/external", async (req, res) => {
   try {
     const q = (req.query.q || req.query.query) as string;
-    if (!q) {
-      return res.status(400).json({ success: false, error: "Missing search query" });
-    }
+    if (!q) return res.status(400).json({ success: false, error: "Missing search query" });
     const results = await queryExternalSearch(q);
     res.json({ success: true, data: results });
   } catch (error: any) {
@@ -31,7 +29,7 @@ router.get("/api/notifications", async (req, res) => {
     const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
     if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
       const parsed = JSON.parse(result.rows[0].founderMessageEn);
-      return res.json({ notifications: parsed.notifications || [] });
+      return res.json({ notifications: Array.isArray(parsed.notifications) ? parsed.notifications : [] });
     }
     res.json({ notifications: [] });
   } catch (err: any) {
@@ -44,7 +42,7 @@ router.get("/api/testimonials", async (req, res) => {
     const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
     if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
       const parsed = JSON.parse(result.rows[0].founderMessageEn);
-      return res.json({ testimonials: parsed.testimonials || [] });
+      return res.json({ testimonials: Array.isArray(parsed.testimonials) ? parsed.testimonials : [] });
     }
     res.json({ testimonials: [] });
   } catch (err: any) {
@@ -54,112 +52,45 @@ router.get("/api/testimonials", async (req, res) => {
 
 router.get("/api/stats", async (req, res) => {
   const cached = apiCache.get("/api/stats");
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return res.json(cached.data);
-  }
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) return res.json(cached.data);
 
   let beneficiaries = 0;
   let volunteers = 0;
   let healthCamps = 0;
   let campaigns = 0;
 
-  let offsets = { beneficiaries: 0, volunteers: 0, healthCamps: 0, campaigns: 0 };
-  try {
-    const cmsRes = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
-    if (cmsRes.rows.length > 0 && cmsRes.rows[0].founderMessageEn) {
-      const parsed = JSON.parse(cmsRes.rows[0].founderMessageEn);
-      if (parsed.statsOffsets) offsets = parsed.statsOffsets;
-    }
-  } catch (e) {}
-
   try {
     const bRes = await pool.query("SELECT COUNT(*) FROM card_applications_v2");
-    beneficiaries = parseInt(bRes.rows[0].count, 10);
+    beneficiaries = parseInt(bRes.rows[0].count, 10) || 0;
   } catch (e) {}
-
   try {
     const vRes = await pool.query("SELECT COUNT(*) FROM volunteers");
-    volunteers = parseInt(vRes.rows[0].count, 10);
+    volunteers = parseInt(vRes.rows[0].count, 10) || 0;
   } catch (e) {}
-
   try {
     const hRes = await pool.query("SELECT COUNT(*) FROM health_camps");
-    healthCamps = parseInt(hRes.rows[0].count, 10);
+    healthCamps = parseInt(hRes.rows[0].count, 10) || 0;
   } catch (e) {}
-
   try {
     const sRes = await pool.query(`
-      SELECT COUNT(*) FROM service_submissions_v2 
-      WHERE "serviceName" = 'Scholarships Support' OR "serviceNameEn" = 'Scholarships Support' OR "serviceName" = 'Campaigns'
+      SELECT COUNT(*) FROM service_submissions_v2
+      WHERE "serviceName" = 'Scholarships Support'
+         OR "serviceNameEn" = 'Scholarships Support'
+         OR "serviceName" = 'Campaigns'
     `);
-    campaigns = parseInt(sRes.rows[0].count, 10);
+    campaigns = parseInt(sRes.rows[0].count, 10) || 0;
   } catch (e) {}
 
-  const data = {
-    beneficiaries: beneficiaries + (offsets.beneficiaries || 0),
-    volunteers: volunteers + (offsets.volunteers || 0),
-    healthCamps: healthCamps + (offsets.healthCamps || 0),
-    campaigns: campaigns + (offsets.campaigns || 0)
-  };
+  const data = { beneficiaries, volunteers, healthCamps, campaigns };
   apiCache.set("/api/stats", { data, timestamp: Date.now() });
   res.json(data);
 });
-// Mock initial data for Jobs
-const MOCK_JOBS = [
-  {
-    id: "job_01",
-    title: "Primary School Teacher",
-    company: "Bhopal District Schools",
-    location: "Bhopal, MP",
-    type: "Full-Time",
-    salary: "₹18,000 - ₹25,000 / month",
-    description: "Looking for dedicated teachers for local government primary schools."
-  },
-  {
-    id: "job_02",
-    title: "Data Entry Operator",
-    company: "Smart City Org",
-    location: "Indore, MP",
-    type: "Contract",
-    salary: "₹12,000 / month",
-    description: "Requires basic computer skills and Hindi typing."
-  },
-  {
-    id: "job_03",
-    title: "Nursing Staff",
-    company: "Apollo Seva Hospital",
-    location: "Jabalpur, MP",
-    type: "Full-Time",
-    salary: "₹22,000 - ₹30,000 / month",
-    description: "Urgent hiring for registered nurses for the emergency ward."
-  },
-  {
-    id: "job_04",
-    title: "Delivery Executive",
-    company: "Kisan Fresh",
-    location: "Multiple Locations",
-    type: "Part-Time",
-    salary: "₹15,000 + Fuel",
-    description: "Deliver fresh produce directly from farmers to city markets."
-  }
-];
 
-// Jobs Endpoint
+// Jobs are database-backed only. Empty tables intentionally return an empty list;
+// the API must never seed fictional listings into production data.
 router.get('/api/jobs', async (req, res) => {
   try {
-    let result = await pool.query("SELECT * FROM job_listings ORDER BY posted_at DESC");
-    
-    // Seed if empty
-    if (result.rows.length === 0) {
-      for (const job of MOCK_JOBS) {
-        await pool.query(
-          "INSERT INTO job_listings (id, title, company, location, type, salary, description) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-          [job.id, job.title, job.company, job.location, job.type, job.salary, job.description]
-        );
-      }
-      result = await pool.query("SELECT * FROM job_listings ORDER BY posted_at DESC");
-    }
-    
+    const result = await pool.query("SELECT * FROM job_listings ORDER BY posted_at DESC");
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching jobs:", err);
@@ -167,36 +98,12 @@ router.get('/api/jobs', async (req, res) => {
   }
 });
 
-// Panchang Endpoint
+// Panchang is database-backed only. No fabricated daily values are inserted.
 router.get('/api/culture/panchang', async (req, res) => {
-  // In a real app, this would use a planetary calculation library (like swisseph) or an external API.
-  // We'll mock the current day's panchang.
   try {
     const today = new Date().toISOString().split('T')[0];
-    
-    let result = await pool.query("SELECT * FROM panchang_calendar WHERE date = $1", [today]);
-    
-    if (result.rows.length === 0) {
-      // Mock data for today
-      const mockPanchang = {
-        date: today,
-        tithi: "Shukla Paksha Ekadashi",
-        nakshatra: "Rohini",
-        sunrise: "05:42 AM",
-        sunset: "07:11 PM",
-        moonrise: "03:15 PM",
-        moonset: "02:10 AM",
-        festivals: "Nirjala Ekadashi"
-      };
-      
-      await pool.query(
-        "INSERT INTO panchang_calendar (date, tithi, nakshatra, sunrise, sunset, moonrise, moonset, festivals) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-        [today, mockPanchang.tithi, mockPanchang.nakshatra, mockPanchang.sunrise, mockPanchang.sunset, mockPanchang.moonrise, mockPanchang.moonset, mockPanchang.festivals]
-      );
-      
-      result = await pool.query("SELECT * FROM panchang_calendar WHERE date = $1", [today]);
-    }
-    
+    const result = await pool.query("SELECT * FROM panchang_calendar WHERE date = $1", [today]);
+    if (result.rows.length === 0) return res.status(404).json({ error: "Panchang data is not available for today" });
     res.json(result.rows[0]);
   } catch (err) {
     console.error("Error fetching panchang:", err);
@@ -204,63 +111,18 @@ router.get('/api/culture/panchang', async (req, res) => {
   }
 });
 
-// AI Chat Endpoint (Mocked Gemini/ChatGPT)
+// AI chat remains an API integration point; this route must not pretend to be a real AI service.
 router.post('/api/ai/chat', async (req, res) => {
-  try {
-    const { message, sessionId = 'default' } = req.body;
-    
-    if (!message) {
-      return res.status(400).json({ error: "Message is required" });
-    }
-    
-    // Save user message
-    await pool.query(
-      "INSERT INTO chat_history (session_id, role, content) VALUES ($1, $2, $3)",
-      [sessionId, 'user', message]
-    );
-    
-    // Generate mock AI response based on keywords
-    let responseText = "I'm a helpful AI assistant. I can help you navigate the platform, translate text, or answer basic questions.";
-    
-    const lowerMessage = message.toLowerCase();
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-      responseText = "Namaste! How can I assist you today? You can ask me about Jobs, Panchang, or how to use the RPF platform.";
-    } else if (lowerMessage.includes('job') || lowerMessage.includes('work')) {
-      responseText = "We have several job listings available! You can find them under the 'Jobs & Internships' section. I can also help you build your resume.";
-    } else if (lowerMessage.includes('panchang') || lowerMessage.includes('calendar') || lowerMessage.includes('festival')) {
-      responseText = "You can view today's Tithi, Nakshatra, and auspicious timings in the 'Culture & Heritage' section.";
-    } else if (lowerMessage.includes('thank')) {
-      responseText = "You're welcome! Let me know if you need anything else.";
-    } else if (lowerMessage.includes('translate')) {
-      responseText = "I can translate text between English and Hindi for you. Just type the phrase and ask me to translate it!";
-    }
-
-    // Simulate network delay for realism
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Save AI response
-    await pool.query(
-      "INSERT INTO chat_history (session_id, role, content) VALUES ($1, $2, $3)",
-      [sessionId, 'assistant', responseText]
-    );
-    
-    res.json({ reply: responseText });
-  } catch (err) {
-    console.error("Error in AI chat:", err);
-    res.status(500).json({ error: "Failed to process chat" });
-  }
+  return res.status(503).json({ error: "AI assistant is not configured" });
 });
 
-// Get Chat History
-router.get('/api/ai/chat/history', async (req, res) => {
+router.get('/api/ai/chat/history', authenticateToken, async (req, res) => {
   try {
     const { sessionId = 'default' } = req.query;
-    
     const result = await pool.query(
       "SELECT role, content FROM chat_history WHERE session_id = $1 ORDER BY timestamp ASC LIMIT 50",
       [sessionId]
     );
-    
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching chat history:", err);
