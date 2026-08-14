@@ -116,34 +116,49 @@ export default function JanSevaCard() {
     }
   };
 
-  const handleSubmit = async () => {
-    setSubmitting(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (form.idNumber.length !== 12) {
+      setErrorMsg(lang === "hi" ? "कृपया 12 अंकों का आधार नंबर दर्ज करें।" : "Please enter a valid 12-digit Aadhaar number.");
+      return;
+    }
     
+    setSubmitting(true);
+    setErrorMsg(null);
     const fullAddress = `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`;
     
-    submitCardApplication({
-      userId: user?.id || "guest",
-      name: form.name,
-      gender: form.gender,
-      dob: form.dob || "N/A",
-      address: fullAddress,
-      idType: form.idType,
-      idNumber: form.idNumber,
-      status: "pending"
-    });
-
-    if (user) {
-      await updateUser({ 
-        janSevaCardStatus: "pending",
+    try {
+      const res = await axios.post("/api/cards", {
+        userId: user?.id || "guest",
         name: form.name,
         gender: form.gender,
         dob: form.dob || "N/A",
-        address: fullAddress
+        address: fullAddress,
+        idType: "aadhaar",
+        idNumber: form.idNumber
       });
+
+      if (res.data.success) {
+        if (user) {
+          await updateUser({ 
+            janSevaCardStatus: "approved",
+            janSevaCardNo: res.data.cardNo,
+            name: form.name,
+            gender: form.gender,
+            dob: form.dob || "N/A",
+            address: fullAddress
+          });
+        }
+        setView("home");
+      }
+    } catch (err: any) {
+      console.error("Card submission failed:", err);
+      setErrorMsg(err.response?.data?.error || "An error occurred during submission.");
+    } finally {
+      setSubmitting(false);
     }
-    
-    setSubmitting(false);
-    setView("home");
   };
 
   const handleAdminApprove = async () => {
@@ -482,293 +497,191 @@ export default function JanSevaCard() {
     );
   }
 
-  // View: Application Wizard Step-by-Step
+  // View: Application Form (Single Step)
   if (view === "apply") {
     return (
       <div className="flex flex-col h-full bg-slate-50 animate-fadeIn max-w-md mx-auto">
-        <div className="bg-white px-5 py-4.5 border-b border-slate-200 sticky top-0 z-20 shadow-xs">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="font-display font-extrabold text-[#000080] text-base uppercase tracking-wider">
-              {lang === "hi" ? "जन सेवा कार्ड आवेदन" : "Apply for Digital Card"}
-            </h2>
-            <span className="text-[10px] font-black text-[#FF9933] bg-[#FF9933]/10 border border-[#FF9933]/25 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              {lang === "hi" ? `चरण ${step + 1}/${STEPS.length}` : `Step ${step + 1}/${STEPS.length}`}
-            </span>
-          </div>
-          
-          {/* Saffron Slider indicator */}
-          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/50">
-            <div 
-              className="h-full bg-gradient-to-r from-[#FF9933] to-[#FF6600] transition-all duration-500 ease-out"
-              style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
-            ></div>
-          </div>
+        <div className="bg-white px-5 py-4.5 border-b border-slate-200 sticky top-0 z-20 shadow-xs flex justify-between items-center">
+          <h2 className="font-display font-extrabold text-[#000080] text-base uppercase tracking-wider">
+            {lang === "hi" ? "जन सेवा कार्ड आवेदन" : "Apply for Digital Card"}
+          </h2>
+          <span className="text-[10px] font-black text-[#FF9933] bg-[#FF9933]/10 border border-[#FF9933]/25 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            {lang === "hi" ? "तत्काल अनुमोदन" : "Instant Approval"}
+          </span>
         </div>
 
-        <div className="flex-1 p-5 overflow-y-auto pb-24 space-y-5">
-          <div className="space-y-1">
-            <span className="text-[9.5px] font-black text-slate-400 uppercase tracking-widest block leading-none">Current Section</span>
-            <h3 className="font-display font-black text-xl text-slate-805 leading-none">{STEPS[step]}</h3>
+        <form onSubmit={handleSubmit} className="flex-1 p-5 overflow-y-auto pb-24 space-y-5">
+          {errorMsg && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-xs font-bold flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
+          <div className="space-y-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 className="font-black text-sm text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-2 mb-3">
+              {lang === "hi" ? "व्यक्तिगत विवरण" : "Personal Details"}
+            </h3>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">Full Name / पूरा नाम *</label>
+              <input 
+                type="text" 
+                required
+                value={form.name} 
+                onChange={e => setForm({...form, name: e.target.value})}
+                className="w-full border border-slate-200 bg-slate-50 rounded-xl p-3 text-xs font-bold text-slate-800 focus:bg-white focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
+                placeholder="As printed on government ID card"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">Gender / लिंग *</label>
+              <div className="grid grid-cols-3 gap-2.5">
+                {["Male", "Female", "Other"].map(g => (
+                  <div 
+                    key={g}
+                    onClick={() => setForm({...form, gender: g})}
+                    className={`border p-2.5 rounded-xl flex items-center justify-center cursor-pointer transition font-bold text-xs ${
+                      form.gender === g 
+                        ? "border-[#000080] bg-[#000080]/5 text-[#000080] shadow-sm" 
+                        : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span>{g}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">Date of Birth / जन्म तिथि *</label>
+              <input 
+                type="text" 
+                required
+                value={form.dob} 
+                onChange={e => setForm({...form, dob: e.target.value})}
+                className="w-full border border-slate-200 bg-slate-50 rounded-xl p-3 text-xs font-bold text-slate-800 focus:bg-white focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
+                placeholder="DD/MM/YYYY"
+              />
+            </div>
           </div>
 
-          {step === 0 && (
-            <div className="space-y-4 animate-fadeIn">
+          <div className="space-y-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 className="font-black text-sm text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-2 mb-3">
+              {lang === "hi" ? "आवासीय पता" : "Residential Address"}
+            </h3>
+
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">Address / पता *</label>
+              <textarea 
+                required
+                value={form.address} 
+                onChange={e => setForm({...form, address: e.target.value})}
+                className="w-full border border-slate-200 bg-slate-50 rounded-xl p-3 text-xs font-bold text-slate-800 min-h-[70px] focus:bg-white focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
+                placeholder="Flat No, House Name, Street, Locality"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">Full Name / पूरा नाम</label>
+                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">City / शहर *</label>
                 <input 
                   type="text" 
-                  value={form.name} 
-                  onChange={e => setForm({...form, name: e.target.value})}
-                  className="w-full border border-slate-200 bg-white rounded-xl p-3 text-xs font-bold text-slate-800 focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
-                  placeholder="As printed on government ID card"
+                  required
+                  value={form.city} 
+                  onChange={e => setForm({...form, city: e.target.value})}
+                  className="w-full border border-slate-200 bg-slate-50 rounded-xl p-3 text-xs font-bold text-slate-800 focus:bg-white focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
+                  placeholder="Bhopal"
                 />
               </div>
-
               <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">Gender / लिंग</label>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {["Male", "Female", "Other"].map(g => (
-                    <div 
-                      key={g}
-                      onClick={() => setForm({...form, gender: g})}
-                      className={`border p-2.5 rounded-xl flex items-center justify-center cursor-pointer transition font-bold text-xs ${
-                        form.gender === g 
-                          ? "border-[#000080] bg-[#000080]/5 text-[#000080] shadow-sm" 
-                          : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-                      }`}
-                    >
-                      <span>{g}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">Date of Birth / जन्म तिथि</label>
+                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">State / राज्य *</label>
                 <input 
                   type="text" 
-                  value={form.dob} 
-                  onChange={e => setForm({...form, dob: e.target.value})}
-                  className="w-full border border-slate-200 bg-white rounded-xl p-3 text-xs font-bold text-slate-800 focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
-                  placeholder="DD/MM/YYYY or N/A"
+                  required
+                  value={form.state} 
+                  onChange={e => setForm({...form, state: e.target.value})}
+                  className="w-full border border-slate-200 bg-slate-50 rounded-xl p-3 text-xs font-bold text-slate-800 focus:bg-white focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
+                  placeholder="Madhya Pradesh"
                 />
               </div>
             </div>
-          )}
-
-          {step === 1 && (
-            <div className="space-y-4 animate-fadeIn">
-              <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">Residential Address / पता</label>
-                <textarea 
-                  value={form.address} 
-                  onChange={e => setForm({...form, address: e.target.value})}
-                  className="w-full border border-slate-200 bg-white rounded-xl p-3 text-xs font-bold text-slate-800 min-h-[90px] focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
-                  placeholder="Flat No, House Name, Street, Locality"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">City / शहर</label>
-                  <input 
-                    type="text" 
-                    value={form.city} 
-                    onChange={e => setForm({...form, city: e.target.value})}
-                    className="w-full border border-slate-200 bg-white rounded-xl p-3 text-xs font-bold text-slate-800 focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
-                    placeholder="Bhopal"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">State / राज्य</label>
-                  <input 
-                    type="text" 
-                    value={form.state} 
-                    onChange={e => setForm({...form, state: e.target.value})}
-                    className="w-full border border-slate-200 bg-white rounded-xl p-3 text-xs font-bold text-slate-800 focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
-                    placeholder="Madhya Pradesh"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">PIN Code / पिन कोड</label>
-                <input 
-                  type="text" 
-                  maxLength={6}
-                  value={form.pincode} 
-                  onChange={e => setForm({...form, pincode: e.target.value.replace(/\D/g, '')})}
-                  className="w-full border border-slate-200 bg-white rounded-xl p-3 text-xs font-bold text-slate-800 focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
-                  placeholder="462001"
-                />
-              </div>
+            
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">PIN Code / पिन कोड *</label>
+              <input 
+                type="text" 
+                required
+                maxLength={6}
+                value={form.pincode} 
+                onChange={e => setForm({...form, pincode: e.target.value.replace(/\D/g, '')})}
+                className="w-full border border-slate-200 bg-slate-50 rounded-xl p-3 text-xs font-bold text-slate-800 focus:bg-white focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition"
+                placeholder="462001"
+              />
             </div>
-          )}
+          </div>
 
-          {step === 2 && (
-            <div className="space-y-5 animate-fadeIn">
-              <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2.5">Select Document Type / पहचान दस्तावेज</label>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {["Aadhaar", "PAN Card", "Voter ID", "Driving License"].map(id => (
-                    <div 
-                      key={id}
-                      onClick={() => setForm({...form, idType: id})}
-                      className={`border p-3.5 rounded-xl flex items-center justify-between cursor-pointer transition ${
-                        form.idType === id 
-                          ? "border-[#000080] bg-[#000080]/5 text-[#000080]" 
-                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                      }`}
-                    >
-                      <span className="text-xs font-bold">{id}</span>
-                      {form.idType === id && <Check className="w-4 h-4 text-[#000080]" />}
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <div className="space-y-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 className="font-black text-sm text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-2 mb-3">
+              {lang === "hi" ? "पहचान दस्तावेज़" : "Identity Verification"}
+            </h3>
 
-              <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">{form.idType} Number</label>
-                <input 
-                  type="text" 
-                  value={form.idNumber} 
-                  onChange={e => setForm({...form, idNumber: e.target.value})}
-                  className="w-full border border-slate-200 bg-white rounded-xl p-3 text-xs font-bold text-slate-800 focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition uppercase"
-                  placeholder={`Enter 12-digit ${form.idType} number`}
-                />
-              </div>
-
-              <div className="relative">
-                <input 
-                  type="file" 
-                  id="document-upload" 
-                  className="hidden" 
-                  accept=".jpg,.jpeg,.png,.pdf"
-                  onChange={handleFileUpload} 
-                  disabled={uploading}
-                />
-                <label 
-                  htmlFor="document-upload"
-                  className="border-2 border-dashed border-slate-300 rounded-2xl p-6 bg-white flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition border-[#000080]/20"
-                >
-                  {uploading ? (
-                    <div className="flex flex-col items-center">
-                      <RefreshCw className="w-8 h-8 text-[#FF9933] animate-spin mb-2" />
-                      <span className="text-xs font-black text-slate-600">Uploading File...</span>
-                    </div>
-                  ) : uploadedFile ? (
-                    <div className="flex flex-col items-center">
-                      <CheckCircle className="w-8 h-8 text-green-500 mb-2" />
-                      <span className="text-xs font-black text-slate-800 uppercase tracking-wide">Document Attached</span>
-                      <span className="text-[10px] text-slate-450 font-mono mt-1">{uploadedFile}</span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <UploadCloud className="w-9 h-9 text-[#000080] mb-2.5" />
-                      <span className="text-xs font-black text-slate-700">Upload Identity Proof ({form.idType})</span>
-                      <span className="text-[9.5px] text-slate-400 mt-1 font-medium">JPEG, PNG or PDF (Max Size 2MB)</span>
-                    </div>
-                  )}
-                </label>
-              </div>
+            <div>
+              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-wider mb-2">Aadhaar Number / आधार नंबर *</label>
+              <input 
+                type="text" 
+                required
+                maxLength={12}
+                value={form.idNumber} 
+                onChange={e => setForm({...form, idNumber: e.target.value.replace(/\D/g, '')})}
+                className="w-full border border-slate-200 bg-slate-50 rounded-xl p-3 text-xs font-bold text-slate-800 focus:bg-white focus:border-[#000080] focus:ring-1 focus:ring-[#000080] outline-none transition tracking-[0.2em]"
+                placeholder="1234 5678 9012"
+              />
+              <p className="text-[9px] text-slate-500 mt-2">
+                {lang === "hi" 
+                  ? "आधार नंबर का उपयोग केवल विशिष्ट पहचान और कार्ड निर्माण के लिए किया जाता है। आपको कोई दस्तावेज़ अपलोड करने की आवश्यकता नहीं है।" 
+                  : "Aadhaar number is used strictly for unique identification and instant generation. No document upload is required."}
+              </p>
             </div>
-          )}
+          </div>
 
-          {step === 3 && (
-            <div className="space-y-4 animate-fadeIn">
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-                
-                {/* Block 1 */}
-                <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Personal Data</span>
-                  <button onClick={() => setStep(0)} className="text-[10.5px] font-black text-[#FF9933] uppercase">Edit</button>
-                </div>
-                <div className="p-4 space-y-2.5 text-xs font-bold text-slate-750">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Name</span>
-                    <span>{form.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Gender</span>
-                    <span>{form.gender}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Date of Birth</span>
-                    <span>{form.dob}</span>
-                  </div>
-                </div>
-
-                {/* Block 2 */}
-                <div className="p-4 border-y border-slate-100 flex justify-between items-center bg-slate-50/50">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Address Details</span>
-                  <button onClick={() => setStep(1)} className="text-[10.5px] font-black text-[#FF9933] uppercase">Edit</button>
-                </div>
-                <div className="p-4 space-y-2 text-xs font-bold text-slate-750">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-slate-450 font-medium">Permanent Address</span>
-                    <span className="text-slate-800 leading-relaxed font-bold mt-1">
-                      {form.address}, {form.city}, {form.state} - {form.pincode}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Block 3 */}
-                <div className="p-4 border-y border-slate-100 flex justify-between items-center bg-slate-50/50">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Uploaded Document</span>
-                  <button onClick={() => setStep(2)} className="text-[10.5px] font-black text-[#FF9933] uppercase">Edit</button>
-                </div>
-                <div className="p-4 space-y-2.5 text-xs font-bold text-slate-750">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Document ID Type</span>
-                    <span>{form.idType}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Document ID No.</span>
-                    <span className="uppercase">{form.idNumber || "N/A"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400 font-medium">Attached File</span>
-                    <span className="text-slate-500 font-mono text-[10px]">{uploadedFile || "None"}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-blue-50/60 border border-blue-150 rounded-2xl p-4 flex gap-3 text-blue-900 shadow-inner">
-                <Shield className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <span className="text-xs font-black uppercase tracking-wider block">Applicant Declaration</span>
-                  <p className="text-[10px] font-medium leading-relaxed opacity-90">
-                    I hereby declare that all files and statements submitted above are accurate. I authorize RP Foundation to check details against official databases for membership issuance.
-                  </p>
-                </div>
-              </div>
+          <div className="bg-blue-50/60 border border-blue-150 rounded-2xl p-4 flex gap-3 text-blue-900 shadow-inner">
+            <Shield className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="text-xs font-black uppercase tracking-wider block">Applicant Declaration</span>
+              <p className="text-[10px] font-medium leading-relaxed opacity-90">
+                I hereby declare that all details submitted above are accurate. I authorize RP Foundation to generate my Jan Seva Identity based on this information.
+              </p>
             </div>
-          )}
+          </div>
 
-        </div>
-
-        {/* Footer Actions */}
-        <div className="bg-white border-t border-slate-200 p-4 sticky bottom-0 z-20 flex gap-3 shadow-lg shrink-0">
-          <button 
-            onClick={() => step > 0 ? setStep(step - 1) : setView("home")}
-            className="px-5 py-3.5 border border-slate-205 rounded-2xl text-slate-600 font-black text-xs uppercase tracking-wider hover:bg-slate-50 transition cursor-pointer"
-          >
-            {step > 0 ? "Back" : "Cancel"}
-          </button>
-          
-          <button 
-            onClick={() => step < 3 ? setStep(step + 1) : handleSubmit()}
-            disabled={submitting}
-            className="flex-1 bg-[#000080] hover:bg-[#000066] text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md disabled:opacity-75 disabled:cursor-wait flex justify-center items-center gap-1.5 transition cursor-pointer"
-          >
-            {submitting ? (
-              <span className="animate-pulse">Submitting Data...</span>
-            ) : (
-              <>
-                <span>{step < 3 ? "Continue" : "Submit Details"}</span>
-                {step < 3 && <ChevronRight className="w-4 h-4" />}
-              </>
-            )}
-          </button>
-        </div>
+          {/* Footer Actions */}
+          <div className="flex gap-3 pt-4 border-t border-slate-200">
+            <button 
+              type="button"
+              onClick={() => setView("home")}
+              className="px-5 py-3.5 border border-slate-205 rounded-2xl text-slate-600 font-black text-xs uppercase tracking-wider hover:bg-slate-50 transition cursor-pointer"
+            >
+              {lang === "hi" ? "रद्द करें" : "Cancel"}
+            </button>
+            
+            <button 
+              type="submit"
+              disabled={submitting}
+              className="flex-1 bg-[#000080] hover:bg-[#000066] text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md disabled:opacity-75 disabled:cursor-wait flex justify-center items-center gap-1.5 transition cursor-pointer"
+            >
+              {submitting ? (
+                <span className="animate-pulse">{lang === "hi" ? "सबमिट हो रहा है..." : "Submitting..."}</span>
+              ) : (
+                <>
+                  <span>{lang === "hi" ? "कार्ड जेनरेट करें" : "Generate Card"}</span>
+                  <CheckCircle className="w-4 h-4 ml-1" />
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     );
   }

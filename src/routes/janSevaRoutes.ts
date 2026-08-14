@@ -24,13 +24,25 @@ router.get("/api/cards", async (req, res) => {
 
 router.post("/api/cards", async (req, res) => {
     try {
-      const { userId, name, gender, dob, address, idType, idNumber, status } = req.body;
+      const { userId, name, gender, dob, address, idType, idNumber } = req.body;
+      
+      // Enforce Aadhaar uniqueness
+      if (idType === "aadhaar" || idNumber) {
+        const existing = await pool.query('SELECT "cardNo" FROM card_applications_v2 WHERE "idNumber" = $1', [idNumber]);
+        if (existing.rows.length > 0) {
+           return res.status(400).json({ success: false, error: "A card with this Aadhaar number already exists.", cardNo: existing.rows[0].cardNo });
+        }
+      }
+
       const submittedAt = new Date().toISOString();
       const id = crypto.randomUUID();
+      const cardNo = `JSC-${Math.floor(10000000 + Math.random() * 90000000)}`;
+      const status = "approved"; // Instant generation
+
       await pool.query(
         `INSERT INTO card_applications_v2 
-         (id, "userId", name, gender, dob, address, "idType", "idNumber", status, "submittedAt") 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+         (id, "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt") 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
           id,
           userId || "guest",
@@ -38,13 +50,23 @@ router.post("/api/cards", async (req, res) => {
           gender,
           dob,
           address,
-          idType,
+          idType || "aadhaar",
           idNumber,
-          status || "pending",
+          status,
+          cardNo,
           submittedAt
         ]
-    );
-    res.json({ success: true });
+      );
+
+      // Link to user profile if logged in
+      if (userId && userId !== "guest") {
+        await pool.query(
+          'UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
+          ["approved", cardNo, userId]
+        );
+      }
+
+    res.json({ success: true, cardNo });
   } catch (error: any) {
     console.error("Error saving card application:", error);
     res.status(500).json({ error: error.message });
