@@ -1,155 +1,214 @@
 import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Users, Bell, Search, Globe, X, Heart, Shield, HeartHandshake } from "lucide-react";
+import {
+  ArrowLeft,
+  User,
+  Compass,
+  Bell,
+  Search,
+  Globe,
+  Heart,
+  HeartHandshake,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
-import { motion } from "motion/react";
-
-function GridIcon(props) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect width="7" height="7" x="3" y="3" rx="1" />
-      <rect width="7" height="7" x="14" y="3" rx="1" />
-      <rect width="7" height="7" x="14" y="14" rx="1" />
-      <rect width="7" height="7" x="3" y="14" rx="1" />
-    </svg>
-  );
-}
 
 export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { language, setLanguage, user } = useAuth();
-  
+  const { notifications, globalSettings } = useApp();
+
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
-  
+  const unreadCount = notifications?.filter((n) => !n.read).length || 0;
+
+  const [showGuestModal, setShowGuestModal] = useState(false);
+
   React.useEffect(() => {
     if (isAdmin && !location.pathname.startsWith("/admin")) {
       navigate("/admin");
     }
   }, [isAdmin, location.pathname, navigate]);
 
-  const { notifications, globalSettings } = useApp();
-  const unreadCount = notifications?.filter(n => !n.read).length || 0;
-  
-  const [isAiOpen, setIsAiOpen] = useState(false);
-  const [isSosOpen, setIsSosOpen] = useState(false);
-  const [showGuestModal, setShowGuestModal] = useState(false);
-
   if (isAdmin) {
     return (
-      <div className="w-full min-h-screen bg-slate-50 flex flex-col font-sans">
+      <div className="min-h-screen w-full bg-slate-50 font-sans text-slate-900">
         <Outlet context={{ lang: language }} />
       </div>
     );
   }
 
-  const handleNav = (path) => {
-    if (user?.role === "guest" && (path === "/services" || path === "/community" || path === "/notifications")) {
+  const handleNav = (path: string) => {
+    if (
+      user?.role === "guest" &&
+      (path === "/services" || path === "/community" || path === "/notifications")
+    ) {
       setShowGuestModal(true);
       return;
     }
     navigate(path);
   };
 
-  const isRoot = ["/", "/services", "/community", "/notifications", "/profile"].includes(location.pathname);
+  const rootPaths = ["/", "/services", "/community", "/notifications", "/profile"];
+  const isRoot = rootPaths.includes(location.pathname);
+
+  const navItems = [
+    { path: "/", labelEn: "Home", labelHi: "होम", icon: Compass },
+    { path: "/services", labelEn: "Explore", labelHi: "खोजें", icon: Search },
+    { path: "/notifications", labelEn: "Activity", labelHi: "गतिविधि", icon: Bell },
+    { path: "/community", labelEn: "Impact", labelHi: "प्रभाव", icon: Heart },
+    { path: "/profile", labelEn: "Me", labelHi: "मैं", icon: User },
+  ];
 
   return (
-    <div className="w-full min-h-screen bg-white flex flex-col font-sans overflow-hidden">
-      
-      {/* Clean Top App Bar */}
-      <header className="w-full bg-white border-b border-slate-100 px-4 pb-3 pt-safe-header flex justify-between items-center shrink-0 z-40 sticky top-0">
-        <div className="flex items-center gap-3">
-          {!isRoot ? (
-            <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-50 transition text-slate-700">
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-          ) : (
-            <img src={globalSettings?.logo_image || "/assets/logo.png"} alt="RP Foundation" className="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-100" />
-          )}
-          <div className="flex flex-col">
-            <h1 className="font-bold text-lg text-[#000080] leading-none">
-              RP Foundation
-            </h1>
-            <span className="text-[10px] font-medium text-slate-500 mt-0.5 tracking-wide">
-              {language === "hi" ? "सेवा • समर्पण • संकल्प" : "Service • Dedication • Resolve"}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button onClick={() => setLanguage(language === "hi" ? "en" : "hi")} className="p-2 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-600 transition">
-            <Globe className="w-5 h-5" />
-          </button>
-          <div className="relative">
-            <button onClick={() => handleNav("/notifications")} className="p-2 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-600 transition">
-              <Bell className="w-5 h-5" />
-            </button>
-            {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+    <div className="min-h-screen w-full overflow-hidden bg-slate-50 font-sans text-slate-900 selection:bg-slate-900 selection:text-white">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/70 bg-white/95 px-4 pt-safe-header backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-3xl items-center justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            {!isRoot ? (
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                aria-label={language === "hi" ? "वापस जाएं" : "Go back"}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-700 transition-colors hover:bg-slate-100 active:scale-95"
+              >
+                <ArrowLeft className="h-5 w-5" strokeWidth={1.9} />
+              </button>
+            ) : (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <img
+                  src={globalSettings?.logo_image || "/assets/logo.png"}
+                  alt="RP Foundation"
+                  className="h-full w-full object-contain"
+                />
+              </div>
             )}
+
+            <div className="min-w-0">
+              <h1 className="truncate text-[15px] font-semibold tracking-[-0.02em] text-slate-950">
+                RP Foundation
+              </h1>
+              <p className="truncate text-[10px] font-medium tracking-[0.08em] text-slate-400">
+                COMMUNITY • SERVICE • IMPACT
+              </p>
+            </div>
           </div>
-          <button onClick={() => handleNav("/profile")} className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200 ml-1">
-            <User className="w-5 h-5" />
-          </button>
+
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setLanguage(language === "hi" ? "en" : "hi")}
+              aria-label={language === "hi" ? "Switch to English" : "भाषा बदलें"}
+              className="flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 active:scale-95"
+            >
+              <Globe className="h-[19px] w-[19px]" strokeWidth={1.8} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleNav("/notifications")}
+              aria-label={language === "hi" ? "सूचनाएं" : "Notifications"}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 active:scale-95"
+            >
+              <Bell className="h-[19px] w-[19px]" strokeWidth={1.8} />
+              {unreadCount > 0 && (
+                <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white" />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleNav("/profile")}
+              aria-label={language === "hi" ? "मेरी प्रोफ़ाइल" : "My profile"}
+              className="ml-1 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:scale-95"
+            >
+              <User className="h-[17px] w-[17px]" strokeWidth={1.8} />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Main Scrollable Content */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 w-full pb-safe-content relative">
-        <Outlet context={{ lang: language }} />
+      <main className="min-h-0 w-full overflow-x-hidden bg-slate-50 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+        <div className="mx-auto w-full max-w-3xl">
+          <Outlet context={{ lang: language }} />
+        </div>
       </main>
 
-      {/* Floating Donate Button (Only on Home and Explore) */}
       {(location.pathname === "/" || location.pathname === "/services") && (
-        <button 
-          onClick={() => handleNav("/donations")} 
-          className="fixed bottom-20 right-4 z-40 flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#FF9933] to-[#F26522] rounded-full shadow-lg text-white shadow-orange-500/40 transform transition active:scale-95"
-          aria-label="Donate"
+        <button
+          type="button"
+          onClick={() => handleNav("/donations")}
+          aria-label={language === "hi" ? "दान करें" : "Donate"}
+          className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 text-white shadow-xl shadow-slate-900/20 transition-transform hover:scale-[1.03] active:scale-95"
         >
-          <HeartHandshake className="w-7 h-7" />
+          <HeartHandshake className="h-5 w-5" strokeWidth={1.8} />
         </button>
       )}
 
-      {/* Standard Bottom Navigation - 5 Tabs */}
-      <nav className="fixed bottom-0 w-full bg-white border-t border-slate-100 flex justify-around items-center px-1 pb-safe-nav pt-2 shrink-0 z-50 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
-        
-        {/* 1. Home */}
-        <button onClick={() => handleNav("/")} className={`flex flex-col items-center p-2 w-[20%] ${location.pathname === "/" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
-          <Compass className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/" ? "stroke-[2.5px]" : "stroke-2"}`} />
-          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "होम" : "Home"}</span>
-        </button>
-
-        {/* 2. Explore */}
-        <button onClick={() => handleNav("/services")} className={`flex flex-col items-center p-2 w-[20%] ${location.pathname === "/services" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
-          <Search className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/services" ? "stroke-[2.5px]" : "stroke-2"}`} />
-          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "खोजें" : "Explore"}</span>
-        </button>
-
-        {/* 3. Activity */}
-        <button onClick={() => handleNav("/notifications")} className={`flex flex-col items-center p-2 w-[20%] relative ${location.pathname === "/notifications" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
-          <Bell className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/notifications" ? "stroke-[2.5px]" : "stroke-2"}`} />
-          {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-          )}
-          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "गतिविधि" : "Activity"}</span>
-        </button>
-
-        {/* 4. Impact */}
-        <button onClick={() => handleNav("/community")} className={`flex flex-col items-center p-2 w-[20%] ${location.pathname === "/community" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
-          <Heart className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/community" ? "stroke-[2.5px]" : "stroke-2"}`} />
-          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "प्रभाव" : "Impact"}</span>
-        </button>
-
-        {/* 5. Me */}
-        <button onClick={() => handleNav("/profile")} className={`flex flex-col items-center p-2 w-[20%] ${location.pathname === "/profile" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
-          <User className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/profile" ? "stroke-[2.5px]" : "stroke-2"}`} />
-          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "मेरा खाता" : "Me"}</span>
-        </button>
-
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/95 px-1 pt-1.5 pb-[calc(0.4rem+env(safe-area-inset-bottom))] shadow-[0_-8px_30px_-20px_rgba(15,23,42,0.35)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-3xl items-center justify-around">
+          {navItems.map(({ path, labelEn, labelHi, icon: Icon }) => {
+            const active = location.pathname === path;
+            return (
+              <button
+                key={path}
+                type="button"
+                onClick={() => handleNav(path)}
+                aria-current={active ? "page" : undefined}
+                className={`relative flex min-h-12 w-1/5 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium transition-colors active:scale-95 ${
+                  active ? "text-slate-950" : "text-slate-400 hover:text-slate-700"
+                }`}
+              >
+                <Icon
+                  className={`h-[19px] w-[19px] ${active ? "stroke-[2.1]" : "stroke-[1.7]"}`}
+                />
+                <span>{language === "hi" ? labelHi : labelEn}</span>
+                {active && <span className="absolute bottom-0 h-0.5 w-5 rounded-full bg-slate-950" />}
+                {path === "/notifications" && unreadCount > 0 && (
+                  <span className="absolute right-[calc(50%-0.8rem)] top-1 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white" />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </nav>
 
-
+      {showGuestModal && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/30 p-4 backdrop-blur-sm sm:items-center">
+          <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+              <User className="h-5 w-5" strokeWidth={1.8} />
+            </div>
+            <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+              {language === "hi" ? "पहले साइन इन करें" : "Sign in to continue"}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              {language === "hi"
+                ? "इस सुविधा का उपयोग करने के लिए अपने खाते में साइन इन करें।"
+                : "Sign in to access your personal community features."}
+            </p>
+            <div className="mt-6 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowGuestModal(false)}
+                className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700"
+              >
+                {language === "hi" ? "बंद करें" : "Close"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGuestModal(false);
+                  navigate("/login");
+                }}
+                className="flex-1 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-sm"
+              >
+                {language === "hi" ? "साइन इन" : "Sign in"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
