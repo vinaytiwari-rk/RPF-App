@@ -6,6 +6,15 @@ import crypto from 'crypto';
 
 const router = express.Router();
 
+// Legacy administrator bootstrap is permanently retired. Administrator credentials
+// must only be managed through the authenticated administrator control plane.
+router.all("/api/admin-setup", (_req, res) => {
+  return res.status(410).json({
+    success: false,
+    error: "Administrator setup endpoint has been retired."
+  });
+});
+
 // Public certificate verification metadata only. Do not fabricate a signature record
 // when no record exists; absence must remain explicit and verifiable.
 router.get("/api/admin/hq/certificates/signatures/:service_id", async (req, res) => {
