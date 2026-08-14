@@ -1,13 +1,22 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import rateLimit from "express-rate-limit";
 import { updateServiceContent } from "../controllers/adminHqController.js";
 import { pool } from "../db/dbPool.js";
 import { authenticateToken, requireAdmin, JWT_SECRET, auditEvent } from "../db/middleware.js";
 
 const router = Router();
 
-router.post("/api/auth/admin-login", async (req, res) => {
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many administrator login attempts. Please try again later." },
+});
+
+router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
   try {
     const { identifier, password } = req.body || {};
     const normalizedIdentifier = String(identifier || "").trim().toLowerCase();
@@ -25,13 +34,14 @@ router.post("/api/auth/admin-login", async (req, res) => {
       return res.status(401).json({ success: false, error: "Invalid administrator credentials." });
     }
 
-    const valid = await bcrypt.compare(String(password), result.rows[0].password_hash);
+    const credential = result.rows[0];
+    const valid = await bcrypt.compare(String(password), credential.password_hash);
     if (!valid) {
-      await auditEvent({ action: "admin_login_failed", resource: "administrator", req, metadata: { reason: "invalid_password" } });
+      await auditEvent({ action: "admin_login_failed", resource: "administrator", req, metadata: { reason: "invalid_password", username: normalizedIdentifier } });
       return res.status(401).json({ success: false, error: "Invalid administrator credentials." });
     }
 
-    const user = { id: "usr_staff_admin", name: "System Administrator", role: "admin" };
+    const user = { id: String(credential.id), name: "System Administrator", role: "admin" };
     const token = jwt.sign(user, JWT_SECRET, { expiresIn: "7d" });
 
     try {
@@ -146,8 +156,6 @@ router.get("/api/admin/system/diagnostics", ...admin, async (_req, res) => {
   }
 });
 
-// Canonical Administrator write contract. The router is mounted under /api/admin/hq
-// and server.ts also protects that mount with JWT + admin role.
 router.put("/services/:serviceId/content", ...admin, updateServiceContent);
 
 export default router;
