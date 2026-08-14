@@ -32,4 +32,9 @@ jobs:
 
       - name: Deploy to cPanel
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
         run: node deploy.cjs
