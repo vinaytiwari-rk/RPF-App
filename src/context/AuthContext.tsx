@@ -62,7 +62,7 @@ interface AuthContextType {
   login: (userData: Partial<User>, token?: string) => Promise<void>;
   loginAsGuest: () => Promise<void>;
   logout: () => Promise<void>;
-  updateUser: (updates: Partial<User>) => Promise<void>;
+  updateUser: (updates: Partial<User>) => Promise<boolean>;
   completeOnboarding: (interests: string[]) => Promise<void>;
   /** Helper: true if role is admin, super_admin, or volunteer */
   hasAdminAccess: boolean;
@@ -112,15 +112,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const fresh = data.user as Partial<User>;
               const merged: User = {
                 ...parsed,
+                ...fresh,
                 role: (fresh.role as UserRole) ?? parsed.role,
                 name: fresh.name ?? parsed.name,
                 displayName: fresh.displayName ?? fresh.name ?? parsed.name,
-                janSevaCardStatus: fresh.janSevaCardStatus ?? parsed.janSevaCardStatus,
-                janSevaCardNo: fresh.janSevaCardNo ?? parsed.janSevaCardNo,
+                // ✅ IMPORTANT: Protect card status from being wiped on refresh
+                janSevaCardStatus:
+                  (fresh.janSevaCardStatus as User["janSevaCardStatus"]) ||
+                  parsed.janSevaCardStatus ||
+                  "none",
+                janSevaCardNo: fresh.janSevaCardNo || parsed.janSevaCardNo,
                 points: fresh.points ?? parsed.points,
                 badges: fresh.badges ?? parsed.badges,
                 avatar: fresh.avatar ?? parsed.avatar,
                 cover: fresh.cover ?? parsed.cover,
+                gender: fresh.gender ?? parsed.gender,
+                dob: fresh.dob ?? parsed.dob,
+                address: fresh.address ?? parsed.address,
+                username: fresh.username ?? parsed.username,
+                phone: fresh.phone ?? parsed.phone,
+                email: fresh.email ?? parsed.email,
+                isVolunteer: fresh.isVolunteer ?? parsed.isVolunteer,
+                isDonor: fresh.isDonor ?? parsed.isDonor,
+                volunteerData: fresh.volunteerData ?? parsed.volunteerData,
               };
               localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
               setUser(merged);
@@ -128,14 +142,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                // Invalid token or user not found
                localStorage.removeItem(STORAGE_KEY);
                localStorage.removeItem("@rpf_token");
-    setToken(null);
+               setToken(null);
                setUser(null);
             }
           } else {
              // Expired token or auth error
              localStorage.removeItem(STORAGE_KEY);
              localStorage.removeItem("@rpf_token");
-    setToken(null);
+             setToken(null);
              setUser(null);
           }
         } catch {
@@ -146,18 +160,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem("@rpf_token");
-    setToken(null);
+        setToken(null);
       }
     } catch {
       // Corrupted storage - clear it
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem("@rpf_token");
-    setToken(null);
+      setToken(null);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const loadLanguage = () => {
     const stored = localStorage.getItem(LANG_KEY) as "en" | "hi" | null;
@@ -170,10 +183,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   /* ── Persist user locally and in state ── */
-  const saveUser = (u: User) => {
+  const saveUser = useCallback((u: User) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
     setUser(u);
-  };
+  }, []);
 
   /* ── Login ── */
   const login = useCallback(async (userData: Partial<User>) => {
@@ -186,7 +199,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok) throw new Error("Backend login failed");
       const data = await res.json();
       if (data.success && data.user) {
-        saveUser(data.user);
+        if (data.token) {
+          localStorage.setItem("@rpf_token", data.token);
+          setToken(data.token);
+        }
+        saveUser({
+          janSevaCardStatus: "none",
+          ...data.user,
+        });
       }
     } catch (err) {
       console.error("AuthContext login error:", err);
@@ -205,7 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       saveUser(fallbackUser);
     }
-  }, []);
+  }, [saveUser]);
 
   /* ── Guest login ── */
   const loginAsGuest = useCallback(async () => {
@@ -218,7 +238,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok) throw new Error("Backend guest login failed");
       const data = await res.json();
       if (data.success && data.user) {
-        saveUser(data.user);
+        if (data.token) {
+          localStorage.setItem("@rpf_token", data.token);
+          setToken(data.token);
+        }
+        saveUser({
+          janSevaCardStatus: "none",
+          ...data.user,
+        });
       }
     } catch (err) {
       console.error("AuthContext guest login error:", err);
@@ -235,50 +262,87 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       saveUser(guest);
     }
-  }, []);
+  }, [saveUser]);
 
   /* ── Logout ── */
   const logout = useCallback(async () => {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem("@rpf_token");
+    setToken(null);
     setUser(null);
   }, []);
 
   /* ── Update user profile ── */
   const updateUser = useCallback(
     async (updates: Partial<User>) => {
-      if (!user) return;
-      const updated: User = { ...user, ...updates };
+      if (!user) return false;
+      
       try {
-        await fetch(`/api/users/${user.id}/update`, {
+        const response = await fetch(`/api/users/${user.id}/update`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify(updates)
         });
+        
+        const data = await response.json();
+        
+        // ✅ Only save locally if backend confirmed success
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "User update failed");
+        }
+        
+        const updated: User = {
+          ...user,
+          ...updates,
+          ...(data.user || {}),
+        };
+        saveUser(updated);
+        return true;
       } catch (err) {
         console.error("AuthContext: updateUser backend error:", err);
+        throw err;
       }
-      saveUser(updated);
     },
-    [user]
+    [user, token, saveUser]
   );
 
   /* ── Complete onboarding ── */
   const completeOnboarding = useCallback(
     async (interests: string[]) => {
       if (!user) return;
-      const updated: User = { ...user, interests, onboardingCompleted: true };
+      
       try {
-        await fetch(`/api/users/${user.id}/update`, {
+        const response = await fetch(`/api/users/${user.id}/update`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({ interests, onboardingCompleted: true })
         });
+        
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Onboarding update failed");
+        }
+        
+        const updated: User = {
+          ...user,
+          interests,
+          onboardingCompleted: true,
+          ...(data.user || {}),
+        };
+        saveUser(updated);
       } catch (err) {
         console.error("AuthContext: completeOnboarding backend error:", err);
+        throw err;
       }
-      saveUser(updated);
     },
-    [user]
+    [user, token, saveUser]
   );
 
   /* ── Computed RBAC helper ── */
@@ -315,8 +379,3 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
   return ctx;
 }
-
-
-
-
-
