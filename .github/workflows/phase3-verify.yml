@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - phase-3-premium-frontend
+      - phase-3-complete
   pull_request:
     branches:
       - main
       - phase-3-premium-frontend
+      - phase-3-complete
 
 jobs:
   verify:
