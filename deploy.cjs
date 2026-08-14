@@ -3,6 +3,9 @@ async function main() {
   const client = new ftp.Client();
   client.ftp.verbose = true;
   try {
+    // Increase timeout to 120000 (2 minutes) to prevent control socket timeouts
+    client.ftp.timeout = 120000;
+    
     await client.access({
       host: 'ftp.therpfoundation.org',
       user: 'RPF_App@appapi.therpfoundation.org',
