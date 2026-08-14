@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Briefcase, ChevronRight, CloudSun, GraduationCap, Heart, HeartHandshake, Megaphone, Search, ShieldAlert, Sparkles, Users, Wind } from "lucide-react";
 import { motion } from "motion/react";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 
@@ -48,7 +49,6 @@ export default function Home() {
 
   return <main className="min-h-full bg-slate-50 pb-6 text-slate-900 sm:pb-10">
     <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-6 sm:py-5">
-      {/* Light, mobile-first hero: no black/dark surface */}
       <section className="relative overflow-hidden rounded-[24px] border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-indigo-50 p-5 shadow-sm sm:rounded-[28px] sm:p-7">
         <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-teal-200/40 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-12 h-36 w-36 rounded-full bg-indigo-200/40 blur-3xl" />
@@ -67,12 +67,7 @@ export default function Home() {
 
       {alert && <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3.5 sm:mt-5 sm:p-4"><div className="flex gap-3"><Megaphone className="h-5 w-5 shrink-0 text-amber-700"/><div><p className="text-[9px] font-extrabold uppercase tracking-wider text-amber-700 sm:text-[10px]">{lang === "hi" ? "महत्वपूर्ण सूचना" : "Important update"}</p><p className="mt-1 text-[13px] font-semibold leading-5 text-amber-950 sm:text-sm">{alert}</p></div></div></section>}
 
-      <section className="mt-6 sm:mt-7">
-        <div className="mb-3 flex items-center justify-between"><h2 className="text-[15px] font-extrabold text-slate-900 sm:text-base">{lang === "hi" ? "त्वरित सेवाएं" : "Quick actions"}</h2><button onClick={() => navigate("/services")} className="inline-flex items-center text-[11px] font-bold text-slate-500 sm:text-xs">{lang === "hi" ? "सभी" : "View all"}<ChevronRight className="h-4 w-4"/></button></div>
-        <div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar sm:grid sm:grid-cols-5 sm:gap-3">
-          {quickActions.map(({ id, icon: Icon, en, hi, route }) => <button key={id} onClick={() => navigate(route)} className="flex w-[92px] min-w-[92px] shrink-0 flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white px-1.5 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:scale-[.98] sm:w-auto sm:min-w-0"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 sm:h-11 sm:w-11"><Icon className="h-5 w-5"/></span><span className="line-clamp-2 text-center text-[10px] font-bold leading-3 text-slate-700 sm:text-[10px]">{lang === "hi" ? hi : en}</span></button>)}
-        </div>
-      </section>
+      <section className="mt-6 sm:mt-7"><div className="mb-3 flex items-center justify-between"><h2 className="text-[15px] font-extrabold text-slate-900 sm:text-base">{lang === "hi" ? "त्वरित सेवाएं" : "Quick actions"}</h2><button onClick={() => navigate("/services")} className="inline-flex items-center text-[11px] font-bold text-slate-500 sm:text-xs">{lang === "hi" ? "सभी" : "View all"}<ChevronRight className="h-4 w-4"/></button></div><div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar sm:grid sm:grid-cols-5 sm:gap-3">{quickActions.map(({ id, icon: Icon, en, hi, route }) => <button key={id} onClick={() => navigate(route)} className="flex w-[92px] min-w-[92px] shrink-0 flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white px-1.5 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:scale-[.98] sm:w-auto sm:min-w-0"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 sm:h-11 sm:w-11"><Icon className="h-5 w-5"/></span><span className="line-clamp-2 text-center text-[10px] font-bold leading-3 text-slate-700 sm:text-[10px]">{lang === "hi" ? hi : en}</span></button>)}</div></section>
 
       <section className="mt-6 overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm sm:mt-7 sm:rounded-[26px]"><div className="flex items-center justify-between px-4 pt-4 sm:px-5 sm:pt-5"><div><p className="text-[9px] font-extrabold uppercase tracking-[.16em] text-slate-400 sm:text-[10px]">{lang === "hi" ? "दैनिक उपयोग" : "Daily utility"}</p><h2 className="mt-1 text-[17px] font-extrabold text-slate-900 sm:text-lg">{lang === "hi" ? "मौसम और वायु गुणवत्ता" : "Weather & air quality"}</h2></div><CloudSun className="h-5 w-5 text-teal-600"/></div><button onClick={() => navigate("/daily")} className="m-4 mt-3.5 flex min-h-[72px] w-[calc(100%-2rem)] items-center justify-between rounded-2xl bg-gradient-to-r from-teal-600 to-indigo-600 p-4 text-left text-white shadow-md shadow-indigo-600/10 sm:m-5 sm:mt-4 sm:w-[calc(100%-2.5rem)]"><span><span className="block text-[13px] font-extrabold sm:text-sm">{lang === "hi" ? "आज का डैशबोर्ड खोलें" : "Open today’s dashboard"}</span><span className="mt-1 block text-[10px] leading-4 text-white/80 sm:text-xs">{lang === "hi" ? "Weather • AQI • News • Culture • Health • Radio" : "Weather • AQI • News • Culture • Health • Radio"}</span></span><Wind className="h-5 w-5 shrink-0"/></button></section>
 
