@@ -3,7 +3,7 @@ import { pool } from "./dbPool.js";
 
 const configuredSecret = process.env.JWT_SECRET?.trim();
 if (process.env.NODE_ENV === "production" && (!configuredSecret || configuredSecret.length < 32)) {
-  console.error("CRITICAL WARNING: JWT_SECRET is missing or less than 32 characters in production. This is a severe security risk.");
+  throw new Error("JWT_SECRET must be configured with at least 32 characters in production.");
 }
 
 export const JWT_SECRET = configuredSecret || "development_only_change_me_please_32_chars";
@@ -20,16 +20,9 @@ export const authorizeRole = (requiredRole) => (req, res, next) => {
 
   const userRole = normalizeRole(req.user.role);
   const wantedRole = normalizeRole(requiredRole);
+  if (!wantedRole) return res.status(500).json({ success: false, error: "Authorization policy is not configured" });
 
-  if (!wantedRole) {
-    return res.status(500).json({ success: false, error: "Authorization policy is not configured" });
-  }
-
-  if (wantedRole === CANONICAL_ADMIN_ROLE) {
-    if (userRole !== CANONICAL_ADMIN_ROLE) {
-      return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
-    }
-  } else if (userRole !== wantedRole) {
+  if (userRole !== wantedRole) {
     return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
   }
 
@@ -44,27 +37,19 @@ export const authenticateToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (!decoded || typeof decoded !== "object") {
-      return res.status(403).json({ success: false, error: "Invalid token" });
-    }
+    if (!decoded || typeof decoded !== "object") return res.status(403).json({ success: false, error: "Invalid token" });
 
     const normalizedRole = normalizeRole(decoded.role);
-    if (!normalizedRole || !decoded.id) {
-      return res.status(403).json({ success: false, error: "Invalid token claims" });
-    }
+    if (!normalizedRole || !decoded.id) return res.status(403).json({ success: false, error: "Invalid token claims" });
 
     const user = { ...decoded, role: normalizedRole };
 
-    // Every non-guest token must have a live database session. If the session
-    // store cannot be checked, fail closed instead of allowing the JWT alone.
     if (user.role !== "guest") {
       const sessionRes = await pool.query(
         "SELECT 1 FROM sessions WHERE token = $1 AND expires_at > NOW() LIMIT 1",
         [token]
       );
-      if (sessionRes.rows.length === 0) {
-        return res.status(401).json({ success: false, error: "Session expired or logged out" });
-      }
+      if (sessionRes.rows.length === 0) return res.status(401).json({ success: false, error: "Session expired or logged out" });
     }
 
     req.user = user;
@@ -81,9 +66,7 @@ export const authenticateToken = async (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ success: false, error: "Authentication required" });
-  }
+  if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
   if (normalizeRole(req.user.role) !== CANONICAL_ADMIN_ROLE) {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
@@ -108,21 +91,21 @@ export const auditEvent = async ({
       : String(forwarded || req?.ip || "").split(",")[0].trim() || null;
     const userAgent = req?.headers?.["user-agent"] || null;
 
-    const details = {
-      resource,
-      resourceId,
-      ipAddress,
-      userAgent,
-      ...metadata,
-    };
-
     await pool.query(
-      `INSERT INTO audit_logs
-        (admin_id, admin_name, action, details)
-       VALUES ($1, $2, $3, $4::jsonb)`,
-      [userId, null, action, JSON.stringify(details)]
+      `INSERT INTO administrator_audit_log
+        (actor_user_id, actor_role, action, entity_type, entity_id, request_id, details)
+       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
+      [
+        userId,
+        normalizeRole(req?.user?.role) || "system",
+        action,
+        resource,
+        resourceId,
+        req?.headers?.["x-request-id"] || null,
+        JSON.stringify({ ipAddress, userAgent, ...metadata }),
+      ]
     );
   } catch (error) {
-    console.error("Audit log write failed:", error);
+    console.error("Administrator audit log write failed:", error);
   }
 };
