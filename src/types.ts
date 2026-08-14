@@ -12,10 +12,13 @@ export interface UserProfile {
   role: "Citizen" | "Active Volunteer" | "Donor";
   points?: number;
   badge?: string;
+  profileImage?: string;
+  bloodGroup?: string;
+  memberSince?: string;
 }
 
 export interface Grievance {
-  id: string; // RPF-2026-XXXX
+  id: string;
   title: string;
   description: string;
   category: string;
@@ -81,5 +84,3 @@ export interface AppSettings {
 }
 
 export type DbRecord = Record<string, any>;
-
-
