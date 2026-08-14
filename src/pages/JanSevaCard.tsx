@@ -6,12 +6,9 @@ import { useApp } from "../context/AppContext";
 import { 
   ArrowLeft, CheckCircle, Clock, Award, QrCode, UploadCloud, 
   Shield, Check, ChevronRight, Facebook, Instagram, Twitter, 
-  Send, Printer, Download, RefreshCw, AlertCircle 
+  Send, Printer, Download, RefreshCw, AlertCircle, RotateCw
 } from "lucide-react";
 import { getEligibleSchemes, getCardExpiryTracker, validateLuhn, getPovertyLineStatus, getDependencyRatio } from "../utils/janSevaCalculators";
-
-// Slogan/Tagline on Logo
-// सेवा • समर्पण • संकल्प
 
 const STEPS = ["Personal Details", "Residential Address", "Identity Document", "Review Application"];
 
@@ -58,6 +55,10 @@ export default function JanSevaCard() {
   const [monthlyExpense, setMonthlyExpense] = useState(15000);
   const [uploading, setUploading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  
+  // ✨ NEW: Flip card state
+  const [flipped, setFlipped] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   
   const [form, setForm] = useState({ 
     name: user?.name ?? "", 
@@ -184,33 +185,51 @@ export default function JanSevaCard() {
     }
   };
 
+  // ✨ FIXED: PDF Download with front + back
   const handleSimulateDownload = async () => {
+    setPdfLoading(true);
     try {
       const { jsPDF } = await import("jspdf");
       const html2canvas = (await import("html2canvas")).default;
       
-      const cardElement = document.getElementById("jan-seva-card-front");
-      if (!cardElement) return;
+      const frontEl = document.getElementById("jan-seva-card-front");
+      const backEl = document.getElementById("jan-seva-card-back");
+      if (!frontEl) {
+        alert(lang === "hi" ? "कार्ड एलिमेंट नहीं मिला।" : "Card element not found.");
+        return;
+      }
 
-      const canvas = await html2canvas(cardElement, { scale: 2 });
-      const imgData = canvas.toDataURL("image/jpeg", 1.0);
-      
+      const opts = { scale: 2, useCORS: true, allowTaint: true, backgroundColor: "#ffffff", logging: false };
+      const frontCanvas = await html2canvas(frontEl, opts);
+      const frontImg = frontCanvas.toDataURL("image/jpeg", 0.95);
+
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "mm",
-        format: [canvas.width * 0.264583, canvas.height * 0.264583]
+        format: [85.6, 54] // Standard ID card size
       });
-      
-      pdf.addImage(imgData, "JPEG", 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+
+      pdf.addImage(frontImg, "JPEG", 0, 0, 85.6, 54);
+
+      if (backEl) {
+        const backCanvas = await html2canvas(backEl, opts);
+        const backImg = backCanvas.toDataURL("image/jpeg", 0.95);
+        pdf.addPage([85.6, 54], "landscape");
+        pdf.addImage(backImg, "JPEG", 0, 0, 85.6, 54);
+      }
+
       pdf.save(`JanSevaCard_${cardName.replace(/\s+/g, '_')}.pdf`);
     } catch (err) {
       console.error("PDF generation failed:", err);
-      alert("Failed to generate PDF. Please try again.");
+      alert(lang === "hi" ? "PDF बनाने में समस्या हुई। फिर कोशिश करें।" : "Failed to generate PDF. Please try again.");
+    } finally {
+      setPdfLoading(false);
     }
   };
 
+  // ✨ FIXED: Real print
   const handleSimulatePrint = () => {
-    alert(lang === "hi" ? "प्रिंट कमांड भेजी गई। कार्ड का लेआउट प्रिंटर के अनुकूल है।" : "Print command triggered. Card layout is print-optimized.");
+    window.print();
   };
 
   // Card details to render
@@ -301,178 +320,189 @@ export default function JanSevaCard() {
     );
   }
 
-  // View: Approved Card Display (STACKED FRONT & BACK EXACTLY LIKE SCREENSHOT 1)
+  // ✨ FIXED: Approved Card with Flip UI
   if (user?.janSevaCardStatus === "approved") {
     return (
-      <div className="p-4 space-y-6 animate-fadeIn pb-28 max-w-md mx-auto">
+      <div className="p-4 space-y-4 animate-fadeIn pb-28 max-w-md mx-auto">
         
         {/* Intro */}
-        <div className="text-center space-y-1">
-          <h2 className="font-display font-extrabold text-lg text-[#0B1E3F] leading-tight">
+        <div className="text-center space-y-1 no-print">
+          <h2 className="font-display font-extrabold text-lg text-[#000080] leading-tight">
             {lang === "hi" ? "आपका डिजिटल जनसेवा कार्ड" : "Your Digital Jan Seva Card"}
           </h2>
-          <p className="text-[10.5px] text-slate-500 font-semibold leading-relaxed">
-            {lang === "hi" 
-              ? "यह कार्ड आपके सामाजिक योगदान, योजनाओं और शिविरों का पहचान पत्र है।"
-              : "Official citizen identity token for RP Foundation welfare verticals."}
+          <p className="text-[10.5px] text-slate-500 font-semibold flex items-center justify-center gap-1.5">
+            <RotateCw className="w-3 h-3" />
+            {lang === "hi" ? "कार्ड पर टैप करें — आगे/पीछे पलटेगा" : "Tap card to flip front/back"}
           </p>
         </div>
 
-        {/* 1. FRONT SIDE OF THE CARD */}
-        <div id="jan-seva-card-front" className="w-full bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200 relative flex flex-col justify-between" style={{ minHeight: '275px' }}>
-          
-          {/* Orange Header Accent */}
-          <div className="bg-[#FF9933] px-4 py-3.5 flex items-center gap-3 relative">
-            <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 border border-amber-300">
-              <img src="/assets/logo.png" alt="Logo" className="w-full h-full object-contain" />
+        {/* ✨ PRINT AREA: Both sides stacked for print (hidden on screen, visible on print) */}
+        <div id="jan-seva-print-area" className="hidden print:block print-area-container">
+          {/* Print Front */}
+          <div id="print-front" className="print-card w-full max-w-[340px] mx-auto mb-4 bg-white rounded-2xl overflow-hidden shadow-xl border border-slate-200 flex flex-col">
+            <div className="bg-[#FF9933] px-3 py-2.5 flex items-center gap-2.5 shrink-0">
+              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 border border-white/40">
+                <img src="/assets/logo.png" alt="Logo" className="w-full h-full object-contain" crossOrigin="anonymous" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
+              </div>
+              <div className="flex flex-col text-white min-w-0">
+                <h3 className="font-sans font-black text-[13px] tracking-wider leading-none">RP FOUNDATION</h3>
+                <p className="text-[8.5px] font-medium mt-0.5 leading-none opacity-95 truncate">(Rohit Pandit Foundation) | Reg. No. 14675/05</p>
+              </div>
             </div>
-            <div className="flex flex-col text-white">
-              <h3 className="font-sans font-black text-base tracking-wider leading-none">RP FOUNDATION</h3>
-              <p className="text-[9px] font-medium tracking-wide mt-0.5 leading-none opacity-95">
-                (Rohit Pandit Foundation) | Reg. No. 14675/05
+            <div className="p-3 flex-1 relative flex flex-col justify-between bg-white">
+              <div className="absolute inset-0 flex justify-center items-center opacity-[0.035] pointer-events-none">
+                <svg viewBox="0 0 100 100" className="w-28 h-28 text-[#000080]" fill="currentColor">
+                  <path d="M50 0a50 50 0 1 0 0 100A50 50 0 0 0 50 0zm0 95a45 45 0 1 1 0-90 45 45 0 0 1 0 90z"/>
+                </svg>
+              </div>
+              <div className="relative z-10 flex items-center justify-between gap-2 mb-2">
+                <h4 className="font-sans font-black text-[18px] text-[#000080] leading-none">जनसेवा कार्ड</h4>
+                <span className="font-mono font-black text-[13px] text-[#000080] tracking-wide">{cardNumber}</span>
+              </div>
+              <div className="relative z-10 space-y-1.5 text-[11px] text-[#000080]">
+                <div className="flex"><span className="w-[90px] shrink-0 font-medium">नाम / Name :</span><span className="font-medium truncate">{cardName}</span></div>
+                <div className="flex flex-wrap">
+                  <span className="w-[90px] shrink-0 font-medium">लिंग :</span><span className="font-medium">{cardGender}</span>
+                  <span className="mx-2 text-slate-300">|</span>
+                  <span className="font-medium">DOB :</span><span className="font-medium ml-1">{cardDob}</span>
+                </div>
+                <div className="flex items-start"><span className="w-[90px] shrink-0 mt-0.5 font-medium">पता :</span><span className="font-medium leading-snug line-clamp-2">{cardAddress}</span></div>
+              </div>
+              <div className="relative z-10 text-center pt-2 border-t border-slate-100 mt-2">
+                <p className="font-sans font-black text-[14px] text-[#000080] tracking-wider leading-none">Toll Free : 1800-569-0991</p>
+                <p className="text-[9px] text-slate-600 font-medium mt-1">www.therpfoundation.org | info@therpfoundation.org</p>
+              </div>
+            </div>
+            <div className="bg-[#138808] h-2 w-full shrink-0"></div>
+          </div>
+
+          {/* Print Back */}
+          <div id="print-back" className="print-card w-full max-w-[340px] mx-auto bg-white rounded-2xl overflow-hidden shadow-xl border border-slate-200 flex flex-col">
+            <div className="bg-[#FF9933] h-2 w-full shrink-0"></div>
+            <div className="p-3 flex-1 relative flex flex-col bg-white overflow-hidden">
+              <div className="absolute inset-0 flex justify-center items-center opacity-[0.035] pointer-events-none">
+                <svg viewBox="0 0 100 100" className="w-28 h-28 text-[#000080]" fill="currentColor">
+                  <path d="M50 0a50 50 0 1 0 0 100A50 50 0 0 0 50 0zm0 95a45 45 0 1 1 0-90 45 45 0 0 1 0 90z"/>
+                </svg>
+              </div>
+              <div className="relative z-10 text-center mb-2">
+                <h4 className="font-sans font-black text-[15px] text-[#000080] leading-none">जनसेवा कार्ड के फायदे :</h4>
+              </div>
+              <div className="relative z-10 px-3 py-1 flex items-center justify-center my-1">
+                <div className="absolute left-0 top-0 bottom-0 w-2 border-l-2 border-t-2 border-b-2 border-orange-400/80 rounded-l-xs"></div>
+                <ul className="text-[10.5px] text-slate-700 font-medium space-y-1.5 w-full px-2 leading-snug">
+                  {activeBenefits.map((b, idx) => (
+                    <li key={idx}><span className="text-[#000080] font-black">{b.label}</span> – {b.desc}</li>
+                  ))}
+                </ul>
+                <div className="absolute right-0 top-0 bottom-0 w-2 border-r-2 border-t-2 border-b-2 border-orange-400/80 rounded-r-xs"></div>
+              </div>
+              <p className="relative z-10 text-center text-[10px] font-semibold text-slate-600 border-t border-slate-100 pt-2 mt-auto">
+                {lang === "hi" ? "नोट: यह सभी सुविधाएं जन सेवा कार्ड धारकों के लिए निःशुल्क है।" : "Note: All facilities are free for Jan Seva Card holders."}
               </p>
             </div>
+            <div className="bg-[#138808] h-2 w-full shrink-0"></div>
           </div>
-
-          {/* Main Details Body */}
-          <div className="p-4 bg-white flex-1 relative flex flex-col justify-between">
-            {/* Subtle Ashoka Chakra watermark in background */}
-            <div className="absolute inset-0 flex justify-center items-center opacity-[0.035] pointer-events-none">
-              <svg viewBox="0 0 100 100" className="w-32 h-32 text-[#000080]" fill="currentColor">
-                <path d="M50 0a50 50 0 1 0 0 100A50 50 0 0 0 50 0zm0 95a45 45 0 1 1 0-90 45 45 0 0 1 0 90z"/>
-              </svg>
-            </div>
-
-            {/* Title & Card Number */}
-            <div className="relative z-10 flex items-center justify-between gap-2 mb-4 px-2">
-  <h4 className="font-sans font-black text-[22px] text-[#000080] leading-none tracking-wide">
-    जनसेवा कार्ड
-  </h4>
-  <span className="font-mono font-black text-[18px] text-[#000080] tracking-wide leading-none">
-    {cardNumber}
-  </span>
-</div>
-
-            {/* Info Grid */}
-            <div className="relative z-10 space-y-3 text-[12px] text-[#000080] mb-5 px-2">
-  <div className="flex items-baseline">
-    <span className="w-[120px] shrink-0 font-medium">नाम / Name :</span>
-    <span className="font-medium text-[13px]">{cardName}</span>
-  </div>
-  <div className="flex justify-between items-baseline pr-4">
-    <div className="flex items-baseline">
-      <span className="w-[120px] shrink-0 font-medium">लिंग / Gender :</span>
-      <span className="font-medium">{cardGender}</span>
-    </div>
-    <div className="flex items-baseline">
-      <span className="shrink-0 font-medium mr-2">जन्म तिथि / DOB :</span>
-      <span className="font-medium">{cardDob}</span>
-    </div>
-  </div>
-  <div className="flex items-start">
-    <span className="w-[120px] shrink-0 mt-0.5 font-medium">पता / Address :</span>
-    <span className="font-medium leading-snug flex-1 text-[12px] pr-2">{cardAddress}</span>
-  </div>
-</div>
-
-{/* Toll-Free Section */}
-            <div className="relative z-10 text-center pt-1 pb-1">
-  <p className="font-sans font-black text-[22px] text-[#000080] tracking-wider leading-none mb-2">
-    Toll Free Number : 1800 - 569 - 0991
-  </p>
-  <p className="text-[12px] text-slate-600 font-medium tracking-wide leading-none font-serif">
-    Web - www.therpfoundation.org <span className="font-bold text-[#000080] mx-1">|</span> Email - info@therpfoundation.org
-  </p>
-</div>
-
-{/* Social Links Row */}
-<div className="relative z-10 flex justify-center items-center gap-4 text-[9.5px] font-bold text-slate-600 mt-1 pb-2">
-  <div className="flex items-center gap-1">
-    <Facebook className="w-3.5 h-3.5 text-[#000080] fill-[#000080]" />
-    <span>rpfoundationofficial</span>
-  </div>
-  <div className="flex items-center gap-1">
-    <Instagram className="w-3.5 h-3.5 text-[#000080]" />
-    <span>rpfoundationofficial</span>
-  </div>
-  <div className="flex items-center gap-1">
-    <Twitter className="w-3.5 h-3.5 text-[#000080] fill-[#000080]" />
-    <span>rpfoundation15</span>
-  </div>
-  <div className="flex items-center gap-1">
-    <span className="text-[12px] text-[#000080]">@</span>
-    <span>rpfoundationofficial</span>
-  </div>
-</div>
-</div>
-
-{/* Green Bottom Border */}
-          <div className="bg-[#138808] h-2.5 w-full"></div>
         </div>
 
-        {/* 2. BACK SIDE OF THE CARD */}
-        <div className="w-full bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-200 relative flex flex-col justify-between" style={{ minHeight: '275px' }}>
-          
-          {/* Orange Top Border */}
-          <div className="bg-[#FF9933] h-2.5 w-full"></div>
+        {/* ✨ FLIP CARD (Screen only, hidden on print) */}
+        <div
+          className="perspective-1000 w-full max-w-[340px] mx-auto cursor-pointer screen-card"
+          onClick={() => setFlipped(f => !f)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setFlipped(f => !f); }}
+        >
+          <div className={`relative w-full aspect-[1.586] transition-transform duration-500 transform-style-3d ${flipped ? "rotate-y-180" : ""}`}>
+            
+            {/* FRONT */}
+            <div id="jan-seva-card-front" className="absolute inset-0 backface-hidden w-full h-full bg-white rounded-2xl overflow-hidden shadow-xl border border-slate-200 flex flex-col">
+              <div className="bg-[#FF9933] px-3 py-2.5 flex items-center gap-2.5 shrink-0">
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 border border-white/40">
+                  <img src="/assets/logo.png" alt="Logo" className="w-full h-full object-contain" crossOrigin="anonymous" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; (e.target as HTMLImageElement).parentElement!.innerHTML = '<span class="text-[#000080] font-black text-xs">RPF</span>'; }} />
+                </div>
+                <div className="flex flex-col text-white min-w-0">
+                  <h3 className="font-sans font-black text-[13px] tracking-wider leading-none truncate">RP FOUNDATION</h3>
+                  <p className="text-[8.5px] font-medium mt-0.5 leading-none opacity-95 truncate">(Rohit Pandit Foundation) | Reg. No. 14675/05</p>
+                </div>
+              </div>
 
-          {/* Main Details Body */}
-          <div className="p-4 bg-white flex-1 relative flex flex-col justify-between">
-            {/* Subtle Ashoka Chakra watermark in background */}
-            <div className="absolute inset-0 flex justify-center items-center opacity-[0.035] pointer-events-none">
-              <svg viewBox="0 0 100 100" className="w-32 h-32 text-[#000080]" fill="currentColor">
-                <path d="M50 0a50 50 0 1 0 0 100A50 50 0 0 0 50 0zm0 95a45 45 0 1 1 0-90 45 45 0 0 1 0 90z"/>
-              </svg>
+              <div className="p-3 flex-1 relative flex flex-col justify-between bg-white">
+                <div className="absolute inset-0 flex justify-center items-center opacity-[0.035] pointer-events-none">
+                  <svg viewBox="0 0 100 100" className="w-28 h-28 text-[#000080]" fill="currentColor">
+                    <path d="M50 0a50 50 0 1 0 0 100A50 50 0 0 0 50 0zm0 95a45 45 0 1 1 0-90 45 45 0 0 1 0 90z"/>
+                  </svg>
+                </div>
+
+                <div className="relative z-10 flex items-center justify-between gap-2 mb-2">
+                  <h4 className="font-sans font-black text-[18px] text-[#000080] leading-none">जनसेवा कार्ड</h4>
+                  <span className="font-mono font-black text-[12px] text-[#000080] tracking-wide">{cardNumber}</span>
+                </div>
+
+                <div className="relative z-10 space-y-1.5 text-[11px] text-[#000080]">
+                  <div className="flex"><span className="w-[80px] shrink-0 font-medium">नाम :</span><span className="font-semibold truncate">{cardName}</span></div>
+                  <div className="flex flex-wrap">
+                    <span className="w-[80px] shrink-0 font-medium">लिंग :</span><span className="font-semibold">{cardGender}</span>
+                    <span className="mx-2 text-slate-300">|</span>
+                    <span className="font-medium">DOB :</span><span className="font-semibold ml-1">{cardDob}</span>
+                  </div>
+                  <div className="flex items-start"><span className="w-[80px] shrink-0 mt-0.5 font-medium">पता :</span><span className="font-semibold leading-snug line-clamp-2 flex-1">{cardAddress}</span></div>
+                </div>
+
+                <div className="relative z-10 text-center pt-2 border-t border-slate-100">
+                  <p className="font-sans font-black text-[13px] text-[#000080] tracking-wider leading-none">Toll Free : 1800-569-0991</p>
+                  <p className="text-[8.5px] text-slate-600 font-medium mt-1">www.therpfoundation.org</p>
+                </div>
+              </div>
+              <div className="bg-[#138808] h-2 w-full shrink-0"></div>
             </div>
 
-            {/* Card Benefits Heading */}
-            <div className="relative z-10 text-center mb-4 mt-2">
-  <h4 className="font-sans font-black text-[22px] text-[#000080] leading-none tracking-wide">
-    जनसेवा कार्ड के फायदे :
-  </h4>
-</div>
+            {/* BACK */}
+            <div id="jan-seva-card-back" className="absolute inset-0 backface-hidden rotate-y-180 w-full h-full bg-white rounded-2xl overflow-hidden shadow-xl border border-slate-200 flex flex-col">
+              <div className="bg-[#FF9933] h-2 w-full shrink-0"></div>
+              <div className="p-3 flex-1 relative flex flex-col bg-white overflow-hidden">
+                <div className="absolute inset-0 flex justify-center items-center opacity-[0.035] pointer-events-none">
+                  <svg viewBox="0 0 100 100" className="w-28 h-28 text-[#000080]" fill="currentColor">
+                    <path d="M50 0a50 50 0 1 0 0 100A50 50 0 0 0 50 0zm0 95a45 45 0 1 1 0-90 45 45 0 0 1 0 90z"/>
+                  </svg>
+                </div>
 
-{/* Benefits List (Styled with absolute corner brackets on sides) */}
-            <div className="relative z-10 px-3.5 py-1 flex items-center justify-center my-1.5">
-              {/* Left bracket */}
-              <div className="absolute left-1 top-0 bottom-0 w-2.5 border-l-2 border-t-2 border-b-2 border-orange-400/80 rounded-l-xs"></div>
-              
-              <ul className="text-[12px] text-slate-700 font-medium space-y-2 w-full px-2 leading-relaxed">
-  {activeBenefits.map((b, idx) => (
-    <li key={idx} className="flex items-start">
-      <span className="leading-tight">
-        <span className="text-[#000080] font-black text-[13px]">{b.label}</span> <span className="text-slate-500 mx-1">–</span> {b.desc}
-      </span>
-    </li>
-  ))}
-</ul>
+                <div className="relative z-10 text-center mb-2">
+                  <h4 className="font-sans font-black text-[15px] text-[#000080] leading-none">जनसेवा कार्ड के फायदे :</h4>
+                </div>
 
-              {/* Right bracket */}
-              <div className="absolute right-1 top-0 bottom-0 w-2.5 border-r-2 border-t-2 border-b-2 border-orange-400/80 rounded-r-xs"></div>
-            </div>
+                <div className="relative z-10 px-3 py-1 flex items-center justify-center my-1 flex-1">
+                  <div className="absolute left-0 top-0 bottom-0 w-2 border-l-2 border-t-2 border-b-2 border-orange-400/80 rounded-l-xs"></div>
+                  <ul className="text-[10.5px] text-slate-700 font-medium space-y-1.5 w-full px-2 leading-snug overflow-y-auto">
+                    {activeBenefits.map((b, idx) => (
+                      <li key={idx}><span className="text-[#000080] font-black">{b.label}</span> – {b.desc}</li>
+                    ))}
+                  </ul>
+                  <div className="absolute right-0 top-0 bottom-0 w-2 border-r-2 border-t-2 border-b-2 border-orange-400/80 rounded-r-xs"></div>
+                </div>
 
-            {/* Disclaimer Footer Text */}
-            <div className="relative z-10 text-center border-t border-slate-100 pt-3 pb-0.5">
-              <p className="text-[13px] font-semibold text-slate-600 leading-tight pb-1">
-  {lang === "hi" 
-    ? "नोट: यह सभी सुविधाएं जन सेवा कार्ड धारकों के लिए निःशुल्क होगा।" 
-    : "Note: All these facilities will be free of charge for Jan Seva Card holders."}
-</p>
+                <p className="relative z-10 text-center text-[10px] font-semibold text-slate-600 border-t border-slate-100 pt-2 mt-1">
+                  {lang === "hi" ? "नोट: यह सभी सुविधाएं जन सेवा कार्ड धारकों के लिए निःशुल्क है।" : "Note: All facilities are free for Jan Seva Card holders."}
+                </p>
+              </div>
+              <div className="bg-[#138808] h-2 w-full shrink-0"></div>
             </div>
           </div>
-
-          {/* Green Bottom Border */}
-          <div className="bg-[#138808] h-2.5 w-full"></div>
         </div>
 
-        {/* Card Actions Stack */}
-        <div className="grid grid-cols-2 gap-3 pt-2">
+        <p className="text-center text-[10px] text-slate-400 font-medium no-print">
+          {flipped ? (lang === "hi" ? "पीछे की तरफ • फिर टैप करें" : "Back side • tap again") : (lang === "hi" ? "सामने की तरफ • टैप करके पलटें" : "Front side • tap to flip")}
+        </p>
+
+        {/* Card Actions */}
+        <div className="grid grid-cols-2 gap-3 pt-2 no-print">
           <button 
             onClick={handleSimulateDownload}
-            className="bg-[#000080] hover:bg-[#000066] text-white py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+            disabled={pdfLoading}
+            className="bg-[#000080] hover:bg-[#000066] text-white py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-70"
           >
             <Download className="w-4 h-4" />
-            <span>{lang === "hi" ? "कार्ड डाउनलोड करें" : "Download Card"}</span>
+            <span>{pdfLoading ? "..." : (lang === "hi" ? "PDF डाउनलोड" : "Download PDF")}</span>
           </button>
           
           <button 
@@ -480,14 +510,14 @@ export default function JanSevaCard() {
             className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow-sm flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>{lang === "hi" ? "कार्ड प्रिंट करें" : "Print Card"}</span>
+            <span>{lang === "hi" ? "प्रिंट करें" : "Print Card"}</span>
           </button>
         </div>
 
-        {/* Reset & Re-apply Admin Option */}
+        {/* Reset Button */}
         <button 
           onClick={handleResetCard}
-          className="w-full bg-red-50 hover:bg-red-100 border border-red-150 text-red-700 py-3 rounded-2xl font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+          className="w-full bg-red-50 hover:bg-red-100 border border-red-150 text-red-700 py-3 rounded-2xl font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 no-print"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           <span>{lang === "hi" ? "कार्ड डेटा रीसेट करें (री-अप्लाई)" : "Reset Card & Apply Again"}</span>
@@ -692,7 +722,6 @@ export default function JanSevaCard() {
       
       {/* 3D Gold Accent card mockup */}
       <div className="bg-gradient-to-tr from-[#000080] via-[#102A6A] to-[#1E3A8A] rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden border border-white/5 animate-float">
-        {/* Ashoka Chakra Background watermark */}
         <div className="absolute top-0 right-0 w-36 h-36 bg-white/10 rounded-full blur-2xl transform translate-x-12 -translate-y-12"></div>
         
         <div className="flex justify-between items-start mb-6">
