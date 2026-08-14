@@ -4,18 +4,14 @@ import {
   Award,
   CheckCircle2,
   Download,
-  Droplet,
   QrCode,
   RotateCw,
   Share2,
   ShieldCheck,
-  Sparkles,
   X,
   Printer,
 } from "lucide-react";
 import QRCode from "react-qr-code";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 
 interface JanSevaCardCompProps {
   lang: "hi" | "en";
@@ -57,19 +53,20 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
     try {
       if (navigator.share) await navigator.share(shareData);
       else await navigator.clipboard.writeText(verifyUrl);
-    } catch {
-      // User cancelled sharing; no UI error is necessary.
-    }
+    } catch {}
   };
 
-  // ✨ PDF Download (Front + Back)
+  // ✅ Safe Dynamic Import - no top-level crash
   const handleDownloadPDF = async () => {
     setPdfLoading(true);
     try {
+      const { jsPDF } = await import("jspdf");
+      const html2canvas = (await import("html2canvas")).default;
+      
       const frontEl = document.getElementById("comp-card-front");
       const backEl = document.getElementById("comp-card-back");
       if (!frontEl) {
-        alert(lang === "hi" ? "कार्ड एलिमेंट नहीं मिला।" : "Card element not found.");
+        alert("Card not found");
         return;
       }
 
@@ -94,8 +91,8 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
 
       pdf.save(`RPFoundation_Card_${valueOrDash(profile.janSevaId)}.pdf`);
     } catch (err) {
-      console.error("PDF generation failed:", err);
-      alert(lang === "hi" ? "PDF बनाने में समस्या हुई।" : "Failed to generate PDF.");
+      console.error("PDF error:", err);
+      alert(lang === "hi" ? "PDF डाउनलोड फेल।" : "PDF download failed.");
     } finally {
       setPdfLoading(false);
     }
@@ -126,7 +123,6 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
           </button>
         </div>
 
-        {/* ✨ FLIP CARD */}
         <div
           className="perspective-1000 w-full cursor-pointer"
           onClick={() => setFlipped(f => !f)}
@@ -138,7 +134,6 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
             
             {/* FRONT */}
             <div id="comp-card-front" className="absolute inset-0 backface-hidden w-full h-full bg-white rounded-2xl overflow-hidden shadow-xl border border-slate-200 flex flex-col">
-              {/* Saffron Header */}
               <div className="bg-[#FF9933] px-3 py-2.5 flex items-center gap-2.5 shrink-0">
                 <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 border border-white/40">
                   {profile.profileImage ? (
@@ -157,9 +152,7 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
                 </span>
               </div>
 
-              {/* Main Content */}
               <div className="p-3 flex-1 relative flex flex-col justify-between bg-white">
-                {/* Ashoka Chakra Watermark */}
                 <div className="absolute inset-0 flex justify-center items-center opacity-[0.035] pointer-events-none">
                   <svg viewBox="0 0 100 100" className="w-28 h-28 text-[#000080]" fill="currentColor">
                     <path d="M50 0a50 50 0 1 0 0 100A50 50 0 0 0 50 0zm0 95a45 45 0 1 1 0-90 45 45 0 0 1 0 90z"/>
@@ -199,7 +192,6 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
                   <p className="text-[8px] text-slate-600 font-medium mt-0.5">www.therpfoundation.org</p>
                 </div>
               </div>
-              {/* Green Footer */}
               <div className="bg-[#138808] h-2 w-full shrink-0"></div>
             </div>
 
@@ -249,7 +241,6 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
         </p>
       </div>
 
-      {/* Card Services */}
       <div className="mx-auto max-w-[340px] rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="mb-2.5 flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-[#000080]" />
@@ -281,9 +272,8 @@ export default function JanSevaCardComp({ lang, profile, onRenew }: JanSevaCardC
         )}
       </div>
 
-      {/* Verify Modal */}
       {showVerify && (
-        <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-900/45 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Verify member card">
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-900/45 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
