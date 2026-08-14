@@ -10,6 +10,9 @@ export interface UserProfile {
   division: string; // ward/assembly/district
   janSevaId: string;
   role: "Citizen" | "Active Volunteer" | "Donor";
+  profileImage?: string;
+  bloodGroup?: string;
+  memberSince?: string;
   points?: number;
   badge?: string;
 }
@@ -81,5 +84,3 @@ export interface AppSettings {
 }
 
 export type DbRecord = Record<string, any>;
-
-
