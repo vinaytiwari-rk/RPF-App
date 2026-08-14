@@ -100,32 +100,53 @@ export default function MainLayout() {
         <Outlet context={{ lang: language }} />
       </main>
 
-      {/* Standard Bottom Navigation */}
-      <nav className="fixed bottom-0 w-full bg-white border-t border-slate-100 flex justify-around items-center px-2 pb-safe-nav pt-2 shrink-0 z-50">
-        <button onClick={() => handleNav("/")} className={`flex flex-col items-center p-2 w-16 ${location.pathname === "/" ? "text-[#FF9933]" : "text-slate-500 hover:text-slate-800"}`}>
-          <Compass className={`w-6 h-6 mb-1 ${location.pathname === "/" ? "stroke-2" : "stroke-1.5"}`} />
-          <span className="text-[10px] font-medium">{language === "hi" ? "होम" : "Home"}</span>
-        </button>
-
-        <button onClick={() => handleNav("/services")} className={`flex flex-col items-center p-2 w-16 ${location.pathname === "/services" ? "text-[#FF9933]" : "text-slate-500 hover:text-slate-800"}`}>
-          <GridIcon className={`w-6 h-6 mb-1 ${location.pathname === "/services" ? "stroke-2" : "stroke-1.5"}`} />
-          <span className="text-[10px] font-medium">{language === "hi" ? "सेवाएं" : "Services"}</span>
-        </button>
-
-        {/* Floating Donate Button Alternative */}
-        <button onClick={() => handleNav("/donations")} className="relative -top-4 flex flex-col items-center justify-center w-14 h-14 bg-gradient-to-br from-[#FF9933] to-[#F26522] rounded-full shadow-lg text-white shadow-orange-500/30 transform transition active:scale-95">
+      {/* Floating Donate Button (Only on Home and Explore) */}
+      {(location.pathname === "/" || location.pathname === "/services") && (
+        <button 
+          onClick={() => handleNav("/donations")} 
+          className="fixed bottom-20 right-4 z-40 flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#FF9933] to-[#F26522] rounded-full shadow-lg text-white shadow-orange-500/40 transform transition active:scale-95"
+          aria-label="Donate"
+        >
           <HeartHandshake className="w-7 h-7" />
         </button>
+      )}
 
-        <button onClick={() => handleNav("/community")} className={`flex flex-col items-center p-2 w-16 ${location.pathname === "/community" ? "text-[#FF9933]" : "text-slate-500 hover:text-slate-800"}`}>
-          <Users className={`w-6 h-6 mb-1 ${location.pathname === "/community" ? "stroke-2" : "stroke-1.5"}`} />
-          <span className="text-[10px] font-medium">{language === "hi" ? "समुदाय" : "Community"}</span>
+      {/* Standard Bottom Navigation - 5 Tabs */}
+      <nav className="fixed bottom-0 w-full bg-white border-t border-slate-100 flex justify-around items-center px-1 pb-safe-nav pt-2 shrink-0 z-50 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
+        
+        {/* 1. Home */}
+        <button onClick={() => handleNav("/")} className={`flex flex-col items-center p-2 w-[20%] ${location.pathname === "/" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
+          <Compass className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/" ? "stroke-[2.5px]" : "stroke-2"}`} />
+          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "होम" : "Home"}</span>
         </button>
 
-        <button onClick={() => handleNav("/profile")} className={`flex flex-col items-center p-2 w-16 ${location.pathname === "/profile" ? "text-[#FF9933]" : "text-slate-500 hover:text-slate-800"}`}>
-          <User className={`w-6 h-6 mb-1 ${location.pathname === "/profile" ? "stroke-2" : "stroke-1.5"}`} />
-          <span className="text-[10px] font-medium">{language === "hi" ? "प्रोफ़ाइल" : "Profile"}</span>
+        {/* 2. Explore */}
+        <button onClick={() => handleNav("/services")} className={`flex flex-col items-center p-2 w-[20%] ${location.pathname === "/services" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
+          <Search className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/services" ? "stroke-[2.5px]" : "stroke-2"}`} />
+          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "खोजें" : "Explore"}</span>
         </button>
+
+        {/* 3. Activity */}
+        <button onClick={() => handleNav("/notifications")} className={`flex flex-col items-center p-2 w-[20%] relative ${location.pathname === "/notifications" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
+          <Bell className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/notifications" ? "stroke-[2.5px]" : "stroke-2"}`} />
+          {unreadCount > 0 && (
+            <span className="absolute top-1.5 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+          )}
+          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "गतिविधि" : "Activity"}</span>
+        </button>
+
+        {/* 4. Impact */}
+        <button onClick={() => handleNav("/community")} className={`flex flex-col items-center p-2 w-[20%] ${location.pathname === "/community" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
+          <Heart className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/community" ? "stroke-[2.5px]" : "stroke-2"}`} />
+          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "प्रभाव" : "Impact"}</span>
+        </button>
+
+        {/* 5. Me */}
+        <button onClick={() => handleNav("/profile")} className={`flex flex-col items-center p-2 w-[20%] ${location.pathname === "/profile" ? "text-[#FF9933]" : "text-slate-400 hover:text-slate-700"}`}>
+          <User className={`w-[22px] h-[22px] mb-1 ${location.pathname === "/profile" ? "stroke-[2.5px]" : "stroke-2"}`} />
+          <span className="text-[10px] font-medium tracking-tight">{language === "hi" ? "मेरा खाता" : "Me"}</span>
+        </button>
+
       </nav>
 
 
