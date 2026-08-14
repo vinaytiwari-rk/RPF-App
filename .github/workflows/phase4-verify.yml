@@ -1,0 +1,38 @@
+name: Premium Reset Verification
+
+on:
+  push:
+    branches:
+      - phase-4-premium-reset
+  pull_request:
+    branches:
+      - main
+      - phase-4-premium-reset
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install iOS platform for compatibility audit
+        run: npm install --no-save @capacitor/ios@8.4.2
+
+      - name: Generate iOS native project
+        run: npx cap add ios
+
+      - name: Type check
+        run: npm run lint
+
+      - name: Production build
+        run: npm run build
