@@ -1,7 +1,7 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { getServiceContent, updateServiceContent } from "../controllers/adminHqController.js";
+import { updateServiceContent } from "../controllers/adminHqController.js";
 import { pool } from "../db/dbPool.js";
 import { authenticateToken, requireAdmin, JWT_SECRET, auditEvent } from "../db/middleware.js";
 
@@ -17,14 +17,17 @@ router.post("/api/auth/admin-login", async (req, res) => {
     const result = await pool.query(`SELECT * FROM admin_credentials WHERE LOWER(username)=LOWER($1) LIMIT 1`, ["admin"]);
     if (!result.rows.length) return res.status(401).json({ success:false,error:"Administrator account is not configured." });
     const valid = await bcrypt.compare(String(password), result.rows[0].password_hash);
-    if (!valid) return res.status(401).json({ success:false,error:"Invalid administrator credentials." });
+    if (!valid) {
+      await auditEvent({ action: "admin_login_failed", resource: "administrator", req, metadata: { reason: "invalid_password" } });
+      return res.status(401).json({success:false,error:"Invalid administrator credentials."});
+    }
     const user={id:"usr_staff_admin",name:"System Administrator",role:"admin"};
     const token=jwt.sign(user,JWT_SECRET,{expiresIn:"7d"});
     try { await pool.query(`INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '7 days') ON CONFLICT(id) DO NOTHING`,[`admin-${Date.now()}`,user.id,token]); }
     catch (e) { console.error("Administrator session tracking failed:",e); return res.status(503).json({success:false,error:"Administrator session service is temporarily unavailable."}); }
     await auditEvent({ action: "admin_login_success", resource: "administrator", userId: user.id, req });
     return res.json({success:true,user,token});
-  } catch(error) { console.error("Administrator login error:",error); return res.status(500).json({success:false,error:"Administrator login failed."}); }
+  } catch(error) { console.error("Administrator login error:",error);return res.status(500).json({success:false,error:"Administrator login failed."}); }
 });
 
 router.all("/api/admin-setup", (_req,res)=>res.status(410).json({success:false,error:"Administrator setup endpoint has been retired."}));
@@ -81,6 +84,7 @@ router.get("/api/admin/system/diagnostics", ...admin, async (_req,res)=>{
   }catch(error){console.error("Admin diagnostics error:",error);return res.status(500).json({success:false,error:"Unable to run system diagnostics."});}
 });
 
-router.get("/services/:serviceId/content", getServiceContent);
-router.post("/services/:serviceId/content", ...admin, updateServiceContent);
+// Canonical Administrator write contract. The router is mounted under
+// /api/admin/hq and server.ts also protects that mount with JWT + admin role.
+router.put("/services/:serviceId/content", ...admin, updateServiceContent);
 export default router;
