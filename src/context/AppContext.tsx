@@ -24,6 +24,18 @@ const DEFAULT_CMS_CONFIG: CmsConfig = { alertBannerEn: "", alertBannerHi: "", fo
 const DEFAULT_SERVICES = [["card","welfare","ShieldCheck","Jan Seva Card","जन सेवा कार्ड"],["blood","urgent","Heart","Blood Network","रक्त नेटवर्क"],["donations","involved","HandCoins","Donations","दान"],["grievance","civic","AlertTriangle","Grievances","शिकायतें"],["volunteers","involved","Users","Volunteering","स्वयंसेवा"],["health-care","welfare","HeartPulse","Health Care","स्वास्थ्य सेवा"],["jobs","welfare","Briefcase","Jobs Portal","रोजगार पोर्टल"],["environment","involved","TreePine","Environment","पर्यावरण"],["culture","civic","Landmark","Religious & Culture","धर्म और संस्कृति"],["disaster","urgent","AlertCircle","Disaster Management","आपदा प्रबंधन"],["farmer","welfare","Sprout","Farmer Support","किसान सहयोग"],["schemes","empowerment","FileText","Government Schemes","सरकारी योजनाएं"],["skills","empowerment","GraduationCap","Skills Training","कौशल प्रशिक्षण"],["doc-scanner","local","Camera","Doc Scanner","दस्तावेज़ स्कैनर"],["gps-toolkit","local","MapPin","GPS Toolkit","जीपीएस टूलकिट"],["vitals","local","Thermometer","Vitals Tracker","स्वास्थ्य ट्रैकर"],["resume-builder","local","Briefcase","Resume Builder","बायोडाटा मेकर"],["medical-dict","local","Heart","Medical Dictionary","चिकित्सा शब्दकोश"],["women-safety","urgent","ShieldAlert","Women Safety","महिला सुरक्षा"],["ai-chat","empowerment","Bot","RP AI Mitr","आरपी एआई मित्र"]].map(([id,category,iconName,titleEn,titleHi]) => ({ id, category, iconName, titleEn, titleHi, descEn: "", descHi: "" }));
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [{ platform: "founder_instagram", label: "Founder Instagram", url: "https://www.instagram.com/therohitpandit/" },{ platform: "foundation_instagram", label: "Foundation Instagram", url: "https://www.instagram.com/rpfoundationofficial/" },{ platform: "facebook", label: "Facebook Page", url: "https://www.facebook.com/rpfofficial" },{ platform: "twitter", label: "X (Twitter)", url: "https://x.com/rpfoundation15" },{ platform: "youtube", label: "YouTube Channel", url: "https://www.youtube.com/@rpfoundationofficial" }];
 
+const CACHE_PREFIX = "@rpf_cache:";
+const CACHE_TTL = 10 * 60 * 1000;
+const NOTIFICATION_TTL = 60 * 1000;
+const readCache = <T,>(key: string, ttl: number): T | null => {
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + key); if (!raw) return null;
+    const parsed = JSON.parse(raw); if (!parsed || Date.now() - parsed.savedAt > ttl) return null;
+    return parsed.data as T;
+  } catch { return null; }
+};
+const writeCache = (key: string, data: unknown) => { try { localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ savedAt: Date.now(), data })); } catch {} };
+
 interface AppContextType {
   loading: boolean; settings: Settings; globalSettings: any; announcements: any[]; notifications: NotificationItem[]; cmsConfig: CmsConfig; servicesList: any[]; isLoadingServices: boolean; socialPosts: SocialPost[]; socialLinks: SocialLink[]; grievances: Grievance[]; cardApplications: CardApplication[];
   updateSettings: (newSettings: Partial<Settings>) => Promise<void>; updateCmsConfig: (newCms: CmsConfig) => Promise<void>; addSocialPost: (post: Omit<SocialPost, "id" | "time" | "likes" | "commentsCount" | "liked">) => Promise<void>; likePost: (id: string) => Promise<void>; addGrievance: (grievance: Omit<Grievance, "id" | "status" | "createdAt">) => Promise<void>; updateGrievanceStatus: (id: string, status: Grievance["status"]) => Promise<void>; submitCardApplication: (app: CardApplication) => Promise<void>; approveCardApplication: (userId: string) => string; rejectCardApplication: (userId: string) => void; refreshData: () => Promise<void>; userLocation: { city?: string; region?: string; country?: string; latitude?: string; longitude?: string } | null;
@@ -33,28 +45,54 @@ const AppContext = createContext<AppContextType | null>(null);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true); const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS); const [globalSettings, setGlobalSettings] = useState<any>({}); const [announcements, setAnnouncements] = useState<any[]>([]); const [cmsConfig, setCmsConfig] = useState<CmsConfig>(DEFAULT_CMS_CONFIG); const [servicesList, setServicesList] = useState<any[]>(DEFAULT_SERVICES); const [isLoadingServices, setIsLoadingServices] = useState(false); const [socialPosts, setSocialPosts] = useState<SocialPost[]>([]); const [socialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS); const [grievances, setGrievances] = useState<Grievance[]>([]); const [cardApplications, setCardApplications] = useState<CardApplication[]>([]); const [notifications, setNotifications] = useState<NotificationItem[]>([]); const [userLocation] = useState<any>(null);
 
+  const userCacheKey = () => { try { const user = JSON.parse(localStorage.getItem("@rpf_user") || "null"); return user?.id ? `user:${user.id}` : "anonymous"; } catch { return "anonymous"; } };
+
+  const hydrateCache = () => {
+    const cachedSettings = readCache<Settings>("settings", CACHE_TTL); if (cachedSettings) setSettings(cachedSettings);
+    const cachedGlobal = readCache<any>("global-settings", CACHE_TTL); if (cachedGlobal) setGlobalSettings(cachedGlobal);
+    const cachedAnnouncements = readCache<any[]>("announcements", CACHE_TTL); if (cachedAnnouncements) setAnnouncements(cachedAnnouncements);
+    const cachedCms = readCache<CmsConfig>("cms", CACHE_TTL); if (cachedCms) setCmsConfig(cachedCms);
+    const cachedServices = readCache<any[]>("services", CACHE_TTL); if (cachedServices) setServicesList(cachedServices);
+    const cachedSocial = readCache<SocialPost[]>("social", CACHE_TTL); if (cachedSocial) setSocialPosts(cachedSocial);
+    const cachedGrievances = readCache<Grievance[]>(`grievances:${userCacheKey()}`, CACHE_TTL); if (cachedGrievances) setGrievances(cachedGrievances);
+    const cachedCards = readCache<CardApplication[]>(`cards:${userCacheKey()}`, CACHE_TTL); if (cachedCards) setCardApplications(cachedCards);
+    const cachedNotifications = readCache<NotificationItem[]>(`notifications:${userCacheKey()}`, NOTIFICATION_TTL); if (cachedNotifications) setNotifications(cachedNotifications);
+    setLoading(false);
+  };
+
+  const refreshNotifications = async () => {
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      if (!token) { setNotifications([]); return; }
+      const notificationRes = await fetch("/api/notifications", { headers: { Authorization: `Bearer ${token}` } });
+      if (notificationRes.ok) { const d = await notificationRes.json(); const list = Array.isArray(d.notifications) ? d.notifications : []; setNotifications(list); writeCache(`notifications:${userCacheKey()}`, list); }
+      else if (notificationRes.status === 401) setNotifications([]);
+    } catch {}
+  };
+
   const fetchAllData = async () => {
     try {
-      try { const res = await fetch("/api/admin/settings"); if (res.ok) { const d = await res.json(); if (d.data) { setGlobalSettings(d.data); const root = document.documentElement; if (d.data.primary_color) root.style.setProperty('--color-primary', d.data.primary_color); if (d.data.secondary_color) root.style.setProperty('--color-secondary', d.data.secondary_color); if (d.data.font_family) root.style.setProperty('--font-primary', d.data.font_family); } } } catch {}
-      try { const res = await fetch("/api/admin/announcements"); if (res.ok) { const d = await res.json(); if (Array.isArray(d.data)) setAnnouncements(d.data); } } catch {}
-      const settingsRes = await fetch("/api/settings"); if (settingsRes.ok) { const d = await settingsRes.json(); if (d.settings) setSettings((prev) => ({ ...prev, ...d.settings })); }
-      const cmsRes = await fetch("/api/cms"); if (cmsRes.ok) { const d = await cmsRes.json(); if (d.cms) setCmsConfig((prev) => ({ ...prev, ...d.cms })); }
-      try {
-        const token = localStorage.getItem("@rpf_token");
-        if (token) {
-          const notificationRes = await fetch("/api/notifications", { headers: { Authorization: `Bearer ${token}` } });
-          if (notificationRes.ok) { const d = await notificationRes.json(); if (Array.isArray(d.notifications)) setNotifications(d.notifications); }
-          else if (notificationRes.status === 401) setNotifications([]);
-        } else setNotifications([]);
-      } catch {}
-      const socialRes = await fetch("/api/social"); if (socialRes.ok) { const d = await socialRes.json(); if (Array.isArray(d.posts)) setSocialPosts([...d.posts].sort((a: any,b: any) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())); }
-      const grievancesRes = await fetch("/api/grievances"); if (grievancesRes.ok) { const d = await grievancesRes.json(); if (Array.isArray(d.grievances)) setGrievances(d.grievances); }
-      const cardsRes = await fetch("/api/cards"); if (cardsRes.ok) { const d = await cardsRes.json(); if (Array.isArray(d.applications)) setCardApplications(d.applications); }
-      try { setIsLoadingServices(true); const servicesRes = await fetch("/api/public/services"); if (servicesRes.ok) { const d = await servicesRes.json(); if (Array.isArray(d.data)) setServicesList(d.data); } } catch {} finally { setIsLoadingServices(false); }
+      try { const res = await fetch("/api/admin/settings"); if (res.ok) { const d = await res.json(); if (d.data) { setGlobalSettings(d.data); writeCache("global-settings", d.data); const root = document.documentElement; if (d.data.primary_color) root.style.setProperty('--color-primary', d.data.primary_color); if (d.data.secondary_color) root.style.setProperty('--color-secondary', d.data.secondary_color); if (d.data.font_family) root.style.setProperty('--font-primary', d.data.font_family); } } } catch {}
+      try { const res = await fetch("/api/admin/announcements"); if (res.ok) { const d = await res.json(); if (Array.isArray(d.data)) { setAnnouncements(d.data); writeCache("announcements", d.data); } } } catch {}
+      try { const settingsRes = await fetch("/api/settings"); if (settingsRes.ok) { const d = await settingsRes.json(); if (d.settings) { setSettings((prev) => ({ ...prev, ...d.settings })); writeCache("settings", { ...settings, ...d.settings }); } } } catch {}
+      try { const cmsRes = await fetch("/api/cms"); if (cmsRes.ok) { const d = await cmsRes.json(); if (d.cms) { setCmsConfig((prev) => ({ ...prev, ...d.cms })); writeCache("cms", d.cms); } } } catch {}
+      try { const socialRes = await fetch("/api/social"); if (socialRes.ok) { const d = await socialRes.json(); if (Array.isArray(d.posts)) { const list = [...d.posts].sort((a: any,b: any) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()); setSocialPosts(list); writeCache("social", list); } } } catch {}
+      try { const grievancesRes = await fetch("/api/grievances"); if (grievancesRes.ok) { const d = await grievancesRes.json(); if (Array.isArray(d.grievances)) { setGrievances(d.grievances); writeCache(`grievances:${userCacheKey()}`, d.grievances); } } } catch {}
+      try { const cardsRes = await fetch("/api/cards"); if (cardsRes.ok) { const d = await cardsRes.json(); if (Array.isArray(d.applications)) { setCardApplications(d.applications); writeCache(`cards:${userCacheKey()}`, d.applications); } } } catch {}
+      try { setIsLoadingServices(true); const servicesRes = await fetch("/api/public/services"); if (servicesRes.ok) { const d = await servicesRes.json(); if (Array.isArray(d.data)) { setServicesList(d.data); writeCache("services", d.data); } } } catch {} finally { setIsLoadingServices(false); }
     } catch (e) { console.error("AppContext fetch error:", e); } finally { setLoading(false); }
   };
-  useEffect(() => { fetchAllData(); const interval = window.setInterval(fetchAllData, 5 * 60 * 1000); return () => window.clearInterval(interval); }, []);
-  const updateSettings = async (newSettings: Partial<Settings>) => { const res = await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newSettings) }); if (!res.ok) throw new Error("Failed to save settings"); setSettings((prev) => ({ ...prev, ...newSettings })); };
+
+  useEffect(() => {
+    hydrateCache();
+    void fetchAllData();
+    void refreshNotifications();
+    const dataInterval = window.setInterval(() => { void fetchAllData(); }, CACHE_TTL);
+    const notificationInterval = window.setInterval(() => { void refreshNotifications(); }, NOTIFICATION_TTL);
+    return () => { window.clearInterval(dataInterval); window.clearInterval(notificationInterval); };
+  }, []);
+
+  const updateSettings = async (newSettings: Partial<Settings>) => { const res = await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newSettings) }); if (!res.ok) throw new Error("Failed to save settings"); const next = { ...settings, ...newSettings }; setSettings(next); writeCache("settings", next); };
   const addSocialPost = async (post: Omit<SocialPost, "id" | "time" | "likes" | "commentsCount" | "liked">) => { const res = await fetch("/api/social", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(post) }); if (!res.ok) throw new Error("Failed to publish social post"); await fetchAllData(); };
   const likePost = async (id: string) => { const res = await fetch("/api/social/like", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) }); if (!res.ok) throw new Error("Failed to update reaction"); setSocialPosts((prev) => prev.map((p) => p.id === id ? { ...p, liked: !p.liked, likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1 } : p)); };
   const addGrievance = async (grievance: Omit<Grievance, "id" | "status" | "createdAt">) => { const res = await fetch("/api/grievances", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(grievance) }); if (!res.ok) throw new Error("Failed to submit grievance"); await fetchAllData(); };
@@ -62,7 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const submitCardApplication = async (appVal: CardApplication) => { const res = await fetch("/api/cards", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(appVal) }); if (!res.ok) throw new Error("Failed to submit card application"); await fetchAllData(); };
   const approveCardApplication = (userId: string): string => { fetch("/api/cards/approve", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId }) }).then((r) => { if (!r.ok) throw new Error("Approval failed"); return fetchAllData(); }).catch(console.error); return ""; };
   const rejectCardApplication = (userId: string) => { fetch("/api/cards/reject", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId }) }).then((r) => { if (!r.ok) throw new Error("Rejection failed"); return fetchAllData(); }).catch(console.error); };
-  const updateCmsConfig = async (newCms: CmsConfig) => { const res = await fetch("/api/cms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newCms) }); if (!res.ok) throw new Error("Failed to save CMS"); setCmsConfig(newCms); };
+  const updateCmsConfig = async (newCms: CmsConfig) => { const res = await fetch("/api/cms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newCms) }); if (!res.ok) throw new Error("Failed to save CMS"); setCmsConfig(newCms); writeCache("cms", newCms); };
   return <AppContext.Provider value={{ loading, settings, globalSettings, announcements, cmsConfig, servicesList, isLoadingServices, socialPosts, socialLinks, grievances, cardApplications, updateSettings, updateCmsConfig, addSocialPost, likePost, addGrievance, updateGrievanceStatus, submitCardApplication, approveCardApplication, rejectCardApplication, refreshData: fetchAllData, userLocation, notifications }}>{children}</AppContext.Provider>;
 }
 export function useApp() { const context = useContext(AppContext); if (!context) throw new Error("useApp must be used within an AppProvider"); return context; }
