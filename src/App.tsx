@@ -7,7 +7,7 @@ import { Toaster } from "react-hot-toast";
 import MainLayout from "./layouts/MainLayout";
 axios.defaults.headers.common['Accept'] = 'application/json';
 if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') if (axios.defaults.baseURL && axios.defaults.baseURL.startsWith('http://')) axios.defaults.baseURL = axios.defaults.baseURL.replace('http://', 'https://');
-import Home from "./pages/Home";
+import Home from "./pages/HomeV2";
 const JanSevaCard = React.lazy(() => import("./pages/JanSevaCard"));
 const BloodNetwork = React.lazy(() => import('./pages/BloodNetwork'));
 const Grievances = React.lazy(() => import('./pages/Grievances'));
