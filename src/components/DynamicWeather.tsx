@@ -1,75 +1,59 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Cloud, CloudRain, Sun, Wind, Droplets } from "lucide-react";
 
-export default function DynamicWeather({ weather, lang }: { weather: any, lang: "hi" | "en" }) {
+export default function DynamicWeather({ weather, lang }: { weather: any; lang: "hi" | "en" }) {
   const isHi = lang === "hi";
-  
-  // Fake weather state to show cool animations, based on temp or random
-  const temp = weather?.current_weather?.temperature || 25;
-  const wind = weather?.current_weather?.windspeed || 12;
-  const isRaining = weather?.daily?.precipitation_sum?.[0] > 0 || temp < 20;
+  const current = weather?.current_weather || weather?.current || null;
 
-  // Background and icons dynamically change
-  const bgClass = isRaining 
-    ? "bg-gradient-to-br from-slate-700 to-slate-900" 
-    : "bg-gradient-to-br from-blue-400 to-blue-600";
-    
+  // Never invent weather values. If the upstream source has no reading,
+  // render an unavailable state instead of showing a fake 25°C/12 km/h value.
+  const temp = Number.isFinite(Number(current?.temperature)) ? Number(current.temperature) : null;
+  const wind = Number.isFinite(Number(current?.windspeed)) ? Number(current.windspeed) : null;
+  const humidity = Number.isFinite(Number(current?.relative_humidity_2m)) ? Number(current.relative_humidity_2m) : null;
+  const isRaining = Boolean(weather?.daily?.precipitation_sum?.[0] > 0 || weather?.current?.weather_code >= 51);
+  const available = temp !== null;
+
   return (
-    <div className={`relative overflow-hidden rounded-2xl p-5 text-white shadow-lg ${bgClass} transition-colors duration-1000`}>
-      {/* Weather Animations */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-50">
-        {isRaining ? (
-          <div className="absolute inset-0">
-            {/* Simple CSS rain simulation using repeating linear gradients and animation */}
-            <div className="w-full h-full bg-[linear-gradient(rgba(255,255,255,0)_0%,rgba(255,255,255,0.4)_100%)] bg-[length:2px_50px] animate-rain"></div>
-          </div>
-        ) : (
-          <div className="absolute top-0 right-0 p-4 animate-spin-slow">
-            <Sun className="w-32 h-32 text-yellow-300 opacity-20" />
-          </div>
-        )}
+    <div className="relative overflow-hidden rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 via-white to-green-50 p-5 text-[#000080] shadow-lg">
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" aria-hidden="true" />
+      <div className="pointer-events-none absolute right-0 top-0 p-4 opacity-10">
+        {isRaining ? <CloudRain className="h-32 w-32 text-[#000080]" /> : <Sun className="h-32 w-32 text-[#FF9933]" />}
       </div>
 
-      <div className="relative z-10 flex flex-col h-full justify-between">
-        <div className="flex justify-between items-start">
+      <div className="relative z-10 flex min-h-[210px] flex-col justify-between">
+        <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-display font-black text-xl drop-shadow-md">
-              {isHi ? "भोपाल, म.प्र." : "Bhopal, MP"}
-            </h3>
-            <p className="text-xs font-bold text-white/80 uppercase tracking-widest mt-1">
-              {isRaining ? (isHi ? "भारी बारिश" : "Heavy Rain") : (isHi ? "साफ मौसम" : "Clear Sky")}
+            <h3 className="font-display text-xl font-black">{weather?.place || (isHi ? "आपका स्थान" : "Your location")}</h3>
+            <p className="mt-1 text-xs font-bold uppercase tracking-widest text-slate-500">
+              {available ? (isRaining ? (isHi ? "बारिश" : "Rain") : (isHi ? "वर्तमान मौसम" : "Current weather")) : (isHi ? "मौसम उपलब्ध नहीं" : "Weather unavailable")}
             </p>
           </div>
-          <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md border border-white/30">
-            {isRaining ? <CloudRain className="w-6 h-6 text-white" /> : <Sun className="w-6 h-6 text-yellow-300" />}
+          <div className="rounded-xl border border-orange-100 bg-white/80 p-2 shadow-sm">
+            {isRaining ? <CloudRain className="h-6 w-6 text-[#000080]" /> : <Sun className="h-6 w-6 text-[#FF9933]" />}
           </div>
         </div>
 
-        <div className="mt-6 flex justify-between items-end">
-          <div className="flex items-start">
-            <span className="text-5xl font-black drop-shadow-lg leading-none">{temp}</span>
-            <span className="text-xl font-bold mt-1">°C</span>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-lg backdrop-blur-sm border border-white/10">
-              <Wind className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold">{wind} km/h</span>
+        {available ? (
+          <div className="mt-6 flex items-end justify-between">
+            <div className="flex items-start">
+              <span className="text-5xl font-black leading-none">{Math.round(temp)}</span>
+              <span className="mt-1 text-xl font-bold">°C</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-lg backdrop-blur-sm border border-white/10">
-              <Droplets className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold">{isRaining ? "85%" : "45%"} {isHi ? "नमी" : "Hum"}</span>
+            <div className="flex flex-col gap-2">
+              {wind !== null && <div className="flex items-center gap-1.5 rounded-lg bg-[#000080]/5 px-2 py-1"><Wind className="h-3.5 w-3.5" /><span className="text-[10px] font-bold">{Math.round(wind)} km/h</span></div>}
+              {humidity !== null && <div className="flex items-center gap-1.5 rounded-lg bg-[#138808]/5 px-2 py-1"><Droplets className="h-3.5 w-3.5 text-[#138808]" /><span className="text-[10px] font-bold">{Math.round(humidity)}% {isHi ? "नमी" : "Humidity"}</span></div>}
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="mt-6 rounded-xl border border-orange-100 bg-white/80 p-4 text-sm font-semibold text-slate-600">
+            {isHi ? "लाइव मौसम डेटा उपलब्ध नहीं है। फोन की लोकेशन और saved reading fallback का उपयोग किया जा सकता है।" : "Live weather data is unavailable. The app can use phone location and a saved reading as fallback."}
+          </div>
+        )}
 
-        {/* Agri-Advisory Alert */}
-        <div className="mt-4 bg-white/10 border border-white/20 p-3 rounded-xl backdrop-blur-md">
-          <p className="text-[10px] font-bold leading-tight">
-            <span className="text-yellow-300 font-black mr-1">{isHi ? "⚠️ कृषि सलाह:" : "⚠️ Agri-Advisory:"}</span>
-            {isRaining 
-              ? (isHi ? "अगले 24 घंटे खेतों में कीटनाशक का छिड़काव न करें।" : "Do not spray pesticides for the next 24 hours.")
-              : (isHi ? "फसलों में पर्याप्त सिंचाई बनाए रखें।" : "Maintain adequate irrigation for crops.")}
+        <div className="mt-4 rounded-xl border border-slate-200 bg-white/70 p-3 backdrop-blur-md">
+          <p className="text-[10px] font-bold leading-tight text-slate-600">
+            <span className="mr-1 font-black text-[#FF9933]">{isHi ? "ℹ️ जानकारी:" : "ℹ️ Info:"}</span>
+            {isHi ? "फोन की लोकेशन मौसम का स्थान बताती है; सामान्य मोबाइल फोन स्वयं वर्तमान मौसम या AQI को विश्वसनीय रूप से माप नहीं सकते।" : "Phone location identifies the place; ordinary phones do not reliably measure current weather or AQI themselves."}
           </p>
         </div>
       </div>
