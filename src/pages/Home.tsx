@@ -1,40 +1,94 @@
-import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Briefcase, ChevronRight, CloudSun, GraduationCap, Heart, HeartHandshake, Megaphone, Search, ShieldAlert, Sparkles, Users, Wind, HandHeart } from "lucide-react";
+import { useMemo } from "react";
+import { ArrowRight, ChevronRight, HeartHandshake, Megaphone, Sparkles, HandHeart, Users, BookOpen, HeartPulse, Leaf, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 
 type Lang = "en" | "hi";
-type Stats = { beneficiaries:number; volunteers:number; healthCamps:number; campaigns:number };
-const quickActions=[{id:"blood",icon:Heart,en:"Need Blood",hi:"रक्त चाहिए",route:"/blood-network",tone:"rose"},{id:"help",icon:ShieldAlert,en:"Need Help",hi:"मदद चाहिए",route:"/grievance",tone:"saffron"},{id:"jobs",icon:Briefcase,en:"Jobs",hi:"रोज़गार",route:"/services",tone:"indigo"},{id:"education",icon:GraduationCap,en:"Education",hi:"शिक्षा",route:"/services",tone:"gold"},{id:"volunteer",icon:Users,en:"Volunteer",hi:"स्वयंसेवा",route:"/services",tone:"green"}];
-const tones:Record<string,string>={rose:"from-[#FF4D67] to-[#FF9933]",saffron:"from-[#FF9933] to-[#FFC107]",indigo:"from-[#000080] to-[#2563EB]",gold:"from-[#FFB000] to-[#FF9933]",green:"from-[#138808] to-[#22C55E]"};
-const metric=(v:number)=>!Number.isFinite(v)||v<0?"0":v>=1000000?`${(v/1000000).toFixed(1)}M`:v>=1000?`${(v/1000).toFixed(1)}K`:String(v);
 
-export default function Home(){
- const {lang}=useOutletContext<{lang:Lang}>();const navigate=useNavigate();const {user}=useAuth();const {cmsConfig,globalSettings,announcements}=useApp();
- const [stats,setStats]=useState<Stats>({beneficiaries:0,volunteers:0,healthCamps:0,campaigns:0});const slides=useMemo(()=>Array.isArray(cmsConfig?.carouselSlides)?cmsConfig.carouselSlides.filter((s:any)=>s?.image):[],[cmsConfig?.carouselSlides]);const [slide,setSlide]=useState(0);
- useEffect(()=>{let c=false;fetch("/api/stats").then(r=>r.ok?r.json():null).then(d=>{if(!c&&d)setStats({beneficiaries:Number(d.beneficiaries)||0,volunteers:Number(d.volunteers)||0,healthCamps:Number(d.healthCamps)||0,campaigns:Number(d.campaigns)||0})}).catch(()=>undefined);return()=>{c=true}},[]);
- useEffect(()=>{if(slides.length>1){const t=window.setInterval(()=>setSlide(s=>(s+1)%slides.length),5000);return()=>window.clearInterval(t)}},[slides.length]);
- const h=new Date().getHours();const greeting=h<12?(lang==="hi"?"सुप्रभात":"Good morning"):h<17?(lang==="hi"?"शुभ दोपहर":"Good afternoon"):(lang==="hi"?"शुभ संध्या":"Good evening");const name=user?.name?.trim().split(/\s+/)[0]||"";const alert=lang==="hi"?cmsConfig?.alertBannerHi:cmsConfig?.alertBannerEn;
- return <main className="min-h-full bg-[#f8fafc] pb-10 text-slate-900"><div className="mx-auto w-full max-w-3xl px-3.5 py-4 sm:px-6 sm:py-5">
-  <motion.section initial={{opacity:0,y:14}} animate={{opacity:1,y:0}} transition={{duration:.5}} className="relative overflow-hidden rounded-[28px] border border-orange-200/70 bg-white shadow-[0_12px_40px_rgba(0,0,0,.07)]">
-   <div className="h-1.5 w-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808]"/><div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-[#FF9933]/15 blur-3xl"/><div className="absolute -bottom-20 -left-16 h-52 w-52 rounded-full bg-[#138808]/15 blur-3xl"/>
-   <div className="relative p-5 sm:p-7"><div className="flex items-start justify-between gap-4"><div className="flex items-center gap-3">
-    <motion.div animate={{y:[0,-4,0],rotate:[0,2,0,-2,0]}} transition={{duration:4,repeat:Infinity,ease:"easeInOut"}} className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF9933] via-white to-[#138808] p-[2px] shadow-lg shadow-orange-100"><div className="flex h-full w-full items-center justify-center rounded-[14px] bg-white"><HandHeart className="h-7 w-7 text-[#000080]"/></div></motion.div>
-    <div><div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[.2em] text-[#FF9933]"><Sparkles className="h-3.5 w-3.5"/> RP Foundation</div><p className="mt-1 text-[10px] font-semibold text-slate-500">{lang==="hi"?"सेवा • संस्कार • समाज":"Seva • Sanskar • Samaj"}</p></div></div>
-    <motion.div animate={{rotate:360}} transition={{duration:18,repeat:Infinity,ease:"linear"}} className="hidden h-12 w-12 rounded-full border border-orange-200/60 sm:block"/></div>
-    <h1 className="mt-5 text-[27px] font-black leading-tight tracking-[-0.03em] text-[#000080] sm:text-[32px]">{greeting}{name?`, ${name}`:""}</h1><p className="mt-2 max-w-xl text-[13px] leading-5 text-slate-600">{lang==="hi"?"सेवा, समुदाय और सकारात्मक प्रभाव के लिए आपका डिजिटल स्थान।":"Your digital space for service, community and meaningful impact."}</p>
-    <div className="mt-5 flex flex-wrap gap-2.5"><motion.button whileTap={{scale:.97}} whileHover={{y:-1}} onClick={()=>navigate("/daily")} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#FF9933] px-4 py-2.5 text-[12px] font-bold text-white shadow-md shadow-orange-200">{lang==="hi"?"आज आपके लिए":"Today for you"}<ArrowRight className="h-4 w-4"/></motion.button><motion.button whileTap={{scale:.97}} onClick={()=>navigate("/services")} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-[12px] font-bold text-[#000080]">{lang==="hi"?"सेवाएं":"Explore"}</motion.button></div>
-    <div className="mt-6 grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/80 text-center"><div className="border-r border-slate-200 py-2.5"><span className="block text-[10px] font-black text-[#FF9933]">SEVA</span><span className="text-[9px] text-slate-500">{lang==="hi"?"सेवा":"Service"}</span></div><div className="border-r border-slate-200 py-2.5"><span className="block text-[10px] font-black text-[#000080]">SAMARPAN</span><span className="text-[9px] text-slate-500">{lang==="hi"?"समर्पण":"Dedication"}</span></div><div className="py-2.5"><span className="block text-[10px] font-black text-[#138808]">SANGATHAN</span><span className="text-[9px] text-slate-500">{lang==="hi"?"संगठन":"Community"}</span></div></div>
-   </div></motion.section>
-  <motion.button initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.12}} onClick={()=>navigate("/services")} className="group mt-3 flex min-h-12 w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><Search className="h-5 w-5 text-[#000080]"/><span className="flex-1 text-[13px] font-medium text-slate-500">{lang==="hi"?"आपको किस चीज़ में मदद चाहिए?":"What do you need help with?"}</span><ChevronRight className="h-4 w-4 text-slate-300 transition group-hover:translate-x-1"/></motion.button>
-  {alert&&<section className="mt-4 rounded-2xl border border-orange-200 bg-orange-50/70 p-4"><div className="flex gap-3"><Megaphone className="h-5 w-5 text-[#FF9933]"/><div><p className="text-[9px] font-black uppercase tracking-wider text-[#FF9933]">{lang==="hi"?"महत्वपूर्ण सूचना":"Important update"}</p><p className="mt-1 text-[13px] font-semibold text-slate-800">{alert}</p></div></div></section>}
-  <section className="mt-6"><div className="mb-3 flex items-center justify-between"><h2 className="text-[15px] font-black text-[#000080]">{lang==="hi"?"त्वरित सेवाएं":"Quick actions"}</h2><button onClick={()=>navigate("/services")} className="text-[11px] font-bold text-[#000080]">{lang==="hi"?"सभी":"View all"} <ChevronRight className="inline h-4 w-4"/></button></div><div className="-mx-3.5 flex gap-2.5 overflow-x-auto px-3.5 pb-1 sm:mx-0 sm:grid sm:grid-cols-5 sm:px-0">{quickActions.map(({id,icon:Icon,en,hi,route,tone},i)=><motion.button key={id} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:.08*i}} whileTap={{scale:.95}} whileHover={{y:-3}} onClick={()=>navigate(route)} className="flex min-w-[88px] flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white px-2 py-3 shadow-sm transition-shadow hover:shadow-md sm:min-w-0"><motion.span animate={{y:[0,-2,0]}} transition={{duration:2.8,delay:i*.15,repeat:Infinity,ease:"easeInOut"}} className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${tones[tone]} shadow-sm`}><Icon className="h-5 w-5 text-white"/></motion.span><span className="text-center text-[10px] font-extrabold leading-3 text-slate-700">{lang==="hi"?hi:en}</span></motion.button>)}</div></section>
-  <section className="mt-6 overflow-hidden rounded-[22px] border border-orange-200/70 bg-white shadow-sm"><div className="flex items-center justify-between px-5 pt-5"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">{lang==="hi"?"दैनिक उपयोग":"Daily utility"}</p><h2 className="mt-1 text-[16px] font-black text-[#000080]">{lang==="hi"?"मौसम और वायु गुणवत्ता":"Weather & air quality"}</h2></div><CloudSun className="h-5 w-5 text-[#FF9933]"/></div><motion.button whileTap={{scale:.99}} onClick={()=>navigate("/daily")} className="m-4 flex min-h-16 w-[calc(100%-2rem)] items-center justify-between rounded-2xl bg-gradient-to-r from-[#FF9933] via-white to-[#138808] p-[1px] shadow-sm"><span className="flex min-h-16 flex-1 items-center justify-between rounded-[15px] bg-[#000080] p-4 text-left text-white"><span><span className="block text-[13px] font-black">{lang==="hi"?"आज का डैशबोर्ड खोलें":"Open today’s dashboard"}</span><span className="mt-1 block text-[10px] text-blue-100">Weather • AQI • News • Culture • Health • Radio</span></span><Wind className="h-5 w-5"/></span></motion.button></section>
-  {slides.length>0&&<section className="mt-6 overflow-hidden rounded-[22px] border border-blue-100 bg-[#000080]"><div className="relative h-48 sm:h-52"><motion.img key={slide} src={slides[slide]?.image} alt="" initial={{opacity:0,scale:1.03}} animate={{opacity:.92,scale:1}} transition={{duration:.7}} className="absolute inset-0 h-full w-full object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-[#000080]/90 via-[#000080]/25 to-transparent"/><div className="absolute inset-x-0 bottom-0 p-5"><h2 className="text-[17px] font-black text-white">{lang==="hi"?slides[slide]?.titleHi:slides[slide]?.titleEn}</h2><p className="mt-1 text-[11px] text-blue-50">{lang==="hi"?slides[slide]?.subHi:slides[slide]?.subEn}</p></div></div></section>}
-  <section className="mt-6"><div className="mb-3 flex items-end justify-between"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">{lang==="hi"?"वास्तविक डेटा":"Real data"}</p><h2 className="mt-1 text-[15px] font-black text-[#000080]">{lang==="hi"?"हमारा प्रभाव":"Our impact"}</h2></div><span className="text-[9px] text-slate-400">API → database</span></div><div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">{[["Beneficiaries",stats.beneficiaries],["Volunteers",stats.volunteers],["Health camps",stats.healthCamps],["Campaigns",stats.campaigns]].map(([label,value],i)=><motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{delay:.08*i}} key={String(label)} className={`rounded-2xl border p-3.5 shadow-sm ${i===0?"border-rose-100 bg-rose-50/50":i===1?"border-emerald-100 bg-emerald-50/50":i===2?"border-blue-100 bg-blue-50/50":"border-orange-100 bg-orange-50/50"}`}><p className="text-[22px] font-black text-[#000080]">{metric(Number(value))}</p><p className="mt-1 text-[9px] font-bold uppercase tracking-wider text-slate-500">{label}</p></motion.div>)}</div></section>
-  {globalSettings?.show_notices!==false&&Array.isArray(announcements)&&announcements.length>0&&<section className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5"><h2 className="text-[14px] font-black text-[#000080]">{lang==="hi"?"समुदाय अपडेट":"Community updates"}</h2><Megaphone className="h-4 w-4 text-[#FF9933]"/></div>{announcements.slice(0,4).map((a:any,i:number)=><div key={a?.id||i} className="border-b border-slate-100 px-4 py-3.5"><p className="text-[13px] font-bold text-slate-800">{a?.title}</p>{a?.content&&<p className="mt-1 text-[11px] text-slate-500">{a.content}</p>}</div>)}</section>}
-  <motion.button whileTap={{scale:.99}} onClick={()=>navigate("/donations")} className="mt-6 flex min-h-16 w-full items-center justify-between rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50 via-white to-green-50 px-5 py-4 text-left shadow-sm"><span><span className="block text-[13px] font-black text-[#000080]">{lang==="hi"?"अच्छे काम में साथ दें":"Support a good cause"}</span><span className="mt-1 block text-[10px] text-slate-500">{lang==="hi"?"दान और सेवा के माध्यम से जुड़ें।":"Connect through giving and service."}</span></span><HeartHandshake className="h-5 w-5 text-[#138808]"/></motion.button>
- </div></main>;
+const sevaCards = [
+  { icon: HeartPulse, en: "Care for people", hi: "लोगों की सेवा", textEn: "Health, blood and essential support", textHi: "स्वास्थ्य, रक्त और जरूरी सहायता", route: "/services", gradient: "from-[#FF9933] to-[#F97316]" },
+  { icon: BookOpen, en: "Build futures", hi: "भविष्य बनाएं", textEn: "Education, youth and opportunity", textHi: "शिक्षा, युवा और अवसर", route: "/services", gradient: "from-[#000080] to-[#2563EB]" },
+  { icon: Leaf, en: "Protect tomorrow", hi: "कल को सुरक्षित करें", textEn: "Environment and community action", textHi: "पर्यावरण और सामुदायिक पहल", route: "/services", gradient: "from-[#138808] to-[#22C55E]" },
+];
+
+export default function Home() {
+  const { lang } = useOutletContext<{ lang: Lang }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { cmsConfig, globalSettings, announcements } = useApp();
+  const name = user?.name?.trim().split(/\s+/)[0] || "";
+  const alert = lang === "hi" ? cmsConfig?.alertBannerHi : cmsConfig?.alertBannerEn;
+  const announcement = useMemo(() => Array.isArray(announcements) ? announcements[0] : null, [announcements]);
+  const h = new Date().getHours();
+  const greeting = h < 12 ? (lang === "hi" ? "सुप्रभात" : "Good morning") : h < 17 ? (lang === "hi" ? "शुभ दोपहर" : "Good afternoon") : (lang === "hi" ? "शुभ संध्या" : "Good evening");
+
+  return (
+    <main className="min-h-full bg-[#f8fafc] pb-10 text-slate-900">
+      <div className="mx-auto w-full max-w-3xl px-3.5 py-4 sm:px-6 sm:py-5">
+        <motion.section initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .55 }} className="relative overflow-hidden rounded-[30px] border border-orange-200/70 bg-white shadow-[0_18px_55px_rgba(0,0,0,.08)]">
+          <div className="h-1.5 w-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
+          <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-[#FF9933]/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-[#138808]/15 blur-3xl" />
+          <div className="relative p-5 sm:p-7">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <motion.div animate={{ y: [0, -4, 0], rotate: [0, 2, 0, -2, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF9933] via-white to-[#138808] p-[2px] shadow-lg shadow-orange-100">
+                  <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-white"><HandHeart className="h-7 w-7 text-[#000080]" /></div>
+                </motion.div>
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-[.2em] text-[#FF9933]">RPF Seva App</p>
+                  <p className="mt-1 text-[10px] font-bold tracking-[.12em] text-[#000080]">SEVA • SAMARPAN • SANKALP</p>
+                </div>
+              </div>
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="hidden h-12 w-12 rounded-full border border-dashed border-orange-200 sm:block" />
+            </div>
+            <h1 className="mt-6 text-[28px] font-black leading-tight tracking-[-0.035em] text-[#000080] sm:text-[34px]">{greeting}{name ? `, ${name}` : ""}</h1>
+            <p className="mt-2 max-w-xl text-[13px] leading-5 text-slate-600">{lang === "hi" ? "जहाँ सेवा एक विचार नहीं, एक संकल्प बनकर जीवन से जुड़ती है।" : "Where service becomes more than an idea — it becomes a shared commitment."}</p>
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              <motion.button whileTap={{ scale: .97 }} whileHover={{ y: -2 }} onClick={() => navigate("/services")} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#000080] px-4 py-2.5 text-[12px] font-bold text-white shadow-md shadow-blue-200">{lang === "hi" ? "सेवा से जुड़ें" : "Join the seva"}<ArrowRight className="h-4 w-4" /></motion.button>
+              <motion.button whileTap={{ scale: .97 }} whileHover={{ y: -2 }} onClick={() => navigate("/community")} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-2.5 text-[12px] font-bold text-[#000080]">{lang === "hi" ? "हमारा प्रभाव" : "See our impact"}</motion.button>
+            </div>
+            <div className="mt-6 grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/80 text-center">
+              <div className="border-r border-slate-200 py-2.5"><span className="block text-[10px] font-black text-[#FF9933]">SEVA</span><span className="text-[9px] text-slate-500">{lang === "hi" ? "सेवा" : "Service"}</span></div>
+              <div className="border-r border-slate-200 py-2.5"><span className="block text-[10px] font-black text-[#000080]">SAMARPAN</span><span className="text-[9px] text-slate-500">{lang === "hi" ? "समर्पण" : "Dedication"}</span></div>
+              <div className="py-2.5"><span className="block text-[10px] font-black text-[#138808]">SANKALP</span><span className="text-[9px] text-slate-500">{lang === "hi" ? "संकल्प" : "Commitment"}</span></div>
+            </div>
+          </div>
+        </motion.section>
+
+        <motion.section initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .12 }} className="mt-5 overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">{lang === "hi" ? "आज की प्रेरणा" : "A reason to care"}</p><h2 className="mt-1 text-[17px] font-black text-[#000080]">{lang === "hi" ? "आपकी छोटी पहल, किसी की बड़ी उम्मीद" : "A small act can become someone's big hope"}</h2></div>
+            <Sparkles className="h-5 w-5 text-[#FF9933]" />
+          </div>
+          <div className="grid gap-2.5 p-3 sm:grid-cols-3">
+            {sevaCards.map(({ icon: Icon, en, hi, textEn, textHi, route, gradient }, i) => (
+              <motion.button key={en} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .16 + i * .08 }} whileHover={{ y: -4 }} whileTap={{ scale: .98 }} onClick={() => navigate(route)} className="group rounded-2xl border border-slate-100 bg-slate-50/60 p-4 text-left shadow-sm transition-shadow hover:shadow-md">
+                <motion.span animate={{ y: [0, -2, 0] }} transition={{ duration: 2.8, delay: i * .2, repeat: Infinity, ease: "easeInOut" }} className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-sm`}><Icon className="h-5 w-5 text-white" /></motion.span>
+                <p className="mt-3 text-[12px] font-black text-slate-800">{lang === "hi" ? hi : en}</p>
+                <p className="mt-1 text-[10px] leading-4 text-slate-500">{lang === "hi" ? textHi : textEn}</p>
+                <ChevronRight className="mt-3 h-4 w-4 text-slate-300 transition group-hover:translate-x-1" />
+              </motion.button>
+            ))}
+          </div>
+        </motion.section>
+
+        <motion.section initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .25 }} className="mt-5 overflow-hidden rounded-[25px] border border-orange-200/70 bg-gradient-to-br from-orange-50 via-white to-green-50 shadow-sm">
+          <div className="flex items-center justify-between px-5 pt-5"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">{lang === "hi" ? "संस्थापक की बात" : "From the founder"}</p><h2 className="mt-1 text-[17px] font-black text-[#000080]">{lang === "hi" ? "सेवा, समर्पण और संकल्प" : "Seva, Samarpan & Sankalp"}</h2></div><ShieldCheck className="h-5 w-5 text-[#138808]" /></div>
+          <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+            <motion.div whileHover={{ scale: 1.03 }} className="relative mx-auto shrink-0 sm:mx-0"><div className="absolute inset-0 rounded-[22px] bg-gradient-to-br from-[#FF9933] via-white to-[#138808] blur-sm" /><img src="/assets/founder.png" alt="Rohit Pandit, Founder of RP Foundation" className="relative h-36 w-32 rounded-[20px] border-2 border-white object-cover object-top shadow-lg" /></motion.div>
+            <div className="flex-1"><p className="text-[13px] font-black text-slate-900">{lang === "hi" ? "रोहित पंडित" : "Rohit Pandit"}</p><p className="mt-0.5 text-[10px] font-bold text-[#000080]">{lang === "hi" ? "संस्थापक, आरपी फाउंडेशन" : "Founder, RP Foundation"}</p><p className="mt-3 text-[12px] leading-5 text-slate-600">{lang === "hi" ? "सच्ची सेवा वही है जो समाज के सबसे कमजोर व्यक्ति तक पहुंचे और उसके जीवन में सकारात्मक परिवर्तन लाए।" : "True social service reaches the most vulnerable and creates meaningful positive change in their lives."}</p><motion.button whileTap={{ scale: .97 }} onClick={() => navigate("/community")} className="mt-4 inline-flex items-center gap-1 text-[11px] font-black text-[#000080]">{lang === "hi" ? "पूरा संदेश पढ़ें" : "Read the full message"}<ArrowRight className="h-3.5 w-3.5" /></motion.button></div>
+          </div>
+        </motion.section>
+
+        {alert && <motion.section initial={{ opacity: 0, scale: .98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="mt-5 rounded-2xl border border-orange-200 bg-orange-50/70 p-4"><div className="flex gap-3"><Megaphone className="h-5 w-5 shrink-0 text-[#FF9933]" /><div><p className="text-[9px] font-black uppercase tracking-wider text-[#FF9933]">{lang === "hi" ? "महत्वपूर्ण सूचना" : "Important update"}</p><p className="mt-1 text-[13px] font-semibold text-slate-800">{alert}</p></div></div></motion.section>}
+
+        {globalSettings?.show_notices !== false && announcement && <motion.section initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5"><h2 className="text-[14px] font-black text-[#000080]">{lang === "hi" ? "समुदाय से जुड़ें" : "Stay connected"}</h2><Megaphone className="h-4 w-4 text-[#FF9933]" /></div><div className="px-4 py-4"><p className="text-[13px] font-bold text-slate-800">{announcement?.title}</p>{announcement?.content && <p className="mt-1 text-[11px] leading-5 text-slate-500">{announcement.content}</p>}<button onClick={() => navigate("/notifications")} className="mt-3 text-[10px] font-black text-[#000080]">{lang === "hi" ? "सभी अपडेट देखें" : "View all updates"} <ChevronRight className="inline h-3.5 w-3.5" /></button></div></motion.section>}
+
+        <motion.button whileHover={{ y: -2 }} whileTap={{ scale: .99 }} onClick={() => navigate("/donations")} className="mt-5 flex min-h-16 w-full items-center justify-between rounded-2xl border border-orange-200 bg-white px-5 py-4 text-left shadow-sm"><span><span className="block text-[13px] font-black text-[#000080]">{lang === "hi" ? "संकल्प को सहयोग दें" : "Stand behind the sankalp"}</span><span className="mt-1 block text-[10px] text-slate-500">{lang === "hi" ? "समय, सेवा या सहयोग — हर योगदान मायने रखता है।" : "Time, service or support — every contribution matters."}</span></span><HeartHandshake className="h-5 w-5 text-[#138808]" /></motion.button>
+      </div>
+    </main>
+  );
 }
