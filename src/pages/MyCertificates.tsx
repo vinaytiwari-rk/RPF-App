@@ -5,31 +5,9 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 type Certificate = { id: string; certificate_id: string; service_id: string; issue_date: string };
-
 export default function MyCertificates() {
-  const navigate = useNavigate();
-  const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
-  const { user } = useAuth();
-  const [items, setItems] = useState<Certificate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const hi = lang === "hi";
-
-  useEffect(() => {
-    if (!user?.id || !user?.isVolunteer) { setLoading(false); return; }
-    fetch(`/api/volunteers/me/certificates?volunteer_id=${encodeURIComponent(user.id)}`)
-      .then(r => r.ok ? r.json() : Promise.reject())
-      .then(d => setItems(Array.isArray(d.certificates) ? d.certificates : []))
-      .catch(() => setItems([]))
-      .finally(() => setLoading(false));
-  }, [user?.id, user?.isVolunteer]);
-
-  return <main className="min-h-full bg-[#f8fafc] pb-12"><div className="mx-auto max-w-3xl px-3.5 py-5 sm:px-6">
-    <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-black text-slate-600 shadow-sm"><ArrowLeft className="h-4 w-4"/>{hi ? "वापस" : "Back"}</button>
-    <motion.section initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="overflow-hidden rounded-[28px] border border-violet-200 bg-white shadow-sm">
-      <div className="h-1.5 bg-gradient-to-r from-[#7C3AED] via-[#EC4899] to-[#F59E0B]"/>
-      <div className="p-5 sm:p-7"><div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600"><Award className="h-6 w-6"/></span><div><h1 className="text-[22px] font-black text-[#000080]">{hi ? "मेरे प्रमाणपत्र" : "My Certificates"}</h1><p className="text-[10px] text-slate-500">{hi ? "आपकी सेवा के लिए जारी प्रमाणपत्र" : "Certificates issued for your service"}</p></div></div>
-      {loading ? <div className="flex justify-center py-14"><Loader2 className="h-6 w-6 animate-spin text-violet-500"/></div> : items.length === 0 ? <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center"><FileText className="mx-auto h-8 w-8 text-slate-300"/><p className="mt-3 text-[13px] font-black text-slate-600">{hi ? "अभी कोई प्रमाणपत्र उपलब्ध नहीं है" : "No certificates available yet"}</p><p className="mt-1 text-[10px] text-slate-400">{hi ? "आपकी सेवा गतिविधियों के बाद प्रमाणपत्र यहां दिखाई देंगे।" : "Certificates will appear here after eligible service activities."}</p></div> : <div className="mt-5 space-y-2.5">{items.map(c => <div key={c.id || c.certificate_id} className="flex items-center gap-3 rounded-2xl border border-slate-100 p-3.5"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><Award className="h-5 w-5"/></span><div className="min-w-0 flex-1"><p className="text-[12px] font-black text-slate-800">{c.service_id?.replace(/-/g, " ").toUpperCase()} {hi ? "सेवा" : "SERVICE"}</p><p className="mt-1 text-[9px] text-slate-500">{c.certificate_id} • {new Date(c.issue_date).toLocaleDateString(hi ? "hi-IN" : "en-IN")}</p></div><a href={`/api/certificates/download/${encodeURIComponent(c.certificate_id)}`} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white" title={hi ? "डाउनलोड" : "Download"}><Download className="h-4 w-4"/></a></div>)}</div>}
-      </div>
-    </motion.section>
-  </div></main>;
+  const navigate=useNavigate(); const {lang}=useOutletContext<{lang:"en"|"hi"}>(); const {user}=useAuth(); const [items,setItems]=useState<Certificate[]>([]); const [loading,setLoading]=useState(true); const hi=lang==="hi";
+  const volunteer=!!user?.id && (user?.role==="volunteer" || !!user?.isVolunteer);
+  useEffect(()=>{if(!volunteer){setLoading(false);return;} fetch(`/api/volunteers/me/certificates?volunteer_id=${encodeURIComponent(user!.id)}`).then(r=>r.ok?r.json():Promise.reject()).then(d=>setItems(Array.isArray(d.certificates)?d.certificates:[])).catch(()=>setItems([])).finally(()=>setLoading(false));},[user?.id,volunteer]);
+  return <main className="min-h-full bg-[#f8fafc] pb-12"><div className="mx-auto max-w-3xl px-3.5 py-5 sm:px-6"><button onClick={()=>navigate(-1)} className="mb-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-black text-slate-600 shadow-sm"><ArrowLeft className="h-4 w-4"/>{hi?"वापस":"Back"}</button><motion.section initial={{opacity:0,y:14}} animate={{opacity:1,y:0}} className="overflow-hidden rounded-[28px] border border-violet-200 bg-white shadow-sm"><div className="h-1.5 bg-gradient-to-r from-[#7C3AED] via-[#EC4899] to-[#F59E0B]"/><div className="p-5 sm:p-7"><div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600"><Award className="h-6 w-6"/></span><div><h1 className="text-[22px] font-black text-[#000080]">{hi?"मेरे प्रमाणपत्र":"My Certificates"}</h1><p className="text-[10px] text-slate-500">{hi?"आपकी सेवा के लिए जारी प्रमाणपत्र":"Certificates issued for your service"}</p></div></div>{loading?<div className="flex justify-center py-14"><Loader2 className="h-6 w-6 animate-spin text-violet-500"/></div>:items.length===0?<div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center"><FileText className="mx-auto h-8 w-8 text-slate-300"/><p className="mt-3 text-[13px] font-black text-slate-600">{hi?"अभी कोई प्रमाणपत्र उपलब्ध नहीं है":"No certificates available yet"}</p><p className="mt-1 text-[10px] text-slate-400">{hi?"आपकी सेवा गतिविधियों के बाद प्रमाणपत्र यहां दिखाई देंगे।":"Certificates will appear here after eligible service activities."}</p></div>:<div className="mt-5 space-y-2.5">{items.map(c=><div key={c.id||c.certificate_id} className="flex items-center gap-3 rounded-2xl border border-slate-100 p-3.5"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><Award className="h-5 w-5"/></span><div className="min-w-0 flex-1"><p className="text-[12px] font-black text-slate-800">{c.service_id?.replace(/-/g," ").toUpperCase()} {hi?"सेवा":"SERVICE"}</p><p className="mt-1 text-[9px] text-slate-500">{c.certificate_id} • {new Date(c.issue_date).toLocaleDateString(hi?"hi-IN":"en-IN")}</p></div><a href={`/api/certificates/download/${encodeURIComponent(c.certificate_id)}`} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white" title={hi?"डाउनलोड":"Download"}><Download className="h-4 w-4"/></a></div>)}</div>}</div></motion.section></div></main>;
 }
