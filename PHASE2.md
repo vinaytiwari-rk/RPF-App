@@ -1,85 +1,45 @@
 # RPF Seva App — Phase 2 Visual & UX Enhancement
 
-## Objective
-Transform the application into a cohesive, premium, emotionally connected mobile-first experience while preserving the Phase 1 architecture and existing functionality.
+## Product identity
+- Primary product name: **RPF Seva App**.
+- Core identity: **Seva, Samarpan & Sankalp** / **सेवा, समर्पण एंड संकल्प**.
+- Tricolour is the visual anchor, not the only palette.
+- Supporting colours may include red, yellow, green, purple, black, light sky blue, pink and brown where they improve semantic clarity and visual hierarchy.
 
-## Brand direction
-- Product name: **RPF Seva App**
-- Brand language: **Seva • Samarpan • Sankalp**
-- Hindi: **सेवा, समर्पण एंड संकल्प**
-- Visual identity: Indian Tricolour-inspired saffron, white, green with India navy blue accents.
-- Use gradients, depth, motion and imagery tastefully; avoid excessive decoration.
+## Application-wide UX
+- Apply consistent entrance/scroll-reveal, card, icon, tab and interaction motion across Home, Explore, Activity, Impact and Me.
+- Use gradient icons and tasteful micro-interactions throughout the application.
+- Preserve accessibility and reduced-motion compatibility.
+- Avoid excessive blue dominance.
 
-## Application-wide requirements
-1. Consistent motion system across Home, Activity, Explore, Impact and Me.
-2. Route/page entrance transitions.
-3. Scroll-reveal animations for major sections and cards.
-4. Micro-interactions for buttons, cards, tabs, navigation and important actions.
-5. Flip/3D-style interactions only where they improve comprehension; never for every element.
-6. Gradient icons and consistent icon containers throughout Explore and other service-heavy screens.
-7. Responsive Android/iPhone layouts with safe-area support.
-8. Respect reduced-motion accessibility preferences.
-9. Shared visual language rather than page-by-page styling differences.
+## Home requirements
+- Keep the premium animated hero and RPF Seva App branding.
+- Keep **Weather, AQI and Quote of the day** visible on Home; remove only the unwanted solid blue strip treatment.
+- Keep a **real-visual carousel**. Use genuine photographic/real-world foundation assets where available; avoid cartoonish illustrations.
+- Keep Founder visibility with a real founder image and provide a complete Founder Message route.
+- Do not duplicate the same impact-number block on both Home and Impact.
+- Replace generic Quick Actions with creative, emotionally connecting service pathways.
+- **Join the Seva** must route to **Jan Seva Card**; it should not be an unresolved standalone destination.
 
-## Home screen direction
-- Clearly display **RPF Seva App**.
-- Replace the old Quick Actions block with creative, emotionally engaging service pathways.
-- Remove the Weather/Daily Utility block from Home.
-- Keep impact numbers in **Impact**, not duplicated on Home.
-- Remove the existing cartoonish carousel treatment.
-- Prefer authentic, real photographic imagery when editorial imagery is needed.
-- Restore and prominently present the Founder’s Message and real founder image.
-- Use the founder image from `/assets/founder.png`.
-- Present **Seva • Samarpan • Sankalp** as the core identity.
+## Me / Profile
+- Profile must never render as a blank screen.
+- Provide resilient profile identity, Jan Seva Card, activity, notifications and language controls with animated gradient iconography.
 
-## Core navigation
-The five primary destinations remain:
-- Home
-- Explore
-- Activity
-- Impact
-- Me
+## Founder Message
+- Provide a dedicated full-message screen with the founder image, complete message and Jan Seva Card CTA.
 
-Each destination must receive the same level of visual and interaction polish.
+## Current implementation fixes
+- Restored Home Weather/AQI/Quote section.
+- Restored Home carousel using repository foundation assets.
+- Restored Founder image and added dedicated full Founder Message screen.
+- Replaced the blank Me/Profile implementation with a resilient animated profile surface.
+- Routed Join the Seva to Jan Seva Card.
 
-## Explore
-- Gradient service icons.
-- Better grouping and hierarchy.
-- Animated category/service cards.
-- Clear primary actions.
-- Avoid dense lists that feel like an admin dashboard.
-
-## Activity
-- Animated timeline/list entrance.
-- Clear notification states.
-- Better unread/read hierarchy.
-- Subtle motion for updates and interactions.
-
-## Impact
-- Keep the authoritative impact numbers here.
-- Add visual storytelling around impact instead of duplicating numbers elsewhere.
-- Use animated charts/progress/impact storytelling where useful.
-
-## Me
-- Premium profile header.
-- Gradient identity treatment.
-- Animated settings/action cards.
-- Clear account, volunteer and contribution areas.
-
-## Founder content
-- Founder’s Message must remain discoverable and visually prominent.
-- Use the real founder photograph from the repository asset instead of an initials placeholder.
-
-## Quality gates
-Phase 2 is complete only after:
-- all five primary destinations have the new visual language;
-- global navigation and route transitions are animated;
-- major scrollable sections use tasteful reveal motion;
-- Explore has gradient icons;
-- Home no longer contains the old Quick Actions, Weather/Daily Utility or duplicated impact-number block;
-- Home uses RPF Seva App and Seva • Samarpan • Sankalp branding;
-- founder image/message is visible;
-- no cartoonish/placeholder carousel treatment remains on Home;
-- responsive/mobile layouts remain stable;
-- TypeScript/build checks pass;
-- Phase 3 is not started until this checklist is verified.
+## Exit criteria
+- Home, Explore, Activity, Impact and Me share one coherent visual/motion system.
+- No blank primary screen or dead CTA remains.
+- Home contains Weather, AQI, Quote, real-visual carousel and Founder entry.
+- Founder Message is complete and reachable.
+- Jan Seva Card is the canonical Join the Seva destination.
+- Impact numbers are intentionally shown in one primary location only.
+- Build/type checks pass before Phase 2 is closed.
