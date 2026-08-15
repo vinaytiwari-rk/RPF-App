@@ -19,21 +19,21 @@ This document records confirmed findings. A feature is not marked WORKING merely
 
 ### 1. Build / CI baseline — PASS
 
-The latest commit `2f572b4a6cb92448fbc52eeb966f72cd4d812fb8` passed the repository Deploy Application workflow. The workflow runs `npm ci`, `npm run lint`, and `npm run build` before deployment. No APK was built.
+The latest scanner-fix commit passed the repository Deploy Application workflow. The workflow runs `npm ci`, `npm run lint`, and `npm run build` before deployment. No APK was built.
 
 ### 2. Document Scanner — FIXED AT SOURCE LEVEL; RUNTIME VERIFICATION PENDING
 
-The scanner now attaches the camera stream after the `<video>` element is rendered, explicitly calls `video.play()`, handles `canplay`, and reports common camera errors. It also generates PDFs with jsPDF and keeps a local scan library. The remaining Phase 0 work is native Android/iOS camera lifecycle/permission verification, large-image memory limits, and packaged-app persistence behavior.
+The scanner now attaches the camera stream after the `<video>` element is rendered, explicitly calls `video.play()`, handles `canplay`, and reports common camera errors. It generates PDFs with jsPDF and keeps a local scan library. Remaining Phase 0 work: native Android/iOS camera lifecycle/permission verification, large-image memory limits, and packaged-app persistence behavior.
 
 ### 3. Service catalog — GAP CONFIRMED
 
 `src/data/coreServices.ts` contains a large catalog, but `src/pages/Services.tsx` only maps a subset to dedicated routes. Most IDs fall through to `/services/:id`.
 
-`src/pages/ServiceDetails.tsx` is a generic CMS-backed details page. A service card therefore does not prove that the service is implemented. A complete service/implementation matrix is recorded in `PHASE0_SERVICE_MATRIX.md`.
+`src/pages/ServiceDetails.tsx` is a generic CMS-backed details page. A service card therefore does not prove that the service is implemented. The complete service/implementation matrix is recorded in `PHASE0_SERVICE_MATRIX.md`.
 
 ### 4. Local-first candidates — IDENTIFIED
 
-Fuel Tracker, GPS Toolkit, Vitals, Medication Reminder, Medical Dictionary, SOS, Period Tracker, Child Tracker and similar personal utilities should not depend on generic backend service content. They are Phase 0 rewrite candidates for local/device-first implementation.
+Fuel Tracker, GPS Toolkit, Vitals, Medication Reminder, Medical Dictionary, SOS, Period Tracker, Child Tracker and similar personal utilities should not depend on generic backend service content. They are rewrite candidates for local/device-first implementation.
 
 ### 5. Resume Builder — PARTIAL
 
@@ -47,7 +47,7 @@ Volunteer search, impact statistics and success stories also require backend/dat
 
 ### 7. Generic service content security — AUDIT REQUIRED
 
-`ServiceDetails.tsx` renders CMS body HTML through `dangerouslySetInnerHTML`. The source of CMS content must be sanitized/allowlisted before production. This is tracked for the security phase but is also a Phase 0 release blocker if untrusted CMS content can reach the page.
+`ServiceDetails.tsx` renders CMS body HTML through `dangerouslySetInnerHTML`. The source of CMS content must be sanitized/allowlisted before production. This is a Phase 0 release blocker if untrusted CMS content can reach the page.
 
 ### 8. Backend load — OPTIMIZATION REQUIRED
 
@@ -61,6 +61,14 @@ Capacitor configuration contains Android/iOS sections, but the inspected `packag
 
 `Services.tsx` currently calls `/api/search/external` for generic web search. This will later be separated into the planned RPF Web & Government Services Hub with in-app web handling and browser fallback. It should not become a dependency for local utilities.
 
+### 11. Tracked credential / obsolete-source cleanup — FIXED
+
+Phase 0 repository audit found an obsolete `init_db.ts` containing a hardcoded SMTP password fallback and an obsolete `list_ftp.cjs` containing an FTP password. Both unused helper sources have been removed. A duplicate unused `server_new.ts` was also removed to prevent stale server code from becoming a future deployment/security hazard.
+
+### 12. External API-key dependency — FOUND; REWRITE REQUIRED
+
+`src/routes/publicExternalRoutes.ts` contains hard-coded third-party API credentials for news and astrology services. This conflicts with the approved API-key-minimization strategy. These routes must be replaced with keyless/public-feed or direct user web workflows, or credentials must be moved to server-only environment configuration where an external API is genuinely required. The keys must be considered compromised and rotated outside the repository.
+
 ## Phase 0 acceptance checklist
 
 - [x] Build/lint baseline verified through GitHub Actions
@@ -68,6 +76,7 @@ Capacitor configuration contains Android/iOS sections, but the inspected `packag
 - [x] Service-to-route/implementation matrix created
 - [x] Generic/placeholder service pattern identified
 - [x] Backend-dependent vs local-first candidates classified
+- [x] Obsolete tracked credential helpers removed
 - [ ] Android permission/native capability matrix verified
 - [ ] iOS native capability matrix verified
 - [ ] Persistence strategy verified for each utility
@@ -75,6 +84,7 @@ Capacitor configuration contains Android/iOS sections, but the inspected `packag
 - [ ] 503/error-prone endpoints identified and verified
 - [ ] Fake/demo activity/data search completed
 - [ ] CMS HTML sanitization verified
+- [ ] Hard-coded third-party API credentials removed/replaced and rotated
 - [ ] No feature marked WORKING without end-to-end verification
 
 ## Current execution order
@@ -82,10 +92,11 @@ Capacitor configuration contains Android/iOS sections, but the inspected `packag
 1. Verify/fix Community chat server event, persistence and authorization.
 2. Verify/fix volunteer search privacy and availability semantics.
 3. Search for fabricated testimonials/demo activity and remove/gate them.
-4. Convert high-value generic utility routes into real local-first utilities.
-5. Add the reusable device capability layer for Camera, Filesystem, Notifications, Geolocation and Sensors.
-6. Verify Android/iOS permission and lifecycle behavior.
-7. Run final Phase 0 build/lint and update this report to COMPLETE only when all acceptance items are resolved or explicitly deferred to a later phase.
+4. Replace high-value generic utility routes with real local-first utilities.
+5. Replace hard-coded external API-key routes with keyless/public-feed or direct web workflows.
+6. Add the reusable device capability layer for Camera, Filesystem, Notifications, Geolocation and Sensors.
+7. Verify Android/iOS permission and lifecycle behavior.
+8. Run final Phase 0 build/lint and update this report to COMPLETE only when all acceptance items are resolved or explicitly deferred to a later phase.
 
 ## Important constraint
 
