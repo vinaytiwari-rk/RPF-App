@@ -1,6 +1,6 @@
 # Phase 1 — Architecture & Foundation
 
-Status: STARTED
+Status: COMPLETE
 Date: 2026-08-15
 
 ## Architectural rules
@@ -32,6 +32,21 @@ Android / iOS / Browser
 Optional RPF Backend
 ```
 
+## Phase 1 implementation boundaries
+
+- `src/lib/deviceCapabilities.ts` — capability detection and safe device operations.
+- `src/lib/capabilityAdapters.ts` — platform-neutral adapter contract and central adapter entry point.
+- `src/lib/capabilityGuards.ts` — explicit capability/permission checks before device operations.
+- `src/lib/platform.ts` — centralized Android/iOS/Web/unknown platform detection.
+- `src/lib/permissions.ts` — normalized cross-platform permission contract.
+- `src/lib/featureState.ts` — ready/loading/offline/permission-denied/unsupported/error state contract.
+- `src/lib/featureModule.ts` — feature-module context and standard async state runner.
+- `src/lib/localData.ts` — compatibility contract for small synchronous local settings.
+- `src/lib/localStore.ts` — IndexedDB-first local record persistence with a restricted localStorage fallback.
+- `src/lib/externalWeb.ts` — HTTPS-only external-service allowlist boundary.
+
+Native Capacitor adapters can be introduced behind `CapabilityAdapter` without importing Android/iOS APIs into feature pages. The current web adapter deliberately provides the browser/WebView implementation while preserving the native replacement boundary.
+
 ## Capability groups
 
 - Camera / microphone / media
@@ -42,8 +57,6 @@ Optional RPF Backend
 - Share / Print / Browser / Maps
 - Bluetooth / NFC where platform permits
 - Biometrics / secure storage
-
-The existing `src/lib/deviceCapabilities.ts` is the first implementation of this boundary. Future Capacitor-native adapters should implement the same user-facing contracts rather than leaking platform-specific code into pages.
 
 ## Data ownership
 
@@ -70,6 +83,12 @@ Government portals, public web services and third-party information sources. The
 - Android/iOS readiness without building APK/IPA.
 - Architecture documentation and migration rules for new features.
 
+## Exit verification
+
+A new utility can depend on `FeatureModuleContext` and `CapabilityAdapter` rather than Android/iOS-specific APIs. Device availability and permissions are explicit, local persistence has an IndexedDB-first boundary, standard feature states are reusable, and external services are forced through the HTTPS allowlist. APK/IPA creation and native runtime verification remain intentionally deferred to the later native/build phases.
+
 ## Phase 1 exit criteria
 
 A new utility can be implemented without directly importing Android/iOS-specific code into its page; it can detect unavailable capabilities; it can operate locally where appropriate; and backend usage is explicit rather than accidental.
+
+**Phase 1 status: CLOSED at architecture/source level.**
