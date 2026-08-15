@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import axios from 'axios';
 import ErrorBoundary from "./components/ErrorBoundary";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import MainLayout from "./layouts/MainLayout";
@@ -47,13 +47,17 @@ const PageLoader = () => (
 
 function AppContent() {
   const { isAuthenticated, isLoading, login, loginAsGuest, language } = useAuth();
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => sessionStorage.getItem("@rpf_splash_seen") !== "true");
   const [onboardingCompleted, setOnboardingCompleted] = useState(() => localStorage.getItem("onboarding_completed") === "true");
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 1800);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!showSplash) return;
+    const timer = window.setTimeout(() => {
+      sessionStorage.setItem("@rpf_splash_seen", "true");
+      setShowSplash(false);
+    }, 1800);
+    return () => window.clearTimeout(timer);
+  }, [showSplash]);
 
   if (isLoading || showSplash) return <SplashScreen />;
 
@@ -67,6 +71,7 @@ function AppContent() {
   return <>
     <ErrorBoundary>
       <BrowserRouter>
+        <RoutePersistence />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route element={<MainLayout />}>
@@ -96,8 +101,28 @@ function AppContent() {
         </Suspense>
       </BrowserRouter>
     </ErrorBoundary>
-    {!onboardingCompleted && <OnboardingModal onComplete={() => setOnboardingCompleted(true)} />}
+    {!onboardingCompleted && <OnboardingModal onComplete={() => { localStorage.setItem("onboarding_completed", "true"); setOnboardingCompleted(true); }} />}
   </>;
+}
+
+function RoutePersistence() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const current = `${location.pathname}${location.search}${location.hash}`;
+    if (location.pathname !== "/") localStorage.setItem("@rpf_last_route", current);
+  }, [location.pathname, location.search, location.hash]);
+
+  useEffect(() => {
+    if (location.pathname !== "/") return;
+    const saved = localStorage.getItem("@rpf_last_route");
+    if (!saved || saved === "/" || saved.startsWith("/login")) return;
+    const path = saved.split("#")[0];
+    if (path && path !== "/") navigate(saved, { replace: true });
+  }, []);
+
+  return null;
 }
 
 export default function App() {
