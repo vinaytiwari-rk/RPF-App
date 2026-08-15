@@ -8,11 +8,14 @@
   --rp-text: #0f172a;
   --rp-muted: #64748b;
   --rp-border: #e2e8f0;
-  --rp-primary: #0f172a;
-  --rp-primary-hover: #1e293b;
-  --rp-accent: #d4a72c;
+  --rp-primary: #000080;
+  --rp-primary-hover: #000066;
+  --rp-saffron: #ff9933;
+  --rp-green: #138808;
+  --rp-navy: #000080;
+  --rp-accent: #ff9933;
   --rp-danger: #b91c1c;
-  --rp-success: #047857;
+  --rp-success: #138808;
   --rp-radius-sm: 10px;
   --rp-radius-md: 16px;
   --rp-radius-lg: 24px;
@@ -28,11 +31,28 @@
 
 html, body, #root { min-height: 100%; }
 html { background: var(--rp-bg); color-scheme: light; }
-body { margin: 0; background: var(--rp-bg); color: var(--rp-text); font-family: "Inter", ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body {
+  margin: 0;
+  background: var(--rp-bg);
+  color: var(--rp-text);
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: 14px;
+  line-height: 1.45;
+}
 * { box-sizing: border-box; }
 button, input, textarea, select { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--rp-accent); outline-offset: 2px; }
+
+/* Mobile-first typography: keep content compact without sacrificing readability. */
+h1 { font-size: clamp(1.35rem, 5vw, 1.75rem); line-height: 1.18; }
+h2 { font-size: clamp(1rem, 4vw, 1.2rem); line-height: 1.25; }
+h3 { font-size: clamp(.95rem, 3.6vw, 1.05rem); line-height: 1.3; }
+p { max-width: 100%; }
+img, video { max-width: 100%; }
+input, textarea, select { min-width: 0; }
 
 @layer utilities {
   .font-display { font-family: "Lora", Georgia, serif; }
@@ -45,36 +65,38 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .pr-safe { padding-right: env(safe-area-inset-right, 0px); }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-  /* ✨ नया: 3D Flip Card Utilities (मोबाइल और iOS Safari के लिए -webkit- prefixes के साथ) */
   .perspective-1000 { perspective: 1000px; -webkit-perspective: 1000px; }
   .transform-style-3d { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
   .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
   .rotate-y-180 { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
 }
 
+/* Indian tricolour-inspired, low-contrast decorative background. */
+.rp-tricolour-surface {
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(255,153,51,.08), transparent 34%),
+    radial-gradient(circle at 50% 100%, rgba(19,136,8,.06), transparent 34%),
+    repeating-linear-gradient(45deg, rgba(0,0,128,.018) 0, rgba(0,0,128,.018) 1px, transparent 1px, transparent 14px);
+}
+
+@media (max-width: 380px) {
+  body { font-size: 13px; }
+  h1 { font-size: 1.3rem; }
+  h2 { font-size: 1rem; }
+}
+
+@media (min-width: 768px) {
+  body { font-size: 14px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
-/* ✨ नया: Print CSS (सिर्फ कार्ड प्रिंट करने के लिए) */
 @media print {
-  /* बाकी सभी UI को हाइड करें */
   body * { visibility: hidden !important; }
-  
-  /* सिर्फ Print Area और उसके अंदर के एलिमेंट्स को दिखाएं */
-  #jan-seva-print-area,
-  #jan-seva-print-area * { visibility: visible !important; }
-  
-  #jan-seva-print-area {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 100% !important;
-    display: block !important;
-  }
-
-  /* कार्ड को स्टैंडर्ड ID साइज (85.6mm x 54mm) दें */
+  #jan-seva-print-area, #jan-seva-print-area * { visibility: visible !important; }
+  #jan-seva-print-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; display: block !important; }
   .print-card {
     width: 85.6mm !important;
     height: 54mm !important;
@@ -85,7 +107,5 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     transform: none !important;
     background-color: #ffffff !important;
   }
-
-  /* स्क्रीन पर दिखने वाला फ्लिप कार्ड और बटन्स हाइड करें */
   .no-print, .screen-card { display: none !important; }
 }
