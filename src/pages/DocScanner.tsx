@@ -38,19 +38,74 @@ const DocScanner: React.FC = () => {
       setError('Camera is not supported in this browser or WebView.');
       return;
     }
+
     try {
+      // Stop any previous stream before requesting a new one.
+      setStream(current => {
+        current?.getTracks().forEach(track => track.stop());
+        return null;
+      });
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
         audio: false,
       });
+
+      // The <video> element is rendered only after stream state changes.
+      // Do not assign srcObject here because videoRef.current can still be null.
       setStream(mediaStream);
-      if (videoRef.current) videoRef.current.srcObject = mediaStream;
       setError('');
     } catch (err) {
-      setError('Camera access was denied or is unavailable. Please allow camera permission and try again.');
+      const name = err instanceof DOMException ? err.name : '';
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        setError('Camera permission was denied. Please allow Camera permission for RPFoundation in Android Settings and try again.');
+      } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+        setError('No camera was found on this device.');
+      } else if (name === 'NotReadableError' || name === 'TrackStartError') {
+        setError('The camera is busy or unavailable. Close other apps using the camera and try again.');
+      } else {
+        setError('Unable to start the camera. Please check camera permission and try again.');
+      }
       console.error('Error accessing camera:', err);
     }
   };
+
+  // IMPORTANT for Android WebView: the video element does not exist until
+  // after setStream() causes a render. Attach the MediaStream after that render.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !stream) return;
+
+    video.srcObject = stream;
+    video.muted = true;
+    video.autoplay = true;
+    video.playsInline = true;
+
+    const playVideo = async () => {
+      try {
+        await video.play();
+        setError('');
+      } catch (err) {
+        console.warn('Video autoplay/play failed; waiting for canplay:', err);
+      }
+    };
+
+    const handleCanPlay = () => {
+      void playVideo();
+    };
+
+    video.addEventListener('canplay', handleCanPlay);
+    void playVideo();
+
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay);
+      if (video.srcObject === stream) video.srcObject = null;
+    };
+  }, [stream]);
 
   const stopCamera = useCallback(() => {
     setStream(current => {
