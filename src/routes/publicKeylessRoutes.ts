@@ -1,0 +1,32 @@
+import express from "express";
+import axios from "axios";
+import Parser from "rss-parser";
+import { apiCache } from "../lib/apiCache.js";
+
+const router = express.Router();
+const rss = new Parser();
+const get = (key: string, ttl: number) => { const x = apiCache.get(key); return x && Date.now() - x.timestamp < ttl ? x.data : null; };
+const put = (key: string, data: unknown) => apiCache.set(key, { data, timestamp: Date.now() });
+
+router.get("/api/public/weather", async (req, res) => {
+  try {
+    const lat = Number(req.query.lat), lon = Number(req.query.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return res.status(400).json({ success:false,error:"Invalid coordinates" });
+    const key = `weather_${lat.toFixed(3)}_${lon.toFixed(3)}`; const cached = get(key, 900000); if (cached) return res.json({success:true,data:cached});
+    const { data } = await axios.get("https://api.open-meteo.com/v1/forecast", { params:{ latitude:lat, longitude:lon, current:"temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m", daily:"temperature_2m_max,temperature_2m_min,precipitation_sum", timezone:"auto" }, timeout:8000 }); put(key,data); return res.json({success:true,data});
+  } catch { return res.status(503).json({success:false,error:"Weather temporarily unavailable"}); }
+});
+
+router.get("/api/public/forex", async (_req,res) => { try { const c=get("forex_inr",3600000); if(c) return res.json({success:true,data:c}); const {data}=await axios.get("https://api.frankfurter.app/latest?to=INR",{timeout:8000}); put("forex_inr",data); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Exchange rates temporarily unavailable"}); } });
+
+router.get("/api/public/news", async (_req,res) => { try { const c=get("india_news_rss",1800000); if(c) return res.json({success:true,data:c}); const feed=await rss.parseURL("https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en"); const data=feed.items.slice(0,20).map(i=>({title:i.title,link:i.link,pubDate:i.pubDate,source:i.creator||"Google News",description:i.contentSnippet||null,image_url:null})); put("india_news_rss",data); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"News temporarily unavailable"}); } });
+
+router.get("/api/public/jobs-feed", async (_req,res) => { try { const c=get("jobs_rss",3600000); if(c) return res.json({success:true,data:c}); const feed=await rss.parseURL("https://news.google.com/rss/search?q=Sarkari+Naukri+India+Jobs&hl=en-IN&gl=IN&ceid=IN:en"); const data=feed.items.slice(0,20).map(i=>({title:i.title,link:i.link,pubDate:i.pubDate})); put("jobs_rss",data); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Jobs feed temporarily unavailable"}); } });
+
+router.get("/api/public/remote-jobs", async (_req,res) => { try { const {data}=await axios.get("https://jobicy.com/api/v2/remote-jobs?count=20&geo=india",{timeout:8000}); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Remote jobs temporarily unavailable"}); } });
+
+router.get("/api/public/nearby", async (req,res) => { try { const lat=Number(req.query.lat),lon=Number(req.query.lon),type=String(req.query.type||"police"); if(!Number.isFinite(lat)||!Number.isFinite(lon)||!["police","veterinary"].includes(type)) return res.status(400).json({success:false,error:"Invalid nearby search"}); const key=`nearby_${type}_${lat.toFixed(3)}_${lon.toFixed(3)}`; const c=get(key,86400000); if(c) return res.json({success:true,data:c}); const tag=type==="police"?"amenity=police":"amenity=veterinary"; const q=`[out:json][timeout:10];node[${tag}](around:5000,${lat},${lon});out;`; const {data}=await axios.get("https://overpass-api.de/api/interpreter",{params:{data:q},timeout:12000}); const locations=(data.elements||[]).map((e:any)=>({name:e.tags?.name||`Unnamed ${type}`,lat:e.lat,lon:e.lon})); put(key,locations); return res.json({success:true,data:locations}); } catch { return res.status(503).json({success:false,error:"Nearby search temporarily unavailable"}); } });
+
+router.get("/api/public/disaster-alerts", async (_req,res) => { try { const c=get("disaster_rss",900000); if(c) return res.json({success:true,data:c}); const feed=await rss.parseURL("https://www.gdacs.org/xml/rss.xml"); const data=feed.items.filter(i=>`${i.title||""} ${i.contentSnippet||""}`.toLowerCase().includes("india")).slice(0,30).map(i=>({id:i.guid||i.link,titleEn:i.title,titleHi:i.title,severity:"Alert",link:i.link})); put("disaster_rss",data); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Disaster alerts temporarily unavailable"}); } });
+
+export default router;
