@@ -1,43 +1,85 @@
-# RPF App — Phase 2 Production Hardening
+# RPF Seva App — Phase 2 Visual & UX Enhancement
 
 ## Objective
-Move the Phase 1 Administrator/data-flow remediation from code-complete to production-verifiable and remove remaining API/database contract drift.
+Transform the application into a cohesive, premium, emotionally connected mobile-first experience while preserving the Phase 1 architecture and existing functionality.
 
-## Phase 2 scope
+## Brand direction
+- Product name: **RPF Seva App**
+- Brand language: **Seva • Samarpan • Sankalp**
+- Hindi: **सेवा, समर्पण एंड संकल्प**
+- Visual identity: Indian Tricolour-inspired saffron, white, green with India navy blue accents.
+- Use gradients, depth, motion and imagery tastefully; avoid excessive decoration.
 
-1. **API contract unification**
-   - One canonical `service_content` contract for public reads and Administrator writes.
-   - Align HTTP methods, payloads, and response shapes between frontend and backend.
-   - Remove legacy `service_cms_content` references.
+## Application-wide requirements
+1. Consistent motion system across Home, Activity, Explore, Impact and Me.
+2. Route/page entrance transitions.
+3. Scroll-reveal animations for major sections and cards.
+4. Micro-interactions for buttons, cards, tabs, navigation and important actions.
+5. Flip/3D-style interactions only where they improve comprehension; never for every element.
+6. Gradient icons and consistent icon containers throughout Explore and other service-heavy screens.
+7. Responsive Android/iPhone layouts with safe-area support.
+8. Respect reduced-motion accessibility preferences.
+9. Shared visual language rather than page-by-page styling differences.
 
-2. **Database readiness**
-   - Verify required Phase 1 tables, columns, indexes, and constraints.
-   - Ensure `service_content.service_id` is unique for upsert safety.
-   - Verify audit/session tables required by Administrator authentication.
+## Home screen direction
+- Clearly display **RPF Seva App**.
+- Replace the old Quick Actions block with creative, emotionally engaging service pathways.
+- Remove the Weather/Daily Utility block from Home.
+- Keep impact numbers in **Impact**, not duplicated on Home.
+- Remove the existing cartoonish carousel treatment.
+- Prefer authentic, real photographic imagery when editorial imagery is needed.
+- Restore and prominently present the Founder’s Message and real founder image.
+- Use the founder image from `/assets/founder.png`.
+- Present **Seva • Samarpan • Sankalp** as the core identity.
 
-3. **Administrator security**
-   - Verify every mutation route requires the Administrator role.
-   - Keep administrator setup/reset endpoint retired.
-   - Audit successful and failed sensitive mutations.
-   - Ensure no credentials or API keys are hard-coded in source.
+## Core navigation
+The five primary destinations remain:
+- Home
+- Explore
+- Activity
+- Impact
+- Me
 
-4. **Frontend/backend verification**
-   - Verify every Administrator save operation uses the actual backend contract.
-   - Verify public service pages render persisted content in English and Hindi.
-   - Verify failed API calls show useful errors without fabricated/mock data.
+Each destination must receive the same level of visual and interaction polish.
 
-5. **Build and deployment verification**
-   - Run frontend/backend build and type checks.
-   - Resolve compile/type errors introduced by Phase 1.
-   - Confirm the application can be deployed as the existing single-port architecture.
+## Explore
+- Gradient service icons.
+- Better grouping and hierarchy.
+- Animated category/service cards.
+- Clear primary actions.
+- Avoid dense lists that feel like an admin dashboard.
 
-## Exit criteria
+## Activity
+- Animated timeline/list entrance.
+- Clear notification states.
+- Better unread/read hierarchy.
+- Subtle motion for updates and interactions.
 
-Phase 2 is complete only when:
+## Impact
+- Keep the authoritative impact numbers here.
+- Add visual storytelling around impact instead of duplicating numbers elsewhere.
+- Use animated charts/progress/impact storytelling where useful.
 
-- build/type checks pass;
-- no known public/admin service-content contract mismatch remains;
-- required database schema is verified;
-- Administrator mutation routes are authenticated and audited;
-- no production credential/API-key fallback is hard-coded;
-- live smoke tests for login, service content save, public service read, volunteer administration, and Blood Network administration pass.
+## Me
+- Premium profile header.
+- Gradient identity treatment.
+- Animated settings/action cards.
+- Clear account, volunteer and contribution areas.
+
+## Founder content
+- Founder’s Message must remain discoverable and visually prominent.
+- Use the real founder photograph from the repository asset instead of an initials placeholder.
+
+## Quality gates
+Phase 2 is complete only after:
+- all five primary destinations have the new visual language;
+- global navigation and route transitions are animated;
+- major scrollable sections use tasteful reveal motion;
+- Explore has gradient icons;
+- Home no longer contains the old Quick Actions, Weather/Daily Utility or duplicated impact-number block;
+- Home uses RPF Seva App and Seva • Samarpan • Sankalp branding;
+- founder image/message is visible;
+- no cartoonish/placeholder carousel treatment remains on Home;
+- responsive/mobile layouts remain stable;
+- TypeScript/build checks pass;
+- Phase 3 is not started until this checklist is verified.
