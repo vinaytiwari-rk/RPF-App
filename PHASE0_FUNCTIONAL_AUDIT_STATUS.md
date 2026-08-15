@@ -1,62 +1,92 @@
 # Phase 0 Functional Audit Status
 
-This document records the current audit rules and confirmed implementation gaps. It is intentionally conservative: a feature is not marked working merely because its route or UI exists.
+Date: 2026-08-15
+Status: IN PROGRESS
+
+This document records confirmed findings. A feature is not marked WORKING merely because its route or UI exists.
 
 ## Status rules
 
-- **WORKING** — real user workflow completes and data/result is persisted correctly.
-- **LOCAL** — intentionally device-only and does not require the RPF backend.
-- **PARTIAL** — meaningful implementation exists but one or more production paths are incomplete.
+- **WORKING** — real user workflow completes and result is handled correctly.
+- **LOCAL** — intentionally device-only/local-first.
+- **PARTIAL** — meaningful implementation exists but production paths remain incomplete.
 - **PLACEHOLDER** — route/UI exists without the intended real workflow.
 - **BROKEN** — workflow currently fails or has a known blocking defect.
 - **BACKEND** — backend is legitimately required; API/auth/data flow must be verified.
-- **REWRITE** — existing implementation is better replaced than patched.
+- **REWRITE** — existing implementation is better replaced by a local/native implementation.
 
-## Confirmed audit observations
+## Confirmed findings
 
-### Document Scanner
+### 1. Build / CI baseline — PASS
 
-- Camera capture exists.
-- Image filters exist.
-- PDF generation exists through jsPDF.
-- Local scan library uses browser/device local storage.
-- Server upload is not required for saved scans.
-- Remaining production audit: native Android/iOS camera behavior, large-image memory limits, and persistence behavior inside the packaged app.
+The latest commit `2f572b4a6cb92448fbc52eeb966f72cd4d812fb8` passed the repository Deploy Application workflow. The workflow runs `npm ci`, `npm run lint`, and `npm run build` before deployment. No APK was built.
 
-### Community / Chat
+### 2. Document Scanner — FIXED AT SOURCE LEVEL; RUNTIME VERIFICATION PENDING
 
-- Community page contains a chat tab and Socket.IO client.
-- Chat history is loaded from `/api/community/chat/messages`.
-- Sending uses a Socket.IO `chat_message` event.
-- Authentication is passed to the socket when a token exists.
-- This is **not yet marked WORKING** until the server-side socket handler, persistence, authorization, reconnect behavior, and message delivery are verified together.
+The scanner now attaches the camera stream after the `<video>` element is rendered, explicitly calls `video.play()`, handles `canplay`, and reports common camera errors. It also generates PDFs with jsPDF and keeps a local scan library. The remaining Phase 0 work is native Android/iOS camera lifecycle/permission verification, large-image memory limits, and packaged-app persistence behavior.
 
-### Volunteer Search
+### 3. Service catalog — GAP CONFIRMED
 
-- Community page requests `/api/public/volunteers` and supports a city filter.
-- This is **not yet marked WORKING** until the returned data, privacy rules, search behavior, availability semantics, and empty/error states are verified end-to-end.
+`src/data/coreServices.ts` contains a large catalog, but `src/pages/Services.tsx` only maps a subset to dedicated routes. Most IDs fall through to `/services/:id`.
 
-### Foundation Impact / Statistics
+`src/pages/ServiceDetails.tsx` is a generic CMS-backed details page. A service card therefore does not prove that the service is implemented. A complete service/implementation matrix is recorded in `PHASE0_SERVICE_MATRIX.md`.
 
-- Community page obtains statistics from `/api/stats` rather than embedding fixed counts in the component.
-- Zero is displayed when the API provides no value.
-- This is **not evidence that the underlying statistics are accurate**; the backend source and calculation must still be audited.
+### 4. Local-first candidates — IDENTIFIED
 
-### Success Stories
+Fuel Tracker, GPS Toolkit, Vitals, Medication Reminder, Medical Dictionary, SOS, Period Tracker, Child Tracker and similar personal utilities should not depend on generic backend service content. They are Phase 0 rewrite candidates for local/device-first implementation.
 
-- Community page loads stories from `/api/success-stories`.
-- An empty response is handled instead of requiring fabricated records.
-- Any hard-coded testimonial/review content elsewhere in the app remains a Phase 0 search target and must not be treated as real user feedback.
+### 5. Resume Builder — PARTIAL
 
-## Core Phase 0 principle
+Local form/templates/PDF generation exist. AI generation uses `/api/ai/resume`, so the AI path is backend/API dependent. The non-AI resume workflow should remain independently usable.
 
-Never replace missing real data with invented data. If a real record does not exist, show an honest empty state. If a feature cannot complete its intended workflow, classify it as partial/broken/placeholder rather than calling it complete.
+### 6. Community — NOT YET VERIFIED END-TO-END
 
-## Next verification order
+The Community page loads chat history through `/api/community/chat/messages` and sends Socket.IO `chat_message` events. Server-side socket handler, persistence, authorization, reconnect behavior and delivery still require verification before WORKING status.
 
-1. Chat server event + persistence + authorization.
-2. Volunteer search backend data + privacy + availability.
-3. Grievance reviews/testimonials: remove or gate all fabricated records.
-4. Generic service routes: identify pages that are only shells.
-5. Health/private utilities: move eligible features to local-first storage.
-6. Android/iOS permission and lifecycle audit.
+Volunteer search, impact statistics and success stories also require backend/data verification before being marked WORKING.
+
+### 7. Generic service content security — AUDIT REQUIRED
+
+`ServiceDetails.tsx` renders CMS body HTML through `dangerouslySetInnerHTML`. The source of CMS content must be sanitized/allowlisted before production. This is tracked for the security phase but is also a Phase 0 release blocker if untrusted CMS content can reach the page.
+
+### 8. Backend load — OPTIMIZATION REQUIRED
+
+`AppContext` refreshes general backend data every 10 minutes and notifications every minute. This is not a functional blocker, but it conflicts with the long-term local-first/low-backend-load strategy. It will be optimized after functional correctness is established.
+
+### 9. Mobile readiness — NOT RELEASE READY
+
+Capacitor configuration contains Android/iOS sections, but the inspected `package.json` does not include `@capacitor/ios`. Android/iOS native capability adapters and permission/lifecycle behavior still need to be implemented and verified.
+
+### 10. External web services — ARCHITECTURE CHANGE REQUIRED
+
+`Services.tsx` currently calls `/api/search/external` for generic web search. This will later be separated into the planned RPF Web & Government Services Hub with in-app web handling and browser fallback. It should not become a dependency for local utilities.
+
+## Phase 0 acceptance checklist
+
+- [x] Build/lint baseline verified through GitHub Actions
+- [x] Initial complete service catalog captured
+- [x] Service-to-route/implementation matrix created
+- [x] Generic/placeholder service pattern identified
+- [x] Backend-dependent vs local-first candidates classified
+- [ ] Android permission/native capability matrix verified
+- [ ] iOS native capability matrix verified
+- [ ] Persistence strategy verified for each utility
+- [ ] API failure/offline behavior verified for critical workflows
+- [ ] 503/error-prone endpoints identified and verified
+- [ ] Fake/demo activity/data search completed
+- [ ] CMS HTML sanitization verified
+- [ ] No feature marked WORKING without end-to-end verification
+
+## Current execution order
+
+1. Verify/fix Community chat server event, persistence and authorization.
+2. Verify/fix volunteer search privacy and availability semantics.
+3. Search for fabricated testimonials/demo activity and remove/gate them.
+4. Convert high-value generic utility routes into real local-first utilities.
+5. Add the reusable device capability layer for Camera, Filesystem, Notifications, Geolocation and Sensors.
+6. Verify Android/iOS permission and lifecycle behavior.
+7. Run final Phase 0 build/lint and update this report to COMPLETE only when all acceptance items are resolved or explicitly deferred to a later phase.
+
+## Important constraint
+
+Do not rewrite the entire app wholesale. Preserve verified working functionality and make incremental, testable changes. APK/IPA creation is explicitly deferred until all planned phases are complete.
