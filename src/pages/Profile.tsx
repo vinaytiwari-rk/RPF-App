@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Award, Bell, ChevronRight, FileText, Globe, HeartHandshake, IdCard, Mail, Phone, Settings, ShieldCheck, Upload, User, Users, Activity, Download, BookOpen, MessageSquare, ClipboardList } from "lucide-react";
+import { Award, Bell, ChevronRight, FileText, Globe, HeartHandshake, IdCard, Mail, Phone, Settings, ShieldCheck, Upload, User, Users, Activity, MessageSquare, ClipboardList, HeartPulse, AlertTriangle, Briefcase, Leaf } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
@@ -13,120 +13,48 @@ export default function Profile() {
   const hi = lang === "hi" || language === "hi";
   const name = user?.name?.trim() || (hi ? "नागरिक" : "Citizen");
   const role = user?.role || "citizen";
-  const [avatar, setAvatar] = useState<string>("");
-
+  const [avatar, setAvatar] = useState("");
   const localAvatarKey = `@rpf_profile_avatar:${user?.id || "guest"}`;
-  useEffect(() => {
-    try { setAvatar(localStorage.getItem(localAvatarKey) || user?.avatar || ""); } catch { setAvatar(user?.avatar || ""); }
-  }, [localAvatarKey, user?.avatar]);
 
-  const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const max = 720;
-        const scale = Math.min(1, max / Math.max(img.width, img.height));
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const compressed = canvas.toDataURL("image/jpeg", 0.82);
-        try { localStorage.setItem(localAvatarKey, compressed); } catch {}
-        setAvatar(compressed);
-      };
-      img.src = String(reader.result);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
+  useEffect(() => { try { setAvatar(localStorage.getItem(localAvatarKey) || user?.avatar || ""); } catch { setAvatar(user?.avatar || ""); } }, [localAvatarKey, user?.avatar]);
+  const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => { const file=e.target.files?.[0]; if(!file||!file.type.startsWith("image/"))return; const reader=new FileReader(); reader.onload=()=>{ const img=new Image(); img.onload=()=>{ const max=720, scale=Math.min(1,max/Math.max(img.width,img.height)), canvas=document.createElement("canvas"); canvas.width=Math.round(img.width*scale); canvas.height=Math.round(img.height*scale); const ctx=canvas.getContext("2d"); if(!ctx)return; ctx.drawImage(img,0,0,canvas.width,canvas.height); const compressed=canvas.toDataURL("image/jpeg",.82); try{localStorage.setItem(localAvatarKey,compressed)}catch{} setAvatar(compressed); }; img.src=String(reader.result); }; reader.readAsDataURL(file); e.target.value=""; };
 
-  const initials = name.split(/\s+/).map(p => p[0]).slice(0, 2).join("").toUpperCase();
-  const isVolunteer = role === "volunteer" || user?.isVolunteer;
-  const registrationNo = user?.registration_number || user?.volunteerData?.registration_number || user?.volunteerData?.registrationNumber || "";
-  const volunteerSinceRaw = user?.volunteerData?.registeredAt || user?.volunteerData?.registered_at || user?.volunteerData?.created_at || user?.volunteerData?.createdAt;
-  const volunteerSince = volunteerSinceRaw ? new Date(volunteerSinceRaw).toLocaleDateString(hi ? "hi-IN" : "en-IN", { month: "long", year: "numeric" }) : "";
+  const initials=name.split(/\s+/).map(p=>p[0]).slice(0,2).join("").toUpperCase();
+  const isVolunteer=role==="volunteer"||!!user?.isVolunteer;
+  const registrationNo=user?.registration_number||user?.volunteerData?.registration_number||user?.volunteerData?.registrationNumber||"";
+  const volunteerSinceRaw=user?.volunteerData?.registeredAt||user?.volunteerData?.registered_at||user?.volunteerData?.created_at||user?.volunteerData?.createdAt;
+  const volunteerSince=volunteerSinceRaw?new Date(volunteerSinceRaw).toLocaleDateString(hi?"hi-IN":"en-IN",{month:"long",year:"numeric"}):"";
 
-  const menu = [
-    { icon: IdCard, title: hi ? "जन सेवा कार्ड" : "Jan Seva Card", sub: hi ? "डिजिटल फ्लिप कार्ड • PDF/JPEG डाउनलोड" : "Digital flip card • PDF/JPEG download", route: "/jan-seva-card", color: "from-[#FF9933] to-[#F59E0B]" },
-    { icon: Award, title: hi ? "मेरे प्रमाणपत्र" : "My Certificates", sub: hi ? "आपके सेवा प्रमाणपत्र" : "Your service certificates", route: "/my-certificates", color: "from-[#7C3AED] to-[#A855F7]" },
-    { icon: Activity, title: hi ? "मेरी गतिविधि" : "My Activity", sub: hi ? "हाल की गतिविधियां और अपडेट" : "Recent activities and updates", route: "/notifications", color: "from-[#0EA5E9] to-[#38BDF8]" },
-    { icon: Bell, title: hi ? "सूचनाएं" : "Notifications", sub: hi ? "जरूरी अपडेट और घोषणाएं" : "Important updates and announcements", route: "/notifications", color: "from-[#E11D48] to-[#FB7185]" },
+  const menu=[
+    {icon:IdCard,title:hi?"जन सेवा कार्ड":"Jan Seva Card",sub:hi?"डिजिटल फ्लिप कार्ड • PDF/JPEG डाउनलोड":"Digital flip card • PDF/JPEG download",route:"/jan-seva-card",color:"from-[#FF9933] to-[#F59E0B]"},
+    {icon:Award,title:hi?"मेरे प्रमाणपत्र":"My Certificates",sub:hi?"आपके सेवा प्रमाणपत्र":"Your service certificates",route:"/my-certificates",color:"from-[#7C3AED] to-[#A855F7]"},
+    {icon:Activity,title:hi?"मेरी गतिविधि":"My Activity",sub:hi?"हाल की गतिविधियां और अपडेट":"Recent activities and updates",route:"/notifications",color:"from-[#0EA5E9] to-[#38BDF8]"},
+    {icon:Bell,title:hi?"सूचनाएं":"Notifications",sub:hi?"जरूरी अपडेट और घोषणाएं":"Important updates and announcements",route:"/notifications",color:"from-[#E11D48] to-[#FB7185]"},
   ];
+  const forms=useMemo(()=>[
+    {icon:IdCard,title:hi?"जन सेवा कार्ड आवेदन":"Jan Seva Card",route:"/jan-seva-card",color:"text-[#FF9933] bg-orange-50"},
+    {icon:MessageSquare,title:hi?"जन शिकायत फॉर्म":"Public Grievance",route:"/grievance",color:"text-[#E11D48] bg-rose-50"},
+    {icon:HeartHandshake,title:hi?"रक्त नेटवर्क":"Blood Network",route:"/blood-network",color:"text-[#DC2626] bg-red-50"},
+    {icon:ClipboardList,title:hi?"स्वयंसेवा / सेवा":"Volunteer & Seva",route:"/services",color:"text-[#138808] bg-green-50"},
+    {icon:HeartPulse,title:hi?"स्वास्थ्य सहायता":"Health Care",route:"/health-care",color:"text-[#0EA5E9] bg-sky-50"},
+    {icon:Briefcase,title:hi?"रोजगार / कौशल":"Jobs & Skills",route:"/services",color:"text-[#7C3AED] bg-violet-50"},
+    {icon:Leaf,title:hi?"पर्यावरण पहल":"Environment",route:"/services",color:"text-[#16A34A] bg-lime-50"},
+    {icon:AlertTriangle,title:hi?"आपदा सहायता":"Disaster Management",route:"/services",color:"text-[#CA8A04] bg-yellow-50"},
+  ],[hi]);
 
-  const forms = useMemo(() => [
-    { icon: IdCard, title: hi ? "जन सेवा कार्ड आवेदन" : "Jan Seva Card", route: "/jan-seva-card", color: "text-[#FF9933] bg-orange-50" },
-    { icon: MessageSquare, title: hi ? "जन शिकायत फॉर्म" : "Public Grievance", route: "/grievance", color: "text-[#E11D48] bg-rose-50" },
-    { icon: HeartHandshake, title: hi ? "रक्त नेटवर्क" : "Blood Network", route: "/blood-network", color: "text-[#DC2626] bg-red-50" },
-    { icon: ClipboardList, title: hi ? "स्वयंसेवा / सेवा" : "Volunteer & Seva", route: "/services", color: "text-[#138808] bg-green-50" },
-  ], [hi]);
+  return <main className="min-h-full bg-[#f8fafc] pb-12 text-slate-900"><div className="mx-auto max-w-3xl px-3.5 py-5 sm:px-6">
+    <motion.section initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} className="relative overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(0,0,0,.08)]"><div className="h-1.5 bg-gradient-to-r from-[#FF9933] via-[#FDE047] to-[#138808]"/><div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl"/><div className="absolute -bottom-24 -left-16 h-60 w-60 rounded-full bg-sky-200/30 blur-3xl"/><div className="relative p-5 sm:p-7">
+      <div className="flex items-start gap-4"><div className="relative shrink-0"><div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[28px] bg-gradient-to-br from-[#FF9933] via-white to-[#138808] p-[2px] shadow-lg"><div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[26px] bg-slate-50 text-2xl font-black text-[#000080]">{avatar?<img src={avatar} alt="Profile" className="h-full w-full object-cover"/>:initials||<User className="h-9 w-9"/>}</div></div><label className="absolute -bottom-2 -right-2 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-[#000080] text-white shadow-md"><Upload className="h-4 w-4"/><input type="file" accept="image/*" className="hidden" onChange={handleAvatar}/></label></div><div className="min-w-0 flex-1 pt-1"><p className="text-[9px] font-black uppercase tracking-[.2em] text-[#FF9933]">RPF Seva App</p><h1 className="mt-1 truncate text-[23px] font-black text-[#000080]">{name}</h1><p className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-400">{role.replace(/_/g," ")}</p>{user?.phone&&<p className="mt-1 text-[11px] text-slate-500">{user.phone}</p>}<p className="mt-2 text-[9px] font-bold text-slate-400">{hi?"फोटो केवल इस डिवाइस/app profile में सुरक्षित है":"Photo is kept only with this app profile"}</p></div></div>
+      {isVolunteer&&<div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3"><div className="rounded-2xl border border-orange-100 bg-orange-50/70 p-3"><p className="text-[8px] font-black uppercase tracking-wider text-orange-500">Volunteer No.</p><p className="mt-1 text-[12px] font-black text-slate-800">{registrationNo||"—"}</p></div><div className="rounded-2xl border border-green-100 bg-green-50/70 p-3"><p className="text-[8px] font-black uppercase tracking-wider text-green-600">Volunteer Since</p><p className="mt-1 text-[12px] font-black text-slate-800">{volunteerSince||"—"}</p></div><div className="col-span-2 rounded-2xl border border-violet-100 bg-violet-50/70 p-3 sm:col-span-1"><p className="text-[8px] font-black uppercase tracking-wider text-violet-600">Status</p><p className="mt-1 text-[12px] font-black text-slate-800">{user?.janSevaCardStatus==="approved"?"Active • Card Ready":"Active Volunteer"}</p></div></div>}
+      <div className="mt-5 grid grid-cols-3 rounded-2xl border border-slate-100 bg-slate-50/70 text-center"><div className="border-r border-slate-200 py-3"><ShieldCheck className="mx-auto h-4 w-4 text-[#138808]"/><p className="mt-1 text-[9px] font-bold text-slate-500">{hi?"सत्यापित":"Verified"}</p></div><div className="border-r border-slate-200 py-3"><Users className="mx-auto h-4 w-4 text-[#7C3AED]"/><p className="mt-1 text-[9px] font-bold text-slate-500">{hi?"समुदाय":"Community"}</p></div><div className="py-3"><Award className="mx-auto h-4 w-4 text-[#FF9933]"/><p className="mt-1 text-[9px] font-bold text-slate-500">{hi?"सेवा":"Seva"}</p></div></div>
+    </div></motion.section>
 
-  return <main className="min-h-full bg-[#f8fafc] pb-12 text-slate-900">
-    <div className="mx-auto max-w-3xl px-3.5 py-5 sm:px-6">
-      <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(0,0,0,.08)]">
-        <div className="h-1.5 bg-gradient-to-r from-[#FF9933] via-[#FDE047] via-50% to-[#138808]" />
-        <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl" />
-        <div className="absolute -bottom-24 -left-16 h-60 w-60 rounded-full bg-sky-200/30 blur-3xl" />
-        <div className="relative p-5 sm:p-7">
-          <div className="flex items-start gap-4">
-            <div className="relative shrink-0">
-              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[28px] bg-gradient-to-br from-[#FF9933] via-white to-[#138808] p-[2px] shadow-lg">
-                <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[26px] bg-slate-50 text-2xl font-black text-[#000080]">
-                  {avatar ? <img src={avatar} alt="Profile" className="h-full w-full object-cover" /> : initials || <User className="h-9 w-9" />}
-                </div>
-              </div>
-              <label className="absolute -bottom-2 -right-2 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-[#000080] text-white shadow-md" title={hi ? "प्रोफाइल फोटो बदलें" : "Change profile photo"}>
-                <Upload className="h-4 w-4" />
-                <input type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-              </label>
-            </div>
-            <div className="min-w-0 flex-1 pt-1">
-              <p className="text-[9px] font-black uppercase tracking-[.2em] text-[#FF9933]">RPF Seva App</p>
-              <h1 className="mt-1 truncate text-[23px] font-black text-[#000080]">{name}</h1>
-              <p className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-400">{role.replace(/_/g, " ")}</p>
-              {user?.phone && <p className="mt-1 text-[11px] text-slate-500">{user.phone}</p>}
-              <p className="mt-2 text-[9px] font-bold text-slate-400">{hi ? "फोटो केवल इस डिवाइस/app profile में सुरक्षित है" : "Photo is kept only with this app profile"}</p>
-            </div>
-          </div>
+    <section className="mt-5 grid gap-2.5 sm:grid-cols-2">{menu.map(({icon:Icon,title,sub,route,color})=><motion.button key={title} whileHover={{y:-2}} whileTap={{scale:.985}} onClick={()=>navigate(route)} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm"><span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${color}`}><Icon className="h-5 w-5 text-white"/></span><span className="min-w-0 flex-1"><span className="block text-[13px] font-black text-slate-800">{title}</span><span className="mt-0.5 block text-[10px] leading-4 text-slate-500">{sub}</span></span><ChevronRight className="h-4 w-4 text-slate-300"/></motion.button>)}</section>
 
-          {isVolunteer && <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-            <div className="rounded-2xl border border-orange-100 bg-orange-50/70 p-3"><p className="text-[8px] font-black uppercase tracking-wider text-orange-500">Volunteer No.</p><p className="mt-1 text-[12px] font-black text-slate-800">{registrationNo || "—"}</p></div>
-            <div className="rounded-2xl border border-green-100 bg-green-50/70 p-3"><p className="text-[8px] font-black uppercase tracking-wider text-green-600">Volunteer Since</p><p className="mt-1 text-[12px] font-black text-slate-800">{volunteerSince || "—"}</p></div>
-            <div className="col-span-2 rounded-2xl border border-violet-100 bg-violet-50/70 p-3 sm:col-span-1"><p className="text-[8px] font-black uppercase tracking-wider text-violet-600">Status</p><p className="mt-1 text-[12px] font-black text-slate-800">{user?.janSevaCardStatus === "approved" ? "Active • Card Ready" : "Active Volunteer"}</p></div>
-          </div>}
+    <section className="mt-5 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-500"><FileText className="h-5 w-5"/></span><div><h2 className="text-[15px] font-black text-slate-800">{hi?"मेरे डिजिटल फॉर्म":"My Digital Forms"}</h2><p className="text-[10px] text-slate-500">{hi?"जरूरी फॉर्म एक ही जगह":"Important forms in one place"}</p></div></div><div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">{forms.map(({icon:Icon,title,route,color})=><button key={title} onClick={()=>navigate(route)} className="flex items-center gap-2 rounded-xl border border-slate-100 p-3 text-left hover:bg-slate-50"><span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${color}`}><Icon className="h-4 w-4"/></span><span className="text-[10px] font-black leading-4 text-slate-700">{title}</span></button>)}</div></section>
 
-          <div className="mt-5 grid grid-cols-3 rounded-2xl border border-slate-100 bg-slate-50/70 text-center">
-            <div className="border-r border-slate-200 py-3"><ShieldCheck className="mx-auto h-4 w-4 text-[#138808]"/><p className="mt-1 text-[9px] font-bold text-slate-500">{hi ? "सत्यापित" : "Verified"}</p></div>
-            <div className="border-r border-slate-200 py-3"><Users className="mx-auto h-4 w-4 text-[#7C3AED]"/><p className="mt-1 text-[9px] font-bold text-slate-500">{hi ? "समुदाय" : "Community"}</p></div>
-            <div className="py-3"><Award className="mx-auto h-4 w-4 text-[#FF9933]"/><p className="mt-1 text-[9px] font-bold text-slate-500">{hi ? "सेवा" : "Seva"}</p></div>
-          </div>
-        </div>
-      </motion.section>
-
-      <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }} className="mt-5 grid gap-2.5 sm:grid-cols-2">
-        {menu.map(({ icon: Icon, title, sub, route, color }) => <motion.button key={title} whileHover={{ y: -2 }} whileTap={{ scale: .985 }} onClick={() => navigate(route)} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm"><span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${color}`}><Icon className="h-5 w-5 text-white"/></span><span className="min-w-0 flex-1"><span className="block text-[13px] font-black text-slate-800">{title}</span><span className="mt-0.5 block text-[10px] leading-4 text-slate-500">{sub}</span></span><ChevronRight className="h-4 w-4 text-slate-300"/></motion.button>)}
-      </motion.section>
-
-      <section className="mt-5 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-500"><FileText className="h-5 w-5"/></span><div><h2 className="text-[15px] font-black text-slate-800">{hi ? "मेरे डिजिटल फॉर्म" : "My Digital Forms"}</h2><p className="text-[10px] text-slate-500">{hi ? "जरूरी फॉर्म एक ही जगह" : "Important forms in one place"}</p></div></div>
-        <div className="mt-3 grid grid-cols-2 gap-2.5">{forms.map(({ icon: Icon, title, route, color }) => <button key={title} onClick={() => navigate(route)} className="flex items-center gap-2 rounded-xl border border-slate-100 p-3 text-left hover:bg-slate-50"><span className={`flex h-9 w-9 items-center justify-center rounded-lg ${color}`}><Icon className="h-4 w-4"/></span><span className="text-[10px] font-black text-slate-700">{title}</span></button>)}</div>
-      </section>
-
-      <section className="mt-5 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-[15px] font-black text-slate-800">{hi ? "RP FOUNDATION से संपर्क" : "Contact RP FOUNDATION"}</h2>
-        <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
-          <a href={settings.tollFree ? `tel:${settings.tollFree.replace(/[^+\d]/g, "")}` : undefined} className="flex items-center gap-3 rounded-xl bg-green-50 p-3"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 text-green-700"><Phone className="h-4 w-4"/></span><span><span className="block text-[9px] font-black uppercase tracking-wider text-green-700">Helpline</span><span className="block text-[11px] font-black text-slate-700">{settings.tollFree || "—"}</span></span></a>
-          <a href={settings.email ? `mailto:${settings.email}` : undefined} className="flex items-center gap-3 rounded-xl bg-sky-50 p-3"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-700"><Mail className="h-4 w-4"/></span><span><span className="block text-[9px] font-black uppercase tracking-wider text-sky-700">Email</span><span className="block text-[11px] font-black text-slate-700">{settings.email || "—"}</span></span></a>
-        </div>
-        {settings.webUrl && <a href={settings.webUrl} target="_blank" rel="noreferrer" className="mt-2.5 flex items-center gap-2 rounded-xl bg-violet-50 p-3 text-[10px] font-black text-violet-700"><Globe className="h-4 w-4"/> {settings.webUrl}<ChevronRight className="ml-auto h-4 w-4"/></a>}
-      </section>
-
-      <section className="mt-5 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700"><Settings className="h-5 w-5"/></span><div className="flex-1"><p className="text-[12px] font-black text-slate-800">{hi ? "भाषा" : "Language"}</p><p className="text-[10px] text-slate-500">{hi ? "ऐप की भाषा बदलें" : "Change app language"}</p></div><button onClick={() => setLanguage(hi ? "en" : "hi")} className="rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-black text-[#000080]">{hi ? "English" : "हिन्दी"}</button></div></section>
-      <p className="mt-6 text-center text-[9px] font-bold tracking-[.16em] text-slate-300">SEVA • SAMARPAN • SANKALP</p>
-    </div>
-  </main>;
+    <section className="mt-5 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"><h2 className="text-[15px] font-black text-slate-800">{hi?"RP FOUNDATION से संपर्क":"Contact RP FOUNDATION"}</h2><div className="mt-3 grid gap-2.5 sm:grid-cols-2"><a href={settings.tollFree?`tel:${settings.tollFree.replace(/[^+\d]/g,"")}:undefined`} className="flex items-center gap-3 rounded-xl bg-green-50 p-3"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 text-green-700"><Phone className="h-4 w-4"/></span><span><span className="block text-[9px] font-black uppercase tracking-wider text-green-700">Helpline</span><span className="block text-[11px] font-black text-slate-700">{settings.tollFree||"—"}</span></span></a><a href={settings.email?`mailto:${settings.email}`:undefined} className="flex items-center gap-3 rounded-xl bg-sky-50 p-3"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-700"><Mail className="h-4 w-4"/></span><span><span className="block text-[9px] font-black uppercase tracking-wider text-sky-700">Email</span><span className="block text-[11px] font-black text-slate-700">{settings.email||"—"}</span></span></a></div>{settings.webUrl&&<a href={settings.webUrl} target="_blank" rel="noreferrer" className="mt-2.5 flex items-center gap-2 rounded-xl bg-violet-50 p-3 text-[10px] font-black text-violet-700"><Globe className="h-4 w-4"/>{settings.webUrl}<ChevronRight className="ml-auto h-4 w-4"/></a>}</section>
+    <section className="mt-5 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700"><Settings className="h-5 w-5"/></span><div className="flex-1"><p className="text-[12px] font-black text-slate-800">{hi?"भाषा":"Language"}</p><p className="text-[10px] text-slate-500">{hi?"ऐप की भाषा बदलें":"Change app language"}</p></div><button onClick={()=>setLanguage(hi?"en":"hi")} className="rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-black text-[#000080]">{hi?"English":"हिन्दी"}</button></div></section>
+    <p className="mt-6 text-center text-[9px] font-bold tracking-[.16em] text-slate-300">SEVA • SAMARPAN • SANKALP</p>
+  </div></main>;
 }
