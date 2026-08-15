@@ -1,10 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
 import { ArrowLeft, ExternalLink, Download, Compass, Sparkles } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 type LocalizedServiceContent = { body?: string; actionLabel?: string };
+
+// CMS content is trusted only after removing executable HTML, inline handlers,
+// dangerous URLs and embedded browsing contexts. Keep this dependency-free so
+// the app can remain offline-first.
+function sanitizeHtml(input: string): string {
+  if (typeof window === "undefined" || !input) return "";
+  const template = document.createElement("template");
+  template.innerHTML = input;
+  const blocked = new Set(["SCRIPT", "STYLE", "IFRAME", "OBJECT", "EMBED", "FORM", "BASE"]);
+  const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
+  const elements: Element[] = [];
+  while (walker.nextNode()) elements.push(walker.currentNode as Element);
+  for (const el of elements) {
+    if (blocked.has(el.tagName)) { el.remove(); continue; }
+    for (const attr of Array.from(el.attributes)) {
+      const name = attr.name.toLowerCase();
+      const value = attr.value.trim();
+      if (name.startsWith("on") || name === "srcdoc" || name === "style") el.removeAttribute(attr.name);
+      if ((name === "href" || name === "src" || name === "action") && /^(javascript|data|vbscript):/i.test(value)) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  }
+  return template.innerHTML;
+}
 
 export default function ServiceDetails() {
   const { id } = useParams<{ id: string }>();
@@ -20,24 +45,28 @@ export default function ServiceDetails() {
     if (!id) return;
     const fetchContent = async () => {
       setIsLoadingContent(true); setContentData(null);
-      try { const res = await fetch(`/api/public/services/${id}/content`); const json = await res.json(); setContentData(res.ok && json.success ? json.data : null); }
-      catch (err) { console.error("Error fetching service content:", err); setContentData(null); }
+      try {
+        const res = await fetch(`/api/public/services/${encodeURIComponent(id)}/content`);
+        const json = await res.json();
+        setContentData(res.ok && json.success ? json.data : null);
+      } catch (err) { console.error("Error fetching service content:", err); setContentData(null); }
       finally { setIsLoadingContent(false); }
     };
     fetchContent();
   }, [id, locale]);
 
-  if (isLoadingServices || isLoadingContent) return <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50"><div className="flex flex-col items-center gap-3"><div className="w-8 h-8 border-4 border-[#000080] border-t-transparent rounded-full animate-spin" /><p className="text-xs font-bold text-slate-500">Loading service...</p></div></div>;
+  const localized: LocalizedServiceContent = contentData?.content?.[locale] || contentData?.content?.en || {};
+  const htmlContent = useMemo(() => sanitizeHtml(localized.body || ""), [localized.body]);
+  const actionLabel = localized.actionLabel || "";
+  const actionUrl = contentData?.action_url || "";
+  const resources = Array.isArray(contentData?.resources) ? contentData.resources : [];
 
+  if (isLoadingServices || isLoadingContent) return <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50"><div className="flex flex-col items-center gap-3"><div className="w-8 h-8 border-4 border-[#000080] border-t-transparent rounded-full animate-spin" /><p className="text-xs font-bold text-slate-500">Loading service...</p></div></div>;
   if (!serviceMeta) return <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-slate-50 p-6 text-center space-y-4"><div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-2"><Compass className="w-8 h-8" /></div><h2 className="text-lg font-bold text-slate-800">Service Not Found</h2><p className="text-xs text-slate-500 max-w-xs">This service is no longer available or the URL is incorrect.</p><button onClick={() => navigate("/services")} className="mt-4 px-6 py-2.5 bg-[#000080] text-white rounded-xl text-xs font-bold shadow-md">Back to Services</button></div>;
 
   const IconComponent = (LucideIcons as any)[serviceMeta.iconName || "Compass"] || Compass;
   const colorClass = serviceMeta.color || "bg-indigo-50 text-indigo-600 border-indigo-100";
-  const localized: LocalizedServiceContent = contentData?.content?.[locale] || contentData?.content?.en || {};
-  const htmlContent = localized.body || "";
-  const actionLabel = localized.actionLabel || "";
-  const actionUrl = contentData?.action_url || "";
-  const resources = Array.isArray(contentData?.resources) ? contentData.resources : [];
+  const isExternalAction = /^https?:\/\//i.test(actionUrl);
 
   return <div className="p-5 flex-1 flex flex-col min-h-screen bg-slate-50/50 pb-24 relative overflow-x-hidden">
     <div className="flex items-center gap-3 border-b border-slate-200/80 pb-4 mb-5 relative z-10"><button onClick={() => navigate(-1)} className="w-8 h-8 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-600 hover:text-[#000080] hover:border-[#000080] transition-colors shrink-0 shadow-sm"><ArrowLeft className="w-4 h-4" /></button><div className="flex-1 min-w-0"><h3 className="font-display font-extrabold text-base text-[#000080] truncate">{locale === "hi" ? serviceMeta.titleHi : serviceMeta.titleEn}</h3><p className="text-[10px] text-slate-500 font-bold truncate">{locale === "hi" ? serviceMeta.descHi : serviceMeta.descEn}</p></div></div>
@@ -45,7 +74,7 @@ export default function ServiceDetails() {
     {!contentData ? <div className="bg-white border border-slate-200 rounded-xl p-6 text-center shadow-sm"><Sparkles className="w-8 h-8 text-amber-400 mx-auto mb-2 opacity-50" /><p className="text-xs text-slate-500 font-bold">Detailed content for this service is not yet available.</p></div> : <div className="space-y-6">
       {htmlContent && <div className="prose prose-sm prose-slate max-w-none bg-white p-5 rounded-2xl shadow-sm border border-slate-100" dangerouslySetInnerHTML={{ __html: htmlContent }} />}
       {resources.length > 0 && <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-3"><h5 className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider border-b pb-2">Documents & Resources</h5><div className="space-y-2">{resources.map((resource: any, idx: number) => { const resourceTitle = resource?.title?.[locale] || resource?.title?.en || resource?.title || "Resource"; return <a key={idx} href={resource.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors group"><div className="w-8 h-8 bg-white border border-slate-200 rounded-lg flex items-center justify-center shrink-0 text-slate-400 group-hover:text-indigo-600"><Download className="w-4 h-4" /></div><p className="text-xs font-bold text-slate-700 truncate group-hover:text-indigo-700">{resourceTitle}</p></a>; })}</div></div>}
-      {actionLabel && actionUrl && <div className="pt-2"><a href={actionUrl} target={actionUrl.startsWith("http") ? "_blank" : "_self"} rel={actionUrl.startsWith("http") ? "noopener noreferrer" : undefined} className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#000080] text-white font-bold rounded-xl text-xs shadow-lg hover:bg-navy-dark transition-transform active:scale-95"><span>{actionLabel}</span>{actionUrl.startsWith("http") && <ExternalLink className="w-3.5 h-3.5" />}</a></div>}
+      {actionLabel && actionUrl && <div className="pt-2"><a href={actionUrl} target={isExternalAction ? "_blank" : undefined} rel={isExternalAction ? "noopener noreferrer" : undefined} className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#000080] text-white font-bold rounded-xl text-xs shadow-lg hover:bg-navy-dark transition-transform active:scale-95"><span>{actionLabel}</span>{isExternalAction && <ExternalLink className="w-3.5 h-3.5" />}</a></div>}
     </div>}
   </div>;
 }
