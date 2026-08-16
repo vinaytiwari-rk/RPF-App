@@ -1,177 +1,290 @@
-# RPF Seva App — Revised 17-Phase Master Plan
+# RPF Seva App — Revised 10-Phase Master Plan
 
 Date: 2026-08-16
-Status: PLANNING RESET — AUDIT BEFORE NEW FEATURE EXECUTION
+Status: PLANNING RESET — 10 PHASES
 
-## Why this reset
-The first three phases were closed too early at source/architecture/UI level while several real workflows remain partial, generic, backend-dependent, unverified, or visually inconsistent. This master plan resets execution around one rule:
+## Product Goal
 
-> A feature is complete only when its user workflow, data source, loading/empty/error states, navigation, permissions, mobile behavior, build checks and relevant runtime/deployment verification are complete.
+Build **RPF Seva App** as a premium, multipurpose, daily-use application for citizens and volunteers, while keeping routine features as local-first and minimizing unnecessary admin/backend dependence.
 
-No phase may be marked complete merely because a route, card, icon or component exists.
+The product must feel complete, reliable and useful even when the backend is unavailable. Backend/database remain authoritative wherever records, identity, approvals or organizational data genuinely require them.
 
-## Phase 0 — Repository & Product Audit
-- Freeze current main branch as audit baseline.
-- Inventory every route, screen, CTA, form, API, external URL, upload, permission and data dependency.
-- Classify every feature: WORKING / LOCAL / BACKEND / PARTIAL / PLACEHOLDER / BROKEN / REWRITE.
-- Remove fake/demo claims and dead CTAs.
-- Record all known bugs and regressions.
-- Deliverable: master defect + feature matrix.
+## Non-negotiable engineering scope
 
-## Phase 1 — Architecture & Stability Foundation
-- Keep capability-driven, platform-neutral architecture.
-- Enforce local-first for device utilities and offline-safe state handling.
-- Standardize feature states: loading, ready, empty, offline, denied, unsupported, error.
-- Centralize API/error handling, navigation guards and storage boundaries.
-- Add iOS dependency/config readiness without creating release builds yet.
-- Establish testable service adapters and eliminate direct platform API leakage.
+Every phase may require coordinated work across:
+- Frontend / React UI and UX
+- Backend / Node + Express APIs
+- PostgreSQL database / migrations / data integrity
+- Admin panel and CMS
+- Android/iOS capability adapters
+- Deployment and runtime verification
 
-## Phase 2 — Design System & Application-Wide UI/UX
-- Finalize RPF Seva App visual identity.
-- Seva, Samarpan & Sankalp / सेवा, समर्पण एंड संकल्प.
-- Tricolour as visual anchor with controlled supporting palette.
-- Responsive mobile-first typography, spacing, cards, buttons, icons and gradients.
-- Motion system: page transitions, scroll reveal, micro-interactions, reduced-motion support.
-- Complete Home, Explore, Activity, Impact and Me without blank/dead destinations.
-- Home: location/weather/AQI, quote, real photographic carousel, founder preview, social links, home-only engaging content.
-- Me: profile, volunteer identity, Jan Seva Card, certificates, settings, contact, logout.
+A screen, route or API alone is never considered a completed feature.
 
-## Phase 3 — Navigation, State & UX Reliability
-- Audit every route and back action.
-- Remove redirects that land users in unrelated or unfinished screens.
-- No clickable item without a working destination or an explicit in-place interaction.
-- Persist safe navigation state without trapping users.
-- Global error boundary, retry UI, offline UI and session-expiry handling.
-- Deep-link and refresh behavior.
+## Current Audit Findings — Baseline
 
-## Phase 4 — Authentication, Volunteer Identity & Profile
-- Complete citizen/volunteer/admin auth flows.
-- Volunteer registration number and Volunteer Since from authoritative backend data.
-- Profile editing and local profile photo with clear privacy boundary.
-- Jan Seva Card generation from volunteer record + Aadhaar input as required.
-- Flip card, QR identity, PDF/JPEG export.
-- Approval/status lifecycle and secure account/logout behavior.
+The existing Phase 0 matrix already identifies a substantial number of generic CMS placeholders, partial workflows and backend-dependent services. In particular, most of the service catalogue currently routes through generic `/services/:id` handling and must not be counted as implemented merely because a card/route exists. fileciteturn248file0L2-L2
 
-## Phase 5 — Home & Public Experience
-- Final production Home design.
-- Real, neutral photographic carousel with verified image availability and no unrelated organization branding/uniforms.
-- Quote-of-day parser/source reliability and caching.
-- Location/weather/AQI resilience and graceful permission denial.
-- Founder message preview + full speech.
-- Home-only engagement feature that does not create dead routes.
-- Social links verified against official RP Foundation destinations.
+The current frontend has a broad service catalogue, but Explore still performs an external web search for every non-empty search query, creating unnecessary backend/external dependency. This is explicitly identified as an architectural concern in the existing audit. fileciteturn251file0L2-L2
 
-## Phase 6 — Explore / Service Catalog
-- Replace generic CMS placeholders with real feature modules where required.
-- Service matrix becomes implementation backlog.
-- Each service gets one of: real local utility, real backend workflow, controlled external service, or explicitly unavailable state.
-- Remove generic "Active Service" claims when no workflow exists.
-- Search/category/filter reliability and no unnecessary external web search on every query.
+The backend is already substantial: authentication, volunteer, certificate, community, donation, CMS, upload, government and admin route groups exist, with PostgreSQL initialization and automatic schema alteration in `server.ts`. This makes backend/database repair a first-class workstream rather than a later add-on. fileciteturn253file0L2-L2
 
-## Phase 7 — Community, Seva & Participation
-- Volunteer/Seva workflows.
-- Community participation, events, registrations and attendance records.
-- Blood Network, donations, grievances and community services end-to-end.
-- Jan Seva Card integration.
-- Participation history and service recognition where backed by real data.
+The Admin Hub already contains Overview, People, Content, Requests, Blood Network, Services and System areas, but it is currently a functional control surface rather than a fully polished, audited administration platform. fileciteturn255file0L2-L2
 
-## Phase 8 — Health, Safety & Emergency Utilities
-- Health Care, medicine support, medical dictionary and private trackers.
-- SOS/native device capability workflow.
-- Vitals must never invent sensor/BP values.
-- Child/period/medication utilities local/private where appropriate.
-- Permission, privacy, emergency UX and failure-state verification.
+## Phase 1 — Full Audit, Bug Inventory & Stabilization
 
-## Phase 9 — Local-First Utility Suite
-- Document Scanner.
-- GPS Toolkit.
-- Fuel Tracker.
-- Resume Builder.
-- Calendar and offline-friendly tools.
-- Local storage, export/import, device permissions and recovery.
-- Native Android/iOS adapters for camera/files/share where required.
+**Goal:** Stop feature drift and establish one trusted baseline.
 
-## Phase 10 — Backend Contracts & Data Integrity
-- Formal API contract audit.
-- Authentication/authorization checks.
-- Volunteer/profile/Jan Seva Card/certificates/community data consistency.
-- Validation, duplicate prevention, audit fields and transaction safety.
-- Error codes and controlled empty states.
-- End-to-end production workflow verification.
+- Audit every frontend route/screen/CTA/form/modal.
+- Audit every backend route and response contract.
+- Audit PostgreSQL tables, migrations, indexes, relationships and duplicate/legacy columns.
+- Audit Admin workflows and permissions.
+- Audit authentication/session/logout behavior.
+- Audit uploads, local storage, device permissions and external URLs.
+- Identify blank screens, broken routes, dead buttons, fake/demo data, placeholder services and incorrect redirects.
+- Create one master defect matrix with severity and owner phase.
+- Fix all P0/P1 blockers before new feature expansion.
 
-## Phase 11 — Content, CMS & External Integrations
-- CMS content governance.
-- Sanitization and allowlists.
-- Official social links and feeds.
-- Quote/weather/AQI/news/external data adapters.
-- External URLs, attribution and failure handling.
-- No third-party organization imagery in RPF visual surfaces unless explicitly authorized.
+**Exit:** no known blocking defect in the core user journey; `npm run lint` and `npm run build` pass.
 
-## Phase 12 — Notifications, Activity & Communication
-- Activity feed backed by real events.
-- Notification read/unread state and deep links.
-- Email/SMS/push strategy according to approved product requirements.
-- Avoid empty notification screens.
-- Retry, pagination and efficient refresh.
+## Phase 2 — Premium Design System + Core App Shell
 
-## Phase 13 — Settings, Accessibility, Privacy & Security
-- Expand Settings as a real persistent preference system.
-- Language, notifications, haptics, appearance, text size/accessibility, privacy/data controls and permissions.
-- Secure token/session handling.
-- Input sanitization, rate limits, upload restrictions, secure headers and secret rotation checklist.
-- Privacy boundaries for local-only profile data.
+**Goal:** Make the entire application look and behave like one premium product.
 
-## Phase 14 — Native Android & iOS Readiness
-- Add/verify Android and iOS native projects/dependencies.
-- Camera, microphone, location, notification, files, sharing, vibration and lifecycle adapters.
-- Native permission flows and denial/retry behavior.
-- Device-specific UI/safe areas/background lifecycle.
-- Real device verification on Android and iPhone.
+- Finalize **RPF Seva App** identity.
+- Correct identity: **Seva • Samarpan • Sankalp / सेवा, समर्पण एंड संकल्प**.
+- Tricolour as the visual anchor, with controlled supporting colours including saffron, green, navy, red, yellow, purple, sky blue, pink, brown and black where semantically appropriate.
+- Unified typography, spacing, cards, gradients, icons and buttons.
+- Application-wide animation: page transitions, scroll reveal, card entrance, icon motion, flip interactions and micro-interactions.
+- Respect reduced-motion preferences.
+- Complete Home, Explore, Activity, Impact and Me with no blank/dead destination.
+- Responsive Android/iPhone/web layouts.
 
-## Phase 15 — Performance, Reliability & Quality Engineering
-- Bundle and asset optimization.
-- Image lazy loading and resilient fallbacks.
-- API caching, request cancellation and polling optimization.
-- Memory/leak checks for camera/media/animation.
-- Accessibility audit.
-- Automated lint/type/build tests plus targeted component/workflow tests.
-- Regression checklist for all 17 phases.
+**Exit:** visual consistency audit passes across all primary screens.
 
-## Phase 16 — Release Build & Deployment Certification
-- Production environment validation.
-- Final Android APK/AAB and iOS archive/IPA process.
-- Release signing/configuration.
-- cPanel/server deployment verification.
-- FTP/SSH deployment reliability and rollback plan.
-- Smoke test after deployment.
+## Phase 3 — Daily-Use Local-First Utility Hub
 
-## Phase 17 — Final Product Audit, Launch & Continuous Improvement
-- Full user journey audit from splash → onboarding → auth → Home → Explore → service → Me → logout.
-- Verify every CTA, route, form, API, upload, permission and external link.
-- Verify no blank screen, placeholder, fake number, dead button or unexpected redirect.
-- Verify visual consistency and motion across all primary screens.
-- Verify Android/iOS/web where applicable.
-- Security, privacy, performance and accessibility sign-off.
-- Create production launch checklist, known-issues register and post-launch improvement backlog.
-- Phase 17 is the only final release gate; earlier phases may be reopened when audit findings require it.
+**Goal:** Make the app useful every day without requiring admin/backend for routine utilities.
 
-## Non-negotiable quality gates for every phase
-1. No fake/demo data presented as real.
-2. No blank screen for an intended user state.
-3. No dead CTA or route without an explicit graceful state.
-4. No feature marked complete from UI alone.
-5. Every feature has loading/empty/error/offline/permission states where applicable.
-6. Real data sources are authoritative and validated.
-7. External imagery must be neutral/authorized; never accidentally show another organization's branding/uniforms.
-8. Mobile-first and Android/iOS-safe behavior.
-9. `npm run lint` and `npm run build` must pass before phase closure.
-10. Phase closure requires a written verification record.
+Prioritize local/private features such as:
+- Document Scanner + PDF/image export
+- GPS/location toolkit
+- Fuel tracker
+- Medication/reminder tools
+- Private health/vitals logging without inventing sensor values
+- Period tracker
+- Child/personal tracker where appropriate
+- Resume Builder
+- Calendar and offline-friendly tools
+- Notes/bookmarks/basic personal utilities as justified by the audit
 
-## Current reset decision
-- Phase 0: reopen for a fresh audit pass.
-- Phase 1: reopen for verification against the revised architecture gate.
-- Phase 2: reopen; previous visual work becomes an input, not a final closure.
-- Phase 3–17: planning baseline only until the new audit identifies actual dependencies and defects.
+Use local storage/IndexedDB/device APIs first. Backend is optional unless synchronization is genuinely required.
 
-## Execution rule
-Work in order. Fix blockers before adding cosmetic features. Reopen earlier phases whenever a later audit exposes a foundational defect. Never move forward simply to increase the phase count.
+**Exit:** each utility works offline/local where designed, with clear permission/error/empty states.
+
+## Phase 4 — Identity, Volunteer, Jan Seva Card & Personal Space
+
+**Goal:** Make Me/Profile a complete digital identity hub.
+
+- Citizen/Volunteer authentication.
+- Volunteer registration and authoritative registration number.
+- Volunteer Since from real data.
+- Profile editing.
+- Local profile photo with explicit privacy boundary.
+- Jan Seva Card generated from volunteer data + required Aadhaar input.
+- Digital flip card.
+- QR identity.
+- PDF/JPEG export.
+- My Certificates.
+- Settings and preferences.
+- Logout/session security.
+- No unfinished options or redirects.
+
+**Exit:** complete citizen/volunteer profile journey works end-to-end.
+
+## Phase 5 — RPF Services & Community Platform
+
+**Goal:** Turn the service catalogue into real useful workflows instead of generic CMS pages.
+
+Core service groups:
+- Women
+- Children
+- Senior Citizens
+- Animal Welfare
+- Health Care
+- Community & Culture/Spirituality
+- Youth
+- Blood Donation / Blood Network
+- Public Grievance
+- Help to Poor
+- Employment / Jobs
+- Education / Scholarships
+- Environment
+- Disaster Management
+- Farmer Support
+- Government Schemes
+- Skills Training
+- Donations/Campaigns
+- Volunteer/Seva participation
+
+For every service choose exactly one implementation model:
+1. Local-first feature
+2. Real RPF backend workflow
+3. Controlled official external service
+4. Explicitly unavailable/graceful state
+
+No generic “Active Service” claim when no real workflow exists.
+
+## Phase 6 — Home, Explore, Activity & Impact Experience
+
+**Goal:** Create the premium public-facing experience and meaningful engagement loop.
+
+### Home
+- Location + Weather + AQI
+- Quote of the Day with reliable source/parser/cache
+- Real photographic carousel with neutral/authorized imagery only
+- Founder message preview + full speech
+- Home-only engaging daily feature
+- Official RPF social links
+- Jan Seva Card access where appropriate
+
+### Explore
+- Real service discovery
+- Categories/search/filter
+- No unnecessary external web search on every query
+- Clear availability state
+
+### Activity
+- Real user activity/events/notifications only
+- No empty-looking placeholder sections
+
+### Impact
+- Real organization/community metrics only
+- Avoid duplicate impact-number presentation across Home and Impact unless each has a distinct purpose.
+
+## Phase 7 — Backend + PostgreSQL + Admin Repair
+
+**Goal:** Make the backend, database and admin panel dependable and easier to operate.
+
+### Backend
+- API contract normalization
+- Authentication/authorization
+- Validation
+- Rate limiting
+- Error handling
+- Pagination/filtering
+- Upload restrictions
+- Audit logging
+- Idempotency/duplicate prevention where required
+
+### PostgreSQL
+- Schema audit
+- Normalize duplicate/legacy fields where safe
+- Proper indexes and constraints
+- Foreign keys/relationships
+- Migration discipline
+- Transaction safety
+- Data consistency between users/volunteers/cards/certificates/community records
+
+### Admin
+- Repair all existing Admin Hub modules
+- Dashboard/overview
+- Users
+- Volunteers
+- Jan Seva Card approvals/data
+- Certificates
+- Grievances
+- Blood Network
+- Donations/campaigns
+- Services/CMS
+- Announcements
+- Settings/system health
+- Search/filter/export where useful
+- Role-based access
+- Safe destructive actions and audit trail
+
+**Exit:** normal operations can be performed by admin without developer/database manual intervention for routine tasks.
+
+## Phase 8 — Integrations, Notifications, Privacy & Security
+
+**Goal:** Connect the app safely without making every feature dependent on external systems.
+
+- Weather/AQI/location adapters
+- Quote feed
+- News/social feeds
+- Email/SMS/push strategy according to approved requirements
+- Notification state and deep links
+- External URL allowlists
+- CMS sanitization
+- Secret/credential rotation checklist
+- Secure session/token handling
+- Privacy controls
+- Local-only profile media boundary
+- Accessibility and permission explanations
+
+External services must fail gracefully and must never make the whole app appear broken.
+
+## Phase 9 — Native Android/iOS + Performance + QA
+
+**Goal:** Convert the strong web/PWA foundation into a reliable mobile application.
+
+- Capacitor Android/iOS readiness
+- Camera/microphone/location/files/share/vibration adapters
+- Native permission flows
+- Safe areas and lifecycle handling
+- Offline behavior
+- Image/media optimization
+- Lazy loading
+- Request cancellation/caching
+- Animation/memory checks
+- Accessibility audit
+- Real Android device verification
+- Real iPhone verification
+- Regression tests for all major workflows
+
+## Phase 10 — Release Certification & Final Product Audit
+
+**Goal:** Ship only after the entire product passes one final audit.
+
+Full journey:
+
+**Splash → Onboarding → Login/Guest → Home → Explore → Service → Activity → Impact → Me → Settings → Jan Seva Card → Logout**
+
+Verify:
+- No blank screen
+- No dead button
+- No unfinished route
+- No fake/demo data presented as real
+- No unexpected redirect
+- No unauthorized external organization imagery
+- All core APIs work
+- Database integrity passes
+- Admin workflows work
+- Local utilities work offline where promised
+- Permissions behave correctly
+- Android/iOS behavior is verified
+- `npm run lint` passes
+- `npm run build` passes
+- Production deployment succeeds
+- Post-deployment smoke test passes
+
+Create a final known-issues register and post-launch backlog.
+
+## Product Principles
+
+1. **Multipurpose, not cluttered.** Every feature must earn its place through daily usefulness or clear RPF mission value.
+2. **Local-first by default.** Do not create a backend endpoint when the device can safely handle the task locally.
+3. **Backend authoritative for organizational data.** Volunteer identity, approvals, cards, certificates, donations, grievances and community records remain server/database-backed.
+4. **Admin-light operation.** Routine user actions should not require admin intervention.
+5. **No fake completeness.** A card/route/API does not equal a feature.
+6. **No dead destinations.** Every interaction either completes in place or opens a real, complete destination.
+7. **Premium but practical.** Animation and visual effects must improve comprehension, not slow the app.
+8. **Real data only.** Never invent health readings, impact numbers, volunteer status or organizational metrics.
+9. **Privacy by design.** Local-only data stays local unless the user explicitly needs synchronization.
+10. **Reopen freely.** A later audit may send work back to an earlier phase; phase numbering is not the goal.
+
+## Execution Order
+
+**Audit → Stabilize → Design System → Daily Utilities → Identity → Services → Experience → Backend/DB/Admin → Integrations/Security → Native/QA → Release.**
+
+No new feature sprint should begin while a P0/P1 blocker from the current phase remains unresolved.
