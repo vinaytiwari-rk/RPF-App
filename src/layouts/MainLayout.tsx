@@ -13,6 +13,22 @@ export default function MainLayout() {
   const isAdmin = user?.role === "admin" || user?.role === "super_admin"; const unread = notifications?.filter(n => !n.read).length || 0; const [guest, setGuest] = useState(false); const [avatar, setAvatar] = useState(""); const localAvatarKey = `@rpf_profile_avatar:${user?.id || "guest"}`;
   useEffect(() => { try { setAvatar(localStorage.getItem(localAvatarKey) || ""); } catch {} const onChange = (e: Event) => setAvatar((e as CustomEvent<string>).detail || ""); window.addEventListener("rpf-avatar-changed", onChange); return () => window.removeEventListener("rpf-avatar-changed", onChange); }, [localAvatarKey]);
   useEffect(() => { if (isAdmin && !location.pathname.startsWith("/admin")) navigate("/admin"); }, [isAdmin, location.pathname, navigate]);
+  useEffect(() => {
+    const onDocumentClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const anchor = target?.closest("a") as HTMLAnchorElement | null;
+      if (!anchor || !anchor.href) return;
+      if (anchor.dataset.rpfExternalHandled === "true") return;
+      let url: URL;
+      try { url = new URL(anchor.href, window.location.origin); } catch { return; }
+      if ((url.protocol !== "http:" && url.protocol !== "https:") || url.origin === window.location.origin) return;
+      event.preventDefault();
+      event.stopPropagation();
+      navigate(`/browser?url=${encodeURIComponent(url.toString())}`);
+    };
+    document.addEventListener("click", onDocumentClick, true);
+    return () => document.removeEventListener("click", onDocumentClick, true);
+  }, [navigate]);
   if (isAdmin) return <div className="min-h-screen w-full bg-white font-sans text-slate-900" style={tricolorPattern}><Outlet context={{ lang: language }} /></div>;
   const nav = (p: string) => { if (user?.role === "guest" && (p === "/services" || p === "/community" || p === "/notifications")) { setGuest(true); return; } navigate(p); };
   const roots = ["/", "/services", "/community", "/notifications", "/profile"]; const root = roots.includes(location.pathname); const items = [{ path: "/", en: "Home", hi: "होम", icon: Compass }, { path: "/services", en: "Explore", hi: "खोजें", icon: Search }, { path: "/notifications", en: "Activity", hi: "गतिविधि", icon: Bell }, { path: "/community", en: "Impact", hi: "प्रभाव", icon: Heart }, { path: "/profile", en: "Me", hi: "मैं", icon: User }];
