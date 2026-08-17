@@ -3,33 +3,34 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { openExternalLink, isExternalWebUrl, normalizeExternalWebUrl } from '../utils/browser';
 
-/** Unified RPF Browser surface. Web stays in the current app tab; native uses the native WebView layer. */
+/** Unified RPF Browser surface. Native uses the native WebView layer; web cannot embed sites that forbid iframes. */
 export default function InAppBrowser() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const rawUrl = normalizeExternalWebUrl(params.get('url') || '') || '';
   const title = params.get('title') || 'RPF Browser';
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(Boolean(rawUrl));
 
   useEffect(() => {
-    if (!rawUrl) {
+    if (!rawUrl || !isExternalWebUrl(rawUrl)) {
       setError('Invalid or unsupported web URL.');
-      setLoading(false);
       return;
     }
-    if (!isExternalWebUrl(rawUrl)) {
-      setError('Invalid or unsupported web URL.');
-      setLoading(false);
-      return;
-    }
+
     if (Capacitor.isNativePlatform()) {
       void openExternalLink(rawUrl, navigate, title).catch((err) => {
         console.error('[RPF Browser] Native open failed:', err);
         setError('Website could not be opened inside RPF Browser.');
-        setLoading(false);
       });
+      return;
     }
+
+    // A normal web page cannot provide a real embedded browser engine. Many
+    // publishers explicitly block iframe embedding with X-Frame-Options/CSP.
+    // Loading those pages in an iframe produces the user's "Refused to connect"
+    // error. Keep the web preview in the same Brave/Chrome tab instead of using
+    // an iframe or opening a second tab. APK/IPA continues to use native WebView.
+    window.location.assign(rawUrl);
   }, [rawUrl, navigate, title]);
 
   const goBack = () => navigate(-1);
@@ -44,24 +45,13 @@ export default function InAppBrowser() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-white">
-      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-3">
-        <button type="button" onClick={goBack} className="rounded px-2 py-1 text-lg text-slate-700" aria-label="Back">‹</button>
-        <button type="button" onClick={() => window.history.forward()} className="rounded px-2 py-1 text-lg text-slate-700" aria-label="Forward">›</button>
-        <button type="button" onClick={reload} className="rounded px-2 py-1 text-sm text-slate-700" aria-label="Refresh">↻</button>
-        <button type="button" onClick={() => navigate('/')} className="rounded px-2 py-1 text-sm text-slate-700" aria-label="Home">⌂</button>
-        <div className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{title}</div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white p-8 text-center">
+      <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
+      <p className="text-sm font-medium text-slate-600">Opening {title}…</p>
+      <div className="mt-5 flex gap-2">
+        <button type="button" onClick={goBack} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700">Back</button>
+        <button type="button" onClick={reload} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700">Retry</button>
       </div>
-      {loading && <div className="h-1 w-full animate-pulse bg-slate-400" />}
-      <iframe
-        title={title}
-        src={rawUrl}
-        className="min-h-0 w-full flex-1 border-0"
-        referrerPolicy="strict-origin-when-cross-origin"
-        allow="camera; microphone; geolocation; fullscreen; autoplay; clipboard-read; clipboard-write; payment"
-        onLoad={() => setLoading(false)}
-        onError={() => { setLoading(false); setError('This website does not allow embedding in web preview. Native APK/IPA uses the native WebView layer.'); }}
-      />
     </div>
   );
 }
