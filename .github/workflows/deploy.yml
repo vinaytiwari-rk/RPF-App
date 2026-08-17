@@ -17,6 +17,8 @@ jobs:
           cache: npm
       - name: Install Dependencies
         run: npm ci
+      - name: Browser Policy Regression Check
+        run: npm run browser:check
       - name: Type Check & Lint
         run: npm run lint
       - name: Build Application
