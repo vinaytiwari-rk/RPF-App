@@ -34,15 +34,22 @@ function attachBrowserGuards(browser: any): void {
     if (nextUrl && !isAllowedRedirect(nextUrl)) {
       console.warn('[RPF Browser] Blocked unsafe redirect:', nextUrl);
       try { browser.close?.(); } catch { /* native close may be unavailable */ }
+      return;
     }
   });
-  browser?.addEventListener?.('loadstop', (event: any) => console.debug('[RPF Browser] loadstop:', event?.url || ''));
-  browser?.addEventListener?.('loaderror', (event: any) => console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event));
-  browser?.addEventListener?.('exit', () => {
-    // Cookies/session are intentionally preserved.
+  browser?.addEventListener?.('loaderror', (event: any) => {
+    console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event);
   });
 }
 
+/**
+ * One browser entry point for every external web link.
+ *
+ * Web preview: stays inside the RPF route. It never calls window.open().
+ * Native build: uses the embedded Cordova InAppBrowser only. It deliberately
+ * has NO @capacitor/browser/system-browser fallback, so an unavailable native
+ * browser cannot silently launch Chrome/Safari.
+ */
 export async function openExternalLink(
   url: string,
   navigate?: NavigateFunction,
@@ -55,13 +62,12 @@ export async function openExternalLink(
   }
 
   if (Capacitor.isNativePlatform()) {
-    // Native mode must stay inside the application. Do NOT fall back to
-    // @capacitor/browser because that can hand the URL to the system browser.
     const iab = (window as any).cordova?.InAppBrowser || (window as any).InAppBrowser;
     if (!iab?.open) {
-      console.error('[RPF Browser] Native InAppBrowser WebView is unavailable. Refusing external browser fallback.');
+      console.error('[RPF Browser] Native InAppBrowser is unavailable; refusing external browser fallback.');
       return;
     }
+
     try {
       const browser = iab.open(
         value,
@@ -87,13 +93,11 @@ export async function openExternalLink(
       );
       attachBrowserGuards(browser);
     } catch (error) {
-      console.error('[RPF Browser] InAppBrowser WebView failed:', error);
+      console.error('[RPF Browser] Native InAppBrowser failed; refusing external browser fallback:', error);
     }
     return;
   }
 
-  // Web preview/testing never uses window.open(). Keep navigation in the RPF
-  // browser route so the host browser cannot create a second tab.
   if (navigate) {
     navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title)}`);
     return;
@@ -104,12 +108,17 @@ export async function openExternalLink(
 
 export const openRPFBrowser = openExternalLink;
 
-export function openRegisteredExternalLink(id: ExternalLinkId, navigate?: NavigateFunction): Promise<void> {
+export function openRegisteredExternalLink(
+  id: ExternalLinkId,
+  navigate?: NavigateFunction,
+): Promise<void> {
   const entry = getExternalLink(id);
   return openExternalLink(entry.url, navigate, entry.label);
 }
 
-export function installExternalLinkInterceptor(getNavigate: () => NavigateFunction | undefined): () => void {
+export function installExternalLinkInterceptor(
+  getNavigate: () => NavigateFunction | undefined,
+): () => void {
   const handleClick = (event: MouseEvent) => {
     if (event.defaultPrevented || event.button !== 0) return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
