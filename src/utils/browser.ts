@@ -3,6 +3,7 @@ import type { NavigateFunction } from 'react-router-dom';
 
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
+const NATIVE_BROWSER_TARGET = 'rpf_browser';
 
 /** Returns a safe, normalized HTTP(S) URL suitable for the RPF browser. */
 export function normalizeExternalWebUrl(url: string): string | null {
@@ -12,7 +13,6 @@ export function normalizeExternalWebUrl(url: string): string | null {
   try {
     const parsed = new URL(value);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
-    // Never allow credentials to be silently embedded in a navigated URL.
     parsed.username = '';
     parsed.password = '';
     return parsed.toString();
@@ -31,7 +31,8 @@ export function isExternalWebUrl(url: string): boolean {
 
 /**
  * Single navigation boundary for all external web links in RPF.
- * Native browser settings deliberately preserve cookies and session state.
+ * Native browser navigation is deliberately session-preserving: the app never
+ * asks the native browser to clear cookies or session storage.
  */
 export async function openExternalLink(
   url: string,
@@ -49,9 +50,12 @@ export async function openExternalLink(
 
     if (iab?.open) {
       try {
+        // Use one stable native browser target. Reusing the target lets links
+        // opened from Directory/E-paper continue in the same native browser
+        // context instead of creating a fresh login/session context each time.
         const browser = iab.open(
           value,
-          '_blank',
+          NATIVE_BROWSER_TARGET,
           [
             'location=no',
             'toolbar=no',
@@ -63,16 +67,16 @@ export async function openExternalLink(
             'clearsessioncache=no',
             'mediaPlaybackRequiresUserAction=no',
             'hidden=no',
+            'allowInlineMediaPlayback=yes',
+            'disallowoverscroll=no',
           ].join(','),
         );
 
-        // Keep the native browser's navigation/session lifecycle explicit.
-        // We do not clear cookies or session storage between navigations.
         browser?.addEventListener?.('loaderror', (event: any) => {
           console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event);
         });
         browser?.addEventListener?.('exit', () => {
-          // Native browser closed; the host RPF app remains untouched.
+          // Do not clear any site cookies/session data when the browser closes.
         });
         return;
       } catch (error) {
@@ -80,9 +84,9 @@ export async function openExternalLink(
       }
     }
 
-    // Capacitor Browser is still an in-app native browser surface (not a raw
-    // window.location redirect). Use it only when the Cordova implementation
-    // is unavailable, and never fall back to the system browser explicitly.
+    // Capacitor Browser remains an in-app native browser surface when the
+    // Cordova compatibility plugin is unavailable. It is never replaced with
+    // a window.location/system-browser redirect by this helper.
     try {
       const { Browser } = await import('@capacitor/browser');
       await Browser.open({ url: value, presentationStyle: 'fullscreen' });
@@ -94,14 +98,15 @@ export async function openExternalLink(
     return;
   }
 
-  // Web/dev builds cannot provide a native WebView; use the host browser.
+  // Web/dev builds do not have a native app browser. Keep a single named
+  // popup so navigation remains in one browser context during web testing.
   const W = 520;
   const H = Math.min(window.screen.availHeight - 60, 820);
   const left = Math.max(0, Math.round((window.screen.availWidth - W) / 2));
   const top = Math.max(0, Math.round((window.screen.availHeight - H) / 2));
   const popup = window.open(
     value,
-    'rpf_browser',
+    NATIVE_BROWSER_TARGET,
     `width=${W},height=${H},left=${left},top=${top},` +
       'toolbar=no,menubar=no,scrollbars=yes,resizable=yes,status=no,location=no',
   );
