@@ -58,14 +58,15 @@ router.get('/api/gov/web-proxy', async (req, res) => {
     // XML/SVG/error documents and produce the visible browser parsing error.
     $('iframe, frame, frameset, object, embed').remove();
 
-    const SPA_INTERCEPTOR = `
+    const BROWSER_INTERCEPTOR = `
 <script>
 (function(){
-  var origin = new URL(location.href).searchParams.get('url');
-  if(!origin) return;
-  origin = new URL(origin).origin;
-  var prox = function(u){ return '/api/gov/web-proxy?url=' + encodeURIComponent(u); };
+  var urlParam = new URL(location.href).searchParams.get('url');
+  if(!urlParam) return;
+  var origin = new URL(urlParam).origin;
+  var prox = function(u){ return '/api/gov/web-proxy?url=' + encodeURIComponent(u) + '&clean=1'; };
   
+  // 1. Proxy all AJAX requests (for SPAs like Next.js, Google Fact Check)
   var ofetch = window.fetch;
   window.fetch = function(){
     var a = arguments[0];
@@ -88,15 +89,29 @@ router.get('/api/gov/web-proxy', async (req, res) => {
     }
     return oxhr.call(this, m, u, a, usr, p);
   };
+
+  // 2. Direct-load dynamic UI assets (SVGs, Icons) to avoid proxy WAF blocking (XML Parsing Errors)
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      m.addedNodes.forEach(function(n) {
+        if (n.nodeType !== 1) return;
+        var fixAsset = function(el, attr) {
+          var v = el.getAttribute(attr);
+          if (v && v.startsWith('/') && !v.startsWith('//')) el.setAttribute(attr, origin + v);
+        };
+        if (n.tagName === 'OBJECT') fixAsset(n, 'data');
+        else if (n.querySelectorAll) n.querySelectorAll('object[data^="/"]').forEach(function(o){ fixAsset(o, 'data'); });
+
+        if (n.tagName === 'IMG') fixAsset(n, 'src');
+        else if (n.querySelectorAll) n.querySelectorAll('img[src^="/"]').forEach(function(i){ fixAsset(i, 'src'); });
+      });
+    });
+  });
+  if (document.documentElement) observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 </script>
 `;
-    
-    // Only inject SPA interceptor for complex React/Angular SPAs that strictly need it
-    const isSPA = target.hostname.includes('google.com') || target.hostname.includes('originality.ai');
-    if (isSPA) {
-      $('head').prepend(SPA_INTERCEPTOR);
-    }
+    $('head').prepend(BROWSER_INTERCEPTOR);
     
     // Convert links and forms to use OUR proxy so navigation stays in-app
     $('a[href]').each((_i, el) => {
