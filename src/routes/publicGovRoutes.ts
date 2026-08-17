@@ -45,12 +45,20 @@ router.get('/api/gov/web-proxy', async (req, res) => {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5'
       },
-      validateStatus: status => status >= 200 && status < 400,
+      validateStatus: () => true, // always get the body, handle errors ourselves
     });
 
     const contentType = String(upstream.headers['content-type'] || 'text/html');
+    
+    // Strip upstream security headers that would block iframe embedding
+    res.removeHeader('X-Frame-Options');
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('x-frame-options');
+    res.removeHeader('content-security-policy');
+
     if (!contentType.includes('text/html')) {
       res.setHeader('Content-Type', contentType);
+      res.setHeader('Access-Control-Allow-Origin', '*');
       return res.send(upstream.data);
     }
 
@@ -180,11 +188,16 @@ router.get('/api/gov/web-proxy', async (req, res) => {
       }
     });
 
-    res.setHeader('Content-Security-Policy', "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self'; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:;");
+    // Explicitly remove any X-Frame-Options and set permissive frame-ancestors
+    res.removeHeader('X-Frame-Options');
+    res.removeHeader('x-frame-options');
+    res.setHeader('Content-Security-Policy', "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors *; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:;");
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.type('html').send($.html());
-  } catch {
-    return res.status(502).send('<html><body style="font-family:system-ui;padding:32px"><h2>RPF Browser</h2><p>This government portal is temporarily unavailable.</p></body></html>');
+  } catch (err: any) {
+    const msg = err?.message || 'Unknown error';
+    return res.status(502).send(`<html><body style="font-family:system-ui;padding:32px;max-width:480px;margin:0 auto"><h2 style="color:#000080">RPF Browser</h2><p>This portal could not be loaded right now.</p><p style="color:#888;font-size:13px">Technical reason: ${msg}</p><button onclick="history.back()" style="margin-top:16px;padding:10px 24px;background:#000080;color:#fff;border:none;border-radius:8px;cursor:pointer">← Go Back</button></body></html>`);
   }
 });
 
