@@ -1,12 +1,12 @@
 const fs = require('node:fs');
 
 const browser = fs.readFileSync('src/utils/browser.ts', 'utf8');
+const policy = fs.readFileSync('src/config/browserPolicy.ts', 'utf8');
 const registry = fs.readFileSync('src/config/externalLinks.ts', 'utf8');
 
-// Keep this gate intentionally structural rather than dependent on exact
-// formatting/escaping of TypeScript regular expressions.
 const includes = (text, value) => text.includes(value);
 const hasAny = (text, values) => values.some((value) => includes(text, value));
+const registryEntries = (registry.match(/'[^']+':\s*\{\s*id:/g) || []).length;
 
 const checks = [
   ['HTTP(S) validation', includes(browser, 'HTTP_URL') && includes(browser, "parsed.protocol !== 'http:'")],
@@ -16,7 +16,10 @@ const checks = [
   ['external anchor interception', includes(browser, 'installExternalLinkInterceptor') && includes(browser, "document.addEventListener('click'")],
   ['reusable browser API', includes(browser, 'openRPFBrowser')],
   ['registry API', includes(browser, 'openRegisteredExternalLink') && includes(browser, 'getExternalLink')],
-  ['canonical link registry', includes(registry, 'EXTERNAL_LINK_REGISTRY')],
+  ['canonical link registry', includes(registry, 'EXTERNAL_LINK_REGISTRY') && registryEntries >= 20],
+  ['domain policy', includes(browser, 'isSafeWebUrl') && includes(browser, 'isAllowedRedirect')],
+  ['redirect guard', includes(browser, 'Blocked unsafe redirect') && includes(browser, 'attachBrowserGuards')],
+  ['content-type policy', includes(policy, 'classifyContentType') && hasAny(policy, ['application/pdf', 'image/', 'audio/', 'video/'])],
   ['no direct system-browser fallback', !includes(browser, 'window.location =') && !includes(browser, 'location.href =')],
 ];
 
