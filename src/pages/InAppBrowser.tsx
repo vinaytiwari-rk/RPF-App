@@ -3,12 +3,16 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { openExternalLink, isExternalWebUrl, normalizeExternalWebUrl } from '../utils/browser';
 
-/** Unified RPF Browser surface. Native uses the native WebView layer; web cannot embed sites that forbid iframes. */
+/**
+ * Invisible navigation bridge for external web content.
+ * User-facing browser chrome is intentionally hidden; navigation remains
+ * controlled by the app/native layer and the device's normal back gesture.
+ */
 export default function InAppBrowser() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const rawUrl = normalizeExternalWebUrl(params.get('url') || '') || '';
-  const title = params.get('title') || 'RPF Browser';
+  const title = params.get('title') || 'RPF WebView';
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -19,39 +23,22 @@ export default function InAppBrowser() {
 
     if (Capacitor.isNativePlatform()) {
       void openExternalLink(rawUrl, navigate, title).catch((err) => {
-        console.error('[RPF Browser] Native open failed:', err);
-        setError('Website could not be opened inside RPF Browser.');
+        console.error('[RPF WebView] Native open failed:', err);
+        setError('Website could not be opened.');
       });
       return;
     }
 
-    // A normal web page cannot provide a real embedded browser engine. Many
-    // publishers explicitly block iframe embedding with X-Frame-Options/CSP.
-    // Loading those pages in an iframe produces the user's "Refused to connect"
-    // error. Keep the web preview in the same Brave/Chrome tab instead of using
-    // an iframe or opening a second tab. APK/IPA continues to use native WebView.
+    // Web browsers cannot reliably embed sites that forbid iframes.
+    // Open in the same tab; never create a second tab/window.
     window.location.assign(rawUrl);
   }, [rawUrl, navigate, title]);
 
-  const goBack = () => navigate(-1);
-  const reload = () => window.location.reload();
-
+  // Keep this route visually empty. No "RPF Browser" label, no Back/Forward,
+  // Refresh or Home toolbar, and no duplicate browser chrome is shown to users.
   if (error) {
-    return <div className="flex min-h-screen items-center justify-center bg-white p-8 text-center"><p className="max-w-md text-sm font-medium text-slate-600">{error}</p></div>;
+    return <div className="min-h-screen bg-white" aria-label="Web content unavailable" />;
   }
 
-  if (Capacitor.isNativePlatform()) {
-    return <div className="flex min-h-screen items-center justify-center bg-white p-8 text-center"><div><div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" /><p className="text-sm font-medium text-slate-600">Opening in RPF Browser…</p></div></div>;
-  }
-
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white p-8 text-center">
-      <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
-      <p className="text-sm font-medium text-slate-600">Opening {title}…</p>
-      <div className="mt-5 flex gap-2">
-        <button type="button" onClick={goBack} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700">Back</button>
-        <button type="button" onClick={reload} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700">Retry</button>
-      </div>
-    </div>
-  );
+  return <div className="min-h-screen bg-white" aria-hidden="true" />;
 }
