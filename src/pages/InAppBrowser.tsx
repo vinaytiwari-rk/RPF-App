@@ -40,7 +40,16 @@ export default function InAppBrowser() {
         <ArrowLeft className="h-4 w-4 text-slate-700" />
       </button>
       <main className="min-h-0 flex-1 bg-white">
-        <iframe ref={frameRef} key={frameUrl} src={frameUrl} title="RPF Web Content" className="h-[calc(100vh-96px)] w-full border-0" referrerPolicy="strict-origin-when-cross-origin" onLoad={onLoad} />
+        <iframe 
+          ref={frameRef} 
+          key={frameUrl} 
+          src={frameUrl} 
+          title="RPF Web Content" 
+          className="h-[calc(100vh-96px)] w-full border-0" 
+          referrerPolicy="strict-origin-when-cross-origin" 
+          onLoad={onLoad} 
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
+        />
       </main>
       {cleanApplied && <span className="sr-only" aria-live="polite">Clean page applied</span>}
     </div>
