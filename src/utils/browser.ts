@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import type { NavigateFunction } from 'react-router-dom';
+import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
 
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
@@ -73,9 +74,6 @@ export async function openExternalLink(
           ].join(','),
         );
 
-        // Keep all normal document/navigation lifecycle events inside the
-        // same native browser surface. In particular, do not redirect a PDF,
-        // authentication page, media page or popup to the system browser.
         browser?.addEventListener?.('loadstart', (event: any) => {
           console.debug('[RPF Browser] loadstart:', event?.url || '');
         });
@@ -94,9 +92,6 @@ export async function openExternalLink(
       }
     }
 
-    // Capacitor Browser remains an in-app native browser surface when the
-    // Cordova compatibility plugin is unavailable. It is never replaced with
-    // a window.location/system-browser redirect by this helper.
     try {
       const { Browser } = await import('@capacitor/browser');
       await Browser.open({ url: value, presentationStyle: 'fullscreen' });
@@ -108,8 +103,6 @@ export async function openExternalLink(
     return;
   }
 
-  // Web/dev builds do not have a native app browser. Keep a single named
-  // popup so navigation remains in one browser context during web testing.
   const W = 520;
   const H = Math.min(window.screen.availHeight - 60, 820);
   const left = Math.max(0, Math.round((window.screen.availWidth - W) / 2));
@@ -126,6 +119,18 @@ export async function openExternalLink(
   } else {
     popup?.focus();
   }
+}
+
+/** Stable public API for all future pages/components. */
+export const openRPFBrowser = openExternalLink;
+
+/** Open a canonical destination from the central external-link registry. */
+export function openRegisteredExternalLink(
+  id: ExternalLinkId,
+  navigate?: NavigateFunction,
+): Promise<void> {
+  const entry = getExternalLink(id);
+  return openExternalLink(entry.url, navigate, entry.label);
 }
 
 /**
