@@ -1,36 +1,26 @@
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import { NavigateFunction } from 'react-router-dom';
-
-const PROXY_HOSTS = new Set([
-  "www.india.gov.in", 
-  "india.gov.in", 
-  "www.myscheme.gov.in", 
-  "myscheme.gov.in", 
-  "www.calculator.net", 
-  "calculator.net"
-]);
+import type { NavigateFunction } from 'react-router-dom';
 
 /**
- * Safely opens an external link.
- * - On Native (Android/iOS): Uses Capacitor Browser for a seamless in-app experience.
- * - On Web (Proxied): Uses the internal /browser iframe for whitelisted sites.
- * - On Web (External): Opens in a new tab to avoid iframe X-Frame-Options blocking.
+ * Opens a third-party website without routing it through the RPF HTML proxy.
+ *
+ * Native Android/iOS: Capacitor Browser keeps the user inside the app's
+ * browser experience while preserving the site's own cookies, JavaScript,
+ * redirects, popups and authentication flows.
+ * Web: a normal new tab is used because arbitrary third-party sites cannot be
+ * reliably embedded due to CSP/X-Frame-Options and many publisher WAFs.
  */
-export function openExternalLink(url: string, navigate: NavigateFunction) {
+export function openExternalLink(url: string, _navigate?: NavigateFunction) {
+  const value = String(url || '').trim();
+  if (!/^https?:\/\//i.test(value)) return;
+
   if (Capacitor.isNativePlatform()) {
-    Browser.open({ url }).catch(console.error);
+    Browser.open({ url: value }).catch((error) => {
+      console.error('Unable to open external link:', error);
+    });
     return;
   }
-  
-  try {
-    const u = new URL(url);
-    if (PROXY_HOSTS.has(u.hostname.toLowerCase())) {
-      navigate(`/browser?url=${encodeURIComponent(url)}`);
-      return;
-    }
-  } catch {}
-  
-  // Direct web open (bypasses popup blockers if called directly from onClick)
-  window.open(url, '_blank', 'noopener,noreferrer');
+
+  window.open(value, '_blank', 'noopener,noreferrer');
 }
