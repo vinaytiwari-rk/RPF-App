@@ -66,6 +66,20 @@ router.get('/api/gov/web-proxy', async (req, res) => {
     $('meta[http-equiv="Content-Security-Policy"], meta[http-equiv="X-Frame-Options"]').remove();
     $('base').remove();
 
+    // Inject FIRST script to neutralize frame-busting JS (sites like india.gov.in, eraktkosh that do window.top.location=...) 
+    const FRAME_BUST_NEUTRALIZER = `<script>
+(function(){
+  // Override frame-busting: make window.top and window.parent appear to be the same as window itself
+  // so that checks like "if (window.top !== window)" pass, preventing redirect to login page
+  try {
+    Object.defineProperty(window, 'top', { get: function(){ return window; }, configurable: true });
+    Object.defineProperty(window, 'parent', { get: function(){ return window; }, configurable: true });
+    Object.defineProperty(window, 'frameElement', { get: function(){ return null; }, configurable: true });
+  } catch(e) {}
+})();
+</script>`;
+    $('head').prepend(FRAME_BUST_NEUTRALIZER);
+
     const BROWSER_INTERCEPTOR = `
 <script>
 (function(){
