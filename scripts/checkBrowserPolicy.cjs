@@ -3,18 +3,21 @@ const fs = require('node:fs');
 const browser = fs.readFileSync('src/utils/browser.ts', 'utf8');
 const registry = fs.readFileSync('src/config/externalLinks.ts', 'utf8');
 
-const has = (pattern) => pattern.test(browser);
+// Keep this gate intentionally structural rather than dependent on exact
+// formatting/escaping of TypeScript regular expressions.
+const includes = (text, value) => text.includes(value);
+const hasAny = (text, values) => values.some((value) => includes(text, value));
 
 const checks = [
-  ['HTTP(S) validation', has(/HTTP_URL|https?:\\/\\//)],
-  ['unsafe scheme blocking', has(/UNSAFE_URL_SCHEME|javascript|data|file|blob|intent/i)],
-  ['native browser target', has(/NATIVE_BROWSER_TARGET|rpf_browser/)],
-  ['session preservation', has(/clearsessioncache\\s*=\\s*no/i) && has(/clearcache\\s*=\\s*no/i)],
-  ['external anchor interception', has(/installExternalLinkInterceptor/) && has(/addEventListener\\s*\\(\\s*['\"]click['\"]/)],
-  ['reusable browser API', has(/openRPFBrowser\\s*=|function\\s+openRPFBrowser|openRPFBrowser/)],
-  ['registry API', has(/openRegisteredExternalLink/) && has(/getExternalLink/)],
-  ['canonical link registry', /EXTERNAL_LINK_REGISTRY/.test(registry)],
-  ['no direct system-browser fallback', !/window\\.location\\s*=/.test(browser) && !/location\\.href\\s*=/.test(browser)],
+  ['HTTP(S) validation', includes(browser, 'HTTP_URL') && includes(browser, "parsed.protocol !== 'http:'")],
+  ['unsafe scheme blocking', includes(browser, 'UNSAFE_URL_SCHEME') && hasAny(browser, ['javascript', 'data', 'file', 'blob', 'intent'])],
+  ['native browser target', includes(browser, 'NATIVE_BROWSER_TARGET') && includes(browser, 'rpf_browser')],
+  ['session preservation', includes(browser, 'clearcache=no') && includes(browser, 'clearsessioncache=no')],
+  ['external anchor interception', includes(browser, 'installExternalLinkInterceptor') && includes(browser, "document.addEventListener('click'")],
+  ['reusable browser API', includes(browser, 'openRPFBrowser')],
+  ['registry API', includes(browser, 'openRegisteredExternalLink') && includes(browser, 'getExternalLink')],
+  ['canonical link registry', includes(registry, 'EXTERNAL_LINK_REGISTRY')],
+  ['no direct system-browser fallback', !includes(browser, 'window.location =') && !includes(browser, 'location.href =')],
 ];
 
 let failed = 0;
