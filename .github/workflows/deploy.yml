@@ -19,6 +19,8 @@ jobs:
         run: npm ci
       - name: Browser Policy Regression Check
         run: npm run browser:check
+      - name: Browser Critical Link Smoke Check
+        run: npm run browser:smoke
       - name: Type Check & Lint
         run: npm run lint
       - name: Build Application
