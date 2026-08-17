@@ -6,16 +6,16 @@ import { CORE_SERVICES } from '../data/coreServices.js';
 
 const router = express.Router();
 
-const PROXY_HOSTS = new Set([
-  'www.india.gov.in', 'india.gov.in',
-  'www.myscheme.gov.in', 'myscheme.gov.in',
-  'www.calculator.net', 'calculator.net'
-]);
-
 const isAllowedPortal = (raw: string) => {
   try {
     const u = new URL(raw);
-    return (u.protocol === 'https:' || u.protocol === 'http:') && PROXY_HOSTS.has(u.hostname.toLowerCase());
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
+    // Block internal IPs to prevent SSRF
+    const h = u.hostname.toLowerCase();
+    if (h === 'localhost' || h.startsWith('127.') || h.startsWith('10.') || h.startsWith('192.168.') || h.startsWith('172.16.')) {
+      return false;
+    }
+    return true;
   } catch { return false; }
 };
 
