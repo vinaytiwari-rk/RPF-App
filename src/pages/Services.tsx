@@ -152,9 +152,19 @@ export default function Services() {
               ? "/grievance"
               : id === "culture"
                 ? "/culture"
-                : id === "schemes"
-                  ? `/browser?url=${encodeURIComponent("https://www.myscheme.gov.in/find-scheme")}`
-                  : `/services/${id}`;
+                : id === "internet-radio"
+                  ? "/internet-radio"
+                  : id === "news-feed"
+                    ? "/news"
+                    : id === "hindu-calendar"
+                      ? "/hindu-calendar"
+                      : id === "doc-scanner"
+                        ? "/doc-scanner"
+                        : id === "resume-builder"
+                          ? "/resume-builder"
+                          : id === "schemes"
+                            ? `/browser?url=${encodeURIComponent("https://www.myscheme.gov.in/find-scheme")}`
+                            : `/services/${id}`;
 
   return (
     <div className="p-4 flex-1 flex flex-col min-h-screen bg-slate-50 pb-28">
