@@ -1,6 +1,7 @@
 import React from "react";
 import { CheckCircle2, ExternalLink } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { openExternalLink } from "../utils/browser";
 
 type Lang = "en" | "hi";
 
@@ -23,7 +24,7 @@ export default function FactCheck() {
           </div>
           <div className="mt-6 space-y-3">
             {SOURCES.map(source => (
-              <button key={source.url} type="button" onClick={() => navigate(`/browser?url=${encodeURIComponent(source.url)}`)} className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:bg-white hover:shadow-sm active:scale-[.99]">
+              <button key={source.url} type="button" onClick={() => openExternalLink(source.url, navigate)} className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:bg-white hover:shadow-sm active:scale-[.99]">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-700 shadow-sm"><ExternalLink className="h-5 w-5" /></div>
                 <div className="min-w-0 flex-1"><h2 className="text-sm font-black text-slate-800">{source.name}</h2><p className="mt-1 text-xs text-slate-500">{source.description}</p></div>
               </button>
