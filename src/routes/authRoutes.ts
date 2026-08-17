@@ -207,6 +207,22 @@ router.post("/api/auth/logout", async (req, res) => {
 router.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
+    
+    // If the user is a guest or admin, do not query the normal users/volunteers tables.
+    if (req.user.role === 'guest' || req.user.role === 'admin' || req.user.role === 'super_admin') {
+      return res.json({ 
+        success: true, 
+        user: { 
+          id: userId, 
+          name: req.user.role === 'guest' ? "Guest User" : "System Admin", 
+          role: req.user.role,
+          janSevaCardStatus: "none",
+          points: 0,
+          badges: 0
+        } 
+      });
+    }
+
     let result = await pool.query(`SELECT id, username, name, role, email, phone, avatar, cover FROM users WHERE id = $1`, [userId]);
     if (result.rows.length === 0) {
       const volResult = await pool.query(`SELECT id, username, registration_number, full_name as name, email, mobile as phone, avatar, cover FROM volunteers WHERE id = $1`, [userId]);
