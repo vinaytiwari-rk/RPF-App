@@ -2,55 +2,95 @@ import { Capacitor } from '@capacitor/core';
 import type { NavigateFunction } from 'react-router-dom';
 
 const HTTP_URL = /^https?:\/\//i;
+const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
+
+/** Returns a safe, normalized HTTP(S) URL suitable for the RPF browser. */
+export function normalizeExternalWebUrl(url: string): string | null {
+  const value = String(url || '').trim();
+  if (!value || UNSAFE_URL_SCHEME.test(value) || !HTTP_URL.test(value)) return null;
+
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+    // Never allow credentials to be silently embedded in a navigated URL.
+    parsed.username = '';
+    parsed.password = '';
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
 
 /** Returns true only for HTTP(S) links that leave the RPF web origin. */
 export function isExternalWebUrl(url: string): boolean {
-  const value = String(url || '').trim();
-  if (!HTTP_URL.test(value)) return false;
+  const value = normalizeExternalWebUrl(url);
+  if (!value) return false;
   if (typeof window === 'undefined') return true;
   return new URL(value, window.location.href).origin !== window.location.origin;
 }
 
-/** Single navigation boundary for all external web links in RPF. */
+/**
+ * Single navigation boundary for all external web links in RPF.
+ * Native browser settings deliberately preserve cookies and session state.
+ */
 export async function openExternalLink(
   url: string,
   navigate?: NavigateFunction,
   title: string = 'RPF Browser',
 ): Promise<void> {
-  const value = String(url || '').trim();
-  if (!HTTP_URL.test(value)) return;
+  const value = normalizeExternalWebUrl(url);
+  if (!value) {
+    console.warn('[RPF Browser] Blocked unsupported URL:', url);
+    return;
+  }
 
   if (Capacitor.isNativePlatform()) {
     const iab = (window as any).cordova?.InAppBrowser || (window as any).InAppBrowser;
 
     if (iab?.open) {
       try {
-        iab.open(value, '_blank', [
-          'location=no',
-          'toolbar=no',
-          'hidenavigationbuttons=yes',
-          'hideurlbar=yes',
-          'hardwareback=yes',
-          'zoom=yes',
-          'clearcache=no',
-          'clearsessioncache=no',
-          'mediaPlaybackRequiresUserAction=no',
-        ].join(','));
+        const browser = iab.open(
+          value,
+          '_blank',
+          [
+            'location=no',
+            'toolbar=no',
+            'hidenavigationbuttons=yes',
+            'hideurlbar=yes',
+            'hardwareback=yes',
+            'zoom=yes',
+            'clearcache=no',
+            'clearsessioncache=no',
+            'mediaPlaybackRequiresUserAction=no',
+            'hidden=no',
+          ].join(','),
+        );
+
+        // Keep the native browser's navigation/session lifecycle explicit.
+        // We do not clear cookies or session storage between navigations.
+        browser?.addEventListener?.('loaderror', (event: any) => {
+          console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event);
+        });
+        browser?.addEventListener?.('exit', () => {
+          // Native browser closed; the host RPF app remains untouched.
+        });
         return;
       } catch (error) {
         console.error('[RPF Browser] InAppBrowser failed:', error);
       }
     }
 
+    // Capacitor Browser is still an in-app native browser surface (not a raw
+    // window.location redirect). Use it only when the Cordova implementation
+    // is unavailable, and never fall back to the system browser explicitly.
     try {
       const { Browser } = await import('@capacitor/browser');
-      await Browser.open({ url: value });
+      await Browser.open({ url: value, presentationStyle: 'fullscreen' });
       return;
     } catch (error) {
       console.error('[RPF Browser] Native browser fallback failed:', error);
     }
 
-    // Do not silently launch Chrome or revive the old iframe/proxy route.
     return;
   }
 
