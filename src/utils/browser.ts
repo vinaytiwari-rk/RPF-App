@@ -10,7 +10,6 @@ const NATIVE_BROWSER_TARGET = 'rpf_browser';
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
   if (!value || UNSAFE_URL_SCHEME.test(value) || !HTTP_URL.test(value) || !isSafeWebUrl(value)) return null;
-
   try {
     const parsed = new URL(value);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
@@ -35,18 +34,12 @@ function attachBrowserGuards(browser: any): void {
     if (nextUrl && !isAllowedRedirect(nextUrl)) {
       console.warn('[RPF Browser] Blocked unsafe redirect:', nextUrl);
       try { browser.close?.(); } catch { /* native close may be unavailable */ }
-      return;
     }
-    console.debug('[RPF Browser] loadstart:', nextUrl);
   });
-  browser?.addEventListener?.('loadstop', (event: any) => {
-    console.debug('[RPF Browser] loadstop:', event?.url || '');
-  });
-  browser?.addEventListener?.('loaderror', (event: any) => {
-    console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event);
-  });
+  browser?.addEventListener?.('loadstop', (event: any) => console.debug('[RPF Browser] loadstop:', event?.url || ''));
+  browser?.addEventListener?.('loaderror', (event: any) => console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event));
   browser?.addEventListener?.('exit', () => {
-    // Website cookies/session state are deliberately preserved.
+    // Cookies/session are intentionally preserved.
   });
 }
 
@@ -62,75 +55,61 @@ export async function openExternalLink(
   }
 
   if (Capacitor.isNativePlatform()) {
+    // Native mode must stay inside the application. Do NOT fall back to
+    // @capacitor/browser because that can hand the URL to the system browser.
     const iab = (window as any).cordova?.InAppBrowser || (window as any).InAppBrowser;
-    if (iab?.open) {
-      try {
-        const browser = iab.open(
-          value,
-          NATIVE_BROWSER_TARGET,
-          [
-            'location=no',
-            'toolbar=no',
-            'hidenavigationbuttons=yes',
-            'hideurlbar=yes',
-            'hardwareback=yes',
-            'zoom=yes',
-            'clearcache=no',
-            'clearsessioncache=no',
-            'mediaPlaybackRequiresUserAction=no',
-            'allowInlineMediaPlayback=yes',
-            'enableViewportScale=yes',
-            'useWideViewPort=yes',
-            'disallowoverscroll=no',
-            'hidden=no',
-            'footer=no',
-            'shouldPauseOnSuspend=no',
-          ].join(','),
-        );
-        attachBrowserGuards(browser);
-        return;
-      } catch (error) {
-        console.error('[RPF Browser] InAppBrowser failed:', error);
-      }
-    }
-
-    try {
-      const { Browser } = await import('@capacitor/browser');
-      await Browser.open({ url: value, presentationStyle: 'fullscreen' });
+    if (!iab?.open) {
+      console.error('[RPF Browser] Native InAppBrowser WebView is unavailable. Refusing external browser fallback.');
       return;
+    }
+    try {
+      const browser = iab.open(
+        value,
+        NATIVE_BROWSER_TARGET,
+        [
+          'location=no',
+          'toolbar=no',
+          'hidenavigationbuttons=yes',
+          'hideurlbar=yes',
+          'hardwareback=yes',
+          'zoom=yes',
+          'clearcache=no',
+          'clearsessioncache=no',
+          'mediaPlaybackRequiresUserAction=no',
+          'allowInlineMediaPlayback=yes',
+          'enableViewportScale=yes',
+          'useWideViewPort=yes',
+          'disallowoverscroll=no',
+          'hidden=no',
+          'footer=no',
+          'shouldPauseOnSuspend=no',
+        ].join(','),
+      );
+      attachBrowserGuards(browser);
     } catch (error) {
-      console.error('[RPF Browser] Native browser fallback failed:', error);
+      console.error('[RPF Browser] InAppBrowser WebView failed:', error);
     }
     return;
   }
 
-  // Web preview/testing must NEVER use window.open(). That would launch a
-  // second tab in the very browser we are using to test the RPF application.
-  // Instead, route into the same RPF Browser page. The page can render the
-  // target in its preview frame where the remote site permits embedding.
+  // Web preview/testing never uses window.open(). Keep navigation in the RPF
+  // browser route so the host browser cannot create a second tab.
   if (navigate) {
     navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title)}`);
     return;
   }
 
-  // No navigation function is available in non-native preview code. Do not
-  // escape to the host browser; fail closed rather than opening a new tab.
   console.warn('[RPF Browser] Web navigation unavailable; refusing external tab:', value);
 }
 
 export const openRPFBrowser = openExternalLink;
 
-export function openRegisteredExternalLink(
-  id: ExternalLinkId,
-  navigate?: NavigateFunction,
-): Promise<void> {
+export function openRegisteredExternalLink(id: ExternalLinkId, navigate?: NavigateFunction): Promise<void> {
   const entry = getExternalLink(id);
   return openExternalLink(entry.url, navigate, entry.label);
 }
 
-export function installExternalLinkInterceptor(
-  getNavigate: () => NavigateFunction | undefined,
-): () => void {
+export function installExternalLinkInterceptor(getNavigate: () => NavigateFunction | undefined): () => void {
   const handleClick = (event: MouseEvent) => {
     if (event.defaultPrevented || event.button !== 0) return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
