@@ -31,8 +31,8 @@ export function isExternalWebUrl(url: string): boolean {
 
 /**
  * Single navigation boundary for all external web links in RPF.
- * Native browser navigation is deliberately session-preserving: the app never
- * asks the native browser to clear cookies or session storage.
+ * Native browser navigation is session-preserving and content-capable: the
+ * app never asks the native browser to clear cookies or session storage.
  */
 export async function openExternalLink(
   url: string,
@@ -50,9 +50,6 @@ export async function openExternalLink(
 
     if (iab?.open) {
       try {
-        // Use one stable native browser target. Reusing the target lets links
-        // opened from Directory/E-paper continue in the same native browser
-        // context instead of creating a fresh login/session context each time.
         const browser = iab.open(
           value,
           NATIVE_BROWSER_TARGET,
@@ -66,17 +63,30 @@ export async function openExternalLink(
             'clearcache=no',
             'clearsessioncache=no',
             'mediaPlaybackRequiresUserAction=no',
-            'hidden=no',
             'allowInlineMediaPlayback=yes',
+            'enableViewportScale=yes',
+            'useWideViewPort=yes',
             'disallowoverscroll=no',
+            'hidden=no',
+            'footer=no',
+            'shouldPauseOnSuspend=no',
           ].join(','),
         );
 
+        // Keep all normal document/navigation lifecycle events inside the
+        // same native browser surface. In particular, do not redirect a PDF,
+        // authentication page, media page or popup to the system browser.
+        browser?.addEventListener?.('loadstart', (event: any) => {
+          console.debug('[RPF Browser] loadstart:', event?.url || '');
+        });
+        browser?.addEventListener?.('loadstop', (event: any) => {
+          console.debug('[RPF Browser] loadstop:', event?.url || '');
+        });
         browser?.addEventListener?.('loaderror', (event: any) => {
           console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event);
         });
         browser?.addEventListener?.('exit', () => {
-          // Do not clear any site cookies/session data when the browser closes.
+          // Never clear site cookies/session data when the browser closes.
         });
         return;
       } catch (error) {
