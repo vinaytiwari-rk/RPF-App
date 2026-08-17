@@ -6,19 +6,19 @@ import { CORE_SERVICES } from '../data/coreServices.js';
 
 const router = express.Router();
 
-// Allow-listed same-origin portal proxy. This avoids iframe/X-Frame-Options failures
-// without creating an unrestricted SSRF proxy.
 const PROXY_HOSTS = new Set([
   'www.india.gov.in', 'india.gov.in',
   'www.myscheme.gov.in', 'myscheme.gov.in',
   'www.calculator.net', 'calculator.net'
 ]);
+
 const isAllowedPortal = (raw: string) => {
   try {
     const u = new URL(raw);
     return (u.protocol === 'https:' || u.protocol === 'http:') && PROXY_HOSTS.has(u.hostname.toLowerCase());
   } catch { return false; }
 };
+
 const proxied = (value: string, base: string) => {
   try {
     const absolute = new URL(value, base).toString();
@@ -29,6 +29,7 @@ const proxied = (value: string, base: string) => {
 router.get('/api/gov/web-proxy', async (req, res) => {
   const raw = String(req.query.url || '');
   if (!isAllowedPortal(raw)) return res.status(400).send('Unsupported government portal');
+
   try {
     const target = new URL(raw);
     const upstream = await axios.get(target.toString(), {
@@ -36,25 +37,42 @@ router.get('/api/gov/web-proxy', async (req, res) => {
       headers: { 'User-Agent': 'Mozilla/5.0 (RPF Seva App)' },
       validateStatus: status => status >= 200 && status < 400,
     });
+
     const contentType = String(upstream.headers['content-type'] || 'text/html');
-    if (!contentType.includes('text/html')) return res.type(contentType).send(upstream.data);
+    if (!contentType.includes('text/html')) {
+      res.setHeader('Content-Type', contentType);
+      return res.send(upstream.data);
+    }
 
     const $ = cheerio.load(String(upstream.data));
     $('meta[http-equiv="Content-Security-Policy"], meta[http-equiv="X-Frame-Options"]').remove();
     $('base').remove();
+
+    // Do not allow nested frames/documents to render inside RPF. These can load
+    // XML/SVG/error documents and produce the visible browser parsing error.
+    $('iframe, frame, frameset, object, embed').remove();
+
     $('a[href], link[href]').each((_i, el) => {
       const value = $(el).attr('href');
-      if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) $(el).attr('href', proxied(value, target.toString()));
+      if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) {
+        $(el).attr('href', proxied(value, target.toString()));
+      }
     });
-    $('img[src], script[src], iframe[src], source[src]').each((_i, el) => {
+
+    $('img[src], script[src], source[src]').each((_i, el) => {
       const value = $(el).attr('src');
-      if (value && !/^data:/i.test(value)) $(el).attr('src', proxied(value, target.toString()));
+      if (value && !/^data:/i.test(value)) {
+        $(el).attr('src', proxied(value, target.toString()));
+      }
     });
+
     $('form[action]').each((_i, el) => {
       const value = $(el).attr('action');
       if (value) $(el).attr('action', proxied(value, target.toString()));
     });
+
     res.setHeader('Content-Security-Policy', "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self'; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:;");
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     return res.type('html').send($.html());
   } catch {
     return res.status(502).send('<html><body style="font-family:system-ui;padding:32px"><h2>RPF Browser</h2><p>This government portal is temporarily unavailable.</p></body></html>');
