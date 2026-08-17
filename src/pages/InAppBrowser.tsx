@@ -22,15 +22,25 @@ export default function InAppBrowser() {
     let active = true;
     if (Capacitor.isNativePlatform()) {
       Browser.open({ url: current }).catch(console.error);
-      // Wait a moment then navigate back so the user doesn't see a blank page
       setTimeout(() => {
         if (active) navigate(-1);
       }, 300);
+    } else {
+      // On web, if the URL is not proxied, it will likely fail in an iframe due to X-Frame-Options.
+      // Open in a new tab instead to permanently fix "Firefox Can't Open This Page" issues.
+      if (getFrameUrl(current) === current) {
+        window.open(current, '_blank');
+        setTimeout(() => {
+          if (active) navigate(-1);
+        }, 300);
+      }
     }
     return () => { active = false; };
   }, [current, navigate]);
 
-  if (Capacitor.isNativePlatform()) {
+  const isWebExternal = !Capacitor.isNativePlatform() && frameUrl === current;
+
+  if (Capacitor.isNativePlatform() || isWebExternal) {
     return <div className="min-h-screen bg-white" />;
   }
 
