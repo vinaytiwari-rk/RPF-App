@@ -1,15 +1,15 @@
 import { Capacitor } from '@capacitor/core';
 import type { NavigateFunction } from 'react-router-dom';
 import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
+import { isAllowedRedirect, isSafeWebUrl } from '../config/browserPolicy';
 
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const NATIVE_BROWSER_TARGET = 'rpf_browser';
 
-/** Returns a safe, normalized HTTP(S) URL suitable for the RPF browser. */
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
-  if (!value || UNSAFE_URL_SCHEME.test(value) || !HTTP_URL.test(value)) return null;
+  if (!value || UNSAFE_URL_SCHEME.test(value) || !HTTP_URL.test(value) || !isSafeWebUrl(value)) return null;
 
   try {
     const parsed = new URL(value);
@@ -22,7 +22,6 @@ export function normalizeExternalWebUrl(url: string): string | null {
   }
 }
 
-/** Returns true only for HTTP(S) links that leave the RPF web origin. */
 export function isExternalWebUrl(url: string): boolean {
   const value = normalizeExternalWebUrl(url);
   if (!value) return false;
@@ -30,11 +29,27 @@ export function isExternalWebUrl(url: string): boolean {
   return new URL(value, window.location.href).origin !== window.location.origin;
 }
 
-/**
- * Single navigation boundary for all external web links in RPF.
- * Native browser navigation is session-preserving and content-capable: the
- * app never asks the native browser to clear cookies or session storage.
- */
+function attachBrowserGuards(browser: any): void {
+  browser?.addEventListener?.('loadstart', (event: any) => {
+    const nextUrl = String(event?.url || '');
+    if (nextUrl && !isAllowedRedirect(nextUrl)) {
+      console.warn('[RPF Browser] Blocked unsafe redirect:', nextUrl);
+      try { browser.close?.(); } catch { /* native close may be unavailable */ }
+      return;
+    }
+    console.debug('[RPF Browser] loadstart:', nextUrl);
+  });
+  browser?.addEventListener?.('loadstop', (event: any) => {
+    console.debug('[RPF Browser] loadstop:', event?.url || '');
+  });
+  browser?.addEventListener?.('loaderror', (event: any) => {
+    console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event);
+  });
+  browser?.addEventListener?.('exit', () => {
+    // Deliberately preserve website cookies/session state.
+  });
+}
+
 export async function openExternalLink(
   url: string,
   navigate?: NavigateFunction,
@@ -48,7 +63,6 @@ export async function openExternalLink(
 
   if (Capacitor.isNativePlatform()) {
     const iab = (window as any).cordova?.InAppBrowser || (window as any).InAppBrowser;
-
     if (iab?.open) {
       try {
         const browser = iab.open(
@@ -73,19 +87,7 @@ export async function openExternalLink(
             'shouldPauseOnSuspend=no',
           ].join(','),
         );
-
-        browser?.addEventListener?.('loadstart', (event: any) => {
-          console.debug('[RPF Browser] loadstart:', event?.url || '');
-        });
-        browser?.addEventListener?.('loadstop', (event: any) => {
-          console.debug('[RPF Browser] loadstop:', event?.url || '');
-        });
-        browser?.addEventListener?.('loaderror', (event: any) => {
-          console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event);
-        });
-        browser?.addEventListener?.('exit', () => {
-          // Never clear site cookies/session data when the browser closes.
-        });
+        attachBrowserGuards(browser);
         return;
       } catch (error) {
         console.error('[RPF Browser] InAppBrowser failed:', error);
@@ -99,7 +101,6 @@ export async function openExternalLink(
     } catch (error) {
       console.error('[RPF Browser] Native browser fallback failed:', error);
     }
-
     return;
   }
 
@@ -121,10 +122,8 @@ export async function openExternalLink(
   }
 }
 
-/** Stable public API for all future pages/components. */
 export const openRPFBrowser = openExternalLink;
 
-/** Open a canonical destination from the central external-link registry. */
 export function openRegisteredExternalLink(
   id: ExternalLinkId,
   navigate?: NavigateFunction,
@@ -133,29 +132,21 @@ export function openRegisteredExternalLink(
   return openExternalLink(entry.url, navigate, entry.label);
 }
 
-/**
- * One capture-phase interceptor for ordinary external <a href> links.
- * Future pages automatically inherit the same RPF browser policy.
- */
 export function installExternalLinkInterceptor(
   getNavigate: () => NavigateFunction | undefined,
 ): () => void {
   const handleClick = (event: MouseEvent) => {
     if (event.defaultPrevented || event.button !== 0) return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-
     const target = event.target as HTMLElement | null;
     const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null;
     if (!anchor) return;
-
     const href = anchor.href;
     if (!isExternalWebUrl(href)) return;
-
     event.preventDefault();
     event.stopImmediatePropagation();
     void openExternalLink(href, getNavigate(), anchor.textContent?.trim() || 'RPF Browser');
   };
-
   document.addEventListener('click', handleClick, true);
   return () => document.removeEventListener('click', handleClick, true);
 }
