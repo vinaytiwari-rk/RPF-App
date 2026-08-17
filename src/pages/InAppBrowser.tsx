@@ -34,18 +34,29 @@ export default function InAppBrowser() {
 
   const onLoad = () => setCleanApplied(installCleanEngine(frameRef.current!));
   
+  useEffect(() => {
+    const handleRefresh = () => {
+      if (frameRef.current) {
+        const oldSrc = frameRef.current.src;
+        frameRef.current.src = "";
+        setTimeout(() => {
+          if (frameRef.current) frameRef.current.src = oldSrc;
+        }, 50);
+      }
+    };
+    window.addEventListener("rpf-browser-refresh", handleRefresh);
+    return () => window.removeEventListener("rpf-browser-refresh", handleRefresh);
+  }, []);
+
   return (
     <div className="relative flex min-h-screen flex-col bg-white pb-24">
-      <button onClick={() => navigate(-1)} aria-label="Back" className="absolute left-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/95 shadow-sm backdrop-blur">
-        <ArrowLeft className="h-4 w-4 text-slate-700" />
-      </button>
       <main className="min-h-0 flex-1 bg-white">
         <iframe 
           ref={frameRef} 
           key={frameUrl} 
           src={frameUrl} 
           title="RPF Web Content" 
-          className="h-[calc(100vh-96px)] w-full border-0" 
+          className="h-[calc(100vh-140px)] w-full border-0" 
           referrerPolicy="strict-origin-when-cross-origin" 
           onLoad={onLoad} 
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"

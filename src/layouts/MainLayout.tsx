@@ -10,6 +10,7 @@ import {
   Heart,
   HeartHandshake,
   Wrench,
+  RotateCw,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../context/AuthContext";
@@ -110,60 +111,81 @@ export default function MainLayout() {
               </motion.div>
             )}
             <div className="min-w-0">
-              <h1 className="truncate text-[14px] font-black tracking-[-0.02em] text-[#000080] sm:text-[15px]">
-                RPF Seva App
-              </h1>
-              <p className="truncate text-[9px] font-bold tracking-[.08em] text-slate-400">
-                SEVA • SAMARPAN • SANKALP
-              </p>
+              {location.pathname === "/browser" ? (
+                <h1 className="truncate text-[14px] font-black tracking-[-0.02em] text-[#000080] sm:text-[15px]">
+                  {decodeURIComponent(new URLSearchParams(location.search).get("title") || "RPF Browser")}
+                </h1>
+              ) : (
+                <>
+                  <h1 className="truncate text-[14px] font-black tracking-[-0.02em] text-[#000080] sm:text-[15px]">
+                    RPF Seva App
+                  </h1>
+                  <p className="truncate text-[9px] font-bold tracking-[.08em] text-slate-400">
+                    SEVA • SAMARPAN • SANKALP
+                  </p>
+                </>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-0.5">
-            <motion.button
-              whileTap={{ scale: 0.88 }}
-              onClick={() => navigate("/tools")}
-              aria-label={language === "hi" ? "टूल्स" : "Tools"}
-              title={language === "hi" ? "टूल्स" : "Tools"}
-              className="flex h-10 w-10 items-center justify-center rounded-full text-[#000080] hover:bg-orange-50"
-            >
-              <Wrench className="h-[19px] w-[19px]" />
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.88, rotate: -12 }}
-              onClick={() => setLanguage(language === "hi" ? "en" : "hi")}
-              className="flex h-10 w-10 items-center justify-center rounded-full text-[#000080] hover:bg-blue-50"
-            >
-              <Globe className="h-[19px] w-[19px]" />
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.88 }}
-              onClick={() => nav("/notifications")}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-[#000080] hover:bg-blue-50"
-            >
-              <Bell className="h-[19px] w-[19px]" />
-              {unread > 0 && (
-                <motion.span
-                  animate={{ scale: [1, 1.25, 1] }}
-                  transition={{ duration: 1.8, repeat: Infinity }}
-                  className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#FF9933] ring-2 ring-white"
-                />
-              )}
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => nav("/profile")}
-              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-orange-200 bg-orange-50 text-[#000080]"
-            >
-              {avatar ? (
-                <img
-                  src={avatar}
-                  alt="Profile"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <User className="h-[17px] w-[17px]" />
-              )}
-            </motion.button>
+            {location.pathname === "/browser" ? (
+              <motion.button
+                whileTap={{ scale: 0.85, rotate: 180 }}
+                onClick={() => window.dispatchEvent(new CustomEvent("rpf-browser-refresh"))}
+                aria-label="Refresh page"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-[#000080] hover:bg-orange-50"
+              >
+                <RotateCw className="h-[19px] w-[19px]" />
+              </motion.button>
+            ) : (
+              <>
+                <motion.button
+                  whileTap={{ scale: 0.88 }}
+                  onClick={() => navigate("/tools")}
+                  aria-label={language === "hi" ? "टूल्स" : "Tools"}
+                  title={language === "hi" ? "टूल्स" : "Tools"}
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-[#000080] hover:bg-orange-50"
+                >
+                  <Wrench className="h-[19px] w-[19px]" />
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.88, rotate: -12 }}
+                  onClick={() => setLanguage(language === "hi" ? "en" : "hi")}
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-[#000080] hover:bg-blue-50"
+                >
+                  <Globe className="h-[19px] w-[19px]" />
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.88 }}
+                  onClick={() => nav("/notifications")}
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full text-[#000080] hover:bg-blue-50"
+                >
+                  <Bell className="h-[19px] w-[19px]" />
+                  {unread > 0 && (
+                    <motion.span
+                      animate={{ scale: [1, 1.25, 1] }}
+                      transition={{ duration: 1.8, repeat: Infinity }}
+                      className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#FF9933] ring-2 ring-white"
+                    />
+                  )}
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => nav("/profile")}
+                  className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-orange-200 bg-orange-50 text-[#000080]"
+                >
+                  {avatar ? (
+                    <img
+                      src={avatar}
+                      alt="Profile"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-[17px] w-[17px]" />
+                  )}
+                </motion.button>
+              </>
+            )}
           </div>
         </div>
       </header>

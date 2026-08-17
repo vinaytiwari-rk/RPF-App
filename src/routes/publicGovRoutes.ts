@@ -166,6 +166,20 @@ router.get('/api/gov/web-proxy', async (req, res) => {
       }
     });
 
+    $('object[data]').each((_i, el) => {
+      const value = $(el).attr('data');
+      if (value && !/^data:/i.test(value)) {
+        $(el).attr('data', proxiedAsset(value, target.toString()));
+      }
+    });
+
+    $('embed[src]').each((_i, el) => {
+      const value = $(el).attr('src');
+      if (value && !/^data:/i.test(value)) {
+        $(el).attr('src', proxiedAsset(value, target.toString()));
+      }
+    });
+
     res.setHeader('Content-Security-Policy', "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self'; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:;");
     res.setHeader('X-Content-Type-Options', 'nosniff');
     return res.type('html').send($.html());
