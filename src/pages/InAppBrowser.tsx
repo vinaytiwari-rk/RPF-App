@@ -1,68 +1,134 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Capacitor } from '@capacitor/core';
-import { Browser } from '@capacitor/browser';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ExternalLink } from 'lucide-react';
 
-const HOME="https://www.google.com";
-function normalize(value:string){const v=value.trim();if(!v)return HOME;if(/^https?:\/\//i.test(v))return v;if(/^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(v))return`https://${v}`;return`https://www.google.com/search?q=${encodeURIComponent(v)}`}
-function getFrameUrl(url:string){return`/api/gov/web-proxy?url=${encodeURIComponent(url)}&clean=1`}
-const CLEAN_CSS=`\nfooter,header,[role="contentinfo"],[aria-label*="cookie" i],[id*="cookie" i],[class*="cookie" i],[id*="consent" i],[class*="consent" i],[id*="advert" i],[class*="advert" i],[id*="banner" i],[class*="banner" i],[id*="popup" i],[class*="popup" i],[class*="modal" i]{display:none!important;visibility:hidden!important}nav,[role="navigation"]{display:none!important}body{margin:0!important;background:#fff!important}main,article,[role="main"],.content,.main-content{max-width:100%!important;width:100%!important;margin:0 auto!important}a{cursor:pointer}`;
-function installCleanEngine(frame:HTMLIFrameElement){try{const doc=frame.contentDocument;if(!doc)return false;let style=doc.getElementById("rpf-smart-clean-style")as HTMLStyleElement|null;if(!style){style=doc.createElement("style");style.id="rpf-smart-clean-style";style.textContent=CLEAN_CSS;doc.head?.appendChild(style)}const nodes=doc.querySelectorAll<HTMLElement>("body *");const terms=["accept cookies","cookie policy","we use cookies","subscribe to our newsletter","advertisement","advertisements","privacy policy"];for(const el of Array.from(nodes)){if(el.children.length>8)continue;const t=(el.innerText||"").trim().toLowerCase();if(t&&t.length<180&&terms.some(x=>t.includes(x)))el.style.setProperty("display","none","important")}return true}catch{return false}}
+/**
+ * RPF Internal Browser — Iframe fallback.
+ *
+ * This page is shown ONLY when the popup window was blocked by the user's
+ * browser (e.g. strict popup blocker). In that case we try to load the site
+ * in an iframe via our server-side proxy. If the site blocks iframes too,
+ * we show a clean "Open in New Tab" button so the user can still access it.
+ */
+
+function getProxyUrl(url: string) {
+  return `/api/gov/web-proxy?url=${encodeURIComponent(url)}&clean=1`;
+}
+
+const CLEAN_CSS = `
+footer,header,[role="contentinfo"],
+[aria-label*="cookie" i],[id*="cookie" i],[class*="cookie" i],
+[id*="consent" i],[class*="consent" i],[id*="advert" i],[class*="advert" i],
+[id*="banner" i],[class*="banner" i],[id*="popup" i],[class*="popup" i],
+[class*="modal" i]{display:none!important;visibility:hidden!important}
+nav,[role="navigation"]{display:none!important}
+body{margin:0!important;background:#fff!important}
+main,article,[role="main"],.content,.main-content{max-width:100%!important;width:100%!important;margin:0 auto!important}
+`;
+
+function installClean(frame: HTMLIFrameElement) {
+  try {
+    const doc = frame.contentDocument;
+    if (!doc) return false;
+    if (!doc.getElementById('rpf-clean')) {
+      const s = doc.createElement('style');
+      s.id = 'rpf-clean';
+      s.textContent = CLEAN_CSS;
+      doc.head?.appendChild(s);
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function InAppBrowser() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const frameRef = useRef<HTMLIFrameElement | null>(null);
-  const [current] = useState(() => normalize(params.get("url") || HOME));
-  const frameUrl = useMemo(() => getFrameUrl(current), [current]);
-  const [cleanApplied, setCleanApplied] = useState(false);
-  
-  useEffect(() => {
-    let active = true;
-    if (Capacitor.isNativePlatform()) {
-      Browser.open({ url: current }).catch(console.error);
-      setTimeout(() => {
-        if (active) navigate(-1);
-      }, 300);
-    }
-    return () => { active = false; };
-  }, [current, navigate]);
+  const rawUrl = params.get('url') || '';
+  const frameUrl = useMemo(() => (rawUrl ? getProxyUrl(rawUrl) : ''), [rawUrl]);
+  const [iframeBlocked, setIframeBlocked] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-  if (Capacitor.isNativePlatform()) {
-    return <div className="min-h-screen bg-white" />;
-  }
-
-  const onLoad = () => setCleanApplied(installCleanEngine(frameRef.current!));
-  
+  // Refresh handler called from MainLayout header
   useEffect(() => {
     const handleRefresh = () => {
       if (frameRef.current) {
-        const oldSrc = frameRef.current.src;
-        frameRef.current.src = "";
+        const src = frameRef.current.src;
+        frameRef.current.src = '';
         setTimeout(() => {
-          if (frameRef.current) frameRef.current.src = oldSrc;
+          if (frameRef.current) frameRef.current.src = src;
         }, 50);
       }
     };
-    window.addEventListener("rpf-browser-refresh", handleRefresh);
-    return () => window.removeEventListener("rpf-browser-refresh", handleRefresh);
+    window.addEventListener('rpf-browser-refresh', handleRefresh);
+    return () => window.removeEventListener('rpf-browser-refresh', handleRefresh);
   }, []);
 
+  const onLoad = () => {
+    setLoaded(true);
+    // Try to detect if the iframe actually loaded content or was blocked
+    try {
+      const doc = frameRef.current?.contentDocument;
+      if (!doc || !doc.body || doc.body.innerHTML.trim() === '') {
+        setIframeBlocked(true);
+        return;
+      }
+      installClean(frameRef.current!);
+    } catch {
+      // Cross-origin error means the site loaded but blocked iframe access
+      // This is actually OK — it means the site IS showing (browser renders it)
+      setIframeBlocked(false);
+    }
+  };
+
+  if (!rawUrl) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-8 text-center text-slate-400">
+        <p>No URL provided.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative flex min-h-screen flex-col bg-white pb-24">
-      <main className="min-h-0 flex-1 bg-white">
-        <iframe 
-          ref={frameRef} 
-          key={frameUrl} 
-          src={frameUrl} 
-          title="RPF Web Content" 
-          className="h-[calc(100vh-140px)] w-full border-0" 
-          referrerPolicy="strict-origin-when-cross-origin" 
-          onLoad={onLoad} 
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
-        />
-      </main>
-      {cleanApplied && <span className="sr-only" aria-live="polite">Clean page applied</span>}
+    <div className="relative flex min-h-screen flex-col bg-white">
+      {iframeBlocked && (
+        <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
+          <p className="text-sm text-slate-600">
+            यह website in-app browser में नहीं खुल सकती (security restriction)।
+          </p>
+          <a
+            href={rawUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 rounded-xl bg-[#000080] px-6 py-3 font-bold text-white"
+          >
+            <ExternalLink className="h-4 w-4" />
+            नए Tab में खोलें
+          </a>
+        </div>
+      )}
+
+      {!iframeBlocked && (
+        <main className="min-h-0 flex-1">
+          {!loaded && (
+            <div className="flex h-64 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#000080] border-t-transparent" />
+            </div>
+          )}
+          <iframe
+            ref={frameRef}
+            key={frameUrl}
+            src={frameUrl}
+            title="RPF Web Content"
+            className={`h-[calc(100vh-140px)] w-full border-0 ${loaded ? '' : 'invisible'}`}
+            referrerPolicy="strict-origin-when-cross-origin"
+            onLoad={onLoad}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
+          />
+        </main>
+      )}
     </div>
   );
 }
