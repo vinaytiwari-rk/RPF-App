@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
-import { Search, Compass, Globe, ChevronRight, Newspaper, GraduationCap, ShieldCheck } from "lucide-react";
+import { Search, Compass, Globe, ChevronRight, Newspaper, GraduationCap, ShieldCheck, BookOpen } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 export default function Services() {
@@ -101,6 +101,12 @@ export default function Services() {
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#a84424] text-white shadow-sm"><Newspaper className="h-6 w-6" /></div>
             <div className="min-w-0 flex-1"><h4 className="text-sm font-black text-[#3b1f1f]">{isHi ? "ई-पेपर" : "Epaper"}</h4><p className="mt-1 text-[11px] font-medium text-slate-500">{isHi ? "आज के प्रमुख दैनिक ई-पेपर एक ही जगह पढ़ें" : "Read today's leading daily e-papers in one place"}</p></div>
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white border border-amber-100"><ChevronRight className="h-4 w-4 text-[#a84424]" /></div>
+          </button>
+
+          <button type="button" onClick={() => navigate("/directory")} className="group flex min-h-[88px] items-center gap-4 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50 via-white to-sky-50 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99]">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-white shadow-sm"><BookOpen className="h-6 w-6" /></div>
+            <div className="min-w-0 flex-1"><h4 className="text-sm font-black text-blue-950">{isHi ? "निर्देशिका" : "Directory"}</h4><p className="mt-1 text-[11px] font-medium text-slate-500">{isHi ? "सरकारी संपर्क और उपयोगिता" : "Gov Contacts & Utilities"}</p></div>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white border border-blue-100"><ChevronRight className="h-4 w-4 text-blue-700" /></div>
           </button>
 
           <button type="button" onClick={() => navigate(`/browser?url=${encodeURIComponent("https://www.peoplesuniversity.edu.in/")}`)} className="group flex min-h-[88px] items-center gap-4 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 via-white to-sky-50 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:scale-[.99]">
