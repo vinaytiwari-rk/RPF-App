@@ -18,5 +18,6 @@ export function openExternalLink(url: string, navigate: NavigateFunction) {
     return;
   }
 
-  navigate(`/browser?url=${encodeURIComponent(value)}`);
+  // Web fallback: Open in a new tab to bypass WAF / Cloudflare server-side proxy blocks
+  window.open(value, '_blank', 'noopener,noreferrer');
 }
