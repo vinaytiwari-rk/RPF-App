@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Home, Lock, RefreshCw, ShieldChec
 
 type Lang = "en" | "hi";
 const HOME = "https://www.google.com";
+const PROXY_HOSTS = new Set(["www.india.gov.in", "india.gov.in", "www.myscheme.gov.in", "myscheme.gov.in", "www.calculator.net", "calculator.net"]);
 
 function normalize(value: string) {
   const v = value.trim();
@@ -11,6 +12,14 @@ function normalize(value: string) {
   if (/^https?:\/\//i.test(v)) return v;
   if (/^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(v)) return `https://${v}`;
   return `https://www.google.com/search?q=${encodeURIComponent(v)}`;
+}
+
+function getFrameUrl(url: string) {
+  try {
+    const u = new URL(url);
+    if (PROXY_HOSTS.has(u.hostname.toLowerCase())) return `/api/gov/web-proxy?url=${encodeURIComponent(url)}`;
+  } catch {}
+  return url;
 }
 
 export default function InAppBrowser() {
@@ -23,6 +32,7 @@ export default function InAppBrowser() {
   const [index, setIndex] = useState(0);
   const [key, setKey] = useState(0);
   const current = history[index] || HOME;
+  const frameUrl = useMemo(() => getFrameUrl(current), [current]);
   const canBack = index > 0;
   const canForward = index < history.length - 1;
   const title = useMemo(() => {
@@ -46,16 +56,9 @@ export default function InAppBrowser() {
   return <div className="flex min-h-screen flex-col bg-white pb-24">
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <div className="flex items-center gap-2 px-3 py-2">
-        <button onClick={() => navigate(-1)} aria-label="Back to RPF" className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white">
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-black text-slate-900">{isHi ? "RPF रीडिंग मोड" : "RPF Reading Mode"}</p>
-          <p className="truncate text-[10px] text-slate-500">{title}</p>
-        </div>
-        <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700" title={isHi ? "सुरक्षित कनेक्शन" : "Secure connection"}>
-          <Lock className="h-3 w-3" /><span className="text-[9px] font-bold">HTTPS</span>
-        </div>
+        <button onClick={() => navigate(-1)} aria-label="Back to RPF" className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white"><ArrowLeft className="h-4 w-4" /></button>
+        <div className="min-w-0 flex-1"><p className="truncate text-sm font-black text-slate-900">{isHi ? "RPF रीडिंग मोड" : "RPF Reading Mode"}</p><p className="truncate text-[10px] text-slate-500">{title}</p></div>
+        <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700"><Lock className="h-3 w-3" /><span className="text-[9px] font-bold">HTTPS</span></div>
         <ShieldCheck className="h-5 w-5 text-emerald-600" />
       </div>
       <div className="flex items-center gap-1 px-3 pb-2">
@@ -67,7 +70,7 @@ export default function InAppBrowser() {
       </div>
     </header>
     <main className="min-h-0 flex-1 bg-white">
-      <iframe key={key} src={current} title={title} className="h-[calc(100vh-112px)] w-full border-0" referrerPolicy="strict-origin-when-cross-origin" />
+      <iframe key={`${key}-${frameUrl}`} src={frameUrl} title={title} className="h-[calc(100vh-112px)] w-full border-0" referrerPolicy="strict-origin-when-cross-origin" />
     </main>
   </div>;
 }
