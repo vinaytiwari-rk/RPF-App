@@ -44,6 +44,7 @@ export default function Services() {
     "sos",
     "youth",
     "nation",
+    "internet-radio",
   ];
   const REMOVED_SERVICE_IDS = [
     "gps-toolkit",
@@ -51,7 +52,6 @@ export default function Services() {
     "earthquakes",
     "global-guide",
     "transit-planner",
-    "internet-radio",
     "news-feed",
     "hindu-calendar",
     "audiobooks",
