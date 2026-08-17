@@ -1,5 +1,55 @@
-import React,{useEffect,useMemo,useState}from'react';
-type Item={id:string|number};
-type Props<T extends Item>={items:T[];storageKey:string;renderItem:(item:T,index:number,arranging:boolean)=>React.ReactNode;className?:string};
-const read=(k:string):string[]=>{try{const v=JSON.parse(localStorage.getItem(`rpf-order:${k}`)||'[]');return Array.isArray(v)?v.map(String):[]}catch{return[]}};
-export default function SortableList<T extends Item>({items,storageKey,renderItem,className='space-y-2'}:Props<T>){const[arranging,setArranging]=useState(false);const[order,setOrder]=useState<string[]>(()=>read(storageKey));const[dragged,setDragged]=useState<string|null>(null);useEffect(()=>{try{localStorage.setItem(`rpf-order:${storageKey}`,JSON.stringify(order))}catch{}},[order,storageKey]);const ordered=useMemo(()=>{const rank=new Map(order.map((id,i)=>[id,i]));return[...items].sort((a,b)=>(rank.get(String(a.id))??999999)-(rank.get(String(b.id))??999999))},[items,order]);const move=(from:string,to:string)=>{const ids=ordered.map(x=>String(x.id));const a=ids.indexOf(from),b=ids.indexOf(to);if(a<0||b<0||a===b)return;ids.splice(a,1);ids.splice(b,0,from);setOrder(ids)};return <div className={className}><div className="flex justify-end pb-1"><button type="button" onClick={()=>setArranging(v=>!v)} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold text-slate-600 shadow-sm">{arranging?'Done':'Arrange'}</button></div>{arranging&&<p className="pb-1 text-[10px] text-slate-400">☰ Hold and drag to move up or down</p>}{ordered.map((item,index)=><div key={String(item.id)} draggable={arranging} onDragStart={()=>setDragged(String(item.id))} onDragOver={e=>arranging&&e.preventDefault()} onDrop={()=>{if(dragged)move(dragged,String(item.id));setDragged(null)}} onDragEnd={()=>setDragged(null)} className={arranging?'touch-none select-none':''}>{renderItem(item,index,arranging)}</div>)}</div>}
+import React, { useEffect, useMemo, useState } from "react";
+import { GripVertical, ChevronUp, ChevronDown, Check, ListOrdered } from "lucide-react";
+
+type Item = { id: string | number };
+type Props<T extends Item> = { items: T[]; storageKey: string; renderItem: (item: T, index: number, arranging: boolean) => React.ReactNode; className?: string };
+const readOrder = (key: string): string[] => { try { const value = JSON.parse(localStorage.getItem(`rpf-order:${key}`) || "[]"); return Array.isArray(value) ? value.map(String) : []; } catch { return []; } };
+
+export default function SortableList<T extends Item>({ items, storageKey, renderItem, className = "space-y-2" }: Props<T>) {
+  const [arranging, setArranging] = useState(false);
+  const [order, setOrder] = useState<string[]>(() => readOrder(storageKey));
+
+  useEffect(() => { setOrder(readOrder(storageKey)); }, [storageKey]);
+  useEffect(() => { try { localStorage.setItem(`rpf-order:${storageKey}`, JSON.stringify(order)); } catch {} }, [order, storageKey]);
+
+  const ordered = useMemo(() => {
+    const rank = new Map(order.map((id, index) => [id, index]));
+    return [...items].sort((a, b) => (rank.get(String(a.id)) ?? 999999) - (rank.get(String(b.id)) ?? 999999));
+  }, [items, order]);
+
+  const persist = (next: T[]) => setOrder(next.map(item => String(item.id)));
+  const move = (index: number, direction: -1 | 1) => {
+    const next = [...ordered];
+    const target = index + direction;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    persist(next);
+  };
+  const reset = () => { try { localStorage.removeItem(`rpf-order:${storageKey}`); } catch {} setOrder([]); };
+
+  return (
+    <div className={className}>
+      <div className="flex items-center justify-between pb-1">
+        <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">{arranging && <><ListOrdered className="h-3.5 w-3.5" />Arrange order</>}</div>
+        <div className="flex items-center gap-2">
+          {arranging && <button type="button" onClick={reset} className="rounded-full px-2.5 py-1.5 text-[10px] font-bold text-slate-400 hover:bg-slate-100">Reset</button>}
+          <button type="button" onClick={() => setArranging(v => !v)} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold shadow-sm ${arranging ? "bg-[#000080] text-white" : "border border-slate-200 bg-white text-slate-600"}`}>
+            {arranging ? <Check className="h-3.5 w-3.5" /> : <GripVertical className="h-3.5 w-3.5" />}{arranging ? "Done" : "Arrange"}
+          </button>
+        </div>
+      </div>
+      {arranging && <p className="pb-1 text-[10px] text-slate-400">Use ↑ ↓ to move any item up or down.</p>}
+      {ordered.map((item, index) => (
+        <div key={String(item.id)} className={arranging ? "rounded-2xl ring-1 ring-slate-100" : ""}>
+          <div className="relative">
+            {arranging && <div className="absolute right-2 top-1/2 z-10 flex -translate-y-1/2 flex-col gap-1 rounded-xl bg-white/95 p-1 shadow-md ring-1 ring-slate-200">
+              <button type="button" disabled={index === 0} onClick={(e) => { e.stopPropagation(); move(index, -1); }} aria-label="Move up" className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-25"><ChevronUp className="h-4 w-4" /></button>
+              <button type="button" disabled={index === ordered.length - 1} onClick={(e) => { e.stopPropagation(); move(index, 1); }} aria-label="Move down" className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-25"><ChevronDown className="h-4 w-4" /></button>
+            </div>}
+            {renderItem(item, index, arranging)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
