@@ -146,11 +146,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                setUser(null);
             }
           } else {
-             // Expired token or auth error
-             localStorage.removeItem(STORAGE_KEY);
-             localStorage.removeItem("@rpf_token");
-             setToken(null);
-             setUser(null);
+             // Only log the user out if the token was explicitly rejected (401, 403) or user deleted (404)
+             if (res.status === 401 || res.status === 403 || res.status === 404) {
+               localStorage.removeItem(STORAGE_KEY);
+               localStorage.removeItem("@rpf_token");
+               setToken(null);
+               setUser(null);
+             } else {
+               // 500/502/503 (Server down/restarting). Keep the cached user.
+               console.warn("Auth server unavailable, using cached session.");
+             }
           }
         } catch {
           // Backend unreachable - use cached user silently
