@@ -58,10 +58,6 @@ router.get('/api/gov/web-proxy', async (req, res) => {
     $('meta[http-equiv="Content-Security-Policy"], meta[http-equiv="X-Frame-Options"]').remove();
     $('base').remove();
 
-    // Do not allow nested frames/documents to render inside RPF. These can load
-    // XML/SVG/error documents and produce the visible browser parsing error.
-    $('iframe, frame, frameset, object, embed').remove();
-
     const BROWSER_INTERCEPTOR = `
 <script>
 (function(){
@@ -115,7 +111,12 @@ router.get('/api/gov/web-proxy', async (req, res) => {
 })();
 </script>
 `;
-    $('head').prepend(BROWSER_INTERCEPTOR);
+
+    const isSPA = target.hostname.includes('google.com') || target.hostname.includes('originality.ai');
+    if (isSPA) {
+      $('iframe, frame, frameset, object, embed').remove();
+      $('head').prepend(BROWSER_INTERCEPTOR);
+    }
     
     // Convert links and forms to use OUR proxy so navigation stays in-app
     $('a[href]').each((_i, el) => {
@@ -130,6 +131,14 @@ router.get('/api/gov/web-proxy', async (req, res) => {
       if (value) $(el).attr('action', proxiedLink(value, target.toString()));
     });
     
+    // Proxy nested iframes and frames so they bypass X-Frame-Options
+    $('iframe[src], frame[src]').each((_i, el) => {
+      const value = $(el).attr('src');
+      if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) {
+        $(el).attr('src', proxiedLink(value, target.toString()));
+      }
+    });
+
     // Assets (CSS, JS, Images) load directly from the original server
     $('link[href]').each((_i, el) => {
       const value = $(el).attr('href');
@@ -138,7 +147,7 @@ router.get('/api/gov/web-proxy', async (req, res) => {
       }
     });
 
-    $('img[src], script[src], source[src], iframe[src]').each((_i, el) => {
+    $('img[src], script[src], source[src]').each((_i, el) => {
       const value = $(el).attr('src');
       if (value && !/^data:/i.test(value)) {
         $(el).attr('src', proxiedAsset(value, target.toString()));
