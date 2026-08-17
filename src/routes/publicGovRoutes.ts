@@ -76,7 +76,13 @@ router.get('/api/gov/web-proxy', async (req, res) => {
     } else if(a && a.url){
       var u = a.url;
       if(u.startsWith('/')) u = origin + u;
-      if(u.startsWith(origin)) arguments[0] = new Request(prox(u), a);
+      if(u.startsWith(origin)) {
+        try {
+          arguments[0] = new Request(prox(u), a);
+        } catch(e) {
+          console.warn('Proxy Request bypass:', e);
+        }
+      }
     }
     return ofetch.apply(this, arguments);
   };
@@ -112,7 +118,9 @@ router.get('/api/gov/web-proxy', async (req, res) => {
 </script>
 `;
 
-    const isSPA = target.hostname.includes('google.com') || target.hostname.includes('originality.ai');
+    const isSPA = target.hostname.includes('google.com') || 
+                  target.hostname.includes('originality.ai') || 
+                  target.hostname.includes('eraktkosh.mohfw.gov.in');
     if (isSPA) {
       $('iframe, frame, frameset, object, embed').remove();
       $('head').prepend(BROWSER_INTERCEPTOR);
@@ -123,12 +131,16 @@ router.get('/api/gov/web-proxy', async (req, res) => {
       const value = $(el).attr('href');
       if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) {
         $(el).attr('href', proxiedLink(value, target.toString()));
+        $(el).removeAttr('target'); // Prevent escaping the iframe (target="_top", target="_blank")
       }
     });
 
     $('form[action]').each((_i, el) => {
       const value = $(el).attr('action');
-      if (value) $(el).attr('action', proxiedLink(value, target.toString()));
+      if (value) {
+        $(el).attr('action', proxiedLink(value, target.toString()));
+        $(el).removeAttr('target'); // Prevent escaping the iframe
+      }
     });
     
     // Proxy nested iframes and frames so they bypass X-Frame-Options
