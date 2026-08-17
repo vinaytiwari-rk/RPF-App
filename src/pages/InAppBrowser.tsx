@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useOutletContext, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Lock, ShieldCheck } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 type Lang = "en" | "hi";
 const HOME = "https://www.google.com";
@@ -63,14 +63,6 @@ export default function InAppBrowser() {
             </p>
             <p className="truncate text-[10px] text-slate-500">{title}</p>
           </div>
-          <div
-            className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700"
-            title={isHi ? "सुरक्षित कनेक्शन" : "Secure connection"}
-          >
-            <Lock className="h-3 w-3" />
-            <span className="text-[9px] font-bold">HTTPS</span>
-          </div>
-          <ShieldCheck className="h-5 w-5 text-emerald-600" />
         </div>
       </header>
 
