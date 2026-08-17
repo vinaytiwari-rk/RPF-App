@@ -46,7 +46,7 @@ function attachBrowserGuards(browser: any): void {
     console.error('[RPF Browser] Native page load error:', event?.message || event?.url || event);
   });
   browser?.addEventListener?.('exit', () => {
-    // Deliberately preserve website cookies/session state.
+    // Website cookies/session state are deliberately preserved.
   });
 }
 
@@ -104,22 +104,18 @@ export async function openExternalLink(
     return;
   }
 
-  const W = 520;
-  const H = Math.min(window.screen.availHeight - 60, 820);
-  const left = Math.max(0, Math.round((window.screen.availWidth - W) / 2));
-  const top = Math.max(0, Math.round((window.screen.availHeight - H) / 2));
-  const popup = window.open(
-    value,
-    NATIVE_BROWSER_TARGET,
-    `width=${W},height=${H},left=${left},top=${top},` +
-      'toolbar=no,menubar=no,scrollbars=yes,resizable=yes,status=no,location=no',
-  );
-
-  if (!popup && navigate) {
+  // Web preview/testing must NEVER use window.open(). That would launch a
+  // second tab in the very browser we are using to test the RPF application.
+  // Instead, route into the same RPF Browser page. The page can render the
+  // target in its preview frame where the remote site permits embedding.
+  if (navigate) {
     navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title)}`);
-  } else {
-    popup?.focus();
+    return;
   }
+
+  // No navigation function is available in non-native preview code. Do not
+  // escape to the host browser; fail closed rather than opening a new tab.
+  console.warn('[RPF Browser] Web navigation unavailable; refusing external tab:', value);
 }
 
 export const openRPFBrowser = openExternalLink;
