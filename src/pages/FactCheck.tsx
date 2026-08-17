@@ -21,6 +21,7 @@ export default function FactCheck() {
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><CheckCircle2 className="h-6 w-6" /></div>
             <div><h1 className="text-2xl font-black text-[#000080]">{hi ? "फैक्ट चेक" : "Fact Check"}</h1><p className="mt-1 text-xs text-slate-500">{hi ? "दावों और खबरों की तथ्य-जांच के लिए उपयोगी स्रोत" : "Useful sources for checking claims and news"}</p></div>
           </div>
+          <div className="mt-6 space-y-3">
             {SOURCES.map(source => (
               <button key={source.url} type="button" onClick={() => navigate(`/browser?url=${encodeURIComponent(source.url)}`)} className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:bg-white hover:shadow-sm active:scale-[.99]">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-700 shadow-sm"><ExternalLink className="h-5 w-5" /></div>

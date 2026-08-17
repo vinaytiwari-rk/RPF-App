@@ -19,10 +19,16 @@ const isAllowedPortal = (raw: string) => {
   } catch { return false; }
 };
 
-const proxied = (value: string, base: string) => {
+const proxiedAsset = (value: string, base: string) => {
+  try {
+    return new URL(value, base).toString();
+  } catch { return value; }
+};
+
+const proxiedLink = (value: string, base: string) => {
   try {
     const absolute = new URL(value, base).toString();
-    return isAllowedPortal(absolute) ? `/api/gov/web-proxy?url=${encodeURIComponent(absolute)}` : value;
+    return isAllowedPortal(absolute) ? `/api/gov/web-proxy?url=${encodeURIComponent(absolute)}&clean=1` : absolute;
   } catch { return value; }
 };
 
@@ -85,26 +91,39 @@ router.get('/api/gov/web-proxy', async (req, res) => {
 })();
 </script>
 `;
-    $('head').prepend(SPA_INTERCEPTOR);
     
-    // Convert absolute paths back to proxy as well (for base cases)
-    $('a[href], link[href]').each((_i, el) => {
+    // Only inject SPA interceptor for complex React/Angular SPAs that strictly need it
+    const isSPA = target.hostname.includes('google.com') || target.hostname.includes('originality.ai');
+    if (isSPA) {
+      $('head').prepend(SPA_INTERCEPTOR);
+    }
+    
+    // Convert links and forms to use OUR proxy so navigation stays in-app
+    $('a[href]').each((_i, el) => {
       const value = $(el).attr('href');
       if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) {
-        $(el).attr('href', proxied(value, target.toString()));
-      }
-    });
-
-    $('img[src], script[src], source[src]').each((_i, el) => {
-      const value = $(el).attr('src');
-      if (value && !/^data:/i.test(value)) {
-        $(el).attr('src', proxied(value, target.toString()));
+        $(el).attr('href', proxiedLink(value, target.toString()));
       }
     });
 
     $('form[action]').each((_i, el) => {
       const value = $(el).attr('action');
-      if (value) $(el).attr('action', proxied(value, target.toString()));
+      if (value) $(el).attr('action', proxiedLink(value, target.toString()));
+    });
+    
+    // Assets (CSS, JS, Images) load directly from the original server
+    $('link[href]').each((_i, el) => {
+      const value = $(el).attr('href');
+      if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) {
+        $(el).attr('href', proxiedAsset(value, target.toString()));
+      }
+    });
+
+    $('img[src], script[src], source[src], iframe[src]').each((_i, el) => {
+      const value = $(el).attr('src');
+      if (value && !/^data:/i.test(value)) {
+        $(el).attr('src', proxiedAsset(value, target.toString()));
+      }
     });
 
     res.setHeader('Content-Security-Policy', "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self'; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:;");
