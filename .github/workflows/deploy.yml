@@ -16,7 +16,7 @@ jobs:
           node-version: '22'
           cache: npm
       - name: Install Dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci
       - name: Type Check & Lint
         run: npm run lint
       - name: Build Application
