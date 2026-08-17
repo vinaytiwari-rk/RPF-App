@@ -3,15 +3,11 @@ import { Browser } from '@capacitor/browser';
 import type { NavigateFunction } from 'react-router-dom';
 
 /**
- * Opens a third-party website without routing it through the RPF HTML proxy.
- *
- * Native Android/iOS: Capacitor Browser keeps the user inside the app's
- * browser experience while preserving the site's own cookies, JavaScript,
- * redirects, popups and authentication flows.
- * Web: a normal new tab is used because arbitrary third-party sites cannot be
- * reliably embedded due to CSP/X-Frame-Options and many publisher WAFs.
+ * Opens a third-party website without changing RPF authentication state.
+ * Native Android/iOS uses the Capacitor browser surface. Web uses the RPF
+ * browser route so the user does not leave the application tab.
  */
-export function openExternalLink(url: string, _navigate?: NavigateFunction) {
+export function openExternalLink(url: string, navigate: NavigateFunction) {
   const value = String(url || '').trim();
   if (!/^https?:\/\//i.test(value)) return;
 
@@ -22,5 +18,5 @@ export function openExternalLink(url: string, _navigate?: NavigateFunction) {
     return;
   }
 
-  window.open(value, '_blank', 'noopener,noreferrer');
+  navigate(`/browser?url=${encodeURIComponent(value)}`);
 }
