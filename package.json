@@ -10,6 +10,7 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "browser:check": "node scripts/checkBrowserPolicy.cjs",
+    "browser:smoke": "node scripts/browserSmokeCheck.cjs",
     "migrate": "node scripts/runMigrations.cjs"
   },
   "dependencies": {
@@ -31,14 +32,13 @@
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "express-rate-limit": "^8.6.0",
+    "country-state-city": "^3.2.0",
     "firebase": "^12.17.1",
     "firebase-admin": "^14.2.0",
     "hls.js": "^1.7.0",
     "html2canvas": "^1.4.1",
     "jodit-react": "^5.3.21",
     "jsonwebtoken": "^9.0.3",
-    "jspdf": "^4.2.1",
-    "leaflet": "^1.9.4",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "multer": "^2.2.0",
