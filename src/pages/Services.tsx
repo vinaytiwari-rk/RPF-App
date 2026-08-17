@@ -44,7 +44,7 @@ export default function Services() {
     "sos",
     "youth",
     "nation",
-    "internet-radio",
+    "internet-radio", // live radio stream
   ];
   const REMOVED_SERVICE_IDS = [
     "gps-toolkit",
