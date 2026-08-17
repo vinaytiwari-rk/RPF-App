@@ -52,6 +52,42 @@ router.get('/api/gov/web-proxy', async (req, res) => {
     // XML/SVG/error documents and produce the visible browser parsing error.
     $('iframe, frame, frameset, object, embed').remove();
 
+    const SPA_INTERCEPTOR = `
+<script>
+(function(){
+  var origin = new URL(location.href).searchParams.get('url');
+  if(!origin) return;
+  origin = new URL(origin).origin;
+  var prox = function(u){ return '/api/gov/web-proxy?url=' + encodeURIComponent(u); };
+  
+  var ofetch = window.fetch;
+  window.fetch = function(){
+    var a = arguments[0];
+    if(typeof a === 'string'){
+      if(a.startsWith('/')) a = origin + a;
+      if(a.startsWith(origin)) arguments[0] = prox(a);
+    } else if(a && a.url){
+      var u = a.url;
+      if(u.startsWith('/')) u = origin + u;
+      if(u.startsWith(origin)) arguments[0] = new Request(prox(u), a);
+    }
+    return ofetch.apply(this, arguments);
+  };
+  
+  var oxhr = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function(m, u, a, usr, p){
+    if(typeof u === 'string'){
+      if(u.startsWith('/')) u = origin + u;
+      if(u.startsWith(origin)) u = prox(u);
+    }
+    return oxhr.call(this, m, u, a, usr, p);
+  };
+})();
+</script>
+`;
+    $('head').prepend(SPA_INTERCEPTOR);
+    
+    // Convert absolute paths back to proxy as well (for base cases)
     $('a[href], link[href]').each((_i, el) => {
       const value = $(el).attr('href');
       if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) {
