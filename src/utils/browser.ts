@@ -8,7 +8,7 @@ const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const NATIVE_BROWSER_TARGET = 'rpf_webview';
 const DEFAULT_WEB_TITLE = 'Web content';
 
-export function normalizeExternalWebUrl(url: string): string | null {
+export function normalizeExternalWebUrl(url: string): string |null {
   const value = String(url || '').trim();
   if (!value || UNSAFE_URL_SCHEME.test(value) || !HTTP_URL.test(value) || !isSafeWebUrl(value)) return null;
   try {
@@ -67,7 +67,7 @@ export async function openExternalLink(
           'location=yes',
           'toolbar=yes',
           'hidenavigationbuttons=no',
-          'hideurlbar=no',
+          'hideurlbar=yes',
           'hardwareback=yes',
           'zoom=yes',
           'clearcache=no',
@@ -78,7 +78,7 @@ export async function openExternalLink(
           'useWideViewPort=yes',
           'disallowoverscroll=no',
           'hidden=no',
-          'footer=yes',
+          'footer=no',
           'shouldPauseOnSuspend=no',
         ].join(','),
       );
