@@ -6,8 +6,13 @@
         android:usesCleartextTraffic="false"
         tools:replace="android:usesCleartextTraffic"
         android:theme="@style/AppTheme"
-        android:label="RPF Seva App">
-        <activity android:name=".NativeBrowserActivity" android:exported="false" />
+        android:label="RPF Seva App"
+        android:icon="@drawable/rpf_logo"
+        android:roundIcon="@drawable/rpf_logo">
+        <activity
+            android:name=".NativeBrowserActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
