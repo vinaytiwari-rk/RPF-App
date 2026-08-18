@@ -39,9 +39,13 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      # Use the same dependency-install strategy as the passing web deployment.
       - name: Install Dependencies
         run: npm install --no-audit --no-fund
+
+      - name: Verify required modules
+        run: |
+          node -e "console.log('react-router-dom@' + require('./node_modules/react-router-dom/package.json').version)"
+          node -e "console.log('@capacitor/android@' + require('./node_modules/@capacitor/android/package.json').version)"
 
       - name: Type Check
         run: npm run lint
@@ -52,31 +56,19 @@ jobs:
       - name: Sync Capacitor Android
         run: npx cap sync android
 
-      - name: CI: Print Capacitor Android info
+      - name: CI: Write CAPACITOR_ANDROID_VERSION safely
         run: |
-          node -v
-          echo "=== node_modules/@capacitor/android ==="
-          if [ -f node_modules/@capacitor/android/package.json ]; then
-            node -p "require('./node_modules/@capacitor/android/package.json').version"
-            if command -v jq >/dev/null 2>&1; then
-              jq -r '.name + "@" + .version' node_modules/@capacitor/android/package.json || cat node_modules/@capacitor/android/package.json
-            else
-              cat node_modules/@capacitor/android/package.json
-            fi
-          else
-            echo "node_modules/@capacitor/android not found"
+          if [ ! -f node_modules/@capacitor/android/package.json ]; then
+            echo "ERROR: @capacitor/android is missing" >&2
+            exit 1
           fi
-
-      - name: CI: Write CAPACITOR_ANDROID_VERSION to android/gradle.properties
-        run: |
-          if [ -f node_modules/@capacitor/android/package.json ]; then
-            VERSION=$(node -p "require('./node_modules/@capacitor/android/package.json').version")
-            echo "CAPACITOR_ANDROID_VERSION=${VERSION}" > android/gradle.properties
-            echo "Wrote CAPACITOR_ANDROID_VERSION=${VERSION} to android/gradle.properties"
+          VERSION=$(node -p "require('./node_modules/@capacitor/android/package.json').version")
+          if grep -q '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties 2>/dev/null; then
+            sed -i "s/^CAPACITOR_ANDROID_VERSION=.*/CAPACITOR_ANDROID_VERSION=${VERSION}/" android/gradle.properties
           else
-            echo "# no capacitor android found" > android/gradle.properties
-            echo "No local capacitor android; gradle.properties created without version"
+            printf '\nCAPACITOR_ANDROID_VERSION=%s\n' "${VERSION}" >> android/gradle.properties
           fi
+          grep '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
