@@ -27,6 +27,8 @@ export default function InAppBrowser() {
 
   const go = (path: string) => navigate(path);
 
+  const proxyUrl = rawUrl ? `/api/gov/web-proxy?url=${encodeURIComponent(rawUrl)}&clean=1` : '';
+
   return (
     <div className="fixed inset-0 z-[90] flex min-h-[100dvh] flex-col bg-white">
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-3 shadow-sm">
@@ -36,7 +38,7 @@ export default function InAppBrowser() {
           <button onClick={() => frameHistory('forward')} aria-label="Move right" className="flex h-10 w-10 items-center justify-center rounded-full text-xl font-bold text-[#000080] active:bg-orange-50">›</button>
         </div>
       </header>
-
+ 
       <main className="min-h-0 flex-1 bg-white">
         {error || !rawUrl ? (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm font-medium text-slate-500">{error || 'Web page unavailable.'}</div>
@@ -44,7 +46,7 @@ export default function InAppBrowser() {
           <iframe
             ref={frameRef}
             title="RPF Web View"
-            src={rawUrl}
+            src={proxyUrl}
             className="h-full w-full border-0 bg-white"
             allow="autoplay; clipboard-read; clipboard-write; encrypted-media; fullscreen; geolocation; microphone; camera; picture-in-picture"
             allowFullScreen
