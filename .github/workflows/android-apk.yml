@@ -5,8 +5,6 @@ on:
   push:
     branches: [main]
     paths:
-      # Native/package changes only. Normal web/UI/content deployments do not
-      # create a new APK, keeping the installed base APK stable.
       - 'android/**'
       - 'package.json'
       - 'package-lock.json'
@@ -36,11 +34,16 @@ jobs:
 
       - name: Materialize Official RPF App Icon
         run: |
+          test -f android/app/src/main/assets/rpf-logo.webp.base64
           mkdir -p android/app/src/main/res/drawable-nodpi
-          base64 -d android/app/src/main/assets/rpf-logo.webp.base64 > android/app/src/main/res/drawable-nodpi/rpf_launcher_icon.webp
+          base64 -d android/app/src/main/assets/rpf-logo.webp.base64 > android/app/src/main/res/drawable-nodpi/rpf_logo.webp
+          test -s android/app/src/main/res/drawable-nodpi/rpf_logo.webp
 
       - name: Install Dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
+
+      - name: Type Check
+        run: npm run lint
 
       - name: Build Web Application
         run: npm run build
