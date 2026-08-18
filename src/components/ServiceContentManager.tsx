@@ -9,6 +9,7 @@ const SERVICE_OPTIONS = [
   { id: "women-safety", label: "Women Safety" }, { id: "youth", label: "Youth Empowerment" }, { id: "health-care", label: "Health Care" },
   { id: "grievance", label: "Grievances" }, { id: "education", label: "Education Aid" }, { id: "environment", label: "Environment" },
   { id: "seniors", label: "Senior Citizens" }, { id: "countries", label: "Global Guide" }, { id: "skills", label: "Skills Training" },
+  { id: "animals", label: "Animal Welfare" },
 ];
 const SUPPORTED_LANGUAGES = [{ code: "en", label: "English" }, { code: "hi", label: "Hindi" }];
 type LocalizedContent = Record<string, { body?: string; actionLabel?: string }>;

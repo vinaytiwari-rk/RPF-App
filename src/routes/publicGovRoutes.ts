@@ -259,9 +259,48 @@ router.get("/api/public/services/:id/content", async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`SELECT service_id, content, action_url, updated_at FROM service_content WHERE service_id = $1`, [id]);
-    if (result.rows.length === 0) return res.json({ success: true, data: null });
-    res.json({ success: true, data: result.rows[0] });
-  } catch (error: any) { console.error("Service content fetch error:", error); res.status(500).json({ success: false, error: error.message }); }
+    
+    let data: any = result.rows.length > 0 ? result.rows[0] : null;
+
+    if (id === "animals") {
+      const animalResources = [
+        { title: { en: "PETA India Actions", hi: "पेटा इंडिया एक्शन्स" }, url: "https://www.petaindia.com/action/" },
+        { title: { en: "AWBI Colony Animal Caretaker", hi: "AWBI कॉलोनी पशु केयरटेकर" }, url: "https://awbi.gov.in/colony-animal-care-taker" },
+        { title: { en: "Bharat Pashudhan Portal", hi: "भारत पशुधन पोर्टल" }, url: "https://bharatpashudhan.ndlm.co.in/" },
+        { title: { en: "DAHD Schemes & Programmes", hi: "DAHD योजनाएं और कार्यक्रम" }, url: "https://dahd.gov.in/hi/schemes-programmes" },
+        { title: { en: "MPDAH Animal Breeding Farm", hi: "MPDAH पशु प्रजनन फार्म" }, url: "https://mpdah.gov.in/animal-breeding-farm" },
+        { title: { en: "MPDAH Welfare Schemes", hi: "MPDAH कल्याणकारी योजनाएं" }, url: "https://mpdah.gov.in/schemes" },
+        { title: { en: "NDVSU Grievance Portal", hi: "NDVSU शिकायत पोर्टल" }, url: "https://ndvsu.org/grievance" }
+      ];
+
+      if (!data) {
+        data = {
+          service_id: "animals",
+          content: {
+            en: {
+              body: "<h3>Animal Welfare Support</h3><p>Access official animal welfare portals, central/state dairy and animal husbandry schemes, breeding directories, and grievance resources below.</p>",
+              actionLabel: "Report Stray Emergency"
+            },
+            hi: {
+              body: "<h3>पशु कल्याण सहयोग</h3><p>आधिकारिक पशु कल्याण पोर्टल, केंद्र/राज्य डेयरी और पशुपालन योजनाएं, प्रजनन निर्देशिका और शिकायत निवारण संसाधनों तक नीचे पहुंचें।</p>",
+              actionLabel: "आवारा पशु आपातकाल दर्ज करें"
+            }
+          },
+          action_url: "/grievance",
+          updated_at: new Date().toISOString()
+        };
+      }
+
+      data.resources = animalResources;
+    } else if (data) {
+      data.resources = data.content?.resources || [];
+    }
+
+    res.json({ success: true, data });
+  } catch (error: any) { 
+    console.error("Service content fetch error:", error); 
+    res.status(500).json({ success: false, error: error.message }); 
+  }
 });
 
 export default router;
