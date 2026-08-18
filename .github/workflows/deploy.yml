@@ -16,7 +16,7 @@ jobs:
           node-version: '22'
           cache: npm
       - name: Install Dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - name: Browser Policy Regression Check
         run: npm run browser:check
       - name: Browser Critical Link Smoke Check
