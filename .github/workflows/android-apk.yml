@@ -52,6 +52,32 @@ jobs:
       - name: Sync Capacitor Android
         run: npx cap sync android
 
+      - name: CI: Print Capacitor Android info
+        run: |
+          node -v
+          echo "=== node_modules/@capacitor/android ==="
+          if [ -f node_modules/@capacitor/android/package.json ]; then
+            node -p "require('./node_modules/@capacitor/android/package.json').version"
+            if command -v jq >/dev/null 2>&1; then
+              jq -r '.name + "@" + .version' node_modules/@capacitor/android/package.json || cat node_modules/@capacitor/android/package.json
+            else
+              cat node_modules/@capacitor/android/package.json
+            fi
+          else
+            echo "node_modules/@capacitor/android not found"
+          fi
+
+      - name: CI: Write CAPACITOR_ANDROID_VERSION to android/gradle.properties
+        run: |
+          if [ -f node_modules/@capacitor/android/package.json ]; then
+            VERSION=$(node -p "require('./node_modules/@capacitor/android/package.json').version")
+            echo "CAPACITOR_ANDROID_VERSION=${VERSION}" > android/gradle.properties
+            echo "Wrote CAPACITOR_ANDROID_VERSION=${VERSION} to android/gradle.properties"
+          else
+            echo "# no capacitor android found" > android/gradle.properties
+            echo "No local capacitor android; gradle.properties created without version"
+          fi
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -61,7 +87,7 @@ jobs:
         working-directory: android
         run: |
           gradle --version
-          gradle :app:dependencies --configuration debugRuntimeClasspath --no-daemon
+          gradle :app:dependencies --configuration debugRuntimeClasspath --no-daemon --info
 
       - name: Build Debug APK
         working-directory: android
