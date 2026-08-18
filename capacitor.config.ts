@@ -4,6 +4,10 @@ const config: CapacitorConfig = {
   appId: 'com.rpfoundation.app',
   appName: 'RPFoundation',
   webDir: 'dist',
+  server: {
+    url: 'https://appapi.therpfoundation.org',
+    cleartext: true
+  },
   ios: {
     contentInset: 'automatic',
     backgroundColor: '#f8fafc'
