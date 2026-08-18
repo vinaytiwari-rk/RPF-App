@@ -39,9 +39,28 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      # Use the same dependency-install strategy as the passing web deployment.
-      - name: Install Dependencies
-        run: npm install --no-audit --no-fund
+      # Use deterministic dependency-install strategy
+      - name: Install Dependencies (deterministic)
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify install & required modules
+        run: |
+          echo "== verify: package-lock and required modules =="
+          if [ ! -f package-lock.json ]; then
+            echo "ERROR: package-lock.json missing" >&2
+            exit 1
+          fi
+          if [ ! -f node_modules/react-router-dom/package.json ]; then
+            echo "ERROR: react-router-dom not found in node_modules; npm ci may have failed" >&2
+            ls -la node_modules | sed -n '1,200p' || true
+            exit 2
+          fi
+          if [ ! -f node_modules/@capacitor/android/package.json ]; then
+            echo "ERROR: node_modules/@capacitor/android not found; npx cap sync android requires it. Failing rather than creating placeholders." >&2
+            exit 3
+          fi
+          node -e "console.log('react-router-dom@' + require('./node_modules/react-router-dom/package.json').version)"
+          node -e "console.log('@capacitor/android@' + require('./node_modules/@capacitor/android/package.json').version)"
 
       - name: Type Check
         run: npm run lint
@@ -71,11 +90,22 @@ jobs:
         run: |
           if [ -f node_modules/@capacitor/android/package.json ]; then
             VERSION=$(node -p "require('./node_modules/@capacitor/android/package.json').version")
-            echo "CAPACITOR_ANDROID_VERSION=${VERSION}" > android/gradle.properties
-            echo "Wrote CAPACITOR_ANDROID_VERSION=${VERSION} to android/gradle.properties"
+            echo "Found local @capacitor/android version: ${VERSION}"
+            if [ -f android/gradle.properties ]; then
+              if grep -q '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties; then
+                sed -i "s/^CAPACITOR_ANDROID_VERSION=.*/CAPACITOR_ANDROID_VERSION=${VERSION}/" android/gradle.properties
+                echo "Replaced CAPACITOR_ANDROID_VERSION in android/gradle.properties"
+              else
+                printf "\nCAPACITOR_ANDROID_VERSION=%s\n" "${VERSION}" >> android/gradle.properties
+                echo "Appended CAPACITOR_ANDROID_VERSION to android/gradle.properties"
+              fi
+            else
+              printf "CAPACITOR_ANDROID_VERSION=%s\n" "${VERSION}" > android/gradle.properties
+              echo "Created android/gradle.properties (only CAPACITOR_ANDROID_VERSION) because file did not exist"
+            fi
           else
-            echo "# no capacitor android found" > android/gradle.properties
-            echo "No local capacitor android; gradle.properties created without version"
+            echo "ERROR: node_modules/@capacitor/android not found; cannot set CAPACITOR_ANDROID_VERSION. Run npm ci or ensure @capacitor/android is available." >&2
+            exit 1
           fi
 
       - name: Setup Gradle
