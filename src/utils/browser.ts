@@ -1,14 +1,12 @@
-import { Capacitor } from '@capacitor/core';
 import type { NavigateFunction } from 'react-router-dom';
 import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
-import { isAllowedRedirect, isSafeWebUrl } from '../config/browserPolicy';
+import { isSafeWebUrl } from '../config/browserPolicy';
 
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
-const NATIVE_BROWSER_TARGET = 'rpf_webview';
-const DEFAULT_WEB_TITLE = 'Web content';
+const DEFAULT_WEB_TITLE = 'RPF Web View';
 
-export function normalizeExternalWebUrl(url: string): string |null {
+export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
   if (!value || UNSAFE_URL_SCHEME.test(value) || !HTTP_URL.test(value) || !isSafeWebUrl(value)) return null;
   try {
@@ -29,19 +27,10 @@ export function isExternalWebUrl(url: string): boolean {
   return new URL(value, window.location.href).origin !== window.location.origin;
 }
 
-function attachBrowserGuards(browser: any): void {
-  browser?.addEventListener?.('loadstart', (event: any) => {
-    const nextUrl = String(event?.url || '');
-    if (nextUrl && !isAllowedRedirect(nextUrl)) {
-      console.warn('[WebView] Blocked unsafe redirect:', nextUrl);
-      try { browser.close?.(); } catch { /* native close may be unavailable */ }
-    }
-  });
-  browser?.addEventListener?.('loaderror', (event: any) => {
-    console.error('[WebView] Native page load error:', event?.message || event?.url || event);
-  });
-}
-
+/**
+ * Keep external web content inside the React application route so the RPF
+ * header and bottom navigation remain visible on native and web platforms.
+ */
 export async function openExternalLink(
   url: string,
   navigate?: NavigateFunction,
@@ -53,48 +42,12 @@ export async function openExternalLink(
     return;
   }
 
-  if (Capacitor.isNativePlatform()) {
-    const iab = (window as any).cordova?.InAppBrowser || (window as any).InAppBrowser;
-    if (!iab?.open) {
-      console.error('[WebView] Native InAppBrowser is unavailable; refusing external browser fallback.');
-      return;
-    }
-    try {
-      const browser = iab.open(
-        value,
-        NATIVE_BROWSER_TARGET,
-        [
-          'location=yes',
-          'toolbar=yes',
-          'hidenavigationbuttons=no',
-          'hideurlbar=yes',
-          'hardwareback=yes',
-          'zoom=yes',
-          'clearcache=no',
-          'clearsessioncache=no',
-          'mediaPlaybackRequiresUserAction=no',
-          'allowInlineMediaPlayback=yes',
-          'enableViewportScale=yes',
-          'useWideViewPort=yes',
-          'disallowoverscroll=no',
-          'hidden=no',
-          'footer=no',
-          'shouldPauseOnSuspend=no',
-        ].join(','),
-      );
-      attachBrowserGuards(browser);
-    } catch (error) {
-      console.error('[WebView] Native open failed; refusing external browser fallback:', error);
-    }
+  if (!navigate) {
+    console.warn('[WebView] App navigation unavailable:', value);
     return;
   }
 
-  if (navigate) {
-    navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title || DEFAULT_WEB_TITLE)}`);
-    return;
-  }
-
-  console.warn('[WebView] Web navigation unavailable; refusing external tab:', value);
+  navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title || DEFAULT_WEB_TITLE)}`);
 }
 
 export const openRPFBrowser = openExternalLink;
