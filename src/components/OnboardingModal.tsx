@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ShieldCheck, MapPin, Bell, ChevronRight, Check } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { LocalNotifications } from "@capacitor/local-notifications";
 
 interface OnboardingModalProps {
   onComplete: () => void;
@@ -11,16 +13,31 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
   const [requestingLoc, setRequestingLoc] = useState(false);
   const [requestingNotif, setRequestingNotif] = useState(false);
 
-  // Auto-detect existing browser permission state on mount
+  // Auto-detect existing browser/native permission state on mount
   useEffect(() => {
-    if (navigator.permissions && navigator.permissions.query) {
-      navigator.permissions.query({ name: "geolocation" as any }).then((res) => {
-        if (res.state === "granted") setLocGranted(true);
+    if (Capacitor.isNativePlatform()) {
+      LocalNotifications.checkPermissions().then((result) => {
+        if (result.display === "granted") setNotifGranted(true);
       }).catch(() => {});
+      
+      // Native geolocation permission status check is handled via Geolocation API natively, coarse/fine defaults.
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          () => setLocGranted(true),
+          () => setLocGranted(false),
+          { enableHighAccuracy: false, timeout: 2000 }
+        );
+      }
+    } else {
+      if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: "geolocation" as any }).then((res) => {
+          if (res.state === "granted") setLocGranted(true);
+        }).catch(() => {});
 
-      navigator.permissions.query({ name: "notifications" as any }).then((res) => {
-        if (res.state === "granted") setNotifGranted(true);
-      }).catch(() => {});
+        navigator.permissions.query({ name: "notifications" as any }).then((res) => {
+          if (res.state === "granted") setNotifGranted(true);
+        }).catch(() => {});
+      }
     }
   }, []);
 
@@ -32,30 +49,43 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
         setRequestingLoc(false);
       },
       () => {
-        // Fallback or deny
         setLocGranted(false);
         setRequestingLoc(false);
         alert("Location access was not granted. You can still proceed, but location-dependent services like automatic grievance tagging will be inactive.");
       },
-      { enableHighAccuracy: true, timeout: 5000 }
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
   const handleRequestNotifications = () => {
     setRequestingNotif(true);
-    if (!("Notification" in window)) {
-      alert("This browser does not support notifications.");
-      setRequestingNotif(false);
-      return;
-    }
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") {
-        setNotifGranted(true);
-      } else {
-        alert("Notification permission was denied. You will not receive real-time push alerts.");
+    if (Capacitor.isNativePlatform()) {
+      LocalNotifications.requestPermissions().then((result) => {
+        if (result.display === "granted") {
+          setNotifGranted(true);
+        } else {
+          alert("Notification permission was denied. You will not receive real-time push alerts.");
+        }
+        setRequestingNotif(false);
+      }).catch((err) => {
+        console.error("Native notification permission request failed:", err);
+        setRequestingNotif(false);
+      });
+    } else {
+      if (!("Notification" in window)) {
+        alert("This browser does not support notifications.");
+        setRequestingNotif(false);
+        return;
       }
-      setRequestingNotif(false);
-    });
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          setNotifGranted(true);
+        } else {
+          alert("Notification permission was denied. You will not receive real-time push alerts.");
+        }
+        setRequestingNotif(false);
+      });
+    }
   };
 
   const handleFinish = () => {

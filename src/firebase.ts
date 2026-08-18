@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 // Your web app's Firebase configuration
 // These values will be injected from your .env file
@@ -28,7 +30,13 @@ try {
 export const requestNotificationPermission = async () => {
   if (!messaging) return null;
   try {
-    const permission = await Notification.requestPermission();
+    let permission: string;
+    if (Capacitor.isNativePlatform()) {
+      const result = await LocalNotifications.requestPermissions();
+      permission = result.display === "granted" ? "granted" : "denied";
+    } else {
+      permission = await Notification.requestPermission();
+    }
     if (permission === 'granted') {
       // You must provide your VAPID key here later
       const token = await getToken(messaging, { 
