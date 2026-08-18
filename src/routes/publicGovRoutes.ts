@@ -273,22 +273,28 @@ router.get("/api/public/services/:id/content", async (req, res) => {
         { title: { en: "NDVSU Grievance Portal", hi: "NDVSU शिकायत पोर्टल" }, url: "https://ndvsu.org/grievance" }
       ];
 
-      if (!data) {
-        data = {
-          service_id: "animals",
-          content: {
-            en: {
-              body: "<h3>Animal Welfare Support</h3><p>Access official animal welfare portals, central/state dairy and animal husbandry schemes, breeding directories, and grievance resources below.</p>",
-              actionLabel: "Report Stray Emergency"
-            },
-            hi: {
-              body: "<h3>पशु कल्याण सहयोग</h3><p>आधिकारिक पशु कल्याण पोर्टल, केंद्र/राज्य डेयरी और पशुपालन योजनाएं, प्रजनन निर्देशिका और शिकायत निवारण संसाधनों तक नीचे पहुंचें।</p>",
-              actionLabel: "आवारा पशु आपातकाल दर्ज करें"
-            }
+      if (!data || !data.content || Object.keys(data.content).length === 0) {
+        const defaultContent = {
+          en: {
+            body: "<h3>Animal Welfare Support</h3><p>Access official animal welfare portals, central/state dairy and animal husbandry schemes, breeding directories, and grievance resources below.</p>",
+            actionLabel: "Report Stray Emergency"
           },
-          action_url: "/grievance",
-          updated_at: new Date().toISOString()
+          hi: {
+            body: "<h3>पशु कल्याण सहयोग</h3><p>आधिकारिक पशु कल्याण पोर्टल, केंद्र/राज्य डेयरी और पशुपालन योजनाएं, प्रजनन निर्देशिका और शिकायत निवारण संसाधनों तक नीचे पहुंचें।</p>",
+            actionLabel: "आवारा पशु आपातकाल दर्ज करें"
+          }
         };
+        if (!data) {
+          data = {
+            service_id: "animals",
+            content: defaultContent,
+            action_url: "/grievance",
+            updated_at: new Date().toISOString()
+          };
+        } else {
+          data.content = defaultContent;
+          if (!data.action_url) data.action_url = "/grievance";
+        }
       }
 
       data.resources = animalResources;
