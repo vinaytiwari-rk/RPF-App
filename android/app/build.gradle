@@ -18,11 +18,10 @@ dependencies {
     implementation project(':capacitor-cordova-android-plugins')
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.webkit:webkit:1.12.1'
-    // Explicitly add Capacitor core for annotation support
-    implementation 'com.getcapacitor:capacitor-android:+'
 }
 
-// Always package the same official RPF Foundation logo used by the web app as the Android launcher icon.
+// Single authoritative launcher-icon source: public/assets/logo.png.
+// Copy it into the Android resource tree before every Android build.
 tasks.register('prepareRpfLauncherIcon', Copy) {
     from(file("${rootProject.projectDir}/../public/assets/logo.png"))
     into(file("${projectDir}/src/main/res/drawable"))
