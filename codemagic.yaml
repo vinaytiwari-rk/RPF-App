@@ -1,0 +1,30 @@
+workflows:
+  rpf-android-apk:
+    name: Build RPF Android APK
+    max_build_duration: 60
+    environment:
+      node: v22.11.0
+      java: 21
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install --no-audit --no-fund
+      - name: Verify required Capacitor Android module
+        script: |
+          test -f node_modules/@capacitor/android/package.json
+          node -e "console.log('@capacitor/android@' + require('./node_modules/@capacitor/android/package.json').version)"
+      - name: Build web application
+        script: |
+          npm run build
+      - name: Sync Capacitor Android
+        script: |
+          npx cap sync android
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build debug APK
+        script: |
+          cd android
+          gradle :app:assembleDebug --no-daemon --stacktrace --warning-mode all
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
