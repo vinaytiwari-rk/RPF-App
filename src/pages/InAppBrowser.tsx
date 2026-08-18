@@ -1,41 +1,54 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
-import { openExternalLink, isExternalWebUrl, normalizeExternalWebUrl } from '../utils/browser';
+import React, { useEffect, useRef, useState } from 'react';
+import { isExternalWebUrl, normalizeExternalWebUrl } from '../utils/browser';
+import { useSearchParams } from 'react-router-dom';
 
-/**
- * Invisible navigation bridge for external web content.
- * Browser chrome stays hidden; navigation remains controlled by the app/native layer.
- */
+/** Web content rendered inside the RPF application shell. */
 export default function InAppBrowser() {
-  const navigate = useNavigate();
   const [params] = useSearchParams();
   const rawUrl = normalizeExternalWebUrl(params.get('url') || '') || '';
-  const title = params.get('title') || 'Web content';
+  const frameRef = useRef<HTMLIFrameElement>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!rawUrl || !isExternalWebUrl(rawUrl)) {
-      setError('Invalid or unsupported web URL.');
-      return;
-    }
+    if (!rawUrl || !isExternalWebUrl(rawUrl)) setError('Invalid or unsupported web URL.');
+    else setError('');
+  }, [rawUrl]);
 
-    if (Capacitor.isNativePlatform()) {
-      void openExternalLink(rawUrl, navigate, title).catch((err) => {
-        console.error('[WebView] Native open failed:', err);
-        setError('Website could not be opened.');
-      });
-      return;
-    }
+  useEffect(() => {
+    const goBack = () => {
+      try { frameRef.current?.contentWindow?.history.back(); } catch {}
+    };
+    const goForward = () => {
+      try { frameRef.current?.contentWindow?.history.forward(); } catch {}
+    };
+    const refresh = () => {
+      try { frameRef.current?.contentWindow?.location.reload(); } catch {}
+    };
+    window.addEventListener('rpf-browser-back', goBack);
+    window.addEventListener('rpf-browser-forward', goForward);
+    window.addEventListener('rpf-browser-refresh', refresh);
+    return () => {
+      window.removeEventListener('rpf-browser-back', goBack);
+      window.removeEventListener('rpf-browser-forward', goForward);
+      window.removeEventListener('rpf-browser-refresh', refresh);
+    };
+  }, []);
 
-    // Arbitrary third-party sites may forbid iframes. Keep web preview in the
-    // same tab instead of creating another browser tab/window.
-    window.location.assign(rawUrl);
-  }, [rawUrl, navigate, title]);
-
-  if (error) {
-    return <div className="min-h-screen bg-white" aria-label="Web content unavailable" />;
+  if (error || !rawUrl) {
+    return <div className="flex min-h-[60vh] items-center justify-center px-6 text-center text-sm font-medium text-slate-500">{error || 'Web page unavailable.'}</div>;
   }
 
-  return <div className="min-h-screen bg-white" aria-hidden="true" />;
+  return (
+    <div className="h-[calc(100dvh-9.25rem-env(safe-area-inset-bottom))] min-h-[420px] w-full bg-white">
+      <iframe
+        ref={frameRef}
+        title="RPF Web View"
+        src={rawUrl}
+        className="h-full w-full border-0 bg-white"
+        allow="autoplay; clipboard-read; clipboard-write; encrypted-media; fullscreen; geolocation; microphone; camera; picture-in-picture"
+        allowFullScreen
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+    </div>
+  );
 }
