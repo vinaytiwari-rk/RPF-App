@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
+        android:icon="@drawable/rpf_launcher_icon"
+        android:roundIcon="@drawable/rpf_launcher_icon"
         android:usesCleartextTraffic="false"
         tools:replace="android:usesCleartextTraffic"
         android:theme="@style/AppTheme"
