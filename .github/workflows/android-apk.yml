@@ -29,19 +29,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20.x'
           cache: npm
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '17'
           cache: gradle
 
       # Use the same dependency-install strategy as the passing web deployment.
       - name: Install Dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Type Check
         run: npm run lint
@@ -51,6 +51,17 @@ jobs:
 
       - name: Sync Capacitor Android
         run: npx cap sync android
+
+      - name: Verify Capacitor Android module
+        run: |
+          if [ -d "node_modules/@capacitor/android/capacitor" ]; then
+            echo "Capacitor Android module present"
+          else
+            echo "ERROR: Capacitor Android module not found under node_modules/@capacitor/android/capacitor"
+            echo "Contents of node_modules (top-level):"
+            ls -la node_modules || true
+            exit 1
+          fi
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
