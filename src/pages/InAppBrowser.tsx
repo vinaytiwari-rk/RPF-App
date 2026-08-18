@@ -5,14 +5,13 @@ import { openExternalLink, isExternalWebUrl, normalizeExternalWebUrl } from '../
 
 /**
  * Invisible navigation bridge for external web content.
- * User-facing browser chrome is intentionally hidden; navigation remains
- * controlled by the app/native layer and the device's normal back gesture.
+ * Browser chrome stays hidden; navigation remains controlled by the app/native layer.
  */
 export default function InAppBrowser() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const rawUrl = normalizeExternalWebUrl(params.get('url') || '') || '';
-  const title = params.get('title') || 'RPF WebView';
+  const title = params.get('title') || 'Web content';
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -23,19 +22,17 @@ export default function InAppBrowser() {
 
     if (Capacitor.isNativePlatform()) {
       void openExternalLink(rawUrl, navigate, title).catch((err) => {
-        console.error('[RPF WebView] Native open failed:', err);
+        console.error('[WebView] Native open failed:', err);
         setError('Website could not be opened.');
       });
       return;
     }
 
-    // Web browsers cannot reliably embed sites that forbid iframes.
-    // Open in the same tab; never create a second tab/window.
+    // Arbitrary third-party sites may forbid iframes. Keep web preview in the
+    // same tab instead of creating another browser tab/window.
     window.location.assign(rawUrl);
   }, [rawUrl, navigate, title]);
 
-  // Keep this route visually empty. No "RPF Browser" label, no Back/Forward,
-  // Refresh or Home toolbar, and no duplicate browser chrome is shown to users.
   if (error) {
     return <div className="min-h-screen bg-white" aria-label="Web content unavailable" />;
   }
