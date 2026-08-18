@@ -35,12 +35,44 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
   const value = normalizeExternalWebUrl(url);
   if (!value) { console.warn('[WebView] Blocked unsupported URL:', url); return; }
   const safeTitle = title || DEFAULT_WEB_TITLE;
-  if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
-    try { await NativeRPFBrowser.open({ url: value, title: safeTitle }); return; }
-    catch (error) { console.warn('[WebView] Native browser unavailable, using app shell:', error); }
+  
+  if (Capacitor.isNativePlatform()) {
+    if (Capacitor.getPlatform() === 'android') {
+      try {
+        await NativeRPFBrowser.open({ url: value, title: safeTitle });
+        return;
+      } catch (error) {
+        console.warn('[WebView] Native browser unavailable, falling back:', error);
+      }
+    }
+    
+    // Fallback for iOS or other native platforms: Capacitor Browser
+    try {
+      const { Browser } = await import('@capacitor/browser');
+      await Browser.open({ url: value });
+      return;
+    } catch (error) {
+      console.warn('[WebView] Capacitor Browser failed:', error);
+    }
   }
-  if (!navigate) { console.warn('[WebView] App navigation unavailable:', value); return; }
-  navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
+
+  // Web (Computer browser) fallback:
+  // Open in a new tab / window to prevent X-Frame-Options blockage and session hijacking.
+  const W = 1200;
+  const H = 800;
+  const left = Math.round((window.screen.availWidth - W) / 2);
+  const top = Math.round((window.screen.availHeight - H) / 2);
+  
+  const popup = window.open(
+    value, 
+    '_blank', 
+    `width=${W},height=${H},left=${left},top=${top},resizable=yes,scrollbars=yes`
+  );
+  if (popup) {
+    popup.focus();
+  } else {
+    window.open(value, '_blank');
+  }
 }
 
 export const openRPFBrowser = openExternalLink;
