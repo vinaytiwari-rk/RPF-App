@@ -19,7 +19,7 @@ workflows:
 
       - name: Build web application
         script: |
-          npm run build
+          npx vite build
 
       - name: Sync Capacitor Android
         script: |
