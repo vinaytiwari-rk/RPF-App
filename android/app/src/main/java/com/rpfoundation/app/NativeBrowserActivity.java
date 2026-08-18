@@ -3,6 +3,7 @@ package com.rpfoundation.app;
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -21,7 +22,6 @@ import java.util.Locale;
 public class NativeBrowserActivity extends AppCompatActivity {
     private WebView webView;
     private Button rotateButton;
-    private String initialUrl;
     private boolean youtubeLandscape = false;
 
     private boolean isYoutubeUrl(String url) {
@@ -46,11 +46,11 @@ public class NativeBrowserActivity extends AppCompatActivity {
         Window window = getWindow();
         window.setStatusBarColor(Color.WHITE);
         window.setNavigationBarColor(Color.WHITE);
-        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        int uiFlags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) uiFlags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        window.getDecorView().setSystemUiVisibility(uiFlags);
 
         String url = getIntent().getStringExtra("url");
-        String title = getIntent().getStringExtra("title");
-        initialUrl = url;
         if (url == null || !(url.startsWith("https://") || url.startsWith("http://"))) { finish(); return; }
 
         LinearLayout root = new LinearLayout(this);
@@ -58,9 +58,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         root.setBackgroundColor(Color.WHITE);
         root.setFitsSystemWindows(false);
         root.setOnApplyWindowInsetsListener((v, insets) -> {
-            WindowInsets bars = insets;
-            android.graphics.Insets system = bars.getInsets(WindowInsets.Type.systemBars());
-            v.setPadding(0, system.top, 0, system.bottom);
+            v.setPadding(0, insets.getSystemWindowInsetTop(), 0, insets.getSystemWindowInsetBottom());
             return insets;
         });
 
@@ -90,9 +88,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         webView.getSettings().setBuiltInZoomControls(false);
         webView.getSettings().setDisplayZoomControls(false);
         String ua = webView.getSettings().getUserAgentString();
-        if (!ua.toLowerCase(Locale.ROOT).contains("mobile")) {
-            webView.getSettings().setUserAgentString(ua + " Mobile");
-        }
+        if (!ua.toLowerCase(Locale.ROOT).contains("mobile")) webView.getSettings().setUserAgentString(ua + " Mobile");
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, String nextUrl) {
                 if (isYoutubeUrl(nextUrl) && !youtubeLandscape) setYoutubeOrientation(true);
@@ -128,7 +124,6 @@ public class NativeBrowserActivity extends AppCompatActivity {
         back.setOnClickListener(v -> { if (webView.canGoBack()) webView.goBack(); });
         forward.setOnClickListener(v -> { if (webView.canGoForward()) webView.goForward(); });
         rotateButton.setOnClickListener(v -> setYoutubeOrientation(!youtubeLandscape));
-
         if (isYoutubeUrl(url)) setYoutubeOrientation(true);
         webView.loadUrl(url);
     }
