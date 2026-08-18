@@ -14,7 +14,6 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
-import com.getcapacitor.annotation.PluginMethod;
 
 @CapacitorPlugin(name = "NativePermissions", permissions = {
     @Permission(alias = "location", strings = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION }),
@@ -27,18 +26,18 @@ import com.getcapacitor.annotation.PluginMethod;
     @Permission(alias = "notifications", strings = { Manifest.permission.POST_NOTIFICATIONS })
 })
 public class NativePermissionsPlugin extends Plugin {
-    @PluginMethod public void request(PluginCall call) {
+    public void request(PluginCall call) {
         String name = call.getString("permission");
         if (name == null || name.trim().isEmpty()) { call.reject("permission is required"); return; }
         if ((name.equals("notifications") || name.equals("images") || name.equals("audio")) && Build.VERSION.SDK_INT < 33) { JSObject r = new JSObject(); r.put("status", "granted"); call.resolve(r); return; }
         requestPermissionForAlias(name, call, "permissionCallback");
     }
-    @PluginMethod public void check(PluginCall call) {
+    public void check(PluginCall call) {
         String name = call.getString("permission"); JSObject r = new JSObject();
         if (name == null || name.trim().isEmpty()) { r.put("status", "unknown"); call.resolve(r); return; }
         PermissionState s = getPermissionState(name); r.put("status", s == PermissionState.GRANTED ? "granted" : (s == PermissionState.DENIED ? "denied" : "prompt")); call.resolve(r);
     }
-    @PluginMethod public void currentLocation(PluginCall call) {
+    public void currentLocation(PluginCall call) {
         if (getPermissionState("location") != PermissionState.GRANTED) { call.reject("Location permission not granted"); return; }
         LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
         if (lm == null) { call.reject("Location service unavailable"); return; }
