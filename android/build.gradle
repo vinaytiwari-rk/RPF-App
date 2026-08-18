@@ -8,14 +8,4 @@ allprojects {
         mavenCentral()
         gradlePluginPortal()
     }
-
-    // Ensure any requests for the Capacitor Android Maven artifact use the local project
-    configurations.all {
-        resolutionStrategy.dependencySubstitution {
-            substitute module('com.getcapacitor:capacitor-android') with project(':capacitor-android')
-        }
-    }
 }
-
-// ci-trigger: updated to kick GitHub Actions after dependency substitution fix
-// ci: rebuild trigger
