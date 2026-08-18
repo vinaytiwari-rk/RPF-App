@@ -8,8 +8,9 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowInsets;
+import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -34,13 +35,11 @@ public class NativeBrowserActivity extends AppCompatActivity {
 
     private void setYoutubeOrientation(boolean landscape) {
         youtubeLandscape = landscape;
-        setRequestedOrientation(landscape
-                ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(landscape ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         if (rotateButton != null) rotateButton.setText(landscape ? "↕" : "↔");
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "MissingSuperCall"})
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         Window window = getWindow();
@@ -56,11 +55,6 @@ public class NativeBrowserActivity extends AppCompatActivity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.WHITE);
-        root.setFitsSystemWindows(false);
-        root.setOnApplyWindowInsetsListener((v, insets) -> {
-            v.setPadding(0, insets.getSystemWindowInsetTop(), 0, insets.getSystemWindowInsetBottom());
-            return insets;
-        });
 
         LinearLayout top = new LinearLayout(this);
         top.setGravity(Gravity.CENTER_VERTICAL);
@@ -82,17 +76,39 @@ public class NativeBrowserActivity extends AppCompatActivity {
         webView.setBackgroundColor(Color.WHITE);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
+        webView.getSettings().setDatabaseEnabled(true);
+        webView.getSettings().setSupportMultipleWindows(false);
+        webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
         webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setLoadWithOverviewMode(false);
         webView.getSettings().setTextZoom(100);
         webView.getSettings().setBuiltInZoomControls(false);
         webView.getSettings().setDisplayZoomControls(false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            webView.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+        }
+        CookieManager cookies = CookieManager.getInstance();
+        cookies.setAcceptCookie(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) cookies.setAcceptThirdPartyCookies(webView, true);
+
         String ua = webView.getSettings().getUserAgentString();
         if (!ua.toLowerCase(Locale.ROOT).contains("mobile")) webView.getSettings().setUserAgentString(ua + " Mobile");
+
         webView.setWebViewClient(new WebViewClient() {
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String nextUrl = request.getUrl().toString();
+                if (nextUrl.startsWith("http://") || nextUrl.startsWith("https://")) {
+                    if (isYoutubeUrl(nextUrl) && !youtubeLandscape) setYoutubeOrientation(true);
+                    view.loadUrl(nextUrl);
+                }
+                return true;
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, String nextUrl) {
-                if (isYoutubeUrl(nextUrl) && !youtubeLandscape) setYoutubeOrientation(true);
-                return false;
+                if (nextUrl != null && (nextUrl.startsWith("http://") || nextUrl.startsWith("https://"))) {
+                    if (isYoutubeUrl(nextUrl) && !youtubeLandscape) setYoutubeOrientation(true);
+                    view.loadUrl(nextUrl);
+                }
+                return true;
             }
             @Override public void onPageStarted(WebView view, String nextUrl, android.graphics.Bitmap favicon) {
                 super.onPageStarted(view, nextUrl, favicon);
