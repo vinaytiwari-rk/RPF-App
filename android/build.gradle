@@ -1,3 +1,18 @@
 plugins {
     id 'com.android.application' version '8.9.1' apply false
 }
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    // Ensure any requests for the Capacitor Android Maven artifact use the local project
+    configurations.all {
+        resolutionStrategy.dependencySubstitution {
+            substitute module('com.getcapacitor:capacitor-android') with project(':capacitor-android')
+        }
+    }
+}
