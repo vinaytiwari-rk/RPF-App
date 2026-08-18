@@ -16,3 +16,5 @@ allprojects {
         }
     }
 }
+
+// ci-trigger: updated to kick GitHub Actions after dependency substitution fix
