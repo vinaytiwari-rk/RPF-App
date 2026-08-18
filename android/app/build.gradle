@@ -14,7 +14,18 @@ android {
 }
 
 dependencies {
-    implementation project(':capacitor-android')
+    // Prefer the local Capacitor Android project when available (from node_modules).
+    // If not present in the CI runner, fall back to a pinned published version provided
+    // via the CAPACITOR_ANDROID_VERSION gradle property (written by the workflow).
+    if (findProject(':capacitor-android') != null) {
+        implementation project(':capacitor-android')
+    } else if (project.hasProperty('CAPACITOR_ANDROID_VERSION')) {
+        implementation "com.getcapacitor:capacitor-android:${CAPACITOR_ANDROID_VERSION}"
+    } else {
+        // Last resort: attempt a dynamic resolution (not recommended but kept as fallback)
+        implementation 'com.getcapacitor:capacitor-android:+'
+    }
+
     implementation project(':capacitor-cordova-android-plugins')
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.webkit:webkit:1.12.1'
