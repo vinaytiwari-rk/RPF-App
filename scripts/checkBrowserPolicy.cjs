@@ -11,7 +11,7 @@ const registryEntries = (registry.match(/'[^']+':\s*\{\s*id:/g) || []).length;
 const checks = [
   ['HTTP(S) validation', includes(browser, 'HTTP_URL') && includes(browser, "parsed.protocol !== 'http:'")],
   ['unsafe scheme blocking', includes(browser, 'UNSAFE_URL_SCHEME') && hasAny(browser, ['javascript', 'data', 'file', 'blob', 'intent'])],
-  ['native browser target', includes(browser, 'NATIVE_BROWSER_TARGET') && includes(browser, 'rpf_browser')],
+  ['native webview target', includes(browser, 'NATIVE_BROWSER_TARGET') && includes(browser, 'rpf_webview')],
   ['session preservation', includes(browser, 'clearcache=no') && includes(browser, 'clearsessioncache=no')],
   ['external anchor interception', includes(browser, 'installExternalLinkInterceptor') && includes(browser, "document.addEventListener('click'")],
   ['reusable browser API', includes(browser, 'openRPFBrowser')],
