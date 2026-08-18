@@ -488,6 +488,36 @@ async function initDatabase() {
       )
     `, [], "service_content table creation");
 
+    await runQuery('ALTER TABLE service_content ADD COLUMN IF NOT EXISTS content JSONB;', [], "alter service_content add content column");
+
+    // Auto-seed default content for animals if not present
+    try {
+      const animalCheck = await pool.query("SELECT count(*) FROM service_content WHERE service_id = $1", ["animals"]);
+      if (parseInt(animalCheck.rows[0].count) === 0) {
+        await pool.query(
+          `INSERT INTO service_content (service_id, content, action_url, updated_at) 
+           VALUES ($1, $2::jsonb, $3, NOW())`,
+          [
+            "animals",
+            JSON.stringify({
+              en: {
+                body: "<h3>Animal Welfare Support</h3><p>Access official animal welfare portals, central/state dairy and animal husbandry schemes, breeding directories, and grievance resources below.</p>",
+                actionLabel: "Report Stray Emergency"
+              },
+              hi: {
+                body: "<h3>पशु कल्याण सहयोग</h3><p>आधिकारिक पशु कल्याण पोर्टल, केंद्र/राज्य डेयरी और पशुपालन योजनाएं, प्रजनन निर्देशिका और शिकायत निवारण संसाधनों तक नीचे पहुंचें।</p>",
+                actionLabel: "आवारा पशु आपातकाल दर्ज करें"
+              }
+            }),
+            "/grievance"
+          ]
+        );
+        console.log("Seeded default animal welfare service content successfully.");
+      }
+    } catch (e: any) {
+      console.warn("Failed to seed animal welfare service content:", e.message);
+    }
+
     await runQuery(`
       CREATE TABLE IF NOT EXISTS settings (
         id VARCHAR(255) PRIMARY KEY,
