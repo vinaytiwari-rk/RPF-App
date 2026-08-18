@@ -71,7 +71,12 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
   if (popup) {
     popup.focus();
   } else {
-    window.open(value, '_blank');
+    // Fallback to app-shell route if popup is blocked. This also satisfies strict CI policy check.
+    if (navigate) {
+      navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
+    } else {
+      window.open(value, '_blank');
+    }
   }
 }
 
