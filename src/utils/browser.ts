@@ -64,10 +64,10 @@ export async function openExternalLink(
         value,
         NATIVE_BROWSER_TARGET,
         [
-          'location=no',
-          'toolbar=no',
-          'hidenavigationbuttons=yes',
-          'hideurlbar=yes',
+          'location=yes',
+          'toolbar=yes',
+          'hidenavigationbuttons=no',
+          'hideurlbar=no',
           'hardwareback=yes',
           'zoom=yes',
           'clearcache=no',
@@ -78,7 +78,7 @@ export async function openExternalLink(
           'useWideViewPort=yes',
           'disallowoverscroll=no',
           'hidden=no',
-          'footer=no',
+          'footer=yes',
           'shouldPauseOnSuspend=no',
         ].join(','),
       );
