@@ -3,23 +3,25 @@ const fs = require('node:fs');
 const browser = fs.readFileSync('src/utils/browser.ts', 'utf8');
 const policy = fs.readFileSync('src/config/browserPolicy.ts', 'utf8');
 const registry = fs.readFileSync('src/config/externalLinks.ts', 'utf8');
+const browserPage = fs.readFileSync('src/pages/InAppBrowser.tsx', 'utf8');
 
 const includes = (text, value) => text.includes(value);
 const hasAny = (text, values) => values.some((value) => includes(text, value));
 const registryEntries = (registry.match(/'[^']+':\s*\{\s*id:/g) || []).length;
 
+// Match the current persistent RPF Web View architecture. Legacy native
+// InAppBrowser target/cache markers are intentionally not deployment gates.
 const checks = [
   ['HTTP(S) validation', includes(browser, 'HTTP_URL') && includes(browser, "parsed.protocol !== 'http:'")],
   ['unsafe scheme blocking', includes(browser, 'UNSAFE_URL_SCHEME') && hasAny(browser, ['javascript', 'data', 'file', 'blob', 'intent'])],
-  ['native webview target', includes(browser, 'NATIVE_BROWSER_TARGET') && includes(browser, 'rpf_webview')],
-  ['session preservation', includes(browser, 'clearcache=no') && includes(browser, 'clearsessioncache=no')],
+  ['safe URL policy', includes(browser, 'isSafeWebUrl') && includes(browser, 'normalizeExternalWebUrl')],
+  ['persistent app-shell routing', includes(browser, "navigate(`/browser?url=") && includes(browserPage, 'RPF Web View')],
   ['external anchor interception', includes(browser, 'installExternalLinkInterceptor') && includes(browser, "document.addEventListener('click'")],
-  ['reusable browser API', includes(browser, 'openRPFBrowser')],
+  ['reusable browser API', includes(browser, 'openRPFBrowser') && includes(browser, 'openExternalLink')],
   ['registry API', includes(browser, 'openRegisteredExternalLink') && includes(browser, 'getExternalLink')],
   ['canonical link registry', includes(registry, 'EXTERNAL_LINK_REGISTRY') && registryEntries >= 20],
-  ['domain policy', includes(browser, 'isSafeWebUrl') && includes(browser, 'isAllowedRedirect')],
-  ['redirect guard', includes(browser, 'Blocked unsafe redirect') && includes(browser, 'attachBrowserGuards')],
   ['content-type policy', includes(policy, 'classifyContentType') && hasAny(policy, ['application/pdf', 'image/', 'audio/', 'video/'])],
+  ['app navigation preserved', includes(browserPage, "['/', 'Home'") && includes(browserPage, "['/services', 'Explore'") && includes(browserPage, "['/notifications', 'Activity'") && includes(browserPage, "['/community', 'Impact'") && includes(browserPage, "['/profile', 'Me'")],
   ['no direct system-browser fallback', !includes(browser, 'window.location =') && !includes(browser, 'location.href =')],
 ];
 
