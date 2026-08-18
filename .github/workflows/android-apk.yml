@@ -5,13 +5,12 @@ on:
   push:
     branches: [main]
     paths:
+      # Native/package changes only. Normal web/UI/content deployments do not
+      # create a new APK, keeping the installed base APK stable.
       - 'android/**'
       - 'package.json'
       - 'package-lock.json'
       - 'capacitor.config.*'
-      - 'src/**'
-      - 'public/**'
-      - 'vite.config.*'
       - '.github/workflows/android-apk.yml'
 
 jobs:
@@ -34,6 +33,11 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
+
+      - name: Materialize Official RPF App Icon
+        run: |
+          mkdir -p android/app/src/main/res/drawable-nodpi
+          base64 -d android/app/src/main/assets/rpf-logo.webp.base64 > android/app/src/main/res/drawable-nodpi/rpf_launcher_icon.webp
 
       - name: Install Dependencies
         run: npm install --no-audit --no-fund
@@ -60,12 +64,12 @@ jobs:
         run: gradle :app:assembleDebug --no-daemon --stacktrace --warning-mode all
 
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk RPF-Foundation-debug.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk RPF-Seva-App-debug.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RPF-Foundation-Android-${{ github.sha }}
-          path: RPF-Foundation-debug.apk
+          name: RPF-Seva-App-Android-${{ github.sha }}
+          path: RPF-Seva-App-debug.apk
           if-no-files-found: error
           retention-days: 14
