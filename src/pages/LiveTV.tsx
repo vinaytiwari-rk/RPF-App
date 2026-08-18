@@ -1,7 +1,7 @@
 import React from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { Tv, Play, Search, Youtube } from "lucide-react";
+import { ArrowLeft, Play, Search, Tv, Youtube } from "lucide-react";
 import SortableList from "../components/SortableList";
 import { openExternalLink } from "../utils/browser";
 
@@ -39,13 +39,14 @@ export default function LiveTV() {
   const hi = lang === "hi";
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [active, setActive] = useState<Channel | null>(null);
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q ? CHANNELS.filter(c => c.name.toLowerCase().includes(q)) : CHANNELS;
   }, [search]);
 
   const renderChannel = (channel: Channel) => (
-    <button type="button" onClick={() => openExternalLink(channel.url, navigate)} className="w-full rounded-2xl border border-slate-100 bg-white p-3 text-left shadow-sm active:scale-[.99]">
+    <button type="button" onClick={() => channel.videoId ? setActive(channel) : openExternalLink(channel.url, navigate)} className="w-full rounded-2xl border border-slate-100 bg-white p-3 text-left shadow-sm active:scale-[.99]">
       <div className="flex items-center gap-3">
         {channel.videoId ? <img loading="lazy" src={`https://i.ytimg.com/vi/${channel.videoId}/mqdefault.jpg`} alt="" className="h-16 w-24 shrink-0 rounded-xl object-cover bg-slate-100" /> : <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600"><Youtube className="h-7 w-7" /></div>}
         <div className="min-w-0 flex-1"><p className="text-sm font-black text-slate-800">{channel.name}</p><p className="mt-1 text-[11px] font-medium text-slate-500">{channel.category === "Channel" ? "YouTube channel" : "YouTube Live"}</p></div>
@@ -54,13 +55,23 @@ export default function LiveTV() {
     </button>
   );
 
-  return (
-    <div className="min-h-full bg-slate-50 pb-10">
-      <div className="mx-auto max-w-3xl space-y-4 px-3.5 py-5 sm:px-6">
-        <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-600"><Tv className="h-6 w-6" /></div><div><h1 className="text-lg font-black text-[#000080]">{hi ? "लाइव टीवी" : "Live TV"}</h1><p className="text-[11px] font-medium text-slate-500">{hi ? "आपके दिए YouTube Live channels" : "Your selected YouTube Live channels"}</p></div></div>
-        <div className="relative"><Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder={hi ? "चैनल खोजें..." : "Search channels..."} className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none" /></div>
-        <SortableList items={filtered} storageKey="youtube-live-channels" renderItem={renderChannel} className="space-y-2" />
+  if (active?.videoId) {
+    return <div className="min-h-full bg-black">
+      <div className="sticky top-0 z-20 flex items-center gap-2 bg-black/85 px-3 py-2 text-white backdrop-blur-sm">
+        <button type="button" onClick={() => setActive(null)} aria-label="Back" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white active:scale-95"><ArrowLeft className="h-5 w-5" /></button>
+        <p className="truncate text-sm font-bold">{active.name}</p>
       </div>
+      <div className="aspect-video w-full bg-black">
+        <iframe className="h-full w-full border-0" src={`https://www.youtube-nocookie.com/embed/${active.videoId}?autoplay=1&playsinline=1&rel=0`} title={active.name} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+      </div>
+    </div>;
+  }
+
+  return <div className="min-h-full bg-slate-50 pb-10">
+    <div className="mx-auto max-w-3xl space-y-4 px-3.5 py-5 sm:px-6">
+      <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-600"><Tv className="h-6 w-6" /></div><div><h1 className="text-lg font-black text-[#000080]">{hi ? "लाइव टीवी" : "Live TV"}</h1><p className="text-[11px] font-medium text-slate-500">{hi ? "आपके दिए YouTube Live channels" : "Your selected YouTube Live channels"}</p></div></div>
+      <div className="relative"><Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder={hi ? "चैनल खोजें..." : "Search channels..."} className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none" /></div>
+      <SortableList items={filtered} storageKey="youtube-live-channels" renderItem={renderChannel} className="space-y-2" />
     </div>
-  );
+  </div>;
 }
