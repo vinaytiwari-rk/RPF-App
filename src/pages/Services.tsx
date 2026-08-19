@@ -44,7 +44,7 @@ export default function Services() {
   }, [servicesList]);
 
   const filtered = useMemo(() => allServices.filter((s: any) => {
-    if (!s || REMOVED_SERVICE_IDS.includes(s.id)) return false;
+    if (!s || REMOVED_SERVICE_IDS.includes(s.id) || s.enabled === false || s.hidden === true || s.active === false) return false;
     const matchesCat = category === "all" ||
       (category === "health" && HEALTH_SERVICES.includes(s.id)) ||
       (category === "education" && EDUCATION_SERVICES.includes(s.id)) ||
@@ -86,7 +86,8 @@ export default function Services() {
   };
 
   const renderService = (svc: any, idx: number) => {
-    const target = routeFor(svc.id);
+    const configuredTarget = typeof svc.url === "string" && svc.url.trim() ? svc.url.trim() : (typeof svc.link === "string" && svc.link.trim() ? svc.link.trim() : (typeof svc.route === "string" && svc.route.trim() ? svc.route.trim() : ""));
+    const target = configuredTarget || routeFor(svc.id);
     const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;
     const gradients = ["bg-blue-50 text-blue-600", "bg-orange-50 text-orange-600", "bg-green-50 text-green-600", "bg-purple-50 text-purple-600", "bg-rose-50 text-rose-600", "bg-indigo-50 text-indigo-600"];
     return (
