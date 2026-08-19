@@ -2,28 +2,37 @@ package com.rpfoundation.app;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.net.Uri;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class NativeBrowserActivity extends AppCompatActivity {
     private WebView webView;
     private View customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
-    private LinearLayout root;
+    private FrameLayout contentFrame;
+    private ProgressBar progressBar;
+    private LinearLayout errorView;
+    private boolean mainFrameError = false;
 
     private boolean isHttpUrl(String value) {
         return value != null && (value.startsWith("https://") || value.startsWith("http://"));
@@ -45,8 +54,32 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private boolean loadInApp(String value) {
         String target = resolveInAppUrl(value);
         if (target == null || webView == null) return false;
+        mainFrameError = false;
+        hideError();
+        showLoading();
         webView.loadUrl(target);
         return true;
+    }
+
+    private void showLoading() {
+        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
+        if (progressBar != null) progressBar.setVisibility(View.GONE);
+    }
+
+    private void hideError() {
+        if (errorView != null) errorView.setVisibility(View.GONE);
+    }
+
+    private void showError(String message) {
+        hideLoading();
+        if (errorView != null) {
+            TextView detail = errorView.findViewWithTag("detail");
+            if (detail != null) detail.setText(message);
+            errorView.setVisibility(View.VISIBLE);
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -58,9 +91,8 @@ public class NativeBrowserActivity extends AppCompatActivity {
         String url = getIntent().getStringExtra("url");
         if (!isHttpUrl(url)) { finish(); return; }
 
-        root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.WHITE);
+        contentFrame = new FrameLayout(this);
+        contentFrame.setBackgroundColor(Color.WHITE);
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
 
@@ -86,25 +118,15 @@ public class NativeBrowserActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
             private boolean handleUrl(String next) {
                 if (next == null) return false;
-                if (next.toLowerCase().contains("therpfoundation.org")) {
-                    NativeBrowserActivity.this.finish();
-                    return true;
-                }
-                if (isHttpUrl(next)) {
-                    return false;
-                }
-                if (loadInApp(next)) {
-                    return true;
-                }
+                if (isHttpUrl(next)) return false;
+                if (loadInApp(next)) return true;
                 try {
                     Intent intent = Intent.parseUri(next, Intent.URI_INTENT_SCHEME);
-                    if (intent != null) {
-                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                        intent.setComponent(null);
-                        if (getPackageManager().resolveActivity(intent, 0) != null) {
-                            startActivity(intent);
-                            return true;
-                        }
+                    intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                    intent.setComponent(null);
+                    if (getPackageManager().resolveActivity(intent, 0) != null) {
+                        startActivity(intent);
+                        return true;
                     }
                 } catch (Exception ignored) { }
                 try {
@@ -114,12 +136,35 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 } catch (Exception ignored) { }
                 return true;
             }
+
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String next = request != null && request.getUrl() != null ? request.getUrl().toString() : null;
                 return handleUrl(next);
             }
+
             @Override public boolean shouldOverrideUrlLoading(WebView view, String next) {
                 return handleUrl(next);
+            }
+
+            @Override public void onPageStarted(WebView view, String next, android.graphics.Bitmap favicon) {
+                mainFrameError = false;
+                hideError();
+                showLoading();
+                super.onPageStarted(view, next, favicon);
+            }
+
+            @Override public void onPageFinished(WebView view, String next) {
+                if (!mainFrameError) hideLoading();
+                super.onPageFinished(view, next);
+            }
+
+            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request != null && request.isForMainFrame()) {
+                    mainFrameError = true;
+                    String detail = error != null && error.getDescription() != null ? error.getDescription().toString() : "The page could not be loaded.";
+                    showError(detail);
+                }
+                super.onReceivedError(view, request, error);
             }
         });
 
@@ -152,21 +197,54 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 customView = view;
                 customViewCallback = callback;
                 webView.setVisibility(View.GONE);
-                root.addView(customView, new LinearLayout.LayoutParams(-1, -1));
+                contentFrame.addView(customView, new FrameLayout.LayoutParams(-1, -1));
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
             }
             @Override public void onHideCustomView() { hideCustomView(); }
         });
 
-        root.addView(webView, new LinearLayout.LayoutParams(-1, 0, 1));
-        setContentView(root);
-        webView.loadUrl(url);
+        contentFrame.addView(webView, new FrameLayout.LayoutParams(-1, -1));
+        progressBar = new ProgressBar(this);
+        FrameLayout.LayoutParams progressParams = new FrameLayout.LayoutParams(-2, -2, Gravity.CENTER);
+        contentFrame.addView(progressBar, progressParams);
+
+        errorView = new LinearLayout(this);
+        errorView.setOrientation(LinearLayout.VERTICAL);
+        errorView.setGravity(Gravity.CENTER);
+        errorView.setPadding(48, 48, 48, 48);
+        errorView.setBackgroundColor(Color.WHITE);
+        TextView title = new TextView(this);
+        title.setText("Page could not be loaded");
+        title.setTextSize(18);
+        title.setTextColor(Color.rgb(20, 30, 50));
+        title.setGravity(Gravity.CENTER);
+        errorView.addView(title, new LinearLayout.LayoutParams(-1, -2));
+        TextView detail = new TextView(this);
+        detail.setTag("detail");
+        detail.setTextSize(13);
+        detail.setTextColor(Color.rgb(100, 110, 125));
+        detail.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams detailParams = new LinearLayout.LayoutParams(-1, -2);
+        detailParams.topMargin = 16;
+        errorView.addView(detail, detailParams);
+        Button retry = new Button(this);
+        retry.setText("Retry");
+        retry.setOnClickListener(v -> webView.reload());
+        LinearLayout.LayoutParams retryParams = new LinearLayout.LayoutParams(-2, -2);
+        retryParams.topMargin = 24;
+        retryParams.gravity = Gravity.CENTER_HORIZONTAL;
+        errorView.addView(retry, retryParams);
+        errorView.setVisibility(View.GONE);
+        contentFrame.addView(errorView, new FrameLayout.LayoutParams(-1, -1));
+
+        setContentView(contentFrame);
+        loadInApp(url);
     }
 
     private void hideCustomView() {
         if (customView == null) return;
-        root.removeView(customView);
+        contentFrame.removeView(customView);
         customView = null;
         if (customViewCallback != null) customViewCallback.onCustomViewHidden();
         customViewCallback = null;
