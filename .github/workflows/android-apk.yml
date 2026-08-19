@@ -77,6 +77,8 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
+          ./gradlew --version > version_log.txt 2>&1 || true
+          cat version_log.txt >> $GITHUB_STEP_SUMMARY
           ./gradlew --version
 
       - name: Build Debug APK
