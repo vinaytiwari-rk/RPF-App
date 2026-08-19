@@ -83,12 +83,19 @@ public class NativeBrowserActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) cookies.setAcceptThirdPartyCookies(webView, true);
 
         webView.setWebViewClient(new WebViewClient() {
-            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                String next = request != null && request.getUrl() != null ? request.getUrl().toString() : null;
+            private boolean handleUrl(String next) {
+                if (next != null && next.toLowerCase().contains("therpfoundation.org")) {
+                    NativeBrowserActivity.this.finish();
+                    return true;
+                }
                 return loadInApp(next) || !isHttpUrl(next);
             }
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String next = request != null && request.getUrl() != null ? request.getUrl().toString() : null;
+                return handleUrl(next);
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, String next) {
-                return loadInApp(next) || !isHttpUrl(next);
+                return handleUrl(next);
             }
         });
 
