@@ -56,7 +56,7 @@ jobs:
       - name: Sync Capacitor Android
         run: npx cap sync android
 
-      - name: CI: Write CAPACITOR_ANDROID_VERSION safely
+      - name: "CI: Write CAPACITOR_ANDROID_VERSION safely"
         run: |
           if [ ! -f node_modules/@capacitor/android/package.json ]; then
             echo "ERROR: @capacitor/android is missing" >&2
