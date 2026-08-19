@@ -28,7 +28,8 @@ export function isExternalWebUrl(url: string): boolean {
   if (typeof window === 'undefined') return true;
   try {
     const parsed = new URL(value, window.location.href);
-    if (parsed.hostname === 'appapi.therpfoundation.org') return false;
+    const host = parsed.hostname.toLowerCase();
+    if (host === 'therpfoundation.org' || host.endsWith('.therpfoundation.org')) return false;
   } catch {}
   return new URL(value, window.location.href).origin !== window.location.origin;
 }
@@ -39,7 +40,8 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
   if (!value) { console.warn('[WebView] Blocked unsupported URL:', url); return; }
   const safeTitle = title || DEFAULT_WEB_TITLE;
 
-  if (value.includes('appapi.therpfoundation.org')) {
+  const lowercaseUrl = value.toLowerCase();
+  if (lowercaseUrl.includes('therpfoundation.org')) {
     try {
       const urlObj = new URL(value);
       if (!urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
@@ -99,7 +101,7 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
     const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null;
     if (!anchor) return;
 
-    if (anchor.href.includes('appapi.therpfoundation.org')) {
+    if (anchor.href.toLowerCase().includes('therpfoundation.org')) {
       try {
         const urlObj = new URL(anchor.href);
         const navigateFn = getNavigate();
