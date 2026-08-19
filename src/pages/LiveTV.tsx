@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { ArrowLeft, Play, Search, Tv } from "lucide-react";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
 
-type CmsResponse = { cms?: { liveTvChannels?: LiveTvChannel[] } };
+type CmsResponse = { cms?: { liveTvChannels?: unknown } };
 const normalize = (value: unknown): LiveTvChannel[] => Array.isArray(value) ? value.filter((x: any) => x?.id && x?.name && x?.url).map((x: any, i) => ({ ...x, enabled: x.enabled !== false, order: Number.isFinite(x.order) ? x.order : i })).sort((a,b) => (a.order ?? 0) - (b.order ?? 0)) : [];
 
 export default function LiveTV() {
@@ -13,7 +13,7 @@ export default function LiveTV() {
   const [channels, setChannels] = useState<LiveTvChannel[]>(LIVE_TV_DEFAULTS);
   const [active, setActive] = useState<LiveTvChannel | null>(null);
   const [serverControlled, setServerControlled] = useState(false);
-  useEffect(() => { let cancelled = false; fetch("/api/cms", { cache: "no-store" }).then(r => r.ok ? r.json() as Promise<CmsResponse> : null).then(data => { const remote = normalize(data?.cms?.liveTvChannels); if (!cancelled && remote.length) { setChannels(remote); setServerControlled(true); } }).catch(() => undefined); return () => { cancelled = true; }; }, []);
+  useEffect(() => { let cancelled = false; fetch("/api/cms", { cache: "no-store" }).then(r => r.ok ? r.json() as Promise<CmsResponse> : null).then(data => { const configured = data?.cms?.liveTvChannels; if (!cancelled && Array.isArray(configured)) { setChannels(normalize(configured)); setServerControlled(true); } }).catch(() => undefined); return () => { cancelled = true; }; }, []);
   const visible = useMemo(() => channels.filter(c => c.enabled !== false), [channels]);
   const filtered = useMemo(() => { const q = search.trim().toLowerCase(); return q ? visible.filter(c => `${c.name} ${c.category}`.toLowerCase().includes(q)) : visible; }, [search, visible]);
   const videoId = active?.videoId || active?.url.match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|watch\?v=))([^?&/]+)/)?.[1];
