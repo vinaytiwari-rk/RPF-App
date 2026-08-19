@@ -45,5 +45,11 @@ jobs:
 
       - name: Deploy Live Update to Capgo
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          CAPGO_TOKEN: ${{ secrets.CAPGO_TOKEN }}
         run: |
-          npx @capgo/cli@latest bundle upload com.rpfoundation.app --apikey ${{ secrets.CAPGO_TOKEN }} --channel production --path ./dist --auto-bump patch
+          if [ -z "$CAPGO_TOKEN" ]; then
+            echo "WARNING: CAPGO_TOKEN is not set. Skipping Capgo deploy."
+          else
+            npx @capgo/cli@latest bundle upload com.rpfoundation.app --channel production --path ./dist --auto-bump patch
+          fi
