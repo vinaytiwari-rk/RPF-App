@@ -2,12 +2,11 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.rpfoundation.app',
-  appName: 'RPFoundation',
+  appName: 'RPF Seva App',
+  // Keep a complete local build inside the APK so the app can always launch.
+  // Regular web/content updates are deployed separately; native-only changes
+  // still require a new APK.
   webDir: 'dist',
-  server: {
-    url: 'https://appapi.therpfoundation.org',
-    cleartext: true
-  },
   ios: {
     contentInset: 'automatic',
     backgroundColor: '#f8fafc'

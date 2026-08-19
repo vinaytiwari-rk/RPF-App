@@ -1,20 +1,7 @@
-/**
- * Platform-neutral capability adapter contracts.
- *
- * Feature code depends on these contracts, never on browser/Capacitor APIs.
- * Native adapters can replace the web adapter without changing feature code.
- */
+/** Platform-neutral capability adapters. */
 import { getPlatform, type RPFPlatform } from "./platform";
-import {
-  getDeviceCapabilities,
-  getCurrentPosition,
-  requestCameraStream,
-  shareContent,
-  vibrate,
-  stopMediaStream,
-  type DeviceCapabilities,
-} from "./deviceCapabilities";
-import { getPermissionStatus, requestNotificationPermission, type PermissionName, type PermissionStatus } from "./permissions";
+import { getDeviceCapabilities, getCurrentPosition, requestCameraStream, shareContent, vibrate, stopMediaStream, type DeviceCapabilities } from "./deviceCapabilities";
+import { getNativeCurrentLocation, getPermissionStatus, requestNotificationPermission, type PermissionName, type PermissionStatus } from "./permissions";
 
 export type CapabilityAdapter = {
   platform: RPFPlatform;
@@ -28,23 +15,31 @@ export type CapabilityAdapter = {
   stopMediaStream(stream?: MediaStream | null): void;
 };
 
-/** WebView/browser adapter. Capacitor native adapters can implement the same contract later. */
+async function currentPosition(options?: PositionOptions): Promise<GeolocationPosition> {
+  const native = await getNativeCurrentLocation();
+  if (native) {
+    const coords: GeolocationCoordinates = {
+      latitude: native.latitude, longitude: native.longitude, accuracy: native.accuracy,
+      altitude: null, altitudeAccuracy: null, heading: null, speed: null,
+      toJSON: () => ({ latitude: native.latitude, longitude: native.longitude, accuracy: native.accuracy, altitude: null, altitudeAccuracy: null, heading: null, speed: null })
+    };
+    return { coords, timestamp: native.timestamp, toJSON: () => ({ coords: coords.toJSON(), timestamp: native.timestamp }) } as GeolocationPosition;
+  }
+  return getCurrentPosition(options);
+}
+
 export const webCapabilityAdapter: CapabilityAdapter = {
   platform: "web",
   detect: getDeviceCapabilities,
   permission: getPermissionStatus,
   requestNotificationPermission,
-  currentPosition: getCurrentPosition,
+  currentPosition,
   cameraStream: requestCameraStream,
   share: shareContent,
   vibrate,
   stopMediaStream,
 };
 
-/** Central capability entry point used by feature modules. */
 export function getCapabilityAdapter(): CapabilityAdapter {
-  // Keep platform selection centralized. Native adapters are intentionally injectable
-  // rather than imported into pages, preserving the Phase 1 boundary.
-  const platform = getPlatform();
-  return { ...webCapabilityAdapter, platform };
+  return { ...webCapabilityAdapter, platform: getPlatform() };
 }

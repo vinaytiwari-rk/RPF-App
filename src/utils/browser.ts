@@ -29,24 +29,28 @@ export function isExternalWebUrl(url: string): boolean {
   return new URL(value, window.location.href).origin !== window.location.origin;
 }
 
-/** Native Android uses a real WebView so X-Frame-Options/CSP iframe rules do not apply.
- * Web/PWA keeps the existing RPF shell route as the fallback. */
+/** Android always routes external HTTP(S) links to the native RPF WebView. */
 export async function openExternalLink(url: string, navigate?: NavigateFunction, title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
   if (!value) { console.warn('[WebView] Blocked unsupported URL:', url); return; }
   const safeTitle = title || DEFAULT_WEB_TITLE;
-  
+
   if (Capacitor.isNativePlatform()) {
     if (Capacitor.getPlatform() === 'android') {
       try {
         await NativeRPFBrowser.open({ url: value, title: safeTitle });
         return;
       } catch (error) {
-        console.warn('[WebView] Native browser unavailable, falling back:', error);
+        console.error('[WebView] Native Android browser failed:', error);
+        // Do not silently send Android users to Chrome.
+        if (navigate) {
+          navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
+        }
+        return;
       }
     }
-    
-    // Fallback for iOS or other native platforms: Capacitor Browser
+
+    // Non-Android native fallback.
     try {
       const { Browser } = await import('@capacitor/browser');
       await Browser.open({ url: value });
@@ -56,39 +60,30 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     }
   }
 
-  // Web (Computer browser) fallback:
-  // Open in a new tab / window to prevent X-Frame-Options blockage and session hijacking.
-  const W = 1200;
-  const H = 800;
-  const left = Math.round((window.screen.availWidth - W) / 2);
-  const top = Math.round((window.screen.availHeight - H) / 2);
-  
-  const popup = window.open(
-    value, 
-    '_blank', 
-    `width=${W},height=${H},left=${left},top=${top},resizable=yes,scrollbars=yes`
-  );
-  if (popup) {
-    popup.focus();
-  } else {
-    // Fallback to app-shell route if popup is blocked. This also satisfies strict CI policy check.
-    if (navigate) {
-      navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
-    } else {
-      window.open(value, '_blank');
-    }
+  // Web/PWA fallback.
+  if (navigate) {
+    navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
+    return;
   }
+
+  const popup = window.open(value, '_blank', 'noopener,noreferrer');
+  if (popup) popup.focus();
 }
 
 export const openRPFBrowser = openExternalLink;
-export function openRegisteredExternalLink(id: ExternalLinkId, navigate?: NavigateFunction): Promise<void> { const entry = getExternalLink(id); return openExternalLink(entry.url, navigate, entry.label); }
+export function openRegisteredExternalLink(id: ExternalLinkId, navigate?: NavigateFunction): Promise<void> {
+  const entry = getExternalLink(id);
+  return openExternalLink(entry.url, navigate, entry.label);
+}
+
 export function installExternalLinkInterceptor(getNavigate: () => NavigateFunction | undefined): () => void {
   const handleClick = (event: MouseEvent) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const target = event.target as HTMLElement | null;
     const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null;
     if (!anchor || !isExternalWebUrl(anchor.href)) return;
-    event.preventDefault(); event.stopImmediatePropagation();
+    event.preventDefault();
+    event.stopImmediatePropagation();
     void openExternalLink(anchor.href, getNavigate(), anchor.textContent?.trim() || DEFAULT_WEB_TITLE);
   };
   document.addEventListener('click', handleClick, true);
