@@ -1,22 +1,10 @@
 import React from "react";
-import { useOutletContext } from "react-router-dom";
-import Donations from "../components/Donations";
-import { useAuth } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
 
+/**
+ * Legacy compatibility redirect.
+ * Donations is no longer an active page; old /donations links return to home.
+ */
 export default function DonationsPage() {
-  const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
-  const { updateUser } = useAuth();
-
-  const handleDonationComplete = (amount: number) => {
-    updateUser({ isDonor: true });
-  };
-
-  return (
-    <div className="p-4 pb-24">
-      <Donations 
-        lang={lang}
-        onDonationComplete={handleDonationComplete}
-      />
-    </div>
-  );
+  return <Navigate to="/" replace />;
 }
