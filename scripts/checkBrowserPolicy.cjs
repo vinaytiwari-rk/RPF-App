@@ -8,10 +8,18 @@ const browserPage = fs.readFileSync('src/pages/InAppBrowser.tsx', 'utf8');
 const includes = (text, value) => text.includes(value);
 const hasAny = (text, values) => values.some((value) => includes(text, value));
 const registryEntries = (registry.match(/'[^']+':\s*\{\s*id:/g) || []).length;
-const hasNavItem = (path, label) => browserPage.includes(`'${path}'`) && browserPage.includes(`'${label}'`);
 
-// Match the current persistent RPF Web View architecture. Legacy native
-// InAppBrowser target/cache markers are intentionally not deployment gates.
+// Navigation must remain available through the app shell/browser API. The RPF
+// Web View intentionally hides duplicate app bottom navigation until the user
+// taps for browser controls, so visible Home/Explore/etc. labels are not a CI
+// requirement.
+const appNavigationPreserved =
+  includes(browser, 'openExternalLink') &&
+  includes(browser, 'navigate(`/browser?url=') &&
+  includes(browserPage, 'useSearchParams') &&
+  includes(browserPage, 'frameHistory') &&
+  includes(browserPage, "setControls(v=>!v)");
+
 const checks = [
   ['HTTP(S) validation', includes(browser, 'HTTP_URL') && includes(browser, "parsed.protocol !== 'http:'")],
   ['unsafe scheme blocking', includes(browser, 'UNSAFE_URL_SCHEME') && hasAny(browser, ['javascript', 'data', 'file', 'blob', 'intent'])],
@@ -22,7 +30,7 @@ const checks = [
   ['registry API', includes(browser, 'openRegisteredExternalLink') && includes(browser, 'getExternalLink')],
   ['canonical link registry', includes(registry, 'EXTERNAL_LINK_REGISTRY') && registryEntries >= 20],
   ['content-type policy', includes(policy, 'classifyContentType') && hasAny(policy, ['application/pdf', 'image/', 'audio/', 'video/'])],
-  ['app navigation preserved', hasNavItem('/', 'Home') && hasNavItem('/services', 'Explore') && hasNavItem('/notifications', 'Activity') && hasNavItem('/community', 'Impact') && hasNavItem('/profile', 'Me')],
+  ['app navigation preserved', appNavigationPreserved],
   ['no direct system-browser fallback', !includes(browser, 'window.location =') && !includes(browser, 'location.href =')],
 ];
 
