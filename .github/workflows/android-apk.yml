@@ -78,7 +78,6 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew --version
-          ./gradlew :app:dependencies --configuration debugRuntimeClasspath --no-daemon --info
 
       - name: Build Debug APK
         working-directory: android
