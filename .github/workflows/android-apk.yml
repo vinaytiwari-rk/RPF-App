@@ -77,13 +77,6 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
-          echo "=== SYSTEM DIAGNOSTICS ===" > version_log.txt
-          echo "Java Path: $(which java)" >> version_log.txt
-          echo "JAVA_HOME: $JAVA_HOME" >> version_log.txt
-          java -version >> version_log.txt 2>&1 || true
-          echo "=== GRADLEW EXECUTION ===" >> version_log.txt
-          ./gradlew --version >> version_log.txt 2>&1 || true
-          cat version_log.txt >> $GITHUB_STEP_SUMMARY
           ./gradlew --version
 
       - name: Build Debug APK
@@ -91,13 +84,6 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon --stacktrace --warning-mode all
-
-      - name: Upload Diagnostics Log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: diagnostics-log
-          path: android/version_log.txt
 
       - name: Rename APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk RPF-Seva-App-debug.apk
