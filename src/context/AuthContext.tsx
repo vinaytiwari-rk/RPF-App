@@ -53,9 +53,46 @@ const LANG_KEY = "@rpf_lang";
 const API_BASE = Capacitor.isNativePlatform() ? "https://appapi.therpfoundation.org" : "";
 const apiUrl = (path: string) => `${API_BASE}${path}`;
 
+const setPersistentItem = async (key: string, value: string) => {
+  localStorage.setItem(key, value);
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const { Preferences } = await import('@capacitor/preferences');
+      await Preferences.set({ key, value });
+    } catch (e) {
+      console.error("Preferences write failed:", e);
+    }
+  }
+};
+
+const getPersistentItem = async (key: string): Promise<string | null> => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const { Preferences } = await import('@capacitor/preferences');
+      const { value } = await Preferences.get({ key });
+      if (value !== null) return value;
+    } catch (e) {
+      console.error("Preferences read failed:", e);
+    }
+  }
+  return localStorage.getItem(key);
+};
+
+const removePersistentItem = async (key: string) => {
+  localStorage.removeItem(key);
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const { Preferences } = await import('@capacitor/preferences');
+      await Preferences.remove({ key });
+    } catch (e) {
+      console.error("Preferences remove failed:", e);
+    }
+  }
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem("@rpf_token"));
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem("@rpf_token"));
   const [language, setLanguageState] = useState<"en" | "hi">("en");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -64,19 +101,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadLanguage();
   }, []);
 
-  const clearSession = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem("@rpf_token");
+  const clearSession = useCallback(async () => {
+    await removePersistentItem(STORAGE_KEY);
+    await removePersistentItem("@rpf_token");
     setToken(null);
     setUser(null);
-  };
+  }, []);
 
   const loadUser = async () => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const storedToken = localStorage.getItem("@rpf_token");
+      const stored = await getPersistentItem(STORAGE_KEY);
+      const storedToken = await getPersistentItem("@rpf_token");
       if (!stored || !storedToken) {
-        clearSession();
+        await clearSession();
         return;
       }
 
@@ -112,19 +149,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               isDonor: fresh.isDonor ?? parsed.isDonor,
               volunteerData: fresh.volunteerData ?? parsed.volunteerData,
             };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+            await setPersistentItem(STORAGE_KEY, JSON.stringify(merged));
             setUser(merged);
           } else {
-            clearSession();
+            await clearSession();
           }
         } else if (res.status === 401 || res.status === 403 || res.status === 404) {
-          clearSession();
+          await clearSession();
         }
       } catch {
         // Keep cached session when the backend is temporarily unreachable.
       }
     } catch {
-      clearSession();
+      await clearSession();
     } finally {
       setIsLoading(false);
     }
@@ -141,11 +178,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const saveUser = useCallback((u: User) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+    void setPersistentItem(STORAGE_KEY, JSON.stringify(u));
     setUser(u);
   }, []);
 
-  const login = useCallback(async (userData: Partial<User>) => {
+  const login = useCallback(async (userData: Partial<User>, tokenArg?: string) => {
+    if (tokenArg) {
+      await setPersistentItem("@rpf_token", tokenArg);
+      setToken(tokenArg);
+      saveUser({ janSevaCardStatus: "none", ...userData } as User);
+      return;
+    }
     try {
       const res = await fetch(apiUrl("/api/auth/login"), {
         method: "POST",
@@ -156,7 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       if (!data.success || !data.user) throw new Error(data.error || "Backend login failed");
       if (data.token) {
-        localStorage.setItem("@rpf_token", data.token);
+        await setPersistentItem("@rpf_token", data.token);
         setToken(data.token);
       }
       saveUser({ janSevaCardStatus: "none", ...data.user });
@@ -189,7 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       if (!data.success || !data.user) throw new Error(data.error || "Backend guest login failed");
       if (data.token) {
-        localStorage.setItem("@rpf_token", data.token);
+        await setPersistentItem("@rpf_token", data.token);
         setToken(data.token);
       }
       saveUser({ janSevaCardStatus: "none", ...data.user });
@@ -209,8 +252,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [saveUser]);
 
   const logout = useCallback(async () => {
-    clearSession();
-  }, []);
+    await clearSession();
+  }, [clearSession]);
 
   const updateUser = useCallback(async (updates: Partial<User>) => {
     if (!user) return false;

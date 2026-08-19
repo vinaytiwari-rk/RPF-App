@@ -2,6 +2,7 @@ package com.rpfoundation.app;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Build;
@@ -84,11 +85,34 @@ public class NativeBrowserActivity extends AppCompatActivity {
 
         webView.setWebViewClient(new WebViewClient() {
             private boolean handleUrl(String next) {
-                if (next != null && next.toLowerCase().contains("therpfoundation.org")) {
+                if (next == null) return false;
+                if (next.toLowerCase().contains("therpfoundation.org")) {
                     NativeBrowserActivity.this.finish();
                     return true;
                 }
-                return loadInApp(next) || !isHttpUrl(next);
+                if (isHttpUrl(next)) {
+                    return false;
+                }
+                if (loadInApp(next)) {
+                    return true;
+                }
+                try {
+                    Intent intent = Intent.parseUri(next, Intent.URI_INTENT_SCHEME);
+                    if (intent != null) {
+                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                        intent.setComponent(null);
+                        if (getPackageManager().resolveActivity(intent, 0) != null) {
+                            startActivity(intent);
+                            return true;
+                        }
+                    }
+                } catch (Exception ignored) { }
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(next));
+                    startActivity(intent);
+                    return true;
+                } catch (Exception ignored) { }
+                return true;
             }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String next = request != null && request.getUrl() != null ? request.getUrl().toString() : null;
