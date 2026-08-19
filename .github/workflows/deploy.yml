@@ -42,3 +42,8 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           FTP_SECURE: 'true'
         run: node deploy.cjs
+
+      - name: Deploy Live Update to Capgo
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          npx @capgo/cli@latest bundle upload com.rpfoundation.app --apikey ${{ secrets.CAPGO_TOKEN }} --channel production --path ./dist --auto-bump patch

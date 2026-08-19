@@ -5,6 +5,7 @@ import './index.css';
 import './styles/premium-reset.css';
 import { Capacitor } from '@capacitor/core';
 import axios from 'axios';
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
 
 const RPF_WEB_ORIGIN = 'https://appapi.therpfoundation.org';
 const RPF_VERSION_KEY = '@rpf_web_version';
@@ -41,6 +42,7 @@ async function checkForWebUpdate() {
 
 // Intercept relative paths for Capacitor native builds
 if (Capacitor.isNativePlatform()) {
+  CapacitorUpdater.notifyAppReady();
   axios.defaults.baseURL = RPF_WEB_ORIGIN;
 
   const originalFetch = window.fetch;
