@@ -26,6 +26,10 @@ export function isExternalWebUrl(url: string): boolean {
   const value = normalizeExternalWebUrl(url);
   if (!value) return false;
   if (typeof window === 'undefined') return true;
+  try {
+    const parsed = new URL(value, window.location.href);
+    if (parsed.hostname === 'appapi.therpfoundation.org') return false;
+  } catch {}
   return new URL(value, window.location.href).origin !== window.location.origin;
 }
 
@@ -34,6 +38,18 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
   const value = normalizeExternalWebUrl(url);
   if (!value) { console.warn('[WebView] Blocked unsupported URL:', url); return; }
   const safeTitle = title || DEFAULT_WEB_TITLE;
+
+  if (value.includes('appapi.therpfoundation.org')) {
+    try {
+      const urlObj = new URL(value);
+      if (!urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
+        if (navigate) {
+          navigate(urlObj.pathname + urlObj.search + urlObj.hash);
+          return;
+        }
+      }
+    } catch {}
+  }
 
   if (Capacitor.isNativePlatform()) {
     if (Capacitor.getPlatform() === 'android') {
@@ -81,7 +97,22 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const target = event.target as HTMLElement | null;
     const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null;
-    if (!anchor || !isExternalWebUrl(anchor.href)) return;
+    if (!anchor) return;
+
+    if (anchor.href.includes('appapi.therpfoundation.org')) {
+      try {
+        const urlObj = new URL(anchor.href);
+        const navigateFn = getNavigate();
+        if (navigateFn && !urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          navigateFn(urlObj.pathname + urlObj.search + urlObj.hash);
+          return;
+        }
+      } catch {}
+    }
+
+    if (!isExternalWebUrl(anchor.href)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     void openExternalLink(anchor.href, getNavigate(), anchor.textContent?.trim() || DEFAULT_WEB_TITLE);
