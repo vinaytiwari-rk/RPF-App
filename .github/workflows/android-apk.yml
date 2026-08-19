@@ -92,22 +92,12 @@ jobs:
           chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon --stacktrace --warning-mode all
 
-      - name: Commit Debug Logs to Git
+      - name: Upload Diagnostics Log
         if: always()
-        run: |
-          git config --global user.name "AI Bot"
-          git config --global user.email "bot@example.com"
-          git fetch origin
-          git checkout debug-logs 2>/dev/null || git checkout -b debug-logs
-          mkdir -p debug
-          if [ -f android/version_log.txt ]; then
-            cp android/version_log.txt debug/version_log.txt
-          else
-            echo "No version_log.txt found" > debug/version_log.txt
-          fi
-          git add debug/version_log.txt
-          git commit -m "ci: save debug log from GitHub run ${{ github.run_id }}"
-          git push -f origin debug-logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostics-log
+          path: android/version_log.txt
 
       - name: Rename APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk RPF-Seva-App-debug.apk
