@@ -137,6 +137,67 @@ router.get("/api/cms", async (req, res) => {
     if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
       let parsed = JSON.parse(result.rows[0].founderMessageEn);
       let modified = false;
+
+      if (Array.isArray(parsed.liveTvChannels)) {
+        const newChannelsMap = new Map([
+          ['uploaded-42', 'https://www.ndtv.com/livetv-ndtv24x7'],
+          ['uploaded-43', 'https://www.republicworld.com/livetv'],
+          ['uploaded-44', 'https://www.wionews.com/live-tv'],
+          ['uploaded-45', 'https://www.timesnownews.com/live-tv'],
+          ['uploaded-46', 'https://www.indiatoday.in/livetv'],
+          ['uploaded-47', 'https://www.news18.com/livetv/'],
+          ['uploaded-48', 'https://www.aajtak.in/livetv'],
+          ['uploaded-49', 'https://www.abplive.com/live-tv'],
+          ['uploaded-50', 'https://hindi.news18.com/livetv/'],
+          ['uploaded-51', 'https://www.timesnowhindi.com/live-tv'],
+          ['uploaded-52', 'https://zeenews.india.com/hindi/live-tv'],
+          ['uploaded-53', 'https://www.republicbharat.com/livetv'],
+          ['uploaded-54', 'https://www.indiatvnews.com/livetv'],
+          ['uploaded-55', 'https://www.tv9hindi.com/live-tv'],
+          ['uploaded-56', 'https://ndtv.in/livetv-ndtvindia?pfrom=home-ndtv-india_nav'],
+          ['uploaded-57', 'https://www.newsnationtv.com/liveTV'],
+        ]);
+
+        let hasUpdates = false;
+        parsed.liveTvChannels = parsed.liveTvChannels.map((channel: any) => {
+          if (channel && channel.id && newChannelsMap.has(channel.id)) {
+            const newUrl = newChannelsMap.get(channel.id);
+            if (channel.url !== newUrl) {
+              channel.url = newUrl;
+              channel.videoId = "";
+              hasUpdates = true;
+            }
+          }
+          return channel;
+        });
+
+        const existingIds = new Set(parsed.liveTvChannels.map((c: any) => c?.id));
+        const newChannelsToAdd = [
+          { id: 'uploaded-59', name: 'DW', url: 'https://www.dw.com/en/live-tv/channel-english', category: 'News', enabled: true },
+          { id: 'uploaded-60', name: 'Sansad 3', url: 'https://webcast.gov.in/lstvlive/', category: 'News', enabled: true },
+          { id: 'uploaded-61', name: 'France24', url: 'https://www.france24.com/en/live', category: 'News', enabled: true },
+          { id: 'uploaded-62', name: 'Al Jazeera', url: 'https://www.aljazeera.com/video/live', category: 'News', enabled: true },
+          { id: 'uploaded-63', name: 'Euro News', url: 'https://www.euronews.com/live', category: 'News', enabled: true },
+          { id: 'uploaded-64', name: 'CNN', url: 'https://edition.cnn.com/videos/fast/cnni-fast', category: 'News', enabled: true },
+          { id: 'uploaded-65', name: 'RT', url: 'https://www.rt.com/on-air/', category: 'News', enabled: true },
+          { id: 'uploaded-66', name: 'IMF', url: 'https://www.imf.org/en/live', category: 'News', enabled: true }
+        ];
+
+        newChannelsToAdd.forEach(nc => {
+          if (!existingIds.has(nc.id)) {
+            parsed.liveTvChannels.push({
+              ...nc,
+              order: parsed.liveTvChannels.length
+            });
+            hasUpdates = true;
+          }
+        });
+
+        if (hasUpdates) {
+          modified = true;
+        }
+      }
+
       if (!parsed.faqs) {
         parsed.faqs = [
           {
