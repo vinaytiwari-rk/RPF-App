@@ -1,6 +1,4 @@
 import type { NavigateFunction } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
-import { Browser } from '@capacitor/browser';
 import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
 import '../config/dynamicExternalLinks';
 import { isSafeWebUrl } from '../config/browserPolicy';
@@ -8,6 +6,10 @@ import { isSafeWebUrl } from '../config/browserPolicy';
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const DEFAULT_WEB_TITLE = 'RPF Web View';
+
+type InAppBrowserRef = { addEventListener?: (name:string, cb:()=>void)=>void };
+type InAppBrowserApi = { open: (url:string, target?:string, options?:string)=>InAppBrowserRef };
+declare global { interface Window { cordova?: { InAppBrowser?: InAppBrowserApi } } }
 
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
@@ -33,13 +35,8 @@ export function isExternalWebUrl(url: string): boolean {
   } catch { return false; }
 }
 
-/**
- * Third-party pages must never be routed through the React /browser screen.
- * Android opens them in Capacitor's native Custom Tab; if that is unavailable,
- * the platform's normal external window is used immediately instead of showing
- * an in-app iframe spinner. This is especially important for YouTube and sites
- * that block or slow embedded WebViews.
- */
+/** Open third-party pages INSIDE the app. Native Android uses Cordova InAppBrowser,
+ * which is an in-app WebView, not Chrome or an external browser. */
 export async function openExternalLink(url: string, navigate?: NavigateFunction, _title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
   if (!value) { console.warn('[Browser] Blocked unsupported URL:', url); return; }
@@ -48,36 +45,24 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     const urlObj = new URL(value);
     const host = urlObj.hostname.toLowerCase();
     if ((host === 'therpfoundation.org' || host.endsWith('.therpfoundation.org')) &&
-        !urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
-      if (navigate) {
-        navigate(urlObj.pathname + urlObj.search + urlObj.hash);
-        return;
-      }
+        !urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/') && navigate) {
+      navigate(urlObj.pathname + urlObj.search + urlObj.hash);
+      return;
     }
   } catch {}
 
-  if (Capacitor.isNativePlatform()) {
-    try {
-      await Browser.open({ url: value });
-      return;
-    } catch (error) {
-      console.warn('[Browser] Native Custom Tab failed; using platform fallback:', error);
-    }
-
-    // Do not navigate to /browser here: that was the source of the long spinner.
-    try {
-      const opened = window.open(value, '_blank', 'noopener,noreferrer');
-      if (opened) { opened.focus(); return; }
-    } catch {}
+  const inApp = window.cordova?.InAppBrowser;
+  if (inApp) {
+    inApp.open(value, '_blank', 'location=yes,toolbar=yes,hardwareback=yes,zoom=yes,clearcache=no,clearsessioncache=no');
     return;
   }
 
-  try {
-    const opened = window.open(value, '_blank', 'noopener,noreferrer');
-    if (opened) opened.focus();
-  } catch (error) {
-    console.error('[Browser] Unable to open external URL:', error);
+  // Web/PWA fallback: keep navigation inside the current app context instead of forcing Chrome.
+  if (navigate) {
+    navigate('/browser?url=' + encodeURIComponent(value));
+    return;
   }
+  window.location.assign(value);
 }
 
 export const openRPFBrowser = openExternalLink;
@@ -91,9 +76,7 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const target = event.target as HTMLElement | null;
     const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null;
-    if (!anchor) return;
-
-    if (!isExternalWebUrl(anchor.href)) return;
+    if (!anchor || !isExternalWebUrl(anchor.href)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     void openExternalLink(anchor.href, getNavigate(), anchor.textContent?.trim() || DEFAULT_WEB_TITLE);
