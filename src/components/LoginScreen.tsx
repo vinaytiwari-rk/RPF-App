@@ -97,7 +97,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           <h1 className="text-2xl font-black tracking-wide text-[#0B1E3F]">RP Foundation</h1>
           <p className="text-[10px] font-black uppercase tracking-widest text-[#FF9933] mt-1">Rohit Pandit Foundation</p>
           <img
-            src="/assets/rpf-samahit-icon.svg"
+            src="/assets/rpf-samahit-icon.png"
             alt="RPF Samahit Logo"
             className="w-28 h-28 object-contain drop-shadow-xl mt-4"
           />
