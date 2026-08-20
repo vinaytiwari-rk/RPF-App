@@ -5,16 +5,19 @@ import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
 
 type CmsResponse = { cms?: { liveTvChannels?: unknown } };
 const normalize = (value: unknown): LiveTvChannel[] => Array.isArray(value) ? value.filter((x: any) => x?.id && x?.name && x?.url).map((x: any, i) => ({ ...x, enabled: x.enabled !== false, order: Number.isFinite(x.order) ? x.order : i })).sort((a,b) => (a.order ?? 0) - (b.order ?? 0)) : [];
+// Only keep channels with a usable/verified live source. These are filtered even if an old CMS payload still contains them.
+const REMOVED_UNVERIFIED_CHANNELS = new Set(["ani", "ians"]);
+const isAllowedChannel = (channel: LiveTvChannel) => !REMOVED_UNVERIFIED_CHANNELS.has(channel.name.trim().toLowerCase());
 
 export default function LiveTV() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const hi = lang === "hi";
   const [search, setSearch] = useState("");
-  const [channels, setChannels] = useState<LiveTvChannel[]>(LIVE_TV_DEFAULTS);
+  const [channels, setChannels] = useState<LiveTvChannel[]>(LIVE_TV_DEFAULTS.filter(isAllowedChannel));
   const [active, setActive] = useState<LiveTvChannel | null>(null);
   const [serverControlled, setServerControlled] = useState(false);
 
-  useEffect(() => { let cancelled = false; fetch("/api/cms", { cache: "no-store" }).then(r => r.ok ? r.json() as Promise<CmsResponse> : null).then(data => { const configured = data?.cms?.liveTvChannels; if (!cancelled && Array.isArray(configured)) { setChannels(normalize(configured)); setServerControlled(true); } }).catch(() => undefined); return () => { cancelled = true; }; }, []);
+  useEffect(() => { let cancelled = false; fetch("/api/cms", { cache: "no-store" }).then(r => r.ok ? r.json() as Promise<CmsResponse> : null).then(data => { const configured = data?.cms?.liveTvChannels; if (!cancelled && Array.isArray(configured)) { setChannels(normalize(configured).filter(isAllowedChannel)); setServerControlled(true); } }).catch(() => undefined); return () => { cancelled = true; }; }, []);
 
   useEffect(() => {
     const onPopState = () => setActive(null);
