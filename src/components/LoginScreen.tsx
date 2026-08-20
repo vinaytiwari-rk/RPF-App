@@ -34,9 +34,9 @@ export default function LoginScreen({onLoginSuccess}:LoginScreenProps){
       
       <div className="relative z-10 w-full max-w-sm flex flex-col items-center space-y-6">
         <div className="flex flex-col items-center text-center">
-          <img src={globalSettings?.logo_image||'/assets/logo.png'} alt="RP Foundation Logo" className="w-20 h-20 bg-white rounded-full p-1.5 shadow-xl" onError={e=>{e.currentTarget.style.display='none';}}/>
-          <h1 className="mt-4 text-2xl font-black tracking-widest text-[#0B1E3F]">RP FOUNDATION</h1>
+          <h1 className="text-2xl font-black tracking-widest text-[#0B1E3F]">RP FOUNDATION</h1>
           <p className="text-[10px] font-black uppercase tracking-widest text-[#FF9933] mt-1">Rohit Pandit Foundation</p>
+          <img src={globalSettings?.logo_image||'/assets/logo.png'} alt="RP Foundation Logo" className="w-20 h-20 bg-white rounded-full p-1.5 shadow-xl mt-4" onError={e=>{e.currentTarget.style.display='none';}}/>
         </div>
 
         <div className="w-full bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-white/90">
