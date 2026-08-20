@@ -40,6 +40,19 @@ async function main() {
     }));
     console.log('Connected to FTP server!');
 
+    // Clean up old remote dist/ directory to free up disk space from past build assets
+    try {
+      console.log('Checking remote directory for cleanup...');
+      const list = await client.list();
+      if (list.some((f) => f.name === 'dist')) {
+        console.log('Removing old remote dist/ folder to free disk space...');
+        await client.removeDir('dist');
+        console.log('Old remote dist/ folder removed successfully.');
+      }
+    } catch (cleanupErr) {
+      console.log('Notice: Remote dist cleanup step skipped/failed:', cleanupErr?.message || cleanupErr);
+    }
+
     await withRetry('server.cjs upload', () => client.uploadFrom('server.cjs', 'server.cjs'));
     console.log('server.cjs uploaded');
 
@@ -58,6 +71,17 @@ async function main() {
 
     console.log('Server deployment completed.');
   } catch (err) {
+    const isDiskFull = err?.code === 552 || String(err?.message || '').includes('552') || String(err?.message || '').toLowerCase().includes('disk full');
+    if (isDiskFull) {
+      console.error('\n================================================================');
+      console.error('CRITICAL: FTP ERROR 552 - DISK FULL ON CPANEL SERVER');
+      console.error('The cPanel hosting account has run out of allocated disk space.');
+      console.error('Action Required in cPanel / File Manager:');
+      console.error('1. Empty cPanel Trash (.trash directory).');
+      console.error('2. Delete old error logs (error_log) or manual backup zip files.');
+      console.error('3. Increase Disk Quota for this user in WHM / cPanel.');
+      console.error('================================================================\n');
+    }
     console.error('FTP deployment error after retries:', err);
     process.exitCode = 1;
   } finally {
