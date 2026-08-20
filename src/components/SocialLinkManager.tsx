@@ -1,61 +1,55 @@
-// src/components/SocialLinkManager.tsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
-// Replaced Firebase with backend API proxy calls
 
-/**
- * Admin UI for live editing of the five official social media links.
- * The links are stored in the Firestore document:
- *   settings/social_links
- * and merged on each save.
+type LinkMap = Record<string, string>;
+
+const FIELDS = [
+  ["founder_instagram", "Founder Instagram", "https://www.instagram.com/therohitpandit/"],
+  ["foundation_instagram", "Foundation Instagram", "https://www.instagram.com/rpfoundationofficial/"],
+  ["facebook", "Facebook Page", "https://www.facebook.com/rpfofficial"],
+  ["twitter", "X (Twitter)", "https://x.com/rpfoundation15"],
+  ["youtube", "YouTube Channel", "https://www.youtube.com/@rpfoundationofficial"],
+] as const;
+
+/** Admin UI for the official social links.
+ * Links live inside the existing CMS JSON so changing a URL does not require
+ * an APK rebuild. Existing CMS fields are preserved on every save.
  */
 export default function SocialLinkManager() {
-  const { socialLinks } = useApp();
+  const { cmsConfig, socialLinks } = useApp();
+  const [links, setLinks] = useState<LinkMap>({});
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
 
-  // Helper to extract a link by platform name (fallback to empty string)
-  const getLink = (platform: string) => {
-    const found = socialLinks?.find((l) => (l as any).platform === platform);
-    return found ? (found as any).url : "";
-  };
-
-  const [founderInstagram, setFounderInstagram] = useState<string>("");
-  const [foundationInstagram, setFoundationInstagram] = useState<string>("");
-  const [facebook, setFacebook] = useState<string>("");
-  const [twitter, setTwitter] = useState<string>("");
-  const [youtube, setYoutube] = useState<string>("");
-  const [saving, setSaving] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
-
-  // Populate fields from Firestore on mount / when socialLinks change
   useEffect(() => {
-    setFounderInstagram(getLink("founder_instagram"));
-    setFoundationInstagram(getLink("foundation_instagram"));
-    setFacebook(getLink("facebook"));
-    setTwitter(getLink("twitter"));
-    setYoutube(getLink("youtube"));
-  }, [socialLinks]);
+    const cmsLinks = Array.isArray((cmsConfig as any)?.socialLinks) ? (cmsConfig as any).socialLinks : [];
+    const source = cmsLinks.length ? cmsLinks : socialLinks || [];
+    const next: LinkMap = {};
+    for (const [platform, , fallback] of FIELDS) {
+      next[platform] = source.find((item: any) => item?.platform === platform)?.url || fallback;
+    }
+    setLinks(next);
+  }, [cmsConfig, socialLinks]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setMessage("");
     try {
-      const res = await fetch("/api/settings", {
+      const currentRes = await fetch("/api/cms/config", { cache: "no-store" });
+      const current = currentRes.ok ? await currentRes.json() : { data: {} };
+      const token = localStorage.getItem("@rpf_token");
+      const nextSocialLinks = FIELDS.map(([platform, label]) => ({ platform, label, url: (links[platform] || "").trim() }));
+      const res = await fetch("/api/cms/config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          founder_instagram: founderInstagram.trim(),
-          foundation_instagram: foundationInstagram.trim(),
-          facebook: facebook.trim(),
-          twitter: twitter.trim(),
-          youtube: youtube.trim(),
-        })
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ ...(current?.data || {}), socialLinks: nextSocialLinks }),
       });
-      if (!res.ok) throw new Error("Failed to save settings");
-      setMessage("✅ Links saved successfully!");
+      if (!res.ok) throw new Error("Failed to save social links");
+      setMessage("Links saved successfully. The app will use the updated CMS links on refresh.");
     } catch (err) {
       console.error("error saving social links:", err);
-      setMessage("❌ Failed to save links. Check console for details.");
+      setMessage("Failed to save links. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -63,71 +57,21 @@ export default function SocialLinkManager() {
 
   return (
     <div className="p-6 bg-white rounded shadow-lg max-w-xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-4">Social Link Manager</h2>
+      <h2 className="text-2xl font-semibold mb-2">Social Link Manager</h2>
+      <p className="text-sm text-slate-500 mb-4">Changes are stored in CMS and do not need an APK update.</p>
       <form onSubmit={handleSave} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Founder Instagram</label>
-          <input
-            type="url"
-            className="w-full border rounded px-3 py-2"
-            value={founderInstagram}
-            onChange={(e) => setFounderInstagram(e.target.value)}
-            placeholder="https://www.instagram.com/therohitpandit/"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Foundation Instagram</label>
-          <input
-            type="url"
-            className="w-full border rounded px-3 py-2"
-            value={foundationInstagram}
-            onChange={(e) => setFoundationInstagram(e.target.value)}
-            placeholder="https://www.instagram.com/rpfoundationofficial/"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Facebook Page</label>
-          <input
-            type="url"
-            className="w-full border rounded px-3 py-2"
-            value={facebook}
-            onChange={(e) => setFacebook(e.target.value)}
-            placeholder="https://www.facebook.com/rpfofficial"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Twitter (X)</label>
-          <input
-            type="url"
-            className="w-full border rounded px-3 py-2"
-            value={twitter}
-            onChange={(e) => setTwitter(e.target.value)}
-            placeholder="https://x.com/rpfoundation15"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">YouTube Channel</label>
-          <input
-            type="url"
-            className="w-full border rounded px-3 py-2"
-            value={youtube}
-            onChange={(e) => setYoutube(e.target.value)}
-            placeholder="https://www.youtube.com/@rpfoundationofficial"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
-        >
+        {FIELDS.map(([platform, label, placeholder]) => (
+          <div key={platform}>
+            <label className="block text-sm font-medium mb-1">{label}</label>
+            <input type="url" className="w-full border rounded px-3 py-2" value={links[platform] || ""}
+              onChange={(e) => setLinks((prev) => ({ ...prev, [platform]: e.target.value }))}
+              placeholder={placeholder} required />
+          </div>
+        ))}
+        <button type="submit" disabled={saving} className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">
           {saving ? "Saving…" : "Save Links"}
         </button>
-        {message && <p className="mt-2 text-center">{message}</p>}
+        {message && <p className="mt-2 text-center text-sm">{message}</p>}
       </form>
     </div>
   );

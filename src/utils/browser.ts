@@ -1,6 +1,7 @@
 import type { NavigateFunction } from 'react-router-dom';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
+import '../config/dynamicExternalLinks';
 import { isSafeWebUrl } from '../config/browserPolicy';
 
 const HTTP_URL = /^https?:\/\//i;
@@ -60,7 +61,6 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
         return;
       } catch (error) {
         console.error('[WebView] Native Android browser failed:', error);
-        // Do not silently send Android users to Chrome.
         if (navigate) {
           navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
         }
@@ -68,7 +68,6 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
       }
     }
 
-    // Non-Android native fallback.
     try {
       const { Browser } = await import('@capacitor/browser');
       await Browser.open({ url: value });
@@ -78,7 +77,6 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     }
   }
 
-  // Web/PWA fallback.
   if (navigate) {
     navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
     return;

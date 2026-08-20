@@ -25,73 +25,52 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: gradle
-
       - name: Install Dependencies
         run: npm install --no-audit --no-fund
-
       - name: Verify required modules
         run: |
           node -e "console.log('react-router-dom@' + require('./node_modules/react-router-dom/package.json').version)"
           node -e "console.log('@capacitor/android@' + require('./node_modules/@capacitor/android/package.json').version)"
-
       - name: Type Check
         run: npm run lint
-
       - name: Build Web Application
         run: npm run build
-
       - name: Sync Capacitor Android
         run: npx cap sync android
-
       - name: "CI: Write CAPACITOR_ANDROID_VERSION safely"
         run: |
-          if [ ! -f node_modules/@capacitor/android/package.json ]; then
-            echo "ERROR: @capacitor/android is missing" >&2
-            exit 1
-          fi
           VERSION=$(node -p "require('./node_modules/@capacitor/android/package.json').version")
-          if grep -q '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties 2>/dev/null; then
-            sed -i "s/^CAPACITOR_ANDROID_VERSION=.*/CAPACITOR_ANDROID_VERSION=${VERSION}/" android/gradle.properties
-          else
-            printf '\nCAPACITOR_ANDROID_VERSION=%s\n' "${VERSION}" >> android/gradle.properties
-          fi
+          if grep -q '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties 2>/dev/null; then sed -i "s/^CAPACITOR_ANDROID_VERSION=.*/CAPACITOR_ANDROID_VERSION=${VERSION}/" android/gradle.properties; else printf '\nCAPACITOR_ANDROID_VERSION=%s\n' "${VERSION}" >> android/gradle.properties; fi
           grep '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-
       - name: Verify Android Build Environment
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew --version
-
       - name: Build Debug APK
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon --stacktrace --warning-mode all
-
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk RPF-Seva-App-debug.apk
-
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk RPF-Samahit-debug.apk
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RPF-Seva-App-Android-${{ github.sha }}
-          path: RPF-Seva-App-debug.apk
+          name: RPF-Samahit-Android-${{ github.sha }}
+          path: RPF-Samahit-debug.apk
           if-no-files-found: error
           retention-days: 14

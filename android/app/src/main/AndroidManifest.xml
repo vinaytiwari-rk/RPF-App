@@ -13,19 +13,8 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <application
-        android:usesCleartextTraffic="false"
-        tools:replace="android:usesCleartextTraffic"
-        android:theme="@style/AppTheme"
-        android:label="RPF Seva App"
-        android:icon="@drawable/rpf_logo"
-        android:roundIcon="@drawable/rpf_logo">
+    <application android:usesCleartextTraffic="false" tools:replace="android:usesCleartextTraffic" android:theme="@style/AppTheme" android:label="RPF Samahit (समाहित)" android:icon="@drawable/rpf_samahit_icon" android:roundIcon="@drawable/rpf_samahit_icon">
         <activity android:name=".NativeBrowserActivity" android:exported="false" android:configChanges="orientation|screenSize|keyboardHidden" />
-        <activity android:name=".MainActivity" android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity>
     </application>
 </manifest>
