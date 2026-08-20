@@ -49,13 +49,13 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     }
   } catch {}
 
-  // Keep external services inside the persistent RPF app-shell browser.
   if (navigate) {
+    // Canonical persistent app-shell routing required by browser policy.
     navigate(`/browser?url=${encodeURIComponent(value)}`);
     return;
   }
 
-  // Last-resort web fallback when this API is called without React navigation.
+  // Keep a safe same-window fallback for non-React callers.
   window.open(value, '_self');
 }
 
