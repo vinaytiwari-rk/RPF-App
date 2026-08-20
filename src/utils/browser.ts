@@ -7,10 +7,6 @@ const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const DEFAULT_WEB_TITLE = 'RPF Web View';
 
-type InAppBrowserRef = { addEventListener?: (name:string, cb:()=>void)=>void };
-type InAppBrowserApi = { open: (url:string, target?:string, options?:string)=>InAppBrowserRef };
-declare global { interface Window { cordova?: { InAppBrowser?: InAppBrowserApi } } }
-
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
   if (!value || UNSAFE_URL_SCHEME.test(value) || !HTTP_URL.test(value) || !isSafeWebUrl(value)) return null;
@@ -35,8 +31,10 @@ export function isExternalWebUrl(url: string): boolean {
   } catch { return false; }
 }
 
-/** Open third-party pages INSIDE the app. Native Android uses Cordova InAppBrowser,
- * which is an in-app WebView, not Chrome or an external browser. */
+/**
+ * The RPF browser is the canonical destination for third-party web content.
+ * Do not bypass it with Chrome, Custom Tabs, or a system-browser fallback.
+ */
 export async function openExternalLink(url: string, navigate?: NavigateFunction, _title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
   if (!value) { console.warn('[Browser] Blocked unsupported URL:', url); return; }
@@ -51,18 +49,14 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     }
   } catch {}
 
-  const inApp = window.cordova?.InAppBrowser;
-  if (inApp) {
-    inApp.open(value, '_blank', 'location=yes,toolbar=yes,hardwareback=yes,zoom=yes,clearcache=no,clearsessioncache=no');
+  // Keep external services inside the persistent RPF app-shell browser.
+  if (navigate) {
+    navigate(`/browser?url=${encodeURIComponent(value)}`);
     return;
   }
 
-  // Web/PWA fallback: keep navigation inside the current app context instead of forcing Chrome.
-  if (navigate) {
-    navigate('/browser?url=' + encodeURIComponent(value));
-    return;
-  }
-  window.location.assign(value);
+  // Last-resort web fallback when this API is called without React navigation.
+  window.open(value, '_self');
 }
 
 export const openRPFBrowser = openExternalLink;
