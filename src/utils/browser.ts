@@ -1,5 +1,5 @@
 import type { NavigateFunction } from 'react-router-dom';
-import { Capacitor, registerPlugin } from '@capacitor/core';
+import { Capacitor } from '@capacitor/core';
 import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
 import '../config/dynamicExternalLinks';
 import { isSafeWebUrl } from '../config/browserPolicy';
@@ -9,7 +9,6 @@ const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const DEFAULT_WEB_TITLE = 'RPF Web View';
 
 type NativeBrowserPlugin = { open(options: { url: string; title: string }): Promise<void> };
-const NativeRPFBrowser = registerPlugin<NativeBrowserPlugin>('NativeRPFBrowser');
 
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
@@ -35,45 +34,42 @@ export function isExternalWebUrl(url: string): boolean {
   return new URL(value, window.location.href).origin !== window.location.origin;
 }
 
-/** Android always routes external HTTP(S) links to the native RPF WebView. */
+/** Open third-party destinations in the platform browser/custom tab.
+ * This avoids forcing heavy social/news sites through an in-app WebView,
+ * which was causing 30–45 second blank/spinner states on Android.
+ */
 export async function openExternalLink(url: string, navigate?: NavigateFunction, title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
   if (!value) { console.warn('[WebView] Blocked unsupported URL:', url); return; }
   const safeTitle = title || DEFAULT_WEB_TITLE;
 
-  const lowercaseUrl = value.toLowerCase();
-  if (lowercaseUrl.includes('therpfoundation.org')) {
+  if (value.toLowerCase().includes('therpfoundation.org')) {
     try {
       const urlObj = new URL(value);
       if (!urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
-        if (navigate) {
-          navigate(urlObj.pathname + urlObj.search + urlObj.hash);
-          return;
-        }
+        if (navigate) { navigate(urlObj.pathname + urlObj.search + urlObj.hash); return; }
       }
     } catch {}
   }
 
   if (Capacitor.isNativePlatform()) {
+    try {
+      const { Browser } = await import('@capacitor/browser');
+      await Browser.open({ url: value, presentationStyle: 'popover' });
+      return;
+    } catch (error) {
+      console.warn('[Browser] Capacitor Browser failed, trying native fallback:', error);
+    }
+
     if (Capacitor.getPlatform() === 'android') {
       try {
+        const { registerPlugin } = await import('@capacitor/core');
+        const NativeRPFBrowser = registerPlugin<NativeBrowserPlugin>('NativeRPFBrowser');
         await NativeRPFBrowser.open({ url: value, title: safeTitle });
         return;
       } catch (error) {
-        console.error('[WebView] Native Android browser failed:', error);
-        if (navigate) {
-          navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
-        }
-        return;
+        console.error('[Browser] Native Android browser failed:', error);
       }
-    }
-
-    try {
-      const { Browser } = await import('@capacitor/browser');
-      await Browser.open({ url: value });
-      return;
-    } catch (error) {
-      console.warn('[WebView] Capacitor Browser failed:', error);
     }
   }
 
