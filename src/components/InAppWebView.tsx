@@ -1,26 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { X, Instagram, Facebook, Youtube, Twitter, Globe } from "lucide-react";
 import BrandLoader from "./BrandLoader";
-import { openExternalLink } from "../utils/browser";
 
 interface InAppWebViewProps { url:string; title?:string; platform?:string; onClose:()=>void; }
 const PLATFORM_ICON: Record<string, React.ElementType>={instagram:Instagram,facebook:Facebook,youtube:Youtube,x:Twitter,twitter:Twitter};
 
-/** Opens the destination in the app's native InAppBrowser WebView. */
+/** RPF's own in-app browser surface. Keep all supported services inside the app. */
 export default function InAppWebView({url,title,platform,onClose}:InAppWebViewProps){
- const [opening,setOpening]=useState(true);
+ const [status,setStatus]=useState<"loading"|"loaded"|"slow">("loading");
+ const timeoutRef=useRef<ReturnType<typeof setTimeout>|null>(null);
+ useEffect(()=>{
+   setStatus("loading");
+   timeoutRef.current=setTimeout(()=>setStatus(prev=>prev==="loading"?"slow":prev),12000);
+   return()=>{if(timeoutRef.current)clearTimeout(timeoutRef.current)};
+ },[url]);
  const Icon=(platform&&PLATFORM_ICON[platform.toLowerCase()])||Globe;
  let hostname="";try{hostname=new URL(url).hostname.replace(/^www\./,"")}catch{hostname=url}
- useEffect(()=>{
-  let active=true;
-  void openExternalLink(url,undefined,title||hostname).finally(()=>{
-   if(active){setOpening(false);setTimeout(()=>{if(active)onClose()},150)}
-  });
-  return()=>{active=false};
- },[url,title,hostname,onClose]);
- return <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center px-8 text-center">
-   <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4"><Icon className="w-7 h-7 text-[#000080]"/></div>
-   {opening?<BrandLoader size="md" label="Opening in app"/>:<p className="text-sm font-black text-slate-900">Opened</p>}
-   <button onClick={onClose} className="mt-6 px-5 py-3 rounded-xl bg-[#000080] text-white text-xs font-bold flex items-center gap-2"><X className="w-4 h-4"/>Cancel</button>
+ return <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex flex-col animate-fadeIn">
+   <div className="shrink-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm">
+    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0"><Icon className="w-4 h-4 text-slate-600"/></div>
+    <div className="flex-1 min-w-0"><p className="text-xs font-black text-slate-900 truncate">{title||hostname}</p><p className="text-[10px] text-slate-400 truncate">{hostname}</p></div>
+    <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-900 hover:bg-slate-700 flex items-center justify-center shrink-0 transition" aria-label="Close"><X className="w-4 h-4 text-white"/></button>
+   </div>
+   <div className="flex-1 relative bg-white">
+    {status==="loading"&&<div className="absolute inset-0 flex items-center justify-center bg-white z-10"><BrandLoader size="md" label="Opening"/></div>}
+    {status==="slow"&&<div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 rounded-full bg-slate-900 text-white text-[10px] px-3 py-1.5 shadow">Still opening… you can wait or go back</div>}
+    <iframe src={url} title={title||"RPF Browser"} className="w-full h-full border-0" onLoad={()=>setStatus("loaded")} sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"/>
+   </div>
  </div>;
 }
