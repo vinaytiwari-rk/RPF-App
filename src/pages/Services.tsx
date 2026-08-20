@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
-import { Search, Compass, Globe, ChevronRight } from "lucide-react";
+import { Search, Compass, Globe, ChevronRight, ExternalLink } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { openExternalLink } from "../utils/browser";
 import SortableList from "../components/SortableList";
@@ -13,6 +13,35 @@ const EXPLORE_LINKS = [
   { id: "fact-check", category: "community", iconName: "ShieldCheck", titleEn: "Fact Check", titleHi: "फैक्ट चेक", descEn: "Check claims and news before sharing", descHi: "वायरल दावों और खबरों की जांच करें", route: "/fact-check" },
   { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live TV", titleHi: "लाइव टीवी", descEn: "Official live TV channels", descHi: "आधिकारिक लाइव टीवी चैनल", route: "/live-tv" },
 ];
+
+const getWebsiteLogo = (url?: string) => {
+  if (!url || !/^https?:\/\//i.test(url)) return "";
+  try {
+    const parsed = new URL(url);
+    return `${parsed.origin}/favicon.ico`;
+  } catch {
+    return "";
+  }
+};
+
+const getDomain = (url?: string) => {
+  if (!url || !/^https?:\/\//i.test(url)) return "";
+  try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; }
+};
+
+function WebsiteLogo({ url, label }: { url?: string; label: string }) {
+  const [failed, setFailed] = useState(false);
+  const logo = getWebsiteLogo(url);
+  return (
+    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm flex items-center justify-center p-2">
+      {logo && !failed ? (
+        <img src={logo} alt={`${label} logo`} className="h-full w-full object-contain" loading="lazy" onError={() => setFailed(true)} />
+      ) : (
+        <Globe className="h-6 w-6 text-[#000080]" />
+      )}
+    </div>
+  );
+}
 
 export default function Services() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -88,6 +117,7 @@ export default function Services() {
   const renderService = (svc: any, idx: number) => {
     const configuredTarget = typeof svc.url === "string" && svc.url.trim() ? svc.url.trim() : (typeof svc.link === "string" && svc.link.trim() ? svc.link.trim() : (typeof svc.route === "string" && svc.route.trim() ? svc.route.trim() : ""));
     const target = configuredTarget || routeFor(svc.id);
+    const isWebsite = /^https?:\/\//i.test(target);
     const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;
     const gradients = ["bg-blue-50 text-blue-600", "bg-orange-50 text-orange-600", "bg-green-50 text-green-600", "bg-purple-50 text-purple-600", "bg-rose-50 text-rose-600", "bg-indigo-50 text-indigo-600"];
     return (
@@ -95,9 +125,13 @@ export default function Services() {
         if (target.startsWith("http")) openExternalLink(target, navigate, svc.titleEn);
         else if (target.startsWith("/browser?url=")) openExternalLink(decodeURIComponent(target.split("url=")[1]), navigate, svc.titleEn);
         else navigate(target);
-      }} className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 border border-slate-100 active:scale-[0.99] cursor-pointer">
-        <div className={`w-12 h-12 shrink-0 flex items-center justify-center rounded-xl ${gradients[idx % gradients.length]}`}><IconComponent className="w-6 h-6" /></div>
-        <div className="flex-1 min-w-0 text-left"><h4 className="font-bold text-sm text-slate-800 leading-tight truncate">{isHi ? svc.titleHi : svc.titleEn}</h4><p className="text-[11px] font-medium text-slate-500 mt-1 line-clamp-1">{isHi ? svc.descHi : svc.descEn}</p></div>
+      }} className="w-full bg-white rounded-2xl p-3.5 flex items-center gap-3.5 border border-slate-100 active:scale-[0.99] cursor-pointer shadow-[0_4px_16px_rgba(15,23,42,.04)]">
+        {isWebsite ? <WebsiteLogo url={target} label={svc.titleEn || "Website"} /> : <div className={`w-12 h-12 shrink-0 flex items-center justify-center rounded-xl ${gradients[idx % gradients.length]}`}><IconComponent className="w-6 h-6" /></div>}
+        <div className="flex-1 min-w-0 text-left">
+          <div className="flex items-center gap-2 min-w-0"><h4 className="font-bold text-sm text-slate-800 leading-tight truncate">{isHi ? svc.titleHi : svc.titleEn}</h4>{isWebsite && <span className="shrink-0 rounded-full bg-blue-50 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-[#000080]">Web</span>}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1 line-clamp-1">{isHi ? svc.descHi : svc.descEn}</p>
+          {isWebsite && <p className="text-[9px] font-semibold text-slate-400 mt-1 truncate">{getDomain(target)}</p>}
+        </div>
         <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 border border-slate-100"><ChevronRight className="w-4 h-4 text-slate-400" /></div>
       </button>
     );
@@ -112,7 +146,7 @@ export default function Services() {
       </div>
       {isLoadingServices ? <div className="py-12 flex justify-center"><div className="w-6 h-6 border-2 border-[#000080] border-t-transparent rounded-full animate-spin" /></div> : <SortableList items={filtered} storageKey={`services:${category}`} renderItem={(svc, idx) => renderService(svc, idx)} className="flex flex-col gap-3 pt-3" />}
       {!isLoadingServices && filtered.length === 0 && <div className="py-12 text-center"><Search className="mx-auto h-6 w-6 text-slate-400" /><p className="text-sm font-bold text-slate-700 mt-3">{isHi ? "कोई सेवा नहीं मिली" : "No services found"}</p></div>}
-      {search.trim() && <div className="pt-2">{webLoading ? <div className="flex justify-center py-6"><div className="w-6 h-6 border-2 border-[#000080] border-t-transparent rounded-full animate-spin" /></div> : webResults.length > 0 && <div className="bg-white rounded-2xl border border-slate-100 p-4"><p className="text-[11px] font-extrabold text-[#000080] uppercase tracking-wider flex items-center gap-2 mb-3"><Globe className="w-3.5 h-3.5" />{isHi ? "वेब परिणाम" : "Web Results"}</p><div className="space-y-4">{webResults.map((r, i) => <button key={i} onClick={() => openExternalLink(r.link, navigate)} className="w-full text-left flex gap-3 group"><div className="mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100"/><div className="flex-1 min-w-0"><p className="text-xs font-bold text-slate-800 leading-snug line-clamp-2">{r.title}</p><p className="text-[11px] font-medium text-slate-500 mt-1 line-clamp-2 leading-relaxed">{r.snippet}</p></div></button>)}</div></div>}</div>}
+      {search.trim() && <div className="pt-2">{webLoading ? <div className="flex justify-center py-6"><div className="w-6 h-6 border-2 border-[#000080] border-t-transparent rounded-full animate-spin" /></div> : webResults.length > 0 && <div className="bg-white rounded-2xl border border-slate-100 p-4"><p className="text-[11px] font-extrabold text-[#000080] uppercase tracking-wider flex items-center gap-2 mb-3"><Globe className="w-3.5 h-3.5" />{isHi ? "वेब परिणाम" : "Web Results"}</p><div className="space-y-3">{webResults.map((r, i) => <button key={i} onClick={() => openExternalLink(r.link, navigate)} className="w-full text-left flex items-center gap-3 group rounded-xl border border-slate-100 p-2.5 hover:bg-slate-50"><WebsiteLogo url={r.link} label={r.title || "Website"} /><div className="flex-1 min-w-0"><p className="text-xs font-bold text-slate-800 leading-snug line-clamp-2">{r.title}</p><p className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-1 leading-relaxed">{r.snippet}</p><p className="text-[9px] font-semibold text-slate-400 mt-1 truncate">{getDomain(r.link)}</p></div><ExternalLink className="h-4 w-4 shrink-0 text-slate-400" /></button>)}</div></div>}</div>}
     </div>
   );
 }
