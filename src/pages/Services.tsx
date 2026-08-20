@@ -16,7 +16,7 @@ const EXPLORE_LINKS = [
 
 export default function Services() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
-  const { servicesList, isLoadingServices } = useApp();
+  const { servicesList, isLoadingServices, cmsConfig } = useApp();
   const navigate = useNavigate();
   const isHi = lang === "hi";
   const [category, setCategory] = useState("all");
@@ -81,7 +81,7 @@ export default function Services() {
     if (id === "hindu-calendar") return "/hindu-calendar";
     if (id === "doc-scanner") return "/doc-scanner";
     if (id === "resume-builder") return "/resume-builder";
-    if (id === "schemes") return "/browser?url=" + encodeURIComponent("https://www.myscheme.gov.in/find-scheme");
+    if (id === "schemes") return "/browser?url=" + encodeURIComponent(cmsConfig?.govSchemeUrl || "https://services.mp.gov.in/eservice/");
     return `/services/${id}`;
   };
 

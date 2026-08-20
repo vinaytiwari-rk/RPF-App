@@ -197,6 +197,10 @@ router.get("/api/cms", async (req, res) => {
           modified = true;
         }
       }
+      if (!parsed.govSchemeUrl || parsed.govSchemeUrl === "https://www.myscheme.gov.in/find-scheme") {
+        parsed.govSchemeUrl = "https://services.mp.gov.in/eservice/";
+        modified = true;
+      }
 
       if (!parsed.faqs) {
         parsed.faqs = [
@@ -419,7 +423,8 @@ router.get("/api/cms", async (req, res) => {
           { name: "Dainik Bhaskar No Fake News", nameHi: "दैनिक भास्कर - नो फेक न्यूज़", url: "https://www.bhaskar.com/no-fake-news/", description: "Fact-checks by Dainik Bhaskar.", descriptionHi: "दैनिक भास्कर द्वारा तथ्य-जांच।" },
           { name: "BoomLive Fact Check", nameHi: "बूमलाइव फैक्ट चेक", url: "https://www.boomlive.in/fact-check", description: "Independent digital journalism and fact-checking.", descriptionHi: "स्वतंत्र डिजिटल पत्रकारिता और तथ्य-जांच।" },
           { name: "Alt News", nameHi: "ऑल्ट न्यूज़", url: "https://www.altnews.in/", description: "A leading Indian fact-checking website.", descriptionHi: "भारत की एक प्रमुख तथ्य-जांच वेबसाइट।" }
-        ]
+        ],
+        govSchemeUrl: "https://services.mp.gov.in/eservice/"
       };
       await pool.query(
         `INSERT INTO settings (id, "founderMessageEn") VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET "founderMessageEn" = $2`,
