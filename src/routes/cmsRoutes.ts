@@ -177,6 +177,23 @@ router.get("/api/cms", async (req, res) => {
         parsed.statsOffsets = { beneficiaries: 0, volunteers: 0, healthCamps: 0, campaigns: 0 };
         modified = true;
       }
+      if (!parsed.factCheckSources) {
+        parsed.factCheckSources = [
+          { name: "PIB Fact Check", nameHi: "पीआईबी फैक्ट चेक", url: "https://xcancel.com/pibfactcheck", description: "Press Information Bureau fact-checks regarding government policies and schemes.", descriptionHi: "सरकारी नीतियों और योजनाओं के संबंध में प्रेस सूचना ब्यूरो द्वारा तथ्य-जांच।" },
+          { name: "Vishvas News", nameHi: "विश्वास न्यूज़", url: "https://www.vishvasnews.com/", description: "A leading Indian multilingual fact-checking website.", descriptionHi: "भारत की एक प्रमुख बहुभाषी तथ्य-जांच वेबसाइट।" },
+          { name: "India Today Anti Fake News War", nameHi: "इंडिया टुडे एंटी फेक न्यूज़ वॉर", url: "https://xcancel.com/IndiaTodayFacts", description: "India Today fact-checks addressing viral misinformation.", descriptionHi: "इंडिया टुडे द्वारा वायरल भ्रामक जानकारियों की तथ्य-जांच।" },
+          { name: "PTI Fact Check (X)", nameHi: "पीटीआई फैक्ट चेक (X)", url: "https://xcancel.com/ptifactcheck", description: "PTI's official fact-check handle on X/Twitter.", descriptionHi: "प्रेस ट्रस्ट ऑफ इंडिया (PTI) का आधिकारिक तथ्य-जांच हैंडल।" },
+          { name: "MEA Fact Check", nameHi: "विदेश मंत्रालय फैक्ट चेक", url: "https://xcancel.com/MEAFactCheck", description: "Ministry of External Affairs official fact-checking handle.", descriptionHi: "विदेश मंत्रालय का आधिकारिक तथ्य-जांच हैंडल।" },
+          { name: "Jansampark MP Fact Check", nameHi: "जनसंपर्क मध्य प्रदेश फैक्ट चेक", url: "https://xcancel.com/jansamparkFC", description: "Madhya Pradesh Government's official public relations fact-checker.", descriptionHi: "मध्य प्रदेश सरकार का आधिकारिक जनसंपर्क तथ्य-जांच हैंडल।" },
+          { name: "NewsMeter Fact Check", nameHi: "न्यूज़मीटर फैक्ट चेक", url: "https://xcancel.com/newsmeterfacts", description: "Independent digital fact-checking and investigative journalism.", descriptionHi: "स्वतंत्र डिजिटल तथ्य-जांच और खोजी पत्रकारिता।" },
+          { name: "UP Police Viral Check", nameHi: "यूपी पुलिस वायरल चेक", url: "https://xcancel.com/UPPViralCheck", description: "Uttar Pradesh Police official handle for checking viral rumors.", descriptionHi: "उत्तर प्रदेश पुलिस का वायरल अफवाहों की जांच का आधिकारिक हैंडल।" },
+          { name: "Info UP Fact Check", nameHi: "इन्फो यूपी फैक्ट चेक", url: "https://xcancel.com/InfoUPFactcheck", description: "Information & Public Relations Department of UP fact-checking handle.", descriptionHi: "सूचना एवं जनसंपर्क विभाग (उत्तर प्रदेश) का आधिकारिक तथ्य-जांच हैंडल।" },
+          { name: "Dainik Bhaskar No Fake News", nameHi: "दैनिक भास्कर - नो फेक न्यूज़", url: "https://www.bhaskar.com/no-fake-news/", description: "Fact-checks by Dainik Bhaskar.", descriptionHi: "दैनिक भास्कर द्वारा तथ्य-जांच।" },
+          { name: "BoomLive Fact Check", nameHi: "बूमलाइव फैक्ट चेक", url: "https://www.boomlive.in/fact-check", description: "Independent digital journalism and fact-checking.", descriptionHi: "स्वतंत्र डिजिटल पत्रकारिता और तथ्य-जांच।" },
+          { name: "Alt News", nameHi: "ऑल्ट न्यूज़", url: "https://www.altnews.in/", description: "A leading Indian fact-checking website.", descriptionHi: "भारत की एक प्रमुख तथ्य-जांच वेबसाइट।" }
+        ];
+        modified = true;
+      }
       if (modified) {
         await pool.query(
           'UPDATE settings SET "founderMessageEn" = $1 WHERE id = $2',
@@ -327,6 +344,20 @@ router.get("/api/cms", async (req, res) => {
             quoteEn: "During my husband's eye surgery, RP Foundation volunteers did everything from hospital registration to arranging blood donors. They treated us like family members.",
             quoteHi: "मेरे पति के नेत्र ऑपरेशन के दौरान, आरपी फाउंडेशन के स्वयंसेवकों ने अस्पताल पंजीकरण से लेकर रक्तदाताओं की व्यवस्था करने तक सब कुछ किया। उन्होंने हमारे साथ परिवार के सदस्यों जैसा व्यवहार किया।"
           }
+        ],
+        factCheckSources: [
+          { name: "PIB Fact Check", nameHi: "पीआईबी फैक्ट चेक", url: "https://xcancel.com/pibfactcheck", description: "Press Information Bureau fact-checks regarding government policies and schemes.", descriptionHi: "सरकारी नीतियों और योजनाओं के संबंध में प्रेस सूचना ब्यूरो द्वारा तथ्य-जांच।" },
+          { name: "Vishvas News", nameHi: "विश्वास न्यूज़", url: "https://www.vishvasnews.com/", description: "A leading Indian multilingual fact-checking website.", descriptionHi: "भारत की एक प्रमुख बहुभाषी तथ्य-जांच वेबसाइट।" },
+          { name: "India Today Anti Fake News War", nameHi: "इंडिया टुडे एंटी फेक न्यूज़ वॉर", url: "https://xcancel.com/IndiaTodayFacts", description: "India Today fact-checks addressing viral misinformation.", descriptionHi: "इंडिया टुडे द्वारा वायरल भ्रामक जानकारियों की तथ्य-जांच।" },
+          { name: "PTI Fact Check (X)", nameHi: "पीटीआई फैक्ट चेक (X)", url: "https://xcancel.com/ptifactcheck", description: "PTI's official fact-check handle on X/Twitter.", descriptionHi: "प्रेस ट्रस्ट ऑफ इंडिया (PTI) का आधिकारिक तथ्य-जांच हैंडल।" },
+          { name: "MEA Fact Check", nameHi: "विदेश मंत्रालय फैक्ट चेक", url: "https://xcancel.com/MEAFactCheck", description: "Ministry of External Affairs official fact-checking handle.", descriptionHi: "विदेश मंत्रालय का आधिकारिक तथ्य-जांच हैंडल।" },
+          { name: "Jansampark MP Fact Check", nameHi: "जनसंपर्क मध्य प्रदेश फैक्ट चेक", url: "https://xcancel.com/jansamparkFC", description: "Madhya Pradesh Government's official public relations fact-checker.", descriptionHi: "मध्य प्रदेश सरकार का आधिकारिक जनसंपर्क तथ्य-जांच हैंडल।" },
+          { name: "NewsMeter Fact Check", nameHi: "न्यूज़मीटर फैक्ट चेक", url: "https://xcancel.com/newsmeterfacts", description: "Independent digital fact-checking and investigative journalism.", descriptionHi: "स्वतंत्र डिजिटल तथ्य-जांच और खोजी पत्रकारिता।" },
+          { name: "UP Police Viral Check", nameHi: "यूपी पुलिस वायरल चेक", url: "https://xcancel.com/UPPViralCheck", description: "Uttar Pradesh Police official handle for checking viral rumors.", descriptionHi: "उत्तर प्रदेश पुलिस का वायरल अफवाहों की जांच का आधिकारिक हैंडल।" },
+          { name: "Info UP Fact Check", nameHi: "इन्फो यूपी फैक्ट चेक", url: "https://xcancel.com/InfoUPFactcheck", description: "Information & Public Relations Department of UP fact-checking handle.", descriptionHi: "सूचना एवं जनसंपर्क विभाग (उत्तर प्रदेश) का आधिकारिक तथ्य-जांच हैंडल।" },
+          { name: "Dainik Bhaskar No Fake News", nameHi: "दैनिक भास्कर - नो फेक न्यूज़", url: "https://www.bhaskar.com/no-fake-news/", description: "Fact-checks by Dainik Bhaskar.", descriptionHi: "दैनिक भास्कर द्वारा तथ्य-जांच।" },
+          { name: "BoomLive Fact Check", nameHi: "बूमलाइव फैक्ट चेक", url: "https://www.boomlive.in/fact-check", description: "Independent digital journalism and fact-checking.", descriptionHi: "स्वतंत्र डिजिटल पत्रकारिता और तथ्य-जांच।" },
+          { name: "Alt News", nameHi: "ऑल्ट न्यूज़", url: "https://www.altnews.in/", description: "A leading Indian fact-checking website.", descriptionHi: "भारत की एक प्रमुख तथ्य-जांच वेबसाइट।" }
         ]
       };
       await pool.query(

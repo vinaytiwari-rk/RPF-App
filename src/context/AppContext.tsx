@@ -12,6 +12,7 @@ export interface CmsConfig {
   carouselSlides: CarouselSlide[]; customServices: any[]; socialDirectory?: SocialDirectoryItem[]; notifications?: NotificationItem[];
   testimonials?: TestimonialItem[]; faqs?: FaqItem[]; aboutTextEn?: string; aboutTextHi?: string; logoImgUrl?: string; homeServices?: any[];
   quoteOfTheDayEn?: string; quoteOfTheDayHi?: string; impactBottomTextEn?: string; impactBottomTextHi?: string;
+  factCheckSources?: any[];
 }
 export interface Settings { tollFree: string; webUrl: string; email: string; founderMessageEn: string; founderMessageHi: string; helplinesMarquee?: string; founderImgUrl?: string; alertBannerEn?: string; alertBannerHi?: string; carouselSlides?: any[]; customServices?: any[]; }
 export interface SocialLink { platform: string; label: string; url: string; icon?: string; }
