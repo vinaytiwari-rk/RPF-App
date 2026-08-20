@@ -78,3 +78,5 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
   document.addEventListener('click', handleClick, true);
   return () => document.removeEventListener('click', handleClick, true);
 }
+
+// Trigger a fresh main-branch CI run using the current browser policy implementation.
