@@ -7,16 +7,17 @@ import { useApp } from "../context/AppContext";
 type Lang = "en" | "hi";
 type Source = { name: string; nameHi: string; url: string; description: string; descriptionHi: string };
 
+const xcancel = (handle: string) => `https://xcancel.com/${handle.replace(/^@/, "")}`;
 const DEFAULT_SOURCES: Source[] = [
-  { name: "PIB Fact Check", nameHi: "पीआईबी फैक्ट चेक", url: "https://x.com/PIBFactCheck", description: "Press Information Bureau fact-checks regarding government policies and schemes.", descriptionHi: "सरकारी नीतियों और योजनाओं के संबंध में प्रेस सूचना ब्यूरो द्वारा तथ्य-जांच।" },
+  { name: "PIB Fact Check", nameHi: "पीआईबी फैक्ट चेक", url: xcancel("PIBFactCheck"), description: "Press Information Bureau fact-checks regarding government policies and schemes.", descriptionHi: "सरकारी नीतियों और योजनाओं के संबंध में प्रेस सूचना ब्यूरो द्वारा तथ्य-जांच।" },
   { name: "Vishvas News", nameHi: "विश्वास न्यूज़", url: "https://www.vishvasnews.com/", description: "A leading Indian multilingual fact-checking website.", descriptionHi: "भारत की एक प्रमुख बहुभाषी तथ्य-जांच वेबसाइट।" },
-  { name: "India Today Anti Fake News War", nameHi: "इंडिया टुडे एंटी फेक न्यूज़ वॉर", url: "https://x.com/IndiaTodayFacts", description: "India Today fact-checks addressing viral misinformation.", descriptionHi: "इंडिया टुडे द्वारा वायरल भ्रामक जानकारियों की तथ्य-जांच।" },
-  { name: "PTI Fact Check (X)", nameHi: "पीटीआई फैक्ट चेक (X)", url: "https://x.com/ptifactcheck", description: "PTI's official fact-check handle on X.", descriptionHi: "प्रेस ट्रस्ट ऑफ इंडिया (PTI) का आधिकारिक तथ्य-जांच हैंडल।" },
-  { name: "MEA Fact Check", nameHi: "विदेश मंत्रालय फैक्ट चेक", url: "https://x.com/MEAIndia", description: "Ministry of External Affairs official updates and clarifications.", descriptionHi: "विदेश मंत्रालय के आधिकारिक अपडेट और स्पष्टीकरण।" },
-  { name: "Jansampark MP Fact Check", nameHi: "जनसंपर्क मध्य प्रदेश फैक्ट चेक", url: "https://x.com/MPJansampark", description: "Madhya Pradesh Government public information and fact-check updates.", descriptionHi: "मध्य प्रदेश सरकार के जनसंपर्क और तथ्य-जांच अपडेट।" },
-  { name: "NewsMeter Fact Check", nameHi: "न्यूज़मीटर फैक्ट चेक", url: "https://x.com/NewsMeter", description: "Independent digital fact-checking and investigative journalism.", descriptionHi: "स्वतंत्र डिजिटल तथ्य-जांच और खोजी पत्रकारिता।" },
-  { name: "UP Police Viral Check", nameHi: "यूपी पुलिस वायरल चेक", url: "https://x.com/uppolice", description: "Uttar Pradesh Police official public-information updates.", descriptionHi: "उत्तर प्रदेश पुलिस के आधिकारिक जन-सूचना अपडेट।" },
-  { name: "Info UP Fact Check", nameHi: "इन्फो यूपी फैक्ट चेक", url: "https://x.com/InfoUPFactCheck", description: "Uttar Pradesh information and public-relations fact-check updates.", descriptionHi: "उत्तर प्रदेश सूचना एवं जनसंपर्क विभाग के तथ्य-जांच अपडेट।" },
+  { name: "India Today Anti Fake News War", nameHi: "इंडिया टुडे एंटी फेक न्यूज़ वॉर", url: xcancel("IndiaTodayFacts"), description: "India Today fact-checks addressing viral misinformation.", descriptionHi: "India Today द्वारा वायरल भ्रामक जानकारियों की तथ्य-जांच।" },
+  { name: "PTI Fact Check", nameHi: "पीटीआई फैक्ट चेक", url: xcancel("ptifactcheck"), description: "PTI's official fact-check handle.", descriptionHi: "प्रेस ट्रस्ट ऑफ इंडिया (PTI) का आधिकारिक तथ्य-जांच हैंडल।" },
+  { name: "MEA Fact Check", nameHi: "विदेश मंत्रालय फैक्ट चेक", url: xcancel("MEAIndia"), description: "Ministry of External Affairs official updates and clarifications.", descriptionHi: "विदेश मंत्रालय के आधिकारिक अपडेट और स्पष्टीकरण।" },
+  { name: "Jansampark MP Fact Check", nameHi: "जनसंपर्क मध्य प्रदेश फैक्ट चेक", url: xcancel("MPJansampark"), description: "Madhya Pradesh Government public information and fact-check updates.", descriptionHi: "मध्य प्रदेश सरकार के जनसंपर्क और तथ्य-जांच अपडेट।" },
+  { name: "NewsMeter Fact Check", nameHi: "न्यूज़मीटर फैक्ट चेक", url: xcancel("NewsMeter"), description: "Independent digital fact-checking and investigative journalism.", descriptionHi: "स्वतंत्र डिजिटल तथ्य-जांच और खोजी पत्रकारिता।" },
+  { name: "UP Police Viral Check", nameHi: "यूपी पुलिस वायरल चेक", url: xcancel("uppolice"), description: "Uttar Pradesh Police official public-information updates.", descriptionHi: "उत्तर प्रदेश पुलिस के आधिकारिक जन-सूचना अपडेट।" },
+  { name: "Info UP Fact Check", nameHi: "इन्फो यूपी फैक्ट चेक", url: xcancel("InfoUPFactCheck"), description: "Uttar Pradesh information and public-relations fact-check updates.", descriptionHi: "उत्तर प्रदेश सूचना एवं जनसंपर्क विभाग के तथ्य-जांच अपडेट।" },
   { name: "Dainik Bhaskar No Fake News", nameHi: "दैनिक भास्कर - नो फेक न्यूज़", url: "https://www.bhaskar.com/no-fake-news/", description: "Fact-checks by Dainik Bhaskar.", descriptionHi: "दैनिक भास्कर द्वारा तथ्य-जांच।" },
   { name: "BoomLive Fact Check", nameHi: "बूमलाइव फैक्ट चेक", url: "https://www.boomlive.in/fact-check", description: "Independent digital journalism and fact-checking.", descriptionHi: "स्वतंत्र डिजिटल पत्रकारिता और तथ्य-जांच।" },
   { name: "Alt News", nameHi: "ऑल्ट न्यूज़", url: "https://www.altnews.in/", description: "A leading Indian fact-checking website.", descriptionHi: "भारत की एक प्रमुख तथ्य-जांच वेबसाइट।" },
@@ -26,42 +27,11 @@ const DEFAULT_SOURCES: Source[] = [
   { name: "FactCheck.org", nameHi: "फैक्टचेक.org", url: "https://www.factcheck.org/", description: "Monitoring the factual accuracy of public statements.", descriptionHi: "सार्वजनिक बयानों की तथ्यात्मक सटीकता की निगरानी।" },
   { name: "Reuters Fact Check", nameHi: "रॉयटर्स फैक्ट चेक", url: "https://www.reuters.com/fact-check/", description: "Global fact-checking of claims and misinformation.", descriptionHi: "दावों और गलत सूचनाओं की वैश्विक तथ्य-जांच।" },
   { name: "AP News Fact Check", nameHi: "एपी न्यूज़ फैक्ट चेक", url: "https://apnews.com/ap-fact-check", description: "Fact-checking and accountability journalism from AP.", descriptionHi: "एसोसिएटेड प्रेस (AP) द्वारा तथ्य-जांच।" },
-  { name: "BBC Verify", nameHi: "बीबीसी वेरीफाई", url: "https://www.bbc.com/news/bbcverify", description: "BBC verification and forensic journalism.", descriptionHi: "बीबीसी का सत्यापन और फोरेंसिक पत्रकारिता।" },
-  { name: "PTI Fact Check", nameHi: "पीटीआई फैक्ट चेक", url: "https://www.ptinews.com/fact-check", description: "Fact-check initiative by the Press Trust of India.", descriptionHi: "प्रेस ट्रस्ट ऑफ इंडिया (PTI) की तथ्य-जांच पहल।" },
+  { name: "BBC Verify", nameHi: "बीबीसी वेरीफाई", url: "https://www.bbc.com/news/bbcverify", description: "BBC verification and forensic journalism.", descriptionHi: "BBC का सत्यापन और फोरेंसिक पत्रकारिता।" },
+  { name: "PTI Fact Check Website", nameHi: "पीटीआई फैक्ट चेक वेबसाइट", url: "https://www.ptinews.com/fact-check", description: "Fact-check initiative by the Press Trust of India.", descriptionHi: "प्रेस ट्रस्ट ऑफ इंडिया (PTI) की तथ्य-जांच पहल।" },
   { name: "NewsChecker", nameHi: "न्यूज़चेकर", url: "https://newschecker.in/", description: "Dedicated to fact-checking and debunking misinformation.", descriptionHi: "गलत सूचनाओं का पर्दाफाश करने के लिए समर्पित।" },
   { name: "Google Fact Check Explorer", nameHi: "गूगल फैक्ट चेक एक्सप्लोरर", url: "https://toolbox.google.com/factcheck/explorer/", description: "Search fact-checks from multiple publishers.", descriptionHi: "कई प्रकाशकों की तथ्य-जांच खोजने का टूल।" },
   { name: "Originality.ai Fact Checker", nameHi: "Originality.ai फैक्ट चेकर", url: "https://originality.ai/automated-fact-checker", description: "Automated claim-checking tool.", descriptionHi: "स्वचालित दावे-जांच टूल।" }
 ];
-
-function WebsiteLogo({ url, label }: { url: string; label: string }) {
-  const [failed, setFailed] = useState(false);
-  let logo = "";
-  try { logo = `${new URL(url).origin}/favicon.ico`; } catch {}
-  return <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
-    {!failed && logo ? <img src={logo} alt={`${label} logo`} className="h-full w-full object-contain" loading="lazy" onError={() => setFailed(true)} /> : <Globe2 className="h-5 w-5 text-emerald-700" />}
-  </div>;
-}
-
-export default function FactCheck() {
-  const { lang } = useOutletContext<{ lang: Lang }>();
-  const { cmsConfig } = useApp();
-  const navigate = useNavigate();
-  const hi = lang === "hi";
-  const sources = useMemo(() => {
-    const configured = Array.isArray(cmsConfig?.factCheckSources) ? cmsConfig.factCheckSources : [];
-    const merged = [...configured, ...DEFAULT_SOURCES];
-    const seen = new Set<string>();
-    return merged.filter((source: any) => {
-      const url = String(source?.url || "").trim();
-      if (!url || seen.has(url)) return false;
-      seen.add(url);
-      return true;
-    });
-  }, [cmsConfig]);
-
-  return <main className="min-h-full bg-slate-50 pb-28"><div className="mx-auto w-full max-w-3xl px-4 py-6"><section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-    <div className="flex items-center gap-3"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><CheckCircle2 className="h-6 w-6" /></div><div><h1 className="text-2xl font-black text-[#000080]">{hi ? "फैक्ट चेक" : "Fact Check"}</h1><p className="mt-1 text-xs text-slate-500">{hi ? "दावों और खबरों की तथ्य-जांच के लिए उपयोगी स्रोत" : "Useful sources for checking claims and news"}</p></div></div>
-    <div className="mt-6 space-y-3">{sources.map((source: any) => <button key={source.url} type="button" onClick={() => openExternalLink(source.url, navigate, hi ? source.nameHi : source.name)} className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:bg-white hover:shadow-sm active:scale-[.99]"><WebsiteLogo url={source.url} label={hi ? source.nameHi : source.name}/><div className="min-w-0 flex-1"><h2 className="text-sm font-black text-slate-800">{hi ? source.nameHi : source.name}</h2><p className="mt-1 text-xs text-slate-500">{hi ? source.descriptionHi : source.description}</p></div></button>)}</div>
-    <p className="mt-5 text-center text-[10px] leading-5 text-slate-400">{hi ? "स्रोत अपने मूल/आधिकारिक पेज पर खुलेंगे। किसी भी मौजूदा स्रोत को हटाया नहीं जाएगा।" : "Sources open on their original/official pages. Existing sources are preserved."}</p>
-  </section></div></main>;
-}
+function WebsiteLogo({ url, label }: { url: string; label: string }) { const [failed, setFailed] = useState(false); let logo=""; try { logo=`${new URL(url).origin}/favicon.ico`; } catch {} return <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm">{!failed&&logo?<img src={logo} alt={`${label} logo`} className="h-full w-full object-contain" loading="lazy" onError={()=>setFailed(true)}/>:<Globe2 className="h-5 w-5 text-emerald-700"/>}</div>; }
+export default function FactCheck(){ const {lang}=useOutletContext<{lang:Lang}>(); const {cmsConfig}=useApp(); const navigate=useNavigate(); const hi=lang==="hi"; const sources=useMemo(()=>{const configured=Array.isArray(cmsConfig?.factCheckSources)?cmsConfig.factCheckSources:[]; const merged=[...configured,...DEFAULT_SOURCES]; const seen=new Set<string>(); return merged.filter((source:any)=>{const url=String(source?.url||"").trim();if(!url||seen.has(url))return false;seen.add(url);return true;});},[cmsConfig]); return <main className="min-h-full bg-slate-50 pb-28"><div className="mx-auto w-full max-w-3xl px-4 py-6"><section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex items-center gap-3"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><CheckCircle2 className="h-6 w-6"/></div><div><h1 className="text-2xl font-black text-[#000080]">{hi?"फैक्ट चेक":"Fact Check"}</h1><p className="mt-1 text-xs text-slate-500">{hi?"दावों और खबरों की तथ्य-जांच के लिए उपयोगी स्रोत":"Useful sources for checking claims and news"}</p></div></div><div className="mt-6 space-y-3">{sources.map((source:any)=><button key={source.url} type="button" onClick={()=>openExternalLink(source.url,navigate,hi?source.nameHi:source.name)} className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:bg-white hover:shadow-sm active:scale-[.99]"><WebsiteLogo url={source.url} label={hi?source.nameHi:source.name}/><div className="min-w-0 flex-1"><h2 className="text-sm font-black text-slate-800">{hi?source.nameHi:source.name}</h2><p className="mt-1 text-xs text-slate-500">{hi?source.descriptionHi:source.description}</p></div></button>)}</div><p className="mt-5 text-center text-[10px] leading-5 text-slate-400">{hi?"X/Twitter स्रोत xcancel के माध्यम से और अन्य स्रोत अपने मूल पेज पर खुलेंगे। कोई मौजूदा स्रोत हटाया नहीं जाएगा।":"X/Twitter sources use xcancel; other sources open on their original pages. Existing sources are preserved."}</p></section></div></main>; }
