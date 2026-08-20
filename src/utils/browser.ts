@@ -1,5 +1,6 @@
 import type { NavigateFunction } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
 import '../config/dynamicExternalLinks';
 import { isSafeWebUrl } from '../config/browserPolicy';
@@ -7,8 +8,6 @@ import { isSafeWebUrl } from '../config/browserPolicy';
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const DEFAULT_WEB_TITLE = 'RPF Web View';
-
-type NativeBrowserPlugin = { open(options: { url: string; title: string }): Promise<void> };
 
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
@@ -30,56 +29,55 @@ export function isExternalWebUrl(url: string): boolean {
     const parsed = new URL(value, window.location.href);
     const host = parsed.hostname.toLowerCase();
     if (host === 'therpfoundation.org' || host.endsWith('.therpfoundation.org')) return false;
-  } catch {}
-  return new URL(value, window.location.href).origin !== window.location.origin;
+    return parsed.origin !== window.location.origin;
+  } catch { return false; }
 }
 
-/** Open third-party destinations in the platform browser/custom tab.
- * This avoids forcing heavy social/news sites through an in-app WebView,
- * which was causing 30–45 second blank/spinner states on Android.
+/**
+ * Third-party pages must never be routed through the React /browser screen.
+ * Android opens them in Capacitor's native Custom Tab; if that is unavailable,
+ * the platform's normal external window is used immediately instead of showing
+ * an in-app iframe spinner. This is especially important for YouTube and sites
+ * that block or slow embedded WebViews.
  */
-export async function openExternalLink(url: string, navigate?: NavigateFunction, title: string = DEFAULT_WEB_TITLE): Promise<void> {
+export async function openExternalLink(url: string, navigate?: NavigateFunction, _title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
-  if (!value) { console.warn('[WebView] Blocked unsupported URL:', url); return; }
-  const safeTitle = title || DEFAULT_WEB_TITLE;
+  if (!value) { console.warn('[Browser] Blocked unsupported URL:', url); return; }
 
-  if (value.toLowerCase().includes('therpfoundation.org')) {
-    try {
-      const urlObj = new URL(value);
-      if (!urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
-        if (navigate) { navigate(urlObj.pathname + urlObj.search + urlObj.hash); return; }
+  try {
+    const urlObj = new URL(value);
+    const host = urlObj.hostname.toLowerCase();
+    if ((host === 'therpfoundation.org' || host.endsWith('.therpfoundation.org')) &&
+        !urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
+      if (navigate) {
+        navigate(urlObj.pathname + urlObj.search + urlObj.hash);
+        return;
       }
-    } catch {}
-  }
+    }
+  } catch {}
 
   if (Capacitor.isNativePlatform()) {
     try {
-      const { Browser } = await import('@capacitor/browser');
-      await Browser.open({ url: value, presentationStyle: 'popover' });
+      await Browser.open({ url: value });
       return;
     } catch (error) {
-      console.warn('[Browser] Capacitor Browser failed, trying native fallback:', error);
+      console.warn('[Browser] Native Custom Tab failed; using platform fallback:', error);
     }
 
-    if (Capacitor.getPlatform() === 'android') {
-      try {
-        const { registerPlugin } = await import('@capacitor/core');
-        const NativeRPFBrowser = registerPlugin<NativeBrowserPlugin>('NativeRPFBrowser');
-        await NativeRPFBrowser.open({ url: value, title: safeTitle });
-        return;
-      } catch (error) {
-        console.error('[Browser] Native Android browser failed:', error);
-      }
-    }
-  }
-
-  if (navigate) {
-    navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
+    // Do not navigate to /browser here: that was the source of the long spinner.
+    try {
+      const opened = window.open(value, '_blank', 'noopener,noreferrer');
+      if (opened) { opened.focus(); return; }
+    } catch {}
     return;
   }
 
-  const popup = window.open(value, '_blank', 'noopener,noreferrer');
-  if (popup) popup.focus();
+  try {
+    const opened = window.open(value, '_blank', 'noopener,noreferrer');
+    if (opened) opened.focus();
+  } catch (error) {
+    console.error('[Browser] Unable to open external URL:', error);
+  }
 }
 
 export const openRPFBrowser = openExternalLink;
@@ -94,19 +92,6 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
     const target = event.target as HTMLElement | null;
     const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null;
     if (!anchor) return;
-
-    if (anchor.href.toLowerCase().includes('therpfoundation.org')) {
-      try {
-        const urlObj = new URL(anchor.href);
-        const navigateFn = getNavigate();
-        if (navigateFn && !urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          navigateFn(urlObj.pathname + urlObj.search + urlObj.hash);
-          return;
-        }
-      } catch {}
-    }
 
     if (!isExternalWebUrl(anchor.href)) return;
     event.preventDefault();
