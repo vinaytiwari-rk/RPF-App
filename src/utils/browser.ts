@@ -3,11 +3,17 @@ import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
 import '../config/dynamicExternalLinks';
 import { isSafeWebUrl } from '../config/browserPolicy';
 import { Browser } from '@capacitor/browser';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const DEFAULT_WEB_TITLE = 'RPF Web View';
+
+interface NativeRPFBrowserPlugin {
+  open(options: { url: string; title?: string }): Promise<void>;
+}
+
+const NativeRPFBrowser = registerPlugin<NativeRPFBrowserPlugin>('NativeRPFBrowser');
 
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
@@ -35,9 +41,10 @@ export function isExternalWebUrl(url: string): boolean {
 
 /**
  * The RPF browser is the canonical destination for third-party web content.
- * Using native Chrome Custom Tabs / Safari View Controller for maximum compatibility on native.
+ * Android uses our native fullscreen WebView activity instead of Chrome Custom Tabs.
+ * The web fallback keeps the persistent /browser app-shell route required by policy.
  */
-export async function openExternalLink(url: string, navigate?: NavigateFunction, _title: string = DEFAULT_WEB_TITLE): Promise<void> {
+export async function openExternalLink(url: string, navigate?: NavigateFunction, title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
   if (!value) { console.warn('[Browser] Blocked unsupported URL:', url); return; }
 
@@ -51,7 +58,15 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     }
   } catch {}
 
-  if (Capacitor.isNativePlatform()) {
+  if (Capacitor.getPlatform() === 'android') {
+    try {
+      await NativeRPFBrowser.open({ url: value, title });
+      return;
+    } catch (err) {
+      console.error('Failed to open native RPF Web View:', err);
+    }
+    // Do not fall back to Chrome Custom Tabs on Android; that recreates the toolbar.
+  } else if (Capacitor.isNativePlatform()) {
     try {
       await Browser.open({ url: value, presentationStyle: 'fullscreen', toolbarColor: '#000080' });
       return;
@@ -61,12 +76,10 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
   }
 
   if (navigate) {
-    // Canonical persistent app-shell routing required by browser policy.
     navigate(`/browser?url=${encodeURIComponent(value)}`);
     return;
   }
 
-  // Keep a safe same-window fallback for non-React callers.
   window.open(value, '_self');
 }
 
