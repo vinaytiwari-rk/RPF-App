@@ -1,5 +1,4 @@
 import type { NavigateFunction } from 'react-router-dom';
-import { Capacitor, registerPlugin } from '@capacitor/core';
 import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
 import '../config/dynamicExternalLinks';
 import { isSafeWebUrl } from '../config/browserPolicy';
@@ -7,9 +6,6 @@ import { isSafeWebUrl } from '../config/browserPolicy';
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const DEFAULT_WEB_TITLE = 'RPF Web View';
-
-type NativeBrowserPlugin = { open(options: { url: string; title: string }): Promise<void> };
-const NativeRPFBrowser = registerPlugin<NativeBrowserPlugin>('NativeRPFBrowser');
 
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
@@ -31,59 +27,36 @@ export function isExternalWebUrl(url: string): boolean {
     const parsed = new URL(value, window.location.href);
     const host = parsed.hostname.toLowerCase();
     if (host === 'therpfoundation.org' || host.endsWith('.therpfoundation.org')) return false;
-  } catch {}
-  return new URL(value, window.location.href).origin !== window.location.origin;
+    return parsed.origin !== window.location.origin;
+  } catch { return false; }
 }
 
-/** Android always routes external HTTP(S) links to the native RPF WebView. */
-export async function openExternalLink(url: string, navigate?: NavigateFunction, title: string = DEFAULT_WEB_TITLE): Promise<void> {
+/**
+ * The RPF browser is the canonical destination for third-party web content.
+ * Do not bypass it with Chrome, Custom Tabs, or a system-browser fallback.
+ */
+export async function openExternalLink(url: string, navigate?: NavigateFunction, _title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
-  if (!value) { console.warn('[WebView] Blocked unsupported URL:', url); return; }
-  const safeTitle = title || DEFAULT_WEB_TITLE;
+  if (!value) { console.warn('[Browser] Blocked unsupported URL:', url); return; }
 
-  const lowercaseUrl = value.toLowerCase();
-  if (lowercaseUrl.includes('therpfoundation.org')) {
-    try {
-      const urlObj = new URL(value);
-      if (!urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
-        if (navigate) {
-          navigate(urlObj.pathname + urlObj.search + urlObj.hash);
-          return;
-        }
-      }
-    } catch {}
-  }
-
-  if (Capacitor.isNativePlatform()) {
-    if (Capacitor.getPlatform() === 'android') {
-      try {
-        await NativeRPFBrowser.open({ url: value, title: safeTitle });
-        return;
-      } catch (error) {
-        console.error('[WebView] Native Android browser failed:', error);
-        if (navigate) {
-          navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
-        }
-        return;
-      }
-    }
-
-    try {
-      const { Browser } = await import('@capacitor/browser');
-      await Browser.open({ url: value });
+  try {
+    const urlObj = new URL(value);
+    const host = urlObj.hostname.toLowerCase();
+    if ((host === 'therpfoundation.org' || host.endsWith('.therpfoundation.org')) &&
+        !urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/') && navigate) {
+      navigate(urlObj.pathname + urlObj.search + urlObj.hash);
       return;
-    } catch (error) {
-      console.warn('[WebView] Capacitor Browser failed:', error);
     }
-  }
+  } catch {}
 
   if (navigate) {
-    navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(safeTitle)}`);
+    // Canonical persistent app-shell routing required by browser policy.
+    navigate(`/browser?url=${encodeURIComponent(value)}`);
     return;
   }
 
-  const popup = window.open(value, '_blank', 'noopener,noreferrer');
-  if (popup) popup.focus();
+  // Keep a safe same-window fallback for non-React callers.
+  window.open(value, '_self');
 }
 
 export const openRPFBrowser = openExternalLink;
@@ -97,22 +70,7 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const target = event.target as HTMLElement | null;
     const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null;
-    if (!anchor) return;
-
-    if (anchor.href.toLowerCase().includes('therpfoundation.org')) {
-      try {
-        const urlObj = new URL(anchor.href);
-        const navigateFn = getNavigate();
-        if (navigateFn && !urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/')) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          navigateFn(urlObj.pathname + urlObj.search + urlObj.hash);
-          return;
-        }
-      } catch {}
-    }
-
-    if (!isExternalWebUrl(anchor.href)) return;
+    if (!anchor || !isExternalWebUrl(anchor.href)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     void openExternalLink(anchor.href, getNavigate(), anchor.textContent?.trim() || DEFAULT_WEB_TITLE);
@@ -120,3 +78,5 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
   document.addEventListener('click', handleClick, true);
   return () => document.removeEventListener('click', handleClick, true);
 }
+
+// Trigger a fresh main-branch CI run using the current browser policy implementation.
