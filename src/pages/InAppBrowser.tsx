@@ -12,6 +12,7 @@ export default function InAppBrowser(){
  const rawUrl=normalizeExternalWebUrl(params.get('url')||'')||'';
  const frameRef=useRef<HTMLIFrameElement>(null);
  const[loading,setLoading]=useState(true),[failed,setFailed]=useState(false),[controls,setControls]=useState(false),[menu,setMenu]=useState(false),[desktop,setDesktop]=useState(false),[frameKey,setFrameKey]=useState(0),[progress,setProgress]=useState(12);
+ // App-owned frame history keeps browser navigation state independent of the shell route.
  const[frameHistory,setFrameHistory]=useState<string[]>([]);
  const safe=!!rawUrl&&isExternalWebUrl(rawUrl);
  const host=useMemo(()=>{try{return new URL(rawUrl).hostname.replace(/^www\./,'')}catch{return 'Website'}},[rawUrl]);
