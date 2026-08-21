@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
-import { Award, ChevronRight, Globe, HeartHandshake, IdCard, Mail, Phone, Settings, ShieldCheck, Upload, User, Users, LogOut, FileText, Loader2, Camera, Sparkles, BadgeCheck } from "lucide-react";
+import { Award, ChevronRight, Globe, HeartHandshake, IdCard, Mail, Phone, Settings, Instagram, Twitter, Facebook, Linkedin, ShieldCheck, Upload, User, Users, LogOut, FileText, Loader2, Camera, Sparkles, BadgeCheck } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -135,7 +135,7 @@ export default function Profile() {
 
       <section className="mt-5">
         <div className="mb-3 flex items-end justify-between px-1"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">{hi ? "आपका RPF स्पेस" : "YOUR RPF SPACE"}</p><h2 className="mt-0.5 text-[17px] font-black text-[#000080]">{hi ? "त्वरित पहुंच" : "Quick access"}</h2></div><Sparkles className="h-4 w-4 text-orange-400" /></div>
-        <div className="grid gap-2.5 sm:grid-cols-3">{accountItems.map(({ icon: Icon, title, sub, route, gradient }) => <motion.button key={title} whileHover={{ y: -2 }} whileTap={{ scale: .985 }} onClick={() => navigate(route)} className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm transition hover:shadow-md"><span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-sm`}><Icon className="h-5 w-5 text-white" /></span><span className="min-w-0 flex-1"><span className="block text-[13px] font-black text-slate-800">{title}</span><span className="mt-0.5 block text-[10px] leading-4 text-slate-500">{sub}</span></span><ChevronRight className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-slate-500" /></motion.button>)}</div>
+        <div className="grid gap-2.5 sm:grid-cols-3">{accountItems.map(({ icon: Icon, title, sub, route, gradient }) => <motion.button key={title} whileHover={{ y: -2 }} whileTap={{ scale: .985 }} onClick={() => navigate(route)} className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 text-left shadow-[0_4px_20px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300"><span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-sm`}><Icon className="h-5 w-5 text-white" /></span><span className="min-w-0 flex-1"><span className="block text-[13px] font-black text-slate-800">{title}</span><span className="mt-0.5 block text-[10px] leading-4 text-slate-500">{sub}</span></span><ChevronRight className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-slate-500" /></motion.button>)}</div>
       </section>
 
       <section className="mt-5 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
