@@ -2,6 +2,8 @@ import type { NavigateFunction } from 'react-router-dom';
 import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
 import '../config/dynamicExternalLinks';
 import { isSafeWebUrl } from '../config/browserPolicy';
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
@@ -31,11 +33,9 @@ export function isExternalWebUrl(url: string): boolean {
   } catch { return false; }
 }
 
-import { Browser } from '@capacitor/browser';
-
 /**
  * The RPF browser is the canonical destination for third-party web content.
- * Using native Chrome Custom Tabs / Safari View Controller for maximum compatibility.
+ * Using native Chrome Custom Tabs / Safari View Controller for maximum compatibility on native.
  */
 export async function openExternalLink(url: string, navigate?: NavigateFunction, _title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
@@ -51,12 +51,23 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     }
   } catch {}
 
-  try {
-    await Browser.open({ url: value, presentationStyle: 'fullscreen', toolbarColor: '#000080' });
-  } catch (err) {
-    console.error('Failed to open native browser:', err);
-    window.open(value, '_blank');
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await Browser.open({ url: value, presentationStyle: 'fullscreen', toolbarColor: '#000080' });
+      return;
+    } catch (err) {
+      console.error('Failed to open native browser:', err);
+    }
   }
+
+  if (navigate) {
+    // Canonical persistent app-shell routing required by browser policy.
+    navigate(`/browser?url=${encodeURIComponent(value)}`);
+    return;
+  }
+
+  // Keep a safe same-window fallback for non-React callers.
+  window.open(value, '_self');
 }
 
 export const openRPFBrowser = openExternalLink;
@@ -78,5 +89,3 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
   document.addEventListener('click', handleClick, true);
   return () => document.removeEventListener('click', handleClick, true);
 }
-
-// Trigger a fresh main-branch CI run using the current browser policy implementation.
