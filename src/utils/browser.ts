@@ -31,9 +31,11 @@ export function isExternalWebUrl(url: string): boolean {
   } catch { return false; }
 }
 
+import { Browser } from '@capacitor/browser';
+
 /**
  * The RPF browser is the canonical destination for third-party web content.
- * Do not bypass it with Chrome, Custom Tabs, or a system-browser fallback.
+ * Using native Chrome Custom Tabs / Safari View Controller for maximum compatibility.
  */
 export async function openExternalLink(url: string, navigate?: NavigateFunction, _title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
@@ -49,14 +51,12 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     }
   } catch {}
 
-  if (navigate) {
-    // Canonical persistent app-shell routing required by browser policy.
-    navigate(`/browser?url=${encodeURIComponent(value)}`);
-    return;
+  try {
+    await Browser.open({ url: value, presentationStyle: 'fullscreen', toolbarColor: '#000080' });
+  } catch (err) {
+    console.error('Failed to open native browser:', err);
+    window.open(value, '_blank');
   }
-
-  // Keep a safe same-window fallback for non-React callers.
-  window.open(value, '_self');
 }
 
 export const openRPFBrowser = openExternalLink;
