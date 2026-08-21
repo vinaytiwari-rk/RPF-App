@@ -259,6 +259,16 @@ router.get("/api/cms", async (req, res) => {
         ];
         modified = true;
       }
+      if (Array.isArray(parsed.factCheckSources)) {
+        const filteredFc = parsed.factCheckSources.filter((s: any) => 
+          !s.name?.toLowerCase().includes("google fact check") && 
+          !s.url?.toLowerCase().includes("toolbox.google.com/factcheck")
+        );
+        if (filteredFc.length !== parsed.factCheckSources.length) {
+          parsed.factCheckSources = filteredFc;
+          modified = true;
+        }
+      }
       if (modified) {
         await pool.query(
           'UPDATE settings SET "founderMessageEn" = $1 WHERE id = $2',

@@ -12,7 +12,7 @@ export const CORE_SERVICES = [
   { id: "education", category: "welfare", iconName: "BookOpen", titleEn: "Education Aid", titleHi: "शिक्षा सहायता", descEn: "Scholarships and Books", descHi: "छात्रवृत्ति और किताबें" },
   { id: "women-safety", category: "urgent", iconName: "Shield", titleEn: "Women Safety", titleHi: "महिला सुरक्षा", descEn: "24/7 Helpline and support", descHi: "24/7 हेल्पलाइन" },
   { id: "seniors", category: "welfare", iconName: "HandHelping", titleEn: "Senior Citizens", titleHi: "वरिष्ठ नागरिक", descEn: "Doorstep checkups & elder care", descHi: "वरिष्ठ नागरिकों के लिए सहायता" },
-  { id: "animals", category: "welfare", iconName: "Compass", titleEn: "Animal Welfare", titleHi: "पशु कल्याण", descEn: "Stray rescue & adoption registry", descHi: "बेसहारा पशुओं की सहायता" },
+  { id: "animals", category: "welfare", iconName: "PawPrint", titleEn: "Animal Welfare", titleHi: "पशु कल्याण", descEn: "Stray rescue & adoption registry", descHi: "बेसहारा पशुओं की सहायता" },
   { id: "environment", category: "involved", iconName: "TreePine", titleEn: "Environment", titleHi: "पर्यावरण", descEn: "Tree plantation drives", descHi: "वृक्षारोपण अभियान" },
   { id: "crowdfunding", category: "involved", iconName: "Coins", titleEn: "Crowdfunding", titleHi: "सामुदायिक धन संचय", descEn: "Crowdfunded community projects", descHi: "सामुदायिक परियोजनाओं के लिए धन" },
   { id: "culture", category: "civic", iconName: "Landmark", titleEn: "Religious & Culture", titleHi: "धर्म और संस्कृति", descEn: "Festivals, sacred texts & live feeds", descHi: "त्यौहार, ग्रंथ और मंदिर लाइव" },

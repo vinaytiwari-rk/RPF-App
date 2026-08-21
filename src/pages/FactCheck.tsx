@@ -26,9 +26,14 @@ export default function FactCheck() {
   const navigate = useNavigate();
   const hi = lang === "hi";
   
-  const sources = Array.isArray(cmsConfig?.factCheckSources) && cmsConfig.factCheckSources.length > 0 
+  const rawSources = Array.isArray(cmsConfig?.factCheckSources) && cmsConfig.factCheckSources.length > 0 
     ? cmsConfig.factCheckSources 
     : DEFAULT_SOURCES;
+
+  const sources = rawSources.filter((s: any) => 
+    !s.name?.toLowerCase().includes("google fact check") && 
+    !s.url?.toLowerCase().includes("toolbox.google.com/factcheck")
+  );
 
   return (
     <main className="min-h-full bg-slate-50 pb-28">

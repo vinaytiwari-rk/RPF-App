@@ -102,14 +102,17 @@ public class NativeBrowserActivity extends AppCompatActivity {
         settings.setDatabaseEnabled(true);
         settings.setSupportMultipleWindows(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
-        settings.setMediaPlaybackRequiresUserGesture(true);
+        settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setUseWideViewPort(true);
-        settings.setLoadWithOverviewMode(false);
-        settings.setBuiltInZoomControls(false);
+        settings.setLoadWithOverviewMode(true);
+        settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
-        settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setUserAgentString("Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
 
         CookieManager cookies = CookieManager.getInstance();
         cookies.setAcceptCookie(true);

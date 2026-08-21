@@ -1,11 +1,26 @@
 import React, { useState, useMemo } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { Heart, Search, ExternalLink } from "lucide-react";
+import { 
+  Heart, 
+  Search, 
+  ExternalLink, 
+  Globe, 
+  Building2, 
+  Pill, 
+  Droplet, 
+  ShieldCheck, 
+  Baby, 
+  Smile, 
+  BookOpen, 
+  Activity, 
+  Stethoscope 
+} from "lucide-react";
 import { openExternalLink } from "../utils/browser";
 
 type Lang = "en" | "hi";
 
 const HEALTH_LINKS = [
+  { name: "eRaktkosh", url: "https://eraktkosh.mohfw.gov.in/eraktkoshPortal/#/", category: "Welfare & Services", categoryHi: "कल्याण और सेवाएं", desc: "Government blood availability and blood center locator portal." },
   { name: "WHO", url: "https://www.who.int/news", category: "Global Bodies", categoryHi: "वैश्विक संस्थाएं", desc: "World Health Organization news and updates." },
   { name: "CDC", url: "https://www.cdc.gov/health-topics.html", category: "Global Bodies", categoryHi: "वैश्विक संस्थाएं", desc: "Centers for Disease Control and Prevention health topics." },
   { name: "NIH", url: "https://www.nih.gov/", category: "Global Bodies", categoryHi: "वैश्विक संस्थाएं", desc: "National Institutes of Health official website." },
@@ -58,6 +73,19 @@ const HEALTH_LINKS = [
   { name: "Medlineplus", url: "https://medlineplus.gov/", category: "Reference & Tools", categoryHi: "संदर्भ और उपकरण", desc: "Trusted health information from the US National Library of Medicine." },
   { name: "Jivi AI", url: "https://www.jivi.ai/", category: "Reference & Tools", categoryHi: "संदर्भ और उपकरण", desc: "AI-driven medical assistant and diagnostics portal." }
 ];
+
+function getHealthIcon(name: string) {
+  const lower = name.toLowerCase();
+  if (lower.includes("eraktkosh") || lower.includes("blood")) return <Droplet className="h-5 w-5 text-red-600" />;
+  if (lower.includes("drug") || lower.includes("med") || lower.includes("aushad")) return <Pill className="h-5 w-5 text-emerald-600" />;
+  if (lower.includes("hospital") || lower.includes("cghs") || lower.includes("echs") || lower.includes("esic") || lower.includes("mandir") || lower.includes("tmc") || lower.includes("cip")) return <Building2 className="h-5 w-5 text-blue-600" />;
+  if (lower.includes("who") || lower.includes("cdc") || lower.includes("nih") || lower.includes("cdsco") || lower.includes("nmc") || lower.includes("naco")) return <Globe className="h-5 w-5 text-teal-600" />;
+  if (lower.includes("ayushman") || lower.includes("abha") || lower.includes("pmjay") || lower.includes("yojna") || lower.includes("scheme")) return <ShieldCheck className="h-5 w-5 text-amber-600" />;
+  if (lower.includes("u-win") || lower.includes("rch") || lower.includes("child") || lower.includes("surrogacy")) return <Baby className="h-5 w-5 text-pink-600" />;
+  if (lower.includes("tele manas") || lower.includes("mental") || lower.includes("soch")) return <Smile className="h-5 w-5 text-purple-600" />;
+  if (lower.includes("pub") || lower.includes("journal") || lower.includes("jama") || lower.includes("nejm") || lower.includes("ama") || lower.includes("trials")) return <BookOpen className="h-5 w-5 text-indigo-600" />;
+  return <Stethoscope className="h-5 w-5 text-teal-600" />;
+}
 
 export default function HealthCare() {
   const { lang } = useOutletContext<{ lang: Lang }>();
@@ -127,7 +155,7 @@ export default function HealthCare() {
             className={`py-1.5 px-4 rounded-full text-[10px] uppercase tracking-wider font-extrabold text-center transition shrink-0 ${
               activeTab === cat 
                 ? "bg-teal-700 text-white shadow-2xs" 
-                : "bg-slate-100 text-slate-650 hover:bg-slate-200"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
             {cat === "All" ? (hi ? "सभी" : "All") : cat}
@@ -150,7 +178,7 @@ export default function HealthCare() {
               className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4.5 text-left transition hover:border-teal-300 hover:shadow-2xs active:scale-[.99] cursor-pointer"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700 border border-teal-100 shadow-3xs">
-                <ExternalLink className="h-5 w-5" />
+                {getHealthIcon(link.name)}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
@@ -163,6 +191,7 @@ export default function HealthCare() {
                   {link.desc}
                 </p>
               </div>
+              <ExternalLink className="h-4 w-4 text-slate-400 shrink-0" />
             </button>
           ))
         )}
