@@ -1,2 +1,71 @@
-import {motion,AnimatePresence}from 'motion/react';import {Music2,Pause,Play,Radio,X}from 'lucide-react';import {useNavigate}from 'react-router-dom';import {useRadioPlayer}from '../context/RadioPlayerContext';
-export default function RadioMiniPlayer(){const navigate=useNavigate();const{station,playing,loading,toggle,pause}=useRadioPlayer();return <AnimatePresence>{station&&<motion.div initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} exit={{opacity:0,y:18}} className="fixed inset-x-3 bottom-[calc(4.8rem+env(safe-area-inset-bottom))] z-[55] mx-auto max-w-[720px]"><div className="flex items-center gap-2.5 rounded-2xl border border-white/15 bg-[#07133d]/95 p-2.5 text-white shadow-[0_18px_45px_rgba(0,0,0,.25)] backdrop-blur-xl"><button onClick={()=>navigate('/internet-radio')} className="flex min-w-0 flex-1 items-center gap-2.5 text-left"><div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/10">{station.image?<img src={station.image} alt="" className="h-full w-full object-cover"/>:<Radio className="h-5 w-5 text-[#FF9933]"/>}{playing&&<span className="absolute inset-0 grid place-items-center bg-[#000080]/40"><Music2 className="h-4 w-4 animate-pulse text-[#FF9933]"/></span>}</div><span className="min-w-0"><span className="block truncate text-[12px] font-black">{station.name}</span><span className="mt-0.5 block text-[9px] font-bold uppercase tracking-[.14em] text-white/55">{playing?'Live now':loading?'Loading':'Paused'}</span></span></button><button onClick={()=>void toggle()} disabled={loading} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#FF9933] text-white disabled:opacity-60">{loading?<span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"/>:playing?<Pause className="h-4 w-4 fill-current"/>:<Play className="ml-0.5 h-4 w-4 fill-current"/>}</button><button onClick={pause} aria-label="Stop radio" className="grid h-8 w-8 place-items-center rounded-full text-white/55 hover:bg-white/10"><X className="h-4 w-4"/></button></div></motion.div></motion.div>}</AnimatePresence>}
+import { motion, AnimatePresence } from "motion/react";
+import { Music2, Pause, Play, Radio, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useRadioPlayer } from "../context/RadioPlayerContext";
+
+export default function RadioMiniPlayer() {
+  const navigate = useNavigate();
+  const { station, playing, loading, toggle, pause } = useRadioPlayer();
+
+  return (
+    <AnimatePresence>
+      {station && (
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 18 }}
+          className="fixed inset-x-3 bottom-[calc(4.8rem+env(safe-area-inset-bottom))] z-[55] mx-auto max-w-[720px]"
+        >
+          <div className="flex items-center gap-2.5 rounded-2xl border border-white/15 bg-[#07133d]/95 p-2.5 text-white shadow-[0_18px_45px_rgba(0,0,0,.25)] backdrop-blur-xl">
+            <button
+              onClick={() => navigate("/internet-radio")}
+              className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+            >
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/10">
+                {station.image ? (
+                  <img src={station.image} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <Radio className="h-5 w-5 text-[#FF9933]" />
+                )}
+                {playing && (
+                  <span className="absolute inset-0 grid place-items-center bg-[#000080]/40">
+                    <Music2 className="h-4 w-4 animate-pulse text-[#FF9933]" />
+                  </span>
+                )}
+              </div>
+              <span className="min-w-0">
+                <span className="block truncate text-[12px] font-black">{station.name}</span>
+                <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-[.14em] text-white/55">
+                  {playing ? "Live now" : loading ? "Loading" : "Paused"}
+                </span>
+              </span>
+            </button>
+
+            <button
+              onClick={() => void toggle()}
+              disabled={loading}
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#FF9933] text-white disabled:opacity-60"
+              aria-label={playing ? "Pause radio" : "Play radio"}
+            >
+              {loading ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              ) : playing ? (
+                <Pause className="h-4 w-4 fill-current" />
+              ) : (
+                <Play className="ml-0.5 h-4 w-4 fill-current" />
+              )}
+            </button>
+
+            <button
+              onClick={pause}
+              aria-label="Stop radio"
+              className="grid h-8 w-8 place-items-center rounded-full text-white/55 hover:bg-white/10"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
