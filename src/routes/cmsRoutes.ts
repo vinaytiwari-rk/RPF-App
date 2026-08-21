@@ -139,23 +139,25 @@ router.get("/api/cms", async (req, res) => {
       let modified = false;
 
       if (Array.isArray(parsed.liveTvChannels)) {
+        const unwanted = new Set([
+          'uploaded-45', 'uploaded-46', 'uploaded-47', 'uploaded-50', 'uploaded-51',
+          'uploaded-52', 'uploaded-53', 'uploaded-43', 'uploaded-56', 'uploaded-57',
+          'uploaded-59', 'uploaded-60', 'uploaded-65', 'uploaded-66'
+        ]);
+
+        const beforeCount = parsed.liveTvChannels.length;
+        parsed.liveTvChannels = parsed.liveTvChannels.filter((c: any) => !c || !unwanted.has(c.id));
+        if (parsed.liveTvChannels.length !== beforeCount) {
+          modified = true;
+        }
+
         const newChannelsMap = new Map([
           ['uploaded-42', 'https://www.ndtv.com/livetv-ndtv24x7'],
-          ['uploaded-43', 'https://www.republicworld.com/livetv'],
           ['uploaded-44', 'https://www.wionews.com/live-tv'],
-          ['uploaded-45', 'https://www.timesnownews.com/live-tv'],
-          ['uploaded-46', 'https://www.indiatoday.in/livetv'],
-          ['uploaded-47', 'https://www.news18.com/livetv/'],
           ['uploaded-48', 'https://www.aajtak.in/livetv'],
           ['uploaded-49', 'https://www.abplive.com/live-tv'],
-          ['uploaded-50', 'https://hindi.news18.com/livetv/'],
-          ['uploaded-51', 'https://www.timesnowhindi.com/live-tv'],
-          ['uploaded-52', 'https://zeenews.india.com/hindi/live-tv'],
-          ['uploaded-53', 'https://www.republicbharat.com/livetv'],
           ['uploaded-54', 'https://www.indiatvnews.com/livetv'],
-          ['uploaded-55', 'https://www.tv9hindi.com/live-tv'],
-          ['uploaded-56', 'https://ndtv.in/livetv-ndtvindia?pfrom=home-ndtv-india_nav'],
-          ['uploaded-57', 'https://www.newsnationtv.com/liveTV'],
+          ['uploaded-55', 'https://www.tv9hindi.com/live-tv']
         ]);
 
         let hasUpdates = false;
@@ -173,14 +175,10 @@ router.get("/api/cms", async (req, res) => {
 
         const existingIds = new Set(parsed.liveTvChannels.map((c: any) => c?.id));
         const newChannelsToAdd = [
-          { id: 'uploaded-59', name: 'DW', url: 'https://www.dw.com/en/live-tv/channel-english', category: 'News', enabled: true },
-          { id: 'uploaded-60', name: 'Sansad 3', url: 'https://webcast.gov.in/lstvlive/', category: 'News', enabled: true },
           { id: 'uploaded-61', name: 'France24', url: 'https://www.france24.com/en/live', category: 'News', enabled: true },
           { id: 'uploaded-62', name: 'Al Jazeera', url: 'https://www.aljazeera.com/video/live', category: 'News', enabled: true },
           { id: 'uploaded-63', name: 'Euro News', url: 'https://www.euronews.com/live', category: 'News', enabled: true },
-          { id: 'uploaded-64', name: 'CNN', url: 'https://edition.cnn.com/videos/fast/cnni-fast', category: 'News', enabled: true },
-          { id: 'uploaded-65', name: 'RT', url: 'https://www.rt.com/on-air/', category: 'News', enabled: true },
-          { id: 'uploaded-66', name: 'IMF', url: 'https://www.imf.org/en/live', category: 'News', enabled: true }
+          { id: 'uploaded-64', name: 'CNN', url: 'https://edition.cnn.com/videos/fast/cnni-fast', category: 'News', enabled: true }
         ];
 
         newChannelsToAdd.forEach(nc => {
