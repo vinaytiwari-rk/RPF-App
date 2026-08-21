@@ -7,6 +7,7 @@ import { Browser } from '@capacitor/browser';
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const DEFAULT_WEB_TITLE = 'Samahit';
+const SAMAHIT_BROWSER_ROUTE = '/browser?url=';
 
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
@@ -52,6 +53,7 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
   } catch {}
 
   if (navigate) {
+    // Keep external browsing inside the persistent Samahit app shell.
     navigate(`/browser?url=${encodeURIComponent(value)}`);
     return;
   }
