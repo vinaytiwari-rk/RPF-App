@@ -71,6 +71,10 @@ export default function ServiceDetails() {
 
   useEffect(() => {
     if (!id) return;
+    if (id === "card") {
+      navigate("/jan-seva-card", { replace: true });
+      return;
+    }
     const fetchContent = async () => {
       setIsLoadingContent(true);
       setContentData(null);

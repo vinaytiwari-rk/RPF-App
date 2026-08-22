@@ -9,14 +9,7 @@ export interface GovLink {
 }
 
 export const SERVICE_GOV_LINKS: Record<string, GovLink[]> = {
-  card: [
-    { title: "National Portal of India", titleHi: "भारत का राष्ट्रीय पोर्टल", desc: "Single window access to government services & foundational ID verification.", descHi: "सरकारी सेवाओं और आधारभूत आईडी का राष्ट्रीय पोर्टल।", url: "https://www.india.gov.in/", isGov: true },
-    { title: "MP e-Services Portal", titleHi: "एम.पी. ई-सेवा पोर्टल", desc: "Madhya Pradesh government e-services & citizen card portal.", descHi: "मध्य प्रदेश सरकार की ई-सेवाएं पोर्टल।", url: "https://services.mp.gov.in/eservice/", isGov: true },
-    { title: "Digital India Citizen Portal", titleHi: "डिजिटल इंडिया पोर्टल", desc: "Official Digital India initiative and citizen identity services.", descHi: "डिजिटल इंडिया पहल और नागरिक सेवाएं।", url: "https://digitalindia.gov.in/", isGov: true },
-    { title: "UIDAI Resident Portal", titleHi: "यूआईडीएआई निवासी पोर्टल", desc: "Official Aadhaar identity and verification services portal.", descHi: "आधिकारिक आधार पहचान और सत्यापन सेवा पोर्टल।", url: "https://uidai.gov.in/", isGov: true },
-    { title: "UMANG Unified App", titleHi: "उमंग एकीकृत ऐप पोर्टल", desc: "Unified mobile app for multi-government services in India.", descHi: "भारत में बहु-सरकारी सेवाओं के लिए एकीकृत मोबाइल ऐप।", url: "https://web.umang.gov.in/", isGov: true },
-    { title: "MyGov Citizen Services", titleHi: "मायगव नागरिक पोर्टल", desc: "Citizen engagement and identity service programs.", descHi: "नागरिक सहभागिता और पहचान सेवा कार्यक्रम।", url: "https://www.mygov.in/", isGov: true }
-  ],
+  card: [],
   blood: [
     { title: "e-RaktKosh Portal", titleHi: "ई-रक्तकोश पोर्टल", desc: "Centralized blood bank management system & donor finder by MoHFW.", descHi: "स्वास्थ्य मंत्रालय द्वारा केंद्रीयकृत रक्त बैंक प्रबंधन एवं दाता खोज।", url: "https://www.eraktkosh.in/", isGov: true },
     { title: "National Health Portal (NHP)", titleHi: "राष्ट्रीय स्वास्थ्य पोर्टल", desc: "Official health guidance & blood emergency directory.", descHi: "आधिकारिक स्वास्थ्य मार्गदर्शन और रक्त आपातकालीन निर्देशिका।", url: "https://www.nhp.gov.in/", isGov: true },
