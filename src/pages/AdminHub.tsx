@@ -194,7 +194,7 @@ export default function AdminHub() {
             </div>
           )}
 
-          {section === "overview" && <Overview counts={counts} />}
+          {section === "overview" && <Overview counts={counts} onNavigate={(s) => setSection(s)} />}
           {section === "people" && (
             <People
               users={users}
@@ -305,31 +305,43 @@ export default function AdminHub() {
   );
 }
 
-function Stat({ label, value, icon: Icon }: { label: string; value: number; icon: typeof Users }) {
+function Stat({ label, value, icon: Icon, onClick }: { label: string; value: number; icon: typeof Users; onClick?: () => void }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <Icon className="h-5 w-5 text-[#FF9933]" />
+    <div
+      onClick={onClick}
+      className="group relative cursor-pointer rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs hover:shadow-md hover:border-[#FF9933]/60 transition active:scale-[.99]"
+    >
+      <div className="flex items-center justify-between">
+        <div className="h-9 w-9 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-[#FF9933] group-hover:scale-105 transition-transform">
+          <Icon className="h-4.5 w-4.5" />
+        </div>
+        <span className="text-[10px] font-black uppercase text-[#000080] bg-blue-50/80 px-2.5 py-1 rounded-full border border-blue-100 group-hover:bg-[#000080] group-hover:text-white transition flex items-center gap-1">
+          View List →
+        </span>
+      </div>
       <p className="mt-4 text-3xl font-black text-[#000080]">{value}</p>
-      <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">{label}</p>
     </div>
   );
 }
 
-function Overview({ counts }: { counts: Record<string, number> }) {
+function Overview({ counts, onNavigate }: { counts: Record<string, number>; onNavigate: (section: Section) => void }) {
   return (
     <>
       <div className="mb-5">
         <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#FF9933]">Control centre</p>
         <h2 className="mt-1 text-2xl font-black text-slate-900">Overview</h2>
-        <p className="mt-1 text-sm text-slate-500">Live records overview. Click any tab to view full person-level details.</p>
+        <p className="mt-1 text-xs text-slate-500 font-semibold">
+          Live records overview. Click any stat card below to view full person-level details and records.
+        </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <Stat label="Registered Citizens" value={counts.users > 0 ? counts.users : 1245} icon={Users} />
-        <Stat label="Active Volunteers" value={counts.volunteers > 0 ? counts.volunteers : 340} icon={UserRoundCheck} />
-        <Stat label="Beneficiaries / Grievances" value={counts.grievances > 0 ? counts.grievances : 2890} icon={ClipboardList} />
-        <Stat label="Announcements" value={counts.announcements} icon={Bell} />
-        <Stat label="Blood Donors" value={counts.blood} icon={Droplet} />
-        <Stat label="Job Postings" value={counts.jobs} icon={BriefcaseBusiness} />
+        <Stat label="Registered Citizens" value={counts.users > 0 ? counts.users : 1245} icon={Users} onClick={() => onNavigate("people")} />
+        <Stat label="Active Volunteers" value={counts.volunteers > 0 ? counts.volunteers : 340} icon={UserRoundCheck} onClick={() => onNavigate("people")} />
+        <Stat label="Beneficiaries / Grievances" value={counts.grievances > 0 ? counts.grievances : 2890} icon={ClipboardList} onClick={() => onNavigate("requests")} />
+        <Stat label="Announcements" value={counts.announcements} icon={Bell} onClick={() => onNavigate("content")} />
+        <Stat label="Blood Donors" value={counts.blood} icon={Droplet} onClick={() => onNavigate("blood")} />
+        <Stat label="Job Postings" value={counts.jobs} icon={BriefcaseBusiness} onClick={() => onNavigate("services")} />
       </div>
     </>
   );
