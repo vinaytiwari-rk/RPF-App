@@ -135,17 +135,6 @@ export default function Services() {
     const isWebsite = /^https?:\/\//i.test(target);
     const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;
 
-    // Distinct micro-theme icon background styling
-    const colorStyles = [
-      "bg-orange-50 text-[#FF9933] border-orange-100",
-      "bg-blue-50 text-[#000080] border-blue-100",
-      "bg-emerald-50 text-[#138808] border-emerald-100",
-      "bg-purple-50 text-purple-700 border-purple-100",
-      "bg-rose-50 text-rose-600 border-rose-100",
-      "bg-indigo-50 text-indigo-700 border-indigo-100",
-    ];
-    const badgeColor = colorStyles[idx % colorStyles.length];
-
     return (
       <button
         type="button"
@@ -153,30 +142,32 @@ export default function Services() {
           if (target.startsWith("http")) openExternalLink(target, navigate, svc.titleEn);
           else navigate(target);
         }}
-        className="group relative w-full bg-white rounded-2xl p-4 flex items-center gap-4 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-orange-200 active:scale-[.99] transition-all duration-200 text-left cursor-pointer"
+        className="group relative w-full bg-white rounded-2xl p-3.5 flex items-center justify-between border border-slate-200/70 shadow-xs hover:shadow-md hover:border-slate-300 active:scale-[.99] transition-all duration-200 text-left cursor-pointer"
       >
-        <div className={`w-12 h-12 shrink-0 flex items-center justify-center rounded-2xl border shadow-inner ${badgeColor}`}>
-          <IconComponent className="w-6 h-6 transition-transform group-hover:scale-110" />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h4 className="font-black text-sm text-slate-900 leading-snug truncate group-hover:text-[#000080] transition">
-              {isHi ? svc.titleHi : svc.titleEn}
-            </h4>
-            {isWebsite && (
-              <span className="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#000080] border border-blue-100">
-                Portal
-              </span>
-            )}
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl bg-[#FAF8F5] border border-slate-200/80 text-amber-800">
+            <IconComponent className="w-5 h-5 transition-transform group-hover:scale-110" />
           </div>
-          <p className="text-[11px] font-medium text-slate-500 mt-0.5 line-clamp-1">
-            {isHi ? svc.descHi : svc.descEn}
-          </p>
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h4 className="font-extrabold text-xs text-slate-900 leading-snug truncate group-hover:text-[#000080] transition">
+                {isHi ? svc.titleHi : svc.titleEn}
+              </h4>
+              {isWebsite && (
+                <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider text-amber-800 border border-amber-200">
+                  PORTAL
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] font-medium text-slate-500 mt-0.5 line-clamp-1">
+              {isHi ? svc.descHi : svc.descEn}
+            </p>
+          </div>
         </div>
 
-        <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 border border-slate-200 group-hover:bg-[#000080] group-hover:text-white transition">
-          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white" />
+        <div className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-[#FAF8F5] border border-slate-200/80 group-hover:bg-[#000080] group-hover:text-white transition">
+          <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-white" />
         </div>
       </button>
     );
