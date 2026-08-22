@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, ChevronRight, CloudSun, HeartHandshake, HeartPulse, Leaf, Megaphone, Quote, ShieldCheck, Sparkles, HandHeart, BookOpen, Wind, Instagram, Twitter, Facebook, Linkedin } from "lucide-react";
+import { FEATURED_INSTAGRAM_REEL } from "../config/featuredPost";
 import InstagramEmbed from "../components/InstagramEmbed";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate, useOutletContext } from "react-router-dom";
@@ -87,7 +88,7 @@ export default function Home() {
     {globalSettings?.show_notices !== false && announcement && <motion.section initial={{opacity:0,y:12}} whileInView={{opacity:1,y:0}} viewport={{once:true}} className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5"><h2 className="text-[14px] font-black text-[#000080]">{lang === "hi" ? "समुदाय से जुड़ें" : "Stay connected"}</h2><Megaphone className="h-4 w-4 text-[#FF9933]"/></div><div className="px-4 py-4"><p className="text-[13px] font-bold text-slate-800">{announcement.title}</p>{announcement.content && <p className="mt-1 text-[11px] leading-5 text-slate-500">{announcement.content}</p>}<button onClick={()=>navigate("/notifications")} className="mt-3 text-[10px] font-black text-[#000080]">{lang === "hi" ? "सभी अपडेट देखें" : "View all updates"}<ChevronRight className="inline h-3.5 w-3.5"/></button></div></motion.section>}
     <div className="mt-5 mb-5">
       <p className="text-[11px] font-black uppercase tracking-[.18em] text-slate-400 mb-2">{lang === "hi" ? "नवीनतम अपडेट" : "Latest Updates"}</p>
-      <InstagramEmbed url="https://www.instagram.com/p/DcTxtFGMvfj/" />
+      <InstagramEmbed url={FEATURED_INSTAGRAM_REEL} />
     </div>
     <motion.button whileHover={{y:-2}} whileTap={{scale:.99}} onClick={()=>navigate("/donations")} className="mt-5 flex min-h-16 w-full items-center justify-between rounded-2xl border border-orange-200 bg-white px-5 py-4 text-left shadow-sm"><span><span className="block text-[13px] font-black text-[#000080]">{lang === "hi" ? "सेवा के लिए योगदान दें" : "Support the seva"}</span><span className="mt-1 block text-[10px] text-slate-500">{lang === "hi" ? "आपका सहयोग सीधे सेवा के कार्यों तक पहुंचता है।" : "Your support helps turn compassion into action."}</span></span><HeartHandshake className="h-6 w-6 text-[#FF9933]"/></motion.button>
   </div></main>;
