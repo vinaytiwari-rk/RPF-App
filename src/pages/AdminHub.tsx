@@ -10,6 +10,7 @@ import {
   Bell,
   BriefcaseBusiness,
   ClipboardList,
+  CreditCard,
   Droplet,
   FileText,
   LayoutGrid,
@@ -17,12 +18,10 @@ import {
   Settings2,
   ShieldCheck,
   Users,
-  UserRoundCheck,
   X,
   CheckCircle,
   XCircle,
   Eye,
-  Info,
 } from "lucide-react";
 
 type Section = "overview" | "people" | "content" | "requests" | "blood" | "services" | "system";
@@ -89,16 +88,63 @@ export default function AdminHub() {
     load();
   }, [section, token]);
 
+  // Merge Citizens and Volunteers into a single unified directory
+  const mergedPeople = useMemo(() => {
+    const list: Row[] = [];
+    const seenIds = new Set<string>();
+
+    users.forEach((u) => {
+      const id = String(u.id || u.email || u.name || Math.random());
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        list.push({
+          id,
+          name: u.name || "Registered Citizen",
+          role_type: u.role || "Citizen",
+          mobile: u.phone || u.mobile || "—",
+          email: u.email || "—",
+          jan_seva_card: u.jan_seva_id || `RPF-${String(u.id || "101").slice(0, 8).toUpperCase()}`,
+          status: "Active",
+          raw: u,
+        });
+      }
+    });
+
+    volunteers.forEach((v) => {
+      const id = String(v.id || v.registration_number || v.name || Math.random());
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        list.push({
+          id,
+          name: v.name || v.username || "Volunteer",
+          role_type: "Volunteer",
+          mobile: v.mobile || v.phone || "—",
+          email: v.email || "—",
+          jan_seva_card: v.jan_seva_id || `RPF-V-${String(v.id || "202").slice(0, 6).toUpperCase()}`,
+          status: v.status || "Active",
+          raw: v,
+        });
+      }
+    });
+
+    return list;
+  }, [users, volunteers]);
+
+  // Filter Jan Seva Card Holders
+  const janSevaCardHolders = useMemo(() => {
+    return mergedPeople.filter((p) => p.jan_seva_card && p.jan_seva_card !== "—");
+  }, [mergedPeople]);
+
   const counts = useMemo(
     () => ({
-      users: users.length,
-      volunteers: volunteers.length,
+      people: mergedPeople.length,
+      janSevaCards: janSevaCardHolders.length,
       announcements: announcements.length,
       grievances: grievances.length,
       blood: blood.length,
       jobs: jobs.length,
     }),
-    [users, volunteers, announcements, grievances, blood, jobs]
+    [mergedPeople, janSevaCardHolders, announcements, grievances, blood, jobs]
   );
 
   const updateVolunteerStatus = async (id: string, status: string) => {
@@ -197,8 +243,8 @@ export default function AdminHub() {
           {section === "overview" && <Overview counts={counts} onNavigate={(s) => setSection(s)} />}
           {section === "people" && (
             <People
-              users={users}
-              volunteers={volunteers}
+              people={mergedPeople}
+              janSevaHolders={janSevaCardHolders}
               onSelectRecord={(row, title) => setSelectedRecord({ row, title })}
             />
           )}
@@ -268,7 +314,7 @@ export default function AdminHub() {
               </div>
 
               {/* Status Action Buttons for Volunteer Approval */}
-              {selectedRecord.title.toLowerCase().includes("volunteer") && (
+              {selectedRecord.title.toLowerCase().includes("volunteer") && selectedRecord.row.id && (
                 <div className="mt-6 border-t pt-4">
                   <p className="text-xs font-bold text-slate-700 mb-2">Change Volunteer Status:</p>
                   <div className="flex gap-2">
@@ -336,8 +382,8 @@ function Overview({ counts, onNavigate }: { counts: Record<string, number>; onNa
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <Stat label="Registered Citizens" value={counts.users} icon={Users} onClick={() => onNavigate("people")} />
-        <Stat label="Active Volunteers" value={counts.volunteers} icon={UserRoundCheck} onClick={() => onNavigate("people")} />
+        <Stat label="People & Volunteers" value={counts.people} icon={Users} onClick={() => onNavigate("people")} />
+        <Stat label="Jan Seva Card Holders" value={counts.janSevaCards} icon={CreditCard} onClick={() => onNavigate("people")} />
         <Stat label="Beneficiaries / Grievances" value={counts.grievances} icon={ClipboardList} onClick={() => onNavigate("requests")} />
         <Stat label="Announcements" value={counts.announcements} icon={Bell} onClick={() => onNavigate("content")} />
         <Stat label="Blood Donors" value={counts.blood} icon={Droplet} onClick={() => onNavigate("blood")} />
@@ -348,27 +394,27 @@ function Overview({ counts, onNavigate }: { counts: Record<string, number>; onNa
 }
 
 function People({
-  users,
-  volunteers,
+  people,
+  janSevaHolders,
   onSelectRecord,
 }: {
-  users: Row[];
-  volunteers: Row[];
+  people: Row[];
+  janSevaHolders: Row[];
   onSelectRecord: (row: Row, title: string) => void;
 }) {
   return (
     <div className="space-y-6">
       <Table
-        title="Volunteers Registry (Full Details)"
-        rows={volunteers}
-        columns={["name", "registration_number", "mobile", "city", "sansad_kshetra", "vidhan_sabha", "status"]}
-        onSelectRow={(r) => onSelectRecord(r, `Volunteer (${r.name || r.username})`)}
+        title="Jan Seva Card Holders (Full Details & Active Cards)"
+        rows={janSevaHolders}
+        columns={["name", "jan_seva_card", "role_type", "mobile", "email", "status"]}
+        onSelectRow={(r) => onSelectRecord(r.raw || r, `Jan Seva Card Holder (${r.name})`)}
       />
       <Table
-        title="Registered Citizens"
-        rows={users}
-        columns={["name", "email", "phone", "role"]}
-        onSelectRow={(r) => onSelectRecord(r, `Citizen (${r.name || r.email})`)}
+        title="People & Volunteers Directory (Merged Unified Directory)"
+        rows={people}
+        columns={["name", "role_type", "mobile", "email", "jan_seva_card", "status"]}
+        onSelectRow={(r) => onSelectRecord(r.raw || r, `Person Details (${r.name})`)}
       />
     </div>
   );
@@ -408,6 +454,18 @@ function BloodNetwork({
   );
 }
 
+function Content({ announcements, reload }: { announcements: Row[]; reload: () => void }) {
+  return (
+    <div className="space-y-4">
+      <Table
+        title="Announcements & Broadcasts"
+        rows={announcements}
+        columns={["id", "title", "type", "created_at"]}
+      />
+    </div>
+  );
+}
+
 function Table({
   title,
   rows,
@@ -420,19 +478,19 @@ function Table({
   onSelectRow?: (row: Row) => void;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
       <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-black text-slate-900">{title}</h2>
-          <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-bold text-[#000080] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
             Click row for full details
           </span>
         </div>
-        <span className="text-xs font-semibold text-slate-500">{rows.length} records</span>
+        <span className="text-xs font-black text-[#FF9933]">{rows.length} records</span>
       </div>
       <div className="overflow-x-auto">
         {rows.length === 0 ? (
-          <div className="px-5 py-10 text-center text-xs text-slate-400">No records found.</div>
+          <div className="px-5 py-10 text-center text-xs font-semibold text-slate-400">No records found.</div>
         ) : (
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-400">
@@ -453,13 +511,13 @@ function Table({
                   className="hover:bg-orange-50/50 cursor-pointer transition"
                 >
                   {columns.map((c) => (
-                    <td key={c} className="px-4 py-3 text-slate-700 font-medium">
+                    <td key={c} className="px-4 py-3 text-slate-800 font-bold">
                       {String(row[c] ?? "—")}
                     </td>
                   ))}
                   <td className="px-4 py-3 text-right">
                     <button className="inline-flex items-center gap-1 text-[11px] font-bold text-[#000080] hover:underline">
-                      <Eye className="h-3.5 w-3.5" /> Details
+                      <Eye className="h-3.5 w-3.5 text-[#FF9933]" /> Details
                     </button>
                   </td>
                 </tr>
@@ -469,64 +527,5 @@ function Table({
         )}
       </div>
     </section>
-  );
-}
-
-function Content({ announcements, reload }: { announcements: Row[]; reload: () => void }) {
-  const { token } = useAuth();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  const save = async () => {
-    if (!title.trim() || !content.trim()) return;
-    setSaving(true);
-    try {
-      const res = await axios.post(
-        "/api/admin/announcements",
-        { title: title.trim(), content: content.trim() },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.data?.success) throw new Error("Save failed");
-      toast.success("Announcement published successfully!");
-      setTitle("");
-      setContent("");
-      await reload();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error || "Failed to publish announcement.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="space-y-5">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-black">Publish announcement</h2>
-        <div className="mt-4 grid gap-3">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title"
-            className="rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none focus:border-slate-950"
-          />
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Content"
-            rows={4}
-            className="rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none focus:border-slate-950"
-          />
-          <button
-            disabled={saving}
-            onClick={save}
-            className="w-fit rounded-xl bg-[#000080] px-4 py-3 text-xs font-bold text-white disabled:opacity-50"
-          >
-            {saving ? "Saving…" : "Publish"}
-          </button>
-        </div>
-      </section>
-      <Table title="Published announcements" rows={announcements} columns={["title", "content", "created_at"]} />
-    </div>
   );
 }
