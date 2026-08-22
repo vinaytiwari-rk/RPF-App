@@ -176,43 +176,43 @@ export default function HomePremium() {
           </div>
         </section>
 
-        {/* Impact Today Section (Almond Surfaces) */}
+        {/* Key Welfare Initiatives Section (Almond Theme) */}
         <section className="mt-5 space-y-2.5">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-black text-[#2D241E] tracking-wide uppercase">{hi ? "आज का प्रभाव" : "Impact Today"}</h3>
-            <button onClick={() => navigate("/impact")} className="text-[10px] font-bold text-[#8C5A3C] flex items-center">
-              View All <ChevronRight className="w-3 h-3" />
+            <h3 className="text-xs font-black text-[#2D241E] tracking-wide uppercase">{hi ? "प्रमुख समाज कल्याण योजनाएं" : "Key Welfare Initiatives"}</h3>
+            <button onClick={() => navigate("/vision-goals")} className="text-[10px] font-bold text-[#8C5A3C] flex items-center">
+              {hi ? "सभी जानें" : "Explore All"} <ChevronRight className="w-3 h-3" />
             </button>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div
-              onClick={() => navigate("/impact")}
-              className="relative h-28 rounded-2xl overflow-hidden bg-[#5C3A24] text-white p-3.5 flex items-end cursor-pointer shadow-xs group"
+              onClick={() => navigate("/vision-goals")}
+              className="relative h-28 rounded-2xl overflow-hidden bg-[#5C3A24] text-white p-3.5 flex flex-col justify-between cursor-pointer shadow-xs group"
             >
-              <img
-                src="/assets/rpf-samahit-icon.png"
-                alt="Impact"
-                className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform"
-                onError={(e) => { e.currentTarget.style.display = "none"; }}
-              />
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-black uppercase tracking-wider text-[#E8DCD1] bg-[#2D241E]/40 px-2 py-0.5 rounded-full">
+                  Foundation
+                </span>
+                <Sparkles className="w-3.5 h-3.5 text-[#E8DCD1]" />
+              </div>
               <p className="relative z-10 text-xs font-black leading-snug drop-shadow-md text-[#FFFBF7]">
-                Education & Health Project Update
+                {hi ? "आर.पी. फाउंडेशन विजन एवं उद्देश्य" : "RP Foundation Vision & Mission"}
               </p>
             </div>
 
             <div
               onClick={() => navigate("/impact")}
-              className="h-28 rounded-2xl bg-[#FFFBF7] border border-[#E8DCD1] p-3.5 flex flex-col justify-between cursor-pointer shadow-xs"
+              className="h-28 rounded-2xl bg-[#FFFBF7] border border-[#E8DCD1] p-3.5 flex flex-col justify-between cursor-pointer shadow-xs hover:border-[#8C5A3C]/40 transition"
             >
               <div>
-                <p className="text-xs font-black text-[#2D241E] leading-snug">Rojgar Mela & Skill Drives</p>
+                <p className="text-xs font-black text-[#2D241E] leading-snug">{hi ? "सोशल मीडिया एवं लाइव रील्स" : "Live Media & Reels Gallery"}</p>
                 <p className="text-[10px] font-bold text-[#8C5A3C] mt-1 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[#A67C52]" /> Active Ground Initiative
+                  @rpfoundationofficial
                 </p>
               </div>
               <div className="flex items-center justify-between text-[10px] font-bold text-[#7A6A5D] pt-1 border-t border-[#E8DCD1]">
-                <span>View Details</span>
+                <span>{hi ? "रील्स देखें" : "Watch Reels"}</span>
                 <ChevronRight className="w-3.5 h-3.5 text-[#8C5A3C]" />
               </div>
             </div>

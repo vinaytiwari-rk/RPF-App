@@ -179,22 +179,22 @@ export default function Grievances() {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 font-sans selection:bg-orange-100 animate-fadeIn">
+    <div className="flex flex-col h-full bg-[#FAF0E6] font-sans selection:bg-[#E8DCD1] animate-fadeIn text-[#2D241E]">
       {/* Top Banner Header */}
-      <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-emerald-700 pt-6 pb-6 px-5 relative overflow-hidden shrink-0 shadow-md">
+      <div className="bg-gradient-to-br from-[#A67C52] via-[#8C5A3C] to-[#5C3A24] pt-6 pb-6 px-5 relative overflow-hidden shrink-0 shadow-md">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />
         <div className="relative z-10 flex items-center gap-3">
           <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-sm border border-white/30 text-white">
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[9px] font-black uppercase tracking-[.18em] text-orange-100 bg-white/15 px-2 py-0.5 rounded-full border border-white/20">
+            <span className="text-[9px] font-black uppercase tracking-[.18em] text-[#E8DCD1] bg-white/15 px-2 py-0.5 rounded-full border border-white/20">
               Samahit Care
             </span>
-            <h2 className="font-black text-xl text-white tracking-tight mt-1">
+            <h2 className="font-black text-xl text-white tracking-tight mt-1 font-serif">
               {isHi ? "लोक शिकायत निवारण हब" : "Public Grievance Portal"}
             </h2>
-            <p className="text-xs text-orange-100 font-medium">
+            <p className="text-xs text-[#F5ECE2] font-medium">
               {isHi ? "स्थानीय शिकायत दर्ज करें या सरकारी शिकायत पोर्टल खोलें" : "File local complaints or access official Govt portals"}
             </p>
           </div>
@@ -202,11 +202,11 @@ export default function Grievances() {
       </div>
 
       {/* Modern Tab Selection */}
-      <div className="flex bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm overflow-x-auto scrollbar-hide">
+      <div className="flex bg-[#FFFBF7] border-b border-[#E8DCD1] sticky top-0 z-10 shadow-xs overflow-x-auto scrollbar-hide">
         <button 
           onClick={() => setTab("file")}
           className={`flex-1 min-w-[120px] py-3 text-xs font-black transition border-b-2 uppercase tracking-wider ${
-            tab === "file" ? "border-orange-500 text-orange-600 bg-orange-50/40" : "border-transparent text-slate-500 hover:text-slate-800"
+            tab === "file" ? "border-[#8C5A3C] text-[#8C5A3C] bg-[#F5ECE2]" : "border-transparent text-[#7A6A5D] hover:text-[#2D241E]"
           }`}
         >
           {isHi ? "स्थानीय फ़ॉर्म (Local)" : "Local Complaint"}
@@ -215,16 +215,16 @@ export default function Grievances() {
         <button 
           onClick={() => setTab("gov")}
           className={`flex-1 min-w-[120px] py-3 text-xs font-black transition border-b-2 uppercase tracking-wider ${
-            tab === "gov" ? "border-[#000080] text-[#000080] bg-blue-50/40" : "border-transparent text-slate-500 hover:text-slate-800"
+            tab === "gov" ? "border-[#8C5A3C] text-[#8C5A3C] bg-[#F5ECE2]" : "border-transparent text-[#7A6A5D] hover:text-[#2D241E]"
           }`}
         >
-          {isHi ? "सरकारी पोर्टल (Websites)" : "Govt Portals"}
+          {isHi ? "सरकारी पोर्टल (Govt)" : "Govt Portals"}
         </button>
 
         <button 
           onClick={() => setTab("track")}
           className={`flex-1 min-w-[110px] py-3 text-xs font-black transition border-b-2 uppercase tracking-wider ${
-            tab === "track" ? "border-emerald-600 text-emerald-700 bg-emerald-50/40" : "border-transparent text-slate-500 hover:text-slate-800"
+            tab === "track" ? "border-[#8C5A3C] text-[#8C5A3C] bg-[#F5ECE2]" : "border-transparent text-[#7A6A5D] hover:text-[#2D241E]"
           }`}
         >
           {isHi ? `ट्रैक (${grievances.length})` : `Track (${grievances.length})`}
@@ -233,7 +233,7 @@ export default function Grievances() {
         <button 
           onClick={() => setTab("community")}
           className={`flex-1 min-w-[110px] py-3 text-xs font-black transition border-b-2 uppercase tracking-wider ${
-            tab === "community" ? "border-purple-600 text-purple-700 bg-purple-50/40" : "border-transparent text-slate-500 hover:text-slate-800"
+            tab === "community" ? "border-[#8C5A3C] text-[#8C5A3C] bg-[#F5ECE2]" : "border-transparent text-[#7A6A5D] hover:text-[#2D241E]"
           }`}
         >
           {isHi ? "समुदाय" : "Community"}
