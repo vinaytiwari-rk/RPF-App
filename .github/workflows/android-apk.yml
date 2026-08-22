@@ -1,5 +1,6 @@
 name: Build Android APK
 
+# Current redesign snapshot build pipeline
 on:
   workflow_dispatch:
   push:
