@@ -207,7 +207,7 @@ export default function HomePremium() {
           <div className="flex items-center justify-between mb-2.5">
             <h3 className="text-xs font-black text-[#000080] uppercase tracking-wider">{hi ? "प्रमुख सेवाएं" : "Core Super-App Services"}</h3>
             <button onClick={() => navigate("/services")} className="text-[11px] font-black text-[#FF9933] hover:underline flex items-center gap-0.5">
-              {isHi ? "सभी देखें" : "View All"} <ChevronRight className="h-3 w-3" />
+              {hi ? "सभी देखें" : "View All"} <ChevronRight className="h-3 w-3" />
             </button>
           </div>
 
@@ -222,8 +222,8 @@ export default function HomePremium() {
                 <div className={`w-10 h-10 rounded-2xl ${act.color} flex items-center justify-center mb-2 shadow-sm transition-transform group-hover:scale-110`}>
                   <act.icon className="w-5 h-5" />
                 </div>
-                <p className="text-[11px] font-black text-slate-800 leading-tight line-clamp-1">{isHi ? act.titleHi : act.titleEn}</p>
-                <p className="text-[9px] font-bold text-slate-400 leading-none mt-0.5 truncate w-full">{isHi ? act.descHi : act.descEn}</p>
+                <p className="text-[11px] font-black text-slate-800 leading-tight line-clamp-1">{hi ? act.titleHi : act.titleEn}</p>
+                <p className="text-[9px] font-bold text-slate-400 leading-none mt-0.5 truncate w-full">{hi ? act.descHi : act.descEn}</p>
               </button>
             ))}
           </div>
