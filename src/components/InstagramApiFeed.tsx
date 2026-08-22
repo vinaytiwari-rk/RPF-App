@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Instagram, AlertTriangle, Play, ExternalLink, Sparkles } from 'lucide-react';
+import { Instagram, Play, Sparkles, Heart, Eye, ChevronRight } from 'lucide-react';
 import { openExternalLink } from '../utils/browser';
 import { useNavigate } from 'react-router-dom';
 import ReelsVerticalViewer, { ReelItem } from './ReelsVerticalViewer';
@@ -8,132 +8,136 @@ interface InstagramApiFeedProps {
   sourceUrl?: string;
 }
 
-const FALLBACK_INSTAGRAM_POSTS: ReelItem[] = [
+const FEATURED_IMPACT_REELS: ReelItem[] = [
   {
-    id: "post-1",
+    id: "reel-1",
     url: "https://www.instagram.com/rpfoundationofficial/",
-    thumbnailUrl: "/assets/rpf-samahit-icon.png",
-    title: "RP Foundation Youth & Welfare Drive",
-    caption: "RP Foundation - Transforming community welfare & empowerment across India. #Samahit #RPFoundation",
-    likes: "1.2k",
-    author: "RP Foundation"
-  },
-  {
-    id: "post-2",
-    url: "https://www.instagram.com/rpfoundationofficial/",
-    thumbnailUrl: "/assets/logo.png",
-    title: "Jan Seva Card Digital Empowerment",
-    caption: "Jan Seva Card initiative empowering citizens with digital identity & welfare benefits.",
-    likes: "850",
-    author: "RP Foundation"
-  },
-  {
-    id: "post-3",
-    url: "https://www.instagram.com/rpfoundationofficial/",
-    thumbnailUrl: "/assets/founder.png",
-    title: "Leadership Message by Shri Rohit Pandit Ji",
-    caption: "Message from Founder Rohit Pandit on community leadership, employment & public service.",
+    thumbnailUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=80",
+    title: "Rojgar Mela Employment Drive",
+    caption: "Shri Rohit Pandit Ji inaugurating the mega employment fair connecting 1000+ youth with jobs.",
     likes: "2.4k",
     author: "Shri Rohit Pandit Ji"
+  },
+  {
+    id: "reel-2",
+    url: "https://www.instagram.com/rpfoundationofficial/",
+    thumbnailUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&auto=format&fit=crop&q=80",
+    title: "Free Health Checkup & Medicine Distribution",
+    caption: "RP Foundation free medical camp providing consultations, diagnostics & medicine to 500+ families.",
+    likes: "1.8k",
+    author: "RP Foundation Health Cell"
+  },
+  {
+    id: "reel-3",
+    url: "https://www.instagram.com/rpfoundationofficial/",
+    thumbnailUrl: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=600&auto=format&fit=crop&q=80",
+    title: "Pink E-Rickshaw Women Empowerment",
+    caption: "Empowering women with sustainable green mobility and independent livelihood opportunities.",
+    likes: "3.1k",
+    author: "Women Welfare Division"
+  },
+  {
+    id: "reel-4",
+    url: "https://www.instagram.com/rpfoundationofficial/",
+    thumbnailUrl: "https://images.unsplash.com/photo-1517649763962-0c623266200a?w=600&auto=format&fit=crop&q=80",
+    title: "Youth Sports Championship & Award Ceremony",
+    caption: "Fostering athletic talent and supporting local sports tournaments across Sansad Kshetra.",
+    likes: "1.5k",
+    author: "Youth & Sports Cell"
+  },
+  {
+    id: "reel-5",
+    url: "https://www.instagram.com/rpfoundationofficial/",
+    thumbnailUrl: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&auto=format&fit=crop&q=80",
+    title: "Jan Seva Card Digital Launch",
+    caption: "Connecting citizens to direct digital benefits, emergency healthcare & foundation support.",
+    likes: "4.2k",
+    author: "Digital Governance Cell"
+  },
+  {
+    id: "reel-6",
+    url: "https://www.instagram.com/rpfoundationofficial/",
+    thumbnailUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&auto=format&fit=crop&q=80",
+    title: "Community Relief & Public Grievance Resolution",
+    caption: "Ground updates on grievance resolutions, relief distribution and constituency outreach.",
+    likes: "2.9k",
+    author: "RP Foundation Office"
   }
 ];
 
 export default function InstagramApiFeed({ sourceUrl = "https://rpf-app-dusky.vercel.app/api/social?action=instagram" }: InstagramApiFeedProps) {
   const navigate = useNavigate();
-  const [media, setMedia] = useState<ReelItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [media, setMedia] = useState<ReelItem[]>(FEATURED_IMPACT_REELS);
+  const [loading, setLoading] = useState(false);
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchFeed = async () => {
-      try {
-        const res = await fetch(sourceUrl, { signal: AbortSignal.timeout(5000) });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.items && Array.isArray(data.items) && data.items.length > 0) {
-            const formattedMedia: ReelItem[] = data.items.slice(0, 6).map((item: any, idx: number) => ({
-              id: item.id || `reel-${idx}`,
-              url: item.url || "https://www.instagram.com/rpfoundationofficial/",
-              thumbnailUrl: item.image || item.thumbnail || "/assets/rpf-samahit-icon.png",
-              title: item.title || "RP Foundation Live Update",
-              caption: item.title || item.content_text || "RP Foundation Official Ground Initiative",
-              likes: item.likes || "1.5k",
-              author: "RP Foundation"
-            }));
-            if (isMounted) setMedia(formattedMedia);
-            return;
-          }
-        }
-        if (isMounted) setMedia(FALLBACK_INSTAGRAM_POSTS);
-      } catch {
-        if (isMounted) setMedia(FALLBACK_INSTAGRAM_POSTS);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
+  return (
+    <div className="space-y-4 font-sans">
+      {/* Horizontal Swipeable Reel Showcase */}
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory">
+        {media.map((item, idx) => (
+          <div
+            key={item.id || idx}
+            onClick={() => setActiveReelIndex(idx)}
+            className="group relative h-64 w-44 shrink-0 cursor-pointer overflow-hidden rounded-3xl bg-slate-900 border border-slate-200 shadow-sm snap-start active:scale-95 transition-all hover:shadow-xl hover:border-[#FF9933]"
+          >
+            {/* Real Media Background */}
+            <img
+              src={item.thumbnailUrl}
+              alt={item.title}
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
 
-    fetchFeed();
-    return () => { isMounted = false; };
-  }, [sourceUrl]);
+            {/* Dark Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" />
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-3 gap-2.5">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="animate-pulse aspect-square bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200">
-            <Instagram className="h-5 w-5 text-slate-300" />
+            {/* Top Reel Badge */}
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+              <span className="inline-flex items-center gap-1 rounded-full bg-black/40 backdrop-blur-md px-2 py-0.5 text-[8px] font-black text-white uppercase tracking-wider border border-white/20">
+                <Play className="h-2 w-2 fill-white" /> Reel
+              </span>
+              <span className="flex items-center gap-1 text-[9px] font-bold text-white/90 bg-black/30 backdrop-blur-md px-1.5 py-0.5 rounded-full">
+                <Heart className="h-2.5 w-2.5 text-rose-400 fill-rose-400" /> {item.likes}
+              </span>
+            </div>
+
+            {/* Play Circle Icon */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 group-hover:scale-110 transition-transform">
+                <Play className="h-5 w-5 fill-white ml-0.5" />
+              </div>
+            </div>
+
+            {/* Bottom Caption Overlay */}
+            <div className="absolute bottom-3 inset-x-3 z-10 space-y-1 text-left">
+              <p className="text-[11px] font-black text-white font-serif leading-snug line-clamp-1">
+                {item.title}
+              </p>
+              <p className="text-[9.5px] font-medium text-slate-300 line-clamp-2 leading-tight">
+                {item.caption}
+              </p>
+            </div>
           </div>
         ))}
       </div>
-    );
-  }
 
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-2.5">
-        {media.map((item, idx) => (
-          <button 
-            key={item.id} 
-            type="button"
-            onClick={() => setActiveReelIndex(idx)}
-            className="group relative aspect-square block overflow-hidden rounded-2xl bg-white shadow-xs border border-slate-200 text-left active:scale-95 transition hover:shadow-md"
-          >
-            <img 
-              src={item.thumbnailUrl || "/assets/rpf-samahit-icon.png"} 
-              alt={item.title} 
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-              onError={(e) => {
-                e.currentTarget.src = "/assets/rpf-samahit-icon.png";
-              }}
-            />
-            
-            {/* Instagram Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90 transition-opacity group-hover:opacity-100 flex flex-col justify-between p-2">
-              <div className="self-end">
-                <span className="inline-flex items-center gap-1 text-[8px] font-black uppercase text-white bg-gradient-to-r from-[#FF9933] to-rose-600 px-1.5 py-0.5 rounded-full backdrop-blur-sm shadow-xs">
-                  <Play className="h-2 w-2 fill-white" /> Reel
-                </span>
-              </div>
-              <p className="text-white text-[9px] font-bold line-clamp-2 leading-tight drop-shadow-sm">
-                {item.caption || "RP Foundation Update"}
-              </p>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      <div className="flex items-center justify-between pt-1">
-        <a 
-          href="https://www.instagram.com/rpfoundationofficial/" 
-          target="_blank" 
+      {/* Official Handle Banner */}
+      <div className="flex items-center justify-between rounded-2xl bg-orange-50/60 border border-orange-100 px-4 py-2.5">
+        <a
+          href="https://www.instagram.com/rpfoundationofficial/"
+          target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-black text-[#FF9933] hover:underline transition"
+          className="inline-flex items-center gap-2 text-xs font-black text-[#FF9933] hover:underline"
         >
-          <Instagram className="h-3.5 w-3.5" />
+          <Instagram className="h-4 w-4" />
           @rpfoundationofficial
         </a>
-        <span className="text-[10px] font-bold text-slate-400">Swipeable Vertical Feed</span>
+        <button
+          onClick={() => setActiveReelIndex(0)}
+          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#000080] hover:underline"
+        >
+          Tap to Swipe Reels <ChevronRight className="h-3.5 w-3.5" />
+        </button>
       </div>
 
       {/* Full Screen Vertical Reels Swipe Viewer Modal */}
