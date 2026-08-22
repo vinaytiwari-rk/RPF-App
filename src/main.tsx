@@ -5,44 +5,13 @@ import './index.css';
 import './styles/premium-reset.css';
 import { Capacitor } from '@capacitor/core';
 import axios from 'axios';
-import { CapacitorUpdater } from '@capgo/capacitor-updater';
 
 const RPF_WEB_ORIGIN = 'https://appapi.therpfoundation.org';
-const RPF_VERSION_KEY = '@rpf_web_version';
-let updateCheckInFlight = false;
 
-async function checkForWebUpdate() {
-  if (!Capacitor.isNativePlatform() || updateCheckInFlight) return;
-  updateCheckInFlight = true;
-  try {
-    const response = await fetch(`${RPF_WEB_ORIGIN}/version.json?ts=${Date.now()}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
-    });
-    if (!response.ok) return;
-    const payload = await response.json();
-    const remoteVersion = String(payload?.version || '').trim();
-    if (!remoteVersion) return;
-
-    const localVersion = localStorage.getItem(RPF_VERSION_KEY);
-    if (!localVersion) {
-      localStorage.setItem(RPF_VERSION_KEY, remoteVersion);
-      return;
-    }
-    if (localVersion === remoteVersion) return;
-
-    localStorage.setItem(RPF_VERSION_KEY, remoteVersion);
-    window.location.reload();
-  } catch {
-    // Offline or temporarily unavailable: keep the currently loaded app running.
-  } finally {
-    updateCheckInFlight = false;
-  }
-}
-
-// Intercept relative paths for Capacitor native builds
+// Native builds keep the same local React bundle that was packaged into the APK.
+// Only API requests are routed to the production backend; app code is never
+// replaced at runtime by an OTA updater.
 if (Capacitor.isNativePlatform()) {
-  CapacitorUpdater.notifyAppReady();
   axios.defaults.baseURL = RPF_WEB_ORIGIN;
 
   const originalFetch = window.fetch;
@@ -69,14 +38,6 @@ if (Capacitor.isNativePlatform()) {
     }
     return originalFetch(input, init);
   };
-
-  // Keep the installed APK as a stable native shell while automatically
-  // picking up newly deployed web code from the server.
-  window.setTimeout(checkForWebUpdate, 1500);
-  window.setInterval(checkForWebUpdate, 60_000);
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') checkForWebUpdate();
-  });
 }
 
 createRoot(document.getElementById('root')!).render(
