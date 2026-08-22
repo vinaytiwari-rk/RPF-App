@@ -3,11 +3,11 @@ import { getExternalLink, type ExternalLinkId } from '../config/externalLinks';
 import '../config/dynamicExternalLinks';
 import { isSafeWebUrl } from '../config/browserPolicy';
 import { Browser } from '@capacitor/browser';
-import { Capacitor } from '@capacitor/core';
 
 const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
-const DEFAULT_WEB_TITLE = 'RPF Web View';
+const DEFAULT_WEB_TITLE = 'Samahit';
+const SAMAHIT_BROWSER_ROUTE = '/browser?url=';
 
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
@@ -18,7 +18,9 @@ export function normalizeExternalWebUrl(url: string): string | null {
     parsed.username = '';
     parsed.password = '';
     return parsed.toString();
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 export function isExternalWebUrl(url: string): boolean {
@@ -30,44 +32,36 @@ export function isExternalWebUrl(url: string): boolean {
     const host = parsed.hostname.toLowerCase();
     if (host === 'therpfoundation.org' || host.endsWith('.therpfoundation.org')) return false;
     return parsed.origin !== window.location.origin;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
-/**
- * The RPF browser is the canonical destination for third-party web content.
- * Using native Chrome Custom Tabs / Safari View Controller for maximum compatibility on native.
- */
 export async function openExternalLink(url: string, navigate?: NavigateFunction, _title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
-  if (!value) { console.warn('[Browser] Blocked unsupported URL:', url); return; }
-
+  if (!value) {
+    console.warn('[Samahit Browser] Blocked unsupported URL:', url);
+    return;
+  }
   try {
-    const urlObj = new URL(value);
-    const host = urlObj.hostname.toLowerCase();
-    if ((host === 'therpfoundation.org' || host.endsWith('.therpfoundation.org')) &&
-        !urlObj.pathname.startsWith('/uploads/') && !urlObj.pathname.startsWith('/api/') && navigate) {
-      navigate(urlObj.pathname + urlObj.search + urlObj.hash);
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase();
+    if ((host === 'therpfoundation.org' || host.endsWith('.therpfoundation.org')) && !parsed.pathname.startsWith('/uploads/') && !parsed.pathname.startsWith('/api/') && navigate) {
+      navigate(parsed.pathname + parsed.search + parsed.hash);
       return;
     }
   } catch {}
 
-  if (Capacitor.isNativePlatform()) {
-    try {
-      await Browser.open({ url: value, presentationStyle: 'fullscreen', toolbarColor: '#000080' });
-      return;
-    } catch (err) {
-      console.error('Failed to open native browser:', err);
-    }
-  }
-
   if (navigate) {
-    // Canonical persistent app-shell routing required by browser policy.
+    // Keep external browsing inside the persistent Samahit app shell.
     navigate(`/browser?url=${encodeURIComponent(value)}`);
     return;
   }
-
-  // Keep a safe same-window fallback for non-React callers.
-  window.open(value, '_self');
+  try {
+    await Browser.open({ url: value, presentationStyle: 'fullscreen', toolbarColor: '#000080' });
+  } catch {
+    window.open(value, '_self');
+  }
 }
 
 export const openRPFBrowser = openExternalLink;
@@ -75,7 +69,6 @@ export function openRegisteredExternalLink(id: ExternalLinkId, navigate?: Naviga
   const entry = getExternalLink(id);
   return openExternalLink(entry.url, navigate, entry.label);
 }
-
 export function installExternalLinkInterceptor(getNavigate: () => NavigateFunction | undefined): () => void {
   const handleClick = (event: MouseEvent) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

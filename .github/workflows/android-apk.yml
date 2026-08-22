@@ -1,9 +1,10 @@
 name: Build Android APK
 
+# Current redesign snapshot build pipeline
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, redesign/reconstruct-navigation-radio]
     paths:
       - 'android/**'
       - 'src/**'

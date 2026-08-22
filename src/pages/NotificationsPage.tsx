@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useApp, NotificationItem } from "../context/AppContext";
-import { Info, AlertTriangle, CheckCircle, BellOff, Activity, Star } from "lucide-react";
+import { Info, AlertTriangle, CheckCircle, BellOff, Bell, Star, Sparkles } from "lucide-react";
 
 export default function NotificationsPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -11,42 +11,8 @@ export default function NotificationsPage() {
   const important = notifications.filter(n => n.type === "urgent" || n.type === "warning");
   const displayedNotifications = activeTab === "important" ? important : notifications;
   const unreadCount = notifications.filter(n => !n.read).length;
-
-  const markRead = async (id: string) => {
-    const token = localStorage.getItem("@rpf_token");
-    if (!token) return;
-    try {
-      const res = await fetch(`/api/notifications/${encodeURIComponent(id)}/read`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
-      if (res.ok) await refreshData();
-    } catch (error) { console.error("Notification read update failed:", error); }
-  };
-  const ago = (dateStr: string) => {
-    const time = new Date(dateStr).getTime();
-    if (!Number.isFinite(time)) return "";
-    const diff = Math.max(0, Date.now() - time); const mins = Math.floor(diff / 60000);
-    if (mins < 60) return lang === "hi" ? `${mins} मिनट पहले` : `${mins}m ago`;
-    const hrs = Math.floor(mins / 60); if (hrs < 24) return lang === "hi" ? `${hrs} घंटे पहले` : `${hrs}h ago`;
-    const days = Math.floor(hrs / 24); return lang === "hi" ? `${days} दिन पहले` : `${days}d ago`;
-  };
-  const TYPE_CLASSES: Record<NotificationItem["type"], { icon: React.ReactNode; dot: string; border: string }> = {
-    info: { icon: <Info className="w-3.5 h-3.5 text-blue-600" />, dot: "bg-blue-500", border: "border-blue-100" },
-    success: { icon: <CheckCircle className="w-3.5 h-3.5 text-green-600" />, dot: "bg-green-500", border: "border-green-100" },
-    warning: { icon: <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />, dot: "bg-amber-500", border: "border-amber-100" },
-    urgent: { icon: <AlertTriangle className="w-3.5 h-3.5 text-red-600" />, dot: "bg-red-500 animate-pulse", border: "border-red-100" },
-  };
-
-  return <div className="flex flex-col h-full bg-slate-50 animate-fadeIn min-h-screen pb-24 overflow-x-hidden">
-    <div className="bg-white pt-4 pb-3 border-b border-slate-100 sticky top-0 z-10 shadow-sm shrink-0">
-      <div className="flex items-center justify-between px-4"><div><h3 className="font-display font-extrabold text-xl sm:text-2xl text-slate-900 tracking-tight flex items-center gap-2"><Activity className="w-5 h-5 text-[#000080]" />{lang === "hi" ? "गतिविधि" : "Activity"}</h3><p className="text-[10px] sm:text-[11px] text-slate-500 font-medium mt-1 uppercase tracking-wider">{unreadCount > 0 ? `${unreadCount} ${lang === "hi" ? "नए अपडेट" : "new updates"}` : lang === "hi" ? "सब पढ़ लिया गया" : "You're all caught up"}</p></div></div>
-      <div className="px-4 pt-3 flex gap-2"><button onClick={() => setActiveTab("all")} className={`px-3 py-2 rounded-full text-[11px] sm:text-xs font-bold transition-all flex-1 ${activeTab === "all" ? "bg-[#000080] text-white shadow-md" : "bg-slate-100 text-slate-600 border border-slate-200"}`}>{lang === "hi" ? "सभी गतिविधि" : "All Activity"}</button><button onClick={() => setActiveTab("important")} className={`px-3 py-2 rounded-full text-[11px] sm:text-xs font-bold transition-all flex-1 flex items-center justify-center gap-1.5 ${activeTab === "important" ? "bg-[#FF9933] text-white shadow-md" : "bg-slate-100 text-slate-600 border border-slate-200"}`}><Star className={`w-3.5 h-3.5 ${activeTab === "important" ? "fill-current text-white" : "text-slate-400"}`} />{lang === "hi" ? "महत्वपूर्ण" : "Important"}</button></div>
-    </div>
-    <div className="flex-1 p-4">
-      {displayedNotifications.length === 0 ? <div className="text-center py-14 space-y-4"><div className="w-14 h-14 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center mx-auto"><BellOff className="w-6 h-6 text-slate-300" /></div><div><p className="text-sm font-bold text-slate-700">{lang === "hi" ? "कोई गतिविधि नहीं" : "No recent activity"}</p><p className="text-xs text-slate-500 max-w-[260px] mx-auto mt-1">{lang === "hi" ? "जब आपके खाते से जुड़ा कोई नया अपडेट आएगा, वह यहाँ दिखाई देगा।" : "Updates related to your account will appear here."}</p></div></div> : <div className="relative border-l-2 border-slate-200 ml-4 pl-5 space-y-5 pt-2">
-        {displayedNotifications.map(n => { const cls = TYPE_CLASSES[n.type]; return <div key={n.id} className="relative"><div className={`absolute -left-[27px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm ${cls.dot}`} /><button type="button" onClick={() => !n.read && markRead(n.id)} className={`w-full text-left bg-white p-3 rounded-2xl shadow-sm border ${!n.read ? `border-l-4 ${n.type === "urgent" ? "border-l-red-500" : "border-l-[#000080]"}` : "border-slate-100"}`} aria-label={n.read ? "Notification" : "Mark notification as read"}>
-          <div className="flex justify-between items-start mb-1.5"><div className="flex items-center gap-2 min-w-0"><div className={`w-6 h-6 rounded-full bg-slate-50 border flex items-center justify-center shrink-0 ${cls.border}`}>{cls.icon}</div><h4 className={`text-[13px] font-bold leading-tight ${!n.read ? "text-slate-900" : "text-slate-700"}`}>{lang === "hi" ? n.titleHi : n.titleEn}</h4></div>{!n.read && <span className="w-2 h-2 bg-[#000080] rounded-full shrink-0 mt-1" />}</div>
-          <div className="pl-8"><p className="text-xs text-slate-500 leading-relaxed">{lang === "hi" ? n.bodyHi : n.bodyEn}</p><span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block pt-2"><Activity className="w-3 h-3 inline mr-1" />{ago(n.createdAt)}</span></div>
-        </button></div>; })}
-      </div>}
-    </div>
-  </div>;
+  const markRead = async (id: string) => { const token = localStorage.getItem("@rpf_token"); if (!token) return; try { const res = await fetch(`/api/notifications/${encodeURIComponent(id)}/read`, { method: "POST", headers: { Authorization: `Bearer ${token}` } }); if (res.ok) await refreshData(); } catch (error) { console.error("Notification read update failed:", error); } };
+  const ago = (dateStr: string) => { const diff = Math.max(0, Date.now() - new Date(dateStr).getTime()); const mins = Math.floor(diff / 60000); if (mins < 60) return lang === "hi" ? `${mins} मिनट पहले` : `${mins}m ago`; const hrs = Math.floor(mins / 60); if (hrs < 24) return lang === "hi" ? `${hrs} घंटे पहले` : `${hrs}h ago`; return lang === "hi" ? `${Math.floor(hrs / 24)} दिन पहले` : `${Math.floor(hrs / 24)}d ago`; };
+  const TYPE_CLASSES: Record<NotificationItem["type"], { icon: React.ReactNode; dot: string; border: string }> = {info:{icon:<Info className="h-4 w-4 text-blue-600"/>,dot:"bg-blue-500",border:"border-blue-100"},success:{icon:<CheckCircle className="h-4 w-4 text-green-600"/>,dot:"bg-green-500",border:"border-green-100"},warning:{icon:<AlertTriangle className="h-4 w-4 text-amber-600"/>,dot:"bg-amber-500",border:"border-amber-100"},urgent:{icon:<AlertTriangle className="h-4 w-4 text-red-600"/>,dot:"bg-red-500 animate-pulse",border:"border-red-100"}};
+  return <div className="min-h-screen bg-[#f7f8fc] pb-28 text-slate-900"><div className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-4 pb-4 pt-5 backdrop-blur-xl"><div className="mx-auto max-w-3xl"><div className="flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-[#000080] to-[#2563EB] text-white shadow-sm"><Bell className="h-5 w-5"/></div><div><h1 className="text-[22px] font-black tracking-tight text-[#000080]">{lang === "hi" ? "अपडेट्स" : "Updates"}</h1><p className="text-[11px] font-medium text-slate-500">{unreadCount>0?(lang==="hi"?`${unreadCount} नए अपडेट आपके लिए`:`${unreadCount} new updates for you`):(lang==="hi"?"आप पूरी तरह अपडेट हैं":"You're all caught up")}</p></div></div><div className="mt-4 flex gap-2 rounded-2xl bg-slate-100 p-1"><button onClick={()=>setActiveTab("all")} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[11px] font-black transition ${activeTab==="all"?"bg-white text-[#000080] shadow-sm":"text-slate-500"}`}><Sparkles className="h-3.5 w-3.5"/>{lang==="hi"?"सभी अपडेट":"All Updates"}</button><button onClick={()=>setActiveTab("important")} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[11px] font-black transition ${activeTab==="important"?"bg-[#000080] text-white shadow-sm":"text-slate-500"}`}><Star className="h-3.5 w-3.5"/>{lang==="hi"?"महत्वपूर्ण":"Important"}</button></div></div></div><div className="mx-auto max-w-3xl px-4 py-5">{displayedNotifications.length===0?<div className="rounded-[28px] border border-dashed border-slate-200 bg-white px-6 py-16 text-center"><div className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-slate-50"><BellOff className="h-7 w-7 text-slate-300"/></div><h2 className="mt-5 text-base font-black text-slate-800">{lang==="hi"?"अभी कोई नया अपडेट नहीं":"No new updates yet"}</h2><p className="mx-auto mt-2 max-w-xs text-xs leading-5 text-slate-500">{lang==="hi"?"आपके खाते और समाहित से जुड़ी नई जानकारी यहां दिखाई देगी।":"Updates related to your account and Samahit will appear here."}</p></div>:<div className="space-y-3">{displayedNotifications.map(n=>{const cls=TYPE_CLASSES[n.type];return <button key={n.id} onClick={()=>!n.read&&markRead(n.id)} className={`w-full rounded-2xl border bg-white p-4 text-left shadow-sm transition active:scale-[.99] ${!n.read?"border-[#000080]/15":"border-slate-100"}`}><div className="flex items-start gap-3"><div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border ${cls.border} bg-slate-50`}>{cls.icon}</div><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><h3 className="text-[13px] font-black leading-5 text-slate-900">{lang==="hi"?n.titleHi:n.titleEn}</h3>{!n.read&&<span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#FF9933]"/>}</div><p className="mt-1 text-xs leading-5 text-slate-500">{lang==="hi"?n.bodyHi:n.bodyEn}</p><p className="mt-2 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">{ago(n.createdAt)}</p></div></div></button>})}</div>}</div></div>;
 }
