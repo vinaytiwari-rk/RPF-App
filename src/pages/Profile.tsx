@@ -88,9 +88,10 @@ export default function Profile() {
     user?.email ? { icon: Mail, label: hi ? "ईमेल" : "Email", value: user.email } : null,
   ].filter(Boolean) as { icon: typeof Phone; label: string; value: string }[];
 
-  return <main className="min-h-full bg-[#f8fafc] pb-12 text-slate-900">
-    <div className="mx-auto max-w-3xl px-3.5 py-5 sm:px-6">
-      <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(0,0,0,.08)]">
+  return (
+    <main className="min-h-full bg-[#FAF9F6] pb-28 text-slate-900 font-sans selection:bg-orange-100">
+      <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6">
+        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="h-1.5 bg-gradient-to-r from-[#FF9933] via-[#FDE047] to-[#138808]" />
         <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-purple-200/30 blur-3xl" />
         <div className="absolute -left-20 -bottom-28 h-64 w-64 rounded-full bg-orange-100/40 blur-3xl" />
@@ -149,5 +150,6 @@ export default function Profile() {
 
       <div className="mt-6 flex items-center justify-center gap-2 text-center"><Users className="h-3.5 w-3.5 text-green-600" /><p className="text-[9px] font-bold tracking-[.16em] text-slate-300">SEVA • SAMARPAN • SANKALP</p></div>
     </div>
-  </main>;
+  </main>
+  );
 }

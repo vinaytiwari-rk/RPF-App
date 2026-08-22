@@ -530,7 +530,7 @@ export default function JanSevaCard() {
   // View: Application Form (Single Step)
   if (view === "apply") {
     return (
-      <div className="flex flex-col h-full bg-slate-50 animate-fadeIn max-w-md mx-auto">
+      <div className="flex flex-col h-full bg-[#FAF9F6] font-sans animate-fadeIn max-w-md mx-auto">
         <div className="bg-white px-5 py-4.5 border-b border-slate-200 sticky top-0 z-20 shadow-xs flex justify-between items-center">
           <h2 className="font-display font-extrabold text-[#000080] text-base uppercase tracking-wider">
             {lang === "hi" ? "जन सेवा कार्ड आवेदन" : "Apply for Digital Card"}
