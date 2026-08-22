@@ -188,7 +188,7 @@ router.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req,
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT id, name, username, mobile, email, status, registration_number, \"createdAt\" FROM volunteers ORDER BY \"createdAt\" DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT id, name, username, mobile, email, status, registration_number, password, "createdAt" FROM volunteers ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset}`);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch volunteers" });
@@ -203,6 +203,16 @@ router.put("/api/admin/volunteers/:id/status", authenticateToken, requireAdmin, 
     res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to update volunteer status" });
+  }
+});
+
+// DELETE a volunteer
+router.delete("/api/admin/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM volunteers WHERE id = $1", [req.params.id]);
+    res.json({ success: true, message: "Volunteer deleted successfully" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: "Failed to delete volunteer" });
   }
 });
 

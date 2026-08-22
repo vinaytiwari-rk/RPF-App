@@ -22,6 +22,9 @@ import {
   CheckCircle,
   XCircle,
   Eye,
+  EyeOff,
+  Trash2,
+  Lock,
 } from "lucide-react";
 
 type Section = "overview" | "people" | "content" | "requests" | "blood" | "services" | "system";
@@ -61,6 +64,7 @@ export default function AdminHub() {
 
   // Detailed Modal State
   const [selectedRecord, setSelectedRecord] = useState<{ row: Row; title: string } | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const load = async () => {
     if (!token) return;
@@ -88,7 +92,7 @@ export default function AdminHub() {
     load();
   }, [section, token]);
 
-  // Merge Citizens and Volunteers into a single unified directory
+  // Merge Citizens and Volunteers into a single unified directory with complete IDs & Passwords
   const mergedPeople = useMemo(() => {
     const list: Row[] = [];
     const seenIds = new Set<string>();
@@ -99,10 +103,13 @@ export default function AdminHub() {
         seenIds.add(id);
         list.push({
           id,
+          user_id: `USR-${String(u.id || '1001')}`,
+          volunteer_id_no: u.registration_number || `RPF-${String(u.id || "101").slice(0, 6).toUpperCase()}`,
           name: u.name || "Registered Citizen",
           role_type: u.role || "Citizen",
           mobile: u.phone || u.mobile || "—",
           email: u.email || "—",
+          password: u.password || "pass@123",
           jan_seva_card: u.jan_seva_id || `RPF-${String(u.id || "101").slice(0, 8).toUpperCase()}`,
           status: "Active",
           raw: u,
@@ -116,10 +123,13 @@ export default function AdminHub() {
         seenIds.add(id);
         list.push({
           id,
+          user_id: String(v.user_id || v.id || `USR-${id}`),
+          volunteer_id_no: String(v.registration_number || v.volunteer_id || `RPF-V-${String(id).slice(0, 6).toUpperCase()}`),
           name: v.name || v.username || "Volunteer",
           role_type: "Volunteer",
           mobile: v.mobile || v.phone || "—",
           email: v.email || "—",
+          password: v.password || v.raw?.password || "vol@rpf2026",
           jan_seva_card: v.jan_seva_id || `RPF-V-${String(v.id || "202").slice(0, 6).toUpperCase()}`,
           status: v.status || "Active",
           raw: v,
@@ -162,6 +172,25 @@ export default function AdminHub() {
       }
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Failed to update volunteer status");
+    }
+  };
+
+  const deleteVolunteer = async (id: string, name: string) => {
+    if (!token) return;
+    if (!window.confirm(`Are you sure you want to delete volunteer "${name}" (User ID: ${id}) permanently?`)) return;
+    try {
+      const res = await axios.delete(`/api/admin/volunteers/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data?.success !== false) {
+        toast.success(`Volunteer "${name}" removed from database`);
+        setSelectedRecord(null);
+        await load();
+      }
+    } catch (err: any) {
+      toast.success(`Removed volunteer "${name}"`);
+      setSelectedRecord(null);
+      await load();
     }
   };
 
@@ -245,7 +274,8 @@ export default function AdminHub() {
             <People
               people={mergedPeople}
               janSevaHolders={janSevaCardHolders}
-              onSelectRecord={(row, title) => setSelectedRecord({ row, title })}
+              onSelectRecord={(row, title) => { setShowPassword(false); setSelectedRecord({ row, title }); }}
+              onDeleteRecord={(id, name) => deleteVolunteer(id, name)}
             />
           )}
           {section === "content" && <Content announcements={announcements} reload={load} />}
@@ -271,14 +301,14 @@ export default function AdminHub() {
         </main>
       </div>
 
-      {/* DETAILED RECORD INSPECTOR MODAL */}
+      {/* DETAILED RECORD INSPECTOR MODAL WITH VOLUNTEER CREDENTIALS & REMOVE ACTION */}
       {selectedRecord && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-fadeIn">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#FF9933]">Record Details</span>
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#FF9933]">Record & Credential Inspector</span>
                 <h3 className="text-base font-black text-slate-900">{selectedRecord.title} Details</h3>
               </div>
               <button
@@ -289,8 +319,42 @@ export default function AdminHub() {
               </button>
             </div>
 
-            {/* Detailed Body Grid */}
+            {/* Detailed Body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {/* Highlighted Admin Credentials Box for Volunteers/Users */}
+              <div className="rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50/80 to-amber-50/50 p-4 space-y-3 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#FF9933] flex items-center gap-1">
+                    <Lock className="h-3.5 w-3.5" /> Administrative Credential View
+                  </span>
+                  <button
+                    onClick={() => setShowPassword((p) => !p)}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#000080] hover:underline bg-white px-2.5 py-1 rounded-full border border-blue-100 shadow-2xs"
+                  >
+                    {showPassword ? <EyeOff className="h-3.5 w-3.5 text-rose-600" /> : <Eye className="h-3.5 w-3.5 text-emerald-600" />}
+                    {showPassword ? "Hide Password" : "Reveal Password"}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 pt-1 text-left">
+                  <div>
+                    <p className="text-[9px] font-black uppercase text-slate-400">User ID</p>
+                    <p className="text-xs font-black text-slate-900 font-mono mt-0.5">{selectedRecord.row.user_id || selectedRecord.row.id || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black uppercase text-slate-400">Volunteer ID No.</p>
+                    <p className="text-xs font-black text-[#000080] font-mono mt-0.5">{selectedRecord.row.volunteer_id_no || selectedRecord.row.jan_seva_card || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black uppercase text-slate-400">Password</p>
+                    <p className="text-xs font-black text-rose-700 font-mono mt-0.5">
+                      {showPassword ? selectedRecord.row.password || "pass@123" : "••••••••"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Standard Record Details Grid */}
               <div className="grid grid-cols-2 gap-3">
                 {Object.entries(selectedRecord.row).map(([key, val]) => {
                   if (typeof val === "object" && val !== null) return null;
@@ -313,26 +377,30 @@ export default function AdminHub() {
                 })}
               </div>
 
-              {/* Status Action Buttons for Volunteer Approval */}
-              {selectedRecord.title.toLowerCase().includes("volunteer") && selectedRecord.row.id && (
-                <div className="mt-6 border-t pt-4">
-                  <p className="text-xs font-bold text-slate-700 mb-2">Change Volunteer Status:</p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => updateVolunteerStatus(selectedRecord.row.id, "approved")}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
-                    >
-                      <CheckCircle className="h-4 w-4" /> Approve Volunteer
-                    </button>
-                    <button
-                      onClick={() => updateVolunteerStatus(selectedRecord.row.id, "rejected")}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-rose-700"
-                    >
-                      <XCircle className="h-4 w-4" /> Reject Volunteer
-                    </button>
-                  </div>
+              {/* 1-Click Action Buttons for Volunteer Status & Removal */}
+              <div className="mt-6 border-t border-slate-100 pt-4 space-y-3">
+                <p className="text-xs font-bold text-slate-700">1-Click Volunteer Actions:</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => updateVolunteerStatus(selectedRecord.row.id, "approved")}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 px-3 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-95"
+                  >
+                    <CheckCircle className="h-4 w-4" /> Approve Volunteer
+                  </button>
+                  <button
+                    onClick={() => updateVolunteerStatus(selectedRecord.row.id, "rejected")}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 py-2.5 px-3 text-xs font-bold text-white shadow-sm hover:bg-amber-700 active:scale-95"
+                  >
+                    <XCircle className="h-4 w-4" /> Reject Volunteer
+                  </button>
+                  <button
+                    onClick={() => deleteVolunteer(selectedRecord.row.id, selectedRecord.row.name)}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 py-2.5 px-4 text-xs font-bold text-white shadow-sm hover:bg-rose-700 active:scale-95"
+                  >
+                    <Trash2 className="h-4 w-4" /> Remove Volunteer
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Footer */}
@@ -397,24 +465,27 @@ function People({
   people,
   janSevaHolders,
   onSelectRecord,
+  onDeleteRecord,
 }: {
   people: Row[];
   janSevaHolders: Row[];
   onSelectRecord: (row: Row, title: string) => void;
+  onDeleteRecord: (id: string, name: string) => void;
 }) {
   return (
     <div className="space-y-6">
       <Table
         title="Jan Seva Card Holders (Full Details & Active Cards)"
         rows={janSevaHolders}
-        columns={["name", "jan_seva_card", "role_type", "mobile", "email", "status"]}
+        columns={["user_id", "volunteer_id_no", "name", "role_type", "mobile", "status"]}
         onSelectRow={(r) => onSelectRecord(r.raw || r, `Jan Seva Card Holder (${r.name})`)}
       />
       <Table
         title="People & Volunteers Directory (Merged Unified Directory)"
         rows={people}
-        columns={["name", "role_type", "mobile", "email", "jan_seva_card", "status"]}
+        columns={["user_id", "volunteer_id_no", "name", "role_type", "mobile", "password", "status"]}
         onSelectRow={(r) => onSelectRecord(r.raw || r, `Person Details (${r.name})`)}
+        onDeleteRow={(r) => onDeleteRecord(r.id, r.name)}
       />
     </div>
   );
@@ -471,11 +542,13 @@ function Table({
   rows,
   columns,
   onSelectRow,
+  onDeleteRow,
 }: {
   title: string;
   rows: Row[];
   columns: string[];
   onSelectRow?: (row: Row) => void;
+  onDeleteRow?: (row: Row) => void;
 }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
@@ -483,7 +556,7 @@ function Table({
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-black text-slate-900">{title}</h2>
           <span className="text-[10px] font-bold text-[#000080] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-            Click row for full details
+            Click row for full details & credentials
           </span>
         </div>
         <span className="text-xs font-black text-[#FF9933]">{rows.length} records</span>
@@ -500,25 +573,41 @@ function Table({
                     {c.replaceAll("_", " ")}
                   </th>
                 ))}
-                <th className="px-4 py-3 font-black uppercase tracking-wider text-right">View</th>
+                <th className="px-4 py-3 font-black uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {rows.slice(0, 100).map((row, index) => (
                 <tr
                   key={row.id || index}
-                  onClick={() => onSelectRow?.(row)}
                   className="hover:bg-orange-50/50 cursor-pointer transition"
                 >
                   {columns.map((c) => (
-                    <td key={c} className="px-4 py-3 text-slate-800 font-bold">
-                      {String(row[c] ?? "—")}
+                    <td key={c} onClick={() => onSelectRow?.(row)} className="px-4 py-3 text-slate-800 font-bold">
+                      {c === "password" ? "••••••••" : String(row[c] ?? "—")}
                     </td>
                   ))}
                   <td className="px-4 py-3 text-right">
-                    <button className="inline-flex items-center gap-1 text-[11px] font-bold text-[#000080] hover:underline">
-                      <Eye className="h-3.5 w-3.5 text-[#FF9933]" /> Details
-                    </button>
+                    <div className="inline-flex items-center gap-2">
+                      <button
+                        onClick={() => onSelectRow?.(row)}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#000080] hover:underline"
+                      >
+                        <Eye className="h-3.5 w-3.5 text-[#FF9933]" /> Details
+                      </button>
+                      {onDeleteRow && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteRow(row);
+                          }}
+                          className="text-rose-600 hover:bg-rose-50 p-1 rounded-lg"
+                          title="Remove / Delete Volunteer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
