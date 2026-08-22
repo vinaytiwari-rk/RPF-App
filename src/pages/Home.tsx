@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, ChevronRight, CloudSun, HeartHandshake, HeartPulse, Leaf, Megaphone, Quote, ShieldCheck, Sparkles, HandHeart, BookOpen, Wind, Instagram, Twitter, Facebook, Linkedin } from "lucide-react";
+import InstagramEmbed from "../components/InstagramEmbed";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
