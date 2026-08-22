@@ -176,7 +176,7 @@ export default function InAppBrowser() {
               </button>
             </div>
           </div>
-        ) : frameBlocked || rawUrl.includes(".gov.in") || rawUrl.includes(".nic.in") || rawUrl.includes("jamanetwork") || rawUrl.includes("nejm.org") || rawUrl.includes("dynamed") || rawUrl.includes("zocdoc") || rawUrl.includes("drugs.com") || Boolean(error) ? (
+        ) : frameBlocked || rawUrl.includes(".gov.in") || rawUrl.includes(".nic.in") || rawUrl.includes("jamanetwork") || rawUrl.includes("nejm.org") || rawUrl.includes("clinicaltrials") || rawUrl.includes("dynamed") || rawUrl.includes("zocdoc") || rawUrl.includes("drugs.com") || Boolean(error) ? (
           /* Medical Journal / Government Security / Frame Blocked Fallback Card */
           <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-[#FAF9F6] selection:bg-orange-100">
             <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-md border border-orange-200 text-[#FF9933] mb-4">
