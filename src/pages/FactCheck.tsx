@@ -90,7 +90,14 @@ export default function FactCheck() {
               <button
                 key={source.url}
                 type="button"
-                onClick={() => openExternalLink(source.url, navigate, hi ? source.nameHi : source.name)}
+                onClick={() => {
+                  if (source.url.includes("xcancel.com")) {
+                    const handle = source.url.split("xcancel.com/")[1].replace(/\//g, '');
+                    navigate(`/fact-check/twitter/${handle}`);
+                  } else {
+                    openExternalLink(source.url, navigate, hi ? source.nameHi : source.name);
+                  }
+                }}
                 className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:bg-white hover:shadow-sm active:scale-[.99]"
               >
                 <WebsiteLogo url={source.url} label={hi ? source.nameHi : source.name} />
