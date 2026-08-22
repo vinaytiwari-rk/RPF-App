@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   CloudSun,
@@ -20,20 +20,30 @@ import {
   Radio,
   Tv,
   Newspaper,
+  Briefcase,
+  AlertTriangle,
+  Stethoscope,
+  ChevronRight,
+  ShieldAlert,
 } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
+import InstagramApiFeed from "../components/InstagramApiFeed";
 
 type Lang = "en" | "hi";
 type Daily = { temp: number | null; aqi: number | null; location: string };
 type QuoteData = { quote: string; author: string; link?: string };
 
-const sevaCards = [
-  { icon: HeartPulse, title: "Care", hi: "देखभाल", text: "Be there for someone who needs support.", textHi: "किसी जरूरतमंद के लिए सहारा बनें।", tone: "rose" },
-  { icon: Users, title: "Connect", hi: "जुड़ें", text: "Bring one person closer to a positive community.", textHi: "एक व्यक्ति को सकारात्मक समुदाय से जोड़ें।", tone: "sky" },
-  { icon: Leaf, title: "Protect", hi: "संरक्षण", text: "Take one meaningful step for our environment.", textHi: "पर्यावरण के लिए एक सार्थक कदम उठाएं।", tone: "green" },
-  { icon: HandHeart, title: "Share", hi: "साझा करें", text: "Share time, knowledge or encouragement.", textHi: "समय, ज्ञान या प्रोत्साहन साझा करें।", tone: "purple" },
+const QUICK_ACTIONS = [
+  { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Citizen ID & Schemes", descHi: "नागरिक आईडी", icon: HeartHandshake, color: "bg-orange-500 text-white", route: "/jan-seva-card" },
+  { id: "blood", titleEn: "Blood Network", titleHi: "ब्लड नेटवर्क", descEn: "Emergency Donors", descHi: "आपातकालीन रक्तदान", icon: HeartPulse, color: "bg-rose-600 text-white", route: "/blood-network" },
+  { id: "health", titleEn: "Health Care", titleHi: "स्वास्थ्य सेवा", descEn: "Ayushman & Doctors", descHi: "आयुष्मान एवं डॉक्टर", icon: Stethoscope, color: "bg-emerald-600 text-white", route: "/health-care" },
+  { id: "jobs", titleEn: "Jobs Portal", titleHi: "रोजगार पोर्टल", descEn: "Career & Hirings", descHi: "करियर और नौकरियां", icon: Briefcase, color: "bg-blue-600 text-white", route: "/jobs" },
+  { id: "grievance", titleEn: "Grievances", titleHi: "शिकायत पोर्टल", descEn: "Civic Complaints", descHi: "नागरिक शिकायतें", icon: AlertTriangle, color: "bg-amber-600 text-white", route: "/grievance" },
+  { id: "radio", titleEn: "Internet Radio", titleHi: "इंटरनेट रेडियो", descEn: "AIR & Akashvani", descHi: "लाइव रेडियो प्रसारण", icon: Radio, color: "bg-purple-600 text-white", route: "/internet-radio" },
+  { id: "tv", titleEn: "Live Broadcast", titleHi: "लाइव टीवी", descEn: "News & Culture", descHi: "लाइव समाचार चैनल", icon: Tv, color: "bg-indigo-600 text-white", route: "/live-tv" },
+  { id: "epaper", titleEn: "E-Paper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Daily Newspapers", descHi: "दैनिक समाचार पत्र", icon: Newspaper, color: "bg-sky-600 text-white", route: "/epaper" },
 ];
 
 const socialFallback = [
@@ -52,7 +62,7 @@ export default function HomePremium() {
 
   const [daily, setDaily] = useState<Daily>({ temp: null, aqi: null, location: "" });
   const [quote, setQuote] = useState<QuoteData | null>(null);
-  const [selectedSeva, setSelectedSeva] = useState(0);
+  const [activeBanner, setActiveBanner] = useState(0);
 
   const hi = lang === "hi";
   const name = user?.name?.trim().split(/\s+/)[0] || "";
@@ -103,47 +113,64 @@ export default function HomePremium() {
     return { ...item, url: found?.url || item.url };
   });
 
-  const selected = useMemo(() => sevaCards[selectedSeva], [selectedSeva]);
-
   return (
     <main className="min-h-full bg-[#FAF9F6] pb-28 text-slate-900 font-sans selection:bg-orange-100">
       <div className="mx-auto w-full max-w-3xl px-4 py-4 sm:px-6">
-        {/* Top Branding Banner Header */}
-        <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm p-6">
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#FF9933] via-[#FDE047] to-[#138808]" />
-          
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
-                <img src="/assets/logo.png" alt="RP Foundation" className="h-full w-full object-contain" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#000080]">RP Foundation</p>
-                <h2 className="text-xs font-black text-slate-900 tracking-wider">समाहित सुपर-ऐप</h2>
-              </div>
+        
+        {/* Top Super-App Header */}
+        <header className="mb-4 flex items-center justify-between border-b border-slate-200/60 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+              <img src="/assets/logo.png" alt="RP Foundation" className="h-full w-full object-contain" />
             </div>
-            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active
-            </span>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#000080]">Samahit Super-App</p>
+              <h2 className="text-xs font-black text-slate-900 tracking-wider">RP Foundation India</h2>
+            </div>
           </div>
 
-          <div className="mt-5">
-            <h1 className="text-2xl font-black leading-tight text-[#000080] sm:text-3xl">
-              {greeting}{name ? `, ${name}` : ""}
-            </h1>
-            <p className="mt-1.5 text-xs leading-relaxed text-slate-600 font-medium">
-              {hi ? "जहाँ सेवा एक विचार नहीं, एक संकल्प बनकर जीवन से जुड़ती है।" : "Where service becomes more than an idea — a shared commitment to national progress."}
-            </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate("/sos")}
+              className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-md active:scale-95 transition"
+            >
+              <ShieldAlert className="h-3.5 w-3.5" />
+              SOS
+            </button>
+          </div>
+        </header>
+
+        {/* Hero Greeting & Banner Card */}
+        <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm p-5 sm:p-6">
+          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#FF9933] via-[#FDE047] to-[#138808]" />
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[.18em] text-[#000080] bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+                Official Portal
+              </span>
+              <h1 className="text-2xl font-black leading-tight text-[#000080] mt-2 sm:text-3xl">
+                {greeting}{name ? `, ${name}` : ""}
+              </h1>
+              <p className="mt-1 text-xs leading-relaxed text-slate-600 font-medium">
+                {hi ? "नागरिक सशक्तिकरण एवं जन कल्याण सुपर-ऐप" : "National Citizen Welfare & Empowerment Platform"}
+              </p>
+            </div>
           </div>
 
-          <div className="mt-5 flex items-center gap-3">
+          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
             <button
               onClick={() => navigate("/jan-seva-card")}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#FF9933] to-[#F59E0B] px-4 py-2.5 text-xs font-bold text-white shadow-md active:scale-95 transition"
+              className="w-full flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#F59E0B] p-3.5 text-xs font-bold text-white shadow-md active:scale-95 transition"
             >
-              <HeartHandshake className="h-4 w-4" />
-              {hi ? "जन सेवा कार्ड आवेदन" : "Jan Seva Card"}
-              <ArrowRight className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2.5">
+                <HeartHandshake className="h-5 w-5 shrink-0" />
+                <div className="text-left">
+                  <p className="font-black leading-tight">{hi ? "जन सेवा कार्ड बनाएं" : "Apply Jan Seva Card"}</p>
+                  <p className="text-[10px] text-orange-100 font-medium leading-none mt-0.5">Citizen Identity & Privileges</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 shrink-0 text-white" />
             </button>
           </div>
         </section>
@@ -151,70 +178,73 @@ export default function HomePremium() {
         {/* Live Weather & Location Bar */}
         <section className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="grid grid-cols-3 divide-x divide-slate-100">
-            <div className="p-3.5">
-              <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-                <MapPin className="h-3.5 w-3.5 text-[#FF9933]" />
-                <span className="text-[9px] font-black uppercase tracking-wider">{hi ? "स्थान" : "Location"}</span>
+            <div className="p-3">
+              <div className="flex items-center gap-1 text-slate-400 mb-0.5">
+                <MapPin className="h-3 w-3 text-[#FF9933]" />
+                <span className="text-[8.5px] font-black uppercase tracking-wider">{hi ? "स्थान" : "Location"}</span>
               </div>
               <p className="truncate text-xs font-black text-slate-800">{daily.location || (hi ? "पता कर रहे हैं…" : "Locating…")}</p>
             </div>
-            <div className="p-3.5">
-              <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-                <CloudSun className="h-3.5 w-3.5 text-sky-500" />
-                <span className="text-[9px] font-black uppercase tracking-wider">{hi ? "मौसम" : "Weather"}</span>
+            <div className="p-3">
+              <div className="flex items-center gap-1 text-slate-400 mb-0.5">
+                <CloudSun className="h-3 w-3 text-sky-500" />
+                <span className="text-[8.5px] font-black uppercase tracking-wider">{hi ? "मौसम" : "Weather"}</span>
               </div>
               <p className="text-sm font-black text-[#000080]">{daily.temp == null ? "—" : `${daily.temp}°C`}</p>
             </div>
-            <div className="p-3.5">
-              <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-                <Wind className="h-3.5 w-3.5 text-emerald-600" />
-                <span className="text-[9px] font-black uppercase tracking-wider">AQI</span>
+            <div className="p-3">
+              <div className="flex items-center gap-1 text-slate-400 mb-0.5">
+                <Wind className="h-3 w-3 text-emerald-600" />
+                <span className="text-[8.5px] font-black uppercase tracking-wider">AQI</span>
               </div>
               <p className="text-sm font-black text-[#138808]">{daily.aqi == null ? "—" : daily.aqi}</p>
             </div>
           </div>
         </section>
 
-        {/* Media & Feature Shortcuts */}
-        <section className="mt-4 grid grid-cols-3 gap-2.5">
-          <button
-            onClick={() => navigate("/internet-radio")}
-            className="flex items-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3 text-left hover:bg-emerald-100/50 transition active:scale-95"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shrink-0 shadow-sm">
-              <Radio className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-black text-emerald-950 truncate">Radio</p>
-              <p className="text-[9px] font-bold text-emerald-700 truncate">Live AIR</p>
-            </div>
-          </button>
+        {/* Super-App Quick Action Grid (4x2 Grid) */}
+        <section className="mt-4">
+          <div className="flex items-center justify-between mb-2.5">
+            <h3 className="text-xs font-black text-[#000080] uppercase tracking-wider">{hi ? "प्रमुख सेवाएं" : "Core Super-App Services"}</h3>
+            <button onClick={() => navigate("/services")} className="text-[11px] font-black text-[#FF9933] hover:underline flex items-center gap-0.5">
+              {isHi ? "सभी देखें" : "View All"} <ChevronRight className="h-3 w-3" />
+            </button>
+          </div>
 
-          <button
-            onClick={() => navigate("/live-tv")}
-            className="flex items-center gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/60 p-3 text-left hover:bg-rose-100/50 transition active:scale-95"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-600 text-white shrink-0 shadow-sm">
-              <Tv className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-black text-rose-950 truncate">Live TV</p>
-              <p className="text-[9px] font-bold text-rose-700 truncate">Broadcast</p>
-            </div>
-          </button>
+          <div className="grid grid-cols-4 gap-2.5">
+            {QUICK_ACTIONS.map((act) => (
+              <button
+                key={act.id}
+                type="button"
+                onClick={() => navigate(act.route)}
+                className="group flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-orange-200 active:scale-95 transition text-center"
+              >
+                <div className={`w-10 h-10 rounded-2xl ${act.color} flex items-center justify-center mb-2 shadow-sm transition-transform group-hover:scale-110`}>
+                  <act.icon className="w-5 h-5" />
+                </div>
+                <p className="text-[11px] font-black text-slate-800 leading-tight line-clamp-1">{isHi ? act.titleHi : act.titleEn}</p>
+                <p className="text-[9px] font-bold text-slate-400 leading-none mt-0.5 truncate w-full">{isHi ? act.descHi : act.descEn}</p>
+              </button>
+            ))}
+          </div>
+        </section>
 
-          <button
-            onClick={() => navigate("/epaper")}
-            className="flex items-center gap-2.5 rounded-2xl border border-blue-200 bg-blue-50/60 p-3 text-left hover:bg-blue-100/50 transition active:scale-95"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#000080] text-white shrink-0 shadow-sm">
-              <Newspaper className="h-4 w-4" />
+        {/* Live Instagram Feed Section */}
+        <section className="mt-5 rounded-3xl border border-pink-100 bg-white p-4 sm:p-5 shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 text-white shadow-sm">
+                <Instagram className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">{hi ? "लाइव इंस्टाग्राम अपडेट्स" : "Live Instagram Feed"}</h3>
+                <p className="text-[10px] text-slate-400 font-bold">@rpfoundationofficial</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-black text-blue-950 truncate">E-Paper</p>
-              <p className="text-[9px] font-bold text-blue-700 truncate">Daily News</p>
-            </div>
-          </button>
+            <span className="flex h-2 w-2 rounded-full bg-pink-500 animate-pulse" />
+          </div>
+
+          <InstagramApiFeed />
         </section>
 
         {/* Quote of the Day */}
@@ -231,32 +261,6 @@ export default function HomePremium() {
               {quote?.author && <p className="mt-1 text-[10px] font-black text-slate-400">— {quote.author}</p>}
             </div>
             <Sparkles className="h-4 w-4 text-purple-500 shrink-0" />
-          </div>
-        </section>
-
-        {/* Small Steps to Serve */}
-        <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-            <div>
-              <p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">{hi ? "सेवा के छोटे कदम" : "Ways to Serve"}</p>
-              <h2 className="text-sm font-black text-[#000080]">{hi ? selected.hi : selected.title}</h2>
-            </div>
-            <selected.icon className="h-5 w-5 text-[#FF9933]" />
-          </div>
-          <p className="mt-2.5 text-xs leading-relaxed text-slate-600 font-medium">{hi ? selected.textHi : selected.text}</p>
-          <div className="mt-3.5 grid grid-cols-4 gap-2">
-            {sevaCards.map((item, index) => (
-              <button
-                key={item.title}
-                onClick={() => setSelectedSeva(index)}
-                aria-label={hi ? item.hi : item.title}
-                className={`flex h-11 items-center justify-center rounded-xl border transition active:scale-95 ${
-                  selectedSeva === index ? "border-orange-300 bg-orange-50 text-[#FF9933] shadow-inner font-bold" : "border-slate-100 bg-slate-50 text-slate-500"
-                }`}
-              >
-                <item.icon className="h-4 w-4" />
-              </button>
-            ))}
           </div>
         </section>
 
