@@ -26,15 +26,11 @@ jobs:
         run: npm run lint
       - name: Build Application
         run: npm run build
-      - name: Upload deployment bundle
+      - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: deployment-bundle
-          path: |
-            dist
-            server.cjs
-            deploy.cjs
-            delete_cpanel_maps.cjs
+          name: deployment-dist
+          path: dist
           if-no-files-found: error
 
   deploy-cpanel:
@@ -43,10 +39,19 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - name: Download deployment bundle
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Deployment Dependencies
+        run: npm install --no-audit --no-fund
+      - name: Download dist artifact
         uses: actions/download-artifact@v4
         with:
-          name: deployment-bundle
+          name: deployment-dist
+          path: dist
       - name: Diagnose FTP endpoint
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
@@ -63,6 +68,7 @@ jobs:
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
+          FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node delete_cpanel_maps.cjs
       - name: Deploy to cPanel
         env:
@@ -71,6 +77,7 @@ jobs:
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
+          FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
 
   deploy-capgo:
@@ -78,10 +85,13 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Download deployment bundle
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Download dist artifact
         uses: actions/download-artifact@v4
         with:
-          name: deployment-bundle
+          name: deployment-dist
+          path: dist
       - name: Deploy Live Update to Capgo
         env:
           CAPGO_TOKEN: ${{ secrets.CAPGO_TOKEN }}
