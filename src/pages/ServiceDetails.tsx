@@ -71,10 +71,52 @@ export default function ServiceDetails() {
 
   useEffect(() => {
     if (!id) return;
+    // Native dedicated routes - DO NOT replace with web links
     if (id === "card") {
       navigate("/jan-seva-card", { replace: true });
       return;
     }
+    if (id === "internet-radio") {
+      navigate("/internet-radio", { replace: true });
+      return;
+    }
+    if (id === "live-tv") {
+      navigate("/live-tv", { replace: true });
+      return;
+    }
+    if (id === "news-feed") {
+      navigate("/news", { replace: true });
+      return;
+    }
+    if (id === "epaper") {
+      navigate("/epaper", { replace: true });
+      return;
+    }
+    if (id === "fact-check") {
+      navigate("/fact-check", { replace: true });
+      return;
+    }
+    if (id === "directory") {
+      navigate("/directory", { replace: true });
+      return;
+    }
+    if (id === "culture") {
+      navigate("/culture", { replace: true });
+      return;
+    }
+    if (id === "donations") {
+      navigate("/donations", { replace: true });
+      return;
+    }
+    if (id === "grievance") {
+      navigate("/grievance", { replace: true });
+      return;
+    }
+    if (id === "blood") {
+      navigate("/blood-network", { replace: true });
+      return;
+    }
+
     const fetchContent = async () => {
       setIsLoadingContent(true);
       setContentData(null);
