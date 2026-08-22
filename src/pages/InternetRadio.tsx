@@ -1,9 +1,274 @@
-import React,{useEffect,useMemo,useRef,useState}from 'react';
-import {useOutletContext}from 'react-router-dom';import {Radio,Play,Pause,Volume2,VolumeX,Search,Signal,WifiOff}from 'lucide-react';import BrandLoader from '../components/BrandLoader';import rawChannels from '../data/akashvaniChannels.json';
-interface RadioStation{name:string;url:string;image:string;page:string;enabled?:boolean;order?:number}const REGIONS=[{id:'All',name:'All Stations',nameHi:'सभी स्टेशन'},{id:'Bhopal',name:'Bhopal',nameHi:'भोपाल'},{id:'MP',name:'Madhya Pradesh',nameHi:'मध्य प्रदेश'},{id:'UP',name:'Uttar Pradesh',nameHi:'उत्तर Pradesh'},{id:'Delhi',name:'Delhi',nameHi:'दिल्ली'},{id:'Mumbai',name:'Mumbai',nameHi:'मुंबई'},{id:'Kolkata',name:'Kolkata',nameHi:'कोलकाता'},{id:'Vividh',name:'Vividh Bharati',nameHi:'विविध भारती'},{id:'Other',name:'Other Regions',nameHi:'अन्य क्षेत्र'}];const fallbackStations=rawChannels as RadioStation[];const validStations=(v:unknown):v is RadioStation[]=>Array.isArray(v)&&v.every((s:any)=>s&&typeof s.name==='string'&&typeof s.url==='string');function getRegionId(name:string){const n=name.toLowerCase();if(n.includes('bhopal'))return'Bhopal';if(n.includes('delhi')||n.includes('indraprastha'))return'Delhi';if(n.includes('mumbai'))return'Mumbai';if(n.includes('kolkata'))return'Kolkata';if(n.includes('vividh')||n.includes('vbs'))return'Vividh';if(['indore','gwalior','jabalpur','chhindwara','sagar','rewa','ratlam','shahdol','balaghat'].some(c=>n.includes(c)))return'MP';if(['lucknow','kanpur','varanasi','mathura','najibabad','obra','rampur','allahabad','prayagraj','gorakhpur','agra'].some(c=>n.includes(c)))return'UP';return'Other'}function SoundBars(){return <div className="flex items-end gap-[2px] h-5">{[40,80,60,100,50].map((h,i)=><div key={i} className="w-[3px] bg-[#FF9933] rounded-full" style={{height:`${h}%`,animation:`soundBar .8s ease-in-out ${i*.12}s infinite alternate`}}/>)}</div>}
-export default function InternetRadio(){const{lang}=useOutletContext<{lang:'en'|'hi'}>();const hi=lang==='hi';const[stations,setStations]=useState<RadioStation[]>(fallbackStations);const[source,setSource]=useState<'server'|'fallback'>('fallback');const[active,setActive]=useState<RadioStation>(()=>fallbackStations.find(s=>s.name.toLowerCase()==='akashvani bhopal')||fallbackStations[0]);const[playing,setPlaying]=useState(false),[loading,setLoading]=useState(false),[muted,setMuted]=useState(false),[volume,setVolume]=useState(.85),[error,setError]=useState(''),[search,setSearch]=useState(''),[selectedRegion,setSelectedRegion]=useState('All');const audioRef=useRef<HTMLAudioElement|null>(null),hlsRef=useRef<any>(null),retryRef=useRef(0),autoTried=useRef(false);
-const stopCurrent=()=>{if(hlsRef.current){hlsRef.current.destroy();hlsRef.current=null}const a=audioRef.current;if(a){a.pause();a.removeAttribute('src');a.load()}};
-const loadStation=async(station:RadioStation,attempt=0)=>{const audio=audioRef.current;if(!audio||!station?.url)return;setError('');setLoading(true);setPlaying(false);stopCurrent();retryRef.current=attempt;try{audio.volume=volume;audio.muted=muted;if(/\.m3u8(?:\?|$)/i.test(station.url)){const Hls=(await import('hls.js')).default;if(Hls.isSupported()){const hls=new Hls({lowLatencyMode:true,maxBufferLength:8,backBufferLength:15,enableWorker:true,manifestLoadingMaxRetry:3,levelLoadingMaxRetry:3,manifestLoadingRetryDelay:700,levelLoadingRetryDelay:700});hlsRef.current=hls;hls.loadSource(station.url);hls.attachMedia(audio);hls.on(Hls.Events.MANIFEST_PARSED,async()=>{try{await audio.play();setPlaying(true);setLoading(false)}catch{setPlaying(false);setLoading(false);setError(hi?'▶ दबाकर स्टेशन चलाएं।':'Tap Play to start the station.')}});hls.on(Hls.Events.ERROR,(_:any,data:any)=>{if(data.fatal){if(attempt<1){setTimeout(()=>void loadStation(station,attempt+1),900)}else{setError(hi?'स्ट्रीम अभी उपलब्ध नहीं है। कृपया फिर प्रयास करें।':'Stream is unavailable right now. Please try again.');setLoading(false);setPlaying(false)}}});return}if(audio.canPlayType('application/vnd.apple.mpegurl'))audio.src=station.url;else throw new Error('HLS unsupported')}else audio.src=station.url;await audio.play();setPlaying(true)}catch{if(attempt<1){setTimeout(()=>void loadStation(station,attempt+1),700)}else setError(hi?'स्ट्रीम शुरू नहीं हो सकी।':'Could not start stream.')}finally{if(attempt>0||!hlsRef.current)setLoading(false)}};
-useEffect(()=>{let cancelled=false;fetch('/api/cms',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{const configured=d?.cms?.internetRadioStations;if(!cancelled&&validStations(configured)){const ordered=[...configured].sort((a,b)=>(a.order??0)-(b.order??0));setStations(ordered);setSource('server');const enabled=ordered.filter(s=>s.enabled!==false);if(enabled.length)setActive(prev=>enabled.find(s=>s.name===prev.name)||enabled.find(s=>s.name.toLowerCase()==='akashvani bhopal')||enabled[0])}}).catch(()=>undefined);return()=>{cancelled=true}},[]);
-useEffect(()=>{if(!active||autoTried.current)return;autoTried.current=true;const timer=setTimeout(()=>void loadStation(active),350);return()=>clearTimeout(timer)},[active]);useEffect(()=>{const a=audioRef.current;if(!a)return;const onError=()=>{if(retryRef.current<1)void loadStation(active,retryRef.current+1)};const onPause=()=>{if(!a.ended)setPlaying(false)};const onPlay=()=>{setPlaying(true);setError('')};a.addEventListener('error',onError);a.addEventListener('pause',onPause);a.addEventListener('play',onPlay);return()=>{a.removeEventListener('error',onError);a.removeEventListener('pause',onPause);a.removeEventListener('play',onPlay)}},[active]);const visibleStations=useMemo(()=>stations.filter(s=>s.enabled!==false),[stations]);const filtered=useMemo(()=>{const q=search.toLowerCase();return visibleStations.filter(s=>(selectedRegion==='All'||getRegionId(s.name)===selectedRegion)&&(!q||s.name.toLowerCase().includes(q)))},[visibleStations,search,selectedRegion]);const handleSelect=(station:RadioStation)=>{setActive(station);void loadStation(station)};const togglePlay=()=>{if(!audioRef.current)return;if(playing){audioRef.current.pause();setPlaying(false)}else void loadStation(active)};useEffect(()=>{if(audioRef.current)audioRef.current.volume=volume},[volume]);useEffect(()=>()=>{stopCurrent()},[]);
-return <div className="min-h-full bg-[#f8f7f4] pb-10"><style>{`@keyframes soundBar{from{transform:scaleY(.3)}to{transform:scaleY(1)}}`}</style><audio ref={audioRef} preload="auto"/><div className="mx-auto max-w-3xl px-3.5 py-5 sm:px-6 space-y-4"><div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FF9933]/10"><Radio className="h-6 w-6 text-[#FF9933]"/></div><div><h1 className="text-lg font-black text-[#000080] leading-tight">{hi?'आकाशवाणी लाइव रेडियो':'Akashvani Live Radio'}</h1><p className="text-[11px] font-medium text-slate-500">{hi?`सरकारी लाइव स्ट्रीम • ${visibleStations.length} स्टेशन`:`Government Live Streams • ${visibleStations.length} Stations`}</p></div></div><div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#000080] via-[#001060] to-[#000040] p-5 text-white shadow-xl"><p className="mb-1 text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">{hi?'▶ अभी बज रहा है':'▶ Now Playing'}</p><h2 className="text-xl font-black leading-tight">{active?.name||'No station configured'}</h2><p className="mt-.5 text-[11px] font-medium text-white/60">Live Stream</p><div className="mt-4 flex items-center gap-4"><button onClick={togglePlay} disabled={loading||!active} className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#FF9933] shadow-lg disabled:opacity-60">{loading?<BrandLoader size="sm" label={hi?'लोड हो रहा है':'Loading'}/>:playing?<Pause className="h-6 w-6"/>:<Play className="h-6 w-6 ml-.5"/>}</button><div className="flex-1">{playing&&!loading?<SoundBars/>:<div className="h-5"/>}</div><div className="flex items-center gap-2"><button onClick={()=>{const next=!muted;if(audioRef.current)audioRef.current.muted=next;setMuted(next)}}>{muted?<VolumeX className="h-4 w-4"/>:<Volume2 className="h-4 w-4"/>}</button><input type="range" min="0" max="1" step=".01" value={muted?0:volume} onChange={e=>{setVolume(+e.target.value);setMuted(false)}} className="w-20 accent-[#FF9933] h-1"/></div></div>{error&&<div className="mt-3 flex items-center gap-2 rounded-xl bg-red-500/20 px-3 py-2 text-[11px] font-bold text-red-200"><WifiOff className="h-3.5 w-3.5"/>{error}</div>}<div className="mt-3 flex items-center gap-1.5"><span className={`h-2 w-2 rounded-full ${playing?'bg-[#FF9933] animate-pulse':'bg-white/30'}`}/><span className="text-[10px] font-bold text-white/60">{playing?(hi?'लाइव':'LIVE'):(hi?'रुका हुआ':'PAUSED')}</span><Signal className="ml-auto h-3.5 w-3.5 text-white/30"/></div></div><div className="space-y-2.5"><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={hi?'स्टेशन का नाम खोजें...':'Search station name...'} className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none"/></div><div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">{REGIONS.map(r=><button key={r.id} onClick={()=>setSelectedRegion(r.id)} className={`shrink-0 rounded-full px-3.5 py-1 text-[11px] font-bold ${selectedRegion===r.id?'bg-[#000080] text-white':'bg-white border border-slate-200 text-slate-600'}`}>{hi?r.nameHi:r.name}</button>)}</div></div><div className="space-y-2"><p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{filtered.length} {hi?'स्टेशन मिले':'Stations found'}</p><div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">{filtered.map(station=>{const isActive=station.name===active?.name;return <button key={`${station.name}-${station.url}`} onClick={()=>handleSelect(station)} className={`w-full flex items-center gap-3 rounded-2xl border p-3 text-left ${isActive?'border-[#FF9933] bg-[#FF9933]/5':'border-slate-200 bg-white'}`}><img src={station.image} alt="" className="h-11 w-11 rounded-xl object-cover bg-slate-100" onError={e=>{e.currentTarget.style.display='none'}}/><div className="min-w-0 flex-1"><p className="truncate text-sm font-black text-slate-800">{station.name}</p><p className="text-[10px] font-bold text-slate-400">Live Radio</p></div>{isActive&&playing&&<Signal className="h-4 w-4 text-[#FF9933]"/>}</button>})}{filtered.length===0&&<div className="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-xs text-slate-500">{hi?'कोई स्टेशन नहीं मिला।':'No stations found.'}</div>}</div></div>{source==='fallback'&&<p className="text-center text-[10px] text-slate-400">{hi?'सर्वर उपलब्ध न होने पर सुरक्षित बैकअप सूची सक्रिय है':'Safe built-in backup station list active'}</p>}</div></div>}
+import React, { useEffect, useMemo, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import { Radio, Play, Pause, Volume2, VolumeX, Search, Signal, WifiOff, X } from 'lucide-react';
+import BrandLoader from '../components/BrandLoader';
+import rawChannels from '../data/akashvaniChannels.json';
+import { useMedia } from '../context/MediaContext';
+
+interface RadioStation {
+  name: string;
+  url: string;
+  image: string;
+  page?: string;
+  enabled?: boolean;
+  order?: number;
+}
+
+const REGIONS = [
+  { id: 'All', name: 'All Stations', nameHi: 'सभी स्टेशन' },
+  { id: 'Bhopal', name: 'Bhopal', nameHi: 'भोपाल' },
+  { id: 'MP', name: 'Madhya Pradesh', nameHi: 'मध्य प्रदेश' },
+  { id: 'UP', name: 'Uttar Pradesh', nameHi: 'उत्तर प्रदेश' },
+  { id: 'Delhi', name: 'Delhi', nameHi: 'दिल्ली' },
+  { id: 'Mumbai', name: 'Mumbai', nameHi: 'मुंबई' },
+  { id: 'Kolkata', name: 'Kolkata', nameHi: 'कोलकाता' },
+  { id: 'Vividh', name: 'Vividh Bharati', nameHi: 'विविध भारती' },
+  { id: 'Other', name: 'Other Regions', nameHi: 'अन्य क्षेत्र' },
+];
+
+const fallbackStations = rawChannels as RadioStation[];
+const validStations = (v: unknown): v is RadioStation[] =>
+  Array.isArray(v) && v.every((s: any) => s && typeof s.name === 'string' && typeof s.url === 'string');
+
+function getRegionId(name: string) {
+  const n = name.toLowerCase();
+  if (n.includes('bhopal')) return 'Bhopal';
+  if (n.includes('delhi') || n.includes('indraprastha')) return 'Delhi';
+  if (n.includes('mumbai')) return 'Mumbai';
+  if (n.includes('kolkata')) return 'Kolkata';
+  if (n.includes('vividh') || n.includes('vbs')) return 'Vividh';
+  if (['indore', 'gwalior', 'jabalpur', 'chhindwara', 'sagar', 'rewa', 'ratlam', 'shahdol', 'balaghat'].some((c) => n.includes(c))) return 'MP';
+  if (['lucknow', 'kanpur', 'varanasi', 'mathura', 'najibabad', 'obra', 'rampur', 'allahabad', 'prayagraj', 'gorakhpur', 'agra'].some((c) => n.includes(c))) return 'UP';
+  return 'Other';
+}
+
+function SoundBars() {
+  return (
+    <div className="flex items-end gap-[2px] h-5">
+      {[40, 80, 60, 100, 50].map((h, i) => (
+        <div
+          key={i}
+          className="w-[3px] bg-[#FF9933] rounded-full"
+          style={{ height: `${h}%`, animation: `soundBar .8s ease-in-out ${i * 0.12}s infinite alternate` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+export default function InternetRadio() {
+  const { lang } = useOutletContext<{ lang: 'en' | 'hi' }>();
+  const hi = lang === 'hi';
+
+  const {
+    activeRadio,
+    isRadioPlaying,
+    isRadioLoading,
+    radioVolume,
+    isRadioMuted,
+    radioError,
+    playRadio,
+    toggleRadioPlay,
+    stopRadio,
+    setRadioVolume,
+    toggleRadioMute,
+  } = useMedia();
+
+  const [stations, setStations] = useState<RadioStation[]>(fallbackStations);
+  const [source, setSource] = useState<'server' | 'fallback'>('fallback');
+  const [search, setSearch] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('All');
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/cms', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => {
+        const configured = d?.cms?.internetRadioStations;
+        if (!cancelled && validStations(configured)) {
+          const ordered = [...configured].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          setStations(ordered);
+          setSource('server');
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const currentStation = activeRadio || stations.find((s) => s.name.toLowerCase() === 'akashvani bhopal') || stations[0];
+
+  const visibleStations = useMemo(() => stations.filter((s) => s.enabled !== false), [stations]);
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return visibleStations.filter(
+      (s) => (selectedRegion === 'All' || getRegionId(s.name) === selectedRegion) && (!q || s.name.toLowerCase().includes(q))
+    );
+  }, [visibleStations, search, selectedRegion]);
+
+  const handleSelect = (station: RadioStation) => {
+    void playRadio(station);
+  };
+
+  return (
+    <div className="min-h-full bg-[#f8f7f4] pb-10">
+      <style>{`@keyframes soundBar{from{transform:scaleY(.3)}to{transform:scaleY(1)}}`}</style>
+      <div className="mx-auto max-w-3xl px-3.5 py-5 sm:px-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FF9933]/10">
+            <Radio className="h-6 w-6 text-[#FF9933]" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black text-[#000080] leading-tight">
+              {hi ? 'आकाशवाणी लाइव रेडियो' : 'Akashvani Live Radio'}
+            </h1>
+            <p className="text-[11px] font-medium text-slate-500">
+              {hi ? `सरकारी लाइव स्ट्रीम • ${visibleStations.length} स्टेशन` : `Government Live Streams • ${visibleStations.length} Stations`}
+            </p>
+          </div>
+        </div>
+
+        {/* Player Card */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#000080] via-[#001060] to-[#000040] p-5 text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <p className="mb-1 text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">
+              {hi ? '▶ अभी बज रहा है' : '▶ Now Playing'}
+            </p>
+            {activeRadio && (
+              <button
+                onClick={stopRadio}
+                className="flex items-center gap-1 text-[10px] font-bold text-rose-300 hover:text-white bg-white/10 px-2 py-0.5 rounded-full"
+              >
+                <X className="h-3 w-3" />
+                {hi ? 'बंद करें' : 'Stop Player'}
+              </button>
+            )}
+          </div>
+          <h2 className="text-xl font-black leading-tight">{currentStation?.name || 'No station configured'}</h2>
+          <p className="mt-.5 text-[11px] font-medium text-white/60">Live Stream</p>
+
+          <div className="mt-4 flex items-center gap-4">
+            <button
+              onClick={() => (activeRadio ? toggleRadioPlay() : handleSelect(currentStation))}
+              disabled={isRadioLoading || !currentStation}
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#FF9933] shadow-lg disabled:opacity-60 hover:bg-orange-500 active:scale-95 transition"
+            >
+              {isRadioLoading ? (
+                <BrandLoader size="sm" label={hi ? 'लोड हो रहा है' : 'Loading'} />
+              ) : isRadioPlaying ? (
+                <Pause className="h-6 w-6" />
+              ) : (
+                <Play className="h-6 w-6 ml-.5" />
+              )}
+            </button>
+
+            <div className="flex-1">{isRadioPlaying && !isRadioLoading ? <SoundBars /> : <div className="h-5" />}</div>
+
+            <div className="flex items-center gap-2">
+              <button onClick={toggleRadioMute}>
+                {isRadioMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step=".01"
+                value={isRadioMuted ? 0 : radioVolume}
+                onChange={(e) => setRadioVolume(+e.target.value)}
+                className="w-20 accent-[#FF9933] h-1"
+              />
+            </div>
+          </div>
+
+          {radioError && (
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-red-500/20 px-3 py-2 text-[11px] font-bold text-red-200">
+              <WifiOff className="h-3.5 w-3.5" />
+              {radioError}
+            </div>
+          )}
+
+          <div className="mt-3 flex items-center gap-1.5">
+            <span className={`h-2 w-2 rounded-full ${isRadioPlaying ? 'bg-[#FF9933] animate-pulse' : 'bg-white/30'}`} />
+            <span className="text-[10px] font-bold text-white/60">
+              {isRadioPlaying ? (hi ? 'लाइव' : 'LIVE') : (hi ? 'रुका हुआ' : 'PAUSED')}
+            </span>
+            <Signal className="ml-auto h-3.5 w-3.5 text-white/30" />
+          </div>
+        </div>
+
+        {/* Filter & Search */}
+        <div className="space-y-2.5">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={hi ? 'स्टेशन का नाम खोजें...' : 'Search station name...'}
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none"
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {REGIONS.map((r) => (
+              <button
+                key={r.id}
+                onClick={() => setSelectedRegion(r.id)}
+                className={`shrink-0 rounded-full px-3.5 py-1 text-[11px] font-bold ${
+                  selectedRegion === r.id ? 'bg-[#000080] text-white' : 'bg-white border border-slate-200 text-slate-600'
+                }`}
+              >
+                {hi ? r.nameHi : r.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Stations List */}
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            {filtered.length} {hi ? 'स्टेशन मिले' : 'Stations found'}
+          </p>
+          <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+            {filtered.map((station) => {
+              const isActive = station.name === activeRadio?.name;
+              return (
+                <button
+                  key={`${station.name}-${station.url}`}
+                  onClick={() => handleSelect(station)}
+                  className={`w-full flex items-center gap-3 rounded-2xl border p-3 text-left transition ${
+                    isActive ? 'border-[#FF9933] bg-[#FF9933]/5 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <img
+                    src={station.image}
+                    alt=""
+                    className="h-11 w-11 rounded-xl object-cover bg-slate-100"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-black text-slate-800">{station.name}</p>
+                    <p className="text-[10px] font-bold text-slate-400">Live Radio</p>
+                  </div>
+                  {isActive && isRadioPlaying && <Signal className="h-4 w-4 text-[#FF9933]" />}
+                </button>
+              );
+            })}
+            {filtered.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-xs text-slate-500">
+                {hi ? 'कोई स्टेशन नहीं मिला।' : 'No stations found.'}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {source === 'fallback' && (
+          <p className="text-center text-[10px] text-slate-400">
+            {hi ? 'सर्वर उपलब्ध न होने पर सुरक्षित बैकअप सूची सक्रिय है' : 'Safe built-in backup station list active'}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

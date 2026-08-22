@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import FileUpload from '../FileUpload';
-import { CmsConfig } from '../../context/AppContext';
+import { useApp, CmsConfig } from '../../context/AppContext';
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from '../../data/liveTvDefaults';
 import rawRadioStations from '../../data/akashvaniChannels.json';
 import { Save, User, Quote, FileText, Tv, Radio } from 'lucide-react';
@@ -39,7 +40,24 @@ export const CmsSettings = () => {
   const channels = Array.isArray((cms as any)?.liveTvChannels) ? (cms as any).liveTvChannels as LiveTvChannel[] : [];
   const radios = validRadio((cms as any)?.internetRadioStations) ? (cms as any).internetRadioStations as RadioStation[] : [];
   const factChecks = Array.isArray((cms as any)?.factCheckSources) ? (cms as any).factCheckSources : [];
-  const save = async () => { if (!cms || channelError || radioError || factCheckError) return; setSaving(true); try { await axios.post('/api/cms', cms, { headers:{Authorization:`Bearer ${token}`} }); } finally { setSaving(false); } };
+  const { refreshData } = useApp();
+  const save = async () => {
+    if (!cms || channelError || radioError || factCheckError) return;
+    setSaving(true);
+    try {
+      const res = await axios.post('/api/cms', cms, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.data && res.data.success !== false) {
+        toast.success("CMS settings saved successfully!");
+        await refreshData();
+      } else {
+        toast.error("Failed to save CMS settings.");
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || err.message || "Unable to save CMS settings.");
+    } finally {
+      setSaving(false);
+    }
+  };
   const updateChannels=(raw:string)=>{setChannelText(raw);try{const parsed=JSON.parse(raw);if(!Array.isArray(parsed))throw new Error();set('liveTvChannels',parsed);setChannelError('')}catch{setChannelError('Channel list must be a valid JSON array before saving.')}};
   const updateRadio=(raw:string)=>{setRadioText(raw);try{const parsed=JSON.parse(raw);if(!validRadio(parsed))throw new Error();set('internetRadioStations',parsed);setRadioError('')}catch{setRadioError('Radio list must be a valid JSON array and every station needs at least name and url.')}};
   const updateFactCheck=(raw:string)=>{setFactCheckText(raw);try{const parsed=JSON.parse(raw);if(!Array.isArray(parsed))throw new Error();set('factCheckSources',parsed);setFactCheckError('')}catch{setFactCheckError('Fact check list must be a valid JSON array.')}};

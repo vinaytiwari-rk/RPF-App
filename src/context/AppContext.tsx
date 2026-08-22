@@ -8,7 +8,8 @@ export interface TestimonialItem { id: string; nameEn: string; nameHi: string; v
 export interface FaqItem { id: string; questionEn: string; questionHi: string; answerEn: string; answerHi: string; }
 
 export interface CmsConfig {
-  alertBannerEn: string; alertBannerHi: string; founderName: string; founderDesignation: string; founderImgUrl: string;
+  alertBannerEn: string; alertBannerHi: string;
+  instagramReelUrl?: string; founderName: string; founderDesignation: string; founderImgUrl: string;
   carouselSlides: CarouselSlide[]; customServices: any[]; socialDirectory?: SocialDirectoryItem[]; notifications?: NotificationItem[];
   testimonials?: TestimonialItem[]; faqs?: FaqItem[]; aboutTextEn?: string; aboutTextHi?: string; logoImgUrl?: string; homeServices?: any[];
   quoteOfTheDayEn?: string; quoteOfTheDayHi?: string; impactBottomTextEn?: string; impactBottomTextHi?: string;

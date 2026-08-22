@@ -36,7 +36,7 @@ router.get("/api/settings", async (req, res) => {
   }
 });
 
-router.post("/api/settings", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
+router.post("/api/settings", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { tollFree, webUrl, email, founderMessageEn, founderMessageHi, helplinesMarquee } = req.body;
     await pool.query(
@@ -118,7 +118,7 @@ router.get("/api/cms/config", async (req, res) => {
   }
 });
 
-router.post("/api/cms/config", authenticateToken, authorizeRole("super_admin"), async (req, res) => {
+router.post("/api/cms/config", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query(
       `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
