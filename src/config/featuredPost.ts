@@ -18,3 +18,5 @@ export const FEATURED_INSTAGRAM_REEL = "https://www.instagram.com/p/DcTxtFGMvfj/
 // Example: "1234abcd-5678-efgh-9012-ijklmnop3456"
 
 export const ELFSIGHT_INSTAGRAM_WIDGET_ID = "";
+
+export const META_API_KEY = "LLM_1754139272268372_e-CrSAgIIYUkik2QTb9qoLPZ0HU";
