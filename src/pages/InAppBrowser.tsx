@@ -1,31 +1,30 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
 import {
   ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
   RotateCw,
   Share2,
   ExternalLink,
-  ShieldCheck,
-  Globe,
-  Monitor,
   Smartphone,
-  Sparkles,
-  Lock,
+  Monitor,
+  ChevronLeft,
+  ChevronRight,
   Compass,
+  Globe,
+  Lock,
 } from 'lucide-react';
-import BrandLoader from '../components/BrandLoader';
 import { isExternalWebUrl, normalizeExternalWebUrl } from '../utils/browser';
+import { RPF_WEB_ORIGIN } from '../config/browserPolicy';
+import { Capacitor } from '@capacitor/core';
+import BrandLoader from '../components/BrandLoader';
 
-const RPF_WEB_ORIGIN = 'https://appapi.therpfoundation.org';
+const DEFAULT_TITLE = 'RPF Web View';
 
 export default function InAppBrowser() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const rawUrl = normalizeExternalWebUrl(params.get('url') || '') || '';
-  const pageTitle = params.get('title') || 'Web Portal';
+  const pageTitle = params.get('title') || DEFAULT_TITLE;
 
   const frameRef = useRef<HTMLIFrameElement>(null);
   const hideTimerRef = useRef<number | null>(null);
@@ -36,13 +35,11 @@ export default function InAppBrowser() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [frameBlocked, setFrameBlocked] = useState(false);
 
   useEffect(() => {
     setError(!rawUrl || !isExternalWebUrl(rawUrl) ? 'Invalid or unsupported web portal.' : '');
     setLoading(true);
     setTimedOut(false);
-    setFrameBlocked(false);
   }, [rawUrl]);
 
   const proxyPath = rawUrl ? `/api/gov/web-proxy?url=${encodeURIComponent(rawUrl)}` : '';
@@ -62,39 +59,49 @@ export default function InAppBrowser() {
     setControls(true);
     if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
     hideTimerRef.current = window.setTimeout(() => {
-      // Keep controls visible if website is delayed or errored
-      if (!timedOut && !error && !frameBlocked && !loading) {
-        setControls(false);
-      }
+      setControls(false);
     }, 3200);
   };
+
+  useEffect(() => {
+    return () => {
+      if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+    };
+  }, []);
 
   const reload = () => {
     setLoading(true);
     setTimedOut(false);
-    setError('');
-    setFrameBlocked(false);
-    const f = frameRef.current;
-    if (f) f.src = proxyUrl;
-  };
-
-  const frameHistory = (d: 'back' | 'forward') => {
-    try {
-      if (d === 'back') frameRef.current?.contentWindow?.history.back();
-      else frameRef.current?.contentWindow?.history.forward();
-    } catch {}
+    if (frameRef.current) {
+      try {
+        frameRef.current.src = proxyUrl;
+      } catch {
+        frameRef.current.removeAttribute('src');
+        frameRef.current.setAttribute('src', proxyUrl);
+      }
+    }
   };
 
   const handleShare = async () => {
+    if (!rawUrl) return;
     try {
       if (navigator.share) {
         await navigator.share({ title: pageTitle, url: rawUrl });
       } else {
         await navigator.clipboard.writeText(rawUrl);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        window.setTimeout(() => setCopied(false), 2000);
       }
     } catch {}
+  };
+
+  const frameHistory = (action: 'back' | 'forward') => {
+    try {
+      if (action === 'back') frameRef.current?.contentWindow?.history.back();
+      else frameRef.current?.contentWindow?.history.forward();
+    } catch {
+      reload();
+    }
   };
 
   const openDirectExternal = () => {
@@ -103,7 +110,7 @@ export default function InAppBrowser() {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex min-h-[100dvh] flex-col overflow-hidden bg-[#FAF0E6] font-sans selection:bg-[#E8DCD1]"
+      className="fixed inset-0 z-[90] flex min-h-[100dvh] flex-col overflow-hidden bg-[#FAF9F6] font-sans selection:bg-orange-100"
       onClick={() => { setControls(v=>!v); triggerControlsTemporarily(); }}
       onTouchStart={() => { setControls(v=>!v); triggerControlsTemporarily(); }}
     >
@@ -111,42 +118,42 @@ export default function InAppBrowser() {
       <header
         onClick={(e) => e.stopPropagation()}
         className={`fixed top-3 inset-x-3.5 z-40 mx-auto max-w-2xl transition-all duration-300 ${
-          controls || timedOut || error || frameBlocked ? 'translate-y-0 opacity-100' : '-translate-y-16 opacity-0 pointer-events-none'
+          controls || timedOut || error ? 'translate-y-0 opacity-100' : '-translate-y-16 opacity-0 pointer-events-none'
         }`}
       >
-        <div className="flex h-12 items-center justify-between gap-2.5 rounded-2xl border border-[#E8DCD1] bg-[#FFFBF7]/95 px-3.5 shadow-xl backdrop-blur-2xl">
+        <div className="flex h-12 items-center justify-between gap-2.5 rounded-2xl border border-slate-200 bg-white/95 px-3.5 shadow-xl backdrop-blur-2xl">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#2D241E] hover:bg-[#F5ECE2] active:scale-95 transition"
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-800 hover:bg-slate-100 active:scale-95 transition"
             aria-label="Back to App"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
 
           {/* Title Banner */}
-          <div className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-[#F5ECE2] px-3 py-1 text-center border border-[#E8DCD1]">
-            <Lock className="h-3 w-3 text-[#8C5A3C] shrink-0" />
-            <span className="truncate text-xs font-black text-[#2D241E]">{pageTitle}</span>
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-orange-50 px-3 py-1 text-center border border-orange-100">
+            <Lock className="h-3 w-3 text-[#FF9933] shrink-0" />
+            <span className="truncate text-xs font-black text-[#000080]">{pageTitle}</span>
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={reload}
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-[#8C5A3C] hover:bg-[#F5ECE2] active:scale-95"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 active:scale-95"
               title="Refresh Portal"
             >
-              <RotateCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#8C5A3C]' : ''}`} />
+              <RotateCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#FF9933]' : ''}`} />
             </button>
             <button
               onClick={handleShare}
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-[#8C5A3C] hover:bg-[#F5ECE2] active:scale-95"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 active:scale-95"
               title="Share"
             >
               <Share2 className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={openDirectExternal}
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-[#8C5A3C] hover:bg-[#F5ECE2] active:scale-95"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 active:scale-95"
               title="Open External"
             >
               <ExternalLink className="h-3.5 w-3.5" />
@@ -203,35 +210,29 @@ export default function InAppBrowser() {
 
             {/* Light Loader */}
             {loading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#FAF0E6]/95 backdrop-blur-sm">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#FAF9F6]/95 backdrop-blur-sm">
                 <BrandLoader size="lg" label="Connecting to Portal..." />
-                <p className="mt-3 text-xs font-bold text-[#7A6A5D]">Connecting to Portal...</p>
+                <p className="mt-3 text-xs font-bold text-slate-600">Connecting to Portal...</p>
               </div>
             )}
 
             {/* Floating Banner on Delay/Timeout */}
             {timedOut && !loading && (
-              <div className="absolute bottom-16 left-1/2 z-30 -translate-x-1/2 flex items-center gap-3 rounded-2xl border border-[#E8DCD1] bg-[#FFFBF7]/95 px-4 py-2.5 text-xs text-[#2D241E] shadow-2xl backdrop-blur-md">
-                <Compass className="h-4 w-4 text-[#8C5A3C] shrink-0" />
+              <div className="absolute bottom-16 left-1/2 z-30 -translate-x-1/2 flex items-center gap-3 rounded-2xl border border-orange-200 bg-white/95 px-4 py-2.5 text-xs text-slate-800 shadow-2xl backdrop-blur-md">
+                <Compass className="h-4 w-4 text-[#FF9933] shrink-0" />
                 <span className="font-medium">Page loading delayed?</span>
                 <button
                   onClick={reload}
-                  className="rounded-xl border border-[#E8DCD1] bg-[#F5ECE2] px-2.5 py-1 text-[11px] font-bold text-[#8C5A3C] hover:bg-[#E8DCD1]"
+                  className="rounded-xl border border-orange-200 bg-orange-50 px-2.5 py-1 text-[11px] font-bold text-[#FF9933] hover:bg-orange-100"
                 >
                   Refresh Page
-                </button>
-                <button
-                  onClick={openDirectExternal}
-                  className="rounded-xl bg-[#8C5A3C] px-3 py-1 text-[11px] font-bold text-white shadow-xs"
-                >
-                  Direct View
                 </button>
               </div>
             )}
 
             {/* Toast */}
             {copied && (
-              <div className="absolute top-16 left-1/2 z-40 -translate-x-1/2 rounded-full bg-[#2D241E]/90 px-4 py-1.5 text-xs font-bold text-white shadow-xl backdrop-blur-md">
+              <div className="absolute top-16 left-1/2 z-40 -translate-x-1/2 rounded-full bg-slate-900/90 px-4 py-1.5 text-xs font-bold text-white shadow-xl backdrop-blur-md">
                 Link copied
               </div>
             )}
@@ -239,43 +240,43 @@ export default function InAppBrowser() {
         )}
       </main>
 
-      {/* Auto-Hiding Bottom Navigation Controls (Hidden by default unless screen touched or load delayed) */}
+      {/* Auto-Hiding Bottom Navigation Controls */}
       <footer
         onClick={(e) => e.stopPropagation()}
         className={`fixed bottom-3 inset-x-3.5 z-40 mx-auto max-w-sm transition-all duration-300 ${
-          controls || timedOut || error || frameBlocked ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'
+          controls || timedOut || error ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'
         }`}
       >
-        <div className="flex h-11 items-center justify-between rounded-2xl border border-[#E8DCD1] bg-[#FFFBF7]/95 px-4 shadow-xl backdrop-blur-2xl text-xs font-bold text-[#7A6A5D]">
+        <div className="flex h-11 items-center justify-between rounded-2xl border border-slate-200 bg-white/95 px-4 shadow-xl backdrop-blur-2xl text-xs font-bold text-slate-600">
           <div className="flex items-center gap-2">
             <button
               onClick={() => frameHistory('back')}
-              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-[#F5ECE2] active:scale-95"
+              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-slate-100 active:scale-95"
               title="Back"
             >
-              <ChevronLeft className="h-4 w-4 text-[#2D241E]" />
+              <ChevronLeft className="h-4 w-4 text-slate-800" />
             </button>
             <button
               onClick={() => frameHistory('forward')}
-              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-[#F5ECE2] active:scale-95"
+              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-slate-100 active:scale-95"
               title="Forward"
             >
-              <ChevronRight className="h-4 w-4 text-[#2D241E]" />
+              <ChevronRight className="h-4 w-4 text-slate-800" />
             </button>
           </div>
 
           <button
             onClick={reload}
-            className="flex items-center gap-1 text-[10px] font-black text-[#8C5A3C] uppercase tracking-wider hover:underline"
+            className="flex items-center gap-1 text-[10px] font-black text-[#FF9933] uppercase tracking-wider hover:underline"
           >
             <RotateCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh Page
           </button>
 
           <button
             onClick={() => setIsDesktop((v) => !v)}
-            className="flex items-center gap-1 text-[11px] font-bold text-[#7A6A5D] hover:text-[#2D241E]"
+            className="flex items-center gap-1 text-[11px] font-bold text-slate-600 hover:text-slate-900"
           >
-            {isDesktop ? <Smartphone className="h-3.5 w-3.5 text-[#8C5A3C]" /> : <Monitor className="h-3.5 w-3.5" />}
+            {isDesktop ? <Smartphone className="h-3.5 w-3.5 text-[#FF9933]" /> : <Monitor className="h-3.5 w-3.5" />}
             {isDesktop ? 'Mobile' : 'Desktop'}
           </button>
         </div>
