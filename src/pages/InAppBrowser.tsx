@@ -176,61 +176,8 @@ export default function InAppBrowser() {
               </button>
             </div>
           </div>
-        ) : frameBlocked || rawUrl.includes(".gov.in") || rawUrl.includes(".nic.in") || rawUrl.includes("jamanetwork") || rawUrl.includes("nejm.org") || rawUrl.includes("clinicaltrials") || rawUrl.includes("dynamed") || rawUrl.includes("zocdoc") || rawUrl.includes("drugs.com") || Boolean(error) ? (
-          /* Medical Journal / Anti-Bot Security / Frame Blocked Fallback Card */
-          <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-[#FAF9F6] selection:bg-orange-100">
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-md border border-orange-200 text-[#FF9933] mb-4">
-              <ShieldCheck className="h-8 w-8 text-[#FF9933]" />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-[.18em] text-[#FF9933] bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100">
-              {rawUrl.includes("jamanetwork") || rawUrl.includes("nejm") || rawUrl.includes("dynamed") ? "Verified Medical Journal" : rawUrl.includes("zocdoc") ? "Anti-Bot Protected Portal" : "Verified Official Portal"}
-            </span>
-            <h2 className="mt-2 text-lg font-black text-slate-900 font-serif">{pageTitle}</h2>
-            <p className="mt-2 text-xs text-slate-500 max-w-sm leading-relaxed font-medium">
-              This portal ({new URL(rawUrl).hostname}) enforces DataDome Anti-Bot & Frame protection. Tap below to launch securely on your device network.
-            </p>
-            <div className="mt-6 space-y-2.5 w-full max-w-xs">
-              <button
-                onClick={openDirectExternal}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#D97706] py-3.5 text-xs font-black text-white shadow-lg active:scale-95 transition hover:brightness-110"
-              >
-                <Sparkles className="h-4 w-4 text-amber-200" />
-                Launch Portal Securely (Direct View)
-              </button>
-              <button
-                onClick={() => navigate(-1)}
-                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
-              >
-                Return to Samahit
-              </button>
-            </div>
-          </div>
-        ) : error ? (
-          /* General Error Card */
-          <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-[#FAF9F6]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-[#FF9933] mb-4 border border-orange-200 shadow-xs">
-              <Globe className="h-8 w-8" />
-            </div>
-            <h2 className="text-base font-black text-slate-900 font-serif">{pageTitle}</h2>
-            <p className="mt-1.5 text-xs text-slate-500 max-w-sm leading-relaxed font-medium">
-              This portal prefers external window view.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => navigate(-1)}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs"
-              >
-                Back to App
-              </button>
-              <button
-                onClick={openDirectExternal}
-                className="rounded-2xl bg-[#FF9933] px-5 py-2.5 text-xs font-bold text-white shadow-md active:scale-95"
-              >
-                Launch Portal
-              </button>
-            </div>
-          </div>
         ) : (
+          /* Direct In-App Browser Iframe for ALL Portals */
           <>
             <iframe
               ref={frameRef}
@@ -239,10 +186,13 @@ export default function InAppBrowser() {
               onLoad={() => {
                 setLoading(false);
                 setTimedOut(false);
+                try {
+                  const title = frameRef.current?.contentDocument?.title;
+                  if (title && title !== pageTitle) setPageTitle(title);
+                } catch {}
               }}
               onError={() => {
                 setLoading(false);
-                setFrameBlocked(true);
                 setControls(true);
               }}
               className="h-full w-full border-0 bg-white"

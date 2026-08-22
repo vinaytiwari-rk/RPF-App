@@ -2,9 +2,11 @@ import express from 'express';
 import { pool } from '../db/dbPool.js';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import https from 'https';
 import { CORE_SERVICES } from '../data/coreServices.js';
 
 const router = express.Router();
+const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
 const isAllowedPortal = (raw: string) => {
   try {
@@ -39,7 +41,7 @@ router.get('/api/gov/web-proxy', async (req, res) => {
   try {
     const target = new URL(raw);
     const upstream = await axios.get(target.toString(), {
-      responseType: 'text', timeout: 15000, maxRedirects: 5,
+      responseType: 'text', timeout: 15000, maxRedirects: 5, httpsAgent,
       headers: { 
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
