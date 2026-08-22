@@ -157,32 +157,26 @@ export default function InAppBrowser() {
 
       {/* Main Web View Area */}
       <main className="relative flex-1 w-full bg-white overflow-hidden">
-        {error || !rawUrl ? (
-          /* Error State Card */
-          <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-[#FAF0E6]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#FFFBF7] text-[#8C5A3C] mb-4 border border-[#E8DCD1] shadow-xs">
+        {!rawUrl ? (
+          /* Invalid URL State Card */
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-[#FAF9F6]">
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-[#FF9933] mb-4 border border-orange-200 shadow-xs">
               <Globe className="h-8 w-8" />
             </div>
-            <h2 className="text-base font-black text-[#2D241E] font-serif">{pageTitle}</h2>
-            <p className="mt-1.5 text-xs text-[#7A6A5D] max-w-sm leading-relaxed">
-              {error || 'This portal prefers external window view.'}
+            <h2 className="text-base font-black text-slate-900 font-serif">{pageTitle}</h2>
+            <p className="mt-1.5 text-xs text-slate-500 max-w-sm leading-relaxed font-medium">
+              Invalid or unsupported portal link.
             </p>
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => navigate(-1)}
-                className="rounded-2xl border border-[#E8DCD1] bg-[#FFFBF7] px-4 py-2.5 text-xs font-bold text-[#2D241E] shadow-xs"
+                className="rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 shadow-xs"
               >
                 Back to App
               </button>
-              <button
-                onClick={openDirectExternal}
-                className="rounded-2xl bg-[#8C5A3C] px-5 py-2.5 text-xs font-bold text-white shadow-md active:scale-95"
-              >
-                Launch Portal
-              </button>
             </div>
           </div>
-        ) : frameBlocked || rawUrl.includes(".gov.in") || rawUrl.includes(".nic.in") ? (
+        ) : frameBlocked || rawUrl.includes(".gov.in") || rawUrl.includes(".nic.in") || (error && (error.includes("certificate") || error.includes("issuer") || error.includes("ssl") || error.includes("CloudFront") || error.includes("403") || error.includes("500"))) ? (
           /* Government Security / SSL / WAF Protection Fallback Card */
           <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-[#FAF9F6] selection:bg-orange-100">
             <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-md border border-orange-200 text-[#FF9933] mb-4">
@@ -208,6 +202,31 @@ export default function InAppBrowser() {
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
               >
                 Return to Samahit
+              </button>
+            </div>
+          </div>
+        ) : error ? (
+          /* General Error Card */
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-[#FAF9F6]">
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-[#FF9933] mb-4 border border-orange-200 shadow-xs">
+              <Globe className="h-8 w-8" />
+            </div>
+            <h2 className="text-base font-black text-slate-900 font-serif">{pageTitle}</h2>
+            <p className="mt-1.5 text-xs text-slate-500 max-w-sm leading-relaxed font-medium">
+              This portal prefers external window view.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => navigate(-1)}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs"
+              >
+                Back to App
+              </button>
+              <button
+                onClick={openDirectExternal}
+                className="rounded-2xl bg-[#FF9933] px-5 py-2.5 text-xs font-bold text-white shadow-md active:scale-95"
+              >
+                Launch Portal
               </button>
             </div>
           </div>
