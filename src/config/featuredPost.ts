@@ -19,4 +19,4 @@ export const FEATURED_INSTAGRAM_REEL = "https://www.instagram.com/p/DcTxtFGMvfj/
 
 export const ELFSIGHT_INSTAGRAM_WIDGET_ID = "";
 
-export const INSTAGRAM_DATA_SOURCE = "https://rss.app/feeds/v1.1/laWV6LcTILOTuLNE.json";
+export const INSTAGRAM_DATA_SOURCE = "https://rpf-app-dusky.vercel.app/api/social?action=instagram";
