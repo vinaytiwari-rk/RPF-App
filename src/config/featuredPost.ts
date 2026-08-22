@@ -19,4 +19,4 @@ export const FEATURED_INSTAGRAM_REEL = "https://www.instagram.com/p/DcTxtFGMvfj/
 
 export const ELFSIGHT_INSTAGRAM_WIDGET_ID = "";
 
-export const META_API_KEY = "LLM_1754139272268372_e-CrSAgIIYUkik2QTb9qoLPZ0HU";
+export const INSTAGRAM_DATA_SOURCE = "https://rss.app/feeds/v1.1/laWV6LcTILOTuLNE.json";

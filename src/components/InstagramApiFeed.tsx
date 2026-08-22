@@ -1,51 +1,62 @@
 import React, { useEffect, useState } from 'react';
-import { Instagram, AlertTriangle, Play, LayoutGrid } from 'lucide-react';
+import { Instagram, AlertTriangle, Play, LayoutGrid, Rss } from 'lucide-react';
 
 interface InstagramApiFeedProps {
-  apiKey: string;
+  sourceUrl: string; // The URL to the JSON feed (e.g. RSS.app JSON endpoint)
 }
 
-export default function InstagramApiFeed({ apiKey }: InstagramApiFeedProps) {
+export default function InstagramApiFeed({ sourceUrl }: InstagramApiFeedProps) {
   const [media, setMedia] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!apiKey) {
-      setError("API Key is missing.");
+    if (!sourceUrl) {
+      setError("Data source URL is missing.");
       setLoading(false);
       return;
     }
 
     const fetchFeed = async () => {
       try {
-        // Attempting to hit the official Instagram Basic Display API 
-        // (If the token is from socialapis.io, it will throw an error and we will know to switch the endpoint)
-        const endpoint = `https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&access_token=${apiKey}&limit=6`;
-        const res = await fetch(endpoint);
+        const res = await fetch(sourceUrl);
         const data = await res.json();
 
         if (data.error) {
-          throw new Error(data.error.message || data.error.type || "Invalid API Key or Token format");
+          throw new Error(data.error.message || "Failed to load feed");
         }
 
-        if (data.data) {
-          setMedia(data.data);
-        } else if (Array.isArray(data)) {
-          // Fallback if the API returns a direct array (e.g., some 3rd party APIs)
-          setMedia(data.slice(0,6));
-        } else {
-          throw new Error("Unexpected API response format");
+        // Handle RSS.app JSON v1.1 format
+        if (data.items && Array.isArray(data.items)) {
+          const formattedMedia = data.items.slice(0, 6).map((item: any) => ({
+            id: item.id,
+            permalink: item.url,
+            media_url: item.image,
+            thumbnail_url: item.image,
+            caption: item.title || item.content_text || "",
+            media_type: item.attachments?.length ? "VIDEO" : "IMAGE" // Guess type based on standard formats
+          }));
+          setMedia(formattedMedia);
+          return;
         }
+
+        // Handle standard Meta Graph API format (fallback if they ever get an official token)
+        if (data.data && Array.isArray(data.data)) {
+          setMedia(data.data.slice(0, 6));
+          return;
+        }
+        
+        throw new Error("Unexpected API response format");
+        
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message || "Network Error while fetching the feed");
       } finally {
         setLoading(false);
       }
     };
 
     fetchFeed();
-  }, [apiKey]);
+  }, [sourceUrl]);
 
   if (loading) {
     return (
@@ -63,10 +74,10 @@ export default function InstagramApiFeed({ apiKey }: InstagramApiFeedProps) {
     return (
       <div className="p-5 bg-rose-50 border border-rose-200 rounded-3xl shadow-sm">
         <div className="flex items-center gap-2 text-rose-700 font-black tracking-wide text-sm mb-2 uppercase">
-          <AlertTriangle className="h-4 w-4" /> Connection Error
+          <AlertTriangle className="h-4 w-4" /> Live Feed Error
         </div>
         <p className="text-[13px] text-rose-600 font-medium leading-relaxed">
-          The API returned an error. This usually means the API Key is invalid or expired.
+          Unable to fetch the latest updates from the source.
         </p>
         <div className="mt-3 p-3 bg-white/60 rounded-xl border border-rose-100 font-mono text-[10px] text-rose-800 break-all">
           {error}
@@ -85,22 +96,28 @@ export default function InstagramApiFeed({ apiKey }: InstagramApiFeedProps) {
           href={item.permalink} 
           target="_blank" 
           rel="noreferrer" 
-          className="group relative aspect-square block overflow-hidden rounded-2xl bg-slate-100 shadow-sm"
+          className="group relative aspect-square block overflow-hidden rounded-2xl bg-slate-100 shadow-sm border border-slate-100"
         >
-          <img 
-            src={item.thumbnail_url || item.media_url} 
-            alt={item.caption?.substring(0, 30) || "Instagram post"} 
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          <div className="absolute top-2 right-2 drop-shadow-md">
-            {item.media_type === "VIDEO" ? (
-               <Play className="h-5 w-5 text-white fill-white" />
-            ) : item.media_type === "CAROUSEL_ALBUM" ? (
-               <LayoutGrid className="h-5 w-5 text-white fill-white" />
-            ) : null}
-          </div>
+          {item.thumbnail_url || item.media_url ? (
+            <img 
+              src={item.thumbnail_url || item.media_url} 
+              alt="Instagram Post" 
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              onError={(e) => {
+                // Hide broken images from 3rd party scrapers gracefully
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center', 'bg-slate-50');
+              }}
+            />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center bg-slate-50">
+               <Instagram className="text-slate-300 h-8 w-8" />
+            </div>
+          )}
+          
+          {/* Overlay gradient & Text */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-end p-3">
-            <p className="text-white text-[10px] font-medium line-clamp-2 leading-tight drop-shadow-md">
+            <p className="text-white text-[10px] font-medium line-clamp-3 leading-tight drop-shadow-md">
               {item.caption || "View on Instagram"}
             </p>
           </div>
