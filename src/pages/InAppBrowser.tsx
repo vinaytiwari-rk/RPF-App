@@ -10,14 +10,15 @@ import {
   Copy,
   ExternalLink,
   ShieldCheck,
-  AlertTriangle,
+  Globe,
   Monitor,
   Smartphone,
-  X,
-  Globe,
+  Sparkles,
+  Lock,
+  Compass,
 } from 'lucide-react';
-import { isExternalWebUrl, normalizeExternalWebUrl } from '../utils/browser';
 import BrandLoader from '../components/BrandLoader';
+import { isExternalWebUrl, normalizeExternalWebUrl } from '../utils/browser';
 
 const RPF_WEB_ORIGIN = 'https://appapi.therpfoundation.org';
 
@@ -25,7 +26,7 @@ export default function InAppBrowser() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const rawUrl = normalizeExternalWebUrl(params.get('url') || '') || '';
-  const pageTitle = params.get('title') || 'RPF Browser';
+  const pageTitle = params.get('title') || 'RPF Smart Browser';
 
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [error, setError] = useState('');
@@ -34,11 +35,19 @@ export default function InAppBrowser() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [frameBlocked, setFrameBlocked] = useState(false);
+
+  // Extract hostname cleanly for UI
+  let domain = 'portal';
+  try {
+    domain = new URL(rawUrl).hostname.replace(/^www\./, '');
+  } catch {}
 
   useEffect(() => {
     setError(!rawUrl || !isExternalWebUrl(rawUrl) ? 'Invalid or unsupported web URL.' : '');
     setLoading(true);
     setTimedOut(false);
+    setFrameBlocked(false);
   }, [rawUrl]);
 
   const proxyPath = rawUrl ? `/api/gov/web-proxy?url=${encodeURIComponent(rawUrl)}` : '';
@@ -49,7 +58,7 @@ export default function InAppBrowser() {
     const timer = window.setTimeout(() => {
       setTimedOut(true);
       setLoading(false);
-    }, 12000);
+    }, 10000);
     return () => window.clearTimeout(timer);
   }, [rawUrl, error]);
 
@@ -57,6 +66,7 @@ export default function InAppBrowser() {
     setLoading(true);
     setTimedOut(false);
     setError('');
+    setFrameBlocked(false);
     const f = frameRef.current;
     if (f) f.src = proxyUrl;
   };
@@ -91,93 +101,114 @@ export default function InAppBrowser() {
   };
 
   return (
-    <div className="fixed inset-0 z-[90] flex min-h-[100dvh] flex-col overflow-hidden bg-white selection:bg-orange-100" onClick={() => setControls(v=>!v)}>
-      {/* Top Floating Browser Toolbar */}
+    <div
+      className="fixed inset-0 z-[90] flex min-h-[100dvh] flex-col overflow-hidden bg-slate-50 font-sans selection:bg-orange-100"
+      onClick={() => setControls(v=>!v)}
+    >
+      {/* Invisible Floating Header (Glassmorphic & Minimal - Auto-Hides) */}
       <header
         onClick={(e) => e.stopPropagation()}
-        className={`sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-3 shadow-sm backdrop-blur-md transition-transform duration-200 ${
-          controls ? 'translate-y-0' : '-translate-y-full absolute inset-x-0'
+        className={`fixed top-3 inset-x-3.5 z-40 mx-auto max-w-2xl transition-all duration-300 ${
+          controls ? 'translate-y-0 opacity-100' : '-translate-y-16 opacity-0 pointer-events-none'
         }`}
       >
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex h-12 items-center justify-between gap-2.5 rounded-2xl border border-slate-200/80 bg-white/95 px-3 shadow-lg backdrop-blur-xl">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 active:scale-95 transition"
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-700 hover:bg-orange-50 hover:text-[#000080] active:scale-95 transition"
             aria-label="Back to App"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </button>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-              <h1 className="truncate text-xs font-bold text-slate-900">{pageTitle || "RPF Web View"}</h1>
-            </div>
-            <p className="truncate text-[10px] text-slate-400 font-mono">{rawUrl}</p>
-          </div>
-        </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            onClick={() => frameHistory('back')}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95"
-            title="Back"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => frameHistory('forward')}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95"
-            title="Forward"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-          <button
-            onClick={reload}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95"
-            title="Reload"
-          >
-            <RotateCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            onClick={handleCopyLink}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95"
-            title="Copy Link"
-          >
-            <Copy className="h-4 w-4" />
-          </button>
-          <button
-            onClick={handleShare}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95"
-            title="Share Link"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={openDirectExternal}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-emerald-700 hover:bg-emerald-50 active:scale-95"
-            title="Open in System Browser"
-          >
-            <ExternalLink className="h-4 w-4" />
-          </button>
+          {/* Minimal Domain Pill (App-Integrated Branding) */}
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-slate-100/80 px-2.5 py-1">
+            <Lock className="h-3 w-3 text-emerald-600 shrink-0" />
+            <span className="truncate text-xs font-bold text-slate-800">{domain}</span>
+            <span className="ml-auto text-[9px] font-black uppercase tracking-wider text-[#FF9933] bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-100 shrink-0">
+              Samahit Safe
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={reload}
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 active:scale-95"
+              title="Refresh"
+            >
+              <RotateCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#000080]' : ''}`} />
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 active:scale-95"
+              title="Share"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={openDirectExternal}
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-emerald-700 hover:bg-emerald-50 active:scale-95"
+              title="External Browser"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Main View Container */}
-      <main className="relative flex-1 bg-slate-50 overflow-hidden">
+      {/* Main Full-Screen Web View Container */}
+      <main className="relative flex-1 w-full bg-white overflow-hidden">
         {error || !rawUrl ? (
-          <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-50 text-rose-600 mb-4">
-              <AlertTriangle className="h-8 w-8" />
+          /* Error State Card */
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-white">
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-50 text-rose-600 mb-4 border border-rose-100">
+              <Globe className="h-8 w-8" />
             </div>
-            <h2 className="text-base font-bold text-slate-900">Page Unavailable</h2>
-            <p className="mt-1 text-xs text-slate-500 max-w-sm">{error || 'The requested web page could not be loaded.'}</p>
-            <button
-              onClick={() => navigate(-1)}
-              className="mt-5 rounded-2xl bg-[#000080] px-5 py-2.5 text-xs font-bold text-white shadow-md active:scale-95 transition"
-            >
-              Return to App
-            </button>
+            <h2 className="text-base font-black text-slate-900">{pageTitle || 'Web Portal'}</h2>
+            <p className="mt-1.5 text-xs text-slate-500 max-w-sm leading-relaxed">
+              {error || 'This external portal cannot be embedded directly.'}
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => navigate(-1)}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-sm"
+              >
+                Back to App
+              </button>
+              <button
+                onClick={openDirectExternal}
+                className="rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#138808] px-5 py-2.5 text-xs font-bold text-white shadow-md active:scale-95"
+              >
+                Open Official Portal
+              </button>
+            </div>
+          </div>
+        ) : frameBlocked ? (
+          /* Frame Blocked / X-Frame-Options Fallback Card (NO White Screen) */
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-orange-50/40 via-white to-slate-50">
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-md border border-orange-100 text-[#000080] mb-4">
+              <ShieldCheck className="h-8 w-8 text-[#FF9933]" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-[.18em] text-[#000080]">Protected Portal</span>
+            <h2 className="mt-1 text-lg font-black text-slate-900">{pageTitle}</h2>
+            <p className="mt-2 text-xs text-slate-500 max-w-xs leading-relaxed">
+              This official portal prefers dedicated window view for security and login features.
+            </p>
+            <div className="mt-6 space-y-2.5 w-full max-w-xs">
+              <button
+                onClick={openDirectExternal}
+                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#000080] to-[#138808] py-3 text-xs font-bold text-white shadow-lg active:scale-95 transition"
+              >
+                <Sparkles className="h-4 w-4 text-[#FF9933]" />
+                Launch Portal Securely
+              </button>
+              <button
+                onClick={() => navigate(-1)}
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50"
+              >
+                Return to Samahit
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -191,7 +222,7 @@ export default function InAppBrowser() {
               }}
               onError={() => {
                 setLoading(false);
-                setError('This website could not be displayed inside the container.');
+                setFrameBlocked(true);
               }}
               className="h-full w-full border-0 bg-white"
               style={
@@ -203,37 +234,37 @@ export default function InAppBrowser() {
               allowFullScreen
             />
 
-            {/* Loader Overlay */}
+            {/* Light Glassmorphic Loader */}
             {loading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
-                <BrandLoader size="lg" label="Opening Web Portal..." />
-                <p className="mt-3 text-xs font-bold text-slate-500">Securing connection to portal</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm">
+                <BrandLoader size="lg" label="Connecting to Portal..." />
+                <p className="mt-3 text-xs font-bold text-slate-500">Securing Samahit Web Session</p>
               </div>
             )}
 
-            {/* Fallback Banner for Slow / Restricted Sites */}
+            {/* Smart Floating Bottom Action Bar (Appears when timed out or user taps) */}
             {timedOut && !loading && (
-              <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 flex items-center gap-3 rounded-2xl bg-slate-900/95 px-4 py-3 text-xs text-white shadow-2xl backdrop-blur-md">
-                <Globe className="h-4 w-4 text-[#FF9933] shrink-0" />
-                <span>Taking longer than expected?</span>
+              <div className="absolute bottom-16 left-1/2 z-30 -translate-x-1/2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-2.5 text-xs text-slate-800 shadow-2xl backdrop-blur-md">
+                <Compass className="h-4 w-4 text-[#FF9933] shrink-0" />
+                <span className="font-medium">Page loading slowly?</span>
                 <button
                   onClick={reload}
-                  className="rounded-lg bg-white/20 px-2.5 py-1 text-[11px] font-semibold hover:bg-white/30"
+                  className="rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-200"
                 >
                   Retry
                 </button>
                 <button
                   onClick={openDirectExternal}
-                  className="rounded-lg bg-[#FF9933] px-2.5 py-1 text-[11px] font-bold text-slate-900 hover:bg-orange-400"
+                  className="rounded-xl bg-[#000080] px-3 py-1 text-[11px] font-bold text-white shadow-sm"
                 >
-                  Open Direct
+                  Direct View
                 </button>
               </div>
             )}
 
-            {/* Toast for Copied Link */}
+            {/* Copy Link Toast Notification */}
             {copied && (
-              <div className="absolute top-4 left-1/2 z-30 -translate-x-1/2 rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-lg">
+              <div className="absolute top-16 left-1/2 z-40 -translate-x-1/2 rounded-full bg-slate-900/90 px-4 py-1.5 text-xs font-bold text-white shadow-xl backdrop-blur-md">
                 Link copied to clipboard
               </div>
             )}
@@ -241,26 +272,46 @@ export default function InAppBrowser() {
         )}
       </main>
 
-      {/* Footer Navigation Bar */}
-      <footer className="flex h-10 shrink-0 items-center justify-between border-t border-slate-200 bg-white px-4 text-[11px] font-medium text-slate-500">
-        <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          <span>Samahit Protected Session</span>
+      {/* Invisible Floating Bottom Navigation Pill (Auto-Hides) */}
+      <footer
+        onClick={(e) => e.stopPropagation()}
+        className={`fixed bottom-3 inset-x-3.5 z-40 mx-auto max-w-sm transition-all duration-300 ${
+          controls ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="flex h-11 items-center justify-between rounded-2xl border border-slate-200/80 bg-white/95 px-4 shadow-lg backdrop-blur-xl text-xs font-bold text-slate-600">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => frameHistory('back')}
+              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-slate-100 active:scale-95"
+              title="Back"
+            >
+              <ChevronLeft className="h-4 w-4 text-slate-700" />
+            </button>
+            <button
+              onClick={() => frameHistory('forward')}
+              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-slate-100 active:scale-95"
+              title="Forward"
+            >
+              <ChevronRight className="h-4 w-4 text-slate-700" />
+            </button>
+          </div>
+
+          <button
+            onClick={handleCopyLink}
+            className="flex items-center gap-1 text-[11px] font-bold text-[#000080] hover:text-blue-700"
+          >
+            <Copy className="h-3.5 w-3.5" /> Copy Link
+          </button>
+
+          <button
+            onClick={() => setIsDesktop((v) => !v)}
+            className="flex items-center gap-1 text-[11px] font-bold text-slate-600 hover:text-slate-900"
+          >
+            {isDesktop ? <Smartphone className="h-3.5 w-3.5 text-[#FF9933]" /> : <Monitor className="h-3.5 w-3.5" />}
+            {isDesktop ? 'Mobile' : 'Desktop'}
+          </button>
         </div>
-        <button
-          onClick={() => setIsDesktop((v) => !v)}
-          className="flex items-center gap-1 hover:text-[#000080] font-bold"
-        >
-          {isDesktop ? (
-            <>
-              <Smartphone className="h-3.5 w-3.5" /> Mobile View
-            </>
-          ) : (
-            <>
-              <Monitor className="h-3.5 w-3.5" /> Desktop View
-            </>
-          )}
-        </button>
       </footer>
     </div>
   );
