@@ -63,32 +63,32 @@ export default function HomePremium() {
   const founderName = cmsConfig.founderName || "Shri Rohit Pandit Ji";
 
   const QUICK_ACTIONS = [
-    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: HeartHandshake, route: "/jan-seva-card" },
-    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", icon: HeartPulse, route: "/blood-network" },
-    { id: "services", labelEn: "Services", labelHi: "सेवाएं", icon: Wrench, route: "/services" },
-    { id: "community", labelEn: "Community", labelHi: "समुदाय", icon: Users, route: "/community" },
-    { id: "news", labelEn: "News", labelHi: "समाचार", icon: Newspaper, route: "/news" },
-    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", icon: ShieldAlert, route: "/sos" },
-    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", icon: Radio, route: "/internet-radio" },
-    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", icon: Stethoscope, route: "/health-care" },
+    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: HeartHandshake, route: "/jan-seva-card", color: "bg-orange-50 text-[#FF9933]" },
+    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", icon: HeartPulse, route: "/blood-network", color: "bg-rose-50 text-rose-600" },
+    { id: "services", labelEn: "Services", labelHi: "सेवाएं", icon: Wrench, route: "/services", color: "bg-blue-50 text-[#000080]" },
+    { id: "community", labelEn: "Community", labelHi: "समुदाय", icon: Users, route: "/community", color: "bg-purple-50 text-purple-600" },
+    { id: "news", labelEn: "News", labelHi: "समाचार", icon: Newspaper, route: "/news", color: "bg-amber-50 text-amber-700" },
+    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", icon: ShieldAlert, route: "/sos", color: "bg-red-50 text-red-600" },
+    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", icon: Radio, route: "/internet-radio", color: "bg-emerald-50 text-[#138808]" },
+    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", icon: Stethoscope, route: "/health-care", color: "bg-teal-50 text-teal-700" },
   ];
 
   return (
-    <main className="min-h-screen bg-[#FAF0E6] text-[#2D241E] font-sans pb-28 selection:bg-[#E8DCD1]">
+    <main className="min-h-screen bg-[#FAF9F6] text-slate-800 font-sans pb-28 selection:bg-orange-100">
       <div className="mx-auto w-full max-w-md px-4 pt-3 pb-6">
 
-        {/* Header Bar matching Almond Theme */}
+        {/* Header Bar matching Tricolor Theme */}
         <header className="flex items-center justify-between pb-3">
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate("/profile")}
-              className="w-9 h-9 rounded-full bg-[#FFFBF7] border border-[#E8DCD1] flex items-center justify-center text-[#8C5A3C] hover:bg-[#F5ECE2] transition shadow-xs"
+              className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#000080] hover:bg-orange-50 transition shadow-xs"
             >
               <User className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-1">
-              <h1 className="font-black text-xl tracking-tight text-[#2D241E] font-serif">Samahit</h1>
-              <span className="text-[#8C5A3C] text-sm">🪷</span>
+              <h1 className="font-black text-xl tracking-tight text-[#000080]">Samahit</h1>
+              <span className="text-[#FF9933] text-sm">🪷</span>
             </div>
           </div>
 
@@ -96,55 +96,77 @@ export default function HomePremium() {
             onClick={() => navigate("/services")}
             className="relative flex-1 max-w-[150px] ml-auto cursor-pointer"
           >
-            <div className="w-full bg-[#FFFBF7] border border-[#E8DCD1] rounded-full py-1.5 pl-8 pr-3 text-xs text-[#7A6A5D] font-bold flex items-center shadow-xs">
+            <div className="w-full bg-white border border-slate-200/90 rounded-full py-1.5 pl-8 pr-3 text-xs text-slate-400 font-bold flex items-center shadow-xs">
               {hi ? "खोजें" : "Search"}
             </div>
-            <Search className="w-3.5 h-3.5 text-[#8C5A3C] absolute left-2.5 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-[#000080] absolute left-2.5 top-2.5" />
           </div>
         </header>
 
-        {/* Hero Banner: RP FOUNDATION VISION (Luxury Almond Warm Card) */}
+        {/* Premium Executive Hero Banner: RP FOUNDATION VISION */}
         <section
           onClick={() => navigate("/vision-goals")}
-          className="mt-1 overflow-hidden rounded-3xl bg-gradient-to-br from-[#A67C52] via-[#8C5A3C] to-[#5C3A24] text-white p-6 shadow-lg relative cursor-pointer hover:scale-[1.01] transition-transform duration-300 border border-[#E8DCD1]/50"
+          className="mt-1 overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B132B] via-[#1C2541] to-[#0A192F] text-white shadow-xl relative cursor-pointer hover:scale-[1.008] transition-all duration-300 border border-slate-700/60 group"
         >
-          <div className="flex justify-between items-start">
-            <div className="space-y-1 max-w-[65%]">
-              <p className="text-[11px] font-black tracking-widest text-[#E8DCD1] uppercase">RP</p>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-none text-white font-serif drop-shadow-xs">
-                FOUNDATION
-              </h2>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-none text-white font-serif drop-shadow-xs flex items-center gap-1.5">
-                VISION <span className="text-[#FAF0E6] text-lg">🪷</span>
-              </h2>
-            </div>
+          {/* Top Tricolor Strip */}
+          <div className="h-1 w-full bg-gradient-to-r from-[#FF9933] via-amber-300 to-[#138808]" />
 
-            <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#E8DCD1]/60 shadow-md shrink-0 bg-[#5C3A24]/40">
-              <img
-                src="/assets/founder.png"
-                alt={founderName}
-                className="w-full h-full object-cover"
-                onError={(e) => { e.currentTarget.style.display = "none"; }}
-              />
+          <div className="p-5.5 sm:p-6">
+            <div className="flex justify-between items-start gap-3">
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/15 border border-amber-400/30 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-amber-300">
+                  <Sparkles className="w-3 h-3 text-amber-300" />
+                  RP Foundation
+                </div>
+
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight text-white font-serif drop-shadow-xs">
+                  {hi ? "आर.पी. फाउंडेशन विज़न" : "RP Foundation Vision"}
+                </h2>
+
+                <p className="text-xs font-bold text-amber-200/90 leading-snug">
+                  {hi ? "श्री रोहित पंडित जी का नेतृत्व एवं विचार" : "Pioneered by Shri Rohit Pandit Ji"}
+                </p>
+
+                <p className="text-[10.5px] font-medium text-slate-300 leading-relaxed pt-1 line-clamp-2">
+                  {hi ? "रोजगार मेला • महिला स्वावलंबन • निःशुल्क स्वास्थ्य • खेलकूद प्रोत्साहन" : "Rojgar Melas • Pink E-Rickshaws • Health Camps • Youth Sports"}
+                </p>
+              </div>
+
+              {/* Founder Portrait Box */}
+              <div className="relative shrink-0">
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden border-2 border-amber-400/60 shadow-xl bg-slate-900/80 group-hover:border-amber-300 transition">
+                  <img
+                    src="/assets/founder.png"
+                    alt={founderName}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => { e.currentTarget.style.display = "none"; }}
+                  />
+                </div>
+                <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-md whitespace-nowrap border border-amber-300">
+                  Founder
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="mt-6 pt-3 flex items-center justify-between border-t border-white/20">
-            <p className="text-xs font-bold text-[#F5ECE2]">
-              {hi ? "राष्ट्र निर्माण एवं जन कल्याण" : "Empowering India Together"}
+          {/* Card Footer Bar */}
+          <div className="bg-white/5 border-t border-white/10 px-5.5 py-3 flex items-center justify-between backdrop-blur-xs">
+            <p className="text-xs font-bold text-slate-200">
+              {hi ? "राष्ट्र निर्माण एवं जन कल्याण" : "Nation Building & Welfare"}
             </p>
             <button
               type="button"
-              className="bg-[#FFFBF7] text-[#5C3A24] text-xs font-black px-4 py-1.5 rounded-full shadow-md hover:bg-white transition"
+              className="bg-gradient-to-r from-[#FF9933] to-[#D97706] text-white text-xs font-black px-4 py-1.5 rounded-xl shadow-md hover:brightness-110 transition flex items-center gap-1"
             >
-              {hi ? "विवरण देखें" : "Learn More"}
+              <span>{hi ? "विवरण देखें" : "Learn More"}</span>
+              <ChevronRight className="w-3.5 h-3.5 text-white" />
             </button>
           </div>
         </section>
 
-        {/* Quick Actions (Almond Luxury Icons) */}
+        {/* Quick Actions (Tricolor Themed Grid) */}
         <section className="mt-5 space-y-2.5">
-          <h3 className="text-xs font-black text-[#2D241E] tracking-wide uppercase">{hi ? "त्वरित सेवाएं" : "Quick Actions"}</h3>
+          <h3 className="text-xs font-black text-slate-800 tracking-wide uppercase">{hi ? "त्वरित सेवाएं" : "Quick Actions"}</h3>
           
           <div className="grid grid-cols-4 gap-2.5">
             {QUICK_ACTIONS.map((act) => (
@@ -152,35 +174,35 @@ export default function HomePremium() {
                 key={act.id}
                 type="button"
                 onClick={() => navigate(act.route)}
-                className="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#FFFBF7] border border-[#E8DCD1] hover:bg-[#F5ECE2] active:scale-95 transition text-center shadow-xs group"
+                className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-[#000080]/30 active:scale-95 transition text-center shadow-xs group"
               >
-                <div className="w-8 h-8 rounded-xl bg-[#F5ECE2] border border-[#E8DCD1] flex items-center justify-center text-[#8C5A3C] mb-1.5 group-hover:scale-105 transition-transform">
+                <div className={`w-8 h-8 rounded-xl ${act.color} flex items-center justify-center mb-1.5 group-hover:scale-105 transition-transform`}>
                   <act.icon className="w-4 h-4" />
                 </div>
-                <span className="text-[10px] font-black text-[#2D241E] leading-tight line-clamp-1">{hi ? act.labelHi : act.labelEn}</span>
+                <span className="text-[10px] font-black text-slate-800 leading-tight line-clamp-1">{hi ? act.labelHi : act.labelEn}</span>
               </button>
             ))}
           </div>
         </section>
 
-        {/* Weather Card (Almond Surface) */}
-        <section className="mt-5 bg-[#FFFBF7] rounded-3xl p-5 border border-[#E8DCD1] shadow-xs flex items-center justify-between">
+        {/* Weather Card */}
+        <section className="mt-5 bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-[#7A6A5D]">{greeting}, {daily.location || "India"}</p>
-            <h2 className="text-3xl font-black text-[#2D241E] mt-1">{daily.temp == null ? "28°C" : `${daily.temp}°C`}</h2>
+            <p className="text-xs font-bold text-slate-500">{greeting}, {daily.location || "India"}</p>
+            <h2 className="text-3xl font-black text-slate-900 mt-1">{daily.temp == null ? "28°C" : `${daily.temp}°C`}</h2>
           </div>
           <div className="text-right">
-            <CloudSun className="w-9 h-9 text-[#8C5A3C] inline-block mb-1" />
-            <p className="text-[10px] font-bold text-[#7A6A5D]">H:31° L:26°</p>
-            <p className="text-xs font-bold text-[#2D241E]">Partly Cloudy</p>
+            <CloudSun className="w-9 h-9 text-[#FF9933] inline-block mb-1" />
+            <p className="text-[10px] font-bold text-slate-400">H:31° L:26°</p>
+            <p className="text-xs font-bold text-slate-700">Partly Cloudy</p>
           </div>
         </section>
 
-        {/* Key Welfare Initiatives Section (Almond Theme) */}
+        {/* Key Welfare Initiatives Section */}
         <section className="mt-5 space-y-2.5">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-black text-[#2D241E] tracking-wide uppercase">{hi ? "प्रमुख समाज कल्याण योजनाएं" : "Key Welfare Initiatives"}</h3>
-            <button onClick={() => navigate("/vision-goals")} className="text-[10px] font-bold text-[#8C5A3C] flex items-center">
+            <h3 className="text-xs font-black text-slate-800 tracking-wide uppercase">{hi ? "प्रमुख समाज कल्याण योजनाएं" : "Key Welfare Initiatives"}</h3>
+            <button onClick={() => navigate("/vision-goals")} className="text-[10px] font-bold text-[#000080] flex items-center">
               {hi ? "सभी जानें" : "Explore All"} <ChevronRight className="w-3 h-3" />
             </button>
           </div>
@@ -188,32 +210,32 @@ export default function HomePremium() {
           <div className="grid grid-cols-2 gap-3">
             <div
               onClick={() => navigate("/vision-goals")}
-              className="relative h-28 rounded-2xl overflow-hidden bg-[#5C3A24] text-white p-3.5 flex flex-col justify-between cursor-pointer shadow-xs group"
+              className="relative h-28 rounded-2xl overflow-hidden bg-[#000080] text-white p-3.5 flex flex-col justify-between cursor-pointer shadow-xs group"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[9px] font-black uppercase tracking-wider text-[#E8DCD1] bg-[#2D241E]/40 px-2 py-0.5 rounded-full">
+                <span className="text-[9px] font-black uppercase tracking-wider text-amber-300 bg-white/10 px-2 py-0.5 rounded-full">
                   Foundation
                 </span>
-                <Sparkles className="w-3.5 h-3.5 text-[#E8DCD1]" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               </div>
-              <p className="relative z-10 text-xs font-black leading-snug drop-shadow-md text-[#FFFBF7]">
+              <p className="relative z-10 text-xs font-black leading-snug drop-shadow-md text-white font-serif">
                 {hi ? "आर.पी. फाउंडेशन विजन एवं उद्देश्य" : "RP Foundation Vision & Mission"}
               </p>
             </div>
 
             <div
               onClick={() => navigate("/impact")}
-              className="h-28 rounded-2xl bg-[#FFFBF7] border border-[#E8DCD1] p-3.5 flex flex-col justify-between cursor-pointer shadow-xs hover:border-[#8C5A3C]/40 transition"
+              className="h-28 rounded-2xl bg-white border border-slate-200/80 p-3.5 flex flex-col justify-between cursor-pointer shadow-xs hover:border-[#000080]/40 transition"
             >
               <div>
-                <p className="text-xs font-black text-[#2D241E] leading-snug">{hi ? "सोशल मीडिया एवं लाइव रील्स" : "Live Media & Reels Gallery"}</p>
-                <p className="text-[10px] font-bold text-[#8C5A3C] mt-1 flex items-center gap-1">
+                <p className="text-xs font-black text-slate-900 leading-snug">{hi ? "सोशल मीडिया एवं लाइव रील्स" : "Live Media & Reels Gallery"}</p>
+                <p className="text-[10px] font-bold text-[#000080] mt-1 flex items-center gap-1">
                   @rpfoundationofficial
                 </p>
               </div>
-              <div className="flex items-center justify-between text-[10px] font-bold text-[#7A6A5D] pt-1 border-t border-[#E8DCD1]">
+              <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 pt-1 border-t border-slate-100">
                 <span>{hi ? "रील्स देखें" : "Watch Reels"}</span>
-                <ChevronRight className="w-3.5 h-3.5 text-[#8C5A3C]" />
+                <ChevronRight className="w-3.5 h-3.5 text-[#000080]" />
               </div>
             </div>
           </div>
