@@ -336,9 +336,9 @@ function Overview({ counts, onNavigate }: { counts: Record<string, number>; onNa
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <Stat label="Registered Citizens" value={counts.users > 0 ? counts.users : 1245} icon={Users} onClick={() => onNavigate("people")} />
-        <Stat label="Active Volunteers" value={counts.volunteers > 0 ? counts.volunteers : 340} icon={UserRoundCheck} onClick={() => onNavigate("people")} />
-        <Stat label="Beneficiaries / Grievances" value={counts.grievances > 0 ? counts.grievances : 2890} icon={ClipboardList} onClick={() => onNavigate("requests")} />
+        <Stat label="Registered Citizens" value={counts.users} icon={Users} onClick={() => onNavigate("people")} />
+        <Stat label="Active Volunteers" value={counts.volunteers} icon={UserRoundCheck} onClick={() => onNavigate("people")} />
+        <Stat label="Beneficiaries / Grievances" value={counts.grievances} icon={ClipboardList} onClick={() => onNavigate("requests")} />
         <Stat label="Announcements" value={counts.announcements} icon={Bell} onClick={() => onNavigate("content")} />
         <Stat label="Blood Donors" value={counts.blood} icon={Droplet} onClick={() => onNavigate("blood")} />
         <Stat label="Job Postings" value={counts.jobs} icon={BriefcaseBusiness} onClick={() => onNavigate("services")} />
