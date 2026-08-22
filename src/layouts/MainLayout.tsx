@@ -13,7 +13,7 @@ const tricolorPattern = {
 
 const navGradient: Record<string, string> = {
   "/": "from-[#FF9933] to-[#000080]",
-  "/impact": "from-[#EC4899] to-[#8B5CF6]",
+  "/impact": "from-[#FF9933] to-[#000080]",
   "/services": "from-[#FF9933] via-white to-[#138808]",
   "/profile": "from-[#FF9933] to-[#138808]",
 };

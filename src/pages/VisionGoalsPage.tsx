@@ -43,7 +43,7 @@ export default function VisionGoalsPage() {
       descEn: "Driving financial independence for women through specialized initiatives like Pink E-Rickshaw distribution.",
       descHi: "पिंक ई-रिक्शा वितरण जैसे ऐतिहासिक कदमों से महिलाओं को सम्मानजनक आजीविका और वित्तीय स्वतंत्रता देना।",
       icon: Users,
-      color: "bg-pink-50 text-pink-700 border-pink-200"
+      color: "bg-amber-50 text-amber-900 border-amber-200"
     },
     {
       id: "sports",

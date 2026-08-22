@@ -124,7 +124,7 @@ export default function SosSystem() {
   const EMERGENCY_NUMBERS = [
     { labelEn: "National Emergency", labelHi: "राष्ट्रीय आपातकाल", phone: "112", icon: ShieldAlert, color: "bg-red-600 text-white" },
     { labelEn: "Ambulance Emergency", labelHi: "एम्बुलेंस सेवा", phone: "108", icon: PhoneCall, color: "bg-[#000080] text-white" },
-    { labelEn: "Women Helpline", labelHi: "महिला हेल्पलाइन", phone: "1091", icon: PhoneCall, color: "bg-pink-600 text-white" },
+    { labelEn: "Women Helpline", labelHi: "महिला हेल्पलाइन", phone: "1091", icon: PhoneCall, color: "bg-slate-800 text-white" },
     { labelEn: "Police Emergency", labelHi: "पुलिस आपातकाल", phone: "100", icon: ShieldAlert, color: "bg-[#138808] text-white" },
     { labelEn: "RP Foundation Helpline", labelHi: "आर.पी. फाउंडेशन हेल्पलाइन", phone: "+917554005000", icon: PhoneCall, color: "bg-amber-600 text-white" },
   ];
