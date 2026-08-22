@@ -70,6 +70,27 @@ export const CmsSettings = () => {
   if(loading||!cms)return <div className="space-y-4"><Skeleton className="h-10"/><Skeleton className="h-[220px]"/></div>;
   return <div className="max-w-4xl space-y-5 pb-20">
     <div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-slate-400">Content only</p><h2 className="mt-1 text-xl font-black">Foundation content</h2><p className="mt-1 text-xs text-slate-500">Content changes are served from the CMS. Native Android changes still require a new APK.</p></div><button onClick={save} disabled={saving||!!channelError||!!radioError||!!factCheckError} className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-xs font-bold text-white disabled:opacity-50"><Save className="h-4 w-4"/>{saving?'Saving…':'Save changes'}</button></div>
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 className="flex items-center gap-2 text-sm font-black text-[#FF9933]">
+        <Instagram className="h-4 w-4 text-rose-600" /> Instagram Reels & Social Feed Link Control
+      </h3>
+      <p className="mt-1 text-xs text-slate-500">
+        Paste any Instagram Reel or Post link below. It will automatically update and play live inside the app's Impact Reel carousel and vertical player.
+      </p>
+      <div className="mt-4 space-y-3">
+        <div>
+          <label className="text-xs font-bold text-slate-700">Instagram Reel / Post URL</label>
+          <input
+            type="url"
+            value={cms.instagramFeedUrl || ''}
+            onChange={(e) => set('instagramFeedUrl', e.target.value)}
+            placeholder="https://www.instagram.com/reel/C... or https://www.instagram.com/rpfoundationofficial/"
+            className="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-medium outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933]"
+          />
+        </div>
+      </div>
+    </section>
+
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h3 className="flex items-center gap-2 text-sm font-black"><FileText className="h-4 w-4"/>General information</h3><div className="mt-4 grid gap-4"><FileUpload label="Site logo" defaultUrl={cms.logoImgUrl||''} onUploadSuccess={url=>set('logoImgUrl',url)}/><div><label className="text-xs font-bold text-slate-600">About content</label><textarea value={cms.aboutTextEn||''} onChange={e=>set('aboutTextEn',e.target.value)} rows={4} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none"/></div></div></section>
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h3 className="flex items-center gap-2 text-sm font-black"><Tv className="h-4 w-4"/>Live TV remote control</h3><p className="mt-1 text-xs text-slate-500">Add, remove, disable, rename, recategorize or reorder channels. No APK rebuild is needed for channel changes.</p><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={loadDefaults} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold">Load current default channels ({LIVE_TV_DEFAULTS.length})</button><button type="button" onClick={clearChannels} className="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-700">Clear all</button><span className="self-center text-[11px] text-slate-400">Configured: {channels.length}</span></div><label className="mt-4 block text-xs font-bold text-slate-600">Channel JSON</label><textarea value={channelText} onChange={e=>updateChannels(e.target.value)} rows={14} spellCheck={false} className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-950 px-3 py-3 font-mono text-xs text-slate-100 outline-none"/>{channelError&&<p className="mt-2 text-xs font-semibold text-rose-600">{channelError}</p>}</section>
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h3 className="flex items-center gap-2 text-sm font-black"><Radio className="h-4 w-4"/>Internet Radio remote control</h3><p className="mt-1 text-xs text-slate-500">The complete bundled station list is preserved as a safe fallback. Load the current list once, save it to the CMS, then add, remove, disable, edit or reorder stations without an APK rebuild.</p><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={loadRadioDefaults} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold">Load current bundled stations ({RADIO_DEFAULTS.length})</button><button type="button" onClick={clearRadio} className="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-700">Clear all</button><span className="self-center text-[11px] text-slate-400">Configured: {radios.length}</span></div><label className="mt-4 block text-xs font-bold text-slate-600">Station JSON</label><textarea value={radioText} onChange={e=>updateRadio(e.target.value)} rows={18} spellCheck={false} className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-950 px-3 py-3 font-mono text-xs text-slate-100 outline-none"/>{radioError&&<p className="mt-2 text-xs font-semibold text-rose-600">{radioError}</p>}<p className="mt-2 text-[11px] text-slate-500">Each station needs name and url. Optional: image, page, enabled and order. Set enabled:false to hide without deleting.</p></section>
