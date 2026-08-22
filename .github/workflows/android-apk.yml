@@ -47,6 +47,12 @@ jobs:
         run: npm run build:web
       - name: Sync Capacitor Android
         run: npx cap sync android
+      - name: Verify CapGo removal
+        run: |
+          if grep -Rni --exclude-dir=.git --exclude='package-lock.json' --exclude='*.lock' 'capgo\|capacitor-updater' package.json capacitor.config.* src android; then
+            echo 'CapGo reference remains after cleanup.' >&2
+            exit 1
+          fi
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Verify Android Build Environment
