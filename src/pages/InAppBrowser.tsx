@@ -7,7 +7,6 @@ import {
   ChevronRight,
   RotateCw,
   Share2,
-  Copy,
   ExternalLink,
   ShieldCheck,
   Globe,
@@ -26,7 +25,7 @@ export default function InAppBrowser() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const rawUrl = normalizeExternalWebUrl(params.get('url') || '') || '';
-  const pageTitle = params.get('title') || 'RPF Smart Browser';
+  const pageTitle = params.get('title') || 'RPF Portal';
 
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [error, setError] = useState('');
@@ -37,14 +36,8 @@ export default function InAppBrowser() {
   const [copied, setCopied] = useState(false);
   const [frameBlocked, setFrameBlocked] = useState(false);
 
-  // Extract hostname cleanly for UI
-  let domain = 'portal';
-  try {
-    domain = new URL(rawUrl).hostname.replace(/^www\./, '');
-  } catch {}
-
   useEffect(() => {
-    setError(!rawUrl || !isExternalWebUrl(rawUrl) ? 'Invalid or unsupported web URL.' : '');
+    setError(!rawUrl || !isExternalWebUrl(rawUrl) ? 'Invalid or unsupported web portal.' : '');
     setLoading(true);
     setTimedOut(false);
     setFrameBlocked(false);
@@ -78,20 +71,14 @@ export default function InAppBrowser() {
     } catch {}
   };
 
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(rawUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {}
-  };
-
   const handleShare = async () => {
     try {
       if (navigator.share) {
         await navigator.share({ title: pageTitle, url: rawUrl });
       } else {
-        await handleCopyLink();
+        await navigator.clipboard.writeText(rawUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
       }
     } catch {}
   };
@@ -105,14 +92,14 @@ export default function InAppBrowser() {
       className="fixed inset-0 z-[90] flex min-h-[100dvh] flex-col overflow-hidden bg-slate-50 font-sans selection:bg-orange-100"
       onClick={() => setControls(v=>!v)}
     >
-      {/* Invisible Floating Header (Glassmorphic & Minimal - Auto-Hides) */}
+      {/* Sleek App Floating Header (100% Native App Look - ABSOLUTELY NO VISIBLE URL) */}
       <header
         onClick={(e) => e.stopPropagation()}
         className={`fixed top-3 inset-x-3.5 z-40 mx-auto max-w-2xl transition-all duration-300 ${
           controls ? 'translate-y-0 opacity-100' : '-translate-y-16 opacity-0 pointer-events-none'
         }`}
       >
-        <div className="flex h-12 items-center justify-between gap-2.5 rounded-2xl border border-slate-200/80 bg-white/95 px-3 shadow-lg backdrop-blur-xl">
+        <div className="flex h-12 items-center justify-between gap-2.5 rounded-2xl border border-slate-200/80 bg-white/95 px-3.5 shadow-lg backdrop-blur-xl">
           <button
             onClick={() => navigate(-1)}
             className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-700 hover:bg-orange-50 hover:text-[#000080] active:scale-95 transition"
@@ -121,12 +108,12 @@ export default function InAppBrowser() {
             <ArrowLeft className="h-4 w-4" />
           </button>
 
-          {/* Minimal Domain Pill (App-Integrated Branding) */}
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-slate-100/80 px-2.5 py-1">
+          {/* Clean App Portal Title Pill (NO Address Bar, NO URL text) */}
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-100/80 px-3 py-1 text-center">
             <Lock className="h-3 w-3 text-emerald-600 shrink-0" />
-            <span className="truncate text-xs font-bold text-slate-800">{domain}</span>
-            <span className="ml-auto text-[9px] font-black uppercase tracking-wider text-[#FF9933] bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-100 shrink-0">
-              Samahit Safe
+            <span className="truncate text-xs font-black text-slate-800">{pageTitle || "Samahit Portal"}</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-[#000080] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 shrink-0">
+              Verified
             </span>
           </div>
 
@@ -148,7 +135,7 @@ export default function InAppBrowser() {
             <button
               onClick={openDirectExternal}
               className="flex h-8 w-8 items-center justify-center rounded-xl text-emerald-700 hover:bg-emerald-50 active:scale-95"
-              title="External Browser"
+              title="External View"
             >
               <ExternalLink className="h-3.5 w-3.5" />
             </button>
@@ -156,7 +143,7 @@ export default function InAppBrowser() {
         </div>
       </header>
 
-      {/* Main Full-Screen Web View Container */}
+      {/* Main App Container */}
       <main className="relative flex-1 w-full bg-white overflow-hidden">
         {error || !rawUrl ? (
           /* Error State Card */
@@ -164,9 +151,9 @@ export default function InAppBrowser() {
             <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-50 text-rose-600 mb-4 border border-rose-100">
               <Globe className="h-8 w-8" />
             </div>
-            <h2 className="text-base font-black text-slate-900">{pageTitle || 'Web Portal'}</h2>
+            <h2 className="text-base font-black text-slate-900">{pageTitle || 'Portal View'}</h2>
             <p className="mt-1.5 text-xs text-slate-500 max-w-sm leading-relaxed">
-              {error || 'This external portal cannot be embedded directly.'}
+              {error || 'This portal is restricted from direct embedding.'}
             </p>
             <div className="mt-6 flex gap-3">
               <button
@@ -179,12 +166,12 @@ export default function InAppBrowser() {
                 onClick={openDirectExternal}
                 className="rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#138808] px-5 py-2.5 text-xs font-bold text-white shadow-md active:scale-95"
               >
-                Open Official Portal
+                Launch Portal
               </button>
             </div>
           </div>
         ) : frameBlocked ? (
-          /* Frame Blocked / X-Frame-Options Fallback Card (NO White Screen) */
+          /* Frame Blocked Fallback Card */
           <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-orange-50/40 via-white to-slate-50">
             <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-md border border-orange-100 text-[#000080] mb-4">
               <ShieldCheck className="h-8 w-8 text-[#FF9933]" />
@@ -192,7 +179,7 @@ export default function InAppBrowser() {
             <span className="text-[10px] font-black uppercase tracking-[.18em] text-[#000080]">Protected Portal</span>
             <h2 className="mt-1 text-lg font-black text-slate-900">{pageTitle}</h2>
             <p className="mt-2 text-xs text-slate-500 max-w-xs leading-relaxed">
-              This official portal prefers dedicated window view for security and login features.
+              This official portal prefers dedicated window view for security.
             </p>
             <div className="mt-6 space-y-2.5 w-full max-w-xs">
               <button
@@ -234,19 +221,19 @@ export default function InAppBrowser() {
               allowFullScreen
             />
 
-            {/* Light Glassmorphic Loader */}
+            {/* Light Loader */}
             {loading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm">
                 <BrandLoader size="lg" label="Connecting to Portal..." />
-                <p className="mt-3 text-xs font-bold text-slate-500">Securing Samahit Web Session</p>
+                <p className="mt-3 text-xs font-bold text-slate-500">Securing Samahit Connection</p>
               </div>
             )}
 
-            {/* Smart Floating Bottom Action Bar (Appears when timed out or user taps) */}
+            {/* Floating Action Bar on Slow Load */}
             {timedOut && !loading && (
               <div className="absolute bottom-16 left-1/2 z-30 -translate-x-1/2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-2.5 text-xs text-slate-800 shadow-2xl backdrop-blur-md">
                 <Compass className="h-4 w-4 text-[#FF9933] shrink-0" />
-                <span className="font-medium">Page loading slowly?</span>
+                <span className="font-medium">Loading taking time?</span>
                 <button
                   onClick={reload}
                   className="rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-200"
@@ -257,22 +244,22 @@ export default function InAppBrowser() {
                   onClick={openDirectExternal}
                   className="rounded-xl bg-[#000080] px-3 py-1 text-[11px] font-bold text-white shadow-sm"
                 >
-                  Direct View
+                  Direct Launch
                 </button>
               </div>
             )}
 
-            {/* Copy Link Toast Notification */}
+            {/* Notification Toast */}
             {copied && (
               <div className="absolute top-16 left-1/2 z-40 -translate-x-1/2 rounded-full bg-slate-900/90 px-4 py-1.5 text-xs font-bold text-white shadow-xl backdrop-blur-md">
-                Link copied to clipboard
+                Portal shared
               </div>
             )}
           </>
         )}
       </main>
 
-      {/* Invisible Floating Bottom Navigation Pill (Auto-Hides) */}
+      {/* Floating App Navigation Bar (Auto-Hides) */}
       <footer
         onClick={(e) => e.stopPropagation()}
         className={`fixed bottom-3 inset-x-3.5 z-40 mx-auto max-w-sm transition-all duration-300 ${
@@ -297,12 +284,9 @@ export default function InAppBrowser() {
             </button>
           </div>
 
-          <button
-            onClick={handleCopyLink}
-            className="flex items-center gap-1 text-[11px] font-bold text-[#000080] hover:text-blue-700"
-          >
-            <Copy className="h-3.5 w-3.5" /> Copy Link
-          </button>
+          <div className="flex items-center gap-1 text-[10px] font-black text-[#000080] uppercase tracking-wider">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Samahit Session
+          </div>
 
           <button
             onClick={() => setIsDesktop((v) => !v)}
