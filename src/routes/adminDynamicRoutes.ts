@@ -98,11 +98,19 @@ router.get("/api/admin/announcements", async (req, res) => {
 // POST announcement
 router.post("/api/admin/announcements", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { title, content, is_active } = req.body;
-    const result = await pool.query(
-      "INSERT INTO announcements (title, content, is_active) VALUES ($1, $2, $3) RETURNING *",
-      [title, content, is_active ?? true]
-    );
+    const { title, content, type, action_url, is_active } = req.body;
+    let result;
+    try {
+      result = await pool.query(
+        "INSERT INTO announcements (title, content, type, action_url, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+        [title, content, type || "Urgent Alert", action_url || null, is_active ?? true]
+      );
+    } catch {
+      result = await pool.query(
+        "INSERT INTO announcements (title, content, is_active) VALUES ($1, $2, $3) RETURNING *",
+        [title, content, is_active ?? true]
+      );
+    }
     res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to create announcement" });

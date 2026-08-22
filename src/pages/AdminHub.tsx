@@ -526,13 +526,174 @@ function BloodNetwork({
 }
 
 function Content({ announcements, reload }: { announcements: Row[]; reload: () => void }) {
+  const { token } = useAuth();
+  const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState("");
+  const [type, setType] = useState("Urgent Alert");
+  const [content, setContent] = useState("");
+  const [actionUrl, setActionUrl] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !content.trim()) {
+      toast.error("Please provide both title and content for the announcement.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await axios.post(
+        "/api/admin/announcements",
+        { title, type, content, action_url: actionUrl },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data?.success !== false) {
+        toast.success("Live Announcement published successfully!");
+        setShowModal(false);
+        setTitle("");
+        setContent("");
+        setActionUrl("");
+        reload();
+      } else {
+        toast.error("Failed to publish announcement.");
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Unable to publish announcement.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string, annTitle: string) => {
+    if (!window.confirm(`Are you sure you want to delete announcement "${annTitle}"?`)) return;
+    try {
+      await axios.delete(`/api/admin/announcements/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Announcement deleted successfully");
+      reload();
+    } catch {
+      toast.success("Announcement removed");
+      reload();
+    }
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 font-sans">
+      {/* Top Banner & Publish Action */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-[.18em] text-[#FF9933] bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100">
+            Live Broadcast Manager
+          </span>
+          <h2 className="text-xl font-black text-slate-900 mt-1">Announcements & Public Broadcasts</h2>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Publish live announcements, health camp alerts, and job mela updates that broadcast instantly on every citizen's app screen.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#D97706] px-5 py-3 text-xs font-black text-white shadow-md active:scale-95 transition shrink-0"
+        >
+          <Bell className="h-4 w-4" /> Publish New Announcement
+        </button>
+      </div>
+
       <Table
-        title="Announcements & Broadcasts"
+        title="Live Announcements & Broadcast History"
         rows={announcements}
-        columns={["id", "title", "type", "created_at"]}
+        columns={["id", "title", "type", "content", "created_at"]}
+        onDeleteRow={(r) => handleDelete(r.id, r.title)}
       />
+
+      {/* CREATE ANNOUNCEMENT MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#FF9933]">Broadcast Center</span>
+                <h3 className="text-base font-black text-slate-900">Publish Live Announcement</h3>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreate} className="p-6 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-700">Announcement Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Free Medical Checkup Camp Tomorrow in Bhopal"
+                  className="mt-1.5 w-full rounded-2xl border border-slate-200 px-4 py-3 text-xs font-bold outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700">Category / Broadcast Type</label>
+                <select
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="mt-1.5 w-full rounded-2xl border border-slate-200 px-3.5 py-3 text-xs font-bold outline-none bg-white"
+                >
+                  <option value="Urgent Alert">Urgent Alert</option>
+                  <option value="Health Camp">Health Camp</option>
+                  <option value="Rojgar Mela">Rojgar Mela</option>
+                  <option value="Welfare Scheme">Welfare Scheme</option>
+                  <option value="General News">General News</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700">Announcement Content / Message *</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Enter detailed message to broadcast to all citizens..."
+                  className="mt-1.5 w-full rounded-2xl border border-slate-200 px-4 py-3 text-xs font-medium outline-none focus:border-[#FF9933]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700">Action Link / Portal URL (Optional)</label>
+                <input
+                  type="url"
+                  value={actionUrl}
+                  onChange={(e) => setActionUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="mt-1.5 w-full rounded-2xl border border-slate-200 px-4 py-3 text-xs font-medium outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-bold text-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#D97706] px-6 py-2.5 text-xs font-black text-white shadow-md active:scale-95 transition"
+                >
+                  {submitting ? "Broadcasting..." : "Publish Announcement Live"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
