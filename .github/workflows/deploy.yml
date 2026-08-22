@@ -30,19 +30,20 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SECURE: 'true'
+          FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
         run: node delete_cpanel_maps.cjs
       - name: Deploy to cPanel
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SECURE: 'true'
+          FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
         run: node deploy.cjs
-
       - name: Deploy Live Update to Capgo
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
