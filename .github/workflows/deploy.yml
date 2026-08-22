@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install Dependencies
-        run: npm install --no-audit --no-fund
+        run: npm install --include=dev --no-audit --no-fund
       - name: Browser Policy Regression Check
         run: npm run browser:check
       - name: Browser Critical Link Smoke Check
@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install Deployment Dependencies
-        run: npm install --no-audit --no-fund
+        run: npm install --include=dev --no-audit --no-fund
       - name: Download dist artifact
         uses: actions/download-artifact@v4
         with:
@@ -87,6 +87,16 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Capacitor Project Dependencies
+        run: npm install --include=dev --no-audit --no-fund
+      - name: Verify Capacitor Configuration
+        run: |
+          test -f capacitor.config.ts || test -f capacitor.config.json || test -f capacitor.config.js
+          npx cap --version
       - name: Download dist artifact
         uses: actions/download-artifact@v4
         with:
