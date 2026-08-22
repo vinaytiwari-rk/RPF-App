@@ -1,5 +1,7 @@
 export const ALLOWED_WEB_PROTOCOLS = new Set(['http:', 'https:']);
 
+export const RPF_WEB_ORIGIN = 'https://appapi.therpfoundation.org';
+
 /** Hosts that are explicitly part of RPF's own web surface. */
 export const FIRST_PARTY_HOSTS = new Set([
   'therpfoundation.org',

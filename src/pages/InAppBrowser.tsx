@@ -14,10 +14,9 @@ import {
   Lock,
 } from 'lucide-react';
 import { isExternalWebUrl, normalizeExternalWebUrl } from '../utils/browser';
+import { RPF_WEB_ORIGIN } from '../config/browserPolicy';
 import { Capacitor } from '@capacitor/core';
 import BrandLoader from '../components/BrandLoader';
-
-const RPF_WEB_ORIGIN = 'https://appapi.therpfoundation.org';
 
 const DEFAULT_TITLE = 'RPF Web View';
 
