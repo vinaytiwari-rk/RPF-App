@@ -17,12 +17,11 @@ on:
       - 'tsconfig*.json'
       - '.github/workflows/android-apk.yml'
 
-# Updated APK build trigger: build from the latest main branch code and configuration.
 jobs:
   android-apk:
     name: Build Android APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -38,22 +37,22 @@ jobs:
           java-version: '21'
           cache: gradle
       - name: Install Dependencies
-        run: npm install --no-audit --no-fund
-      - name: Verify required modules
+        run: npm ci --no-audit --no-fund
+      - name: Verify Capacitor version
         run: |
-          node -e "console.log('react-router-dom@' + require('./node_modules/react-router-dom/package.json').version)"
-          node -e "console.log('@capacitor/android@' + require('./node_modules/@capacitor/android/package.json').version)"
+          node -e "const p=require('./node_modules/@capacitor/android/package.json'); if(p.version !== '8.5.0') throw new Error('Unexpected @capacitor/android version: '+p.version); console.log('@capacitor/android@'+p.version)"
       - name: Type Check
         run: npm run lint
       - name: Build Web Application
-        run: npm run build
+        run: npm run build:web
       - name: Sync Capacitor Android
         run: npx cap sync android
-      - name: "CI: Write CAPACITOR_ANDROID_VERSION safely"
+      - name: Verify CapGo removal
         run: |
-          VERSION=$(node -p "require('./node_modules/@capacitor/android/package.json').version")
-          if grep -q '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties 2>/dev/null; then sed -i "s/^CAPACITOR_ANDROID_VERSION=.*/CAPACITOR_ANDROID_VERSION=${VERSION}/" android/gradle.properties; else printf '\nCAPACITOR_ANDROID_VERSION=%s\n' "${VERSION}" >> android/gradle.properties; fi
-          grep '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties
+          if grep -Rni --exclude-dir=.git --exclude='package-lock.json' --exclude='*.lock' 'capgo\|capacitor-updater' package.json capacitor.config.* src android; then
+            echo 'CapGo reference remains after cleanup.' >&2
+            exit 1
+          fi
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Verify Android Build Environment
@@ -63,15 +62,18 @@ jobs:
           ./gradlew --version
       - name: Build Debug APK
         working-directory: android
+        env:
+          RPF_VERSION_CODE: ${{ github.run_number }}
+          RPF_VERSION_NAME: 1.0.${{ github.run_number }}
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon --stacktrace --warning-mode all
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk RPF-Samahit-debug.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk RPF-Samahit-1.0.${{ github.run_number }}-${{ github.sha }}.apk
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RPF-Samahit-Android-${{ github.sha }}
-          path: RPF-Samahit-debug.apk
+          name: RPF-Samahit-1.0.${{ github.run_number }}-${{ github.sha }}
+          path: RPF-Samahit-1.0.${{ github.run_number }}-${{ github.sha }}.apk
           if-no-files-found: error
           retention-days: 14
