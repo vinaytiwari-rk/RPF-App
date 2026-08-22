@@ -25,11 +25,14 @@ import {
   Stethoscope,
   ChevronRight,
   ShieldAlert,
+  Building2,
+  Trophy,
+  Award,
+  Medal,
 } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
-import InstagramApiFeed from "../components/InstagramApiFeed";
 
 type Lang = "en" | "hi";
 type Daily = { temp: number | null; aqi: number | null; location: string };
@@ -39,7 +42,7 @@ const QUICK_ACTIONS = [
   { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Citizen ID & Schemes", descHi: "नागरिक आईडी", icon: HeartHandshake, color: "bg-orange-500 text-white", route: "/jan-seva-card" },
   { id: "blood", titleEn: "Blood Network", titleHi: "ब्लड नेटवर्क", descEn: "Emergency Donors", descHi: "आपातकालीन रक्तदान", icon: HeartPulse, color: "bg-rose-600 text-white", route: "/blood-network" },
   { id: "health", titleEn: "Health Care", titleHi: "स्वास्थ्य सेवा", descEn: "Ayushman & Doctors", descHi: "आयुष्मान एवं डॉक्टर", icon: Stethoscope, color: "bg-emerald-600 text-white", route: "/health-care" },
-  { id: "jobs", titleEn: "Jobs Portal", titleHi: "रोजगार पोर्टल", descEn: "Career & Hirings", descHi: "करियर और नौकरियां", icon: Briefcase, color: "bg-blue-600 text-white", route: "/jobs" },
+  { id: "jobs", titleEn: "Jobs Portal", titleHi: "रोजगार पोर्टल", descEn: "Rojgar Mela & Careers", descHi: "करियर और नौकरियां", icon: Briefcase, color: "bg-blue-600 text-white", route: "/jobs" },
   { id: "grievance", titleEn: "Grievances", titleHi: "शिकायत पोर्टल", descEn: "Civic Complaints", descHi: "नागरिक शिकायतें", icon: AlertTriangle, color: "bg-amber-600 text-white", route: "/grievance" },
   { id: "radio", titleEn: "Internet Radio", titleHi: "इंटरनेट रेडियो", descEn: "AIR & Akashvani", descHi: "लाइव रेडियो प्रसारण", icon: Radio, color: "bg-purple-600 text-white", route: "/internet-radio" },
   { id: "tv", titleEn: "Live Broadcast", titleHi: "लाइव टीवी", descEn: "News & Culture", descHi: "लाइव समाचार चैनल", icon: Tv, color: "bg-indigo-600 text-white", route: "/live-tv" },
@@ -62,7 +65,6 @@ export default function HomePremium() {
 
   const [daily, setDaily] = useState<Daily>({ temp: null, aqi: null, location: "" });
   const [quote, setQuote] = useState<QuoteData | null>(null);
-  const [activeBanner, setActiveBanner] = useState(0);
 
   const hi = lang === "hi";
   const name = user?.name?.trim().split(/\s+/)[0] || "";
@@ -103,7 +105,7 @@ export default function HomePremium() {
       .catch(() => setQuote(null));
   }, []);
 
-  const founderName = cmsConfig.founderName || "Rohit Pandit";
+  const founderName = cmsConfig.founderName || "Shri Rohit Pandit Ji";
   const founderImg = settings.founderImgUrl || cmsConfig.founderImgUrl || "/assets/founder.png";
   const founderMessage = hi ? settings.founderMessageHi : settings.founderMessageEn;
 
@@ -135,39 +137,43 @@ export default function HomePremium() {
               className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-md active:scale-95 transition"
             >
               <ShieldAlert className="h-3.5 w-3.5" />
-              SOS
+              SOS Alert
             </button>
           </div>
         </header>
 
-        {/* Hero Greeting & Banner Card */}
-        <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm p-5 sm:p-6">
-          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#FF9933] via-[#FDE047] to-[#138808]" />
+        {/* Hero Banner: Dedicated RP Foundation Vision, Motive & Goals */}
+        <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-orange-50/40 to-blue-50/30 shadow-sm p-5 sm:p-6">
+          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#FF9933] via-[#000080] to-[#138808]" />
           
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-[.18em] text-[#000080] bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
-                Official Portal
+              <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[.18em] text-[#000080] bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+                <Sparkles className="w-3 h-3 text-[#FF9933]" />
+                {hi ? "आर.पी. फाउंडेशन दृष्टि एवं उद्देश्य" : "RP Foundation Vision & Mission"}
               </span>
               <h1 className="text-2xl font-black leading-tight text-[#000080] mt-2 sm:text-3xl">
                 {greeting}{name ? `, ${name}` : ""}
               </h1>
-              <p className="mt-1 text-xs leading-relaxed text-slate-600 font-medium">
-                {hi ? "नागरिक सशक्तिकरण एवं जन कल्याण सुपर-ऐप" : "National Citizen Welfare & Empowerment Platform"}
+              <p className="mt-1 text-xs leading-relaxed text-slate-600 font-medium max-w-lg">
+                {hi 
+                  ? "रोजगार मेला, महिला सशक्तिकरण (पिंक ई-रिक्शा), स्वास्थ्य शिविर, खेलकूद संवर्धन एवं सांस्कृतिक विरासत का राष्ट्रीय संकल्प।"
+                  : "Empowering citizens through Rojgar Melas, Pink E-Rickshaws, Free Health Camps, Sports & Cultural Heritage."}
               </p>
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+          {/* Vision & Motive CTA Button */}
+          <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
             <button
-              onClick={() => navigate("/jan-seva-card")}
-              className="w-full flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#F59E0B] p-3.5 text-xs font-bold text-white shadow-md active:scale-95 transition"
+              onClick={() => navigate("/vision-goals")}
+              className="w-full flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#000080] to-[#138808] p-3.5 text-xs font-bold text-white shadow-md active:scale-95 transition"
             >
               <div className="flex items-center gap-2.5">
-                <HeartHandshake className="h-5 w-5 shrink-0" />
+                <Award className="h-5 w-5 text-yellow-300 shrink-0" />
                 <div className="text-left">
-                  <p className="font-black leading-tight">{hi ? "जन सेवा कार्ड बनाएं" : "Apply Jan Seva Card"}</p>
-                  <p className="text-[10px] text-orange-100 font-medium leading-none mt-0.5">Citizen Identity & Privileges</p>
+                  <p className="font-black leading-tight">{hi ? "फाउंडेशन का उद्देश्य और विजन देखें" : "Explore Foundation Vision & Motive"}</p>
+                  <p className="text-[10px] text-blue-100 font-medium leading-none mt-0.5">Rojgar Mela, Women, Youth & Health</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-white" />
@@ -229,22 +235,21 @@ export default function HomePremium() {
           </div>
         </section>
 
-        {/* Live Instagram Feed Section */}
-        <section className="mt-5 rounded-3xl border border-pink-100 bg-white p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 text-white shadow-sm">
-                <Instagram className="h-4.5 w-4.5" />
-              </div>
-              <div>
-                <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">{hi ? "लाइव इंस्टाग्राम अपडेट्स" : "Live Instagram Feed"}</h3>
-                <p className="text-[10px] text-slate-400 font-bold">@rpfoundationofficial</p>
-              </div>
-            </div>
-            <span className="flex h-2 w-2 rounded-full bg-pink-500 animate-pulse" />
+        {/* Impact & Reels Banner (Redirect to Impact Tab) */}
+        <section 
+          onClick={() => navigate("/impact")}
+          className="mt-4 bg-gradient-to-r from-pink-600 via-purple-600 to-[#000080] rounded-3xl p-5 text-white shadow-md cursor-pointer hover:shadow-lg transition flex items-center justify-between gap-4"
+        >
+          <div className="space-y-1">
+            <span className="text-[9px] font-black uppercase tracking-[.18em] text-pink-200 bg-white/20 px-2 py-0.5 rounded-full">
+              Live Reels & Media
+            </span>
+            <h3 className="text-sm font-black">{hi ? "इंस्टाग्राम रील्स एवं सोशल इम्पैक्ट देखें" : "Watch Instagram Reels & Social Impact"}</h3>
+            <p className="text-[11px] text-pink-100 font-medium">Explore live videos, ground transformation & stories.</p>
           </div>
-
-          <InstagramApiFeed />
+          <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shrink-0">
+            <ChevronRight className="w-5 h-5 text-white" />
+          </div>
         </section>
 
         {/* Quote of the Day */}
@@ -264,22 +269,23 @@ export default function HomePremium() {
           </div>
         </section>
 
-        {/* Founder's Message */}
+        {/* Founder & Managing Leadership Section */}
         <section className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 overflow-hidden rounded-xl border-2 border-[#FF9933] bg-slate-100 shadow-sm shrink-0">
+            <div className="h-14 w-14 overflow-hidden rounded-2xl border-2 border-[#FF9933] bg-slate-100 shadow-sm shrink-0">
               <img src={founderImg} alt={founderName} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} />
             </div>
             <div>
-              <p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">{hi ? "संस्थापक का संदेश" : "Founder's Message"}</p>
+              <p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">{hi ? "संस्थापक एवं प्रेरणास्रोत" : "Founder & Managing Leadership"}</p>
               <h2 className="text-sm font-black text-[#000080]">{founderName}</h2>
+              <p className="text-[10px] font-bold text-slate-500">Vice Chairman & MD, People's Group</p>
             </div>
           </div>
           <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-slate-600 font-medium">
             {founderMessage || (hi ? "संस्थापक का संदेश शीघ्र उपलब्ध होगा।" : "The founder's message will be available shortly.")}
           </p>
-          <button onClick={() => navigate("/founder-speech")} className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-[#000080]">
-            {hi ? "पूरा संदेश पढ़ें" : "Read full message"} <ArrowRight className="h-3.5 w-3.5" />
+          <button onClick={() => navigate("/vision-goals")} className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-[#000080]">
+            {hi ? "विजन और संदेश विस्तार से पढ़ें" : "Read full vision & message"} <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </section>
 

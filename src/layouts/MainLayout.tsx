@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Bell, Search, Globe, Heart, HeartHandshake, Wrench, RotateCw } from "lucide-react";
+import { ArrowLeft, User, Compass, Bell, Search, Globe, Heart, HeartHandshake, Wrench, RotateCw, Home, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
@@ -13,9 +13,8 @@ const tricolorPattern = {
 
 const navGradient: Record<string, string> = {
   "/": "from-[#FF9933] to-[#000080]",
+  "/impact": "from-[#EC4899] to-[#8B5CF6]",
   "/services": "from-[#FF9933] via-white to-[#138808]",
-  "/notifications": "from-[#000080] to-[#2563EB]",
-  "/community": "from-[#138808] to-[#22C55E]",
   "/profile": "from-[#FF9933] to-[#138808]",
 };
 
@@ -52,20 +51,19 @@ export default function MainLayout() {
   }
 
   const nav = (p: string) => {
-    if (user?.role === "guest" && (p === "/services" || p === "/community" || p === "/notifications")) {
+    if (user?.role === "guest" && (p === "/services" || p === "/impact" || p === "/notifications")) {
       setGuest(true);
       return;
     }
     navigate(p);
   };
 
-  const roots = ["/", "/services", "/community", "/notifications", "/profile"];
+  const roots = ["/", "/impact", "/services", "/profile"];
   const root = roots.includes(location.pathname);
   const items = [
-    { path: "/", en: "Home", hi: "होम", icon: Compass },
-    { path: "/services", en: "Explore", hi: "खोजें", icon: Search },
-    { path: "/notifications", en: "Activity", hi: "गतिविधि", icon: Bell },
-    { path: "/community", en: "Impact", hi: "प्रभाव", icon: Heart },
+    { path: "/", en: "Home", hi: "होम", icon: Home },
+    { path: "/impact", en: "Impact", hi: "प्रभाव", icon: Sparkles },
+    { path: "/services", en: "Explore", hi: "खोजें", icon: Compass },
     { path: "/profile", en: "Profile", hi: "प्रोफाइल", icon: User },
   ];
 
