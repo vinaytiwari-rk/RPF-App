@@ -16,13 +16,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
       - name: Install Dependencies
-        run: npm install --include=dev --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Browser Policy Regression Check
         run: npm run browser:check
       - name: Browser Critical Link Smoke Check
         run: npm run browser:smoke
-      - name: Type Check & Lint
+      - name: Type Check
         run: npm run lint
       - name: Build Application
         run: npm run build
@@ -37,7 +38,6 @@ jobs:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -45,23 +45,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
       - name: Install Deployment Dependencies
-        run: npm install --include=dev --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Download dist artifact
         uses: actions/download-artifact@v4
         with:
           name: deployment-dist
           path: dist
-      - name: Diagnose FTP endpoint
+      - name: Verify FTP endpoint
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_PORT: ${{ secrets.FTP_PORT }}
         run: |
           PORT="${FTP_PORT:-21}"
           echo "Testing TCP connectivity to configured FTP endpoint on port ${PORT}"
-          timeout 15 bash -c "</dev/tcp/$FTP_HOST/$PORT" && echo "TCP endpoint reachable" || echo "TCP endpoint unavailable from this GitHub runner"
+          timeout 15 bash -c "</dev/tcp/$FTP_HOST/$PORT"
       - name: Delete maps-master from cPanel
-        continue-on-error: true
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_PORT: ${{ secrets.FTP_PORT }}
@@ -79,35 +79,3 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
-
-  deploy-capgo:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Install Capacitor Project Dependencies
-        run: npm install --include=dev --no-audit --no-fund
-      - name: Verify Capacitor Configuration
-        run: |
-          test -f capacitor.config.ts || test -f capacitor.config.json || test -f capacitor.config.js
-          npx cap --version
-      - name: Download dist artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: deployment-dist
-          path: dist
-      - name: Deploy Live Update to Capgo
-        env:
-          CAPGO_TOKEN: ${{ secrets.CAPGO_TOKEN }}
-        run: |
-          if [ -z "$CAPGO_TOKEN" ]; then
-            echo "WARNING: CAPGO_TOKEN is not set. Skipping Capgo deploy."
-            exit 0
-          fi
-          npx @capgo/cli@latest bundle upload com.rpfoundation.app --channel production --path ./dist --auto-bump patch
