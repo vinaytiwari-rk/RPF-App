@@ -144,18 +144,27 @@ export default function MainLayout() {
         </motion.button>
       )}
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/96 px-1 pt-1 pb-[calc(.35rem+env(safe-area-inset-bottom))] shadow-[0_-8px_30px_-20px_rgba(0,0,128,.22)] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-3xl items-center justify-around">
-          {items.map(({ path, en, hi, icon: Icon }, index) => {
+      <nav className="fixed inset-x-4 bottom-3 z-50 mx-auto max-w-lg rounded-3xl border border-slate-200/90 bg-white/95 px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-2xl">
+        <div className="flex items-center justify-around">
+          {items.map(({ path, en, hi, icon: Icon }) => {
             const active = location.pathname === path;
             return (
-              <motion.button key={path} whileTap={{ scale: 0.88 }} whileHover={{ y: -2 }} onClick={() => nav(path)} className={`relative flex min-h-12 w-1/5 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium ${active ? "text-[#000080]" : "text-slate-400 hover:text-[#138808]"}`}>
-                <motion.span animate={active ? { y: [0, -2, 0] } : { y: 0 }} transition={{ duration: 2.2, repeat: active ? Infinity : 0, delay: index * 0.08, ease: "easeInOut" }} className={`flex h-7 w-8 items-center justify-center rounded-lg ${active ? `bg-gradient-to-br ${navGradient[path]} shadow-sm` : ""}`}>
-                  <Icon className={`h-[18px] w-[18px] ${active ? "text-white" : ""}`} />
-                </motion.span>
+              <motion.button
+                key={path}
+                whileTap={{ scale: 0.88 }}
+                onClick={() => nav(path)}
+                className={`relative flex flex-col items-center justify-center gap-0.5 rounded-2xl py-1 px-3 text-[10px] font-black tracking-tight transition-all ${
+                  active ? "text-[#000080]" : "text-slate-400 hover:text-slate-700"
+                }`}
+              >
+                <div
+                  className={`flex h-7 w-9 items-center justify-center rounded-xl transition-all ${
+                    active ? "bg-gradient-to-r from-[#FF9933] to-[#F59E0B] text-white shadow-md" : ""
+                  }`}
+                >
+                  <Icon className={`h-4 w-4 ${active ? "text-white" : ""}`} />
+                </div>
                 <span>{language === "hi" ? hi : en}</span>
-                {active && <motion.span layoutId="active-nav" className="absolute bottom-0 h-0.5 w-7 rounded-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />}
-                {path === "/notifications" && unread > 0 && <motion.span animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} className="absolute right-[calc(50%-0.8rem)] top-1 h-1.5 w-1.5 rounded-full bg-[#FF9933] ring-2 ring-white" />}
               </motion.button>
             );
           })}
