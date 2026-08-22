@@ -227,27 +227,36 @@ export default function ServiceDetails() {
             </p>
 
             <div className="space-y-2.5 pt-1">
-              {govLinks.map((link) => (
-                <button
-                  key={link.url}
-                  onClick={() => openExternalLink(link.url, navigate, link.title)}
-                  className="flex w-full items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-3.5 text-left shadow-sm transition hover:border-orange-300 hover:shadow-md active:scale-[.99]"
-                >
-                  <WebsiteLogo url={link.url} label={link.title} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-black uppercase text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                        Official Gov
-                      </span>
-                      <h4 className="text-xs font-black text-slate-900 truncate">{hi ? link.titleHi : link.title}</h4>
+              {govLinks.map((link) => {
+                const isGov = link.isGov !== false;
+                return (
+                  <button
+                    key={link.url}
+                    onClick={() => openExternalLink(link.url, navigate, link.title)}
+                    className="flex w-full items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-3.5 text-left shadow-sm transition hover:border-orange-300 hover:shadow-md active:scale-[.99]"
+                  >
+                    <WebsiteLogo url={link.url} label={link.title} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded border ${
+                            isGov
+                              ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                              : "text-sky-700 bg-sky-50 border-sky-200"
+                          }`}
+                        >
+                          {isGov ? (hi ? "आधिकारिक पोर्टल" : "Official Gov") : hi ? "उपयोगी संसाधन" : "Verified Resource"}
+                        </span>
+                        <h4 className="text-xs font-black text-slate-900 truncate">{hi ? link.titleHi : link.title}</h4>
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-[11px] font-medium text-slate-500">
+                        {hi ? link.descHi : link.desc}
+                      </p>
                     </div>
-                    <p className="mt-1 line-clamp-2 text-[11px] font-medium text-slate-500">
-                      {hi ? link.descHi : link.desc}
-                    </p>
-                  </div>
-                  <ExternalLink className="h-4 w-4 shrink-0 text-[#000080]" />
-                </button>
-              ))}
+                    <ExternalLink className="h-4 w-4 shrink-0 text-[#000080]" />
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
