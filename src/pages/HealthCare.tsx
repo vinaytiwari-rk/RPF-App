@@ -54,7 +54,7 @@ const HEALTH_LINKS = [
   { name: "CDSCO", url: "https://cdscoonline.gov.in/CDSCO/cdscoDrugs", category: "Global Bodies", categoryHi: "वैश्विक संस्थाएं", desc: "Central Drugs Standard Control Organization." },
   { name: "ART SURROGACY", url: "https://artsurrogacy.gov.in/", category: "Programs & Registries", categoryHi: "कार्यक्रम और रजिस्ट्रियां", desc: "National ART & Surrogacy registry." },
   { name: "Tele MANAS", url: "https://telemanas.mohfw.gov.in/home", category: "Welfare & Services", categoryHi: "कल्याण और सेवाएं", desc: "Mental health helpline and support portal." },
-  { name: "Swasth Bharat", url: "https://swasthbharat.mohfw.gov.in/", category: "Welfare & Services", categoryHi: "कल्याण और सेवाएं", desc: "Healthy India official portal." },
+  { name: "MoHFW Main Portal", url: "https://main.mohfw.gov.in/", category: "Welfare & Services", categoryHi: "कल्याण और सेवाएं", desc: "Ministry of Health & Family Welfare official portal." },
   { name: "TMC", url: "https://tmc.gov.in/abha", category: "Clinical & Hospitals", categoryHi: "क्लीनिकल और अस्पताल", desc: "Tata Memorial Centre ABHA integration." },
   { name: "MCC", url: "https://mcc.nic.in/", category: "Programs & Registries", categoryHi: "कार्यक्रम और रजिस्ट्रियां", desc: "Medical Counselling Committee." },
   { name: "NMC", url: "https://www.nmc.org.in/", category: "Global Bodies", categoryHi: "वैश्विक संस्थाएं", desc: "National Medical Commission." },
