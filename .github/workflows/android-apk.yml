@@ -17,6 +17,7 @@ on:
       - 'tsconfig*.json'
       - '.github/workflows/android-apk.yml'
 
+# Updated APK build trigger: build from the latest main branch code and configuration.
 jobs:
   android-apk:
     name: Build Android APK
