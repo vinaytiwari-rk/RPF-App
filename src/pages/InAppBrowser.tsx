@@ -186,10 +186,6 @@ export default function InAppBrowser() {
               onLoad={() => {
                 setLoading(false);
                 setTimedOut(false);
-                try {
-                  const title = frameRef.current?.contentDocument?.title;
-                  if (title && title !== pageTitle) setPageTitle(title);
-                } catch {}
               }}
               onError={() => {
                 setLoading(false);
