@@ -6,7 +6,7 @@ import FileUpload from '../FileUpload';
 import { useApp, CmsConfig } from '../../context/AppContext';
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from '../../data/liveTvDefaults';
 import rawRadioStations from '../../data/akashvaniChannels.json';
-import { Save, User, Quote, FileText, Tv, Radio } from 'lucide-react';
+import { Save, User, Quote, FileText, Tv, Radio, Instagram } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
 
 type RadioStation = { name: string; url: string; image: string; page: string; enabled?: boolean; order?: number };
@@ -82,8 +82,8 @@ export const CmsSettings = () => {
           <label className="text-xs font-bold text-slate-700">Instagram Reel / Post URL</label>
           <input
             type="url"
-            value={cms.instagramFeedUrl || ''}
-            onChange={(e) => set('instagramFeedUrl', e.target.value)}
+            value={cms.instagramReelUrl || ''}
+            onChange={(e) => set('instagramReelUrl', e.target.value)}
             placeholder="https://www.instagram.com/reel/C... or https://www.instagram.com/rpfoundationofficial/"
             className="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-medium outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933]"
           />
