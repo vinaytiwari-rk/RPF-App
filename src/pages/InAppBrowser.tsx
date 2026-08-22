@@ -182,30 +182,32 @@ export default function InAppBrowser() {
               </button>
             </div>
           </div>
-        ) : frameBlocked ? (
-          /* Frame Blocked Fallback Card */
-          <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-[#FAF0E6]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#FFFBF7] shadow-md border border-[#E8DCD1] text-[#8C5A3C] mb-4">
-              <ShieldCheck className="h-8 w-8 text-[#8C5A3C]" />
+        ) : frameBlocked || rawUrl.includes(".gov.in") || rawUrl.includes(".nic.in") ? (
+          /* Government Security / SSL / WAF Protection Fallback Card */
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-[#FAF9F6] selection:bg-orange-100">
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-md border border-orange-200 text-[#FF9933] mb-4">
+              <ShieldCheck className="h-8 w-8 text-[#FF9933]" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[.18em] text-[#8C5A3C]">Verified Portal</span>
-            <h2 className="mt-1 text-lg font-black text-[#2D241E] font-serif">{pageTitle}</h2>
-            <p className="mt-2 text-xs text-[#7A6A5D] max-w-xs leading-relaxed">
-              This official portal prefers dedicated window view for security.
+            <span className="text-[10px] font-black uppercase tracking-[.18em] text-[#FF9933] bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100">
+              Government Security Protocol
+            </span>
+            <h2 className="mt-2 text-lg font-black text-slate-900 font-serif">{pageTitle}</h2>
+            <p className="mt-2 text-xs text-slate-500 max-w-sm leading-relaxed font-medium">
+              This official Government portal ({new URL(rawUrl).hostname}) uses CloudFront WAF and NIC Security certificates. For your security and seamless OTP/Aadhaar authentication, please launch directly in a secure window.
             </p>
             <div className="mt-6 space-y-2.5 w-full max-w-xs">
               <button
                 onClick={openDirectExternal}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#8C5A3C] py-3 text-xs font-bold text-white shadow-lg active:scale-95 transition"
+                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#D97706] py-3.5 text-xs font-black text-white shadow-lg active:scale-95 transition hover:brightness-110"
               >
                 <Sparkles className="h-4 w-4 text-amber-200" />
-                Launch Portal Securely
+                Launch Portal Securely (Direct View)
               </button>
               <button
                 onClick={() => navigate(-1)}
-                className="w-full rounded-2xl border border-[#E8DCD1] bg-[#FFFBF7] py-2.5 text-xs font-bold text-[#2D241E] hover:bg-[#F5ECE2]"
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
               >
-                Return to App
+                Return to Samahit
               </button>
             </div>
           </div>
