@@ -30,7 +30,90 @@ export default function VolunteerRegistrationWizard({onBack,onComplete}:Voluntee
  <section className="space-y-4"><h3 className="font-black text-sm text-slate-800 flex items-center gap-2 border-b pb-2"><MapPin className="w-4 h-4 text-[#000080]"/>Location</h3><button type="button" onClick={detectGps} disabled={gpsLoading} className="w-full py-3 rounded-xl bg-[#000080] text-white text-xs font-black flex items-center justify-center gap-2">{gpsLoading?<Loader2 className="w-4 h-4 animate-spin"/>:<MapPin className="w-4 h-4"/>}Detect GPS Location</button>{locationMessage&&<p className="text-[10px] text-green-700 font-bold">{locationMessage}</p>}<div className="grid grid-cols-2 gap-3"><label className="text-[10px] font-bold text-slate-500 uppercase">Country <span className="text-red-600 ml-0.5">*</span><select required value={countryIso} onChange={e=>changeCountry(e.target.value)} className={input}>{countries.map(c=><option key={c.isoCode} value={c.isoCode}>{c.name}</option>)}</select></label><label className="text-[10px] font-bold text-slate-500 uppercase">State <span className="text-red-600 ml-0.5">*</span><select required value={stateIso} onChange={e=>setStateIso(e.target.value)} className={input}><option value="">Select</option>{states.map(s=><option key={s.isoCode} value={s.isoCode}>{s.name}</option>)}</select></label><label className="text-[10px] font-bold text-slate-500 uppercase">City <span className="text-red-600 ml-0.5">*</span><select required value={city} onChange={e=>setCity(e.target.value)} className={input}><option value="">Select</option>{cities.map(c=><option key={`${c.name}-${c.latitude}`} value={c.name}>{c.name}</option>)}{city&&!cities.some(c=>c.name===city)&&<option value={city}>{city}</option>}</select></label><label className="text-[10px] font-bold text-slate-500 uppercase">Pincode <span className="text-red-600 ml-0.5">*</span><input required value={pincode} onChange={e=>setPincode(e.target.value)} className={input}/></label></div><label className="text-[10px] font-bold text-slate-500 uppercase">Area / Locality <span className="text-red-600 ml-0.5">*</span><input required value={area} onChange={e=>setArea(e.target.value)} className={input}/></label>{countryIso==='IN'&&<div className="grid grid-cols-2 gap-3"><label className="text-[10px] font-bold text-slate-500 uppercase">Sansad Kshetra <span className="text-red-600 ml-0.5">*</span><input required value={sansad} onChange={e=>setSansad(e.target.value)} className={input}/></label><label className="text-[10px] font-bold text-slate-500 uppercase">Vidhan Sabha <span className="text-red-600 ml-0.5">*</span><input required value={vidhan} onChange={e=>setVidhan(e.target.value)} className={input}/></label></div>}<label className="text-[10px] font-bold text-slate-500 uppercase">Ward / Local Electoral Area <span className="text-red-600 ml-0.5">*</span><input required value={ward} onChange={e=>setWard(e.target.value)} className={input}/></label><label className="text-[10px] font-bold text-slate-500 uppercase">Address <span className="text-red-600 ml-0.5">*</span><textarea required value={address} onChange={e=>setAddress(e.target.value)} rows={2} className={`${input} resize-none`}/></label></section>
  <section className="space-y-4"><h3 className="font-black text-sm text-slate-800 border-b pb-2">Personal Details</h3><label className="text-[10px] font-bold text-slate-500 uppercase">Full Name <span className="text-red-600 ml-0.5">*</span><input required value={fullName} onChange={e=>setFullName(e.target.value)} className={input}/></label><div className="grid grid-cols-2 gap-3"><label className="text-[10px] font-bold text-slate-500 uppercase">Father / Husband Name <span className="text-red-600 ml-0.5">*</span><input required value={fatherName} onChange={e=>setFatherName(e.target.value)} className={input}/></label><label className="text-[10px] font-bold text-slate-500 uppercase">Mother Name <span className="text-red-600 ml-0.5">*</span><input required value={motherName} onChange={e=>setMotherName(e.target.value)} className={input}/></label></div><div className="grid grid-cols-2 gap-3"><label className="text-[10px] font-bold text-slate-500 uppercase">Date of Birth <span className="text-red-600 ml-0.5">*</span><input required type="date" value={dob} onChange={e=>setDob(e.target.value)} className={input}/></label><div className="p-2.5 rounded-lg bg-slate-50 border text-xs font-black text-slate-600 flex items-center">{age===null?'Age':`${age} years`}</div></div>{age!==null&&age<16&&<div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-black">You are Minor, Not Eligible Now</div>}</section>
  <section className="space-y-4"><h3 className="font-black text-sm text-slate-800 flex items-center gap-2 border-b pb-2"><Phone className="w-4 h-4 text-[#000080]"/>Contact</h3><div className="grid grid-cols-[110px_1fr] gap-2"><label className="text-[10px] font-bold text-slate-500 uppercase">ISD Code <span className="text-red-600 ml-0.5">*</span><select required value={isdCode} onChange={e=>setIsdCode(e.target.value)} className={input}>{countries.map(c=><option key={`${c.isoCode}-${c.phonecode}`} value={`+${c.phonecode}`}>+{c.phonecode} ({c.isoCode})</option>)}</select></label><label className="text-[10px] font-bold text-slate-500 uppercase">Mobile Number <span className="text-red-600 ml-0.5">*</span><input required value={mobile} onChange={e=>setMobile(e.target.value.replace(/\D/g,''))} className={input} inputMode="numeric"/></label></div><label className="text-[10px] font-bold text-slate-500 uppercase">Email <span className="text-red-600 ml-0.5">*</span><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className={input}/></label>{email&&!emailValid&&<p className="text-[10px] text-red-600 font-bold">Allowed: Gmail, Yahoo, Rediff, Zoho and @peoplesuniversity.edu.in</p>}</section>
- <section className="space-y-4"><h3 className="font-black text-sm text-slate-800 flex items-center gap-2 border-b pb-2"><Droplet className="w-4 h-4 text-red-600"/>Blood Donation Network</h3><label className="text-[10px] font-bold text-slate-500 uppercase">Blood Group <span className="text-red-600 ml-0.5">*</span><select required value={bloodGroup} onChange={e=>setBloodGroup(e.target.value)} className={input}><option value="">Select</option>{BLOOD_GROUPS.map(g=><option key={g}>{g}</option>)}</select></label><div className="p-4 rounded-xl border bg-slate-50"><p className="text-xs font-black text-slate-800">Are You Ready to become the part of Blood Donation Network?</p><div className="grid grid-cols-2 gap-2 mt-3"><button type="button" onClick={()=>setBloodReady(true)} className={`py-2.5 rounded-lg text-xs font-black ${bloodReady===true?'bg-green-600 text-white':'bg-white border'}`}>Yes</button><button type="button" onClick={()=>setBloodReady(false)} className={`py-2.5 rounded-lg text-xs font-black ${bloodReady===false?'bg-slate-700 text-white':'bg-white border'}`}>No</button></div></div></section>
+  <section className="space-y-4">
+    <h3 className="font-black text-sm text-slate-800 flex items-center gap-2 border-b pb-2">
+      <Droplet className="w-4 h-4 text-red-600" />
+      Blood Donation Network
+    </h3>
+    <label className="text-[10px] font-bold text-slate-500 uppercase">
+      Blood Group <span className="text-red-600 ml-0.5">*</span>
+      <select required value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)} className={input}>
+        <option value="">Select Blood Group</option>
+        {BLOOD_GROUPS.map((g) => (
+          <option key={g}>{g}</option>
+        ))}
+      </select>
+    </label>
+
+    {/* Blood Donation Network Question & Disappearing Logic with Green (Yes) / Red (No) */}
+    {bloodReady === null ? (
+      <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 shadow-sm">
+        <p className="text-xs font-black text-slate-800">
+          Are You Ready to become the part of Blood Donation Network? <span className="text-red-600 ml-0.5">*</span>
+        </p>
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          <button
+            type="button"
+            onClick={() => setBloodReady(true)}
+            className="py-3 rounded-xl text-xs font-black bg-emerald-600 text-white shadow-md hover:bg-emerald-700 active:scale-95 transition flex items-center justify-center gap-1.5"
+          >
+            <Check className="w-4 h-4" /> Yes (Green)
+          </button>
+          <button
+            type="button"
+            onClick={() => setBloodReady(false)}
+            className="py-3 rounded-xl text-xs font-black bg-rose-600 text-white shadow-md hover:bg-rose-700 active:scale-95 transition flex items-center justify-center gap-1.5"
+          >
+            <X className="w-4 h-4" /> No (Red)
+          </button>
+        </div>
+      </div>
+    ) : bloodReady === true ? (
+      /* Question Disappears - Display Green Badge for YES */
+      <div className="flex items-center justify-between p-3.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-900 shadow-sm">
+        <div className="flex items-center gap-3">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold text-sm shadow">
+            ✓
+          </span>
+          <div>
+            <p className="text-xs font-black text-emerald-900">Blood Donation Network: YES (Green)</p>
+            <p className="text-[10px] font-semibold text-emerald-700">
+              Ready to help emergency patients in your local area.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setBloodReady(null)}
+          className="text-[11px] font-bold text-emerald-800 underline hover:text-emerald-950 ml-2"
+        >
+          Change
+        </button>
+      </div>
+    ) : (
+      /* Question Disappears - Display Red Badge for NO */
+      <div className="flex items-center justify-between p-3.5 rounded-xl border border-rose-300 bg-rose-50 text-rose-900 shadow-sm">
+        <div className="flex items-center gap-3">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-600 text-white font-bold text-sm shadow">
+            ✕
+          </span>
+          <div>
+            <p className="text-xs font-black text-rose-900">Blood Donation Network: NO (Red)</p>
+            <p className="text-[10px] font-semibold text-rose-700">
+              Opted out of the emergency donor registry.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setBloodReady(null)}
+          className="text-[11px] font-bold text-rose-800 underline hover:text-rose-950 ml-2"
+        >
+          Change
+        </button>
+      </div>
+    )}
+  </section>
  <section className="space-y-4"><h3 className="font-black text-sm text-slate-800 border-b pb-2">Security</h3><label className="text-[10px] font-bold text-slate-500 uppercase">Create Password <span className="text-red-600 ml-0.5">*</span><div className="relative"><input required type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} className={input}/><button type="button" onClick={()=>setShowPassword(!showPassword)} className="absolute right-3 top-[10px] text-slate-400">{showPassword?<EyeOff className="w-4 h-4"/>:<Eye className="w-4 h-4"/>}</button></div></label><label className="text-[10px] font-bold text-slate-500 uppercase">Confirm Password <span className="text-red-600 ml-0.5">*</span><div className="relative"><input required type={showPassword?"text":"password"} value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} className={input}/><button type="button" onClick={()=>setShowPassword(!showPassword)} className="absolute right-3 top-[10px] text-slate-400">{showPassword?<EyeOff className="w-4 h-4"/>:<Eye className="w-4 h-4"/>}</button></div></label></section>
  <div className="flex gap-3 pt-2"><button type="button" onClick={onBack} disabled={loading} className="flex-1 py-3.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-black uppercase">Cancel</button><button type="submit" disabled={loading||usernameStatus!=='available'} className="flex-1 py-3.5 rounded-xl bg-[#000080] text-white text-xs font-black uppercase flex items-center justify-center gap-2 disabled:opacity-50">{loading?<Loader2 className="w-4 h-4 animate-spin"/>:'Submit Volunteer Registration'}</button></div>
  </form></div>;
