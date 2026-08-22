@@ -138,12 +138,6 @@ export default function MainLayout() {
       {/* Global Persistent Mini Player for Radio & TV Media Streams */}
       <GlobalMiniPlayer />
 
-      {(location.pathname === "/" || location.pathname === "/services") && (
-        <motion.button whileTap={{ scale: 0.88 }} whileHover={{ y: -3, scale: 1.04 }} onClick={() => nav("/donations")} aria-label="Donate" className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3.5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#FF9933] to-[#138808] text-white shadow-lg">
-          <HeartHandshake className="h-5 w-5" />
-        </motion.button>
-      )}
-
       <nav className="fixed inset-x-4 bottom-3 z-50 mx-auto max-w-lg rounded-3xl border border-slate-200/90 bg-white/95 px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-2xl">
         <div className="flex items-center justify-around">
           {items.map(({ path, en, hi, icon: Icon }) => {

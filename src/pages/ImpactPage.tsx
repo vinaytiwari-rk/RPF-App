@@ -23,11 +23,11 @@ export default function ImpactPage() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const isHi = lang === "hi";
 
-  const IMPACT_METRICS = [
-    { labelEn: "Rojgar Mela Jobs", labelHi: "रोजगार मेला अवसर", count: "15,000+", icon: Briefcase, color: "text-blue-600 bg-blue-50" },
-    { labelEn: "Free Health Camps", labelHi: "निःशुल्क स्वास्थ्य शिविर", count: "50,000+", icon: Stethoscope, color: "text-emerald-600 bg-emerald-50" },
-    { labelEn: "Volunteers Active", labelHi: "सक्रिय स्वयंसेवक", count: "8,500+", icon: Users, color: "text-purple-600 bg-purple-50" },
-    { labelEn: "Pink E-Rickshaws", labelHi: "पिंक ई-रिक्शा वितरण", count: "500+", icon: Heart, color: "text-rose-600 bg-rose-50" },
+  const CORE_INITIATIVES = [
+    { labelEn: "Rojgar Mela Jobs", labelHi: "रोजगार मेला आजीविका", descEn: "Employment drives & career melas", descHi: "युवाओं हेतु प्रत्यक्ष रोजगार अवसर", icon: Briefcase, color: "text-blue-600 bg-blue-50" },
+    { labelEn: "Pink E-Rickshaws", labelHi: "पिंक ई-रिक्शा पहल", descEn: "Women empowerment & green mobility", descHi: "महिला स्वावलंबन एवं हरित यातायात", icon: Heart, color: "text-pink-600 bg-pink-50" },
+    { labelEn: "Free Health Camps", labelHi: "निःशुल्क स्वास्थ्य शिविर", descEn: "Medical checkups & care services", descHi: "चिकित्सा परामर्श एवं दवा वितरण", icon: Stethoscope, color: "text-emerald-600 bg-emerald-50" },
+    { labelEn: "Youth & Sports Support", labelHi: "खेलकूद एवं युवा प्रोत्साहन", descEn: "Athlete aid & local tournaments", descHi: "उदीयमान खिलाड़ियों को राष्ट्रीय मंच", icon: ShieldCheck, color: "text-amber-600 bg-amber-50" },
   ];
 
   return (
@@ -51,22 +51,22 @@ export default function ImpactPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-6">
 
-        {/* Impact Numbers Counter Grid */}
+        {/* Foundation Key Initiatives */}
         <section className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">{isHi ? "हमारा सामाजिक प्रभाव" : "Real Ground Impact"}</h3>
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">{isHi ? "फाउंडेशन के प्रमुख कार्यक्षेत्र" : "Core Ground Initiatives"}</h3>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            {IMPACT_METRICS.map((m, idx) => (
+            {CORE_INITIATIVES.map((m, idx) => (
               <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${m.color}`}>
                   <m.icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-lg font-black text-slate-900 leading-none">{m.count}</p>
-                  <p className="text-[10px] font-bold text-slate-500 mt-1 line-clamp-1">{isHi ? m.labelHi : m.labelEn}</p>
+                  <p className="text-xs font-black text-slate-900 leading-snug line-clamp-1">{isHi ? m.labelHi : m.labelEn}</p>
+                  <p className="text-[9.5px] font-medium text-slate-500 mt-0.5 line-clamp-1">{isHi ? m.descHi : m.descEn}</p>
                 </div>
               </div>
             ))}
