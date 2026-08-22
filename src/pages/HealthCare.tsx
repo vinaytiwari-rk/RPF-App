@@ -22,7 +22,7 @@ type Lang = "en" | "hi";
 const HEALTH_LINKS = [
   { name: "eRaktkosh", url: "https://eraktkosh.mohfw.gov.in/eraktkoshPortal/#/", category: "Welfare & Services", categoryHi: "कल्याण और सेवाएं", desc: "Government blood availability and blood center locator portal." },
   { name: "WHO", url: "https://www.who.int/news", category: "Global Bodies", categoryHi: "वैश्विक संस्थाएं", desc: "World Health Organization news and updates." },
-  { name: "CDC", url: "https://www.cdc.gov/health-topics.html", category: "Global Bodies", categoryHi: "वैश्विक संस्थाएं", desc: "Centers for Disease Control and Prevention health topics." },
+  { name: "NCDC India", url: "https://ncdc.gov.in/", category: "Global Bodies", categoryHi: "सरकारी संस्थाएं", desc: "National Centre for Disease Control (MoHFW India)." },
   { name: "NIH", url: "https://www.nih.gov/", category: "Global Bodies", categoryHi: "वैश्विक संस्थाएं", desc: "National Institutes of Health official website." },
   { name: "Know Drugs", url: "https://www.drugs.com/", category: "Reference & Tools", categoryHi: "संदर्भ और उपकरण", desc: "Prescription drug information and database." },
   { name: "DailyMed", url: "https://dailymed.nlm.nih.gov/dailymed/", category: "Reference & Tools", categoryHi: "संदर्भ और उपकरण", desc: "Official database of FDA drug labels." },
