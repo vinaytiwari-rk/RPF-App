@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, ChevronRight, CloudSun, HeartHandshake, HeartPulse, Leaf, Megaphone, Quote, ShieldCheck, Sparkles, HandHeart, BookOpen, Wind, Instagram, Twitter, Facebook, Linkedin } from "lucide-react";
-import { FEATURED_INSTAGRAM_REEL } from "../config/featuredPost";
+import { FEATURED_INSTAGRAM_REEL, ELFSIGHT_INSTAGRAM_WIDGET_ID } from "../config/featuredPost";
 import InstagramEmbed from "../components/InstagramEmbed";
+import InstagramLiveFeed from "../components/InstagramLiveFeed";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -89,6 +90,10 @@ export default function Home() {
     <div className="mt-5 mb-5">
       <p className="text-[11px] font-black uppercase tracking-[.18em] text-slate-400 mb-2">{lang === "hi" ? "नवीनतम अपडेट" : "Latest Updates"}</p>
       <InstagramEmbed url={FEATURED_INSTAGRAM_REEL} />
+    </div>
+    <div className="mt-5 mb-5">
+      <p className="text-[11px] font-black uppercase tracking-[.18em] text-slate-400 mb-2">{lang === "hi" ? "लाइव फीड" : "Live Social Feed"}</p>
+      <InstagramLiveFeed widgetId={ELFSIGHT_INSTAGRAM_WIDGET_ID} />
     </div>
     <motion.button whileHover={{y:-2}} whileTap={{scale:.99}} onClick={()=>navigate("/donations")} className="mt-5 flex min-h-16 w-full items-center justify-between rounded-2xl border border-orange-200 bg-white px-5 py-4 text-left shadow-sm"><span><span className="block text-[13px] font-black text-[#000080]">{lang === "hi" ? "सेवा के लिए योगदान दें" : "Support the seva"}</span><span className="mt-1 block text-[10px] text-slate-500">{lang === "hi" ? "आपका सहयोग सीधे सेवा के कार्यों तक पहुंचता है।" : "Your support helps turn compassion into action."}</span></span><HeartHandshake className="h-6 w-6 text-[#FF9933]"/></motion.button>
   </div></main>;
