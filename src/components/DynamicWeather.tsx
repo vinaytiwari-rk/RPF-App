@@ -1,12 +1,12 @@
 import React from "react";
-import { Cloud, CloudRain, Sun, Wind, Droplets } from "lucide-react";
+import { CloudRain, Sun, Wind, Droplets } from "lucide-react";
 
 export default function DynamicWeather({ weather, lang }: { weather: any; lang: "hi" | "en" }) {
   const isHi = lang === "hi";
   const current = weather?.current_weather || weather?.current || null;
 
   // Never invent weather values. If the upstream source has no reading,
-  // render an unavailable state instead of showing a fake 25°C/12 km/h value.
+  // render an unavailable state instead of showing a fake value.
   const temp = Number.isFinite(Number(current?.temperature)) ? Number(current.temperature) : null;
   const wind = Number.isFinite(Number(current?.windspeed)) ? Number(current.windspeed) : null;
   const humidity = Number.isFinite(Number(current?.relative_humidity_2m)) ? Number(current.relative_humidity_2m) : null;
@@ -46,14 +46,14 @@ export default function DynamicWeather({ weather, lang }: { weather: any; lang: 
           </div>
         ) : (
           <div className="mt-6 rounded-xl border border-orange-100 bg-white/80 p-4 text-sm font-semibold text-slate-600">
-            {isHi ? "लाइव मौसम डेटा उपलब्ध नहीं है। फोन की लोकेशन और saved reading fallback का उपयोग किया जा सकता है।" : "Live weather data is unavailable. The app can use phone location and a saved reading as fallback."}
+            {isHi ? "लाइव मौसम डेटा उपलब्ध नहीं है। मौसम स्रोत उपलब्ध होने पर वास्तविक रीडिंग दिखाई जाएगी।" : "Live weather data is unavailable. Real readings will be shown when a weather source is available."}
           </div>
         )}
 
         <div className="mt-4 rounded-xl border border-slate-200 bg-white/70 p-3 backdrop-blur-md">
           <p className="text-[10px] font-bold leading-tight text-slate-600">
             <span className="mr-1 font-black text-[#FF9933]">{isHi ? "ℹ️ जानकारी:" : "ℹ️ Info:"}</span>
-            {isHi ? "फोन की लोकेशन मौसम का स्थान बताती है; सामान्य मोबाइल फोन स्वयं वर्तमान मौसम या AQI को विश्वसनीय रूप से माप नहीं सकते।" : "Phone location identifies the place; ordinary phones do not reliably measure current weather or AQI themselves."}
+            {isHi ? "फोन की लोकेशन केवल स्थान बताती है; सामान्य मोबाइल फोन स्वयं वर्तमान मौसम या AQI को विश्वसनीय रूप से माप नहीं सकते।" : "Phone location identifies the place; ordinary phones do not reliably measure current weather or AQI themselves."}
           </p>
         </div>
       </div>
