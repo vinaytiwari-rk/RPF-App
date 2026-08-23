@@ -7,17 +7,17 @@ import { useApp } from "../context/AppContext";
 type Lang = "en" | "hi";
 type Source = { name: string; nameHi: string; url: string; description: string; descriptionHi: string };
 
-const xcancel = (handle: string) => `https://xcancel.com/${handle.replace(/^@/, "")}`;
+const x = (handle: string) => `https://x.com/${handle.replace(/^@/, "")}`;
 const DEFAULT_SOURCES: Source[] = [
-  { name: "PIB Fact Check", nameHi: "पीआईबी फैक्ट चेक", url: xcancel("PIBFactCheck"), description: "Press Information Bureau fact-checks regarding government policies and schemes.", descriptionHi: "सरकारी नीतियों और योजनाओं के संबंध में प्रेस सूचना ब्यूरो द्वारा तथ्य-जांच।" },
+  { name: "PIB Fact Check", nameHi: "पीआईबी फैक्ट चेक", url: "https://factcheck.pib.gov.in/", description: "Official Government of India fact-check portal for suspicious information related to the Union Government.", descriptionHi: "भारत सरकार का आधिकारिक फैक्ट-चेक पोर्टल, विशेषकर केंद्र सरकार से संबंधित संदिग्ध जानकारी के लिए।" },
   { name: "Vishvas News", nameHi: "विश्वास न्यूज़", url: "https://www.vishvasnews.com/", description: "A leading Indian multilingual fact-checking website.", descriptionHi: "भारत की एक प्रमुख बहुभाषी तथ्य-जांच वेबसाइट।" },
-  { name: "India Today Anti Fake News War", nameHi: "इंडिया टुडे एंटी फेक न्यूज़ वॉर", url: xcancel("IndiaTodayFacts"), description: "India Today fact-checks addressing viral misinformation.", descriptionHi: "India Today द्वारा वायरल भ्रामक जानकारियों की तथ्य-जांच।" },
-  { name: "PTI Fact Check", nameHi: "पीटीआई फैक्ट चेक", url: xcancel("ptifactcheck"), description: "PTI's official fact-check handle.", descriptionHi: "प्रेस ट्रस्ट ऑफ इंडिया (PTI) का आधिकारिक तथ्य-जांच हैंडल।" },
-  { name: "MEA Fact Check", nameHi: "विदेश मंत्रालय फैक्ट चेक", url: xcancel("MEAIndia"), description: "Ministry of External Affairs official updates and clarifications.", descriptionHi: "विदेश मंत्रालय के आधिकारिक अपडेट और स्पष्टीकरण।" },
-  { name: "Jansampark MP Fact Check", nameHi: "जनसंपर्क मध्य प्रदेश फैक्ट चेक", url: xcancel("MPJansampark"), description: "Madhya Pradesh Government public information and fact-check updates.", descriptionHi: "मध्य प्रदेश सरकार के जनसंपर्क और तथ्य-जांच अपडेट।" },
-  { name: "NewsMeter Fact Check", nameHi: "न्यूज़मीटर फैक्ट चेक", url: xcancel("NewsMeter"), description: "Independent digital fact-checking and investigative journalism.", descriptionHi: "स्वतंत्र डिजिटल तथ्य-जांच और खोजी पत्रकारिता।" },
-  { name: "UP Police Viral Check", nameHi: "यूपी पुलिस वायरल चेक", url: xcancel("uppolice"), description: "Uttar Pradesh Police official public-information updates.", descriptionHi: "उत्तर प्रदेश पुलिस के आधिकारिक जन-सूचना अपडेट।" },
-  { name: "Info UP Fact Check", nameHi: "इन्फो यूपी फैक्ट चेक", url: xcancel("InfoUPFactCheck"), description: "Uttar Pradesh information and public-relations fact-check updates.", descriptionHi: "उत्तर प्रदेश सूचना एवं जनसंपर्क विभाग के तथ्य-जांच अपडेट।" },
+  { name: "India Today Fact Check", nameHi: "इंडिया टुडे फैक्ट चेक", url: "https://www.indiatoday.in/fact-check", description: "India Today fact-checks addressing viral misinformation.", descriptionHi: "India Today द्वारा वायरल भ्रामक जानकारियों की तथ्य-जांच।" },
+  { name: "PTI Fact Check", nameHi: "पीटीआई फैक्ट चेक", url: x("ptifactcheck"), description: "PTI's fact-check social account.", descriptionHi: "प्रेस ट्रस्ट ऑफ इंडिया (PTI) का तथ्य-जांच सोशल अकाउंट।" },
+  { name: "MEA India", nameHi: "विदेश मंत्रालय", url: x("MEAIndia"), description: "Ministry of External Affairs official updates and clarifications.", descriptionHi: "विदेश मंत्रालय के आधिकारिक अपडेट और स्पष्टीकरण।" },
+  { name: "Jansampark MP", nameHi: "जनसंपर्क मध्य प्रदेश", url: x("MPJansampark"), description: "Madhya Pradesh Government public-information updates.", descriptionHi: "मध्य प्रदेश सरकार के आधिकारिक जन-सूचना अपडेट।" },
+  { name: "NewsMeter Fact Check", nameHi: "न्यूज़मीटर फैक्ट चेक", url: x("NewsMeter"), description: "Independent digital fact-checking and investigative journalism.", descriptionHi: "स्वतंत्र डिजिटल तथ्य-जांच और खोजी पत्रकारिता।" },
+  { name: "UP Police", nameHi: "यूपी पुलिस", url: x("uppolice"), description: "Uttar Pradesh Police official public-information updates.", descriptionHi: "उत्तर प्रदेश पुलिस के आधिकारिक जन-सूचना अपडेट।" },
+  { name: "Info UP", nameHi: "इन्फो यूपी", url: x("InfoUPFactCheck"), description: "Uttar Pradesh information and public-relations updates.", descriptionHi: "उत्तर प्रदेश सूचना एवं जनसंपर्क से संबंधित अपडेट।" },
   { name: "Dainik Bhaskar No Fake News", nameHi: "दैनिक भास्कर - नो फेक न्यूज़", url: "https://www.bhaskar.com/no-fake-news/", description: "Fact-checks by Dainik Bhaskar.", descriptionHi: "दैनिक भास्कर द्वारा तथ्य-जांच।" },
   { name: "BoomLive Fact Check", nameHi: "बूमलाइव फैक्ट चेक", url: "https://www.boomlive.in/fact-check", description: "Independent digital journalism and fact-checking.", descriptionHi: "स्वतंत्र डिजिटल पत्रकारिता और तथ्य-जांच।" },
   { name: "Alt News", nameHi: "ऑल्ट न्यूज़", url: "https://www.altnews.in/", description: "A leading Indian fact-checking website.", descriptionHi: "भारत की एक प्रमुख तथ्य-जांच वेबसाइट।" },
@@ -80,9 +80,7 @@ export default function FactCheck() {
             </div>
             <div>
               <h1 className="text-2xl font-black text-[#000080]">{hi ? "फैक्ट चेक" : "Fact Check"}</h1>
-              <p className="mt-1 text-xs text-slate-500">
-                {hi ? "दावों और खबरों की तथ्य-जांच के लिए उपयोगी स्रोत" : "Useful sources for checking claims and news"}
-              </p>
+              <p className="mt-1 text-xs text-slate-500">{hi ? "दावों और खबरों की तथ्य-जांच के लिए उपयोगी स्रोत" : "Useful sources for checking claims and news"}</p>
             </div>
           </div>
           <div className="mt-6 space-y-3">
@@ -101,11 +99,7 @@ export default function FactCheck() {
               </button>
             ))}
           </div>
-          <p className="mt-5 text-center text-[10px] leading-5 text-slate-400">
-            {hi
-              ? "स्रोत अपनी आधिकारिक वेबसाइट पर खुलेंगे ताकि उनके मूल लेख, लॉगिन, कुकी और सुरक्षा सुविधाएँ सही रहें।"
-              : "Sources open on their official websites so their original articles, login, cookies and security features work correctly."}
-          </p>
+          <p className="mt-5 text-center text-[10px] leading-5 text-slate-400">{hi ? "स्रोत सीधे उनके आधिकारिक गंतव्य पर खुलेंगे ताकि मूल लेख और सुरक्षा सुविधाएँ सही रहें।" : "Sources open directly at their official destinations so original articles and security features work correctly."}</p>
         </section>
       </div>
     </main>
