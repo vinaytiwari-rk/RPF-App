@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
+    "dev": "node addRoutes.cjs && tsx server.ts",
     "build:web": "node scripts/writeAppVersion.cjs && cross-env GOMAXPROCS=1 RAYON_NUM_THREADS=1 UV_THREADPOOL_SIZE=1 NODE_OPTIONS=\"--max-old-space-size=2048\" vite build",
-    "build:server": "esbuild server.ts --bundle --platform=node --outfile=server.cjs",
+    "build:server": "node addRoutes.cjs && esbuild server.ts --bundle --platform=node --outfile=server.cjs",
     "build": "npm run build:web && npm run build:server",
     "start": "node server.cjs",
     "clean": "rm -rf dist server.cjs",
