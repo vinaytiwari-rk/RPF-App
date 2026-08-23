@@ -2,49 +2,13 @@ import { useState } from "react";
 import { ArrowLeft, Download, Image as ImageIcon, Loader2, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import JanSevaCard from "./JanSevaCard";
+import JanSevaCardLive from "./JanSevaCardLive";
 
 export default function JanSevaCardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading,setLoading]=useState(false);
   const [message,setMessage]=useState("");
-
-  const downloadJpeg=async()=>{
-    setLoading(true);setMessage("");
-    try{
-      const el=document.getElementById("jan-seva-card-front");
-      if(!el)throw new Error("Card not ready");
-      const html2canvas=(await import("html2canvas")).default;
-      const canvas=await html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:"#fff",logging:false});
-      const a=document.createElement("a");
-      a.href=canvas.toDataURL("image/jpeg",.95);
-      a.download=`JanSevaCard_${(user?.name||"User").replace(/\s+/g,"_")}.jpg`;
-      a.click();
-    }catch(e){
-      console.error("JPEG generation failed",e);
-      setMessage("Card image could not be generated. Please try again.");
-    }finally{setLoading(false)}
-  };
-
-  return <main className="min-h-full bg-[var(--rp-bg)] pb-safe-content text-slate-900">
-    <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6 sm:py-6">
-      <section className="mb-4 overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm">
-        <div className="h-1 bg-gradient-to-r from-[#FF9933] via-[#fff] to-[#138808]" />
-        <div className="flex items-start gap-3 p-4 sm:p-5">
-          <button onClick={()=>navigate(-1)} aria-label="Go back" className="mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-[#000080] shadow-sm transition active:scale-95"><ArrowLeft className="h-5 w-5"/></button>
-          <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-[#000080]"><ShieldCheck className="h-4 w-4"/></span><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">RPF Digital Identity</p></div><h1 className="mt-1 text-[22px] font-black text-[#000080]">Jan Seva Card</h1><p className="mt-1 text-xs leading-5 text-slate-500">View your current card status and save a copy when your card is available.</p></div>
-        </div>
-      </section>
-
-      {message&&<div role="alert" className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">{message}</div>}
-      <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,.05)]"><JanSevaCard/></section>
-    </div>
-
-    <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-safe-nav pt-3 pointer-events-none">
-      <div className="mx-auto flex max-w-md justify-end">
-        <button onClick={downloadJpeg} disabled={loading} className="pointer-events-auto inline-flex min-h-11 items-center gap-2 rounded-full bg-[#000080] px-5 py-3 text-[11px] font-black text-white shadow-xl transition active:scale-[.98] disabled:opacity-60"><span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/15">{loading?<Loader2 className="h-4 w-4 animate-spin"/>:<ImageIcon className="h-4 w-4"/>}</span>{loading?"Preparing image…":"Save card image"}{!loading&&<Download className="h-4 w-4"/>}</button>
-      </div>
-    </div>
-  </main>;
+  const downloadJpeg=async()=>{setLoading(true);setMessage("");try{const el=document.getElementById("jan-seva-card-front");if(!el)throw new Error("Card not ready");const html2canvas=(await import("html2canvas")).default;const canvas=await html2canvas(el,{scale:3,useCORS:true,backgroundColor:"#fff",logging:false});const a=document.createElement("a");a.href=canvas.toDataURL("image/jpeg",.95);a.download=`JanSevaCard_${(user?.name||"User").replace(/\s+/g,"_")}.jpg`;a.click()}catch{setMessage("Card image could not be generated. Please try again.")}finally{setLoading(false)}};
+  return <main className="min-h-full bg-[var(--rp-bg)] pb-safe-content text-slate-900"><div className="mx-auto max-w-3xl px-4 py-4 sm:px-6 sm:py-6"><section className="mb-4 overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm"><div className="h-1 bg-gradient-to-r from-[#FF9933] via-[#fff] to-[#138808]"/><div className="flex items-start gap-3 p-4 sm:p-5"><button onClick={()=>navigate(-1)} aria-label="Go back" className="mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-[#000080] shadow-sm"><ArrowLeft className="h-5 w-5"/></button><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-[#000080]"><ShieldCheck className="h-4 w-4"/></span><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">RPF Digital Identity</p></div><h1 className="mt-1 text-[22px] font-black text-[#000080]">Jan Seva Card</h1><p className="mt-1 text-xs leading-5 text-slate-500">Your identity and card status are loaded from the secured application record.</p></div></div></section>{message&&<div role="alert" className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">{message}</div>}<section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,.05)]"><JanSevaCardLive/></section></div><div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-safe-nav pt-3 pointer-events-none"><div className="mx-auto flex max-w-md justify-end"><button onClick={downloadJpeg} disabled={loading} className="pointer-events-auto inline-flex min-h-11 items-center gap-2 rounded-full bg-[#000080] px-5 py-3 text-[11px] font-black text-white shadow-xl disabled:opacity-60"><span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/15">{loading?<Loader2 className="h-4 w-4 animate-spin"/>:<ImageIcon className="h-4 w-4"/>}</span>{loading?"Preparing image…":"Save card image"}{!loading&&<Download className="h-4 w-4"/>}</button></div></div></main>;
 }
