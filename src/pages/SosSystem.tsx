@@ -81,9 +81,9 @@ export default function SosSystem() {
 
   const EMERGENCY_NUMBERS = [
     { labelEn: "National Emergency", labelHi: "राष्ट्रीय आपातकाल", phone: "112", icon: ShieldAlert, color: "bg-red-600 text-white" },
-    { labelEn: "Ambulance Emergency", labelHi: "एम्बुलेंस सेवा", phone: "108", icon: PhoneCall, color: "bg-[#000080] text-white" },
-    { labelEn: "Women Helpline", labelHi: "महिला हेल्पलाइन", phone: "1091", icon: PhoneCall, color: "bg-slate-800 text-white" },
-    { labelEn: "Police Emergency", labelHi: "पुलिस आपातकाल", phone: "100", icon: ShieldAlert, color: "bg-[#138808] text-white" },
+    { labelEn: "Ambulance", labelHi: "एम्बुलेंस सेवा", phone: "102", icon: PhoneCall, color: "bg-[#000080] text-white" },
+    { labelEn: "Women Helpline", labelHi: "महिला हेल्पलाइन", phone: "181", icon: PhoneCall, color: "bg-slate-800 text-white" },
+    { labelEn: "Police Helpline", labelHi: "पुलिस हेल्पलाइन", phone: "100", icon: ShieldAlert, color: "bg-[#138808] text-white" },
   ];
 
   return (
@@ -103,8 +103,8 @@ export default function SosSystem() {
         </section>
         <section className="bg-white rounded-3xl border border-red-200 p-6 text-center shadow-md space-y-4">
           <div className="relative inline-block"><div className="absolute -inset-4 rounded-full bg-red-500/20 animate-ping" /><button onClick={handleBroadcastSos} disabled={sendingAlert} className="relative w-36 h-36 rounded-full bg-gradient-to-tr from-red-600 via-rose-600 to-red-500 text-white font-black text-xl shadow-xl hover:scale-105 active:scale-95 transition-all flex flex-col items-center justify-center mx-auto border-4 border-white">{sendingAlert ? <Loader2 className="w-10 h-10 animate-spin" /> : <><ShieldAlert className="w-10 h-10 mb-1" /><span>SOS</span></>}</button></div>
-          <p className="text-xs text-slate-600 font-bold">{isHi ? "आपातस्थिति में लाल बटन दबाएं" : "Press SOS to send the emergency alert"}</p>
-          {sosSent && <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-emerald-800 text-xs font-bold flex items-center justify-center gap-2"><CheckCircle2 className="w-5 h-5 text-emerald-600" /><span>{isHi ? "SOS अलर्ट सर्वर द्वारा स्वीकार किया गया।" : "SOS alert confirmed by the server."}</span></div>}
+          <p className="text-xs text-slate-600 font-bold">{isHi ? "आपातस्थिति में लाल बटन दबाएं" : "Press SOS to record the emergency alert"}</p>
+          {sosSent && <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-emerald-800 text-xs font-bold flex items-center justify-center gap-2"><CheckCircle2 className="w-5 h-5 text-emerald-600" /><span>{isHi ? "SOS अलर्ट सर्वर में दर्ज हो गया है। आपातकालीन सेवाओं को स्वतः नहीं भेजा गया।" : "SOS alert was recorded by the server. Emergency services were not automatically dispatched."}</span></div>}
           {sosError && <div className="bg-rose-50 border border-rose-200 p-4 rounded-2xl text-rose-800 text-xs font-bold">{sosError}</div>}
         </section>
         <section className="space-y-2.5"><h3 className="text-xs font-black uppercase tracking-wider text-slate-800">{isHi ? "आपातकालीन नंबर" : "Emergency numbers"}</h3><div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">{EMERGENCY_NUMBERS.map((num) => <a key={num.phone} href={`tel:${num.phone}`} className="w-full bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex items-center justify-between gap-3 active:scale-95"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${num.color}`}><num.icon className="w-5 h-5" /></div><div><h4 className="font-black text-xs text-slate-900">{isHi ? num.labelHi : num.labelEn}</h4><p className="text-[11px] font-mono font-bold text-slate-500">{num.phone}</p></div></div><PhoneCall className="w-4 h-4 text-emerald-600" /></a>)}</div></section>
