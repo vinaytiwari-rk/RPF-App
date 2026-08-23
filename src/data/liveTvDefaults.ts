@@ -34,7 +34,6 @@ export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
   ['uploaded-25','Mechanical Engineering and Manufacturing','https://www.youtube.com/live/PriApwtX0g0','PriApwtX0g0','Education'],
   ['uploaded-26','Visual Communications, Graphic Design & Media Technology','https://www.youtube.com/live/1Pb9hz1TqGo','1Pb9hz1TqGo','Education'],
   ['uploaded-27','Architecture and Interior Design','https://www.youtube.com/live/mFSfDJJo6Mg','mFSfDJJo6Mg','Education'],
-  ['uploaded-28','Computer Science Engineering / IT','https://www.youtube.com/live/mFSfDJJo6Mg','mFSfDJJo6Mg','Education'],
   ['uploaded-29','Instrumentation Control, Biomedical and Engineering','https://www.youtube.com/live/SgGWOXHeErM','SgGWOXHeErM','Education'],
   ['uploaded-30','Bridge Courses and Impact Series','https://www.youtube.com/live/oXCdp4PHIPE','oXCdp4PHIPE','Education'],
   ['uploaded-31','Chemical Engineering, Nanotechnology & Environmental Sciences','https://www.youtube.com/live/6IkM4xJzDZQ','6IkM4xJzDZQ','Education'],
