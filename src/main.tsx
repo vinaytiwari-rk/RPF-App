@@ -5,7 +5,6 @@ import './index.css';
 import './styles/premium-reset.css';
 import { Capacitor } from '@capacitor/core';
 import axios from 'axios';
-import { CapacitorUpdater } from '@capgo/capacitor-updater';
 
 const RPF_WEB_ORIGIN = 'https://appapi.therpfoundation.org';
 const RPF_VERSION_KEY = '@rpf_web_version';
@@ -40,9 +39,8 @@ async function checkForWebUpdate() {
   }
 }
 
-// Intercept relative paths for Capacitor native builds
+// Intercept relative paths for Capacitor native builds.
 if (Capacitor.isNativePlatform()) {
-  CapacitorUpdater.notifyAppReady();
   axios.defaults.baseURL = RPF_WEB_ORIGIN;
 
   const originalFetch = window.fetch;
@@ -70,8 +68,8 @@ if (Capacitor.isNativePlatform()) {
     return originalFetch(input, init);
   };
 
-  // Keep the installed APK as a stable native shell while automatically
-  // picking up newly deployed web code from the server.
+  // The installed APK remains a stable native shell. It checks the deployed
+  // application version directly and reloads only when newer web assets exist.
   window.setTimeout(checkForWebUpdate, 1500);
   window.setInterval(checkForWebUpdate, 60_000);
   document.addEventListener('visibilitychange', () => {
