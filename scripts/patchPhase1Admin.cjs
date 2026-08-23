@@ -1,0 +1,14 @@
+const fs=require('fs');const path=require('path');
+const file=path.join(__dirname,'..','src','pages','AdminHub.tsx');let s=fs.readFileSync(file,'utf8');
+if(!s.includes('ContentGovernanceManager'))s=s.replace('import { CmsSettings } from "../components/admin/CmsSettings";','import { CmsSettings } from "../components/admin/CmsSettings";\nimport ContentGovernanceManager from "../components/admin/ContentGovernanceManager";');
+s=s.replace('{section === "content" && <Content announcements={announcements} reload={load} />}','{section === "content" && <ContentGovernanceManager />}');
+s=s.replace('user_id: `USR-${String(u.id || \'1001\')}`,','user_id: String(u.id || "—"),');
+s=s.replace('volunteer_id_no: u.registration_number || `RPF-${String(u.id || "101").slice(0, 6).toUpperCase()}`,','volunteer_id_no: u.registration_number || "—",');
+s=s.replace('password: u.password || "pass@123",','');
+s=s.replace('jan_seva_card: u.jan_seva_id || `RPF-${String(u.id || "101").slice(0, 8).toUpperCase()}`,','jan_seva_card: u.jan_seva_id || "—",');
+s=s.replace('user_id: String(v.user_id || v.id || `USR-${id}`),','user_id: String(v.user_id || v.id || "—"),');
+s=s.replace('volunteer_id_no: String(v.registration_number || v.volunteer_id || `RPF-V-${String(id).slice(0, 6).toUpperCase()}`),','volunteer_id_no: String(v.registration_number || v.volunteer_id || "—"),');
+s=s.replace('password: v.password || v.raw?.password || "vol@rpf2026",','');
+s=s.replace('jan_seva_card: v.jan_seva_id || `RPF-V-${String(v.id || "202").slice(0, 6).toUpperCase()}`,','jan_seva_card: v.jan_seva_id || "—",');
+s=s.replace('toast.success(`Removed volunteer "${name}"`);','toast.error(err?.response?.data?.error || `Failed to remove volunteer "${name}"`);');
+fs.writeFileSync(file,s);console.log('Phase 1 admin patch applied');
