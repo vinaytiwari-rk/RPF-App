@@ -1,5 +1,8 @@
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
+
+execFileSync(process.execPath, [path.resolve(__dirname, 'patchPhase1Admin.cjs')], { stdio: 'inherit' });
 
 const version = process.env.APP_VERSION || process.env.GITHUB_SHA || new Date().toISOString();
 const payload = {
