@@ -63,6 +63,3 @@ export function resolveConstituency(_pincode: string, district: string, _areas: 
   const sansads = [...new Set(matches.map(m => m.sansad_kshetra).filter(Boolean))];
   return { vidhan_sabha: '', vidhan_sabhas, sansad_kshetra: sansads.length === 1 ? sansads[0] : '' };
 }
-
-// Temporary compatibility export for legacy imports. It contains no data and is not used for resolution.
-export const MP_CONSTITUENCIES_MOCK: never[] = [];
