@@ -5,7 +5,6 @@ import {
   Camera,
   ChevronRight,
   FileText,
-  CalendarDays,
   ShieldCheck,
   Smartphone,
   Wrench,
@@ -29,7 +28,6 @@ const tools: Tool[] = [
   { title: "Document Scanner", titleHi: "डॉक्यूमेंट स्कैनर", description: "Scan and export documents as image or PDF", descriptionHi: "दस्तावेज़ स्कैन करें और इमेज या PDF में सेव करें", path: "/doc-scanner", icon: Camera, badge: "On device" },
   { title: "Notes & Reminders", titleHi: "नोट्स और रिमाइंडर", description: "Keep private notes and reminder lists on this device", descriptionHi: "निजी नोट्स और रिमाइंडर सूची इस डिवाइस पर रखें", path: "/local-planner", icon: Bell, badge: "Local" },
   { title: "Resume Builder", titleHi: "रिज़्यूमे बिल्डर", description: "Create and export your resume", descriptionHi: "अपना रिज़्यूमे बनाएं और एक्सपोर्ट करें", path: "/resume-builder", icon: FileText },
-  { title: "Calendar", titleHi: "कैलेंडर", description: "Calendar and date information", descriptionHi: "कैलेंडर और तारीख से जुड़ी जानकारी", path: "/hindu-calendar", icon: CalendarDays },
   { title: "Device Tools", titleHi: "डिवाइस टूल्स", description: "Useful device and location tools; location is used only when you choose to share it", descriptionHi: "उपयोगी डिवाइस और लोकेशन टूल्स; लोकेशन केवल आपकी अनुमति पर इस्तेमाल होगी", path: "/device-tools", icon: Smartphone, badge: "Permission first" },
 ];
 
