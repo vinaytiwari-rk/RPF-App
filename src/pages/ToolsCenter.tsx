@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Bell,
   Calculator,
   Camera,
   ChevronRight,
@@ -41,6 +42,15 @@ const tools: Tool[] = [
     path: "/doc-scanner",
     icon: Camera,
     badge: "On device",
+  },
+  {
+    title: "Notes & Reminders",
+    titleHi: "नोट्स और रिमाइंडर",
+    description: "Keep private notes and reminder lists on this device",
+    descriptionHi: "निजी नोट्स और रिमाइंडर सूची इस डिवाइस पर रखें",
+    path: "/local-planner",
+    icon: Bell,
+    badge: "Local",
   },
   {
     title: "Resume Builder",
