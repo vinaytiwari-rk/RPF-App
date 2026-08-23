@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import './styles/premium-reset.css';
+import './styles/phase2-app-shell.css';
 import { Capacitor } from '@capacitor/core';
 import axios from 'axios';
 
