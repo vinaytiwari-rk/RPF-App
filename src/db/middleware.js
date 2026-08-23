@@ -70,7 +70,34 @@ export const requireAdmin = (req, res, next) => {
   if (normalizeRole(req.user.role) !== CANONICAL_ADMIN_ROLE) {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
+
   req.user.role = CANONICAL_ADMIN_ROLE;
+
+  // Phase 1 governance: every successful or failed admin mutation gets a
+  // persistent audit event. GET/HEAD/OPTIONS are intentionally excluded so
+  // normal browsing does not flood the audit trail, and request bodies are
+  // never logged because they may contain personal or sensitive data.
+  const method = String(req.method || "").toUpperCase();
+  if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
+    let recorded = false;
+    res.once("finish", () => {
+      if (recorded) return;
+      recorded = true;
+      auditEvent({
+        userId: req.user?.id || req.user?.userId || null,
+        action: `ADMIN_${method}`,
+        resource: "admin_request",
+        resourceId: `${method} ${req.originalUrl || req.path || ""}`,
+        req,
+        metadata: {
+          method,
+          path: req.originalUrl || req.path || null,
+          statusCode: res.statusCode,
+        },
+      });
+    });
+  }
+
   next();
 };
 
@@ -96,7 +123,7 @@ export const auditEvent = async ({
         (actor_user_id, actor_role, action, entity_type, entity_id, request_id, details)
        VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
       [
-        userId,
+        userId || "unknown",
         normalizeRole(req?.user?.role) || "system",
         action,
         resource,
