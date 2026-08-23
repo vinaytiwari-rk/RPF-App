@@ -5,6 +5,21 @@ import axios from 'axios';
 let acGeoJsonData: any = null;
 let acGeoJsonLoadAttempted = false;
 
+// Compatibility exports for routes that prefer a local cache. They intentionally
+// start empty so the application never invents constituency data when no verified
+// dataset has been loaded.
+export const PINCODE_CONSTITUENCY_MAP: Record<string, {
+  vidhan_sabha: string;
+  vidhan_sabhas: string[];
+  sansad_kshetra: string;
+}> = {};
+
+export const MP_CONSTITUENCIES_MOCK: {
+  district: string;
+  vidhan_sabha: string;
+  sansad_kshetra: string;
+}[] = [];
+
 function findConstituenciesByDistrict(district: string, state?: string) {
   const geoJson = loadACGeoJson();
   if (!geoJson || !Array.isArray(geoJson.features)) return null;
