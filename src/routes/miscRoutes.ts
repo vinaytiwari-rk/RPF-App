@@ -63,6 +63,51 @@ router.post('/api/notifications/:id/read', authenticateToken, async (req, res) =
   }
 });
 
+// SOS is considered successful only after this authenticated server endpoint
+// has durably recorded the alert. Recording an alert does NOT claim that
+// police, ambulance, or emergency services have been dispatched.
+router.post('/api/public/sos-alert', authenticateToken, async (req, res) => {
+  const userId = String((req as any).user?.id || '').trim();
+  if (!userId) return res.status(401).json({ success: false, error: 'Authenticated user is required' });
+
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS sos_alerts (
+        id UUID PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        user_name TEXT,
+        user_phone TEXT,
+        location TEXT,
+        latitude DOUBLE PRECISION,
+        longitude DOUBLE PRECISION,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    const crypto = await import('crypto');
+    const id = crypto.randomUUID();
+    const userName = String((req as any).user?.name || req.body?.userName || 'Citizen').trim();
+    const userPhone = String((req as any).user?.phone || req.body?.userPhone || '').trim();
+    const location = String(req.body?.location || 'Location unavailable').trim();
+    const lat = Number.isFinite(Number(req.body?.lat)) ? Number(req.body.lat) : null;
+    const lon = Number.isFinite(Number(req.body?.lon)) ? Number(req.body.lon) : null;
+
+    await pool.query(`
+      INSERT INTO sos_alerts (id, user_id, user_name, user_phone, location, latitude, longitude)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `, [id, userId, userName, userPhone, location, lat, lon]);
+
+    res.status(201).json({
+      success: true,
+      alertId: id,
+      message: 'SOS alert recorded by the RP Foundation server. Emergency services were not automatically dispatched.'
+    });
+  } catch (error: any) {
+    console.error('SOS alert recording error:', error);
+    res.status(500).json({ success: false, error: 'SOS alert could not be confirmed by the server' });
+  }
+});
+
 router.get('/api/testimonials', async (_req, res) => {
   try {
     const result = await pool.query('SELECT * FROM settings WHERE id = $1', ['cms_data']);
