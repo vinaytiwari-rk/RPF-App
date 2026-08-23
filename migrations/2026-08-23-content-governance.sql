@@ -1,6 +1,9 @@
 -- Content Governance: campaigns + editable/publish-controlled metrics
 -- Rule: Draft content and metrics are never public until an admin publishes them.
 
+-- UUID defaults in this migration require pgcrypto.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 DO $$
 BEGIN
   IF to_regclass('public.campaigns') IS NULL THEN
