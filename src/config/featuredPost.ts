@@ -1,22 +1,9 @@
-// ==========================================
-// FEATURED INSTAGRAM POST CONFIGURATION
-// ==========================================
-//
-// Jab bhi aapko nayi Reel ya Post Home screen par lagani ho, 
-// aapko sirf neeche diye gaye link ko change karna hai. 
-// Kisi developer ya CMS ki zaroorat nahi hai!
-//
-// Example: "https://www.instagram.com/reel/XYZ12345/"
+// Social media discovery is intentionally source-driven.
+// Do not place demo posts, fabricated engagement counts, or arbitrary static media here.
 
-export const FEATURED_INSTAGRAM_REEL = "https://www.instagram.com/p/DcTxtFGMvfj/";
+export const INSTAGRAM_DATA_SOURCE = '/api/social?action=instagram';
+export const YOUTUBE_DATA_SOURCE = '/api/social?action=youtube';
 
-// ==========================================
-// LIVE INSTAGRAM FEED (Elfsight Widget)
-// ==========================================
-// Elfsight.com par account banakar Instagram feed banayein.
-// Wahan se milne wali Widget ID ko yahan paste karein.
-// Example: "1234abcd-5678-efgh-9012-ijklmnop3456"
-
-export const ELFSIGHT_INSTAGRAM_WIDGET_ID = "";
-
-export const INSTAGRAM_DATA_SOURCE = "https://rpf-app-dusky.vercel.app/api/social?action=instagram";
+// Optional spotlight content must come from a verified published source.
+// Empty means the UI should not invent a featured post.
+export const FEATURED_INSTAGRAM_REEL = '';
