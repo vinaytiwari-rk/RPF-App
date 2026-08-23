@@ -8,19 +8,34 @@
   --rp-primary: #173b8f;
   --rp-primary-strong: #102d70;
   --rp-accent: #c99a2e;
+  --rp-saffron: #ff9933;
+  --rp-green: #138808;
   --rp-danger: #b42318;
   --rp-success: #137333;
   --rp-radius-sm: 10px;
   --rp-radius-md: 14px;
   --rp-radius-lg: 20px;
+  --rp-page-max: 768px;
+  --rp-tap-target: 44px;
   --rp-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
   --rp-shadow-md: 0 8px 24px rgba(16, 24, 40, 0.07);
   --rp-shadow-lg: 0 18px 45px rgba(16, 24, 40, 0.09);
 }
 
+* { -webkit-tap-highlight-color: transparent; }
+html, body { background: var(--rp-bg); color: var(--rp-text); }
+button, a, input, select, textarea { touch-action: manipulation; }
+button, a { min-height: var(--rp-tap-target); }
+
 .rp-page {
   color: var(--rp-text);
   background: var(--rp-bg);
+}
+
+.rp-page-shell {
+  width: 100%;
+  max-width: var(--rp-page-max);
+  margin-inline: auto;
 }
 
 .rp-surface {
@@ -49,7 +64,7 @@
 }
 
 .rp-button-primary {
-  min-height: 44px;
+  min-height: var(--rp-tap-target);
   border-radius: var(--rp-radius-sm);
   background: var(--rp-primary);
   color: #fff;
@@ -63,18 +78,17 @@
   box-shadow: var(--rp-shadow-sm);
 }
 
-.rp-button-primary:active {
-  transform: translateY(1px);
-}
+.rp-button-primary:active { transform: translateY(1px); }
 
-.rp-focus:focus-visible {
+.rp-focus:focus-visible, :focus-visible {
   outline: 3px solid rgba(23, 59, 143, 0.25);
   outline-offset: 2px;
 }
 
 .rp-icon-button {
-  width: 44px;
-  height: 44px;
+  width: var(--rp-tap-target);
+  height: var(--rp-tap-target);
+  min-height: var(--rp-tap-target);
   display: inline-flex;
   align-items: center;
   justify-content: center;
