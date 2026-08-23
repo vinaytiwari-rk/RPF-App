@@ -1,290 +1,304 @@
-# RPF Seva App — Revised 10-Phase Master Plan
+# Samahit — 17-Phase Master Upgrade Plan
 
-Date: 2026-08-16
-Status: PLANNING RESET — 10 PHASES
+Date: 2026-08-23
+Status: REVISED MASTER PLAN
 
-## Product Goal
+## Product Direction
 
-Build **RPF Seva App** as a premium, multipurpose, daily-use application for citizens and volunteers, while keeping routine features as local-first and minimizing unnecessary admin/backend dependence.
+Upgrade the existing **Samahit / RPF App** into a mature, India-scale service and seva platform.
 
-The product must feel complete, reliable and useful even when the backend is unavailable. Backend/database remain authoritative wherever records, identity, approvals or organizational data genuinely require them.
+The product is **not a UMANG clone**. We may closely adopt proven interaction patterns such as service discovery, search, category navigation, cards, bottom navigation, status tracking and information hierarchy, while retaining Samahit’s own identity and capabilities.
 
-## Non-negotiable engineering scope
+Top-level service model:
 
-Every phase may require coordinated work across:
-- Frontend / React UI and UX
-- Backend / Node + Express APIs
-- PostgreSQL database / migrations / data integrity
-- Admin panel and CMS
-- Android/iOS capability adapters
-- Deployment and runtime verification
+- **Government services** — official, verified, external or integrated public services.
+- **RPF Foundation umbrella** — RPF initiatives plus relevant People’s Group capabilities, without presenting People’s Group as a separate top-level ecosystem.
 
-A screen, route or API alone is never considered a completed feature.
+Government-first priority remains category-specific:
 
-## Current Audit Findings — Baseline
+- Volunteer: RPF
+- Blood Donation: Government → RPF
+- Health: Government → RPF
+- Women & Children: Government
+- Senior Citizens: Government
+- Education: Government, with relevant RPF umbrella capabilities where approved
+- Public Grievance: Government → RPF
+- Employment: Government + approved private opportunities
+- Disaster Support: Government
+- Environment: Government → RPF
+- Community Activities: HOLD until purpose is defined
+- Jan Seva Card: RPF
+- Foundation Campaigns/Initiatives: RPF
 
-The existing Phase 0 matrix already identifies a substantial number of generic CMS placeholders, partial workflows and backend-dependent services. In particular, most of the service catalogue currently routes through generic `/services/:id` handling and must not be counted as implemented merely because a card/route exists. fileciteturn248file0L2-L2
+## Non-Negotiable Product Rules
 
-The current frontend has a broad service catalogue, but Explore still performs an external web search for every non-empty search query, creating unnecessary backend/external dependency. This is explicitly identified as an architectural concern in the existing audit. fileciteturn251file0L2-L2
+1. No fake, mock or demo data presented as real.
+2. No hard-coded public metrics, campaigns, drives, initiatives or success claims.
+3. Every public metric must have a real source and Admin control.
+4. Public content follows governance: **Draft → Review/Approval → Published → Archived/Unpublished**.
+5. Deleted or disabled data must not reappear through hidden fallback values.
+6. External services must be official/verified and controlled through a service registry.
+7. No meaningless gamification: no points, badges, levels or leaderboard unless a future real benefit model is explicitly approved.
+8. Task recognition is based on verified completion, seva history and certificates where applicable.
+9. PDF, image and Excel support are core infrastructure, not one-off features.
+10. Existing working functionality should be preserved and upgraded rather than randomly rebuilt.
+11. Web and Android APK must remain functionally aligned.
+12. Capgo and Codemagic are to be removed from the project/deployment model.
 
-The backend is already substantial: authentication, volunteer, certificate, community, donation, CMS, upload, government and admin route groups exist, with PostgreSQL initialization and automatic schema alteration in `server.ts`. This makes backend/database repair a first-class workstream rather than a later add-on. fileciteturn253file0L2-L2
+---
 
-The Admin Hub already contains Overview, People, Content, Requests, Blood Network, Services and System areas, but it is currently a functional control surface rather than a fully polished, audited administration platform. fileciteturn255file0L2-L2
+# Phase 0 — Baseline Audit & Truth Cleanup
 
-## Phase 1 — Full Audit, Bug Inventory & Stabilization
+- Complete Web-vs-APK parity audit.
+- Identify fake/demo/mock/unused/trash features, files, services, numbers and links.
+- Remove or replace fake social content, fake metrics, fake IDs and unsupported claims.
+- Audit dead buttons, blank routes, broken redirects and generic placeholder pages.
+- Remove obsolete Capgo/Codemagic dependencies and workflows.
+- Preserve an audit matrix and classify every finding as Remove, Replace, Repair or Retain.
 
-**Goal:** Stop feature drift and establish one trusted baseline.
+**Exit:** trusted baseline with known findings documented.
 
-- Audit every frontend route/screen/CTA/form/modal.
-- Audit every backend route and response contract.
-- Audit PostgreSQL tables, migrations, indexes, relationships and duplicate/legacy columns.
-- Audit Admin workflows and permissions.
-- Audit authentication/session/logout behavior.
-- Audit uploads, local storage, device permissions and external URLs.
-- Identify blank screens, broken routes, dead buttons, fake/demo data, placeholder services and incorrect redirects.
-- Create one master defect matrix with severity and owner phase.
-- Fix all P0/P1 blockers before new feature expansion.
+# Phase 1 — Data Governance & Admin Publication Control
 
-**Exit:** no known blocking defect in the core user journey; `npm run lint` and `npm run build` pass.
+- Dynamic campaigns, initiatives, banners, announcements and metrics.
+- Add/Edit/Delete/Publish/Unpublish controls.
+- Draft → Review → Publish lifecycle.
+- Scheduled start/end and archival where relevant.
+- Last updated, updated by and audit trail.
+- Public APIs expose only approved/published records.
 
-## Phase 2 — Premium Design System + Core App Shell
+**Exit:** no public organizational content depends on frontend hard-coding.
 
-**Goal:** Make the entire application look and behave like one premium product.
+# Phase 2 — Core Data Model & Migration Discipline
 
-- Finalize **RPF Seva App** identity.
-- Correct identity: **Seva • Samarpan • Sankalp / सेवा, समर्पण एंड संकल्प**.
-- Tricolour as the visual anchor, with controlled supporting colours including saffron, green, navy, red, yellow, purple, sky blue, pink, brown and black where semantically appropriate.
-- Unified typography, spacing, cards, gradients, icons and buttons.
-- Application-wide animation: page transitions, scroll reveal, card entrance, icon motion, flip interactions and micro-interactions.
-- Respect reduced-motion preferences.
-- Complete Home, Explore, Activity, Impact and Me with no blank/dead destination.
-- Responsive Android/iPhone/web layouts.
+- PostgreSQL schema audit.
+- Proper migrations instead of uncontrolled schema drift.
+- Constraints, indexes, foreign keys and transaction safety.
+- Authoritative IDs for volunteers, applications, certificates and governed records.
+- Safe import/export and duplicate prevention.
 
-**Exit:** visual consistency audit passes across all primary screens.
+**Exit:** database is the authoritative source for organizational workflows.
 
-## Phase 3 — Daily-Use Local-First Utility Hub
+# Phase 3 — Samahit Design System
 
-**Goal:** Make the app useful every day without requiring admin/backend for routine utilities.
+- Upgrade existing UI rather than replacing the application blindly.
+- UMANG-inspired maturity: hierarchy, spacing, cards, search, category discovery and clear actions.
+- Samahit-specific branding, icons, typography and assets.
+- Unified responsive system for web and Android.
+- Consistent empty, loading, error and unavailable states.
 
-Prioritize local/private features such as:
-- Document Scanner + PDF/image export
-- GPS/location toolkit
-- Fuel tracker
-- Medication/reminder tools
-- Private health/vitals logging without inventing sensor values
-- Period tracker
-- Child/personal tracker where appropriate
-- Resume Builder
-- Calendar and offline-friendly tools
-- Notes/bookmarks/basic personal utilities as justified by the audit
+**Exit:** reusable design system and primary screens share one visual language.
 
-Use local storage/IndexedDB/device APIs first. Backend is optional unless synchronization is genuinely required.
+# Phase 4 — New Dynamic Home Experience
 
-**Exit:** each utility works offline/local where designed, with clear permission/error/empty states.
+- Search-first entry.
+- Admin-published banners/notices.
+- Quick Services.
+- Recently Used.
+- My Applications/Documents where applicable.
+- Useful tools.
+- Essential verified helplines.
+- Government-first discovery.
+- RPF services and initiatives where applicable.
+- No static fake campaign or metric fallback.
 
-## Phase 4 — Identity, Volunteer, Jan Seva Card & Personal Space
+**Exit:** Home is fully data-driven and useful without fabricated content.
 
-**Goal:** Make Me/Profile a complete digital identity hub.
+# Phase 5 — Government + RPF Service Registry
 
-- Citizen/Volunteer authentication.
-- Volunteer registration and authoritative registration number.
-- Volunteer Since from real data.
-- Profile editing.
-- Local profile photo with explicit privacy boundary.
-- Jan Seva Card generated from volunteer data + required Aadhaar input.
-- Digital flip card.
-- QR identity.
-- PDF/JPEG export.
+Each service record should support:
+
+- Name and category
+- Provider
+- Provider type
+- Priority/order
+- Coverage
+- Description/eligibility
+- Official/internal URL
+- Contact/email/hours where verified
+- Verification status
+- Last verified
+- Active/inactive state
+
+- Government services use verified official sources.
+- RPF services use real internal workflows or approved RPF destinations.
+- Private employment entries require an approved provider policy.
+- No promotion of other NGOs.
+
+**Exit:** services are registry-driven, searchable and controllable.
+
+# Phase 6 — Service Browser & External Link Safety
+
+- Controlled in-app/browser experience for approved external services.
+- Domain allowlists and URL validation.
+- Provider/source disclosure.
+- Dead-link detection and disable workflow.
+- Graceful external-opening fallback where embedding is unsupported.
+
+**Exit:** external dependency is managed rather than treated as random links.
+
+# Phase 7 — Identity, Volunteer & Jan Seva Card
+
+- Real volunteer registration persistence.
+- Authoritative Volunteer Registration ID.
+- Application status and verification workflow.
+- Profile and document management.
+- Jan Seva Card as an RPF service.
+- QR/verification where approved.
+- Session persistence until explicit logout, subject to security rules.
+
+**Exit:** volunteer identity works end-to-end from registration to verified profile/card.
+
+# Phase 8 — Volunteer Task Management & Seva History
+
+Lifecycle:
+
+Create → Assign → Accept/Decline → In Progress → Update → Submit → Review → Complete/Returned/Cancelled.
+
+- Task description, due date, location and coordinator.
+- Evidence/photos/documents where required.
+- Volunteer progress updates.
+- Admin/coordinator review.
+- Real task history and service history.
+- No points, badges, levels or leaderboard.
+
+**Exit:** task tracking is operational, auditable and useful.
+
+# Phase 9 — Certificates & Verification
+
+- Task/campaign/service certificates where appropriate.
+- Admin-approved issue workflow.
+- Certificate number and authoritative database record.
+- Volunteer/task/date details.
+- PDF generation and download.
+- Image rendition where needed.
+- QR/verification status where approved.
 - My Certificates.
-- Settings and preferences.
-- Logout/session security.
-- No unfinished options or redirects.
 
-**Exit:** complete citizen/volunteer profile journey works end-to-end.
+**Exit:** certificates are real records, not decorative frontend downloads.
 
-## Phase 5 — RPF Services & Community Platform
+# Phase 10 — Universal File & Document Infrastructure
 
-**Goal:** Turn the service catalogue into real useful workflows instead of generic CMS pages.
+Support common governed workflows for:
 
-Core service groups:
-- Women
-- Children
-- Senior Citizens
-- Animal Welfare
-- Health Care
-- Community & Culture/Spirituality
-- Youth
-- Blood Donation / Blood Network
-- Public Grievance
-- Help to Poor
-- Employment / Jobs
-- Education / Scholarships
-- Environment
-- Disaster Management
-- Farmer Support
-- Government Schemes
-- Skills Training
-- Donations/Campaigns
-- Volunteer/Seva participation
+- PDF upload/view/download/share
+- Image upload/preview/compression/storage
+- Secure document attachments
+- File type/size validation
+- Ownership/access control
+- Audit records
 
-For every service choose exactly one implementation model:
-1. Local-first feature
-2. Real RPF backend workflow
-3. Controlled official external service
-4. Explicitly unavailable/graceful state
+Use one consistent file-management layer rather than separate ad-hoc upload logic.
 
-No generic “Active Service” claim when no real workflow exists.
+**Exit:** file handling is reusable across volunteers, tasks, campaigns, grievances and reports.
 
-## Phase 6 — Home, Explore, Activity & Impact Experience
+# Phase 11 — Excel Import & Export Operations
 
-**Goal:** Create the premium public-facing experience and meaningful engagement loop.
+Excel upload flow:
 
-### Home
-- Location + Weather + AQI
-- Quote of the Day with reliable source/parser/cache
-- Real photographic carousel with neutral/authorized imagery only
-- Founder message preview + full speech
-- Home-only engaging daily feature
-- Official RPF social links
-- Jan Seva Card access where appropriate
+Upload → Template/Column Validation → Preview → Duplicate/Error Detection → Confirm → Import → Audit.
 
-### Explore
-- Real service discovery
-- Categories/search/filter
-- No unnecessary external web search on every query
-- Clear availability state
+- Downloadable templates.
+- Row-level validation.
+- Partial/error reporting without silent corruption.
+- Error workbook download where useful.
+- Controlled bulk import for approved master data and operational records.
 
-### Activity
-- Real user activity/events/notifications only
-- No empty-looking placeholder sections
+Exports may include volunteers, tasks, certificates, campaigns, services, metrics and other approved reports.
 
-### Impact
-- Real organization/community metrics only
-- Avoid duplicate impact-number presentation across Home and Impact unless each has a distinct purpose.
+**Exit:** admins can perform routine bulk operations without direct database editing.
 
-## Phase 7 — Backend + PostgreSQL + Admin Repair
+# Phase 12 — RPF Campaigns, Initiatives & Real Impact
 
-**Goal:** Make the backend, database and admin panel dependable and easier to operate.
+- Campaign/initiative draft, review and publish workflow.
+- Real dates, locations, descriptions and media.
+- Real metrics with editable source-backed records.
+- Add/Edit/Delete controls.
+- Archive completed campaigns.
+- No fictional Blood Donation Drive or other campaign placeholders.
 
-### Backend
-- API contract normalization
-- Authentication/authorization
-- Validation
-- Rate limiting
-- Error handling
-- Pagination/filtering
-- Upload restrictions
-- Audit logging
-- Idempotency/duplicate prevention where required
+**Exit:** public RPF activity is administratively controlled and truthful.
 
-### PostgreSQL
-- Schema audit
-- Normalize duplicate/legacy fields where safe
-- Proper indexes and constraints
-- Foreign keys/relationships
-- Migration discipline
-- Transaction safety
-- Data consistency between users/volunteers/cards/certificates/community records
+# Phase 13 — RPF Social & Media Experience
 
-### Admin
-- Repair all existing Admin Hub modules
-- Dashboard/overview
-- Users
-- Volunteers
-- Jan Seva Card approvals/data
-- Certificates
-- Grievances
-- Blood Network
-- Donations/campaigns
-- Services/CMS
-- Announcements
-- Settings/system health
-- Search/filter/export where useful
-- Role-based access
-- Safe destructive actions and audit trail
+- Official RPF Instagram account integration, with emphasis on Reels.
+- Official RPF YouTube channel/videos.
+- Verified social links.
+- Safe embed/API/feed strategy with graceful failure states.
+- No fake/static social posts masquerading as live content.
+- Admin control over featured media where appropriate.
 
-**Exit:** normal operations can be performed by admin without developer/database manual intervention for routine tasks.
+**Exit:** social content is real, current and optional rather than a point of failure.
 
-## Phase 8 — Integrations, Notifications, Privacy & Security
+# Phase 14 — Admin Command Centre & Auditability
 
-**Goal:** Connect the app safely without making every feature dependent on external systems.
+Admin controls for:
 
-- Weather/AQI/location adapters
-- Quote feed
-- News/social feeds
-- Email/SMS/push strategy according to approved requirements
-- Notification state and deep links
-- External URL allowlists
-- CMS sanitization
-- Secret/credential rotation checklist
-- Secure session/token handling
-- Privacy controls
-- Local-only profile media boundary
-- Accessibility and permission explanations
+- Content and publication
+- Metrics
+- Services/service registry
+- Volunteers and applications
+- Tasks and certificates
+- Campaigns and initiatives
+- Files/documents
+- Excel import/export
+- Helplines and directories
+- Social/media settings
+- Roles/permissions
 
-External services must fail gracefully and must never make the whole app appear broken.
+Maintain meaningful audit history for sensitive actions.
 
-## Phase 9 — Native Android/iOS + Performance + QA
+**Exit:** routine operations do not require developer intervention.
 
-**Goal:** Convert the strong web/PWA foundation into a reliable mobile application.
+# Phase 15 — Search, Discovery, Documents & Notifications
 
-- Capacitor Android/iOS readiness
-- Camera/microphone/location/files/share/vibration adapters
-- Native permission flows
-- Safe areas and lifecycle handling
-- Offline behavior
-- Image/media optimization
-- Lazy loading
-- Request cancellation/caching
-- Animation/memory checks
-- Accessibility audit
-- Real Android device verification
-- Real iPhone verification
-- Regression tests for all major workflows
+- Unified service/content search.
+- Category and location-aware discovery where real data supports it.
+- Recently used services based on real activity.
+- My Applications.
+- My Documents/Certificates.
+- Real notifications and status updates only.
+- No fabricated recommendation or activity feed.
 
-## Phase 10 — Release Certification & Final Product Audit
+**Exit:** users can reliably find, revisit and track what matters.
 
-**Goal:** Ship only after the entire product passes one final audit.
+# Phase 16 — Security, Web/APK Parity & Production Hardening
 
-Full journey:
+- Authentication and authorization audit.
+- Session persistence/logout correctness.
+- Input validation and rate limiting.
+- Secure file access.
+- Secret/configuration review.
+- External URL allowlists.
+- Android lifecycle, permissions, files, camera/location where applicable.
+- Web-vs-APK regression matrix.
+- Performance and accessibility checks.
 
-**Splash → Onboarding → Login/Guest → Home → Explore → Service → Activity → Impact → Me → Settings → Jan Seva Card → Logout**
+**Exit:** core workflows behave consistently across supported platforms.
 
-Verify:
-- No blank screen
-- No dead button
-- No unfinished route
-- No fake/demo data presented as real
-- No unexpected redirect
-- No unauthorized external organization imagery
-- All core APIs work
-- Database integrity passes
-- Admin workflows work
-- Local utilities work offline where promised
-- Permissions behave correctly
-- Android/iOS behavior is verified
-- `npm run lint` passes
-- `npm run build` passes
-- Production deployment succeeds
-- Post-deployment smoke test passes
+# Phase 17 — Release Certification & Continuous Audit
 
-Create a final known-issues register and post-launch backlog.
+Before release verify:
 
-## Product Principles
+- No blank screen or dead CTA in core journeys.
+- No fake/demo data presented as real.
+- No hard-coded public metric/campaign fallback.
+- Publication controls work.
+- Volunteer registration ID is authoritative.
+- Task lifecycle works end-to-end.
+- Certificates/PDF/image workflows work.
+- Excel import/export works.
+- External links and service browser work safely.
+- Instagram/YouTube integrations degrade gracefully.
+- Admin controls and audit trails work.
+- Web and APK parity passes.
+- Build/deployment succeeds without Capgo/Codemagic.
+- Production smoke test passes.
 
-1. **Multipurpose, not cluttered.** Every feature must earn its place through daily usefulness or clear RPF mission value.
-2. **Local-first by default.** Do not create a backend endpoint when the device can safely handle the task locally.
-3. **Backend authoritative for organizational data.** Volunteer identity, approvals, cards, certificates, donations, grievances and community records remain server/database-backed.
-4. **Admin-light operation.** Routine user actions should not require admin intervention.
-5. **No fake completeness.** A card/route/API does not equal a feature.
-6. **No dead destinations.** Every interaction either completes in place or opens a real, complete destination.
-7. **Premium but practical.** Animation and visual effects must improve comprehension, not slow the app.
-8. **Real data only.** Never invent health readings, impact numbers, volunteer status or organizational metrics.
-9. **Privacy by design.** Local-only data stays local unless the user explicitly needs synchronization.
-10. **Reopen freely.** A later audit may send work back to an earlier phase; phase numbering is not the goal.
+Maintain a post-release issue register and continue audit-driven upgrades.
 
-## Execution Order
+## Execution Rule
 
-**Audit → Stabilize → Design System → Daily Utilities → Identity → Services → Experience → Backend/DB/Admin → Integrations/Security → Native/QA → Release.**
+**Audit → Govern Data → Stabilize Data Model → Upgrade Design → Build Dynamic Home → Registry/Services → Identity → Volunteer Operations → Documents/Excel → Campaigns/Social → Admin → Discovery → Hardening → Release.**
 
-No new feature sprint should begin while a P0/P1 blocker from the current phase remains unresolved.
+A phase is not complete merely because a screen exists. Completion requires database/API/admin/UI integration, error states and appropriate verification.
