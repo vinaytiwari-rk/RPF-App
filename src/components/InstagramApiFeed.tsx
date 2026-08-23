@@ -3,10 +3,15 @@ import { Instagram, ExternalLink } from 'lucide-react';
 import { openExternalLink } from '../utils/browser';
 import { useNavigate } from 'react-router-dom';
 
+type InstagramApiFeedProps = {
+  sourceUrl?: string;
+};
+
 const OFFICIAL_INSTAGRAM_URL = 'https://www.instagram.com/rpfoundationofficial/';
 
-export default function InstagramApiFeed() {
+export default function InstagramApiFeed({ sourceUrl }: InstagramApiFeedProps) {
   const navigate = useNavigate();
+  const destination = sourceUrl || OFFICIAL_INSTAGRAM_URL;
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -16,12 +21,10 @@ export default function InstagramApiFeed() {
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="font-bold text-slate-900">RP Foundation on Instagram</h3>
-          <p className="mt-1 text-sm text-slate-600">
-            Follow official updates and reels from RP Foundation.
-          </p>
+          <p className="mt-1 text-sm text-slate-600">Follow official updates and reels from RP Foundation.</p>
           <button
             type="button"
-            onClick={() => openExternalLink(OFFICIAL_INSTAGRAM_URL, navigate, 'RP Foundation Instagram')}
+            onClick={() => openExternalLink(destination, navigate, 'RP Foundation Instagram')}
             className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"
           >
             Open Official Instagram
