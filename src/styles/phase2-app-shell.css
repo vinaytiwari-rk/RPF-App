@@ -1,0 +1,49 @@
+/* Phase 2: shared mobile app shell */
+:root {
+  --rp-shell-bg: #f7f8fa;
+  --rp-shell-surface: rgba(255,255,255,.96);
+  --rp-shell-border: rgba(17,24,39,.08);
+  --rp-shell-text: #15171a;
+  --rp-shell-muted: #667085;
+  --rp-shell-primary: #173b8f;
+  --rp-shell-accent: #c99a2e;
+}
+
+/* Give the existing persistent shell one neutral, service-first visual language. */
+header.sticky {
+  background: var(--rp-shell-surface) !important;
+  border-color: var(--rp-shell-border) !important;
+  box-shadow: 0 1px 0 rgba(16,24,40,.03);
+}
+
+main > .mx-auto {
+  min-width: 0;
+}
+
+nav.fixed.inset-x-4 {
+  border-color: var(--rp-shell-border) !important;
+  background: rgba(255,255,255,.97) !important;
+  box-shadow: 0 12px 34px rgba(16,24,40,.12) !important;
+}
+
+@media (max-width: 640px) {
+  header.sticky > div {
+    min-height: 58px;
+  }
+  nav.fixed.inset-x-4 {
+    left: 10px;
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  nav.fixed button {
+    min-width: 56px;
+    min-height: 48px;
+  }
+}
+
+@media (prefers-contrast: more) {
+  header.sticky,
+  nav.fixed.inset-x-4 {
+    border-width: 2px !important;
+  }
+}
