@@ -59,7 +59,7 @@ router.post('/api/notifications/:id/read', authenticateToken, async (req, res) =
     res.json({ success: true });
   } catch (err: any) {
     console.error('Notification read API error:', err);
-    res.status(500).json({ success: false, error: 'Unable to update notification' });
+    res.status(500).json({ success: false, error: 'Unable to update notifications' });
   }
 });
 
@@ -141,17 +141,6 @@ router.get('/api/stats', async (_req, res) => {
   } catch (error: any) {
     console.error('Stats API error:', error);
     res.status(500).json({ success: false, error: 'Unable to load verified statistics' });
-  }
-});
-
-// Jobs must come from the real jobs database. Never seed fabricated listings automatically.
-router.get('/api/jobs', async (_req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM job_listings ORDER BY posted_at DESC');
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error fetching jobs:', err);
-    res.status(500).json({ error: 'Failed to fetch jobs' });
   }
 });
 
