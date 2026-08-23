@@ -51,16 +51,17 @@ jobs:
         with:
           name: deployment-dist
           path: dist
-      - name: Diagnose FTP endpoint
+      - name: Verify FTP endpoint
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_PORT: ${{ secrets.FTP_PORT }}
         run: |
           PORT="${FTP_PORT:-21}"
+          test -n "$FTP_HOST"
           echo "Testing TCP connectivity to configured FTP endpoint on port ${PORT}"
-          timeout 15 bash -c "</dev/tcp/$FTP_HOST/$PORT" && echo "TCP endpoint reachable" || echo "TCP endpoint unavailable from this GitHub runner"
+          timeout 15 bash -c "</dev/tcp/$FTP_HOST/$PORT"
+          echo "TCP endpoint reachable"
       - name: Delete maps-master from cPanel
-        continue-on-error: true
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_PORT: ${{ secrets.FTP_PORT }}
