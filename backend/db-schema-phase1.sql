@@ -1,7 +1,8 @@
 -- ============================================================================
 -- PHASE 1: DATABASE SCHEMA - SECURE AUTHENTICATION FOUNDATION
 -- ============================================================================
--- Production schema only. No test/demo accounts or default passwords are seeded.
+-- Production schema only. No test/demo accounts, default passwords or
+-- gamification fields are seeded.
 -- ============================================================================
 
 DROP TABLE IF EXISTS audit_logs CASCADE;
@@ -28,8 +29,6 @@ CREATE TABLE users (
   is_volunteer BOOLEAN DEFAULT false,
   is_donor BOOLEAN DEFAULT false,
   onboarding_completed BOOLEAN DEFAULT false,
-  points INTEGER DEFAULT 0,
-  badges INTEGER DEFAULT 0,
   jan_seva_card_status VARCHAR(50) DEFAULT 'none'
     CHECK (jan_seva_card_status IN ('none', 'pending', 'approved', 'rejected')),
   jan_seva_card_no VARCHAR(50)
@@ -96,9 +95,3 @@ EXECUTE FUNCTION update_users_updated_at();
 -- IMPORTANT: No development/test users are inserted here.
 -- Production/admin provisioning must be performed through the controlled
 -- provisioning process with a securely supplied password and audit trail.
-
--- Verification queries (manual):
--- SELECT column_name, data_type, is_nullable FROM information_schema.columns
--- WHERE table_name = 'users' ORDER BY ordinal_position;
--- SELECT indexname, indexdef FROM pg_indexes
--- WHERE tablename IN ('users', 'sessions', 'audit_logs');
