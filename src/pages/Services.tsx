@@ -132,8 +132,18 @@ export default function Services() {
         ? svc.route.trim()
         : "";
     const target = configuredTarget || routeFor(svc.id);
-    const isWebsite = /^https?:\/\//i.test(target);
     const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;
+
+    const getCardStyle = (catId: string, idx: number) => {
+      const pastels = [
+        "bg-[#FFF9E6] border-amber-200/80 text-amber-900 hover:border-amber-400",
+        "bg-[#FFEEEE] border-rose-200/80 text-rose-900 hover:border-rose-400",
+        "bg-[#EAF8EE] border-emerald-200/80 text-emerald-900 hover:border-emerald-400",
+        "bg-[#F3E8FF] border-purple-200/80 text-purple-900 hover:border-purple-400",
+        "bg-[#FFF2E5] border-orange-200/80 text-orange-900 hover:border-orange-400",
+      ];
+      return pastels[idx % pastels.length];
+    };
 
     return (
       <button
@@ -142,80 +152,60 @@ export default function Services() {
           if (target.startsWith("http")) openExternalLink(target, navigate, svc.titleEn);
           else navigate(target);
         }}
-        className="group relative w-full bg-[#FFFBF7] rounded-2xl p-3.5 flex items-center justify-between border border-[#E8DCD1] shadow-xs hover:shadow-md hover:border-[#8C5A3C]/40 active:scale-[.99] transition-all duration-200 text-left cursor-pointer"
+        className={`group relative w-full rounded-3xl p-4 flex items-center justify-between border shadow-xs hover:shadow-md active:scale-[.99] transition-all duration-200 text-left cursor-pointer ${getCardStyle(svc.category, idx)}`}
       >
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl bg-[#F5ECE2] border border-[#E8DCD1] text-[#8C5A3C]">
-            <IconComponent className="w-5 h-5 transition-transform group-hover:scale-105" />
+          <div className="w-11 h-11 shrink-0 flex items-center justify-center rounded-2xl bg-white/90 shadow-xs border border-white/60 text-[#FF9933]">
+            <IconComponent className="w-5 h-5 transition-transform group-hover:scale-110" />
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h4 className="font-extrabold text-xs text-[#2D241E] leading-snug truncate group-hover:text-[#8C5A3C] transition">
+              <h4 className="font-black text-xs text-slate-900 leading-snug truncate">
                 {isHi ? svc.titleHi : svc.titleEn}
               </h4>
-              {isWebsite && (
-                <span className="shrink-0 rounded-full bg-[#F5ECE2] px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider text-[#8C5A3C] border border-[#E8DCD1]">
-                  PORTAL
-                </span>
-              )}
+              <span className="shrink-0 rounded-full bg-emerald-100/90 text-[#27AE60] px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider border border-emerald-300/60 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" />
+                VERIFIED
+              </span>
             </div>
-            <p className="text-[10px] font-medium text-[#7A6A5D] mt-0.5 line-clamp-1">
+            <p className="text-[10px] font-bold text-slate-600 mt-0.5 line-clamp-1">
               {isHi ? svc.descHi : svc.descEn}
             </p>
           </div>
         </div>
 
-        <div className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-[#F5ECE2] border border-[#E8DCD1] group-hover:bg-[#8C5A3C] group-hover:text-white transition">
-          <ChevronRight className="w-3.5 h-3.5 text-[#8C5A3C] group-hover:text-white" />
+        <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 border border-white/60 shadow-xs group-hover:bg-[#FF9933] group-hover:text-white transition">
+          <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-white" />
         </div>
       </button>
     );
   };
 
   return (
-    <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-screen bg-[#FAF0E6] pb-28 font-sans selection:bg-[#E8DCD1]">
-      {/* Top Brand Header */}
-      <header className="mb-5 flex items-center justify-between border-b border-[#E8DCD1] pb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FFFBF7] border border-[#E8DCD1] shadow-xs p-1">
-            <img src="/assets/logo.png" alt="Samahit" className="h-full w-full object-contain" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#8C5A3C]">Samahit Super-App</p>
-            <p className="text-[11px] font-black text-[#2D241E]">{isHi ? "समाहित नागरिक सेवा" : "Services Directory"}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 text-[#7A6A5D]">
-          <span className="flex h-2 w-2 rounded-full bg-[#8C5A3C] animate-pulse" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8C5A3C] bg-[#F5ECE2] px-2 py-0.5 rounded-full border border-[#E8DCD1]">
-            Live
-          </span>
-        </div>
-      </header>
-
-      {/* Hero Title & Modern Search Bar */}
-      <div className="space-y-4">
+    <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-screen bg-[#FAF9F6] pb-28 font-sans selection:bg-orange-100">
+      {/* Top Banner */}
+      <div className="mb-5 space-y-3">
         <div>
-          <h1 className="font-black text-2xl text-[#2D241E] tracking-tight sm:text-3xl font-serif">
-            {isHi ? "सेवाएं एवं सुविधाएं" : "Services & Facilities"}
+          <h1 className="font-black text-2xl text-slate-900 tracking-tight sm:text-3xl font-serif">
+            {isHi ? "सेवाएं एवं सुविधाएं" : "Explore & Services"}
           </h1>
-          <p className="text-xs text-[#7A6A5D] font-semibold mt-1">
-            {isHi ? "RP Foundation द्वारा नागरिक कल्याण सेवाएं" : "Discover foundational citizen welfare programs & portals"}
+          <p className="text-xs text-slate-500 font-bold mt-1">
+            {isHi ? "RP Foundation द्वारा संचालित सत्यापित नागरिक सेवाएं" : "Discover verified citizen welfare programs & official portals"}
           </p>
         </div>
 
+        {/* Search Input */}
         <div className="relative">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-[#8C5A3C]" />
+          <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-slate-400" />
           </div>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={isHi ? "क्या खोज रहे हैं?..." : "Search services or utilities..."}
-            className="w-full pl-11 pr-4 py-3.5 bg-[#FFFBF7] border border-[#E8DCD1] rounded-2xl text-xs font-bold shadow-xs focus:outline-none focus:border-[#8C5A3C] text-[#2D241E] placeholder:text-[#7A6A5D] transition"
+            placeholder={isHi ? "सेवाएं या योजनाएं खोजें..." : "Search services, portals or schemes..."}
+            className="w-full pl-10 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-bold shadow-xs focus:outline-none focus:border-[#FF9933] text-slate-900 placeholder:text-slate-400 transition"
           />
         </div>
 
@@ -227,8 +217,8 @@ export default function Services() {
               onClick={() => setCategory(c.id)}
               className={`whitespace-nowrap px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all ${
                 category === c.id
-                  ? "bg-[#8C5A3C] text-white shadow-xs"
-                  : "bg-[#FFFBF7] text-[#7A6A5D] border border-[#E8DCD1] hover:bg-[#F5ECE2]"
+                  ? "bg-gradient-to-r from-[#FF9933] to-[#F59E0B] text-white shadow-md"
+                  : "bg-white text-slate-600 border border-slate-200 hover:bg-orange-50 hover:border-orange-200"
               }`}
             >
               {isHi ? c.hi : c.en}

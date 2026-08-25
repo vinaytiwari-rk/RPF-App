@@ -32,7 +32,7 @@ export default function MainLayout() {
 
   if (isAdmin) {
     return (
-      <div className="min-h-screen w-full bg-[#FAF0E6] font-sans text-[#2D241E]">
+      <div className="min-h-screen w-full bg-[#FAF9F6] font-sans text-slate-800">
         <Outlet context={{ lang: language }} />
       </div>
     );
@@ -56,32 +56,33 @@ export default function MainLayout() {
   ];
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#FAF0E6] font-sans text-[#2D241E] selection:bg-[#E8DCD1]">
-      <div className="fixed inset-x-0 top-0 z-[60] h-0.5 bg-[#8C5A3C]" aria-hidden="true" />
+    <div className="min-h-screen w-full overflow-hidden bg-[#FAF9F6] font-sans text-slate-800 selection:bg-orange-100">
+      {/* Tricolor Saffron, Gold & Green Accent Top Bar */}
+      <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-gradient-to-r from-[#FF9933] via-[#F59E0B] to-[#27AE60]" aria-hidden="true" />
       
-      <header className="sticky top-0 z-40 w-full border-b border-[#E8DCD1] bg-[#FFFBF7]/95 px-3.5 pt-safe-header backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full border-b border-orange-100/80 bg-[#FFFBF7]/95 px-3.5 pt-safe-header backdrop-blur-xl shadow-xs">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between sm:h-16 sm:px-1">
           <div className="flex min-w-0 items-center gap-2.5">
             {!root ? (
-              <motion.button whileTap={{ scale: 0.9 }} whileHover={{ x: -2 }} onClick={() => navigate(-1)} aria-label="Go back" className="flex h-10 w-10 items-center justify-center rounded-full text-[#8C5A3C] hover:bg-[#F5ECE2]">
+              <motion.button whileTap={{ scale: 0.9 }} whileHover={{ x: -2 }} onClick={() => navigate(-1)} aria-label="Go back" className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-orange-50 transition">
                 <ArrowLeft className="h-5 w-5" />
               </motion.button>
             ) : (
-              <motion.div whileHover={{ rotate: -3, scale: 1.04 }} className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-[#E8DCD1] bg-white shadow-xs sm:h-10 sm:w-10">
+              <motion.div whileHover={{ rotate: -3, scale: 1.04 }} className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-orange-200/80 bg-white shadow-xs sm:h-10 sm:w-10">
                 <img src={globalSettings?.logo_image || "/assets/logo.png"} alt="RP Foundation" className="h-full w-full object-contain" />
               </motion.div>
             )}
             <div className="min-w-0">
               {location.pathname === "/browser" ? (
-                <h1 className="truncate text-[14px] font-black tracking-[-0.02em] text-[#2D241E] sm:text-[15px]">
+                <h1 className="truncate text-[14px] font-black tracking-[-0.02em] text-slate-900 sm:text-[15px]">
                   {decodeURIComponent(new URLSearchParams(location.search).get("title") || "RPF Browser")}
                 </h1>
               ) : (
                 <>
-                  <h1 className="truncate text-[16px] font-black tracking-[-0.02em] text-[#2D241E] font-serif">
+                  <h1 className="truncate text-[16px] font-black tracking-[-0.02em] text-slate-900 font-serif">
                     समाहित
                   </h1>
-                  <p className="truncate text-[9px] font-bold tracking-[.08em] text-[#8C5A3C]">An initiative of RP Foundation</p>
+                  <p className="truncate text-[9px] font-extrabold tracking-[.08em] text-[#FF9933] uppercase">An initiative of RP Foundation</p>
                 </>
               )}
             </div>
@@ -89,22 +90,22 @@ export default function MainLayout() {
 
           <div className="flex items-center gap-0.5">
             {location.pathname === "/browser" ? (
-              <motion.button whileTap={{ scale: 0.85, rotate: 180 }} onClick={() => window.dispatchEvent(new CustomEvent("rpf-browser-refresh"))} aria-label="Refresh page" className="flex h-10 w-10 items-center justify-center rounded-full text-[#8C5A3C] hover:bg-[#F5ECE2]">
+              <motion.button whileTap={{ scale: 0.85, rotate: 180 }} onClick={() => window.dispatchEvent(new CustomEvent("rpf-browser-refresh"))} aria-label="Refresh page" className="flex h-10 w-10 items-center justify-center rounded-full text-[#FF9933] hover:bg-orange-50">
                 <RotateCw className="h-[19px] w-[19px]" />
               </motion.button>
             ) : (
               <>
-                <motion.button whileTap={{ scale: 0.88 }} onClick={() => navigate("/tools")} aria-label={language === "hi" ? "टूल्स" : "Tools"} title={language === "hi" ? "टूल्स" : "Tools"} className="flex h-10 w-10 items-center justify-center rounded-full text-[#8C5A3C] hover:bg-[#F5ECE2]">
+                <motion.button whileTap={{ scale: 0.88 }} onClick={() => navigate("/tools")} aria-label={language === "hi" ? "टूल्स" : "Tools"} title={language === "hi" ? "टूल्स" : "Tools"} className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-orange-50 hover:text-[#FF9933] transition">
                   <Wrench className="h-[19px] w-[19px]" />
                 </motion.button>
-                <motion.button whileTap={{ scale: 0.88, rotate: -12 }} onClick={() => setLanguage(language === "hi" ? "en" : "hi")} className="flex h-10 w-10 items-center justify-center rounded-full text-[#8C5A3C] hover:bg-[#F5ECE2]">
+                <motion.button whileTap={{ scale: 0.88, rotate: -12 }} onClick={() => setLanguage(language === "hi" ? "en" : "hi")} className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-orange-50 hover:text-[#FF9933] transition">
                   <Globe className="h-[19px] w-[19px]" />
                 </motion.button>
-                <motion.button whileTap={{ scale: 0.88 }} onClick={() => nav("/notifications")} className="relative flex h-10 w-10 items-center justify-center rounded-full text-[#8C5A3C] hover:bg-[#F5ECE2]">
+                <motion.button whileTap={{ scale: 0.88 }} onClick={() => nav("/notifications")} className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-orange-50 hover:text-[#FF9933] transition">
                   <Bell className="h-[19px] w-[19px]" />
-                  {unread > 0 && <motion.span animate={{ scale: [1, 1.25, 1] }} transition={{ duration: 1.8, repeat: Infinity }} className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#8C5A3C] ring-2 ring-white" />}
+                  {unread > 0 && <motion.span animate={{ scale: [1, 1.25, 1] }} transition={{ duration: 1.8, repeat: Infinity }} className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#FF9933] ring-2 ring-white" />}
                 </motion.button>
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => nav("/profile")} className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-[#E8DCD1] bg-[#F5ECE2] text-[#8C5A3C]">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => nav("/profile")} className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-orange-200/80 bg-orange-50 text-[#FF9933] shadow-xs">
                   {avatar ? <img src={avatar} alt="Profile" className="h-full w-full object-cover" /> : <User className="h-[17px] w-[17px]" />}
                 </motion.button>
               </>
@@ -113,7 +114,7 @@ export default function MainLayout() {
         </div>
       </header>
 
-      <main className="min-h-0 w-full overflow-x-hidden bg-[#FAF0E6] pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
+      <main className="min-h-0 w-full overflow-x-hidden bg-[#FAF9F6] pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
         <div className="mx-auto w-full max-w-3xl">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={location.pathname} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.28, ease: "easeOut" }} className="min-h-full">
