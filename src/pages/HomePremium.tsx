@@ -29,6 +29,25 @@ type Daily = {
 
 const WEATHER_API_KEY = "f54f6cb62e264dabb1990414262508";
 
+// Standard Indian CPCB AQI Calculation from PM2.5 concentration (ug/m3)
+function getIndianAqi(pm25?: number, pm10?: number): number {
+  if (pm25 == null || isNaN(pm25)) {
+    if (pm10 != null && !isNaN(pm10)) {
+      if (pm10 <= 50) return Math.round((50 / 50) * pm10);
+      if (pm10 <= 100) return Math.round(50 + ((100 - 50) / (100 - 50)) * (pm10 - 50));
+      if (pm10 <= 250) return Math.round(100 + ((200 - 100) / (250 - 100)) * (pm10 - 100));
+      return Math.round(200 + ((300 - 200) / (350 - 250)) * (pm10 - 250));
+    }
+    return 65;
+  }
+  if (pm25 <= 30) return Math.round((50 / 30) * pm25);
+  if (pm25 <= 60) return Math.round(50 + ((100 - 50) / (30)) * (pm25 - 30));
+  if (pm25 <= 90) return Math.round(100 + ((200 - 100) / (30)) * (pm25 - 60));
+  if (pm25 <= 120) return Math.round(200 + ((300 - 200) / (30)) * (pm25 - 90));
+  if (pm25 <= 250) return Math.round(300 + ((400 - 300) / (130)) * (pm25 - 120));
+  return Math.round(400 + ((500 - 400) / (130)) * (pm25 - 250));
+}
+
 export default function HomePremium() {
   const { lang } = useOutletContext<{ lang: Lang }>();
   const navigate = useNavigate();
@@ -37,7 +56,7 @@ export default function HomePremium() {
 
   const [daily, setDaily] = useState<Daily>({
     temp: 27,
-    aqi: 159,
+    aqi: 65,
     location: "Bhopal",
     conditionText: "Partly Cloudy",
   });
@@ -58,11 +77,8 @@ export default function HomePremium() {
           if (data?.current && data?.location) {
             const pm25 = data.current.air_quality?.pm2_5;
             const pm10 = data.current.air_quality?.pm10;
-            const calcAqi = pm25
-              ? Math.round(pm25 * 3.5)
-              : pm10
-              ? Math.round(pm10 * 1.5)
-              : 159;
+            const calcAqi = getIndianAqi(pm25, pm10);
+
             const iconUrl = data.current.condition?.icon
               ? data.current.condition.icon.startsWith("//")
                 ? `https:${data.current.condition.icon}`
