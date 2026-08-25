@@ -227,6 +227,19 @@ export default function VisionGoalsPage() {
           </div>
         </section>
 
+        {/* Legal Identity & Government Non-Affiliation Disclaimer Card */}
+        <section className="bg-slate-100/90 rounded-3xl border border-slate-200 p-4 space-y-2 text-slate-700">
+          <div className="flex items-center gap-2 text-amber-700 font-extrabold text-xs">
+            <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>{isHi ? "कानूनी पहचान एवं गैर-सरकारी प्रकटीकरण" : "Legal Identity & Non-Government Disclaimer"}</span>
+          </div>
+          <p className="text-[11px] leading-relaxed text-slate-600 font-medium">
+            {isHi 
+              ? "समाहित (Samahit) स्वयंसेवकों द्वारा विकसित एवं प्रबंधित एक स्वतंत्र डिजिटल पहल है। यह कोई सरकारी ऐप नहीं है और भारत सरकार या किसी राज्य सरकार द्वारा संचालित नहीं है। सरकारी योजनाओं की जानकारी केवल संदर्भ हेतु है; कृपया आधिकारिक (.gov.in / .nic.in) पोर्टल से सत्यापन करें।"
+              : "Samahit is an independent digital application developed and managed by volunteers associated with RP Foundation. It is NOT a government app and is NOT operated or endorsed by any Government authority. Information displayed is for reference only; verify from official (.gov.in / .nic.in) portals."}
+          </p>
+        </section>
+
       </div>
     </div>
   );
