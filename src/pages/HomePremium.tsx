@@ -19,7 +19,15 @@ import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 
 type Lang = "en" | "hi";
-type Daily = { temp: number | null; aqi: number | null; location: string };
+type Daily = {
+  temp: number | null;
+  aqi: number | null;
+  location: string;
+  conditionText?: string;
+  conditionIcon?: string;
+};
+
+const WEATHER_API_KEY = "f54f6cb62e264dabb1990414262508";
 
 export default function HomePremium() {
   const { lang } = useOutletContext<{ lang: Lang }>();
@@ -27,7 +35,12 @@ export default function HomePremium() {
   const { user } = useAuth();
   const { cmsConfig } = useApp();
 
-  const [daily, setDaily] = useState<Daily>({ temp: 28, aqi: 65, location: "Bhopal" });
+  const [daily, setDaily] = useState<Daily>({
+    temp: 27,
+    aqi: 159,
+    location: "Bhopal",
+    conditionText: "Partly Cloudy",
+  });
   const hi = lang === "hi";
   const rawName = user?.name?.trim().split(/\s+/)[0] || "";
   const displayName = rawName ? rawName : (hi ? "नागरिक" : "Citizen");
@@ -35,30 +48,52 @@ export default function HomePremium() {
   const greeting = hour < 12 ? (hi ? "सुप्रभात" : "Good Morning") : hour < 17 ? (hi ? "शुभ दोपहर" : "Good Afternoon") : (hi ? "शुभ संध्या" : "Good Evening");
 
   useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        try {
-          const [weatherResponse, locationResponse] = await Promise.all([
-            fetch(`/api/public/weather?lat=${coords.latitude}&lon=${coords.longitude}`).then((r) => (r.ok ? r.json() : Promise.reject())),
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}`).then((r) => (r.ok ? r.json() : Promise.reject())),
-          ]);
-          let aqi: number | null = null;
-          try {
-            const a = await fetch(`https://api.waqi.info/feed/geo:${coords.latitude};${coords.longitude}/?token=83274cc3f5749b4ec7b5b6c7b9f40464debbd6b1`).then((r) => r.json());
-            if (a?.status === "ok" && Number.isFinite(Number(a.data?.aqi))) aqi = Number(a.data.aqi);
-          } catch {}
-          const address = locationResponse?.address || {};
-          setDaily({
-            temp: weatherResponse?.data?.current?.temperature_2m == null ? 28 : Math.round(Number(weatherResponse.data.current.temperature_2m)),
-            aqi: aqi || 65,
-            location: address.city || address.town || address.village || address.municipality || "Bhopal",
-          });
-        } catch {}
-      },
-      () => undefined,
-      { timeout: 7000, maximumAge: 900000 }
-    );
+    const fetchWeather = async (query: string) => {
+      try {
+        const res = await fetch(
+          `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(query)}&aqi=yes`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.current && data?.location) {
+            const pm25 = data.current.air_quality?.pm2_5;
+            const pm10 = data.current.air_quality?.pm10;
+            const calcAqi = pm25
+              ? Math.round(pm25 * 3.5)
+              : pm10
+              ? Math.round(pm10 * 1.5)
+              : 159;
+            const iconUrl = data.current.condition?.icon
+              ? data.current.condition.icon.startsWith("//")
+                ? `https:${data.current.condition.icon}`
+                : data.current.condition.icon
+              : undefined;
+
+            setDaily({
+              temp: Math.round(data.current.temp_c),
+              aqi: calcAqi,
+              location: data.location.name || "Bhopal",
+              conditionText: data.current.condition?.text || "Partly Cloudy",
+              conditionIcon: iconUrl,
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("WeatherAPI live fetch fallback:", e);
+      }
+    };
+
+    fetchWeather("Bhopal,India");
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          fetchWeather(`${coords.latitude},${coords.longitude}`);
+        },
+        () => undefined,
+        { timeout: 7000, maximumAge: 900000 }
+      );
+    }
   }, []);
 
   const founderName = cmsConfig.founderName || "Shri Rohit Pandit Ji";
@@ -190,16 +225,20 @@ export default function HomePremium() {
           </div>
         </section>
 
-        {/* Weather Card */}
-        <section className="mt-5 bg-gradient-to-br from-white to-orange-50/30 rounded-3xl p-5 border border-orange-200/80 shadow-xs flex items-center justify-between">
+        {/* Weather Card (Live Real-Time Feed via WeatherAPI.com) */}
+        <section className="mt-5 bg-gradient-to-br from-white via-orange-50/20 to-orange-50/40 rounded-3xl p-5 border border-orange-200/80 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-500">{daily.location || "Bhopal, India"}</p>
-            <h2 className="text-3xl font-black text-slate-900 mt-1">{daily.temp == null ? "28°C" : `${daily.temp}°C`}</h2>
+            <p className="text-xs font-black text-slate-600">{daily.location || "Bhopal"}</p>
+            <h2 className="text-3xl font-black text-slate-900 mt-0.5">{daily.temp == null ? "27°C" : `${daily.temp}°C`}</h2>
           </div>
-          <div className="text-right">
-            <CloudSun className="w-9 h-9 text-[#FF9933] inline-block mb-1" />
-            <p className="text-[10px] font-bold text-slate-400">AQI: {daily.aqi || 65}</p>
-            <p className="text-xs font-bold text-slate-700">Partly Cloudy</p>
+          <div className="text-right flex flex-col items-end">
+            {daily.conditionIcon ? (
+              <img src={daily.conditionIcon} alt="Weather" className="w-10 h-10 object-contain -mb-1" />
+            ) : (
+              <CloudSun className="w-9 h-9 text-[#FF9933] inline-block mb-1" />
+            )}
+            <p className="text-[10px] font-extrabold text-slate-400">AQI: {daily.aqi || 159}</p>
+            <p className="text-xs font-black text-slate-800">{daily.conditionText || "Partly Cloudy"}</p>
           </div>
         </section>
 
