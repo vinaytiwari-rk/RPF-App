@@ -13,6 +13,8 @@ import {
   Stethoscope,
   ChevronRight,
   Sparkles,
+  Quote,
+  Share2,
 } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -115,14 +117,14 @@ export default function HomePremium() {
   const founderName = cmsConfig.founderName || "Shri Rohit Pandit Ji";
 
   const QUICK_ACTIONS = [
-    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", img3d: "/assets/3d_icons/kosh.png", icon: HeartHandshake, route: "/jan-seva-card", color: "bg-[#FFF9E6] border border-amber-200 text-amber-700 shadow-xs" },
-    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", img3d: "/assets/3d_icons/e_pooja.png", icon: HeartPulse, route: "/blood-network", color: "bg-[#FFEEEE] border border-rose-200 text-rose-600 shadow-xs" },
-    { id: "services", labelEn: "Services", labelHi: "सेवाएं", img3d: "/assets/3d_icons/calculator.png", icon: Wrench, route: "/services", color: "bg-[#EAF8EE] border border-emerald-200 text-emerald-700 shadow-xs" },
-    { id: "community", labelEn: "Community", labelHi: "समुदाय", img3d: "/assets/3d_icons/about_team.png", icon: Users, route: "/community", color: "bg-[#F3E8FF] border border-purple-200 text-purple-700 shadow-xs" },
-    { id: "news", labelEn: "News", labelHi: "समाचार", img3d: "/assets/3d_icons/emagazine.png", icon: Newspaper, route: "/news", color: "bg-[#FFF2E5] border border-orange-200 text-orange-700 shadow-xs" },
-    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", img3d: "/assets/3d_icons/prashan_yantra.png", icon: ShieldAlert, route: "/sos", color: "bg-red-50 border border-red-200 text-red-600 shadow-xs" },
-    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", img3d: "/assets/3d_icons/divine_quotes.png", icon: Radio, route: "/internet-radio", color: "bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-xs" },
-    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", img3d: "/assets/3d_icons/jyotish_prediction.png", icon: Stethoscope, route: "/health-care", color: "bg-teal-50 border border-teal-200 text-teal-700 shadow-xs" },
+    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: HeartHandshake, route: "/jan-seva-card", color: "bg-[#FFF9E6] border border-amber-200 text-amber-700 shadow-xs" },
+    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", icon: HeartPulse, route: "/blood-network", color: "bg-[#FFEEEE] border border-rose-200 text-rose-600 shadow-xs" },
+    { id: "services", labelEn: "Services", labelHi: "सेवाएं", icon: Wrench, route: "/services", color: "bg-[#EAF8EE] border border-emerald-200 text-emerald-700 shadow-xs" },
+    { id: "community", labelEn: "Community", labelHi: "समुदाय", icon: Users, route: "/community", color: "bg-[#F3E8FF] border border-purple-200 text-purple-700 shadow-xs" },
+    { id: "news", labelEn: "News", labelHi: "समाचार", icon: Newspaper, route: "/news", color: "bg-[#FFF2E5] border border-orange-200 text-orange-700 shadow-xs" },
+    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", icon: ShieldAlert, route: "/sos", color: "bg-red-50 border border-red-200 text-red-600 shadow-xs" },
+    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", icon: Radio, route: "/internet-radio", color: "bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-xs" },
+    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", icon: Stethoscope, route: "/health-care", color: "bg-teal-50 border border-teal-200 text-teal-700 shadow-xs" },
   ];
 
   return (
@@ -161,37 +163,37 @@ export default function HomePremium() {
           </div>
         </header>
 
-        {/* Hero Banner: RP FOUNDATION VISION (Vibrant Saffron-Gold Tricolor Card) */}
+        {/* Hero Banner: RP FOUNDATION VISION (Harmonized Off-White & Saffron Card) */}
         <section
           onClick={() => navigate("/vision-goals")}
-          className="mt-3.5 overflow-hidden rounded-3xl bg-gradient-to-br from-[#FF9933] via-[#F59E0B] to-[#D97706] text-white p-5 sm:p-6 shadow-lg relative cursor-pointer hover:scale-[1.008] transition-all duration-300 border border-amber-200/50 group"
+          className="mt-3.5 overflow-hidden rounded-3xl bg-white text-slate-900 p-5 sm:p-6 shadow-xs relative cursor-pointer hover:shadow-md transition-all duration-300 border border-orange-200/80 group"
         >
-          {/* Top Tricolor Strip */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
+          {/* Top Tricolor Accent Line */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#FF9933] via-[#F59E0B] to-[#138808]" />
 
           <div className="flex justify-between items-start gap-3">
             <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 border border-white/30 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-white backdrop-blur-md">
-                <Sparkles className="w-3 h-3 text-amber-200" />
-                RP Foundation
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 border border-orange-200 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-[#FF9933]">
+                <Sparkles className="w-3 h-3 text-[#FF9933]" />
+                RP Foundation Vision
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight text-white font-serif drop-shadow-xs">
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight text-slate-900 font-serif">
                 {hi ? "आर.पी. फाउंडेशन विज़न" : "RP Foundation Vision"}
               </h2>
 
-              <p className="text-xs font-bold text-amber-100 leading-snug">
+              <p className="text-xs font-bold text-[#FF9933] leading-snug">
                 {hi ? "श्री रोहित पंडित जी का नेतृत्व एवं विचार" : "Pioneered by Shri Rohit Pandit Ji"}
               </p>
 
-              <p className="text-[10.5px] font-medium text-white/95 leading-relaxed pt-0.5 line-clamp-2">
+              <p className="text-[10.5px] font-medium text-slate-600 leading-relaxed pt-0.5 line-clamp-2">
                 {hi ? "रोजगार मेला • महिला स्वावलंबन • निःशुल्क स्वास्थ्य • खेलकूद प्रोत्साहन" : "Rojgar Melas • Pink E-Rickshaws • Health Camps • Youth Sports"}
               </p>
             </div>
 
             {/* Founder Portrait Box */}
             <div className="relative shrink-0">
-              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden border-2 border-white/80 shadow-xl bg-white group-hover:scale-105 transition-transform duration-300">
+              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden border-2 border-orange-200/80 shadow-md bg-orange-50 group-hover:scale-105 transition-transform duration-300">
                 <img
                   src="/assets/founder.png"
                   alt={founderName}
@@ -199,28 +201,67 @@ export default function HomePremium() {
                   onError={(e) => { e.currentTarget.style.display = "none"; }}
                 />
               </div>
-              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-white text-[#D97706] text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-md whitespace-nowrap border border-amber-200">
+              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-[#FF9933] text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-md whitespace-nowrap">
                 Founder
               </span>
             </div>
           </div>
 
           {/* Card Footer Bar */}
-          <div className="bg-white/15 border-t border-white/20 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 px-5 py-3 flex items-center justify-between backdrop-blur-xs mt-4">
-            <p className="text-xs font-bold text-white">
+          <div className="bg-orange-50/70 border-t border-orange-100 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 px-5 py-3 flex items-center justify-between mt-4">
+            <p className="text-xs font-black text-slate-800">
               {hi ? "राष्ट्र निर्माण एवं जन कल्याण" : "Nation Building & Public Welfare"}
             </p>
             <button
               type="button"
-              className="bg-white text-[#D97706] text-xs font-black px-4 py-1.5 rounded-xl shadow-md hover:bg-amber-50 transition flex items-center gap-1"
+              className="bg-[#FF9933] text-white text-xs font-black px-4 py-1.5 rounded-xl shadow-xs hover:bg-orange-600 transition flex items-center gap-1"
             >
               <span>{hi ? "विवरण देखें" : "Learn More"}</span>
-              <ChevronRight className="w-3.5 h-3.5 text-[#D97706]" />
+              <ChevronRight className="w-3.5 h-3.5 text-white" />
             </button>
           </div>
         </section>
 
-        {/* Quick Actions (Realistic Icon Badges) */}
+        {/* Quote of the Day (Daily Seva Thought by Shri Rohit Pandit Ji) */}
+        <section className="mt-4 bg-[#FFFDF7] rounded-3xl p-5 border border-amber-200/90 shadow-xs relative overflow-hidden">
+          <div className="flex items-center justify-between pb-2.5 border-b border-amber-100 mb-3">
+            <div className="flex items-center gap-2">
+              <Quote className="w-4 h-4 text-[#FF9933]" />
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#FF9933]">
+                {hi ? "दैनिक सेवा विचार" : "Quote of the Day"}
+              </span>
+            </div>
+            <span className="text-[9px] font-black text-amber-700/80 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
+              RP Foundation
+            </span>
+          </div>
+          <blockquote className="text-xs font-bold text-slate-800 leading-relaxed italic font-serif">
+            "{cmsConfig.quoteOfTheDayEn || "True public service lies in empowering every citizen with dignity, self-reliance, and accessible welfare."}"
+          </blockquote>
+          <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-amber-100/70">
+            <p className="text-[10px] font-black text-[#D97706] uppercase tracking-wider">
+              — {founderName}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: "Daily Seva Thought",
+                    text: `"${cmsConfig.quoteOfTheDayEn || "True public service lies in empowering every citizen with dignity, self-reliance, and accessible welfare."}" — ${founderName}`,
+                    url: window.location.href,
+                  }).catch(() => undefined);
+                }
+              }}
+              className="text-[10px] font-extrabold text-[#FF9933] bg-orange-50 hover:bg-orange-100 border border-orange-200 px-3 py-1 rounded-xl transition flex items-center gap-1.5"
+            >
+              <Share2 className="w-3 h-3 text-[#FF9933]" />
+              <span>{hi ? "साझा करें" : "Share Quote"}</span>
+            </button>
+          </div>
+        </section>
+
+        {/* Quick Actions (Clean NGO Service Badges) */}
         <section className="mt-5 space-y-2.5">
           <h3 className="text-xs font-black text-slate-800 tracking-wide uppercase">{hi ? "त्वरित सेवाएं" : "Quick Actions"}</h3>
           
@@ -232,12 +273,8 @@ export default function HomePremium() {
                 onClick={() => navigate(act.route)}
                 className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-orange-100/80 hover:border-[#FF9933]/50 active:scale-95 transition text-center shadow-xs group"
               >
-                <div className={`w-10 h-10 rounded-2xl ${act.color} flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform overflow-hidden p-1`}>
-                  {act.img3d ? (
-                    <img src={act.img3d} alt={act.labelEn} className="w-full h-full object-contain" />
-                  ) : (
-                    <act.icon className="w-5 h-5" />
-                  )}
+                <div className={`w-10 h-10 rounded-2xl ${act.color} flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform overflow-hidden`}>
+                  <act.icon className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-black text-slate-800 leading-tight line-clamp-1">{hi ? act.labelHi : act.labelEn}</span>
               </button>
