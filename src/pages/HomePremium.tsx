@@ -64,14 +64,14 @@ export default function HomePremium() {
   const founderName = cmsConfig.founderName || "Shri Rohit Pandit Ji";
 
   const QUICK_ACTIONS = [
-    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: HeartHandshake, route: "/jan-seva-card", color: "bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-xs" },
-    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", icon: HeartPulse, route: "/blood-network", color: "bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-xs" },
-    { id: "services", labelEn: "Services", labelHi: "सेवाएं", icon: Wrench, route: "/services", color: "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-xs" },
-    { id: "community", labelEn: "Community", labelHi: "समुदाय", icon: Users, route: "/community", color: "bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-xs" },
-    { id: "news", labelEn: "News", labelHi: "समाचार", icon: Newspaper, route: "/news", color: "bg-gradient-to-br from-amber-500 to-yellow-600 text-white shadow-xs" },
-    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", icon: ShieldAlert, route: "/sos", color: "bg-gradient-to-br from-red-600 to-rose-700 text-white shadow-xs" },
-    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", icon: Radio, route: "/internet-radio", color: "bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-xs" },
-    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", icon: Stethoscope, route: "/health-care", color: "bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-xs" },
+    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: HeartHandshake, route: "/jan-seva-card", color: "bg-[#FFF9E6] border border-amber-200 text-amber-700 shadow-xs" },
+    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", icon: HeartPulse, route: "/blood-network", color: "bg-[#FFEEEE] border border-rose-200 text-rose-600 shadow-xs" },
+    { id: "services", labelEn: "Services", labelHi: "सेवाएं", icon: Wrench, route: "/services", color: "bg-[#EAF8EE] border border-emerald-200 text-emerald-700 shadow-xs" },
+    { id: "community", labelEn: "Community", labelHi: "समुदाय", icon: Users, route: "/community", color: "bg-[#F3E8FF] border border-purple-200 text-purple-700 shadow-xs" },
+    { id: "news", labelEn: "News", labelHi: "समाचार", icon: Newspaper, route: "/news", color: "bg-[#FFF2E5] border border-orange-200 text-orange-700 shadow-xs" },
+    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", icon: ShieldAlert, route: "/sos", color: "bg-red-50 border border-red-200 text-red-600 shadow-xs" },
+    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", icon: Radio, route: "/internet-radio", color: "bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-xs" },
+    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", icon: Stethoscope, route: "/health-care", color: "bg-teal-50 border border-teal-200 text-teal-700 shadow-xs" },
   ];
 
   return (
@@ -94,7 +94,7 @@ export default function HomePremium() {
               </h1>
               <p className="text-[10px] font-black uppercase tracking-wider text-[#FF9933] flex items-center gap-1 mt-0.5">
                 <Sparkles className="w-3 h-3 text-[#FF9933]" />
-                Samahit • RP Foundation
+                Samahit • An Initiative of RP Foundation
               </p>
             </div>
           </div>

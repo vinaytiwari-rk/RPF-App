@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Bell, Search, Globe, Heart, HeartHandshake, Wrench, RotateCw, Home, Sparkles } from "lucide-react";
+import { ArrowLeft, User, Compass, Bell, Search, Globe, Heart, HeartHandshake, Wrench, RotateCw, Home, Sparkles, Headphones, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
@@ -46,12 +46,13 @@ export default function MainLayout() {
     navigate(p);
   };
 
-  const roots = ["/", "/impact", "/services", "/profile"];
+  const roots = ["/", "/impact", "/events", "/services", "/profile"];
   const root = roots.includes(location.pathname);
   const items = [
     { path: "/", en: "Home", hi: "होम", icon: Home },
-    { path: "/impact", en: "Impact", hi: "प्रभाव", icon: Sparkles },
-    { path: "/services", en: "Explore", hi: "खोजें", icon: Compass },
+    { path: "/impact", en: "Initiatives", hi: "अभियान", icon: Sparkles },
+    { path: "/events", en: "Events", hi: "कार्यक्रम", icon: Calendar },
+    { path: "/services", en: "Support", hi: "सहायता", icon: Compass },
     { path: "/profile", en: "Profile", hi: "प्रोफाइल", icon: User },
   ];
 
@@ -81,7 +82,7 @@ export default function MainLayout() {
                   <h1 className="truncate text-[16px] font-black tracking-[-0.02em] text-[#2D241E] font-serif">
                     समाहित
                   </h1>
-                  <p className="truncate text-[9px] font-bold tracking-[.08em] text-[#8C5A3C]">RP Foundation</p>
+                  <p className="truncate text-[9px] font-bold tracking-[.08em] text-[#8C5A3C]">An initiative of RP Foundation</p>
                 </>
               )}
             </div>
@@ -125,6 +126,22 @@ export default function MainLayout() {
 
       {/* Global Persistent Mini Player for Radio & TV Media Streams */}
       <GlobalMiniPlayer />
+
+      {/* Floating 24/7 Helpline Widget (FAB) */}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05 }}
+        onClick={() => navigate("/grievance")}
+        aria-label="24/7 Helpline"
+        title={language === "hi" ? "24/7 हेल्पलाइन" : "24/7 Helpline"}
+        className="fixed right-4 bottom-24 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-[#FF9933] to-[#F59E0B] text-white shadow-lg shadow-orange-500/30 border border-white/50"
+      >
+        <Headphones className="h-6 w-6" />
+        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        </span>
+      </motion.button>
 
       {/* Luxury Almond Glassmorphic Floating Bottom Bar */}
       <nav className="fixed inset-x-4 bottom-3 z-50 mx-auto max-w-lg rounded-3xl border border-[#E8DCD1] bg-[#FFFBF7]/95 px-2 py-1.5 shadow-[0_12px_35px_rgba(140,90,60,0.12)] backdrop-blur-2xl">

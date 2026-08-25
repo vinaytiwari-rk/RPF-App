@@ -79,35 +79,3 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
-
-  deploy-capgo:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Install Capacitor Project Dependencies
-        run: npm install --include=dev --no-audit --no-fund
-      - name: Verify Capacitor Configuration
-        run: |
-          test -f capacitor.config.ts || test -f capacitor.config.json || test -f capacitor.config.js
-          npx cap --version
-      - name: Download dist artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: deployment-dist
-          path: dist
-      - name: Deploy Live Update to Capgo
-        env:
-          CAPGO_TOKEN: ${{ secrets.CAPGO_TOKEN }}
-        run: |
-          if [ -z "$CAPGO_TOKEN" ]; then
-            echo "WARNING: CAPGO_TOKEN is not set. Skipping Capgo deploy."
-            exit 0
-          fi
-          npx @capgo/cli@latest bundle upload com.rpfoundation.app --channel production --path ./dist --auto-bump patch
