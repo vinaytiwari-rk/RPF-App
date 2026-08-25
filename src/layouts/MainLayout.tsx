@@ -142,9 +142,9 @@ export default function MainLayout() {
         </span>
       </motion.button>
 
-      {/* Luxury Almond Glassmorphic Floating Bottom Bar */}
-      <nav className="fixed inset-x-4 bottom-3 z-50 mx-auto max-w-lg rounded-3xl border border-[#E8DCD1] bg-[#FFFBF7]/95 px-2 py-1.5 shadow-[0_12px_35px_rgba(140,90,60,0.12)] backdrop-blur-2xl">
-        <div className="flex items-center justify-around">
+      {/* Full-Width Glassmorphic 4-Tab Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 inset-x-0 z-50 mx-auto w-full max-w-3xl h-16 border-t border-[#E8DCD1] bg-[#FFFBF7]/95 px-3 backdrop-blur-xl shadow-[0_-4px_25px_rgba(0,0,0,0.06)]">
+        <div className="flex h-full items-center justify-around">
           {items.map(({ path, en, hi, icon: Icon }) => {
             const active = location.pathname === path;
             return (
@@ -152,18 +152,24 @@ export default function MainLayout() {
                 key={path}
                 whileTap={{ scale: 0.88 }}
                 onClick={() => nav(path)}
-                className={`relative flex flex-col items-center justify-center gap-0.5 rounded-2xl py-1 px-3 text-[10px] font-black tracking-tight transition-all ${
-                  active ? "text-[#5C3A24]" : "text-[#7A6A5D] hover:text-[#2D241E]"
+                className={`relative flex flex-1 flex-col items-center justify-center gap-1 py-1 text-[11px] font-black tracking-tight transition-all ${
+                  active ? "text-[#FF9933]" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 <div
-                  className={`flex h-7 w-9 items-center justify-center rounded-xl transition-all ${
-                    active ? "bg-gradient-to-r from-[#A67C52] to-[#8C5A3C] text-white shadow-sm" : ""
+                  className={`flex h-8 w-12 items-center justify-center rounded-2xl transition-all ${
+                    active ? "bg-orange-100/80 text-[#FF9933] shadow-xs" : ""
                   }`}
                 >
-                  <Icon className={`h-4 w-4 ${active ? "text-white" : ""}`} />
+                  <Icon className={`h-5 w-5 ${active ? "text-[#FF9933] stroke-[2.5]" : "stroke-[1.8]"}`} />
                 </div>
-                <span>{language === "hi" ? hi : en}</span>
+                <span className="leading-none">{language === "hi" ? hi : en}</span>
+                {active && (
+                  <motion.div
+                    layoutId="activeTabDot"
+                    className="absolute top-1 h-1 w-1 rounded-full bg-[#FF9933]"
+                  />
+                )}
               </motion.button>
             );
           })}
