@@ -115,14 +115,14 @@ export default function HomePremium() {
   const founderName = cmsConfig.founderName || "Shri Rohit Pandit Ji";
 
   const QUICK_ACTIONS = [
-    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: HeartHandshake, route: "/jan-seva-card", color: "bg-[#FFF9E6] border border-amber-200 text-amber-700 shadow-xs" },
-    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", icon: HeartPulse, route: "/blood-network", color: "bg-[#FFEEEE] border border-rose-200 text-rose-600 shadow-xs" },
-    { id: "services", labelEn: "Services", labelHi: "सेवाएं", icon: Wrench, route: "/services", color: "bg-[#EAF8EE] border border-emerald-200 text-emerald-700 shadow-xs" },
-    { id: "community", labelEn: "Community", labelHi: "समुदाय", icon: Users, route: "/community", color: "bg-[#F3E8FF] border border-purple-200 text-purple-700 shadow-xs" },
-    { id: "news", labelEn: "News", labelHi: "समाचार", icon: Newspaper, route: "/news", color: "bg-[#FFF2E5] border border-orange-200 text-orange-700 shadow-xs" },
-    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", icon: ShieldAlert, route: "/sos", color: "bg-red-50 border border-red-200 text-red-600 shadow-xs" },
-    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", icon: Radio, route: "/internet-radio", color: "bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-xs" },
-    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", icon: Stethoscope, route: "/health-care", color: "bg-teal-50 border border-teal-200 text-teal-700 shadow-xs" },
+    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", img3d: "/assets/3d_icons/kosh.png", icon: HeartHandshake, route: "/jan-seva-card", color: "bg-[#FFF9E6] border border-amber-200 text-amber-700 shadow-xs" },
+    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", img3d: "/assets/3d_icons/e_pooja.png", icon: HeartPulse, route: "/blood-network", color: "bg-[#FFEEEE] border border-rose-200 text-rose-600 shadow-xs" },
+    { id: "services", labelEn: "Services", labelHi: "सेवाएं", img3d: "/assets/3d_icons/calculator.png", icon: Wrench, route: "/services", color: "bg-[#EAF8EE] border border-emerald-200 text-emerald-700 shadow-xs" },
+    { id: "community", labelEn: "Community", labelHi: "समुदाय", img3d: "/assets/3d_icons/about_team.png", icon: Users, route: "/community", color: "bg-[#F3E8FF] border border-purple-200 text-purple-700 shadow-xs" },
+    { id: "news", labelEn: "News", labelHi: "समाचार", img3d: "/assets/3d_icons/emagazine.png", icon: Newspaper, route: "/news", color: "bg-[#FFF2E5] border border-orange-200 text-orange-700 shadow-xs" },
+    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", img3d: "/assets/3d_icons/prashan_yantra.png", icon: ShieldAlert, route: "/sos", color: "bg-red-50 border border-red-200 text-red-600 shadow-xs" },
+    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", img3d: "/assets/3d_icons/divine_quotes.png", icon: Radio, route: "/internet-radio", color: "bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-xs" },
+    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", img3d: "/assets/3d_icons/jyotish_prediction.png", icon: Stethoscope, route: "/health-care", color: "bg-teal-50 border border-teal-200 text-teal-700 shadow-xs" },
   ];
 
   return (
@@ -232,8 +232,12 @@ export default function HomePremium() {
                 onClick={() => navigate(act.route)}
                 className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-orange-100/80 hover:border-[#FF9933]/50 active:scale-95 transition text-center shadow-xs group"
               >
-                <div className={`w-9 h-9 rounded-xl ${act.color} flex items-center justify-center mb-1.5 group-hover:scale-105 transition-transform`}>
-                  <act.icon className="w-4.5 h-4.5" />
+                <div className={`w-10 h-10 rounded-2xl ${act.color} flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform overflow-hidden p-1`}>
+                  {act.img3d ? (
+                    <img src={act.img3d} alt={act.labelEn} className="w-full h-full object-contain" />
+                  ) : (
+                    <act.icon className="w-5 h-5" />
+                  )}
                 </div>
                 <span className="text-[10px] font-black text-slate-800 leading-tight line-clamp-1">{hi ? act.labelHi : act.labelEn}</span>
               </button>
