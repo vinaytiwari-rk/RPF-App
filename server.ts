@@ -1820,6 +1820,36 @@ import { CORE_SERVICES } from "./src/data/coreServices.js";
 
 
 // =============================================================================
+// REAL DYNAMIC IMPACT STATISTICS API (POSTGRESQL DB COUNTS)
+// =============================================================================
+
+app.get("/api/impact/live-stats", async (req, res) => {
+  try {
+    const volRes = await pool.query(`SELECT COUNT(*) FROM users WHERE role IN ('volunteer', 'admin', 'super_admin') OR "isVolunteer" = true`);
+    const dutyRes = await pool.query(`SELECT COALESCE(SUM(duration_minutes), 0) AS total_minutes FROM volunteer_duty_sessions WHERE status = 'completed'`);
+    const reportRes = await pool.query(`SELECT COUNT(*) FROM volunteer_field_reports WHERE approval_status = 'approved'`);
+    const grievRes = await pool.query(`SELECT COUNT(*) FROM grievances WHERE status = 'Resolved'`);
+
+    const totalVolunteers = parseInt(volRes.rows[0].count, 10) || 0;
+    const totalDutyHours = Math.round((parseInt(dutyRes.rows[0].total_minutes, 10) || 0) / 60);
+    const approvedReports = parseInt(reportRes.rows[0].count, 10) || 0;
+    const resolvedGrievances = parseInt(grievRes.rows[0].count, 10) || 0;
+
+    res.json({
+      success: true,
+      stats: {
+        totalVolunteers,
+        totalDutyHours,
+        approvedReports,
+        resolvedGrievances,
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// =============================================================================
 // VOLUNTEER DUTY & FIELD REPORTING APIs (100% REAL PRODUCTION BACKEND)
 // =============================================================================
 

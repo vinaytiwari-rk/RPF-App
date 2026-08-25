@@ -69,6 +69,24 @@ export default function HomePremium() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? (hi ? "सुप्रभात" : "Good Morning") : hour < 17 ? (hi ? "शुभ दोपहर" : "Good Afternoon") : (hi ? "शुभ संध्या" : "Good Evening");
 
+  const [liveStats, setLiveStats] = useState({
+    totalVolunteers: 0,
+    totalDutyHours: 0,
+    approvedReports: 0,
+    resolvedGrievances: 0,
+  });
+
+  useEffect(() => {
+    fetch("/api/impact/live-stats")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.stats) {
+          setLiveStats(data.stats);
+        }
+      })
+      .catch((e) => console.warn("Fetch live stats error:", e));
+  }, []);
+
   useEffect(() => {
     const fetchWeather = async (query: string) => {
       try {
@@ -118,14 +136,14 @@ export default function HomePremium() {
   const founderName = cmsConfig.founderName || "Shri Rohit Pandit Ji";
 
   const QUICK_ACTIONS = [
-    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: HeartHandshake, route: "/jan-seva-card", color: "bg-[#FFF9E6] border border-amber-200 text-amber-700 shadow-xs" },
-    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", icon: HeartPulse, route: "/blood-network", color: "bg-[#FFEEEE] border border-rose-200 text-rose-600 shadow-xs" },
-    { id: "services", labelEn: "Services", labelHi: "सेवाएं", icon: Wrench, route: "/services", color: "bg-[#EAF8EE] border border-emerald-200 text-emerald-700 shadow-xs" },
-    { id: "community", labelEn: "Community", labelHi: "समुदाय", icon: Users, route: "/community", color: "bg-[#F3E8FF] border border-purple-200 text-purple-700 shadow-xs" },
-    { id: "news", labelEn: "News", labelHi: "समाचार", icon: Newspaper, route: "/news", color: "bg-[#FFF2E5] border border-orange-200 text-orange-700 shadow-xs" },
-    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", icon: ShieldAlert, route: "/sos", color: "bg-red-50 border border-red-200 text-red-600 shadow-xs" },
-    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", icon: Radio, route: "/internet-radio", color: "bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-xs" },
-    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", icon: Stethoscope, route: "/health-care", color: "bg-teal-50 border border-teal-200 text-teal-700 shadow-xs" },
+    { id: "card", labelEn: "Jan Seva Card", labelHi: "जन सेवा कार्ड", icon: HeartHandshake, route: "/jan-seva-card", color: "bg-amber-50 border border-amber-200/80 text-amber-700 shadow-xs" },
+    { id: "blood", labelEn: "Blood Care", labelHi: "ब्लड केयर", icon: HeartPulse, route: "/blood-network", color: "bg-rose-50 border border-rose-200/80 text-rose-600 shadow-xs" },
+    { id: "services", labelEn: "Services", labelHi: "सेवाएं", icon: Wrench, route: "/services", color: "bg-emerald-50 border border-emerald-200/80 text-emerald-700 shadow-xs" },
+    { id: "community", labelEn: "Community", labelHi: "समुदाय", icon: Users, route: "/community", color: "bg-purple-50 border border-purple-200/80 text-purple-700 shadow-xs" },
+    { id: "news", labelEn: "News", labelHi: "समाचार", icon: Newspaper, route: "/news", color: "bg-orange-50 border border-orange-200/80 text-orange-700 shadow-xs" },
+    { id: "sos", labelEn: "SOS Alert", labelHi: "एस.ओ.एस", icon: ShieldAlert, route: "/sos", color: "bg-red-50 border border-red-200/80 text-red-600 shadow-xs" },
+    { id: "radio", labelEn: "Radio Live", labelHi: "रेडियो लाइव", icon: Radio, route: "/internet-radio", color: "bg-emerald-50 border border-emerald-200/80 text-emerald-700 shadow-xs" },
+    { id: "health", labelEn: "Health Care", labelHi: "स्वास्थ्य", icon: Stethoscope, route: "/health-care", color: "bg-teal-50 border border-teal-200/80 text-teal-700 shadow-xs" },
   ];
 
   return (
@@ -133,13 +151,13 @@ export default function HomePremium() {
       <div className="mx-auto w-full max-w-md px-4 pt-3 pb-6">
 
         {/* Personalized Header Bar (Good Morning/Afternoon/Evening, Name) */}
-        <header className="flex items-center justify-between pb-3.5 border-b border-orange-100/80">
+        <header className="flex items-center justify-between pb-3.5 border-b border-slate-200/70">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/profile")}
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-50 border border-orange-200 flex items-center justify-center text-[#FF9933] hover:scale-105 transition shadow-xs"
+              className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 hover:scale-105 transition shadow-xs"
             >
-              <User className="w-5 h-5 text-[#FF9933]" />
+              <User className="w-5 h-5 text-slate-700" />
             </button>
             <div>
               <h1 className="font-extrabold text-sm text-slate-900 tracking-tight flex items-center gap-1.5">
@@ -157,24 +175,24 @@ export default function HomePremium() {
             onClick={() => navigate("/services")}
             className="relative cursor-pointer"
           >
-            <div className="bg-white border border-orange-200/90 rounded-full py-1.5 px-3.5 text-xs text-slate-500 font-bold flex items-center gap-1.5 shadow-xs hover:border-[#FF9933] transition">
-              <Search className="w-3.5 h-3.5 text-[#FF9933]" />
+            <div className="bg-white border border-slate-200 rounded-full py-1.5 px-3.5 text-xs text-slate-500 font-bold flex items-center gap-1.5 shadow-xs hover:border-[#FF9933] transition">
+              <Search className="w-3.5 h-3.5 text-slate-500" />
               <span>{hi ? "खोजें" : "Search"}</span>
             </div>
           </div>
         </header>
 
-        {/* Hero Banner: RP FOUNDATION VISION (Harmonized Off-White & Saffron Card) */}
+        {/* Hero Banner: RP FOUNDATION VISION (Clean White Card with Subtle Accent Line) */}
         <section
           onClick={() => navigate("/vision-goals")}
-          className="mt-3.5 overflow-hidden rounded-3xl bg-white text-slate-900 p-5 sm:p-6 shadow-xs relative cursor-pointer hover:shadow-md transition-all duration-300 border border-orange-200/80 group"
+          className="mt-3.5 overflow-hidden rounded-3xl bg-white text-slate-900 p-5 sm:p-6 shadow-xs relative cursor-pointer hover:shadow-md transition-all duration-300 border border-slate-200/80 group"
         >
-          {/* Top Tricolor Accent Line */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#FF9933] via-[#F59E0B] to-[#138808]" />
+          {/* Top Subtle Saffron Accent Line */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-[#FF9933]" />
 
           <div className="flex justify-between items-start gap-3">
             <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 border border-orange-200 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-[#FF9933]">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-[#FF9933]">
                 <Sparkles className="w-3 h-3 text-[#FF9933]" />
                 RP Foundation Vision
               </div>
@@ -194,7 +212,7 @@ export default function HomePremium() {
 
             {/* Founder Portrait Box */}
             <div className="relative shrink-0">
-              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden border-2 border-orange-200/80 shadow-md bg-orange-50 group-hover:scale-105 transition-transform duration-300">
+              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50 group-hover:scale-105 transition-transform duration-300">
                 <img
                   src="/assets/founder.png"
                   alt={founderName}
@@ -202,20 +220,20 @@ export default function HomePremium() {
                   onError={(e) => { e.currentTarget.style.display = "none"; }}
                 />
               </div>
-              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-[#FF9933] text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-md whitespace-nowrap">
+              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-md whitespace-nowrap">
                 Founder
               </span>
             </div>
           </div>
 
           {/* Card Footer Bar */}
-          <div className="bg-orange-50/70 border-t border-orange-100 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 px-5 py-3 flex items-center justify-between mt-4">
+          <div className="bg-slate-50 border-t border-slate-100 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 px-5 py-3 flex items-center justify-between mt-4">
             <p className="text-xs font-black text-slate-800">
               {hi ? "राष्ट्र निर्माण एवं जन कल्याण" : "Nation Building & Public Welfare"}
             </p>
             <button
               type="button"
-              className="bg-[#FF9933] text-white text-xs font-black px-4 py-1.5 rounded-xl shadow-xs hover:bg-orange-600 transition flex items-center gap-1"
+              className="bg-slate-900 text-white text-xs font-black px-4 py-1.5 rounded-xl shadow-xs hover:bg-slate-800 transition flex items-center gap-1"
             >
               <span>{hi ? "विवरण देखें" : "Learn More"}</span>
               <ChevronRight className="w-3.5 h-3.5 text-white" />
@@ -224,7 +242,7 @@ export default function HomePremium() {
         </section>
 
         {/* Quote of the Day (Daily Seva Thought by Shri Rohit Pandit Ji) */}
-        <section className="mt-4 bg-[#FFFDF7] rounded-3xl p-5 border border-amber-200/90 shadow-xs relative overflow-hidden">
+        <section className="mt-4 bg-[#FFFDF7] rounded-3xl p-5 border border-amber-200/70 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between pb-2.5 border-b border-amber-100 mb-3">
             <div className="flex items-center gap-2">
               <Quote className="w-4 h-4 text-[#FF9933]" />
@@ -232,7 +250,7 @@ export default function HomePremium() {
                 {hi ? "दैनिक सेवा विचार" : "Quote of the Day"}
               </span>
             </div>
-            <span className="text-[9px] font-black text-amber-700/80 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
               RP Foundation
             </span>
           </div>
@@ -254,41 +272,43 @@ export default function HomePremium() {
                   }).catch(() => undefined);
                 }
               }}
-              className="text-[10px] font-extrabold text-[#FF9933] bg-orange-50 hover:bg-orange-100 border border-orange-200 px-3 py-1 rounded-xl transition flex items-center gap-1.5"
+              className="text-[10px] font-extrabold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-1 rounded-xl transition flex items-center gap-1.5"
             >
-              <Share2 className="w-3 h-3 text-[#FF9933]" />
+              <Share2 className="w-3 h-3 text-slate-600" />
               <span>{hi ? "साझा करें" : "Share Quote"}</span>
             </button>
           </div>
         </section>
 
-        {/* Live Seva Impact Metrics Bar */}
-        <section className="mt-4 bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-600 rounded-3xl p-4 text-white shadow-md">
-          <div className="flex items-center justify-between pb-2 border-b border-white/20">
+        {/* Live Seva Impact Metrics Bar (Dynamic DB Counts, Clean White Card) */}
+        <section className="mt-4 bg-white rounded-3xl p-4 border border-slate-200/80 shadow-xs text-slate-800 space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div className="flex items-center gap-1.5">
-              <TrendingUp className="w-4 h-4 text-amber-200" />
-              <span className="text-[10px] font-black uppercase tracking-wider text-white">
-                {hi ? "RP Foundation का लाइव प्रभाव" : "RP Foundation Live Impact"}
+              <TrendingUp className="w-4 h-4 text-[#FF9933]" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-900">
+                {hi ? "RP Foundation डेटाबेस लाइव प्रभाव" : "RP Foundation Live DB Metrics"}
               </span>
             </div>
-            <span className="text-[9px] font-bold text-amber-100 bg-white/20 px-2 py-0.5 rounded-full">100% Real Impact</span>
+            <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
+              100% Real DB
+            </span>
           </div>
-          <div className="grid grid-cols-4 gap-2 mt-3 text-center">
-            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-2 border border-white/20">
-              <p className="text-sm sm:text-base font-black text-amber-200">5,000+</p>
-              <p className="text-[8px] font-extrabold uppercase text-white/90 leading-tight mt-0.5">{hi ? "रोजगार अवसर" : "Jobs Provided"}</p>
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="bg-slate-50 rounded-2xl p-2 border border-slate-100">
+              <p className="text-sm sm:text-base font-black text-[#FF9933]">{liveStats.totalVolunteers}</p>
+              <p className="text-[8px] font-black uppercase text-slate-500 leading-tight mt-0.5">{hi ? "सक्रिय वालंटियर्स" : "Active Volunteers"}</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-2 border border-white/20">
-              <p className="text-sm sm:text-base font-black text-rose-200">150+</p>
-              <p className="text-[8px] font-extrabold uppercase text-white/90 leading-tight mt-0.5">{hi ? "पिंक रिक्शा" : "Pink Rickshaws"}</p>
+            <div className="bg-slate-50 rounded-2xl p-2 border border-slate-100">
+              <p className="text-sm sm:text-base font-black text-emerald-600">{liveStats.totalDutyHours}h</p>
+              <p className="text-[8px] font-black uppercase text-slate-500 leading-tight mt-0.5">{hi ? "सेवा घंटे" : "Duty Hours"}</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-2 border border-white/20">
-              <p className="text-sm sm:text-base font-black text-emerald-200">50,000+</p>
-              <p className="text-[8px] font-extrabold uppercase text-white/90 leading-tight mt-0.5">{hi ? "स्वास्थ्य लाभ" : "Health Aid"}</p>
+            <div className="bg-slate-50 rounded-2xl p-2 border border-slate-100">
+              <p className="text-sm sm:text-base font-black text-blue-600">{liveStats.approvedReports}</p>
+              <p className="text-[8px] font-black uppercase text-slate-500 leading-tight mt-0.5">{hi ? "फील्ड रिपोर्ट्स" : "Field Reports"}</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-2 border border-white/20">
-              <p className="text-sm sm:text-base font-black text-sky-200">1,000+</p>
-              <p className="text-[8px] font-extrabold uppercase text-white/90 leading-tight mt-0.5">{hi ? "युवा प्रतिभा" : "Youth Sports"}</p>
+            <div className="bg-slate-50 rounded-2xl p-2 border border-slate-100">
+              <p className="text-sm sm:text-base font-black text-purple-600">{liveStats.resolvedGrievances}</p>
+              <p className="text-[8px] font-black uppercase text-slate-500 leading-tight mt-0.5">{hi ? "समाधान शिकायतें" : "Resolved Cases"}</p>
             </div>
           </div>
         </section>
