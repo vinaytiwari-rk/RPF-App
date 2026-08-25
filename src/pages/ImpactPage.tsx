@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ShieldCheck,
   TrendingUp,
+  Clock,
 } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import InstagramApiFeed from "../components/InstagramApiFeed";
@@ -68,6 +69,44 @@ export default function ImpactPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Live Volunteer Seva Duty & Activity Section */}
+        <section className="bg-white rounded-3xl border border-orange-200/80 p-5 shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-orange-100 pb-2.5">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-[#FF9933]" />
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                  {isHi ? "लाइव वालंटियर सेवा एक्टिविटी" : "Live Volunteer Duty & Field Reports"}
+                </h3>
+                <p className="text-[10px] text-slate-500 font-medium">
+                  {isHi ? "स्वयंसेवकों की रीयल-टाइम सेवा ड्यूटी एवं रिपोर्टिंग" : "Real-time volunteer clock-in timers & verified reports"}
+                </p>
+              </div>
+            </div>
+            <span className="bg-emerald-50 text-[#138808] border border-emerald-200 text-[9px] font-black uppercase px-2 py-0.5 rounded-full animate-pulse">
+              100% Live
+            </span>
+          </div>
+
+          <div className="bg-orange-50/50 rounded-2xl p-4 border border-orange-100 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-black text-slate-900">
+                {isHi ? "सेवा ड्यूटी पंच-इन करें या रिपोर्ट भेजें" : "Punch-in Duty Hours & Send Field Reports"}
+              </p>
+              <p className="text-[10px] text-slate-600 font-medium mt-0.5">
+                {isHi ? "लाइव टाइमर, जियो-टैग्ड फोटो एवं वालंटियर रैंकिंग।" : "Live timer, GPS-tagged photos & volunteer standings."}
+              </p>
+            </div>
+            <button
+              onClick={() => navigate("/duty-tracker")}
+              className="bg-[#FF9933] text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-xs hover:bg-orange-600 transition shrink-0 flex items-center gap-1"
+            >
+              <span>{isHi ? "ड्यूटी पोर्टल" : "Duty Portal"}</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </section>
 
