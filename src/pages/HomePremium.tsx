@@ -15,6 +15,7 @@ import {
   Sparkles,
   Quote,
   Share2,
+  TrendingUp,
 } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -258,6 +259,37 @@ export default function HomePremium() {
               <Share2 className="w-3 h-3 text-[#FF9933]" />
               <span>{hi ? "साझा करें" : "Share Quote"}</span>
             </button>
+          </div>
+        </section>
+
+        {/* Live Seva Impact Metrics Bar */}
+        <section className="mt-4 bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-600 rounded-3xl p-4 text-white shadow-md">
+          <div className="flex items-center justify-between pb-2 border-b border-white/20">
+            <div className="flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-amber-200" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-white">
+                {hi ? "RP Foundation का लाइव प्रभाव" : "RP Foundation Live Impact"}
+              </span>
+            </div>
+            <span className="text-[9px] font-bold text-amber-100 bg-white/20 px-2 py-0.5 rounded-full">100% Real Impact</span>
+          </div>
+          <div className="grid grid-cols-4 gap-2 mt-3 text-center">
+            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-2 border border-white/20">
+              <p className="text-sm sm:text-base font-black text-amber-200">5,000+</p>
+              <p className="text-[8px] font-extrabold uppercase text-white/90 leading-tight mt-0.5">{hi ? "रोजगार अवसर" : "Jobs Provided"}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-2 border border-white/20">
+              <p className="text-sm sm:text-base font-black text-rose-200">150+</p>
+              <p className="text-[8px] font-extrabold uppercase text-white/90 leading-tight mt-0.5">{hi ? "पिंक रिक्शा" : "Pink Rickshaws"}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-2 border border-white/20">
+              <p className="text-sm sm:text-base font-black text-emerald-200">50,000+</p>
+              <p className="text-[8px] font-extrabold uppercase text-white/90 leading-tight mt-0.5">{hi ? "स्वास्थ्य लाभ" : "Health Aid"}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-2 border border-white/20">
+              <p className="text-sm sm:text-base font-black text-sky-200">1,000+</p>
+              <p className="text-[8px] font-extrabold uppercase text-white/90 leading-tight mt-0.5">{hi ? "युवा प्रतिभा" : "Youth Sports"}</p>
+            </div>
           </div>
         </section>
 

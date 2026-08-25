@@ -125,6 +125,23 @@ export default function Profile() {
               <div className="rounded-xl border border-white bg-white/80 p-2.5"><p className="text-[8px] font-black uppercase tracking-wider text-green-600">{hi ? "सेवा शुरू" : "Serving since"}</p>{volunteerLoading ? <Loader2 className="mt-1 h-4 w-4 animate-spin text-green-600" /> : <p className="mt-1 text-[11px] font-black text-slate-800">{volunteerSince || (hi ? "उपलब्ध नहीं" : "Not available")}</p>}</div>
               <button onClick={() => navigate("/jan-seva-card")} className="col-span-2 flex items-center justify-between rounded-xl border border-white bg-white/80 p-2.5 text-left transition hover:bg-white sm:col-span-1"><span><p className="text-[8px] font-black uppercase tracking-wider text-violet-600">{hi ? "सेवा कार्ड" : "Seva Card"}</p><p className="mt-1 text-[11px] font-black text-slate-800">{hi ? "कार्ड खोलें" : "Open card"}</p></span><ChevronRight className="h-4 w-4 text-slate-300" /></button>
             </div>
+
+            {/* Seva Badge Progress Milestone */}
+            <div className="mt-3 bg-white/90 rounded-2xl p-3 border border-orange-100/90 shadow-xs">
+              <div className="flex items-center justify-between text-[10px] font-black text-slate-800">
+                <span className="flex items-center gap-1.5 text-amber-700">
+                  <Award className="w-4 h-4 text-[#FF9933]" />
+                  {hi ? "सेवा बैज लेवल 2: सिल्वर वालंटियर" : "Seva Badge Level 2: Silver Volunteer"}
+                </span>
+                <span className="text-[#FF9933]">25 / 50 {hi ? "घंटे" : "hrs"}</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden border border-slate-200/60">
+                <div className="bg-gradient-to-r from-[#FF9933] to-[#F59E0B] h-full rounded-full w-1/2 transition-all duration-500" />
+              </div>
+              <p className="text-[9px] font-bold text-slate-500 mt-1.5">
+                {hi ? "अगला लेवल: गोल्ड वालंटियर बैज (25 घंटे सेवा शेष)" : "Next Milestone: Gold Seva Badge (25 duty hours remaining)"}
+              </p>
+            </div>
           </div>}
 
           <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5">
