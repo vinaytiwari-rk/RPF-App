@@ -218,15 +218,25 @@ export default function InAppBrowser() {
 
             {/* Floating Banner on Delay/Timeout */}
             {timedOut && !loading && (
-              <div className="absolute bottom-16 left-1/2 z-30 -translate-x-1/2 flex items-center gap-3 rounded-2xl border border-orange-200 bg-white/95 px-4 py-2.5 text-xs text-slate-800 shadow-2xl backdrop-blur-md">
-                <Compass className="h-4 w-4 text-[#FF9933] shrink-0" />
-                <span className="font-medium">Page loading delayed?</span>
-                <button
-                  onClick={reload}
-                  className="rounded-xl border border-orange-200 bg-orange-50 px-2.5 py-1 text-[11px] font-bold text-[#FF9933] hover:bg-orange-100"
-                >
-                  Refresh Page
-                </button>
+              <div className="absolute bottom-16 left-1/2 z-30 -translate-x-1/2 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white/95 px-4 py-2.5 text-xs text-slate-800 shadow-2xl backdrop-blur-md max-w-sm">
+                <div className="flex items-center gap-1.5 font-medium">
+                  <Compass className="h-4 w-4 text-[#FF9933] shrink-0" />
+                  <span>Portal loading restricted?</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={reload}
+                    className="rounded-xl border border-orange-200 bg-orange-50 px-2.5 py-1 text-[11px] font-bold text-[#FF9933] hover:bg-orange-100"
+                  >
+                    Refresh
+                  </button>
+                  <button
+                    onClick={openDirectExternal}
+                    className="rounded-xl bg-[#27AE60] px-3 py-1 text-[11px] font-black text-white hover:bg-emerald-600 shadow-xs"
+                  >
+                    Open Direct
+                  </button>
+                </div>
               </div>
             )}
 
