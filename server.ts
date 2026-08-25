@@ -1353,6 +1353,44 @@ async function initDatabase() {
         festivals TEXT
       )
     `, [], "panchang_calendar table creation");
+
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS volunteer_duty_sessions (
+        id VARCHAR(255) PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        user_name TEXT,
+        user_phone TEXT,
+        initiative_name TEXT,
+        clock_in_time TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        clock_out_time TIMESTAMP WITH TIME ZONE,
+        duration_minutes INTEGER DEFAULT 0,
+        clock_in_lat NUMERIC,
+        clock_in_lon NUMERIC,
+        clock_out_lat NUMERIC,
+        clock_out_lon NUMERIC,
+        notes TEXT,
+        status VARCHAR(50) DEFAULT 'active'
+      )
+    `, [], "volunteer_duty_sessions table creation");
+
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS volunteer_field_reports (
+        id VARCHAR(255) PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        user_name TEXT,
+        user_phone TEXT,
+        title TEXT NOT NULL,
+        description TEXT,
+        image_url TEXT,
+        location_name TEXT,
+        latitude NUMERIC,
+        longitude NUMERIC,
+        approval_status VARCHAR(50) DEFAULT 'pending',
+        admin_notes TEXT,
+        points_awarded INTEGER DEFAULT 50,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `, [], "volunteer_field_reports table creation");
     
     await runQuery(`
       CREATE TABLE IF NOT EXISTS chat_history (
@@ -1780,6 +1818,210 @@ import { CORE_SERVICES } from "./src/data/coreServices.js";
 
 
 
+
+// =============================================================================
+// VOLUNTEER DUTY & FIELD REPORTING APIs (100% REAL PRODUCTION BACKEND)
+// =============================================================================
+
+// 1. Clock-in Duty Session
+app.post("/api/volunteers/duty/clock-in", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    const userName = req.user?.name || "Volunteer";
+    const userPhone = req.user?.phone || "";
+    const { initiativeName, lat, lon, notes } = req.body;
+
+    if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
+
+    const existing = await pool.query(
+      `SELECT * FROM volunteer_duty_sessions WHERE user_id = $1 AND status = 'active'`,
+      [userId]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.json({ success: true, session: existing.rows[0], message: "Already on active duty" });
+    }
+
+    const sessionId = "duty_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+    const result = await pool.query(
+      `INSERT INTO volunteer_duty_sessions 
+       (id, user_id, user_name, user_phone, initiative_name, clock_in_time, clock_in_lat, clock_in_lon, notes, status)
+       VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8, 'active')
+       RETURNING *`,
+      [sessionId, userId, userName, userPhone, initiativeName || "General Seva Drive", lat || null, lon || null, notes || ""]
+    );
+
+    res.json({ success: true, session: result.rows[0] });
+  } catch (error: any) {
+    console.error("Clock-in error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 2. Clock-out Duty Session
+app.post("/api/volunteers/duty/clock-out", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    const { sessionId, lat, lon, notes } = req.body;
+
+    if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
+
+    const sessionRes = await pool.query(
+      `SELECT * FROM volunteer_duty_sessions WHERE (id = $1 OR user_id = $2) AND status = 'active' ORDER BY clock_in_time DESC LIMIT 1`,
+      [sessionId || "", userId]
+    );
+
+    if (sessionRes.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "No active duty session found" });
+    }
+
+    const session = sessionRes.rows[0];
+    const clockIn = new Date(session.clock_in_time).getTime();
+    const now = Date.now();
+    const durationMinutes = Math.max(1, Math.round((now - clockIn) / (1000 * 60)));
+
+    const result = await pool.query(
+      `UPDATE volunteer_duty_sessions 
+       SET clock_out_time = NOW(), duration_minutes = $1, clock_out_lat = $2, clock_out_lon = $3, notes = COALESCE($4, notes), status = 'completed'
+       WHERE id = $5
+       RETURNING *`,
+      [durationMinutes, lat || null, lon || null, notes || null, session.id]
+    );
+
+    await pool.query(
+      `UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2`,
+      [Math.round(durationMinutes * 2), userId]
+    );
+
+    res.json({ success: true, session: result.rows[0], durationMinutes });
+  } catch (error: any) {
+    console.error("Clock-out error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 3. Get Active Duty Session for Logged-In User
+app.get("/api/volunteers/duty/active", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
+
+    const result = await pool.query(
+      `SELECT * FROM volunteer_duty_sessions WHERE user_id = $1 AND status = 'active' ORDER BY clock_in_time DESC LIMIT 1`,
+      [userId]
+    );
+
+    res.json({ success: true, session: result.rows[0] || null });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 4. Submit Field Report
+app.post("/api/volunteers/reports/submit", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    const userName = req.user?.name || "Volunteer";
+    const userPhone = req.user?.phone || "";
+    const { title, description, imageUrl, locationName, latitude, longitude } = req.body;
+
+    if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
+    if (!title) return res.status(400).json({ success: false, error: "Title is required" });
+
+    const reportId = "report_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+    const result = await pool.query(
+      `INSERT INTO volunteer_field_reports 
+       (id, user_id, user_name, user_phone, title, description, image_url, location_name, latitude, longitude, approval_status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', NOW())
+       RETURNING *`,
+      [reportId, userId, userName, userPhone, title, description || "", imageUrl || "", locationName || "", latitude || null, longitude || null]
+    );
+
+    res.json({ success: true, report: result.rows[0] });
+  } catch (error: any) {
+    console.error("Report submit error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 5. Get Real Volunteer Leaderboard
+app.get("/api/volunteers/leaderboard", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        u.id, 
+        u.name, 
+        u.avatar, 
+        u.role,
+        COALESCE(SUM(s.duration_minutes), 0) AS total_duty_minutes,
+        COUNT(DISTINCT r.id) AS approved_reports_count,
+        COALESCE(u.points, 0) AS total_points
+      FROM users u
+      LEFT JOIN volunteer_duty_sessions s ON u.id = s.user_id AND s.status = 'completed'
+      LEFT JOIN volunteer_field_reports r ON u.id = r.user_id AND r.approval_status = 'approved'
+      WHERE u.role IN ('volunteer', 'admin', 'super_admin') OR u."isVolunteer" = true
+      GROUP BY u.id, u.name, u.avatar, u.role, u.points
+      ORDER BY total_duty_minutes DESC, total_points DESC
+      LIMIT 20
+    `);
+
+    res.json({ success: true, leaderboard: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 6. Admin APIs: Get All Live Duty Sessions
+app.get("/api/admin/duty-sessions", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM volunteer_duty_sessions ORDER BY clock_in_time DESC LIMIT 100`
+    );
+    res.json({ success: true, sessions: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 7. Admin APIs: Get & Approve Field Reports
+app.get("/api/admin/field-reports", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM volunteer_field_reports ORDER BY created_at DESC LIMIT 100`
+    );
+    res.json({ success: true, reports: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post("/api/admin/field-reports/approve", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { reportId, status, adminNotes, points } = req.body;
+    if (!reportId) return res.status(400).json({ success: false, error: "Report ID required" });
+
+    const pointsToAward = points || 50;
+    const result = await pool.query(
+      `UPDATE volunteer_field_reports 
+       SET approval_status = $1, admin_notes = $2, points_awarded = $3
+       WHERE id = $4
+       RETURNING *`,
+      [status || 'approved', adminNotes || 'Approved by Admin', pointsToAward, reportId]
+    );
+
+    if (result.rows.length > 0 && status === 'approved') {
+      const report = result.rows[0];
+      await pool.query(
+        `UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2`,
+        [pointsToAward, report.user_id]
+      );
+    }
+
+    res.json({ success: true, report: result.rows[0] });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // Serve static assets in production or integrate Vite in development
 async function startServer() {
