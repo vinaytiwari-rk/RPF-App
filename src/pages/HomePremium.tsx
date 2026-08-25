@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import RealTimeAqiWidget from "../components/RealTimeAqiWidget";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 
@@ -167,6 +168,11 @@ export default function HomePremium() {
               <ChevronRight className="w-3.5 h-3.5 text-[#D97706]" />
             </button>
           </div>
+        </section>
+
+        {/* Live Official AQI Widget (data.gov.in CPCB Real-Time Feed) */}
+        <section className="mt-4">
+          <RealTimeAqiWidget isHi={hi} />
         </section>
 
         {/* Quick Actions (Realistic Icon Badges) */}
