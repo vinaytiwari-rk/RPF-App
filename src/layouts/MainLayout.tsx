@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Bell, Search, Globe, Heart, HeartHandshake, Wrench, RotateCw, Home, Sparkles, Headphones, Calendar } from "lucide-react";
+import { ArrowLeft, User, Compass, Bell, Search, Globe, Heart, HeartHandshake, Wrench, RotateCw, Home, Sparkles, Headphones, Calendar, Activity } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
@@ -46,13 +46,12 @@ export default function MainLayout() {
     navigate(p);
   };
 
-  const roots = ["/", "/impact", "/events", "/services", "/profile"];
+  const roots = ["/", "/services", "/impact", "/profile"];
   const root = roots.includes(location.pathname);
   const items = [
     { path: "/", en: "Home", hi: "होम", icon: Home },
-    { path: "/impact", en: "Initiatives", hi: "अभियान", icon: Sparkles },
-    { path: "/events", en: "Events", hi: "कार्यक्रम", icon: Calendar },
-    { path: "/services", en: "Support", hi: "सहायता", icon: Compass },
+    { path: "/services", en: "Explore", hi: "खोजें", icon: Compass },
+    { path: "/impact", en: "Activity", hi: "गतिविधियां", icon: Activity },
     { path: "/profile", en: "Profile", hi: "प्रोफाइल", icon: User },
   ];
 

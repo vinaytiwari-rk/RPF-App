@@ -36,10 +36,10 @@ export default function ImpactPage() {
         <div className="relative z-10 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-md border border-white/30 mb-2 text-white">
             <Sparkles className="w-3.5 h-3.5 text-amber-200" />
-            {isHi ? "सामाजिक प्रभाव एवं रील्स" : "Social Impact & Live Reels"}
+            {isHi ? "गतिविधियां एवं सामाजिक प्रभाव" : "Activity & Social Impact"}
           </div>
           <h1 className="text-2xl font-black tracking-tight leading-tight font-serif text-white">
-            {isHi ? "प्रभाव एवं मीडिया गैलरी" : "RP Foundation Impact & Media"}
+            {isHi ? "गतिविधियां एवं मीडिया गैलरी" : "Activity & Impact Gallery"}
           </h1>
           <p className="text-xs text-orange-50 font-medium mt-1">
             {isHi ? "लाइव इंस्टाग्राम रील्स, वीडियो अपडेट्स एवं सामाजिक बदलाव की कहानियां।" : "Explore live reels, video documentaries & stories of social transformation."}
