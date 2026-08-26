@@ -1,5 +1,6 @@
 name: Build Android APK
 
+# Fresh CI verification after resolving Home carousel typing.
 on:
   workflow_dispatch:
   push:
