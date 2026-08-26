@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BadgePlus, BriefcaseBusiness, ClipboardList, CloudSun, HeartPulse, MapPin, UsersRound, Stethoscope, CalendarDays, ChevronRight, Radio, ShieldAlert } from "lucide-react";
+import { BadgePlus, BriefcaseBusiness, ClipboardList, CloudSun, HeartPulse, MapPin, UsersRound, Stethoscope, CalendarDays, ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -19,8 +19,8 @@ const actions = [
   { title: "Grievance", subtitle: "Submit and track an issue", icon: ClipboardList, route: "/grievance", accent: "text-[#1D5B93] bg-[#EFF6FF]" },
 ];
 
-const defaultPib = ["Official Government updates from the Press Information Bureau (PIB)."];
-const defaultSachet = ["No active disaster alert at this time. Follow official guidance and stay informed."];
+const defaultPib = ["Official Government updates are loading…"];
+const defaultSachet = ["Official disaster alerts are loading…"];
 
 export default function Home() {
   const navigate = useNavigate();
@@ -47,16 +47,20 @@ export default function Home() {
   useEffect(() => {
     let alive = true;
     const load = async () => {
-      try {
-        const response = await fetch("/api/public/live-feeds");
-        const json = await response.json();
-        if (!alive || !json?.success) return;
-        if (Array.isArray(json.data?.pib) && json.data.pib.length) setPibFeed(json.data.pib);
-        if (Array.isArray(json.data?.sachet) && json.data.sachet.length) setSachetFeed(json.data.sachet);
-      } catch {}
+      for (const endpoint of ["/api/public/live-feeds", "/rss-proxy.php"]) {
+        try {
+          const response = await fetch(`${endpoint}?t=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) continue;
+          const json = await response.json();
+          if (!alive || !json?.success) continue;
+          if (Array.isArray(json.data?.pib) && json.data.pib.length) setPibFeed(json.data.pib);
+          if (Array.isArray(json.data?.sachet) && json.data.sachet.length) setSachetFeed(json.data.sachet);
+          return;
+        } catch {}
+      }
     };
     load();
-    const timer = window.setInterval(load, 300000);
+    const timer = window.setInterval(load, 60000);
     return () => { alive = false; window.clearInterval(timer); };
   }, []);
 
@@ -66,12 +70,8 @@ export default function Home() {
   return (
     <main className="min-h-full bg-[#FAFAF7] text-[#12233D]">
       <div className="mx-auto w-full max-w-3xl px-4 pb-3 pt-3 sm:px-6">
-        <section className="mb-2 overflow-hidden rounded-xl border border-[#E7EAE4] bg-white shadow-[0_2px_10px_rgba(15,49,87,.03)]">
-          <div className="flex h-9 items-center"><span className="flex h-full shrink-0 items-center gap-1.5 bg-[#0F3157] px-3 text-[8px] font-black uppercase tracking-[.12em] text-white"><Radio className="h-3 w-3" /> PIB LIVE</span><div className="min-w-0 flex-1 overflow-hidden"><div className="inline-block min-w-max whitespace-nowrap pl-full text-[10px] font-semibold text-[#46566A]" style={{ animation: "rpf-pib-marquee 34s linear infinite" }}>{pibText}</div></div></div>
-        </section>
-        <section className="mb-3 overflow-hidden rounded-xl border border-[#F0DDD5] bg-[#FFFDFC] shadow-[0_2px_10px_rgba(15,49,87,.025)]">
-          <div className="flex h-9 items-center"><span className="flex h-full shrink-0 items-center gap-1.5 bg-[#B42318] px-3 text-[8px] font-black uppercase tracking-[.12em] text-white"><ShieldAlert className="h-3 w-3" /> SACHET</span><div className="min-w-0 flex-1 overflow-hidden"><div className="inline-block min-w-max whitespace-nowrap pr-full text-[10px] font-semibold text-[#6B4B47]" style={{ animation: "rpf-sachet-marquee 34s linear infinite" }}>{sachetText}</div></div></div>
-        </section>
+        <section className="mb-2 overflow-hidden rounded-xl border border-[#E7EAE4] bg-white shadow-[0_2px_10px_rgba(15,49,87,.03)]"><div className="h-9 overflow-hidden"><div className="inline-block min-w-max whitespace-nowrap px-4 text-[10px] font-semibold leading-9 text-[#46566A]" style={{ animation: "rpf-pib-marquee 34s linear infinite" }}>{pibText}</div></div></section>
+        <section className="mb-3 overflow-hidden rounded-xl border border-[#F0DDD5] bg-[#FFFDFC] shadow-[0_2px_10px_rgba(15,49,87,.025)]"><div className="h-9 overflow-hidden"><div className="inline-block min-w-max whitespace-nowrap px-4 text-[10px] font-semibold leading-9 text-[#6B4B47]" style={{ animation: "rpf-sachet-marquee 34s linear infinite" }}>{sachetText}</div></div></section>
 
         <section className="mb-4"><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#138808]">RP Foundation</p><div className="mt-1 flex items-end justify-between gap-3"><div><h1 className="text-[21px] font-black leading-tight tracking-[-0.04em] text-[#12233D]">Namaste, {name} Ji <span className="text-[17px]">🙏</span></h1><p className="mt-0.5 text-[12px] font-bold text-[#64748B]">{greeting}</p></div><div className="flex shrink-0 items-center gap-1.5 pb-0.5 text-[10px] font-bold text-[#64748B]"><MapPin className="h-3.5 w-3.5 text-[#E67817]" /><span className="max-w-[82px] truncate">Your location</span><span className="mx-0.5 text-slate-300">•</span><CloudSun className="h-3.5 w-3.5 text-[#1D5B93]" /><span>25°C</span></div></div></section>
 
