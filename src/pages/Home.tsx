@@ -4,16 +4,18 @@ import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+// These use project-owned visual assets already present in the app. Replace/add through
+// the CMS asset pipeline when the approved campaign posters are uploaded to the repository.
 const slides = [
-  { image: "/assets/mega_camp_banner.png", eyebrow: "Community Service", title: "Health & Community Support", copy: "Camps, care and support initiatives for people who need them.", route: "/services" },
-  { image: "/assets/water_pump_camp.png", eyebrow: "On Ground", title: "Service That Reaches Communities", copy: "Real work, real people and meaningful initiatives.", route: "/impact" },
-  { image: "/assets/founder.png", eyebrow: "RP Foundation", title: "Service. Commitment. Resolve.", copy: "Building stronger communities through sustained action.", route: "/impact" },
-  { image: "/assets/donate.jpg", eyebrow: "Foundation at Work", title: "Support, Care & Opportunity", copy: "Discover programmes and services designed around people.", route: "/services" },
+  { image: "/assets/mega_camp_banner.png", eyebrow: "Healthcare", title: "Health Camps & Community Care", copy: "Explore RP Foundation healthcare initiatives and support services.", route: "/health-care" },
+  { image: "/assets/water_pump_camp.png", eyebrow: "Community", title: "Service on the Ground", copy: "See initiatives focused on practical community support.", route: "/impact" },
+  { image: "/assets/founder.png", eyebrow: "RP Foundation", title: "Service. Commitment. Resolve.", copy: "Discover the people and purpose behind the foundation's work.", route: "/founder-message" },
+  { image: "/assets/donate.jpg", eyebrow: "Initiatives", title: "Support, Care & Opportunity", copy: "Explore programmes and services available through the foundation.", route: "/services" },
 ];
 
 const actions = [
   { title: "Jan Seva Card", icon: BadgePlus, route: "/jan-seva-card", tone: "bg-orange-50 text-[#E67817]" },
-  { title: "Healthcare", icon: HeartPulse, route: "/services", tone: "bg-rose-50 text-rose-600" },
+  { title: "Healthcare", icon: HeartPulse, route: "/health-care", tone: "bg-rose-50 text-rose-600" },
   { title: "Employment", icon: BriefcaseBusiness, route: "/employment", tone: "bg-green-50 text-[#138808]" },
   { title: "Grievance", icon: ClipboardList, route: "/grievance", tone: "bg-blue-50 text-[#1D5B93]" },
 ];
@@ -82,7 +84,7 @@ export default function Home() {
 
         <section className="mt-7 pb-2">
           <div className="mb-3"><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#138808]">Our Impact</p><h2 className="mt-0.5 text-[21px] font-black tracking-[-0.03em] text-[#12233D]">RP Foundation Metrics</h2></div>
-          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-[#E5EAE6] bg-white shadow-[0_4px_16px_rgba(15,49,87,.04)]">{[{ icon: UsersRound, value: "5,000+", label: "Beneficiaries" }, { icon: Stethoscope, value: "Care", label: "Health initiatives" }, { icon: CalendarDays, value: "Active", label: "Community work" }].map(({ icon: Icon, value, label }) => <div key={label} className="border-r border-[#EEF1EE] px-2 py-4 text-center last:border-r-0"><Icon className="mx-auto h-4 w-4 text-[#138808]" /><p className="mt-2 text-[14px] font-black text-[#0F3157]">{value}</p><p className="mt-0.5 text-[8px] font-bold text-slate-400">{label}</p></div>)}</div>
+          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-[#E5EAE6] bg-white shadow-[0_4px_16px_rgba(15,49,87,.04)]">{[{ icon: UsersRound, value: "Community", label: "People first" }, { icon: Stethoscope, value: "Care", label: "Health initiatives" }, { icon: CalendarDays, value: "Active", label: "Foundation work" }].map(({ icon: Icon, value, label }) => <div key={label} className="border-r border-[#EEF1EE] px-2 py-4 text-center last:border-r-0"><Icon className="mx-auto h-4 w-4 text-[#138808]" /><p className="mt-2 text-[14px] font-black text-[#0F3157]">{value}</p><p className="mt-0.5 text-[8px] font-bold text-slate-400">{label}</p></div>)}</div>
         </section>
       </div>
     </main>
