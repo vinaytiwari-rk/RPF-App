@@ -1,34 +1,37 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ServicesManager from "../components/ServicesManager";
 import ServiceContentManager from "../components/ServiceContentManager";
 import { CmsSettings } from "../components/admin/CmsSettings";
 import {
   AlertTriangle,
-  Bell,
   BriefcaseBusiness,
   ClipboardList,
-  CreditCard,
   Droplet,
   FileText,
   LayoutGrid,
   LogOut,
+  RefreshCw,
   Settings2,
   ShieldCheck,
   Users,
-  X,
-  CheckCircle,
-  XCircle,
-  Eye,
-  EyeOff,
+  Images,
   Trash2,
-  Lock,
 } from "lucide-react";
 
 type Section = "overview" | "people" | "content" | "requests" | "blood" | "services" | "system";
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+type AdminState = {
+  users: Row[];
+  volunteers: Row[];
+  announcements: Row[];
+  grievances: Row[];
+  blood: Row[];
+  jobs: Row[];
+};
 
 const nav: Array<{ id: Section; label: string; icon: typeof Users }> = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
@@ -40,742 +43,129 @@ const nav: Array<{ id: Section; label: string; icon: typeof Users }> = [
   { id: "system", label: "System Config", icon: Settings2 },
 ];
 
-async function getAdmin<T>(url: string, token: string) {
-  try {
-    const response = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
-    return (response.data?.data ?? response.data ?? []) as T;
-  } catch (e: any) {
-    console.warn(`Admin API offline for ${url}:`, e?.message);
-    return [] as unknown as T;
+const emptyState: AdminState = { users: [], volunteers: [], announcements: [], grievances: [], blood: [], jobs: [] };
+const authHeaders = (token: string) => ({ Authorization: `Bearer ${token}` });
+
+async function getAdmin(url: string, token: string): Promise<Row[]> {
+  const response = await axios.get(url, { headers: authHeaders(token) });
+  const payload = response.data?.data ?? response.data;
+  if (Array.isArray(payload)) return payload as Row[];
+  if (Array.isArray(payload?.items)) return payload.items as Row[];
+  return [];
+}
+
+function firstText(row: Row, keys: string[]) {
+  for (const key of keys) {
+    const value = row[key];
+    if (value !== undefined && value !== null && String(value).trim()) return String(value);
   }
+  return "—";
+}
+
+function DataTable({ title, rows, emptyText, onDelete }: { title: string; rows: Row[]; emptyText: string; onDelete?: (row: Row) => void }) {
+  if (!rows.length) return <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm font-medium text-slate-500">{emptyText}</div>;
+  return (
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-100 px-5 py-4"><h2 className="text-sm font-black text-slate-900">{title}</h2></div>
+      <div className="divide-y divide-slate-100">
+        {rows.map((row, index) => (
+          <div key={String(row.id ?? row._id ?? index)} className="flex items-center gap-4 px-5 py-4">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-slate-900">{firstText(row, ["name", "title", "subject", "email", "registration_number", "id"])}</p>
+              <p className="mt-1 truncate text-xs text-slate-500">{firstText(row, ["status", "category", "email", "phone", "created_at", "description"])}</p>
+            </div>
+            {onDelete && <button onClick={() => onDelete(row)} className="rounded-xl border border-rose-200 p-2 text-rose-600 hover:bg-rose-50" aria-label="Delete record"><Trash2 className="h-4 w-4" /></button>}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 export default function AdminHub() {
   const { user, token, logout } = useAuth();
+  const navigate = useNavigate();
   const [section, setSection] = useState<Section>("overview");
-  const [users, setUsers] = useState<Row[]>([]);
-  const [volunteers, setVolunteers] = useState<Row[]>([]);
-  const [announcements, setAnnouncements] = useState<Row[]>([]);
-  const [grievances, setGrievances] = useState<Row[]>([]);
-  const [blood, setBlood] = useState<Row[]>([]);
-  const [jobs, setJobs] = useState<Row[]>([]);
+  const [data, setData] = useState<AdminState>(emptyState);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
 
-  // Detailed Modal State
-  const [selectedRecord, setSelectedRecord] = useState<{ row: Row; title: string } | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!token) return;
     setLoading(true);
-    setError("");
-    try {
-      const tasks: Promise<void>[] = [];
-      if (["overview", "people"].includes(section)) {
-        tasks.push(getAdmin<Row[]>("/api/admin/users", token).then(setUsers));
-        tasks.push(getAdmin<Row[]>("/api/admin/volunteers", token).then(setVolunteers));
-      }
-      if (["overview", "content"].includes(section)) tasks.push(getAdmin<Row[]>("/api/admin/announcements", token).then(setAnnouncements));
-      if (["overview", "requests"].includes(section)) tasks.push(getAdmin<Row[]>("/api/admin/grievances", token).then(setGrievances));
-      if (["overview", "blood"].includes(section)) tasks.push(getAdmin<Row[]>("/api/admin/blood_donors", token).then(setBlood));
-      if (["overview", "services"].includes(section)) tasks.push(getAdmin<Row[]>("/api/admin/jobs", token).then(setJobs));
-      await Promise.all(tasks);
-    } catch (e: any) {
-      setError(e?.response?.data?.error || "Unable to load administrator data.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, [section, token]);
-
-  // Merge Citizens and Volunteers into a single unified directory with complete IDs & Passwords
-  const mergedPeople = useMemo(() => {
-    const list: Row[] = [];
-    const seenIds = new Set<string>();
-
-    users.forEach((u) => {
-      const id = String(u.id || u.email || u.name || Math.random());
-      if (!seenIds.has(id)) {
-        seenIds.add(id);
-        list.push({
-          id,
-          user_id: `USR-${String(u.id || '1001')}`,
-          volunteer_id_no: u.registration_number || `RPF-${String(u.id || "101").slice(0, 6).toUpperCase()}`,
-          name: u.name || "Registered Citizen",
-          role_type: u.role || "Citizen",
-          mobile: u.phone || u.mobile || "—",
-          email: u.email || "—",
-          password: u.password || "pass@123",
-          jan_seva_card: u.jan_seva_id || `RPF-${String(u.id || "101").slice(0, 8).toUpperCase()}`,
-          status: "Active",
-          raw: u,
-        });
-      }
+    setErrors([]);
+    const endpoints: Array<[keyof AdminState, string]> = [
+      ["users", "/api/admin/users"],
+      ["volunteers", "/api/admin/volunteers"],
+      ["announcements", "/api/admin/announcements"],
+      ["grievances", "/api/admin/grievances"],
+      ["blood", "/api/admin/blood_donors"],
+      ["jobs", "/api/admin/jobs"],
+    ];
+    const results = await Promise.allSettled(endpoints.map(([, url]) => getAdmin(url, token)));
+    const next: AdminState = { ...emptyState };
+    const failed: string[] = [];
+    results.forEach((result, index) => {
+      const [key, url] = endpoints[index];
+      if (result.status === "fulfilled") next[key] = result.value;
+      else failed.push(`${url}: ${axios.isAxiosError(result.reason) ? result.reason.response?.data?.error || result.reason.message : "request failed"}`);
     });
+    setData(next);
+    setErrors(failed);
+    setLoading(false);
+  }, [token]);
 
-    volunteers.forEach((v) => {
-      const id = String(v.id || v.registration_number || v.name || Math.random());
-      if (!seenIds.has(id)) {
-        seenIds.add(id);
-        list.push({
-          id,
-          user_id: String(v.user_id || v.id || `USR-${id}`),
-          volunteer_id_no: String(v.registration_number || v.volunteer_id || `RPF-V-${String(id).slice(0, 6).toUpperCase()}`),
-          name: v.name || v.username || "Volunteer",
-          role_type: "Volunteer",
-          mobile: v.mobile || v.phone || "—",
-          email: v.email || "—",
-          password: v.password || v.raw?.password || "vol@rpf2026",
-          jan_seva_card: v.jan_seva_id || `RPF-V-${String(v.id || "202").slice(0, 6).toUpperCase()}`,
-          status: v.status || "Active",
-          raw: v,
-        });
-      }
-    });
+  useEffect(() => { void load(); }, [load]);
 
-    return list;
-  }, [users, volunteers]);
+  const counts = useMemo(() => ({
+    people: data.users.length + data.volunteers.length,
+    volunteers: data.volunteers.length,
+    announcements: data.announcements.length,
+    grievances: data.grievances.length,
+    blood: data.blood.length,
+    jobs: data.jobs.length,
+  }), [data]);
 
-  // Filter Jan Seva Card Holders
-  const janSevaCardHolders = useMemo(() => {
-    return mergedPeople.filter((p) => p.jan_seva_card && p.jan_seva_card !== "—");
-  }, [mergedPeople]);
-
-  const counts = useMemo(
-    () => ({
-      people: mergedPeople.length,
-      janSevaCards: janSevaCardHolders.length,
-      announcements: announcements.length,
-      grievances: grievances.length,
-      blood: blood.length,
-      jobs: jobs.length,
-    }),
-    [mergedPeople, janSevaCardHolders, announcements, grievances, blood, jobs]
-  );
-
-  const updateVolunteerStatus = async (id: string, status: string) => {
+  const deleteVolunteer = async (row: Row) => {
     if (!token) return;
+    const id = String(row.id ?? row._id ?? "");
+    if (!id) { toast.error("This volunteer record has no valid ID."); return; }
+    const name = firstText(row, ["name", "username", "email", "registration_number"]);
+    if (!window.confirm(`Delete volunteer “${name}”? This cannot be undone.`)) return;
     try {
-      const res = await axios.put(
-        `/api/admin/volunteers/${id}/status`,
-        { status },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.data?.success) {
-        toast.success(`Volunteer status updated to ${status}`);
-        setSelectedRecord(null);
-        await load();
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to update volunteer status");
-    }
-  };
-
-  const deleteVolunteer = async (id: string, name: string) => {
-    if (!token) return;
-    if (!window.confirm(`Are you sure you want to delete volunteer "${name}" (User ID: ${id}) permanently?`)) return;
-    try {
-      const res = await axios.delete(`/api/admin/volunteers/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data?.success !== false) {
-        toast.success(`Volunteer "${name}" removed from database`);
-        setSelectedRecord(null);
-        await load();
-      }
-    } catch (err: any) {
-      toast.success(`Removed volunteer "${name}"`);
-      setSelectedRecord(null);
+      const response = await axios.delete(`/api/admin/volunteers/${id}`, { headers: authHeaders(token) });
+      if (response.data?.success === false) throw new Error(response.data?.error || "Delete request was rejected.");
+      toast.success("Volunteer deleted.");
       await load();
+    } catch (error: unknown) {
+      const message = axios.isAxiosError(error) ? error.response?.data?.error || error.message : error instanceof Error ? error.message : "Delete failed.";
+      toast.error(message);
     }
   };
 
   if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-slate-50 p-6">
-        <div className="max-w-sm rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-xl">
-          <ShieldCheck className="mx-auto h-12 w-12 text-slate-900" />
-          <h1 className="mt-4 text-xl font-black">Administrator access required</h1>
-          <p className="mt-2 text-sm text-slate-500">This control area is restricted to authorized administrators.</p>
-        </div>
-      </div>
-    );
+    return <div className="grid min-h-screen place-items-center bg-slate-50 p-6"><div className="max-w-sm rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-xl"><ShieldCheck className="mx-auto h-12 w-12 text-slate-900" /><h1 className="mt-4 text-xl font-black">Administrator access required</h1><p className="mt-2 text-sm text-slate-500">This control area is restricted to authorized administrators.</p></div></div>;
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950 font-sans">
+    <div className="min-h-screen bg-slate-50 pb-10 text-slate-950">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#000080]">RP Foundation</p>
-            <h1 className="text-lg font-black tracking-tight text-slate-900">Administrator Control HQ</h1>
-          </div>
-          <button
-            onClick={logout}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 active:scale-95"
-          >
-            <LogOut className="h-4 w-4" /> Sign out
-          </button>
-        </div>
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-[#000080]">RP Foundation</p><h1 className="text-lg font-black tracking-tight">Administrator Control</h1></div><div className="flex gap-2"><button onClick={() => void load()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold" disabled={loading}><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh</button><button onClick={logout} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold"><LogOut className="h-4 w-4" /> Sign out</button></div></div>
       </header>
-
       <div className="mx-auto flex max-w-7xl gap-5 px-4 py-5 sm:px-6">
-        <aside className="hidden w-56 shrink-0 lg:block">
-          <div className="sticky top-24 space-y-1">
-            {nav.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setSection(id)}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold transition ${
-                  section === id ? "bg-[#000080] text-white shadow-sm" : "text-slate-600 hover:bg-white"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </aside>
-
-        <main className="min-w-0 flex-1">
-          <div className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden">
-            {nav.map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => setSection(id)}
-                className={`whitespace-nowrap rounded-xl px-3 py-2 text-xs font-bold ${
-                  section === id ? "bg-[#000080] text-white" : "border border-slate-200 bg-white text-slate-600"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {error && (
-            <div className="mb-4 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
-              <AlertTriangle className="h-4 w-4" />
-              {error}
-            </div>
-          )}
-
-          {loading && (
-            <div className="mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-500">
-              Loading live administrator data…
-            </div>
-          )}
-
-          {section === "overview" && <Overview counts={counts} onNavigate={(s) => setSection(s)} />}
-          {section === "people" && (
-            <People
-              people={mergedPeople}
-              janSevaHolders={janSevaCardHolders}
-              onSelectRecord={(row, title) => { setShowPassword(false); setSelectedRecord({ row, title }); }}
-              onDeleteRecord={(id, name) => deleteVolunteer(id, name)}
-            />
-          )}
-          {section === "content" && <Content announcements={announcements} reload={load} />}
-          {section === "requests" && (
-            <Requests
-              grievances={grievances}
-              onSelectRecord={(row, title) => setSelectedRecord({ row, title })}
-            />
-          )}
-          {section === "blood" && (
-            <BloodNetwork
-              members={blood}
-              onSelectRecord={(row, title) => setSelectedRecord({ row, title })}
-            />
-          )}
-          {section === "services" && (
-            <div className="space-y-5">
-              <ServicesManager />
-              <ServiceContentManager />
-            </div>
-          )}
+        <aside className="hidden w-60 shrink-0 lg:block"><div className="sticky top-24 space-y-1">{nav.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => setSection(id)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold ${section === id ? "bg-[#000080] text-white" : "text-slate-600 hover:bg-white"}`}><Icon className="h-4 w-4" />{label}</button>)}<button onClick={() => navigate("/admin/carousel")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold text-slate-600 hover:bg-white"><Images className="h-4 w-4" />Carousel Manager</button></div></aside>
+        <main className="min-w-0 flex-1"><div className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden">{nav.map(({ id, label }) => <button key={id} onClick={() => setSection(id)} className={`whitespace-nowrap rounded-xl px-3 py-2 text-xs font-bold ${section === id ? "bg-[#000080] text-white" : "border border-slate-200 bg-white text-slate-600"}`}>{label}</button>)}<button onClick={() => navigate("/admin/carousel")} className="whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">Carousel</button></div>
+          {errors.length > 0 && <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><div className="flex items-center gap-2 font-bold"><AlertTriangle className="h-4 w-4" />Some administrator data could not be loaded</div><ul className="mt-2 list-disc space-y-1 pl-5 text-xs">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
+          {loading && <div className="mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-500">Loading administrator data…</div>}
+          {section === "overview" && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{Object.entries(counts).map(([label, value]) => <button key={label} onClick={() => setSection(label === "people" || label === "volunteers" ? "people" : label === "announcements" ? "content" : label === "grievances" ? "requests" : label === "blood" ? "blood" : "services")} className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm"><p className="text-xs font-bold capitalize text-slate-500">{label.replace(/([A-Z])/g, " $1")}</p><p className="mt-2 text-3xl font-black text-slate-900">{value}</p></button>)}</div>}
+          {section === "people" && <div className="space-y-4"><DataTable title="Registered Users" rows={data.users} emptyText="No user records were returned by the API." /><DataTable title="Volunteers" rows={data.volunteers} emptyText="No volunteer records were returned by the API." onDelete={deleteVolunteer} /></div>}
+          {section === "content" && <DataTable title="Announcements" rows={data.announcements} emptyText="No announcements were returned by the API." />}
+          {section === "requests" && <DataTable title="Grievances & Beneficiary Requests" rows={data.grievances} emptyText="No grievance records were returned by the API." />}
+          {section === "blood" && <DataTable title="Blood Network" rows={data.blood} emptyText="No blood donor records were returned by the API." />}
+          {section === "services" && <div className="space-y-5"><DataTable title="Employment Records" rows={data.jobs} emptyText="No job records were returned by the API." /><ServicesManager /><ServiceContentManager /></div>}
           {section === "system" && <CmsSettings />}
         </main>
       </div>
-
-      {/* DETAILED RECORD INSPECTOR MODAL WITH VOLUNTEER CREDENTIALS & REMOVE ACTION */}
-      {selectedRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-fadeIn">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#FF9933]">Record & Credential Inspector</span>
-                <h3 className="text-base font-black text-slate-900">{selectedRecord.title} Details</h3>
-              </div>
-              <button
-                onClick={() => setSelectedRecord(null)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-200"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Detailed Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {/* Highlighted Admin Credentials Box for Volunteers/Users */}
-              <div className="rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50/80 to-amber-50/50 p-4 space-y-3 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-[#FF9933] flex items-center gap-1">
-                    <Lock className="h-3.5 w-3.5" /> Administrative Credential View
-                  </span>
-                  <button
-                    onClick={() => setShowPassword((p) => !p)}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#000080] hover:underline bg-white px-2.5 py-1 rounded-full border border-blue-100 shadow-2xs"
-                  >
-                    {showPassword ? <EyeOff className="h-3.5 w-3.5 text-rose-600" /> : <Eye className="h-3.5 w-3.5 text-emerald-600" />}
-                    {showPassword ? "Hide Password" : "Reveal Password"}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 pt-1 text-left">
-                  <div>
-                    <p className="text-[9px] font-black uppercase text-slate-400">User ID</p>
-                    <p className="text-xs font-black text-slate-900 font-mono mt-0.5">{selectedRecord.row.user_id || selectedRecord.row.id || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black uppercase text-slate-400">Volunteer ID No.</p>
-                    <p className="text-xs font-black text-[#000080] font-mono mt-0.5">{selectedRecord.row.volunteer_id_no || selectedRecord.row.jan_seva_card || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black uppercase text-slate-400">Password</p>
-                    <p className="text-xs font-black text-rose-700 font-mono mt-0.5">
-                      {showPassword ? selectedRecord.row.password || "pass@123" : "••••••••"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Standard Record Details Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                {Object.entries(selectedRecord.row).map(([key, val]) => {
-                  if (typeof val === "object" && val !== null) return null;
-                  return (
-                    <div key={key} className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                        {key.replaceAll("_", " ")}
-                      </p>
-                      <p className="mt-1 text-xs font-bold text-slate-800 break-words">
-                        {val === true ? (
-                          <span className="text-emerald-700 font-black">YES (True)</span>
-                        ) : val === false ? (
-                          <span className="text-rose-600 font-black">NO (False)</span>
-                        ) : (
-                          String(val ?? "—")
-                        )}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* 1-Click Action Buttons for Volunteer Status & Removal */}
-              <div className="mt-6 border-t border-slate-100 pt-4 space-y-3">
-                <p className="text-xs font-bold text-slate-700">1-Click Volunteer Actions:</p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => updateVolunteerStatus(selectedRecord.row.id, "approved")}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 px-3 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-95"
-                  >
-                    <CheckCircle className="h-4 w-4" /> Approve Volunteer
-                  </button>
-                  <button
-                    onClick={() => updateVolunteerStatus(selectedRecord.row.id, "rejected")}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 py-2.5 px-3 text-xs font-bold text-white shadow-sm hover:bg-amber-700 active:scale-95"
-                  >
-                    <XCircle className="h-4 w-4" /> Reject Volunteer
-                  </button>
-                  <button
-                    onClick={() => deleteVolunteer(selectedRecord.row.id, selectedRecord.row.name)}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 py-2.5 px-4 text-xs font-bold text-white shadow-sm hover:bg-rose-700 active:scale-95"
-                  >
-                    <Trash2 className="h-4 w-4" /> Remove Volunteer
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="border-t border-slate-100 bg-slate-50 px-6 py-3 text-right">
-              <button
-                onClick={() => setSelectedRecord(null)}
-                className="rounded-xl bg-slate-900 px-5 py-2 text-xs font-bold text-white"
-              >
-                Close Details
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  );
-}
-
-function Stat({ label, value, icon: Icon, onClick }: { label: string; value: number; icon: typeof Users; onClick?: () => void }) {
-  return (
-    <div
-      onClick={onClick}
-      className="group relative cursor-pointer rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs hover:shadow-md hover:border-[#FF9933]/60 transition active:scale-[.99]"
-    >
-      <div className="flex items-center justify-between">
-        <div className="h-9 w-9 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-[#FF9933] group-hover:scale-105 transition-transform">
-          <Icon className="h-4.5 w-4.5" />
-        </div>
-        <span className="text-[10px] font-black uppercase text-[#000080] bg-blue-50/80 px-2.5 py-1 rounded-full border border-blue-100 group-hover:bg-[#000080] group-hover:text-white transition flex items-center gap-1">
-          View List →
-        </span>
-      </div>
-      <p className="mt-4 text-3xl font-black text-[#000080]">{value}</p>
-      <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">{label}</p>
-    </div>
-  );
-}
-
-function Overview({ counts, onNavigate }: { counts: Record<string, number>; onNavigate: (section: Section) => void }) {
-  return (
-    <>
-      <div className="mb-5">
-        <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#FF9933]">Control centre</p>
-        <h2 className="mt-1 text-2xl font-black text-slate-900">Overview</h2>
-        <p className="mt-1 text-xs text-slate-500 font-semibold">
-          Live records overview. Click any stat card below to view full person-level details and records.
-        </p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <Stat label="People & Volunteers" value={counts.people} icon={Users} onClick={() => onNavigate("people")} />
-        <Stat label="Jan Seva Card Holders" value={counts.janSevaCards} icon={CreditCard} onClick={() => onNavigate("people")} />
-        <Stat label="Beneficiaries / Grievances" value={counts.grievances} icon={ClipboardList} onClick={() => onNavigate("requests")} />
-        <Stat label="Announcements" value={counts.announcements} icon={Bell} onClick={() => onNavigate("content")} />
-        <Stat label="Blood Donors" value={counts.blood} icon={Droplet} onClick={() => onNavigate("blood")} />
-        <Stat label="Job Postings" value={counts.jobs} icon={BriefcaseBusiness} onClick={() => onNavigate("services")} />
-      </div>
-    </>
-  );
-}
-
-function People({
-  people,
-  janSevaHolders,
-  onSelectRecord,
-  onDeleteRecord,
-}: {
-  people: Row[];
-  janSevaHolders: Row[];
-  onSelectRecord: (row: Row, title: string) => void;
-  onDeleteRecord: (id: string, name: string) => void;
-}) {
-  return (
-    <div className="space-y-6">
-      <Table
-        title="Jan Seva Card Holders (Full Details & Active Cards)"
-        rows={janSevaHolders}
-        columns={["user_id", "volunteer_id_no", "name", "role_type", "mobile", "status"]}
-        onSelectRow={(r) => onSelectRecord(r.raw || r, `Jan Seva Card Holder (${r.name})`)}
-      />
-      <Table
-        title="People & Volunteers Directory (Merged Unified Directory)"
-        rows={people}
-        columns={["user_id", "volunteer_id_no", "name", "role_type", "mobile", "password", "status"]}
-        onSelectRow={(r) => onSelectRecord(r.raw || r, `Person Details (${r.name})`)}
-        onDeleteRow={(r) => onDeleteRecord(r.id, r.name)}
-      />
-    </div>
-  );
-}
-
-function Requests({
-  grievances,
-  onSelectRecord,
-}: {
-  grievances: Row[];
-  onSelectRecord: (row: Row, title: string) => void;
-}) {
-  return (
-    <Table
-      title="Grievance & Beneficiary Requests (Full Details)"
-      rows={grievances}
-      columns={["id", "complainant_name", "category", "status", "created_at"]}
-      onSelectRow={(r) => onSelectRecord(r, `Grievance / Beneficiary (${r.complainant_name || r.id})`)}
-    />
-  );
-}
-
-function BloodNetwork({
-  members,
-  onSelectRecord,
-}: {
-  members: Row[];
-  onSelectRecord: (row: Row, title: string) => void;
-}) {
-  return (
-    <Table
-      title="Blood Donation Members (Full Details)"
-      rows={members}
-      columns={["name", "blood_group", "mobile", "email", "location"]}
-      onSelectRow={(r) => onSelectRecord(r, `Blood Donor (${r.name})`)}
-    />
-  );
-}
-
-function Content({ announcements, reload }: { announcements: Row[]; reload: () => void }) {
-  const { token } = useAuth();
-  const [showModal, setShowModal] = useState(false);
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState("Urgent Alert");
-  const [content, setContent] = useState("");
-  const [actionUrl, setActionUrl] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !content.trim()) {
-      toast.error("Please provide both title and content for the announcement.");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const res = await axios.post(
-        "/api/admin/announcements",
-        { title, type, content, action_url: actionUrl },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.data?.success !== false) {
-        toast.success("Live Announcement published successfully!");
-        setShowModal(false);
-        setTitle("");
-        setContent("");
-        setActionUrl("");
-        reload();
-      } else {
-        toast.error("Failed to publish announcement.");
-      }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error || "Unable to publish announcement.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDelete = async (id: string, annTitle: string) => {
-    if (!window.confirm(`Are you sure you want to delete announcement "${annTitle}"?`)) return;
-    try {
-      await axios.delete(`/api/admin/announcements/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Announcement deleted successfully");
-      reload();
-    } catch {
-      toast.success("Announcement removed");
-      reload();
-    }
-  };
-
-  return (
-    <div className="space-y-5 font-sans">
-      {/* Top Banner & Publish Action */}
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-[.18em] text-[#FF9933] bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100">
-            Live Broadcast Manager
-          </span>
-          <h2 className="text-xl font-black text-slate-900 mt-1">Announcements & Public Broadcasts</h2>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Publish live announcements, health camp alerts, and job mela updates that broadcast instantly on every citizen's app screen.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#D97706] px-5 py-3 text-xs font-black text-white shadow-md active:scale-95 transition shrink-0"
-        >
-          <Bell className="h-4 w-4" /> Publish New Announcement
-        </button>
-      </div>
-
-      <Table
-        title="Live Announcements & Broadcast History"
-        rows={announcements}
-        columns={["id", "title", "type", "content", "created_at"]}
-        onDeleteRow={(r) => handleDelete(r.id, r.title)}
-      />
-
-      {/* CREATE ANNOUNCEMENT MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#FF9933]">Broadcast Center</span>
-                <h3 className="text-base font-black text-slate-900">Publish Live Announcement</h3>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-200"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreate} className="p-6 space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700">Announcement Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Free Medical Checkup Camp Tomorrow in Bhopal"
-                  className="mt-1.5 w-full rounded-2xl border border-slate-200 px-4 py-3 text-xs font-bold outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Category / Broadcast Type</label>
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="mt-1.5 w-full rounded-2xl border border-slate-200 px-3.5 py-3 text-xs font-bold outline-none bg-white"
-                >
-                  <option value="Urgent Alert">Urgent Alert</option>
-                  <option value="Health Camp">Health Camp</option>
-                  <option value="Rojgar Mela">Rojgar Mela</option>
-                  <option value="Welfare Scheme">Welfare Scheme</option>
-                  <option value="General News">General News</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Announcement Content / Message *</label>
-                <textarea
-                  required
-                  rows={4}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Enter detailed message to broadcast to all citizens..."
-                  className="mt-1.5 w-full rounded-2xl border border-slate-200 px-4 py-3 text-xs font-medium outline-none focus:border-[#FF9933]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Action Link / Portal URL (Optional)</label>
-                <input
-                  type="url"
-                  value={actionUrl}
-                  onChange={(e) => setActionUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="mt-1.5 w-full rounded-2xl border border-slate-200 px-4 py-3 text-xs font-medium outline-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-bold text-slate-700"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#D97706] px-6 py-2.5 text-xs font-black text-white shadow-md active:scale-95 transition"
-                >
-                  {submitting ? "Broadcasting..." : "Publish Announcement Live"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Table({
-  title,
-  rows,
-  columns,
-  onSelectRow,
-  onDeleteRow,
-}: {
-  title: string;
-  rows: Row[];
-  columns: string[];
-  onSelectRow?: (row: Row) => void;
-  onDeleteRow?: (row: Row) => void;
-}) {
-  return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
-      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-black text-slate-900">{title}</h2>
-          <span className="text-[10px] font-bold text-[#000080] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-            Click row for full details & credentials
-          </span>
-        </div>
-        <span className="text-xs font-black text-[#FF9933]">{rows.length} records</span>
-      </div>
-      <div className="overflow-x-auto">
-        {rows.length === 0 ? (
-          <div className="px-5 py-10 text-center text-xs font-semibold text-slate-400">No records found.</div>
-        ) : (
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-400">
-              <tr>
-                {columns.map((c) => (
-                  <th key={c} className="px-4 py-3 font-black uppercase tracking-wider">
-                    {c.replaceAll("_", " ")}
-                  </th>
-                ))}
-                <th className="px-4 py-3 font-black uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {rows.slice(0, 100).map((row, index) => (
-                <tr
-                  key={row.id || index}
-                  className="hover:bg-orange-50/50 cursor-pointer transition"
-                >
-                  {columns.map((c) => (
-                    <td key={c} onClick={() => onSelectRow?.(row)} className="px-4 py-3 text-slate-800 font-bold">
-                      {c === "password" ? "••••••••" : String(row[c] ?? "—")}
-                    </td>
-                  ))}
-                  <td className="px-4 py-3 text-right">
-                    <div className="inline-flex items-center gap-2">
-                      <button
-                        onClick={() => onSelectRow?.(row)}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#000080] hover:underline"
-                      >
-                        <Eye className="h-3.5 w-3.5 text-[#FF9933]" /> Details
-                      </button>
-                      {onDeleteRow && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteRow(row);
-                          }}
-                          className="text-rose-600 hover:bg-rose-50 p-1 rounded-lg"
-                          title="Remove / Delete Volunteer"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </section>
   );
 }
