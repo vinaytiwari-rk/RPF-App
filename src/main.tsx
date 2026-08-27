@@ -45,16 +45,18 @@ if (Capacitor.isNativePlatform()) {
     let resolvedInput: RequestInfo | URL = input;
     let url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input instanceof Request ? input.url : '';
 
-    // Native WebView has no PHP/API origin of its own. Route both the API and
-    // the cPanel RSS fallback to the deployed application origin.
-    if (url.startsWith('/api/')) url = `${RPF_WEB_ORIGIN}${url}`;
+    // The live feed service is served by the cPanel PHP proxy. Route it directly
+    // instead of waiting for a Node route that may not exist in the native build.
+    if (url.startsWith('/api/public/live-feeds')) url = `${RPF_WEB_ORIGIN}/rss-proxy.php${url.includes('?') ? url.slice(url.indexOf('?')) : ''}`;
+    else if (url.startsWith('api/public/live-feeds')) url = `${RPF_WEB_ORIGIN}/rss-proxy.php`;
+    else if (url.startsWith('/api/')) url = `${RPF_WEB_ORIGIN}${url}`;
     else if (url.startsWith('api/')) url = `${RPF_WEB_ORIGIN}/${url}`;
     else if (url.startsWith('/rss-proxy.php')) url = `${RPF_WEB_ORIGIN}${url}`;
     else if (url.startsWith('rss-proxy.php')) url = `${RPF_WEB_ORIGIN}/${url}`;
 
     if (url) resolvedInput = url;
 
-    const isLiveFeed = url.includes('/api/public/live-feeds') || url.includes('/rss-proxy.php');
+    const isLiveFeed = url.includes('/rss-proxy.php');
     if (!isLiveFeed) return originalFetch(resolvedInput, init);
 
     const controller = new AbortController();
