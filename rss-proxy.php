@@ -54,26 +54,27 @@ function parseXmlTitles($xmlString) {
     libxml_use_internal_errors(true);
     $titles = [];
     
-    $xml = @simplexml_load_string($xmlString, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NONET);
-    if ($xml) {
-        $nodes = $xml->xpath('//item/title | //entry/title');
-        if (is_array($nodes)) {
-            foreach ($nodes as $n) {
-                $t = trim(html_entity_decode((string)$n, ENT_QUOTES | ENT_XML1, 'UTF-8'));
-                $t = preg_replace('/\s+/', ' ', $t);
-                if ($t !== '') $titles[] = $t;
+    preg_match_all('/<title(?:\s[^>]*)?>([\s\S]*?)<\/title>/i', $xmlString, $matches);
+    if (!empty($matches[1])) {
+        foreach ($matches[1] as $idx => $rawTitle) {
+            $clean = preg_replace('/<!\[CDATA\[([\s\S]*?)\]\]>/i', '$1', $rawTitle);
+            $clean = html_entity_decode(strip_tags($clean), ENT_QUOTES | ENT_XML1, 'UTF-8');
+            $clean = preg_replace('/\s+/', ' ', trim($clean));
+            if ($clean !== '' && !preg_match('/^(pib|press information bureau|sachet|ndma|rss feed|disaster alerts|public alerts)$/i', $clean)) {
+                $titles[] = $clean;
                 if (count($titles) >= 20) break;
             }
         }
     }
     
     if (empty($titles)) {
-        preg_match_all('/<(?:item|entry)\b[\s\S]*?<\/(?:item|entry)>/i', $xmlString, $items);
-        if (!empty($items[0])) {
-            foreach ($items[0] as $item) {
-                if (preg_match('/<title(?:\s[^>]*)?>([\s\S]*?)<\/title>/i', $item, $match)) {
-                    $t = html_entity_decode(strip_tags(preg_replace('/<!\[CDATA\[([\s\S]*?)\]\]>/i', '$1', $match[1])), ENT_QUOTES | ENT_XML1, 'UTF-8');
-                    $t = preg_replace('/\s+/', ' ', trim($t));
+        $xml = @simplexml_load_string($xmlString, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NONET);
+        if ($xml) {
+            $nodes = $xml->xpath('//item/title | //entry/title');
+            if (is_array($nodes)) {
+                foreach ($nodes as $n) {
+                    $t = trim(html_entity_decode((string)$n, ENT_QUOTES | ENT_XML1, 'UTF-8'));
+                    $t = preg_replace('/\s+/', ' ', $t);
                     if ($t !== '') $titles[] = $t;
                     if (count($titles) >= 20) break;
                 }
@@ -129,7 +130,7 @@ function fetchSachetFeed() {
     $gdacsTitles = parseXmlTitles($gdacsData);
     if (!empty($gdacsTitles)) return $gdacsTitles;
 
-    return ['National Disaster Management Authority (SACHET) alert system is active.'];
+    return ['National Disaster Management Authority (SACHET) active alert system is online.'];
 }
 
 $pib = fetchPibFeed();
