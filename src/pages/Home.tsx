@@ -64,70 +64,28 @@ function parseFeedItems(items: unknown): string[] {
 
 useEffect(() => {
   let alive = true;
-  try {
-    const cachedPib = localStorage.getItem("@rpf_news_cache");
-    const cachedSachet = localStorage.getItem("@rpf_sachet_cache");
-    if (cachedPib) { const parsed = JSON.parse(cachedPib); if (Array.isArray(parsed) && parsed.length) setPibFeed(parsed); }
-    if (cachedSachet) { const parsed = JSON.parse(cachedSachet); if (Array.isArray(parsed) && parsed.length) setSachetFeed(parsed); }
-  } catch {}
-
-  const load = async () => {
-    let fetchedPib: string[] = [];
-    let fetchedSachet: string[] = [];
-
-    // Try fast cached proxy first, then fallback to API
-    const fastTargets = ["/rss-proxy.php", "/api/public/news"];
-    for (const url of fastTargets) {
-      try {
-        const r = await timedFetch(url, 3500);
-        if (r.ok) {
-          const j = await r.json();
-          const pItems = parseFeedItems(j?.data?.pib ?? j?.data?.news ?? j?.data);
-          const sItems = parseFeedItems(j?.data?.sachet ?? j?.data);
-          if (pItems.length) fetchedPib = pItems;
-          if (sItems.length) fetchedSachet = sItems;
-          if (fetchedPib.length && fetchedSachet.length) break;
-        }
-      } catch {}
-    }
-
-    if (alive) {
-      if (fetchedPib.length > 0) {
-        setPibFeed(fetchedPib);
-        try { localStorage.setItem("@rpf_news_cache", JSON.stringify(fetchedPib)); } catch {}
-      }
-      if (fetchedSachet.length > 0) {
-        setSachetFeed(fetchedSachet);
-        try { localStorage.setItem("@rpf_sachet_cache", JSON.stringify(fetchedSachet)); } catch {}
-      }
-    }
-  };
-
-  void load();
-  const t = window.setInterval(() => void load(), 60000);
-  return () => { alive = false; window.clearInterval(t); };
-}, []);
-
-useEffect(() => {
-  let alive = true;
   if (!("geolocation" in navigator)) { setLocationName("Location unavailable"); return; }
-  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
-    try {
-      const [p, w] = await Promise.all([
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}&zoom=10`, { headers: { Accept: "application/json" } }),
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m&timezone=auto`)
-      ]);
-      const place = await p.json(), weather = await w.json();
-      if (!alive) return;
-      const a = place?.address || {};
-      setLocationName(a.city || a.town || a.village || a.county || a.state || "Current location");
-      if (typeof weather?.current?.temperature_2m === "number") setTemperature(`${Math.round(weather.current.temperature_2m)}°C`);
-    } catch {
-      if (alive) setLocationName("Current location");
-    }
-  }, () => {
-    if (alive) setLocationName("Enable location");
-  }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+  navigator.geolocation.getCurrentPosition(
+    async ({ coords }) => {
+      try {
+        const [p, w] = await Promise.all([
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}&zoom=10`, { headers: { Accept: "application/json" } }),
+          fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m&timezone=auto`)
+        ]);
+        const place = await p.json(), weather = await w.json();
+        if (!alive) return;
+        const a = place?.address || {};
+        setLocationName(a.city || a.town || a.village || a.county || a.state || "Current location");
+        if (typeof weather?.current?.temperature_2m === "number") setTemperature(`${Math.round(weather.current.temperature_2m)}°C`);
+      } catch {
+        if (alive) setLocationName("Current location");
+      }
+    },
+    () => {
+      if (alive) setLocationName("Enable location");
+    },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+  );
   return () => { alive = false; };
 }, []);
 
@@ -137,14 +95,14 @@ const pibDuration = useMemo(() => `${Math.max(50, Math.round(pibText.length * 0.
 const sachetDuration = useMemo(() => `${Math.max(50, Math.round(sachetText.length * 0.08))}s`, [sachetText]);
 
 return (
-  <main className="min-h-full bg-transparent text-[#12233D] font-serif">
+  <main className="min-h-full bg-transparent text-[#12233D]">
     <div className="mx-auto w-full max-w-3xl px-4 pb-3 pt-2 sm:px-6">
       
-      {/* 1. Header ke Turant Baad: Completely Transparent Welcome Section with Purple Name Text & Light Pink Badge */}
+      {/* 1. Header ke Turant Baad: Completely Transparent Welcome Section with Blue Name Text & Saffron Badge */}
       <section className="mb-3.5 bg-transparent py-1">
         <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-pink-400/60 bg-transparent px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-pink-700">
-            <Sparkles className="h-3 w-3 text-pink-600" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-400/60 bg-transparent px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-[#E67817]">
+            <Sparkles className="h-3 w-3 text-[#FF9933]" />
             {greeting}
           </span>
           <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-700 bg-transparent px-2.5 py-0.5 rounded-full border border-slate-300/60">
@@ -159,10 +117,10 @@ return (
             )}
           </div>
         </div>
-        <h1 className="mt-2 text-[22px] font-black leading-tight tracking-tight text-[#7E22CE] font-serif sm:text-[25px]">
+        <h1 className="mt-2 text-[22px] font-black leading-tight tracking-tight text-[#1D5B93] sm:text-[25px]">
           Namaste, {name} Ji <span className="text-[20px]">🙏</span>
         </h1>
-        <p className="mt-0.5 text-[11px] font-semibold text-slate-600 font-serif">
+        <p className="mt-0.5 text-[11px] font-semibold text-slate-600">
           {greeting}! Welcome to RP Foundation Samahit.
         </p>
       </section>
@@ -170,7 +128,7 @@ return (
       {/* 2. Iske Baad: Card 2 - Thought of the Day (Transparent Card) */}
       <section className="mb-3.5 rounded-2xl border border-white/70 bg-transparent px-4 py-3">
         <p className="text-[8.5px] font-black uppercase tracking-[.18em] text-[#E67817]">Thought of the Day</p>
-        <p className="mt-1 text-[12px] font-black leading-5 text-[#12233D] font-serif">“Work is worship, and service is the greatest religion.”</p>
+        <p className="mt-1 text-[12px] font-black leading-5 text-[#12233D]">“Work is worship, and service is the greatest religion.”</p>
       </section>
 
       {/* 3. Fir Marquee: Saffron PIB & Green SACHET Tickers */}
@@ -194,15 +152,15 @@ return (
         <div className="mb-2.5 flex items-end justify-between">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#E67817]">Discover</p>
-            <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">RP Foundation at Work</h2>
+            <h2 className="mt-.5 text-[21px] font-black text-[#12233D]">RP Foundation at Work</h2>
           </div>
           <span className="text-[12px] font-black text-slate-500">{slide + 1}/{slides.length}</span>
         </div>
-        <motion.article key={`${current?.image || "slide"}-${slide}`} initial={{ opacity: .2 }} animate={{ opacity: 1 }} className="relative h-[330px] overflow-hidden rounded-[22px] bg-[#0F3157] shadow-md">
+        <motion.article key={`${current?.image || "slide"}-${slide}`} initial={{ opacity: 0.2 }} animate={{ opacity: 1 }} className="relative h-[330px] overflow-hidden rounded-[22px] bg-[#0F3157] shadow-md">
           <img src={getSlideImage(current?.image, slide)} alt={current?.titleEn || "RP Foundation initiative"} className="absolute inset-0 h-full w-full object-cover" onError={(e) => { const img = e.currentTarget; const fb = fallbackSlides[slide % fallbackSlides.length].image; if (img.src !== fb) img.src = fb; }} />
           <div className="absolute inset-0 bg-gradient-to-t from-[#07182C]/90 via-[#07182C]/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-            <h3 className="text-[22px] font-black leading-tight font-serif">{current?.titleEn}</h3>
+            <h3 className="text-[22px] font-black leading-tight">{current?.titleEn}</h3>
             <p className="mt-1 text-[11px] leading-5 text-slate-200">{current?.subEn}</p>
             <button onClick={() => navigate((current as any)?.route || "/impact")} className="mt-2 inline-flex items-center gap-1 text-[11px] font-black">Explore <ChevronRight className="h-4 w-4" /></button>
           </div>
@@ -218,17 +176,17 @@ return (
       <section className="mt-7">
         <div className="mb-3">
           <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#138808]">Foundation</p>
-          <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">Our Vision & Leadership</h2>
+          <h2 className="mt-.5 text-[21px] font-black text-[#12233D]">Our Vision & Leadership</h2>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <button onClick={() => navigate("/vision-goals")} className="rounded-2xl border border-white/70 bg-transparent p-4 text-left hover:bg-white/20 transition-all">
             <Compass className="h-5 w-5 text-[#1D5B93]" />
-            <p className="mt-4 text-[15px] font-black font-serif">Our Vision</p>
+            <p className="mt-4 text-[15px] font-black">Our Vision</p>
             <p className="mt-1 text-[10px] text-slate-600 font-medium">A clear direction for meaningful social impact.</p>
           </button>
           <button onClick={() => navigate("/founder-message")} className="rounded-2xl border border-white/70 bg-transparent p-4 text-left hover:bg-white/20 transition-all">
             <UserRound className="h-5 w-5 text-[#E67817]" />
-            <p className="mt-4 text-[15px] font-black font-serif">Founder’s Message</p>
+            <p className="mt-4 text-[15px] font-black">Founder’s Message</p>
             <p className="mt-1 text-[10px] text-slate-600 font-medium">A message from Rohit Pandit, Founder of RP Foundation.</p>
           </button>
         </div>
@@ -238,15 +196,15 @@ return (
       <section className="mt-7">
         <div className="mb-3">
           <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#E67817]">Quick Access</p>
-          <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">What can we help with?</h2>
+          <h2 className="mt-.5 text-[21px] font-black text-[#12233D]">What can we help with?</h2>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {actions.map(({ title, subtitle, icon: Icon, route, accent }) => (
-            <motion.button key={title} whileTap={{ scale: .98 }} onClick={() => navigate(route)} className="min-h-[150px] rounded-2xl border border-white/70 bg-transparent p-4 text-left hover:bg-white/20 transition-all">
+            <motion.button key={title} whileTap={{ scale: 0.98 }} onClick={() => navigate(route)} className="min-h-[150px] rounded-2xl border border-white/70 bg-transparent p-4 text-left hover:bg-white/20 transition-all">
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent}`}>
                 <Icon className="h-5 w-5" />
               </div>
-              <p className="mt-4 text-[15px] font-black font-serif">{title}</p>
+              <p className="mt-4 text-[15px] font-black">{title}</p>
               <p className="mt-1 text-[10px] text-slate-600 font-medium">{subtitle}</p>
             </motion.button>
           ))}
@@ -257,13 +215,13 @@ return (
       <section className="mt-7 pb-3">
         <div className="mb-3">
           <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#138808]">Our Impact</p>
-          <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">Social Impact Highlights</h2>
+          <h2 className="mt-.5 text-[21px] font-black text-[#12233D]">Social Impact Highlights</h2>
         </div>
         <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-white/70 bg-transparent">
           {[{ icon: UsersRound, value: "Community", label: "People first" }, { icon: Stethoscope, value: "Care", label: "Health initiatives" }, { icon: CalendarDays, value: "Active", label: "Foundation work" }].map(({ icon: Icon, value, label }) => (
             <div key={label} className="border-r border-slate-200/50 px-2 py-4 text-center last:border-r-0">
               <Icon className="mx-auto h-4 w-4 text-[#138808]" />
-              <p className="mt-2 text-[13px] font-black font-serif">{value}</p>
+              <p className="mt-2 text-[13px] font-black">{value}</p>
               <p className="mt-.5 text-[8px] text-slate-500 font-bold">{label}</p>
             </div>
           ))}

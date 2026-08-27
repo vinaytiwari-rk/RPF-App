@@ -63,7 +63,7 @@ export default function MainLayout() {
                 <ArrowLeft className="h-5 w-5" />
               </motion.button>
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-[#E8ECE7] bg-white/90 shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-transparent">
                 <img src={globalSettings?.logo_image || "/assets/rpf-samahit-icon.png"} alt="समाहित" className="h-full w-full object-contain" />
               </div>
             )}
