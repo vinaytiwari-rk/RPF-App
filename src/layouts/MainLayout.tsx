@@ -72,8 +72,8 @@ export default function MainLayout() {
                 <h1 className="truncate text-[14px] font-black text-slate-900">{decodeURIComponent(new URLSearchParams(location.search).get("title") || "RPF Browser")}</h1>
               ) : (
                 <>
-                  <img src="/assets/samahit_header_logo.png" alt="समाहित" className="h-7 sm:h-8 w-auto max-w-[140px] sm:max-w-[170px] object-contain select-none bg-transparent" />
-                  <p className="truncate text-[8.5px] font-bold tracking-[.08em] text-[#667085] uppercase -mt-0.5">An Initiative For RP Foundation</p>
+                  <img src="/assets/samahit_header_logo.png" alt="समाहित" className="h-9 sm:h-11 w-auto max-w-[190px] sm:max-w-[240px] object-contain select-none bg-transparent" />
+                  <p className="truncate text-[8.5px] font-bold tracking-[.08em] text-[#667085] uppercase -mt-1">An Initiative For RP Foundation</p>
                 </>
               )}
             </div>

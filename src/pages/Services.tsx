@@ -136,11 +136,11 @@ export default function Services() {
 
     const getCardStyle = (catId: string, idx: number) => {
       const pastels = [
-        "bg-[#FFF9E6] border-amber-200/80 text-amber-900 hover:border-amber-400",
-        "bg-[#FFEEEE] border-rose-200/80 text-rose-900 hover:border-rose-400",
-        "bg-[#EAF8EE] border-emerald-200/80 text-emerald-900 hover:border-emerald-400",
-        "bg-[#F3E8FF] border-purple-200/80 text-purple-900 hover:border-purple-400",
-        "bg-[#FFF2E5] border-orange-200/80 text-orange-900 hover:border-orange-400",
+        "bg-[#FFF9E6]/85 backdrop-blur-md border-amber-200/70 text-amber-950 hover:border-amber-400 hover:bg-[#FFF9E6]/95 shadow-xs",
+        "bg-[#FFEEEE]/85 backdrop-blur-md border-rose-200/70 text-rose-950 hover:border-rose-400 hover:bg-[#FFEEEE]/95 shadow-xs",
+        "bg-[#EAF8EE]/85 backdrop-blur-md border-emerald-200/70 text-emerald-950 hover:border-emerald-400 hover:bg-[#EAF8EE]/95 shadow-xs",
+        "bg-[#F3E8FF]/85 backdrop-blur-md border-purple-200/70 text-purple-950 hover:border-purple-400 hover:bg-[#F3E8FF]/95 shadow-xs",
+        "bg-[#FFF2E5]/85 backdrop-blur-md border-orange-200/70 text-orange-950 hover:border-orange-400 hover:bg-[#FFF2E5]/95 shadow-xs",
       ];
       return pastels[idx % pastels.length];
     };
@@ -152,46 +152,45 @@ export default function Services() {
           if (target.startsWith("http")) openExternalLink(target, navigate, svc.titleEn);
           else navigate(target);
         }}
-        className={`group relative w-full rounded-3xl p-4 flex items-center justify-between border shadow-xs hover:shadow-md active:scale-[.99] transition-all duration-200 text-left cursor-pointer ${getCardStyle(svc.category, idx)}`}
+        className={`group relative w-full rounded-3xl p-4 flex items-center justify-between border transition-all duration-200 text-left cursor-pointer ${getCardStyle(svc.category, idx)}`}
       >
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="w-11 h-11 shrink-0 flex items-center justify-center rounded-2xl bg-white/90 shadow-xs border border-white/60 text-[#FF9933]">
             <IconComponent className="w-5 h-5 transition-transform group-hover:scale-110" />
           </div>
 
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h4 className="font-black text-xs text-slate-900 leading-snug truncate">
-                {isHi ? svc.titleHi : svc.titleEn}
-              </h4>
-              <span className="shrink-0 rounded-full bg-emerald-100/90 text-[#27AE60] px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider border border-emerald-300/60 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" />
-                VERIFIED
+          <div className="min-w-0 pr-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm font-black tracking-tight group-hover:text-[#FF9933] transition-colors truncate">
+                {isHi ? svc.titleHi || svc.titleEn : svc.titleEn}
+              </h3>
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                <ShieldCheck className="w-2.5 h-2.5" /> VERIFIED
               </span>
             </div>
-            <p className="text-[10px] font-bold text-slate-600 mt-0.5 line-clamp-1">
-              {isHi ? svc.descHi : svc.descEn}
+            <p className="text-[11px] text-slate-500 font-semibold line-clamp-1 mt-0.5">
+              {isHi ? svc.descHi || svc.descEn : svc.descEn}
             </p>
           </div>
         </div>
 
-        <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 border border-white/60 shadow-xs group-hover:bg-[#FF9933] group-hover:text-white transition">
-          <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-white" />
+        <div className="w-7 h-7 rounded-full bg-white/80 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-400 group-hover:bg-[#FF9933] group-hover:text-white group-hover:border-transparent transition-all">
+          <ChevronRight className="w-4 h-4" />
         </div>
       </button>
     );
   };
 
   return (
-    <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-screen bg-transparent pb-28 font-sans selection:bg-orange-100">
-      {/* Top Banner */}
-      <div className="mb-5 space-y-3">
+    <div className="min-h-full bg-transparent pb-16 text-slate-900">
+      {/* Header Container */}
+      <div className="mx-auto max-w-3xl px-4 pt-4 pb-2 sm:px-6 space-y-3">
         <div>
-          <h1 className="font-black text-2xl text-slate-900 tracking-tight sm:text-3xl font-serif">
-            {isHi ? "सेवाएं एवं सुविधाएं" : "Explore & Services"}
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">
+            {isHi ? "सेवाएं और पोर्टल" : "Explore & Services"}
           </h1>
-          <p className="text-xs text-slate-500 font-bold mt-1">
-            {isHi ? "RP Foundation द्वारा संचालित सत्यापित नागरिक सेवाएं" : "Discover verified citizen welfare programs & official portals"}
+          <p className="text-xs font-semibold text-slate-500 mt-0.5">
+            {isHi ? "सत्यापित नागरिक कल्याण कार्यक्रम और आधिकारिक पोर्टल खोजें" : "Discover verified citizen welfare programs & official portals"}
           </p>
         </div>
 
@@ -205,7 +204,7 @@ export default function Services() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={isHi ? "सेवाएं या योजनाएं खोजें..." : "Search services, portals or schemes..."}
-            className="w-full pl-10 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-xs font-bold shadow-xs focus:outline-none focus:border-[#FF9933] text-slate-900 placeholder:text-slate-400 transition"
+            className="w-full pl-10 pr-4 py-3.5 bg-white/80 backdrop-blur-md border border-white/70 rounded-2xl text-xs font-bold shadow-xs focus:outline-none focus:border-[#FF9933] focus:bg-white text-slate-900 placeholder:text-slate-400 transition"
           />
         </div>
 
@@ -218,7 +217,7 @@ export default function Services() {
               className={`whitespace-nowrap px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all ${
                 category === c.id
                   ? "bg-gradient-to-r from-[#FF9933] to-[#F59E0B] text-white shadow-md"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-orange-50 hover:border-orange-200"
+                  : "bg-white/80 backdrop-blur-md border border-white/70 text-slate-600 hover:bg-white shadow-2xs"
               }`}
             >
               {isHi ? c.hi : c.en}
