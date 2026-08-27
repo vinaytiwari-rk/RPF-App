@@ -110,27 +110,36 @@ export default function InstagramReelsPage() {
       </header>
 
       <div className="relative flex-1 w-full h-full flex items-center justify-center pt-14 pb-24">
-        {embedUrl ? (
+        {currentReel?.videoUrl || (embedUrl && (embedUrl.endsWith(".mp4") || embedUrl.includes(".mp4?"))) ? (
+          <video
+            key={currentReel.id}
+            src={currentReel?.videoUrl || embedUrl}
+            poster={currentReel?.thumbnailUrl}
+            controls
+            autoPlay
+            loop
+            playsInline
+            className="w-full max-w-md h-full max-h-[640px] rounded-2xl object-cover bg-black shadow-2xl"
+          />
+        ) : embedUrl ? (
           <iframe
             key={currentReel.id}
             src={embedUrl}
             title={currentReel.title}
             className="w-full max-w-md h-full max-h-[640px] rounded-2xl border-0 bg-black shadow-2xl"
-            allowTransparency
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; accelerometer; camera; gyroscope; microphone"
           />
         ) : (
           <div className="flex flex-col items-center justify-center p-8 text-center">
             <Instagram className="h-16 w-16 text-rose-500 animate-pulse" />
             <h2 className="mt-4 text-lg font-black">{currentReel?.title || "Instagram Post"}</h2>
             <p className="mt-2 text-xs text-slate-400 max-w-xs">{currentReel?.caption || "Explore RP Foundation Instagram community updates."}</p>
-            <a
-              href={currentReel?.url || "https://www.instagram.com/"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-rose-500 to-amber-500 px-5 py-3 text-xs font-black text-white shadow-lg"
+            <button
+              onClick={() => navigate(`/browser?url=${encodeURIComponent(currentReel?.url || "https://www.instagram.com/")}&title=${encodeURIComponent(currentReel?.title || "Instagram")}`)}
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-rose-500 to-amber-500 px-5 py-3 text-xs font-black text-white shadow-lg active:scale-95"
             >
-              <ExternalLink className="h-4 w-4" /> Open on Instagram
-            </a>
+              <Instagram className="h-4 w-4" /> View in App Browser
+            </button>
           </div>
         )}
 

@@ -110,30 +110,30 @@ export default function ImpactPage() {
           </div>
         </section>
 
-        {/* Featured Reel Card (Emerald Green Theme) */}
-        <section className="bg-gradient-to-br from-[#138808] to-[#15803D] border border-emerald-600 rounded-3xl p-5 text-white shadow-md space-y-3">
+        {/* Featured Reel Card (Emerald Green Theme & In-App Player Link) */}
+        <section className="bg-gradient-to-br from-[#138808] via-emerald-700 to-teal-800 border border-emerald-600 rounded-3xl p-5 text-white shadow-md space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[9px] font-black uppercase tracking-[.18em] text-emerald-100 bg-white/20 px-2.5 py-1 rounded-full border border-white/20">
-              Featured Reel
+              In-App Reels Player
             </span>
             <Instagram className="w-4 h-4 text-emerald-100" />
           </div>
 
           <div>
             <h3 className="text-base font-black leading-snug font-serif text-white">
-              {isHi ? "पिंक ई-रिक्शा एवं महिला आजीविका पहल" : "Pink E-Rickshaw & Women Empowerment Drive"}
+              {isHi ? "पिंक ई-रिक्शा एवं महिला आजीविका रील्स" : "Pink E-Rickshaw & Social Work Reels"}
             </h3>
             <p className="text-xs text-emerald-100 mt-1 line-clamp-2 font-medium">
-              Watch how RP Foundation is empowering women across the region with sustainable green mobility.
+              {isHi ? "ऐप के अंदर ही रील्स स्वाइप करें और ग्राउंड-लेवल कार्यों के वीडियो देखें।" : "Swipe through field reels, health camps and video updates right inside the app."}
             </p>
           </div>
 
           <button
-            onClick={() => openExternalLink(FEATURED_INSTAGRAM_REEL, navigate, "Featured Reel")}
+            onClick={() => navigate("/instagram")}
             className="w-full bg-white text-[#138808] text-xs font-black py-3 rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 hover:bg-emerald-50"
           >
             <Play className="w-4 h-4 fill-[#138808]" />
-            <span>{isHi ? "इंस्टाग्राम पर रील देखें" : "Watch Featured Reel on Instagram"}</span>
+            <span>{isHi ? "एप में रील्स प्लेयर खोलें 📱" : "Open In-App Reels Player 📱"}</span>
           </button>
         </section>
 

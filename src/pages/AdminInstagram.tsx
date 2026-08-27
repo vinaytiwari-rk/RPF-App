@@ -9,6 +9,8 @@ export type InstagramPost = {
   id: string;
   title: string;
   url: string;
+  videoUrl?: string;
+  thumbnailUrl?: string;
   caption?: string;
   category?: string;
   active?: boolean;
@@ -18,13 +20,16 @@ export type InstagramPost = {
 export function extractInstagramEmbedUrl(url: string): { embedUrl: string; shortcode: string; type: "reel" | "post" | "other" } {
   if (!url) return { embedUrl: "", shortcode: "", type: "other" };
   const trimmed = url.trim();
+  if (trimmed.endsWith(".mp4") || trimmed.includes(".mp4?")) {
+    return { embedUrl: trimmed, shortcode: "", type: "reel" };
+  }
   if (trimmed.includes("/embed")) return { embedUrl: trimmed, shortcode: "", type: "post" };
   const match = trimmed.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
   if (match) {
     const type = match[1].toLowerCase() === "reel" ? "reel" : "post";
     const shortcode = match[2];
     return {
-      embedUrl: `https://www.instagram.com/p/${shortcode}/embed`,
+      embedUrl: `https://www.instagram.com/p/${shortcode}/embed/captioned/`,
       shortcode,
       type
     };
@@ -242,14 +247,23 @@ export default function AdminInstagram() {
                   </label>
 
                   <label className="block text-xs font-bold text-slate-700">
+                    Direct MP4 Video File URL (Optional - 100% In-App Video Playback)
+                    <input value={p.videoUrl || ""} onChange={(e) => patch(selected, { videoUrl: e.target.value })} placeholder="https://domain.com/video.mp4" className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-rose-400 font-mono text-xs" />
+                  </label>
+
+                  <label className="block text-xs font-bold text-slate-700">
                     Caption / Description
                     <textarea value={p.caption || ""} onChange={(e) => patch(selected, { caption: e.target.value })} placeholder="Write a short description or caption for this Reel..." rows={3} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-rose-400" />
                   </label>
 
-                  {embedUrl && (
+                  {(p.videoUrl || embedUrl) && (
                     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-2">
-                      <p className="mb-2 text-[10px] font-black uppercase tracking-[.14em] text-slate-500">Live Embed Preview</p>
-                      <iframe src={embedUrl} title="Instagram Preview" className="h-[360px] w-full rounded-xl border-0 bg-white" allowTransparency />
+                      <p className="mb-2 text-[10px] font-black uppercase tracking-[.14em] text-slate-500">Live Player Preview</p>
+                      {p.videoUrl ? (
+                        <video src={p.videoUrl} controls className="h-[360px] w-full rounded-xl object-cover bg-black" />
+                      ) : (
+                        <iframe src={embedUrl} title="Instagram Preview" className="h-[360px] w-full rounded-xl border-0 bg-white" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; accelerometer; camera; gyroscope; microphone" />
+                      )}
                     </div>
                   )}
 

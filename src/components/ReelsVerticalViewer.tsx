@@ -175,15 +175,18 @@ export default function ReelsVerticalViewer({
                   <span className="text-[10px] font-black tracking-wider text-white">Share</span>
                 </button>
 
-                {/* Open in App Browser */}
+                {/* Open in App Player */}
                 <button
-                  onClick={() => openExternalLink(reel.url, navigate, reel.title)}
+                  onClick={() => {
+                    onClose();
+                    navigate("/instagram");
+                  }}
                   className="flex flex-col items-center gap-1 active:scale-95 transition"
                 >
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF9933] to-[#138808] text-white shadow-lg">
                     <Instagram className="h-5 w-5" />
                   </div>
-                  <span className="text-[9px] font-black tracking-wider text-orange-300">Open IG</span>
+                  <span className="text-[9px] font-black tracking-wider text-orange-300">Reels</span>
                 </button>
               </div>
 
