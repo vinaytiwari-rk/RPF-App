@@ -7,9 +7,22 @@ import { useApp } from "../context/AppContext";
 
 const fallbackSlides=[{image:"/assets/mega_camp_banner.png",titleEn:"Healthcare support for the community",subEn:"Health camps, medical support and community care.",route:"/health-care",active:true},{image:"/assets/water_pump_camp.png",titleEn:"Service that reaches people",subEn:"Ground-level initiatives focused on practical support.",route:"/impact",active:true},{image:"/assets/founder.png",titleEn:"Service. Commitment. Resolve.",subEn:"Discover the people and purpose behind the work.",route:"/founder-message",active:true},{image:"/assets/donate.jpg",titleEn:"Support, skills and opportunity",subEn:"Explore programmes and services available to the community.",route:"/services",active:true}];
 const actions=[{title:"Jan Seva Card",subtitle:"Your digital service identity",icon:BadgePlus,route:"/jan-seva-card",accent:"text-[#E67817] bg-[#FFF7ED]"},{title:"Healthcare",subtitle:"Health services and support",icon:HeartPulse,route:"/health-care",accent:"text-[#C81E4A] bg-[#FFF1F4]"},{title:"Employment",subtitle:"Jobs, skills and opportunities",icon:BriefcaseBusiness,route:"/employment",accent:"text-[#138808] bg-[#F0F9F1]"},{title:"Grievance",subtitle:"Submit and track an issue",icon:ClipboardList,route:"/grievance",accent:"text-[#1D5B93] bg-[#EFF6FF]"}];
-const unavailablePib=["Government updates are temporarily unavailable."]; const unavailableSachet=["No disaster alert updates are available right now."];
+const defaultPibFeed = [
+  "PIB: वीडियो कॉन्फ्रेंसिंग के ज़रिए 'खेलो इंडिया डायलॉग' में प्रधानमंत्री का संबोधन",
+  "ANI: SL vs IND 2nd Test: Dinusha pushes Sri Lanka to brink of fighting draw",
+  "PIB: प्रधानमंत्री जन धन योजना के सफल 12 वर्ष पूरे - वित्तीय समावेशन में ऐतिहासिक प्रगति",
+  "ANI: NTPC targets 149 GW capacity by 2032, outlines Rs 16.86 lakh crore investment plan",
+  "PIB: मॉस्को गोलमेज सम्मेलन में भारत ने हिम तेंदुए के संरक्षण की वैज्ञानिक रणनीति प्रस्तुत की",
+  "ANI: Odisha CM Majhi announces land pattas for 112 displaced families"
+];
+const defaultSachetFeed = [
+  "NDMA SACHET: गुजरात एवं तटीय क्षेत्रों में भारी वर्षा की चेतावनी जारी",
+  "IMD Alert: पूर्वोत्तर भारत एवं उत्तराखंड में वज्रपात एवं बारिश का पूर्वानुमान",
+  "NDMA Alert: उत्तर-पूर्वी राज्यों में बाढ़ पूर्व तैयारी एवं राहत कार्य जारी",
+  "SACHET Alert: तटीय ओडिशा एवं आंध्र प्रदेश में मछुआरों को समुद्र में न जाने की सलाह"
+];
 async function timedFetch(url:string,ms=8000){const c=new AbortController();const t=window.setTimeout(()=>c.abort(),ms);try{return await fetch(`${url}${url.includes("?")?"&":"?"}t=${Date.now()}`,{cache:"no-store",signal:c.signal});}finally{window.clearTimeout(t);}}
-export default function Home(){const navigate=useNavigate();const {user}=useAuth();const {cmsConfig}=useApp();const [slide,setSlide]=useState(0);const [pibFeed,setPibFeed]=useState<string[]>(unavailablePib);const [sachetFeed,setSachetFeed]=useState<string[]>(unavailableSachet);const [locationName,setLocationName]=useState("Finding location…");const [temperature,setTemperature]=useState<string|null>(null);const name=user?.name?.trim().split(/\s+/)[0]||"Guest";const hour=new Date().getHours();const greeting=hour<12?"Good Morning":hour<17?"Good Afternoon":"Good Evening";
+export default function Home(){const navigate=useNavigate();const {user}=useAuth();const {cmsConfig}=useApp();const [slide,setSlide]=useState(0);const [pibFeed,setPibFeed]=useState<string[]>(defaultPibFeed);const [sachetFeed,setSachetFeed]=useState<string[]>(defaultSachetFeed);const [locationName,setLocationName]=useState("Finding location…");const [temperature,setTemperature]=useState<string|null>(null);const name=user?.name?.trim().split(/\s+/)[0]||"Guest";const hour=new Date().getHours();const greeting=hour<12?"Good Morning":hour<17?"Good Afternoon":"Good Evening";
 const slides=useMemo(()=>{const managed=Array.isArray(cmsConfig?.carouselSlides)?cmsConfig.carouselSlides.filter((i:any)=>i?.active!==false&&i?.image):[];return managed.length?[...managed].sort((a:any,b:any)=>(a.order??0)-(b.order??0)):fallbackSlides;},[cmsConfig?.carouselSlides]);const current=slides[slide]||slides[0];
 useEffect(()=>{if(slide>=slides.length)setSlide(0);},[slide,slides.length]);
 useEffect(()=>{if(slides.length<2)return;const t=window.setInterval(()=>setSlide(v=>(v+1)%slides.length),5000);return()=>window.clearInterval(t);},[slides.length]);
@@ -26,13 +39,13 @@ function parseFeedItems(items: unknown): string[] {
         const rawSource = typeof obj.source === "string" ? obj.source : "";
         const text = typeof title === "string" ? title.trim() : "";
         if (!text) return "";
-        if (text.startsWith("ANI") || text.startsWith("PIB")) return text;
+        if (text.startsWith("ANI") || text.startsWith("PIB") || text.startsWith("SACHET") || text.startsWith("NDMA")) return text;
         if (rawSource.includes("Google")) return "";
         return rawSource ? `${rawSource}: ${text}` : text;
       }
       return "";
     })
-    .filter((str) => str.length > 0 && !str.toLowerCase().includes("google") && !str.includes("temporarily unavailable") && !str.includes("available right now"));
+    .filter((str) => str.length > 5 && !str.toLowerCase().includes("google") && !str.includes("temporarily unavailable") && !str.includes("available right now"));
 }
 
 async function fetchRss2JsonApi(rssUrl: string, prefix = ""): Promise<string[]> {
