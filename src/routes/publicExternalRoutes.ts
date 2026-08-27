@@ -54,19 +54,6 @@ router.get("/api/public/news", async (_req,res) => {
     const c=cache("india_news_rss",1800000);
     if(c) return res.json({success:true,data:c});
 
-    let aniItems: any[] = [];
-    try {
-      const aniFeed = await fetchRssFeed("https://www.aninews.in/rss/feed/category/national.xml");
-      aniItems = (aniFeed.items || []).slice(0, 15).map(i => ({
-        title: cleanText(i.title || ""),
-        link: i.link,
-        pubDate: i.pubDate || new Date().toISOString(),
-        source: "ANI News",
-        description: cleanText(i.contentSnippet || i.content || ""),
-        image_url: null
-      }));
-    } catch {}
-
     let pibItems: any[] = [];
     try {
       const pibFeed = await fetchRssFeed("https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48");
@@ -80,7 +67,20 @@ router.get("/api/public/news", async (_req,res) => {
       }));
     } catch {}
 
-    const combined = [...aniItems, ...pibItems];
+    let aniItems: any[] = [];
+    try {
+      const aniFeed = await fetchRssFeed("https://www.aninews.in/rss/feed/category/national.xml");
+      aniItems = (aniFeed.items || []).slice(0, 15).map(i => ({
+        title: cleanText(i.title || ""),
+        link: i.link,
+        pubDate: i.pubDate || new Date().toISOString(),
+        source: "ANI News",
+        description: cleanText(i.contentSnippet || i.content || ""),
+        image_url: null
+      }));
+    } catch {}
+
+    const combined = [...pibItems, ...aniItems];
     const data = combined.length > 0 ? combined : pibItems;
     save("india_news_rss", data);
     return res.json({ success: true, data });

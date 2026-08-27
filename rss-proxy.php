@@ -78,7 +78,23 @@ function parseXmlTitles($xmlString, $prefix = '') {
 function fetchCombinedNewsFeed() {
     $combinedTitles = [];
 
-    // 1. ANI News RSS
+    // 1. PIB Official RSS (FIRST PRIORITY)
+    $pibUrls = [
+        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48',
+        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48'
+    ];
+    foreach ($pibUrls as $url) {
+        $data = fetchRawUrl($url);
+        $titles = parseXmlTitles($data, 'PIB');
+        foreach ($titles as $t) {
+            if (!in_array($t, $combinedTitles, true)) {
+                $combinedTitles[] = $t;
+                if (count($combinedTitles) >= 10) break 2;
+            }
+        }
+    }
+
+    // 2. ANI News RSS (SECOND PRIORITY)
     $aniUrls = [
         'https://www.aninews.in/rss/feed/category/national.xml',
         'https://www.aninews.in/rss/feed/category/national/politics.xml',
@@ -94,32 +110,14 @@ function fetchCombinedNewsFeed() {
         foreach ($titles as $t) {
             if (!in_array($t, $combinedTitles, true)) {
                 $combinedTitles[] = $t;
-                if (count($combinedTitles) >= 12) break 2;
-            }
-        }
-    }
-
-    // 2. PIB Official RSS
-    $pibUrls = [
-        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48',
-        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48'
-    ];
-    $pibAdded = 0;
-    foreach ($pibUrls as $url) {
-        $data = fetchRawUrl($url);
-        $titles = parseXmlTitles($data, 'PIB');
-        foreach ($titles as $t) {
-            if (!in_array($t, $combinedTitles, true)) {
-                $combinedTitles[] = $t;
-                $pibAdded++;
-                if ($pibAdded >= 8) break 2;
+                if (count($combinedTitles) >= 20) break 2;
             }
         }
     }
 
     if (!empty($combinedTitles)) return $combinedTitles;
 
-    return ['ANI • PIB राष्ट्रीय समाचार नेटवर्क सक्रिय है।'];
+    return ['PIB • ANI राष्ट्रीय समाचार नेटवर्क सक्रिय है।'];
 }
 
 function fetchSachetFeed() {
