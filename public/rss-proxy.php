@@ -78,7 +78,7 @@ function parseXmlTitles($xmlString, $prefix = '') {
 function fetchCombinedNewsFeed() {
     $combinedTitles = [];
 
-    // 1. ANI News RSS (Using www.aninews.in for instant 80ms resolution)
+    // 1. ANI News RSS
     $aniUrls = [
         'https://www.aninews.in/rss/feed/category/national.xml',
         'https://www.aninews.in/rss/feed/category/national/politics.xml',
@@ -112,32 +112,14 @@ function fetchCombinedNewsFeed() {
             if (!in_array($t, $combinedTitles, true)) {
                 $combinedTitles[] = $t;
                 $pibAdded++;
-                if ($pibAdded >= 6) break 2;
-            }
-        }
-    }
-
-    // 3. Google News India RSS
-    $gnewsUrls = [
-        'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi',
-        'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en'
-    ];
-    $gAdded = 0;
-    foreach ($gnewsUrls as $url) {
-        $data = fetchRawUrl($url);
-        $titles = parseXmlTitles($data, 'Google News');
-        foreach ($titles as $t) {
-            if (!in_array($t, $combinedTitles, true)) {
-                $combinedTitles[] = $t;
-                $gAdded++;
-                if ($gAdded >= 6) break 2;
+                if ($pibAdded >= 8) break 2;
             }
         }
     }
 
     if (!empty($combinedTitles)) return $combinedTitles;
 
-    return ['ANI • PIB • Google News राष्ट्रीय समाचार नेटवर्क सक्रिय है।'];
+    return ['ANI • PIB राष्ट्रीय समाचार नेटवर्क सक्रिय है।'];
 }
 
 function fetchSachetFeed() {
