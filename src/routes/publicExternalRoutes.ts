@@ -174,13 +174,16 @@ const officialUrls = {
 async function refreshOfficialFeed(kind: "pib" | "sachet") {
   const state = officialState[kind];
   if (kind === "pib") {
-    const urls = [
-      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
-      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3",
-      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48",
-      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1"
+    const aniUrls = [
+      "https://aninews.in/rss/feed/category/national.xml",
+      "https://aninews.in/rss/feed/category/national/politics.xml",
+      "https://aninews.in/rss/feed/category/business.xml",
+      "https://aninews.in/rss/feed/category/health.xml",
+      "https://aninews.in/rss/feed/category/world.xml",
+      "https://aninews.in/rss/feed/category/sports/others.xml",
+      "https://aninews.in/rss/feed/category/national/features.xml"
     ];
-    for (const url of urls) {
+    for (const url of aniUrls) {
       try {
         const parsed = await fetchRssFeed(url);
         const items = (parsed.items || []).map(item => cleanText(item.title || item.contentSnippet || item.content || "")).filter(Boolean).slice(0, 20);
@@ -189,9 +192,41 @@ async function refreshOfficialFeed(kind: "pib" | "sachet") {
           state.updatedAt = new Date().toISOString();
           return state.items;
         }
-      } catch (err) {
-        console.warn(`Fallback error fetching PIB feed (${url}):`, err);
-      }
+      } catch {}
+    }
+
+    const pibUrls = [
+      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
+      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3",
+      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48",
+      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1"
+    ];
+    for (const url of pibUrls) {
+      try {
+        const parsed = await fetchRssFeed(url);
+        const items = (parsed.items || []).map(item => cleanText(item.title || item.contentSnippet || item.content || "")).filter(Boolean).slice(0, 20);
+        if (items.length > 0) {
+          state.items = items;
+          state.updatedAt = new Date().toISOString();
+          return state.items;
+        }
+      } catch {}
+    }
+
+    const gnewsUrls = [
+      "https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi",
+      "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en"
+    ];
+    for (const url of gnewsUrls) {
+      try {
+        const parsed = await fetchRssFeed(url);
+        const items = (parsed.items || []).map(item => cleanText(item.title || item.contentSnippet || item.content || "")).filter(Boolean).slice(0, 20);
+        if (items.length > 0) {
+          state.items = items;
+          state.updatedAt = new Date().toISOString();
+          return state.items;
+        }
+      } catch {}
     }
   } else {
     const urls = [
