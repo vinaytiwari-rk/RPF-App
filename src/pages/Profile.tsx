@@ -89,7 +89,7 @@ export default function Profile() {
   ].filter(Boolean) as { icon: typeof Phone; label: string; value: string }[];
 
   return (
-    <main className="min-h-full bg-[#FAF9F6] pb-28 text-slate-900 font-sans selection:bg-orange-100">
+    <main className="min-h-full bg-transparent pb-28 text-slate-900 font-sans selection:bg-orange-100">
       <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6">
         <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="h-1.5 bg-gradient-to-r from-[#FF9933] via-[#FDE047] to-[#138808]" />

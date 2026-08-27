@@ -52,18 +52,18 @@ export default function MainLayout() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#F8F9F7] font-sans text-slate-800 selection:bg-orange-100">
+    <div className="min-h-screen w-full bg-[url('/assets/app_tricolor_bg.png')] bg-cover bg-center bg-fixed font-sans text-slate-800 selection:bg-orange-100">
       <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-gradient-to-r from-[#FF9933] via-[#F59E0B] to-[#138808]" aria-hidden="true" />
       
-      <header className="sticky top-0 z-40 w-full border-b border-[#E8ECE7] bg-white/96 px-3.5 pt-safe-header backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full border-b border-[#E8ECE7]/80 bg-white/85 px-3.5 pt-safe-header backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between sm:h-16 sm:px-1">
           <div className="flex min-w-0 items-center gap-2.5">
             {!root ? (
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)} aria-label="Go back" className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100">
+              <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)} aria-label="Go back" className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100/80">
                 <ArrowLeft className="h-5 w-5" />
               </motion.button>
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-[#E8ECE7] bg-white shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-[#E8ECE7] bg-white/90 shadow-sm">
                 <img src={globalSettings?.logo_image || "/assets/rpf-samahit-icon.png"} alt="समाहित" className="h-full w-full object-contain" />
               </div>
             )}
@@ -85,14 +85,14 @@ export default function MainLayout() {
               </motion.button>
             ) : (
               <>
-                <motion.button whileTap={{ scale: 0.88 }} onClick={() => window.dispatchEvent(new CustomEvent("rpf-open-search"))} aria-label="Search" className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-50">
+                <motion.button whileTap={{ scale: 0.88 }} onClick={() => window.dispatchEvent(new CustomEvent("rpf-open-search"))} aria-label="Search" className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100/80">
                   <Search className="h-[20px] w-[20px]" />
                 </motion.button>
-                <motion.button whileTap={{ scale: 0.88 }} onClick={() => nav("/notifications")} aria-label="Notifications" className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-50">
+                <motion.button whileTap={{ scale: 0.88 }} onClick={() => nav("/notifications")} aria-label="Notifications" className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100/80">
                   <Bell className="h-[20px] w-[20px]" />
                   {unread > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#FF9933] ring-2 ring-white" />}
                 </motion.button>
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => nav("/profile")} aria-label="Profile" className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-[#E8ECE7] bg-slate-50 text-slate-600">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => nav("/profile")} aria-label="Profile" className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-[#E8ECE7] bg-white/80 text-slate-600">
                   {avatar ? <img src={avatar} alt="Profile" className="h-full w-full object-cover" /> : <User className="h-[17px] w-[17px]" />}
                 </motion.button>
               </>
@@ -101,7 +101,7 @@ export default function MainLayout() {
         </div>
       </header>
 
-      <main className="w-full bg-[#F8F9F7] pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+      <main className="w-full bg-transparent pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         <div className="mx-auto w-full max-w-3xl">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={location.pathname} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="w-full">

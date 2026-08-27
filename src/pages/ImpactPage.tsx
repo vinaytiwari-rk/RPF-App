@@ -30,7 +30,7 @@ export default function ImpactPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans selection:bg-orange-100 animate-fadeIn text-slate-800">
+    <div className="min-h-screen bg-transparent pb-28 font-sans selection:bg-orange-100 animate-fadeIn text-slate-800">
       {/* Header Banner (Vibrant Saffron-Emerald Tricolor) */}
       <div className="bg-gradient-to-br from-[#FF9933] via-[#F59E0B] to-[#138808] p-6 text-white relative overflow-hidden shadow-md">
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />

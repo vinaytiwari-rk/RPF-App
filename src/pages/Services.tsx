@@ -183,7 +183,7 @@ export default function Services() {
   };
 
   return (
-    <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-screen bg-[#FAF9F6] pb-28 font-sans selection:bg-orange-100">
+    <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-screen bg-transparent pb-28 font-sans selection:bg-orange-100">
       {/* Top Banner */}
       <div className="mb-5 space-y-3">
         <div>
