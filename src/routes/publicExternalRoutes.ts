@@ -21,22 +21,37 @@ router.get("/api/public/remote-jobs", async (_req,res) => { try { const {data}=a
 router.get("/api/public/nearby", async (req,res) => { try { const lat=Number(req.query.lat),lon=Number(req.query.lon),type=String(req.query.type||"police"); if(!Number.isFinite(lat)||!Number.isFinite(lon)||!["police","veterinary"].includes(type)) return res.status(400).json({success:false,error:"Invalid nearby search"}); const key=`nearby_${type}_${lat.toFixed(3)}_${lon.toFixed(3)}`; const c=cache(key,86400000); if(c) return res.json({success:true,data:c}); const tag=type==="police"?"amenity=police":"amenity=veterinary"; const q=`[out:json][timeout:10];node[${tag}](around:5000,${lat},${lon});out;`; const {data}=await axios.get("https://overpass-api.de/api/interpreter",{params:{data:q},timeout:12000}); const locations=(data.elements||[]).map((e:any)=>({name:e.tags?.name||`Unnamed ${type}`,lat:e.lat,lon:e.lon})); save(key,locations); return res.json({success:true,data:locations}); } catch { return res.status(503).json({success:false,error:"Nearby search temporarily unavailable"}); } });
 router.get("/api/public/disaster-alerts", async (_req,res) => { try { const c=cache("disaster_rss",900000); if(c) return res.json({success:true,data:c}); const feed=await rssParser.parseURL("https://www.gdacs.org/xml/rss.xml"); const data=feed.items.filter(i=>`${i.title||""} ${i.contentSnippet||""}`.toLowerCase().includes("india")).slice(0,30).map(i=>({id:i.guid||i.link,titleEn:i.title,titleHi:i.title,severity:"Alert",link:i.link})); save("disaster_rss",data); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Disaster alerts temporarily unavailable"}); } });
 
+const fetchOfficialFeed = async (url: string) => {
+  const { data } = await axios.get<string>(url, {
+    responseType: "text",
+    timeout: 7000,
+    maxRedirects: 5,
+    headers: {
+      "User-Agent": "RPFoundation-App/1.0 RSS Reader",
+      "Accept": "application/rss+xml, application/xml, text/xml, */*"
+    }
+  });
+  return rssParser.parseString(data);
+};
+
 router.get("/api/public/live-feeds", async (_req,res) => {
-  const fallbackPib=["Government updates and public information from Press Information Bureau."];
-  const fallbackSachet=["No active disaster alert at this time. Stay informed and follow official guidance."];
+  const fallbackPib=["Official government updates are temporarily unavailable."];
+  const fallbackSachet=["Official public alerts are temporarily unavailable."];
+  const cached=cache("official_live_feeds",300000);
+  if(cached) return res.json({success:true,data:cached});
   try {
-    const cached=cache("official_live_feeds",300000);
-    if(cached) return res.json({success:true,data:cached});
     const [pibResult,sachetResult]=await Promise.allSettled([
-      rssParser.parseURL("https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=1&reg=1"),
-      rssParser.parseURL("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml")
+      fetchOfficialFeed("https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=1&reg=1"),
+      fetchOfficialFeed("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml")
     ]);
-    const pib=pibResult.status==="fulfilled" ? pibResult.value.items.map(i=>cleanText(i.title||"")).filter(Boolean).slice(0,12) : fallbackPib;
-    const sachet=sachetResult.status==="fulfilled" ? sachetResult.value.items.map(i=>cleanText(i.title||i.contentSnippet||"")).filter(Boolean).slice(0,12) : fallbackSachet;
+    const pib=pibResult.status==="fulfilled" ? pibResult.value.items.map(i=>cleanText(i.title||i.contentSnippet||"")).filter(Boolean).slice(0,12) : fallbackPib;
+    const sachet=sachetResult.status==="fulfilled" ? sachetResult.value.items.map(i=>cleanText(i.title||i.contentSnippet||i.content||"")).filter(Boolean).slice(0,12) : fallbackSachet;
     const data={pib:pib.length?pib:fallbackPib,sachet:sachet.length?sachet:fallbackSachet,updatedAt:new Date().toISOString()};
     save("official_live_feeds",data);
     return res.json({success:true,data});
-  } catch { return res.json({success:true,data:{pib:fallbackPib,sachet:fallbackSachet,updatedAt:new Date().toISOString()}}); }
+  } catch {
+    return res.status(200).json({success:true,data:{pib:fallbackPib,sachet:fallbackSachet,updatedAt:new Date().toISOString()}});
+  }
 });
 
 export default router;
