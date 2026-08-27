@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Users,
   Images,
+  Instagram,
   Trash2,
 } from "lucide-react";
 
@@ -153,11 +154,35 @@ export default function AdminHub() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-[#000080]">RP Foundation</p><h1 className="text-lg font-black tracking-tight">Administrator Control</h1></div><div className="flex gap-2"><button onClick={() => void load()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold" disabled={loading}><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh</button><button onClick={logout} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold"><LogOut className="h-4 w-4" /> Sign out</button></div></div>
       </header>
       <div className="mx-auto flex max-w-7xl gap-5 px-4 py-5 sm:px-6">
-        <aside className="hidden w-60 shrink-0 lg:block"><div className="sticky top-24 space-y-1">{nav.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => setSection(id)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold ${section === id ? "bg-[#000080] text-white" : "text-slate-600 hover:bg-white"}`}><Icon className="h-4 w-4" />{label}</button>)}<button onClick={() => navigate("/admin/carousel")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold text-slate-600 hover:bg-white"><Images className="h-4 w-4" />Carousel Manager</button></div></aside>
-        <main className="min-w-0 flex-1"><div className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden">{nav.map(({ id, label }) => <button key={id} onClick={() => setSection(id)} className={`whitespace-nowrap rounded-xl px-3 py-2 text-xs font-bold ${section === id ? "bg-[#000080] text-white" : "border border-slate-200 bg-white text-slate-600"}`}>{label}</button>)}<button onClick={() => navigate("/admin/carousel")} className="whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">Carousel</button></div>
+        <aside className="hidden w-60 shrink-0 lg:block"><div className="sticky top-24 space-y-1">{nav.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => setSection(id)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold ${section === id ? "bg-[#000080] text-white" : "text-slate-600 hover:bg-white"}`}><Icon className="h-4 w-4" />{label}</button>)}<button onClick={() => navigate("/admin/carousel")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold text-slate-600 hover:bg-white"><Images className="h-4 w-4" />Carousel Manager</button><button onClick={() => navigate("/admin/instagram")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold text-rose-600 hover:bg-rose-50"><Instagram className="h-4 w-4" />Instagram Reels CMS</button></div></aside>
+        <main className="min-w-0 flex-1"><div className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden">{nav.map(({ id, label }) => <button key={id} onClick={() => setSection(id)} className={`whitespace-nowrap rounded-xl px-3 py-2 text-xs font-bold ${section === id ? "bg-[#000080] text-white" : "border border-slate-200 bg-white text-slate-600"}`}>{label}</button>)}<button onClick={() => navigate("/admin/carousel")} className="whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">Carousel</button><button onClick={() => navigate("/admin/instagram")} className="whitespace-nowrap rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">Instagram CMS</button></div>
           {errors.length > 0 && <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><div className="flex items-center gap-2 font-bold"><AlertTriangle className="h-4 w-4" />Some administrator data could not be loaded</div><ul className="mt-2 list-disc space-y-1 pl-5 text-xs">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
           {loading && <div className="mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-500">Loading administrator data…</div>}
-          {section === "overview" && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{Object.entries(counts).map(([label, value]) => <button key={label} onClick={() => setSection(label === "people" || label === "volunteers" ? "people" : label === "announcements" ? "content" : label === "grievances" ? "requests" : label === "blood" ? "blood" : "services")} className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm"><p className="text-xs font-bold capitalize text-slate-500">{label.replace(/([A-Z])/g, " $1")}</p><p className="mt-2 text-3xl font-black text-slate-900">{value}</p></button>)}</div>}
+          {section === "overview" && (
+            <div className="space-y-5">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <button onClick={() => navigate("/admin/carousel")} className="flex items-center justify-between rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-5 text-left shadow-xs hover:border-blue-300">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-wider text-blue-600">Media Content</p>
+                    <p className="mt-1 text-base font-black text-slate-900">Carousel Manager</p>
+                    <p className="mt-0.5 text-xs text-slate-500">Manage banner slides & announcements</p>
+                  </div>
+                  <Images className="h-7 w-7 text-blue-600 shrink-0" />
+                </button>
+                <button onClick={() => navigate("/admin/instagram")} className="flex items-center justify-between rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-amber-50 p-5 text-left shadow-xs hover:border-rose-300">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-wider text-rose-600">Social Media</p>
+                    <p className="mt-1 text-base font-black text-slate-900">Instagram Reels CMS</p>
+                    <p className="mt-0.5 text-xs text-slate-500">Post Reels links & arrange swipe player</p>
+                  </div>
+                  <Instagram className="h-7 w-7 text-rose-600 shrink-0" />
+                </button>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {Object.entries(counts).map(([label, value]) => <button key={label} onClick={() => setSection(label === "people" || label === "volunteers" ? "people" : label === "announcements" ? "content" : label === "grievances" ? "requests" : label === "blood" ? "blood" : "services")} className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm"><p className="text-xs font-bold capitalize text-slate-500">{label.replace(/([A-Z])/g, " $1")}</p><p className="mt-2 text-3xl font-black text-slate-900">{value}</p></button>)}
+              </div>
+            </div>
+          )}
           {section === "people" && <div className="space-y-4"><DataTable title="Registered Users" rows={data.users} emptyText="No user records were returned by the API." /><DataTable title="Volunteers" rows={data.volunteers} emptyText="No volunteer records were returned by the API." onDelete={deleteVolunteer} /></div>}
           {section === "content" && <DataTable title="Announcements" rows={data.announcements} emptyText="No announcements were returned by the API." />}
           {section === "requests" && <DataTable title="Grievances & Beneficiary Requests" rows={data.grievances} emptyText="No grievance records were returned by the API." />}

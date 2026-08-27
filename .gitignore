@@ -8,6 +8,10 @@ coverage/
 dist/
 android/
 APK+/
+APK/
+APK_EXTRACT/
+.android/
+Android Studio/
 scratch/
 
 
