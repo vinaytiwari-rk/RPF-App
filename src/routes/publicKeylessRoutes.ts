@@ -89,8 +89,14 @@ router.get("/api/public/news", async (_req,res) => {
       }));
     } catch {}
 
-    const combined = [...pibItems, ...aniItems];
-    const data = combined.length > 0 ? combined : pibItems;
+    const interleaved: any[] = [];
+    const maxLen = Math.max(pibItems.length, aniItems.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (i < pibItems.length) interleaved.push(pibItems[i]);
+      if (i < aniItems.length) interleaved.push(aniItems[i]);
+    }
+
+    const data = interleaved.length > 0 ? interleaved : pibItems;
     put("india_news_rss", data);
     return res.json({ success: true, data });
   } catch {

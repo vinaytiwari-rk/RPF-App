@@ -76,9 +76,8 @@ function parseXmlTitles($xmlString, $prefix = '') {
 }
 
 function fetchCombinedNewsFeed() {
-    $combinedTitles = [];
-
-    // 1. PIB Official RSS (FIRST PRIORITY)
+    // 1. Fetch PIB Official RSS
+    $pibTitles = [];
     $pibUrls = [
         'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48',
         'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48'
@@ -87,14 +86,15 @@ function fetchCombinedNewsFeed() {
         $data = fetchRawUrl($url);
         $titles = parseXmlTitles($data, 'PIB');
         foreach ($titles as $t) {
-            if (!in_array($t, $combinedTitles, true)) {
-                $combinedTitles[] = $t;
-                if (count($combinedTitles) >= 10) break 2;
+            if (!in_array($t, $pibTitles, true)) {
+                $pibTitles[] = $t;
+                if (count($pibTitles) >= 15) break 2;
             }
         }
     }
 
-    // 2. ANI News RSS (SECOND PRIORITY)
+    // 2. Fetch ANI News RSS
+    $aniTitles = [];
     $aniUrls = [
         'https://www.aninews.in/rss/feed/category/national.xml',
         'https://www.aninews.in/rss/feed/category/national/politics.xml',
@@ -108,14 +108,26 @@ function fetchCombinedNewsFeed() {
         $data = fetchRawUrl($url);
         $titles = parseXmlTitles($data, 'ANI');
         foreach ($titles as $t) {
-            if (!in_array($t, $combinedTitles, true)) {
-                $combinedTitles[] = $t;
-                if (count($combinedTitles) >= 20) break 2;
+            if (!in_array($t, $aniTitles, true)) {
+                $aniTitles[] = $t;
+                if (count($aniTitles) >= 15) break 2;
             }
         }
     }
 
-    if (!empty($combinedTitles)) return $combinedTitles;
+    // 3. Alternating Interleaving: 1 PIB -> 1 ANI -> 1 PIB -> 1 ANI ...
+    $interleaved = [];
+    $maxCount = max(count($pibTitles), count($aniTitles));
+    for ($i = 0; $i < $maxCount; $i++) {
+        if (isset($pibTitles[$i])) {
+            $interleaved[] = $pibTitles[$i];
+        }
+        if (isset($aniTitles[$i])) {
+            $interleaved[] = $aniTitles[$i];
+        }
+    }
+
+    if (!empty($interleaved)) return $interleaved;
 
     return ['PIB • ANI राष्ट्रीय समाचार नेटवर्क सक्रिय है।'];
 }
