@@ -55,7 +55,7 @@ export default function MainLayout() {
     <div className="min-h-screen w-full bg-[url('/assets/app_tricolor_bg.png')] bg-cover bg-center bg-fixed font-sans text-slate-800 selection:bg-orange-100">
       <div className="fixed inset-x-0 top-0 z-[60] h-1 bg-gradient-to-r from-[#FF9933] via-[#F59E0B] to-[#138808]" aria-hidden="true" />
       
-      <header className="sticky top-0 z-40 w-full border-b border-[#E8ECE7]/80 bg-white/85 px-3.5 pt-safe-header backdrop-blur-xl">
+      <header className="sticky top-0 z-40 w-full border-b border-orange-200/50 bg-[url('/assets/app_tricolor_bg.png')] bg-cover bg-center bg-fixed bg-white/75 px-3.5 pt-safe-header backdrop-blur-xl shadow-xs">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between sm:h-16 sm:px-1">
           <div className="flex min-w-0 items-center gap-2.5">
             {!root ? (
@@ -114,7 +114,7 @@ export default function MainLayout() {
       <GlobalMiniPlayer />
 
       {/* Android Native Standard Bottom Navigation */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-3xl border-t border-[#E6EAE6] bg-white/98 px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_20px_rgba(15,49,87,.08)] backdrop-blur-xl">
+      <nav className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-3xl border-t border-orange-200/50 bg-[url('/assets/app_tricolor_bg.png')] bg-cover bg-center bg-fixed bg-white/85 px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_20px_rgba(15,49,87,.08)] backdrop-blur-xl">
         <div className="flex items-center justify-around">
           {items.map(({ path, label, icon: Icon }) => {
             const active = location.pathname === path;
