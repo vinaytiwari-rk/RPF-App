@@ -173,15 +173,43 @@ const officialUrls = {
 
 async function refreshOfficialFeed(kind: "pib" | "sachet") {
   const state = officialState[kind];
-  try {
-    const parsed = await fetchRssFeed(officialUrls[kind]);
-    const items = parsed.items.map(item => cleanText(item.title || item.contentSnippet || item.content || "")).filter(Boolean).slice(0, 20);
-    if (items.length) {
-      state.items = items;
-      state.updatedAt = new Date().toISOString();
+  if (kind === "pib") {
+    const urls = [
+      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
+      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48",
+      "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en"
+    ];
+    for (const url of urls) {
+      try {
+        const parsed = await fetchRssFeed(url);
+        const items = (parsed.items || []).map(item => cleanText(item.title || item.contentSnippet || item.content || "")).filter(Boolean).slice(0, 20);
+        if (items.length > 0) {
+          state.items = items;
+          state.updatedAt = new Date().toISOString();
+          return state.items;
+        }
+      } catch (err) {
+        console.warn(`Fallback error fetching PIB feed (${url}):`, err);
+      }
     }
-  } catch (err) {
-    console.warn(`Error refreshing official feed (${kind}):`, err);
+  } else {
+    const urls = [
+      "https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml",
+      "https://www.gdacs.org/xml/rss.xml"
+    ];
+    for (const url of urls) {
+      try {
+        const parsed = await fetchRssFeed(url);
+        const items = (parsed.items || []).map(item => cleanText(item.title || item.contentSnippet || item.content || "")).filter(Boolean).slice(0, 20);
+        if (items.length > 0) {
+          state.items = items;
+          state.updatedAt = new Date().toISOString();
+          return state.items;
+        }
+      } catch (err) {
+        console.warn(`Fallback error fetching SACHET feed (${url}):`, err);
+      }
+    }
   }
   return state.items;
 }
