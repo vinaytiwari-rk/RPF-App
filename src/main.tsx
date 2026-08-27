@@ -22,54 +22,47 @@ async function checkForWebUpdate() {
     const payload = await response.json();
     const remoteVersion = String(payload?.version || '').trim();
     if (!remoteVersion) return;
-
     const localVersion = localStorage.getItem(RPF_VERSION_KEY);
     if (!localVersion) {
       localStorage.setItem(RPF_VERSION_KEY, remoteVersion);
       return;
     }
     if (localVersion === remoteVersion) return;
-
     localStorage.setItem(RPF_VERSION_KEY, remoteVersion);
     window.location.reload();
   } catch {
-    // Offline or temporarily unavailable: keep the currently loaded app running.
+    // Keep the currently loaded app running when the network is unavailable.
   } finally {
     updateCheckInFlight = false;
   }
 }
 
-// Intercept relative paths for Capacitor native builds
 if (Capacitor.isNativePlatform()) {
   axios.defaults.baseURL = RPF_WEB_ORIGIN;
+  const originalFetch = window.fetch.bind(window);
 
-  const originalFetch = window.fetch;
   window.fetch = function (input, init) {
-    if (typeof input === 'string') {
-      if (input.startsWith('/api/')) {
-        input = `${RPF_WEB_ORIGIN}${input}`;
-      } else if (input.startsWith('api/')) {
-        input = `${RPF_WEB_ORIGIN}/${input}`;
-      }
-    } else if (input instanceof URL) {
-      if (input.pathname.startsWith('/api/')) {
-        return originalFetch(new URL(input.pathname, RPF_WEB_ORIGIN).toString(), init);
-      } else if (input.pathname.startsWith('api/')) {
-        return originalFetch(new URL('/' + input.pathname, RPF_WEB_ORIGIN).toString(), init);
-      }
-    } else if (input && typeof input === 'object' && 'url' in input) {
-      const urlStr = String((input as any).url);
-      if (urlStr.startsWith('/api/')) {
-        return originalFetch(new Request(`${RPF_WEB_ORIGIN}${urlStr}`, input as RequestInit), init);
-      } else if (urlStr.startsWith('api/')) {
-        return originalFetch(new Request(`${RPF_WEB_ORIGIN}/${urlStr}`, input as RequestInit), init);
-      }
-    }
-    return originalFetch(input, init);
+    let resolvedInput: RequestInfo | URL = input;
+    let url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input instanceof Request ? input.url : '';
+
+    // Native WebView has no PHP/API origin of its own. Route both the API and
+    // the cPanel RSS fallback to the deployed application origin.
+    if (url.startsWith('/api/')) url = `${RPF_WEB_ORIGIN}${url}`;
+    else if (url.startsWith('api/')) url = `${RPF_WEB_ORIGIN}/${url}`;
+    else if (url.startsWith('/rss-proxy.php')) url = `${RPF_WEB_ORIGIN}${url}`;
+    else if (url.startsWith('rss-proxy.php')) url = `${RPF_WEB_ORIGIN}/${url}`;
+
+    if (url) resolvedInput = url;
+
+    const isLiveFeed = url.includes('/api/public/live-feeds') || url.includes('/rss-proxy.php');
+    if (!isLiveFeed) return originalFetch(resolvedInput, init);
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 10_000);
+    const mergedInit: RequestInit = { ...(init || {}), signal: controller.signal };
+    return originalFetch(resolvedInput, mergedInit).finally(() => window.clearTimeout(timer));
   };
 
-  // Keep the installed APK as a stable native shell while automatically
-  // picking up newly deployed web code from the server.
   window.setTimeout(checkForWebUpdate, 1500);
   window.setInterval(checkForWebUpdate, 60_000);
   document.addEventListener('visibilitychange', () => {
