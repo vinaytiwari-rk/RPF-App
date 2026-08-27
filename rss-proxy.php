@@ -49,7 +49,7 @@ function fetchRawUrl($url) {
     return null;
 }
 
-function parseXmlTitles($xmlString) {
+function parseXmlTitles($xmlString, $prefix = '') {
     if (!$xmlString) return [];
     libxml_use_internal_errors(true);
     $titles = [];
@@ -62,8 +62,8 @@ function parseXmlTitles($xmlString) {
                 $clean = html_entity_decode(strip_tags($clean), ENT_QUOTES | ENT_XML1, 'UTF-8');
                 $clean = preg_replace('/\s+/', ' ', trim($clean));
                 if ($clean !== '' && !preg_match('/^(ani news|press information bureau|sachet|ndma|rss feed|disaster alerts|public alerts|all india: cap)$/i', $clean)) {
-                    $titles[] = $clean;
-                    if (count($titles) >= 20) break;
+                    $titles[] = $prefix ? "{$prefix}: {$clean}" : $clean;
+                    if (count($titles) >= 10) break;
                 }
             }
         }
@@ -72,61 +72,72 @@ function parseXmlTitles($xmlString) {
     return $titles;
 }
 
-function fetchAniDefaultNewsFeed() {
+function fetchCombinedNewsFeed() {
+    $combinedTitles = [];
+
+    // 1. ANI News RSS
     $aniUrls = [
         'https://aninews.in/rss/feed/category/national.xml',
         'https://aninews.in/rss/feed/category/national/politics.xml',
         'https://aninews.in/rss/feed/category/business.xml',
         'https://aninews.in/rss/feed/category/health.xml',
-        'https://aninews.in/rss/feed/category/world.xml',
-        'https://aninews.in/rss/feed/category/sports/others.xml',
-        'https://aninews.in/rss/feed/category/national/features.xml'
+        'https://aninews.in/rss/feed/category/world.xml'
     ];
-
-    $allTitles = [];
     foreach ($aniUrls as $url) {
         $data = fetchRawUrl($url);
-        $titles = parseXmlTitles($data);
-        if (!empty($titles)) {
-            foreach ($titles as $t) {
-                if (!in_array($t, $allTitles, true)) {
-                    $allTitles[] = $t;
-                    if (count($allTitles) >= 20) break 2;
-                }
+        $titles = parseXmlTitles($data, 'ANI');
+        foreach ($titles as $t) {
+            if (!in_array($t, $combinedTitles, true)) {
+                $combinedTitles[] = $t;
+                if (count($combinedTitles) >= 8) break 2;
             }
         }
     }
 
-    if (!empty($allTitles)) return $allTitles;
-
-    // Fallback 1: PIB Official RSS
+    // 2. PIB Official RSS
     $pibUrls = [
         'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48',
         'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48'
     ];
+    $pibAdded = 0;
     foreach ($pibUrls as $url) {
         $data = fetchRawUrl($url);
-        $titles = parseXmlTitles($data);
-        if (!empty($titles)) return $titles;
+        $titles = parseXmlTitles($data, 'PIB');
+        foreach ($titles as $t) {
+            if (!in_array($t, $combinedTitles, true)) {
+                $combinedTitles[] = $t;
+                $pibAdded++;
+                if ($pibAdded >= 8) break 2;
+            }
+        }
     }
 
-    // Fallback 2: Google News India
+    // 3. Google News India RSS
     $gnewsUrls = [
         'https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi',
         'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en'
     ];
+    $gAdded = 0;
     foreach ($gnewsUrls as $url) {
         $data = fetchRawUrl($url);
-        $titles = parseXmlTitles($data);
-        if (!empty($titles)) return $titles;
+        $titles = parseXmlTitles($data, 'Google News');
+        foreach ($titles as $t) {
+            if (!in_array($t, $combinedTitles, true)) {
+                $combinedTitles[] = $t;
+                $gAdded++;
+                if ($gAdded >= 8) break 2;
+            }
+        }
     }
 
-    return ['ANI समाचार नेटवर्क सेवा सक्रिय है।'];
+    if (!empty($combinedTitles)) return $combinedTitles;
+
+    return ['ANI • PIB • Google News राष्ट्रीय नेटवर्क सेवा सक्रिय है।'];
 }
 
 function fetchSachetFeed() {
     $data = fetchRawUrl('https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml');
-    $titles = parseXmlTitles($data);
+    $titles = parseXmlTitles($data, '');
     if (!empty($titles)) return $titles;
 
     $jsonRaw = fetchRawUrl('https://sachet.ndma.gov.in/cap_public_website/FetchAllAlertDetails');
@@ -150,13 +161,13 @@ function fetchSachetFeed() {
     }
 
     $gdacsData = fetchRawUrl('https://www.gdacs.org/xml/rss.xml');
-    $gdacsTitles = parseXmlTitles($gdacsData);
+    $gdacsTitles = parseXmlTitles($gdacsData, '');
     if (!empty($gdacsTitles)) return $gdacsTitles;
 
     return ['राष्ट्रीय आपदा प्रबंधन प्राधिकरण (NDMA SACHET): वर्तमान में आपदा पूर्व चेतावनी प्रणाली सक्रिय है।'];
 }
 
-$news = fetchAniDefaultNewsFeed();
+$news = fetchCombinedNewsFeed();
 $sachet = fetchSachetFeed();
 
 echo json_encode([
