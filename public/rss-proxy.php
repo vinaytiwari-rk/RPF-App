@@ -76,60 +76,58 @@ function parseXmlTitles($xmlString, $prefix = '') {
 }
 
 function fetchCombinedNewsFeed() {
-    // 1. Fetch PIB Official RSS
-    $pibTitles = [];
-    $pibUrls = [
-        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48',
-        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48'
+    $sources = [
+        'PIB' => [
+            'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48',
+            'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48'
+        ],
+        'ANI' => [
+            'https://www.aninews.in/rss/feed/category/national.xml',
+            'https://www.aninews.in/rss/feed/category/national/politics.xml'
+        ],
+        'DD India' => [
+            'https://ddindia.co.in/category/india/feed/'
+        ],
+        'DD News' => [
+            'https://ddnews.gov.in/en/category/top-stories/feed/'
+        ],
+        'Sarkaritel' => [
+            'https://www.sarkaritel.com/category/national-news/feed/'
+        ]
     ];
-    foreach ($pibUrls as $url) {
-        $data = fetchRawUrl($url);
-        $titles = parseXmlTitles($data, 'PIB');
-        foreach ($titles as $t) {
-            if (!in_array($t, $pibTitles, true)) {
-                $pibTitles[] = $t;
-                if (count($pibTitles) >= 15) break 2;
+
+    $results = [];
+    foreach ($sources as $prefix => $urls) {
+        $results[$prefix] = [];
+        foreach ($urls as $url) {
+            $data = fetchRawUrl($url);
+            $titles = parseXmlTitles($data, $prefix);
+            foreach ($titles as $t) {
+                if (!in_array($t, $results[$prefix], true)) {
+                    $results[$prefix][] = $t;
+                    if (count($results[$prefix]) >= 10) break;
+                }
             }
         }
     }
 
-    // 2. Fetch ANI News RSS
-    $aniTitles = [];
-    $aniUrls = [
-        'https://www.aninews.in/rss/feed/category/national.xml',
-        'https://www.aninews.in/rss/feed/category/national/politics.xml',
-        'https://www.aninews.in/rss/feed/category/business.xml',
-        'https://www.aninews.in/rss/feed/category/health.xml',
-        'https://www.aninews.in/rss/feed/category/world.xml',
-        'https://www.aninews.in/rss/feed/category/sports/others.xml',
-        'https://www.aninews.in/rss/feed/category/national/features.xml'
-    ];
-    foreach ($aniUrls as $url) {
-        $data = fetchRawUrl($url);
-        $titles = parseXmlTitles($data, 'ANI');
-        foreach ($titles as $t) {
-            if (!in_array($t, $aniTitles, true)) {
-                $aniTitles[] = $t;
-                if (count($aniTitles) >= 15) break 2;
-            }
-        }
-    }
-
-    // 3. Alternating Interleaving: 1 PIB -> 1 ANI -> 1 PIB -> 1 ANI ...
     $interleaved = [];
-    $maxCount = max(count($pibTitles), count($aniTitles));
+    $maxCount = 0;
+    foreach ($results as $list) {
+        $maxCount = max($maxCount, count($list));
+    }
+
     for ($i = 0; $i < $maxCount; $i++) {
-        if (isset($pibTitles[$i])) {
-            $interleaved[] = $pibTitles[$i];
-        }
-        if (isset($aniTitles[$i])) {
-            $interleaved[] = $aniTitles[$i];
+        foreach ($results as $prefix => $list) {
+            if (isset($list[$i])) {
+                $interleaved[] = $list[$i];
+            }
         }
     }
 
     if (!empty($interleaved)) return $interleaved;
 
-    return ['PIB • ANI राष्ट्रीय समाचार नेटवर्क सक्रिय है।'];
+    return ['PIB • ANI • DD News • DD India • Sarkaritel राष्ट्रीय समाचार नेटवर्क सक्रिय है।'];
 }
 
 function fetchSachetFeed() {

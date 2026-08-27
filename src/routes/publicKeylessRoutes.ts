@@ -63,40 +63,41 @@ router.get("/api/public/news", async (_req,res) => {
     const c=get("india_news_rss",1800000);
     if(c) return res.json({success:true,data:c});
 
-    let pibItems: any[] = [];
-    try {
-      const pibFeed = await fetchRssFeed("https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48");
-      pibItems = (pibFeed.items || []).slice(0, 15).map(i => ({
-        title: cleanText(i.title || ""),
-        link: i.link,
-        pubDate: i.pubDate || new Date().toISOString(),
-        source: "PIB (प्रेस सूचना ब्यूरो)",
-        description: cleanText(i.contentSnippet || i.content || ""),
-        image_url: null
-      }));
-    } catch {}
+    const sources = [
+      { name: "PIB (प्रेस सूचना ब्यूरो)", url: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48" },
+      { name: "ANI News", url: "https://www.aninews.in/rss/feed/category/national.xml" },
+      { name: "DD India", url: "https://ddindia.co.in/category/india/feed/" },
+      { name: "DD News", url: "https://ddnews.gov.in/en/category/top-stories/feed/" },
+      { name: "Sarkaritel", url: "https://www.sarkaritel.com/category/national-news/feed/" }
+    ];
 
-    let aniItems: any[] = [];
-    try {
-      const aniFeed = await fetchRssFeed("https://www.aninews.in/rss/feed/category/national.xml");
-      aniItems = (aniFeed.items || []).slice(0, 15).map(i => ({
-        title: cleanText(i.title || ""),
-        link: i.link,
-        pubDate: i.pubDate || new Date().toISOString(),
-        source: "ANI News",
-        description: cleanText(i.contentSnippet || i.content || ""),
-        image_url: null
-      }));
-    } catch {}
+    const fetchedLists: any[][] = await Promise.all(
+      sources.map(async (s) => {
+        try {
+          const feed = await fetchRssFeed(s.url);
+          return (feed.items || []).slice(0, 10).map(i => ({
+            title: cleanText(i.title || ""),
+            link: i.link,
+            pubDate: i.pubDate || new Date().toISOString(),
+            source: s.name,
+            description: cleanText(i.contentSnippet || i.content || ""),
+            image_url: null
+          })).filter(i => i.title.length > 10);
+        } catch {
+          return [];
+        }
+      })
+    );
 
     const interleaved: any[] = [];
-    const maxLen = Math.max(pibItems.length, aniItems.length);
+    const maxLen = Math.max(0, ...fetchedLists.map(l => l.length));
     for (let i = 0; i < maxLen; i++) {
-      if (i < pibItems.length) interleaved.push(pibItems[i]);
-      if (i < aniItems.length) interleaved.push(aniItems[i]);
+      for (const list of fetchedLists) {
+        if (i < list.length) interleaved.push(list[i]);
+      }
     }
 
-    const data = interleaved.length > 0 ? interleaved : pibItems;
+    const data = interleaved;
     put("india_news_rss", data);
     return res.json({ success: true, data });
   } catch {
