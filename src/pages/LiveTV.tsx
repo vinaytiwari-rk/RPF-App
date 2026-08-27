@@ -164,23 +164,23 @@ export default function LiveTV() {
         </div>
       ) : (
         /* Main Channels Directory View */
-        <div className="mx-auto max-w-4xl px-4 py-5 space-y-5">
-          {/* Saffron-Gold Header Card */}
-          <div className="bg-gradient-to-br from-[#FF9933] via-[#F59E0B] to-[#D97706] rounded-3xl p-5 text-white shadow-lg relative overflow-hidden border border-amber-200/40 space-y-2">
+        <div className="mx-auto max-w-4xl px-4 py-5 space-y-4 text-[#14213D]">
+          {/* Header Card */}
+          <div className="bg-[#14213D] rounded-[24px] p-5 sm:p-6 text-white shadow-md relative overflow-hidden space-y-2">
             <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
-                <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-xs border border-white/20 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 {hi ? "लाइव न्यूज़ एवं ब्रॉडकास्ट" : "Live News & Broadcast"}
               </div>
-              <span className="text-[10px] font-bold bg-white/20 px-2.5 py-0.5 rounded-md border border-white/30">
+              <span className="text-[10px] font-bold bg-white/10 px-2.5 py-0.5 rounded-md border border-white/20 text-slate-200">
                 {visible.length} {hi ? "चैनल" : "Channels"}
               </span>
             </div>
 
-            <h1 className="text-2xl font-black tracking-tight font-serif text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {hi ? "आर.पी.एफ. लाइव टीवी" : "RPF Live TV Channels"}
             </h1>
-            <p className="text-xs text-amber-100 font-medium">
+            <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
               {hi
                 ? "राष्ट्रीय एवं अंतर्राष्ट्रीय लाइव समाचार चैनल एक ही स्थान पर निःशुल्क देखें।"
                 : "Watch live national & international news channels directly in HD."}
@@ -194,12 +194,12 @@ export default function LiveTV() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={hi ? "चैनल खोजें..." : "Search live channels..."}
-              className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-xs font-bold outline-none focus:border-[#FF9933] shadow-xs text-slate-800 placeholder:text-slate-400"
+              className="w-full rounded-2xl border border-amber-200/80 bg-white/80 backdrop-blur-md py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:border-[#D97706] focus:bg-white shadow-2xs text-[#14213D] placeholder:text-slate-400"
             />
           </div>
 
           {/* Channels Grid */}
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((c) => {
               const v = getId(c);
               const thumb = v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null;
@@ -207,7 +207,7 @@ export default function LiveTV() {
                 <button
                   key={c.id}
                   onClick={() => openPlayer(c)}
-                  className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white text-left shadow-xs hover:shadow-md hover:border-[#FF9933]/60 transition-all duration-200 active:scale-[0.99]"
+                  className="group overflow-hidden rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md text-left shadow-2xs hover:shadow-xs hover:border-amber-300/80 transition-all duration-200 active:scale-[0.99]"
                 >
                   <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
                     {thumb ? (
@@ -222,25 +222,25 @@ export default function LiveTV() {
                         <Tv className="h-10 w-10" />
                       </div>
                     )}
-                    <span className="absolute bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-[#FF9933] shadow-lg group-hover:scale-110 transition-transform">
+                    <span className="absolute bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-[#D97706] shadow-md group-hover:scale-110 transition-transform">
                       <Play className="h-4 h-4 fill-current ml-0.5" />
                     </span>
-                    <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-0.5 text-[9px] font-black uppercase text-white shadow-md">
+                    <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-[#DC2626] px-2.5 py-0.5 text-[9px] font-bold uppercase text-white shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
                       LIVE
                     </span>
                   </div>
 
-                  <div className="p-4 flex items-center justify-between">
+                  <div className="p-3.5 flex items-center justify-between">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-black text-slate-900 leading-tight">
+                      <p className="truncate text-xs font-bold text-[#14213D] leading-tight group-hover:text-[#D97706] transition-colors">
                         {c.name}
                       </p>
-                      <p className="mt-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                         {c.category}
                       </p>
                     </div>
-                    <Maximize2 className="w-4 h-4 text-slate-300 group-hover:text-[#FF9933] transition-colors shrink-0 ml-2" />
+                    <Maximize2 className="w-4 h-4 text-slate-400 group-hover:text-[#14213D] transition-colors shrink-0 ml-2" />
                   </div>
                 </button>
               );
@@ -248,7 +248,7 @@ export default function LiveTV() {
           </div>
 
           {!filtered.length && (
-            <div className="py-16 text-center text-xs font-bold text-slate-500 bg-white rounded-3xl border border-slate-200 p-6">
+            <div className="py-12 text-center text-xs font-medium text-slate-500 bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-6 shadow-2xs">
               {hi ? "कोई चैनल नहीं मिला" : "No channels found matching your search."}
             </div>
           )}

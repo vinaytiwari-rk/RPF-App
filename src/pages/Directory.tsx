@@ -66,20 +66,20 @@ export default function Directory() {
   const isHi = lang === "hi";
 
   return (
-    <main className="min-h-full bg-[#fbf8f2] pb-10">
-      <div className="mx-auto w-full max-w-3xl px-3.5 py-4 sm:px-6 sm:py-5 space-y-4">
+    <main className="min-h-full bg-transparent pb-10 text-[#14213D]">
+      <div className="mx-auto w-full max-w-3xl px-4 py-4 sm:px-6 sm:py-5 space-y-4">
         
         {/* Top Header Card */}
-        <section className="relative overflow-hidden rounded-[26px] border border-blue-200/70 bg-gradient-to-br from-[#eff6ff] via-white to-blue-50 p-5 shadow-sm sm:p-7">
-          <div className="relative">
-            <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[.2em] text-blue-800">
+        <section className="relative overflow-hidden rounded-[24px] bg-[#14213D] p-5 sm:p-7 text-white shadow-md">
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">
               <BookOpen className="h-4 w-4" />
               {isHi ? "राष्ट्रीय निर्देशिका" : "National Directory"}
             </div>
-            <h1 className="mt-2 text-[27px] font-black tracking-tight text-slate-900 sm:text-4xl">
+            <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {isHi ? "सरकारी निर्देशिका" : "Government Directory"}
             </h1>
-            <p className="mt-2 max-w-xl text-[13px] leading-5 text-slate-600">
+            <p className="mt-2 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-200 font-medium">
               {isHi
                 ? "भारत सरकार की आधिकारिक निर्देशिकाओं तक पहुँचें। संपर्क, वेब लिंक, उपयोगिताएँ और हेल्पलाइन सब एक ही जगह।"
                 : "Access official directories of the Government of India. Contacts, web links, utilities, and helplines all in one place."}
@@ -88,8 +88,8 @@ export default function Directory() {
         </section>
 
         {/* Verification Notice Banner */}
-        <div className="flex items-center gap-2 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs text-amber-800 font-bold">
-          <ShieldAlert className="w-4 h-4 shrink-0 text-amber-600" />
+        <div className="flex items-center gap-2.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 px-4 py-3 text-xs text-[#14213D] font-semibold backdrop-blur-xs shadow-2xs">
+          <ShieldAlert className="w-4 h-4 shrink-0 text-[#D97706]" />
           <span>
             {isHi
               ? "आधिकारिक स्रोत से सत्यापन करें — सभी सरकारी पोर्टल्स (.gov.in) सीधे उनके मूल सर्वर से लोड होते हैं।"
@@ -104,23 +104,23 @@ export default function Directory() {
               key={dir.url}
               type="button"
               onClick={() => openExternalLink(dir.url, navigate)}
-              className="group flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:scale-[.99]"
+              className="group flex w-full items-center gap-3.5 rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-4 text-left shadow-2xs transition hover:border-amber-300/80 hover:shadow-xs active:scale-[.99]"
             >
               <SiteIcon url={dir.url} label={isHi ? dir.nameHi : dir.name} />
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <h2 className="text-[13px] font-black leading-tight text-slate-900">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h2 className="text-[14px] font-bold text-[#14213D] group-hover:text-[#D97706] transition-colors">
                     {isHi ? dir.nameHi : dir.name}
                   </h2>
-                  <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md border border-emerald-200">
+                  <span className="text-[9px] font-bold bg-emerald-50 text-[#167C5A] px-1.5 py-0.5 rounded border border-emerald-200/80 uppercase">
                     {isHi ? "सत्यापित" : "Official"}
                   </span>
                 </div>
-                <p className="mt-1 text-[11px] font-medium text-slate-500">
+                <p className="mt-0.5 text-[11.5px] font-medium text-slate-500 line-clamp-2">
                   {isHi ? dir.descriptionHi : dir.description}
                 </p>
               </div>
-              <ExternalLink className="h-4 w-4 shrink-0 text-slate-300 group-hover:text-blue-600 transition-colors" />
+              <ExternalLink className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-[#14213D] transition-colors" />
             </button>
           ))}
         </section>

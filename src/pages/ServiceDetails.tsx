@@ -145,22 +145,22 @@ export default function ServiceDetails() {
 
   if (isLoadingServices || isLoadingContent)
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-transparent">
         <BrandLoader size="sm" label={hi ? "सेवा लोड हो रही है" : "Loading service"} />
       </div>
     );
 
   if (!serviceMeta)
     return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-slate-50 p-6 text-center space-y-4">
-        <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-2">
+      <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-transparent p-6 text-center space-y-4">
+        <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 text-[#DC2626] rounded-full flex items-center justify-center mb-2">
           <Compass className="w-8 h-8" />
         </div>
-        <h2 className="text-lg font-bold text-slate-800">Service Not Found</h2>
-        <p className="text-xs text-slate-500 max-w-xs">This service is no longer available or the URL is incorrect.</p>
+        <h2 className="text-lg font-bold text-[#14213D]">Service Not Found</h2>
+        <p className="text-xs text-slate-500 max-w-xs font-medium">This service is no longer available or the URL is incorrect.</p>
         <button
           onClick={() => navigate("/services")}
-          className="mt-4 px-6 py-2.5 bg-[#000080] text-white rounded-xl text-xs font-bold shadow-md"
+          className="mt-4 px-6 py-2.5 bg-[#14213D] text-white rounded-xl text-xs font-bold shadow-md hover:bg-[#0f192e] transition"
         >
           Back to Services
         </button>
@@ -168,58 +168,57 @@ export default function ServiceDetails() {
     );
 
   const IconComponent = (LucideIcons as any)[serviceMeta.iconName || "Compass"] || Compass;
-  const colorClass = serviceMeta.color || "bg-indigo-50 text-indigo-600 border-indigo-100";
   const isExternalAction = /^https?:\/\//i.test(actionUrl);
 
   return (
-    <div className="p-5 flex-1 flex flex-col min-h-screen bg-slate-50/50 pb-28 relative overflow-x-hidden font-sans">
+    <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-screen bg-transparent pb-28 relative overflow-x-hidden text-[#14213D]">
       {/* Header Bar */}
-      <div className="flex items-center gap-3 border-b border-slate-200/80 pb-4 mb-5 relative z-10">
+      <div className="flex items-center gap-3 border-b border-amber-200/80 pb-4 mb-5 relative z-10">
         <button
           onClick={() => navigate(-1)}
-          className="w-8 h-8 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-600 hover:text-[#000080] hover:border-[#000080] transition-colors shrink-0 shadow-sm"
+          className="w-8 h-8 bg-white border border-amber-200/80 rounded-full flex items-center justify-center text-[#14213D] hover:bg-amber-50 transition-colors shrink-0 shadow-2xs"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex-1 min-w-0">
-          <h3 className="font-display font-black text-base text-[#000080] truncate">
+          <h3 className="font-bold text-base text-[#14213D] truncate">
             {hi ? serviceMeta.titleHi : serviceMeta.titleEn}
           </h3>
-          <p className="text-[10px] text-slate-500 font-bold truncate">
+          <p className="text-[10.5px] text-slate-500 font-medium truncate">
             {hi ? serviceMeta.descHi : serviceMeta.descEn}
           </p>
         </div>
       </div>
 
       {/* Main Service Card Banner */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm mb-5 flex items-center gap-4">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner shrink-0 ${colorClass}`}>
-          <IconComponent className="w-7 h-7" />
+      <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-5 shadow-2xs mb-5 flex items-center gap-4">
+        <div className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/10 border border-amber-500/20 text-[#D97706]">
+          <IconComponent className="w-6 h-6" />
         </div>
         <div>
-          <span className="inline-block px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[9px] font-black uppercase tracking-wider mb-1">
-            Verified Service Portal
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-[#167C5A] border border-emerald-200/80 rounded-md text-[9px] font-bold uppercase tracking-wider mb-1">
+            <Sparkles className="w-2.5 h-2.5" /> Verified Service Portal
           </span>
-          <h4 className="font-black text-sm text-slate-900 leading-tight">
+          <h4 className="font-bold text-sm text-[#14213D] leading-tight">
             {hi ? serviceMeta.titleHi : serviceMeta.titleEn}
           </h4>
-          <p className="text-[11px] text-slate-500 mt-0.5">{hi ? serviceMeta.descHi : serviceMeta.descEn}</p>
+          <p className="text-[11.5px] text-slate-500 font-medium mt-0.5">{hi ? serviceMeta.descHi : serviceMeta.descEn}</p>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* Dynamic HTML Content if available */}
         {htmlContent && (
           <div
-            className="prose prose-sm prose-slate max-w-none bg-white p-5 rounded-2xl shadow-sm border border-slate-200"
+            className="prose prose-sm prose-slate max-w-none bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-2xs border border-amber-100/80 text-[#14213D]"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
         )}
 
         {/* Resources & Documents */}
         {resources.length > 0 && (
-          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-            <h5 className="text-[11px] font-black text-slate-500 uppercase tracking-wider border-b pb-2">
+          <div className="bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-2xs border border-amber-100/80 space-y-3">
+            <h5 className="text-[10.5px] font-bold text-[#D97706] uppercase tracking-widest border-b border-amber-100/80 pb-2">
               Documents & Downloads
             </h5>
             <div className="space-y-2">
@@ -229,12 +228,12 @@ export default function ServiceDetails() {
                   <button
                     key={idx}
                     onClick={() => openExternalLink(resource.url, navigate)}
-                    className="flex w-full items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors group text-left"
+                    className="flex w-full items-center gap-3 p-3 bg-white rounded-xl border border-slate-200/80 hover:border-amber-300 transition-all group text-left shadow-2xs"
                   >
-                    <div className="w-8 h-8 bg-white border border-slate-200 rounded-lg flex items-center justify-center shrink-0 text-slate-400 group-hover:text-indigo-600">
+                    <div className="w-8 h-8 bg-amber-50 border border-amber-200/80 rounded-lg flex items-center justify-center shrink-0 text-[#D97706]">
                       <Download className="w-4 h-4" />
                     </div>
-                    <p className="text-xs font-bold text-slate-700 truncate group-hover:text-indigo-700">
+                    <p className="text-xs font-bold text-[#14213D] truncate group-hover:text-[#D97706]">
                       {resourceTitle}
                     </p>
                   </button>
@@ -249,24 +248,24 @@ export default function ServiceDetails() {
           <div>
             <button
               onClick={() => (isExternalAction ? openExternalLink(actionUrl, navigate) : navigate(actionUrl))}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#000080] text-white font-bold rounded-xl text-xs shadow-lg hover:bg-blue-900 transition-transform active:scale-95"
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#14213D] text-white font-bold rounded-xl text-xs shadow-md hover:bg-[#0f192e] transition-transform active:scale-98"
             >
               <span>{actionLabel}</span>
-              {isExternalAction && <ExternalLink className="w-3.5 h-3.5" />}
+              {isExternalAction && <ExternalLink className="w-3.5 h-3.5 text-amber-300" />}
             </button>
           </div>
         )}
 
-        {/* OFFICIAL GOVERNMENT WEBSITES & PORTALS SECTION (Added for ALL Service Pages) */}
+        {/* OFFICIAL GOVERNMENT WEBSITES & PORTALS SECTION */}
         {govLinks.length > 0 && (
-          <div className="bg-gradient-to-br from-orange-50/60 via-white to-emerald-50/40 p-5 rounded-3xl shadow-sm border border-orange-200 space-y-3">
-            <div className="flex items-center gap-2 border-b border-orange-200/80 pb-2.5">
-              <Landmark className="h-4 w-4 text-[#FF9933]" />
-              <h5 className="text-xs font-black uppercase tracking-wider text-[#000080]">
+          <div className="bg-gradient-to-br from-amber-50/60 via-white to-emerald-50/40 p-5 rounded-2xl shadow-2xs border border-amber-200/80 space-y-3">
+            <div className="flex items-center gap-2 border-b border-amber-200/80 pb-2.5">
+              <Landmark className="h-4 w-4 text-[#D97706]" />
+              <h5 className="text-[10.5px] font-bold uppercase tracking-widest text-[#14213D]">
                 {hi ? "आधिकारिक सरकारी पोर्टल एवं वेबसाइटें" : "Official Government Portals & Websites"}
               </h5>
             </div>
-            <p className="text-[11px] text-slate-600">
+            <p className="text-[11.5px] font-medium text-slate-600">
               {hi
                 ? "इस सेवा से संबंधित आधिकारिक भारत सरकार और राज्य सरकार की वेबसाइटें:"
                 : "Official Government of India and State Portals related to this service:"}
@@ -279,27 +278,27 @@ export default function ServiceDetails() {
                   <button
                     key={link.url}
                     onClick={() => openExternalLink(link.url, navigate, link.title)}
-                    className="flex w-full items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-3.5 text-left shadow-sm transition hover:border-orange-300 hover:shadow-md active:scale-[.99]"
+                    className="flex w-full items-center gap-3.5 rounded-xl border border-slate-200/90 bg-white p-3.5 text-left shadow-2xs transition hover:border-amber-300 hover:shadow-xs active:scale-[.99]"
                   >
                     <WebsiteLogo url={link.url} label={link.title} />
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span
-                          className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded border ${
+                          className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border ${
                             isGov
-                              ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                              : "text-sky-700 bg-sky-50 border-sky-200"
+                              ? "text-[#167C5A] bg-emerald-50 border-emerald-200"
+                              : "text-slate-700 bg-slate-50 border-slate-200"
                           }`}
                         >
                           {isGov ? (hi ? "आधिकारिक पोर्टल" : "Official Gov") : hi ? "उपयोगी संसाधन" : "Verified Resource"}
                         </span>
-                        <h4 className="text-xs font-black text-slate-900 truncate">{hi ? link.titleHi : link.title}</h4>
+                        <h4 className="text-xs font-bold text-[#14213D] truncate">{hi ? link.titleHi : link.title}</h4>
                       </div>
                       <p className="mt-1 line-clamp-2 text-[11px] font-medium text-slate-500">
                         {hi ? link.descHi : link.desc}
                       </p>
                     </div>
-                    <ExternalLink className="h-4 w-4 shrink-0 text-[#000080]" />
+                    <ExternalLink className="h-4 w-4 shrink-0 text-[#14213D]" />
                   </button>
                 );
               })}

@@ -3,16 +3,17 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
 import {
   Search,
-  Instagram,
-  Twitter,
-  Facebook,
-  Linkedin,
   Compass,
   ChevronRight,
   Sparkles,
   ShieldCheck,
   Globe2,
-  SlidersHorizontal,
+  BadgePlus,
+  HeartPulse,
+  BriefcaseBusiness,
+  ClipboardList,
+  ExternalLink,
+  Flame
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { openExternalLink } from "../utils/browser";
@@ -25,6 +26,13 @@ const EXPLORE_LINKS = [
   { id: "peoples-university", category: "education", iconName: "GraduationCap", titleEn: "People's University Portal", titleHi: "पीपुल्स यूनिवर्सिटी पोर्टल", descEn: "Official University Information", descHi: "आधिकारिक विश्वविद्यालय पोर्टल", url: "https://www.peoplesuniversity.edu.in/" },
   { id: "fact-check", category: "community", iconName: "ShieldCheck", titleEn: "Fact Check Hub", titleHi: "फैक्ट चेक हब", descEn: "Check claims and viral news", descHi: "वायरल दावों और खबरों की जांच करें", route: "/fact-check" },
   { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "आधिकारिक लाइव टीवी चैनल", route: "/live-tv" }
+];
+
+const FEATURED_SERVICES = [
+  { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवा पहचान और कल्याण पहुंच", icon: BadgePlus, route: "/jan-seva-card", accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20" },
+  { id: "health-care", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", descEn: "Health camps, medicines & hospital locator", descHi: "स्वास्थ्य शिविर, दवाएं और अस्पताल खोजक", icon: HeartPulse, route: "/health-care", accent: "text-[#DC2626] bg-red-500/10 border border-red-500/20" },
+  { id: "employment", titleEn: "Employment", titleHi: "रोजगार पोर्टल", descEn: "Jobs, skill development & career guidance", descHi: "नौकरियां, कौशल विकास और करियर मार्गदर्शन", icon: BriefcaseBusiness, route: "/employment", accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20" },
+  { id: "grievance", titleEn: "Grievance", titleHi: "शिकायत समाधान", descEn: "Submit issues & track resolution progress", descHi: "समस्याएं दर्ज करें और समाधान की स्थिति देखें", icon: ClipboardList, route: "/grievance", accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20" }
 ];
 
 export default function Services() {
@@ -120,7 +128,14 @@ export default function Services() {
     return `/services/${id}`;
   };
 
-  const renderService = (svc: any, idx: number) => {
+  const getSemanticIconStyle = (svcId: string) => {
+    if (HEALTH_SERVICES.includes(svcId)) return "text-[#DC2626] bg-red-500/10 border border-red-500/20";
+    if (GOV_SERVICES.includes(svcId)) return "text-[#D97706] bg-amber-500/10 border border-amber-500/20";
+    if (COMMUNITY_SERVICES.includes(svcId)) return "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20";
+    return "text-[#14213D] bg-slate-500/10 border border-slate-500/20";
+  };
+
+  const renderService = (svc: any) => {
     const configuredTarget =
       svc.id === "schemes"
         ? "/services/schemes"
@@ -133,63 +148,57 @@ export default function Services() {
         : "";
     const target = configuredTarget || routeFor(svc.id);
     const IconComponent = (LucideIcons as any)[svc.iconName || "Compass"] || Compass;
-
-    const getCardStyle = (catId: string, idx: number) => {
-      const pastels = [
-        "bg-[#FFF9E6]/85 backdrop-blur-md border-amber-200/70 text-amber-950 hover:border-amber-400 hover:bg-[#FFF9E6]/95 shadow-xs",
-        "bg-[#FFEEEE]/85 backdrop-blur-md border-rose-200/70 text-rose-950 hover:border-rose-400 hover:bg-[#FFEEEE]/95 shadow-xs",
-        "bg-[#EAF8EE]/85 backdrop-blur-md border-emerald-200/70 text-emerald-950 hover:border-emerald-400 hover:bg-[#EAF8EE]/95 shadow-xs",
-        "bg-[#F3E8FF]/85 backdrop-blur-md border-purple-200/70 text-purple-950 hover:border-purple-400 hover:bg-[#F3E8FF]/95 shadow-xs",
-        "bg-[#FFF2E5]/85 backdrop-blur-md border-orange-200/70 text-orange-950 hover:border-orange-400 hover:bg-[#FFF2E5]/95 shadow-xs",
-      ];
-      return pastels[idx % pastels.length];
-    };
+    const isExternal = target.startsWith("http");
 
     return (
       <button
         type="button"
         onClick={() => {
-          if (target.startsWith("http")) openExternalLink(target, navigate, svc.titleEn);
+          if (isExternal) openExternalLink(target, navigate, svc.titleEn);
           else navigate(target);
         }}
-        className={`group relative w-full rounded-3xl p-4 flex items-center justify-between border transition-all duration-200 text-left cursor-pointer ${getCardStyle(svc.category, idx)}`}
+        className="group relative w-full rounded-2xl p-4 flex items-center justify-between border border-amber-100/80 bg-white/80 backdrop-blur-md shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all text-left cursor-pointer"
       >
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-11 h-11 shrink-0 flex items-center justify-center rounded-2xl bg-white/90 shadow-xs border border-white/60 text-[#FF9933]">
+          <div className={`w-10 h-10 shrink-0 flex items-center justify-center rounded-xl ${getSemanticIconStyle(svc.id)}`}>
             <IconComponent className="w-5 h-5 transition-transform group-hover:scale-110" />
           </div>
 
           <div className="min-w-0 pr-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-black tracking-tight group-hover:text-[#FF9933] transition-colors truncate">
+              <h3 className="text-[14px] font-bold text-[#14213D] group-hover:text-[#D97706] transition-colors truncate">
                 {isHi ? svc.titleHi || svc.titleEn : svc.titleEn}
               </h3>
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                <ShieldCheck className="w-2.5 h-2.5" /> VERIFIED
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-[#167C5A] border border-emerald-200/80 uppercase">
+                <ShieldCheck className="w-2.5 h-2.5" /> Verified
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 font-semibold line-clamp-1 mt-0.5">
+            <p className="text-[11.5px] text-slate-500 font-medium line-clamp-1 mt-0.5">
               {isHi ? svc.descHi || svc.descEn : svc.descEn}
             </p>
           </div>
         </div>
 
-        <div className="w-7 h-7 rounded-full bg-white/80 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-400 group-hover:bg-[#FF9933] group-hover:text-white group-hover:border-transparent transition-all">
-          <ChevronRight className="w-4 h-4" />
+        <div className="w-7 h-7 rounded-full bg-slate-100/80 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-400 group-hover:bg-[#14213D] group-hover:text-white group-hover:border-transparent transition-all">
+          {isExternal ? <ExternalLink className="w-3.5 h-3.5" /> : <ChevronRight className="w-4 h-4" />}
         </div>
       </button>
     );
   };
 
   return (
-    <div className="min-h-full bg-transparent pb-16 text-slate-900">
-      {/* Header Container */}
-      <div className="mx-auto max-w-3xl px-4 pt-4 pb-2 sm:px-6 space-y-3">
+    <div className="min-h-full bg-transparent pb-16 text-[#14213D]">
+      <div className="mx-auto max-w-3xl px-4 pt-4 pb-2 sm:px-6 space-y-4">
+        {/* Header Title */}
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-amber-50/70 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#D97706] uppercase shadow-2xs backdrop-blur-xs mb-1">
+            <Sparkles className="h-3 w-3 text-[#D97706]" />
+            Samahit Ecosystem
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#14213D]">
             {isHi ? "सेवाएं और पोर्टल" : "Explore & Services"}
           </h1>
-          <p className="text-xs font-semibold text-slate-500 mt-0.5">
+          <p className="text-xs sm:text-sm font-medium text-slate-600 mt-0.5">
             {isHi ? "सत्यापित नागरिक कल्याण कार्यक्रम और आधिकारिक पोर्टल खोजें" : "Discover verified citizen welfare programs & official portals"}
           </p>
         </div>
@@ -204,84 +213,125 @@ export default function Services() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={isHi ? "सेवाएं या योजनाएं खोजें..." : "Search services, portals or schemes..."}
-            className="w-full pl-10 pr-4 py-3.5 bg-white/80 backdrop-blur-md border border-white/70 rounded-2xl text-xs font-bold shadow-xs focus:outline-none focus:border-[#FF9933] focus:bg-white text-slate-900 placeholder:text-slate-400 transition"
+            className="w-full pl-10 pr-4 py-3 bg-white/80 backdrop-blur-md border border-amber-200/80 rounded-2xl text-xs font-semibold shadow-2xs focus:outline-none focus:border-[#D97706] focus:bg-white text-[#14213D] placeholder:text-slate-400 transition"
           />
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex overflow-x-auto gap-2 pb-1.5 -mx-4 px-4 scrollbar-hide">
+        <div className="flex overflow-x-auto gap-2 pb-1 -mx-4 px-4 scrollbar-hide">
           {categories.map((c) => (
             <button
               key={c.id}
               onClick={() => setCategory(c.id)}
-              className={`whitespace-nowrap px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all ${
+              className={`whitespace-nowrap px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
                 category === c.id
-                  ? "bg-gradient-to-r from-[#FF9933] to-[#F59E0B] text-white shadow-md"
-                  : "bg-white/80 backdrop-blur-md border border-white/70 text-slate-600 hover:bg-white shadow-2xs"
+                  ? "bg-[#14213D] text-[#FFF9F0] shadow-sm"
+                  : "bg-white/80 backdrop-blur-md border border-amber-100/80 text-slate-700 hover:bg-white shadow-2xs"
               }`}
             >
               {isHi ? c.hi : c.en}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Main Services List */}
-      {isLoadingServices ? (
-        <div className="py-12 flex justify-center">
-          <BrandLoader size="sm" label="Loading services" />
-        </div>
-      ) : (
-        <SortableList
-          items={filtered}
-          storageKey={`services:${category}`}
-          renderItem={(svc, idx) => renderService(svc, idx)}
-          className="flex flex-col gap-3 pt-4"
-        />
-      )}
-
-      {!isLoadingServices && filtered.length === 0 && (
-        <div className="py-12 text-center bg-white rounded-3xl border border-slate-200 p-6 mt-4">
-          <Search className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-          <p className="text-xs font-black text-slate-700">{isHi ? "कोई सेवा नहीं मिली" : "No matching services found"}</p>
-          <p className="text-[11px] text-slate-400 mt-1">Try selecting another category or clear your search.</p>
-        </div>
-      )}
-
-      {/* Web Search Results Section (Without Raw URLs) */}
-      {search.trim() && (
-        <div className="pt-4">
-          {webLoading ? (
-            <div className="flex justify-center py-6">
-              <BrandLoader size="sm" label="Searching web" />
+        {/* Featured / Most Used Services (Only show when not searching and category is 'all') */}
+        {!search.trim() && category === "all" && (
+          <section className="pt-1 pb-2">
+            <div className="flex items-center gap-1.5 mb-2.5">
+              <Flame className="w-3.5 h-3.5 text-[#D97706]" />
+              <h2 className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">
+                {isHi ? "प्रमुख सेवाएं" : "Featured Services"}
+              </h2>
             </div>
-          ) : (
-            webResults.length > 0 && (
-              <div className="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm">
-                <p className="text-[10px] font-black text-[#000080] uppercase tracking-wider flex items-center gap-1.5 mb-3">
-                  <Globe2 className="w-3.5 h-3.5 text-[#FF9933]" />
-                  {isHi ? "वेब परिणाम" : "Web Discoveries"}
-                </p>
-                <div className="space-y-2.5">
+            <div className="grid grid-cols-2 gap-3">
+              {FEATURED_SERVICES.map((feat) => {
+                const FeatIcon = feat.icon;
+                return (
+                  <button
+                    key={feat.id}
+                    onClick={() => navigate(feat.route)}
+                    className="rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-3.5 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all flex flex-col justify-between min-h-[120px]"
+                  >
+                    <div className={`w-9 h-9 flex items-center justify-center rounded-xl ${feat.accent}`}>
+                      <FeatIcon className="w-4.5 h-4.5" />
+                    </div>
+                    <div>
+                      <p className="mt-2 text-[14px] font-bold text-[#14213D]">{isHi ? feat.titleHi : feat.titleEn}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-500 font-medium leading-snug line-clamp-1">{isHi ? feat.descHi : feat.descEn}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Section Heading for All Services */}
+        <div className="pt-2">
+          <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#14213D]">
+            {search.trim() ? (isHi ? "समाहित सेवाएं" : "SAMAHIT SERVICES") : (isHi ? "सभी नागरिक सेवाएं" : "All Services")}
+          </p>
+        </div>
+
+        {/* Main Services List */}
+        {isLoadingServices ? (
+          <div className="py-12 flex justify-center">
+            <BrandLoader size="sm" label="Loading services" />
+          </div>
+        ) : (
+          <SortableList
+            items={filtered}
+            storageKey={`services:${category}`}
+            renderItem={(svc) => renderService(svc)}
+            className="flex flex-col gap-3 pt-2"
+          />
+        )}
+
+        {!isLoadingServices && filtered.length === 0 && (
+          <div className="py-12 text-center bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-6 mt-2 shadow-2xs">
+            <Search className="mx-auto h-8 w-8 text-slate-300 mb-2" />
+            <p className="text-xs font-bold text-[#14213D]">{isHi ? "कोई सेवा नहीं मिली" : "No matching services found"}</p>
+            <p className="text-[11px] text-slate-500 mt-1">Try selecting another category or clear your search.</p>
+          </div>
+        )}
+
+        {/* Official & External Results Section */}
+        {search.trim() && (
+          <div className="pt-4">
+            <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706] flex items-center gap-1.5 mb-2.5">
+              <Globe2 className="w-3.5 h-3.5 text-[#D97706]" />
+              {isHi ? "आधिकारिक एवं बाह्य परिणाम" : "OFFICIAL & EXTERNAL RESULTS"}
+            </p>
+
+            {webLoading ? (
+              <div className="flex justify-center py-6">
+                <BrandLoader size="sm" label="Searching external sources" />
+              </div>
+            ) : (
+              webResults.length > 0 && (
+                <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-3.5 shadow-2xs space-y-2">
                   {webResults.map((r, i) => (
                     <button
                       key={i}
                       onClick={() => openExternalLink(r.link, navigate, r.title)}
-                      className="w-full text-left flex items-center justify-between gap-3 rounded-2xl border border-slate-100 p-3 hover:bg-orange-50/50 transition"
+                      className="w-full text-left flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white p-3 hover:border-amber-300 transition-all shadow-2xs"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-black text-slate-900 leading-snug line-clamp-1">{r.title}</p>
-                        <p className="text-[11px] font-medium text-slate-500 mt-0.5 line-clamp-1">{r.snippet}</p>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/80 uppercase">External Website</span>
+                          <p className="text-xs font-bold text-[#14213D] leading-snug line-clamp-1">{r.title}</p>
+                        </div>
+                        <p className="text-[11px] font-medium text-slate-500 mt-1 line-clamp-1">{r.snippet}</p>
                       </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+                      <ExternalLink className="h-4 w-4 shrink-0 text-[#14213D]" />
                     </button>
                   ))}
                 </div>
-              </div>
-            )
-          )}
-        </div>
-      )}
+              )
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

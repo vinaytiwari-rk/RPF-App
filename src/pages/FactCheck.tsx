@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { CheckCircle2, Globe2 } from "lucide-react";
+import { CheckCircle2, Globe2, Search, ShieldCheck, ExternalLink, HelpCircle } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { openExternalLink } from "../utils/browser";
 import { useApp } from "../context/AppContext";
@@ -40,11 +40,11 @@ function WebsiteLogo({ url, label }: { url: string; label: string }) {
     logo = `${new URL(url).origin}/favicon.ico`;
   } catch {}
   return (
-    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200/80 bg-white p-2 shadow-2xs">
       {!failed && logo ? (
         <img src={logo} alt={`${label} logo`} className="h-full w-full object-contain" loading="lazy" onError={() => setFailed(true)} />
       ) : (
-        <Globe2 className="h-5 w-5 text-emerald-700" />
+        <Globe2 className="h-4 w-4 text-[#167C5A]" />
       )}
     </div>
   );
@@ -55,6 +55,9 @@ export default function FactCheck() {
   const { cmsConfig } = useApp();
   const navigate = useNavigate();
   const hi = lang === "hi";
+
+  const [claimInput, setClaimInput] = useState("");
+  const [filterQuery, setFilterQuery] = useState("");
 
   const sources = useMemo(() => {
     const configured = Array.isArray(cmsConfig?.factCheckSources) ? cmsConfig.factCheckSources : [];
@@ -70,41 +73,124 @@ export default function FactCheck() {
     });
   }, [cmsConfig]);
 
+  const filteredSources = useMemo(() => {
+    if (!filterQuery.trim()) return sources;
+    const q = filterQuery.toLowerCase().trim();
+    return sources.filter(
+      (s: any) => (s.name || "").toLowerCase().includes(q) || (s.nameHi || "").toLowerCase().includes(q) || (s.description || "").toLowerCase().includes(q)
+    );
+  }, [sources, filterQuery]);
+
   return (
-    <main className="min-h-full bg-slate-50 pb-28">
-      <div className="mx-auto w-full max-w-3xl px-4 py-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
-              <CheckCircle2 className="h-6 w-6" />
+    <main className="min-h-full bg-transparent pb-28 text-[#14213D]">
+      <div className="mx-auto w-full max-w-3xl px-4 py-4 sm:px-6 sm:py-5 space-y-5">
+        
+        {/* Hero Banner */}
+        <section className="relative overflow-hidden rounded-[24px] bg-[#14213D] p-5 sm:p-7 text-white shadow-md">
+          <div className="relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[#167C5A]">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">
+                  {hi ? "सत्यापित सूचना" : "Verified Information"}
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">{hi ? "फैक्ट चेक हब" : "Fact Check Hub"}</h1>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-black text-[#000080]">{hi ? "फैक्ट चेक" : "Fact Check"}</h1>
-              <p className="mt-1 text-xs text-slate-500">
-                {hi ? "दावों और खबरों की तथ्य-जांच के लिए उपयोगी स्रोत" : "Useful sources for checking claims and news"}
-              </p>
-            </div>
+            <p className="mt-3 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-200 font-medium">
+              {hi
+                ? "व्हाट्सएप, सोशल मीडिया और समाचारों पर फैलने वाले दावों, वायरल वीडियो और संदेशों की प्रामाणिकता जांचें।"
+                : "Verify claims, viral messages and news items circulating on social media and messaging platforms."}
+            </p>
           </div>
-          <div className="mt-6 space-y-3">
-            {sources.map((source: any) => (
+        </section>
+
+        {/* 1. CHECK A CLAIM SECTION */}
+        <section className="rounded-2xl border border-amber-200/80 bg-amber-50/50 backdrop-blur-xs p-4 sm:p-5 shadow-2xs space-y-3">
+          <div className="flex items-center gap-2 text-[#D97706]">
+            <HelpCircle className="h-4 w-4" />
+            <h2 className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">
+              {hi ? "1. दावों की जांच करें" : "1. CHECK A CLAIM"}
+            </h2>
+          </div>
+          <p className="text-xs font-medium text-slate-600 leading-relaxed">
+            {hi
+              ? "किसी वायरल दावे, खबर या लिंक को यहां दर्ज करें और नीचे दिए गए आधिकारिक फैक्ट चेक एजेंसियों के जरिए उसकी पड़ताल करें:"
+              : "Enter a viral claim, headline or news link below to guide your verification across trusted sources:"}
+          </p>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={claimInput}
+                onChange={(e) => {
+                  setClaimInput(e.target.value);
+                  setFilterQuery(e.target.value);
+                }}
+                placeholder={hi ? "दावा, समाचार या लिंक यहाँ दर्ज करें..." : "Paste claim, viral headline or link..."}
+                className="w-full pl-3.5 pr-4 py-2.5 bg-white border border-slate-200/80 rounded-xl text-xs font-semibold text-[#14213D] placeholder:text-slate-400 focus:outline-none focus:border-[#D97706]"
+              />
+            </div>
+            {claimInput && (
+              <button
+                onClick={() => {
+                  setClaimInput("");
+                  setFilterQuery("");
+                }}
+                className="px-3 py-2.5 bg-white border border-slate-200 text-xs font-bold text-slate-500 rounded-xl hover:bg-slate-50"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </section>
+
+        {/* 2. TRUSTED FACT-CHECK SOURCES SECTION */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A] flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-[#167C5A]" />
+              {hi ? "2. विश्वसनीय फैक्ट-चेक स्रोत" : "2. TRUSTED FACT-CHECK SOURCES"}
+            </h2>
+            <span className="text-xs font-bold text-slate-500">{filteredSources.length}</span>
+          </div>
+
+          <div className="space-y-2.5">
+            {filteredSources.map((source: any) => (
               <button
                 key={source.url}
                 type="button"
                 onClick={() => openExternalLink(source.url, navigate, hi ? source.nameHi : source.name)}
-                className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:bg-white hover:shadow-sm active:scale-[.99]"
+                className="group flex w-full items-center gap-3.5 rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-4 text-left shadow-2xs transition hover:border-amber-300/80 hover:shadow-xs active:scale-[.99]"
               >
                 <WebsiteLogo url={source.url} label={hi ? source.nameHi : source.name} />
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-sm font-black text-slate-800">{hi ? source.nameHi : source.name}</h2>
-                  <p className="mt-1 text-xs text-slate-500">{hi ? source.descriptionHi : source.description}</p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h3 className="text-xs font-bold text-[#14213D] group-hover:text-[#D97706] transition-colors">
+                      {hi ? source.nameHi : source.name}
+                    </h3>
+                    <span className="text-[9px] font-bold bg-emerald-50 text-[#167C5A] border border-emerald-200/80 px-1.5 py-0.5 rounded uppercase">
+                      Verified Source
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11.5px] font-medium text-slate-500 line-clamp-2">{hi ? source.descriptionHi : source.description}</p>
                 </div>
+                <ExternalLink className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-[#14213D]" />
               </button>
             ))}
+            {filteredSources.length === 0 && (
+              <div className="rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-8 text-center text-xs font-medium text-slate-500">
+                No fact check sources found matching your search.
+              </div>
+            )}
           </div>
-          <p className="mt-5 text-center text-[10px] leading-5 text-slate-400">
+
+          <p className="pt-2 text-center text-[11px] font-medium leading-relaxed text-slate-500">
             {hi
-              ? "स्रोत अपनी आधिकारिक वेबसाइट पर खुलेंगे ताकि उनके मूल लेख, लॉगिन, कुकी और सुरक्षा सुविधाएँ सही रहें।"
-              : "Sources open on their official websites so their original articles, login, cookies and security features work correctly."}
+              ? "सभी स्रोत अपनी आधिकारिक वेबसाइट पर खुलेंगे ताकि उनके मूल लेख, आधिकारिक जांच और सुरक्षा की पुष्टि हो सके।"
+              : "Sources open on their official websites so original articles, login, and security features operate correctly."}
           </p>
         </section>
       </div>
