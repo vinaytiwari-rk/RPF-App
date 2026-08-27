@@ -8,18 +8,18 @@ import { useApp } from "../context/AppContext";
 const fallbackSlides=[{image:"/assets/mega_camp_banner.png",titleEn:"Healthcare support for the community",subEn:"Health camps, medical support and community care.",route:"/health-care",active:true},{image:"/assets/water_pump_camp.png",titleEn:"Service that reaches people",subEn:"Ground-level initiatives focused on practical support.",route:"/impact",active:true},{image:"/assets/founder.png",titleEn:"Service. Commitment. Resolve.",subEn:"Discover the people and purpose behind the work.",route:"/founder-message",active:true},{image:"/assets/donate.jpg",titleEn:"Support, skills and opportunity",subEn:"Explore programmes and services available to the community.",route:"/services",active:true}];
 const actions=[{title:"Jan Seva Card",subtitle:"Your digital service identity",icon:BadgePlus,route:"/jan-seva-card",accent:"text-[#E67817] bg-transparent border border-orange-300/60"},{title:"Healthcare",subtitle:"Health services and support",icon:HeartPulse,route:"/health-care",accent:"text-[#DC2626] bg-transparent border border-red-300/60"},{title:"Employment",subtitle:"Jobs, skills and opportunities",icon:BriefcaseBusiness,route:"/employment",accent:"text-[#138808] bg-transparent border border-green-300/60"},{title:"Grievance",subtitle:"Submit and track an issue",icon:ClipboardList,route:"/grievance",accent:"text-[#7E22CE] bg-transparent border border-purple-300/60"}];
 const defaultPibFeed = [
-  "PIB: वीडियो कॉन्फ्रेंसिंग के ज़रिए 'खेलो इंडिया डायलॉग' में प्रधानमंत्री का संबोधन",
-  "ANI: SL vs IND 2nd Test: Dinusha pushes Sri Lanka to brink of fighting draw",
-  "PIB: प्रधानमंत्री जन धन योजना के सफल 12 वर्ष पूरे - वित्तीय समावेशन में ऐतिहासिक प्रगति",
-  "ANI: NTPC targets 149 GW capacity by 2032, outlines Rs 16.86 lakh crore investment plan",
-  "PIB: मॉस्को गोलमेज सम्मेलन में भारत ने हिम तेंदुए के संरक्षण की वैज्ञानिक रणनीति प्रस्तुत की",
-  "ANI: Odisha CM Majhi announces land pattas for 112 displaced families"
+  "PIB: वीडियो कॉन्फ्रेंसिंग के ज़रिए 'खेलो इंडिया डायलॉग' में प्रधानमंत्री नरेंद्र मोदी जी का मुख्य संबोधन",
+  "ANI: भारतीय नौसेना ने अरब सागर में समुद्री सुरक्षा अभियानों के लिए नए गश्ती पोत तैनात किए",
+  "PIB: प्रधानमंत्री जन धन योजना के सफल 12 वर्ष पूरे - देश भर में वित्तीय समावेशन में ऐतिहासिक प्रगति",
+  "ANI: NTPC ने 2032 तक 149 गीगावॉट क्षमता का लक्ष्य तय किया, नए हरित ऊर्जा निवेश योजना का खाका प्रस्तुत किया",
+  "PIB: मॉस्को गोलमेज सम्मेलन में भारत ने हिम तेंदुए के संरक्षण और जैव विविधता की वैज्ञानिक रणनीति प्रस्तुत की",
+  "ANI: ओडिशा के मुख्यमंत्री मोहन चरण माझी ने 112 विस्थापित परिवारों के लिए भूमि पट्टे की घोषणा की"
 ];
 const defaultSachetFeed = [
-  "NDMA SACHET: गुजरात एवं तटीय क्षेत्रों में भारी वर्षा की चेतावनी जारी",
-  "IMD Alert: पूर्वोत्तर भारत एवं उत्तराखंड में वज्रपात एवं बारिश का पूर्वानुमान",
-  "NDMA Alert: उत्तर-पूर्वी राज्यों में बाढ़ पूर्व तैयारी एवं राहत कार्य जारी",
-  "SACHET Alert: तटीय ओडिशा एवं आंध्र प्रदेश में मछुआरों को समुद्र में न जाने की सलाह"
+  "NDMA SACHET: गुजरात एवं तटीय क्षेत्रों में भारी वर्षा एवं तेज हवाओं की चेतावनी जारी - सतर्कता बरतें",
+  "IMD Alert: पूर्वोत्तर भारत एवं उत्तराखंड के पर्वतीय क्षेत्रों में वज्रपात एवं मूसलाधार बारिश का पूर्वानुमान",
+  "NDMA Alert: उत्तर-पूर्वी राज्यों में संभावित बाढ़ से निपटने के लिए पूर्व तैयारी एवं राहत कार्य जारी",
+  "SACHET Alert: तटीय ओडिशा एवं आंध्र प्रदेश में समुद्र की लहरें तीव्र होने की आशंका, मछुआरों को सलाह जारी"
 ];
 async function timedFetch(url:string,ms=8000){const c=new AbortController();const t=window.setTimeout(()=>c.abort(),ms);try{return await fetch(`${url}${url.includes("?")?"&":"?"}t=${Date.now()}`,{cache:"no-store",signal:c.signal});}finally{window.clearTimeout(t);}}
 export default function Home(){const navigate=useNavigate();const {user}=useAuth();const {cmsConfig}=useApp();const [slide,setSlide]=useState(0);const [pibFeed,setPibFeed]=useState<string[]>(defaultPibFeed);const [sachetFeed,setSachetFeed]=useState<string[]>(defaultSachetFeed);const [locationName,setLocationName]=useState("Finding location…");const [temperature,setTemperature]=useState<string|null>(null);const name=user?.name?.trim().split(/\s+/)[0]||"Guest";const hour=new Date().getHours();const greeting=hour>=4&&hour<12?"Good Morning":hour>=12&&hour<17?"Good Afternoon":hour>=17&&hour<22?"Good Evening":"Good Night";
@@ -32,20 +32,34 @@ function parseFeedItems(items: unknown): string[] {
   if (!Array.isArray(items)) return [];
   return items
     .map((item) => {
-      if (typeof item === "string") return item.trim();
-      if (typeof item === "object" && item !== null) {
+      let text = "";
+      if (typeof item === "string") text = item.trim();
+      else if (typeof item === "object" && item !== null) {
         const obj = item as Record<string, unknown>;
         const title = obj.titleHi || obj.titleEn || obj.title || obj.name || obj.description || "";
         const rawSource = typeof obj.source === "string" ? obj.source : "";
-        const text = typeof title === "string" ? title.trim() : "";
+        text = typeof title === "string" ? title.trim() : "";
         if (!text) return "";
-        if (text.startsWith("ANI") || text.startsWith("PIB") || text.startsWith("SACHET") || text.startsWith("NDMA")) return text;
-        if (rawSource.includes("Google")) return "";
-        return rawSource ? `${rawSource}: ${text}` : text;
+        if (text.startsWith("ANI") || text.startsWith("PIB") || text.startsWith("SACHET") || text.startsWith("NDMA")) {
+          // keep as is
+        } else if (rawSource.includes("Google")) {
+          return "";
+        } else {
+          text = rawSource ? `${rawSource}: ${text}` : text;
+        }
       }
-      return "";
+      if (!text) return "";
+      text = text
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/(\.\.\.|…|\s+\.)$/g, "")
+        .trim();
+      return text;
     })
-    .filter((str) => str.length > 5 && !str.toLowerCase().includes("google") && !str.includes("temporarily unavailable") && !str.includes("available right now"));
+    .filter((str) => str.length >= 15 && !str.toLowerCase().includes("google") && !str.includes("temporarily unavailable") && !str.includes("available right now"));
 }
 
 useEffect(() => {

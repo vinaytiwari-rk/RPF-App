@@ -125,38 +125,56 @@ function parseHtmlAniTitles($htmlString) {
 }
 
 $raws = fetchMultiUrls([
-    'pib' => 'https://www.pib.gov.in/allRel.aspx?reg=48&lang=2',
-    'ani' => 'https://www.aninews.in/latest-news/',
+    'pib_hi' => 'https://pib.gov.in/RssMain.aspx?ModId=6&Lang=2',
+    'pib_en' => 'https://pib.gov.in/RssMain.aspx?ModId=6&Lang=1',
+    'pib_web' => 'https://www.pib.gov.in/allRel.aspx?reg=48&lang=2',
+    'ani' => 'https://www.aninews.in/rss/feed/',
     'sachet' => 'https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml'
 ]);
 
-$pibTitles = parseHtmlPibTitles($raws['pib'] ?? '');
-$aniTitles = parseHtmlAniTitles($raws['ani'] ?? '');
+$pibTitlesHi = parseXmlTitles($raws['pib_hi'] ?? '', 'PIB');
+$pibTitlesEn = parseXmlTitles($raws['pib_en'] ?? '', 'PIB');
+$pibWebTitles = parseHtmlPibTitles($raws['pib_web'] ?? '');
+$aniTitles = parseXmlTitles($raws['ani'] ?? '', 'ANI');
+if (empty($aniTitles)) {
+    $aniTitles = parseHtmlAniTitles($raws['ani'] ?? '');
+}
+
+$allPib = array_merge($pibTitlesHi, $pibTitlesEn, $pibWebTitles);
+$pibFiltered = [];
+foreach ($allPib as $t) {
+    // Remove trailing dots or truncation ellipses
+    $clean = preg_replace('/(\.\.\.|…|\s+\.)$/u', '', trim($t));
+    if (mb_strlen($clean) > 15 && !in_array($clean, $pibFiltered, true)) {
+        $pibFiltered[] = $clean;
+    }
+}
 
 $interleaved = [];
-$maxCount = max(count($pibTitles), count($aniTitles));
+$maxCount = max(count($pibFiltered), count($aniTitles));
 for ($i = 0; $i < $maxCount; $i++) {
-    if (isset($pibTitles[$i])) $interleaved[] = $pibTitles[$i];
+    if (isset($pibFiltered[$i])) $interleaved[] = $pibFiltered[$i];
     if (isset($aniTitles[$i])) $interleaved[] = $aniTitles[$i];
 }
+
 if (empty($interleaved)) {
     $interleaved = [
-        "PIB: वीडियो कॉन्फ्रेंसिंग के ज़रिए 'खेलो इंडिया डायलॉग' में प्रधानमंत्री का संबोधन",
-        "ANI: SL vs IND 2nd Test: Dinusha pushes Sri Lanka to brink of fighting draw",
-        "PIB: प्रधानमंत्री जन धन योजना के सफल 12 वर्ष पूरे - वित्तीय समावेशन में ऐतिहासिक प्रगति",
-        "ANI: NTPC targets 149 GW capacity by 2032, outlines Rs 16.86 lakh crore investment plan",
-        "PIB: मॉस्को गोलमेज सम्मेलन में भारत ने हिम तेंदुए के संरक्षण की वैज्ञानिक रणनीति प्रस्तुत की",
-        "ANI: Odisha CM Majhi announces land pattas for 112 displaced families"
+        "PIB: वीडियो कॉन्फ्रेंसिंग के ज़रिए 'खेलो इंडिया डायलॉग' में प्रधानमंत्री नरेंद्र मोदी जी का मुख्य संबोधन",
+        "ANI: भारतीय नौसेना ने अरब सागर में समुद्री सुरक्षा अभियानों के लिए नए गश्ती पोत तैनात किए",
+        "PIB: प्रधानमंत्री जन धन योजना के सफल 12 वर्ष पूरे - देश भर में वित्तीय समावेशन में ऐतिहासिक प्रगति",
+        "ANI: NTPC ने 2032 तक 149 गीगावॉट क्षमता का लक्ष्य तय किया, नए हरित ऊर्जा निवेश योजना का खाका प्रस्तुत किया",
+        "PIB: मॉस्को गोलमेज सम्मेलन में भारत ने हिम तेंदुए के संरक्षण और जैव विविधता की वैज्ञानिक रणनीति प्रस्तुत की",
+        "ANI: ओडिशा के मुख्यमंत्री मोहन चरण माझी ने 112 विस्थापित परिवारों के लिए भूमि पट्टे की घोषणा की"
     ];
 }
 
 $sachetTitles = parseXmlTitles($raws['sachet'] ?? '', '');
 if (empty($sachetTitles)) {
     $sachetTitles = [
-        "NDMA SACHET: गुजरात एवं तटीय क्षेत्रों में भारी वर्षा की चेतावनी जारी",
-        "IMD Alert: पूर्वोत्तर भारत एवं उत्तराखंड में वज्रपात एवं बारिश का पूर्वानुमान",
-        "NDMA Alert: उत्तर-पूर्वी राज्यों में बाढ़ पूर्व तैयारी एवं राहत कार्य जारी",
-        "SACHET Alert: तटीय ओडिशा एवं आंध्र प्रदेश में मछुआरों को समुद्र में न जाने की सलाह"
+        "NDMA SACHET: गुजरात एवं तटीय क्षेत्रों में भारी वर्षा एवं तेज हवाओं की चेतावनी जारी - सतर्कता बरतें",
+        "IMD Alert: पूर्वोत्तर भारत एवं उत्तराखंड के पर्वतीय क्षेत्रों में वज्रपात एवं मूसलाधार बारिश का पूर्वानुमान",
+        "NDMA Alert: उत्तर-पूर्वी राज्यों में संभावित बाढ़ से निपटने के लिए पूर्व तैयारी एवं राहत कार्य जारी",
+        "SACHET Alert: तटीय ओडिशा एवं आंध्र प्रदेश में समुद्र की लहरें तीव्र होने की आशंका, मछुआरों को सलाह जारी"
     ];
 }
 
