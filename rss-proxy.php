@@ -75,41 +75,68 @@ function parseXmlTitles($xmlString, $prefix = '') {
     return $titles;
 }
 
-function fetchCombinedNewsFeed() {
-    $sources = [
-        'PIB' => [
-            'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48',
-            'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48'
-        ],
-        'ANI' => [
-            'https://www.aninews.in/rss/feed/category/national.xml',
-            'https://www.aninews.in/rss/feed/category/national/politics.xml'
-        ],
-        'DD India' => [
-            'https://ddindia.co.in/category/india/feed/'
-        ],
-        'DD News' => [
-            'https://ddnews.gov.in/en/category/top-stories/feed/'
-        ],
-        'Sarkaritel' => [
-            'https://www.sarkaritel.com/category/national-news/feed/'
-        ]
-    ];
-
-    $results = [];
-    foreach ($sources as $prefix => $urls) {
-        $results[$prefix] = [];
-        foreach ($urls as $url) {
-            $data = fetchRawUrl($url);
-            $titles = parseXmlTitles($data, $prefix);
-            foreach ($titles as $t) {
-                if (!in_array($t, $results[$prefix], true)) {
-                    $results[$prefix][] = $t;
-                    if (count($results[$prefix]) >= 10) break;
+function parseHtmlPibTitles($htmlString) {
+    if (!$htmlString) return [];
+    $titles = [];
+    preg_match_all('/<a[^>]*PRID=[0-9]+[^>]*>([\s\S]*?)<\/a>|<a[^>]*ReleaseSimpleHtml[^>]*>([\s\S]*?)<\/a>/i', $htmlString, $matches);
+    if (!empty($matches[0])) {
+        foreach ($matches[0] as $match) {
+            $clean = html_entity_decode(strip_tags($match), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $clean = preg_replace('/\s+/', ' ', trim($clean));
+            if (mb_strlen($clean) > 15 && stripos($clean, 'javascript') === false && stripos($clean, 'skip to content') === false) {
+                $t = "PIB: {$clean}";
+                if (!in_array($t, $titles, true)) {
+                    $titles[] = $t;
+                    if (count($titles) >= 15) break;
                 }
             }
         }
     }
+    return $titles;
+}
+
+function parseHtmlAniTitles($htmlString) {
+    if (!$htmlString) return [];
+    $titles = [];
+    preg_match_all('/<a[^>]*news\/[^>]*>([\s\S]*?)<\/a>/i', $htmlString, $matches);
+    if (!empty($matches[0])) {
+        foreach ($matches[0] as $match) {
+            $clean = html_entity_decode(strip_tags($match), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $clean = preg_replace('/\s+/', ' ', trim($clean));
+            if (mb_strlen($clean) > 20 && stripos($clean, 'rss') === false && stripos($clean, 'copyright') === false && stripos($clean, 'latest news') === false) {
+                $t = "ANI: {$clean}";
+                if (!in_array($t, $titles, true)) {
+                    $titles[] = $t;
+                    if (count($titles) >= 15) break;
+                }
+            }
+        }
+    }
+    return $titles;
+}
+
+function fetchCombinedNewsFeed() {
+    $pibTitles = parseHtmlPibTitles(fetchRawUrl('https://www.pib.gov.in/allRel.aspx?reg=48&lang=2'));
+    if (empty($pibTitles)) {
+        $pibTitles = parseXmlTitles(fetchRawUrl('https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48'), 'PIB');
+    }
+
+    $aniTitles = parseHtmlAniTitles(fetchRawUrl('https://www.aninews.in/latest-news/'));
+    if (empty($aniTitles)) {
+        $aniTitles = parseXmlTitles(fetchRawUrl('https://www.aninews.in/rss/feed/category/national.xml'), 'ANI');
+    }
+
+    $ddIndiaTitles = parseXmlTitles(fetchRawUrl('https://ddindia.co.in/category/india/feed/'), 'DD India');
+    $ddNewsTitles = parseXmlTitles(fetchRawUrl('https://ddnews.gov.in/en/category/top-stories/feed/'), 'DD News');
+    $sarkaritelTitles = parseXmlTitles(fetchRawUrl('https://www.sarkaritel.com/category/national-news/feed/'), 'Sarkaritel');
+
+    $results = [
+        'PIB' => $pibTitles,
+        'ANI' => $aniTitles,
+        'DD India' => $ddIndiaTitles,
+        'DD News' => $ddNewsTitles,
+        'Sarkaritel' => $sarkaritelTitles
+    ];
 
     $interleaved = [];
     $maxCount = 0;
