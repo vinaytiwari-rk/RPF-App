@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 
 const fallbackSlides=[{image:"/assets/mega_camp_banner.png",titleEn:"Healthcare support for the community",subEn:"Health camps, medical support and community care.",route:"/health-care",active:true},{image:"/assets/water_pump_camp.png",titleEn:"Service that reaches people",subEn:"Ground-level initiatives focused on practical support.",route:"/impact",active:true},{image:"/assets/founder.png",titleEn:"Service. Commitment. Resolve.",subEn:"Discover the people and purpose behind the work.",route:"/founder-message",active:true},{image:"/assets/donate.jpg",titleEn:"Support, skills and opportunity",subEn:"Explore programmes and services available to the community.",route:"/services",active:true}];
-const actions=[{title:"Jan Seva Card",subtitle:"Your digital service identity",icon:BadgePlus,route:"/jan-seva-card",accent:"text-[#E67817] bg-[#FFF7ED]"},{title:"Healthcare",subtitle:"Health services and support",icon:HeartPulse,route:"/health-care",accent:"text-[#C81E4A] bg-[#FFF1F4]"},{title:"Employment",subtitle:"Jobs, skills and opportunities",icon:BriefcaseBusiness,route:"/employment",accent:"text-[#138808] bg-[#F0F9F1]"},{title:"Grievance",subtitle:"Submit and track an issue",icon:ClipboardList,route:"/grievance",accent:"text-[#1D5B93] bg-[#EFF6FF]"}];
+const actions=[{title:"Jan Seva Card",subtitle:"Your digital service identity",icon:BadgePlus,route:"/jan-seva-card",accent:"text-[#E67817] bg-transparent border border-orange-300/60"},{title:"Healthcare",subtitle:"Health services and support",icon:HeartPulse,route:"/health-care",accent:"text-[#DC2626] bg-transparent border border-red-300/60"},{title:"Employment",subtitle:"Jobs, skills and opportunities",icon:BriefcaseBusiness,route:"/employment",accent:"text-[#138808] bg-transparent border border-green-300/60"},{title:"Grievance",subtitle:"Submit and track an issue",icon:ClipboardList,route:"/grievance",accent:"text-[#7E22CE] bg-transparent border border-purple-300/60"}];
 const defaultPibFeed = [
   "PIB: वीडियो कॉन्फ्रेंसिंग के ज़रिए 'खेलो इंडिया डायलॉग' में प्रधानमंत्री का संबोधन",
   "ANI: SL vs IND 2nd Test: Dinusha pushes Sri Lanka to brink of fighting draw",
@@ -46,61 +46,6 @@ function parseFeedItems(items: unknown): string[] {
       return "";
     })
     .filter((str) => str.length > 5 && !str.toLowerCase().includes("google") && !str.includes("temporarily unavailable") && !str.includes("available right now"));
-}
-
-async function fetchRss2JsonApi(rssUrl: string, prefix = ""): Promise<string[]> {
-  try {
-    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-    const res = await timedFetch(apiUrl, 6000);
-    if (!res.ok) return [];
-    const j = await res.json();
-    if (j?.status === "ok" && Array.isArray(j?.items)) {
-      const titles: string[] = [];
-      for (const item of j.items) {
-        const rawTitle = typeof item?.title === "string" ? item.title.trim() : "";
-        if (rawTitle) {
-          const clean = rawTitle.replace(/<[^>]+>/g, "").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, "$1").trim();
-          const lower = clean.toLowerCase();
-          if (clean && !lower.includes("all india: cap") && lower !== "national" && lower !== "business") {
-            const itemText = prefix ? `${prefix}: ${clean}` : clean;
-            if (!titles.includes(itemText)) titles.push(itemText);
-          }
-        }
-      }
-      return titles;
-    }
-  } catch {}
-  return [];
-}
-
-async function fetchDirectClientXml(url: string, prefix = ""): Promise<string[]> {
-  try {
-    const res = await timedFetch(url, 6000);
-    if (!res.ok) return [];
-    const text = await res.text();
-    if (!text || text.length < 50) return [];
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, "text/xml");
-    const items = Array.from(xml.querySelectorAll("item, entry"));
-    const titles: string[] = [];
-    for (const item of items) {
-      const titleEl = item.querySelector("title");
-      if (titleEl && titleEl.textContent) {
-        const clean = titleEl.textContent.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, "$1").trim();
-        const lower = clean.toLowerCase();
-        if (clean && !lower.includes("all india: cap") && lower !== "national" && lower !== "business" && lower !== "health" && lower !== "world") {
-          const itemText = prefix ? `${prefix}: ${clean}` : clean;
-          if (!titles.includes(itemText)) {
-            titles.push(itemText);
-            if (titles.length >= 15) break;
-          }
-        }
-      }
-    }
-    return titles;
-  } catch {
-    return [];
-  }
 }
 
 useEffect(() => {
@@ -184,11 +129,11 @@ return (
       {/* 1. Header ke Turant Baad: Completely Transparent Welcome Section with Purple Name Text & Light Pink Badge */}
       <section className="mb-3.5 bg-transparent py-1">
         <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-pink-300/70 bg-pink-50/50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-pink-700 backdrop-blur-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-pink-400/60 bg-transparent px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-pink-700">
             <Sparkles className="h-3 w-3 text-pink-600" />
             {greeting}
           </span>
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-700 bg-white/40 px-2.5 py-0.5 rounded-full border border-white/60 backdrop-blur-xs">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-700 bg-transparent px-2.5 py-0.5 rounded-full border border-slate-300/60">
             <MapPin className="h-3 w-3 text-[#E67817]" />
             <span className="max-w-[110px] truncate">{locationName}</span>
             {temperature && (
@@ -262,12 +207,12 @@ return (
           <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">Our Vision & Leadership</h2>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <button onClick={() => navigate("/vision-goals")} className="rounded-2xl border border-white/70 bg-transparent p-4 text-left shadow-2xs hover:bg-white/30 transition-all">
+          <button onClick={() => navigate("/vision-goals")} className="rounded-2xl border border-white/70 bg-transparent p-4 text-left hover:bg-white/20 transition-all">
             <Compass className="h-5 w-5 text-[#1D5B93]" />
             <p className="mt-4 text-[15px] font-black font-serif">Our Vision</p>
             <p className="mt-1 text-[10px] text-slate-600 font-medium">A clear direction for meaningful social impact.</p>
           </button>
-          <button onClick={() => navigate("/founder-message")} className="rounded-2xl border border-white/70 bg-transparent p-4 text-left shadow-2xs hover:bg-white/30 transition-all">
+          <button onClick={() => navigate("/founder-message")} className="rounded-2xl border border-white/70 bg-transparent p-4 text-left hover:bg-white/20 transition-all">
             <UserRound className="h-5 w-5 text-[#E67817]" />
             <p className="mt-4 text-[15px] font-black font-serif">Founder’s Message</p>
             <p className="mt-1 text-[10px] text-slate-600 font-medium">A message from Rohit Pandit, Founder of RP Foundation.</p>
@@ -283,7 +228,7 @@ return (
         </div>
         <div className="grid grid-cols-2 gap-3">
           {actions.map(({ title, subtitle, icon: Icon, route, accent }) => (
-            <motion.button key={title} whileTap={{ scale: .98 }} onClick={() => navigate(route)} className="min-h-[150px] rounded-2xl border border-white/70 bg-transparent p-4 text-left shadow-2xs hover:bg-white/30 transition-all">
+            <motion.button key={title} whileTap={{ scale: .98 }} onClick={() => navigate(route)} className="min-h-[150px] rounded-2xl border border-white/70 bg-transparent p-4 text-left hover:bg-white/20 transition-all">
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent}`}>
                 <Icon className="h-5 w-5" />
               </div>
@@ -300,7 +245,7 @@ return (
           <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#138808]">Our Impact</p>
           <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">Social Impact Highlights</h2>
         </div>
-        <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-white/70 bg-transparent shadow-2xs">
+        <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-white/70 bg-transparent">
           {[{ icon: UsersRound, value: "Community", label: "People first" }, { icon: Stethoscope, value: "Care", label: "Health initiatives" }, { icon: CalendarDays, value: "Active", label: "Foundation work" }].map(({ icon: Icon, value, label }) => (
             <div key={label} className="border-r border-slate-200/50 px-2 py-4 text-center last:border-r-0">
               <Icon className="mx-auto h-4 w-4 text-[#138808]" />
@@ -316,4 +261,3 @@ return (
   </main>
 );
 }
-
