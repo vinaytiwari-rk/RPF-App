@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 import GlobalMiniPlayer from "../components/GlobalMiniPlayer";
+import SearchModal from "../components/SearchModal";
 
 export default function MainLayout() {
   const navigate = useNavigate(); const location = useLocation();
@@ -12,7 +13,14 @@ export default function MainLayout() {
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const unread = notifications?.filter((n) => !n.read).length || 0;
   const [guest, setGuest] = useState(false); const [avatar, setAvatar] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const localAvatarKey = `@rpf_profile_avatar:${user?.id || "guest"}`;
+
+  useEffect(() => {
+    const handleOpenSearch = () => setSearchOpen(true);
+    window.addEventListener("rpf-open-search", handleOpenSearch);
+    return () => window.removeEventListener("rpf-open-search", handleOpenSearch);
+  }, []);
   
   useEffect(() => {
     try { setAvatar(localStorage.getItem(localAvatarKey) || ""); } catch {}
@@ -144,6 +152,8 @@ export default function MainLayout() {
           </motion.div>
         </div>
       )}
+
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }
