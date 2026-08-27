@@ -2,7 +2,6 @@ import express from "express";
 import axios from "axios";
 import Parser from "rss-parser";
 import { apiCache } from "../lib/apiCache.js";
-
 import https from "https";
 
 const router = express.Router();
@@ -184,103 +183,6 @@ async function refreshOfficialFeed(kind: "pib" | "sachet") {
   } catch (err) {
     console.warn(`Error refreshing official feed (${kind}):`, err);
   }
-  return state.items;
-}
-router.get("/api/public/calendar/digest", async (_req,res) => { try { const {data}=await axios.get("https://hinducalendar.app/feed/digest.txt",{responseType:"text",timeout:8000}); return res.type("text/plain").send(data); } catch { return res.status(503).send("Digest temporarily unavailable"); } });
-router.get("/api/public/jobs-feed", async (_req,res) => { try { const c=cache("jobs_rss",3600000); if(c) return res.json({success:true,data:c}); const feed=await fetchRssFeed("https://news.google.com/rss/search?q=Sarkari+Naukri+India+Jobs&hl=en-IN&gl=IN&ceid=IN:en"); const data=feed.items.slice(0,20).map(i=>({title:i.title,link:i.link,pubDate:i.pubDate})); save("jobs_rss",data); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Jobs feed temporarily unavailable"}); } });
-router.get("/api/public/remote-jobs", async (_req,res) => { try { const {data}=await axios.get("https://jobicy.com/api/v2/remote-jobs?count=20&geo=india",{timeout:8000}); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Remote jobs temporarily unavailable"}); } });
-router.get("/api/public/nearby", async (req,res) => { try { const lat=Number(req.query.lat),lon=Number(req.query.lon),type=String(req.query.type||"police"); if(!Number.isFinite(lat)||!Number.isFinite(lon)||!["police","veterinary"].includes(type)) return res.status(400).json({success:false,error:"Invalid nearby search"}); const key=`nearby_${type}_${lat.toFixed(3)}_${lon.toFixed(3)}`; const c=cache(key,86400000); if(c) return res.json({success:true,data:c}); const tag=type==="police"?"amenity=police":"amenity=veterinary"; const q=`[out:json][timeout:10];node[${tag}](around:5000,${lat},${lon});out;`; const {data}=await axios.get("https://overpass-api.de/api/interpreter",{params:{data:q},timeout:12000}); const locations=(data.elements||[]).map((e:any)=>({name:e.tags?.name||`Unnamed ${type}`,lat:e.lat,lon:e.lon})); save(key,locations); return res.json({success:true,data:locations}); } catch { return res.status(503).json({success:false,error:"Nearby search temporarily unavailable"}); } });
-
-router.get("/api/public/sachet-alerts", async (_req, res) => {
-  try {
-    const c = cache("sachet_alerts_rss", 900000);
-    if (c) return res.json({ success: true, data: c });
-
-    const sachetFeed = await fetchRssFeed("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml");
-    const data = (sachetFeed.items || []).map(i => ({
-      id: i.guid || i.link,
-      titleEn: cleanText(i.title || ""),
-      titleHi: cleanText(i.title || ""),
-      severity: i.categories?.[0] || "Alert",
-      source: i.creator || i.author || "NDMA SACHET",
-      link: i.link,
-      pubDate: i.pubDate
-    }));
-    save("sachet_alerts_rss", data);
-    return res.json({ success: true, data });
-  } catch {
-    return res.status(503).json({ success: false, error: "SACHET alerts temporarily unavailable" });
-  }
-});
-
-router.get("/api/public/disaster-alerts", async (_req,res) => {
-  try {
-    const c=cache("disaster_rss",900000);
-    if(c) return res.json({success:true,data:c});
-
-    let sachetItems: any[] = [];
-    try {
-      const sachetFeed = await fetchRssFeed("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml");
-      sachetItems = (sachetFeed.items || []).map(i => ({
-        id: i.guid || i.link,
-        titleEn: cleanText(i.title || ""),
-        titleHi: cleanText(i.title || ""),
-        severity: i.categories?.[0] || "Alert",
-        source: i.creator || i.author || "NDMA SACHET",
-        link: i.link,
-        pubDate: i.pubDate
-      }));
-    } catch (e) {
-      console.warn("SACHET RSS fetch fallback to GDACS:", e);
-    }
-
-    if (sachetItems.length > 0) {
-      save("disaster_rss", sachetItems);
-      return res.json({ success: true, data: sachetItems });
-    }
-
-    const feed = await fetchRssFeed("https://www.gdacs.org/xml/rss.xml");
-    const data = feed.items.filter(i=>`${i.title||""} ${i.contentSnippet||""}`.toLowerCase().includes("india")).slice(0,30).map(i=>({id:i.guid||i.link,titleEn:i.title,titleHi:i.title,severity:"Alert",source:"GDACS",link:i.link}));
-    save("disaster_rss",data);
-    return res.json({success:true,data});
-  } catch {
-    return res.status(503).json({success:false,error:"Disaster alerts temporarily unavailable"});
-  }
-});
-
-type FeedState = { etag?: string; items: string[]; updatedAt: string };
-const officialState: Record<"pib" | "sachet", FeedState> = {
-  pib: { items: [], updatedAt: "" },
-  sachet: { items: [], updatedAt: "" }
-};
-const officialUrls = {
-  pib: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=1&reg=1",
-  sachet: "https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml"
-};
-
-async function refreshOfficialFeed(kind: "pib" | "sachet") {
-  const state = officialState[kind];
-  const headers: Record<string, string> = {
-    "User-Agent": "Samahit-RPFoundation/1.0",
-    "Accept": "application/rss+xml, application/xml, text/xml, */*"
-  };
-  if (state.etag) headers["If-None-Match"] = state.etag;
-  const response = await axios.get<string>(officialUrls[kind], {
-    responseType: "text",
-    timeout: 8000,
-    maxRedirects: 5,
-    headers,
-    validateStatus: status => status === 200 || status === 304
-  });
-  if (response.status === 304 && state.items.length) return state.items;
-  const parsed = await rssParser.parseString(response.data);
-  const items = parsed.items.map(item => cleanText(item.title || item.contentSnippet || item.content || "")).filter(Boolean).slice(0, 20);
-  if (items.length) {
-    state.items = items;
-    state.updatedAt = new Date().toISOString();
-  }
-  const etag = response.headers.etag;
-  if (typeof etag === "string") state.etag = etag;
   return state.items;
 }
 
