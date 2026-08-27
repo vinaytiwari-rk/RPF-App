@@ -148,10 +148,172 @@ useEffect(() => {
   const t = window.setInterval(() => void load(), 60000);
   return () => { alive = false; window.clearInterval(t); };
 }, []);
-useEffect(()=>{let alive=true;if(!("geolocation"in navigator)){setLocationName("Location unavailable");return;}navigator.geolocation.getCurrentPosition(async({coords})=>{try{const [p,w]=await Promise.all([fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}&zoom=10`,{headers:{Accept:"application/json"}}),fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m&timezone=auto`)]);const place=await p.json(),weather=await w.json();if(!alive)return;const a=place?.address||{};setLocationName(a.city||a.town||a.village||a.county||a.state||"Current location");if(typeof weather?.current?.temperature_2m==="number")setTemperature(`${Math.round(weather.current.temperature_2m)}°C`);}catch{if(alive)setLocationName("Current location");}},()=>{if(alive)setLocationName("Enable location");},{enableHighAccuracy:false,timeout:10000,maximumAge:300000});return()=>{alive=false;};},[]);
+
+useEffect(() => {
+  let alive = true;
+  if (!("geolocation" in navigator)) { setLocationName("Location unavailable"); return; }
+  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+    try {
+      const [p, w] = await Promise.all([
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}&zoom=10`, { headers: { Accept: "application/json" } }),
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m&timezone=auto`)
+      ]);
+      const place = await p.json(), weather = await w.json();
+      if (!alive) return;
+      const a = place?.address || {};
+      setLocationName(a.city || a.town || a.village || a.county || a.state || "Current location");
+      if (typeof weather?.current?.temperature_2m === "number") setTemperature(`${Math.round(weather.current.temperature_2m)}°C`);
+    } catch {
+      if (alive) setLocationName("Current location");
+    }
+  }, () => {
+    if (alive) setLocationName("Enable location");
+  }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+  return () => { alive = false; };
+}, []);
+
 const pibText = useMemo(() => [...pibFeed, ...pibFeed].join("     •     "), [pibFeed]);
 const sachetText = useMemo(() => [...sachetFeed, ...sachetFeed].join("     •     "), [sachetFeed]);
 const pibDuration = useMemo(() => `${Math.max(50, Math.round(pibText.length * 0.08))}s`, [pibText]);
 const sachetDuration = useMemo(() => `${Math.max(50, Math.round(sachetText.length * 0.08))}s`, [sachetText]);
 
-return <main className="min-h-full bg-transparent text-[#12233D] font-serif"><div className="mx-auto w-full max-w-3xl px-4 pb-3 pt-2 sm:px-6"><section className="mb-3.5 overflow-hidden rounded-2xl bg-gradient-to-r from-rose-400 via-pink-400 to-rose-500 p-4 text-white shadow-md border border-rose-300/40 relative"><div className="absolute top-0 right-0 h-28 w-28 rounded-full bg-white/20 blur-xl pointer-events-none transform translate-x-6 -translate-y-6"/><div className="relative z-10"><div className="flex items-center justify-between"><span className="inline-flex items-center gap-1.5 rounded-full bg-white/25 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-white backdrop-blur-md border border-white/30"><Sparkles className="h-3 w-3 text-amber-200"/>{greeting}</span><div className="flex items-center gap-1.5 text-[10px] font-bold text-white bg-black/20 px-2.5 py-0.5 rounded-full backdrop-blur-sm"><MapPin className="h-3 w-3 text-amber-200"/><span className="max-w-[110px] truncate">{locationName}</span>{temperature&&<><span>•</span><CloudSun className="h-3 w-3 text-cyan-200"/><span>{temperature}</span></>}</div></div><h1 className="mt-2.5 text-[20px] font-black leading-tight tracking-tight text-white font-serif sm:text-[23px]">Namaste, {name} Ji <span className="text-[18px]">🙏</span></h1><p className="mt-0.5 text-[11px] font-semibold text-rose-50/90 font-serif">{greeting}! Welcome to RP Foundation Samahit.</p></div></section><section className="mb-3.5 rounded-2xl border border-white/70 bg-white/40 backdrop-blur-md px-4 py-3 shadow-xs"><p className="text-[8.5px] font-black uppercase tracking-[.18em] text-[#E67817]">Thought of the Day</p><p className="mt-1 text-[12px] font-black leading-5 text-[#12233D] font-serif">“Work is worship, and service is the greatest religion.”</p></section><section className="mb-1 overflow-hidden bg-transparent py-0.5"><div className="h-7 overflow-hidden"><div className="inline-block min-w-max whitespace-nowrap px-1 text-[11px] font-bold leading-7 text-[#E67817]" style={{animation:`rpf-pib-marquee ${pibDuration} linear infinite`}}>{pibText}</div></div></section><section className="mb-4 overflow-hidden bg-transparent py-0.5"><div className="h-7 overflow-hidden"><div className="inline-block min-w-max whitespace-nowrap px-1 text-[11px] font-bold leading-7 text-[#138808]" style={{animation:`rpf-sachet-marquee ${sachetDuration} linear infinite`}}>{sachetText}</div></div></section><section><div className="mb-2.5 flex items-end justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#E67817]">Discover</p><h2 className="mt-.5 text-[21px] font-black font-serif">RP Foundation at Work</h2></div><span className="text-[12px] font-black text-slate-500">{slide+1}/{slides.length}</span></div><motion.article key={`${current?.image||"slide"}-${slide}`} initial={{opacity:.2}} animate={{opacity:1}} className="relative h-[330px] overflow-hidden rounded-[22px] bg-[#0F3157] shadow-md"><img src={getSlideImage(current?.image, slide)} alt={current?.titleEn||"RP Foundation initiative"} className="absolute inset-0 h-full w-full object-cover" onError={(e)=>{const img=e.currentTarget;const fb=fallbackSlides[slide%fallbackSlides.length].image;if(img.src!==fb)img.src=fb;}}/><div className="absolute inset-0 bg-gradient-to-t from-[#07182C]/90 via-[#07182C]/20 to-transparent"/><div className="absolute inset-x-0 bottom-0 p-4 text-white"><h3 className="text-[22px] font-black leading-tight font-serif">{current?.titleEn}</h3><p className="mt-1 text-[11px] leading-5 text-slate-200">{current?.subEn}</p><button onClick={()=>navigate((current as any)?.route||"/impact")} className="mt-2 inline-flex items-center gap-1 text-[11px] font-black">Explore <ChevronRight className="h-4 w-4"/></button></div></motion.article><div className="mt-3 flex justify-center gap-2">{slides.map((_:any,i:number)=><button key={i} onClick={()=>setSlide(i)} className={`h-2 rounded-full ${slide===i?"w-7 bg-[#FF9933]":"w-2 bg-slate-300"}`}/>)}</div></section><section className="mt-7"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#138808]">Foundation</p><h2 className="mt-.5 text-[21px] font-black font-serif">Our Vision & Leadership</h2></div><div className="grid grid-cols-2 gap-3"><button onClick={()=>navigate("/vision-goals")} className="rounded-2xl border border-white/70 bg-white/40 backdrop-blur-md p-4 text-left shadow-xs hover:bg-white/60 transition-all"><Compass className="h-5 w-5 text-[#1D5B93]"/><p className="mt-4 text-[15px] font-black font-serif">Our Vision</p><p className="mt-1 text-[10px] text-slate-600 font-medium">A clear direction for meaningful social impact.</p></button><button onClick={()=>navigate("/founder-message")} className="rounded-2xl border border-white/70 bg-white/40 backdrop-blur-md p-4 text-left shadow-xs hover:bg-white/60 transition-all"><UserRound className="h-5 w-5 text-[#E67817]"/><p className="mt-4 text-[15px] font-black font-serif">Founder’s Message</p><p className="mt-1 text-[10px] text-slate-600 font-medium">A message from Rohit Pandit, Founder of RP Foundation.</p></button></div></section><section className="mt-7"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#E67817]">Quick Access</p><h2 className="mt-.5 text-[21px] font-black font-serif">What can we help with?</h2></div><div className="grid grid-cols-2 gap-3">{actions.map(({title,subtitle,icon:Icon,route,accent})=><motion.button key={title} whileTap={{scale:.98}} onClick={()=>navigate(route)} className="min-h-[150px] rounded-2xl border border-white/70 bg-white/40 backdrop-blur-md p-4 text-left shadow-xs hover:bg-white/60 transition-all"><div className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent}`}><Icon className="h-5 w-5"/></div><p className="mt-4 text-[15px] font-black font-serif">{title}</p><p className="mt-1 text-[10px] text-slate-600 font-medium">{subtitle}</p></motion.button>)}</div></section><section className="mt-7 pb-3"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#138808]">Our Impact</p><h2 className="mt-.5 text-[21px] font-black font-serif">Social Impact Highlights</h2></div><div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-white/70 bg-white/40 backdrop-blur-md shadow-xs">{[{icon:UsersRound,value:"Community",label:"People first"},{icon:Stethoscope,value:"Care",label:"Health initiatives"},{icon:CalendarDays,value:"Active",label:"Foundation work"}].map(({icon:Icon,value,label})=><div key={label} className="border-r border-slate-200/50 px-2 py-4 text-center last:border-r-0"><Icon className="mx-auto h-4 w-4 text-[#138808]"/><p className="mt-2 text-[13px] font-black font-serif">{value}</p><p className="mt-.5 text-[8px] text-slate-500 font-bold">{label}</p></div>)}</div></section></div><style>{`@keyframes rpf-pib-marquee{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}@keyframes rpf-sachet-marquee{0%{transform:translate3d(-50%,0,0)}100%{transform:translate3d(0,0,0)}}`}</style></main>;}
+return (
+  <main className="min-h-full bg-transparent text-[#12233D] font-serif">
+    <div className="mx-auto w-full max-w-3xl px-4 pb-3 pt-2 sm:px-6">
+      
+      {/* 1. Header ke Turant Baad: Completely Transparent Welcome Section with Purple Name Text & Light Pink Badge */}
+      <section className="mb-3.5 bg-transparent py-1">
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-pink-300/70 bg-pink-50/50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-pink-700 backdrop-blur-xs">
+            <Sparkles className="h-3 w-3 text-pink-600" />
+            {greeting}
+          </span>
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-700 bg-white/40 px-2.5 py-0.5 rounded-full border border-white/60 backdrop-blur-xs">
+            <MapPin className="h-3 w-3 text-[#E67817]" />
+            <span className="max-w-[110px] truncate">{locationName}</span>
+            {temperature && (
+              <>
+                <span>•</span>
+                <CloudSun className="h-3 w-3 text-[#1D5B93]" />
+                <span>{temperature}</span>
+              </>
+            )}
+          </div>
+        </div>
+        <h1 className="mt-2 text-[22px] font-black leading-tight tracking-tight text-[#7E22CE] font-serif sm:text-[25px]">
+          Namaste, {name} Ji <span className="text-[20px]">🙏</span>
+        </h1>
+        <p className="mt-0.5 text-[11px] font-semibold text-slate-600 font-serif">
+          {greeting}! Welcome to RP Foundation Samahit.
+        </p>
+      </section>
+
+      {/* 2. Iske Baad: Card 2 - Thought of the Day (Transparent Card) */}
+      <section className="mb-3.5 rounded-2xl border border-white/70 bg-transparent px-4 py-3">
+        <p className="text-[8.5px] font-black uppercase tracking-[.18em] text-[#E67817]">Thought of the Day</p>
+        <p className="mt-1 text-[12px] font-black leading-5 text-[#12233D] font-serif">“Work is worship, and service is the greatest religion.”</p>
+      </section>
+
+      {/* 3. Fir Marquee: Saffron PIB & Green SACHET Tickers */}
+      <section className="mb-1 overflow-hidden bg-transparent py-0.5">
+        <div className="h-7 overflow-hidden">
+          <div className="inline-block min-w-max whitespace-nowrap px-1 text-[11px] font-bold leading-7 text-[#E67817]" style={{ animation: `rpf-pib-marquee ${pibDuration} linear infinite` }}>
+            {pibText}
+          </div>
+        </div>
+      </section>
+      <section className="mb-4 overflow-hidden bg-transparent py-0.5">
+        <div className="h-7 overflow-hidden">
+          <div className="inline-block min-w-max whitespace-nowrap px-1 text-[11px] font-bold leading-7 text-[#138808]" style={{ animation: `rpf-sachet-marquee ${sachetDuration} linear infinite` }}>
+            {sachetText}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. RP Foundation at Work (Single Carousel) */}
+      <section className="mb-7">
+        <div className="mb-2.5 flex items-end justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#E67817]">Discover</p>
+            <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">RP Foundation at Work</h2>
+          </div>
+          <span className="text-[12px] font-black text-slate-500">{slide + 1}/{slides.length}</span>
+        </div>
+        <motion.article key={`${current?.image || "slide"}-${slide}`} initial={{ opacity: .2 }} animate={{ opacity: 1 }} className="relative h-[330px] overflow-hidden rounded-[22px] bg-[#0F3157] shadow-md">
+          <img src={getSlideImage(current?.image, slide)} alt={current?.titleEn || "RP Foundation initiative"} className="absolute inset-0 h-full w-full object-cover" onError={(e) => { const img = e.currentTarget; const fb = fallbackSlides[slide % fallbackSlides.length].image; if (img.src !== fb) img.src = fb; }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#07182C]/90 via-[#07182C]/20 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+            <h3 className="text-[22px] font-black leading-tight font-serif">{current?.titleEn}</h3>
+            <p className="mt-1 text-[11px] leading-5 text-slate-200">{current?.subEn}</p>
+            <button onClick={() => navigate((current as any)?.route || "/impact")} className="mt-2 inline-flex items-center gap-1 text-[11px] font-black">Explore <ChevronRight className="h-4 w-4" /></button>
+          </div>
+        </motion.article>
+        <div className="mt-3 flex justify-center gap-2">
+          {slides.map((_: any, i: number) => (
+            <button key={i} onClick={() => setSlide(i)} className={`h-2 rounded-full ${slide === i ? "w-7 bg-[#FF9933]" : "w-2 bg-slate-300"}`} />
+          ))}
+        </div>
+      </section>
+
+      {/* 5. Foundation Vision & Leadership */}
+      <section className="mt-7">
+        <div className="mb-3">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#138808]">Foundation</p>
+          <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">Our Vision & Leadership</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <button onClick={() => navigate("/vision-goals")} className="rounded-2xl border border-white/70 bg-transparent p-4 text-left shadow-2xs hover:bg-white/30 transition-all">
+            <Compass className="h-5 w-5 text-[#1D5B93]" />
+            <p className="mt-4 text-[15px] font-black font-serif">Our Vision</p>
+            <p className="mt-1 text-[10px] text-slate-600 font-medium">A clear direction for meaningful social impact.</p>
+          </button>
+          <button onClick={() => navigate("/founder-message")} className="rounded-2xl border border-white/70 bg-transparent p-4 text-left shadow-2xs hover:bg-white/30 transition-all">
+            <UserRound className="h-5 w-5 text-[#E67817]" />
+            <p className="mt-4 text-[15px] font-black font-serif">Founder’s Message</p>
+            <p className="mt-1 text-[10px] text-slate-600 font-medium">A message from Rohit Pandit, Founder of RP Foundation.</p>
+          </button>
+        </div>
+      </section>
+
+      {/* 6. Quick Access Cards */}
+      <section className="mt-7">
+        <div className="mb-3">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#E67817]">Quick Access</p>
+          <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">What can we help with?</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {actions.map(({ title, subtitle, icon: Icon, route, accent }) => (
+            <motion.button key={title} whileTap={{ scale: .98 }} onClick={() => navigate(route)} className="min-h-[150px] rounded-2xl border border-white/70 bg-transparent p-4 text-left shadow-2xs hover:bg-white/30 transition-all">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent}`}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <p className="mt-4 text-[15px] font-black font-serif">{title}</p>
+              <p className="mt-1 text-[10px] text-slate-600 font-medium">{subtitle}</p>
+            </motion.button>
+          ))}
+        </div>
+      </section>
+
+      {/* 7. Social Impact Highlights */}
+      <section className="mt-7 pb-3">
+        <div className="mb-3">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#138808]">Our Impact</p>
+          <h2 className="mt-.5 text-[21px] font-black font-serif text-[#12233D]">Social Impact Highlights</h2>
+        </div>
+        <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-white/70 bg-transparent shadow-2xs">
+          {[{ icon: UsersRound, value: "Community", label: "People first" }, { icon: Stethoscope, value: "Care", label: "Health initiatives" }, { icon: CalendarDays, value: "Active", label: "Foundation work" }].map(({ icon: Icon, value, label }) => (
+            <div key={label} className="border-r border-slate-200/50 px-2 py-4 text-center last:border-r-0">
+              <Icon className="mx-auto h-4 w-4 text-[#138808]" />
+              <p className="mt-2 text-[13px] font-black font-serif">{value}</p>
+              <p className="mt-.5 text-[8px] text-slate-500 font-bold">{label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+    </div>
+    <style>{`@keyframes rpf-pib-marquee{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}@keyframes rpf-sachet-marquee{0%{transform:translate3d(-50%,0,0)}100%{transform:translate3d(0,0,0)}}`}</style>
+  </main>
+);
+}
+
