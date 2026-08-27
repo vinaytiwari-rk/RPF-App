@@ -1,59 +1,69 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-store, max-age=0');
+header('Cache-Control: public, max-age=300');
 header('Access-Control-Allow-Origin: *');
 
-function fetchRawUrl($url) {
+$cacheFile = __DIR__ . '/rss_cache.json';
+$cacheTtl = 300; // 5 minutes cache
+
+if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < $cacheTtl)) {
+    $cachedData = @file_get_contents($cacheFile);
+    if ($cachedData && strlen($cachedData) > 50) {
+        echo $cachedData;
+        exit;
+    }
+}
+
+function fetchMultiUrls($urls) {
     $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-    
-    if (function_exists('curl_init')) {
+    $mh = curl_multi_init();
+    $handles = [];
+
+    foreach ($urls as $key => $url) {
         $ch = curl_init();
         curl_setopt_array($ch, [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLOPT_CONNECTTIMEOUT => 6,
-            CURLOPT_TIMEOUT => 8,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_TIMEOUT => 4,
             CURLOPT_USERAGENT => $userAgent,
             CURLOPT_HTTPHEADER => ['Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_ENCODING => ''
         ]);
-        $data = curl_exec($ch);
+        curl_multi_add_handle($mh, $ch);
+        $handles[$key] = $ch;
+    }
+
+    $running = null;
+    do {
+        curl_multi_exec($mh, $running);
+        curl_multi_select($mh, 0.05);
+    } while ($running > 0);
+
+    $results = [];
+    foreach ($handles as $key => $ch) {
+        $content = curl_multi_getcontent($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_multi_remove_handle($mh, $ch);
         curl_close($ch);
-        if ($data !== false && $code >= 200 && $code < 300 && strlen($data) > 50) {
-            return $data;
+        if ($content !== false && $code >= 200 && $code < 300 && strlen($content) > 50) {
+            $results[$key] = $content;
+        } else {
+            $results[$key] = null;
         }
     }
-    
-    $opts = [
-        'http' => [
-            'method' => 'GET',
-            'timeout' => 8,
-            'header' => "User-Agent: {$userAgent}\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
-        ],
-        'ssl' => [
-            'verify_peer' => false,
-            'verify_peer_name' => false
-        ]
-    ];
-    $context = stream_context_create($opts);
-    $data = @file_get_contents($url, false, $context);
-    if ($data !== false && strlen($data) > 50) {
-        return $data;
-    }
-    
-    return null;
+    curl_multi_close($mh);
+    return $results;
 }
 
 function parseXmlTitles($xmlString, $prefix = '') {
     if (!$xmlString) return [];
     libxml_use_internal_errors(true);
     $titles = [];
-    
     preg_match_all('/<(?:item|entry)\b[\s\S]*?<\/(?:item|entry)>/i', $xmlString, $itemBlocks);
     if (!empty($itemBlocks[0])) {
         foreach ($itemBlocks[0] as $block) {
@@ -71,7 +81,6 @@ function parseXmlTitles($xmlString, $prefix = '') {
             }
         }
     }
-    
     return $titles;
 }
 
@@ -115,73 +124,39 @@ function parseHtmlAniTitles($htmlString) {
     return $titles;
 }
 
-function fetchCombinedNewsFeed() {
-    $pibTitles = parseHtmlPibTitles(fetchRawUrl('https://www.pib.gov.in/allRel.aspx?reg=48&lang=2'));
-    $aniTitles = parseHtmlAniTitles(fetchRawUrl('https://www.aninews.in/latest-news/'));
+$raws = fetchMultiUrls([
+    'pib' => 'https://www.pib.gov.in/allRel.aspx?reg=48&lang=2',
+    'ani' => 'https://www.aninews.in/latest-news/',
+    'sachet' => 'https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml'
+]);
 
-    $results = [
-        'PIB' => $pibTitles,
-        'ANI' => $aniTitles
-    ];
+$pibTitles = parseHtmlPibTitles($raws['pib'] ?? '');
+$aniTitles = parseHtmlAniTitles($raws['ani'] ?? '');
 
-    $interleaved = [];
-    $maxCount = max(count($pibTitles), count($aniTitles));
-
-    for ($i = 0; $i < $maxCount; $i++) {
-        if (isset($pibTitles[$i])) {
-            $interleaved[] = $pibTitles[$i];
-        }
-        if (isset($aniTitles[$i])) {
-            $interleaved[] = $aniTitles[$i];
-        }
-    }
-
-    if (!empty($interleaved)) return $interleaved;
-
-    return ['PIB • ANI डायरेक्ट वेबसाइट समाचार नेटवर्क सक्रिय है।'];
+$interleaved = [];
+$maxCount = max(count($pibTitles), count($aniTitles));
+for ($i = 0; $i < $maxCount; $i++) {
+    if (isset($pibTitles[$i])) $interleaved[] = $pibTitles[$i];
+    if (isset($aniTitles[$i])) $interleaved[] = $aniTitles[$i];
+}
+if (empty($interleaved)) {
+    $interleaved = ['PIB • ANI डायरेक्ट वेबसाइट समाचार नेटवर्क सक्रिय है।'];
 }
 
-function fetchSachetFeed() {
-    $data = fetchRawUrl('https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml');
-    $titles = parseXmlTitles($data, '');
-    if (!empty($titles)) return $titles;
-
-    $jsonRaw = fetchRawUrl('https://sachet.ndma.gov.in/cap_public_website/FetchAllAlertDetails');
-    if ($jsonRaw) {
-        $json = json_decode($jsonRaw, true);
-        if (is_array($json)) {
-            $titles = [];
-            foreach ($json as $alert) {
-                if (!is_array($alert)) continue;
-                $parts = array_filter([
-                    trim((string)($alert['disaster_type'] ?? $alert['event'] ?? '')),
-                    trim((string)($alert['area_description'] ?? $alert['areaDesc'] ?? '')),
-                    trim((string)($alert['severity'] ?? $alert['severity_level'] ?? ''))
-                ]);
-                $t = implode(' — ', $parts);
-                if ($t !== '') $titles[] = $t;
-                if (count($titles) >= 20) break;
-            }
-            if (!empty($titles)) return $titles;
-        }
-    }
-
-    $gdacsData = fetchRawUrl('https://www.gdacs.org/xml/rss.xml');
-    $gdacsTitles = parseXmlTitles($gdacsData, '');
-    if (!empty($gdacsTitles)) return $gdacsTitles;
-
-    return ['राष्ट्रीय आपदा प्रबंधन प्राधिकरण (NDMA SACHET): वर्तमान में आपदा पूर्व चेतावनी प्रणाली सक्रिय है।'];
+$sachetTitles = parseXmlTitles($raws['sachet'] ?? '', '');
+if (empty($sachetTitles)) {
+    $sachetTitles = ['राष्ट्रीय आपदा प्रबंधन प्राधिकरण (NDMA SACHET): वर्तमान में आपदा पूर्व चेतावनी प्रणाली सक्रिय है।'];
 }
 
-$news = fetchCombinedNewsFeed();
-$sachet = fetchSachetFeed();
-
-echo json_encode([
+$responsePayload = json_encode([
     'success' => true,
     'data' => [
-        'pib' => $news,
-        'news' => $news,
-        'sachet' => $sachet
+        'pib' => $interleaved,
+        'news' => $interleaved,
+        'sachet' => $sachetTitles
     ],
     'updatedAt' => gmdate('c')
 ], JSON_UNESCAPED_UNICODE);
+
+@file_put_contents($cacheFile, $responsePayload);
+echo $responsePayload;

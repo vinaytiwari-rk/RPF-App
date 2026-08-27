@@ -90,7 +90,51 @@ async function fetchDirectClientXml(url: string, prefix = ""): Promise<string[]>
   }
 }
 
-useEffect(()=>{let alive=true;const load=async()=>{let fetchedPib:string[]=[];let fetchedSachet:string[]=[];const endpoints=[{pib:"/api/public/pib-news",sachet:"/api/public/sachet-alerts"},{pib:"/api/public/news",sachet:"/api/public/disaster-alerts"},{pib:"/api/public/live-feeds",sachet:"/api/public/live-feeds"},{pib:"/rss-proxy.php",sachet:"/rss-proxy.php"}];for(const ep of endpoints){try{if(fetchedPib.length===0){const r=await timedFetch(ep.pib);if(r.ok){const j=await r.json();const items=parseFeedItems(j?.data?.pib??j?.data?.news??j?.data);if(items.length)fetchedPib=items;}}if(fetchedSachet.length===0){const r=await timedFetch(ep.sachet);if(r.ok){const j=await r.json();const items=parseFeedItems(j?.data?.sachet??j?.data);if(items.length)fetchedSachet=items;}}if(fetchedPib.length>0&&fetchedSachet.length>0)break;}catch{}}if(alive&&fetchedPib.length===0){try{const pib1=await fetchRss2JsonApi("https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48","PIB");const ani1=await fetchRss2JsonApi("https://www.aninews.in/rss/feed/category/national.xml","ANI");const interleaved:string[]=[];const maxL=Math.max(pib1.length,ani1.length);for(let i=0;i<maxL;i++){if(i<pib1.length)interleaved.push(pib1[i]);if(i<ani1.length)interleaved.push(ani1[i]);}if(interleaved.length)fetchedPib=interleaved;}catch{}}if(alive&&fetchedSachet.length===0){try{const sachet1=await fetchRss2JsonApi("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml","");if(sachet1.length)fetchedSachet=sachet1;}catch{}}if(alive&&fetchedSachet.length===0){try{const direct=await fetchDirectClientXml("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml","");if(direct.length)fetchedSachet=direct;}catch{}}if(alive&&fetchedPib.length===0){try{const directAni=await fetchDirectClientXml("https://www.aninews.in/rss/feed/category/national.xml","ANI");if(directAni.length)fetchedPib=directAni;}catch{}}if(alive){if(fetchedPib.length>0)setPibFeed(fetchedPib);else setPibFeed(unavailablePib);if(fetchedSachet.length>0)setSachetFeed(fetchedSachet);else setSachetFeed(unavailableSachet);}};void load();const t=window.setInterval(()=>void load(),60000);return()=>{alive=false;window.clearInterval(t);};},[]);
+useEffect(() => {
+  let alive = true;
+  try {
+    const cachedPib = localStorage.getItem("@rpf_news_cache");
+    const cachedSachet = localStorage.getItem("@rpf_sachet_cache");
+    if (cachedPib) { const parsed = JSON.parse(cachedPib); if (Array.isArray(parsed) && parsed.length) setPibFeed(parsed); }
+    if (cachedSachet) { const parsed = JSON.parse(cachedSachet); if (Array.isArray(parsed) && parsed.length) setSachetFeed(parsed); }
+  } catch {}
+
+  const load = async () => {
+    let fetchedPib: string[] = [];
+    let fetchedSachet: string[] = [];
+
+    // Try fast cached proxy first, then fallback to API
+    const fastTargets = ["/rss-proxy.php", "/api/public/news"];
+    for (const url of fastTargets) {
+      try {
+        const r = await timedFetch(url, 3500);
+        if (r.ok) {
+          const j = await r.json();
+          const pItems = parseFeedItems(j?.data?.pib ?? j?.data?.news ?? j?.data);
+          const sItems = parseFeedItems(j?.data?.sachet ?? j?.data);
+          if (pItems.length) fetchedPib = pItems;
+          if (sItems.length) fetchedSachet = sItems;
+          if (fetchedPib.length && fetchedSachet.length) break;
+        }
+      } catch {}
+    }
+
+    if (alive) {
+      if (fetchedPib.length > 0) {
+        setPibFeed(fetchedPib);
+        try { localStorage.setItem("@rpf_news_cache", JSON.stringify(fetchedPib)); } catch {}
+      }
+      if (fetchedSachet.length > 0) {
+        setSachetFeed(fetchedSachet);
+        try { localStorage.setItem("@rpf_sachet_cache", JSON.stringify(fetchedSachet)); } catch {}
+      }
+    }
+  };
+
+  void load();
+  const t = window.setInterval(() => void load(), 60000);
+  return () => { alive = false; window.clearInterval(t); };
+}, []);
 useEffect(()=>{let alive=true;if(!("geolocation"in navigator)){setLocationName("Location unavailable");return;}navigator.geolocation.getCurrentPosition(async({coords})=>{try{const [p,w]=await Promise.all([fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}&zoom=10`,{headers:{Accept:"application/json"}}),fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m&timezone=auto`)]);const place=await p.json(),weather=await w.json();if(!alive)return;const a=place?.address||{};setLocationName(a.city||a.town||a.village||a.county||a.state||"Current location");if(typeof weather?.current?.temperature_2m==="number")setTemperature(`${Math.round(weather.current.temperature_2m)}°C`);}catch{if(alive)setLocationName("Current location");}},()=>{if(alive)setLocationName("Enable location");},{enableHighAccuracy:false,timeout:10000,maximumAge:300000});return()=>{alive=false;};},[]);
 const pibText = useMemo(() => [...pibFeed, ...pibFeed].join("     •     "), [pibFeed]);
 const sachetText = useMemo(() => [...sachetFeed, ...sachetFeed].join("     •     "), [sachetFeed]);
