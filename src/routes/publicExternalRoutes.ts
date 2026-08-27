@@ -176,8 +176,9 @@ async function refreshOfficialFeed(kind: "pib" | "sachet") {
   if (kind === "pib") {
     const urls = [
       "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
+      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3",
       "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48",
-      "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en"
+      "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1"
     ];
     for (const url of urls) {
       try {

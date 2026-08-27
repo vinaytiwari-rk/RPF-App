@@ -54,28 +54,15 @@ function parseXmlTitles($xmlString) {
     libxml_use_internal_errors(true);
     $titles = [];
     
-    preg_match_all('/<title(?:\s[^>]*)?>([\s\S]*?)<\/title>/i', $xmlString, $matches);
-    if (!empty($matches[1])) {
-        foreach ($matches[1] as $idx => $rawTitle) {
-            $clean = preg_replace('/<!\[CDATA\[([\s\S]*?)\]\]>/i', '$1', $rawTitle);
-            $clean = html_entity_decode(strip_tags($clean), ENT_QUOTES | ENT_XML1, 'UTF-8');
-            $clean = preg_replace('/\s+/', ' ', trim($clean));
-            if ($clean !== '' && !preg_match('/^(pib|press information bureau|sachet|ndma|rss feed|disaster alerts|public alerts)$/i', $clean)) {
-                $titles[] = $clean;
-                if (count($titles) >= 20) break;
-            }
-        }
-    }
-    
-    if (empty($titles)) {
-        $xml = @simplexml_load_string($xmlString, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NONET);
-        if ($xml) {
-            $nodes = $xml->xpath('//item/title | //entry/title');
-            if (is_array($nodes)) {
-                foreach ($nodes as $n) {
-                    $t = trim(html_entity_decode((string)$n, ENT_QUOTES | ENT_XML1, 'UTF-8'));
-                    $t = preg_replace('/\s+/', ' ', $t);
-                    if ($t !== '') $titles[] = $t;
+    preg_match_all('/<(?:item|entry)\b[\s\S]*?<\/(?:item|entry)>/i', $xmlString, $itemBlocks);
+    if (!empty($itemBlocks[0])) {
+        foreach ($itemBlocks[0] as $block) {
+            if (preg_match('/<title(?:\s[^>]*)?>([\s\S]*?)<\/title>/i', $block, $match)) {
+                $clean = preg_replace('/<!\[CDATA\[([\s\S]*?)\]\]>/i', '$1', $match[1]);
+                $clean = html_entity_decode(strip_tags($clean), ENT_QUOTES | ENT_XML1, 'UTF-8');
+                $clean = preg_replace('/\s+/', ' ', trim($clean));
+                if ($clean !== '' && !preg_match('/^(pib|press information bureau|sachet|ndma|rss feed|disaster alerts|public alerts)$/i', $clean)) {
+                    $titles[] = $clean;
                     if (count($titles) >= 20) break;
                 }
             }
@@ -86,19 +73,20 @@ function parseXmlTitles($xmlString) {
 }
 
 function fetchPibFeed() {
-    $data = fetchRawUrl('https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48');
-    $titles = parseXmlTitles($data);
-    if (!empty($titles)) return $titles;
+    $officialUrls = [
+        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48',
+        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3',
+        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48',
+        'https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1'
+    ];
 
-    $dataEng = fetchRawUrl('https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&reg=48');
-    $titlesEng = parseXmlTitles($dataEng);
-    if (!empty($titlesEng)) return $titlesEng;
+    foreach ($officialUrls as $url) {
+        $data = fetchRawUrl($url);
+        $titles = parseXmlTitles($data);
+        if (!empty($titles)) return $titles;
+    }
 
-    $dataGNews = fetchRawUrl('https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en');
-    $titlesGNews = parseXmlTitles($dataGNews);
-    if (!empty($titlesGNews)) return $titlesGNews;
-
-    return ['Press Information Bureau (PIB) official news bulletins are active.'];
+    return ['पत्र सूचना कार्यालय (PIB) बुलेटिन अद्यतन किया जा रहा है।'];
 }
 
 function fetchSachetFeed() {
@@ -126,11 +114,7 @@ function fetchSachetFeed() {
         }
     }
 
-    $gdacsData = fetchRawUrl('https://www.gdacs.org/xml/rss.xml');
-    $gdacsTitles = parseXmlTitles($gdacsData);
-    if (!empty($gdacsTitles)) return $gdacsTitles;
-
-    return ['National Disaster Management Authority (SACHET) active alert system is online.'];
+    return ['राष्ट्रीय आपदा प्रबंधन प्राधिकरण (SACHET) अलर्ट प्रणाली सक्रिय है।'];
 }
 
 $pib = fetchPibFeed();
