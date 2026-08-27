@@ -67,13 +67,13 @@ export default function MainLayout() {
                 <img src={globalSettings?.logo_image || "/assets/rpf-samahit-icon.png"} alt="समाहित" className="h-full w-full object-contain" />
               </div>
             )}
-            <div className="min-w-0">
+            <div className="min-w-0 flex flex-col justify-center">
               {location.pathname === "/browser" ? (
                 <h1 className="truncate text-[14px] font-black text-slate-900">{decodeURIComponent(new URLSearchParams(location.search).get("title") || "RPF Browser")}</h1>
               ) : (
                 <>
-                  <h1 className="truncate text-[17px] font-black tracking-[-0.02em] text-[#12233D]">समाहित</h1>
-                  <p className="truncate text-[9px] font-bold tracking-[.08em] text-[#667085] uppercase">An Initiative For RP Foundation</p>
+                  <img src="/assets/samahit_header_logo.png" alt="समाहित" className="h-7 sm:h-8 w-auto max-w-[140px] sm:max-w-[170px] object-contain select-none bg-transparent" />
+                  <p className="truncate text-[8.5px] font-bold tracking-[.08em] text-[#667085] uppercase -mt-0.5">An Initiative For RP Foundation</p>
                 </>
               )}
             </div>
