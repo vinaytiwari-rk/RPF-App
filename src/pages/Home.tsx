@@ -27,6 +27,31 @@ function parseFeedItems(items: unknown): string[] {
     .filter((str) => str.length > 0 && !str.includes("temporarily unavailable") && !str.includes("available right now"));
 }
 
+async function fetchRss2JsonApi(rssUrl: string, prefix = ""): Promise<string[]> {
+  try {
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+    const res = await timedFetch(apiUrl, 6000);
+    if (!res.ok) return [];
+    const j = await res.json();
+    if (j?.status === "ok" && Array.isArray(j?.items)) {
+      const titles: string[] = [];
+      for (const item of j.items) {
+        const rawTitle = typeof item?.title === "string" ? item.title.trim() : "";
+        if (rawTitle) {
+          const clean = rawTitle.replace(/<[^>]+>/g, "").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, "$1").trim();
+          const lower = clean.toLowerCase();
+          if (clean && !lower.includes("all india: cap") && lower !== "national" && lower !== "business") {
+            const itemText = prefix ? `${prefix}: ${clean}` : clean;
+            if (!titles.includes(itemText)) titles.push(itemText);
+          }
+        }
+      }
+      return titles;
+    }
+  } catch {}
+  return [];
+}
+
 async function fetchDirectClientXml(url: string, prefix = ""): Promise<string[]> {
   try {
     const res = await timedFetch(url, 6000);
@@ -57,7 +82,7 @@ async function fetchDirectClientXml(url: string, prefix = ""): Promise<string[]>
   }
 }
 
-useEffect(()=>{let alive=true;const load=async()=>{let fetchedPib:string[]=[];let fetchedSachet:string[]=[];const endpoints=[{pib:"/api/public/pib-news",sachet:"/api/public/sachet-alerts"},{pib:"/api/public/news",sachet:"/api/public/disaster-alerts"},{pib:"/api/public/live-feeds",sachet:"/api/public/live-feeds"},{pib:"/rss-proxy.php",sachet:"/rss-proxy.php"}];for(const ep of endpoints){try{if(fetchedPib.length===0){const r=await timedFetch(ep.pib);if(r.ok){const j=await r.json();const items=parseFeedItems(j?.data?.pib??j?.data?.news??j?.data);if(items.length)fetchedPib=items;}}if(fetchedSachet.length===0){const r=await timedFetch(ep.sachet);if(r.ok){const j=await r.json();const items=parseFeedItems(j?.data?.sachet??j?.data);if(items.length)fetchedSachet=items;}}if(fetchedPib.length>0&&fetchedSachet.length>0)break;}catch{}}if(alive&&fetchedSachet.length===0){try{const direct=await fetchDirectClientXml("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml","");if(direct.length)fetchedSachet=direct;}catch{}}if(alive&&fetchedPib.length===0){try{const directPib=await fetchDirectClientXml("https://www.aninews.in/rss/feed/category/national.xml","ANI");if(directPib.length)fetchedPib=directPib;}catch{}}if(alive){if(fetchedPib.length>0)setPibFeed(fetchedPib);else setPibFeed(unavailablePib);if(fetchedSachet.length>0)setSachetFeed(fetchedSachet);else setSachetFeed(unavailableSachet);}};void load();const t=window.setInterval(()=>void load(),60000);return()=>{alive=false;window.clearInterval(t);};},[]);
+useEffect(()=>{let alive=true;const load=async()=>{let fetchedPib:string[]=[];let fetchedSachet:string[]=[];const endpoints=[{pib:"/api/public/pib-news",sachet:"/api/public/sachet-alerts"},{pib:"/api/public/news",sachet:"/api/public/disaster-alerts"},{pib:"/api/public/live-feeds",sachet:"/api/public/live-feeds"},{pib:"/rss-proxy.php",sachet:"/rss-proxy.php"}];for(const ep of endpoints){try{if(fetchedPib.length===0){const r=await timedFetch(ep.pib);if(r.ok){const j=await r.json();const items=parseFeedItems(j?.data?.pib??j?.data?.news??j?.data);if(items.length)fetchedPib=items;}}if(fetchedSachet.length===0){const r=await timedFetch(ep.sachet);if(r.ok){const j=await r.json();const items=parseFeedItems(j?.data?.sachet??j?.data);if(items.length)fetchedSachet=items;}}if(fetchedPib.length>0&&fetchedSachet.length>0)break;}catch{}}if(alive&&fetchedPib.length===0){try{const ani1=await fetchRss2JsonApi("https://www.aninews.in/rss/feed/category/national.xml","ANI");if(ani1.length)fetchedPib=ani1;}catch{}}if(alive&&fetchedPib.length===0){try{const pib1=await fetchRss2JsonApi("https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48","PIB");if(pib1.length)fetchedPib=pib1;}catch{}}if(alive&&fetchedSachet.length===0){try{const sachet1=await fetchRss2JsonApi("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml","");if(sachet1.length)fetchedSachet=sachet1;}catch{}}if(alive&&fetchedSachet.length===0){try{const direct=await fetchDirectClientXml("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml","");if(direct.length)fetchedSachet=direct;}catch{}}if(alive&&fetchedPib.length===0){try{const directAni=await fetchDirectClientXml("https://www.aninews.in/rss/feed/category/national.xml","ANI");if(directAni.length)fetchedPib=directAni;}catch{}}if(alive){if(fetchedPib.length>0)setPibFeed(fetchedPib);else setPibFeed(unavailablePib);if(fetchedSachet.length>0)setSachetFeed(fetchedSachet);else setSachetFeed(unavailableSachet);}};void load();const t=window.setInterval(()=>void load(),60000);return()=>{alive=false;window.clearInterval(t);};},[]);
 useEffect(()=>{let alive=true;if(!("geolocation"in navigator)){setLocationName("Location unavailable");return;}navigator.geolocation.getCurrentPosition(async({coords})=>{try{const [p,w]=await Promise.all([fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}&zoom=10`,{headers:{Accept:"application/json"}}),fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m&timezone=auto`)]);const place=await p.json(),weather=await w.json();if(!alive)return;const a=place?.address||{};setLocationName(a.city||a.town||a.village||a.county||a.state||"Current location");if(typeof weather?.current?.temperature_2m==="number")setTemperature(`${Math.round(weather.current.temperature_2m)}°C`);}catch{if(alive)setLocationName("Current location");}},()=>{if(alive)setLocationName("Enable location");},{enableHighAccuracy:false,timeout:10000,maximumAge:300000});return()=>{alive=false;};},[]);
 const pibText = useMemo(() => [...pibFeed, ...pibFeed].join("     •     "), [pibFeed]);
 const sachetText = useMemo(() => [...sachetFeed, ...sachetFeed].join("     •     "), [sachetFeed]);
