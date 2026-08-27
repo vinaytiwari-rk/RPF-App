@@ -117,44 +117,28 @@ function parseHtmlAniTitles($htmlString) {
 
 function fetchCombinedNewsFeed() {
     $pibTitles = parseHtmlPibTitles(fetchRawUrl('https://www.pib.gov.in/allRel.aspx?reg=48&lang=2'));
-    if (empty($pibTitles)) {
-        $pibTitles = parseXmlTitles(fetchRawUrl('https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48'), 'PIB');
-    }
-
     $aniTitles = parseHtmlAniTitles(fetchRawUrl('https://www.aninews.in/latest-news/'));
-    if (empty($aniTitles)) {
-        $aniTitles = parseXmlTitles(fetchRawUrl('https://www.aninews.in/rss/feed/category/national.xml'), 'ANI');
-    }
-
-    $ddIndiaTitles = parseXmlTitles(fetchRawUrl('https://ddindia.co.in/category/india/feed/'), 'DD India');
-    $ddNewsTitles = parseXmlTitles(fetchRawUrl('https://ddnews.gov.in/en/category/top-stories/feed/'), 'DD News');
-    $sarkaritelTitles = parseXmlTitles(fetchRawUrl('https://www.sarkaritel.com/category/national-news/feed/'), 'Sarkaritel');
 
     $results = [
         'PIB' => $pibTitles,
-        'ANI' => $aniTitles,
-        'DD India' => $ddIndiaTitles,
-        'DD News' => $ddNewsTitles,
-        'Sarkaritel' => $sarkaritelTitles
+        'ANI' => $aniTitles
     ];
 
     $interleaved = [];
-    $maxCount = 0;
-    foreach ($results as $list) {
-        $maxCount = max($maxCount, count($list));
-    }
+    $maxCount = max(count($pibTitles), count($aniTitles));
 
     for ($i = 0; $i < $maxCount; $i++) {
-        foreach ($results as $prefix => $list) {
-            if (isset($list[$i])) {
-                $interleaved[] = $list[$i];
-            }
+        if (isset($pibTitles[$i])) {
+            $interleaved[] = $pibTitles[$i];
+        }
+        if (isset($aniTitles[$i])) {
+            $interleaved[] = $aniTitles[$i];
         }
     }
 
     if (!empty($interleaved)) return $interleaved;
 
-    return ['PIB • ANI • DD News • DD India • Sarkaritel राष्ट्रीय समाचार नेटवर्क सक्रिय है।'];
+    return ['PIB • ANI डायरेक्ट वेबसाइट समाचार नेटवर्क सक्रिय है।'];
 }
 
 function fetchSachetFeed() {

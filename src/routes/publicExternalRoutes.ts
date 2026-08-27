@@ -54,38 +54,47 @@ router.get("/api/public/news", async (_req,res) => {
     const c=cache("india_news_rss",1800000);
     if(c) return res.json({success:true,data:c});
 
-    const sources = [
-      { name: "PIB (प्रेस सूचना ब्यूरो)", url: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48" },
-      { name: "ANI News", url: "https://www.aninews.in/rss/feed/category/national.xml" },
-      { name: "DD India", url: "https://ddindia.co.in/category/india/feed/" },
-      { name: "DD News", url: "https://ddnews.gov.in/en/category/top-stories/feed/" },
-      { name: "Sarkaritel", url: "https://www.sarkaritel.com/category/national-news/feed/" }
-    ];
-
-    const fetchedLists: any[][] = await Promise.all(
-      sources.map(async (s) => {
-        try {
-          const feed = await fetchRssFeed(s.url);
-          return (feed.items || []).slice(0, 10).map(i => ({
-            title: cleanText(i.title || ""),
-            link: i.link,
-            pubDate: i.pubDate || new Date().toISOString(),
-            source: s.name,
-            description: cleanText(i.contentSnippet || i.content || ""),
-            image_url: null
-          })).filter(i => i.title.length > 10);
-        } catch {
-          return [];
+    let pibItems: any[] = [];
+    try {
+      const { data: html } = await axios.get("https://www.pib.gov.in/allRel.aspx?reg=48&lang=2", {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+        timeout: 8000
+      });
+      const matches = html.match(/<a[^>]*PRID=[0-9]+[^>]*>([\s\S]*?)<\/a>|<a[^>]*ReleaseSimpleHtml[^>]*>([\s\S]*?)<\/a>/gi) || [];
+      for (const m of matches) {
+        const title = cleanText(m);
+        if (title.length > 15 && !title.toLowerCase().includes("javascript") && !title.toLowerCase().includes("skip to content")) {
+          if (!pibItems.some(i => i.title === title)) {
+            pibItems.push({ title: `PIB: ${title}`, link: "https://www.pib.gov.in/allRel.aspx?reg=48&lang=2", pubDate: new Date().toISOString(), source: "PIB" });
+            if (pibItems.length >= 15) break;
+          }
         }
-      })
-    );
+      }
+    } catch {}
+
+    let aniItems: any[] = [];
+    try {
+      const { data: html } = await axios.get("https://www.aninews.in/latest-news/", {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+        timeout: 8000
+      });
+      const matches = html.match(/<a[^>]*news\/[^>]*>([\s\S]*?)<\/a>/gi) || [];
+      for (const m of matches) {
+        const title = cleanText(m);
+        if (title.length > 20 && !title.toLowerCase().includes("rss") && !title.toLowerCase().includes("copyright") && !title.toLowerCase().includes("latest news")) {
+          if (!aniItems.some(i => i.title === title)) {
+            aniItems.push({ title: `ANI: ${title}`, link: "https://www.aninews.in/latest-news/", pubDate: new Date().toISOString(), source: "ANI" });
+            if (aniItems.length >= 15) break;
+          }
+        }
+      }
+    } catch {}
 
     const interleaved: any[] = [];
-    const maxLen = Math.max(0, ...fetchedLists.map(l => l.length));
+    const maxLen = Math.max(pibItems.length, aniItems.length);
     for (let i = 0; i < maxLen; i++) {
-      for (const list of fetchedLists) {
-        if (i < list.length) interleaved.push(list[i]);
-      }
+      if (i < pibItems.length) interleaved.push(pibItems[i]);
+      if (i < aniItems.length) interleaved.push(aniItems[i]);
     }
 
     const data = interleaved;
