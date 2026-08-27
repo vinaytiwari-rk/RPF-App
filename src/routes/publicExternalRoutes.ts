@@ -21,37 +21,62 @@ router.get("/api/public/remote-jobs", async (_req,res) => { try { const {data}=a
 router.get("/api/public/nearby", async (req,res) => { try { const lat=Number(req.query.lat),lon=Number(req.query.lon),type=String(req.query.type||"police"); if(!Number.isFinite(lat)||!Number.isFinite(lon)||!["police","veterinary"].includes(type)) return res.status(400).json({success:false,error:"Invalid nearby search"}); const key=`nearby_${type}_${lat.toFixed(3)}_${lon.toFixed(3)}`; const c=cache(key,86400000); if(c) return res.json({success:true,data:c}); const tag=type==="police"?"amenity=police":"amenity=veterinary"; const q=`[out:json][timeout:10];node[${tag}](around:5000,${lat},${lon});out;`; const {data}=await axios.get("https://overpass-api.de/api/interpreter",{params:{data:q},timeout:12000}); const locations=(data.elements||[]).map((e:any)=>({name:e.tags?.name||`Unnamed ${type}`,lat:e.lat,lon:e.lon})); save(key,locations); return res.json({success:true,data:locations}); } catch { return res.status(503).json({success:false,error:"Nearby search temporarily unavailable"}); } });
 router.get("/api/public/disaster-alerts", async (_req,res) => { try { const c=cache("disaster_rss",900000); if(c) return res.json({success:true,data:c}); const feed=await rssParser.parseURL("https://www.gdacs.org/xml/rss.xml"); const data=feed.items.filter(i=>`${i.title||""} ${i.contentSnippet||""}`.toLowerCase().includes("india")).slice(0,30).map(i=>({id:i.guid||i.link,titleEn:i.title,titleHi:i.title,severity:"Alert",link:i.link})); save("disaster_rss",data); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Disaster alerts temporarily unavailable"}); } });
 
-const fetchOfficialFeed = async (url: string) => {
-  const { data } = await axios.get<string>(url, {
-    responseType: "text",
-    timeout: 7000,
-    maxRedirects: 5,
-    headers: {
-      "User-Agent": "RPFoundation-App/1.0 RSS Reader",
-      "Accept": "application/rss+xml, application/xml, text/xml, */*"
-    }
-  });
-  return rssParser.parseString(data);
+type FeedState = { etag?: string; items: string[]; updatedAt: string };
+const officialState: Record<"pib" | "sachet", FeedState> = {
+  pib: { items: [], updatedAt: "" },
+  sachet: { items: [], updatedAt: "" }
+};
+const officialUrls = {
+  pib: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=1&reg=1",
+  sachet: "https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml"
 };
 
-router.get("/api/public/live-feeds", async (_req,res) => {
-  const fallbackPib=["Official government updates are temporarily unavailable."];
-  const fallbackSachet=["Official public alerts are temporarily unavailable."];
-  const cached=cache("official_live_feeds",300000);
-  if(cached) return res.json({success:true,data:cached});
-  try {
-    const [pibResult,sachetResult]=await Promise.allSettled([
-      fetchOfficialFeed("https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=1&reg=1"),
-      fetchOfficialFeed("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml")
-    ]);
-    const pib=pibResult.status==="fulfilled" ? pibResult.value.items.map(i=>cleanText(i.title||i.contentSnippet||"")).filter(Boolean).slice(0,12) : fallbackPib;
-    const sachet=sachetResult.status==="fulfilled" ? sachetResult.value.items.map(i=>cleanText(i.title||i.contentSnippet||i.content||"")).filter(Boolean).slice(0,12) : fallbackSachet;
-    const data={pib:pib.length?pib:fallbackPib,sachet:sachet.length?sachet:fallbackSachet,updatedAt:new Date().toISOString()};
-    save("official_live_feeds",data);
-    return res.json({success:true,data});
-  } catch {
-    return res.status(200).json({success:true,data:{pib:fallbackPib,sachet:fallbackSachet,updatedAt:new Date().toISOString()}});
+async function refreshOfficialFeed(kind: "pib" | "sachet") {
+  const state = officialState[kind];
+  const headers: Record<string, string> = {
+    "User-Agent": "Samahit-RPFoundation/1.0",
+    "Accept": "application/rss+xml, application/xml, text/xml, */*"
+  };
+  if (state.etag) headers["If-None-Match"] = state.etag;
+  const response = await axios.get<string>(officialUrls[kind], {
+    responseType: "text",
+    timeout: 8000,
+    maxRedirects: 5,
+    headers,
+    validateStatus: status => status === 200 || status === 304
+  });
+  if (response.status === 304 && state.items.length) return state.items;
+  const parsed = await rssParser.parseString(response.data);
+  const items = parsed.items.map(item => cleanText(item.title || item.contentSnippet || item.content || "")).filter(Boolean).slice(0, 20);
+  if (items.length) {
+    state.items = items;
+    state.updatedAt = new Date().toISOString();
   }
+  const etag = response.headers.etag;
+  if (typeof etag === "string") state.etag = etag;
+  return state.items;
+}
+
+router.get("/api/public/live-feeds", async (_req,res) => {
+  const cached = cache("official_live_feeds", 60000);
+  if (cached) return res.set("Cache-Control", "no-store").json({ success: true, data: cached });
+  const [pibResult, sachetResult] = await Promise.allSettled([
+    refreshOfficialFeed("pib"),
+    refreshOfficialFeed("sachet")
+  ]);
+  const pib = pibResult.status === "fulfilled" && pibResult.value.length ? pibResult.value : officialState.pib.items;
+  const sachet = sachetResult.status === "fulfilled" && sachetResult.value.length ? sachetResult.value : officialState.sachet.items;
+  const data = {
+    pib: pib.length ? pib : ["Official government updates are temporarily unavailable."],
+    sachet: sachet.length ? sachet : ["No active public alert is currently available."],
+    updatedAt: new Date().toISOString(),
+    sources: {
+      pib: pibResult.status === "fulfilled" ? "live" : officialState.pib.items.length ? "cached" : "unavailable",
+      sachet: sachetResult.status === "fulfilled" ? "live" : officialState.sachet.items.length ? "cached" : "unavailable"
+    }
+  };
+  save("official_live_feeds", data);
+  return res.set("Cache-Control", "no-store").json({ success: true, data });
 });
 
 export default router;
