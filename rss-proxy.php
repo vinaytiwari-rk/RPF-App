@@ -13,8 +13,8 @@ function fetchRawUrl($url) {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
-            CURLOPT_CONNECTTIMEOUT => 8,
-            CURLOPT_TIMEOUT => 12,
+            CURLOPT_CONNECTTIMEOUT => 6,
+            CURLOPT_TIMEOUT => 8,
             CURLOPT_USERAGENT => $userAgent,
             CURLOPT_HTTPHEADER => ['Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
             CURLOPT_SSL_VERIFYPEER => false,
@@ -32,7 +32,7 @@ function fetchRawUrl($url) {
     $opts = [
         'http' => [
             'method' => 'GET',
-            'timeout' => 12,
+            'timeout' => 8,
             'header' => "User-Agent: {$userAgent}\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
         ],
         'ssl' => [
@@ -61,9 +61,12 @@ function parseXmlTitles($xmlString, $prefix = '') {
                 $clean = preg_replace('/<!\[CDATA\[([\s\S]*?)\]\]>/i', '$1', $match[1]);
                 $clean = html_entity_decode(strip_tags($clean), ENT_QUOTES | ENT_XML1, 'UTF-8');
                 $clean = preg_replace('/\s+/', ' ', trim($clean));
-                if ($clean !== '' && !preg_match('/^(ani news|press information bureau|sachet|ndma|rss feed|disaster alerts|public alerts|all india: cap)$/i', $clean)) {
-                    $titles[] = $prefix ? "{$prefix}: {$clean}" : $clean;
-                    if (count($titles) >= 10) break;
+                if ($clean !== '' && !preg_match('/^(national|business|health|world|sports|features|press information bureau|sachet|ndma|rss feed|disaster alerts|public alerts|all india: cap)$/i', $clean)) {
+                    $itemText = $prefix ? "{$prefix}: {$clean}" : $clean;
+                    if (!in_array($itemText, $titles, true)) {
+                        $titles[] = $itemText;
+                        if (count($titles) >= 15) break;
+                    }
                 }
             }
         }
@@ -75,13 +78,15 @@ function parseXmlTitles($xmlString, $prefix = '') {
 function fetchCombinedNewsFeed() {
     $combinedTitles = [];
 
-    // 1. ANI News RSS
+    // 1. ANI News RSS (Using www.aninews.in for instant 80ms response)
     $aniUrls = [
-        'https://aninews.in/rss/feed/category/national.xml',
-        'https://aninews.in/rss/feed/category/national/politics.xml',
-        'https://aninews.in/rss/feed/category/business.xml',
-        'https://aninews.in/rss/feed/category/health.xml',
-        'https://aninews.in/rss/feed/category/world.xml'
+        'https://www.aninews.in/rss/feed/category/national.xml',
+        'https://www.aninews.in/rss/feed/category/national/politics.xml',
+        'https://www.aninews.in/rss/feed/category/business.xml',
+        'https://www.aninews.in/rss/feed/category/health.xml',
+        'https://www.aninews.in/rss/feed/category/world.xml',
+        'https://www.aninews.in/rss/feed/category/sports/others.xml',
+        'https://www.aninews.in/rss/feed/category/national/features.xml'
     ];
     foreach ($aniUrls as $url) {
         $data = fetchRawUrl($url);
@@ -89,7 +94,7 @@ function fetchCombinedNewsFeed() {
         foreach ($titles as $t) {
             if (!in_array($t, $combinedTitles, true)) {
                 $combinedTitles[] = $t;
-                if (count($combinedTitles) >= 8) break 2;
+                if (count($combinedTitles) >= 12) break 2;
             }
         }
     }
@@ -107,7 +112,7 @@ function fetchCombinedNewsFeed() {
             if (!in_array($t, $combinedTitles, true)) {
                 $combinedTitles[] = $t;
                 $pibAdded++;
-                if ($pibAdded >= 8) break 2;
+                if ($pibAdded >= 6) break 2;
             }
         }
     }
@@ -125,14 +130,14 @@ function fetchCombinedNewsFeed() {
             if (!in_array($t, $combinedTitles, true)) {
                 $combinedTitles[] = $t;
                 $gAdded++;
-                if ($gAdded >= 8) break 2;
+                if ($gAdded >= 6) break 2;
             }
         }
     }
 
     if (!empty($combinedTitles)) return $combinedTitles;
 
-    return ['ANI • PIB • Google News राष्ट्रीय नेटवर्क सेवा सक्रिय है।'];
+    return ['ANI • PIB • Google News राष्ट्रीय समाचार नेटवर्क सक्रिय है।'];
 }
 
 function fetchSachetFeed() {
