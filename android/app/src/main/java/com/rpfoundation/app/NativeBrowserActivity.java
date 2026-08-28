@@ -34,7 +34,6 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -53,12 +52,7 @@ import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
-/**
- * Samahit Views native browser.
- * Design goals: fast normal HTTP(S) browsing, keep web navigation in-app,
- * preserve sessions, support popups/uploads/downloads, and keep chrome hidden
- * unless the user asks for it.
- */
+/** Samahit Views: compatibility-first native WebView browser. */
 public class NativeBrowserActivity extends AppCompatActivity {
     private static final int NAVY = Color.rgb(20, 33, 61);
     private static final int IVORY = Color.rgb(255, 249, 240);
@@ -83,29 +77,26 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private GeolocationPermissions.Callback pendingGeoCallback;
     private String pendingGeoOrigin;
 
-    private final ActivityResultLauncher<Intent> filePicker = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(), this::deliverPickedFiles);
-    private final ActivityResultLauncher<String[]> permissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-                if (pendingWebPermission != null) {
-                    ArrayList<String> grant = new ArrayList<>();
-                    for (String resource : pendingWebPermission.getResources()) {
-                        if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource) && Boolean.TRUE.equals(result.get(Manifest.permission.CAMERA))) grant.add(resource);
-                        if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource) && Boolean.TRUE.equals(result.get(Manifest.permission.RECORD_AUDIO))) grant.add(resource);
-                    }
-                    if (grant.isEmpty()) pendingWebPermission.deny(); else pendingWebPermission.grant(grant.toArray(new String[0]));
-                    pendingWebPermission = null;
-                }
-                if (pendingGeoCallback != null) {
-                    boolean allowed = Boolean.TRUE.equals(result.get(Manifest.permission.ACCESS_FINE_LOCATION)) || Boolean.TRUE.equals(result.get(Manifest.permission.ACCESS_COARSE_LOCATION));
-                    pendingGeoCallback.invoke(pendingGeoOrigin, allowed, false);
-                    pendingGeoCallback = null;
-                    pendingGeoOrigin = null;
-                }
-            });
+    private final ActivityResultLauncher<Intent> filePicker = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), this::deliverPickedFiles);
+    private final ActivityResultLauncher<String[]> permissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+        if (pendingWebPermission != null) {
+            ArrayList<String> granted = new ArrayList<>();
+            for (String r : pendingWebPermission.getResources()) {
+                if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(r) && Boolean.TRUE.equals(result.get(Manifest.permission.CAMERA))) granted.add(r);
+                if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r) && Boolean.TRUE.equals(result.get(Manifest.permission.RECORD_AUDIO))) granted.add(r);
+            }
+            if (granted.isEmpty()) pendingWebPermission.deny(); else pendingWebPermission.grant(granted.toArray(new String[0]));
+            pendingWebPermission = null;
+        }
+        if (pendingGeoCallback != null) {
+            boolean ok = Boolean.TRUE.equals(result.get(Manifest.permission.ACCESS_FINE_LOCATION)) || Boolean.TRUE.equals(result.get(Manifest.permission.ACCESS_COARSE_LOCATION));
+            pendingGeoCallback.invoke(pendingGeoOrigin, ok, false);
+            pendingGeoCallback = null; pendingGeoOrigin = null;
+        }
+    });
 
     private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
-    private boolean isHttpUrl(String s) { return s != null && (s.startsWith("https://") || s.startsWith("http://")); }
+    private boolean isHttpUrl(String u) { return u != null && (u.startsWith("https://") || u.startsWith("http://")); }
     private WebView activeWebView() { return popupWebView != null ? popupWebView : webView; }
 
     private String normalizeAddress(String value) {
@@ -121,9 +112,14 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private String resolveIntentFallback(String value) {
         if (value == null || !value.startsWith("intent://")) return null;
         try {
-            Intent i = Intent.parseUri(value, Intent.URI_INTENT_SCHEME);
-            String fallback = i.getStringExtra("browser_fallback_url");
+            Intent intent = Intent.parseUri(value, Intent.URI_INTENT_SCHEME);
+            String fallback = intent.getStringExtra("browser_fallback_url");
             if (isHttpUrl(fallback)) return fallback;
+            Uri data = intent.getData();
+            if (data != null) {
+                String candidate = data.toString().replaceFirst("^intent://", "https://");
+                if (isHttpUrl(candidate)) return candidate;
+            }
         } catch (Exception ignored) { }
         return null;
     }
@@ -131,8 +127,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private boolean routeNonHttp(String url) {
         String fallback = resolveIntentFallback(url);
         if (fallback != null) { loadInApp(fallback); return true; }
-        if (url != null && (url.startsWith("about:") || url.startsWith("javascript:") || url.startsWith("blob:"))) return false;
-        // Do not silently launch another app. The browser stays in control.
+        if (url != null && (url.startsWith("about:") || url.startsWith("javascript:") || url.startsWith("blob:") || url.startsWith("data:"))) return false;
         Toast.makeText(this, "This link does not expose a web page for Samahit Views", Toast.LENGTH_SHORT).show();
         return true;
     }
@@ -141,14 +136,8 @@ public class NativeBrowserActivity extends AppCompatActivity {
         String target = normalizeAddress(value);
         if (target == null) return;
         if (target.startsWith("intent://")) target = resolveIntentFallback(target);
-        if (!isHttpUrl(target)) {
-            Toast.makeText(this, "Only web pages can be opened in Samahit Views", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        mainFrameError = false;
-        hideError();
-        showControls();
-        activeWebView().loadUrl(target);
+        if (!isHttpUrl(target)) { Toast.makeText(this, "Only web pages can be opened in Samahit Views", Toast.LENGTH_SHORT).show(); return; }
+        mainFrameError = false; hideError(); showControls(); activeWebView().loadUrl(target);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -175,8 +164,10 @@ public class NativeBrowserActivity extends AppCompatActivity {
             s.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
             CookieManager.getInstance().setAcceptThirdPartyCookies(target, true);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) target.getSettings().setSafeBrowsingEnabled(true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) target.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            s.setSafeBrowsingEnabled(true);
+            target.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);
+        }
         target.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         CookieManager.getInstance().setAcceptCookie(true);
     }
@@ -191,11 +182,10 @@ public class NativeBrowserActivity extends AppCompatActivity {
                     if (cookies != null) r.addRequestHeader("Cookie", cookies);
                     if (ua != null) r.addRequestHeader("User-Agent", ua);
                     r.setMimeType(mime);
-                    String name = URLUtil.guessFileName(url, disposition, mime);
-                    r.setTitle(name);
+                    r.setTitle(URLUtil.guessFileName(url, disposition, mime));
                     r.setDescription("Downloading with Samahit Views");
                     r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
+                    r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, disposition, mime));
                     ((DownloadManager) getSystemService(DOWNLOAD_SERVICE)).enqueue(r);
                     Toast.makeText(NativeBrowserActivity.this, "Download started", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) { Toast.makeText(NativeBrowserActivity.this, "Download could not be started", Toast.LENGTH_SHORT).show(); }
@@ -211,16 +201,15 @@ public class NativeBrowserActivity extends AppCompatActivity {
             }
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) { return url != null && !isHttpUrl(url) && routeNonHttp(url); }
             @Override public void onPageStarted(WebView view, String url, Bitmap icon) {
-                if (!popup) { mainFrameError = false; loading = true; hideError(); showControls(); updateAddress(url); }
+                loading = true;
+                if (!popup) { mainFrameError = false; hideError(); }
+                updateAddress(url); showControls();
             }
             @Override public void onPageFinished(WebView view, String url) {
-                if (!popup) {
-                    loading = false;
-                    if (isHttpUrl(url)) lastStableUrl = url;
-                    updateAddress(url);
-                    updateNavigation();
-                    if (!mainFrameError) scheduleHide();
-                }
+                loading = false;
+                if (!popup && isHttpUrl(url)) lastStableUrl = url;
+                updateAddress(url); updateNavigation();
+                if (!mainFrameError) scheduleHide();
             }
             @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 if (!popup && request != null && request.isForMainFrame()) {
@@ -228,11 +217,8 @@ public class NativeBrowserActivity extends AppCompatActivity {
                     showError(error != null && error.getDescription() != null ? error.getDescription().toString() : "The page could not be loaded.");
                 }
             }
-            @Override public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse response) {
-                if (!popup && request != null && request.isForMainFrame() && response != null && response.getStatusCode() >= 400) showError("Website returned error " + response.getStatusCode());
-            }
-            @Override public void onReceivedSslError(WebView view, SslErrorHandler handler, android.net.http.SslError error) {
-                handler.cancel();
+            @Override public void onReceivedSslError(WebView view, SslErrorHandler sslHandler, android.net.http.SslError error) {
+                sslHandler.cancel();
                 if (!popup) showError("Secure connection could not be verified.");
             }
             @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
@@ -264,12 +250,16 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 else new AlertDialog.Builder(NativeBrowserActivity.this).setTitle("Location request").setMessage("Allow this website to use your location?").setPositiveButton("Allow", (d,w) -> { pendingGeoCallback = callback; pendingGeoOrigin = origin; permissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}); }).setNegativeButton("Block", (d,w) -> callback.invoke(origin, false, false)).show();
             }
             @Override public void onPermissionRequest(PermissionRequest request) {
-                boolean cam = false, mic = false;
-                for (String r : request.getResources()) { if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(r)) cam = true; if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r)) mic = true; }
-                boolean camOk = !cam || ContextCompat.checkSelfPermission(NativeBrowserActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-                boolean micOk = !mic || ContextCompat.checkSelfPermission(NativeBrowserActivity.this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
-                if (camOk && micOk) request.grant(request.getResources());
-                else { pendingWebPermission = request; ArrayList<String> p = new ArrayList<>(); if (cam) p.add(Manifest.permission.CAMERA); if (mic) p.add(Manifest.permission.RECORD_AUDIO); permissionLauncher.launch(p.toArray(new String[0])); }
+                ArrayList<String> permissions = new ArrayList<>();
+                for (String r : request.getResources()) {
+                    if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(r) && ContextCompat.checkSelfPermission(NativeBrowserActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) permissions.add(Manifest.permission.CAMERA);
+                    if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r) && ContextCompat.checkSelfPermission(NativeBrowserActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) permissions.add(Manifest.permission.RECORD_AUDIO);
+                }
+                if (permissions.isEmpty()) {
+                    ArrayList<String> allowed = new ArrayList<>();
+                    for (String r : request.getResources()) if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(r) || PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r)) allowed.add(r);
+                    if (allowed.isEmpty()) request.deny(); else request.grant(allowed.toArray(new String[0]));
+                } else { pendingWebPermission = request; permissionLauncher.launch(permissions.toArray(new String[0])); }
             }
             @Override public boolean onCreateWindow(WebView view, boolean dialog, boolean userGesture, Message resultMsg) { openPopup(resultMsg); return true; }
             @Override public void onCloseWindow(WebView window) { if (window == popupWebView) closePopup(); }
@@ -289,21 +279,16 @@ public class NativeBrowserActivity extends AppCompatActivity {
 
     private void rebuildMainWebView(String url) {
         if (webView != null) { webView.stopLoading(); webContainer.removeView(webView); webView.destroy(); }
-        webView = new WebView(this);
-        configureWebView(webView); webView.setWebViewClient(createClient(false)); webView.setWebChromeClient(createChromeClient()); installDownloadListener(webView);
+        webView = new WebView(this); configureWebView(webView); webView.setWebViewClient(createClient(false)); webView.setWebChromeClient(createChromeClient()); installDownloadListener(webView);
         webContainer.addView(webView, 0, new FrameLayout.LayoutParams(-1, -1));
         if (isHttpUrl(url)) webView.loadUrl(url);
     }
     private void openPopup(Message msg) {
-        closePopup();
-        popupWebView = new WebView(this);
-        configureWebView(popupWebView); popupWebView.setWebViewClient(createClient(true)); popupWebView.setWebChromeClient(createChromeClient()); installDownloadListener(popupWebView);
+        closePopup(); popupWebView = new WebView(this); configureWebView(popupWebView); popupWebView.setWebViewClient(createClient(true)); popupWebView.setWebChromeClient(createChromeClient()); installDownloadListener(popupWebView);
         webContainer.addView(popupWebView, new FrameLayout.LayoutParams(-1, -1));
         WebView.WebViewTransport t = (WebView.WebViewTransport) msg.obj; t.setWebView(popupWebView); msg.sendToTarget(); showControls();
     }
-    private void closePopup() {
-        if (popupWebView != null) { webContainer.removeView(popupWebView); popupWebView.stopLoading(); popupWebView.destroy(); popupWebView = null; updateAddress(webView != null ? webView.getUrl() : null); updateNavigation(); }
-    }
+    private void closePopup() { if (popupWebView != null) { webContainer.removeView(popupWebView); popupWebView.stopLoading(); popupWebView.destroy(); popupWebView = null; updateAddress(webView != null ? webView.getUrl() : null); updateNavigation(); } }
 
     private void showControls() {
         if (hideRunnable != null) handler.removeCallbacks(hideRunnable);
@@ -316,7 +301,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         if (bottomBar != null && bottomBar.getVisibility() == View.VISIBLE) bottomBar.animate().translationY(dp(80)).alpha(0f).setDuration(180).withEndAction(() -> bottomBar.setVisibility(View.INVISIBLE)).start();
     }
     private void scheduleHide() { if (!autoHide) return; if (hideRunnable != null) handler.removeCallbacks(hideRunnable); hideRunnable = this::hideControls; handler.postDelayed(hideRunnable, AUTO_HIDE_MS); }
-    private void updateNavigation() { WebView w = activeWebView(); if (backButton != null) { backButton.setEnabled(w.canGoBack()); backButton.setAlpha(w.canGoBack()?1f:.35f); } if (forwardButton != null) { forwardButton.setEnabled(w.canGoForward()); forwardButton.setAlpha(w.canGoForward()?1f:.35f); } }
+    private void updateNavigation() { WebView w = activeWebView(); if (w == null) return; if (backButton != null) { backButton.setEnabled(w.canGoBack()); backButton.setAlpha(w.canGoBack()?1f:.35f); } if (forwardButton != null) { forwardButton.setEnabled(w.canGoForward()); forwardButton.setAlpha(w.canGoForward()?1f:.35f); } }
     private void updateAddress(String url) { if (addressBar != null && url != null && !addressBar.hasFocus()) addressBar.setText(url); updateNavigation(); }
     private void showError(String msg) { loading=false; showControls(); if (errorView != null) { TextView d=errorView.findViewWithTag("detail"); if (d!=null) d.setText(msg); errorView.setVisibility(View.VISIBLE); } }
     private void hideError() { if (errorView != null) errorView.setVisibility(View.GONE); }
@@ -327,7 +312,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private void copyUrl() { String u=activeWebView().getUrl(); if(u!=null){((ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("URL",u));Toast.makeText(this,"Link copied",Toast.LENGTH_SHORT).show();} }
     private void share(){String u=activeWebView().getUrl();if(u!=null)startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,u),"Share link"));}
     private void clearData(){ CookieManager.getInstance().removeAllCookies(null); CookieManager.getInstance().flush(); if(webView!=null){webView.clearCache(true);webView.clearHistory();} if(popupWebView!=null){popupWebView.clearCache(true);popupWebView.clearHistory();} Toast.makeText(this,"Browsing data cleared",Toast.LENGTH_SHORT).show(); }
-    private void showSettings(){ String[] o={"Auto-hide toolbar: "+(autoHide?"On":"Off"),"Data Saver: "+(dataSaver?"On":"Off"),"Clear browsing data"}; new AlertDialog.Builder(this).setTitle("Samahit Views Settings").setItems(o,(d,w)->{if(w==0){autoHide=!autoHide;prefs.edit().putBoolean("autoHide",autoHide).apply();if(autoHide)scheduleHide();}else if(w==1)toggleDataSaver();else clearData();}).show(); }
+    private void showSettings(){ String[] o={"Auto-hide toolbar: "+(autoHide?"On":"Off"),"Data Saver: "+(dataSaver?"On":"Off"),"Clear browsing data"}; new AlertDialog.Builder(this).setTitle("Samahit Views Settings").setItems(o,(d,w)->{if(w==0){autoHide=!autoHide;prefs.edit().putBoolean("autoHide",autoHide).apply();if(autoHide)scheduleHide();else showControls();}else if(w==1)toggleDataSaver();else clearData();}).show(); }
     private void showMenu(){ String[] a={"Refresh","Find in page",desktopMode?"Mobile site":"Desktop site",dataSaver?"Disable Data Saver":"Enable Data Saver","Share","Copy link","Close popup","Settings"}; new AlertDialog.Builder(this).setItems(a,(d,w)->{if(w==0)activeWebView().reload();else if(w==1)findInPage();else if(w==2)toggleDesktopMode();else if(w==3)toggleDataSaver();else if(w==4)share();else if(w==5)copyUrl();else if(w==6)closePopup();else showSettings();}).show(); }
 
     private TextView button(String text){TextView v=new TextView(this);v.setText(text);v.setTextColor(NAVY);v.setTextSize(19);v.setGravity(Gravity.CENTER);v.setPadding(dp(10),dp(8),dp(10),dp(8));return v;}
