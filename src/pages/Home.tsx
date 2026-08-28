@@ -57,7 +57,10 @@ export default function Home() {
   }, [cmsConfig?.carouselSlides]);
   const current = slides[slide] || slides[0];
 
-  useEffect(() => { if (slide >= slides.length) setSlide(0); }, [slide, slides.length]);
+  useEffect(() => {
+    if (slide >= slides.length) setSlide(0);
+  }, [slide, slides.length]);
+
   useEffect(() => {
     if (slides.length < 2) return;
     const timer = window.setInterval(() => setSlide((value) => (value + 1) % slides.length), 5000);

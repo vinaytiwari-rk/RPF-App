@@ -303898,9 +303898,9 @@ function getLoad(parse16, render3) {
     const initialRoot = parse16(content, internalOpts, isDocument2, null);
     class LoadedCheerio extends Cheerio {
       _make(selector3, context) {
-        const cheerio2 = initialize(selector3, context);
-        cheerio2.prevObject = this;
-        return cheerio2;
+        const cheerio = initialize(selector3, context);
+        cheerio.prevObject = this;
+        return cheerio;
       }
       _parse(content2, options3, isDocument3, context) {
         return parse16(content2, options3, isDocument3, context);
@@ -336736,7 +336736,7 @@ var fetchNewsAgenciesHtml = async () => {
   const iansItems = [];
   try {
     const { data: html3 } = await axios_default.get("https://www.aninews.in/latest-news/", { headers, timeout: 8e3 });
-    const $4 = cheerio.load(html3);
+    const $4 = load(html3);
     $4("figcaption h6.title, .story-details h6.title, a h6.title, h6.title, .news-card h6").each((_, el) => {
       let t7 = $4(el).text().replace(/\s+/g, " ").trim();
       t7 = cleanText(t7);
@@ -336748,7 +336748,7 @@ var fetchNewsAgenciesHtml = async () => {
   }
   try {
     const { data: html3 } = await axios_default.get("https://www.uniindia.com/home.aspx", { headers, timeout: 8e3 });
-    const $4 = cheerio.load(html3);
+    const $4 = load(html3);
     $4("a").each((_, el) => {
       const href = $4(el).attr("href") || "";
       let t7 = $4(el).text().replace(/\s+/g, " ").trim();
@@ -336763,7 +336763,7 @@ var fetchNewsAgenciesHtml = async () => {
   }
   try {
     const { data: html3 } = await axios_default.get("https://ianslive.in/", { headers, timeout: 8e3 });
-    const $4 = cheerio.load(html3);
+    const $4 = load(html3);
     $4("a, h2, h3, h4").each((_, el) => {
       let t7 = $4(el).text().replace(/\s+/g, " ").trim();
       t7 = cleanText(t7);
@@ -336784,7 +336784,7 @@ var fetchPublicUpdatesHtml = async () => {
   const ddItems = [];
   try {
     const { data: html3 } = await axios_default.get("https://pib.gov.in/indexd.aspx", { headers, timeout: 8e3 });
-    const $4 = cheerio.load(html3);
+    const $4 = load(html3);
     $4("a").each((_, el) => {
       const h5 = $4(el).attr("href") || "";
       const t7 = $4(el).text().replace(/\s+/g, " ").trim();
@@ -336802,7 +336802,7 @@ var fetchPublicUpdatesHtml = async () => {
   }
   try {
     const { data: html3 } = await axios_default.get("https://ddindia.co.in/category/india/", { headers, timeout: 8e3 });
-    const $4 = cheerio.load(html3);
+    const $4 = load(html3);
     $4("h2.entry-title a, h3.entry-title a, article a, .post-title a").each((_, el) => {
       let t7 = $4(el).text().replace(/\s+/g, " ").trim();
       t7 = cleanText(t7);

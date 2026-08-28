@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 import Parser from "rss-parser";
+import * as cheerio from "cheerio";
 import { apiCache } from "../lib/apiCache.js";
 import https from "https";
 
