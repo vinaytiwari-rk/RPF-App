@@ -10,11 +10,16 @@ const hasAny = (text, values) => values.some((value) => includes(text, value));
 const registryEntries = (registry.match(/'[^']+':\s*\{\s*id:/g) || []).length;
 
 // Samahit Views uses a real native WebView on Android and keeps /browser as the
-// compatible web fallback. The checker must validate that architecture instead
-// of requiring the retired iframe-era label or a specific tap implementation.
+// compatible web fallback. Accept the current fallback variable architecture
+// rather than requiring one exact inline navigate template string.
+const hasBrowserFallback =
+  includes(browser, 'const fallback = `/browser?url=') &&
+  includes(browser, 'navigate(fallback)') &&
+  includes(browser, 'window.location.assign(fallback)');
+
 const appNavigationPreserved =
   includes(browser, 'openExternalLink') &&
-  includes(browser, 'navigate(`/browser?url=') &&
+  hasBrowserFallback &&
   includes(browserPage, 'useSearchParams') &&
   includes(browserPage, 'frameHistory') &&
   includes(browserPage, 'onDoubleClick={showControlsTemporarily}');
@@ -23,7 +28,7 @@ const checks = [
   ['HTTP(S) validation', includes(browser, 'HTTP_URL') && includes(browser, "parsed.protocol !== 'http:'")],
   ['unsafe scheme blocking', includes(browser, 'UNSAFE_URL_SCHEME') && hasAny(browser, ['javascript', 'data', 'file', 'blob', 'intent'])],
   ['safe URL policy', includes(browser, 'isSafeWebUrl') && includes(browser, 'normalizeExternalWebUrl')],
-  ['Samahit Views routing', includes(browser, 'NativeSamahitViews.open') && includes(browser, "navigate(`/browser?url=") && includes(browserPage, 'Samahit Views')],
+  ['Samahit Views routing', includes(browser, 'NativeSamahitViews.open') && hasBrowserFallback && includes(browserPage, 'Samahit Views')],
   ['external anchor interception', includes(browser, 'installExternalLinkInterceptor') && includes(browser, "document.addEventListener('click'")],
   ['reusable browser API', includes(browser, 'openSamahitView') && includes(browser, 'openExternalLink')],
   ['registry API', includes(browser, 'openRegisteredExternalLink') && includes(browser, 'getExternalLink')],
