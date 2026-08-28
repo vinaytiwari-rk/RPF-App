@@ -1,7 +1,7 @@
 import express from "express";
 import axios from "axios";
 import Parser from "rss-parser";
-import * as cheerio from "cheerio";
+import { load } from "cheerio";
 import { apiCache } from "../lib/apiCache.js";
 import https from "https";
 
@@ -63,7 +63,7 @@ const fetchNewsAgenciesHtml = async () => {
   // 1. ANI
   try {
     const { data: html } = await axios.get("https://www.aninews.in/latest-news/", { headers, timeout: 8000 });
-    const $ = cheerio.load(html);
+    const $ = load(html);
     $("figcaption h6.title, .story-details h6.title, a h6.title, h6.title, .news-card h6").each((_, el) => {
       let t = $(el).text().replace(/\s+/g, " ").trim();
       t = cleanText(t);
@@ -76,7 +76,7 @@ const fetchNewsAgenciesHtml = async () => {
   // 2. UNI
   try {
     const { data: html } = await axios.get("https://www.uniindia.com/home.aspx", { headers, timeout: 8000 });
-    const $ = cheerio.load(html);
+    const $ = load(html);
     $("a").each((_, el) => {
       const href = $(el).attr("href") || "";
       let t = $(el).text().replace(/\s+/g, " ").trim();
@@ -92,7 +92,7 @@ const fetchNewsAgenciesHtml = async () => {
   // 3. IANS
   try {
     const { data: html } = await axios.get("https://ianslive.in/", { headers, timeout: 8000 });
-    const $ = cheerio.load(html);
+    const $ = load(html);
     $("a, h2, h3, h4").each((_, el) => {
       let t = $(el).text().replace(/\s+/g, " ").trim();
       t = cleanText(t);
@@ -117,7 +117,7 @@ const fetchPublicUpdatesHtml = async () => {
   // 1. PIB
   try {
     const { data: html } = await axios.get("https://pib.gov.in/indexd.aspx", { headers, timeout: 8000 });
-    const $ = cheerio.load(html);
+    const $ = load(html);
     $("a").each((_, el) => {
       const h = $(el).attr("href") || "";
       const t = $(el).text().replace(/\s+/g, " ").trim();
@@ -136,7 +136,7 @@ const fetchPublicUpdatesHtml = async () => {
   // 2. DD India
   try {
     const { data: html } = await axios.get("https://ddindia.co.in/category/india/", { headers, timeout: 8000 });
-    const $ = cheerio.load(html);
+    const $ = load(html);
     $("h2.entry-title a, h3.entry-title a, article a, .post-title a").each((_, el) => {
       let t = $(el).text().replace(/\s+/g, " ").trim();
       t = cleanText(t);
