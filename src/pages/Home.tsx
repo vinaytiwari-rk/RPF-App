@@ -318,26 +318,25 @@ export default function Home() {
         {/* MARQUEE 2: SACHET NDMA + IMD Weather Bulletin -> Left to Right (Emergency Red) */}
         {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="red" />}
 
-        {/* 4. CAROUSEL: RP FOUNDATION AT WORK (NO OVERLAP ON IMAGE + ANIMATED TEXT DRAWER) */}
+        {/* 4. CAROUSEL: RP FOUNDATION AT WORK (CLEAN PHOTO, NO OVERLAP, MATCHING BG, NO 1/6 OR BUTTON) */}
         <section className="pt-1">
-          <div className="mb-2.5 flex items-end justify-between">
+          <div className="mb-2 flex items-center justify-between">
             <div>
               <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">Discover</p>
               <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">RP Foundation at Work</h2>
             </div>
-            <span className="text-[12px] font-semibold text-slate-500">{slide + 1} / {slides.length}</span>
           </div>
 
-          <div className="overflow-hidden rounded-[24px] border border-amber-200/80 bg-white shadow-xs">
+          <div className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-2xs">
             {/* Clear Image Viewport */}
             <div className="relative h-[210px] sm:h-[240px] w-full overflow-hidden bg-[#14213D]">
               <motion.img
                 key={`slide-img-${slide}`}
                 src={getSlideImage(current?.image, slide)}
                 alt={current?.titleEn || "RP Foundation initiative"}
-                initial={{ opacity: 0.3, scale: 1.02 }}
+                initial={{ opacity: 0, scale: 1.03 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="h-full w-full object-cover"
                 onError={(e) => {
                   const img = e.currentTarget;
@@ -345,83 +344,84 @@ export default function Home() {
                   if (img.src !== fb) img.src = fb;
                 }}
               />
-              <div className="absolute top-3 right-3 rounded-full bg-[#14213D]/75 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-amber-300 border border-amber-300/30">
-                {slide + 1} / {slides.length}
-              </div>
             </div>
 
-            {/* Non-Overlapping Animated Content Card */}
+            {/* Non-Overlapping Content Drawer matching app design */}
             <motion.div
               key={`slide-txt-${slide}`}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="p-4 sm:p-5 bg-gradient-to-b from-white via-amber-50/15 to-white"
+              className="p-4 sm:p-5 bg-white border-t border-slate-100 space-y-1"
             >
               <h3 className="text-[17px] sm:text-[19px] font-bold leading-tight text-[#14213D]">
                 {current?.titleEn}
               </h3>
-              <p className="mt-1.5 text-[12.5px] sm:text-[13.5px] leading-relaxed text-slate-600 font-medium">
+              <p className="text-[12.5px] sm:text-[13.5px] leading-relaxed text-slate-600 font-medium">
                 {current?.subEn}
               </p>
-              <button
-                onClick={() => navigate((current as any)?.route || "/impact")}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-amber-500/10 px-3.5 py-1.5 text-[12px] font-bold text-[#C2410C] hover:bg-amber-500/20 transition-all border border-amber-300/40"
-              >
-                Explore Initiative <ChevronRight className="h-4 w-4" />
-              </button>
             </motion.div>
           </div>
 
-          <div className="mt-3 flex justify-center gap-2">
+          {/* Carousel Pagination Dots */}
+          <div className="mt-2.5 flex justify-center gap-1.5">
             {slides.map((_: any, i: number) => (
               <button
                 key={i}
                 onClick={() => setSlide(i)}
-                className={`h-2 rounded-full transition-all ${slide === i ? "w-7 bg-[#D97706]" : "w-2 bg-slate-300"}`}
+                className={`h-2 rounded-full transition-all duration-300 ${slide === i ? "w-7 bg-[#D97706]" : "w-2 bg-slate-300 hover:bg-slate-400"}`}
               />
             ))}
           </div>
         </section>
 
-        {/* 5. OUR VISION & LEADERSHIP (PLACED DIRECTLY AFTER CAROUSEL) */}
+        {/* 5. OUR VISION & LEADERSHIP (DESCRIPTIVE EDITORIAL BLOCK - REDUCED CARDS) */}
         <section className="pt-2">
-          <div className="mb-3">
+          <div className="mb-2.5">
             <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Foundation</p>
             <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Our Vision & Leadership</h2>
           </div>
-          <div className="grid grid-cols-2 gap-3.5">
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate("/vision-goals")}
-              className="rounded-2xl border border-amber-100/80 bg-white/90 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 transition-all flex flex-col justify-between min-h-[145px]"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[#167C5A]">
+
+          <div className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-2xs space-y-4">
+            {/* Vision Narrative */}
+            <div className="flex items-start gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-[#167C5A] border border-emerald-500/20">
                 <Compass className="h-5 w-5" />
               </div>
-              <div>
-                <p className="mt-3 text-[15px] font-bold text-[#14213D]">Our Vision</p>
-                <p className="mt-0.5 text-[11.5px] text-slate-500 font-medium leading-snug">
-                  Clear strategic roadmap for inclusive community welfare & social impact.
+              <div className="space-y-1">
+                <h3 className="text-[16px] font-bold text-[#14213D]">Empowering Communities Through Direct Ground Action</h3>
+                <p className="text-[12.5px] sm:text-[13px] leading-relaxed text-slate-600 font-medium">
+                  RP Foundation is built on an interconnected model of social development—uniting accessible healthcare, sustainable employment, women’s self-reliance, and direct grievance resolution for lasting empowerment across India.
                 </p>
+                <button
+                  onClick={() => navigate("/vision-goals")}
+                  className="mt-1 inline-flex items-center gap-1 text-[12px] font-bold text-[#167C5A] hover:underline"
+                >
+                  Explore Full Vision & Strategic Roadmap <ChevronRight className="h-3.5 w-3.5" />
+                </button>
               </div>
-            </motion.button>
+            </div>
 
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate("/founder-message")}
-              className="rounded-2xl border border-amber-100/80 bg-white/90 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 transition-all flex flex-col justify-between min-h-[145px]"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-[#D97706]">
+            <hr className="border-slate-100" />
+
+            {/* Founder's Message Narrative */}
+            <div className="flex items-start gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-[#D97706] border border-amber-500/20">
                 <UserRound className="h-5 w-5" />
               </div>
-              <div>
-                <p className="mt-3 text-[15px] font-bold text-[#14213D]">Founder’s Message</p>
-                <p className="mt-0.5 text-[11.5px] text-slate-500 font-medium leading-snug">
-                  Direct message & guidance from Rohit Pandit, Founder of RP Foundation.
+              <div className="space-y-1">
+                <h3 className="text-[16px] font-bold text-[#14213D]">Message from Founder Rohit Pandit</h3>
+                <p className="text-[12.5px] sm:text-[13px] leading-relaxed text-slate-600 font-medium italic">
+                  “True service begins when we reach out to those in need with humility, resolve, and unyielding commitment. Every initiative at RP Foundation is driven by our passionate volunteers working at the grass-roots level.”
                 </p>
+                <button
+                  onClick={() => navigate("/founder-message")}
+                  className="mt-1 inline-flex items-center gap-1 text-[12px] font-bold text-[#D97706] hover:underline"
+                >
+                  Read Founder’s Message & Values <ChevronRight className="h-3.5 w-3.5" />
+                </button>
               </div>
-            </motion.button>
+            </div>
           </div>
         </section>
 
