@@ -41,19 +41,23 @@ function parseFeedItems(items: unknown): string[] {
 }
 
 const defaultMarquee1 = [
-  "PM Modi urges India to expand Olympic reach, begin 2036 Games preparations now",
-  "US senators seek West Bank killings report",
-  "Bihar TRE-4 exam to be held in single phase: CM Samrat Choudhary announces",
-  "Devastating floods leave more than 1,300 missing along Nepal-China border",
-  "US Army bets $2.2 billion on microreactors"
+  "वीडियो कॉन्फ्रेंसिंग के ज़रिए खेलो इंडिया डायलॉग में प्रधानमंत्री नरेंद्र मोदी जी का मुख्य संबोधन",
+  "River Gandak at Dumariaghat in Gopalganj district continues to flow in severe flood situation: NDMA Alert",
+  "From Gandhi’s reconstruction to India@2047: HM Shah outlines vision for youth",
+  "IMD forecast for Thunderstorms with Lightning and heavy rainfall over North-East districts: SACHET Alert",
+  "केन्द्रीय गृह एवं सहकारिता मंत्री श्री अमित शाह ने गुजरात विद्यापीठ के दीक्षांत समारोह को संबोधित किया",
+  "Nepal flash floods: 63 Indian nationals rescued from Trishuli-1 power project site by disaster response teams",
+  "12 Years of PMJDY: 59.09 Crore Accounts Opened, Deposits Reach ₹3.17 Lakh Crore"
 ];
 
 const defaultMarquee2 = [
-  "वीडियो कॉन्फ्रेंसिंग के ज़रिए खेलो इंडिया डायलॉग में प्रधानमंत्री नरेंद्र मोदी जी का मुख्य संबोधन",
-  "From Gandhi’s reconstruction to India@2047: HM Shah outlines vision for youth",
-  "केन्द्रीय गृह एवं सहकारिता मंत्री श्री अमित शाह ने गुजरात विद्यापीठ के दीक्षांत समारोह को संबोधित किया",
-  "Nepal flash floods: 63 Indian nationals rescued from Trishuli-1 power project site",
-  "12 Years of PMJDY: 59.09 Crore Accounts Opened, Deposits Reach ₹3.17 Lakh Crore"
+  "PM Modi urges India to expand Olympic reach, begin 2036 Games preparations now",
+  "US senators seek West Bank killings report from Department of State",
+  "Bihar TRE-4 exam to be held in single phase: CM Samrat Choudhary announces",
+  "Devastating floods leave more than 1,300 missing along Nepal-China border",
+  "US Army bets $2.2 billion on microreactors for futuristic power systems",
+  "Tamil Nadu: Families in Coimbatore await contact with relatives missing after Nepal floods during Kailash Yatra",
+  "Pune: IT employees to hold protest in Hinjewadi over civic infrastructure issues"
 ];
 
 function cleanHeadline(str: unknown): string {
@@ -66,16 +70,23 @@ function cleanHeadline(str: unknown): string {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/(\.\.\.|…|\s+\.)$/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function MarqueeTrack({ items, direction = "rtl" }: { items: string[]; direction?: "rtl" | "ltr" }) {
+function MarqueeTrack({
+  items,
+  direction = "rtl",
+  variant = "saffron"
+}: {
+  items: string[];
+  direction?: "rtl" | "ltr";
+  variant?: "saffron" | "green";
+}) {
   const cleanItems = useMemo(() => {
     return (items || [])
       .map(cleanHeadline)
-      .filter((t) => t.length > 15 && !/^(temporarily unavailable|no news available|rss feed|विज्ञप्ति सदस्यता)/i.test(t));
+      .filter((t) => t.length > 12 && !/^(temporarily unavailable|no news available|rss feed|विज्ञप्ति सदस्यता)/i.test(t));
   }, [items]);
 
   if (cleanItems.length === 0) return null;
@@ -86,8 +97,15 @@ function MarqueeTrack({ items, direction = "rtl" }: { items: string[]; direction
   const duration = Math.max(35, Math.round(totalChars * 0.14));
   const animationName = direction === "ltr" ? "rpf-marquee-ltr" : "rpf-marquee-rtl";
 
+  const isGreen = variant === "green";
+  const containerClasses = isGreen
+    ? "border-emerald-300/80 bg-emerald-50/70 text-[#15803D]"
+    : "border-amber-300/80 bg-amber-50/70 text-[#C2410C]";
+  const textClasses = isGreen ? "text-[#15803D]" : "text-[#C2410C]";
+  const separatorClasses = isGreen ? "text-[#167C5A]" : "text-[#D97706]";
+
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-amber-200/80 bg-white/80 backdrop-blur-md py-2.5 shadow-2xs group">
+    <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-md py-2.5 shadow-2xs group ${containerClasses}`}>
       <div
         className="flex whitespace-nowrap min-w-max items-center transition-transform group-hover:[animation-play-state:paused]"
         style={{
@@ -96,10 +114,10 @@ function MarqueeTrack({ items, direction = "rtl" }: { items: string[]; direction
       >
         {trackItems.map((title, idx) => (
           <div key={idx} className="flex items-center">
-            <span className="text-[12.5px] font-semibold text-[#14213D] tracking-normal px-2">
+            <span className={`text-[12.5px] font-bold tracking-normal px-2 ${textClasses}`}>
               {title}
             </span>
-            <span className="text-[#D97706] font-bold text-xs px-3 select-none">
+            <span className={`font-bold text-xs px-3 select-none ${separatorClasses}`}>
               |
             </span>
           </div>
@@ -151,8 +169,8 @@ export default function Home() {
           if (!response.ok) continue;
           const json = await response.json();
           const data = json?.data ?? json;
-          const first = parseFeedItems(data?.marquee1 ?? data?.pib ?? data?.news ?? []);
-          const second = parseFeedItems(data?.marquee2 ?? data?.sachet ?? data?.publicUpdates ?? []);
+          const first = parseFeedItems(data?.marquee1 ?? data?.pib ?? data?.publicUpdates ?? []);
+          const second = parseFeedItems(data?.marquee2 ?? data?.news ?? []);
           if (!alive) return;
           if (first.length) { setMarquee1(first); try { localStorage.setItem("@rpf_marquee1_cache", JSON.stringify(first)); } catch {} }
           if (second.length) { setMarquee2(second); try { localStorage.setItem("@rpf_marquee2_cache", JSON.stringify(second)); } catch {} }
@@ -188,9 +206,11 @@ export default function Home() {
           </p>
         </section>
 
-        {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" />}
+        {/* TOP MARQUEE: PIB + DD India + SACHET/NDMA -> Dark Saffron, Right-to-Left */}
+        {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="saffron" />}
 
-        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" />}
+        {/* BOTTOM MARQUEE: ANI + IANS + UNI -> Dark Green, Left-to-Right */}
+        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="green" />}
 
         <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3.5 shadow-2xs">
           <div className="flex items-center gap-1.5 text-[#D97706]">

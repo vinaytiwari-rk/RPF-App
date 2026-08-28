@@ -156,31 +156,41 @@ const getUnifiedLiveFeed = async () => {
 
   const [newsRes, publicRes] = await Promise.all([fetchNewsAgenciesHtml(), fetchPublicUpdatesHtml()]);
 
-  // Marquee 1: Merged ANI + IANS + UNI
+  let sachetTitles: string[] = [];
+  try {
+    const sachetFeed = await fetchRssFeed("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml");
+    sachetTitles = (sachetFeed.items || [])
+      .map((i) => cleanText(i.title || ""))
+      .filter((t) => t.length > 15);
+  } catch {}
+
+  // TOP MARQUEE (Marquee 1): Merged PIB + DD India + SACHET NDMA Alerts
   const marquee1Items: string[] = [];
-  const maxNewsLen = Math.max(newsRes.ani.length, newsRes.ians.length, newsRes.uni.length);
-  for (let i = 0; i < maxNewsLen; i++) {
-    if (i < newsRes.ani.length) marquee1Items.push(newsRes.ani[i].title);
-    if (i < newsRes.ians.length) marquee1Items.push(newsRes.ians[i].title);
-    if (i < newsRes.uni.length) marquee1Items.push(newsRes.uni[i].title);
+  const maxTopLen = Math.max(publicRes.pib.length, publicRes.ddIndia.length, sachetTitles.length);
+  for (let i = 0; i < maxTopLen; i++) {
+    if (i < publicRes.pib.length) marquee1Items.push(publicRes.pib[i].title);
+    if (i < publicRes.ddIndia.length) marquee1Items.push(publicRes.ddIndia[i].title);
+    if (i < sachetTitles.length) marquee1Items.push(sachetTitles[i]);
   }
 
-  // Marquee 2: Merged PIB + DD India
+  // BOTTOM MARQUEE (Marquee 2): Merged ANI + IANS + UNI News
   const marquee2Items: string[] = [];
-  const maxPubLen = Math.max(publicRes.pib.length, publicRes.ddIndia.length);
-  for (let i = 0; i < maxPubLen; i++) {
-    if (i < publicRes.pib.length) marquee2Items.push(publicRes.pib[i].title);
-    if (i < publicRes.ddIndia.length) marquee2Items.push(publicRes.ddIndia[i].title);
+  const maxBottomLen = Math.max(newsRes.ani.length, newsRes.ians.length, newsRes.uni.length);
+  for (let i = 0; i < maxBottomLen; i++) {
+    if (i < newsRes.ani.length) marquee2Items.push(newsRes.ani[i].title);
+    if (i < newsRes.ians.length) marquee2Items.push(newsRes.ians[i].title);
+    if (i < newsRes.uni.length) marquee2Items.push(newsRes.uni[i].title);
   }
 
   const payload = {
     news: newsRes,
     publicUpdates: publicRes,
-    marquee1: marquee1Items,
-    marquee2: marquee2Items,
+    sachetTitles,
+    marquee1: marquee1Items, // Top: PIB + DD India + SACHET
+    marquee2: marquee2Items, // Bottom: ANI + IANS + UNI
     // Backwards compatibility legacy flat lists
-    pib: marquee2Items,
-    sachet: marquee1Items
+    pib: marquee1Items,
+    sachet: marquee2Items
   };
 
   save("unified_live_feed", payload);
