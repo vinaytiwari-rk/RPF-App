@@ -279,7 +279,7 @@ export default function Home() {
 
   return (
     <main className="min-h-full bg-transparent text-[#14213D]">
-      <div className="mx-auto w-full max-w-3xl px-4 pb-6 pt-3 sm:px-6 space-y-3.5">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-6 pt-3 sm:px-6 space-y-4">
         
         {/* 1. GREETING HEADER */}
         <section className="bg-transparent py-1 space-y-0.5">
@@ -310,7 +310,7 @@ export default function Home() {
           )}
         </section>
 
-        {/* 3. THREE MARQUEES */}
+        {/* 3. TWO MARQUEES (MARQUEE 3 REMOVED) */}
         
         {/* MARQUEE 1: PIB + DD News + DD India + MP Info -> Right to Left (Dark Saffron) */}
         {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="saffron" />}
@@ -318,80 +318,169 @@ export default function Home() {
         {/* MARQUEE 2: SACHET NDMA + IMD Weather Bulletin -> Left to Right (Emergency Red) */}
         {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="red" />}
 
-        {/* MARQUEE 3: NDTV + TOI + ANI World News -> Up to Down (Dark Green Ticker) */}
-        {marquee3.length > 0 && <MarqueeTrack items={marquee3} direction="utd" variant="green" label="World" />}
-
-        <section className="pt-2">
-          <div className="mb-3 flex items-end justify-between">
+        {/* 4. CAROUSEL: RP FOUNDATION AT WORK (NO OVERLAP ON IMAGE + ANIMATED TEXT DRAWER) */}
+        <section className="pt-1">
+          <div className="mb-2.5 flex items-end justify-between">
             <div>
               <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">Discover</p>
               <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">RP Foundation at Work</h2>
             </div>
-            <span className="text-[12px] font-semibold text-slate-500">{slide + 1}/{slides.length}</span>
+            <span className="text-[12px] font-semibold text-slate-500">{slide + 1} / {slides.length}</span>
           </div>
-          <motion.article key={`${current?.image || "slide"}-${slide}`} initial={{ opacity: 0.2 }} animate={{ opacity: 1 }} className="relative h-[320px] sm:h-[350px] overflow-hidden rounded-[24px] bg-[#14213D] shadow-md">
-            <img src={getSlideImage(current?.image, slide)} alt={current?.titleEn || "RP Foundation initiative"} className="absolute inset-0 h-full w-full object-cover" onError={(e) => { const img = e.currentTarget; const fb = fallbackSlides[slide % fallbackSlides.length].image; if (img.src !== fb) img.src = fb; }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/95 via-[#0F172A]/40 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 text-white">
-              <h3 className="text-[20px] sm:text-[22px] font-bold leading-tight text-white">{current?.titleEn}</h3>
-              <p className="mt-1 text-[12px] sm:text-[13px] leading-relaxed text-slate-200 font-medium">{current?.subEn}</p>
-              <button onClick={() => navigate((current as any)?.route || "/impact")} className="mt-2.5 inline-flex items-center gap-1 text-[12px] font-bold text-amber-300 hover:text-amber-200 transition-colors">Explore <ChevronRight className="h-4 w-4" /></button>
+
+          <div className="overflow-hidden rounded-[24px] border border-amber-200/80 bg-white shadow-xs">
+            {/* Clear Image Viewport */}
+            <div className="relative h-[210px] sm:h-[240px] w-full overflow-hidden bg-[#14213D]">
+              <motion.img
+                key={`slide-img-${slide}`}
+                src={getSlideImage(current?.image, slide)}
+                alt={current?.titleEn || "RP Foundation initiative"}
+                initial={{ opacity: 0.3, scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  const fb = fallbackSlides[slide % fallbackSlides.length].image;
+                  if (img.src !== fb) img.src = fb;
+                }}
+              />
+              <div className="absolute top-3 right-3 rounded-full bg-[#14213D]/75 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-amber-300 border border-amber-300/30">
+                {slide + 1} / {slides.length}
+              </div>
             </div>
-          </motion.article>
+
+            {/* Non-Overlapping Animated Content Card */}
+            <motion.div
+              key={`slide-txt-${slide}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="p-4 sm:p-5 bg-gradient-to-b from-white via-amber-50/15 to-white"
+            >
+              <h3 className="text-[17px] sm:text-[19px] font-bold leading-tight text-[#14213D]">
+                {current?.titleEn}
+              </h3>
+              <p className="mt-1.5 text-[12.5px] sm:text-[13.5px] leading-relaxed text-slate-600 font-medium">
+                {current?.subEn}
+              </p>
+              <button
+                onClick={() => navigate((current as any)?.route || "/impact")}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-amber-500/10 px-3.5 py-1.5 text-[12px] font-bold text-[#C2410C] hover:bg-amber-500/20 transition-all border border-amber-300/40"
+              >
+                Explore Initiative <ChevronRight className="h-4 w-4" />
+              </button>
+            </motion.div>
+          </div>
+
           <div className="mt-3 flex justify-center gap-2">
             {slides.map((_: any, i: number) => (
-              <button key={i} onClick={() => setSlide(i)} className={`h-2 rounded-full transition-all ${slide === i ? "w-7 bg-[#D97706]" : "w-2 bg-slate-300"}`} />
+              <button
+                key={i}
+                onClick={() => setSlide(i)}
+                className={`h-2 rounded-full transition-all ${slide === i ? "w-7 bg-[#D97706]" : "w-2 bg-slate-300"}`}
+              />
             ))}
           </div>
         </section>
 
-        <section className="pt-2">
-          <div className="mb-3">
-            <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">Quick Access</p>
-            <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">What can we help with?</h2>
-          </div>
-          <div className="grid grid-cols-2 gap-3.5">
-            {actions.map(({ title, subtitle, icon: Icon, route, accent }) => (
-              <motion.button key={title} whileTap={{ scale: 0.98 }} onClick={() => navigate(route)} className="min-h-[150px] rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all flex flex-col justify-between">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="mt-3 text-[15px] font-bold text-[#14213D]">{title}</p>
-                  <p className="mt-0.5 text-[11.5px] text-slate-500 font-medium leading-snug">{subtitle}</p>
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        </section>
-
+        {/* 5. OUR VISION & LEADERSHIP (PLACED DIRECTLY AFTER CAROUSEL) */}
         <section className="pt-2">
           <div className="mb-3">
             <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Foundation</p>
             <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Our Vision & Leadership</h2>
           </div>
           <div className="grid grid-cols-2 gap-3.5">
-            <button onClick={() => navigate("/vision-goals")} className="rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 transition-all flex flex-col justify-between min-h-[140px]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-500/10 border border-slate-500/20 text-[#14213D]">
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/vision-goals")}
+              className="rounded-2xl border border-amber-100/80 bg-white/90 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 transition-all flex flex-col justify-between min-h-[145px]"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[#167C5A]">
                 <Compass className="h-5 w-5" />
               </div>
               <div>
                 <p className="mt-3 text-[15px] font-bold text-[#14213D]">Our Vision</p>
-                <p className="mt-0.5 text-[11.5px] text-slate-500 font-medium leading-snug">A clear direction for meaningful social impact.</p>
+                <p className="mt-0.5 text-[11.5px] text-slate-500 font-medium leading-snug">
+                  Clear strategic roadmap for inclusive community welfare & social impact.
+                </p>
               </div>
-            </button>
-            <button onClick={() => navigate("/founder-message")} className="rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 transition-all flex flex-col justify-between min-h-[140px]">
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/founder-message")}
+              className="rounded-2xl border border-amber-100/80 bg-white/90 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 transition-all flex flex-col justify-between min-h-[145px]"
+            >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-[#D97706]">
                 <UserRound className="h-5 w-5" />
               </div>
               <div>
                 <p className="mt-3 text-[15px] font-bold text-[#14213D]">Founder’s Message</p>
-                <p className="mt-0.5 text-[11.5px] text-slate-500 font-medium leading-snug">A message from Rohit Pandit, Founder of RP Foundation.</p>
+                <p className="mt-0.5 text-[11.5px] text-slate-500 font-medium leading-snug">
+                  Direct message & guidance from Rohit Pandit, Founder of RP Foundation.
+                </p>
               </div>
-            </button>
+            </motion.button>
           </div>
         </section>
 
+        {/* 6. QUICK ACCESS CARDS (PLACED AFTER VISION & LEADERSHIP) */}
+        <section className="pt-2">
+          <div className="mb-3">
+            <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">Quick Access</p>
+            <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">What can we help with?</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3.5">
+            {[
+              {
+                title: "Jan Seva Card",
+                subtitle: "Your digital service identity & welfare benefit card",
+                icon: BadgePlus,
+                route: "/jan-seva-card",
+                accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
+              },
+              {
+                title: "Healthcare",
+                subtitle: "Free health camps, medical support & emergency assistance",
+                icon: HeartPulse,
+                route: "/health-care",
+                accent: "text-[#DC2626] bg-red-500/10 border border-red-500/20"
+              },
+              {
+                title: "Employment",
+                subtitle: "Job opportunities, skill training & career support",
+                icon: BriefcaseBusiness,
+                route: "/employment",
+                accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20"
+              },
+              {
+                title: "Grievance",
+                subtitle: "Submit public issues, track resolution & support status",
+                icon: ClipboardList,
+                route: "/grievance",
+                accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20"
+              }
+            ].map(({ title, subtitle, icon: Icon, route, accent }) => (
+              <motion.button
+                key={title}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate(route)}
+                className="min-h-[155px] rounded-2xl border border-amber-100/80 bg-white/90 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all flex flex-col justify-between"
+              >
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="mt-3 text-[15px] font-bold text-[#14213D]">{title}</p>
+                  <p className="mt-1 text-[11.5px] text-slate-500 font-medium leading-snug">{subtitle}</p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </section>
+
+        {/* 7. SOCIAL IMPACT HIGHLIGHTS */}
         <section className="pt-2">
           <div className="mb-3">
             <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Our Impact</p>
