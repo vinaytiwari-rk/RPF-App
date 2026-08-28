@@ -34,12 +34,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import java.net.URLDecoder;
 
 public class NativeBrowserActivity extends AppCompatActivity {
     private static final int NAVY = Color.rgb(20, 33, 61);
     private static final int IVORY = Color.rgb(255, 249, 240);
-    private static final int SAFFRON = Color.rgb(217, 119, 6);
     private static final long AUTO_HIDE_MS = 4000L;
 
     private WebView webView;
@@ -51,17 +49,15 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private LinearLayout topBar;
     private LinearLayout bottomBar;
     private EditText addressBar;
-    private ImageButton backButton;
-    private ImageButton forwardButton;
+    private TextView backButton;
+    private TextView forwardButton;
     private boolean mainFrameError = false;
     private boolean pageLoading = false;
     private final Handler handler = new Handler();
     private Runnable hideControlsRunnable;
     private GestureDetector gestureDetector;
 
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
-    }
+    private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
 
     private boolean isHttpUrl(String value) {
         return value != null && (value.startsWith("https://") || value.startsWith("http://"));
@@ -102,9 +98,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         scheduleHideControls();
     }
 
-    private void hideError() {
-        if (errorView != null) errorView.setVisibility(View.GONE);
-    }
+    private void hideError() { if (errorView != null) errorView.setVisibility(View.GONE); }
 
     private void showError(String message) {
         pageLoading = false;
@@ -120,12 +114,12 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private void showControls() {
         if (hideControlsRunnable != null) handler.removeCallbacks(hideControlsRunnable);
         if (topBar != null) {
-            topBar.animate().translationY(0).alpha(1f).setDuration(180).start();
             topBar.setVisibility(View.VISIBLE);
+            topBar.animate().translationY(0).alpha(1f).setDuration(180).start();
         }
         if (bottomBar != null) {
-            bottomBar.animate().translationY(0).alpha(1f).setDuration(180).start();
             bottomBar.setVisibility(View.VISIBLE);
+            bottomBar.animate().translationY(0).alpha(1f).setDuration(180).start();
         }
     }
 
@@ -143,32 +137,20 @@ public class NativeBrowserActivity extends AppCompatActivity {
 
     private void updateNavigationState() {
         if (webView == null) return;
-        if (backButton != null) backButton.setEnabled(webView.canGoBack());
-        if (forwardButton != null) forwardButton.setEnabled(webView.canGoForward());
-    }
-
-    private String hostFor(String value) {
-        try {
-            Uri uri = Uri.parse(value);
-            return uri.getHost() == null ? value : uri.getHost();
-        } catch (Exception ignored) {
-            return value;
-        }
+        if (backButton != null) { backButton.setEnabled(webView.canGoBack()); backButton.setAlpha(webView.canGoBack() ? 1f : .35f); }
+        if (forwardButton != null) { forwardButton.setEnabled(webView.canGoForward()); forwardButton.setAlpha(webView.canGoForward() ? 1f : .35f); }
     }
 
     private void updateAddress(String value) {
-        if (addressBar != null && value != null) addressBar.setText(value);
+        if (addressBar != null && value != null && !addressBar.hasFocus()) addressBar.setText(value);
         updateNavigationState();
     }
 
     private void openExternal() {
         String value = webView != null ? webView.getUrl() : null;
         if (!isHttpUrl(value)) return;
-        try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(value)));
-        } catch (Exception ignored) {
-            Toast.makeText(this, "No compatible browser found", Toast.LENGTH_SHORT).show();
-        }
+        try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(value))); }
+        catch (Exception ignored) { Toast.makeText(this, "No compatible browser found", Toast.LENGTH_SHORT).show(); }
     }
 
     private void shareCurrentPage() {
@@ -198,45 +180,31 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 else if (which == 3) openExternal();
                 else if (which == 4) showFindInPage();
                 else if (which == 5) showBrowserSettings();
-            })
-            .show();
+            }).show();
     }
 
     private void showFindInPage() {
         EditText input = new EditText(this);
         input.setSingleLine(true);
         input.setHint("Find text");
-        new AlertDialog.Builder(this)
-            .setTitle("Find in page")
-            .setView(input)
+        new AlertDialog.Builder(this).setTitle("Find in page").setView(input)
             .setPositiveButton("Find", (dialog, which) -> {
                 if (webView != null && input.getText() != null) webView.findAllAsync(input.getText().toString());
-            })
-            .setNegativeButton("Cancel", null)
-            .show();
+            }).setNegativeButton("Cancel", null).show();
     }
 
     private void showBrowserSettings() {
-        final String[] options = new String[]{"Auto-hide controls", "Desktop site", "Clear browsing data"};
-        new AlertDialog.Builder(this)
-            .setTitle("Samahit Views Settings")
-            .setItems(options, (dialog, which) -> {
-                if (which == 0) {
-                    if (topBar != null && topBar.getVisibility() == View.VISIBLE) scheduleHideControls();
-                    Toast.makeText(this, "Controls auto-hide after a few seconds", Toast.LENGTH_SHORT).show();
-                } else if (which == 1 && webView != null) {
-                    WebSettings settings = webView.getSettings();
-                    settings.setLoadWithOverviewMode(true);
-                    settings.setUseWideViewPort(true);
-                    Toast.makeText(this, "Desktop view can be requested per website", Toast.LENGTH_SHORT).show();
-                } else if (which == 2) {
-                    CookieManager.getInstance().removeAllCookies(null);
-                    CookieManager.getInstance().flush();
-                    if (webView != null) webView.clearCache(true);
-                    Toast.makeText(this, "Browsing data cleared", Toast.LENGTH_SHORT).show();
-                }
-            })
-            .show();
+        final String[] options = new String[]{"Toolbar behaviour", "Desktop site", "Clear browsing data"};
+        new AlertDialog.Builder(this).setTitle("Samahit Views Settings").setItems(options, (dialog, which) -> {
+            if (which == 0) Toast.makeText(this, "Controls auto-hide after a few seconds", Toast.LENGTH_SHORT).show();
+            else if (which == 1) Toast.makeText(this, "Desktop-site preference will be applied per website", Toast.LENGTH_SHORT).show();
+            else {
+                CookieManager.getInstance().removeAllCookies(null);
+                CookieManager.getInstance().flush();
+                if (webView != null) webView.clearCache(true);
+                Toast.makeText(this, "Browsing data cleared", Toast.LENGTH_SHORT).show();
+            }
+        }).show();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -290,32 +258,20 @@ public class NativeBrowserActivity extends AppCompatActivity {
                     intent.setComponent(null);
                     if (getPackageManager().resolveActivity(intent, 0) != null) { startActivity(intent); return true; }
                 } catch (Exception ignored) { }
-                try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(next))); }
-                catch (Exception ignored) { }
+                try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(next))); } catch (Exception ignored) { }
                 return true;
             }
-
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String next = request != null && request.getUrl() != null ? request.getUrl().toString() : null;
                 return handleUrl(next);
             }
-
             @Override public boolean shouldOverrideUrlLoading(WebView view, String next) { return handleUrl(next); }
-
             @Override public void onPageStarted(WebView view, String next, android.graphics.Bitmap favicon) {
-                mainFrameError = false;
-                hideError();
-                updateAddress(next);
-                showLoading();
-                super.onPageStarted(view, next, favicon);
+                mainFrameError = false; hideError(); updateAddress(next); showLoading(); super.onPageStarted(view, next, favicon);
             }
-
             @Override public void onPageFinished(WebView view, String next) {
-                updateAddress(next);
-                if (!mainFrameError) hideLoading();
-                super.onPageFinished(view, next);
+                updateAddress(next); if (!mainFrameError) hideLoading(); super.onPageFinished(view, next);
             }
-
             @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 if (request != null && request.isForMainFrame()) {
                     mainFrameError = true;
@@ -329,12 +285,10 @@ public class NativeBrowserActivity extends AppCompatActivity {
         webView.setWebChromeClient(new WebChromeClient() {
             @Override public void onProgressChanged(WebView view, int progress) {
                 if (progressBar != null) {
-                    progressBar.setIndeterminate(false);
-                    progressBar.setProgress(progress);
+                    progressBar.setIndeterminate(false); progressBar.setProgress(progress);
                     progressBar.setVisibility(progress >= 100 ? View.GONE : View.VISIBLE);
                 }
             }
-
             @Override public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
                 WebView popup = new WebView(NativeBrowserActivity.this);
                 popup.getSettings().setJavaScriptEnabled(true);
@@ -342,27 +296,16 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 popup.setWebViewClient(new WebViewClient() {
                     @Override public boolean shouldOverrideUrlLoading(WebView ignored, WebResourceRequest request) {
                         String next = request != null && request.getUrl() != null ? request.getUrl().toString() : null;
-                        loadInApp(next);
-                        popup.destroy();
-                        return true;
+                        loadInApp(next); popup.destroy(); return true;
                     }
-                    @Override public boolean shouldOverrideUrlLoading(WebView ignored, String next) {
-                        loadInApp(next);
-                        popup.destroy();
-                        return true;
-                    }
+                    @Override public boolean shouldOverrideUrlLoading(WebView ignored, String next) { loadInApp(next); popup.destroy(); return true; }
                 });
                 WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
-                transport.setWebView(popup);
-                resultMsg.sendToTarget();
-                return true;
+                transport.setWebView(popup); resultMsg.sendToTarget(); return true;
             }
-
             @Override public void onShowCustomView(View view, CustomViewCallback callback) {
                 if (customView != null) { callback.onCustomViewHidden(); return; }
-                customView = view;
-                customViewCallback = callback;
-                webView.setVisibility(View.GONE);
+                customView = view; customViewCallback = callback; webView.setVisibility(View.GONE);
                 contentFrame.addView(customView, new FrameLayout.LayoutParams(-1, -1));
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
@@ -370,166 +313,90 @@ public class NativeBrowserActivity extends AppCompatActivity {
             @Override public void onHideCustomView() { hideCustomView(); }
         });
 
-        contentFrame.addView(webView, new FrameLayout.LayoutParams(-1, -1));
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override public boolean onDoubleTap(MotionEvent e) {
+                if (topBar != null && topBar.getVisibility() == View.VISIBLE) hideControls();
+                else { showControls(); scheduleHideControls(); }
+                return true;
+            }
+        });
+        webView.setOnTouchListener((v, event) -> { gestureDetector.onTouchEvent(event); return false; });
 
+        contentFrame.addView(webView, new FrameLayout.LayoutParams(-1, -1));
         progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progressBar.setMax(100);
-        progressBar.setProgress(0);
-        FrameLayout.LayoutParams progressParams = new FrameLayout.LayoutParams(-1, dp(3), Gravity.TOP);
-        contentFrame.addView(progressBar, progressParams);
+        progressBar.setMax(100); progressBar.setProgress(0);
+        contentFrame.addView(progressBar, new FrameLayout.LayoutParams(-1, dp(3), Gravity.TOP));
 
         errorView = new LinearLayout(this);
-        errorView.setOrientation(LinearLayout.VERTICAL);
-        errorView.setGravity(Gravity.CENTER);
-        errorView.setPadding(dp(28), dp(28), dp(28), dp(28));
-        errorView.setBackgroundColor(IVORY);
+        errorView.setOrientation(LinearLayout.VERTICAL); errorView.setGravity(Gravity.CENTER);
+        errorView.setPadding(dp(28), dp(28), dp(28), dp(28)); errorView.setBackgroundColor(IVORY);
         TextView title = new TextView(this);
-        title.setText("This page could not be loaded");
-        title.setTextSize(19);
-        title.setTextColor(NAVY);
-        title.setGravity(Gravity.CENTER);
+        title.setText("This page could not be loaded"); title.setTextSize(19); title.setTextColor(NAVY); title.setGravity(Gravity.CENTER);
         errorView.addView(title, new LinearLayout.LayoutParams(-1, -2));
         TextView detail = new TextView(this);
-        detail.setTag("detail");
-        detail.setTextSize(13);
-        detail.setTextColor(Color.rgb(96, 102, 116));
-        detail.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams detailParams = new LinearLayout.LayoutParams(-1, -2);
-        detailParams.topMargin = dp(12);
+        detail.setTag("detail"); detail.setTextSize(13); detail.setTextColor(Color.rgb(96, 102, 116)); detail.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams detailParams = new LinearLayout.LayoutParams(-1, -2); detailParams.topMargin = dp(12);
         errorView.addView(detail, detailParams);
         TextView retry = new TextView(this);
-        retry.setText("Try again");
-        retry.setTextColor(Color.WHITE);
-        retry.setGravity(Gravity.CENTER);
-        retry.setTextSize(14);
-        retry.setBackgroundColor(NAVY);
-        retry.setPadding(dp(22), dp(12), dp(22), dp(12));
-        retry.setOnClickListener(v -> webView.reload());
-        LinearLayout.LayoutParams retryParams = new LinearLayout.LayoutParams(-2, -2);
-        retryParams.topMargin = dp(24);
-        retryParams.gravity = Gravity.CENTER_HORIZONTAL;
-        errorView.addView(retry, retryParams);
-        errorView.setVisibility(View.GONE);
+        retry.setText("Try again"); retry.setTextColor(Color.WHITE); retry.setGravity(Gravity.CENTER); retry.setTextSize(14); retry.setBackgroundColor(NAVY);
+        retry.setPadding(dp(22), dp(12), dp(22), dp(12)); retry.setOnClickListener(v -> webView.reload());
+        LinearLayout.LayoutParams retryParams = new LinearLayout.LayoutParams(-2, -2); retryParams.topMargin = dp(24); retryParams.gravity = Gravity.CENTER_HORIZONTAL;
+        errorView.addView(retry, retryParams); errorView.setVisibility(View.GONE);
         contentFrame.addView(errorView, new FrameLayout.LayoutParams(-1, -1));
 
         buildBrowserChrome(url);
-
-        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override public boolean onDoubleTap(MotionEvent e) {
-                if (topBar != null && topBar.getVisibility() == View.VISIBLE) hideControls(); else showControls();
-                if (topBar != null && topBar.getVisibility() == View.VISIBLE) scheduleHideControls();
-                return true;
-            }
-            @Override public boolean onSingleTapConfirmed(MotionEvent e) { return false; }
-        });
-        contentFrame.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
-
         setContentView(contentFrame);
         loadInApp(url);
     }
 
-    private ImageButton iconButton(String symbol, String description) {
-        ImageButton button = new ImageButton(this);
-        button.setContentDescription(description);
-        button.setImageResource(android.R.drawable.ic_media_play);
-        button.setRotation(symbol.equals("←") ? 180 : 0);
-        button.setColorFilter(NAVY);
-        button.setBackgroundColor(Color.TRANSPARENT);
-        button.setPadding(dp(8), dp(8), dp(8), dp(8));
-        return button;
-    }
-
     private TextView textButton(String text) {
         TextView view = new TextView(this);
-        view.setText(text);
-        view.setTextColor(NAVY);
-        view.setTextSize(20);
-        view.setGravity(Gravity.CENTER);
+        view.setText(text); view.setTextColor(NAVY); view.setTextSize(20); view.setGravity(Gravity.CENTER);
         view.setPadding(dp(10), dp(6), dp(10), dp(6));
         return view;
     }
 
     private void buildBrowserChrome(String initialUrl) {
         topBar = new LinearLayout(this);
-        topBar.setOrientation(LinearLayout.HORIZONTAL);
-        topBar.setGravity(Gravity.CENTER_VERTICAL);
-        topBar.setPadding(dp(8), dp(10), dp(8), dp(6));
-        topBar.setBackgroundColor(IVORY);
-
-        TextView close = textButton("‹");
-        close.setTextSize(32);
-        close.setOnClickListener(v -> finish());
+        topBar.setOrientation(LinearLayout.HORIZONTAL); topBar.setGravity(Gravity.CENTER_VERTICAL);
+        topBar.setPadding(dp(8), dp(10), dp(8), dp(6)); topBar.setBackgroundColor(IVORY);
+        TextView close = textButton("‹"); close.setTextSize(32); close.setOnClickListener(v -> finish());
         topBar.addView(close, new LinearLayout.LayoutParams(dp(44), dp(52)));
-
         addressBar = new EditText(this);
-        addressBar.setSingleLine(true);
-        addressBar.setText(initialUrl);
-        addressBar.setTextSize(13);
-        addressBar.setTextColor(NAVY);
-        addressBar.setHint("Search or enter address");
-        addressBar.setPadding(dp(14), 0, dp(14), 0);
-        addressBar.setBackgroundColor(Color.WHITE);
-        addressBar.setSelectAllOnFocus(false);
+        addressBar.setSingleLine(true); addressBar.setText(initialUrl); addressBar.setTextSize(13); addressBar.setTextColor(NAVY);
+        addressBar.setHint("Search or enter address"); addressBar.setPadding(dp(14), 0, dp(14), 0); addressBar.setBackgroundColor(Color.WHITE);
         addressBar.setOnEditorActionListener((v, actionId, event) -> {
             String value = addressBar.getText().toString().trim();
             if (value.length() == 0) return true;
             if (!value.startsWith("http://") && !value.startsWith("https://")) value = "https://www.google.com/search?q=" + Uri.encode(value);
-            loadInApp(value);
-            addressBar.clearFocus();
-            return true;
+            loadInApp(value); addressBar.clearFocus(); return true;
         });
-        LinearLayout.LayoutParams addressParams = new LinearLayout.LayoutParams(0, dp(48), 1f);
-        topBar.addView(addressBar, addressParams);
-
-        TextView menu = textButton("⋮");
-        menu.setTextSize(26);
-        menu.setOnClickListener(v -> { showControls(); showBrowserMenu(); });
+        topBar.addView(addressBar, new LinearLayout.LayoutParams(0, dp(48), 1f));
+        TextView menu = textButton("⋮"); menu.setTextSize(26); menu.setOnClickListener(v -> { showControls(); showBrowserMenu(); });
         topBar.addView(menu, new LinearLayout.LayoutParams(dp(44), dp(52)));
-
-        FrameLayout.LayoutParams topParams = new FrameLayout.LayoutParams(-1, -2, Gravity.TOP);
-        contentFrame.addView(topBar, topParams);
+        contentFrame.addView(topBar, new FrameLayout.LayoutParams(-1, -2, Gravity.TOP));
 
         bottomBar = new LinearLayout(this);
-        bottomBar.setOrientation(LinearLayout.HORIZONTAL);
-        bottomBar.setGravity(Gravity.CENTER);
-        bottomBar.setPadding(dp(16), dp(8), dp(16), dp(12));
-        bottomBar.setBackgroundColor(IVORY);
-
-        backButton = textButton("‹");
-        backButton.setTextSize(34);
-        backButton.setOnClickListener(v -> { if (webView.canGoBack()) webView.goBack(); scheduleHideControls(); });
+        bottomBar.setOrientation(LinearLayout.HORIZONTAL); bottomBar.setGravity(Gravity.CENTER);
+        bottomBar.setPadding(dp(16), dp(8), dp(16), dp(12)); bottomBar.setBackgroundColor(IVORY);
+        backButton = textButton("‹"); backButton.setTextSize(34); backButton.setOnClickListener(v -> { if (webView.canGoBack()) webView.goBack(); scheduleHideControls(); });
         bottomBar.addView(backButton, new LinearLayout.LayoutParams(0, dp(48), 1f));
-
-        forwardButton = textButton("›");
-        forwardButton.setTextSize(34);
-        forwardButton.setOnClickListener(v -> { if (webView.canGoForward()) webView.goForward(); scheduleHideControls(); });
+        forwardButton = textButton("›"); forwardButton.setTextSize(34); forwardButton.setOnClickListener(v -> { if (webView.canGoForward()) webView.goForward(); scheduleHideControls(); });
         bottomBar.addView(forwardButton, new LinearLayout.LayoutParams(0, dp(48), 1f));
-
-        TextView refresh = textButton("↻");
-        refresh.setTextSize(28);
-        refresh.setOnClickListener(v -> { webView.reload(); showControls(); });
+        TextView refresh = textButton("↻"); refresh.setTextSize(28); refresh.setOnClickListener(v -> { webView.reload(); showControls(); });
         bottomBar.addView(refresh, new LinearLayout.LayoutParams(0, dp(48), 1f));
-
-        TextView external = textButton("↗");
-        external.setTextSize(24);
-        external.setOnClickListener(v -> openExternal());
+        TextView external = textButton("↗"); external.setTextSize(24); external.setOnClickListener(v -> openExternal());
         bottomBar.addView(external, new LinearLayout.LayoutParams(0, dp(48), 1f));
-
-        FrameLayout.LayoutParams bottomParams = new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM);
-        contentFrame.addView(bottomBar, bottomParams);
+        contentFrame.addView(bottomBar, new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM));
         updateNavigationState();
     }
 
     private void hideCustomView() {
         if (customView == null) return;
-        contentFrame.removeView(customView);
-        customView = null;
-        if (customViewCallback != null) customViewCallback.onCustomViewHidden();
-        customViewCallback = null;
-        webView.setVisibility(View.VISIBLE);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-        showControls();
+        contentFrame.removeView(customView); customView = null;
+        if (customViewCallback != null) customViewCallback.onCustomViewHidden(); customViewCallback = null;
+        webView.setVisibility(View.VISIBLE); setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE); showControls();
     }
 
     @Override public void onBackPressed() {
