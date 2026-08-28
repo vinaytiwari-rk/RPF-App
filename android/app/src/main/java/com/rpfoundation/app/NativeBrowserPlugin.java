@@ -11,10 +11,13 @@ public class NativeBrowserPlugin extends Plugin {
     @PluginMethod
     public void open(PluginCall call) {
         String url = call.getString("url");
-        if (url == null || !(url.startsWith("https://") || url.startsWith("http://"))) { call.reject("Only HTTP(S) URLs are allowed"); return; }
+        if (url == null || !(url.startsWith("https://") || url.startsWith("http://"))) {
+            call.reject("Only HTTP(S) URLs are allowed");
+            return;
+        }
         Intent intent = new Intent(getContext(), NativeBrowserActivity.class);
         intent.putExtra("url", url);
-        intent.putExtra("title", call.getString("title", "RPF Web View"));
+        intent.putExtra("title", call.getString("title", "Samahit Views"));
         getActivity().startActivity(intent);
         call.resolve();
     }
