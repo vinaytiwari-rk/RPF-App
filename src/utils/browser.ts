@@ -34,8 +34,9 @@ export function isExternalWebUrl(url: string): boolean {
   } catch { return false; }
 }
 
-/** Canonical entry point for third-party web content. Native Android always uses
- * the in-app Samahit Views activity; no external browser intent is used here. */
+/** Canonical entry point for third-party web content. Native Android always
+ * prefers the in-app Samahit Views activity and never intentionally delegates
+ * ordinary HTTP(S) links to an external browser. */
 export async function openExternalLink(url: string, navigate?: NavigateFunction, title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
   if (!value) { console.warn('[Samahit Views] Blocked unsupported URL:', url); return; }
@@ -55,19 +56,20 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
       await NativeSamahitViews.open({ url: value, title: title || DEFAULT_WEB_TITLE });
       return;
     } catch (err) {
+      // Keep the user inside Samahit even if the native bridge is temporarily
+      // unavailable instead of falling through to the system browser.
       console.error('Failed to open Samahit Views:', err);
-      return;
     }
   }
 
+  const fallback = `/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title || DEFAULT_WEB_TITLE)}`;
   if (navigate) {
-    navigate(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title || DEFAULT_WEB_TITLE)}`);
+    navigate(fallback);
     return;
   }
 
-  // Browser build fallback stays in the current app context instead of opening
-  // a separate browser window.
-  window.location.assign(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title || DEFAULT_WEB_TITLE)}`);
+  // Browser-build fallback stays in the current application context.
+  window.location.assign(fallback);
 }
 
 export const openSamahitView = openExternalLink;
@@ -78,14 +80,23 @@ export function openRegisteredExternalLink(id: ExternalLinkId, navigate?: Naviga
   return openExternalLink(entry.url, navigate, entry.label);
 }
 
+/**
+ * Capture ordinary third-party links before framework/default handlers can open
+ * another task. target="_blank" is intentionally handled too: in native builds
+ * it must open in Samahit Views, not the system browser. Downloads are left to
+ * the platform's download pipeline.
+ */
 export function installExternalLinkInterceptor(getNavigate: () => NavigateFunction | undefined): () => void {
   const handleClick = (event: MouseEvent) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const target = event.target as HTMLElement | null;
     const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null;
-    if (!anchor || anchor.hasAttribute('download') || anchor.target === '_blank' || !isExternalWebUrl(anchor.href)) return;
+    if (!anchor || anchor.hasAttribute('download') || !isExternalWebUrl(anchor.href)) return;
+
     event.preventDefault();
-    event.stopPropagation();
+    // Prevent duplicate React/default navigation, which can make a single tap
+    // look slow or open the same destination through a second route.
+    event.stopImmediatePropagation();
     void openExternalLink(anchor.href, getNavigate(), anchor.textContent?.trim() || DEFAULT_WEB_TITLE);
   };
   document.addEventListener('click', handleClick, true);
