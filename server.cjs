@@ -336792,7 +336792,7 @@ var fetchPublicUpdatesHtml = async () => {
       let fullTitle = cleanText(titleAttr.length > t7.length ? titleAttr : t7);
       fullTitle = fullTitle.replace(/(\.\.\.|…|\s+\.)$/g, "").trim();
       if ((h5.includes("PRID") || h5.includes("Release") || h5.includes("PressReleaseDetail")) && fullTitle.length > 15) {
-        if (!pibItems.some((x3) => x3.title === fullTitle) && !/^(വിജ്ഞപ്തി|सब्सक्राइब|subscribe)/i.test(fullTitle)) {
+        if (!pibItems.some((x3) => x3.title === fullTitle) && !/^(വിജ്ഞപ്തി|सब्सक्राइब|subscribe|विज्ञप्ति सदस्यता)/i.test(fullTitle)) {
           const fullLink = h5.startsWith("http") ? h5 : `https://pib.gov.in/${h5.replace(/^\//, "")}`;
           pibItems.push({ title: fullTitle, source: "PIB", url: fullLink, publishedAt: (/* @__PURE__ */ new Date()).toISOString() });
         }
@@ -336804,7 +336804,7 @@ var fetchPublicUpdatesHtml = async () => {
     const { data: html3 } = await axios_default.get("https://ddindia.co.in/category/india/", { headers, timeout: 8e3 });
     const $4 = load(html3);
     $4("h2.entry-title a, h3.entry-title a, article a, .post-title a").each((_, el) => {
-      let t7 = $4(el).text().replace(/\s+/g, " ").trim();
+      let t7 = $4(el).text().replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
       t7 = cleanText(t7);
       if (t7.length > 20 && !ddItems.some((x3) => x3.title === t7) && !/^(read more|latest|india|world)$/i.test(t7)) {
         const link = $4(el).attr("href") || "https://ddindia.co.in/category/india/";
