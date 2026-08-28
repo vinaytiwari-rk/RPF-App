@@ -220,8 +220,8 @@ export default function Home() {
           </p>
         </section>
 
-        {/* BOTTOM MARQUEE: ANI + IANS + UNI -> Dark Green, Left-to-Right */}
-        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="green" />}
+        {/* BOTTOM MARQUEE: ANI + IANS + UNI -> Dark Green, Right-to-Left */}
+        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="rtl" variant="green" />}
 
         <section className="pt-2">
           <div className="mb-3 flex items-end justify-between">
