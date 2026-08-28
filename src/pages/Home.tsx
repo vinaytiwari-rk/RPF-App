@@ -59,17 +59,24 @@ export default function Home() {
   const { user } = useAuth();
   const { cmsConfig } = useApp();
   const [slide, setSlide] = useState(0);
-  const [pibFeed, setPibFeed] = useState<string[]>(defaultPibFeed);
-  const [sachetFeed, setSachetFeed] = useState<string[]>(defaultSachetFeed);
-  const [locationName, setLocationName] = useState("Finding location…");
-  const [temperature, setTemperature] = useState<string | null>(null);
+  const [marquee1, setMarquee1] = useState<string[]>([]);
+  const [marquee2, setMarquee2] = useState<string[]>([]);
 
   const name = user?.name?.trim().split(/\s+/)[0] || "Guest";
   const hour = new Date().getHours();
-  const greeting = hour >= 4 && hour < 12 ? "Good Morning" : hour >= 12 && hour < 17 ? "Good Afternoon" : hour >= 17 && hour < 22 ? "Good Evening" : "Good Night";
+  const greeting =
+    hour >= 4 && hour < 12
+      ? "Good Morning"
+      : hour >= 12 && hour < 17
+      ? "Good Afternoon"
+      : hour >= 17 && hour < 22
+      ? "Good Evening"
+      : "Good Night";
 
   const slides = useMemo(() => {
-    const managed = Array.isArray(cmsConfig?.carouselSlides) ? cmsConfig.carouselSlides.filter((i: any) => i?.active !== false && i?.image) : [];
+    const managed = Array.isArray(cmsConfig?.carouselSlides)
+      ? cmsConfig.carouselSlides.filter((i: any) => i?.active !== false && i?.image)
+      : [];
     return managed.length ? [...managed].sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)) : fallbackSlides;
   }, [cmsConfig?.carouselSlides]);
 
@@ -98,10 +105,16 @@ export default function Home() {
   useEffect(() => {
     let alive = true;
     try {
-      const cachedPib = localStorage.getItem("@rpf_news_cache");
-      const cachedSachet = localStorage.getItem("@rpf_sachet_cache");
-      if (cachedPib) { const parsed = JSON.parse(cachedPib); if (Array.isArray(parsed) && parsed.length) setPibFeed(parsed); }
-      if (cachedSachet) { const parsed = JSON.parse(cachedSachet); if (Array.isArray(parsed) && parsed.length) setSachetFeed(parsed); }
+      const cached1 = localStorage.getItem("@rpf_marquee1_cache");
+      const cached2 = localStorage.getItem("@rpf_marquee2_cache");
+      if (cached1) {
+        const p1 = JSON.parse(cached1);
+        if (Array.isArray(p1) && p1.length) setMarquee1(p1);
+      }
+      if (cached2) {
+        const p2 = JSON.parse(cached2);
+        if (Array.isArray(p2) && p2.length) setMarquee2(p2);
+      }
     } catch {}
 
     const load = async () => {
@@ -197,7 +210,7 @@ export default function Home() {
 
         <section className="mb-4"><div className="mb-3"><p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Our Impact</p><h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Social Impact Highlights</h2></div><div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md shadow-2xs">{[{ icon: UsersRound, value: "Community", label: "People first" }, { icon: Stethoscope, value: "Care", label: "Health initiatives" }, { icon: CalendarDays, value: "Active", label: "Foundation work" }].map(({ icon: Icon, value, label }) => <div key={label} className="border-r border-slate-200/60 px-2 py-4 text-center last:border-r-0"><Icon className="mx-auto h-4.5 w-4.5 text-[#167C5A]" /><p className="mt-2 text-[13px] sm:text-[14px] font-bold text-[#14213D]">{value}</p><p className="mt-0.5 text-[9px] text-slate-500 font-semibold tracking-tight">{label}</p></div>)}</div></section>
       </div>
-      <style>{`@keyframes rpf-pib-marquee{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}@keyframes rpf-sachet-marquee{0%{transform:translate3d(-50%,0,0)}100%{transform:translate3d(0,0,0)}}`}</style>
+      <style>{`@keyframes rpf-marquee-rtl{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}`}</style>
     </main>
   );
 }

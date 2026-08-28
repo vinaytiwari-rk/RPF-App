@@ -49,56 +49,155 @@ router.get("/api/public/pib-news", async (_req, res) => {
   }
 });
 
-router.get("/api/public/news", async (_req,res) => {
+const fetchNewsAgenciesHtml = async () => {
+  const headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+  };
+
+  const aniItems: any[] = [];
+  const uniItems: any[] = [];
+  const iansItems: any[] = [];
+
+  // 1. ANI
   try {
-    const c=cache("india_news_rss",1800000);
-    if(c) return res.json({success:true,data:c});
+    const { data: html } = await axios.get("https://www.aninews.in/latest-news/", { headers, timeout: 8000 });
+    const $ = cheerio.load(html);
+    $("figcaption h6.title, .story-details h6.title, a h6.title, h6.title, .news-card h6").each((_, el) => {
+      let t = $(el).text().replace(/\s+/g, " ").trim();
+      t = cleanText(t);
+      if (t.length > 15 && !aniItems.some((x) => x.title === t) && !/^(read more|latest news|photos|videos|national|world|business)$/i.test(t)) {
+        aniItems.push({ title: t, source: "ANI", url: "https://www.aninews.in/latest-news/", publishedAt: new Date().toISOString() });
+      }
+    });
+  } catch {}
 
-    let pibItems: any[] = [];
-    try {
-      const { data: html } = await axios.get("https://www.pib.gov.in/allRel.aspx?reg=48&lang=2", {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
-        timeout: 8000
-      });
-      const matches = html.match(/<a[^>]*PRID=[0-9]+[^>]*>([\s\S]*?)<\/a>|<a[^>]*ReleaseSimpleHtml[^>]*>([\s\S]*?)<\/a>/gi) || [];
-      for (const m of matches) {
-        const title = cleanText(m);
-        if (title.length > 15 && !title.toLowerCase().includes("javascript") && !title.toLowerCase().includes("skip to content")) {
-          if (!pibItems.some(i => i.title === title)) {
-            pibItems.push({ title: `PIB: ${title}`, link: "https://www.pib.gov.in/allRel.aspx?reg=48&lang=2", pubDate: new Date().toISOString(), source: "PIB" });
-            if (pibItems.length >= 15) break;
-          }
+  // 2. UNI
+  try {
+    const { data: html } = await axios.get("https://www.uniindia.com/home.aspx", { headers, timeout: 8000 });
+    const $ = cheerio.load(html);
+    $("a").each((_, el) => {
+      const href = $(el).attr("href") || "";
+      let t = $(el).text().replace(/\s+/g, " ").trim();
+      t = cleanText(t);
+      if ((href.includes("news") || href.includes("story") || href.includes(".html")) && t.length > 20) {
+        if (!uniItems.some((x) => x.title === t) && !/^(home|national|sports|business|world|entertainment|states|about us|contact us|privacy policy)$/i.test(t)) {
+          uniItems.push({ title: t, source: "UNI", url: "https://www.uniindia.com/home.aspx", publishedAt: new Date().toISOString() });
         }
       }
-    } catch {}
+    });
+  } catch {}
 
-    let aniItems: any[] = [];
-    try {
-      const { data: html } = await axios.get("https://www.aninews.in/latest-news/", {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
-        timeout: 8000
-      });
-      const matches = html.match(/<a[^>]*news\/[^>]*>([\s\S]*?)<\/a>/gi) || [];
-      for (const m of matches) {
-        const title = cleanText(m);
-        if (title.length > 20 && !title.toLowerCase().includes("rss") && !title.toLowerCase().includes("copyright") && !title.toLowerCase().includes("latest news")) {
-          if (!aniItems.some(i => i.title === title)) {
-            aniItems.push({ title: `ANI: ${title}`, link: "https://www.aninews.in/latest-news/", pubDate: new Date().toISOString(), source: "ANI" });
-            if (aniItems.length >= 15) break;
-          }
+  // 3. IANS
+  try {
+    const { data: html } = await axios.get("https://ianslive.in/", { headers, timeout: 8000 });
+    const $ = cheerio.load(html);
+    $("a, h2, h3, h4").each((_, el) => {
+      let t = $(el).text().replace(/\s+/g, " ").trim();
+      t = cleanText(t);
+      if (t.length > 22 && !iansItems.some((x) => x.title === t) && !/^(read more|latest|ians|privacy|terms|about us|contact us|copyright)$/i.test(t) && !/^[A-Za-z]+\s+\d{1,2},\s+\d{4}/.test(t)) {
+        iansItems.push({ title: t, source: "IANS", url: "https://ianslive.in/", publishedAt: new Date().toISOString() });
+      }
+    });
+  } catch {}
+
+  return { ani: aniItems, uni: uniItems, ians: iansItems };
+};
+
+const fetchPublicUpdatesHtml = async () => {
+  const headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+  };
+
+  const pibItems: any[] = [];
+  const ddItems: any[] = [];
+
+  // 1. PIB
+  try {
+    const { data: html } = await axios.get("https://pib.gov.in/indexd.aspx", { headers, timeout: 8000 });
+    const $ = cheerio.load(html);
+    $("a").each((_, el) => {
+      const h = $(el).attr("href") || "";
+      const t = $(el).text().replace(/\s+/g, " ").trim();
+      const titleAttr = $(el).attr("title") || "";
+      let fullTitle = cleanText(titleAttr.length > t.length ? titleAttr : t);
+      fullTitle = fullTitle.replace(/(\.\.\.|…|\s+\.)$/g, "").trim();
+      if ((h.includes("PRID") || h.includes("Release") || h.includes("PressReleaseDetail")) && fullTitle.length > 15) {
+        if (!pibItems.some((x) => x.title === fullTitle) && !/^(വിജ്ഞപ്തി|सब्सक्राइब|subscribe)/i.test(fullTitle)) {
+          const fullLink = h.startsWith("http") ? h : `https://pib.gov.in/${h.replace(/^\//, "")}`;
+          pibItems.push({ title: fullTitle, source: "PIB", url: fullLink, publishedAt: new Date().toISOString() });
         }
       }
-    } catch {}
+    });
+  } catch {}
 
-    const interleaved: any[] = [];
-    const maxLen = Math.max(pibItems.length, aniItems.length);
-    for (let i = 0; i < maxLen; i++) {
-      if (i < pibItems.length) interleaved.push(pibItems[i]);
-      if (i < aniItems.length) interleaved.push(aniItems[i]);
-    }
+  // 2. DD India
+  try {
+    const { data: html } = await axios.get("https://ddindia.co.in/category/india/", { headers, timeout: 8000 });
+    const $ = cheerio.load(html);
+    $("h2.entry-title a, h3.entry-title a, article a, .post-title a").each((_, el) => {
+      let t = $(el).text().replace(/\s+/g, " ").trim();
+      t = cleanText(t);
+      if (t.length > 20 && !ddItems.some((x) => x.title === t) && !/^(read more|latest|india|world)$/i.test(t)) {
+        const link = $(el).attr("href") || "https://ddindia.co.in/category/india/";
+        ddItems.push({ title: t, source: "DD India", url: link, publishedAt: new Date().toISOString() });
+      }
+    });
+  } catch {}
 
-    const data = interleaved;
-    save("india_news_rss", data);
+  return { pib: pibItems, ddIndia: ddItems };
+};
+
+const getUnifiedLiveFeed = async () => {
+  const cached = cache("unified_live_feed", 120000);
+  if (cached) return cached;
+
+  const [newsRes, publicRes] = await Promise.all([fetchNewsAgenciesHtml(), fetchPublicUpdatesHtml()]);
+
+  // Marquee 1: Merged ANI + IANS + UNI
+  const marquee1Items: string[] = [];
+  const maxNewsLen = Math.max(newsRes.ani.length, newsRes.ians.length, newsRes.uni.length);
+  for (let i = 0; i < maxNewsLen; i++) {
+    if (i < newsRes.ani.length) marquee1Items.push(newsRes.ani[i].title);
+    if (i < newsRes.ians.length) marquee1Items.push(newsRes.ians[i].title);
+    if (i < newsRes.uni.length) marquee1Items.push(newsRes.uni[i].title);
+  }
+
+  // Marquee 2: Merged PIB + DD India
+  const marquee2Items: string[] = [];
+  const maxPubLen = Math.max(publicRes.pib.length, publicRes.ddIndia.length);
+  for (let i = 0; i < maxPubLen; i++) {
+    if (i < publicRes.pib.length) marquee2Items.push(publicRes.pib[i].title);
+    if (i < publicRes.ddIndia.length) marquee2Items.push(publicRes.ddIndia[i].title);
+  }
+
+  const payload = {
+    news: newsRes,
+    publicUpdates: publicRes,
+    marquee1: marquee1Items,
+    marquee2: marquee2Items,
+    // Backwards compatibility legacy flat lists
+    pib: marquee2Items,
+    sachet: marquee1Items
+  };
+
+  save("unified_live_feed", payload);
+  return payload;
+};
+
+router.get("/api/public/live-feed", async (_req, res) => {
+  try {
+    const data = await getUnifiedLiveFeed();
+    return res.json({ success: true, data });
+  } catch {
+    return res.status(503).json({ success: false, error: "Live feed temporarily unavailable" });
+  }
+});
+
+router.get("/api/public/news", async (_req, res) => {
+  try {
+    const data = await getUnifiedLiveFeed();
     return res.json({ success: true, data });
   } catch {
     return res.status(503).json({ success: false, error: "News temporarily unavailable" });

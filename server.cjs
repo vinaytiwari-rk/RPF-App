@@ -303898,9 +303898,9 @@ function getLoad(parse16, render3) {
     const initialRoot = parse16(content, internalOpts, isDocument2, null);
     class LoadedCheerio extends Cheerio {
       _make(selector3, context) {
-        const cheerio = initialize(selector3, context);
-        cheerio.prevObject = this;
-        return cheerio;
+        const cheerio2 = initialize(selector3, context);
+        cheerio2.prevObject = this;
+        return cheerio2;
       }
       _parse(content2, options3, isDocument3, context) {
         return parse16(content2, options3, isDocument3, context);
@@ -336726,54 +336726,135 @@ router26.get("/api/public/pib-news", async (_req, res) => {
     return res.status(503).json({ success: false, error: "PIB news temporarily unavailable" });
   }
 });
+var fetchNewsAgenciesHtml = async () => {
+  const headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+  };
+  const aniItems = [];
+  const uniItems = [];
+  const iansItems = [];
+  try {
+    const { data: html3 } = await axios_default.get("https://www.aninews.in/latest-news/", { headers, timeout: 8e3 });
+    const $4 = cheerio.load(html3);
+    $4("figcaption h6.title, .story-details h6.title, a h6.title, h6.title, .news-card h6").each((_, el) => {
+      let t7 = $4(el).text().replace(/\s+/g, " ").trim();
+      t7 = cleanText(t7);
+      if (t7.length > 15 && !aniItems.some((x3) => x3.title === t7) && !/^(read more|latest news|photos|videos|national|world|business)$/i.test(t7)) {
+        aniItems.push({ title: t7, source: "ANI", url: "https://www.aninews.in/latest-news/", publishedAt: (/* @__PURE__ */ new Date()).toISOString() });
+      }
+    });
+  } catch {
+  }
+  try {
+    const { data: html3 } = await axios_default.get("https://www.uniindia.com/home.aspx", { headers, timeout: 8e3 });
+    const $4 = cheerio.load(html3);
+    $4("a").each((_, el) => {
+      const href = $4(el).attr("href") || "";
+      let t7 = $4(el).text().replace(/\s+/g, " ").trim();
+      t7 = cleanText(t7);
+      if ((href.includes("news") || href.includes("story") || href.includes(".html")) && t7.length > 20) {
+        if (!uniItems.some((x3) => x3.title === t7) && !/^(home|national|sports|business|world|entertainment|states|about us|contact us|privacy policy)$/i.test(t7)) {
+          uniItems.push({ title: t7, source: "UNI", url: "https://www.uniindia.com/home.aspx", publishedAt: (/* @__PURE__ */ new Date()).toISOString() });
+        }
+      }
+    });
+  } catch {
+  }
+  try {
+    const { data: html3 } = await axios_default.get("https://ianslive.in/", { headers, timeout: 8e3 });
+    const $4 = cheerio.load(html3);
+    $4("a, h2, h3, h4").each((_, el) => {
+      let t7 = $4(el).text().replace(/\s+/g, " ").trim();
+      t7 = cleanText(t7);
+      if (t7.length > 22 && !iansItems.some((x3) => x3.title === t7) && !/^(read more|latest|ians|privacy|terms|about us|contact us|copyright)$/i.test(t7) && !/^[A-Za-z]+\s+\d{1,2},\s+\d{4}/.test(t7)) {
+        iansItems.push({ title: t7, source: "IANS", url: "https://ianslive.in/", publishedAt: (/* @__PURE__ */ new Date()).toISOString() });
+      }
+    });
+  } catch {
+  }
+  return { ani: aniItems, uni: uniItems, ians: iansItems };
+};
+var fetchPublicUpdatesHtml = async () => {
+  const headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+  };
+  const pibItems = [];
+  const ddItems = [];
+  try {
+    const { data: html3 } = await axios_default.get("https://pib.gov.in/indexd.aspx", { headers, timeout: 8e3 });
+    const $4 = cheerio.load(html3);
+    $4("a").each((_, el) => {
+      const h5 = $4(el).attr("href") || "";
+      const t7 = $4(el).text().replace(/\s+/g, " ").trim();
+      const titleAttr = $4(el).attr("title") || "";
+      let fullTitle = cleanText(titleAttr.length > t7.length ? titleAttr : t7);
+      fullTitle = fullTitle.replace(/(\.\.\.|…|\s+\.)$/g, "").trim();
+      if ((h5.includes("PRID") || h5.includes("Release") || h5.includes("PressReleaseDetail")) && fullTitle.length > 15) {
+        if (!pibItems.some((x3) => x3.title === fullTitle) && !/^(വിജ്ഞപ്തി|सब्सक्राइब|subscribe)/i.test(fullTitle)) {
+          const fullLink = h5.startsWith("http") ? h5 : `https://pib.gov.in/${h5.replace(/^\//, "")}`;
+          pibItems.push({ title: fullTitle, source: "PIB", url: fullLink, publishedAt: (/* @__PURE__ */ new Date()).toISOString() });
+        }
+      }
+    });
+  } catch {
+  }
+  try {
+    const { data: html3 } = await axios_default.get("https://ddindia.co.in/category/india/", { headers, timeout: 8e3 });
+    const $4 = cheerio.load(html3);
+    $4("h2.entry-title a, h3.entry-title a, article a, .post-title a").each((_, el) => {
+      let t7 = $4(el).text().replace(/\s+/g, " ").trim();
+      t7 = cleanText(t7);
+      if (t7.length > 20 && !ddItems.some((x3) => x3.title === t7) && !/^(read more|latest|india|world)$/i.test(t7)) {
+        const link = $4(el).attr("href") || "https://ddindia.co.in/category/india/";
+        ddItems.push({ title: t7, source: "DD India", url: link, publishedAt: (/* @__PURE__ */ new Date()).toISOString() });
+      }
+    });
+  } catch {
+  }
+  return { pib: pibItems, ddIndia: ddItems };
+};
+var getUnifiedLiveFeed = async () => {
+  const cached = cache("unified_live_feed", 12e4);
+  if (cached) return cached;
+  const [newsRes, publicRes] = await Promise.all([fetchNewsAgenciesHtml(), fetchPublicUpdatesHtml()]);
+  const marquee1Items = [];
+  const maxNewsLen = Math.max(newsRes.ani.length, newsRes.ians.length, newsRes.uni.length);
+  for (let i6 = 0; i6 < maxNewsLen; i6++) {
+    if (i6 < newsRes.ani.length) marquee1Items.push(newsRes.ani[i6].title);
+    if (i6 < newsRes.ians.length) marquee1Items.push(newsRes.ians[i6].title);
+    if (i6 < newsRes.uni.length) marquee1Items.push(newsRes.uni[i6].title);
+  }
+  const marquee2Items = [];
+  const maxPubLen = Math.max(publicRes.pib.length, publicRes.ddIndia.length);
+  for (let i6 = 0; i6 < maxPubLen; i6++) {
+    if (i6 < publicRes.pib.length) marquee2Items.push(publicRes.pib[i6].title);
+    if (i6 < publicRes.ddIndia.length) marquee2Items.push(publicRes.ddIndia[i6].title);
+  }
+  const payload = {
+    news: newsRes,
+    publicUpdates: publicRes,
+    marquee1: marquee1Items,
+    marquee2: marquee2Items,
+    // Backwards compatibility legacy flat lists
+    pib: marquee2Items,
+    sachet: marquee1Items
+  };
+  save("unified_live_feed", payload);
+  return payload;
+};
+router26.get("/api/public/live-feed", async (_req, res) => {
+  try {
+    const data2 = await getUnifiedLiveFeed();
+    return res.json({ success: true, data: data2 });
+  } catch {
+    return res.status(503).json({ success: false, error: "Live feed temporarily unavailable" });
+  }
+});
 router26.get("/api/public/news", async (_req, res) => {
   try {
-    const c4 = cache("india_news_rss", 18e5);
-    if (c4) return res.json({ success: true, data: c4 });
-    let pibItems = [];
-    try {
-      const { data: html3 } = await axios_default.get("https://www.pib.gov.in/allRel.aspx?reg=48&lang=2", {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
-        timeout: 8e3
-      });
-      const matches2 = html3.match(/<a[^>]*PRID=[0-9]+[^>]*>([\s\S]*?)<\/a>|<a[^>]*ReleaseSimpleHtml[^>]*>([\s\S]*?)<\/a>/gi) || [];
-      for (const m6 of matches2) {
-        const title = cleanText(m6);
-        if (title.length > 15 && !title.toLowerCase().includes("javascript") && !title.toLowerCase().includes("skip to content")) {
-          if (!pibItems.some((i6) => i6.title === title)) {
-            pibItems.push({ title: `PIB: ${title}`, link: "https://www.pib.gov.in/allRel.aspx?reg=48&lang=2", pubDate: (/* @__PURE__ */ new Date()).toISOString(), source: "PIB" });
-            if (pibItems.length >= 15) break;
-          }
-        }
-      }
-    } catch {
-    }
-    let aniItems = [];
-    try {
-      const { data: html3 } = await axios_default.get("https://www.aninews.in/latest-news/", {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
-        timeout: 8e3
-      });
-      const matches2 = html3.match(/<a[^>]*news\/[^>]*>([\s\S]*?)<\/a>/gi) || [];
-      for (const m6 of matches2) {
-        const title = cleanText(m6);
-        if (title.length > 20 && !title.toLowerCase().includes("rss") && !title.toLowerCase().includes("copyright") && !title.toLowerCase().includes("latest news")) {
-          if (!aniItems.some((i6) => i6.title === title)) {
-            aniItems.push({ title: `ANI: ${title}`, link: "https://www.aninews.in/latest-news/", pubDate: (/* @__PURE__ */ new Date()).toISOString(), source: "ANI" });
-            if (aniItems.length >= 15) break;
-          }
-        }
-      }
-    } catch {
-    }
-    const interleaved = [];
-    const maxLen = Math.max(pibItems.length, aniItems.length);
-    for (let i6 = 0; i6 < maxLen; i6++) {
-      if (i6 < pibItems.length) interleaved.push(pibItems[i6]);
-      if (i6 < aniItems.length) interleaved.push(aniItems[i6]);
-    }
-    const data2 = interleaved;
-    save("india_news_rss", data2);
+    const data2 = await getUnifiedLiveFeed();
     return res.json({ success: true, data: data2 });
   } catch {
     return res.status(503).json({ success: false, error: "News temporarily unavailable" });
