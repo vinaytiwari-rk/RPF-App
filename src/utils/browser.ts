@@ -34,11 +34,8 @@ export function isExternalWebUrl(url: string): boolean {
   } catch { return false; }
 }
 
-/**
- * Canonical entry point for third-party web content.
- * Native Android uses Samahit Views' real WebView activity; the web build keeps
- * the existing /browser route as the compatible fallback.
- */
+/** Canonical entry point for third-party web content. Native Android always uses
+ * the in-app Samahit Views activity; no external browser intent is used here. */
 export async function openExternalLink(url: string, navigate?: NavigateFunction, title: string = DEFAULT_WEB_TITLE): Promise<void> {
   const value = normalizeExternalWebUrl(url);
   if (!value) { console.warn('[Samahit Views] Blocked unsupported URL:', url); return; }
@@ -59,6 +56,7 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
       return;
     } catch (err) {
       console.error('Failed to open Samahit Views:', err);
+      return;
     }
   }
 
@@ -67,11 +65,12 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     return;
   }
 
-  window.open(value, '_self');
+  // Browser build fallback stays in the current app context instead of opening
+  // a separate browser window.
+  window.location.assign(`/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title || DEFAULT_WEB_TITLE)}`);
 }
 
 export const openSamahitView = openExternalLink;
-/** Backward-compatible alias for existing callers. */
 export const openRPFBrowser = openExternalLink;
 
 export function openRegisteredExternalLink(id: ExternalLinkId, navigate?: NavigateFunction): Promise<void> {
@@ -84,9 +83,9 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const target = event.target as HTMLElement | null;
     const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null;
-    if (!anchor || !isExternalWebUrl(anchor.href)) return;
+    if (!anchor || anchor.hasAttribute('download') || anchor.target === '_blank' || !isExternalWebUrl(anchor.href)) return;
     event.preventDefault();
-    event.stopImmediatePropagation();
+    event.stopPropagation();
     void openExternalLink(anchor.href, getNavigate(), anchor.textContent?.trim() || DEFAULT_WEB_TITLE);
   };
   document.addEventListener('click', handleClick, true);
