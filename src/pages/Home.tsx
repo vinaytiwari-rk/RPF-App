@@ -194,13 +194,13 @@ export default function Home() {
     <main className="min-h-full bg-transparent text-[#14213D]">
       <div className="mx-auto w-full max-w-3xl px-4 pb-6 pt-3 sm:px-6 space-y-4">
         
-        <section className="bg-transparent py-1 space-y-1">
-          <p className="text-sm sm:text-base font-semibold text-[#14213D] tracking-tight">
-            {greeting}, {name} Ji,
-          </p>
+        <section className="bg-transparent py-1 space-y-0.5">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#14213D] tracking-tight leading-snug">
-            Welcome to Samahit
+            {greeting}, {name} Ji,
           </h1>
+          <p className="text-base sm:text-lg font-semibold text-slate-700 tracking-normal">
+            Welcome to Samahit
+          </p>
           <p className="text-xs sm:text-[13px] italic font-medium text-slate-500 tracking-normal pt-0.5">
             An initiative by the RP Foundation's Volunteers.
           </p>
@@ -209,9 +209,7 @@ export default function Home() {
         {/* TOP MARQUEE: PIB + DD India + SACHET/NDMA -> Dark Saffron, Right-to-Left */}
         {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="saffron" />}
 
-        {/* BOTTOM MARQUEE: ANI + IANS + UNI -> Dark Green, Left-to-Right */}
-        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="green" />}
-
+        {/* MIDDLE: STATIC THOUGHT OF THE DAY */}
         <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3.5 shadow-2xs">
           <div className="flex items-center gap-1.5 text-[#D97706]">
             <Quote className="h-3.5 w-3.5" />
@@ -221,6 +219,9 @@ export default function Home() {
             “Work is worship, and service is the greatest religion.”
           </p>
         </section>
+
+        {/* BOTTOM MARQUEE: ANI + IANS + UNI -> Dark Green, Left-to-Right */}
+        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="green" />}
 
         <section className="pt-2">
           <div className="mb-3 flex items-end justify-between">
