@@ -107,11 +107,11 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL || secrets.POSTGRES_URL }}
         run: |
           if [ -z "$DATABASE_URL" ]; then
-            echo "::warning::DATABASE_URL secret is not set in GitHub repository secrets. Migration step skipped or dependent on server auto-migration."
-          else
-            echo "Executing database migrations against production database..."
-            node scripts/runMigrations.cjs
+            echo "CRITICAL: DATABASE_URL secret is missing in GitHub repository secrets."
+            exit 1
           fi
+          echo "Executing database migrations against production database..."
+          node scripts/runMigrations.cjs
       - name: Deploy to cPanel (Deployment Critical)
         continue-on-error: false
         env:
