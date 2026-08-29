@@ -2,9 +2,14 @@ import fs from 'fs';
 import path from 'path';
 
 export async function runMigrationsOnPool(pool: any) {
-  const migrationsDir = path.resolve(process.cwd(), 'migrations');
+  const candidates = [
+    path.resolve(__dirname, 'migrations'),
+    path.resolve(process.cwd(), 'migrations'),
+    path.resolve(path.dirname(process.argv[1] || ''), 'migrations'),
+  ];
+  const migrationsDir = candidates.find(dir => fs.existsSync(dir)) || candidates[0];
   if (!fs.existsSync(migrationsDir)) {
-    console.log('No migrations directory found on server boot.');
+    console.log('No migrations directory found on server boot. Checked paths:', candidates.join(', '));
     return;
   }
 
