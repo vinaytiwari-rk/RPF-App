@@ -67,7 +67,14 @@ const ImpactPage = lazyWithRetry(() => import("./pages/ImpactPage"), "impact");
 const VisionGoalsPage = lazyWithRetry(() => import("./pages/VisionGoalsPage"), "vision-goals");
 const SosSystem = lazyWithRetry(() => import("./pages/SosSystem"), "sos");
 
-const PageLoader = () => <div className="flex min-h-screen flex-1 flex-col items-center justify-center bg-white"><BrandLoader size="lg" label="Loading" /><p className="mt-4 text-[10px] font-black uppercase tracking-[0.22em] text-[#000080]">Loading</p></div>;
+const PageLoader = () => (
+  <div className="flex min-h-screen flex-1 flex-col items-center justify-center bg-white">
+    <BrandLoader size="lg" label="Loading" />
+    <p className="mt-4 text-[10.5px] font-extrabold uppercase tracking-[0.22em] text-[#14213D]">
+      RP Foundation Samahit
+    </p>
+  </div>
+);
 
 function NavigationBridge() { const navigate = useNavigate(); useEffect(() => { (window as any).__rpfNavigate = navigate; return () => { if ((window as any).__rpfNavigate === navigate) delete (window as any).__rpfNavigate; }; }, [navigate]); return null; }
 function RoutePersistence() { const location = useLocation(); useEffect(() => { sessionStorage.setItem("@rpf_last_route", location.pathname + location.search); }, [location]); return null; }
