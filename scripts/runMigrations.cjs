@@ -4,9 +4,9 @@ const pg = require('pg');
 
 const { Pool } = pg;
 
-const databaseUrl = process.env.DATABASE_URL?.trim();
+const databaseUrl = (process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.LOCAL_DB_URL || '').trim();
 if (!databaseUrl) {
-  console.error('DATABASE_URL is required. No migration was executed.');
+  console.error('DATABASE_URL or POSTGRES_URL is required. No migration was executed.');
   process.exit(1);
 }
 
@@ -20,7 +20,11 @@ if (files.length === 0) {
   process.exit(0);
 }
 
-const pool = new Pool({ connectionString: databaseUrl });
+const isLocal = databaseUrl.includes('localhost') || databaseUrl.includes('127.0.0.');
+const pool = new Pool({
+  connectionString: databaseUrl,
+  ssl: isLocal ? false : { rejectUnauthorized: false }
+});
 
 (async () => {
   const client = await pool.connect();
