@@ -147,7 +147,7 @@ export default function MainLayout() {
             <p className="mt-2 text-sm leading-6 text-slate-500">Sign in to access your personal community features.</p>
             <div className="mt-6 flex gap-2">
               <button onClick={() => setGuest(false)} className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700">Close</button>
-              <button onClick={() => setGuest(false)} className="flex-1 rounded-xl bg-[#0F3157] px-4 py-3 text-sm font-semibold text-white">Sign in</button>
+              <button onClick={() => { setGuest(false); navigate("/login"); }} className="flex-1 rounded-xl bg-[#0F3157] px-4 py-3 text-sm font-semibold text-white">Sign in</button>
             </div>
           </motion.div>
         </div>

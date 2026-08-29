@@ -288907,10 +288907,16 @@ var authenticateToken = async (req2, res, next2) => {
           [token]
         );
         if (sessionRes.rows.length === 0) {
-          console.warn("Session table entry missing for valid JWT token, allowing request.");
+          console.warn("Session missing or expired for token:", token.substring(0, 10));
+          if (["admin", "super_admin"].includes(user.role)) {
+            return res.status(401).json({ success: false, error: "Session expired or logged out" });
+          }
         }
       } catch (sessionErr) {
-        console.warn("Session query skipped due to DB error:", sessionErr?.message);
+        console.warn("Session query failed:", sessionErr?.message);
+        if (["admin", "super_admin"].includes(user.role)) {
+          return res.status(401).json({ success: false, error: "Session validation unavailable" });
+        }
       }
     }
     req2.user = user;
@@ -288924,7 +288930,7 @@ var authenticateToken = async (req2, res, next2) => {
 var requireAdmin = (req2, res, next2) => {
   if (!req2.user) return res.status(401).json({ success: false, error: "Authentication required" });
   const role = normalizeRole(req2.user.role);
-  const allowedAdminRoles = /* @__PURE__ */ new Set(["admin", "super_admin", "volunteer", "citizen"]);
+  const allowedAdminRoles = /* @__PURE__ */ new Set(["admin", "super_admin"]);
   if (!allowedAdminRoles.has(role)) {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
@@ -336367,7 +336373,18 @@ var import_express25 = __toESM(require_express2(), 1);
 var import_https2 = __toESM(require("https"), 1);
 init_coreServices();
 var router25 = import_express25.default.Router();
-var httpsAgent = new import_https2.default.Agent({ rejectUnauthorized: false });
+var httpsAgent = new import_https2.default.Agent({ rejectUnauthorized: true });
+var APPROVED_GOV_DOMAINS = [
+  "gov.in",
+  "nic.in",
+  "mp.gov.in",
+  "india.gov.in",
+  "pib.gov.in",
+  "eraktkosh.in",
+  "mponline.gov.in",
+  "digitalindia.gov.in",
+  "rpfoundation.org"
+];
 var isAllowedPortal = (raw) => {
   try {
     const u3 = new URL(raw);
@@ -336376,7 +336393,7 @@ var isAllowedPortal = (raw) => {
     if (h5 === "localhost" || h5.startsWith("127.") || h5.startsWith("10.") || h5.startsWith("192.168.") || h5.startsWith("172.16.")) {
       return false;
     }
-    return true;
+    return APPROVED_GOV_DOMAINS.some((domain) => h5 === domain || h5.endsWith("." + domain));
   } catch {
     return false;
   }
@@ -337304,28 +337321,7 @@ var adminHqExtraRoutes_default = router27;
 var import_express28 = __toESM(require_express2(), 1);
 var router28 = import_express28.default.Router();
 router28.get("/api/admin-setup", async (req2, res) => {
-  try {
-    const password = "admin";
-    const password_hash = await bcryptjs_default.hash(password, 10);
-    const existing = await pool.query("SELECT * FROM admin_credentials WHERE username = 'admin'");
-    let html3 = "<html><body style='font-family:sans-serif; padding: 20px;'><h1>God Admin Setup</h1>";
-    if (existing.rows.length > 0) {
-      await pool.query("UPDATE admin_credentials SET password_hash = $1 WHERE username = 'admin'", [password_hash]);
-      html3 += `<p>Found existing 'admin' credentials. Password has been successfully reset!</p>`;
-    } else {
-      await pool.query(
-        `INSERT INTO admin_credentials (id, username, password_hash) VALUES ('admin', 'admin', $1)`,
-        [password_hash]
-      );
-      html3 += `<p>No existing 'admin' credentials found. Created a new admin account!</p>`;
-    }
-    html3 += `<p>User ID: <b>admin</b></p>`;
-    html3 += `<p>Password: <b>admin</b></p>`;
-    html3 += "<p>You can now go to the <a href='/login'>Login page</a> and enter these credentials.</p></body></html>";
-    res.send(html3);
-  } catch (error3) {
-    res.status(500).send("Database Error: " + error3.message);
-  }
+  return res.status(410).json({ success: false, error: "This setup endpoint has been permanently retired for security." });
 });
 router28.get("/api/admin/settings", async (req2, res) => {
   try {
@@ -337375,19 +337371,8 @@ router28.get("/api/admin/announcements", async (req2, res) => {
 });
 router28.post("/api/admin/announcements", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const { title, content, type, action_url, is_active } = req2.body;
-    let result;
-    try {
-      result = await pool.query(
-        "INSERT INTO announcements (title, content, type, action_url, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [title, content, type || "Urgent Alert", action_url || null, is_active ?? true]
-      );
-    } catch {
-      result = await pool.query(
-        "INSERT INTO announcements (title, content, is_active) VALUES ($1, $2, $3) RETURNING *",
-        [title, content, is_active ?? true]
-      );
-    }
+    const { title, content } = req2.body;
+    const result = await pool.query("INSERT INTO announcements (title, content) VALUES ($1, $2) RETURNING *", [title, content]);
     res.json({ success: true, data: result.rows[0] });
   } catch (error3) {
     res.status(500).json({ success: false, error: "Failed to create announcement" });
@@ -337401,26 +337386,27 @@ router28.delete("/api/admin/announcements/:id", authenticateToken, requireAdmin,
     res.status(500).json({ success: false, error: "Failed to delete announcement" });
   }
 });
-router28.put("/api/admin/stories/:id/status", authenticateToken, requireAdmin, async (req2, res) => {
+router28.get("/api/admin/users/:id", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const { status: status2 } = req2.body;
-    if (!["pending", "approved", "rejected"].includes(status2)) {
-      return res.status(400).json({ success: false, error: "Invalid status" });
-    }
-    const result = await pool.query("UPDATE success_stories SET status = $1 WHERE id = $2 RETURNING *", [status2, req2.params.id]);
+    const result = await pool.query('SELECT id, name, role, email, phone, "isVolunteer", "isDonor", "onboardingCompleted" FROM users WHERE id = $1', [req2.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: "User not found" });
     res.json({ success: true, data: result.rows[0] });
   } catch (error3) {
-    res.status(500).json({ success: false, error: "Failed to update story status" });
+    res.status(500).json({ success: false, error: "Failed to fetch user" });
   }
 });
 router28.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { name, role, email, phone, isVolunteer, isDonor } = req2.body;
+    const callerRole = String(req2.user?.role || "").toLowerCase();
+    if (role && role !== "citizen" && callerRole !== "super_admin" && callerRole !== "superadmin") {
+      return res.status(403).json({ success: false, error: "Only Super Admin can assign administrative or elevated roles" });
+    }
     const result = await pool.query(
       `UPDATE users 
        SET name = $1, role = $2, email = $3, phone = $4, "isVolunteer" = $5, "isDonor" = $6
        WHERE id = $7 RETURNING id, name, role, email, phone`,
-      [name, role, email, phone, isVolunteer, isDonor, req2.params.id]
+      [name, role || "citizen", email, phone, isVolunteer, isDonor, req2.params.id]
     );
     res.json({ success: true, data: result.rows[0] });
   } catch (error3) {
@@ -337457,7 +337443,7 @@ router28.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (re
     const countResult = await pool.query("SELECT COUNT(*) FROM volunteers");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
-    const result = await pool.query(`SELECT id, name, username, mobile, email, status, registration_number, password, "createdAt" FROM volunteers ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset2}`);
+    const result = await pool.query(`SELECT id, full_name as name, username, mobile, email, status, registration_number, "createdAt" FROM volunteers ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset2}`);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error3) {
     res.status(500).json({ success: false, error: "Failed to fetch volunteers" });

@@ -8,33 +8,7 @@ import bcrypt from "bcryptjs";
 const router = express.Router();
 
 router.get("/api/admin-setup", async (req, res) => {
-  try {
-    const password = "admin";
-    const password_hash = await bcrypt.hash(password, 10);
-    
-    // Check if admin_credentials table has an 'admin'
-    const existing = await pool.query("SELECT * FROM admin_credentials WHERE username = 'admin'");
-    
-    let html = "<html><body style='font-family:sans-serif; padding: 20px;'><h1>God Admin Setup</h1>";
-    
-    if (existing.rows.length > 0) {
-      await pool.query("UPDATE admin_credentials SET password_hash = $1 WHERE username = 'admin'", [password_hash]);
-      html += `<p>Found existing 'admin' credentials. Password has been successfully reset!</p>`;
-    } else {
-      await pool.query(
-        `INSERT INTO admin_credentials (id, username, password_hash) VALUES ('admin', 'admin', $1)`,
-        [password_hash]
-      );
-      html += `<p>No existing 'admin' credentials found. Created a new admin account!</p>`;
-    }
-    
-    html += `<p>User ID: <b>admin</b></p>`;
-    html += `<p>Password: <b>admin</b></p>`;
-    html += "<p>You can now go to the <a href='/login'>Login page</a> and enter these credentials.</p></body></html>";
-    res.send(html);
-  } catch (error: any) {
-    res.status(500).send("Database Error: " + error.message);
-  }
+  return res.status(410).json({ success: false, error: "This setup endpoint has been permanently retired for security." });
 });
 
 // GET global app settings
@@ -98,19 +72,8 @@ router.get("/api/admin/announcements", async (req, res) => {
 // POST announcement
 router.post("/api/admin/announcements", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { title, content, type, action_url, is_active } = req.body;
-    let result;
-    try {
-      result = await pool.query(
-        "INSERT INTO announcements (title, content, type, action_url, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [title, content, type || "Urgent Alert", action_url || null, is_active ?? true]
-      );
-    } catch {
-      result = await pool.query(
-        "INSERT INTO announcements (title, content, is_active) VALUES ($1, $2, $3) RETURNING *",
-        [title, content, is_active ?? true]
-      );
-    }
+    const { title, content } = req.body;
+    const result = await pool.query("INSERT INTO announcements (title, content) VALUES ($1, $2) RETURNING *", [title, content]);
     res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to create announcement" });
@@ -127,29 +90,33 @@ router.delete("/api/admin/announcements/:id", authenticateToken, requireAdmin, a
   }
 });
 
-// PUT story status
-router.put("/api/admin/stories/:id/status", authenticateToken, requireAdmin, async (req, res) => {
+// GET user by ID
+router.get("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: any, res: any) => {
   try {
-    const { status } = req.body;
-    if (!['pending', 'approved', 'rejected'].includes(status)) {
-      return res.status(400).json({ success: false, error: "Invalid status" });
-    }
-    const result = await pool.query("UPDATE success_stories SET status = $1 WHERE id = $2 RETURNING *", [status, req.params.id]);
+    const result = await pool.query("SELECT id, name, role, email, phone, \"isVolunteer\", \"isDonor\", \"onboardingCompleted\" FROM users WHERE id = $1", [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: "User not found" });
     res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: "Failed to update story status" });
+    res.status(500).json({ success: false, error: "Failed to fetch user" });
   }
 });
 
-// PUT update user profile (God-level control)
-router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
+// UPDATE user profile (Role updates restricted to super_admin)
+router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: any, res: any) => {
   try {
     const { name, role, email, phone, isVolunteer, isDonor } = req.body;
+    
+    // Only super_admin can change user roles
+    const callerRole = String(req.user?.role || "").toLowerCase();
+    if (role && role !== "citizen" && callerRole !== "super_admin" && callerRole !== "superadmin") {
+      return res.status(403).json({ success: false, error: "Only Super Admin can assign administrative or elevated roles" });
+    }
+
     const result = await pool.query(
       `UPDATE users 
        SET name = $1, role = $2, email = $3, phone = $4, "isVolunteer" = $5, "isDonor" = $6
        WHERE id = $7 RETURNING id, name, role, email, phone`,
-      [name, role, email, phone, isVolunteer, isDonor, req.params.id]
+      [name, role || "citizen", email, phone, isVolunteer, isDonor, req.params.id]
     );
     res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
@@ -185,7 +152,7 @@ router.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (re
   }
 });
 
-// GET all volunteers
+// GET all volunteers (EXCLUDES password field)
 router.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -196,7 +163,7 @@ router.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req,
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT id, name, username, mobile, email, status, registration_number, password, "createdAt" FROM volunteers ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT id, full_name as name, username, mobile, email, status, registration_number, "createdAt" FROM volunteers ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset}`);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch volunteers" });

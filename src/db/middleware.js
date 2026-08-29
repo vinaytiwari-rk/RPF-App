@@ -50,13 +50,18 @@ export const authenticateToken = async (req, res, next) => {
           "SELECT 1 FROM sessions WHERE token = $1 AND expires_at > NOW() LIMIT 1",
           [token]
         );
-        // Log warning if session missing, but do not block valid JWT token
         if (sessionRes.rows.length === 0) {
-          console.warn("Session table entry missing for valid JWT token, allowing request.");
+          console.warn("Session missing or expired for token:", token.substring(0, 10));
+          // Fail-closed for admin and super_admin users
+          if (["admin", "super_admin"].includes(user.role)) {
+            return res.status(401).json({ success: false, error: "Session expired or logged out" });
+          }
         }
       } catch (sessionErr) {
-        // Database session check failed; proceed with decoded JWT claims
-        console.warn("Session query skipped due to DB error:", sessionErr?.message);
+        console.warn("Session query failed:", sessionErr?.message);
+        if (["admin", "super_admin"].includes(user.role)) {
+          return res.status(401).json({ success: false, error: "Session validation unavailable" });
+        }
       }
     }
 
@@ -72,9 +77,18 @@ export const authenticateToken = async (req, res, next) => {
 export const requireAdmin = (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
   const role = normalizeRole(req.user.role);
-  const allowedAdminRoles = new Set(["admin", "super_admin", "volunteer", "citizen"]);
+  const allowedAdminRoles = new Set(["admin", "super_admin"]);
   if (!allowedAdminRoles.has(role)) {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
+  }
+  next();
+};
+
+export const requireSuperAdmin = (req, res, next) => {
+  if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
+  const rawRole = String(req.user.role || "").trim().toLowerCase();
+  if (rawRole !== "super_admin" && rawRole !== "superadmin") {
+    return res.status(403).json({ success: false, error: "Access Denied: Super Admin role required" });
   }
   next();
 };

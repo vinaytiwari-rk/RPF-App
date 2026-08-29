@@ -80,9 +80,9 @@ export default function Profile() {
   };
 
   const isVolunteer = user?.role === "volunteer" || !!user?.isVolunteer || !!volunteer;
-  const registrationNo = volunteer?.registration_number || user?.registration_number || user?.volunteerData?.registration_number || user?.volunteerData?.registrationNumber || "RPF-VOL-2026-88";
+  const registrationNo = volunteer?.registration_number || user?.registration_number || user?.volunteerData?.registration_number || user?.volunteerData?.registrationNumber || (hi ? "उपलब्ध नहीं" : "Not available");
   const sinceRaw = volunteer?.registeredAt || volunteer?.registered_at || volunteer?.created_at || volunteer?.createdAt || user?.volunteerData?.registeredAt || user?.volunteerData?.registered_at || user?.volunteerData?.created_at || user?.volunteerData?.createdAt;
-  const volunteerSince = sinceRaw ? new Date(sinceRaw).toLocaleDateString(hi ? "hi-IN" : "en-IN", { month: "long", year: "numeric" }) : (hi ? "जनवरी 2026" : "January 2026");
+  const volunteerSince = sinceRaw ? new Date(sinceRaw).toLocaleDateString(hi ? "hi-IN" : "en-IN", { month: "long", year: "numeric" }) : (hi ? "उपलब्ध नहीं" : "Not available");
   const initials = name.split(/\s+/).map(p => p[0]).slice(0, 2).join("").toUpperCase();
 
   const accountItems = useMemo(() => [

@@ -6,18 +6,29 @@ import https from 'https';
 import { CORE_SERVICES } from '../data/coreServices.js';
 
 const router = express.Router();
-const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+const httpsAgent = new https.Agent({ rejectUnauthorized: true });
+
+const APPROVED_GOV_DOMAINS = [
+  "gov.in",
+  "nic.in",
+  "mp.gov.in",
+  "india.gov.in",
+  "pib.gov.in",
+  "eraktkosh.in",
+  "mponline.gov.in",
+  "digitalindia.gov.in",
+  "rpfoundation.org"
+];
 
 const isAllowedPortal = (raw: string) => {
   try {
     const u = new URL(raw);
     if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
-    // Block internal IPs to prevent SSRF
     const h = u.hostname.toLowerCase();
     if (h === 'localhost' || h.startsWith('127.') || h.startsWith('10.') || h.startsWith('192.168.') || h.startsWith('172.16.')) {
       return false;
     }
-    return true;
+    return APPROVED_GOV_DOMAINS.some(domain => h === domain || h.endsWith('.' + domain));
   } catch { return false; }
 };
 
