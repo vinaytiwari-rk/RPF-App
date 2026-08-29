@@ -288884,11 +288884,13 @@ if (process.env.NODE_ENV === "production" && (!configuredSecret || configuredSec
   throw new Error("JWT_SECRET must be configured with at least 32 characters in production.");
 }
 var JWT_SECRET = configuredSecret || "development_only_change_me_please_32_chars";
-var LEGACY_ADMIN_ROLES = /* @__PURE__ */ new Set(["admin", "super_admin", "superadmin"]);
-var CANONICAL_ADMIN_ROLE = "admin";
 var normalizeRole = (role) => {
   const value2 = String(role || "").trim().toLowerCase();
-  return LEGACY_ADMIN_ROLES.has(value2) ? CANONICAL_ADMIN_ROLE : value2;
+  if (value2 === "superadmin" || value2 === "super_admin") return "super_admin";
+  if (value2 === "admin") return "admin";
+  if (value2 === "volunteer") return "volunteer";
+  if (value2 === "guest") return "guest";
+  return "citizen";
 };
 var authenticateToken = async (req2, res, next2) => {
   const authHeader = req2.headers.authorization;
@@ -288930,8 +288932,7 @@ var authenticateToken = async (req2, res, next2) => {
 var requireAdmin = (req2, res, next2) => {
   if (!req2.user) return res.status(401).json({ success: false, error: "Authentication required" });
   const role = normalizeRole(req2.user.role);
-  const allowedAdminRoles = /* @__PURE__ */ new Set(["admin", "super_admin"]);
-  if (!allowedAdminRoles.has(role)) {
+  if (role !== "admin" && role !== "super_admin") {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
   next2();
@@ -296702,44 +296703,6 @@ async function verifyAuthenticationResponse(options2) {
 
 // src/routes/authRoutes.ts
 var router2 = import_express2.default.Router();
-router2.get("/api/auth/fix-db", async (req2, res) => {
-  try {
-    await pool.query("ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
-    await pool.query("ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'pending'");
-    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
-    res.send("<h1>Database Patched Successfully!</h1><p>You can now go back and register volunteers.</p>");
-  } catch (err2) {
-    res.status(500).send("Error patching db: " + err2.message);
-  }
-});
-router2.get("/api/auth/debug-db", async (req2, res) => {
-  try {
-    let result = {};
-    try {
-      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
-      result.users_alter = "Success";
-    } catch (e6) {
-      result.users_alter_error = e6.message;
-    }
-    try {
-      await pool.query("ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE");
-      result.vol_alter = "Success";
-    } catch (e6) {
-      result.vol_alter_error = e6.message;
-    }
-    try {
-      const vol = await pool.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1", ["volunteers"]);
-      result.vol_columns = vol.rows;
-      const usr = await pool.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1", ["users"]);
-      result.usr_columns = usr.rows;
-    } catch (e6) {
-      result.schema_error = e6.message;
-    }
-    res.json({ success: true, result });
-  } catch (err2) {
-    res.json({ success: false, code: err2.code, message: err2.message, stack: err2.stack });
-  }
-});
 var USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
 var RESERVED_USERNAMES = /* @__PURE__ */ new Set(["admin", "root", "superuser", "system", "moderator", "guest", "anonymous"]);
 var rpName = "RP Foundation";
@@ -296797,6 +296760,14 @@ router2.post("/api/auth/login", async (req2, res) => {
         if (adminPasswordValid) {
           const adminUser = { id: "usr_staff_admin", name: "System Administrator", role: "admin" };
           const token2 = import_jsonwebtoken3.default.sign(adminUser, JWT_SECRET, { expiresIn: "7d" });
+          try {
+            await pool.query(
+              `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days') ON CONFLICT (id) DO NOTHING`,
+              ["sess-" + Date.now(), adminUser.id, token2]
+            );
+          } catch (sessErr) {
+            console.warn("Admin session tracking failed:", sessErr?.message);
+          }
           return res.json({ success: true, user: adminUser, token: token2 });
         }
         return res.status(401).json({ success: false, error: "Invalid credentials" });
@@ -336431,6 +336402,10 @@ router25.get("/api/gov/web-proxy", async (req2, res) => {
       validateStatus: () => true
       // always get the body, handle errors ourselves
     });
+    const finalUrl = upstream.request?.res?.responseUrl || upstream.config?.url || target.toString();
+    if (!isAllowedPortal(finalUrl)) {
+      return res.status(403).send("Redirected domain is not on the approved government portal allowlist.");
+    }
     const contentType = String(upstream.headers["content-type"] || "text/html");
     res.removeHeader("X-Frame-Options");
     res.removeHeader("Content-Security-Policy");
@@ -337323,7 +337298,7 @@ var router28 = import_express28.default.Router();
 router28.get("/api/admin-setup", async (req2, res) => {
   return res.status(410).json({ success: false, error: "This setup endpoint has been permanently retired for security." });
 });
-router28.get("/api/admin/settings", async (req2, res) => {
+router28.get("/api/admin/settings", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const cacheKey = "admin_settings";
     const cached = apiCache.get(cacheKey);
@@ -337341,6 +337316,17 @@ router28.get("/api/admin/settings", async (req2, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch settings" });
   }
 });
+var ALLOWED_SETTINGS_KEYS = /* @__PURE__ */ new Set([
+  "app_name",
+  "toll_free",
+  "email",
+  "whatsapp",
+  "maintenance_mode",
+  "announcement_banner",
+  "hero_banner",
+  "site_title",
+  "support_phone"
+]);
 router28.post("/api/admin/settings", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const updates = req2.body;
@@ -337348,6 +337334,7 @@ router28.post("/api/admin/settings", authenticateToken, requireAdmin, async (req
     let values = [];
     let index5 = 1;
     for (const [key, value2] of Object.entries(updates)) {
+      if (!ALLOWED_SETTINGS_KEYS.has(key)) continue;
       setClause.push(`"${key}" = $${index5}`);
       values.push(value2);
       index5++;
@@ -337361,7 +337348,7 @@ router28.post("/api/admin/settings", authenticateToken, requireAdmin, async (req
     res.status(500).json({ success: false, error: "Failed to update settings" });
   }
 });
-router28.get("/api/admin/announcements", async (req2, res) => {
+router28.get("/api/admin/announcements", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const result = await pool.query("SELECT * FROM announcements ORDER BY created_at DESC");
     res.json({ success: true, data: result.rows });
@@ -337415,13 +337402,16 @@ router28.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req
 });
 router28.get("/api/admin/users", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const page = parseInt(req2.query.page) || 1;
-    const limit = parseInt(req2.query.limit) || 50;
+    const page = Math.max(1, parseInt(req2.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req2.query.limit) || 50));
     const offset2 = (page - 1) * limit;
     const countResult = await pool.query("SELECT COUNT(*) FROM users");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
-    const result = await pool.query(`SELECT id, name, role, email, phone, "isVolunteer", "isDonor", "onboardingCompleted" FROM users ORDER BY id DESC LIMIT ${limit} OFFSET ${offset2}`);
+    const result = await pool.query(
+      `SELECT id, name, role, email, phone, "isVolunteer", "isDonor", "onboardingCompleted" FROM users ORDER BY id DESC LIMIT $1 OFFSET $2`,
+      [limit, offset2]
+    );
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error3) {
     res.status(500).json({ success: false, error: "Failed to fetch users" });
@@ -337437,13 +337427,16 @@ router28.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (
 });
 router28.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const page = parseInt(req2.query.page) || 1;
-    const limit = parseInt(req2.query.limit) || 50;
+    const page = Math.max(1, parseInt(req2.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req2.query.limit) || 50));
     const offset2 = (page - 1) * limit;
     const countResult = await pool.query("SELECT COUNT(*) FROM volunteers");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
-    const result = await pool.query(`SELECT id, full_name as name, username, mobile, email, status, registration_number, "createdAt" FROM volunteers ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset2}`);
+    const result = await pool.query(
+      `SELECT id, full_name as name, username, mobile, email, status, registration_number, "createdAt" FROM volunteers ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
+      [limit, offset2]
+    );
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error3) {
     res.status(500).json({ success: false, error: "Failed to fetch volunteers" });
@@ -337468,13 +337461,13 @@ router28.delete("/api/admin/volunteers/:id", authenticateToken, requireAdmin, as
 });
 router28.get("/api/admin/donations", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const page = parseInt(req2.query.page) || 1;
-    const limit = parseInt(req2.query.limit) || 50;
+    const page = Math.max(1, parseInt(req2.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req2.query.limit) || 50));
     const offset2 = (page - 1) * limit;
     const countResult = await pool.query("SELECT COUNT(*) FROM donations");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
-    const result = await pool.query(`SELECT * FROM donations ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset2}`);
+    const result = await pool.query(`SELECT * FROM donations ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset2]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error3) {
     res.status(500).json({ success: false, error: "Failed to fetch donations" });
@@ -337482,13 +337475,13 @@ router28.get("/api/admin/donations", authenticateToken, requireAdmin, async (req
 });
 router28.get("/api/admin/jan-seva-cards", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const page = parseInt(req2.query.page) || 1;
-    const limit = parseInt(req2.query.limit) || 50;
+    const page = Math.max(1, parseInt(req2.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req2.query.limit) || 50));
     const offset2 = (page - 1) * limit;
     const countResult = await pool.query("SELECT COUNT(*) FROM card_applications");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
-    const result = await pool.query(`SELECT * FROM card_applications ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset2}`);
+    const result = await pool.query(`SELECT * FROM card_applications ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset2]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error3) {
     res.status(500).json({ success: false, error: "Failed to fetch jan seva cards" });
@@ -337496,13 +337489,13 @@ router28.get("/api/admin/jan-seva-cards", authenticateToken, requireAdmin, async
 });
 router28.get("/api/admin/health-camps", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const page = parseInt(req2.query.page) || 1;
-    const limit = parseInt(req2.query.limit) || 50;
+    const page = Math.max(1, parseInt(req2.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req2.query.limit) || 50));
     const offset2 = (page - 1) * limit;
     const countResult = await pool.query("SELECT COUNT(*) FROM health_camps");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
-    const result = await pool.query(`SELECT * FROM health_camps ORDER BY date DESC LIMIT ${limit} OFFSET ${offset2}`);
+    const result = await pool.query(`SELECT * FROM health_camps ORDER BY date DESC LIMIT $1 OFFSET $2`, [limit, offset2]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error3) {
     res.status(500).json({ success: false, error: "Failed to fetch health camps" });
@@ -338080,9 +338073,21 @@ var import_jsonwebtoken4 = __toESM(require_jsonwebtoken(), 1);
 import_dotenv2.default.config();
 var app = (0, import_express29.default)();
 app.set("trust proxy", 1);
+var allowedOrigins = [
+  "https://samahit.rpfoundation.org",
+  "https://appapi.therpfoundation.org",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "capacitor://localhost"
+];
 var corsOptions = {
-  origin: true,
-  // Automatically allow the requesting origin to support web and mobile apps
+  origin: (origin2, callback2) => {
+    if (!origin2 || allowedOrigins.includes(origin2) || process.env.NODE_ENV !== "production") {
+      callback2(null, true);
+    } else {
+      callback2(null, false);
+    }
+  },
   credentials: true
 };
 app.use((0, import_cors.default)(corsOptions));
@@ -338139,24 +338144,18 @@ var rpID2 = process.env.WEBAUTHN_RP_ID || "localhost";
 var originUrl2 = `https://${rpID2}`;
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
 var dbUrl2 = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/rp_foundation";
+var rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false";
 var pool3 = new esm_default.Pool({
   connectionString: dbUrl2,
-  ssl: dbUrl2.includes("localhost") || dbUrl2.includes("127.0.0.") ? false : { rejectUnauthorized: false }
+  ssl: dbUrl2.includes("localhost") || dbUrl2.includes("127.0.0.") ? false : { rejectUnauthorized }
 });
 setDbPool(pool3);
-pool3.query(`
-  ALTER TABLE volunteers 
-  ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'pending',
-  ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE,
-  ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
-  ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE
-`).then(() => console.log("Volunteers table migrated automatically")).catch((err2) => console.error("Auto-migration error:", err2));
 app.get("/api/health", async (req2, res) => {
   try {
-    const result = await pool3.query("SELECT NOW()");
-    res.json({ success: true, time: result.rows[0], env: process.env.DATABASE_URL ? "URL Set" : "URL Missing", dbUrl: dbUrl2.substring(0, 15) + "..." });
-  } catch (error3) {
-    res.status(500).json({ success: false, error: error3.message, stack: error3.stack, env: process.env.DATABASE_URL ? "URL Set" : "URL Missing", dbUrl: dbUrl2.substring(0, 15) + "..." });
+    await pool3.query("SELECT 1");
+    res.json({ status: "ok" });
+  } catch {
+    res.status(503).json({ status: "degraded" });
   }
 });
 async function initDatabase() {

@@ -61,6 +61,11 @@ router.get('/api/gov/web-proxy', async (req, res) => {
       validateStatus: () => true, // always get the body, handle errors ourselves
     });
 
+    const finalUrl = upstream.request?.res?.responseUrl || upstream.config?.url || target.toString();
+    if (!isAllowedPortal(finalUrl)) {
+      return res.status(403).send('Redirected domain is not on the approved government portal allowlist.');
+    }
+
     const contentType = String(upstream.headers['content-type'] || 'text/html');
     
     // Strip upstream security headers that would block iframe embedding

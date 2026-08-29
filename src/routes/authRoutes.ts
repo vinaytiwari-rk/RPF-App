@@ -12,49 +12,6 @@ import { GoogleGenAI } from '@google/genai';
 
 const router = express.Router();
 
-router.get("/api/auth/fix-db", async (req, res) => {
-  try {
-    await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
-    await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT \'pending\'');
-    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
-    res.send("<h1>Database Patched Successfully!</h1><p>You can now go back and register volunteers.</p>");
-  } catch (err: any) {
-    res.status(500).send("Error patching db: " + err.message);
-  }
-});
-
-router.get("/api/auth/debug-db", async (req, res) => {
-  try {
-    let result: any = {};
-    try {
-      await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
-      result.users_alter = "Success";
-    } catch(e:any) {
-      result.users_alter_error = e.message;
-    }
-    
-    try {
-      await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE');
-      result.vol_alter = "Success";
-    } catch(e:any) {
-      result.vol_alter_error = e.message;
-    }
-
-    try {
-      const vol = await pool.query('SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1', ['volunteers']);
-      result.vol_columns = vol.rows;
-      const usr = await pool.query('SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1', ['users']);
-      result.usr_columns = usr.rows;
-    } catch(e:any) {
-      result.schema_error = e.message;
-    }
-    
-    res.json({ success: true, result });
-  } catch (err: any) {
-    res.json({ success: false, code: err.code, message: err.message, stack: err.stack });
-  }
-});
-
 const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
 const RESERVED_USERNAMES = new Set(["admin", "root", "superuser", "system", "moderator", "guest", "anonymous"]);
 const rpName = 'RP Foundation';
@@ -110,6 +67,14 @@ router.post("/api/auth/login", async (req, res) => {
         if (adminPasswordValid) {
           const adminUser = { id: "usr_staff_admin", name: "System Administrator", role: "admin" };
           const token = jwt.sign(adminUser, JWT_SECRET, { expiresIn: '7d' });
+          try {
+            await pool.query(
+              `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days') ON CONFLICT (id) DO NOTHING`,
+              ["sess-" + Date.now(), adminUser.id, token]
+            );
+          } catch (sessErr: any) {
+            console.warn("Admin session tracking failed:", sessErr?.message);
+          }
           return res.json({ success: true, user: adminUser, token });
         }
         return res.status(401).json({ success: false, error: "Invalid credentials" });

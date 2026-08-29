@@ -25,14 +25,37 @@ const pool = new Pool({ connectionString: databaseUrl });
 (async () => {
   const client = await pool.connect();
   try {
+    // Create migration history tracking table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE,
+        executed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    let appliedCount = 0;
     for (const file of files) {
+      const checkRes = await client.query('SELECT 1 FROM schema_migrations WHERE name = $1', [file]);
+      if (checkRes.rows.length > 0) {
+        console.log(`Skipping already executed migration: ${file}`);
+        continue;
+      }
+
       console.log(`Applying ${file}...`);
       const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
+      
+      await client.query('BEGIN');
       await client.query(sql);
-      console.log(`Applied ${file}`);
+      await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [file]);
+      await client.query('COMMIT');
+      
+      console.log(`Successfully applied ${file}`);
+      appliedCount++;
     }
-    console.log(`Migration run complete: ${files.length} file(s).`);
+    console.log(`Migration run complete: ${appliedCount} new file(s) applied.`);
   } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
     console.error('Migration failed. No later migration was executed.');
     console.error(error);
     process.exitCode = 1;

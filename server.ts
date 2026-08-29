@@ -62,8 +62,22 @@ dotenv.config();
 
 const app = express();
 app.set('trust proxy', 1);
-const corsOptions = {
-  origin: true, // Automatically allow the requesting origin to support web and mobile apps
+const allowedOrigins = [
+  "https://samahit.rpfoundation.org",
+  "https://appapi.therpfoundation.org",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "capacitor://localhost"
+];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   credentials: true,
 };
 
@@ -217,31 +231,21 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 
-// PostgreSQL Pool Connection
 const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/rp_foundation";
+const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false";
 const pool = new pg.Pool({
     connectionString: dbUrl,
-    ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized: false }
+    ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized }
 });
 
 setDbPool(pool);
 
-// Auto-migrate missing columns for Volunteers Table
-pool.query(`
-  ALTER TABLE volunteers 
-  ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'pending',
-  ADD COLUMN IF NOT EXISTS username VARCHAR(255) UNIQUE,
-  ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
-  ADD COLUMN IF NOT EXISTS registration_number VARCHAR(255) UNIQUE
-`).then(() => console.log('Volunteers table migrated automatically'))
-  .catch(err => console.error('Auto-migration error:', err));
-
 app.get("/api/health", async (req, res) => {
   try {
-    const result = await pool.query("SELECT NOW()");
-    res.json({ success: true, time: result.rows[0], env: process.env.DATABASE_URL ? "URL Set" : "URL Missing", dbUrl: dbUrl.substring(0, 15) + "..." });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message, stack: error.stack, env: process.env.DATABASE_URL ? "URL Set" : "URL Missing", dbUrl: dbUrl.substring(0, 15) + "..." });
+    await pool.query("SELECT 1");
+    res.json({ status: "ok" });
+  } catch {
+    res.status(503).json({ status: "degraded" });
   }
 });
 

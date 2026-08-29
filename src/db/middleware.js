@@ -7,12 +7,13 @@ if (process.env.NODE_ENV === "production" && (!configuredSecret || configuredSec
 }
 
 export const JWT_SECRET = configuredSecret || "development_only_change_me_please_32_chars";
-const LEGACY_ADMIN_ROLES = new Set(["admin", "super_admin", "superadmin"]);
-const CANONICAL_ADMIN_ROLE = "admin";
-
 export const normalizeRole = (role) => {
   const value = String(role || "").trim().toLowerCase();
-  return LEGACY_ADMIN_ROLES.has(value) ? CANONICAL_ADMIN_ROLE : value;
+  if (value === "superadmin" || value === "super_admin") return "super_admin";
+  if (value === "admin") return "admin";
+  if (value === "volunteer") return "volunteer";
+  if (value === "guest") return "guest";
+  return "citizen";
 };
 
 export const authorizeRole = (requiredRole) => (req, res, next) => {
@@ -22,7 +23,7 @@ export const authorizeRole = (requiredRole) => (req, res, next) => {
   const wantedRole = normalizeRole(requiredRole);
   if (!wantedRole) return res.status(500).json({ success: false, error: "Authorization policy is not configured" });
 
-  if (userRole !== wantedRole) {
+  if (userRole !== wantedRole && userRole !== "super_admin") {
     return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
   }
 
@@ -77,8 +78,7 @@ export const authenticateToken = async (req, res, next) => {
 export const requireAdmin = (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
   const role = normalizeRole(req.user.role);
-  const allowedAdminRoles = new Set(["admin", "super_admin"]);
-  if (!allowedAdminRoles.has(role)) {
+  if (role !== "admin" && role !== "super_admin") {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
   next();
@@ -86,8 +86,8 @@ export const requireAdmin = (req, res, next) => {
 
 export const requireSuperAdmin = (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
-  const rawRole = String(req.user.role || "").trim().toLowerCase();
-  if (rawRole !== "super_admin" && rawRole !== "superadmin") {
+  const role = normalizeRole(req.user.role);
+  if (role !== "super_admin") {
     return res.status(403).json({ success: false, error: "Access Denied: Super Admin role required" });
   }
   next();
