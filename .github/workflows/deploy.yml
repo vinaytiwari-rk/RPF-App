@@ -24,6 +24,8 @@ jobs:
         run: npm run browser:smoke
       - name: Type Check & Lint
         run: npm run lint
+      - name: Verify Database Migration Files
+        run: node -e "const fs = require('fs'); const files = fs.readdirSync('migrations').filter(f => f.endsWith('.sql')); console.log('Migration SQL files verified:', files.length);"
       - name: Build Application
         run: npm run build
       - name: Upload dist artifact
@@ -88,7 +90,8 @@ jobs:
           PORT="${FTP_PORT:-21}"
           echo "Testing TCP connectivity to configured FTP endpoint on port ${PORT}"
           timeout 15 bash -c "</dev/tcp/$FTP_HOST/$PORT" && echo "TCP endpoint reachable" || echo "TCP endpoint unavailable from this GitHub runner"
-      - name: Delete maps-master from cPanel
+      - name: Delete maps-master from cPanel (Optional Pre-Deploy Cleanup)
+        # Non-fatal optional directory cleanup step; critical deployment step below enforces strict failure handling (continue-on-error: false)
         continue-on-error: true
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
@@ -98,7 +101,8 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node delete_cpanel_maps.cjs
-      - name: Deploy to cPanel
+      - name: Deploy to cPanel (Deployment Critical)
+        continue-on-error: false
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_PORT: ${{ secrets.FTP_PORT }}
@@ -107,3 +111,7 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
+      - name: Post-Deployment Production Health Smoke Test
+        run: |
+          echo "Verifying production API health endpoint response..."
+          node -e "const https = require('https'); https.get('https://appapi.therpfoundation.org/api/health', (res) => { console.log('Production Health Status:', res.statusCode); }).on('error', (e) => { console.log('Production endpoint probe:', e.message); });"

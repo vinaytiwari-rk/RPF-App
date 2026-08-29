@@ -284,15 +284,15 @@ router.delete("/api/admin/health-camps/:id", authenticateToken, requireAdmin, as
 // GET all grievances
 router.get("/api/admin/grievances", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query("SELECT COUNT(*) FROM grievances");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM grievances ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT * FROM grievances ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch grievances" });
@@ -313,15 +313,15 @@ router.put("/api/admin/grievances/:id/status", authenticateToken, requireAdmin, 
 // GET women complaints
 router.get("/api/admin/women_complaints", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query("SELECT COUNT(*) FROM women_complaints");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM women_complaints ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT * FROM women_complaints ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch women complaints" });
@@ -331,15 +331,15 @@ router.get("/api/admin/women_complaints", authenticateToken, requireAdmin, async
 // GET blood donors
 router.get("/api/admin/blood_donors", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query("SELECT COUNT(*) FROM blood_donors");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM blood_donors ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT * FROM blood_donors ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch blood donors" });
@@ -349,15 +349,15 @@ router.get("/api/admin/blood_donors", authenticateToken, requireAdmin, async (re
 // GET blood requests
 router.get("/api/admin/blood_requests", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query("SELECT COUNT(*) FROM blood_requests");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM blood_requests ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT * FROM blood_requests ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch blood requests" });
@@ -367,15 +367,15 @@ router.get("/api/admin/blood_requests", authenticateToken, requireAdmin, async (
 // GET blogs
 router.get("/api/admin/blogs", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query("SELECT COUNT(*) FROM blogs");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM blogs ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT * FROM blogs ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch blogs" });
@@ -409,15 +409,15 @@ router.delete("/api/admin/blogs/:id", authenticateToken, requireAdmin, async (re
 // GET jobs
 router.get("/api/admin/jobs", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query("SELECT COUNT(*) FROM jobs");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM jobs ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT * FROM jobs ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch jobs" });
@@ -427,15 +427,15 @@ router.get("/api/admin/jobs", authenticateToken, requireAdmin, async (req, res) 
 // GET campaigns
 router.get("/api/admin/campaigns", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query("SELECT COUNT(*) FROM campaigns");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM campaigns ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT * FROM campaigns ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch campaigns" });
@@ -466,19 +466,18 @@ router.delete("/api/admin/campaigns/:id", authenticateToken, requireAdmin, async
   }
 });
 
-
 // GET directory
 router.get("/api/admin/directory", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 50;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query("SELECT COUNT(*) FROM directory_services");
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM directory_services ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+    const result = await pool.query(`SELECT * FROM directory_services ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch directory" });

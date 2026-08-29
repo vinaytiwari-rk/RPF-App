@@ -25,6 +25,9 @@ const pool = new Pool({ connectionString: databaseUrl });
 (async () => {
   const client = await pool.connect();
   try {
+    // Acquire PostgreSQL advisory lock to prevent concurrent migration race conditions
+    await client.query('SELECT pg_advisory_lock(84920491)');
+
     // Create migration history tracking table
     await client.query(`
       CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -60,6 +63,7 @@ const pool = new Pool({ connectionString: databaseUrl });
     console.error(error);
     process.exitCode = 1;
   } finally {
+    await client.query('SELECT pg_advisory_unlock(84920491)').catch(() => {});
     client.release();
     await pool.end();
   }

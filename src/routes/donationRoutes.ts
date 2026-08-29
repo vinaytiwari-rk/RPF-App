@@ -13,23 +13,7 @@ const RESERVED_USERNAMES = new Set(['admin','root','superuser','system','moderat
 let schemaReady: Promise<void> | null = null;
 
 const ensureBloodSchema = async () => {
-  if (!schemaReady) schemaReady = (async () => {
-// pgcrypto extension creation removed to avoid cPanel superuser permission errors
-    await pool.query(`
-      ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS username VARCHAR(255);
-      ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS fcm_token VARCHAR(500);
-      CREATE UNIQUE INDEX IF NOT EXISTS uq_volunteers_username_lower ON volunteers (LOWER(username)) WHERE username IS NOT NULL;
-      CREATE TABLE IF NOT EXISTS volunteer_blood_memberships (volunteer_id VARCHAR(255) PRIMARY KEY,blood_group VARCHAR(10) NOT NULL,is_active BOOLEAN NOT NULL DEFAULT TRUE,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
-      CREATE TABLE IF NOT EXISTS blood_request_acceptances (id VARCHAR(36) PRIMARY KEY,request_id UUID NOT NULL,volunteer_id VARCHAR(255) NOT NULL,status VARCHAR(30) NOT NULL DEFAULT 'accepted',expires_at TIMESTAMPTZ NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),UNIQUE(request_id,volunteer_id));
-      CREATE TABLE IF NOT EXISTS app_notifications (id VARCHAR(36) PRIMARY KEY,recipient_id VARCHAR(255) NOT NULL,title TEXT NOT NULL,message TEXT NOT NULL,type VARCHAR(50) NOT NULL DEFAULT 'general',reference_id VARCHAR(255),is_read BOOLEAN NOT NULL DEFAULT FALSE,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
-      ALTER TABLE blood_requests ADD COLUMN IF NOT EXISTS notes TEXT;
-      ALTER TABLE blood_requests ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
-      CREATE INDEX IF NOT EXISTS idx_blood_request_group_status ON blood_requests(blood_group,status);
-      CREATE INDEX IF NOT EXISTS idx_blood_acceptance_expiry ON blood_request_acceptances(expires_at);
-      CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON app_notifications(recipient_id,created_at DESC);
-    `);
-  })().catch(err => { schemaReady = null; throw err; });
-  return schemaReady;
+  return Promise.resolve();
 };
 const required=(v:unknown)=>typeof v==='string'?v.trim().length>0:v!==undefined&&v!==null;
 const emailAllowed=(email:string)=>{const m=email.trim().toLowerCase().match(/^[^\s@]+@([^\s@]+)$/);return !!m&&EMAIL_DOMAINS.has(m[1]);};
@@ -84,9 +68,6 @@ router.post('/api/save-fcm-token', async (req, res) => {
   try {
     const { volunteerId, token } = req.body;
     if (!volunteerId || !token) return res.status(400).json({ success: false, error: 'Missing data' });
-    
-    // Add fcm_token column if it doesn't exist
-    await pool.query('ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS fcm_token VARCHAR(500)');
     
     // Update the token
     await pool.query('UPDATE volunteers SET fcm_token=$1 WHERE id=$2', [token, volunteerId]);

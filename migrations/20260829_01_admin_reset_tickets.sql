@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS admin_reset_tickets (id SERIAL PRIMARY KEY, identifier VARCHAR(255) NOT NULL, status VARCHAR(50) DEFAULT 'pending', created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW());

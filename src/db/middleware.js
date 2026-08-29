@@ -93,6 +93,16 @@ export const requireSuperAdmin = (req, res, next) => {
   next();
 };
 
+export const requireVolunteer = (req, res, next) => {
+  if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
+  const role = normalizeRole(req.user.role);
+  const isVol = req.user.isVolunteer || req.user.is_volunteer;
+  if (role !== "volunteer" && role !== "admin" && role !== "super_admin" && !isVol) {
+    return res.status(403).json({ success: false, error: "Access Denied: Volunteer role required" });
+  }
+  next();
+};
+
 export const auditEvent = async ({
   userId = null,
   action,

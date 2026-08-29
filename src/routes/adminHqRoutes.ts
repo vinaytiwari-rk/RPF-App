@@ -26,7 +26,7 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT id, username, password_hash FROM admin_credentials WHERE LOWER(username)=LOWER($1) LIMIT 1`,
+      `SELECT id, username, password_hash, role FROM admin_credentials WHERE LOWER(username)=LOWER($1) LIMIT 1`,
       [normalizedIdentifier]
     );
     if (!result.rows.length) {
@@ -41,13 +41,14 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
       return res.status(401).json({ success: false, error: "Invalid administrator credentials." });
     }
 
-    const user = { id: String(credential.id), name: "System Administrator", role: "admin" };
+    const adminRole = credential.role === "super_admin" || credential.role === "superadmin" ? "super_admin" : "admin";
+    const user = { id: String(credential.id), name: "System Administrator", role: adminRole };
     const token = jwt.sign(user, JWT_SECRET, { expiresIn: "7d" });
 
     try {
       await pool.query(
-        `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '7 days') ON CONFLICT(id) DO NOTHING`,
-        [`admin-${Date.now()}`, user.id, token]
+        `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '7 days')`,
+        [`admin-${Date.now()}-${credential.id}`, user.id, token]
       );
     } catch (e) {
       console.error("Administrator session tracking failed:", e);

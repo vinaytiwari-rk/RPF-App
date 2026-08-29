@@ -59,28 +59,6 @@ router.post("/api/auth/login", async (req, res) => {
       return res.status(400).json({ success: false, error: "Missing identifier/phone or password" });
     }
 
-    if (finalIdentifier === "admin") {
-      const adminCredRes = await pool.query(`SELECT * FROM admin_credentials WHERE username = $1`, [finalIdentifier]);
-      if (adminCredRes.rows.length > 0) {
-        const adminRow = adminCredRes.rows[0];
-        const adminPasswordValid = await bcrypt.compare(password, adminRow.password_hash);
-        if (adminPasswordValid) {
-          const adminUser = { id: "usr_staff_admin", name: "System Administrator", role: "admin" };
-          const token = jwt.sign(adminUser, JWT_SECRET, { expiresIn: '7d' });
-          try {
-            await pool.query(
-              `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days') ON CONFLICT (id) DO NOTHING`,
-              ["sess-" + Date.now(), adminUser.id, token]
-            );
-          } catch (sessErr: any) {
-            console.warn("Admin session tracking failed:", sessErr?.message);
-          }
-          return res.json({ success: true, user: adminUser, token });
-        }
-        return res.status(401).json({ success: false, error: "Invalid credentials" });
-      }
-    }
-
     let user = null;
     let isVolunteer = false;
     let validPassword = false;
@@ -127,18 +105,18 @@ router.post("/api/auth/login", async (req, res) => {
     const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
     try {
       await pool.query(
-        `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days') ON CONFLICT (id) DO NOTHING`,
-        ["sess-" + Date.now(), user.id, token]
+        `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
+        ["sess-" + Date.now() + crypto.randomBytes(4).toString("hex"), userPayload.id, token]
       );
-      
       await auditEvent({
         userId: user.id,
         action: "login_success",
         req,
         metadata: { role: userPayload.role, identifier: finalIdentifier }
       });
-    } catch (e: any) {
-      console.warn("Session tracking failed (ignoring):", e.message);
+    } catch (sessErr: any) {
+      console.error("Session creation failed during login:", sessErr?.message);
+      return res.status(503).json({ success: false, error: "Session creation failed. Please try logging in again." });
     }
 
     res.json({ success: true, token, user: userPayload });
@@ -299,7 +277,6 @@ router.post("/api/auth/register-volunteer", async (req, res) => {
 router.post("/api/auth/reset-ticket", async (req, res) => {
   try {
     const { identifier } = req.body;
-    await pool.query(`CREATE TABLE IF NOT EXISTS admin_reset_tickets (id SERIAL PRIMARY KEY, identifier VARCHAR(255) NOT NULL, status VARCHAR(50) DEFAULT 'pending', created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW())`);
     await pool.query(`INSERT INTO admin_reset_tickets (identifier) VALUES ($1)`, [identifier]);
     res.json({ success: true, message: "Admin reset ticket created" });
   } catch (err: any) {
