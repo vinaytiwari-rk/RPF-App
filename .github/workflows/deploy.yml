@@ -101,19 +101,9 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node delete_cpanel_maps.cjs
-      - name: Execute Production Database Migration (Deployment Critical)
-        continue-on-error: false
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || secrets.POSTGRES_URL }}
+      - name: Verify Migration Files Ready for Server Boot
         run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "CRITICAL: DATABASE_URL secret is missing in GitHub repository secrets."
-            exit 1
-          fi
-          echo "Running safe read-only DATABASE_URL metadata diagnostic..."
-          node scripts/diagnoseDbUrl.cjs
-          echo "Executing database migrations against production database..."
-          node scripts/runMigrations.cjs
+          node -e "const fs = require('fs'); const files = fs.readdirSync('migrations').filter(f => f.endsWith('.sql')); console.log('Verified migration SQL files ready for server boot:', files.length);"
       - name: Deploy to cPanel (Deployment Critical)
         continue-on-error: false
         env:

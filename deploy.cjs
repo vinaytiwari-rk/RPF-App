@@ -60,6 +60,10 @@ async function main() {
       await withFreshConnection('index.js upload', (client) => client.uploadFrom('index.js', 'index.js'));
     }
     await withFreshConnection('dist upload', (client) => client.uploadFromDir('dist', 'dist'));
+    if (fs.existsSync('migrations')) {
+      await withFreshConnection('migrations upload', (client) => client.uploadFromDir('migrations', 'migrations'));
+      console.log('migrations directory uploaded');
+    }
     if (fs.existsSync('.htaccess')) {
       await withFreshConnection('.htaccess upload', (client) => client.uploadFrom('.htaccess', '.htaccess'));
       console.log('.htaccess uploaded');

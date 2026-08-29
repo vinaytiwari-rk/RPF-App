@@ -57,6 +57,7 @@ import adminDynamicRoutes from './src/routes/adminDynamicRoutes.js';
 
 
 import { setDbPool } from "./src/controllers/adminHqController.js";
+import { runMigrationsOnPool } from "./src/db/migrationRunner.js";
 
 dotenv.config();
 
@@ -239,6 +240,7 @@ const pool = new pg.Pool({
 });
 
 setDbPool(pool);
+void runMigrationsOnPool(pool);
 
 app.get("/api/health", async (req, res) => {
   try {
