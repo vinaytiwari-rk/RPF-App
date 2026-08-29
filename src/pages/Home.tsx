@@ -110,22 +110,18 @@ function MarqueeTrack({
   const isRed = variant === "red";
 
   const containerClasses = isGreen
-    ? "border-emerald-300/80 bg-emerald-50/70 text-[#15803D]"
+    ? "border-emerald-600/80 bg-[#167C5A] text-white shadow-2xs"
     : isRed
-    ? "border-red-300/80 bg-red-50/70 text-[#DC2626]"
-    : "border-amber-300/80 bg-amber-50/70 text-[#C2410C]";
+    ? "border-red-600/80 bg-[#B91C1C] text-white shadow-2xs"
+    : "border-amber-700/80 bg-[#C2410C] text-white shadow-2xs";
 
-  const textClasses = isGreen
-    ? "text-[#15803D]"
-    : isRed
-    ? "text-[#DC2626]"
-    : "text-[#C2410C]";
+  const textClasses = "text-white font-extrabold";
 
   const separatorClasses = isGreen
-    ? "text-[#167C5A]"
+    ? "text-emerald-300 font-bold"
     : isRed
-    ? "text-[#B91C1C]"
-    : "text-[#D97706]";
+    ? "text-red-300 font-bold"
+    : "text-amber-300 font-bold";
 
   // Handle Vertical (Up to Down) Marquee
   if (direction === "utd") {
@@ -135,7 +131,7 @@ function MarqueeTrack({
     return (
       <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-md py-2 px-3 shadow-2xs group flex items-center ${containerClasses}`}>
         {label && (
-          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-600/15 text-[#15803D] shrink-0 mr-2 select-none">
+          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/20 text-white shrink-0 mr-2 select-none border border-white/30">
             {label}
           </span>
         )}
@@ -195,7 +191,7 @@ export default function Home() {
   const [slide, setSlide] = useState(0);
   const [marquee1, setMarquee1] = useState<string[]>(defaultMarquee1);
   const [marquee2, setMarquee2] = useState<string[]>(defaultMarquee2);
-  const [marquee3, setMarquee3] = useState<string[]>(defaultMarquee3);
+  const [, setMarquee3] = useState<string[]>(defaultMarquee3);
   const [quoteOfDay, setQuoteOfDay] = useState(dailyQuotes[0]);
 
   const name = user?.name?.trim().split(/\s+/)[0] || "Guest";
@@ -237,7 +233,7 @@ export default function Home() {
     void loadQuote();
   }, []);
 
-  // Load 3 Marquees Live
+  // Load 2 Marquees Live
   useEffect(() => {
     let alive = true;
     const restore = (key: string, setter: (value: string[]) => void) => {
@@ -245,7 +241,6 @@ export default function Home() {
     };
     restore("@rpf_marquee1_cache", setMarquee1);
     restore("@rpf_marquee2_cache", setMarquee2);
-    restore("@rpf_marquee3_cache", setMarquee3);
 
     const load = async () => {
       for (const url of ["/api/public/live-feed", "/api/public/news", "/rss-proxy.php", "https://samahit.rpfoundation.org/rss-proxy.php"]) {
@@ -261,7 +256,7 @@ export default function Home() {
           if (m1.length) { setMarquee1(m1); try { localStorage.setItem("@rpf_marquee1_cache", JSON.stringify(m1)); } catch {} }
           if (m2.length) { setMarquee2(m2); try { localStorage.setItem("@rpf_marquee2_cache", JSON.stringify(m2)); } catch {} }
           if (m3.length) { setMarquee3(m3); try { localStorage.setItem("@rpf_marquee3_cache", JSON.stringify(m3)); } catch {} }
-          if (m1.length || m2.length || m3.length) break;
+          if (m1.length || m2.length) break;
         } catch {}
       }
     };
@@ -310,15 +305,15 @@ export default function Home() {
           )}
         </section>
 
-        {/* 3. TWO MARQUEES (MARQUEE 3 REMOVED) */}
+        {/* 3. TWO MARQUEES (FIRST IN GREEN, SECOND IN DARK SAFFRON) */}
         
-        {/* MARQUEE 1: PIB + DD News + DD India + MP Info -> Right to Left (Dark Saffron) */}
-        {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="saffron" />}
+        {/* MARQUEE 1: PIB + DD News + DD India + MP Info -> Right to Left (GREEN) */}
+        {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="green" />}
 
-        {/* MARQUEE 2: SACHET NDMA + IMD Weather Bulletin -> Left to Right (Emergency Red) */}
-        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="red" />}
+        {/* MARQUEE 2: SACHET NDMA + IMD Weather Bulletin -> Left to Right (DARK SAFFRON) */}
+        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="saffron" />}
 
-        {/* 4. CAROUSEL: RP FOUNDATION AT WORK (CLEAN PHOTO, NO OVERLAP, MATCHING BG, NO 1/6 OR BUTTON) */}
+        {/* 4. CAROUSEL: RP FOUNDATION AT WORK (TRANSPARENT TEXT BACKGROUND) */}
         <section className="pt-1">
           <div className="mb-2 flex items-center justify-between">
             <div>
@@ -327,9 +322,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-2xs">
+          <div className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-transparent shadow-2xs">
             {/* Clear Image Viewport */}
-            <div className="relative h-[210px] sm:h-[240px] w-full overflow-hidden bg-[#14213D]">
+            <div className="relative h-[210px] sm:h-[240px] w-full overflow-hidden bg-[#14213D] rounded-t-[24px]">
               <motion.img
                 key={`slide-img-${slide}`}
                 src={getSlideImage(current?.image, slide)}
@@ -346,13 +341,13 @@ export default function Home() {
               />
             </div>
 
-            {/* Non-Overlapping Content Drawer matching app design */}
+            {/* Transparent Content Drawer */}
             <motion.div
               key={`slide-txt-${slide}`}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="p-4 sm:p-5 bg-white border-t border-slate-100 space-y-1"
+              className="py-3 px-1 bg-transparent space-y-1"
             >
               <h3 className="text-[17px] sm:text-[19px] font-bold leading-tight text-[#14213D]">
                 {current?.titleEn}
@@ -364,7 +359,7 @@ export default function Home() {
           </div>
 
           {/* Carousel Pagination Dots */}
-          <div className="mt-2.5 flex justify-center gap-1.5">
+          <div className="mt-2 flex justify-center gap-1.5">
             {slides.map((_: any, i: number) => (
               <button
                 key={i}
@@ -375,14 +370,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 5. OUR VISION & LEADERSHIP (DESCRIPTIVE EDITORIAL BLOCK - REDUCED CARDS) */}
+        {/* 5. OUR VISION & LEADERSHIP (TRANSPARENT BACKGROUND) */}
         <section className="pt-2">
           <div className="mb-2.5">
             <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Foundation</p>
             <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Our Vision & Leadership</h2>
           </div>
 
-          <div className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-2xs space-y-4">
+          <div className="rounded-[24px] border border-slate-200/80 bg-transparent backdrop-blur-xs p-5 shadow-2xs space-y-4">
             {/* Vision Narrative */}
             <div className="flex items-start gap-3.5">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-[#167C5A] border border-emerald-500/20">
@@ -402,7 +397,7 @@ export default function Home() {
               </div>
             </div>
 
-            <hr className="border-slate-100" />
+            <hr className="border-slate-200/60" />
 
             {/* Founder's Message Narrative */}
             <div className="flex items-start gap-3.5">
@@ -425,7 +420,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 6. QUICK ACCESS CARDS (PLACED AFTER VISION & LEADERSHIP) */}
+        {/* 6. WHAT CAN WE HELP WITH (TRANSPARENT BACKGROUND CARDS) */}
         <section className="pt-2">
           <div className="mb-3">
             <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">Quick Access</p>
@@ -466,7 +461,7 @@ export default function Home() {
                 key={title}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate(route)}
-                className="min-h-[155px] rounded-2xl border border-amber-100/80 bg-white/90 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all flex flex-col justify-between"
+                className="min-h-[155px] rounded-2xl border border-slate-200/80 bg-transparent hover:bg-slate-50/50 backdrop-blur-xs p-4 text-left shadow-2xs hover:border-slate-300 transition-all flex flex-col justify-between"
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent}`}>
                   <Icon className="h-5 w-5" />
@@ -480,19 +475,31 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 7. SOCIAL IMPACT HIGHLIGHTS */}
+        {/* 7. SOCIAL IMPACT HIGHLIGHTS (COMMUNITY, CARE, ACTIVE - TRANSPARENT BACKGROUND & LINKED TO IMPACT PAGE) */}
         <section className="pt-2">
-          <div className="mb-3">
-            <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Our Impact</p>
-            <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Social Impact Highlights</h2>
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Our Field Impact</p>
+              <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Community, Care, Active</h2>
+            </div>
+            <button
+              onClick={() => navigate("/community-care-active")}
+              className="text-xs font-bold text-[#167C5A] hover:underline flex items-center gap-1"
+            >
+              View All <ChevronRight className="h-3.5 w-3.5" />
+            </button>
           </div>
-          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md shadow-2xs">
+
+          <div 
+            onClick={() => navigate("/community-care-active")}
+            className="grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-transparent backdrop-blur-xs shadow-2xs cursor-pointer hover:border-emerald-300/80 transition-all"
+          >
             {[
-              { icon: UsersRound, value: "Community", label: "People first" },
-              { icon: Stethoscope, value: "Care", label: "Health initiatives" },
-              { icon: CalendarDays, value: "Active", label: "Foundation work" }
+              { icon: UsersRound, value: "Community", label: "Welfare & Culture" },
+              { icon: Stethoscope, value: "Care", label: "Health & Relief" },
+              { icon: CalendarDays, value: "Active", label: "Field Initiatives" }
             ].map(({ icon: Icon, value, label }) => (
-              <div key={label} className="border-r border-slate-200/60 px-2 py-4 text-center last:border-r-0">
+              <div key={label} className="border-r border-slate-200/60 px-2 py-4 text-center last:border-r-0 hover:bg-emerald-50/20 transition-colors">
                 <Icon className="mx-auto h-4.5 w-4.5 text-[#167C5A]" />
                 <p className="mt-2 text-[13px] sm:text-[14px] font-bold text-[#14213D]">{value}</p>
                 <p className="mt-0.5 text-[9px] text-slate-500 font-semibold tracking-tight">{label}</p>
