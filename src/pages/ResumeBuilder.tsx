@@ -84,8 +84,15 @@ const ResumeBuilder: React.FC = () => {
       const resumeElement = document.getElementById("resume-preview");
       if (!resumeElement) return;
 
-      const canvas = await html2canvas(resumeElement, { scale: 2 });
-      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      const canvas = await html2canvas(resumeElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        windowWidth: 794,
+        logging: false
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
       
       const pdf = new jsPDF({
         orientation: "portrait",
