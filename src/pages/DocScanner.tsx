@@ -216,36 +216,45 @@ const DocScanner: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 animate-fadeIn max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 animate-fadeIn max-w-4xl mx-auto space-y-6 text-[#14213D]">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Camera className="w-8 h-8 text-[var(--rp-primary)]" />
-          Document Scanner
+        <h1 className="text-2xl font-bold text-[#14213D] flex items-center gap-2">
+          <Camera className="w-7 h-7 text-[#D97706]" />
+          Document Scanner (दस्तावेज़ स्कैनर)
         </h1>
-        <p className="text-gray-600">Scan, filter, save as PDF/image, and keep scans privately on this device.</p>
+        <p className="text-slate-600 text-xs sm:text-sm font-medium mt-1">
+          Scan documents, apply magic/grayscale filters, save as PDF/Image, and keep scans securely on your device.
+        </p>
       </div>
 
-      <div className="glass-card p-4 sm:p-8 rounded-2xl flex flex-col items-center">
-        {error && <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-xl w-full text-center">{error}</div>}
+      <div className="rounded-[24px] border border-slate-200/80 bg-white p-4 sm:p-6 flex flex-col items-center shadow-2xs">
+        {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 text-[#DC2626] rounded-xl w-full text-center text-xs font-bold">{error}</div>}
 
-        <div className="relative w-full max-w-xl aspect-[3/4] bg-black rounded-2xl overflow-hidden shadow-premium mb-6">
+        <div className="relative w-full max-w-xl aspect-[3/4] bg-slate-950 rounded-2xl overflow-hidden shadow-md mb-6">
           {!capturedImage ? (
             stream ? (
               <>
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                <div className="absolute inset-4 border-2 border-white/60 border-dashed rounded-lg pointer-events-none flex items-center justify-center">
-                  <span className="bg-black/50 text-white px-3 py-1 rounded text-sm">Align document within frame</span>
+                <div className="absolute inset-4 border-2 border-amber-400/80 border-dashed rounded-xl pointer-events-none flex items-center justify-center">
+                  <span className="bg-black/70 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-bold">
+                    Align document within frame / दस्तावेज़ को फ्रेम में रखें
+                  </span>
                 </div>
               </>
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center">
-                <Camera className="w-16 h-16 mb-4 text-gray-400" />
-                <p className="mb-6 text-gray-300">Grant camera access to scan documents.</p>
-                <button onClick={startCamera} className="px-6 py-3 bg-[var(--rp-primary)] rounded-full font-bold">Open Camera</button>
+                <Camera className="w-14 h-14 mb-3 text-amber-400" />
+                <p className="mb-4 text-slate-300 text-xs font-medium">Camera access is required to scan documents.</p>
+                <button
+                  onClick={startCamera}
+                  className="px-5 py-2.5 bg-[#D97706] hover:bg-[#C2410C] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                >
+                  Start Camera (कैमरा खोलें)
+                </button>
               </div>
             )
           ) : (
-            <img src={capturedImage} alt="Scanned document" className="w-full h-full object-contain bg-gray-100" />
+            <img src={capturedImage} alt="Scanned document" className="w-full h-full object-contain bg-slate-100" />
           )}
           <canvas ref={canvasRef} className="hidden" />
         </div>
