@@ -54,6 +54,10 @@ async function main() {
 
     await withFreshConnection('server.cjs upload', (client) => client.uploadFrom('server.cjs', 'server.cjs'));
     await withFreshConnection('dist upload', (client) => client.uploadFromDir('dist', 'dist'));
+    if (fs.existsSync('.htaccess')) {
+      await withFreshConnection('.htaccess upload', (client) => client.uploadFrom('.htaccess', '.htaccess'));
+      console.log('.htaccess uploaded');
+    }
     if (fs.existsSync('rss-proxy.php')) {
       await withFreshConnection('RSS proxy upload', (client) => client.uploadFrom('rss-proxy.php', 'rss-proxy.php'));
       console.log('rss-proxy.php uploaded');
