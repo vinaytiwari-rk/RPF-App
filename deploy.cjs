@@ -53,6 +53,12 @@ async function main() {
     }
 
     await withFreshConnection('server.cjs upload', (client) => client.uploadFrom('server.cjs', 'server.cjs'));
+    if (fs.existsSync('app.js')) {
+      await withFreshConnection('app.js upload', (client) => client.uploadFrom('app.js', 'app.js'));
+    }
+    if (fs.existsSync('index.js')) {
+      await withFreshConnection('index.js upload', (client) => client.uploadFrom('index.js', 'index.js'));
+    }
     await withFreshConnection('dist upload', (client) => client.uploadFromDir('dist', 'dist'));
     if (fs.existsSync('.htaccess')) {
       await withFreshConnection('.htaccess upload', (client) => client.uploadFrom('.htaccess', '.htaccess'));
