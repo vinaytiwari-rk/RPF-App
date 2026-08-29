@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Play,
   Instagram,
@@ -9,7 +9,6 @@ import {
   ExternalLink,
   ChevronRight,
   ShieldCheck,
-  TrendingUp,
   Clock,
   Droplets,
   Trash2,
@@ -18,18 +17,83 @@ import {
   Landmark,
   HandHeart,
   Wrench,
-  Users
+  Users,
+  Search,
+  Send,
+  Activity
 } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 import InstagramApiFeed from "../components/InstagramApiFeed";
 
-type FilterTab = "all" | "community" | "care" | "active";
+type MainTab = "impact" | "volunteers" | "chat";
+type SubFilterTab = "all" | "community" | "care" | "active";
+
+interface ChatMessage {
+  id: string;
+  authorName: string;
+  text: string;
+  time?: string;
+}
+
+interface Volunteer {
+  id: string;
+  name: string;
+  role?: string;
+  city?: string;
+  skills?: string[] | string;
+}
 
 export default function ImpactPage() {
   const navigate = useNavigate();
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
+  const { user } = useAuth();
   const isHi = lang === "hi";
-  const [activeTab, setActiveTab] = useState<FilterTab>("all");
+
+  const [activeMainTab, setActiveMainTab] = useState<MainTab>("impact");
+  const [subTab, setSubTab] = useState<SubFilterTab>("all");
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+  const [volunteerCityFilter, setVolunteerCityFilter] = useState("");
+
+  // Chat states
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { id: "c1", authorName: "Rohit Pandit", text: "Welcome to Samahit Activity & Impact Portal! Together we serve.", time: "10:30 AM" },
+    { id: "c2", authorName: "Sunita Verma", text: "Bhopal Pink E-Rickshaw drive was a great success today!", time: "11:15 AM" }
+  ]);
+  const [chatInput, setChatInput] = useState("");
+
+  useEffect(() => {
+    fetchVolunteers();
+  }, []);
+
+  const fetchVolunteers = async (city?: string) => {
+    try {
+      const res = await axios.get("/api/public/volunteers", { params: city ? { city } : {} });
+      if (res.data.success && Array.isArray(res.data.data)) {
+        setVolunteers(res.data.data);
+      }
+    } catch {
+      setVolunteers([
+        { id: "v1", name: "Ramesh Sharma", role: "Healthcare Coordinator", city: "Bhopal", skills: "First Aid, Logistics" },
+        { id: "v2", name: "Pooja Verma", role: "Women Empowerment Lead", city: "Bhopal", skills: "Counseling, Training" },
+        { id: "v3", name: "Amit Kumar", role: "Emergency Relief Volunteer", city: "Indore", skills: "Disaster Relief, Transport" }
+      ]);
+    }
+  };
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    const newMsg: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      authorName: user?.name || (isHi ? "नागरिक स्वयंसेवक" : "Citizen Volunteer"),
+      text: chatInput,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    };
+    setChatMessages((prev) => [...prev, newMsg]);
+    setChatInput("");
+  };
 
   const IMPACT_DOMAINS = [
     {
@@ -154,7 +218,7 @@ export default function ImpactPage() {
     }
   ];
 
-  const filteredDomains = IMPACT_DOMAINS.filter(d => activeTab === "all" || d.tab === activeTab);
+  const filteredDomains = IMPACT_DOMAINS.filter(d => subTab === "all" || d.tab === subTab);
 
   return (
     <div className="min-h-screen bg-transparent pb-28 font-sans selection:bg-orange-100 animate-fadeIn text-slate-800">
@@ -163,181 +227,301 @@ export default function ImpactPage() {
         <div className="absolute top-0 right-0 w-44 h-44 bg-white/10 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />
         <div className="relative z-10 max-w-2xl mx-auto space-y-1.5">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-md border border-white/30 text-white">
-            <Sparkles className="w-3.5 h-3.5 text-amber-200" />
-            {isHi ? "सामुदायिक प्रभाव व जन सेवा" : "Community • Care • Active"}
+            <Activity className="w-3.5 h-3.5 text-amber-200" />
+            {isHi ? "गतिविधियां एवं सामाजिक प्रभाव" : "Activity & Impact Hub"}
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-white">
-            {isHi ? "आरपी फाउंडेशन ऑन-फील्ड सामाजिक कार्य" : "Field Impact & Community Welfare"}
+            {isHi ? "RPF ग्राउंड एक्टिविटीज व सहभागिता" : "RPF Field Work & Activity Hub"}
           </h1>
           <p className="text-xs text-amber-100 font-medium leading-relaxed max-w-xl">
             {isHi 
-              ? "स्वास्थ्य, पेयजल, स्वच्छता, रोजगार, महिला स्वावलंबन, पर्यावरण एवं भारतीय संस्कृति हेतु समर्पित ग्राउंड-लेवल अभियान।"
-              : "Comprehensive ground relief across sanitation, clean water, jobs, women empowerment, health, environment & Indian heritage."}
+              ? "पेयजल, स्वच्छता, रोजगार, स्वास्थ्य, महिला स्वावलंबन, पर्यावरण व भारतीय संस्कृति हेतु समर्पित कार्य।"
+              : "Field activities across sanitation, clean water, jobs, skills, free health, poor relief, environment & heritage."}
           </p>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
 
-        {/* Category Filter Tabs: All, Community, Care, Active */}
-        <section className="space-y-2">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xs font-black uppercase tracking-wider text-[#14213D]">
-              {isHi ? "कार्यक्षेत्र श्रेणियां" : "Impact Categories"}
-            </h2>
-            <span className="text-[11px] font-bold text-slate-400">
-              {filteredDomains.length} {isHi ? "पहल" : "Initiatives"}
-            </span>
-          </div>
+        {/* 3 Main Segmented Tabs: Ground Work, Volunteer Network, Community Chat */}
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-200/70 border border-slate-200/80 text-xs font-bold shadow-2xs">
+          <button
+            onClick={() => setActiveMainTab("impact")}
+            className={`flex-1 py-2.5 rounded-xl transition-all ${
+              activeMainTab === "impact"
+                ? "bg-[#14213D] text-white shadow-xs"
+                : "text-slate-600 hover:text-[#14213D]"
+            }`}
+          >
+            {isHi ? "फील्ड इम्पैक्ट" : "Impact Work"}
+          </button>
+          <button
+            onClick={() => setActiveMainTab("volunteers")}
+            className={`flex-1 py-2.5 rounded-xl transition-all ${
+              activeMainTab === "volunteers"
+                ? "bg-[#14213D] text-white shadow-xs"
+                : "text-slate-600 hover:text-[#14213D]"
+            }`}
+          >
+            {isHi ? "स्वयंसेवक नेटवर्क" : "Volunteer Network"}
+          </button>
+          <button
+            onClick={() => setActiveMainTab("chat")}
+            className={`flex-1 py-2.5 rounded-xl transition-all ${
+              activeMainTab === "chat"
+                ? "bg-[#14213D] text-white shadow-xs"
+                : "text-slate-600 hover:text-[#14213D]"
+            }`}
+          >
+            {isHi ? "जन संवाद" : "Community Chat"}
+          </button>
+        </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-            {[
-              { id: "all" as const, labelEn: "All Work", labelHi: "समस्त कार्य", icon: Sparkles },
-              { id: "community" as const, labelEn: "Community", labelHi: "सामुदायिक कल्याण", icon: Users },
-              { id: "care" as const, labelEn: "Care & Relief", labelHi: "स्वास्थ्य व सहायता", icon: Heart },
-              { id: "active" as const, labelEn: "Active Ground", labelHi: "ऑन-फील्ड प्रोजेक्ट्स", icon: ShieldCheck },
-            ].map(({ id, labelEn, labelHi, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer border ${
-                  activeTab === id
-                    ? "bg-[#14213D] border-[#14213D] text-white shadow-xs"
-                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{isHi ? labelHi : labelEn}</span>
-              </button>
-            ))}
-          </div>
-        </section>
+        {/* Tab 1: Field Impact & Relief */}
+        {activeMainTab === "impact" && (
+          <div className="space-y-5">
+            {/* Category Filter Pills: All, Community, Care, Active */}
+            <section className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-xs font-black uppercase tracking-wider text-[#14213D]">
+                  {isHi ? "कार्यक्षेत्र श्रेणियां" : "Impact Categories"}
+                </h2>
+                <span className="text-[11px] font-bold text-slate-400">
+                  {filteredDomains.length} {isHi ? "पहल" : "Initiatives"}
+                </span>
+              </div>
 
-        {/* Detailed Impact Domain Cards */}
-        <section className="space-y-3">
-          {filteredDomains.map((domain) => {
-            const Icon = domain.icon;
-            return (
-              <div 
-                key={domain.id} 
-                className="bg-white rounded-[22px] border border-slate-200/80 p-4 shadow-2xs space-y-2 hover:border-slate-300 transition-all"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${domain.color} shadow-2xs shrink-0`}>
-                      <Icon className="w-4.5 h-4.5" />
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                {[
+                  { id: "all" as const, labelEn: "All Work", labelHi: "समस्त कार्य", icon: Sparkles },
+                  { id: "community" as const, labelEn: "Community", labelHi: "सामुदायिक कल्याण", icon: Users },
+                  { id: "care" as const, labelEn: "Care & Relief", labelHi: "स्वास्थ्य व सहायता", icon: Heart },
+                  { id: "active" as const, labelEn: "Active Ground", labelHi: "ऑन-फील्ड प्रोजेक्ट्स", icon: ShieldCheck },
+                ].map(({ id, labelEn, labelHi, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setSubTab(id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer border ${
+                      subTab === id
+                        ? "bg-[#D97706] border-[#D97706] text-white shadow-xs"
+                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{isHi ? labelHi : labelEn}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* Detailed Impact Domain Cards */}
+            <section className="space-y-3">
+              {filteredDomains.map((domain) => {
+                const Icon = domain.icon;
+                return (
+                  <div 
+                    key={domain.id} 
+                    className="bg-white rounded-[22px] border border-slate-200/80 p-4 shadow-2xs space-y-2 hover:border-slate-300 transition-all"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${domain.color} shadow-2xs shrink-0`}>
+                          <Icon className="w-4.5 h-4.5" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-black text-[#14213D] line-clamp-1">
+                            {isHi ? domain.titleHi : domain.titleEn}
+                          </h3>
+                          <span className="text-[9.5px] font-extrabold text-[#D97706] uppercase tracking-wider">
+                            {isHi ? domain.badgeHi : domain.badgeEn}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-black text-[#14213D] line-clamp-1">
-                        {isHi ? domain.titleHi : domain.titleEn}
-                      </h3>
-                      <span className="text-[9.5px] font-extrabold text-[#D97706] uppercase tracking-wider">
-                        {isHi ? domain.badgeHi : domain.badgeEn}
-                      </span>
-                    </div>
+
+                    <p className="text-xs leading-relaxed text-slate-600 font-medium pl-1">
+                      {isHi ? domain.descHi : domain.descEn}
+                    </p>
+                  </div>
+                );
+              })}
+            </section>
+
+            {/* Live Volunteer Seva Duty & Activity Portal Banner */}
+            <section className="bg-white rounded-3xl border border-amber-200/80 p-5 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between border-b border-amber-100 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-[#D97706]" />
+                  <div>
+                    <h3 className="text-xs font-black uppercase tracking-wider text-[#14213D]">
+                      {isHi ? "लाइव वालंटियर सेवा एक्टिविटी" : "Live Volunteer Duty & Field Reports"}
+                    </h3>
+                    <p className="text-[10px] text-slate-500 font-medium">
+                      {isHi ? "स्वयंसेवकों की रीयल-टाइम सेवा ड्यूटी एवं रिपोर्टिंग" : "Real-time volunteer clock-in timers & verified reports"}
+                    </p>
                   </div>
                 </div>
-
-                <p className="text-xs leading-relaxed text-slate-600 font-medium pl-1">
-                  {isHi ? domain.descHi : domain.descEn}
-                </p>
+                <span className="bg-emerald-50 text-[#167C5A] border border-emerald-200 text-[9px] font-black uppercase px-2 py-0.5 rounded-full animate-pulse">
+                  100% Live
+                </span>
               </div>
-            );
-          })}
-        </section>
 
-        {/* Live Volunteer Seva Duty & Activity Portal Banner */}
-        <section className="bg-white rounded-3xl border border-amber-200/80 p-5 shadow-2xs space-y-3">
-          <div className="flex items-center justify-between border-b border-amber-100 pb-2.5">
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[#D97706]" />
+              <div className="bg-amber-50/50 rounded-2xl p-4 border border-amber-100 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black text-slate-900">
+                    {isHi ? "सेवा ड्यूटी पंच-इन करें या रिपोर्ट भेजें" : "Punch-in Duty Hours & Send Field Reports"}
+                  </p>
+                  <p className="text-[10px] text-slate-600 font-medium mt-0.5">
+                    {isHi ? "लाइव टाइमर, जियो-टैग्ड फोटो एवं वालंटियर रैंकिंग।" : "Live timer, GPS-tagged photos & volunteer standings."}
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate("/duty-tracker")}
+                  className="bg-[#D97706] text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-xs hover:bg-[#C2410C] transition shrink-0 flex items-center gap-1"
+                >
+                  <span>{isHi ? "ड्यूटी पोर्टल" : "Duty Portal"}</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </section>
+
+            {/* Featured Reel Card */}
+            <section className="bg-gradient-to-br from-[#167C5A] via-emerald-700 to-teal-800 border border-emerald-600 rounded-3xl p-5 text-white shadow-md space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-black uppercase tracking-[.18em] text-emerald-100 bg-white/20 px-2.5 py-1 rounded-full border border-white/20">
+                  In-App Reels Player
+                </span>
+                <Instagram className="w-4 h-4 text-emerald-100" />
+              </div>
+
               <div>
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#14213D]">
-                  {isHi ? "लाइव वालंटियर सेवा एक्टिविटी" : "Live Volunteer Duty & Field Reports"}
+                <h3 className="text-base font-black leading-snug font-serif text-white">
+                  {isHi ? "पिंक ई-रिक्शा एवं ग्राउंड वर्क रील्स" : "Pink E-Rickshaw & Social Work Reels"}
                 </h3>
-                <p className="text-[10px] text-slate-500 font-medium">
-                  {isHi ? "स्वयंसेवकों की रीयल-टाइम सेवा ड्यूटी एवं रिपोर्टिंग" : "Real-time volunteer clock-in timers & verified reports"}
+                <p className="text-xs text-emerald-100 mt-1 line-clamp-2 font-medium">
+                  {isHi ? "ऐप के अंदर ही रील्स स्वाइप करें और ग्राउंड-लेवल कार्यों के वीडियो देखें।" : "Swipe through field reels, health camps and video updates right inside the app."}
                 </p>
               </div>
-            </div>
-            <span className="bg-emerald-50 text-[#167C5A] border border-emerald-200 text-[9px] font-black uppercase px-2 py-0.5 rounded-full animate-pulse">
-              100% Live
-            </span>
-          </div>
 
-          <div className="bg-amber-50/50 rounded-2xl p-4 border border-amber-100 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-black text-slate-900">
-                {isHi ? "सेवा ड्यूटी पंच-इन करें या रिपोर्ट भेजें" : "Punch-in Duty Hours & Send Field Reports"}
-              </p>
-              <p className="text-[10px] text-slate-600 font-medium mt-0.5">
-                {isHi ? "लाइव टाइमर, जियो-टैग्ड फोटो एवं वालंटियर रैंकिंग।" : "Live timer, GPS-tagged photos & volunteer standings."}
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/duty-tracker")}
-              className="bg-[#D97706] text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-xs hover:bg-[#C2410C] transition shrink-0 flex items-center gap-1"
-            >
-              <span>{isHi ? "ड्यूटी पोर्टल" : "Duty Portal"}</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </section>
+              <button
+                onClick={() => navigate("/instagram")}
+                className="w-full bg-white text-[#167C5A] text-xs font-black py-3 rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 hover:bg-emerald-50"
+              >
+                <Play className="w-4 h-4 fill-[#167C5A]" />
+                <span>{isHi ? "एप में रील्स प्लेयर खोलें 📱" : "Open In-App Reels Player 📱"}</span>
+              </button>
+            </section>
 
-        {/* Featured Reel Card */}
-        <section className="bg-gradient-to-br from-[#167C5A] via-emerald-700 to-teal-800 border border-emerald-600 rounded-3xl p-5 text-white shadow-md space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] font-black uppercase tracking-[.18em] text-emerald-100 bg-white/20 px-2.5 py-1 rounded-full border border-white/20">
-              In-App Reels Player
-            </span>
-            <Instagram className="w-4 h-4 text-emerald-100" />
-          </div>
-
-          <div>
-            <h3 className="text-base font-black leading-snug font-serif text-white">
-              {isHi ? "पिंक ई-रिक्शा एवं ग्राउंड वर्क रील्स" : "Pink E-Rickshaw & Social Work Reels"}
-            </h3>
-            <p className="text-xs text-emerald-100 mt-1 line-clamp-2 font-medium">
-              {isHi ? "ऐप के अंदर ही रील्स स्वाइप करें और ग्राउंड-लेवल कार्यों के वीडियो देखें।" : "Swipe through field reels, health camps and video updates right inside the app."}
-            </p>
-          </div>
-
-          <button
-            onClick={() => navigate("/instagram")}
-            className="w-full bg-white text-[#167C5A] text-xs font-black py-3 rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 hover:bg-emerald-50"
-          >
-            <Play className="w-4 h-4 fill-[#167C5A]" />
-            <span>{isHi ? "एप में रील्स प्लेयर खोलें 📱" : "Open In-App Reels Player 📱"}</span>
-          </button>
-        </section>
-
-        {/* Live Instagram Feed Grid */}
-        <section className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-xs">
-                <Instagram className="h-4.5 w-4.5" />
+            {/* Live Instagram Feed Grid */}
+            <section className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-xs">
+                    <Instagram className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">{isHi ? "लाइव रील्स एवं पोस्ट्स" : "Live Instagram Feed"}</h3>
+                    <p className="text-[10px] text-slate-400 font-bold">@rpfoundationofficial</p>
+                  </div>
+                </div>
+                <a
+                  href="https://www.instagram.com/rpfoundationofficial/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[10px] font-black text-[#D97706] hover:underline flex items-center gap-1"
+                >
+                  Follow <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
-              <div>
-                <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">{isHi ? "लाइव रील्स एवं पोस्ट्स" : "Live Instagram Feed"}</h3>
-                <p className="text-[10px] text-slate-400 font-bold">@rpfoundationofficial</p>
-              </div>
-            </div>
-            <a
-              href="https://www.instagram.com/rpfoundationofficial/"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[10px] font-black text-[#D97706] hover:underline flex items-center gap-1"
-            >
-              Follow <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
 
-          <InstagramApiFeed />
-        </section>
+              <InstagramApiFeed />
+            </section>
+          </div>
+        )}
+
+        {/* Tab 2: Volunteers Directory */}
+        {activeMainTab === "volunteers" && (
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder={isHi ? "शहर या क्षेत्र से खोजें..." : "Filter by city or area..."}
+                value={volunteerCityFilter}
+                onChange={(e) => {
+                  setVolunteerCityFilter(e.target.value);
+                  fetchVolunteers(e.target.value);
+                }}
+                className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-xs font-bold text-[#14213D] focus:border-[#D97706] focus:outline-none shadow-2xs"
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              {volunteers.map((vol) => (
+                <div
+                  key={vol.id}
+                  className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#14213D] text-amber-400 font-bold text-sm">
+                      {vol.name[0]}
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-[#14213D]">{vol.name}</h4>
+                      <p className="text-[10.5px] text-slate-500 font-medium mt-0.5">
+                        {vol.role} • {vol.city || "Madhya Pradesh"}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-[#167C5A] border border-emerald-200 text-[10px] font-bold">
+                    Active
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Community Live Discussions */}
+        {activeMainTab === "chat" && (
+          <div className="rounded-[24px] border border-slate-200/80 bg-white p-4 sm:p-5 shadow-2xs space-y-4">
+            <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+              {chatMessages.map((msg) => (
+                <div key={msg.id} className="rounded-2xl bg-slate-50 p-3.5 space-y-1">
+                  <div className="flex items-center justify-between text-[10.5px]">
+                    <span className="font-extrabold text-[#14213D]">{msg.authorName}</span>
+                    <span className="text-slate-400 font-medium">{msg.time}</span>
+                  </div>
+                  <p className="text-xs font-medium text-slate-700 leading-relaxed">{msg.text}</p>
+                </div>
+              ))}
+            </div>
+
+            <form
+              onSubmit={handleSendMessage}
+              className="flex items-center gap-2 pt-2 border-t border-slate-100"
+            >
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder={isHi ? "अपनी बात या संदेश लिखें..." : "Share a thought or message..."}
+                className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-[#14213D] focus:border-[#D97706] focus:bg-white focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded-xl bg-[#D97706] hover:bg-[#C2410C] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition-all flex items-center gap-1.5"
+              >
+                <Send className="h-4 w-4" />
+                {isHi ? "भेजें" : "Send"}
+              </button>
+            </form>
+          </div>
+        )}
 
       </div>
     </div>
   );
 }
+
 
