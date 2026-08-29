@@ -110,18 +110,28 @@ function MarqueeTrack({
   const isRed = variant === "red";
 
   const containerClasses = isGreen
-    ? "border-emerald-600/80 bg-[#167C5A] text-white shadow-2xs"
+    ? "border-emerald-200/90 bg-transparent shadow-2xs"
     : isRed
-    ? "border-red-600/80 bg-[#B91C1C] text-white shadow-2xs"
-    : "border-amber-700/80 bg-[#C2410C] text-white shadow-2xs";
+    ? "border-red-200/90 bg-transparent shadow-2xs"
+    : "border-amber-200/90 bg-transparent shadow-2xs";
 
-  const textClasses = "text-white font-extrabold";
+  const textClasses = isGreen
+    ? "text-[#167C5A] font-black"
+    : isRed
+    ? "text-red-700 font-black"
+    : "text-[#C2410C] font-black";
 
   const separatorClasses = isGreen
-    ? "text-emerald-300 font-bold"
+    ? "text-[#D97706] font-bold"
     : isRed
-    ? "text-red-300 font-bold"
-    : "text-amber-300 font-bold";
+    ? "text-amber-500 font-bold"
+    : "text-[#167C5A] font-bold";
+
+  const labelBadgeClasses = isGreen
+    ? "bg-emerald-50 text-[#167C5A] border-emerald-200"
+    : isRed
+    ? "bg-red-50 text-red-700 border-red-200"
+    : "bg-amber-50 text-[#C2410C] border-amber-200";
 
   // Handle Vertical (Up to Down) Marquee
   if (direction === "utd") {
@@ -129,9 +139,9 @@ function MarqueeTrack({
     const duration = Math.max(30, Math.round(cleanItems.length * 4.5));
 
     return (
-      <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-md py-2 px-3 shadow-2xs group flex items-center ${containerClasses}`}>
+      <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-xs py-2 px-3 group flex items-center ${containerClasses}`}>
         {label && (
-          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/20 text-white shrink-0 mr-2 select-none border border-white/30">
+          <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md shrink-0 mr-2 select-none border ${labelBadgeClasses}`}>
             {label}
           </span>
         )}
@@ -144,7 +154,7 @@ function MarqueeTrack({
           >
             {trackItems.map((title, idx) => (
               <div key={idx} className="h-6 flex items-center px-1">
-                <span className={`text-[12.5px] font-bold truncate ${textClasses}`}>
+                <span className={`text-[12.5px] truncate ${textClasses}`}>
                   {title}
                 </span>
               </div>
@@ -162,7 +172,7 @@ function MarqueeTrack({
   const animationName = direction === "ltr" ? "rpf-marquee-ltr" : "rpf-marquee-rtl";
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-md py-2.5 shadow-2xs group ${containerClasses}`}>
+    <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-xs py-2.5 group ${containerClasses}`}>
       <div
         className="flex whitespace-nowrap min-w-max items-center transition-transform group-hover:[animation-play-state:paused]"
         style={{
@@ -171,10 +181,10 @@ function MarqueeTrack({
       >
         {trackItems.map((title, idx) => (
           <div key={idx} className="flex items-center">
-            <span className={`text-[12.5px] font-bold tracking-normal px-2 ${textClasses}`}>
+            <span className={`text-[12.5px] tracking-normal px-2 ${textClasses}`}>
               {title}
             </span>
-            <span className={`font-bold text-xs px-3 select-none ${separatorClasses}`}>
+            <span className={`text-xs px-3 select-none ${separatorClasses}`}>
               |
             </span>
           </div>
