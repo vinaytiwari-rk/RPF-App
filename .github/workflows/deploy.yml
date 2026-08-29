@@ -111,7 +111,7 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
-      - name: Post-Deployment Production Health Smoke Test
+      - name: Post-Deployment Production Health Smoke Test (Fail-Closed Gate)
         run: |
           echo "Verifying production API health endpoint response..."
-          node -e "const https = require('https'); https.get('https://appapi.therpfoundation.org/api/health', (res) => { console.log('Production Health Status:', res.statusCode); }).on('error', (e) => { console.log('Production endpoint probe:', e.message); });"
+          node -e "const https = require('https'); const req = https.get('https://appapi.therpfoundation.org/api/health', (res) => { if (res.statusCode !== 200) { console.error('CRITICAL: Production health probe returned HTTP', res.statusCode); process.exit(1); } let body = ''; res.on('data', chunk => body += chunk); res.on('end', () => { try { const parsed = JSON.parse(body); if (parsed.status !== 'ok') { console.error('CRITICAL: Production health probe returned status:', parsed.status); process.exit(1); } console.log('SUCCESS: Production health probe verified status ok (HTTP 200)'); process.exit(0); } catch (err) { console.error('CRITICAL: Failed to parse health response:', err.message); process.exit(1); } }); }); req.on('error', (e) => { console.error('CRITICAL: Production health probe network error:', e.message); process.exit(1); }); req.setTimeout(10000, () => { console.error('CRITICAL: Production health probe timed out after 10s'); req.destroy(); process.exit(1); });"
