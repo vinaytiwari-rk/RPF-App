@@ -93,11 +93,11 @@ export default function Profile() {
   ], [hi]);
 
   const legalItems = [
-    { id: "terms" as const, icon: FileText, title: hi ? "नियम एवं शर्तें" : "Terms & Conditions", sub: hi ? "सेवा व ऐप उपयोग के नियम" : "Terms governing app usage" },
-    { id: "privacy" as const, icon: Lock, title: hi ? "गोपनीयता नीति" : "Privacy Policy", sub: hi ? "डेटा सुरक्षा एवं सुरक्षा नीति" : "Data protection & privacy guidelines" },
-    { id: "disclaimer" as const, icon: AlertTriangle, title: hi ? "अस्वीकरण व सूचना" : "Disclaimer & Notice", sub: hi ? "पारदर्शिता एवं कानूनी घोषणाएं" : "Official transparency statements" },
-    { id: "support" as const, icon: HelpCircle, title: hi ? "सहायता एवं संपर्क" : "Help Desk & Support", sub: hi ? "हेल्पलाइन एवं प्रतिक्रिया" : "Toll-free, email & WhatsApp support" },
-    { id: "about" as const, icon: Info, title: hi ? "ऐप संस्करण एवं जानकारी" : "About App & Version", sub: "Samahit Seva v2.4.0 (Build 2026.08)" },
+    { id: "terms" as const, icon: FileText, title: hi ? "नियम एवं शर्तें" : "Terms & Conditions", sub: hi ? "समाहित उपयोग के नियम व शर्तें" : "Terms governing Samahit usage" },
+    { id: "privacy" as const, icon: Lock, title: hi ? "गोपनीयता नीति" : "Privacy Policy", sub: hi ? "डेटा सुरक्षा व गोपनीयता नीति" : "How we handle information and privacy" },
+    { id: "disclaimer" as const, icon: AlertTriangle, title: hi ? "अस्वीकरण व सूचना" : "Disclaimer & Notice", sub: hi ? "महत्वपूर्ण पारदर्शिता व उत्तरदायित्व सूचनाएं" : "Important transparency and responsibility notices" },
+    { id: "support" as const, icon: HelpCircle, title: hi ? "सहायता एवं संपर्क" : "Help Desk & Support", sub: hi ? "सहायता, समस्या रिपोर्ट व सुझाव" : "Get help, report issues & share feedback" },
+    { id: "about" as const, icon: Info, title: hi ? "ऐप संस्करण एवं जानकारी" : "About App & Version", sub: hi ? "समाहित ऐप, वालंटियर्स व संस्करण" : "About Samahit, volunteers & app version" },
   ];
 
   return (
@@ -255,7 +255,7 @@ export default function Profile() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-lg rounded-[26px] border border-slate-200 bg-white shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+              className="w-full max-w-xl rounded-[26px] border border-slate-200 bg-white shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
             >
               {/* Modal Header */}
               <div className="bg-[#14213D] p-4 flex items-center justify-between text-white shrink-0">
@@ -264,9 +264,9 @@ export default function Profile() {
                   <h3 className="text-sm font-black tracking-wide">
                     {activeModal === "terms" && (hi ? "नियम एवं शर्तें (Terms & Conditions)" : "Terms & Conditions")}
                     {activeModal === "privacy" && (hi ? "गोपनीयता नीति (Privacy Policy)" : "Privacy Policy")}
-                    {activeModal === "disclaimer" && (hi ? "अस्वीकरण व घोषणा (Disclaimer Notice)" : "Disclaimer & Legal Notice")}
-                    {activeModal === "support" && (hi ? "सहायता एवं संपर्क (Help Desk)" : "Help Desk & Support")}
-                    {activeModal === "about" && (hi ? "ऐप विवरण (App Metadata)" : "About Application")}
+                    {activeModal === "disclaimer" && (hi ? "अस्वीकरण व सूचना (Disclaimer Notice)" : "Disclaimer & Legal Notice")}
+                    {activeModal === "support" && (hi ? "सहायता एवं संपर्क (Help Desk & Support)" : "Help Desk & Support")}
+                    {activeModal === "about" && (hi ? "ऐप विवरण (About Samahit)" : "About Samahit & App Version")}
                   </h3>
                 </div>
                 <button 
@@ -277,64 +277,128 @@ export default function Profile() {
                 </button>
               </div>
 
+              {/* Core Consistency Disclaimer Banner */}
+              <div className="bg-amber-50 p-3 border-b border-amber-200/80 text-[11px] leading-relaxed text-[#14213D] font-medium shrink-0 space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-[#D97706]">
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-[#D97706]" />
+                  <span>{hi ? "मुख्य पारदर्शिता घोषणाएं (Core Transparency Notice)" : "Core Organizational Transparency Notice"}</span>
+                </div>
+                <p>• <strong>Samahit is a volunteer-developed application.</strong></p>
+                <p>• <strong>Samahit is not an official government application.</strong></p>
+                <p>• <strong>RP Foundation is not responsible for the Samahit application, its operation, content, functionality, or services.</strong></p>
+                <p className="text-[10px] text-slate-600 italic">Government and third-party websites are independently operated and are not controlled by Samahit. Users should verify important information directly through the relevant official source.</p>
+              </div>
+
               {/* Modal Body Content */}
               <div className="p-5 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-700">
 
                 {activeModal === "terms" && (
-                  <div className="space-y-3">
-                    <div className="rounded-xl bg-amber-50 p-3 border border-amber-200 text-[#14213D] font-medium">
-                      <p className="font-bold text-amber-800 mb-1">{hi ? "सेवा शर्तें संक्षेप:" : "Summary of Terms:"}</p>
-                      {hi 
-                        ? "RP Foundation समाहित पोर्टल का उपयोग समाज सेवा, जन कल्याण और नागरिक सहायता हेतु किया जाता है। सभी उपयोगकर्ताओं से नैतिक और सत्यवादी आचरण की अपेक्षा की जाती है।"
-                        : "RP Foundation Samahit Portal is operated strictly for community service, public welfare, and citizen support. Users are expected to maintain lawful and honest behavior."}
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-extrabold text-[#14213D] text-sm mb-1">Terms & Conditions</h4>
+                      <p className="text-slate-600">Welcome to <strong>Samahit</strong>. Samahit is a volunteer-developed application intended to make useful information, resources, references, and selected services easier to discover and access through a single platform.</p>
+                      <p className="mt-1 text-slate-600">By accessing, browsing, registering with, or using Samahit, you acknowledge that you have read, understood, and agreed to these Terms & Conditions. If you do not agree with these terms, you should discontinue use of the application.</p>
                     </div>
 
-                    <h4 className="font-extrabold text-[#14213D] text-xs uppercase tracking-wider">{hi ? "1. खाता दायित्व" : "1. Account Responsibilities"}</h4>
-                    <p>{hi ? "उपयोगकर्ता को अपना मोबाइल नंबर एवं व्यक्तिगत जानकारी सत्य और अद्यतन रखनी होगी। गलत जानकारी पाए जाने पर खाता निलंबित किया जा सकता है।" : "Users must maintain accurate registration details. False or misleading identity verification may result in account restriction."}</p>
+                    <div className="space-y-2">
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider">1. About Samahit</h5>
+                      <p>Samahit is an independently developed, volunteer-driven application. The application is designed to provide users with convenient access to information, resources, links, references, and other features that may be useful to the community. Samahit may contain information collected, compiled, organized, or presented by volunteers from publicly available or otherwise permissible sources.</p>
 
-                    <h4 className="font-extrabold text-[#14213D] text-xs uppercase tracking-wider">{hi ? "2. स्वयंसेवक आचरण" : "2. Volunteer Code of Conduct"}</h4>
-                    <p>{hi ? "स्वयंसेवक किसी भी मौद्रिक वसूली या अनधिकृत शुल्क की मांग नहीं करेंगे। समस्त जनसेवा निःशुल्क एवं निस्वार्थ भाव से होगी।" : "Volunteers shall not collect monetary fees or unauthorized donations under the organization's name without official receipts."}</p>
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">2. Volunteer-Developed Application</h5>
+                      <p>Samahit is made and maintained by volunteers associated with the Samahit initiative. The application may be developed, maintained, improved, updated, or supported by different volunteers and contributors. Because Samahit is a volunteer-developed initiative, certain features, information, links, and support services may change from time to time.</p>
 
-                    <h4 className="font-extrabold text-[#14213D] text-xs uppercase tracking-wider">{hi ? "3. बौद्धिक संपदा" : "3. Intellectual Property"}</h4>
-                    <p>{hi ? "RP Foundation का लोगो, ब्रांड प्रतीक व जन सेवा कार्ड प्रारूप सर्वाधिकार सुरक्षित हैं।" : "RP Foundation brand assets, logos, and digital Jan Seva Card templates are copyrighted and proprietary."}</p>
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">3. Relationship with RP Foundation</h5>
+                      <p>Samahit may have been developed or supported by volunteers associated with RP Foundation. However: <strong>RP Foundation is not responsible for the Samahit application, its operation, content, functionality, availability, technical performance, information, links, or services.</strong> Samahit must not be interpreted as an official application, product, service, publication, or communication of RP Foundation. Any reference to RP Foundation is provided only to explain the background or association of volunteers involved in the initiative and does not establish responsibility, ownership, endorsement, sponsorship, or operational control.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">4. Not a Government Application</h5>
+                      <p>Samahit is not an official government application or government portal. Samahit is not operated, controlled, administered, or maintained by any government department or government authority unless a specific statement expressly says otherwise. The presence of a government-related link, information, reference, logo, department name, or service description within Samahit does not by itself establish any government affiliation or endorsement.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">5. Government Information and Services</h5>
+                      <p>Samahit may provide links or references to government websites, portals, departments, schemes, services, forms, notifications, or other publicly available resources. Such information is provided primarily for convenience and informational purposes. Government departments may independently change rules, eligibility, procedures, fees, deadlines, or URLs. Users should always verify important information directly through the relevant official government source.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">6. External Websites and Services</h5>
+                      <p>Samahit may contain links to third-party websites or services. These external services are independent of Samahit. Samahit does not own, operate, control, or guarantee external websites. Following an external link subjects users to that website's terms and privacy policies.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">7. Accuracy of Information</h5>
+                      <p>Reasonable efforts are made to provide useful information, but Samahit does not guarantee that information will always be accurate, complete, current, or error-free. Information may become outdated without notice.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">8. User Accounts & Acceptable Use</h5>
+                      <p>Users must provide accurate details when creating accounts and protect login credentials. Users agree to use Samahit responsibly, legally, and without interfering with security, attempting unauthorized access, or distributing malicious code.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">9. Limitation of Responsibility</h5>
+                      <p>To the maximum extent permitted by law, Samahit and its volunteers shall not be responsible for any loss, damage, inconvenience, or consequence resulting from reliance on the application or third-party/government links.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">10. Acceptance of Terms</h5>
+                      <p>By continuing to use Samahit, you acknowledge that you have understood these Terms & Conditions and agree to use the application responsibly.</p>
+                    </div>
                   </div>
                 )}
 
                 {activeModal === "privacy" && (
-                  <div className="space-y-3">
-                    <div className="rounded-xl bg-emerald-50 p-3 border border-emerald-200 text-[#167C5A] font-medium flex items-center gap-2">
-                      <Lock className="h-4 w-4 shrink-0" />
-                      <span>{hi ? "आपका डेटा 256-बिट एन्क्रिप्शन के साथ पूर्णतः सुरक्षित है।" : "Your personal data is encrypted with enterprise 256-bit standards."}</span>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-extrabold text-[#14213D] text-sm mb-1">Privacy Policy</h4>
+                      <p className="text-slate-600">Your privacy is important to us. This Privacy Policy explains how information may be collected, used, stored, protected, and shared when you use Samahit. Samahit is a volunteer-developed application and is not an official government application.</p>
                     </div>
 
-                    <h4 className="font-extrabold text-[#14213D] text-xs uppercase tracking-wider">{hi ? "1. एकत्रित डेटा" : "1. Information Collected"}</h4>
-                    <p>{hi ? "हम केवल नाम, संपर्क नंबर, ईमेल एवं स्वयंसेवक कार्य विवरण ही एकत्र करते हैं। कोई भी व्यक्तिगत वित्तीय डेटा संग्रहित नहीं किया जाता।" : "We collect basic profile attributes (name, phone, email, district, volunteer skills) strictly for service management."}</p>
+                    <div className="space-y-2">
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider">1. Scope of Policy</h5>
+                      <p>This policy applies to information handled through Samahit. It does not automatically apply to external websites or government portals accessed via external links.</p>
 
-                    <h4 className="font-extrabold text-[#14213D] text-xs uppercase tracking-wider">{hi ? "2. डेटा का उपयोग" : "2. Data Usage"}</h4>
-                    <p>{hi ? "आपकी जानकारी का उपयोग केवल आपदा राहत, जन सेवा कार्यों एवं आधिकारिक सूचनाएं भेजने के लिए होता है।" : "Data is utilized strictly for community outreach, relief duty assignment, and verification of official certificates."}</p>
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">2. Information You May Provide</h5>
+                      <p>Depending on features used, Samahit may receive information voluntarily provided by you (e.g. name, email, phone number, login credentials, support feedback). Avoid submitting unnecessary sensitive information.</p>
 
-                    <h4 className="font-extrabold text-[#14213D] text-xs uppercase tracking-wider">{hi ? "3. थर्ड पार्टी शेयरिंग" : "3. Third Party Sharing"}</h4>
-                    <p>{hi ? "आपका डेटा किसी भी व्यावसायिक एजेंसी को बेचा या साझा नहीं किया जाता।" : "We never sell, trade, or monetize your personal identity to commercial advertizers."}</p>
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">3. Technical Information & Security</h5>
+                      <p>Basic technical info (device type, browser, IP, error logs) may be processed for operation, performance, and security. Standard security measures protect account data, though absolute internet security cannot be guaranteed.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">4. How Information is Used</h5>
+                      <p>Information is used strictly to provide features, manage accounts, respond to support inquiries, maintain security, and improve application functionality.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">5. Data Sharing & Third-Party Services</h5>
+                      <p>Data is not sold to commercial advertisers. Technical infrastructure providers process limited data solely to operate hosting, security, and app functions.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">6. RP Foundation</h5>
+                      <p>Samahit is developed by volunteers associated with RP Foundation. <strong>RP Foundation is not responsible for the Samahit application or its privacy practices.</strong></p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">7. Data Deletion & Privacy Inquiries</h5>
+                      <p>Users may request deletion of their account data. Contact support via the app for any privacy inquiries.</p>
+                    </div>
                   </div>
                 )}
 
                 {activeModal === "disclaimer" && (
-                  <div className="space-y-3">
-                    <div className="rounded-xl bg-slate-100 p-3 border border-slate-200 text-slate-800">
-                      <AlertTriangle className="h-4 w-4 text-amber-600 mb-1" />
-                      <p className="font-bold">{hi ? "गैर-सरकारी संगठन घोषणा:" : "Non-Governmental NGO Notice:"}</p>
-                      <p className="text-[11px] mt-0.5">{hi ? "RP Foundation एक स्वतंत्र सामाजिक संगठन है। यह ऐप किसी सरकारी विभाग का आधिकारिक प्रतिनिधित्व नहीं करता।" : "RP Foundation is an independent social welfare trust and does not represent any government department directly."}</p>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-extrabold text-[#14213D] text-sm mb-1">Disclaimer & Notice</h4>
+                      <p className="text-slate-600">Please read this Disclaimer carefully before relying on information available through Samahit.</p>
                     </div>
 
-                    <h4 className="font-extrabold text-[#14213D] text-xs uppercase tracking-wider">{hi ? "सूचनाओं की प्रामाणिकता" : "Authenticity of Information"}</h4>
-                    <p>{hi ? "ऐप में प्रदर्शित समाचार व सरकारी बुलेटिन (PIB, IMD Mausam, NDMA) आधिकारिक सार्वजनिक RSS/APIs स्रोत से प्रदर्शित किए जाते हैं।" : "News headers & disaster alerts from PIB, IMD Weather, and NDMA are ingested directly via public government RSS feeds."}</p>
+                    <div className="space-y-2">
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider">1. Volunteer Initiative & No Govt Affiliation</h5>
+                      <p><strong>Samahit is a volunteer-developed application.</strong> It is not an official government application, government portal, or department. Inclusion of government links or scheme references does not imply official government endorsement or affiliation.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">2. RP Foundation Disclaimer</h5>
+                      <p><strong>RP Foundation is not responsible for Samahit.</strong> References to RP Foundation describe the background of volunteers involved and do not establish ownership or operational control by RP Foundation.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">3. Information May Change</h5>
+                      <p>Government rules, scheme criteria, deadlines, and external links change frequently. Users must independently verify important information directly with official sources.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">4. No Professional Advice or Guarantee</h5>
+                      <p>Content within Samahit does not constitute formal legal, medical, or financial advice. Using Samahit does not guarantee scheme eligibility, employment, or government approvals.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">5. Emergency Situations</h5>
+                      <p><strong>Samahit is not an emergency service.</strong> Do not rely on Samahit for urgent medical, police, fire, or disaster response. Contact official emergency numbers directly.</p>
+                    </div>
                   </div>
                 )}
 
                 {activeModal === "support" && (
-                  <div className="space-y-3">
-                    <p className="font-semibold text-slate-700">{hi ? "किसी भी सहायता या प्रश्न के लिए नीचे दिए गए माध्यमों से संपर्क करें:" : "Contact official support team via available channels:"}</p>
-                    
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-extrabold text-[#14213D] text-sm mb-1">Help Desk & Support</h4>
+                      <p className="text-slate-600">Welcome to Samahit Support. We aim to make Samahit useful, reliable, and easy to use. Contact us for app support, reporting broken links, or submitting feedback.</p>
+                    </div>
+
                     <div className="grid gap-2">
                       <a href={`tel:${settings.tollFree || "18008901234"}`} className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors">
                         <div className="flex items-center gap-2.5">
@@ -358,23 +422,45 @@ export default function Profile() {
                         <ExternalLink className="h-4 w-4 text-slate-400" />
                       </a>
                     </div>
+
+                    <div className="space-y-2 pt-1">
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider">Support Guidelines</h5>
+                      <p>• <strong>Reporting Broken Links & Incorrect Info:</strong> Provide the page name, link, and correct information if available.</p>
+                      <p>• <strong>Government Website Issues:</strong> Government portals are operated independently. Contact the relevant department directly for official submissions.</p>
+                      <p>• <strong>Credentials Safety:</strong> Never share your password, OTP, or secret credentials with support personnel.</p>
+                      <p>• <strong>Response Time:</strong> Samahit is maintained by volunteers; response times may vary.</p>
+                    </div>
                   </div>
                 )}
 
                 {activeModal === "about" && (
-                  <div className="space-y-3 text-center py-2">
-                    <div className="mx-auto w-14 h-14 rounded-2xl bg-[#14213D] text-white flex items-center justify-center font-black text-xl shadow-md">
-                      RPF
+                  <div className="space-y-4">
+                    <div className="text-center py-2 space-y-2">
+                      <div className="mx-auto w-14 h-14 rounded-2xl bg-[#14213D] text-white flex items-center justify-center font-black text-xl shadow-md">
+                        RPF
+                      </div>
+                      <div>
+                        <h4 className="text-base font-black text-[#14213D]">Samahit Application</h4>
+                        <p className="text-[11px] text-[#D97706] font-extrabold uppercase tracking-wider">v2.4.0 • Build 2026.08</p>
+                      </div>
+                      <p className="text-[11px] text-slate-600 max-w-xs mx-auto">
+                        Useful • Simple • Transparent • Accessible • Community-Oriented
+                      </p>
                     </div>
-                    <div>
-                      <h4 className="text-base font-black text-[#14213D]">Samahit Seva App</h4>
-                      <p className="text-[11px] text-[#D97706] font-extrabold uppercase tracking-wider">v2.4.0 • Build 2026.08</p>
-                    </div>
-                    <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
-                      {hi ? "RP Foundation का आधिकारिक डिजिटल सेवा ऐप। जन कल्याण, स्वयंसेवक प्रबंधन एवं त्वरित सहायता हेतु।" : "Official digital portal for RP Foundation community initiatives, volunteer management and civic empowerment."}
-                    </p>
-                    <div className="pt-2 text-[10px] font-bold text-slate-400 border-t border-slate-100">
-                      © 2026 RP Foundation. All Rights Reserved.
+
+                    <div className="space-y-2 border-t border-slate-100 pt-3">
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider">What is Samahit?</h5>
+                      <p>Samahit is a volunteer-developed application created to bring useful information, resources, references, and selected services together in one convenient platform.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">Made by Volunteers</h5>
+                      <p>Samahit is made and maintained by volunteers. Different volunteers participate in development, design, testing, content organization, and support.</p>
+
+                      <h5 className="font-bold text-[#14213D] uppercase text-[11px] tracking-wider pt-2">Relationship with RP Foundation & Govt</h5>
+                      <p>Some volunteers may be associated with RP Foundation, but <strong>RP Foundation is not responsible for the Samahit application, its operation, content, functionality, or services.</strong> Samahit is not an official government app.</p>
+
+                      <p className="text-[10px] font-bold text-slate-400 pt-2 text-center border-t border-slate-100">
+                        © 2026 Samahit Volunteer Initiative. All Rights Reserved.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -398,4 +484,5 @@ export default function Profile() {
     </main>
   );
 }
+
 
