@@ -110,6 +110,8 @@ jobs:
             echo "CRITICAL: DATABASE_URL secret is missing in GitHub repository secrets."
             exit 1
           fi
+          echo "Running safe read-only DATABASE_URL metadata diagnostic..."
+          node scripts/diagnoseDbUrl.cjs
           echo "Executing database migrations against production database..."
           node scripts/runMigrations.cjs
       - name: Deploy to cPanel (Deployment Critical)
