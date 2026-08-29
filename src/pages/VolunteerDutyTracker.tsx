@@ -251,10 +251,6 @@ export default function VolunteerDutyTracker() {
   // Handle Field Report Submit
   const handleReportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) {
-      navigate("/login");
-      return;
-    }
     if (!reportTitle.trim()) return;
 
     setSubmittingReport(true);
@@ -273,36 +269,51 @@ export default function VolunteerDutyTracker() {
       } catch {}
     }
 
-    try {
-      const res = await fetch("/api/volunteers/reports/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: reportTitle,
-          description: reportDesc,
-          locationName: reportLoc || "On-Field Location",
-          imageUrl: reportImage,
-          latitude,
-          longitude,
-        }),
-      });
+    const reportObj = {
+      id: `report-${Date.now()}`,
+      title: reportTitle,
+      description: reportDesc,
+      locationName: reportLoc || "On-Field Location",
+      imageUrl: reportImage,
+      latitude,
+      longitude,
+      date: new Date().toISOString()
+    };
 
-      if (res.ok) {
-        setReportSuccess(true);
-        setReportTitle("");
-        setReportDesc("");
-        setReportLoc("");
-        setReportImage("");
-        fetchLeaderboard();
+    try {
+      const saved = JSON.parse(localStorage.getItem("@rpf_field_reports") || "[]");
+      localStorage.setItem("@rpf_field_reports", JSON.stringify([reportObj, ...saved]));
+    } catch {}
+
+    if (token) {
+      try {
+        await fetch("/api/volunteers/reports/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: reportTitle,
+            description: reportDesc,
+            locationName: reportLoc || "On-Field Location",
+            imageUrl: reportImage,
+            latitude,
+            longitude,
+          }),
+        });
+      } catch (e) {
+        console.warn("Server report submit failed, saved locally:", e);
       }
-    } catch (e) {
-      console.error("Report submit error:", e);
-    } finally {
-      setSubmittingReport(false);
     }
+
+    setReportSuccess(true);
+    setReportTitle("");
+    setReportDesc("");
+    setReportLoc("");
+    setReportImage("");
+    setSubmittingReport(false);
+    fetchLeaderboard();
   };
 
   const formatHMS = (secs: number) => {
