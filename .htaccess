@@ -22,13 +22,22 @@ PassengerMaxPoolSize 2
   RewriteEngine On
   RewriteBase /
 
-  # Direct static PHP scripts to Apache PHP handler
+  # Keep PHP scripts on the PHP handler.
   RewriteCond %{REQUEST_FILENAME} \.php$
   RewriteRule ^ - [L]
 
-  # Block any direct attempts to fetch uncompiled dev source files
+  # Never allow uncompiled Vite/TypeScript source to be served in production.
   RewriteRule ^src/ - [F,L]
+
+  # LiteSpeed can serve the document root before Passenger. Explicitly route
+  # the production SPA shell and its compiled assets from dist/.
+  RewriteRule ^$ dist/index.html [L]
+  RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
+
+  # SPA routes use the compiled production shell; API routes remain Passenger/Express.
+  RewriteCond %{REQUEST_URI} !^/api/
+  RewriteCond %{REQUEST_URI} !^/assets/
+  RewriteCond %{REQUEST_URI} !^/src/
+  RewriteCond %{REQUEST_URI} !\.php$
+  RewriteRule ^.+$ dist/index.html [L]
 </IfModule>
-
-
-
