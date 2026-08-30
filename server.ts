@@ -232,12 +232,10 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 
-const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/rp_foundation";
-const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false";
-const pool = new pg.Pool({
-    connectionString: dbUrl,
-    ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized }
-});
+import { getPgPoolConfig } from './src/db/dbPool';
+
+const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://rp_admin:therpfoundation%40321@localhost:5432/rp_db";
+const pool = new pg.Pool(getPgPoolConfig(dbUrl));
 
 pool.on('error', (err: any) => {
     console.error('Unexpected error on idle database pool client:', err?.message || err);

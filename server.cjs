@@ -338175,8 +338175,13 @@ var pool3 = new esm_default.Pool({
   connectionString: dbUrl2,
   ssl: dbUrl2.includes("localhost") || dbUrl2.includes("127.0.0.") ? false : { rejectUnauthorized }
 });
+pool3.on("error", (err2) => {
+  console.error("Unexpected error on idle database pool client:", err2?.message || err2);
+});
 setDbPool(pool3);
-void runMigrationsOnPool(pool3);
+void runMigrationsOnPool(pool3).catch((err2) => {
+  console.error("Server boot migration error:", err2?.message || err2);
+});
 app.get("/api/health", async (req2, res) => {
   try {
     await pool3.query("SELECT 1");
