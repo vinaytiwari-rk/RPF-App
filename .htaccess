@@ -21,6 +21,10 @@ PassengerMaxPoolSize 2
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Direct static PHP scripts to Apache PHP handler
+  RewriteCond %{REQUEST_FILENAME} \.php$
+  RewriteRule ^ - [L]
 </IfModule>
 
 
