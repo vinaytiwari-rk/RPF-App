@@ -334891,7 +334891,9 @@ router15.get("/api/community/chat/messages", async (_req, res) => {
 router15.get("/api/public/volunteers", async (req2, res) => {
   try {
     const { city, skill } = req2.query;
-    const conditions = [`approval_status = 'approved'`];
+    await pool.query(`ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS role VARCHAR(100) DEFAULT 'Volunteer'; ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'approved';`).catch(() => {
+    });
+    const conditions = [`COALESCE(approval_status, 'approved') = 'approved'`];
     const params = [];
     if (city) {
       params.push(`%${city}%`);
@@ -334901,7 +334903,7 @@ router15.get("/api/public/volunteers", async (req2, res) => {
       params.push(`%${skill}%`);
       conditions.push(`skills::text ILIKE $${params.length}`);
     }
-    const result = await pool.query(`SELECT id, full_name AS name, avatar, city, area_locality, skills, availability, role, constituency_allocation, "registeredAt" FROM volunteers WHERE ${conditions.join(" AND ")} ORDER BY full_name ASC`, params);
+    const result = await pool.query(`SELECT id, full_name AS name, avatar, city, area_locality, skills, availability, COALESCE(role, 'Volunteer') AS role, constituency_allocation, "registeredAt" FROM volunteers WHERE ${conditions.join(" AND ")} ORDER BY full_name ASC`, params);
     res.json({ success: true, data: result.rows });
   } catch (error3) {
     res.status(500).json({ success: false, error: error3.message });
