@@ -25,6 +25,12 @@ export default defineConfig(() => {
       chunkSizeWarningLimit: 600,
       rollupOptions: {
         output: {
+          // Keep the browser entry filename stable. This is important for the
+          // LiteSpeed/cPanel document-root index.html, which can be served
+          // directly without passing through Express/Passenger.
+          entryFileNames: 'assets/app.js',
+          chunkFileNames: 'assets/chunks/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash][extname]',
           manualChunks(id) {
             if (!id.includes('node_modules')) return;
 
