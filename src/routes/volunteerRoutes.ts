@@ -26,6 +26,25 @@ router.post("/api/volunteers", authenticateToken, async (req: any, res) => { try
 router.get("/api/volunteers", authenticateToken, requireAdmin, async (_req, res) => { try { const result = await pool.query('SELECT id, full_name as name, email, mobile as phone, approval_status as status, "registeredAt" FROM volunteers ORDER BY "registeredAt" DESC'); res.json({ volunteers: result.rows }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
 router.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => { try { await pool.query("DELETE FROM volunteers WHERE id = $1", [req.params.id]); res.json({ success: true }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
 router.get("/api/community/chat/messages", async (_req, res) => { try { const result = await pool.query(`SELECT id, "authorName", "authorAvatar", text, "createdAt" FROM community_chat_messages ORDER BY "createdAt" DESC LIMIT 50`); res.json({ success: true, data: result.rows.reverse() }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
-router.get("/api/public/volunteers", async (req, res) => { try { const { city, skill } = req.query; const conditions: string[] = [`approval_status = 'approved'`]; const params: any[] = []; if (city) { params.push(`%${city}%`); conditions.push(`city ILIKE $${params.length}`); } if (skill) { params.push(`%${skill}%`); conditions.push(`skills::text ILIKE $${params.length}`); } const result = await pool.query(`SELECT id, full_name AS name, avatar, city, area_locality, skills, availability, role, constituency_allocation, "registeredAt" FROM volunteers WHERE ${conditions.join(" AND ")} ORDER BY full_name ASC`, params); res.json({ success: true, data: result.rows }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
+router.get("/api/public/volunteers", async (req, res) => {
+  try {
+    const { city, skill } = req.query;
+    await pool.query(`ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS role VARCHAR(100) DEFAULT 'Volunteer'; ALTER TABLE volunteers ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'approved';`).catch(() => {});
+    const conditions: string[] = [`COALESCE(approval_status, 'approved') = 'approved'`];
+    const params: any[] = [];
+    if (city) {
+      params.push(`%${city}%`);
+      conditions.push(`city ILIKE $${params.length}`);
+    }
+    if (skill) {
+      params.push(`%${skill}%`);
+      conditions.push(`skills::text ILIKE $${params.length}`);
+    }
+    const result = await pool.query(`SELECT id, full_name AS name, avatar, city, area_locality, skills, availability, COALESCE(role, 'Volunteer') AS role, constituency_allocation, "registeredAt" FROM volunteers WHERE ${conditions.join(" AND ")} ORDER BY full_name ASC`, params);
+    res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 export default router;
