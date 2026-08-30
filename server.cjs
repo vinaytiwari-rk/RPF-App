@@ -338492,7 +338492,9 @@ app.post("/api/admin/field-reports/approve", authenticateToken, requireAdmin, as
 });
 async function startServer2() {
   loadACGeoJsonAsync().catch((err2) => console.error("Error loading GeoJSON in background", err2));
-  if (process.env.NODE_ENV !== "production") {
+  const distPath = import_path14.default.join(process.cwd(), "dist");
+  const distIndexHtmlExists = import_fs10.default.existsSync(import_path14.default.join(distPath, "index.html"));
+  if (!distIndexHtmlExists && process.env.NODE_ENV === "development") {
     const { createServer: createViteServer } = await Promise.resolve().then(() => (init_node2(), node_exports2));
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -338500,7 +338502,6 @@ async function startServer2() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = import_path14.default.join(process.cwd(), "dist");
     app.use(import_express29.default.static(distPath));
     app.get("*", (req2, res) => {
       res.sendFile(import_path14.default.join(distPath, "index.html"));
