@@ -1,3 +1,11 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home/vfpmlbpv/appapi.therpfoundation.org"
+PassengerBaseURI "/"
+PassengerNodejs "/home/vfpmlbpv/nodevenv/appapi.therpfoundation.org/22/bin/node"
+PassengerAppType node
+PassengerStartupFile server.cjs
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
@@ -13,3 +21,4 @@
   # Single Page Application (SPA) fallback to index.html
   RewriteRule ^ index.html [L]
 </IfModule>
+
