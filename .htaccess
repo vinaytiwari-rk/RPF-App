@@ -6,9 +6,20 @@ PassengerAppType node
 PassengerStartupFile app.js
 # DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
 
+# Disable Imunify360 Web Shield Bot Protection for API routes
+<IfModule mod_env.c>
+  SetEnvIf Request_URI "^/api/" imunify360_disabled=1
+  SetEnvIf Request_URI "^/api/health" imunify360_disabled=1
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 </IfModule>
+
 
 
