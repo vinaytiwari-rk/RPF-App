@@ -246,8 +246,8 @@ app.get("/api/health", async (req, res) => {
   try {
     await pool.query("SELECT 1");
     res.json({ status: "ok" });
-  } catch {
-    res.status(503).json({ status: "degraded" });
+  } catch (err: any) {
+    res.status(503).json({ status: "degraded", error: err.message });
   }
 });
 
