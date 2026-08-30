@@ -66,26 +66,31 @@ export function AuthProvider({children}:{children:React.ReactNode}){
       if(!stored){
         setToken(null);
         setUser(null);
+        setIsLoading(false);
         return;
       }
       const parsed:User=JSON.parse(stored);
       setToken(storedToken);
       setUser(parsed);
+      setIsLoading(false);
+
       if(storedToken){
-        try {
-          const res=await fetch(apiUrl('/api/auth/me'),{headers:{Authorization:`Bearer ${storedToken}`}});
-          if(res.ok){
-            const data=await res.json();
-            if(data.success&&data.user){
-              const fresh=data.user as Partial<User>;
-              const merged={...parsed,...fresh,role:(fresh.role as UserRole)??parsed.role,name:fresh.name??parsed.name,displayName:fresh.displayName??fresh.name??parsed.name,janSevaCardStatus:(fresh.janSevaCardStatus as User['janSevaCardStatus'])||parsed.janSevaCardStatus||'none'} as User;
-              await setPersistentItem(STORAGE_KEY,JSON.stringify(merged));
-              setUser(merged);
+        void (async () => {
+          try {
+            const res=await fetch(apiUrl('/api/auth/me'),{headers:{Authorization:`Bearer ${storedToken}`}});
+            if(res.ok){
+              const data=await res.json();
+              if(data.success&&data.user){
+                const fresh=data.user as Partial<User>;
+                const merged={...parsed,...fresh,role:(fresh.role as UserRole)??parsed.role,name:fresh.name??parsed.name,displayName:fresh.displayName??fresh.name??parsed.name,janSevaCardStatus:(fresh.janSevaCardStatus as User['janSevaCardStatus'])||parsed.janSevaCardStatus||'none'} as User;
+                await setPersistentItem(STORAGE_KEY,JSON.stringify(merged));
+                setUser(merged);
+              }
             }
+          } catch {
+            /* cached session remains authoritative; network or refresh failures must not force logout */
           }
-        } catch {
-          /* cached session remains authoritative; network or refresh failures must not force logout */
-        }
+        })();
       }
     } catch {
       await clearSession();
@@ -96,8 +101,10 @@ export function AuthProvider({children}:{children:React.ReactNode}){
 
   useEffect(()=>{
     void loadUser();
+    const authSafetyGuard = setTimeout(() => setIsLoading(false), 800);
     const stored=localStorage.getItem(LANG_KEY) as 'en'|'hi'|null;
     if(stored==='en'||stored==='hi')setLanguageState(stored);
+    return () => clearTimeout(authSafetyGuard);
   },[]);
 
   const setLanguage=(lang:'en'|'hi')=>{

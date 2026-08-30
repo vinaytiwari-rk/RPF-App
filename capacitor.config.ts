@@ -9,6 +9,6 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   ios: { contentInset: 'automatic', backgroundColor: '#f8fafc' },
   android: { backgroundColor: '#f8fafc' },
-  plugins: { CapacitorUpdater: { autoUpdate: true } }
+  plugins: { CapacitorUpdater: { autoUpdate: false } }
 };
 export default config;
