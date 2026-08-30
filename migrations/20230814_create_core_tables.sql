@@ -1,7 +1,10 @@
 -- Migration: Create core functional tables for RPF-App
 -- Date: 2023-08-14 (YYYYMMDD naming convention)
--- This migration adds tables that were identified as missing in the Phase 5 audit.
--- All tables include foreign key to users(id) where appropriate and timestamps.
+CREATE OR REPLACE FUNCTION gen_random_uuid() RETURNS uuid AS $$
+BEGIN
+  RETURN md5(random()::text || clock_timestamp()::text)::uuid;
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE TABLE announcements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

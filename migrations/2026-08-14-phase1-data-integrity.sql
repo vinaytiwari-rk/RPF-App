@@ -1,4 +1,9 @@
 -- Phase 1 data-integrity foundation.
+CREATE OR REPLACE FUNCTION gen_random_uuid() RETURNS uuid AS $$
+BEGIN
+  RETURN md5(random()::text || clock_timestamp()::text)::uuid;
+END;
+$$ LANGUAGE plpgsql;
 -- Canonical multilingual content: one logical field, locale resolved by the app.
 CREATE TABLE IF NOT EXISTS service_content (
   id SERIAL PRIMARY KEY,
