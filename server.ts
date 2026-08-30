@@ -873,7 +873,10 @@ async function startServer() {
   // Load GeoJSON data in the background
   loadACGeoJsonAsync().catch(err => console.error("Error loading GeoJSON in background", err));
 
-  if (process.env.NODE_ENV !== "production") {
+  const distPath = path.join(process.cwd(), "dist");
+  const distIndexHtmlExists = fs.existsSync(path.join(distPath, "index.html"));
+
+  if (!distIndexHtmlExists && process.env.NODE_ENV === "development") {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -881,7 +884,6 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
