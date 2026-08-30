@@ -3,7 +3,7 @@ PassengerAppRoot "/home/vfpmlbpv/appapi.therpfoundation.org"
 PassengerBaseURI "/"
 PassengerNodejs "/home/vfpmlbpv/nodevenv/appapi.therpfoundation.org/22/bin/node"
 PassengerAppType node
-PassengerStartupFile app.js
+PassengerStartupFile server.cjs
 PassengerMinInstances 1
 PassengerMaxPoolSize 2
 # DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
