@@ -239,8 +239,14 @@ const pool = new pg.Pool({
     ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized }
 });
 
+pool.on('error', (err: any) => {
+    console.error('Unexpected error on idle database pool client:', err?.message || err);
+});
+
 setDbPool(pool);
-void runMigrationsOnPool(pool);
+void runMigrationsOnPool(pool).catch((err: any) => {
+    console.error('Server boot migration error:', err?.message || err);
+});
 
 app.get("/api/health", async (req, res) => {
   try {

@@ -338181,8 +338181,8 @@ app.get("/api/health", async (req2, res) => {
   try {
     await pool3.query("SELECT 1");
     res.json({ status: "ok" });
-  } catch {
-    res.status(503).json({ status: "degraded" });
+  } catch (err2) {
+    res.status(503).json({ status: "degraded", error: err2.message });
   }
 });
 app.use("/api/admin/hq", adminHqRoutes_default);
