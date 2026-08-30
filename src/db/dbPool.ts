@@ -13,14 +13,14 @@ export function getPgPoolConfig(rawUrl?: string) {
   let database = "rp_db";
 
   try {
-    const u = new URL(connStr);
+    const u = new URL(connStr.replace(/@base(?=[:\/]|$)/g, '@localhost'));
     if (u.username) user = decodeURIComponent(u.username);
     if (u.password) password = decodeURIComponent(u.password);
     if (u.hostname && u.hostname !== 'base' && !u.hostname.includes('base')) host = u.hostname;
     if (u.port) port = parseInt(u.port, 10);
     if (u.pathname && u.pathname !== '/') database = u.pathname.replace(/^\//, '');
   } catch {
-    const match = connStr.match(/postgresql:\/\/([^:]+):([^@]+)@([^:\/]+):?(\d+)?\/(.+)/);
+    const match = connStr.replace(/@base(?=[:\/]|$)/g, '@localhost').match(/postgresql:\/\/([^:]+):([^@]+)@([^:\/]+):?(\d+)?\/(.+)/);
     if (match) {
       user = decodeURIComponent(match[1]);
       password = decodeURIComponent(match[2]);
@@ -30,9 +30,8 @@ export function getPgPoolConfig(rawUrl?: string) {
     }
   }
 
-  if (!host || host === 'base' || host.includes('base')) {
-    host = 'localhost';
-  }
+  // Force localhost for local cPanel PostgreSQL
+  host = 'localhost';
 
   return {
     user,

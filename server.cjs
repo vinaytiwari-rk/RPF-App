@@ -287149,11 +287149,42 @@ var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 // src/db/dbPool.ts
 var import_dotenv = __toESM(require_main(), 1);
 import_dotenv.default.config();
-var dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/rp_foundation";
-var pool = new esm_default.Pool({
-  connectionString: dbUrl,
-  ssl: dbUrl.includes("localhost") || dbUrl.includes("127.0.0.") ? false : { rejectUnauthorized: false }
-});
+function getPgPoolConfig(rawUrl) {
+  const connStr = rawUrl || process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://rp_admin:therpfoundation%40321@localhost:5432/rp_db";
+  let user = "rp_admin";
+  let password = "therpfoundation@321";
+  let host = "localhost";
+  let port = 5432;
+  let database = "rp_db";
+  try {
+    const u3 = new URL(connStr.replace(/@base(?=[:\/]|$)/g, "@localhost"));
+    if (u3.username) user = decodeURIComponent(u3.username);
+    if (u3.password) password = decodeURIComponent(u3.password);
+    if (u3.hostname && u3.hostname !== "base" && !u3.hostname.includes("base")) host = u3.hostname;
+    if (u3.port) port = parseInt(u3.port, 10);
+    if (u3.pathname && u3.pathname !== "/") database = u3.pathname.replace(/^\//, "");
+  } catch {
+    const match2 = connStr.replace(/@base(?=[:\/]|$)/g, "@localhost").match(/postgresql:\/\/([^:]+):([^@]+)@([^:\/]+):?(\d+)?\/(.+)/);
+    if (match2) {
+      user = decodeURIComponent(match2[1]);
+      password = decodeURIComponent(match2[2]);
+      host = match2[3] && !match2[3].includes("base") ? match2[3] : "localhost";
+      port = match2[4] ? parseInt(match2[4], 10) : 5432;
+      database = match2[5];
+    }
+  }
+  host = "localhost";
+  return {
+    user,
+    password,
+    host,
+    port,
+    database,
+    ssl: false
+  };
+}
+var dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://rp_admin:therpfoundation%40321@localhost:5432/rp_db";
+var pool = new esm_default.Pool(getPgPoolConfig());
 
 // src/db/middleware.js
 var configuredSecret = process.env.JWT_SECRET?.trim();
@@ -338169,12 +338200,8 @@ app.use(adminDynamicRoutes_default);
 var rpID2 = process.env.WEBAUTHN_RP_ID || "localhost";
 var originUrl2 = `https://${rpID2}`;
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
-var dbUrl2 = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/rp_foundation";
-var rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false";
-var pool3 = new esm_default.Pool({
-  connectionString: dbUrl2,
-  ssl: dbUrl2.includes("localhost") || dbUrl2.includes("127.0.0.") ? false : { rejectUnauthorized }
-});
+var dbUrl2 = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://rp_admin:therpfoundation%40321@localhost:5432/rp_db";
+var pool3 = new esm_default.Pool(getPgPoolConfig(dbUrl2));
 pool3.on("error", (err2) => {
   console.error("Unexpected error on idle database pool client:", err2?.message || err2);
 });
