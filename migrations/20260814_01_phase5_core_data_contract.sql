@@ -4,7 +4,7 @@
 
 BEGIN;
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Announcements are managed by the Administrator and consumed by Home/notifications.
 CREATE TABLE IF NOT EXISTS announcements (

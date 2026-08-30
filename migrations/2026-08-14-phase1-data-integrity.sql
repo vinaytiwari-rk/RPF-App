@@ -17,7 +17,7 @@ ALTER TABLE service_content ALTER COLUMN content SET DEFAULT '{}'::jsonb;
 ALTER TABLE service_content ALTER COLUMN content SET NOT NULL;
 
 -- Administrator audit trail: one canonical event stream for administrative mutations.
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TABLE IF NOT EXISTS administrator_audit_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   actor_user_id VARCHAR(255) NOT NULL,

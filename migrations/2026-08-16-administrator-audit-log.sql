@@ -1,5 +1,5 @@
 -- Phase 1: persistent administrator audit trail.
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- -- CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS administrator_audit_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
