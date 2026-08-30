@@ -9,16 +9,6 @@ PassengerStartupFile server.cjs
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-
-  # Direct API requests to server.cjs Node.js application handler
-  RewriteRule ^api/(.*)$ server.cjs [L,QSA]
-
-  # Serve existing static assets from dist or public
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
-
-  # Single Page Application (SPA) fallback to index.html
-  RewriteRule ^ index.html [L]
 </IfModule>
+
 
