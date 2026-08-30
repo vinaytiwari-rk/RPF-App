@@ -338501,9 +338501,10 @@ async function startServer2() {
       appType: "spa"
     });
     app.use(vite.middlewares);
-  } else {
+  } else if (distIndexHtmlExists) {
     app.use(import_express29.default.static(distPath));
-    app.get("*", (req2, res) => {
+    app.get("*", (req2, res, next2) => {
+      if (req2.path.startsWith("/api/")) return next2();
       res.sendFile(import_path14.default.join(distPath, "index.html"));
     });
   }

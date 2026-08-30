@@ -3,7 +3,7 @@ PassengerAppRoot "/home/vfpmlbpv/appapi.therpfoundation.org"
 PassengerBaseURI "/"
 PassengerNodejs "/home/vfpmlbpv/nodevenv/appapi.therpfoundation.org/22/bin/node"
 PassengerAppType node
-PassengerStartupFile server.cjs
+PassengerStartupFile app.js
 PassengerMinInstances 1
 PassengerMaxPoolSize 2
 # DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
@@ -25,6 +25,9 @@ PassengerMaxPoolSize 2
   # Direct static PHP scripts to Apache PHP handler
   RewriteCond %{REQUEST_FILENAME} \.php$
   RewriteRule ^ - [L]
+
+  # Block any direct attempts to fetch uncompiled dev source files
+  RewriteRule ^src/ - [F,L]
 </IfModule>
 
 
