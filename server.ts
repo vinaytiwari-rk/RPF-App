@@ -920,7 +920,10 @@ process.on('unhandledRejection', (reason, promise) => {
 
   const server = http.createServer(app);
   const io = new SocketIOServer(server, {
-    cors: corsOptions
+    cors: {
+      origin: "*",
+      credentials: true
+    }
   });
 
   io.use(async (socket, next) => {

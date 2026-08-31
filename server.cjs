@@ -15954,13 +15954,13 @@ var require_lib = __commonJS({
             if (err2) {
               next2(err2);
             } else {
-              var corsOptions2 = assign({}, defaults3, options2);
+              var corsOptions = assign({}, defaults3, options2);
               var originCallback = null;
-              if (corsOptions2.origin && typeof corsOptions2.origin === "function") {
-                originCallback = corsOptions2.origin;
-              } else if (corsOptions2.origin) {
+              if (corsOptions.origin && typeof corsOptions.origin === "function") {
+                originCallback = corsOptions.origin;
+              } else if (corsOptions.origin) {
                 originCallback = function(origin2, cb) {
-                  cb(null, corsOptions2.origin);
+                  cb(null, corsOptions.origin);
                 };
               }
               if (originCallback) {
@@ -15968,8 +15968,8 @@ var require_lib = __commonJS({
                   if (err22 || !origin2) {
                     next2(err22);
                   } else {
-                    corsOptions2.origin = origin2;
-                    cors(corsOptions2, req2, res, next2);
+                    corsOptions.origin = origin2;
+                    cors(corsOptions, req2, res, next2);
                   }
                 });
               } else {
@@ -262379,13 +262379,13 @@ ${e3.message}`);
             if (err2) {
               next2(err2);
             } else {
-              var corsOptions2 = assign({}, defaults3, options2);
+              var corsOptions = assign({}, defaults3, options2);
               var originCallback = null;
-              if (corsOptions2.origin && typeof corsOptions2.origin === "function") {
-                originCallback = corsOptions2.origin;
-              } else if (corsOptions2.origin) {
+              if (corsOptions.origin && typeof corsOptions.origin === "function") {
+                originCallback = corsOptions.origin;
+              } else if (corsOptions.origin) {
                 originCallback = function(origin2, cb) {
-                  cb(null, corsOptions2.origin);
+                  cb(null, corsOptions.origin);
                 };
               }
               if (originCallback) {
@@ -262393,8 +262393,8 @@ ${e3.message}`);
                   if (err22 || !origin2) {
                     next2(err22);
                   } else {
-                    corsOptions2.origin = origin2;
-                    cors(corsOptions2, req2, res, next2);
+                    corsOptions.origin = origin2;
+                    cors(corsOptions, req2, res, next2);
                   }
                 });
               } else {
@@ -331910,7 +331910,10 @@ async function startServer2() {
   });
   const server = import_http5.default.createServer(app);
   const io2 = new Server(server, {
-    cors: corsOptions
+    cors: {
+      origin: "*",
+      credentials: true
+    }
   });
   io2.use(async (socket, next2) => {
     const token = socket.handshake.auth?.token;
