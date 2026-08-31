@@ -21,6 +21,8 @@ PassengerMaxPoolSize 2
   Header always set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma"
   Header always set Access-Control-Max-Age "86400"
   Header always set Vary "Origin"
+  AddType application/javascript .js .mjs
+  AddType text/css .css
 </IfModule>
 
 <IfModule mod_rewrite.c>
@@ -34,15 +36,13 @@ PassengerMaxPoolSize 2
   # Never allow uncompiled Vite/TypeScript source to be served in production.
   RewriteRule ^src/ - [F,L]
 
-  # IMPORTANT: stop per-directory rewrite processing after an internal dist/ rewrite.
-  # Without this, /assets/*.js is rewritten to dist/assets/*.js and then processed
-  # again by the SPA fallback, which returns index.html as text/html. Browsers then
-  # reject the JavaScript/CSS because of the MIME type.
-  RewriteRule ^dist/ - [END]
+  # Stop a second per-directory rewrite pass after an internal dist/ rewrite.
+  # [L] is deliberately used here for broad Apache/LiteSpeed compatibility.
+  RewriteRule ^dist/ - [L]
 
   # Serve the compiled production SPA shell and compiled assets from dist/.
-  RewriteRule ^$ dist/index.html [END]
-  RewriteRule ^assets/(.*)$ dist/assets/$1 [END]
+  RewriteRule ^$ dist/index.html [L]
+  RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
 
   # SPA routes use the compiled production shell; API routes remain Passenger/Express.
   RewriteCond %{REQUEST_URI} !^/api/
@@ -50,5 +50,5 @@ PassengerMaxPoolSize 2
   RewriteCond %{REQUEST_URI} !^/src/
   RewriteCond %{REQUEST_URI} !^/dist/
   RewriteCond %{REQUEST_URI} !\.php$
-  RewriteRule ^.+$ dist/index.html [END]
+  RewriteRule ^.+$ dist/index.html [L]
 </IfModule>
