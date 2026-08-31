@@ -36,9 +36,9 @@ PassengerMaxPoolSize 2
   # Never allow uncompiled Vite/TypeScript source to be served in production.
   RewriteRule ^src/ - [F,L]
 
-  # The deployment mirrors dist/assets into the document-root assets directory.
-  # Stop rewrite processing so real JS/CSS/image files are served directly.
-  RewriteRule ^assets/ - [L]
+  # Vite writes production assets inside dist/assets. Map public /assets/*
+  # requests to the actual deployed files instead of returning the SPA/error HTML.
+  RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
   RewriteRule ^version\.json$ - [L]
 
   # Do not re-enter the rewrite rules for generated deployment files.
