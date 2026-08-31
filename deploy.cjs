@@ -62,7 +62,21 @@ async function main() {
     if (fs.existsSync('index.html')) {
       await withFreshConnection('production index.html upload', (client) => client.uploadFrom('index.html', 'index.html'));
     }
+
     await withFreshConnection('dist upload', (client) => client.uploadFromDir('dist', 'dist'));
+
+    // Static assets are mirrored to the document root so Apache/LiteSpeed can
+    // serve them directly, without SPA rewrite/fallback interference.
+    if (fs.existsSync('dist/assets')) {
+      await withFreshConnection('root assets mirror upload', (client) => client.uploadFromDir('dist/assets', 'assets'));
+      console.log('dist/assets mirrored to document-root assets/');
+    }
+
+    // Publish the generated web version at the root for the native app updater.
+    if (fs.existsSync('dist/version.json')) {
+      await withFreshConnection('root version.json upload', (client) => client.uploadFrom('dist/version.json', 'version.json'));
+    }
+
     if (fs.existsSync('migrations')) {
       await withFreshConnection('migrations upload', (client) => client.uploadFromDir('migrations', 'migrations'));
       console.log('migrations directory uploaded');
