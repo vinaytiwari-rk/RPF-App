@@ -15,8 +15,6 @@ PassengerMaxPoolSize 2
 </IfModule>
 
 # API CORS: the frontend uses bearer-token authorization, not cookie credentials.
-# Keep this wildcard at the web-server layer so CORS is present even when
-# Passenger/Express is not the component producing the response.
 <IfModule mod_headers.c>
   Header always set Access-Control-Allow-Origin "*"
   Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE, PATCH"
@@ -36,15 +34,21 @@ PassengerMaxPoolSize 2
   # Never allow uncompiled Vite/TypeScript source to be served in production.
   RewriteRule ^src/ - [F,L]
 
-  # LiteSpeed can serve the document root before Passenger. Explicitly route
-  # the production SPA shell and its compiled assets from dist/.
-  RewriteRule ^$ dist/index.html [L]
-  RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
+  # IMPORTANT: stop per-directory rewrite processing after an internal dist/ rewrite.
+  # Without this, /assets/*.js is rewritten to dist/assets/*.js and then processed
+  # again by the SPA fallback, which returns index.html as text/html. Browsers then
+  # reject the JavaScript/CSS because of the MIME type.
+  RewriteRule ^dist/ - [END]
+
+  # Serve the compiled production SPA shell and compiled assets from dist/.
+  RewriteRule ^$ dist/index.html [END]
+  RewriteRule ^assets/(.*)$ dist/assets/$1 [END]
 
   # SPA routes use the compiled production shell; API routes remain Passenger/Express.
   RewriteCond %{REQUEST_URI} !^/api/
   RewriteCond %{REQUEST_URI} !^/assets/
   RewriteCond %{REQUEST_URI} !^/src/
+  RewriteCond %{REQUEST_URI} !^/dist/
   RewriteCond %{REQUEST_URI} !\.php$
-  RewriteRule ^.+$ dist/index.html [L]
+  RewriteRule ^.+$ dist/index.html [END]
 </IfModule>
