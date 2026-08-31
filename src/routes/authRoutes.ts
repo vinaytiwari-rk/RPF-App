@@ -20,6 +20,20 @@ const originUrl = process.env.WEBAUTHN_ORIGIN?.trim() || (() => { if (process.en
 const publicAppUrl = process.env.PUBLIC_APP_URL?.trim() || (() => { if (process.env.NODE_ENV === 'production') console.error('CRITICAL WARNING: PUBLIC_APP_URL missing in production.'); return 'http://localhost:5173'; })();
 const webAuthnChallengeStore = new Map();
 
+async function ensureSessionsTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id VARCHAR(255) PRIMARY KEY,
+      user_id VARCHAR(255) NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)`);
+}
+
 router.post("/api/auth/register", async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
@@ -108,6 +122,7 @@ router.post("/api/auth/login", async (req, res) => {
     // non-critical audit logging. Persist the session first, then audit
     // independently so we can identify the real failing subsystem.
     try {
+      await ensureSessionsTable();
       await pool.query(
         `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
         ["sess-" + Date.now() + crypto.randomBytes(4).toString("hex"), userPayload.id, token]
