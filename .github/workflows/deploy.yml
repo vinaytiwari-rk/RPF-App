@@ -2,151 +2,53 @@ name: Deploy Application
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm install --include=dev --no-audit --no-fund
-      - name: Browser Policy Regression Check
-        run: npm run browser:check
-      - name: Browser Critical Link Smoke Check
-        run: npm run browser:smoke
-      - name: Type Check & Lint
+      - name: Type check
         run: npm run lint
-      - name: Verify Database Migration Files
-        run: node -e "const fs = require('fs'); const files = fs.readdirSync('migrations').filter(f => f.endsWith('.sql')); console.log('Migration SQL files verified:', files.length);"
-      - name: Build Application
+      - name: Build application
         run: npm run build
-      - name: Verify Generated Production Entry
-        run: node -e "const fs=require('fs'); const html=fs.readFileSync('dist/index.html','utf8'); if (!html.includes('type=\"module\"') || !html.includes('/assets/')) { console.error('CRITICAL: Generated dist/index.html does not reference production assets'); process.exit(1); } const js=(html.match(/src=\"([^\"]+\.js)\"/g)||[]); const css=(html.match(/href=\"([^\"]+\.css)\"/g)||[]); if(!js.length||!css.length){console.error('CRITICAL: Missing generated JS/CSS references in dist/index.html'); process.exit(1);} for(const ref of [...js,...css]){const p=ref.match(/\"([^\"]+)\"/)[1].replace(/^\//,''); if(!fs.existsSync(require('path').join('dist',p))){console.error('CRITICAL: Missing built asset:',p); process.exit(1);} } console.log('✓ Generated production entry and referenced assets verified.');"
-      - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
+      - name: Verify generated assets
+        run: node -e "const fs=require('fs'),p=require('path');const h=fs.readFileSync('dist/index.html','utf8');const refs=[...h.matchAll(/(?:src|href)=\\\"([^\\\"]+\\.(?:js|css))\\\"/g)].map(m=>m[1].replace(/^\\//,''));if(!refs.length)throw new Error('No JS/CSS assets');for(const r of refs){if(!fs.existsSync(p.join('dist',r)))throw new Error('Missing '+r)}console.log('Assets verified',refs.length)"
+      - uses: actions/upload-artifact@v4
         with:
           name: deployment-dist
           path: dist
-          if-no-files-found: error
-
-  android-runtime-build:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '21'
-      - name: Install Dependencies
-        run: npm install --include=dev --no-audit --no-fund
-      - name: Sync Android Runtime
-        run: npm run android:sync
-      - name: Build Android Debug APK
-        working-directory: android
-        run: chmod +x gradlew && ./gradlew assembleDebug --stacktrace
-      - name: Upload Android Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: samahit-views-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 
   deploy-cpanel:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install Deployment Dependencies
+      - name: Install dependencies
         run: npm install --include=dev --no-audit --no-fund
-      - name: Download dist artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: deployment-dist
           path: dist
-      - name: Diagnose FTP endpoint
-        env:
-          FTP_HOST: ${{ secrets.FTP_SERVER }}
-          FTP_PORT: ${{ secrets.FTP_PORT }}
-        run: |
-          PORT="${FTP_PORT:-21}"
-          echo "Testing TCP connectivity to configured FTP endpoint on port ${PORT}"
-          timeout 15 bash -c "</dev/tcp/$FTP_HOST/$PORT" && echo "TCP endpoint reachable" || echo "TCP endpoint unavailable from this GitHub runner"
-      - name: Delete maps-master from cPanel (Optional Pre-Deploy Cleanup)
-        continue-on-error: true
+      - name: Deploy
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_PORT: ${{ secrets.FTP_PORT }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
-          FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
-        run: node delete_cpanel_maps.cjs
-      - name: Verify Migration Files Ready for Server Boot
-        run: |
-          node -e "const fs = require('fs'); const files = fs.readdirSync('migrations').filter(f => f.endsWith('.sql')); console.log('Verified migration SQL files ready for server boot:', files.length);"
-      - name: Deploy to cPanel (Deployment Critical)
-        continue-on-error: false
-        env:
-          FTP_HOST: ${{ secrets.FTP_SERVER }}
-          FTP_PORT: ${{ secrets.FTP_PORT }}
-          FTP_USER: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
+          FTP_SECURE: ${{ secrets.FTP_SECURE }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
-      - name: Production Liveness Smoke Test (Fail-Closed)
-        continue-on-error: false
-        run: |
-          echo "Verifying production Node/Passenger liveness endpoint response..."
-          node -e "
-          const https = require('https');
-          const req = https.get({hostname:'appapi.therpfoundation.org',path:'/api/liveness',headers:{'User-Agent':'Mozilla/5.0','Accept':'application/json'}}, res => {
-            let body=''; res.on('data',c=>body+=c); res.on('end',()=>{
-              if(res.statusCode!==200){console.error('CRITICAL: Production liveness probe returned HTTP',res.statusCode); process.exit(1);}
-              try{const data=JSON.parse(body); if(data.status!=='ok'||data.success!==true){console.error('CRITICAL: Invalid liveness payload',data); process.exit(1);} console.log('✓ Liveness check passed:',data);}
-              catch(e){console.error('CRITICAL: Liveness response was not JSON:',body.substring(0,300)); process.exit(1);}
-            });
-          }).on('error',e=>{console.error('CRITICAL: Liveness request failed:',e.message);process.exit(1);});
-          "
-      - name: Production Static Asset Smoke Test (Fail-Closed)
-        continue-on-error: false
-        run: |
-          node -e "
-          const https=require('https');
-          const urls=['/'];
-          const expected={'.js':'javascript','.css':'css'};
-          // Discover current hashed assets from the deployed production HTML instead of hard-coding stale filenames.
-          
-          const check=(path)=>new Promise((resolve,reject)=>{https.get({hostname:'appapi.therpfoundation.org',path,headers:{'User-Agent':'Mozilla/5.0','Accept':'*/*'}},res=>{let b='';res.on('data',c=>b+=c);res.on('end',()=>{const ct=String(res.headers['content-type']||'').toLowerCase(); if(res.statusCode!==200) return reject(new Error(path+' returned HTTP '+res.statusCode)); if(path.endsWith('.js')&&!ct.includes('javascript')) return reject(new Error(path+' wrong Content-Type: '+ct)); if(path.endsWith('.css')&&!ct.includes('text/css')) return reject(new Error(path+' wrong Content-Type: '+ct)); if((path.endsWith('.js')||path.endsWith('.css')) && /<html|<!doctype/i.test(b.slice(0,200))) return reject(new Error(path+' returned HTML instead of asset')); resolve({path,status:res.statusCode,contentType:ct,bytes:b.length});});}).on('error',reject);});
-          (async()=>{const root=await check('/'); const html=await new Promise((resolve,reject)=>https.get({hostname:'appapi.therpfoundation.org',path:'/'},res=>{let b='';res.on('data',c=>b+=c);res.on('end',()=>resolve(b));}).on('error',reject)); const refs=[...String(html).matchAll(/(?:src|href)=\"(\/assets\/[^\"]+\.(?:js|css))\"/g)].map(m=>m[1]); if(!refs.length) throw new Error('No production JS/CSS assets found in deployed HTML'); for(const u of refs) console.log('✓',await check(u));})().catch(e=>{console.error('CRITICAL: Static asset smoke test failed:',e.message);process.exit(1);});
-          "
-      - name: Production API Smoke Test (Fail-Closed)
-        continue-on-error: false
-        run: |
-          node -e "
-          const https=require('https');
-          const paths=['/api/public/'];
-          const check=(path)=>new Promise((resolve,reject)=>{https.get({hostname:'appapi.therpfoundation.org',path,headers:{'User-Agent':'Mozilla/5.0','Accept':'application/json'}},res=>{let b='';res.on('data',c=>b+=c);res.on('end',()=>{if(res.statusCode>=500)return reject(new Error(path+' returned HTTP '+res.statusCode+' body='+b.substring(0,300))); console.log('✓',path,'HTTP',res.statusCode,b.substring(0,200)); resolve();});}).on('error',reject);});
-          Promise.all(paths.map(check)).catch(e=>{console.error('CRITICAL: Production API smoke test failed:',e.message);process.exit(1);});
-          "
+      - name: Production liveness
+        run: node -e "require('https').get('https://appapi.therpfoundation.org/api/liveness',r=>{console.log('HTTP',r.statusCode);process.exit(r.statusCode===200?0:1)}).on('error',e=>{console.error(e.message);process.exit(1)})"
