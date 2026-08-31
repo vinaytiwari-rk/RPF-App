@@ -36,19 +36,23 @@ PassengerMaxPoolSize 2
   # Never allow uncompiled Vite/TypeScript source to be served in production.
   RewriteRule ^src/ - [F,L]
 
-  # Stop a second per-directory rewrite pass after an internal dist/ rewrite.
-  # [L] is deliberately used here for broad Apache/LiteSpeed compatibility.
+  # The deployment mirrors dist/assets into the document-root assets directory.
+  # Stop rewrite processing so real JS/CSS/image files are served directly.
+  RewriteRule ^assets/ - [L]
+  RewriteRule ^version\.json$ - [L]
+
+  # Do not re-enter the rewrite rules for generated deployment files.
   RewriteRule ^dist/ - [L]
 
-  # Serve the compiled production SPA shell and compiled assets from dist/.
+  # Serve the compiled production SPA shell.
   RewriteRule ^$ dist/index.html [L]
-  RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
 
-  # SPA routes use the compiled production shell; API routes remain Passenger/Express.
+  # API requests must stay with CloudLinux Passenger/Express.
   RewriteCond %{REQUEST_URI} !^/api/
   RewriteCond %{REQUEST_URI} !^/assets/
   RewriteCond %{REQUEST_URI} !^/src/
   RewriteCond %{REQUEST_URI} !^/dist/
+  RewriteCond %{REQUEST_URI} !^/version\.json$
   RewriteCond %{REQUEST_URI} !\.php$
   RewriteRule ^.+$ dist/index.html [L]
 </IfModule>
