@@ -28,6 +28,8 @@ jobs:
         run: node -e "const fs = require('fs'); const files = fs.readdirSync('migrations').filter(f => f.endsWith('.sql')); console.log('Migration SQL files verified:', files.length);"
       - name: Build Application
         run: npm run build
+      - name: Verify Generated Production Entry
+        run: node -e "const fs=require('fs'); const html=fs.readFileSync('dist/index.html','utf8'); if (!html.includes('type=\"module\"') || !html.includes('/assets/')) { console.error('CRITICAL: Generated dist/index.html does not reference production assets'); process.exit(1); } const js=(html.match(/src=\"([^\"]+\.js)\"/g)||[]); const css=(html.match(/href=\"([^\"]+\.css)\"/g)||[]); if(!js.length||!css.length){console.error('CRITICAL: Missing generated JS/CSS references in dist/index.html'); process.exit(1);} for(const ref of [...js,...css]){const p=ref.match(/\"([^\"]+)\"/)[1].replace(/^\//,''); if(!fs.existsSync(p)){console.error('CRITICAL: Missing built asset:',p); process.exit(1);} } console.log('✓ Generated production entry and referenced assets verified.');"
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
@@ -113,44 +115,36 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
-      - name: Post-Deployment Production Liveness Smoke Test (Fail-Closed Gate)
+      - name: Production Liveness Smoke Test (Fail-Closed)
         continue-on-error: false
         run: |
           echo "Verifying production Node/Passenger liveness endpoint response..."
           node -e "
           const https = require('https');
-          const options = {
-            hostname: 'appapi.therpfoundation.org',
-            path: '/api/liveness',
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              'Accept': 'application/json'
-            }
-          };
-          const req = https.get(options, (res) => {
-            if (res.statusCode !== 200) {
-              console.error('CRITICAL: Production liveness probe returned HTTP', res.statusCode);
-              process.exit(1);
-            }
-            let body = '';
-            res.on('data', chunk => body += chunk);
-            res.on('end', () => {
-              try {
-                const data = JSON.parse(body);
-                if (data.status !== 'ok' || data.success !== true) {
-                  console.error('CRITICAL: Production liveness response is not healthy:', data);
-                  process.exit(1);
-                }
-                console.log('✓ Liveness check passed:', data);
-                process.exit(0);
-              } catch (e) {
-                console.error('CRITICAL: Failed to parse liveness response as JSON');
-                console.error('Response:', body.substring(0, 200));
-                process.exit(1);
-              }
+          const req = https.get({hostname:'appapi.therpfoundation.org',path:'/api/liveness',headers:{'User-Agent':'Mozilla/5.0','Accept':'application/json'}}, res => {
+            let body=''; res.on('data',c=>body+=c); res.on('end',()=>{
+              if(res.statusCode!==200){console.error('CRITICAL: Production liveness probe returned HTTP',res.statusCode); process.exit(1);}
+              try{const data=JSON.parse(body); if(data.status!=='ok'||data.success!==true){console.error('CRITICAL: Invalid liveness payload',data); process.exit(1);} console.log('✓ Liveness check passed:',data);}
+              catch(e){console.error('CRITICAL: Liveness response was not JSON:',body.substring(0,300)); process.exit(1);}
             });
-          }).on('error', (e) => {
-            console.error('CRITICAL: Liveness check request failed:', e.message);
-            process.exit(1);
-          });
+          }).on('error',e=>{console.error('CRITICAL: Liveness request failed:',e.message);process.exit(1);});
+          "
+      - name: Production Static Asset Smoke Test (Fail-Closed)
+        continue-on-error: false
+        run: |
+          node -e "
+          const https=require('https');
+          const urls=['/','/assets/index-WAG2fDA2.js','/assets/react-vendor-OE5EXkh-.js','/assets/index-GCxqyMew.css'];
+          const expected={'.js':'javascript','.css':'css'};
+          const check=(path)=>new Promise((resolve,reject)=>{https.get({hostname:'appapi.therpfoundation.org',path,headers:{'User-Agent':'Mozilla/5.0','Accept':'*/*'}},res=>{let b='';res.on('data',c=>b+=c);res.on('end',()=>{const ct=String(res.headers['content-type']||'').toLowerCase(); if(res.statusCode!==200) return reject(new Error(path+' returned HTTP '+res.statusCode)); if(path.endsWith('.js')&&!ct.includes('javascript')) return reject(new Error(path+' wrong Content-Type: '+ct)); if(path.endsWith('.css')&&!ct.includes('text/css')) return reject(new Error(path+' wrong Content-Type: '+ct)); if((path.endsWith('.js')||path.endsWith('.css')) && /<html|<!doctype/i.test(b.slice(0,200))) return reject(new Error(path+' returned HTML instead of asset')); resolve({path,status:res.statusCode,contentType:ct,bytes:b.length});});}).on('error',reject);});
+          (async()=>{for(const u of urls) console.log('✓',await check(u));})().catch(e=>{console.error('CRITICAL: Static asset smoke test failed:',e.message);process.exit(1);});
+          "
+      - name: Production API Smoke Test (Fail-Closed)
+        continue-on-error: false
+        run: |
+          node -e "
+          const https=require('https');
+          const paths=['/api/public/'];
+          const check=(path)=>new Promise((resolve,reject)=>{https.get({hostname:'appapi.therpfoundation.org',path,headers:{'User-Agent':'Mozilla/5.0','Accept':'application/json'}},res=>{let b='';res.on('data',c=>b+=c);res.on('end',()=>{if(res.statusCode>=500)return reject(new Error(path+' returned HTTP '+res.statusCode+' body='+b.substring(0,300))); console.log('✓',path,'HTTP',res.statusCode,b.substring(0,200)); resolve();});}).on('error',reject);});
+          Promise.all(paths.map(check)).catch(e=>{console.error('CRITICAL: Production API smoke test failed:',e.message);process.exit(1);});
           "
