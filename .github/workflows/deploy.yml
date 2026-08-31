@@ -29,7 +29,7 @@ jobs:
       - name: Build Application
         run: npm run build
       - name: Verify Generated Production Entry
-        run: node -e "const fs=require('fs'); const html=fs.readFileSync('dist/index.html','utf8'); if (!html.includes('type=\"module\"') || !html.includes('/assets/')) { console.error('CRITICAL: Generated dist/index.html does not reference production assets'); process.exit(1); } const js=(html.match(/src=\"([^\"]+\.js)\"/g)||[]); const css=(html.match(/href=\"([^\"]+\.css)\"/g)||[]); if(!js.length||!css.length){console.error('CRITICAL: Missing generated JS/CSS references in dist/index.html'); process.exit(1);} for(const ref of [...js,...css]){const p=ref.match(/\"([^\"]+)\"/)[1].replace(/^\//,''); if(!fs.existsSync(p)){console.error('CRITICAL: Missing built asset:',p); process.exit(1);} } console.log('✓ Generated production entry and referenced assets verified.');"
+        run: node -e "const fs=require('fs'); const html=fs.readFileSync('dist/index.html','utf8'); if (!html.includes('type=\"module\"') || !html.includes('/assets/')) { console.error('CRITICAL: Generated dist/index.html does not reference production assets'); process.exit(1); } const js=(html.match(/src=\"([^\"]+\.js)\"/g)||[]); const css=(html.match(/href=\"([^\"]+\.css)\"/g)||[]); if(!js.length||!css.length){console.error('CRITICAL: Missing generated JS/CSS references in dist/index.html'); process.exit(1);} for(const ref of [...js,...css]){const p=ref.match(/\"([^\"]+)\"/)[1].replace(/^\//,''); if(!fs.existsSync(require('path').join('dist',p))){console.error('CRITICAL: Missing built asset:',p); process.exit(1);} } console.log('✓ Generated production entry and referenced assets verified.');"
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
@@ -134,10 +134,12 @@ jobs:
         run: |
           node -e "
           const https=require('https');
-          const urls=['/','/assets/index-WAG2fDA2.js','/assets/react-vendor-OE5EXkh-.js','/assets/index-GCxqyMew.css'];
+          const urls=['/'];
           const expected={'.js':'javascript','.css':'css'};
+          // Discover current hashed assets from the deployed production HTML instead of hard-coding stale filenames.
+          
           const check=(path)=>new Promise((resolve,reject)=>{https.get({hostname:'appapi.therpfoundation.org',path,headers:{'User-Agent':'Mozilla/5.0','Accept':'*/*'}},res=>{let b='';res.on('data',c=>b+=c);res.on('end',()=>{const ct=String(res.headers['content-type']||'').toLowerCase(); if(res.statusCode!==200) return reject(new Error(path+' returned HTTP '+res.statusCode)); if(path.endsWith('.js')&&!ct.includes('javascript')) return reject(new Error(path+' wrong Content-Type: '+ct)); if(path.endsWith('.css')&&!ct.includes('text/css')) return reject(new Error(path+' wrong Content-Type: '+ct)); if((path.endsWith('.js')||path.endsWith('.css')) && /<html|<!doctype/i.test(b.slice(0,200))) return reject(new Error(path+' returned HTML instead of asset')); resolve({path,status:res.statusCode,contentType:ct,bytes:b.length});});}).on('error',reject);});
-          (async()=>{for(const u of urls) console.log('✓',await check(u));})().catch(e=>{console.error('CRITICAL: Static asset smoke test failed:',e.message);process.exit(1);});
+          (async()=>{const root=await check('/'); const html=await new Promise((resolve,reject)=>https.get({hostname:'appapi.therpfoundation.org',path:'/'},res=>{let b='';res.on('data',c=>b+=c);res.on('end',()=>resolve(b));}).on('error',reject)); const refs=[...String(html).matchAll(/(?:src|href)=\"(\/assets\/[^\"]+\.(?:js|css))\"/g)].map(m=>m[1]); if(!refs.length) throw new Error('No production JS/CSS assets found in deployed HTML'); for(const u of refs) console.log('✓',await check(u));})().catch(e=>{console.error('CRITICAL: Static asset smoke test failed:',e.message);process.exit(1);});
           "
       - name: Production API Smoke Test (Fail-Closed)
         continue-on-error: false
