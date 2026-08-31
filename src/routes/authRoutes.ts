@@ -103,20 +103,30 @@ router.post("/api/auth/login", async (req, res) => {
       : { id: user.id, role: user.role || 'citizen', name: user.name, phone: user.phone, email: user.email };
 
     const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
+
+    // A successful password check must not be turned into a failed login by
+    // non-critical audit logging. Persist the session first, then audit
+    // independently so we can identify the real failing subsystem.
     try {
       await pool.query(
         `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
         ["sess-" + Date.now() + crypto.randomBytes(4).toString("hex"), userPayload.id, token]
       );
+    } catch (sessErr: any) {
+      console.error("Session persistence failed during login:", sessErr?.message, sessErr?.code);
+      return res.status(503).json({ success: false, error: "Unable to create your login session. Please try again." });
+    }
+
+    try {
       await auditEvent({
         userId: user.id,
         action: "login_success",
         req,
         metadata: { role: userPayload.role, identifier: finalIdentifier }
       });
-    } catch (sessErr: any) {
-      console.error("Session creation failed during login:", sessErr?.message);
-      return res.status(503).json({ success: false, error: "Session creation failed. Please try logging in again." });
+    } catch (auditErr: any) {
+      // Audit failure must never block a valid user from signing in.
+      console.error("Non-fatal login audit failure:", auditErr?.message, auditErr?.code);
     }
 
     res.json({ success: true, token, user: userPayload });
