@@ -91,7 +91,6 @@ jobs:
           echo "Testing TCP connectivity to configured FTP endpoint on port ${PORT}"
           timeout 15 bash -c "</dev/tcp/$FTP_HOST/$PORT" && echo "TCP endpoint reachable" || echo "TCP endpoint unavailable from this GitHub runner"
       - name: Delete maps-master from cPanel (Optional Pre-Deploy Cleanup)
-        # Non-fatal optional directory cleanup step; critical deployment step below enforces strict failure handling (continue-on-error: false)
         continue-on-error: true
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
@@ -115,7 +114,7 @@ jobs:
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
       - name: Post-Deployment Production Health Smoke Test (Fail-Closed Gate)
-        continue-on-error: true
+        continue-on-error: false
         run: |
           echo "Verifying production API health endpoint response..."
           node -e "
@@ -151,6 +150,3 @@ jobs:
             process.exit(1);
           });
           "
-
-
-
