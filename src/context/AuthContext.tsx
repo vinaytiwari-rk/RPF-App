@@ -64,6 +64,8 @@ export function AuthProvider({children}:{children:React.ReactNode}){
       const stored=(await getPersistentItem(STORAGE_KEY))??sessionStorage.getItem(STORAGE_KEY);
       const storedToken=(await getPersistentItem(TOKEN_KEY))??sessionStorage.getItem(TOKEN_KEY);
       if(!stored){
+        // Do not require the backend just to leave the splash screen.
+        // The login UI can load even while production API recovery is in progress.
         setToken(null);
         setUser(null);
         setIsLoading(false);
