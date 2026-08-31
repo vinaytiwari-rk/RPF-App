@@ -66,23 +66,41 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
   "https://samahit.rpfoundation.org",
   "https://appapi.therpfoundation.org",
+  "https://api.therpfoundation.org",
+  "https://www.api.therpfoundation.org",
+  "https://jansevacard.therpfoundation.org",
+  "https://therpfoundation.org",
+  "https://www.therpfoundation.org",
   "http://localhost:5173",
   "http://localhost:3000",
   "capacitor://localhost"
 ];
 
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
-      callback(null, true);
-    } else {
-      callback(null, false);
-    }
-  },
-  credentials: true,
+const isAllowedOrigin = (origin?: string): boolean => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  try {
+    const host = new URL(origin).hostname;
+    if (host === "therpfoundation.org" || host.endsWith(".therpfoundation.org")) return true;
+    if (host === "rpfoundation.org" || host.endsWith(".rpfoundation.org")) return true;
+    if (host.endsWith(".vercel.app")) return true;
+  } catch {}
+  return true;
 };
 
-app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (isAllowedOrigin(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma");
+  }
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ limit: '2mb', extended: true }));
 

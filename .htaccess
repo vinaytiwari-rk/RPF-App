@@ -15,7 +15,9 @@ PassengerMaxPoolSize 2
 </IfModule>
 
 <IfModule mod_headers.c>
-  Header set Access-Control-Allow-Origin "*"
+  Header always set Access-Control-Allow-Origin "*"
+  Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE, PATCH"
+  Header always set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma"
 </IfModule>
 
 <IfModule mod_rewrite.c>
