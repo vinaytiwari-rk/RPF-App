@@ -14,12 +14,15 @@ PassengerMaxPoolSize 2
   SetEnvIf Request_URI "^/api/health" imunify360_disabled=1
 </IfModule>
 
+# API CORS: the frontend uses bearer-token authorization, not cookie credentials.
+# Keep this wildcard at the web-server layer so CORS is present even when
+# Passenger/Express is not the component producing the response.
 <IfModule mod_headers.c>
-  SetEnvIf Origin "^(https?://.*)$" CORS_ORIGIN=$1
-  Header always set Access-Control-Allow-Origin "%{CORS_ORIGIN}e" env=CORS_ORIGIN
+  Header always set Access-Control-Allow-Origin "*"
   Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE, PATCH"
   Header always set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma"
-  Header always set Access-Control-Allow-Credentials "true"
+  Header always set Access-Control-Max-Age "86400"
+  Header always set Vary "Origin"
 </IfModule>
 
 <IfModule mod_rewrite.c>
