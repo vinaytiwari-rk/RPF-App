@@ -5,6 +5,9 @@ import VolunteerRegistrationWizard from './VolunteerRegistrationWizard';
 import { requestPermission } from '../lib/permissions';
 import { Capacitor } from '@capacitor/core';
 
+const API_BASE = Capacitor.isNativePlatform() ? 'https://appapi.therpfoundation.org' : '';
+const apiUrl = (path: string) => `${API_BASE}${path}`;
+
 interface LoginScreenProps {
   lang: 'hi' | 'en';
   onLoginSuccess: (
@@ -54,7 +57,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     try {
       const normalized = identifier.trim();
       const endpoint = normalized.toLowerCase() === 'admin' ? '/api/auth/admin-login' : '/api/auth/login';
-      const r = await axios.post(endpoint, { identifier: normalized, password });
+      const r = await axios.post(apiUrl(endpoint), { identifier: normalized, password }, { headers: { 'Content-Type': 'application/json' }, timeout: 15000 });
       if (!r.data?.success || !r.data?.user) throw new Error(r.data?.error || 'Invalid User ID or password.');
       const u = r.data.user;
       await onLoginSuccess(u.role === 'guest' ? 'guest' : 'volunteer', {
