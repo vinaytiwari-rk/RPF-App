@@ -113,15 +113,15 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE || 'true' }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
-      - name: Post-Deployment Production Health Smoke Test (Fail-Closed Gate)
+      - name: Post-Deployment Production Liveness Smoke Test (Fail-Closed Gate)
         continue-on-error: false
         run: |
-          echo "Verifying production API health endpoint response..."
+          echo "Verifying production Node/Passenger liveness endpoint response..."
           node -e "
           const https = require('https');
           const options = {
             hostname: 'appapi.therpfoundation.org',
-            path: '/api/health',
+            path: '/api/liveness',
             headers: {
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
               'Accept': 'application/json'
@@ -129,7 +129,7 @@ jobs:
           };
           const req = https.get(options, (res) => {
             if (res.statusCode !== 200) {
-              console.error('CRITICAL: Production health probe returned HTTP', res.statusCode);
+              console.error('CRITICAL: Production liveness probe returned HTTP', res.statusCode);
               process.exit(1);
             }
             let body = '';
@@ -137,16 +137,20 @@ jobs:
             res.on('end', () => {
               try {
                 const data = JSON.parse(body);
-                console.log('✓ Health check passed:', data);
+                if (data.status !== 'ok' || data.success !== true) {
+                  console.error('CRITICAL: Production liveness response is not healthy:', data);
+                  process.exit(1);
+                }
+                console.log('✓ Liveness check passed:', data);
                 process.exit(0);
               } catch (e) {
-                console.error('CRITICAL: Failed to parse health response as JSON');
+                console.error('CRITICAL: Failed to parse liveness response as JSON');
                 console.error('Response:', body.substring(0, 200));
                 process.exit(1);
               }
             });
           }).on('error', (e) => {
-            console.error('CRITICAL: Health check request failed:', e.message);
+            console.error('CRITICAL: Liveness check request failed:', e.message);
             process.exit(1);
           });
           "
