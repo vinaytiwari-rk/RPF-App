@@ -59,8 +59,13 @@ async function main() {
     if (fs.existsSync('index.js')) {
       await withFreshConnection('index.js upload', (client) => client.uploadFrom('index.js', 'index.js'));
     }
-    if (fs.existsSync('index.html')) {
-      await withFreshConnection('production index.html upload', (client) => client.uploadFrom('index.html', 'index.html'));
+    // The deploy job checks out source files again, so root index.html may still
+    // contain the Vite development entry (/src/main.tsx). Always publish the
+    // generated production HTML from dist instead.
+    if (fs.existsSync('dist/index.html')) {
+      await withFreshConnection('production index.html upload', (client) => client.uploadFrom('dist/index.html', 'index.html'));
+    } else {
+      throw new Error('Missing dist/index.html after build artifact download');
     }
 
     await withFreshConnection('dist upload', (client) => client.uploadFromDir('dist', 'dist'));
