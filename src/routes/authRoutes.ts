@@ -68,23 +68,31 @@ router.post("/api/auth/login", async (req, res) => {
       return res.json({ success: true, user: guestUser, token });
     }
 
-    const finalIdentifier = identifier || phone;
+    const finalIdentifier = String(identifier || phone || '').trim();
     if (!finalIdentifier || !password) {
       return res.status(400).json({ success: false, error: "Missing identifier/phone or password" });
     }
 
-    let user = null;
-    let isVolunteer = false;
+    let user: any = null;
+    let userRole = "user";
     let validPassword = false;
+    let userName = "";
+    let userEmail = "";
+    let userPhone = "";
 
+    // 1. Check volunteers table first
     const volResult = await pool.query(
-      `SELECT * FROM volunteers WHERE mobile = $1 OR LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1) OR LOWER(registration_number) = LOWER($1)`,
+      `SELECT * FROM volunteers WHERE mobile = $1 OR LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1) OR LOWER(registration_number) = LOWER($1) OR id = $1`,
       [finalIdentifier]
     );
 
     if (volResult.rows.length > 0) {
       user = volResult.rows[0];
-      isVolunteer = true;
+      userRole = user.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
+      userName = user.full_name || user.username;
+      userEmail = user.email || '';
+      userPhone = user.mobile || '';
+
       if (user.password_hash) {
         if (user.password_hash.startsWith('$2')) {
           validPassword = await bcrypt.compare(password, user.password_hash);
@@ -92,35 +100,68 @@ router.post("/api/auth/login", async (req, res) => {
           const oldHash = crypto.createHash('sha256').update(password).digest('hex');
           validPassword = (oldHash === user.password_hash);
         }
-      } else {
-        const userResult = await pool.query(`SELECT password_hash FROM users WHERE id = $1`, [user.id]);
-        if (userResult.rows.length > 0 && userResult.rows[0].password_hash) {
-          validPassword = await bcrypt.compare(password, userResult.rows[0].password_hash);
+      }
+    }
+
+    // 2. Check admin_credentials table if not found or invalid
+    if (!validPassword) {
+      const adminCredResult = await pool.query(
+        `SELECT * FROM admin_credentials WHERE LOWER(username) = LOWER($1) OR id = $1`,
+        [finalIdentifier]
+      );
+
+      if (adminCredResult.rows.length > 0) {
+        const adminRow = adminCredResult.rows[0];
+        if (adminRow.password_hash) {
+          if (adminRow.password_hash.startsWith('$2')) {
+            validPassword = await bcrypt.compare(password, adminRow.password_hash);
+          } else {
+            const oldHash = crypto.createHash('sha256').update(password).digest('hex');
+            validPassword = (oldHash === adminRow.password_hash);
+          }
+        }
+        if (validPassword) {
+          user = { id: adminRow.id || 'admin', name: 'System Administrator', role: 'admin' };
+          userRole = 'admin';
+          userName = 'System Administrator';
         }
       }
-    } else {
+    }
+
+    // 3. Check users table
+    if (!validPassword) {
       const userResult = await pool.query(
-        `SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR phone = $1 OR LOWER(username) = LOWER($1)`,
+        `SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR phone = $1 OR LOWER(username) = LOWER($1) OR id = $1`,
         [finalIdentifier]
       );
       if (userResult.rows.length > 0) {
-        user = userResult.rows[0];
-        if (user.password_hash) validPassword = await bcrypt.compare(password, user.password_hash);
+        const uRow = userResult.rows[0];
+        if (uRow.password_hash) {
+          validPassword = await bcrypt.compare(password, uRow.password_hash);
+        }
+        if (validPassword) {
+          user = uRow;
+          userRole = user.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
+          userName = user.name || user.username || 'User';
+          userEmail = user.email || '';
+          userPhone = user.phone || '';
+        }
       }
     }
 
     if (!user) return res.status(401).json({ success: false, error: "User not found" });
     if (!validPassword) return res.status(401).json({ success: false, error: "Invalid credentials" });
 
-    const userPayload = isVolunteer
-      ? { id: user.id, role: "volunteer", name: user.full_name, phone: user.mobile, email: user.email }
-      : { id: user.id, role: user.role || 'citizen', name: user.name, phone: user.phone, email: user.email };
+    const userPayload = {
+      id: user.id,
+      role: userRole,
+      name: userName,
+      phone: userPhone,
+      email: userEmail
+    };
 
     const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
 
-    // A successful password check must not be turned into a failed login by
-    // non-critical audit logging. Persist the session first, then audit
-    // independently so we can identify the real failing subsystem.
     try {
       await ensureSessionsTable();
       await pool.query(
@@ -128,7 +169,7 @@ router.post("/api/auth/login", async (req, res) => {
         ["sess-" + Date.now() + crypto.randomBytes(4).toString("hex"), String(userPayload.id), token]
       );
     } catch (sessErr: any) {
-      console.error("Non-fatal session persistence failure during login:", sessErr?.message, sessErr?.code);
+      console.error("Non-fatal session persistence failure during login:", sessErr?.message);
     }
 
     try {
@@ -138,10 +179,7 @@ router.post("/api/auth/login", async (req, res) => {
         req,
         metadata: { role: userPayload.role, identifier: finalIdentifier }
       });
-    } catch (auditErr: any) {
-      // Audit failure must never block a valid user from signing in.
-      console.error("Non-fatal login audit failure:", auditErr?.message, auditErr?.code);
-    }
+    } catch (auditErr: any) {}
 
     res.json({ success: true, token, user: userPayload });
   } catch (error: any) {
