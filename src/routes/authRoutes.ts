@@ -125,11 +125,10 @@ router.post("/api/auth/login", async (req, res) => {
       await ensureSessionsTable();
       await pool.query(
         `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
-        ["sess-" + Date.now() + crypto.randomBytes(4).toString("hex"), userPayload.id, token]
+        ["sess-" + Date.now() + crypto.randomBytes(4).toString("hex"), String(userPayload.id), token]
       );
     } catch (sessErr: any) {
-      console.error("Session persistence failed during login:", sessErr?.message, sessErr?.code);
-      return res.status(503).json({ success: false, error: "Unable to create your login session. Please try again." });
+      console.error("Non-fatal session persistence failure during login:", sessErr?.message, sessErr?.code);
     }
 
     try {

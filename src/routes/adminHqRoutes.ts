@@ -48,11 +48,10 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
     try {
       await pool.query(
         `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '7 days')`,
-        [`admin-${Date.now()}-${credential.id}`, user.id, token]
+        [`admin-${Date.now()}-${credential.id}`, String(user.id), token]
       );
-    } catch (e) {
-      console.error("Administrator session tracking failed:", e);
-      return res.status(503).json({ success: false, error: "Administrator session service is temporarily unavailable." });
+    } catch (e: any) {
+      console.error("Non-fatal administrator session tracking failure:", e?.message, e?.code);
     }
 
     await auditEvent({ action: "admin_login_success", resource: "administrator", userId: user.id, req });
