@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
+import axios from "axios";
 
 export type UserRole = "guest" | "citizen" | "volunteer" | "donor" | "admin" | "super_admin";
 export interface User { id:string; name:string; username?:string; phone?:string; email?:string; avatar?:string; role:UserRole; displayName?:string; janSevaCardNo?:string; registration_number?:string; janSevaCardStatus?:"none"|"pending"|"approved"|"rejected"; gender?:string; dob?:string; address?:string; isVolunteer?:boolean; isDonor?:boolean; volunteerData?:any; blood_group?:string; interests?:string[]; onboardingCompleted?:boolean; points?:number; badges?:number; cover?:string; }
@@ -46,9 +47,19 @@ export function AuthProvider({children}:{children:React.ReactNode}){
   const[language,setLanguageState]=useState<'en'|'hi'>('en');
   const[isLoading,setIsLoading]=useState(true);
 
+  /* ── Sync Authorization header on token change ── */
+  useEffect(() => {
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common["Authorization"];
+    }
+  }, [token]);
+
   const clearSession=useCallback(async()=>{
     await removePersistentItem(STORAGE_KEY);
     await removePersistentItem(TOKEN_KEY);
+    delete axios.defaults.headers.common["Authorization"];
     setToken(null);
     setUser(null);
   },[]);
