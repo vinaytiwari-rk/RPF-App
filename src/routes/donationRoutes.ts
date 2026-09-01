@@ -10,66 +10,312 @@ const VALID_URGENCY = new Set(['Normal','Urgent','Emergency']);
 const EMAIL_DOMAINS = new Set(['gmail.com','googlemail.com','yahoo.com','yahoo.co.in','rediffmail.com','rediff.com','zoho.com','peoplesuniversity.edu.in']);
 const USERNAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
 const RESERVED_USERNAMES = new Set(['admin','root','superuser','system','moderator','guest','anonymous']);
-let schemaReady: Promise<void> | null = null;
 
-const ensureBloodSchema = async () => {
-  return Promise.resolve();
+const required = (v: unknown) => typeof v === 'string' ? v.trim().length > 0 : v !== undefined && v !== null;
+const emailAllowed = (email: string) => { const m = email.trim().toLowerCase().match(/^[^\s@]+@([^\s@]+)$/); return !!m && EMAIL_DOMAINS.has(m[1]); };
+const ageFromDob = (dob: string) => { const d = new Date(`${dob}T00:00:00`); if (Number.isNaN(d.getTime())) return -1; const n = new Date(); let a = n.getFullYear() - d.getFullYear(); if (n.getMonth() < d.getMonth() || (n.getMonth() === d.getMonth() && n.getDate() < d.getDate())) a--; return a; };
+
+// Unified User / Volunteer Resolver across BOTH users & volunteers tables
+const resolveVolunteer = async (rawId: string) => {
+  const key = String(rawId || '').trim();
+  if (!key) return null;
+
+  // 1. Search volunteers table
+  const v = await pool.query(
+    `SELECT id, username, full_name, mobile, email, blood_group FROM volunteers WHERE id=$1 OR LOWER(username)=LOWER($1) OR mobile=$1 OR LOWER(email)=LOWER($1) LIMIT 1`,
+    [key]
+  );
+  if (v.rows.length > 0) return v.rows[0];
+
+  // 2. Search users table (Unified Account System)
+  const u = await pool.query(
+    `SELECT id, id AS username, name AS full_name, email, role FROM users WHERE id=$1 OR LOWER(name)=LOWER($1) OR LOWER(email)=LOWER($1) LIMIT 1`,
+    [key]
+  );
+  if (u.rows.length > 0) {
+    return {
+      id: u.rows[0].id,
+      username: u.rows[0].username,
+      full_name: u.rows[0].full_name,
+      mobile: '',
+      email: u.rows[0].email,
+      blood_group: null
+    };
+  }
+
+  return null;
 };
-const required=(v:unknown)=>typeof v==='string'?v.trim().length>0:v!==undefined&&v!==null;
-const emailAllowed=(email:string)=>{const m=email.trim().toLowerCase().match(/^[^\s@]+@([^\s@]+)$/);return !!m&&EMAIL_DOMAINS.has(m[1]);};
-const ageFromDob=(dob:string)=>{const d=new Date(`${dob}T00:00:00`);if(Number.isNaN(d.getTime()))return -1;const n=new Date();let a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a;};
 
-router.get('/api/auth/check-username',async(req,res)=>{try{await ensureBloodSchema();const username=String(req.query.username||'').trim().toLowerCase();if(!username)return res.json({available:false,error:'User ID is required.'});if(!USERNAME_REGEX.test(username))return res.json({available:false,error:'Use 3-20 characters, starting with a letter; only letters, numbers, . and _ are allowed.'});if(RESERVED_USERNAMES.has(username))return res.json({available:false,error:'This User ID is reserved.'});const v=await pool.query('SELECT id FROM volunteers WHERE LOWER(username)=LOWER($1) LIMIT 1',[username]);let u={rows:[] as any[]};try{u=await pool.query('SELECT id FROM users WHERE LOWER(username)=LOWER($1) LIMIT 1',[username]);}catch{}return res.json({available:v.rows.length===0&&u.rows.length===0});}catch(error:any){console.error('Username availability error:',error);return res.status(500).json({available:false,error:'Unable to check User ID availability right now.'});}});
-
-router.post('/api/volunteer-registration/submit',async(req,res)=>{try{await ensureBloodSchema();const d=req.body||{};const fullName=String(d.full_name||d.first_name||'').trim();const requiredFields:Record<string,unknown>={username:d.username,full_name:fullName,father_husband_name:d.father_husband_name,mother_name:d.mother_name,dob:d.dob,isd_code:d.isd_code,mobile:d.mobile,email:d.email,blood_group:d.blood_group,country:d.country,state:d.state,city:d.city,pincode:d.pincode,area_locality:d.area_locality,address:d.address,ward_no:d.ward_no,password:d.password,confirm_password:d.confirm_password,blood_network_ready:d.blood_network_ready};if(String(d.country||'').trim()==='India'){requiredFields.sansad_kshetra=d.sansad_kshetra;requiredFields.vidhan_sabha=d.vidhan_sabha;}const missing=Object.entries(requiredFields).filter(([,v])=>!required(v)&&v!==false).map(([k])=>k);if(missing.length)return res.status(400).json({success:false,error:`Please fill these fields before continuing: ${missing.join(', ')}`});const username=String(d.username).trim().toLowerCase();if(!USERNAME_REGEX.test(username))return res.status(400).json({success:false,error:'User ID must be 3-20 characters, start with a letter, and contain only letters, numbers, . or _.'});if(RESERVED_USERNAMES.has(username))return res.status(400).json({success:false,error:'This User ID is reserved. Please choose another.'});const age=ageFromDob(String(d.dob));if(age<0)return res.status(400).json({success:false,error:'Invalid date of birth.'});if(age<16)return res.status(403).json({success:false,code:'MINOR',error:'You are Minor, Not Eligible Now'});const email=String(d.email).trim().toLowerCase();if(!emailAllowed(email))return res.status(400).json({success:false,error:'Only Gmail, Yahoo, Rediff, Zoho, or @peoplesuniversity.edu.in email addresses are accepted.'});const bloodGroup=String(d.blood_group).trim().toUpperCase();if(!BLOOD_GROUPS.has(bloodGroup))return res.status(400).json({success:false,error:'Please select a valid Blood Group.'});const password=String(d.password);if(password.length<8)return res.status(400).json({success:false,error:'Password must be at least 8 characters.'});if(password!==String(d.confirm_password))return res.status(400).json({success:false,error:'Passwords do not match.'});const mobile=String(d.mobile).replace(/\s+/g,'');const isd=String(d.isd_code).replace(/[^+\d]/g,'');if(!/^\+?\d{1,4}$/.test(isd)||!/^[0-9]{6,15}$/.test(mobile))return res.status(400).json({success:false,error:'Please enter a valid ISD code and mobile number.'});const duplicate=await pool.query('SELECT id FROM volunteers WHERE mobile=$1 OR LOWER(email)=LOWER($2) OR LOWER(username)=LOWER($3) LIMIT 1',[mobile,email,username]);if(duplicate.rows.length)return res.status(409).json({success:false,error:'This User ID, mobile number, or email is already registered.'});const id=crypto.randomUUID();const registrationNumber=`RPF/VOL/${new Date().getFullYear().toString().slice(-2)}/${Math.floor(100000+Math.random()*900000)}`;const passwordHash=await bcrypt.hash(password,12);await pool.query('BEGIN');try{await pool.query(`INSERT INTO volunteers (id,username,registration_number,full_name,father_husband_name,mother_name,approval_status,dob,mobile,email,blood_group,country,state,city,address,pincode,area_locality,sansad_kshetra,vidhan_sabha,ward_no,password_hash) VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,[id,username,registrationNumber,fullName,String(d.father_husband_name).trim(),String(d.mother_name).trim(),d.dob,mobile,email,bloodGroup,String(d.country).trim(),String(d.state).trim(),String(d.city).trim(),String(d.address).trim(),String(d.pincode).trim(),String(d.area_locality).trim(),String(d.sansad_kshetra||'').trim(),String(d.vidhan_sabha||'').trim(),String(d.ward_no).trim(),passwordHash]);if(d.blood_network_ready===true||String(d.blood_network_ready).toLowerCase()==='true')await pool.query(`INSERT INTO volunteer_blood_memberships(volunteer_id,blood_group,is_active) VALUES($1,$2,TRUE) ON CONFLICT(volunteer_id) DO UPDATE SET blood_group=EXCLUDED.blood_group,is_active=TRUE,updated_at=NOW()`,[id,bloodGroup]);await pool.query('COMMIT');}catch(e){await pool.query('ROLLBACK');throw e;}res.json({success:true,registration_number:registrationNumber,username,blood_network:!!(d.blood_network_ready===true||String(d.blood_network_ready).toLowerCase()==='true')});}catch(error:any){console.error('Volunteer registration error:',error);if(error.code==='23505')return res.status(409).json({success:false,error:'This User ID, mobile number, or email is already registered.'});res.status(500).json({success:false,error:'Registration failed. Please try again.'});}});
-
-const resolveVolunteer=async(rawId:string)=>{const key=String(rawId||'').trim();if(!key)return null;const r=await pool.query(`SELECT id,username,full_name,mobile,email,blood_group FROM volunteers WHERE id=$1 OR LOWER(username)=LOWER($1) OR mobile=$1 OR LOWER(email)=LOWER($1) LIMIT 1`,[key]);return r.rows[0]||null;};
-router.get('/api/blood-network/access',async(req,res)=>{try{await ensureBloodSchema();const volunteer=await resolveVolunteer(String(req.query.volunteerId||''));if(!volunteer)return res.status(404).json({success:false,error:'Volunteer account not found.'});const m=await pool.query('SELECT blood_group,is_active FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE',[volunteer.id]);res.json({success:true,member:m.rows.length>0,volunteer:{...volunteer,blood_group:m.rows[0]?.blood_group||volunteer.blood_group||null}});}catch(error:any){console.error('Blood access error:',error);res.status(500).json({success:false,error:'Unable to check Blood Donation Network access.'});}});
-router.post('/api/blood-network/join',async(req,res)=>{try{await ensureBloodSchema();const volunteer=await resolveVolunteer(String(req.body?.volunteerId||''));const bloodGroup=String(req.body?.bloodGroup||'').trim().toUpperCase();if(!volunteer)return res.status(404).json({success:false,error:'Volunteer account not found. Please log in again.'});if(!BLOOD_GROUPS.has(bloodGroup))return res.status(400).json({success:false,error:'Please select your Blood Group to become a member.'});await pool.query('BEGIN');try{await pool.query('UPDATE volunteers SET blood_group=$1 WHERE id=$2',[bloodGroup,volunteer.id]);await pool.query(`INSERT INTO volunteer_blood_memberships(volunteer_id,blood_group,is_active) VALUES($1,$2,TRUE) ON CONFLICT(volunteer_id) DO UPDATE SET blood_group=EXCLUDED.blood_group,is_active=TRUE,updated_at=NOW()`,[volunteer.id,bloodGroup]);await pool.query('COMMIT');}catch(e){await pool.query('ROLLBACK');throw e;}res.json({success:true,bloodGroup});}catch(error:any){console.error('Blood join error:',error);res.status(500).json({success:false,error:String(error.message || error)});}});
-router.post('/api/blood-network/requests',async(req,res)=>{try{await ensureBloodSchema();const {requesterId,patientName,bloodGroup,unitsRequired,hospitalName,contactPhone,locationLat,locationLng,urgency,notes}=req.body||{};const requester=await resolveVolunteer(requesterId);if(!requester)return res.status(404).json({success:false,error:'Volunteer account not found.'});if(![patientName,bloodGroup,unitsRequired,hospitalName,contactPhone].every(required))return res.status(400).json({success:false,error:'All requisition fields are mandatory.'});const group=String(bloodGroup).toUpperCase();if(!BLOOD_GROUPS.has(group))return res.status(400).json({success:false,error:'Invalid blood group.'});const qty=Number(unitsRequired);if(!Number.isInteger(qty)||qty<1)return res.status(400).json({success:false,error:'Units required must be at least 1.'});const urgencyValue=VALID_URGENCY.has(String(urgency))?String(urgency):'Normal';const rr=await pool.query(`INSERT INTO blood_requests(requester_id,patient_name,blood_group,units_required,hospital_name,location_lat,location_lng,urgency,contact_phone,status,notes,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'open',$10,NOW()+INTERVAL '48 hours') RETURNING *`,[requester.id,String(patientName).trim(),group,qty,String(hospitalName).trim(),locationLat||null,locationLng||null,urgencyValue,String(contactPhone).trim(),String(notes||'').trim()]);const request=rr.rows[0];const matches=await pool.query(`SELECT m.volunteer_id FROM volunteer_blood_memberships m JOIN volunteers v ON v.id=m.volunteer_id WHERE m.is_active=TRUE AND m.blood_group=$1 AND v.id<>$2`,[group,requester.id]);for(const match of matches.rows) {
-    const title = 'Urgent: Blood Request (' + group + ')';
-    const body = group + ' blood is required at ' + request.hospital_name + '. Tap to Accept.';
-    await pool.query(`INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_request',$5)`, [crypto.randomUUID(), match.volunteer_id, title, body, request.id]);
-    try {
-      const t = await pool.query('SELECT fcm_token FROM volunteers WHERE id=$1', [match.volunteer_id]);
-      if (t.rows[0]?.fcm_token) await sendPushNotification(t.rows[0].fcm_token, title, body);
-    } catch (notificationError) {
-      console.warn('FCM notification lookup failed; blood request remains successful:', notificationError);
-    }
-  }res.json({success:true,request,matchedVolunteers:matches.rowCount});}catch(error:any){console.error('Blood request error:',error);res.status(500).json({success:false,error:'Unable to submit blood requisition.'});}});
-router.get('/api/blood-network/requests',async(req,res)=>{try{await ensureBloodSchema();await pool.query('DELETE FROM blood_request_acceptances WHERE expires_at<=NOW()');const volunteer=await resolveVolunteer(String(req.query.volunteerId||''));if(!volunteer)return res.status(404).json({success:false,error:'Volunteer account not found.'});const result=await pool.query(`SELECT r.*,COALESCE(json_agg(json_build_object('volunteer_id',a.volunteer_id,'volunteer_name',v.full_name,'status',a.status,'accepted_at',a.created_at,'expires_at',a.expires_at) ORDER BY a.created_at DESC) FILTER(WHERE a.id IS NOT NULL),'[]') AS acceptances FROM blood_requests r LEFT JOIN blood_request_acceptances a ON a.request_id=r.id AND a.expires_at>NOW() AND a.status='accepted' LEFT JOIN volunteers v ON v.id=a.volunteer_id WHERE r.status='open' AND (r.expires_at IS NULL OR r.expires_at>NOW()) GROUP BY r.id ORDER BY r.created_at DESC LIMIT 100`);const m=await pool.query('SELECT blood_group FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE',[volunteer.id]);const group=m.rows[0]?.blood_group;const filtered=group?result.rows.filter((r:any)=>r.blood_group===group||r.requester_id===volunteer.id):result.rows.filter((r:any)=>r.requester_id===volunteer.id);res.json({success:true,requests:filtered});}catch(error:any){res.status(500).json({success:false,error:'Unable to load blood requisitions.'});}});
-router.post('/api/blood-network/requests/:id/accept',async(req,res)=>{try{await ensureBloodSchema();const volunteer=await resolveVolunteer(String(req.body?.volunteerId||''));if(!volunteer)return res.status(404).json({success:false,error:'Volunteer account not found.'});const rr=await pool.query(`SELECT * FROM blood_requests WHERE id=$1 AND status='open' AND (expires_at IS NULL OR expires_at>NOW())`,[String(req.params.id)]);if(!rr.rows.length)return res.status(404).json({success:false,error:'This requisition is no longer active.'});const request=rr.rows[0];const member=await pool.query('SELECT blood_group FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE',[volunteer.id]);if(!member.rows.length)return res.status(403).json({success:false,error:'You are not part of the Blood Donation Network.'});if(member.rows[0].blood_group!==request.blood_group)return res.status(403).json({success:false,error:'Only matching blood-group volunteers can accept this request.'});if(request.requester_id===volunteer.id)return res.status(400).json({success:false,error:'You cannot accept your own requisition.'});await pool.query(`INSERT INTO blood_request_acceptances(id,request_id,volunteer_id,status,expires_at) VALUES($1,$2,$3,'accepted',NOW()+INTERVAL '24 hours') ON CONFLICT(request_id,volunteer_id) DO UPDATE SET status='accepted',expires_at=NOW()+INTERVAL '24 hours'`,[crypto.randomUUID(),request.id,volunteer.id]);const title = 'Blood Request Accepted';
-   const body = (volunteer.full_name || 'A volunteer') + ' has accepted your ' + request.blood_group + ' blood request.';
-   await pool.query(`INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_acceptance',$5)`, [crypto.randomUUID(), request.requester_id, title, body, String(request.id)]);
-   try {
-     const t2 = await pool.query('SELECT fcm_token FROM volunteers WHERE id=$1', [request.requester_id]);
-     if (t2.rows[0]?.fcm_token) await sendPushNotification(t2.rows[0].fcm_token, title, body);
-   } catch (notificationError) {
-     console.warn('FCM notification lookup failed; acceptance remains successful:', notificationError);
-   }
-   res.json({success:true});}catch(error:any){res.status(500).json({success:false,error:'Unable to accept this request.'});}});
-router.post('/api/blood-network/requests/:id/cancel',async(req,res)=>{try{await ensureBloodSchema();const volunteer=await resolveVolunteer(String(req.body?.actorId||''));if(!volunteer)return res.status(404).json({success:false,error:'Volunteer account not found.'});const rr=await pool.query('SELECT requester_id FROM blood_requests WHERE id=$1',[String(req.params.id)]);if(!rr.rows.length)return res.status(404).json({success:false,error:'Request not found.'});if(rr.rows[0].requester_id===volunteer.id){await pool.query(`UPDATE blood_requests SET status='cancelled' WHERE id=$1`,[String(req.params.id)]);await pool.query(`UPDATE blood_request_acceptances SET status='cancelled' WHERE request_id=$1`,[String(req.params.id)]);}else await pool.query(`UPDATE blood_request_acceptances SET status='cancelled' WHERE request_id=$1 AND volunteer_id=$2`,[String(req.params.id),volunteer.id]);res.json({success:true});}catch(error:any){res.status(500).json({success:false,error:'Unable to cancel this request.'});}});
-
-
-router.get('/api/blood-network/notifications', async (req, res) => {
+router.get('/api/auth/check-username', async (req, res) => {
   try {
-    await ensureBloodSchema();
-    const volunteerId = String(req.query.recipientId || '');
-    if (!volunteerId) return res.json({ success: true, notifications: [] });
-    const result = await pool.query('SELECT * FROM app_notifications WHERE recipient_id=$1 ORDER BY created_at DESC LIMIT 50', [volunteerId]);
-    res.json({ success: true, notifications: result.rows });
+    const username = String(req.query.username || '').trim().toLowerCase();
+    if (!username) return res.json({ available: false, error: 'User ID is required.' });
+    if (!USERNAME_REGEX.test(username)) return res.json({ available: false, error: 'Use 3-20 characters, starting with a letter; only letters, numbers, . and _ are allowed.' });
+    if (RESERVED_USERNAMES.has(username)) return res.json({ available: false, error: 'This User ID is reserved.' });
+
+    const v = await pool.query('SELECT id FROM volunteers WHERE LOWER(username)=LOWER($1) LIMIT 1', [username]);
+    let u = { rows: [] as any[] };
+    try {
+      u = await pool.query('SELECT id FROM users WHERE LOWER(username)=LOWER($1) OR LOWER(id)=LOWER($1) LIMIT 1', [username]);
+    } catch {}
+
+    return res.json({ available: v.rows.length === 0 && u.rows.length === 0 });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: 'Unable to load notifications' });
+    console.error('Username availability error:', error);
+    return res.status(500).json({ available: false, error: 'Unable to check User ID availability right now.' });
   }
 });
 
+// Unified Registration Flow (Creates entry in BOTH volunteers & users tables!)
+router.post('/api/volunteer-registration/submit', async (req, res) => {
+  try {
+    const d = req.body || {};
+    const fullName = String(d.full_name || d.first_name || '').trim();
+    const requiredFields: Record<string, unknown> = {
+      username: d.username,
+      full_name: fullName,
+      father_husband_name: d.father_husband_name,
+      mother_name: d.mother_name,
+      dob: d.dob,
+      isd_code: d.isd_code,
+      mobile: d.mobile,
+      email: d.email,
+      blood_group: d.blood_group,
+      country: d.country,
+      state: d.state,
+      city: d.city,
+      pincode: d.pincode,
+      area_locality: d.area_locality,
+      address: d.address,
+      ward_no: d.ward_no,
+      password: d.password,
+      confirm_password: d.confirm_password,
+      blood_network_ready: d.blood_network_ready
+    };
+
+    if (String(d.country || '').trim() === 'India') {
+      requiredFields.sansad_kshetra = d.sansad_kshetra;
+      requiredFields.vidhan_sabha = d.vidhan_sabha;
+    }
+
+    const missing = Object.entries(requiredFields).filter(([, v]) => !required(v) && v !== false).map(([k]) => k);
+    if (missing.length) return res.status(400).json({ success: false, error: `Please fill these fields before continuing: ${missing.join(', ')}` });
+
+    const username = String(d.username).trim().toLowerCase();
+    if (!USERNAME_REGEX.test(username)) return res.status(400).json({ success: false, error: 'User ID must be 3-20 characters, start with a letter, and contain only letters, numbers, . or _.' });
+    if (RESERVED_USERNAMES.has(username)) return res.status(400).json({ success: false, error: 'This User ID is reserved. Please choose another.' });
+
+    const age = ageFromDob(String(d.dob));
+    if (age < 0) return res.status(400).json({ success: false, error: 'Invalid date of birth.' });
+    if (age < 16) return res.status(403).json({ success: false, code: 'MINOR', error: 'You are Minor, Not Eligible Now' });
+
+    const email = String(d.email).trim().toLowerCase();
+    if (!emailAllowed(email)) return res.status(400).json({ success: false, error: 'Only Gmail, Yahoo, Rediff, Zoho, or @peoplesuniversity.edu.in email addresses are accepted.' });
+
+    const bloodGroup = String(d.blood_group).trim().toUpperCase();
+    if (!BLOOD_GROUPS.has(bloodGroup)) return res.status(400).json({ success: false, error: 'Please select a valid Blood Group.' });
+
+    const password = String(d.password);
+    if (password.length < 8) return res.status(400).json({ success: false, error: 'Password must be at least 8 characters.' });
+    if (password !== String(d.confirm_password)) return res.status(400).json({ success: false, error: 'Passwords do not match.' });
+
+    const mobile = String(d.mobile).replace(/\s+/g, '');
+    const isd = String(d.isd_code).replace(/[^+\d]/g, '');
+    if (!/^\+?\d{1,4}$/.test(isd) || !/^[0-9]{6,15}$/.test(mobile)) return res.status(400).json({ success: false, error: 'Please enter a valid ISD code and mobile number.' });
+
+    const duplicate = await pool.query(
+      'SELECT id FROM volunteers WHERE mobile=$1 OR LOWER(email)=LOWER($2) OR LOWER(username)=LOWER($3) LIMIT 1',
+      [mobile, email, username]
+    );
+    if (duplicate.rows.length) return res.status(409).json({ success: false, error: 'This User ID, mobile number, or email is already registered.' });
+
+    const id = crypto.randomUUID();
+    const registrationNumber = `RPF/VOL/${new Date().getFullYear().toString().slice(-2)}/${Math.floor(100000 + Math.random() * 900000)}`;
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    await pool.query('BEGIN');
+    try {
+      // 1. Insert into volunteers table
+      await pool.query(
+        `INSERT INTO volunteers (id,username,registration_number,full_name,father_husband_name,mother_name,approval_status,dob,mobile,email,blood_group,country,state,city,address,pincode,area_locality,sansad_kshetra,vidhan_sabha,ward_no,password_hash,role) 
+         VALUES ($1,$2,$3,$4,$5,$6,'approved',$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'user')`,
+        [id, username, registrationNumber, fullName, String(d.father_husband_name).trim(), String(d.mother_name).trim(), d.dob, mobile, email, bloodGroup, String(d.country).trim(), String(d.state).trim(), String(d.city).trim(), String(d.address).trim(), String(d.pincode).trim(), String(d.area_locality).trim(), String(d.sansad_kshetra || '').trim(), String(d.vidhan_sabha || '').trim(), String(d.ward_no).trim(), passwordHash]
+      );
+
+      // 2. ALSO Insert into main users table (Unified User System!)
+      await pool.query(
+        `INSERT INTO users (id, name, email, role, created_at) 
+         VALUES ($1, $2, $3, 'user', NOW()) ON CONFLICT (id) DO UPDATE SET name=$2, email=$3`,
+        [id, fullName, email]
+      );
+
+      // 3. Link Blood Network Membership if requested
+      if (d.blood_network_ready === true || String(d.blood_network_ready).toLowerCase() === 'true') {
+        await pool.query(
+          `INSERT INTO volunteer_blood_memberships(volunteer_id,blood_group,is_active) 
+           VALUES($1,$2,TRUE) ON CONFLICT(volunteer_id) DO UPDATE SET blood_group=EXCLUDED.blood_group,is_active=TRUE,updated_at=NOW()`,
+          [id, bloodGroup]
+        );
+      }
+
+      await pool.query('COMMIT');
+    } catch (e) {
+      await pool.query('ROLLBACK');
+      throw e;
+    }
+
+    res.json({ success: true, registration_number: registrationNumber, username, blood_network: !!(d.blood_network_ready === true || String(d.blood_network_ready).toLowerCase() === 'true') });
+  } catch (error: any) {
+    console.error('Volunteer registration error:', error);
+    if (error.code === '23505') return res.status(409).json({ success: false, error: 'This User ID, mobile number, or email is already registered.' });
+    res.status(500).json({ success: false, error: 'Registration failed. Please try again.' });
+  }
+});
+
+router.get('/api/blood-network/access', async (req, res) => {
+  try {
+    const volunteer = await resolveVolunteer(String(req.query.volunteerId || ''));
+    if (!volunteer) return res.status(404).json({ success: false, error: 'User account not found.' });
+
+    const m = await pool.query('SELECT blood_group,is_active FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE', [volunteer.id]);
+    res.json({ success: true, member: m.rows.length > 0, volunteer: { ...volunteer, blood_group: m.rows[0]?.blood_group || volunteer.blood_group || null } });
+  } catch (error: any) {
+    console.error('Blood access error:', error);
+    res.status(500).json({ success: false, error: 'Unable to check Blood Donation Network access.' });
+  }
+});
+
+router.post('/api/blood-network/join', async (req, res) => {
+  try {
+    const volunteer = await resolveVolunteer(String(req.body?.volunteerId || ''));
+    const bloodGroup = String(req.body?.bloodGroup || '').trim().toUpperCase();
+
+    if (!volunteer) return res.status(404).json({ success: false, error: 'User account not found. Please log in again.' });
+    if (!BLOOD_GROUPS.has(bloodGroup)) return res.status(400).json({ success: false, error: 'Please select your Blood Group to become a member.' });
+
+    await pool.query('BEGIN');
+    try {
+      await pool.query('UPDATE volunteers SET blood_group=$1 WHERE id=$2', [bloodGroup, volunteer.id]);
+      await pool.query(
+        `INSERT INTO volunteer_blood_memberships(volunteer_id,blood_group,is_active) VALUES($1,$2,TRUE) ON CONFLICT(volunteer_id) DO UPDATE SET blood_group=EXCLUDED.blood_group,is_active=TRUE,updated_at=NOW()`,
+        [volunteer.id, bloodGroup]
+      );
+      await pool.query('COMMIT');
+    } catch (e) {
+      await pool.query('ROLLBACK');
+      throw e;
+    }
+
+    res.json({ success: true, bloodGroup });
+  } catch (error: any) {
+    console.error('Blood join error:', error);
+    res.status(500).json({ success: false, error: String(error.message || error) });
+  }
+});
+
+router.post('/api/blood-network/requests', async (req, res) => {
+  try {
+    const { requesterId, patientName, bloodGroup, unitsRequired, hospitalName, contactPhone, locationLat, locationLng, urgency, notes } = req.body || {};
+    const requester = await resolveVolunteer(requesterId);
+
+    if (!requester) return res.status(404).json({ success: false, error: 'User account not found.' });
+    if (![patientName, bloodGroup, unitsRequired, hospitalName, contactPhone].every(required)) return res.status(400).json({ success: false, error: 'All requisition fields are mandatory.' });
+
+    const group = String(bloodGroup).toUpperCase();
+    if (!BLOOD_GROUPS.has(group)) return res.status(400).json({ success: false, error: 'Invalid blood group.' });
+
+    const qty = Number(unitsRequired);
+    if (!Number.isInteger(qty) || qty < 1) return res.status(400).json({ success: false, error: 'Units required must be at least 1.' });
+
+    const urgencyValue = VALID_URGENCY.has(String(urgency)) ? String(urgency) : 'Normal';
+    const rr = await pool.query(
+      `INSERT INTO blood_requests(requester_id,patient_name,blood_group,units_required,hospital_name,location_lat,location_lng,urgency,contact_phone,status,notes,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'open',$10,NOW()+INTERVAL '48 hours') RETURNING *`,
+      [requester.id, String(patientName).trim(), group, qty, String(hospitalName).trim(), locationLat || null, locationLng || null, urgencyValue, String(contactPhone).trim(), String(notes || '').trim()]
+    );
+
+    const request = rr.rows[0];
+    const matches = await pool.query(
+      `SELECT m.volunteer_id FROM volunteer_blood_memberships m WHERE m.is_active=TRUE AND m.blood_group=$1 AND m.volunteer_id<>$2`,
+      [group, requester.id]
+    );
+
+    for (const match of matches.rows) {
+      const title = 'Urgent: Blood Request (' + group + ')';
+      const body = group + ' blood is required at ' + request.hospital_name + '. Tap to Accept.';
+      await pool.query(
+        `INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_request',$5)`,
+        [crypto.randomUUID(), match.volunteer_id, title, body, request.id]
+      );
+      try {
+        const t = await pool.query('SELECT fcm_token FROM volunteers WHERE id=$1', [match.volunteer_id]);
+        if (t.rows[0]?.fcm_token) await sendPushNotification(t.rows[0].fcm_token, title, body);
+      } catch (notificationError) {
+        console.warn('FCM notification lookup failed; blood request remains successful:', notificationError);
+      }
+    }
+
+    res.json({ success: true, request, matchedVolunteers: matches.rowCount });
+  } catch (error: any) {
+    console.error('Blood request error:', error);
+    res.status(500).json({ success: false, error: 'Unable to submit blood requisition.' });
+  }
+});
+
+router.get('/api/blood-network/requests', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM blood_request_acceptances WHERE expires_at<=NOW()');
+    const volunteer = await resolveVolunteer(String(req.query.volunteerId || ''));
+    if (!volunteer) return res.status(404).json({ success: false, error: 'User account not found.' });
+
+    const result = await pool.query(
+      `SELECT r.*,COALESCE(json_agg(json_build_object('volunteer_id',a.volunteer_id,'status',a.status,'accepted_at',a.created_at,'expires_at',a.expires_at) ORDER BY a.created_at DESC) FILTER(WHERE a.id IS NOT NULL),'[]') AS acceptances FROM blood_requests r LEFT JOIN blood_request_acceptances a ON a.request_id=r.id AND a.expires_at>NOW() AND a.status='accepted' WHERE r.status='open' AND (r.expires_at IS NULL OR r.expires_at>NOW()) GROUP BY r.id ORDER BY r.created_at DESC LIMIT 100`
+    );
+
+    const m = await pool.query('SELECT blood_group FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE', [volunteer.id]);
+    const group = m.rows[0]?.blood_group;
+    const filtered = group ? result.rows.filter((r: any) => r.blood_group === group || r.requester_id === volunteer.id) : result.rows.filter((r: any) => r.requester_id === volunteer.id);
+    res.json({ success: true, requests: filtered });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Unable to load blood requisitions.' });
+  }
+});
+
+router.post('/api/blood-network/requests/:id/accept', async (req, res) => {
+  try {
+    const volunteer = await resolveVolunteer(String(req.body?.volunteerId || ''));
+    if (!volunteer) return res.status(404).json({ success: false, error: 'User account not found.' });
+
+    const rr = await pool.query(`SELECT * FROM blood_requests WHERE id=$1 AND status='open' AND (expires_at IS NULL OR expires_at>NOW())`, [String(req.params.id)]);
+    if (!rr.rows.length) return res.status(404).json({ success: false, error: 'This requisition is no longer active.' });
+
+    const request = rr.rows[0];
+    const member = await pool.query('SELECT blood_group FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE', [volunteer.id]);
+    if (!member.rows.length) return res.status(403).json({ success: false, error: 'You are not part of the Blood Donation Network.' });
+    if (member.rows[0].blood_group !== request.blood_group) return res.status(403).json({ success: false, error: 'Only matching blood-group users can accept this request.' });
+    if (request.requester_id === volunteer.id) return res.status(400).json({ success: false, error: 'You cannot accept your own requisition.' });
+
+    await pool.query(
+      `INSERT INTO blood_request_acceptances(id,request_id,volunteer_id,status,expires_at) VALUES($1,$2,$3,'accepted',NOW()+INTERVAL '24 hours') ON CONFLICT(request_id,volunteer_id) DO UPDATE SET status='accepted',expires_at=NOW()+INTERVAL '24 hours'`,
+      [crypto.randomUUID(), request.id, volunteer.id]
+    );
+
+    const title = 'Blood Request Accepted';
+    const body = (volunteer.full_name || 'A user') + ' has accepted your ' + request.blood_group + ' blood request.';
+    await pool.query(
+      `INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_acceptance',$5)`,
+      [crypto.randomUUID(), request.requester_id, title, body, String(request.id)]
+    );
+
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Unable to accept this request.' });
+  }
+});
 
 router.post('/api/save-fcm-token', async (req, res) => {
   try {
     const { volunteerId, token } = req.body;
     if (!volunteerId || !token) return res.status(400).json({ success: false, error: 'Missing data' });
-    
-    // Update the token
     await pool.query('UPDATE volunteers SET fcm_token=$1 WHERE id=$2', [token, volunteerId]);
     res.json({ success: true });
   } catch (err: any) {

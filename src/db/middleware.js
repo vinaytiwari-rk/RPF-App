@@ -7,13 +7,18 @@ if (process.env.NODE_ENV === "production" && (!configuredSecret || configuredSec
 }
 
 export const JWT_SECRET = configuredSecret || "development_only_change_me_please_32_chars";
+
+/**
+ * Unified 2-Role System:
+ * 1. "admin" (Merges admin + superadmin into one)
+ * 2. "user"  (Merges citizen + volunteer + user into one)
+ * 3. "guest" (Unauthenticated visitors)
+ */
 export const normalizeRole = (role) => {
   const value = String(role || "").trim().toLowerCase();
-  if (value === "superadmin" || value === "super_admin") return "super_admin";
-  if (value === "admin") return "admin";
-  if (value === "volunteer") return "volunteer";
+  if (value === "superadmin" || value === "super_admin" || value === "admin") return "admin";
   if (value === "guest") return "guest";
-  return "citizen";
+  return "user";
 };
 
 export const authorizeRole = (requiredRole) => (req, res, next) => {
@@ -21,10 +26,9 @@ export const authorizeRole = (requiredRole) => (req, res, next) => {
 
   const userRole = normalizeRole(req.user.role);
   const wantedRole = normalizeRole(requiredRole);
-  if (!wantedRole) return res.status(500).json({ success: false, error: "Authorization policy is not configured" });
 
-  if (userRole !== wantedRole && userRole !== "super_admin") {
-    return res.status(403).json({ success: false, error: "Access Denied: Insufficient permissions" });
+  if (wantedRole === "admin" && userRole !== "admin") {
+    return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
 
   req.user.role = userRole;
@@ -43,7 +47,7 @@ export const authenticateToken = async (req, res, next) => {
     const normalizedRole = normalizeRole(decoded.role);
     if (!decoded.id) return res.status(403).json({ success: false, error: "Invalid token claims" });
 
-    const user = { ...decoded, role: normalizedRole || "citizen" };
+    const user = { ...decoded, role: normalizedRole || "user" };
 
     if (user.role !== "guest") {
       try {
@@ -52,15 +56,12 @@ export const authenticateToken = async (req, res, next) => {
           [token]
         );
         if (sessionRes.rows.length === 0) {
-          console.warn("Session missing or expired for token:", token.substring(0, 10));
-          // Fail-closed for admin and super_admin users
-          if (["admin", "super_admin"].includes(user.role)) {
+          if (user.role === "admin") {
             return res.status(401).json({ success: false, error: "Session expired or logged out" });
           }
         }
       } catch (sessionErr) {
-        console.warn("Session query failed:", sessionErr?.message);
-        if (["admin", "super_admin"].includes(user.role)) {
+        if (user.role === "admin") {
           return res.status(401).json({ success: false, error: "Session validation unavailable" });
         }
       }
@@ -78,27 +79,19 @@ export const authenticateToken = async (req, res, next) => {
 export const requireAdmin = (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
   const role = normalizeRole(req.user.role);
-  if (role !== "admin" && role !== "super_admin") {
+  if (role !== "admin") {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
   next();
 };
 
-export const requireSuperAdmin = (req, res, next) => {
-  if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
-  const role = normalizeRole(req.user.role);
-  if (role !== "super_admin") {
-    return res.status(403).json({ success: false, error: "Access Denied: Super Admin role required" });
-  }
-  next();
-};
+export const requireSuperAdmin = requireAdmin; // Admin is SuperAdmin
 
 export const requireVolunteer = (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
   const role = normalizeRole(req.user.role);
-  const isVol = req.user.isVolunteer || req.user.is_volunteer;
-  if (role !== "volunteer" && role !== "admin" && role !== "super_admin" && !isVol) {
-    return res.status(403).json({ success: false, error: "Access Denied: Volunteer role required" });
+  if (role !== "user" && role !== "admin") {
+    return res.status(403).json({ success: false, error: "Access Denied: User role required" });
   }
   next();
 };
