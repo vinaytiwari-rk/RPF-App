@@ -282472,11 +282472,10 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req2, res) => {
     try {
       await pool.query(
         `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '7 days')`,
-        [`admin-${Date.now()}-${credential.id}`, user.id, token]
+        [`admin-${Date.now()}-${credential.id}`, String(user.id), token]
       );
     } catch (e3) {
-      console.error("Administrator session tracking failed:", e3);
-      return res.status(503).json({ success: false, error: "Administrator session service is temporarily unavailable." });
+      console.error("Non-fatal administrator session tracking failure:", e3?.message, e3?.code);
     }
     await auditEvent({ action: "admin_login_success", resource: "administrator", userId: user.id, req: req2 });
     return res.json({ success: true, user, token });
@@ -290133,6 +290132,19 @@ var publicAppUrl = process.env.PUBLIC_APP_URL?.trim() || (() => {
   return "http://localhost:5173";
 })();
 var webAuthnChallengeStore = /* @__PURE__ */ new Map();
+async function ensureSessionsTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id VARCHAR(255) PRIMARY KEY,
+      user_id VARCHAR(255) NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)`);
+}
 router2.post("/api/auth/register", async (req2, res) => {
   try {
     const { name, email, phone, password } = req2.body;
@@ -290204,19 +290216,23 @@ router2.post("/api/auth/login", async (req2, res) => {
     const userPayload = isVolunteer ? { id: user.id, role: "volunteer", name: user.full_name, phone: user.mobile, email: user.email } : { id: user.id, role: user.role || "citizen", name: user.name, phone: user.phone, email: user.email };
     const token = import_jsonwebtoken3.default.sign(userPayload, JWT_SECRET, { expiresIn: "7d" });
     try {
+      await ensureSessionsTable();
       await pool.query(
         `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
-        ["sess-" + Date.now() + import_crypto3.default.randomBytes(4).toString("hex"), userPayload.id, token]
+        ["sess-" + Date.now() + import_crypto3.default.randomBytes(4).toString("hex"), String(userPayload.id), token]
       );
+    } catch (sessErr) {
+      console.error("Non-fatal session persistence failure during login:", sessErr?.message, sessErr?.code);
+    }
+    try {
       await auditEvent({
         userId: user.id,
         action: "login_success",
         req: req2,
         metadata: { role: userPayload.role, identifier: finalIdentifier }
       });
-    } catch (sessErr) {
-      console.error("Session creation failed during login:", sessErr?.message);
-      return res.status(503).json({ success: false, error: "Session creation failed. Please try logging in again." });
+    } catch (auditErr) {
+      console.error("Non-fatal login audit failure:", auditErr?.message, auditErr?.code);
     }
     res.json({ success: true, token, user: userPayload });
   } catch (error3) {
