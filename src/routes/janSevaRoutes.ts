@@ -26,11 +26,17 @@ const setCached = (key: string, data: any, ttlMs = CACHE_TTL_MS) => {
   cardCache.set(key, { data, expiresAt: Date.now() + ttlMs });
 };
 
-// Fetch all cards / search cards (bridges with master Jan Seva MongoDB API)
-router.get("/api/cards", async (req, res) => {
+/**
+ * 🔒 PRIVACY POLICY & ACCESS CONTROL:
+ * 1. ONLY ADMINS can view all cards (/api/cards) and overall stats (/api/cards/stats).
+ * 2. Regular USERS can ONLY view/search/download THEIR OWN Jan Seva Card (/api/cards/my).
+ */
+
+// Fetch all cards - STRICTLY ADMIN ONLY
+router.get("/api/cards", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { search = '', page = 1, limit = 20 } = req.query;
-    const cacheKey = `cards:${search}:${page}:${limit}`;
+    const cacheKey = `cards:admin:${search}:${page}:${limit}`;
     const cachedData = getCached(cacheKey);
 
     if (cachedData) {
@@ -49,7 +55,7 @@ router.get("/api/cards", async (req, res) => {
           totalPatients: response.data.totalPatients,
           totalPages: response.data.totalPages
         };
-        setCached(cacheKey, payload, 30 * 1000); // 30 sec cache
+        setCached(cacheKey, payload, 30 * 1000);
         return res.json(payload);
       }
     } catch (apiErr: any) {
@@ -69,8 +75,8 @@ router.get("/api/cards", async (req, res) => {
   }
 });
 
-// Overall Stats (Total 66,505+ records) - Cached for 2 Minutes
-router.get("/api/cards/stats", async (req, res) => {
+// Overall Stats - STRICTLY ADMIN ONLY
+router.get("/api/cards/stats", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const cacheKey = "cards:stats";
     const cachedStats = getCached(cacheKey);
@@ -88,20 +94,39 @@ router.get("/api/cards/stats", async (req, res) => {
     }
 
     const payload = { success: true, stats: statsData };
-    setCached(cacheKey, payload, 120 * 1000); // 2 minute cache
+    setCached(cacheKey, payload, 120 * 1000);
     return res.json(payload);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Search by CardNo, Aadhaar, Mobile across 66,505 dataset
-router.get("/api/cards/search", async (req, res) => {
+// Search Card - Admins can search any record; Regular Users can ONLY search their own record
+router.get("/api/cards/search", authenticateToken, async (req, res) => {
   try {
     const { query } = req.query;
     if (!query) return res.status(400).json({ error: "Query parameter required" });
 
     const q = String(query).trim();
+    const user = (req as any).user;
+
+    // Privacy Protection: Non-admin users are restricted to their own ID/CardNo/Mobile
+    if (user?.role !== "admin") {
+      const isOwnSearch =
+        q === user?.id ||
+        q === user?.mobile ||
+        q === user?.phone ||
+        q === user?.janSevaCardNo ||
+        q === user?.aadhaarNo;
+
+      if (!isOwnSearch) {
+        return res.status(403).json({
+          success: false,
+          error: "Access Denied: You can only search and view your own Jan Seva Card."
+        });
+      }
+    }
+
     const cacheKey = `search:${q}`;
     const cached = getCached(cacheKey);
     if (cached) return res.json(cached);
@@ -189,9 +214,7 @@ router.post("/api/cards", async (req, res) => {
       );
     }
 
-    // Invalidate stats cache so stats update instantly
     cardCache.delete("cards:stats");
-
     res.json({ success: true, cardNo });
   } catch (error: any) {
     console.error("Error saving card application:", error);
@@ -199,6 +222,7 @@ router.post("/api/cards", async (req, res) => {
   }
 });
 
+// Admin Approval & Management Routes
 router.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { userId } = req.body;
@@ -246,20 +270,27 @@ router.delete("/api/cards/:userId", authenticateToken, requireAdmin, async (req,
   }
 });
 
-router.get("/api/cards/my", async (req, res) => {
+// Get My Card - Regular Users can ONLY view THEIR OWN Card
+router.get("/api/cards/my", authenticateToken, async (req, res) => {
   try {
-    const userId = req.query.userId as string;
-    if (!userId) {
-      return res.status(400).json({ error: "Missing userId parameter" });
+    const user = (req as any).user;
+    const requestedUserId = (req.query.userId as string) || user?.id;
+
+    // Privacy Protection: Non-admin users cannot query other users' card
+    if (user?.role !== "admin" && requestedUserId !== user?.id) {
+      return res.status(403).json({
+        success: false,
+        error: "Access Denied: You can only view your own Jan Seva Card."
+      });
     }
 
-    const cacheKey = `cards:my:${userId}`;
+    const cacheKey = `cards:my:${requestedUserId}`;
     const cached = getCached(cacheKey);
     if (cached) return res.json(cached);
 
     const result = await pool.query(
       'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2 WHERE "userId" = $1',
-      [userId]
+      [requestedUserId]
     );
     const payload = { success: true, application: result.rows[0] || null };
     setCached(cacheKey, payload, 30 * 1000);
