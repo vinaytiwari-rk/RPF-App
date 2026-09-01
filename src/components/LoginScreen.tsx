@@ -11,7 +11,7 @@ const apiUrl = (path: string) => `${API_BASE}${path}`;
 interface LoginScreenProps {
   lang: 'hi' | 'en';
   onLoginSuccess: (
-    role: 'volunteer' | 'guest',
+    role: 'volunteer' | 'guest' | 'admin' | 'user' | string,
     details?: {
       phone?: string;
       name?: string;

