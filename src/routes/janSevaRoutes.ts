@@ -8,46 +8,90 @@ const router = express.Router();
 
 const JAN_SEVA_API_BASE = process.env.JAN_SEVA_API_URL || 'https://api.therpfoundation.org/api/patient';
 
+// Zero-Load In-Memory Caching (Prevents Server CPU/RAM Spikes & Rate Limits)
+const cardCache = new Map<string, { data: any, expiresAt: number }>();
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds TTL
+
+const getCached = (key: string) => {
+  const item = cardCache.get(key);
+  if (!item) return null;
+  if (Date.now() > item.expiresAt) {
+    cardCache.delete(key);
+    return null;
+  }
+  return item.data;
+};
+
+const setCached = (key: string, data: any, ttlMs = CACHE_TTL_MS) => {
+  cardCache.set(key, { data, expiresAt: Date.now() + ttlMs });
+};
+
 // Fetch all cards / search cards (bridges with master Jan Seva MongoDB API)
 router.get("/api/cards", async (req, res) => {
   try {
-    const { search, page = 1, limit = 20 } = req.query;
-    
+    const { search = '', page = 1, limit = 20 } = req.query;
+    const cacheKey = `cards:${search}:${page}:${limit}`;
+    const cachedData = getCached(cacheKey);
+
+    if (cachedData) {
+      return res.json(cachedData);
+    }
+
     try {
       const response = await axios.get(`${JAN_SEVA_API_BASE}`, {
         params: { search, page, limit },
-        timeout: 5000
+        timeout: 4000
       });
       if (response.data && response.data.patients) {
-        return res.json({ 
-          success: true, 
+        const payload = {
+          success: true,
           applications: response.data.patients,
           totalPatients: response.data.totalPatients,
           totalPages: response.data.totalPages
-        });
+        };
+        setCached(cacheKey, payload, 30 * 1000); // 30 sec cache
+        return res.json(payload);
       }
     } catch (apiErr: any) {
       console.warn("Jan Seva external API query failed, falling back to local PG:", apiErr.message);
     }
 
     const result = await pool.query(
-      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2 ORDER BY "submittedAt" DESC'
+      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2 ORDER BY "submittedAt" DESC LIMIT $1 OFFSET $2',
+      [limit, (Number(page) - 1) * Number(limit)]
     );
-    res.json({ success: true, applications: result.rows });
+    const payload = { success: true, applications: result.rows };
+    setCached(cacheKey, payload, 10 * 1000);
+    res.json(payload);
   } catch (error: any) {
     console.error("Error fetching card applications:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Overall Stats (Total 66,505+ records)
+// Overall Stats (Total 66,505+ records) - Cached for 2 Minutes
 router.get("/api/cards/stats", async (req, res) => {
   try {
-    const response = await axios.get(`${JAN_SEVA_API_BASE}/stats`, { timeout: 5000 });
-    return res.json({ success: true, stats: response.data });
+    const cacheKey = "cards:stats";
+    const cachedStats = getCached(cacheKey);
+    if (cachedStats) {
+      return res.json(cachedStats);
+    }
+
+    let statsData = null;
+    try {
+      const response = await axios.get(`${JAN_SEVA_API_BASE}/stats`, { timeout: 4000 });
+      statsData = response.data;
+    } catch (error: any) {
+      const pgCount = await pool.query('SELECT COUNT(*) FROM card_applications_v2');
+      statsData = { total: parseInt(pgCount.rows[0]?.count || '0', 10), newToday: 0, thisWeek: 0 };
+    }
+
+    const payload = { success: true, stats: statsData };
+    setCached(cacheKey, payload, 120 * 1000); // 2 minute cache
+    return res.json(payload);
   } catch (error: any) {
-    const pgCount = await pool.query('SELECT COUNT(*) FROM card_applications_v2');
-    res.json({ success: true, stats: { total: parseInt(pgCount.rows[0]?.count || '0', 10), newToday: 0, thisWeek: 0 } });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -57,18 +101,34 @@ router.get("/api/cards/search", async (req, res) => {
     const { query } = req.query;
     if (!query) return res.status(400).json({ error: "Query parameter required" });
 
+    const q = String(query).trim();
+    const cacheKey = `search:${q}`;
+    const cached = getCached(cacheKey);
+    if (cached) return res.json(cached);
+
+    // 1. Search local Postgres first
+    const pgResult = await pool.query(
+      'SELECT * FROM card_applications_v2 WHERE "cardNo" = $1 OR "idNumber" = $1 OR "userId" = $1 LIMIT 1',
+      [q]
+    );
+
+    if (pgResult.rows.length > 0) {
+      const payload = { success: true, patient: pgResult.rows[0] };
+      setCached(cacheKey, payload, 60 * 1000);
+      return res.json(payload);
+    }
+
+    // 2. Fallback to external MongoDB master dataset (66,505 records)
     try {
-      const response = await axios.get(`${JAN_SEVA_API_BASE}/${query}`, { timeout: 5000 });
+      const response = await axios.get(`${JAN_SEVA_API_BASE}/${q}`, { timeout: 4000 });
       if (response.data) {
-        return res.json({ success: true, patient: response.data });
+        const payload = { success: true, patient: response.data };
+        setCached(cacheKey, payload, 60 * 1000);
+        return res.json(payload);
       }
     } catch {}
 
-    const result = await pool.query(
-      'SELECT * FROM card_applications_v2 WHERE "cardNo" = $1 OR "idNumber" = $1',
-      [query]
-    );
-    res.json({ success: true, patient: result.rows[0] || null });
+    res.json({ success: true, patient: null });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -102,7 +162,7 @@ router.post("/api/cards", async (req, res) => {
         vidhanSabhaNo: vidhanSabhaNo || "0000",
         addressType: "Urban",
         createdBy: userId || "web_user"
-      }, { timeout: 5000 });
+      }, { timeout: 4000 });
 
       if (apiResponse.data && apiResponse.data.cardNo) {
         cardNo = apiResponse.data.cardNo;
@@ -129,6 +189,9 @@ router.post("/api/cards", async (req, res) => {
       );
     }
 
+    // Invalidate stats cache so stats update instantly
+    cardCache.delete("cards:stats");
+
     res.json({ success: true, cardNo });
   } catch (error: any) {
     console.error("Error saving card application:", error);
@@ -148,6 +211,7 @@ router.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, r
       'UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
       ["approved", cardNo, userId]
     );
+    cardCache.clear();
     res.json({ success: true, cardNo });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -165,6 +229,7 @@ router.post("/api/cards/reject", authenticateToken, requireAdmin, async (req, re
       'UPDATE users SET "janSevaCardStatus" = $1 WHERE id = $2',
       ["rejected", userId]
     );
+    cardCache.clear();
     res.json({ success: true });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -174,6 +239,7 @@ router.post("/api/cards/reject", authenticateToken, requireAdmin, async (req, re
 router.delete("/api/cards/:userId", authenticateToken, requireAdmin, async (req, res) => {
   try {
     await pool.query('DELETE FROM card_applications_v2 WHERE "userId" = $1', [req.params.userId]);
+    cardCache.clear();
     res.json({ success: true });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -186,11 +252,18 @@ router.get("/api/cards/my", async (req, res) => {
     if (!userId) {
       return res.status(400).json({ error: "Missing userId parameter" });
     }
+
+    const cacheKey = `cards:my:${userId}`;
+    const cached = getCached(cacheKey);
+    if (cached) return res.json(cached);
+
     const result = await pool.query(
       'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2 WHERE "userId" = $1',
       [userId]
     );
-    res.json({ success: true, application: result.rows[0] || null });
+    const payload = { success: true, application: result.rows[0] || null };
+    setCached(cacheKey, payload, 30 * 1000);
+    res.json(payload);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
