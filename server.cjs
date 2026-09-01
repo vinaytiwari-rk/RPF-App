@@ -280568,11 +280568,9 @@ if (process.env.NODE_ENV === "production" && (!configuredSecret || configuredSec
 var JWT_SECRET = configuredSecret || "development_only_change_me_please_32_chars";
 var normalizeRole = (role) => {
   const value2 = String(role || "").trim().toLowerCase();
-  if (value2 === "superadmin" || value2 === "super_admin") return "super_admin";
-  if (value2 === "admin") return "admin";
-  if (value2 === "volunteer") return "volunteer";
+  if (value2 === "superadmin" || value2 === "super_admin" || value2 === "admin") return "admin";
   if (value2 === "guest") return "guest";
-  return "citizen";
+  return "user";
 };
 var authenticateToken = async (req2, res, next2) => {
   const authHeader = req2.headers.authorization;
@@ -280583,7 +280581,7 @@ var authenticateToken = async (req2, res, next2) => {
     if (!decoded || typeof decoded !== "object") return res.status(403).json({ success: false, error: "Invalid token" });
     const normalizedRole = normalizeRole(decoded.role);
     if (!decoded.id) return res.status(403).json({ success: false, error: "Invalid token claims" });
-    const user = { ...decoded, role: normalizedRole || "citizen" };
+    const user = { ...decoded, role: normalizedRole || "user" };
     if (user.role !== "guest") {
       try {
         const sessionRes = await pool.query(
@@ -280591,14 +280589,12 @@ var authenticateToken = async (req2, res, next2) => {
           [token]
         );
         if (sessionRes.rows.length === 0) {
-          console.warn("Session missing or expired for token:", token.substring(0, 10));
-          if (["admin", "super_admin"].includes(user.role)) {
+          if (user.role === "admin") {
             return res.status(401).json({ success: false, error: "Session expired or logged out" });
           }
         }
       } catch (sessionErr) {
-        console.warn("Session query failed:", sessionErr?.message);
-        if (["admin", "super_admin"].includes(user.role)) {
+        if (user.role === "admin") {
           return res.status(401).json({ success: false, error: "Session validation unavailable" });
         }
       }
@@ -280614,7 +280610,7 @@ var authenticateToken = async (req2, res, next2) => {
 var requireAdmin = (req2, res, next2) => {
   if (!req2.user) return res.status(401).json({ success: false, error: "Authentication required" });
   const role = normalizeRole(req2.user.role);
-  if (role !== "admin" && role !== "super_admin") {
+  if (role !== "admin") {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
   }
   next2();
@@ -280622,9 +280618,8 @@ var requireAdmin = (req2, res, next2) => {
 var requireVolunteer = (req2, res, next2) => {
   if (!req2.user) return res.status(401).json({ success: false, error: "Authentication required" });
   const role = normalizeRole(req2.user.role);
-  const isVol = req2.user.isVolunteer || req2.user.is_volunteer;
-  if (role !== "volunteer" && role !== "admin" && role !== "super_admin" && !isVol) {
-    return res.status(403).json({ success: false, error: "Access Denied: Volunteer role required" });
+  if (role !== "user" && role !== "admin") {
+    return res.status(403).json({ success: false, error: "Access Denied: User role required" });
   }
   next2();
 };
@@ -290174,20 +290169,26 @@ router2.post("/api/auth/login", async (req2, res) => {
       const token2 = import_jsonwebtoken3.default.sign(guestUser, JWT_SECRET, { expiresIn: "7d" });
       return res.json({ success: true, user: guestUser, token: token2 });
     }
-    const finalIdentifier = identifier3 || phone;
+    const finalIdentifier = String(identifier3 || phone || "").trim();
     if (!finalIdentifier || !password) {
       return res.status(400).json({ success: false, error: "Missing identifier/phone or password" });
     }
     let user = null;
-    let isVolunteer = false;
+    let userRole = "user";
     let validPassword = false;
+    let userName = "";
+    let userEmail = "";
+    let userPhone = "";
     const volResult = await pool.query(
-      `SELECT * FROM volunteers WHERE mobile = $1 OR LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1) OR LOWER(registration_number) = LOWER($1)`,
+      `SELECT * FROM volunteers WHERE mobile = $1 OR LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1) OR LOWER(registration_number) = LOWER($1) OR id = $1`,
       [finalIdentifier]
     );
     if (volResult.rows.length > 0) {
       user = volResult.rows[0];
-      isVolunteer = true;
+      userRole = user.role?.toLowerCase() === "admin" ? "admin" : "user";
+      userName = user.full_name || user.username;
+      userEmail = user.email || "";
+      userPhone = user.mobile || "";
       if (user.password_hash) {
         if (user.password_hash.startsWith("$2")) {
           validPassword = await bcryptjs_default.compare(password, user.password_hash);
@@ -290195,25 +290196,58 @@ router2.post("/api/auth/login", async (req2, res) => {
           const oldHash = import_crypto3.default.createHash("sha256").update(password).digest("hex");
           validPassword = oldHash === user.password_hash;
         }
-      } else {
-        const userResult = await pool.query(`SELECT password_hash FROM users WHERE id = $1`, [user.id]);
-        if (userResult.rows.length > 0 && userResult.rows[0].password_hash) {
-          validPassword = await bcryptjs_default.compare(password, userResult.rows[0].password_hash);
+      }
+    }
+    if (!validPassword) {
+      const adminCredResult = await pool.query(
+        `SELECT * FROM admin_credentials WHERE LOWER(username) = LOWER($1) OR id = $1`,
+        [finalIdentifier]
+      );
+      if (adminCredResult.rows.length > 0) {
+        const adminRow = adminCredResult.rows[0];
+        if (adminRow.password_hash) {
+          if (adminRow.password_hash.startsWith("$2")) {
+            validPassword = await bcryptjs_default.compare(password, adminRow.password_hash);
+          } else {
+            const oldHash = import_crypto3.default.createHash("sha256").update(password).digest("hex");
+            validPassword = oldHash === adminRow.password_hash;
+          }
+        }
+        if (validPassword) {
+          user = { id: adminRow.id || "admin", name: "System Administrator", role: "admin" };
+          userRole = "admin";
+          userName = "System Administrator";
         }
       }
-    } else {
+    }
+    if (!validPassword) {
       const userResult = await pool.query(
-        `SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR phone = $1 OR LOWER(username) = LOWER($1)`,
+        `SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR phone = $1 OR LOWER(username) = LOWER($1) OR id = $1`,
         [finalIdentifier]
       );
       if (userResult.rows.length > 0) {
-        user = userResult.rows[0];
-        if (user.password_hash) validPassword = await bcryptjs_default.compare(password, user.password_hash);
+        const uRow = userResult.rows[0];
+        if (uRow.password_hash) {
+          validPassword = await bcryptjs_default.compare(password, uRow.password_hash);
+        }
+        if (validPassword) {
+          user = uRow;
+          userRole = user.role?.toLowerCase() === "admin" ? "admin" : "user";
+          userName = user.name || user.username || "User";
+          userEmail = user.email || "";
+          userPhone = user.phone || "";
+        }
       }
     }
     if (!user) return res.status(401).json({ success: false, error: "User not found" });
     if (!validPassword) return res.status(401).json({ success: false, error: "Invalid credentials" });
-    const userPayload = isVolunteer ? { id: user.id, role: "volunteer", name: user.full_name, phone: user.mobile, email: user.email } : { id: user.id, role: user.role || "citizen", name: user.name, phone: user.phone, email: user.email };
+    const userPayload = {
+      id: user.id,
+      role: userRole,
+      name: userName,
+      phone: userPhone,
+      email: userEmail
+    };
     const token = import_jsonwebtoken3.default.sign(userPayload, JWT_SECRET, { expiresIn: "7d" });
     try {
       await ensureSessionsTable();
@@ -290222,7 +290256,7 @@ router2.post("/api/auth/login", async (req2, res) => {
         ["sess-" + Date.now() + import_crypto3.default.randomBytes(4).toString("hex"), String(userPayload.id), token]
       );
     } catch (sessErr) {
-      console.error("Non-fatal session persistence failure during login:", sessErr?.message, sessErr?.code);
+      console.error("Non-fatal session persistence failure during login:", sessErr?.message);
     }
     try {
       await auditEvent({
@@ -290232,7 +290266,6 @@ router2.post("/api/auth/login", async (req2, res) => {
         metadata: { role: userPayload.role, identifier: finalIdentifier }
       });
     } catch (auditErr) {
-      console.error("Non-fatal login audit failure:", auditErr?.message, auditErr?.code);
     }
     res.json({ success: true, token, user: userPayload });
   } catch (error3) {
@@ -327259,47 +327292,161 @@ var cultureRoutes_default = router8;
 var import_express9 = __toESM(require_express2(), 1);
 var import_crypto9 = __toESM(require("crypto"), 1);
 var router9 = import_express9.default.Router();
-router9.get("/api/cards", async (req2, res) => {
+var JAN_SEVA_API_BASE = process.env.JAN_SEVA_API_URL || "https://api.therpfoundation.org/api/patient";
+var cardCache = /* @__PURE__ */ new Map();
+var CACHE_TTL_MS = 60 * 1e3;
+var getCached = (key) => {
+  const item = cardCache.get(key);
+  if (!item) return null;
+  if (Date.now() > item.expiresAt) {
+    cardCache.delete(key);
+    return null;
+  }
+  return item.data;
+};
+var setCached = (key, data2, ttlMs = CACHE_TTL_MS) => {
+  cardCache.set(key, { data: data2, expiresAt: Date.now() + ttlMs });
+};
+router9.get("/api/cards", authenticateToken, requireAdmin, async (req2, res) => {
   try {
+    const { search = "", page = 1, limit = 20 } = req2.query;
+    const cacheKey = `cards:admin:${search}:${page}:${limit}`;
+    const cachedData = getCached(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    }
+    try {
+      const response = await axios_default.get(`${JAN_SEVA_API_BASE}`, {
+        params: { search, page, limit },
+        timeout: 4e3
+      });
+      if (response.data && response.data.patients) {
+        const payload2 = {
+          success: true,
+          applications: response.data.patients,
+          totalPatients: response.data.totalPatients,
+          totalPages: response.data.totalPages
+        };
+        setCached(cacheKey, payload2, 30 * 1e3);
+        return res.json(payload2);
+      }
+    } catch (apiErr) {
+      console.warn("Jan Seva external API query failed, falling back to local PG:", apiErr.message);
+    }
     const result = await pool.query(
-      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2'
+      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2 ORDER BY "submittedAt" DESC LIMIT $1 OFFSET $2',
+      [limit, (Number(page) - 1) * Number(limit)]
     );
-    res.json({ applications: result.rows });
+    const payload = { success: true, applications: result.rows };
+    setCached(cacheKey, payload, 10 * 1e3);
+    res.json(payload);
   } catch (error3) {
     console.error("Error fetching card applications:", error3);
     res.status(500).json({ error: error3.message });
   }
 });
+router9.get("/api/cards/stats", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    const cacheKey = "cards:stats";
+    const cachedStats = getCached(cacheKey);
+    if (cachedStats) {
+      return res.json(cachedStats);
+    }
+    let statsData = null;
+    try {
+      const response = await axios_default.get(`${JAN_SEVA_API_BASE}/stats`, { timeout: 4e3 });
+      statsData = response.data;
+    } catch (error3) {
+      const pgCount = await pool.query("SELECT COUNT(*) FROM card_applications_v2");
+      statsData = { total: parseInt(pgCount.rows[0]?.count || "0", 10), newToday: 0, thisWeek: 0 };
+    }
+    const payload = { success: true, stats: statsData };
+    setCached(cacheKey, payload, 120 * 1e3);
+    return res.json(payload);
+  } catch (error3) {
+    res.status(500).json({ error: error3.message });
+  }
+});
+router9.get("/api/cards/search", authenticateToken, async (req2, res) => {
+  try {
+    const { query } = req2.query;
+    if (!query) return res.status(400).json({ error: "Query parameter required" });
+    const q = String(query).trim();
+    const user = req2.user;
+    if (user?.role !== "admin") {
+      const isOwnSearch = q === user?.id || q === user?.mobile || q === user?.phone || q === user?.janSevaCardNo || q === user?.aadhaarNo;
+      if (!isOwnSearch) {
+        return res.status(403).json({
+          success: false,
+          error: "Access Denied: You can only search and view your own Jan Seva Card."
+        });
+      }
+    }
+    const cacheKey = `search:${q}`;
+    const cached = getCached(cacheKey);
+    if (cached) return res.json(cached);
+    const pgResult = await pool.query(
+      'SELECT * FROM card_applications_v2 WHERE "cardNo" = $1 OR "idNumber" = $1 OR "userId" = $1 LIMIT 1',
+      [q]
+    );
+    if (pgResult.rows.length > 0) {
+      const payload = { success: true, patient: pgResult.rows[0] };
+      setCached(cacheKey, payload, 60 * 1e3);
+      return res.json(payload);
+    }
+    try {
+      const response = await axios_default.get(`${JAN_SEVA_API_BASE}/${q}`, { timeout: 4e3 });
+      if (response.data) {
+        const payload = { success: true, patient: response.data };
+        setCached(cacheKey, payload, 60 * 1e3);
+        return res.json(payload);
+      }
+    } catch {
+    }
+    res.json({ success: true, patient: null });
+  } catch (error3) {
+    res.status(500).json({ error: error3.message });
+  }
+});
 router9.post("/api/cards", async (req2, res) => {
   try {
-    const { userId, name, gender, dob, address, idType, idNumber } = req2.body;
+    const { userId, name, gender, dob, address, idType, idNumber, mobileNo, district, vidhanSabhaNo } = req2.body;
     if (idType === "aadhaar" || idNumber) {
       const existing = await pool.query('SELECT "cardNo" FROM card_applications_v2 WHERE "idNumber" = $1', [idNumber]);
       if (existing.rows.length > 0) {
-        return res.status(400).json({ success: false, error: "A card with this Aadhaar number already exists.", cardNo: existing.rows[0].cardNo });
+        return res.status(400).json({ success: false, error: "A card with this ID number already exists.", cardNo: existing.rows[0].cardNo });
       }
     }
     const submittedAt = (/* @__PURE__ */ new Date()).toISOString();
     const id3 = import_crypto9.default.randomUUID();
-    const cardNo = `JSC-${Math.floor(1e7 + Math.random() * 9e7)}`;
     const status2 = "approved";
-    await pool.query(
-      `INSERT INTO card_applications_v2 
-         (id, "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt") 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-      [
-        id3,
-        userId || "guest",
-        name,
+    let cardNo = "";
+    try {
+      const apiResponse = await axios_default.post(`${JAN_SEVA_API_BASE}`, {
+        nameOfMember: name,
         gender,
         dob,
-        address,
-        idType || "aadhaar",
-        idNumber,
-        status2,
-        cardNo,
-        submittedAt
-      ]
+        mobileNo,
+        aadhaarNo: idNumber,
+        district,
+        vidhanSabhaNo: vidhanSabhaNo || "0000",
+        addressType: "Urban",
+        createdBy: userId || "web_user"
+      }, { timeout: 4e3 });
+      if (apiResponse.data && apiResponse.data.cardNo) {
+        cardNo = apiResponse.data.cardNo;
+      }
+    } catch (apiErr) {
+      console.warn("Failed to create on Mongo master API, generating local cardNo:", apiErr.message);
+    }
+    if (!cardNo) {
+      cardNo = `0001${(vidhanSabhaNo || "0000").padStart(4, "0")}0001${Math.floor(1e3 + Math.random() * 9e3)}`;
+    }
+    await pool.query(
+      `INSERT INTO card_applications_v2 
+       (id, "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [id3, userId || "guest", name, gender, dob, address, idType || "aadhaar", idNumber, status2, cardNo, submittedAt]
     );
     if (userId && userId !== "guest") {
       await pool.query(
@@ -327307,6 +327454,7 @@ router9.post("/api/cards", async (req2, res) => {
         ["approved", cardNo, userId]
       );
     }
+    cardCache.delete("cards:stats");
     res.json({ success: true, cardNo });
   } catch (error3) {
     console.error("Error saving card application:", error3);
@@ -327316,7 +327464,7 @@ router9.post("/api/cards", async (req2, res) => {
 router9.post("/api/cards/approve", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { userId } = req2.body;
-    const cardNo = `JSC-${Math.floor(1e7 + Math.random() * 9e7)}`;
+    const cardNo = `000100000001${Math.floor(1e3 + Math.random() * 9e3)}`;
     await pool.query(
       'UPDATE card_applications_v2 SET status = $1, "cardNo" = $2 WHERE "userId" = $3',
       ["approved", cardNo, userId]
@@ -327325,6 +327473,7 @@ router9.post("/api/cards/approve", authenticateToken, requireAdmin, async (req2,
       'UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
       ["approved", cardNo, userId]
     );
+    cardCache.clear();
     res.json({ success: true, cardNo });
   } catch (error3) {
     res.status(500).json({ error: error3.message });
@@ -327341,6 +327490,7 @@ router9.post("/api/cards/reject", authenticateToken, requireAdmin, async (req2, 
       'UPDATE users SET "janSevaCardStatus" = $1 WHERE id = $2',
       ["rejected", userId]
     );
+    cardCache.clear();
     res.json({ success: true });
   } catch (error3) {
     res.status(500).json({ error: error3.message });
@@ -327349,22 +327499,32 @@ router9.post("/api/cards/reject", authenticateToken, requireAdmin, async (req2, 
 router9.delete("/api/cards/:userId", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     await pool.query('DELETE FROM card_applications_v2 WHERE "userId" = $1', [req2.params.userId]);
+    cardCache.clear();
     res.json({ success: true });
   } catch (error3) {
     res.status(500).json({ error: error3.message });
   }
 });
-router9.get("/api/cards/my", async (req2, res) => {
+router9.get("/api/cards/my", authenticateToken, async (req2, res) => {
   try {
-    const userId = req2.query.userId;
-    if (!userId) {
-      return res.status(400).json({ error: "Missing userId parameter" });
+    const user = req2.user;
+    const requestedUserId = req2.query.userId || user?.id;
+    if (user?.role !== "admin" && requestedUserId !== user?.id) {
+      return res.status(403).json({
+        success: false,
+        error: "Access Denied: You can only view your own Jan Seva Card."
+      });
     }
+    const cacheKey = `cards:my:${requestedUserId}`;
+    const cached = getCached(cacheKey);
+    if (cached) return res.json(cached);
     const result = await pool.query(
       'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2 WHERE "userId" = $1',
-      [userId]
+      [requestedUserId]
     );
-    res.json({ success: true, application: result.rows[0] || null });
+    const payload = { success: true, application: result.rows[0] || null };
+    setCached(cacheKey, payload, 30 * 1e3);
+    res.json(payload);
   } catch (error3) {
     res.status(500).json({ error: error3.message });
   }
@@ -328671,9 +328831,6 @@ var VALID_URGENCY = /* @__PURE__ */ new Set(["Normal", "Urgent", "Emergency"]);
 var EMAIL_DOMAINS = /* @__PURE__ */ new Set(["gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.in", "rediffmail.com", "rediff.com", "zoho.com", "peoplesuniversity.edu.in"]);
 var USERNAME_REGEX2 = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
 var RESERVED_USERNAMES2 = /* @__PURE__ */ new Set(["admin", "root", "superuser", "system", "moderator", "guest", "anonymous"]);
-var ensureBloodSchema = async () => {
-  return Promise.resolve();
-};
 var required = (v) => typeof v === "string" ? v.trim().length > 0 : v !== void 0 && v !== null;
 var emailAllowed = (email) => {
   const m3 = email.trim().toLowerCase().match(/^[^\s@]+@([^\s@]+)$/);
@@ -328687,9 +328844,32 @@ var ageFromDob = (dob) => {
   if (n3.getMonth() < d2.getMonth() || n3.getMonth() === d2.getMonth() && n3.getDate() < d2.getDate()) a--;
   return a;
 };
+var resolveVolunteer = async (rawId) => {
+  const key = String(rawId || "").trim();
+  if (!key) return null;
+  const v = await pool.query(
+    `SELECT id, username, full_name, mobile, email, blood_group FROM volunteers WHERE id=$1 OR LOWER(username)=LOWER($1) OR mobile=$1 OR LOWER(email)=LOWER($1) LIMIT 1`,
+    [key]
+  );
+  if (v.rows.length > 0) return v.rows[0];
+  const u = await pool.query(
+    `SELECT id, id AS username, name AS full_name, email, role FROM users WHERE id=$1 OR LOWER(name)=LOWER($1) OR LOWER(email)=LOWER($1) LIMIT 1`,
+    [key]
+  );
+  if (u.rows.length > 0) {
+    return {
+      id: u.rows[0].id,
+      username: u.rows[0].username,
+      full_name: u.rows[0].full_name,
+      mobile: "",
+      email: u.rows[0].email,
+      blood_group: null
+    };
+  }
+  return null;
+};
 router19.get("/api/auth/check-username", async (req2, res) => {
   try {
-    await ensureBloodSchema();
     const username = String(req2.query.username || "").trim().toLowerCase();
     if (!username) return res.json({ available: false, error: "User ID is required." });
     if (!USERNAME_REGEX2.test(username)) return res.json({ available: false, error: "Use 3-20 characters, starting with a letter; only letters, numbers, . and _ are allowed." });
@@ -328697,7 +328877,7 @@ router19.get("/api/auth/check-username", async (req2, res) => {
     const v = await pool.query("SELECT id FROM volunteers WHERE LOWER(username)=LOWER($1) LIMIT 1", [username]);
     let u = { rows: [] };
     try {
-      u = await pool.query("SELECT id FROM users WHERE LOWER(username)=LOWER($1) LIMIT 1", [username]);
+      u = await pool.query("SELECT id FROM users WHERE LOWER(username)=LOWER($1) OR LOWER(id)=LOWER($1) LIMIT 1", [username]);
     } catch {
     }
     return res.json({ available: v.rows.length === 0 && u.rows.length === 0 });
@@ -328708,10 +328888,29 @@ router19.get("/api/auth/check-username", async (req2, res) => {
 });
 router19.post("/api/volunteer-registration/submit", async (req2, res) => {
   try {
-    await ensureBloodSchema();
     const d2 = req2.body || {};
     const fullName = String(d2.full_name || d2.first_name || "").trim();
-    const requiredFields = { username: d2.username, full_name: fullName, father_husband_name: d2.father_husband_name, mother_name: d2.mother_name, dob: d2.dob, isd_code: d2.isd_code, mobile: d2.mobile, email: d2.email, blood_group: d2.blood_group, country: d2.country, state: d2.state, city: d2.city, pincode: d2.pincode, area_locality: d2.area_locality, address: d2.address, ward_no: d2.ward_no, password: d2.password, confirm_password: d2.confirm_password, blood_network_ready: d2.blood_network_ready };
+    const requiredFields = {
+      username: d2.username,
+      full_name: fullName,
+      father_husband_name: d2.father_husband_name,
+      mother_name: d2.mother_name,
+      dob: d2.dob,
+      isd_code: d2.isd_code,
+      mobile: d2.mobile,
+      email: d2.email,
+      blood_group: d2.blood_group,
+      country: d2.country,
+      state: d2.state,
+      city: d2.city,
+      pincode: d2.pincode,
+      area_locality: d2.area_locality,
+      address: d2.address,
+      ward_no: d2.ward_no,
+      password: d2.password,
+      confirm_password: d2.confirm_password,
+      blood_network_ready: d2.blood_network_ready
+    };
     if (String(d2.country || "").trim() === "India") {
       requiredFields.sansad_kshetra = d2.sansad_kshetra;
       requiredFields.vidhan_sabha = d2.vidhan_sabha;
@@ -328734,15 +328933,33 @@ router19.post("/api/volunteer-registration/submit", async (req2, res) => {
     const mobile = String(d2.mobile).replace(/\s+/g, "");
     const isd = String(d2.isd_code).replace(/[^+\d]/g, "");
     if (!/^\+?\d{1,4}$/.test(isd) || !/^[0-9]{6,15}$/.test(mobile)) return res.status(400).json({ success: false, error: "Please enter a valid ISD code and mobile number." });
-    const duplicate = await pool.query("SELECT id FROM volunteers WHERE mobile=$1 OR LOWER(email)=LOWER($2) OR LOWER(username)=LOWER($3) LIMIT 1", [mobile, email, username]);
+    const duplicate = await pool.query(
+      "SELECT id FROM volunteers WHERE mobile=$1 OR LOWER(email)=LOWER($2) OR LOWER(username)=LOWER($3) LIMIT 1",
+      [mobile, email, username]
+    );
     if (duplicate.rows.length) return res.status(409).json({ success: false, error: "This User ID, mobile number, or email is already registered." });
     const id3 = import_crypto16.default.randomUUID();
     const registrationNumber = `RPF/VOL/${(/* @__PURE__ */ new Date()).getFullYear().toString().slice(-2)}/${Math.floor(1e5 + Math.random() * 9e5)}`;
     const passwordHash = await bcryptjs_default.hash(password, 12);
     await pool.query("BEGIN");
     try {
-      await pool.query(`INSERT INTO volunteers (id,username,registration_number,full_name,father_husband_name,mother_name,approval_status,dob,mobile,email,blood_group,country,state,city,address,pincode,area_locality,sansad_kshetra,vidhan_sabha,ward_no,password_hash) VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`, [id3, username, registrationNumber, fullName, String(d2.father_husband_name).trim(), String(d2.mother_name).trim(), d2.dob, mobile, email, bloodGroup, String(d2.country).trim(), String(d2.state).trim(), String(d2.city).trim(), String(d2.address).trim(), String(d2.pincode).trim(), String(d2.area_locality).trim(), String(d2.sansad_kshetra || "").trim(), String(d2.vidhan_sabha || "").trim(), String(d2.ward_no).trim(), passwordHash]);
-      if (d2.blood_network_ready === true || String(d2.blood_network_ready).toLowerCase() === "true") await pool.query(`INSERT INTO volunteer_blood_memberships(volunteer_id,blood_group,is_active) VALUES($1,$2,TRUE) ON CONFLICT(volunteer_id) DO UPDATE SET blood_group=EXCLUDED.blood_group,is_active=TRUE,updated_at=NOW()`, [id3, bloodGroup]);
+      await pool.query(
+        `INSERT INTO volunteers (id,username,registration_number,full_name,father_husband_name,mother_name,approval_status,dob,mobile,email,blood_group,country,state,city,address,pincode,area_locality,sansad_kshetra,vidhan_sabha,ward_no,password_hash,role) 
+         VALUES ($1,$2,$3,$4,$5,$6,'approved',$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'user')`,
+        [id3, username, registrationNumber, fullName, String(d2.father_husband_name).trim(), String(d2.mother_name).trim(), d2.dob, mobile, email, bloodGroup, String(d2.country).trim(), String(d2.state).trim(), String(d2.city).trim(), String(d2.address).trim(), String(d2.pincode).trim(), String(d2.area_locality).trim(), String(d2.sansad_kshetra || "").trim(), String(d2.vidhan_sabha || "").trim(), String(d2.ward_no).trim(), passwordHash]
+      );
+      await pool.query(
+        `INSERT INTO users (id, name, email, role, created_at) 
+         VALUES ($1, $2, $3, 'user', NOW()) ON CONFLICT (id) DO UPDATE SET name=$2, email=$3`,
+        [id3, fullName, email]
+      );
+      if (d2.blood_network_ready === true || String(d2.blood_network_ready).toLowerCase() === "true") {
+        await pool.query(
+          `INSERT INTO volunteer_blood_memberships(volunteer_id,blood_group,is_active) 
+           VALUES($1,$2,TRUE) ON CONFLICT(volunteer_id) DO UPDATE SET blood_group=EXCLUDED.blood_group,is_active=TRUE,updated_at=NOW()`,
+          [id3, bloodGroup]
+        );
+      }
       await pool.query("COMMIT");
     } catch (e3) {
       await pool.query("ROLLBACK");
@@ -328755,17 +328972,10 @@ router19.post("/api/volunteer-registration/submit", async (req2, res) => {
     res.status(500).json({ success: false, error: "Registration failed. Please try again." });
   }
 });
-var resolveVolunteer = async (rawId) => {
-  const key = String(rawId || "").trim();
-  if (!key) return null;
-  const r3 = await pool.query(`SELECT id,username,full_name,mobile,email,blood_group FROM volunteers WHERE id=$1 OR LOWER(username)=LOWER($1) OR mobile=$1 OR LOWER(email)=LOWER($1) LIMIT 1`, [key]);
-  return r3.rows[0] || null;
-};
 router19.get("/api/blood-network/access", async (req2, res) => {
   try {
-    await ensureBloodSchema();
     const volunteer = await resolveVolunteer(String(req2.query.volunteerId || ""));
-    if (!volunteer) return res.status(404).json({ success: false, error: "Volunteer account not found." });
+    if (!volunteer) return res.status(404).json({ success: false, error: "User account not found." });
     const m3 = await pool.query("SELECT blood_group,is_active FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE", [volunteer.id]);
     res.json({ success: true, member: m3.rows.length > 0, volunteer: { ...volunteer, blood_group: m3.rows[0]?.blood_group || volunteer.blood_group || null } });
   } catch (error3) {
@@ -328775,15 +328985,17 @@ router19.get("/api/blood-network/access", async (req2, res) => {
 });
 router19.post("/api/blood-network/join", async (req2, res) => {
   try {
-    await ensureBloodSchema();
     const volunteer = await resolveVolunteer(String(req2.body?.volunteerId || ""));
     const bloodGroup = String(req2.body?.bloodGroup || "").trim().toUpperCase();
-    if (!volunteer) return res.status(404).json({ success: false, error: "Volunteer account not found. Please log in again." });
+    if (!volunteer) return res.status(404).json({ success: false, error: "User account not found. Please log in again." });
     if (!BLOOD_GROUPS.has(bloodGroup)) return res.status(400).json({ success: false, error: "Please select your Blood Group to become a member." });
     await pool.query("BEGIN");
     try {
       await pool.query("UPDATE volunteers SET blood_group=$1 WHERE id=$2", [bloodGroup, volunteer.id]);
-      await pool.query(`INSERT INTO volunteer_blood_memberships(volunteer_id,blood_group,is_active) VALUES($1,$2,TRUE) ON CONFLICT(volunteer_id) DO UPDATE SET blood_group=EXCLUDED.blood_group,is_active=TRUE,updated_at=NOW()`, [volunteer.id, bloodGroup]);
+      await pool.query(
+        `INSERT INTO volunteer_blood_memberships(volunteer_id,blood_group,is_active) VALUES($1,$2,TRUE) ON CONFLICT(volunteer_id) DO UPDATE SET blood_group=EXCLUDED.blood_group,is_active=TRUE,updated_at=NOW()`,
+        [volunteer.id, bloodGroup]
+      );
       await pool.query("COMMIT");
     } catch (e3) {
       await pool.query("ROLLBACK");
@@ -328797,23 +329009,31 @@ router19.post("/api/blood-network/join", async (req2, res) => {
 });
 router19.post("/api/blood-network/requests", async (req2, res) => {
   try {
-    await ensureBloodSchema();
     const { requesterId, patientName, bloodGroup, unitsRequired, hospitalName, contactPhone, locationLat, locationLng, urgency, notes } = req2.body || {};
     const requester = await resolveVolunteer(requesterId);
-    if (!requester) return res.status(404).json({ success: false, error: "Volunteer account not found." });
+    if (!requester) return res.status(404).json({ success: false, error: "User account not found." });
     if (![patientName, bloodGroup, unitsRequired, hospitalName, contactPhone].every(required)) return res.status(400).json({ success: false, error: "All requisition fields are mandatory." });
     const group = String(bloodGroup).toUpperCase();
     if (!BLOOD_GROUPS.has(group)) return res.status(400).json({ success: false, error: "Invalid blood group." });
     const qty = Number(unitsRequired);
     if (!Number.isInteger(qty) || qty < 1) return res.status(400).json({ success: false, error: "Units required must be at least 1." });
     const urgencyValue = VALID_URGENCY.has(String(urgency)) ? String(urgency) : "Normal";
-    const rr = await pool.query(`INSERT INTO blood_requests(requester_id,patient_name,blood_group,units_required,hospital_name,location_lat,location_lng,urgency,contact_phone,status,notes,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'open',$10,NOW()+INTERVAL '48 hours') RETURNING *`, [requester.id, String(patientName).trim(), group, qty, String(hospitalName).trim(), locationLat || null, locationLng || null, urgencyValue, String(contactPhone).trim(), String(notes || "").trim()]);
+    const rr = await pool.query(
+      `INSERT INTO blood_requests(requester_id,patient_name,blood_group,units_required,hospital_name,location_lat,location_lng,urgency,contact_phone,status,notes,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'open',$10,NOW()+INTERVAL '48 hours') RETURNING *`,
+      [requester.id, String(patientName).trim(), group, qty, String(hospitalName).trim(), locationLat || null, locationLng || null, urgencyValue, String(contactPhone).trim(), String(notes || "").trim()]
+    );
     const request = rr.rows[0];
-    const matches2 = await pool.query(`SELECT m.volunteer_id FROM volunteer_blood_memberships m JOIN volunteers v ON v.id=m.volunteer_id WHERE m.is_active=TRUE AND m.blood_group=$1 AND v.id<>$2`, [group, requester.id]);
+    const matches2 = await pool.query(
+      `SELECT m.volunteer_id FROM volunteer_blood_memberships m WHERE m.is_active=TRUE AND m.blood_group=$1 AND m.volunteer_id<>$2`,
+      [group, requester.id]
+    );
     for (const match2 of matches2.rows) {
       const title = "Urgent: Blood Request (" + group + ")";
       const body = group + " blood is required at " + request.hospital_name + ". Tap to Accept.";
-      await pool.query(`INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_request',$5)`, [import_crypto16.default.randomUUID(), match2.volunteer_id, title, body, request.id]);
+      await pool.query(
+        `INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_request',$5)`,
+        [import_crypto16.default.randomUUID(), match2.volunteer_id, title, body, request.id]
+      );
       try {
         const t3 = await pool.query("SELECT fcm_token FROM volunteers WHERE id=$1", [match2.volunteer_id]);
         if (t3.rows[0]?.fcm_token) await sendPushNotification(t3.rows[0].fcm_token, title, body);
@@ -328829,11 +329049,12 @@ router19.post("/api/blood-network/requests", async (req2, res) => {
 });
 router19.get("/api/blood-network/requests", async (req2, res) => {
   try {
-    await ensureBloodSchema();
     await pool.query("DELETE FROM blood_request_acceptances WHERE expires_at<=NOW()");
     const volunteer = await resolveVolunteer(String(req2.query.volunteerId || ""));
-    if (!volunteer) return res.status(404).json({ success: false, error: "Volunteer account not found." });
-    const result = await pool.query(`SELECT r.*,COALESCE(json_agg(json_build_object('volunteer_id',a.volunteer_id,'volunteer_name',v.full_name,'status',a.status,'accepted_at',a.created_at,'expires_at',a.expires_at) ORDER BY a.created_at DESC) FILTER(WHERE a.id IS NOT NULL),'[]') AS acceptances FROM blood_requests r LEFT JOIN blood_request_acceptances a ON a.request_id=r.id AND a.expires_at>NOW() AND a.status='accepted' LEFT JOIN volunteers v ON v.id=a.volunteer_id WHERE r.status='open' AND (r.expires_at IS NULL OR r.expires_at>NOW()) GROUP BY r.id ORDER BY r.created_at DESC LIMIT 100`);
+    if (!volunteer) return res.status(404).json({ success: false, error: "User account not found." });
+    const result = await pool.query(
+      `SELECT r.*,COALESCE(json_agg(json_build_object('volunteer_id',a.volunteer_id,'status',a.status,'accepted_at',a.created_at,'expires_at',a.expires_at) ORDER BY a.created_at DESC) FILTER(WHERE a.id IS NOT NULL),'[]') AS acceptances FROM blood_requests r LEFT JOIN blood_request_acceptances a ON a.request_id=r.id AND a.expires_at>NOW() AND a.status='accepted' WHERE r.status='open' AND (r.expires_at IS NULL OR r.expires_at>NOW()) GROUP BY r.id ORDER BY r.created_at DESC LIMIT 100`
+    );
     const m3 = await pool.query("SELECT blood_group FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE", [volunteer.id]);
     const group = m3.rows[0]?.blood_group;
     const filtered = group ? result.rows.filter((r3) => r3.blood_group === group || r3.requester_id === volunteer.id) : result.rows.filter((r3) => r3.requester_id === volunteer.id);
@@ -328844,56 +329065,28 @@ router19.get("/api/blood-network/requests", async (req2, res) => {
 });
 router19.post("/api/blood-network/requests/:id/accept", async (req2, res) => {
   try {
-    await ensureBloodSchema();
     const volunteer = await resolveVolunteer(String(req2.body?.volunteerId || ""));
-    if (!volunteer) return res.status(404).json({ success: false, error: "Volunteer account not found." });
+    if (!volunteer) return res.status(404).json({ success: false, error: "User account not found." });
     const rr = await pool.query(`SELECT * FROM blood_requests WHERE id=$1 AND status='open' AND (expires_at IS NULL OR expires_at>NOW())`, [String(req2.params.id)]);
     if (!rr.rows.length) return res.status(404).json({ success: false, error: "This requisition is no longer active." });
     const request = rr.rows[0];
     const member = await pool.query("SELECT blood_group FROM volunteer_blood_memberships WHERE volunteer_id=$1 AND is_active=TRUE", [volunteer.id]);
     if (!member.rows.length) return res.status(403).json({ success: false, error: "You are not part of the Blood Donation Network." });
-    if (member.rows[0].blood_group !== request.blood_group) return res.status(403).json({ success: false, error: "Only matching blood-group volunteers can accept this request." });
+    if (member.rows[0].blood_group !== request.blood_group) return res.status(403).json({ success: false, error: "Only matching blood-group users can accept this request." });
     if (request.requester_id === volunteer.id) return res.status(400).json({ success: false, error: "You cannot accept your own requisition." });
-    await pool.query(`INSERT INTO blood_request_acceptances(id,request_id,volunteer_id,status,expires_at) VALUES($1,$2,$3,'accepted',NOW()+INTERVAL '24 hours') ON CONFLICT(request_id,volunteer_id) DO UPDATE SET status='accepted',expires_at=NOW()+INTERVAL '24 hours'`, [import_crypto16.default.randomUUID(), request.id, volunteer.id]);
+    await pool.query(
+      `INSERT INTO blood_request_acceptances(id,request_id,volunteer_id,status,expires_at) VALUES($1,$2,$3,'accepted',NOW()+INTERVAL '24 hours') ON CONFLICT(request_id,volunteer_id) DO UPDATE SET status='accepted',expires_at=NOW()+INTERVAL '24 hours'`,
+      [import_crypto16.default.randomUUID(), request.id, volunteer.id]
+    );
     const title = "Blood Request Accepted";
-    const body = (volunteer.full_name || "A volunteer") + " has accepted your " + request.blood_group + " blood request.";
-    await pool.query(`INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_acceptance',$5)`, [import_crypto16.default.randomUUID(), request.requester_id, title, body, String(request.id)]);
-    try {
-      const t22 = await pool.query("SELECT fcm_token FROM volunteers WHERE id=$1", [request.requester_id]);
-      if (t22.rows[0]?.fcm_token) await sendPushNotification(t22.rows[0].fcm_token, title, body);
-    } catch (notificationError) {
-      console.warn("FCM notification lookup failed; acceptance remains successful:", notificationError);
-    }
+    const body = (volunteer.full_name || "A user") + " has accepted your " + request.blood_group + " blood request.";
+    await pool.query(
+      `INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_acceptance',$5)`,
+      [import_crypto16.default.randomUUID(), request.requester_id, title, body, String(request.id)]
+    );
     res.json({ success: true });
   } catch (error3) {
     res.status(500).json({ success: false, error: "Unable to accept this request." });
-  }
-});
-router19.post("/api/blood-network/requests/:id/cancel", async (req2, res) => {
-  try {
-    await ensureBloodSchema();
-    const volunteer = await resolveVolunteer(String(req2.body?.actorId || ""));
-    if (!volunteer) return res.status(404).json({ success: false, error: "Volunteer account not found." });
-    const rr = await pool.query("SELECT requester_id FROM blood_requests WHERE id=$1", [String(req2.params.id)]);
-    if (!rr.rows.length) return res.status(404).json({ success: false, error: "Request not found." });
-    if (rr.rows[0].requester_id === volunteer.id) {
-      await pool.query(`UPDATE blood_requests SET status='cancelled' WHERE id=$1`, [String(req2.params.id)]);
-      await pool.query(`UPDATE blood_request_acceptances SET status='cancelled' WHERE request_id=$1`, [String(req2.params.id)]);
-    } else await pool.query(`UPDATE blood_request_acceptances SET status='cancelled' WHERE request_id=$1 AND volunteer_id=$2`, [String(req2.params.id), volunteer.id]);
-    res.json({ success: true });
-  } catch (error3) {
-    res.status(500).json({ success: false, error: "Unable to cancel this request." });
-  }
-});
-router19.get("/api/blood-network/notifications", async (req2, res) => {
-  try {
-    await ensureBloodSchema();
-    const volunteerId = String(req2.query.recipientId || "");
-    if (!volunteerId) return res.json({ success: true, notifications: [] });
-    const result = await pool.query("SELECT * FROM app_notifications WHERE recipient_id=$1 ORDER BY created_at DESC LIMIT 50", [volunteerId]);
-    res.json({ success: true, notifications: result.rows });
-  } catch (error3) {
-    res.status(500).json({ success: false, error: "Unable to load notifications" });
   }
 });
 router19.post("/api/save-fcm-token", async (req2, res) => {

@@ -60,9 +60,10 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
       const r = await axios.post(apiUrl(endpoint), { identifier: normalized, password }, { headers: { 'Content-Type': 'application/json' }, timeout: 15000 });
       if (!r.data?.success || !r.data?.user) throw new Error(r.data?.error || 'Invalid User ID or password.');
       const u = r.data.user;
-      await onLoginSuccess(u.role === 'guest' ? 'guest' : 'volunteer', {
+      const roleCategory = u.role === 'guest' ? 'guest' : (u.role === 'admin' || u.role === 'super_admin' ? 'admin' : 'volunteer');
+      await onLoginSuccess(roleCategory as any, {
         id: u.id,
-        name: u.name || 'Volunteer',
+        name: u.name || 'User',
         phone: u.phone,
         email: u.email,
         role: u.role,

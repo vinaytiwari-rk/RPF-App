@@ -84,15 +84,22 @@ function DataTable({ title, rows, emptyText, onDelete }: { title: string; rows: 
 }
 
 export default function AdminHub() {
-  const { user, token, logout } = useAuth();
+  const { user, token, hasAdminAccess, logout } = useAuth();
   const navigate = useNavigate();
   const [section, setSection] = useState<Section>("overview");
   const [data, setData] = useState<AdminState>(emptyState);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
+  useEffect(() => {
+    if (!hasAdminAccess) {
+      toast.error("Access Denied: Administrator role required");
+      navigate("/", { replace: true });
+    }
+  }, [hasAdminAccess, navigate]);
+
   const load = useCallback(async () => {
-    if (!token) return;
+    if (!token || !hasAdminAccess) return;
     setLoading(true);
     setErrors([]);
     const endpoints: Array<[keyof AdminState, string]> = [
@@ -114,7 +121,7 @@ export default function AdminHub() {
     setData(next);
     setErrors(failed);
     setLoading(false);
-  }, [token]);
+  }, [token, hasAdminAccess]);
 
   useEffect(() => { void load(); }, [load]);
 
