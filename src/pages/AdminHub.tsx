@@ -989,7 +989,7 @@ export default function AdminHub() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4">
             <h3 className="text-sm font-black text-white">Edit User Role</h3>
-            <p className="text-xs text-slate-400">User: {editingUser.name || editingUser.email}</p>
+            <p className="text-xs text-slate-400">User: {String(editingUser.name || editingUser.email || editingUser.id || '')}</p>
             <div>
               <label className="text-xs font-bold text-slate-300">Select System Role</label>
               <select
