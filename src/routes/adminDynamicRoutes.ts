@@ -107,22 +107,21 @@ router.get("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: 
   }
 });
 
-// UPDATE user profile (Role updates restricted to super_admin)
+// UPDATE user profile (Role updates allowed for admin)
 router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: any, res: any) => {
   try {
     const { name, role, email, phone, isVolunteer, isDonor } = req.body;
     
-    // Only super_admin can change user roles
     const callerRole = String(req.user?.role || "").toLowerCase();
-    if (role && role !== "citizen" && callerRole !== "super_admin" && callerRole !== "superadmin") {
-      return res.status(403).json({ success: false, error: "Only Super Admin can assign administrative or elevated roles" });
+    if (role && callerRole !== "admin" && callerRole !== "super_admin" && callerRole !== "superadmin") {
+      return res.status(403).json({ success: false, error: "Only Admin can assign roles" });
     }
 
     const result = await pool.query(
       `UPDATE users 
        SET name = $1, role = $2, email = $3, phone = $4, "isVolunteer" = $5, "isDonor" = $6
        WHERE id = $7 RETURNING id, name, role, email, phone`,
-      [name, role || "citizen", email, phone, isVolunteer, isDonor, req.params.id]
+      [name, role || "user", email, phone, isVolunteer, isDonor, req.params.id]
     );
     res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
