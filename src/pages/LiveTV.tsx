@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ArrowLeft, Play, Search, Tv, Sparkles, ShieldCheck, Maximize2, ExternalLink } from "lucide-react";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
@@ -66,6 +68,7 @@ export default function LiveTV() {
   const [channels, setChannels] = useState<LiveTvChannel[]>(() => canonical(LIVE_TV_DEFAULTS));
   const [active, setActive] = useState<LiveTvChannel | null>(null);
   const [serverControlled, setServerControlled] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,6 +112,22 @@ export default function LiveTV() {
     else setActive(null);
   };
 
+  // Initialize video.js player for non‑YouTube streams
+  useEffect(() => {
+    if (active && videoRef.current && !embed) {
+      const srcUrl = `/api/iptv/proxy?url=${encodeURIComponent(active.url)}`;
+      const player = videojs(videoRef.current, {
+        fluid: true,
+        autoplay: true,
+        controls: true,
+      });
+      player.src({ src: srcUrl, type: 'application/x-mpegURL' });
+      return () => {
+        player.dispose();
+      };
+    }
+  }, [active, embed]);
+
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans text-slate-800 selection:bg-orange-100">
       {active ? (
@@ -146,17 +165,21 @@ export default function LiveTV() {
                   allowFullScreen
                 />
               ) : (
-                <div className="grid h-full place-items-center p-6 text-center text-white">
-                  <div>
-                    <Tv className="mx-auto mb-3 h-12 w-12 text-orange-400 animate-pulse" />
-                    <p className="font-bold text-lg">{active.name}</p>
-                    <button
-                      onClick={() => openExternalLink(active.url, navigate, active.name)}
-                      className="mt-4 rounded-2xl bg-gradient-to-r from-[#FF9933] to-[#F59E0B] px-5 py-2.5 text-xs font-black text-white shadow-lg active:scale-95"
-                    >
-                      {hi ? "RPF ब्राउज़र में खोलें" : "Open in RPF Browser"}
-                    </button>
-                  </div>
+                <div className="relative h-full w-full">
+                  <select
+                    onChange={(e) => console.log('Quality selected:', e.target.value)}
+                    className="absolute top-2 right-2 z-10 bg-black text-white rounded px-2 py-1 text-xs"
+                  >
+                    <option value="auto">Auto</option>
+                    <option value="1080p">1080p</option>
+                    <option value="720p">720p</option>
+                    <option value="480p">480p</option>
+                  </select>
+                  <video
+                    ref={videoRef}
+                    className="video-js vjs-default-skin h-full w-full"
+                    controls
+                  />
                 </div>
               )}
             </div>

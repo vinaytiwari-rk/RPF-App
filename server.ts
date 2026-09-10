@@ -24,7 +24,9 @@ import { authenticateToken, requireAdmin, requireVolunteer, authorizeRole, JWT_S
 import fs from "fs";
 import crypto from "crypto";
 import multer from "multer";
-import adminHqRoutes from "./src/routes/adminHqRoutes.js";
+import iptvRoutes from './src/routes/iptvRoutes';
+app.use('/api/iptv', iptvRoutes);
+
 
 import authRoutes from './src/routes/authRoutes.js';
 import passwordResetSecure from './src/routes/passwordResetSecure.js';
