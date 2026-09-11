@@ -9,8 +9,7 @@ const execFileAsync = promisify(execFile);
 const admin = [authenticateToken, requireAdmin] as const;
 
 function isSuperAdmin(req: any): boolean {
-  const role = String(req.user?.role || "").toLowerCase();
-  return role === "super_admin" || role === "superadmin";
+  return String(req.user?.role || "").toLowerCase() === "super_admin";
 }
 
 async function ensureControlTables() {
@@ -35,32 +34,49 @@ async function ensureControlTables() {
   `);
 }
 
+async function readCms(): Promise<Record<string, any>> {
+  const result = await pool.query("SELECT \"founderMessageEn\" FROM settings WHERE id = $1", ["cms_data"]);
+  if (!result.rows.length || !result.rows[0].founderMessageEn) return {};
+  try {
+    const parsed = JSON.parse(result.rows[0].founderMessageEn);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+async function writeCms(payload: Record<string, any>) {
+  await pool.query(
+    `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1)
+     ON CONFLICT (id) DO UPDATE SET "founderMessageEn" = $1`,
+    [JSON.stringify(payload)]
+  );
+}
+
+async function createCmsSnapshot(req: any, payload: Record<string, any>, label: string) {
+  await ensureControlTables();
+  const crypto = await import("node:crypto");
+  const serialized = JSON.stringify(payload);
+  const checksum = crypto.createHash("sha256").update(serialized).digest("hex");
+  const existing = await pool.query("SELECT id FROM admin_cms_versions WHERE checksum=$1 LIMIT 1", [checksum]);
+  if (existing.rows.length) return { id: existing.rows[0].id, duplicate: true, checksum };
+  const result = await pool.query(
+    `INSERT INTO admin_cms_versions(created_by,label,payload,checksum) VALUES($1,$2,$3::jsonb,$4) RETURNING id,created_at`,
+    [String(req.user?.id || ""), label.slice(0, 160), serialized, checksum]
+  );
+  await auditEvent({ action: "cms_snapshot_created", resource: "cms", resourceId: String(result.rows[0].id), userId: String(req.user?.id || ""), req, metadata: { label, checksum } });
+  return { id: result.rows[0].id, duplicate: false, checksum };
+}
+
 router.get("/api/admin/control/overview", ...admin, async (_req, res) => {
   const started = Date.now();
   try {
     await ensureControlTables();
     const db = await pool.query("SELECT NOW() AS server_time");
-    const tables = await pool.query(`
-      SELECT COUNT(*)::int AS count
-      FROM information_schema.tables
-      WHERE table_schema = current_schema()
-    `);
+    const tables = await pool.query(`SELECT COUNT(*)::int AS count FROM information_schema.tables WHERE table_schema = current_schema()`);
     const versions = await pool.query("SELECT COUNT(*)::int AS count, MAX(created_at) AS latest FROM admin_cms_versions");
     const flags = await pool.query("SELECT COUNT(*)::int AS count, COUNT(*) FILTER (WHERE enabled)::int AS enabled FROM admin_feature_flags");
-    return res.json({
-      success: true,
-      data: {
-        status: "healthy",
-        apiLatencyMs: Date.now() - started,
-        database: { connected: true, serverTime: db.rows[0]?.server_time },
-        schemaTables: tables.rows[0]?.count || 0,
-        cmsVersions: versions.rows[0],
-        featureFlags: flags.rows[0],
-        node: process.version,
-        environment: process.env.NODE_ENV || "development",
-        checkedAt: new Date().toISOString()
-      }
-    });
+    return res.json({ success: true, data: { status: "healthy", apiLatencyMs: Date.now() - started, database: { connected: true, serverTime: db.rows[0]?.server_time }, schemaTables: tables.rows[0]?.count || 0, cmsVersions: versions.rows[0], featureFlags: flags.rows[0], node: process.version, environment: process.env.NODE_ENV || "development", checkedAt: new Date().toISOString() } });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: error?.message || "Control center diagnostics failed." });
   }
@@ -69,13 +85,7 @@ router.get("/api/admin/control/overview", ...admin, async (_req, res) => {
 router.get("/api/admin/control/cms/versions", ...admin, async (_req, res) => {
   try {
     await ensureControlTables();
-    const result = await pool.query(`
-      SELECT id, created_at, created_by, label, checksum,
-             jsonb_object_length(payload) AS field_count
-      FROM admin_cms_versions
-      ORDER BY id DESC
-      LIMIT 50
-    `);
+    const result = await pool.query(`SELECT id, created_at, created_by, label, checksum, jsonb_object_length(payload) AS field_count FROM admin_cms_versions ORDER BY id DESC LIMIT 50`);
     return res.json({ success: true, data: result.rows });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: error?.message || "Unable to load CMS history." });
@@ -84,22 +94,42 @@ router.get("/api/admin/control/cms/versions", ...admin, async (_req, res) => {
 
 router.post("/api/admin/control/cms/snapshot", ...admin, async (req: any, res) => {
   try {
-    await ensureControlTables();
     const payload = req.body?.payload ?? req.body ?? {};
-    const label = String(req.body?.label || "CMS snapshot").slice(0, 160);
-    const serialized = JSON.stringify(payload);
-    const crypto = await import("node:crypto");
-    const checksum = crypto.createHash("sha256").update(serialized).digest("hex");
-    const existing = await pool.query("SELECT id FROM admin_cms_versions WHERE checksum=$1 LIMIT 1", [checksum]);
-    if (existing.rows.length) return res.json({ success: true, id: existing.rows[0].id, duplicate: true });
-    const result = await pool.query(
-      `INSERT INTO admin_cms_versions(created_by,label,payload,checksum) VALUES($1,$2,$3::jsonb,$4) RETURNING id,created_at`,
-      [String(req.user?.id || ""), label, serialized, checksum]
-    );
-    await auditEvent({ action: "cms_snapshot_created", resource: "cms", resourceId: String(result.rows[0].id), userId: String(req.user?.id || ""), req, metadata: { label, checksum } });
-    return res.json({ success: true, data: result.rows[0] });
+    const label = String(req.body?.label || "CMS snapshot");
+    const data = await createCmsSnapshot(req, payload, label);
+    return res.json({ success: true, data });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: error?.message || "Unable to create CMS snapshot." });
+  }
+});
+
+router.post("/api/admin/control/cms/publish", ...admin, async (req: any, res) => {
+  try {
+    const patch = req.body?.patch;
+    if (!patch || typeof patch !== "object" || Array.isArray(patch)) return res.status(400).json({ success: false, error: "A CMS object patch is required." });
+    const current = await readCms();
+    const snapshot = await createCmsSnapshot(req, current, String(req.body?.label || "Before CMS publish"));
+    const next = { ...current, ...patch };
+    await writeCms(next);
+    await auditEvent({ action: "cms_published", resource: "cms", userId: String(req.user?.id || ""), req, metadata: { changedFields: Object.keys(patch), previousSnapshotId: snapshot.id } });
+    return res.json({ success: true, data: next, snapshot });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: error?.message || "Unable to publish CMS changes." });
+  }
+});
+
+router.post("/api/admin/control/cms/rollback/:id", ...admin, async (req: any, res) => {
+  try {
+    const version = await pool.query("SELECT id,payload,checksum FROM admin_cms_versions WHERE id=$1", [req.params.id]);
+    if (!version.rows.length) return res.status(404).json({ success: false, error: "CMS version not found." });
+    const current = await readCms();
+    const backup = await createCmsSnapshot(req, current, "Before CMS rollback");
+    const payload = version.rows[0].payload;
+    await writeCms(payload);
+    await auditEvent({ action: "cms_rolled_back", resource: "cms", resourceId: String(req.params.id), userId: String(req.user?.id || ""), req, metadata: { backupSnapshotId: backup.id, checksum: version.rows[0].checksum } });
+    return res.json({ success: true, data: payload, restoredVersionId: version.rows[0].id, backupSnapshot: backup });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: error?.message || "Unable to rollback CMS." });
   }
 });
 
@@ -131,12 +161,7 @@ router.put("/api/admin/control/feature-flags/:key", ...admin, async (req: any, r
     if (!/^[a-zA-Z0-9._-]{1,100}$/.test(key)) return res.status(400).json({ success: false, error: "Invalid feature flag key." });
     const enabled = Boolean(req.body?.enabled);
     const description = req.body?.description == null ? null : String(req.body.description).slice(0, 500);
-    const result = await pool.query(
-      `INSERT INTO admin_feature_flags(key,enabled,description,updated_by) VALUES($1,$2,$3,$4)
-       ON CONFLICT(key) DO UPDATE SET enabled=$2,description=$3,updated_at=NOW(),updated_by=$4
-       RETURNING key,enabled,description,updated_at,updated_by`,
-      [key, enabled, description, String(req.user?.id || "")]
-    );
+    const result = await pool.query(`INSERT INTO admin_feature_flags(key,enabled,description,updated_by) VALUES($1,$2,$3,$4) ON CONFLICT(key) DO UPDATE SET enabled=$2,description=$3,updated_at=NOW(),updated_by=$4 RETURNING key,enabled,description,updated_at,updated_by`, [key, enabled, description, String(req.user?.id || "")]);
     await auditEvent({ action: "feature_flag_updated", resource: "feature_flag", resourceId: key, userId: String(req.user?.id || ""), req, metadata: { enabled } });
     return res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
