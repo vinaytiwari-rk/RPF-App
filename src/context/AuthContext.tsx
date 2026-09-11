@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { Capacitor } from "@capacitor/core";
 import axios from "axios";
 
-export type UserRole = "guest" | "citizen" | "volunteer" | "donor" | "admin" | "super_admin";
+export type UserRole = "guest" | "citizen" | "volunteer" | "donor" | "admin" | "super_admin" | "superadmin";
 export interface User { id:string; name:string; username?:string; phone?:string; email?:string; avatar?:string; role:UserRole; displayName?:string; janSevaCardNo?:string; registration_number?:string; janSevaCardStatus?:"none"|"pending"|"approved"|"rejected"; gender?:string; dob?:string; address?:string; isVolunteer?:boolean; isDonor?:boolean; volunteerData?:any; blood_group?:string; interests?:string[]; onboardingCompleted?:boolean; points?:number; badges?:number; cover?:string; }
 interface AuthContextType { user:User|null; token:string|null; isLoading:boolean; isAuthenticated:boolean; language:"en"|"hi"; setLanguage:(lang:"en"|"hi")=>void; login:(userData:Partial<User>,token?:string,remember?:boolean)=>Promise<void>; loginAsGuest:()=>Promise<void>; logout:()=>Promise<void>; updateUser:(updates:Partial<User>)=>Promise<boolean>; completeOnboarding:(interests:string[])=>Promise<void>; hasAdminAccess:boolean; }
 
