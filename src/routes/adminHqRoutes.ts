@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import { updateServiceContent } from "../controllers/adminHqController.js";
 import { pool } from "../db/dbPool.js";
 import { authenticateToken, requireAdmin, JWT_SECRET, auditEvent } from "../db/middleware.js";
+import adminControlRoutes from "./adminControlRoutes.js";
 
 const router = Router();
 
@@ -64,6 +65,10 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
 
 router.all("/api/admin-setup", (_req, res) => res.status(410).json({ success: false, error: "Administrator setup endpoint has been retired." }));
 const admin = [authenticateToken, requireAdmin] as const;
+
+// Unified Supreme Admin control-plane APIs. Mounted here so all admin control
+// endpoints share the same canonical authentication/route registration path.
+router.use(adminControlRoutes);
 
 router.get("/api/admin/volunteers", ...admin, async (req, res) => {
   try {
