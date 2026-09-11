@@ -1,5 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+// ES module equivalent of __dirname
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function runMigrationsOnPool(pool: any) {
   const candidates = [
@@ -58,7 +61,7 @@ export async function runMigrationsOnPool(pool: any) {
     }
   } catch (err: any) {
     if (client) await client.query('ROLLBACK').catch(() => {});
-    console.error('Server boot database migration failed:', err.message);
+    console.error('Server boot database migration failed:', err);
   } finally {
     if (client) {
       await client.query('SELECT pg_advisory_unlock(84920491)').catch(() => {});

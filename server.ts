@@ -25,6 +25,11 @@ import fs from "fs";
 import crypto from "crypto";
 import multer from "multer";
 import adminHqRoutes from "./src/routes/adminHqRoutes.js";
+import iptvRoutes from './src/routes/iptvRoutes';
+
+const app = express();
+app.set('trust proxy', 1);
+app.use('/api/iptv', iptvRoutes);
 
 import authRoutes from './src/routes/authRoutes.js';
 import passwordResetSecure from './src/routes/passwordResetSecure.js';
@@ -61,7 +66,7 @@ import { runMigrationsOnPool } from "./src/db/migrationRunner.js";
 
 dotenv.config();
 
-const app = express();
+// Duplicate app init removed (already defined earlier)
 app.set('trust proxy', 1);
 const allowedOrigins = [
   "https://samahit.rpfoundation.org",

@@ -112,6 +112,11 @@ export default function LiveTV() {
     else setActive(null);
   };
 
+  // Debug logs
+  useEffect(() => {
+    console.log('Active channel:', active);
+    console.log('Embed (YouTube) URL:', embed);
+  }, [active, embed]);
   // Initialize video.js player for non‑YouTube streams
   useEffect(() => {
     if (active && videoRef.current && !embed) {
