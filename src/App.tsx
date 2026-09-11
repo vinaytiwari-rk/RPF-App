@@ -42,6 +42,7 @@ const DonationsPage = lazyWithRetry(() => import("./pages/DonationsPage"), "dona
 const HealthCare = lazyWithRetry(() => import("./pages/HealthCare"), "health-care");
 const Employment = lazyWithRetry(() => import("./pages/Employment"), "employment");
 const AdminHub = lazyWithRetry(() => import("./pages/AdminHub"), "admin");
+const SupremeAdminControl = lazyWithRetry(() => import("./pages/SupremeAdminControl"), "admin-control");
 const AdminCarousel = lazyWithRetry(() => import("./pages/AdminCarousel"), "admin-carousel");
 const AdminInstagram = lazyWithRetry(() => import("./pages/AdminInstagram"), "admin-instagram");
 const InstagramReelsPage = lazyWithRetry(() => import("./pages/InstagramReelsPage"), "instagram-reels");
@@ -93,7 +94,7 @@ function AppContent() {
     <Route path="/volunteers" element={<Community />} /><Route path="/community" element={<Community />} /><Route path="/duty-tracker" element={<DutyTracker />} /><Route path="/founder-message" element={<FounderMessage />} /><Route path="/founder-speech" element={<FounderMessage />} />
     <Route path="/notifications" element={<NotificationsPage />} /><Route path="/profile" element={<Profile />} /><Route path="/settings" element={<SettingsPage />} /><Route path="/my-certificates" element={<MyCertificates />} /><Route path="/jan-seva-card" element={<JanSevaCard />} /><Route path="/blood-network" element={<BloodNetwork />} /><Route path="/grievance" element={<Grievances />} /><Route path="/donations" element={<DonationsPage />} /><Route path="/health-care" element={<HealthCare />} /><Route path="/employment" element={<Employment />} /><Route path="/medicine" element={<Navigate to="/health-care?tab=clinical" replace />} />
     <Route path="/resume-builder" element={<ResumeBuilder />} /><Route path="/doc-scanner" element={<DocScanner />} /><Route path="/internet-radio" element={<InternetRadio />} /><Route path="/live-tv" element={<LiveTV />} /><Route path="/news" element={<NewsFeed />} /><Route path="/hindu-calendar" element={<HinduCalendar />} /><Route path="/culture" element={<Culture />} /><Route path="/instagram" element={<InstagramReelsPage />} /><Route path="/reels" element={<InstagramReelsPage />} />
-    <Route path="/admin" element={<AdminHub />} /><Route path="/admin/carousel" element={<AdminCarousel />} /><Route path="/admin/instagram" element={<AdminInstagram />} /><Route path="*" element={<Navigate to="/" replace />} />
+    <Route path="/admin" element={<AdminHub />} /><Route path="/admin/control" element={<SupremeAdminControl />} /><Route path="/admin/carousel" element={<AdminCarousel />} /><Route path="/admin/instagram" element={<AdminInstagram />} /><Route path="*" element={<Navigate to="/" replace />} />
   </Route></Routes></Suspense></BrowserRouter></ErrorBoundary>;
 }
 
