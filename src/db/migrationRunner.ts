@@ -1,12 +1,19 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-// ES module equivalent of __dirname
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+function getDirname(): string {
+  if (typeof __dirname !== 'undefined') return __dirname;
+  try {
+    const metaUrl = (import.meta as any)?.url;
+    if (metaUrl) return path.dirname(fileURLToPath(metaUrl));
+  } catch {}
+  return process.cwd();
+}
 
 export async function runMigrationsOnPool(pool: any) {
+  const currentDir = getDirname();
   const candidates = [
-    path.resolve(__dirname, 'migrations'),
+    path.resolve(currentDir, 'migrations'),
     path.resolve(process.cwd(), 'migrations'),
     path.resolve(path.dirname(process.argv[1] || ''), 'migrations'),
   ];

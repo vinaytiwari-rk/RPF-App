@@ -30,8 +30,10 @@ export function getPgPoolConfig(rawUrl?: string) {
     }
   }
 
-  // Force localhost for local cPanel PostgreSQL
-  host = 'localhost';
+  // Force localhost for cPanel server production environment unless overridden by LOCAL_DB_URL
+  if (process.env.NODE_ENV === 'production' && !process.env.LOCAL_DB_URL) {
+    host = 'localhost';
+  }
 
   return {
     user,
