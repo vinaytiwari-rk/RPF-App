@@ -55,7 +55,7 @@ export default function CentralContentManager() {
   const sectionKeys = useMemo(() => {
     const selected = sections.find(item => item.id === active);
     if (selected?.keys.length) return selected.keys.filter(key => Object.prototype.hasOwnProperty.call(cms, key));
-    const known = new Set(sections.flatMap(item => item.keys));
+    const known = new Set<string>(sections.flatMap(item => item.keys));
     return Object.keys(cms).filter(key => !known.has(key)).sort();
   }, [active, cms]);
 
