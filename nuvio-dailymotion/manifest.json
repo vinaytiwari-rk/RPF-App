@@ -1,0 +1,17 @@
+[
+  {
+    "id": "dailymotion",
+    "name": "Dailymotion",
+    "description": "Dailymotion video provider for Nuvio. Searches Dailymotion and returns available MP4/HLS sources.",
+    "version": "1.0.0",
+    "author": "Vinay Tiwari",
+    "supportedTypes": ["movie", "tv"],
+    "filename": "providers/dailymotion.js",
+    "enabled": true,
+    "contentLanguage": ["en", "hi"],
+    "formats": ["mp4", "m3u8"],
+    "limited": true,
+    "supportsExternalPlayer": true,
+    "hasSettings": true
+  }
+]
