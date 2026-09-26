@@ -896,21 +896,29 @@ async function startServer() {
   // Load GeoJSON data in the background
   loadACGeoJsonAsync().catch(err => console.error("Error loading GeoJSON in background", err));
 
+  const isDev = process.env.NODE_ENV === "development";
   const distPath = path.join(process.cwd(), "dist");
-  const distIndexHtmlExists = fs.existsSync(path.join(distPath, "index.html"));
 
-  if (!distIndexHtmlExists && process.env.NODE_ENV === "development") {
+  if (isDev) {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else if (distIndexHtmlExists) {
-    app.use(express.static(distPath));
+  } else {
+    if (fs.existsSync(distPath)) {
+      app.use(express.static(distPath));
+    }
     app.get("*", (req, res, next) => {
       if (req.path.startsWith("/api/")) return next();
-      res.sendFile(path.join(distPath, "index.html"));
+      const indexPath = fs.existsSync(path.join(distPath, "index.html"))
+        ? path.join(distPath, "index.html")
+        : path.join(process.cwd(), "index.html");
+      if (fs.existsSync(indexPath)) {
+        return res.sendFile(indexPath);
+      }
+      res.status(404).send("Application frontend index.html not found.");
     });
   }
 
