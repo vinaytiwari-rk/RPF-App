@@ -19,6 +19,8 @@ import {
   Settings2,
   ShieldCheck,
   Users,
+  UserPlus,
+  Edit3,
   Images,
   Instagram,
   Trash2,
@@ -146,9 +148,29 @@ export default function AdminHub() {
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
   const [savingCms, setSavingCms] = useState(false);
 
-  // User Role Edit Modal State
+  // User Create Modal State
+  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserUsername, setNewUserUsername] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPhone, setNewUserPhone] = useState("");
+  const [newUserRole, setNewUserRole] = useState("citizen");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserIsVol, setNewUserIsVol] = useState(false);
+  const [newUserIsDonor, setNewUserIsDonor] = useState(false);
+  const [creatingUser, setCreatingUser] = useState(false);
+
+  // User Edit Modal State
   const [editingUser, setEditingUser] = useState<Row | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editUsername, setEditUsername] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
   const [editRole, setEditRole] = useState<string>("user");
+  const [editPassword, setEditPassword] = useState("");
+  const [editIsVol, setEditIsVol] = useState(false);
+  const [editIsDonor, setEditIsDonor] = useState(false);
+  const [updatingUser, setUpdatingUser] = useState(false);
 
   // Announcement Form State
   const [newAnnTitle, setNewAnnTitle] = useState("");
@@ -268,23 +290,103 @@ export default function AdminHub() {
     } catch (e) { toast.error("Failed to delete volunteer."); }
   };
 
-  // Update User Role
-  const handleUserRoleUpdate = async () => {
+  // Create New User
+  const handleCreateUser = async () => {
+    if (!token) return;
+    if (!newUserName.trim()) {
+      toast.error("Full name is required.");
+      return;
+    }
+    setCreatingUser(true);
+    try {
+      const res = await axios.post("/api/admin/users", {
+        name: newUserName.trim(),
+        username: newUserUsername.trim() || undefined,
+        email: newUserEmail.trim() || undefined,
+        phone: newUserPhone.trim() || undefined,
+        role: newUserRole,
+        password: newUserPassword.trim() || undefined,
+        isVolunteer: newUserIsVol,
+        isDonor: newUserIsDonor
+      }, { headers: authHeaders(token) });
+
+      if (res.data?.success !== false) {
+        toast.success("User created successfully!");
+        setIsCreateUserOpen(false);
+        setNewUserName("");
+        setNewUserUsername("");
+        setNewUserEmail("");
+        setNewUserPhone("");
+        setNewUserRole("citizen");
+        setNewUserPassword("");
+        setNewUserIsVol(false);
+        setNewUserIsDonor(false);
+        await load();
+      }
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || "Failed to create user.");
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
+  // Start Editing User
+  const startEditUser = (row: Row) => {
+    setEditingUser(row);
+    setEditName(String(row.name || ""));
+    setEditUsername(String(row.username || ""));
+    setEditEmail(String(row.email || ""));
+    setEditPhone(String(row.phone || ""));
+    setEditRole(String(row.role || "user"));
+    setEditPassword("");
+    setEditIsVol(Boolean(row.isVolunteer));
+    setEditIsDonor(Boolean(row.isDonor));
+  };
+
+  // Update Existing User
+  const handleUpdateUser = async () => {
     if (!token || !editingUser) return;
     const userId = String(editingUser.id);
+    if (!editName.trim()) {
+      toast.error("Full name cannot be empty.");
+      return;
+    }
+    setUpdatingUser(true);
     try {
       const res = await axios.put(`/api/admin/users/${userId}`, {
-        name: editingUser.name,
-        email: editingUser.email,
-        phone: editingUser.phone,
-        role: editRole
+        name: editName.trim(),
+        username: editUsername.trim() || undefined,
+        email: editEmail.trim() || undefined,
+        phone: editPhone.trim() || undefined,
+        role: editRole,
+        password: editPassword.trim() || undefined,
+        isVolunteer: editIsVol,
+        isDonor: editIsDonor
       }, { headers: authHeaders(token) });
+
       if (res.data?.success !== false) {
-        toast.success("User role updated successfully.");
+        toast.success("User updated successfully.");
         setEditingUser(null);
         await load();
       }
-    } catch (e) { toast.error("Failed to update user role."); }
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || "Failed to update user.");
+    } finally {
+      setUpdatingUser(false);
+    }
+  };
+
+  // Delete User
+  const handleDeleteUser = async (id: string, name: string) => {
+    if (!token) return;
+    if (!window.confirm(`Are you sure you want to permanently delete user account "${name || id}"?`)) return;
+    try {
+      await axios.delete(`/api/admin/users/${id}`, { headers: authHeaders(token) });
+      toast.success("User deleted successfully.");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || "Failed to delete user.");
+    }
   };
 
   // Create Announcement
@@ -625,35 +727,69 @@ export default function AdminHub() {
               {/* TABLE 1: USERS */}
               {peopleTab === "users" && (
                 <div className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 shadow-xl">
-                  <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-                    <h3 className="text-sm font-black text-white">Registered Application Accounts</h3>
-                    <button
-                      onClick={() => exportCsv("users", "rpf_users")}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-300 hover:bg-slate-700"
-                    >
-                      <Download className="h-3.5 w-3.5 text-amber-400" /> Export CSV
-                    </button>
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 px-5 py-4">
+                    <div>
+                      <h3 className="text-sm font-black text-white">Registered Application Accounts</h3>
+                      <p className="text-xs text-slate-400">Total: {data.users.length} accounts</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsCreateUserOpen(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-1.5 text-xs font-black text-slate-950 hover:bg-amber-400 transition shadow-sm"
+                      >
+                        <UserPlus className="h-3.5 w-3.5" /> + Add User
+                      </button>
+                      <button
+                        onClick={() => exportCsv("users", "rpf_users")}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-300 hover:bg-slate-700 transition"
+                      >
+                        <Download className="h-3.5 w-3.5 text-amber-400" /> Export CSV
+                      </button>
+                    </div>
                   </div>
                   <div className="divide-y divide-slate-800/80">
                     {filterRows(data.users).map((row, index) => (
-                      <div key={String(row.id || index)} className="flex items-center justify-between px-5 py-4 hover:bg-slate-800/30">
+                      <div key={String(row.id || index)} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 hover:bg-slate-800/30 transition">
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <p className="text-sm font-bold text-white">{firstText(row, ["name", "email", "id"])}</p>
+                            {Boolean(row.username) && (
+                              <span className="text-xs font-medium text-amber-400/90">@{String(row.username)}</span>
+                            )}
                             <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
                               String(row.role).toLowerCase() === "admin" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-slate-800 text-slate-400"
                             }`}>
-                              {String(row.role || "user")}
+                              {String(row.role || "citizen")}
                             </span>
+                            {Boolean(row.isVolunteer) && (
+                              <span className="rounded-full bg-blue-500/20 text-blue-400 px-2 py-0.5 text-[10px] font-bold border border-blue-500/30">
+                                Volunteer
+                              </span>
+                            )}
+                            {Boolean(row.isDonor) && (
+                              <span className="rounded-full bg-emerald-500/20 text-emerald-400 px-2 py-0.5 text-[10px] font-bold border border-emerald-500/30">
+                                Donor
+                              </span>
+                            )}
                           </div>
-                          <p className="mt-1 text-xs text-slate-400">{firstText(row, ["email"])} · {firstText(row, ["phone"])}</p>
+                          <p className="mt-1 text-xs text-slate-400">
+                            {row.email ? String(row.email) : "No email"} · {row.phone ? String(row.phone) : "No phone"}
+                          </p>
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => { setEditingUser(row); setEditRole(String(row.role || "user")); }}
-                            className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-300 hover:bg-slate-700"
+                            onClick={() => startEditUser(row)}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition"
+                            title="Edit user details"
                           >
-                            Edit Role
+                            <Edit3 className="h-3.5 w-3.5 text-amber-400" /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(String(row.id), String(row.name || row.email || row.username || row.id))}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-900/50 bg-rose-950/30 px-3 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-900/50 transition"
+                            title="Delete user account"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> Delete
                           </button>
                         </div>
                       </div>
@@ -984,35 +1120,269 @@ export default function AdminHub() {
         </main>
       </div>
 
-      {/* USER ROLE EDIT MODAL */}
-      {editingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4">
-            <h3 className="text-sm font-black text-white">Edit User Role</h3>
-            <p className="text-xs text-slate-400">User: {String((editingUser as any).name || (editingUser as any).email || (editingUser as any).id || '')}</p>
-            <div>
-              <label className="text-xs font-bold text-slate-300">Select System Role</label>
-              <select
-                value={editRole}
-                onChange={(e) => setEditRole(e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-xs font-bold text-white outline-none"
-              >
-                <option value="user">user (Member / Citizen / Volunteer)</option>
-                <option value="admin">admin (Supreme Administrator)</option>
-              </select>
-            </div>
-            <div className="flex gap-2 pt-2">
+      {/* CREATE USER MODAL */}
+      {isCreateUserOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4 my-8">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-amber-400" />
+                <h3 className="text-base font-black text-white">Create New User</h3>
+              </div>
               <button
-                onClick={() => setEditingUser(null)}
-                className="flex-1 rounded-xl border border-slate-800 px-4 py-2 text-xs font-bold text-slate-400"
+                onClick={() => setIsCreateUserOpen(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-300">Full Name <span className="text-rose-400">*</span></label>
+                <input
+                  type="text"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  placeholder="e.g. Ramesh Kumar"
+                  className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-300">Username</label>
+                  <input
+                    type="text"
+                    value={newUserUsername}
+                    onChange={(e) => setNewUserUsername(e.target.value)}
+                    placeholder="e.g. ramesh_k"
+                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300">Role</label>
+                  <select
+                    value={newUserRole}
+                    onChange={(e) => setNewUserRole(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs font-bold text-white outline-none focus:border-amber-500"
+                  >
+                    <option value="citizen">Citizen (Standard)</option>
+                    <option value="volunteer">Volunteer</option>
+                    <option value="donor">Donor</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-300">Email Address</label>
+                  <input
+                    type="email"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                    placeholder="name@example.com"
+                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={newUserPhone}
+                    onChange={(e) => setNewUserPhone(e.target.value)}
+                    placeholder="+91 9876543210"
+                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-300">Password</label>
+                <input
+                  type="password"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  placeholder="Set initial password (optional)"
+                  className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                />
+                <p className="mt-1 text-[11px] text-slate-500">If left blank, user can login via OTP or have password set later.</p>
+              </div>
+
+              <div className="flex gap-4 pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={newUserIsVol}
+                    onChange={(e) => setNewUserIsVol(e.target.checked)}
+                    className="rounded border-slate-800 bg-slate-950 text-amber-500 focus:ring-0"
+                  />
+                  Mark as Volunteer
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={newUserIsDonor}
+                    onChange={(e) => setNewUserIsDonor(e.target.checked)}
+                    className="rounded border-slate-800 bg-slate-950 text-amber-500 focus:ring-0"
+                  />
+                  Mark as Donor
+                </label>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-3 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setIsCreateUserOpen(false)}
+                className="flex-1 rounded-xl border border-slate-800 px-4 py-2.5 text-xs font-bold text-slate-400 hover:bg-slate-800 transition"
               >
                 Cancel
               </button>
               <button
-                onClick={handleUserRoleUpdate}
-                className="flex-1 rounded-xl bg-amber-500 px-4 py-2 text-xs font-black text-slate-950"
+                type="button"
+                onClick={handleCreateUser}
+                disabled={creatingUser}
+                className="flex-1 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-black text-slate-950 hover:bg-amber-400 transition disabled:opacity-50"
               >
-                Save Role
+                {creatingUser ? "Creating..." : "Create User"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT USER MODAL */}
+      {editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4 my-8">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Edit3 className="h-5 w-5 text-amber-400" />
+                <div>
+                  <h3 className="text-base font-black text-white">Edit User Account</h3>
+                  <p className="text-[11px] text-slate-400">ID: {String(editingUser.id || '')}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingUser(null)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-300">Full Name <span className="text-rose-400">*</span></label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Full name"
+                  className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-300">Username</label>
+                  <input
+                    type="text"
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value)}
+                    placeholder="Username"
+                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300">Role</label>
+                  <select
+                    value={editRole}
+                    onChange={(e) => setEditRole(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs font-bold text-white outline-none focus:border-amber-500"
+                  >
+                    <option value="citizen">Citizen (Standard)</option>
+                    <option value="volunteer">Volunteer</option>
+                    <option value="donor">Donor</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-300">Email Address</label>
+                  <input
+                    type="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    placeholder="Email"
+                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    placeholder="Phone"
+                    className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-300">New Password (Optional)</label>
+                <input
+                  type="password"
+                  value={editPassword}
+                  onChange={(e) => setEditPassword(e.target.value)}
+                  placeholder="Leave blank to keep existing password"
+                  className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white outline-none focus:border-amber-500"
+                />
+                <p className="mt-1 text-[11px] text-slate-500">Only fill this if you want to reset the user's password.</p>
+              </div>
+
+              <div className="flex gap-4 pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={editIsVol}
+                    onChange={(e) => setEditIsVol(e.target.checked)}
+                    className="rounded border-slate-800 bg-slate-950 text-amber-500 focus:ring-0"
+                  />
+                  Mark as Volunteer
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={editIsDonor}
+                    onChange={(e) => setEditIsDonor(e.target.checked)}
+                    className="rounded border-slate-800 bg-slate-950 text-amber-500 focus:ring-0"
+                  />
+                  Mark as Donor
+                </label>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-3 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setEditingUser(null)}
+                className="flex-1 rounded-xl border border-slate-800 px-4 py-2.5 text-xs font-bold text-slate-400 hover:bg-slate-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdateUser}
+                disabled={updatingUser}
+                className="flex-1 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-black text-slate-950 hover:bg-amber-400 transition disabled:opacity-50"
+              >
+                {updatingUser ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>

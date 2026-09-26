@@ -4,6 +4,7 @@ import { pool } from "../db/dbPool.js";
 import { apiCache, CACHE_TTL } from "../lib/apiCache.js";
 
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 const router = express.Router();
 
@@ -99,7 +100,7 @@ router.delete("/api/admin/announcements/:id", authenticateToken, requireAdmin, a
 // GET user by ID
 router.get("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: any, res: any) => {
   try {
-    const result = await pool.query("SELECT id, name, role, email, phone, \"isVolunteer\", \"isDonor\", \"onboardingCompleted\" FROM users WHERE id = $1", [req.params.id]);
+    const result = await pool.query("SELECT id, username, name, role, email, phone, \"isVolunteer\", \"isDonor\", \"onboardingCompleted\", created_at FROM users WHERE id = $1", [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: "User not found" });
     res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
@@ -107,25 +108,141 @@ router.get("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: 
   }
 });
 
-// UPDATE user profile (Role updates allowed for admin)
+// CREATE a user
+router.post("/api/admin/users", authenticateToken, requireAdmin, async (req: any, res: any) => {
+  try {
+    const { name, username, email, phone, role, password, isVolunteer, isDonor } = req.body;
+    
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, error: "Name is required" });
+    }
+
+    const callerRole = String(req.user?.role || "").toLowerCase();
+    const assignedRole = String(role || "user").toLowerCase();
+    if (assignedRole === "admin" && callerRole !== "admin" && callerRole !== "super_admin" && callerRole !== "superadmin") {
+      return res.status(403).json({ success: false, error: "Only Admin can assign admin role" });
+    }
+
+    if (phone && phone.trim()) {
+      const existingPhone = await pool.query("SELECT id FROM users WHERE phone = $1", [phone.trim()]);
+      if (existingPhone.rows.length > 0) {
+        return res.status(409).json({ success: false, error: "Phone number is already registered" });
+      }
+    }
+    if (email && email.trim()) {
+      const existingEmail = await pool.query("SELECT id FROM users WHERE LOWER(email) = LOWER($1)", [email.trim()]);
+      if (existingEmail.rows.length > 0) {
+        return res.status(409).json({ success: false, error: "Email is already registered" });
+      }
+    }
+    if (username && username.trim()) {
+      const existingUsername = await pool.query("SELECT id FROM users WHERE LOWER(username) = LOWER($1)", [username.trim()]);
+      if (existingUsername.rows.length > 0) {
+        return res.status(409).json({ success: false, error: "Username is already in use" });
+      }
+    }
+
+    const userId = crypto.randomUUID();
+    const passwordHash = password && password.trim() ? await bcrypt.hash(password.trim(), 10) : await bcrypt.hash("RPF@12345", 10);
+    const safeUsername = username && username.trim() ? username.trim().toLowerCase() : (phone && phone.trim() ? phone.trim() : `user_${userId.slice(0, 8)}`);
+
+    const result = await pool.query(
+      `INSERT INTO users (id, username, name, email, phone, password_hash, role, "isVolunteer", "isDonor", created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+       RETURNING id, username, name, role, email, phone, "isVolunteer", "isDonor", created_at`,
+      [
+        userId,
+        safeUsername,
+        name.trim(),
+        email && email.trim() ? email.trim() : null,
+        phone && phone.trim() ? phone.trim() : null,
+        passwordHash,
+        assignedRole,
+        Boolean(isVolunteer),
+        Boolean(isDonor)
+      ]
+    );
+
+    res.status(201).json({ success: true, data: result.rows[0] });
+  } catch (error: any) {
+    console.error("Admin create user error:", error);
+    res.status(500).json({ success: false, error: error?.message || "Failed to create user" });
+  }
+});
+
+// UPDATE user profile (Role, details, and optional password update)
 router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: any, res: any) => {
   try {
-    const { name, role, email, phone, isVolunteer, isDonor } = req.body;
+    const { name, username, role, email, phone, password, isVolunteer, isDonor } = req.body;
+    const userId = req.params.id;
     
     const callerRole = String(req.user?.role || "").toLowerCase();
     if (role && callerRole !== "admin" && callerRole !== "super_admin" && callerRole !== "superadmin") {
       return res.status(403).json({ success: false, error: "Only Admin can assign roles" });
     }
 
-    const result = await pool.query(
-      `UPDATE users 
-       SET name = $1, role = $2, email = $3, phone = $4, "isVolunteer" = $5, "isDonor" = $6
-       WHERE id = $7 RETURNING id, name, role, email, phone`,
-      [name, role || "user", email, phone, isVolunteer, isDonor, req.params.id]
-    );
+    if (phone && phone.trim()) {
+      const existingPhone = await pool.query("SELECT id FROM users WHERE phone = $1 AND id != $2", [phone.trim(), userId]);
+      if (existingPhone.rows.length > 0) {
+        return res.status(409).json({ success: false, error: "Phone number is already used by another account" });
+      }
+    }
+    if (email && email.trim()) {
+      const existingEmail = await pool.query("SELECT id FROM users WHERE LOWER(email) = LOWER($1) AND id != $2", [email.trim(), userId]);
+      if (existingEmail.rows.length > 0) {
+        return res.status(409).json({ success: false, error: "Email is already used by another account" });
+      }
+    }
+    if (username && username.trim()) {
+      const existingUsername = await pool.query("SELECT id FROM users WHERE LOWER(username) = LOWER($1) AND id != $2", [username.trim(), userId]);
+      if (existingUsername.rows.length > 0) {
+        return res.status(409).json({ success: false, error: "Username is already in use by another account" });
+      }
+    }
+
+    let passwordHash: string | null = null;
+    if (password && typeof password === "string" && password.trim().length >= 6) {
+      passwordHash = await bcrypt.hash(password.trim(), 10);
+    }
+
+    let result;
+    if (passwordHash) {
+      result = await pool.query(
+        `UPDATE users 
+         SET name = COALESCE($1, name), 
+             username = COALESCE($2, username),
+             role = COALESCE($3, role), 
+             email = $4, 
+             phone = $5, 
+             password_hash = $6,
+             "isVolunteer" = COALESCE($7, "isVolunteer"), 
+             "isDonor" = COALESCE($8, "isDonor"),
+             updated_at = NOW()
+         WHERE id = $9 RETURNING id, username, name, role, email, phone, "isVolunteer", "isDonor"`,
+        [name, username, role, email || null, phone || null, passwordHash, isVolunteer, isDonor, userId]
+      );
+    } else {
+      result = await pool.query(
+        `UPDATE users 
+         SET name = COALESCE($1, name), 
+             username = COALESCE($2, username),
+             role = COALESCE($3, role), 
+             email = $4, 
+             phone = $5, 
+             "isVolunteer" = COALESCE($6, "isVolunteer"), 
+             "isDonor" = COALESCE($7, "isDonor"),
+             updated_at = NOW()
+         WHERE id = $8 RETURNING id, username, name, role, email, phone, "isVolunteer", "isDonor"`,
+        [name, username, role, email || null, phone || null, isVolunteer, isDonor, userId]
+      );
+    }
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
     res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: "Failed to update user profile" });
+    res.status(500).json({ success: false, error: error?.message || "Failed to update user profile" });
   }
 });
 
@@ -133,7 +250,7 @@ router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: 
 router.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
+    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit as string) || 100));
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query("SELECT COUNT(*) FROM users");
@@ -141,7 +258,7 @@ router.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res)
     const totalPages = Math.ceil(totalCount / limit);
 
     const result = await pool.query(
-      `SELECT id, name, role, email, phone, "isVolunteer", "isDonor", "onboardingCompleted" FROM users ORDER BY id DESC LIMIT $1 OFFSET $2`,
+      `SELECT id, username, name, role, email, phone, "isVolunteer", "isDonor", "onboardingCompleted", created_at FROM users ORDER BY id DESC LIMIT $1 OFFSET $2`,
       [limit, offset]
     );
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
@@ -153,10 +270,17 @@ router.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res)
 // DELETE a user
 router.delete("/api/admin/users/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    await pool.query("DELETE FROM users WHERE id = $1", [req.params.id]);
-    res.json({ success: true });
+    const userId = req.params.id;
+    // Clean up sessions and related auth
+    await pool.query("DELETE FROM sessions WHERE user_id = $1", [userId]).catch(() => {});
+    await pool.query("DELETE FROM citizen_auth WHERE user_id = $1", [userId]).catch(() => {});
+    const result = await pool.query("DELETE FROM users WHERE id = $1 RETURNING id", [userId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+    res.json({ success: true, message: "User deleted successfully" });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: "Failed to delete user" });
+    res.status(500).json({ success: false, error: error?.message || "Failed to delete user" });
   }
 });
 
