@@ -30,10 +30,10 @@ export default function MainLayout() {
   }, [localAvatarKey]);
 
   useEffect(() => {
-    if (isAdmin && !location.pathname.startsWith("/admin")) navigate("/admin");
+    if (isAdmin && location.pathname === "/") navigate("/admin", { replace: true });
   }, [isAdmin, location.pathname, navigate]);
 
-  if (isAdmin) return <div className="min-h-screen w-full bg-[#F8F9F7] font-sans text-slate-800"><Outlet context={{ lang: language }} /></div>;
+  if (isAdmin && location.pathname.startsWith("/admin")) return <div className="min-h-screen w-full bg-[#F8F9F7] font-sans text-slate-800"><Outlet context={{ lang: language }} /></div>;
 
   const nav = (p: string) => {
     if (user?.role === "guest" && (p === "/services" || p === "/impact" || p === "/activity" || p === "/notifications" || p === "/grievance")) {

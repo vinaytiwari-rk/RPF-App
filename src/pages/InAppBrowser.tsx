@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCw, Share2, ExternalLink, ChevronLeft, ChevronRight, Globe, Lock, Search, Home } from 'lucide-react';
-import { isExternalWebUrl, normalizeExternalWebUrl } from '../utils/browser';
+import { normalizeExternalWebUrl } from '../utils/browser';
 import { RPF_WEB_ORIGIN } from '../config/browserPolicy';
 import { Capacitor } from '@capacitor/core';
 import BrandLoader from '../components/BrandLoader';
@@ -23,6 +23,7 @@ export default function InAppBrowser() {
   const [loading, setLoading] = useState(true);
   const [controls, setControls] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [frameVersion, setFrameVersion] = useState(0);
 
   useEffect(() => {
     const valid = normalizeExternalWebUrl(params.get('url') || '') || '';
@@ -48,10 +49,27 @@ export default function InAppBrowser() {
   useEffect(() => () => { if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current); }, []);
 
   const reload = () => {
+    setError('');
     setLoading(true);
     showControlsTemporarily();
-    if (frameRef.current) frameRef.current.src = proxyUrl;
+    setFrameVersion(version => version + 1);
   };
+
+  useEffect(() => {
+    const onRefresh = () => reload();
+    window.addEventListener('rpf-browser-refresh', onRefresh);
+    return () => window.removeEventListener('rpf-browser-refresh', onRefresh);
+  }, []);
+
+  useEffect(() => {
+    if (!currentUrl || !loading) return;
+    const timer = window.setTimeout(() => {
+      setLoading(false);
+      setControls(true);
+      setError('This website is taking too long to load. Try opening it directly.');
+    }, 18000);
+    return () => window.clearTimeout(timer);
+  }, [currentUrl, loading, frameVersion]);
 
   const handleNavigateAddress = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -191,6 +209,7 @@ export default function InAppBrowser() {
             <iframe
               ref={frameRef}
               title="Samahit Views"
+              key={`${proxyUrl}:${frameVersion}`}
               src={proxyUrl}
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-modals"
               onLoad={() => {
@@ -200,11 +219,14 @@ export default function InAppBrowser() {
               onError={() => {
                 setLoading(false);
                 setControls(true);
+                setError("Unable to load this website inside Samahit. Open it directly.");
               }}
               className="h-full w-full border-0 bg-white"
               allow="autoplay; clipboard-read; clipboard-write; encrypted-media; fullscreen; geolocation; microphone; camera; picture-in-picture"
               allowFullScreen
             />
+
+            {error && <div role="alert" className="absolute inset-x-4 top-20 z-30 rounded-xl border border-amber-200 bg-[#FFF7E8] p-4 text-sm text-slate-800 shadow-md"><p>{error}</p><button onClick={openDirectExternal} className="mt-2 rounded-lg bg-[#B9E5CC] px-3 py-2 font-bold">Open website directly</button><button onClick={reload} className="ml-2 rounded-lg border px-3 py-2">Retry</button></div>}
 
             {/* SMOOTH LOADING OVERLAY */}
             {loading && (

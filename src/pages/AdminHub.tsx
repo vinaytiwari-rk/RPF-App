@@ -112,8 +112,8 @@ async function getAdminData(url: string, token: string): Promise<Row[]> {
     if (Array.isArray(payload)) return payload as Row[];
     if (Array.isArray(payload?.items)) return payload.items as Row[];
     return [];
-  } catch {
-    return [];
+  } catch (error) {
+    throw new Error(`${url}: ${axios.isAxiosError(error) ? (error.response?.status ? `HTTP ${error.response.status}` : error.message) : "Request failed"}`);
   }
 }
 
@@ -207,7 +207,7 @@ export default function AdminHub() {
     results.forEach((result, index) => {
       const [key, url] = endpoints[index];
       if (result.status === "fulfilled") next[key] = result.value;
-      else failed.push(`${url}: Data fetch unavailable`);
+      else failed.push(result.reason instanceof Error ? result.reason.message : `${url}: Data fetch unavailable`);
     });
 
     // Load CMS Data
