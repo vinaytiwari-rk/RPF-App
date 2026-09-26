@@ -159,7 +159,7 @@ export function AuthProvider({children}:{children:React.ReactNode}){
     if(!response.ok||!data.success)throw new Error(data.error||'Onboarding update failed');
     await saveUser({...user,interests,onboardingCompleted:true,...(data.user||{})});
   },[user,token,saveUser]);
-  const hasAdminAccess=!!user&&(user.role==='admin'||user.role==='super_admin');
+  const hasAdminAccess=!!user&&(user.role==='admin'||(user.role==='super_admin'||user.role==='superadmin'));
 
   return <AuthContext.Provider value={{token,user,isLoading,isAuthenticated:!!user,language,setLanguage,login,loginAsGuest,logout,updateUser,completeOnboarding,hasAdminAccess}}>{children}</AuthContext.Provider>;
 }
