@@ -8,5 +8,4 @@ if (!fs.existsSync(distIndex)) {
   throw new Error('Production build did not generate dist/index.html');
 }
 
-fs.copyFileSync(distIndex, rootIndex);
-console.log('Successfully synced the generated dist/index.html to root index.html for production LiteSpeed serving.');
+console.log('Verified dist/index.html was generated successfully.');
