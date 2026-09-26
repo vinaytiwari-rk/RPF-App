@@ -123,9 +123,23 @@ public class NativeBrowserActivity extends AppCompatActivity {
     }
 
     private boolean routeNonHttp(String url){
+        if(url == null) return false;
         String fallback = resolveIntentFallback(url);
         if(fallback != null){ loadInApp(fallback); return true; }
-        if(url != null && (url.startsWith("about:") || url.startsWith("javascript:") || url.startsWith("blob:") || url.startsWith("data:"))) return false;
+        if(url.startsWith("about:") || url.startsWith("javascript:") || url.startsWith("blob:") || url.startsWith("data:")) return false;
+        try {
+            Intent intent;
+            if (url.startsWith("intent://")) {
+                intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+            } else {
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            }
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                return true;
+            }
+        } catch (Exception ignored) {}
         Toast.makeText(this,"This link requires a non-web app or has no web fallback",Toast.LENGTH_SHORT).show();
         return true;
     }

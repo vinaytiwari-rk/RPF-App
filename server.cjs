@@ -336875,26 +336875,17 @@ var import_https2 = __toESM(require("https"), 1);
 init_coreServices();
 var router27 = import_express27.default.Router();
 var httpsAgent = new import_https2.default.Agent({ rejectUnauthorized: true });
-var APPROVED_GOV_DOMAINS = [
-  "gov.in",
-  "nic.in",
-  "mp.gov.in",
-  "india.gov.in",
-  "pib.gov.in",
-  "eraktkosh.in",
-  "mponline.gov.in",
-  "digitalindia.gov.in",
-  "rpfoundation.org"
-];
 var isAllowedPortal = (raw) => {
   try {
     const u3 = new URL(raw);
     if (u3.protocol !== "https:" && u3.protocol !== "http:") return false;
     const h4 = u3.hostname.toLowerCase();
-    if (h4 === "localhost" || h4.startsWith("127.") || h4.startsWith("10.") || h4.startsWith("192.168.") || h4.startsWith("172.16.")) {
+    if (h4 === "localhost" || h4 === "127.0.0.1" || h4 === "0.0.0.0" || h4 === "::1") return false;
+    if (/^127\./.test(h4) || /^10\./.test(h4) || /^192\.168\./.test(h4) || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(h4) || /^169\.254\./.test(h4)) {
       return false;
     }
-    return APPROVED_GOV_DOMAINS.some((domain) => h4 === domain || h4.endsWith("." + domain));
+    if (h4.endsWith(".internal") || h4.endsWith(".local") || h4.endsWith(".lan")) return false;
+    return true;
   } catch {
     return false;
   }
@@ -336916,25 +336907,28 @@ var proxiedLink = (value2, base2) => {
 };
 router27.get("/api/gov/web-proxy", async (req2, res) => {
   const raw = String(req2.query.url || "");
-  if (!isAllowedPortal(raw)) return res.status(400).send("Unsupported government portal");
+  if (!isAllowedPortal(raw)) {
+    return res.status(400).send(`<html><body style="font-family:sans-serif;padding:30px;text-align:center"><h3 style="color:#C2410C">Invalid Web Address</h3><p style="color:#64748B">The requested address is invalid or restricted.</p></body></html>`);
+  }
   try {
     const target = new URL(raw);
     const upstream = await axios_default.get(target.toString(), {
       responseType: "text",
-      timeout: 15e3,
-      maxRedirects: 5,
+      timeout: 2e4,
+      maxRedirects: 10,
       httpsAgent,
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5"
+        "Accept-Language": "en-IN,en-US,en;q=0.9,hi;q=0.8",
+        "Referer": target.origin + "/"
       },
       validateStatus: () => true
-      // always get the body, handle errors ourselves
+      // Accept 2xx, 3xx, 4xx without throwing immediately
     });
     const finalUrl = upstream.request?.res?.responseUrl || upstream.config?.url || target.toString();
     if (!isAllowedPortal(finalUrl)) {
-      return res.status(403).send("Redirected domain is not on the approved government portal allowlist.");
+      return res.status(403).send(`<html><body style="font-family:sans-serif;padding:30px;text-align:center"><h3 style="color:#C2410C">Restricted Redirect</h3><p style="color:#64748B">The website redirected to a restricted internal address.</p></body></html>`);
     }
     const contentType = String(upstream.headers["content-type"] || "text/html");
     res.removeHeader("X-Frame-Options");
@@ -336947,84 +336941,51 @@ router27.get("/api/gov/web-proxy", async (req2, res) => {
       return res.send(upstream.data);
     }
     const $4 = load(String(upstream.data));
-    $4('meta[http-equiv="Content-Security-Policy"], meta[http-equiv="X-Frame-Options"]').remove();
-    $4("base").remove();
-    const FRAME_BUST_NEUTRALIZER = `<script>
+    $4('meta[http-equiv="Content-Security-Policy"], meta[http-equiv="X-Frame-Options"], meta[http-equiv="content-security-policy"], meta[http-equiv="x-frame-options"]').remove();
+    if ($4("base").length === 0) {
+      $4("head").prepend(`<base href="${target.origin}/" />`);
+    } else {
+      $4("base").attr("href", `${target.origin}/`);
+    }
+    const IN_APP_SHIELD = `<script>
 (function(){
-  // Override frame-busting: make window.top and window.parent appear to be the same as window itself
-  // so that checks like "if (window.top !== window)" pass, preventing redirect to login page
+  // 1. Defeat frame-busting scripts that check window.top or window.parent
   try {
     Object.defineProperty(window, 'top', { get: function(){ return window; }, configurable: true });
     Object.defineProperty(window, 'parent', { get: function(){ return window; }, configurable: true });
     Object.defineProperty(window, 'frameElement', { get: function(){ return null; }, configurable: true });
-  } catch(e) {}
-})();
-</script>`;
-    $4("head").prepend(FRAME_BUST_NEUTRALIZER);
-    const BROWSER_INTERCEPTOR = `
-<script>
-(function(){
-  var urlParam = new URL(location.href).searchParams.get('url');
-  if(!urlParam) return;
-  var origin = new URL(urlParam).origin;
-  var prox = function(u){ return '/api/gov/web-proxy?url=' + encodeURIComponent(u) + '&clean=1'; };
-  
-  // 1. Proxy all AJAX requests (for SPAs like Next.js, Google Fact Check)
-  var ofetch = window.fetch;
-  window.fetch = function(){
-    var a = arguments[0];
-    if(typeof a === 'string'){
-      if(a.startsWith('/')) a = origin + a;
-      if(a.startsWith(origin)) arguments[0] = prox(a);
-    } else if(a && a.url){
-      var u = a.url;
-      if(u.startsWith('/')) u = origin + u;
-      if(u.startsWith(origin)) {
-        try {
-          arguments[0] = new Request(prox(u), a);
-        } catch(e) {
-          console.warn('Proxy Request bypass:', e);
-        }
+  } catch(e) {
+    try {
+      window.__defineGetter__('top', function(){ return window; });
+      window.__defineGetter__('parent', function(){ return window; });
+    } catch(e2) {}
+  }
+
+  // 2. Prevent window.open from escaping to external tabs
+  var _origOpen = window.open;
+  window.open = function(url, target, features) {
+    if (!url) return null;
+    var targetStr = String(target || '').toLowerCase();
+    if (targetStr === '_top' || targetStr === '_parent' || targetStr === '_blank') {
+      target = '_self';
+    }
+    var fullUrl = url.startsWith('http') ? url : (url.startsWith('/') ? "${target.origin}" + url : url);
+    window.location.href = '/api/gov/web-proxy?url=' + encodeURIComponent(fullUrl) + '&clean=1';
+    return window;
+  };
+
+  // 3. Ensure clicked links stay inside the in-app browser proxy
+  document.addEventListener('click', function(e) {
+    var a = e.target && e.target.closest ? e.target.closest('a') : null;
+    if (a && a.href && !a.href.startsWith('javascript:') && !a.href.startsWith('#')) {
+      if (a.target === '_top' || a.target === '_parent' || a.target === '_blank') {
+        a.target = '_self';
       }
     }
-    return ofetch.apply(this, arguments);
-  };
-  
-  var oxhr = XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open = function(m, u, a, usr, p){
-    if(typeof u === 'string'){
-      if(u.startsWith('/')) u = origin + u;
-      if(u.startsWith(origin)) u = prox(u);
-    }
-    return oxhr.call(this, m, u, a, usr, p);
-  };
-
-  // 2. Direct-load dynamic UI assets (SVGs, Icons) to avoid proxy WAF blocking (XML Parsing Errors)
-  var observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(m) {
-      m.addedNodes.forEach(function(n) {
-        if (n.nodeType !== 1) return;
-        var fixAsset = function(el, attr) {
-          var v = el.getAttribute(attr);
-          if (v && v.startsWith('/') && !v.startsWith('//')) el.setAttribute(attr, origin + v);
-        };
-        if (n.tagName === 'OBJECT') fixAsset(n, 'data');
-        else if (n.querySelectorAll) n.querySelectorAll('object[data^="/"]').forEach(function(o){ fixAsset(o, 'data'); });
-
-        if (n.tagName === 'IMG') fixAsset(n, 'src');
-        else if (n.querySelectorAll) n.querySelectorAll('img[src^="/"]').forEach(function(i){ fixAsset(i, 'src'); });
-      });
-    });
-  });
-  if (document.documentElement) observer.observe(document.documentElement, { childList: true, subtree: true });
+  }, true);
 })();
-</script>
-`;
-    const isSPA = target.hostname.includes("google.com") || target.hostname.includes("originality.ai") || target.hostname.includes("eraktkosh.mohfw.gov.in");
-    if (isSPA) {
-      $4("iframe, frame, frameset, object, embed").remove();
-      $4("head").prepend(BROWSER_INTERCEPTOR);
-    }
+</script>`;
+    $4("head").prepend(IN_APP_SHIELD);
     $4("a[href]").each((_i, el) => {
       const value2 = $4(el).attr("href");
       if (value2 && !value2.startsWith("#") && !/^javascript:/i.test(value2)) {
@@ -337071,13 +337032,13 @@ router27.get("/api/gov/web-proxy", async (req2, res) => {
     });
     res.removeHeader("X-Frame-Options");
     res.removeHeader("x-frame-options");
-    res.setHeader("Content-Security-Policy", "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors *; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:;");
+    res.setHeader("Content-Security-Policy", "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors *; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:; font-src * data: blob:;");
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Access-Control-Allow-Origin", "*");
     return res.type("html").send($4.html());
   } catch (err2) {
-    const msg = err2?.message || "Unknown error";
-    return res.status(502).send(`<html><body style="font-family:system-ui;padding:32px;max-width:480px;margin:0 auto"><h2 style="color:#000080">RPF Browser</h2><p>This portal could not be loaded right now.</p><p style="color:#888;font-size:13px">Technical reason: ${msg}</p><button onclick="history.back()" style="margin-top:16px;padding:10px 24px;background:#000080;color:#fff;border:none;border-radius:8px;cursor:pointer">\u2190 Go Back</button></body></html>`);
+    const msg = err2?.message || "Network request failed";
+    return res.status(502).send(`<html><body style="font-family:system-ui,-apple-system,sans-serif;padding:32px;max-width:480px;margin:40px auto;text-align:center"><div style="display:inline-block;padding:12px;background:#FFF7ED;border-radius:16px;margin-bottom:16px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div><h2 style="color:#0A192F;margin:0 0 8px 0;font-size:18px">Website Temporarily Unavailable</h2><p style="color:#64748B;font-size:13px;line-height:1.5;margin:0 0 20px 0">The requested site did not respond in time or rejected the embedded connection.</p><button onclick="history.back()" style="padding:10px 24px;background:#0A192F;color:#fff;border:none;border-radius:12px;font-weight:bold;font-size:13px;cursor:pointer">\u2190 Go Back</button></body></html>`);
   }
 });
 router27.get("/api/gov/mandi-prices", async (req2, res) => {
