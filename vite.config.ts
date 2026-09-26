@@ -27,7 +27,6 @@ export default defineConfig(() => {
             if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('pdf-lib')) return 'pdf-vendor';
             if (id.includes('lucide-react') || id.includes('/icons/')) return 'icons-vendor';
             if (id.includes('leaflet') || id.includes('react-leaflet')) return 'maps-vendor';
-            if (id.includes('recharts') || id.includes('d3-')) return 'charts-vendor';
             if (id.includes('framer-motion') || id.includes('motion')) return 'motion-vendor';
             if (id.includes('firebase')) return 'firebase-vendor';
             if (id.includes('@tanstack') || id.includes('axios') || id.includes('react-router')) return 'core-vendor';
