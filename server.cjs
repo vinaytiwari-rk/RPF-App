@@ -338753,38 +338753,16 @@ app.set("trust proxy", 1);
 app.use("/api/iptv", iptvRoutes_default);
 import_dotenv2.default.config();
 app.set("trust proxy", 1);
-var allowedOrigins = [
-  "https://samahit.rpfoundation.org",
-  "https://appapi.therpfoundation.org",
-  "https://api.therpfoundation.org",
-  "https://www.api.therpfoundation.org",
-  "https://jansevacard.therpfoundation.org",
-  "https://therpfoundation.org",
-  "https://www.therpfoundation.org",
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "capacitor://localhost"
-];
-var isAllowedOrigin = (origin2) => {
-  if (!origin2) return true;
-  if (allowedOrigins.includes(origin2)) return true;
-  try {
-    const host = new URL(origin2).hostname;
-    if (host === "therpfoundation.org" || host.endsWith(".therpfoundation.org")) return true;
-    if (host === "rpfoundation.org" || host.endsWith(".rpfoundation.org")) return true;
-    if (host.endsWith(".vercel.app")) return true;
-  } catch {
-  }
-  return true;
-};
 app.use((req2, res, next2) => {
   const origin2 = req2.headers.origin;
-  if (isAllowedOrigin(origin2)) {
-    res.setHeader("Access-Control-Allow-Origin", origin2 || "*");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma");
+  if (origin2) {
+    res.setHeader("Access-Control-Allow-Origin", origin2);
+    res.setHeader("Vary", "Origin");
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*");
   }
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma");
   if (req2.method === "OPTIONS") {
     return res.sendStatus(204);
   }

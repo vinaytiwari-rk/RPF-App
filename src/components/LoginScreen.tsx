@@ -57,9 +57,33 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     try {
       const normalized = identifier.trim();
       const endpoint = normalized.toLowerCase() === 'admin' ? '/api/auth/admin-login' : '/api/auth/login';
-      const r = await axios.post(apiUrl(endpoint), { identifier: normalized, password }, { headers: { 'Content-Type': 'application/json' }, timeout: 15000 });
-      if (!r.data?.success || !r.data?.user) throw new Error(r.data?.error || 'Invalid User ID or password.');
-      const u = r.data.user;
+      const targetUrl = apiUrl(endpoint);
+
+      let responseData: any = null;
+      try {
+        const r = await axios.post(targetUrl, { identifier: normalized, password }, {
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          timeout: 20000,
+        });
+        responseData = r.data;
+      } catch (axiosErr: any) {
+        // Resilient fallback with native fetch if axios XHR encounters transport or CORS issues
+        try {
+          const fetchRes = await fetch(targetUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ identifier: normalized, password }),
+          });
+          responseData = await fetchRes.json();
+        } catch {
+          throw axiosErr;
+        }
+      }
+
+      if (!responseData?.success || !responseData?.user) {
+        throw new Error(responseData?.error || 'Invalid User ID or password.');
+      }
+      const u = responseData.user;
       const roleCategory = u.role === 'guest' ? 'guest' : (u.role === 'admin' || u.role === 'super_admin' ? 'admin' : 'volunteer');
       await onLoginSuccess(roleCategory as any, {
         id: u.id,
@@ -67,11 +91,16 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         phone: u.phone,
         email: u.email,
         role: u.role,
-        token: r.data.token,
+        token: responseData.token,
         remember,
       });
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Unable to login. Please check your User ID and password.');
+      const rawMsg = err.response?.data?.error || err.message || '';
+      if (rawMsg.toLowerCase().includes('network error') || rawMsg.toLowerCase().includes('failed to fetch')) {
+        setError('सर्वर से संपर्क नहीं हो पा रहा है (Network Error). कृपया इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।');
+      } else {
+        setError(rawMsg || 'Unable to login. Please check your User ID and password.');
+      }
     } finally {
       setLoading(false);
     }

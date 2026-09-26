@@ -9,6 +9,20 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   ios: { contentInset: 'automatic', backgroundColor: '#f8fafc' },
   android: { backgroundColor: '#f8fafc' },
-  plugins: { CapacitorUpdater: { autoUpdate: false } }
+  server: {
+    androidScheme: 'https',
+    cleartext: true,
+    allowNavigation: [
+      'https://appapi.therpfoundation.org',
+      '*.therpfoundation.org',
+      '*.rpfoundation.org'
+    ]
+  },
+  plugins: {
+    CapacitorUpdater: { autoUpdate: false },
+    CapacitorHttp: {
+      enabled: true
+    }
+  }
 };
 export default config;

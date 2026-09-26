@@ -39,6 +39,7 @@ async function checkForWebUpdate() {
 
 if (Capacitor.isNativePlatform()) {
   axios.defaults.baseURL = RPF_WEB_ORIGIN;
+  axios.defaults.adapter = ['fetch', 'xhr', 'http'];
   const originalFetch = window.fetch.bind(window);
 
   window.fetch = function (input, init) {

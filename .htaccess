@@ -16,7 +16,9 @@ PassengerMaxPoolSize 2
 
 # API CORS: the frontend uses bearer-token authorization, not cookie credentials.
 <IfModule mod_headers.c>
-  Header always set Access-Control-Allow-Origin "*"
+  SetEnvIfNoCase Origin "(.+)" CORS_ORIGIN=$1
+  Header always set Access-Control-Allow-Origin "%{CORS_ORIGIN}e" env=CORS_ORIGIN
+  Header always set Access-Control-Allow-Origin "*" env=!CORS_ORIGIN
   Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE, PATCH"
   Header always set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma"
   Header always set Access-Control-Max-Age "86400"
