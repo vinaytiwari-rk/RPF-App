@@ -4,6 +4,7 @@ import * as LucideIcons from "lucide-react";
 import { ArrowLeft, ExternalLink, Download, Compass, Sparkles, Globe2, Landmark } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { openExternalLink } from "../utils/browser";
+import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import BrandLoader from "../components/BrandLoader";
 import { getGovLinksForService, GovLink } from "../data/serviceGovLinks";
 
@@ -34,25 +35,19 @@ function sanitizeHtml(input: string): string {
 }
 
 function WebsiteLogo({ url, label }: { url: string; label: string }) {
-  const [failed, setFailed] = useState(false);
-  let logo = "";
-  try {
-    logo = `${new URL(url).origin}/favicon.ico`;
-  } catch {}
-
+  const [attempt, setAttempt] = useState(0);
+  let host = "";
+  try { host = new URL(url).hostname; } catch {}
+  const candidates = host ? [
+    `https://icons.duckduckgo.com/ip3/${host}.ico`,
+    `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`,
+  ] : [];
   return (
-    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
-      {!failed && logo ? (
-        <img
-          src={logo}
-          alt={`${label} logo`}
-          className="h-full w-full object-contain"
-          loading="lazy"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <Globe2 className="h-5 w-5 text-[#000080]" />
-      )}
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-emerald-50 p-2 shadow-sm">
+      {attempt < candidates.length ? (
+        <img key={attempt} src={candidates[attempt]} alt="" className="h-full w-full object-contain"
+          loading="lazy" onError={() => setAttempt((n) => n + 1)} />
+      ) : <span className="text-xs font-black text-[#245D45]" aria-hidden="true">{label.trim().split(/\s+/).slice(0, 2).map((word) => word[0]).join("").toUpperCase()}</span>}
     </div>
   );
 }
@@ -172,37 +167,19 @@ export default function ServiceDetails() {
 
   return (
     <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-screen bg-transparent pb-28 relative overflow-x-hidden text-[#14213D]">
-      {/* Header Bar */}
-      <div className="flex items-center gap-3 border-b border-amber-200/80 pb-4 mb-5 relative z-10">
-        <button
-          onClick={() => navigate(-1)}
-          className="w-8 h-8 bg-white border border-amber-200/80 rounded-full flex items-center justify-center text-[#14213D] hover:bg-amber-50 transition-colors shrink-0 shadow-2xs"
-        >
-          <ArrowLeft className="w-4 h-4" />
+      {/* One consistent service header: no duplicated title or implied verification. */}
+      <div className="mb-5 rounded-2xl border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-5 shadow-sm">
+        <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 text-xs font-semibold text-[#245D45]">
+          <ArrowLeft className="h-4 w-4" /> {hi ? "सभी सेवाएँ" : "All services"}
         </button>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-base text-[#14213D] truncate">
-            {hi ? serviceMeta.titleHi : serviceMeta.titleEn}
-          </h3>
-          <p className="text-[10.5px] text-slate-500 font-medium truncate">
-            {hi ? serviceMeta.descHi : serviceMeta.descEn}
-          </p>
-        </div>
-      </div>
-
-      {/* Main Service Card Banner */}
-      <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-5 shadow-2xs mb-5 flex items-center gap-4">
-        <div className="w-13 h-13 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/10 border border-amber-500/20 text-[#D97706]">
-          <IconComponent className="w-6 h-6" />
-        </div>
-        <div>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-[#167C5A] border border-emerald-200/80 rounded-md text-[9px] font-bold uppercase tracking-wider mb-1">
-            <Sparkles className="w-2.5 h-2.5" /> Verified Service Portal
-          </span>
-          <h4 className="font-bold text-sm text-[#14213D] leading-tight">
-            {hi ? serviceMeta.titleHi : serviceMeta.titleEn}
-          </h4>
-          <p className="text-[11.5px] text-slate-500 font-medium mt-0.5">{hi ? serviceMeta.descHi : serviceMeta.descEn}</p>
+        <div className="flex items-center gap-4">
+          <div className="h-16 w-16 shrink-0" aria-hidden="true">
+            {serviceArtFor(serviceMeta.id) ? <ServiceIllustration kind={serviceArtFor(serviceMeta.id)!} className="h-full w-full" /> : <div className="flex h-full w-full items-center justify-center rounded-2xl border border-amber-200 bg-white/70 text-[#167C5A]"><IconComponent className="h-8 w-8" /></div>}
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-xl font-extrabold text-[#243B32]">{hi ? serviceMeta.titleHi : serviceMeta.titleEn}</h1>
+            <p className="mt-1 text-sm leading-relaxed text-slate-600">{hi ? serviceMeta.descHi : serviceMeta.descEn}</p>
+          </div>
         </div>
       </div>
 
@@ -290,7 +267,7 @@ export default function ServiceDetails() {
                               : "text-slate-700 bg-slate-50 border-slate-200"
                           }`}
                         >
-                          {isGov ? (hi ? "आधिकारिक पोर्टल" : "Official Gov") : hi ? "उपयोगी संसाधन" : "Verified Resource"}
+                          {isGov ? (hi ? "आधिकारिक पोर्टल" : "Official Gov") : hi ? "बाहरी संसाधन" : "External Resource"}
                         </span>
                         <h4 className="text-xs font-bold text-[#14213D] truncate">{hi ? link.titleHi : link.title}</h4>
                       </div>
