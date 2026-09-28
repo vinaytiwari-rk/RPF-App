@@ -160,7 +160,7 @@ export default function ServiceDetails() {
         <p className="text-xs text-slate-500 max-w-xs font-medium">This service is no longer available or the URL is incorrect.</p>
         <button
           onClick={() => navigate("/services")}
-          className="mt-4 px-6 py-2.5 bg-[#14213D] text-white rounded-xl text-xs font-bold shadow-md hover:bg-[#0f192e] transition"
+          className="mt-4 px-6 py-2.5 bg-[#167C5A] text-white rounded-xl text-xs font-bold shadow-md hover:bg-[#0f192e] transition"
         >
           Back to Services
         </button>
@@ -248,7 +248,7 @@ export default function ServiceDetails() {
           <div>
             <button
               onClick={() => (isExternalAction ? openExternalLink(actionUrl, navigate) : navigate(actionUrl))}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#14213D] text-white font-bold rounded-xl text-xs shadow-md hover:bg-[#0f192e] transition-transform active:scale-98"
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#167C5A] text-white font-bold rounded-xl text-xs shadow-md hover:bg-[#0f192e] transition-transform active:scale-98"
             >
               <span>{actionLabel}</span>
               {isExternalAction && <ExternalLink className="w-3.5 h-3.5 text-amber-300" />}
