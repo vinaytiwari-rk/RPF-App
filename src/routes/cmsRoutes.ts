@@ -120,10 +120,27 @@ router.get("/api/cms/config", async (req, res) => {
 
 router.post("/api/cms/config", authenticateToken, requireAdmin, async (req, res) => {
   try {
+    // Merge individual CMS sections atomically: editing radio or website links must
+    // not silently erase concurrent changes made in another admin screen.
+    const incoming = req.body;
+    if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) {
+      return res.status(400).json({ error: 'Invalid CMS payload' });
+    }
+    if (incoming.serviceWebsiteLinks !== undefined) {
+      if (!incoming.serviceWebsiteLinks || typeof incoming.serviceWebsiteLinks !== 'object' || Array.isArray(incoming.serviceWebsiteLinks)) {
+        return res.status(400).json({ error: 'Invalid service website links' });
+      }
+      for (const links of Object.values(incoming.serviceWebsiteLinks) as any[]) {
+        if (!Array.isArray(links) || links.some((link: any) => !link || typeof link.title !== 'string' || typeof link.url !== 'string' || !/^https?:\\/\\//i.test(link.url))) {
+          return res.status(400).json({ error: 'Every website needs a name and valid http/https URL' });
+        }
+      }
+    }
     await pool.query(
-      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
-       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" = $1`,
-      [JSON.stringify(req.body)]
+      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1)
+       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" =
+         (COALESCE(NULLIF(settings."founderMessageEn", ''), '{}')::jsonb || $1::jsonb)::text`,
+      [JSON.stringify(incoming)]
     );
     res.json({ success: true, data: req.body });
   } catch (error: any) {
