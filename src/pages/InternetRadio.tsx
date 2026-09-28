@@ -146,7 +146,7 @@ export default function InternetRadio() {
             )}
           </div>
           <h2 className="text-xl font-black leading-tight">{currentStation?.name || 'No station configured'}</h2>
-          <p className="mt-.5 text-[11px] font-medium text-white/60">Live Stream</p>
+          <p className="mt-.5 text-[11px] font-medium text-slate-600">Live Stream</p>
 
           <div className="mt-4 flex items-center gap-4">
             <button
