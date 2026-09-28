@@ -1,12 +1,10 @@
 // src/components/Footer.tsx
-import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
-import InAppWebView from "./InAppWebView";
+import { openExternalLink } from "../utils/browser";
 
 /** Footer social links prefer the live CMS list and fall back safely. */
 export default function Footer() {
   const { socialLinks, cmsConfig } = useApp();
-  const [webview, setWebview] = useState<{ url: string; title?: string; platform?: string } | null>(null);
   const liveLinks = Array.isArray((cmsConfig as any)?.socialLinks) && (cmsConfig as any).socialLinks.length
     ? (cmsConfig as any).socialLinks
     : socialLinks;
@@ -24,5 +22,5 @@ export default function Footer() {
     { key: "youtube", label: "YouTube", platform: "youtube", path: "M23.498 6.186a2.997 2.997 0 0 0-2.108-2.115C19.667 3.6 12 3.6 12 3.6s-7.667 0-9.39.471a2.997 2.997 0 0 0-2.108 2.115C0 7.914 0 12 0 12s0 4.086.502 5.814a2.997 2.997 0 0 0 2.108 2.115C4.333 20.4 12 20.4 12 20.4s7.667 0 9.39-.471a2.997 2.997 0 0 0 2.108-2.115C24 16.086 24 12 24 12s0-4.086-.502-5.814zM9.75 15.02V8.98L15.5 12l-5.75 3.02z" }
   ];
 
-  return <footer className="bg-gray-900 text-white py-6 mt-12"><div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4"><p className="text-sm mb-4 md:mb-0">© {new Date().getFullYear()} RP Foundation. All rights reserved.</p><div className="flex space-x-4">{icons.map((icon) => { const url = getUrl(icon.key); return <button key={icon.key} disabled={!url} onClick={() => url && setWebview({ url, title: icon.label, platform: icon.platform })} aria-label={icon.label} className="hover:opacity-80 transition disabled:opacity-40"><svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d={icon.path} /></svg></button>; })}</div></div>{webview && <InAppWebView url={webview.url} title={webview.title} platform={webview.platform} onClose={() => setWebview(null)} />}</footer>;
+  return <footer className="bg-gray-900 text-white py-6 mt-12"><div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4"><p className="text-sm mb-4 md:mb-0">© {new Date().getFullYear()} RP Foundation. All rights reserved.</p><div className="flex space-x-4">{icons.map((icon) => { const url = getUrl(icon.key); return <button key={icon.key} disabled={!url} onClick={() => { if (url) void openExternalLink(url, undefined, icon.label); }} aria-label={icon.label} className="hover:opacity-80 transition disabled:opacity-40"><svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d={icon.path} /></svg></button>; })}</div></div></footer>;
 }
