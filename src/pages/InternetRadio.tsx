@@ -85,8 +85,11 @@ export default function InternetRadio() {
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => {
         const configured = d?.cms?.internetRadioStations;
-        if (!cancelled && validStations(configured)) {
-          const ordered = [...configured].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        if (cancelled) return;
+        if (Array.isArray(configured)) {
+          // Respect an intentionally empty admin station list rather than silently
+          // restoring bundled stations after the administrator removes them.
+          const ordered = configured.filter((s) => s && typeof s.name === 'string' && typeof s.url === 'string' && /^https?:\/\//i.test(s.url)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
           setStations(ordered);
           setSource('server');
         }
