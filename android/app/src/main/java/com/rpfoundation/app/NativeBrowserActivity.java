@@ -52,7 +52,6 @@ import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 /** Samahit Views: compatibility-first native Android browser. */
 public class NativeBrowserActivity extends AppCompatActivity {
@@ -252,14 +251,40 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 try{filePicker.launch(Intent.createChooser(i,"Choose file"));}catch(Exception e){callback.onReceiveValue(null);fileCallback=null;} return true;
             }
             @Override public void onGeolocationPermissionsShowPrompt(String origin,GeolocationPermissions.Callback callback){
-                boolean ok=ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED;
-                if(ok) callback.invoke(origin,true,false); else new AlertDialog.Builder(NativeBrowserActivity.this).setTitle("Location request").setMessage("Allow this website to use your location?").setPositiveButton("Allow",(d,w)->{pendingGeoCallback=callback;pendingGeoOrigin=origin;permissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION});}).setNegativeButton("Block",(d,w)->callback.invoke(origin,false,false)).show();
+                if(origin==null||!origin.startsWith("https://")){callback.invoke(origin,false,false);return;}
+                new AlertDialog.Builder(NativeBrowserActivity.this).setTitle("Location permission")
+                  .setMessage("Allow "+origin+" to access your location this time?")
+                  .setPositiveButton("Allow",(d,w)->{
+                      boolean granted=ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
+                        || ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED;
+                      if(granted)callback.invoke(origin,true,false);
+                      else{pendingGeoCallback=callback;pendingGeoOrigin=origin;permissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION});}
+                  }).setNegativeButton("Block",(d,w)->callback.invoke(origin,false,false))
+                  .setOnCancelListener(d->callback.invoke(origin,false,false)).show();
             }
             @Override public void onPermissionRequest(PermissionRequest request){
-                boolean cam=false,mic=false; for(String r:request.getResources()){if(PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(r))cam=true;if(PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r))mic=true;}
-                boolean camOk=!cam || ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED;
-                boolean micOk=!mic || ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED;
-                if(camOk&&micOk)request.grant(request.getResources()); else {pendingWebPermission=request;ArrayList<String> p=new ArrayList<>();if(cam)p.add(Manifest.permission.CAMERA);if(mic)p.add(Manifest.permission.RECORD_AUDIO);permissionLauncher.launch(p.toArray(new String[0]));}
+                if(request.getOrigin()==null||!"https".equalsIgnoreCase(request.getOrigin().getScheme())){request.deny();return;}
+                boolean cam=false,mic=false;
+                for(String resource:request.getResources()){
+                    if(PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource))cam=true;
+                    else if(PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource))mic=true;
+                    else{request.deny();return;}
+                }
+                final boolean needsCam=cam,needsMic=mic;
+                new AlertDialog.Builder(NativeBrowserActivity.this).setTitle("Website permission")
+                  .setMessage("Allow "+request.getOrigin().getHost()+" to use "+(cam&&mic?"camera and microphone":cam?"camera":"microphone")+" this time?")
+                  .setPositiveButton("Allow",(d,w)->{
+                      boolean camOk=!needsCam||ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED;
+                      boolean micOk=!needsMic||ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED;
+                      if(camOk&&micOk)request.grant(request.getResources());
+                      else{
+                          pendingWebPermission=request;ArrayList<String> p=new ArrayList<>();
+                          if(needsCam&&!camOk)p.add(Manifest.permission.CAMERA);
+                          if(needsMic&&!micOk)p.add(Manifest.permission.RECORD_AUDIO);
+                          permissionLauncher.launch(p.toArray(new String[0]));
+                      }
+                  }).setNegativeButton("Block",(d,w)->request.deny())
+                  .setOnCancelListener(d->request.deny()).show();
             }
             @Override public boolean onCreateWindow(WebView view,boolean dialog,boolean userGesture,Message resultMsg){openPopup(resultMsg);return true;}
             @Override public void onCloseWindow(WebView window){if(window==popupWebView)closePopup();}
