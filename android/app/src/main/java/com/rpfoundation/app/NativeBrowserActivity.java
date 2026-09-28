@@ -23,6 +23,7 @@ import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowInsets;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.GeolocationPermissions;
@@ -228,7 +229,9 @@ public class NativeBrowserActivity extends AppCompatActivity {
             @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){
                 if(!popup && request != null && request.isForMainFrame()){
                     mainFrameError=true;
-                    showError(error != null && error.getDescription()!=null ? error.getDescription().toString() : "The page could not be loaded.");
+                    String description=error != null && error.getDescription()!=null ? error.getDescription().toString() : "The page could not be loaded.";
+                    if(error!=null && error.getErrorCode()==WebViewClient.ERROR_HOST_LOOKUP)description="Website address could not be found (DNS). Check the URL and internet connection. If other sites open, this domain may be unavailable.\n\n"+description;
+                    showError(description);
                 }
             }
             // HTTP 401/403/404 pages may contain valid login/challenge/content. Never replace them with our own error screen.
@@ -368,7 +371,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private TextView tabsButton;
     private void updateTabLabel(){if(tabsButton!=null)tabsButton.setText("▣ "+tabs.size());}
     private void showSettings(){String[] o={"Auto-hide toolbar: "+(autoHide?"On":"Off"),"Data Saver: "+(dataSaver?"On":"Off"),"Clear browsing data"};new AlertDialog.Builder(this).setTitle("Samahit Views Settings").setItems(o,(d,w)->{if(w==0){autoHide=!autoHide;prefs.edit().putBoolean("autoHide",autoHide).apply();if(autoHide)scheduleHide();}else if(w==1)toggleDataSaver();else new AlertDialog.Builder(this).setMessage("Clear cookies, cache and saved history? This may sign you out of websites.").setPositiveButton("Clear",(a,b)->{clearData();prefs.edit().remove(HISTORY).apply();}).setNegativeButton("Cancel",null).show();}).show();}
-    private void showMenu(){String[] a={"Refresh","Zoom in","Zoom out","Reset zoom","Find in page",desktopMode?"Mobile site":"Desktop site",dataSaver?"Disable Data Saver":"Enable Data Saver","Share","Copy link","Close popup","Add bookmark","Bookmarks","History","New tab","Tabs","Settings"};new AlertDialog.Builder(this).setItems(a,(d,w)->{if(w==0)activeWebView().reload();else if(w==1)zoomIn();else if(w==2)zoomOut();else if(w==3)resetZoom();else if(w==4)findInPage();else if(w==5)toggleDesktopMode();else if(w==6)toggleDataSaver();else if(w==7)share();else if(w==8)copyUrl();else if(w==9)closePopup();else if(w==10){String u=activeWebView().getUrl();if(isHttpUrl(u)){remember(BOOKMARKS,u);Toast.makeText(this,"Bookmarked",Toast.LENGTH_SHORT).show();}}else if(w==11)showSaved(BOOKMARKS);else if(w==12)showSaved(HISTORY);else if(w==13)newTab("https://www.google.com");else if(w==14)showTabs();else showSettings();}).show();}
+    private void showMenu(){String[] a={"Refresh","Zoom in","Zoom out","Reset zoom","Find in page",desktopMode?"Mobile site":"Desktop site",dataSaver?"Disable Data Saver":"Enable Data Saver","Share","Copy link","Close popup","Add bookmark","Bookmarks","History","New tab","Tabs","Settings"};new AlertDialog.Builder(this).setItems(a,(d,w)->{if(w==0)activeWebView().reload();else if(w==1)zoomIn();else if(w==2)zoomOut();else if(w==3)resetZoom();else if(w==4)findInPage();else if(w==5)toggleDesktopMode();else if(w==6)toggleDataSaver();else if(w==7)share();else if(w==8)copyUrl();else if(w==9)closePopup();else if(w==10)closePopup();else if(w==11){String u=activeWebView().getUrl();if(isHttpUrl(u)){remember(BOOKMARKS,u);Toast.makeText(this,"Bookmarked",Toast.LENGTH_SHORT).show();}}else if(w==12)showSaved(BOOKMARKS);else if(w==13)showSaved(HISTORY);else if(w==14)newTab("https://www.google.com");else if(w==15)showTabs();else showSettings();}).show();}
 
     private TextView button(String text){TextView v=new TextView(this);v.setText(text);v.setTextColor(NAVY);v.setTextSize(19);v.setGravity(Gravity.CENTER);v.setPadding(dp(10),dp(8),dp(10),dp(8));return v;}
     private void buildChrome(){
@@ -389,8 +392,16 @@ public class NativeBrowserActivity extends AppCompatActivity {
         getWindow().setStatusBarColor(IVORY);getWindow().setNavigationBarColor(IVORY);root=new FrameLayout(this);root.setBackgroundColor(Color.WHITE);webContainer=new FrameLayout(this);root.addView(webContainer,new FrameLayout.LayoutParams(-1,-1));rebuildMainWebView(null);
         gestureDetector=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){@Override public boolean onDoubleTap(MotionEvent e){if(topBar.getVisibility()==View.VISIBLE)hideControls();else{showControls();scheduleHide();}return false;}});webContainer.setOnTouchListener((v,e)->{gestureDetector.onTouchEvent(e);return false;});
         progressBar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);progressBar.setMax(100);root.addView(progressBar,new FrameLayout.LayoutParams(-1,dp(3),Gravity.TOP));
-        errorView=new LinearLayout(this);errorView.setOrientation(LinearLayout.VERTICAL);errorView.setGravity(Gravity.CENTER);errorView.setPadding(dp(28),dp(28),dp(28),dp(28));errorView.setBackgroundColor(IVORY);TextView title=new TextView(this);title.setText("This page could not be loaded");title.setTextColor(NAVY);title.setTextSize(19);title.setGravity(Gravity.CENTER);errorView.addView(title);TextView detail=new TextView(this);detail.setTag("detail");detail.setTextColor(Color.DKGRAY);detail.setTextSize(13);detail.setGravity(Gravity.CENTER);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(12);errorView.addView(detail,p);TextView retry=button("Try again");retry.setTextColor(Color.WHITE);retry.setBackgroundColor(NAVY);retry.setOnClickListener(v->activeWebView().reload());LinearLayout.LayoutParams rp=new LinearLayout.LayoutParams(-2,-2);rp.topMargin=dp(20);errorView.addView(retry,rp);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
-        buildChrome();setContentView(root);String first=getIntent().getStringExtra("url");tabs.add(isHttpUrl(first)?first:"https://www.google.com");if(state!=null)webView.restoreState(state);else loadInApp(tabs.get(0));
+        errorView=new LinearLayout(this);errorView.setOrientation(LinearLayout.VERTICAL);errorView.setGravity(Gravity.CENTER);errorView.setPadding(dp(28),dp(28),dp(28),dp(28));errorView.setBackgroundColor(IVORY);TextView title=new TextView(this);title.setText("This page could not be loaded");title.setTextColor(NAVY);title.setTextSize(19);title.setGravity(Gravity.CENTER);errorView.addView(title);TextView detail=new TextView(this);detail.setTag("detail");detail.setTextColor(Color.DKGRAY);detail.setTextSize(13);detail.setGravity(Gravity.CENTER);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(12);errorView.addView(detail,p);TextView retry=button("Try again");retry.setTextColor(Color.WHITE);retry.setBackgroundColor(NAVY);retry.setOnClickListener(v->activeWebView().reload());LinearLayout.LayoutParams rp=new LinearLayout.LayoutParams(-2,-2);rp.topMargin=dp(20);errorView.addView(retry,rp);
+        TextView external=button("Open in Chrome / another browser");external.setOnClickListener(v->{String u=activeWebView().getUrl();if(!isHttpUrl(u))u=lastStableUrl;if(isHttpUrl(u)){try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(u)).addCategory(Intent.CATEGORY_BROWSABLE));}catch(Exception e){Toast.makeText(this,"No external browser available",Toast.LENGTH_SHORT).show();}}});LinearLayout.LayoutParams ep=new LinearLayout.LayoutParams(-2,-2);ep.topMargin=dp(12);errorView.addView(external,ep);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
+        buildChrome();
+        // Respect three-button and gesture navigation bars, including edge-to-edge devices.
+        root.setOnApplyWindowInsetsListener((view,insets)->{
+            int bottom=insets.getSystemWindowInsetBottom();
+            root.setPadding(0,0,0,bottom);
+            return insets;
+        });
+        setContentView(root);String first=getIntent().getStringExtra("url");tabs.add(isHttpUrl(first)?first:"https://www.google.com");if(state!=null)webView.restoreState(state);else loadInApp(tabs.get(0));
     }
     @Override public void onBackPressed(){if(popupWebView!=null){if(popupWebView.canGoBack())popupWebView.goBack();else closePopup();}else if(webView!=null&&webView.canGoBack())webView.goBack();else super.onBackPressed();}
     @Override protected void onSaveInstanceState(Bundle out){if(webView!=null)webView.saveState(out);super.onSaveInstanceState(out);}
