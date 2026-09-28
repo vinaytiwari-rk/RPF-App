@@ -86,7 +86,7 @@ export default function FactCheck() {
       <div className="mx-auto w-full max-w-3xl px-4 py-4 sm:px-6 sm:py-5 space-y-5">
         
         {/* Hero Banner */}
-        <section className="relative overflow-hidden rounded-[24px] bg-[#14213D] p-5 sm:p-7 text-white shadow-md">
+        <section className="relative overflow-hidden rounded-[24px] border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-5 sm:p-7 text-[#243B32] shadow-sm">
           <div className="relative z-10">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[#167C5A]">
@@ -96,7 +96,7 @@ export default function FactCheck() {
                 <div className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">
                   {hi ? "सत्यापित सूचना" : "Verified Information"}
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">{hi ? "फैक्ट चेक हब" : "Fact Check Hub"}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#243B32]">{hi ? "फैक्ट चेक हब" : "Fact Check Hub"}</h1>
               </div>
             </div>
             <p className="mt-3 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-200 font-medium">
