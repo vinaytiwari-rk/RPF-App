@@ -99,7 +99,7 @@ export default function FactCheck() {
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#243B32]">{hi ? "फैक्ट चेक हब" : "Fact Check Hub"}</h1>
               </div>
             </div>
-            <p className="mt-3 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-200 font-medium">
+            <p className="mt-3 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
               {hi
                 ? "व्हाट्सएप, सोशल मीडिया और समाचारों पर फैलने वाले दावों, वायरल वीडियो और संदेशों की प्रामाणिकता जांचें।"
                 : "Verify claims, viral messages and news items circulating on social media and messaging platforms."}
