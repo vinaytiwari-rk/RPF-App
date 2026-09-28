@@ -207,13 +207,15 @@ export const CmsSettings = () => {
     setDescInput('');
   };
 
+  if (loadError || (!loading && !cms)) {
+    return <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800">
+      <h3 className="font-bold">Admin CMS could not load</h3>
+      <p className="mt-2 text-sm">{loadError || 'CMS response was empty.'}</p>
+      <button className="mt-3 rounded-xl bg-[#167C5A] px-4 py-2 text-sm font-bold text-white" onClick={() => window.location.reload()}>Retry</button>
+    </div>;
+  }
   if (loading || !cms) {
-    return (
-      <div className="space-y-4 p-6">
-        <Skeleton className="h-10 w-1/3" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
+    return <div className="space-y-4 p-6"><Skeleton className="h-10 w-1/3" /><Skeleton className="h-64 w-full" /></div>;
   }
 
   return (
