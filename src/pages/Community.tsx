@@ -138,7 +138,7 @@ export default function Community() {
             onClick={() => setActiveTab("stories")}
             className={`flex-1 py-2.5 rounded-xl transition-all ${
               activeTab === "stories"
-                ? "bg-[#14213D] text-white shadow-xs"
+                ? "bg-[#167C5A] text-white shadow-xs"
                 : "text-slate-600 hover:text-[#14213D]"
             }`}
           >
@@ -148,7 +148,7 @@ export default function Community() {
             onClick={() => setActiveTab("volunteers")}
             className={`flex-1 py-2.5 rounded-xl transition-all ${
               activeTab === "volunteers"
-                ? "bg-[#14213D] text-white shadow-xs"
+                ? "bg-[#167C5A] text-white shadow-xs"
                 : "text-slate-600 hover:text-[#14213D]"
             }`}
           >
@@ -158,7 +158,7 @@ export default function Community() {
             onClick={() => setActiveTab("chat")}
             className={`flex-1 py-2.5 rounded-xl transition-all ${
               activeTab === "chat"
-                ? "bg-[#14213D] text-white shadow-xs"
+                ? "bg-[#167C5A] text-white shadow-xs"
                 : "text-slate-600 hover:text-[#14213D]"
             }`}
           >
@@ -221,7 +221,7 @@ export default function Community() {
                   className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs flex items-center justify-between gap-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#14213D] text-amber-400 font-bold text-sm">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-[#167C5A] font-bold text-sm">
                       {vol.name[0]}
                     </div>
                     <div>
