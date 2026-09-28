@@ -151,7 +151,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                   clear();
                   setMode('login');
                 }}
-                className="w-full py-3.5 rounded-xl bg-[#000080] text-white text-xs font-black uppercase flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-xl bg-[#167C5A] text-white text-xs font-black uppercase flex items-center justify-center gap-2"
               >
                 <KeyRound className="w-4 h-4" />
                 Login with User ID
@@ -230,7 +230,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 </p>
                 <button
                   disabled={loading}
-                  className="w-full py-3.5 rounded-xl bg-[#000080] text-white text-xs font-black uppercase flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-xl bg-[#167C5A] text-white text-xs font-black uppercase flex items-center justify-center gap-2"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Log In'}
                 </button>
