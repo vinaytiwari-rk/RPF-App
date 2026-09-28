@@ -188,11 +188,11 @@ export default function VisionGoalsPage() {
         </section>
 
         {/* Footer Call to Action */}
-        <section className="rounded-[24px] border border-slate-200/80 bg-[#14213D] p-5 sm:p-6 text-white text-center space-y-3">
-          <h3 className="text-lg font-bold text-white">
+        <section className="rounded-[24px] border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-5 sm:p-6 text-[#243B32] text-center space-y-3">
+          <h3 className="text-lg font-bold text-[#243B32]">
             {hi ? "संस्थापक के विचारों को जानें" : "Connect With Our Leadership"}
           </h3>
-          <p className="text-xs leading-relaxed text-slate-300 font-medium max-w-lg mx-auto">
+          <p className="text-xs leading-relaxed text-slate-600 font-medium max-w-lg mx-auto">
             {hi
               ? "संस्थापक रोहित पंडित जी के विज़न और आरपी फाउंडेशन के स्वयंसेवकों की यात्रा के बारे में पढ़ें।"
               : "Discover the personal journey, values, and vision of Founder Rohit Pandit."}
