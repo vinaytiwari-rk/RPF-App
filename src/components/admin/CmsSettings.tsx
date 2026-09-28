@@ -280,8 +280,6 @@ export const CmsSettings = () => {
         >
           <ShieldCheck className="h-4 w-4" /> Fact Check Sources ({factChecks.length})
         </button>
-      </div>
-
         <button onClick={() => setActiveTab('links')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition ${activeTab === 'links' ? 'bg-[#167C5A] text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600'}`}>
           <ExternalLink className="h-4 w-4" /> Service Website Links
