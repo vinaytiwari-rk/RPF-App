@@ -130,7 +130,7 @@ export default function InternetRadio() {
         </div>
 
         {/* Player Card */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#000080] via-[#001060] to-[#000040] p-5 text-white shadow-xl">
+        <div className="relative overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-5 text-[#243B32] shadow-sm">
           <div className="flex items-center justify-between">
             <p className="mb-1 text-[9px] font-black uppercase tracking-[.18em] text-[#FF9933]">
               {hi ? '▶ अभी बज रहा है' : '▶ Now Playing'}
@@ -138,7 +138,7 @@ export default function InternetRadio() {
             {activeRadio && (
               <button
                 onClick={stopRadio}
-                className="flex items-center gap-1 text-[10px] font-bold text-rose-300 hover:text-white bg-white/10 px-2 py-0.5 rounded-full"
+                className="flex items-center gap-1 text-[10px] font-bold text-rose-700 hover:text-rose-900 bg-white/70 px-2 py-0.5 rounded-full"
               >
                 <X className="h-3 w-3" />
                 {hi ? 'बंद करें' : 'Stop Player'}
