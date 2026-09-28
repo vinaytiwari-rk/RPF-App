@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import {
   Play,
   Instagram,
@@ -291,8 +292,8 @@ export default function ImpactPage() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${domain.color} shadow-2xs shrink-0`}>
-                          <Icon className="w-4.5 h-4.5" />
+                        <div className="h-[66px] w-[66px] shrink-0" aria-hidden="true">
+                          {serviceArtFor(domain.id) ? <ServiceIllustration kind={serviceArtFor(domain.id)!} className="h-full w-full" /> : <div className={`h-full w-full rounded-2xl flex items-center justify-center border ${domain.color}`}><Icon className="h-7 w-7" /></div>}
                         </div>
                         <div>
                           <h3 className="text-sm font-black text-[#245D45] line-clamp-1">
