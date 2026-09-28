@@ -20,7 +20,7 @@ type OrientationEventConstructor = typeof DeviceOrientationEvent & {
 };
 
 const card = "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm";
-const button = "rounded-xl bg-[#000080] px-4 py-2.5 text-sm font-bold text-white active:scale-95 transition";
+const button = "rounded-xl bg-[#167C5A] px-4 py-2.5 text-sm font-bold text-white active:scale-95 transition";
 
 function directionForHeading(value: number): string {
   if (value < 22.5 || value >= 337.5) return "N";
