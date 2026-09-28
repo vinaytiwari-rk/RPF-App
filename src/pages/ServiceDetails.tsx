@@ -56,7 +56,7 @@ export default function ServiceDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { lang } = useOutletContext<{ lang: string }>();
-  const { servicesList, isLoadingServices } = useApp();
+  const { servicesList, isLoadingServices, cmsConfig } = useApp();
   const [contentData, setContentData] = useState<any>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(true);
 
@@ -136,7 +136,12 @@ export default function ServiceDetails() {
   const resources = Array.isArray(contentData?.resources) ? contentData.resources : [];
 
   // Fetch all related official government links for this service page
-  const govLinks: GovLink[] = useMemo(() => (id ? getGovLinksForService(id) : []), [id]);
+  const govLinks: GovLink[] = useMemo(() => {
+    if (!id) return [];
+    const overrides = (cmsConfig as any)?.serviceWebsiteLinks;
+    if (overrides && Object.prototype.hasOwnProperty.call(overrides, id) && Array.isArray(overrides[id])) return overrides[id];
+    return getGovLinksForService(id);
+  }, [id, cmsConfig]);
 
   if (isLoadingServices || isLoadingContent)
     return (
@@ -239,13 +244,13 @@ export default function ServiceDetails() {
             <div className="flex items-center gap-2 border-b border-amber-200/80 pb-2.5">
               <Landmark className="h-4 w-4 text-[#D97706]" />
               <h5 className="text-[10.5px] font-bold uppercase tracking-widest text-[#14213D]">
-                {hi ? "आधिकारिक सरकारी पोर्टल एवं वेबसाइटें" : "Official Government Portals & Websites"}
+                {hi ? "संबंधित वेबसाइटें और संसाधन" : "Related Websites & Resources"}
               </h5>
             </div>
             <p className="text-[11.5px] font-medium text-slate-600">
               {hi
-                ? "इस सेवा से संबंधित आधिकारिक भारत सरकार और राज्य सरकार की वेबसाइटें:"
-                : "Official Government of India and State Portals related to this service:"}
+                ? "इस सेवा से संबंधित वेबसाइटें और संसाधन:"
+                : "Websites and resources related to this service:"}
             </p>
 
             <div className="space-y-2.5 pt-1">
