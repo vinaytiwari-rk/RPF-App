@@ -81,7 +81,7 @@ export default function InternetRadio() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/cms', { cache: 'no-store' })
+    const loadStations = () => fetch('/api/cms', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => {
         const configured = d?.cms?.internetRadioStations;
@@ -92,8 +92,14 @@ export default function InternetRadio() {
         }
       })
       .catch(() => undefined);
+    void loadStations();
+    const onFocus = () => { if (!document.hidden) void loadStations(); };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
     return () => {
       cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
     };
   }, []);
 
