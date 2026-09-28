@@ -286,7 +286,7 @@ export default function ServicesManager() {
               onClick={() => setSelectedCategory(cat)}
               className={`whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-black transition ${
                 selectedCategory === cat
-                  ? "bg-[#000080] text-white shadow-sm"
+                  ? "bg-[#167C5A] text-white shadow-sm"
                   : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100"
               }`}
             >
