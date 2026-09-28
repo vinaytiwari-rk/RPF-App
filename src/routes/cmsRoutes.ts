@@ -131,7 +131,7 @@ router.post("/api/cms/config", authenticateToken, requireAdmin, async (req, res)
         return res.status(400).json({ error: 'Invalid service website links' });
       }
       for (const links of Object.values(incoming.serviceWebsiteLinks) as any[]) {
-        if (!Array.isArray(links) || links.some((link: any) => { try { return !link || typeof link.title !== 'string' || !['http:', 'https:'].includes(new URL(link.url).protocol); } catch { return true; } })) {
+        if (!Array.isArray(links) || links.some((link: any) => { if (!link || typeof link.title !== 'string' || typeof link.url !== 'string') return true; try { return !['http:', 'https:'].includes(new URL(link.url).protocol); } catch { return true; } })) {
           return res.status(400).json({ error: 'Every website needs a name and valid http/https URL' });
         }
       }
