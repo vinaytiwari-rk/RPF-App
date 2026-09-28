@@ -76,7 +76,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     const onError = () => {
       setIsRadioPlaying(false);
       setIsRadioLoading(false);
-      setRadioError('Playback error');
+      setRadioError('Station stream could not be loaded. Try another station or check your connection.');
     };
 
     audio.addEventListener('play', onPlay);
@@ -162,11 +162,22 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
             }
           });
           hls.on(Hls.Events.ERROR, (_: any, data: any) => {
-            if (data.fatal) {
-              setRadioError('Stream unavailable');
-              setIsRadioLoading(false);
-              setIsRadioPlaying(false);
+            if (!data.fatal) return;
+            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+              hls.startLoad();
+              setRadioError('Radio connection interrupted. Retrying stream…');
+              return;
             }
+            if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+              hls.recoverMediaError();
+              setRadioError('Recovering radio playback…');
+              return;
+            }
+            hls.destroy();
+            hlsRef.current = null;
+            setRadioError('This station stream is unavailable. Please try another station.');
+            setIsRadioLoading(false);
+            setIsRadioPlaying(false);
           });
           return;
         } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
@@ -181,7 +192,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
       await audio.play();
       setIsRadioPlaying(true);
     } catch {
-      setRadioError('Could not start stream');
+      setRadioError('Could not start this stream. Please try another station or check your connection.');
     } finally {
       if (!hlsRef.current) {
         setIsRadioLoading(false);
