@@ -192,6 +192,11 @@ export default function InternetRadio() {
             </div>
           </div>
 
+          {stationLoadError && (
+            <div role="status" className="mt-3 rounded-xl bg-amber-100 px-3 py-2 text-xs font-semibold text-amber-950">
+              {stationLoadError}
+            </div>
+          )}
           {radioError && (
             <div className="mt-3 flex items-center gap-2 rounded-xl bg-red-500/20 px-3 py-2 text-[11px] font-bold text-red-200">
               <WifiOff className="h-3.5 w-3.5" />
