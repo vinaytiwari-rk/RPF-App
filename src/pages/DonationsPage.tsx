@@ -282,7 +282,7 @@ export default function DonationsPage() {
 
               <button
                 onClick={() => window.print()}
-                className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#14213D] py-2.5 text-xs font-bold text-white shadow-sm"
+                className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#167C5A] py-2.5 text-xs font-bold text-white shadow-sm"
               >
                 <Download className="h-4 w-4" /> {hi ? "रसीद प्रिंट / डाउनलोड करें" : "Print / Download Receipt"}
               </button>
