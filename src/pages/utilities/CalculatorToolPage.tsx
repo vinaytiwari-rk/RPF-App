@@ -34,7 +34,7 @@ export default function CalculatorToolPage() {
         </div>
         <button
           onClick={() => openExternalLink(url, n)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#000080] px-5 py-3 font-black text-white"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#167C5A] px-5 py-3 font-black text-white"
         >
           <ExternalLink className="h-4 w-4" />
           Open Calculator
