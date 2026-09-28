@@ -1,3 +1,4 @@
+import ServiceIllustration from "../components/ServiceIllustration";
 import React, { useMemo, useState } from "react";
 import { HeartPulse, Search, ExternalLink, Stethoscope, ShieldCheck, Activity, FileHeart, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -32,15 +33,13 @@ export default function HealthCare() {
       <section className="relative overflow-hidden rounded-[24px] border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-5 sm:p-6 text-[#243B32] shadow-sm">
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-2.5 text-[#DC2626]">
-              <HeartPulse className="h-6 w-6" />
-            </div>
+            <ServiceIllustration kind="health" className="h-16 w-16 shrink-0" />
             <div>
               <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[#D97706]">
                 <Sparkles className="h-3 w-3" />
                 RP Foundation Care
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-[#243B32]">Healthcare Portal</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight text-[#243B32]">Healthcare Portal</h1>
             </div>
           </div>
           <p className="mt-3 max-w-sm text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
