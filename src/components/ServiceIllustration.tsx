@@ -1,7 +1,7 @@
 import React from "react";
 
 /** Lightweight illustrated service artwork; navigation icons deliberately stay unchanged. */
-export type ServiceArt = "sanitation" | "water" | "jobs" | "pink-erickshaw" | "health" | "jan-seva-card" | "grievance" | "volunteer" | "blood" | "radio" | "epaper" | "directory" | "university" | "fact-check" | "disaster" | "youth" | "nation" | "women-safety" | "live-tv";
+export type ServiceArt = "sanitation" | "water" | "jobs" | "pink-erickshaw" | "health" | "jan-seva-card" | "grievance" | "volunteer" | "blood" | "radio" | "epaper" | "directory" | "university" | "fact-check" | "disaster" | "youth" | "nation" | "women-safety" | "live-tv" | "donations" | "scholarships" | "food" | "medicine" | "education" | "seniors" | "animals" | "environment" | "culture" | "farmer" | "schemes" | "skills" | "crowdfunding" | "sos";
 export function serviceArtFor(value: string): ServiceArt | null {
   const s = value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   if (/internet-radio|^radio$/.test(s)) return "radio";
@@ -14,6 +14,20 @@ export function serviceArtFor(value: string): ServiceArt | null {
   if (/nation/.test(s)) return "nation";
   if (/women-safety/.test(s)) return "women-safety";
   if (/live-tv/.test(s)) return "live-tv";
+  if (/donat|charity/.test(s)) return "donations";
+  if (/scholarship/.test(s)) return "scholarships";
+  if (/food|ration/.test(s)) return "food";
+  if (/medicine|pharmacy/.test(s)) return "medicine";
+  if (/education|school/.test(s)) return "education";
+  if (/senior|elder/.test(s)) return "seniors";
+  if (/animal|pet/.test(s)) return "animals";
+  if (/environment|tree|plantation/.test(s)) return "environment";
+  if (/culture|religious/.test(s)) return "culture";
+  if (/farmer|agriculture/.test(s)) return "farmer";
+  if (/scheme|government/.test(s)) return "schemes";
+  if (/skill|training/.test(s)) return "skills";
+  if (/crowdfund/.test(s)) return "crowdfunding";
+  if (/^sos$|emergency-panic/.test(s)) return "sos";
   if (/sanitation|clean-environment|cleanliness/.test(s)) return "sanitation";
   if (/water/.test(s)) return "water";
   if (/pink|rickshaw|women-empowerment/.test(s)) return "pink-erickshaw";
@@ -33,7 +47,21 @@ export default function ServiceIllustration({kind, className = "h-16 w-16"}: {ki
     volunteer:["#E1F5E9","#A0DDB6"],blood:["#FFE6E7","#F1A0A6"],
     radio:["#E0F5EA","#7ACCA5"],epaper:["#E9F4FF","#8DBBDD"],directory:["#FFF0D9","#E3B575"],university:["#EAF0FC","#99AFD7"],
     "fact-check":["#E4F7EE","#86D0AD"],disaster:["#FFF0DB","#E9BB76"],youth:["#E6F6F1","#86CDB9"],nation:["#FFF0D9","#E9BB76"],
-    "women-safety":["#FFE8EC","#ECA5B7"],"live-tv":["#E9F0FC","#A6B6DE"]
+    "women-safety":["#FFE8EC","#ECA5B7"],"live-tv":["#E9F0FC","#A6B6DE"],
+    "donations":["#E4F5EC","#8CCFB0"],
+    "scholarships":["#FFF1DA","#E3BA7D"],
+    "food":["#FFF1DC","#DDA96B"],
+    "medicine":["#FFE8E8","#E9A0A0"],
+    "education":["#E6F1FF","#A3C0DF"],
+    "seniors":["#E4F5EC","#8CCFB0"],
+    "animals":["#FFF1DA","#E3BA7D"],
+    "environment":["#FFF1DC","#DDA96B"],
+    "culture":["#FFE8E8","#E9A0A0"],
+    "farmer":["#E6F1FF","#A3C0DF"],
+    "schemes":["#E4F5EC","#8CCFB0"],
+    "skills":["#FFF1DA","#E3BA7D"],
+    "crowdfunding":["#FFF1DC","#DDA96B"],
+    "sos":["#FFE8E8","#E9A0A0"]
   };
   const [light, shade] = palette[kind];
   return <svg className={className} viewBox="0 0 100 100" role="img" aria-label={kind.replaceAll("-"," ")} xmlns="http://www.w3.org/2000/svg">
@@ -63,6 +91,20 @@ export default function ServiceIllustration({kind, className = "h-16 w-16"}: {ki
     {kind==="nation" && <><path d="M28 82V23" stroke="#98734E" strokeWidth="5" strokeLinecap="round"/><path d="M31 25Q51 15 76 27V62Q53 52 31 61Z" fill="#fff"/><path d="M31 25Q53 15 76 27V39Q53 28 31 38Z" fill="#F1A94B"/><path d="M31 49Q53 39 76 51V62Q53 52 31 61Z" fill="#4AA679"/><circle cx="54" cy="44" r="6" fill="none" stroke="#557EA3" strokeWidth="2"/><path d="M15 82H44" stroke="#98734E" strokeWidth="5" strokeLinecap="round"/></>}
     {kind==="women-safety" && <><path d="M50 15L78 26V48Q76 69 50 84Q24 69 22 48V26Z" fill="#E58FA9" stroke="#C55E7D" strokeWidth="3"/><circle cx="50" cy="43" r="10" fill="#F9D6B6"/><path d="M39 43Q36 28 50 30Q63 30 61 43L55 37L43 42Z" fill="#593F48"/><path d="M34 68Q35 52 50 52Q65 52 66 68" fill="#FFF1F3"/><path d="M45 64L50 69L58 59" fill="none" stroke="#B7496B" strokeWidth="3"/></>}
     {kind==="live-tv" && <><rect x="15" y="29" width="70" height="48" rx="8" fill="#516D9E"/><rect x="22" y="36" width="56" height="32" rx="4" fill="#C4E0F0"/><path d="M45 42L61 52L45 62Z" fill="#D97706"/><path d="M35 22L50 30L65 22" fill="none" stroke="#516D9E" strokeWidth="3"/><path d="M39 80H61" stroke="#516D9E" strokeWidth="4" strokeLinecap="round"/></>}
+    {kind==="donations" && <><path d="M15 55Q33 39 49 55L62 47Q71 43 77 50L87 60Q71 82 47 81L15 66Z" fill="#F0C393"/><path d="M21 56L44 65L62 59" fill="none" stroke="#C58D60" strokeWidth="3"/><path d="M50 27Q58 15 67 27Q76 15 84 27Q88 38 67 51Q46 38 50 27Z" fill="#D85C6B"/></>}
+    {kind==="scholarships" && <><path d="M17 42L50 24L83 42L50 60Z" fill="#567EA8"/><path d="M29 53V70Q50 84 71 70V53" fill="#8CB3D2"/><path d="M82 42V69" stroke="#D5A35C" strokeWidth="4"/><rect x="32" y="74" width="36" height="9" rx="3" fill="#E9B66A"/></>}
+    {kind==="food" && <><path d="M23 45Q24 22 50 22Q76 22 77 45Z" fill="#D8A36A"/><path d="M19 48H81L74 77H26Z" fill="#E8BB7C"/><path d="M28 49Q35 37 43 50Q51 34 60 49Q69 39 75 50" fill="#75AE68"/><path d="M34 63H66" stroke="#B07A48" strokeWidth="4"/></>}
+    {kind==="medicine" && <><rect x="23" y="28" width="55" height="49" rx="7" fill="#FFF" stroke="#D99999" strokeWidth="3"/><path d="M39 26V18H62V26" stroke="#D99999" strokeWidth="6"/><path d="M45 39H57V48H66V60H57V69H45V60H36V48H45Z" fill="#E15C68"/></>}
+    {kind==="education" && <><path d="M16 32Q33 22 50 34Q67 22 84 32V75Q67 66 50 78Q33 66 16 75Z" fill="#477EAB"/><path d="M21 36Q36 28 48 39V71Q34 63 21 69ZM52 39Q66 28 79 36V69Q66 63 52 71Z" fill="#FFF"/><path d="M28 47H41M59 47H72" stroke="#B0C7D7" strokeWidth="3"/></>}
+    {kind==="seniors" && <><circle cx="44" cy="29" r="12" fill="#E9B58F"/><path d="M22 79V58Q24 44 44 44Q64 44 65 58V79Z" fill="#659C8A"/><path d="M54 25Q59 12 67 23" stroke="#E0E0D8" strokeWidth="6" fill="none"/><path d="M71 49V80M66 51H76" stroke="#987A52" strokeWidth="5" strokeLinecap="round"/></>}
+    {kind==="animals" && <><circle cx="50" cy="60" r="19" fill="#C78B60"/><circle cx="28" cy="35" r="9" fill="#D5A074"/><circle cx="45" cy="27" r="9" fill="#D5A074"/><circle cx="62" cy="27" r="9" fill="#D5A074"/><circle cx="79" cy="38" r="9" fill="#D5A074"/><path d="M40 59Q50 49 60 59" stroke="#FFF" strokeWidth="4" fill="none"/></>}
+    {kind==="environment" && <><path d="M50 80V43" stroke="#8B673F" strokeWidth="7"/><path d="M49 16Q15 24 27 53Q39 69 50 48Q64 67 76 49Q87 25 49 16Z" fill="#4BA477"/><path d="M50 46L34 35M50 42L65 30" stroke="#B4E1B9" strokeWidth="3"/><path d="M18 82Q50 70 82 82" fill="none" stroke="#A2C18B" strokeWidth="6"/></>}
+    {kind==="culture" && <><path d="M17 41L50 19L83 41Z" fill="#C99A5A"/><rect x="24" y="42" width="52" height="34" fill="#F4DDB1"/><path d="M33 44V72M50 44V72M67 44V72" stroke="#A87744" strokeWidth="7"/><path d="M19 79H81" stroke="#A87744" strokeWidth="7"/><circle cx="50" cy="32" r="5" fill="#EAD078"/></>}
+    {kind==="farmer" && <><path d="M19 82Q50 58 81 82" fill="#8FBC74"/><path d="M49 76V42" stroke="#649A58" strokeWidth="4"/><path d="M49 54Q27 49 31 30Q49 33 49 54ZM50 43Q53 21 72 23Q71 42 50 43Z" fill="#4CA36C"/><circle cx="25" cy="25" r="9" fill="#E9BB68"/></>}
+    {kind==="schemes" && <><rect x="22" y="21" width="56" height="62" rx="5" fill="#FFF" stroke="#A9C1A9" strokeWidth="3"/><path d="M33 35H67M33 45H67M33 55H51" stroke="#92B19C" strokeWidth="4" strokeLinecap="round"/><circle cx="62" cy="66" r="12" fill="#D9AE67"/><path d="M56 66L61 71L69 61" fill="none" stroke="#FFF" strokeWidth="3"/></>}
+    {kind==="skills" && <><circle cx="35" cy="29" r="11" fill="#F1C19D"/><path d="M16 79V58Q18 44 35 44Q52 44 54 58V79Z" fill="#5B9E8A"/><path d="M62 28L77 19L87 35L72 45Z" fill="#D4A75D"/><path d="M70 41L51 61" stroke="#8B6749" strokeWidth="5"/></>}
+    {kind==="crowdfunding" && <><circle cx="32" cy="33" r="11" fill="#F1C19D"/><circle cx="68" cy="33" r="11" fill="#DDA67F"/><path d="M13 79Q14 48 32 48Q50 48 50 79ZM50 79Q50 48 68 48Q86 48 87 79Z" fill="#64AB8D"/><circle cx="50" cy="57" r="13" fill="#E4B864"/><path d="M50 48V66M44 52H55M44 61H55" stroke="#FFF" strokeWidth="3"/></>}
+    {kind==="sos" && <><path d="M50 15L79 28V50Q76 72 50 85Q24 72 21 50V28Z" fill="#E77A74"/><path d="M45 32H55V51H45ZM45 58H55V68H45Z" fill="#FFF"/></>}
     {kind==="blood" && <><path d="M50 14C41 31 23 46 23 62A27 27 0 0 0 77 62C77 46 59 31 50 14Z" fill="#D94E57"/><path d="M50 30C45 42 35 52 35 63" fill="none" stroke="#F6B3B6" strokeWidth="6" strokeLinecap="round"/><path d="M48 50H56V58H64V66H56V74H48V66H40V58H48Z" fill="#fff"/></>}
     </g>
   </svg>;
