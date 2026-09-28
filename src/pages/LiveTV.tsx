@@ -194,13 +194,13 @@ export default function LiveTV() {
         /* Main Channels Directory View */
         <div className="mx-auto max-w-4xl px-4 py-5 space-y-4 text-[#14213D]">
           {/* Header Card */}
-          <div className="bg-[#14213D] rounded-[24px] p-5 sm:p-6 text-white shadow-md relative overflow-hidden space-y-2">
+          <div className="border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] rounded-[24px] p-5 sm:p-6 text-[#243B32] shadow-sm relative overflow-hidden space-y-2">
             <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-xs border border-white/20 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 backdrop-blur-xs border border-amber-200 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#B36A16]">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 {hi ? "लाइव न्यूज़ एवं ब्रॉडकास्ट" : "Live News & Broadcast"}
               </div>
-              <span className="text-[10px] font-bold bg-white/10 px-2.5 py-0.5 rounded-md border border-white/20 text-slate-200">
+              <span className="text-[10px] font-bold bg-white px-2.5 py-0.5 rounded-md border border-amber-200 text-slate-700">
                 {visible.length} {hi ? "चैनल" : "Channels"}
               </span>
             </div>
