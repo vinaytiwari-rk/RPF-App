@@ -9,6 +9,7 @@ import SearchModal from "../components/SearchModal";
 
 export default function MainLayout() {
   const navigate = useNavigate(); const location = useLocation();
+  useEffect(() => { const goHome = () => navigate("/"); window.addEventListener("samahit-open-home", goHome); return () => window.removeEventListener("samahit-open-home", goHome); }, [navigate]);
   const { language, user } = useAuth(); const { notifications, globalSettings } = useApp();
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const unread = notifications?.filter((n) => !n.read).length || 0;
