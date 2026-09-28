@@ -168,9 +168,7 @@ export default function Services() {
               <h3 className="text-[14px] font-bold text-[#14213D] group-hover:text-[#D97706] transition-colors truncate">
                 {isHi ? svc.titleHi || svc.titleEn : svc.titleEn}
               </h3>
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-[#167C5A] border border-emerald-200/80 uppercase">
-                <ShieldCheck className="w-2.5 h-2.5" /> Verified
-              </span>
+
             </div>
             <p className="text-[11.5px] text-slate-500 font-medium line-clamp-1 mt-0.5">
               {isHi ? svc.descHi || svc.descEn : svc.descEn}
@@ -179,7 +177,7 @@ export default function Services() {
         </div>
 
         <div className="w-7 h-7 rounded-full bg-slate-100/80 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-400 group-hover:bg-[#14213D] group-hover:text-white group-hover:border-transparent transition-all">
-          {isExternal ? <ExternalLink className="w-3.5 h-3.5" /> : <ChevronRight className="w-4 h-4" />}
+          <ChevronRight className="w-4 h-4" />
         </div>
       </button>
     );
