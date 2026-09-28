@@ -221,7 +221,7 @@ export const CmsSettings = () => {
           onClick={() => setActiveTab('general')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition ${
             activeTab === 'general'
-              ? 'bg-[#000080] text-white shadow-sm'
+              ? 'bg-[#167C5A] text-white shadow-sm'
               : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
           }`}
         >
@@ -231,7 +231,7 @@ export const CmsSettings = () => {
           onClick={() => setActiveTab('tv')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition ${
             activeTab === 'tv'
-              ? 'bg-[#000080] text-white shadow-sm'
+              ? 'bg-[#167C5A] text-white shadow-sm'
               : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
           }`}
         >
@@ -241,7 +241,7 @@ export const CmsSettings = () => {
           onClick={() => setActiveTab('radio')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition ${
             activeTab === 'radio'
-              ? 'bg-[#000080] text-white shadow-sm'
+              ? 'bg-[#167C5A] text-white shadow-sm'
               : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
           }`}
         >
@@ -251,7 +251,7 @@ export const CmsSettings = () => {
           onClick={() => setActiveTab('factcheck')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition ${
             activeTab === 'factcheck'
-              ? 'bg-[#000080] text-white shadow-sm'
+              ? 'bg-[#167C5A] text-white shadow-sm'
               : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
           }`}
         >
