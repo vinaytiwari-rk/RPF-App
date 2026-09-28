@@ -60,8 +60,8 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private static final int IVORY = Color.rgb(255,249,240);
     private static final long AUTO_HIDE_MS = 3500L;
     private static final String PREFS = "samahit_views";
-    private static final String MOBILE_UA = "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36";
-    private static final String DESKTOP_UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+    private String mobileUserAgent;
+    private String desktopUserAgent;
 
     private FrameLayout root, webContainer;
     private WebView webView, popupWebView;
@@ -102,6 +102,12 @@ public class NativeBrowserActivity extends AppCompatActivity {
         }
     });
 
+    private void initializeUserAgents(){
+        mobileUserAgent=WebSettings.getDefaultUserAgent(this);
+        // Keep the actual installed WebView engine/version; change only the mobile device token.
+        desktopUserAgent=mobileUserAgent.replaceAll("\\(Linux; Android[^)]*\\)","(X11; Linux x86_64)")
+          .replace(" Mobile Safari/"," Safari/");
+    }
     private int dp(int v){ return Math.round(v * getResources().getDisplayMetrics().density); }
     private boolean isHttpUrl(String s){ return s != null && (s.startsWith("https://") || s.startsWith("http://")); }
     private WebView activeWebView(){ return popupWebView != null ? popupWebView : webView; }
@@ -179,7 +185,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         s.setLoadsImagesAutomatically(!dataSaver);
         s.setBlockNetworkImage(dataSaver);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        if(desktopMode) s.setUserAgentString(DESKTOP_UA); // Default UA tracks the installed Android WebView version.
+        if(desktopMode) s.setUserAgentString(desktopUserAgent); // Default UA tracks the installed Android WebView version.
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             s.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
             CookieManager.getInstance().setAcceptThirdPartyCookies(target,true);
@@ -316,13 +322,19 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private void showError(String msg){loading=false;showControls();if(errorView!=null){TextView d=errorView.findViewWithTag("detail");if(d!=null)d.setText(msg);errorView.setVisibility(View.VISIBLE);}}
     private void hideError(){if(errorView!=null)errorView.setVisibility(View.GONE);}
 
-    private void toggleDesktopMode(){desktopMode=!desktopMode;prefs.edit().putBoolean("desktop",desktopMode).apply();activeWebView().getSettings().setUserAgentString(desktopMode?DESKTOP_UA:null);activeWebView().reload();}
+    private void toggleDesktopMode(){desktopMode=!desktopMode;prefs.edit().putBoolean("desktop",desktopMode).apply();activeWebView().getSettings().setUserAgentString(desktopMode?desktopUserAgent:null);activeWebView().reload();}
     private void toggleDataSaver(){dataSaver=!dataSaver;prefs.edit().putBoolean("dataSaver",dataSaver).apply();activeWebView().getSettings().setLoadsImagesAutomatically(!dataSaver);activeWebView().getSettings().setBlockNetworkImage(dataSaver);activeWebView().reload();Toast.makeText(this,dataSaver?"Data Saver enabled":"Data Saver disabled",Toast.LENGTH_SHORT).show();}
     private void zoomIn(){WebView w=activeWebView();if(w.canZoomIn())w.zoomIn();}
     private void zoomOut(){WebView w=activeWebView();if(w.canZoomOut())w.zoomOut();}
     private void resetZoom(){activeWebView().zoomBy(1f);}
     private void findInPage(){EditText e=new EditText(this);e.setSingleLine(true);e.setHint("Find text");new AlertDialog.Builder(this).setTitle("Find in page").setView(e).setPositiveButton("Find",(d,w)->activeWebView().findAllAsync(e.getText().toString())).setNegativeButton("Cancel",null).show();}
     private void copyUrl(){String u=activeWebView().getUrl();if(u!=null){((ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("URL",u));Toast.makeText(this,"Link copied",Toast.LENGTH_SHORT).show();}}
+    private void openInExternalBrowser(){
+        String u=activeWebView().getUrl();if(!isHttpUrl(u))u=lastStableUrl;
+        if(!isHttpUrl(u)){Toast.makeText(this,"No website to open",Toast.LENGTH_SHORT).show();return;}
+        try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(u)).addCategory(Intent.CATEGORY_BROWSABLE));}
+        catch(Exception e){Toast.makeText(this,"No external browser available",Toast.LENGTH_SHORT).show();}
+    }
     private void share(){String u=activeWebView().getUrl();if(u!=null)startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,u),"Share link"));}
     private void clearData(){CookieManager.getInstance().removeAllCookies(null);CookieManager.getInstance().flush();if(webView!=null){webView.clearCache(true);webView.clearHistory();}if(popupWebView!=null){popupWebView.clearCache(true);popupWebView.clearHistory();}Toast.makeText(this,"Browsing data cleared",Toast.LENGTH_SHORT).show();}
     private ArrayList<String> saved(String key){
@@ -371,7 +383,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private TextView tabsButton;
     private void updateTabLabel(){if(tabsButton!=null)tabsButton.setText("▣ "+tabs.size());}
     private void showSettings(){String[] o={"Auto-hide toolbar: "+(autoHide?"On":"Off"),"Data Saver: "+(dataSaver?"On":"Off"),"Clear browsing data"};new AlertDialog.Builder(this).setTitle("Samahit Views Settings").setItems(o,(d,w)->{if(w==0){autoHide=!autoHide;prefs.edit().putBoolean("autoHide",autoHide).apply();if(autoHide)scheduleHide();}else if(w==1)toggleDataSaver();else new AlertDialog.Builder(this).setMessage("Clear cookies, cache and saved history? This may sign you out of websites.").setPositiveButton("Clear",(a,b)->{clearData();prefs.edit().remove(HISTORY).apply();}).setNegativeButton("Cancel",null).show();}).show();}
-    private void showMenu(){String[] a={"Refresh","Zoom in","Zoom out","Reset zoom","Find in page",desktopMode?"Mobile site":"Desktop site",dataSaver?"Disable Data Saver":"Enable Data Saver","Share","Copy link","Close popup","Add bookmark","Bookmarks","History","New tab","Tabs","Settings"};new AlertDialog.Builder(this).setItems(a,(d,w)->{if(w==0)activeWebView().reload();else if(w==1)zoomIn();else if(w==2)zoomOut();else if(w==3)resetZoom();else if(w==4)findInPage();else if(w==5)toggleDesktopMode();else if(w==6)toggleDataSaver();else if(w==7)share();else if(w==8)copyUrl();else if(w==9)closePopup();else if(w==10)closePopup();else if(w==11){String u=activeWebView().getUrl();if(isHttpUrl(u)){remember(BOOKMARKS,u);Toast.makeText(this,"Bookmarked",Toast.LENGTH_SHORT).show();}}else if(w==12)showSaved(BOOKMARKS);else if(w==13)showSaved(HISTORY);else if(w==14)newTab("https://www.google.com");else if(w==15)showTabs();else showSettings();}).show();}
+    private void showMenu(){String[] a={"Refresh","Zoom in","Zoom out","Reset zoom","Find in page",desktopMode?"Mobile site":"Desktop site",dataSaver?"Disable Data Saver":"Enable Data Saver","Share","Copy link","Close popup","Open in another browser","Add bookmark","Bookmarks","History","New tab","Tabs","Settings"};new AlertDialog.Builder(this).setItems(a,(d,w)->{if(w==0)activeWebView().reload();else if(w==1)zoomIn();else if(w==2)zoomOut();else if(w==3)resetZoom();else if(w==4)findInPage();else if(w==5)toggleDesktopMode();else if(w==6)toggleDataSaver();else if(w==7)share();else if(w==8)copyUrl();else if(w==9)closePopup();else if(w==10)closePopup();else if(w==11)openInExternalBrowser();else if(w==12){String u=activeWebView().getUrl();if(isHttpUrl(u)){remember(BOOKMARKS,u);Toast.makeText(this,"Bookmarked",Toast.LENGTH_SHORT).show();}}else if(w==13)showSaved(BOOKMARKS);else if(w==14)showSaved(HISTORY);else if(w==15)newTab("https://www.google.com");else if(w==16)showTabs();else showSettings();}).show();}
 
     private TextView button(String text){TextView v=new TextView(this);v.setText(text);v.setTextColor(NAVY);v.setTextSize(19);v.setGravity(Gravity.CENTER);v.setPadding(dp(10),dp(8),dp(10),dp(8));return v;}
     private void buildChrome(){
@@ -388,7 +400,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     }
 
     @Override public void onCreate(Bundle state){
-        super.onCreate(state);prefs=getSharedPreferences(PREFS,MODE_PRIVATE);desktopMode=prefs.getBoolean("desktop",false);autoHide=prefs.getBoolean("autoHide",true);dataSaver=prefs.getBoolean("dataSaver",false);
+        super.onCreate(state);prefs=getSharedPreferences(PREFS,MODE_PRIVATE);desktopMode=prefs.getBoolean("desktop",false);autoHide=prefs.getBoolean("autoHide",true);dataSaver=prefs.getBoolean("dataSaver",false);initializeUserAgents();
         getWindow().setStatusBarColor(IVORY);getWindow().setNavigationBarColor(IVORY);root=new FrameLayout(this);root.setBackgroundColor(Color.WHITE);webContainer=new FrameLayout(this);root.addView(webContainer,new FrameLayout.LayoutParams(-1,-1));rebuildMainWebView(null);
         gestureDetector=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){@Override public boolean onDoubleTap(MotionEvent e){if(topBar.getVisibility()==View.VISIBLE)hideControls();else{showControls();scheduleHide();}return false;}});webContainer.setOnTouchListener((v,e)->{gestureDetector.onTouchEvent(e);return false;});
         progressBar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);progressBar.setMax(100);root.addView(progressBar,new FrameLayout.LayoutParams(-1,dp(3),Gravity.TOP));
