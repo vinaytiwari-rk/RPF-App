@@ -258,7 +258,7 @@ export default function Profile() {
               className="w-full max-w-xl rounded-[26px] border border-slate-200 bg-white shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
             >
               {/* Modal Header */}
-              <div className="bg-[#14213D] p-4 flex items-center justify-between text-white shrink-0">
+              <div className="border-b border-amber-200 bg-gradient-to-r from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-4 flex items-center justify-between text-[#243B32] shrink-0">
                 <div className="flex items-center gap-2.5">
                   <ShieldCheck className="h-5 w-5 text-[#D97706]" />
                   <h3 className="text-sm font-black tracking-wide">
@@ -271,7 +271,7 @@ export default function Profile() {
                 </div>
                 <button 
                   onClick={() => setActiveModal(null)}
-                  className="rounded-full p-1 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  className="rounded-full p-1 text-slate-600 hover:text-[#243B32] hover:bg-amber-100 transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
