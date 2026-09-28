@@ -76,6 +76,7 @@ export default function InternetRadio() {
 
   const [stations, setStations] = useState<RadioStation[]>(fallbackStations);
   const [source, setSource] = useState<'server' | 'fallback'>('fallback');
+  const [stationLoadError, setStationLoadError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('All');
 
@@ -92,9 +93,10 @@ export default function InternetRadio() {
           const ordered = configured.filter((s) => s && typeof s.name === 'string' && typeof s.url === 'string' && /^https?:\/\//i.test(s.url)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
           setStations(ordered);
           setSource('server');
+          setStationLoadError(null);
         }
       })
-      .catch(() => undefined);
+      .catch(() => setStationLoadError('Cannot reach the radio CMS. Showing bundled stations; streams may be unavailable.'));
     void loadStations();
     const onFocus = () => { if (!document.hidden) void loadStations(); };
     window.addEventListener('focus', onFocus);
