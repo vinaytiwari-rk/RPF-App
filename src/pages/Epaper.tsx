@@ -64,13 +64,13 @@ export default function Epaper() {
               <Newspaper className="h-4 w-4" />
               {isHi ? "दैनिक ई-पेपर" : "Daily E-paper Kiosk"}
             </div>
-            <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-[#243B32]">
               {isHi ? "आज के समाचार पत्र" : "Today's Newspapers"}
             </h1>
             <p className="mt-2 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
               {isHi ? "एक ही जगह से प्रमुख दैनिक ई-पेपर पढ़ें। किसी अखबार पर टैप करके उसका आज का संस्करण खोलें।" : "Read leading daily e-papers from one central location. Tap any newspaper to view today's edition."}
             </p>
-            <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-amber-300">
+            <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-white/70 px-3.5 py-2 text-xs font-bold text-[#B36A16]">
               <CalendarDays className="h-4 w-4" />
               {dateLabel}
             </div>
