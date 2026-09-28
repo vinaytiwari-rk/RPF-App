@@ -70,7 +70,7 @@ export default function Directory() {
       <div className="mx-auto w-full max-w-3xl px-4 py-4 sm:px-6 sm:py-5 space-y-4">
         
         {/* Top Header Card */}
-        <section className="relative overflow-hidden rounded-[24px] bg-[#14213D] p-5 sm:p-7 text-white shadow-md">
+        <section className="relative overflow-hidden rounded-[24px] border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-5 sm:p-7 text-[#243B32] shadow-sm">
           <div className="relative z-10">
             <div className="flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">
               <BookOpen className="h-4 w-4" />
@@ -79,7 +79,7 @@ export default function Directory() {
             <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {isHi ? "सरकारी निर्देशिका" : "Government Directory"}
             </h1>
-            <p className="mt-2 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-200 font-medium">
+            <p className="mt-2 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
               {isHi
                 ? "भारत सरकार की आधिकारिक निर्देशिकाओं तक पहुँचें। संपर्क, वेब लिंक, उपयोगिताएँ और हेल्पलाइन सब एक ही जगह।"
                 : "Access official directories of the Government of India. Contacts, web links, utilities, and helplines all in one place."}
