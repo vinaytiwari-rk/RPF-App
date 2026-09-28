@@ -94,7 +94,7 @@ export const CmsSettings = () => {
   const [websiteDraft, setWebsiteDraft] = useState<GovLink>({ title: '', titleHi: '', desc: '', descHi: '', url: '', isGov: false });
   const [editingWebsite, setEditingWebsite] = useState<number | null>(null);
   const saveWebsite = () => {
-    if (!websiteDraft.title.trim() || !/^https?:\\/\\//i.test(websiteDraft.url.trim())) {
+    if (!websiteDraft.title.trim() || !['http:', 'https:'].includes((() => { try { return new URL(websiteDraft.url.trim()).protocol; } catch { return ''; } })())) {
       toast.error('Enter a website name and a valid http/https URL'); return;
     }
     const next = [...currentWebsites];
@@ -296,7 +296,7 @@ export const CmsSettings = () => {
           <label className="block text-sm font-semibold">Choose Service
             <select className="mt-2 w-full rounded-xl border border-slate-200 p-3" value={selectedService}
               onChange={e => { setSelectedService(e.target.value); setEditingWebsite(null); }}>
-              {serviceOptions.map(id => <option key={id} value={id}>{id.replace(/-/g, ' ').replace(/\\b\\w/g, ch => ch.toUpperCase())} ({(Object.prototype.hasOwnProperty.call(websiteOverrides, id) ? websiteOverrides[id] : SERVICE_GOV_LINKS[id]).length})</option>)}
+              {serviceOptions.map(id => <option key={id} value={id}>{id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} ({(Object.prototype.hasOwnProperty.call(websiteOverrides, id) ? websiteOverrides[id] : SERVICE_GOV_LINKS[id]).length})</option>)}
             </select>
           </label>
           <div className="space-y-2">{currentWebsites.map((link, index) => (
