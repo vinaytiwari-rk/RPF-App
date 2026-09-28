@@ -161,14 +161,15 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
               setIsRadioLoading(false);
             }
           });
+          let recoveryAttempts = 0;
           hls.on(Hls.Events.ERROR, (_: any, data: any) => {
             if (!data.fatal) return;
-            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            if (recoveryAttempts++ < 2 && data.type === Hls.ErrorTypes.NETWORK_ERROR) {
               hls.startLoad();
               setRadioError('Radio connection interrupted. Retrying stream…');
               return;
             }
-            if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+            if (recoveryAttempts <= 2 && data.type === Hls.ErrorTypes.MEDIA_ERROR) {
               hls.recoverMediaError();
               setRadioError('Recovering radio playback…');
               return;
