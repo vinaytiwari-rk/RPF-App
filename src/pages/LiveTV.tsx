@@ -205,10 +205,10 @@ export default function LiveTV() {
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#243B32]">
               {hi ? "आर.पी.एफ. लाइव टीवी" : "RPF Live TV Channels"}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
               {hi
                 ? "राष्ट्रीय एवं अंतर्राष्ट्रीय लाइव समाचार चैनल एक ही स्थान पर निःशुल्क देखें।"
                 : "Watch live national & international news channels directly in HD."}
