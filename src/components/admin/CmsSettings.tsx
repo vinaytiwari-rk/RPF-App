@@ -94,7 +94,10 @@ export const CmsSettings = () => {
   const [websiteDraft, setWebsiteDraft] = useState<GovLink>({ title: '', titleHi: '', desc: '', descHi: '', url: '', isGov: false });
   const [editingWebsite, setEditingWebsite] = useState<number | null>(null);
   const saveWebsite = () => {
-    if (!websiteDraft.title.trim() || !['http:', 'https:'].includes((() => { try { return new URL(websiteDraft.url.trim()).protocol; } catch { return ''; } })())) {
+    const websiteUrl = websiteDraft.url.trim();
+    let validWebsiteUrl = false;
+    try { validWebsiteUrl = ['http:', 'https:'].includes(new URL(websiteUrl).protocol); } catch { validWebsiteUrl = false; }
+    if (!websiteDraft.title.trim() || !validWebsiteUrl) {
       toast.error('Enter a website name and a valid http/https URL'); return;
     }
     const next = [...currentWebsites];
