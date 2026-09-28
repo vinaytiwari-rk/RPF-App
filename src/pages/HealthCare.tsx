@@ -29,7 +29,7 @@ export default function HealthCare() {
   return (
     <main className="min-h-screen bg-transparent px-4 py-4 text-[#14213D] max-w-3xl mx-auto">
       {/* Top Hero Banner */}
-      <section className="relative overflow-hidden rounded-[24px] bg-[#14213D] p-5 sm:p-6 text-white shadow-md">
+      <section className="relative overflow-hidden rounded-[24px] border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-5 sm:p-6 text-[#243B32] shadow-sm">
         <div className="relative z-10">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-2.5 text-[#DC2626]">
@@ -40,7 +40,7 @@ export default function HealthCare() {
                 <Sparkles className="h-3 w-3" />
                 RP Foundation Care
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-white">Healthcare Portal</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-[#243B32]">Healthcare Portal</h1>
             </div>
           </div>
           <p className="mt-3 max-w-sm text-xs sm:text-sm leading-relaxed text-slate-200 font-medium">
