@@ -76,7 +76,7 @@ export default function Directory() {
               <BookOpen className="h-4 w-4" />
               {isHi ? "राष्ट्रीय निर्देशिका" : "National Directory"}
             </div>
-            <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-[#243B32]">
               {isHi ? "सरकारी निर्देशिका" : "Government Directory"}
             </h1>
             <p className="mt-2 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
