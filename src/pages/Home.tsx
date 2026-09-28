@@ -1,3 +1,4 @@
+import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
 import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote } from "lucide-react";
 import { motion } from "motion/react";
@@ -473,9 +474,7 @@ export default function Home() {
                 onClick={() => navigate(route)}
                 className="min-h-[155px] rounded-2xl border border-slate-200/80 bg-transparent hover:bg-slate-50/50 backdrop-blur-xs p-4 text-left shadow-2xs hover:border-slate-300 transition-all flex flex-col justify-between"
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
+                <div className="h-16 w-16" aria-hidden="true">{serviceArtFor(title) ? <ServiceIllustration kind={serviceArtFor(title)!} className="h-full w-full" /> : <div className={`flex h-full w-full items-center justify-center rounded-xl ${accent}`}><Icon className="h-6 w-6" /></div>}</div>
                 <div>
                   <p className="mt-3 text-[15px] font-bold text-[#14213D]">{title}</p>
                   <p className="mt-1 text-[11.5px] text-slate-500 font-medium leading-snug">{subtitle}</p>
