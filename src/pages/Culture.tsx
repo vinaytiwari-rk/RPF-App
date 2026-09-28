@@ -50,8 +50,8 @@ const Culture: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-transparent pb-20 font-sans text-[#14213D]">
-      <div className="sticky top-0 z-50 bg-[#14213D] shadow-md border-b border-amber-200/20">
-        <div className="flex items-center px-4 h-14 max-w-3xl mx-auto text-white">
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] shadow-sm border-b border-amber-200">
+        <div className="flex items-center px-4 h-14 max-w-3xl mx-auto text-[#243B32]">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
