@@ -58,7 +58,7 @@ export default function Epaper() {
     <main className="min-h-full bg-transparent pb-10 text-[#14213D]">
       <div className="mx-auto w-full max-w-3xl px-4 py-4 sm:px-6 sm:py-5 space-y-4">
         {/* Hero Header */}
-        <section className="relative overflow-hidden rounded-[24px] bg-[#14213D] p-5 sm:p-7 text-white shadow-md">
+        <section className="relative overflow-hidden rounded-[24px] border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-5 sm:p-7 text-[#243B32] shadow-sm">
           <div className="relative z-10">
             <div className="flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">
               <Newspaper className="h-4 w-4" />
@@ -67,7 +67,7 @@ export default function Epaper() {
             <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {isHi ? "आज के समाचार पत्र" : "Today's Newspapers"}
             </h1>
-            <p className="mt-2 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-200 font-medium">
+            <p className="mt-2 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
               {isHi ? "एक ही जगह से प्रमुख दैनिक ई-पेपर पढ़ें। किसी अखबार पर टैप करके उसका आज का संस्करण खोलें।" : "Read leading daily e-papers from one central location. Tap any newspaper to view today's edition."}
             </p>
             <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-amber-300">
