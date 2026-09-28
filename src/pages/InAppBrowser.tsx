@@ -260,16 +260,10 @@ export default function InAppBrowser() {
           </button>
 
           <button
-            onClick={() => {
-              if (initialUrl) {
-                setCurrentUrl(initialUrl);
-                setAddressInput(initialUrl);
-                setLoading(true);
-              }
-            }}
+            onClick={() => navigate("/")}
             className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-[#C2410C] active:scale-95 transition"
             aria-label="Home"
-            title="Reset to Initial Page"
+            title="Samahit App Home"
           >
             <Home className="h-4 w-4" />
           </button>
