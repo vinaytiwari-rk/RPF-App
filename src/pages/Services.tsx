@@ -1,3 +1,4 @@
+import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import * as LucideIcons from "lucide-react";
@@ -160,9 +161,7 @@ export default function Services() {
         className="group relative w-full rounded-2xl p-4 flex items-center justify-between border border-amber-100/80 bg-white/80 backdrop-blur-md shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all text-left cursor-pointer"
       >
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className={`w-10 h-10 shrink-0 flex items-center justify-center rounded-xl ${getSemanticIconStyle(svc.id)}`}>
-            <IconComponent className="w-5 h-5 transition-transform group-hover:scale-110" />
-          </div>
+          <div className="h-14 w-14 shrink-0" aria-hidden="true">{serviceArtFor(svc.id) ? <ServiceIllustration kind={serviceArtFor(svc.id)!} className="h-full w-full transition-transform group-hover:scale-105" /> : <div className={`flex h-full w-full items-center justify-center rounded-xl ${getSemanticIconStyle(svc.id)}`}><IconComponent className="h-6 w-6" /></div>}</div>
 
           <div className="min-w-0 pr-2">
             <div className="flex items-center gap-2 flex-wrap">
@@ -252,9 +251,7 @@ export default function Services() {
                     onClick={() => navigate(feat.route)}
                     className="rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-3.5 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all flex flex-col justify-between min-h-[120px]"
                   >
-                    <div className={`w-9 h-9 flex items-center justify-center rounded-xl ${feat.accent}`}>
-                      <FeatIcon className="w-4.5 h-4.5" />
-                    </div>
+                    <div className="h-14 w-14" aria-hidden="true">{serviceArtFor(feat.id) ? <ServiceIllustration kind={serviceArtFor(feat.id)!} className="h-full w-full" /> : <div className={`flex h-full w-full items-center justify-center rounded-xl ${feat.accent}`}><FeatIcon className="h-6 w-6" /></div>}</div>
                     <div>
                       <p className="mt-2 text-[14px] font-bold text-[#14213D]">{isHi ? feat.titleHi : feat.titleEn}</p>
                       <p className="mt-0.5 text-[11px] text-slate-500 font-medium leading-snug line-clamp-1">{isHi ? feat.descHi : feat.descEn}</p>
