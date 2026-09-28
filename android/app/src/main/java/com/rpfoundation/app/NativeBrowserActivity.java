@@ -71,6 +71,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private TextView backButton, forwardButton;
     private boolean loading, mainFrameError, desktopMode, autoHide, dataSaver;
     private String lastStableUrl;
+    private String failedUrl;
     private final ArrayList<String> tabs = new ArrayList<>();
     private int currentTab = 0;
     private static final String BOOKMARKS = "bookmarks";
@@ -161,7 +162,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         if(target == null) return;
         if(target.startsWith("intent://")) target = resolveIntentFallback(target);
         if(!isHttpUrl(target)){ Toast.makeText(this,"No compatible web page is available for this link",Toast.LENGTH_SHORT).show(); return; }
-        mainFrameError = false; hideError(); showControls(); activeWebView().loadUrl(target);
+        mainFrameError = false; failedUrl=null; hideError(); showControls(); activeWebView().loadUrl(target);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -234,7 +235,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
             }
             @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){
                 if(!popup && request != null && request.isForMainFrame()){
-                    mainFrameError=true;
+                    mainFrameError=true;failedUrl=request.getUrl()!=null?request.getUrl().toString():view.getUrl();
                     String description=error != null && error.getDescription()!=null ? error.getDescription().toString() : "The page could not be loaded.";
                     if(error!=null && error.getErrorCode()==WebViewClient.ERROR_HOST_LOOKUP)description="Website address could not be found (DNS). Check the URL and internet connection. If other sites open, this domain may be unavailable.\n\n"+description;
                     showError(description);
@@ -242,7 +243,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
             }
             // HTTP 401/403/404 pages may contain valid login/challenge/content. Never replace them with our own error screen.
             @Override public void onReceivedSslError(WebView view,SslErrorHandler handler,android.net.http.SslError error){
-                handler.cancel(); if(!popup) showError("Secure connection could not be verified.");
+                handler.cancel(); if(!popup){failedUrl=error!=null?error.getUrl():view.getUrl();showError("Secure connection could not be verified.");}
             }
             @Override public boolean onRenderProcessGone(WebView view,RenderProcessGoneDetail detail){
                 String url=view.getUrl(); if(view==popupWebView) closePopup(); else rebuildMainWebView(isHttpUrl(url)?url:lastStableUrl); return true;
@@ -330,7 +331,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private void findInPage(){EditText e=new EditText(this);e.setSingleLine(true);e.setHint("Find text");new AlertDialog.Builder(this).setTitle("Find in page").setView(e).setPositiveButton("Find",(d,w)->activeWebView().findAllAsync(e.getText().toString())).setNegativeButton("Cancel",null).show();}
     private void copyUrl(){String u=activeWebView().getUrl();if(u!=null){((ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("URL",u));Toast.makeText(this,"Link copied",Toast.LENGTH_SHORT).show();}}
     private void openInExternalBrowser(){
-        String u=activeWebView().getUrl();if(!isHttpUrl(u))u=lastStableUrl;
+        String u=failedUrl!=null?failedUrl:activeWebView().getUrl();if(!isHttpUrl(u))u=lastStableUrl;
         if(!isHttpUrl(u)){Toast.makeText(this,"No website to open",Toast.LENGTH_SHORT).show();return;}
         try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(u)).addCategory(Intent.CATEGORY_BROWSABLE));}
         catch(Exception e){Toast.makeText(this,"No external browser available",Toast.LENGTH_SHORT).show();}
@@ -405,7 +406,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         gestureDetector=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){@Override public boolean onDoubleTap(MotionEvent e){if(topBar.getVisibility()==View.VISIBLE)hideControls();else{showControls();scheduleHide();}return false;}});webContainer.setOnTouchListener((v,e)->{gestureDetector.onTouchEvent(e);return false;});
         progressBar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);progressBar.setMax(100);root.addView(progressBar,new FrameLayout.LayoutParams(-1,dp(3),Gravity.TOP));
         errorView=new LinearLayout(this);errorView.setOrientation(LinearLayout.VERTICAL);errorView.setGravity(Gravity.CENTER);errorView.setPadding(dp(28),dp(28),dp(28),dp(28));errorView.setBackgroundColor(IVORY);TextView title=new TextView(this);title.setText("This page could not be loaded");title.setTextColor(NAVY);title.setTextSize(19);title.setGravity(Gravity.CENTER);errorView.addView(title);TextView detail=new TextView(this);detail.setTag("detail");detail.setTextColor(Color.DKGRAY);detail.setTextSize(13);detail.setGravity(Gravity.CENTER);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(12);errorView.addView(detail,p);TextView retry=button("Try again");retry.setTextColor(Color.WHITE);retry.setBackgroundColor(NAVY);retry.setOnClickListener(v->activeWebView().reload());LinearLayout.LayoutParams rp=new LinearLayout.LayoutParams(-2,-2);rp.topMargin=dp(20);errorView.addView(retry,rp);
-        TextView external=button("Open in Chrome / another browser");external.setOnClickListener(v->{String u=activeWebView().getUrl();if(!isHttpUrl(u))u=lastStableUrl;if(isHttpUrl(u)){try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(u)).addCategory(Intent.CATEGORY_BROWSABLE));}catch(Exception e){Toast.makeText(this,"No external browser available",Toast.LENGTH_SHORT).show();}}});LinearLayout.LayoutParams ep=new LinearLayout.LayoutParams(-2,-2);ep.topMargin=dp(12);errorView.addView(external,ep);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
+        TextView external=button("Open in another browser (optional)");external.setOnClickListener(v->openInExternalBrowser());LinearLayout.LayoutParams ep=new LinearLayout.LayoutParams(-2,-2);ep.topMargin=dp(12);errorView.addView(external,ep);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
         buildChrome();
         // Respect three-button and gesture navigation bars, including edge-to-edge devices.
         root.setOnApplyWindowInsetsListener((view,insets)->{
