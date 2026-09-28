@@ -43,7 +43,7 @@ export default function HealthCare() {
               <h1 className="text-2xl font-bold tracking-tight text-[#243B32]">Healthcare Portal</h1>
             </div>
           </div>
-          <p className="mt-3 max-w-sm text-xs sm:text-sm leading-relaxed text-slate-200 font-medium">
+          <p className="mt-3 max-w-sm text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
             Find trusted health services, official welfare programmes and emergency resources in one place.
           </p>
           <div className="mt-4 grid grid-cols-2 gap-2.5">
@@ -55,7 +55,7 @@ export default function HealthCare() {
             </button>
             <button
               onClick={() => nav("/grievance")}
-              className="rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 px-3.5 py-2.5 text-left text-xs font-bold text-white transition"
+              className="rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-2.5 text-left text-xs font-bold text-[#245D45] transition"
             >
               Need Support
             </button>
