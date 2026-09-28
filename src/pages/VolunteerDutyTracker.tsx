@@ -328,16 +328,16 @@ export default function VolunteerDutyTracker() {
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans selection:bg-orange-100 text-slate-800">
       {/* Header Banner */}
-      <div className="bg-gradient-to-br from-[#FF9933] via-[#F59E0B] to-[#138808] p-6 text-white relative overflow-hidden shadow-md">
+      <div className="border-b border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#FFE5C4] to-[#DDF3E7] p-6 text-[#243B32] relative overflow-hidden shadow-sm">
         <div className="relative z-10 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-md border border-white/30 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-md border border-white/30 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#B36A16]" />
             {hi ? "100% लाइव वालंटियर ड्यूटी ट्रैक" : "100% Real Live Duty Portal"}
           </div>
           <h1 className="text-2xl font-black tracking-tight leading-tight font-serif">
             {hi ? "सेवा ड्यूटी एवं फील्ड रिपोर्टिंग" : "Volunteer Duty & Field Reporting"}
           </h1>
-          <p className="text-xs text-orange-50 font-medium mt-1">
+          <p className="text-xs text-slate-600 font-medium mt-1">
             {hi
               ? "लाइव ड्यूटी पंच-इन/आउट, फील्ड रिपोर्ट सबमिशन एवं रियल-टाइम सेवा लीडरबोर्ड।"
               : "Clock-in live duty hours, submit verified field photos & track impact leaderboard."}
