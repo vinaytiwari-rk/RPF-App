@@ -40,7 +40,7 @@ const OFFLINE_UTILITY_SERVICES = [
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [{ platform: "founder_instagram", label: "Founder Instagram", url: "https://www.instagram.com/therohitpandit/" },{ platform: "foundation_instagram", label: "Foundation Instagram", url: "https://www.instagram.com/rpfoundationofficial/" },{ platform: "facebook", label: "Facebook Page", url: "https://www.facebook.com/rpfofficial" },{ platform: "twitter", label: "X (Twitter)", url: "https://x.com/rpfoundation15" },{ platform: "youtube", label: "YouTube Channel", url: "https://www.youtube.com/@rpfoundationofficial" }];
 
 const CACHE_PREFIX = "@rpf_cache:";
-const CACHE_TTL = 10 * 60 * 1000;
+const CACHE_TTL = 60 * 1000;
 const NOTIFICATION_TTL = 60 * 1000;
 const readCache = <T,>(key: string, ttl: number): T | null => { try { const raw = localStorage.getItem(CACHE_PREFIX + key); if (!raw) return null; const parsed = JSON.parse(raw); if (!parsed || Date.now() - parsed.savedAt > ttl) return null; return parsed.data as T; } catch { return null; } };
 const writeCache = (key: string, data: unknown) => { try { localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ savedAt: Date.now(), data })); } catch {} };
@@ -63,11 +63,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     void fetchAllData();
     void refreshNotifications();
     const splashTimer = setTimeout(() => setLoading(false), 1500);
-    const dataInterval = window.setInterval(() => { void fetchAllData(); }, CACHE_TTL);
+    const dataInterval = window.setInterval(() => { if (!document.hidden) void fetchAllData(); }, CACHE_TTL);
+    const refreshVisible = () => { if (!document.hidden) void fetchAllData(); };
+    document.addEventListener("visibilitychange", refreshVisible);
+    window.addEventListener("focus", refreshVisible);
+    window.addEventListener("samahit-admin-updated", refreshVisible);
     const notificationInterval = window.setInterval(() => { void refreshNotifications(); }, NOTIFICATION_TTL);
     return () => {
       clearTimeout(splashTimer);
       window.clearInterval(dataInterval);
+      document.removeEventListener("visibilitychange", refreshVisible);
+      window.removeEventListener("focus", refreshVisible);
+      window.removeEventListener("samahit-admin-updated", refreshVisible);
       window.clearInterval(notificationInterval);
     };
   }, []);
@@ -79,7 +86,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const submitCardApplication = async (appVal: CardApplication) => { const res = await fetch("/api/cards", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(appVal) }); if (!res.ok) throw new Error("Failed to submit card application"); await fetchAllData(); };
   const approveCardApplication = (userId: string): string => { fetch("/api/cards/approve", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId }) }).then((r) => { if (!r.ok) throw new Error("Approval failed"); return fetchAllData(); }).catch(console.error); return ""; };
   const rejectCardApplication = (userId: string) => { fetch("/api/cards/reject", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId }) }).then((r) => { if (!r.ok) throw new Error("Rejection failed"); return fetchAllData(); }).catch(console.error); };
-  const updateCmsConfig = async (newCms: CmsConfig) => { const res = await fetch("/api/cms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newCms) }); if (!res.ok) throw new Error("Failed to save CMS"); setCmsConfig(newCms); writeCache("cms", newCms); };
+  const updateCmsConfig = async (newCms: CmsConfig) => { const res = await fetch("/api/cms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newCms) }); if (!res.ok) throw new Error("Failed to save CMS"); setCmsConfig(newCms); writeCache("cms", newCms); window.dispatchEvent(new Event("samahit-admin-updated")); };
   return <AppContext.Provider value={{ loading, settings, globalSettings, announcements, cmsConfig, servicesList, isLoadingServices, socialPosts, socialLinks, grievances, cardApplications, updateSettings, updateCmsConfig, addSocialPost, likePost, addGrievance, updateGrievanceStatus, submitCardApplication, approveCardApplication, rejectCardApplication, refreshData: fetchAllData, userLocation, notifications }}>{children}</AppContext.Provider>;
 }
 export function useApp() { const context = useContext(AppContext); if (!context) throw new Error("useApp must be used within an AppProvider"); return context; }
