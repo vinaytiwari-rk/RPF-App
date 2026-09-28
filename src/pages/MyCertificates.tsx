@@ -181,7 +181,7 @@ export default function MyCertificates() {
                   </h2>
                   <button
                     onClick={handlePrint}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#14213D] px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-slate-800 transition-all"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#167C5A] px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-slate-800 transition-all"
                   >
                     <Printer className="h-4 w-4" />
                     {hi ? "प्रिंट / PDF डाउनलोड" : "Print / Export PDF"}
@@ -197,7 +197,7 @@ export default function MyCertificates() {
 
                   {/* Header Badge */}
                   <div className="flex flex-col items-center gap-1">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#14213D] text-amber-400 shadow-md">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-[#167C5A] shadow-md">
                       <Sparkles className="h-6 w-6" />
                     </div>
                     <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#D97706] mt-2">
