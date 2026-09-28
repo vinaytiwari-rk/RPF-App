@@ -1,3 +1,4 @@
+import { SERVICE_GOV_LINKS, type GovLink } from "../../data/serviceGovLinks";
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -43,7 +44,7 @@ export const CmsSettings = () => {
   const [saving, setSaving] = useState(false);
 
   // Visual Add Form Modal States
-  const [activeTab, setActiveTab] = useState<'tv' | 'radio' | 'factcheck' | 'general'>('general');
+  const [activeTab, setActiveTab] = useState<'tv' | 'radio' | 'factcheck' | 'general' | 'links'>('general');
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalType, setModalType] = useState<'tv' | 'radio' | 'factcheck'>('tv');
 
@@ -81,6 +82,28 @@ export const CmsSettings = () => {
   const factChecks = Array.isArray((cms as any)?.factCheckSources)
     ? (cms as any).factCheckSources
     : FACT_CHECK_DEFAULTS;
+
+  const [selectedService, setSelectedService] = useState('blood');
+  const serviceOptions = Object.keys(SERVICE_GOV_LINKS).sort();
+  const websiteOverrides = ((cms as any)?.serviceWebsiteLinks || {}) as Record<string, GovLink[]>;
+  const currentWebsites = Object.prototype.hasOwnProperty.call(websiteOverrides, selectedService)
+    ? websiteOverrides[selectedService] : SERVICE_GOV_LINKS[selectedService] || [];
+  const updateWebsites = (links: GovLink[]) =>
+    set('serviceWebsiteLinks', { ...websiteOverrides, [selectedService]: links });
+  const [websiteDraft, setWebsiteDraft] = useState<GovLink>({ title: '', titleHi: '', desc: '', descHi: '', url: '', isGov: false });
+  const [editingWebsite, setEditingWebsite] = useState<number | null>(null);
+  const saveWebsite = () => {
+    if (!websiteDraft.title.trim() || !/^https?:\\/\\//i.test(websiteDraft.url.trim())) {
+      toast.error('Enter a website name and a valid http/https URL'); return;
+    }
+    const next = [...currentWebsites];
+    const item = { ...websiteDraft, title: websiteDraft.title.trim(), url: websiteDraft.url.trim() };
+    if (editingWebsite === null) next.push(item); else next[editingWebsite] = item;
+    updateWebsites(next);
+    setEditingWebsite(null);
+    setWebsiteDraft({ title: '', titleHi: '', desc: '', descHi: '', url: '', isGov: false });
+    toast('Website list changed. Click Save All System Settings to publish.');
+  };
 
   const save = async () => {
     if (!cms) return;
@@ -258,6 +281,51 @@ export const CmsSettings = () => {
           <ShieldCheck className="h-4 w-4" /> Fact Check Sources ({factChecks.length})
         </button>
       </div>
+
+        <button onClick={() => setActiveTab('links')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition ${activeTab === 'links' ? 'bg-[#167C5A] text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600'}`}>
+          <ExternalLink className="h-4 w-4" /> Service Website Links
+        </button>
+      </div>
+
+      {activeTab === 'links' && (
+        <section className="space-y-4 rounded-2xl border border-emerald-100 bg-white p-4">
+          <h3 className="text-lg font-extrabold text-[#243B32]">Service Website Manager</h3>
+          <p className="text-xs text-slate-600">Select a service to edit, remove or add its website links. Changes appear to users after Save All System Settings.</p>
+          <label className="block text-sm font-semibold">Choose Service
+            <select className="mt-2 w-full rounded-xl border border-slate-200 p-3" value={selectedService}
+              onChange={e => { setSelectedService(e.target.value); setEditingWebsite(null); }}>
+              {serviceOptions.map(id => <option key={id} value={id}>{id.replace(/-/g, ' ').replace(/\\b\\w/g, ch => ch.toUpperCase())} ({(Object.prototype.hasOwnProperty.call(websiteOverrides, id) ? websiteOverrides[id] : SERVICE_GOV_LINKS[id]).length})</option>)}
+            </select>
+          </label>
+          <div className="space-y-2">{currentWebsites.map((link, index) => (
+            <div key={index} className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 p-3">
+              <div className="min-w-0"><p className="text-sm font-bold">{link.title}</p><p className="break-all text-xs text-slate-500">{link.url}</p></div>
+              <div className="flex shrink-0 gap-2">
+                <button type="button" aria-label={`Edit ${link.title}`} className="rounded-lg bg-emerald-50 p-2 text-emerald-800"
+                  onClick={() => { setWebsiteDraft(link); setEditingWebsite(index); }}><Edit3 className="h-4 w-4"/></button>
+                <button type="button" aria-label={`Remove ${link.title}`} className="rounded-lg bg-red-50 p-2 text-red-700"
+                  onClick={() => { if (window.confirm(`Remove ${link.title} from ${selectedService}?`)) { updateWebsites(currentWebsites.filter((_, i) => i !== index)); if (editingWebsite === index) setEditingWebsite(null); } }}><Trash2 className="h-4 w-4"/></button>
+              </div>
+            </div>
+          ))}</div>
+          <div className="space-y-3 rounded-xl bg-emerald-50/50 p-4">
+            <h4 className="font-bold">{editingWebsite === null ? 'Add Website' : 'Edit Website'}</h4>
+            {(['title', 'titleHi', 'url', 'desc', 'descHi'] as const).map(field => (
+              <label key={field} className="block text-xs font-semibold">{({title:'Website Name',titleHi:'Hindi Name',url:'Website URL',desc:'Description',descHi:'Hindi Description'})[field]}
+                <input className="mt-1 w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm" value={websiteDraft[field] || ''}
+                  onChange={e => setWebsiteDraft(d => ({...d,[field]:e.target.value}))} />
+              </label>
+            ))}
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={websiteDraft.isGov === true}
+              onChange={e => setWebsiteDraft(d => ({...d,isGov:e.target.checked}))}/> Official government website (only if verified)</label>
+            <div className="flex gap-2">
+              <button type="button" onClick={saveWebsite} className="rounded-xl bg-[#167C5A] px-4 py-2 text-sm font-bold text-white">{editingWebsite === null ? 'Add Link' : 'Update Link'}</button>
+              {editingWebsite !== null && <button type="button" onClick={() => {setEditingWebsite(null);setWebsiteDraft({title:'',titleHi:'',desc:'',descHi:'',url:'',isGov:false});}} className="rounded-xl border px-4 py-2 text-sm">Cancel</button>}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* TAB 1: GENERAL & INSTAGRAM REELS */}
       {activeTab === 'general' && (
