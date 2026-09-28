@@ -42,6 +42,7 @@ export const CmsSettings = () => {
   const [cms, setCms] = useState<CmsConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Visual Add Form Modal States
   const [activeTab, setActiveTab] = useState<'tv' | 'radio' | 'factcheck' | 'general' | 'links'>('general');
@@ -57,14 +58,14 @@ export const CmsSettings = () => {
 
   useEffect(() => {
     axios
-      .get('/api/cms')
+      .get('/api/cms', { timeout: 15000, headers: { 'Cache-Control': 'no-cache' } })
       .then((res) => {
         if (res.data.success) {
           const next = res.data.cms;
           setCms(next);
         }
       })
-      .catch(() => undefined)
+      .catch((err) => setLoadError(err?.response?.status === 503 ? "Backend unavailable (HTTP 503). Check server deployment and Passenger logs." : "CMS could not be loaded. Check connection and login."))
       .finally(() => setLoading(false));
   }, []);
 
