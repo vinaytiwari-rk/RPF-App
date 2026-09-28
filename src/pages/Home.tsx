@@ -1,7 +1,7 @@
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
 import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
@@ -196,6 +196,7 @@ function MarqueeTrack({
 }
 
 export default function Home() {
+  const reduceMotion = useReducedMotion();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { cmsConfig } = useApp();
@@ -288,8 +289,19 @@ export default function Home() {
       <div className="mx-auto w-full max-w-3xl px-4 pb-6 pt-3 sm:px-6 space-y-4">
         
         {/* 1. GREETING HEADER */}
-        <section className="bg-transparent py-1 space-y-0.5">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#14213D] tracking-tight leading-snug">
+        <motion.section
+          initial={reduceMotion ? false : { opacity: 0, y: 9 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.48, ease: "easeOut" }}
+          className="relative isolate overflow-hidden rounded-2xl border border-emerald-100/70 bg-gradient-to-r from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] px-4 py-4 shadow-sm"
+        >
+          <motion.div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-14 -z-10 h-44 w-44 rounded-full bg-emerald-200/45 blur-2xl"
+            animate={reduceMotion ? undefined : { x: [0, -18, 0], y: [0, 14, 0], opacity: [0.45, 0.72, 0.45] }}
+            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }} />
+          <motion.div aria-hidden="true" className="pointer-events-none absolute -bottom-16 left-12 -z-10 h-32 w-32 rounded-full bg-amber-200/55 blur-2xl"
+            animate={reduceMotion ? undefined : { x: [0, 18, 0], y: [0, -10, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }} />
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#243B32] tracking-tight leading-snug">
             {greeting}, {name} Ji,
           </h1>
           <p className="text-base sm:text-lg font-semibold text-slate-700 tracking-normal">
@@ -298,7 +310,14 @@ export default function Home() {
           <p className="text-xs sm:text-[13px] italic font-medium text-slate-500 tracking-normal pt-0.5">
             An initiative by the RP Foundation's Volunteers.
           </p>
-        </section>
+          <div className="mt-3 flex items-center gap-2 text-[11px] font-semibold text-[#245D45]">
+            <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+              {!reduceMotion && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />}
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-600" />
+            </span>
+            {cmsConfig?.alertBannerEn || cmsConfig?.alertBannerHi ? "Latest updates available" : "Explore community services"}
+          </div>
+        </motion.section>
 
         {/* 2. THOUGHT OF THE DAY (IMMEDIATELY AFTER GREETING) */}
         <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3 shadow-2xs">
