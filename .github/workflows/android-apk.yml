@@ -37,8 +37,29 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
-      - name: Install Dependencies
-        run: npm install --no-audit --no-fund
+      - name: Install Dependencies (retry transient npm network failures)
+        shell: bash
+        env:
+          npm_config_registry: https://registry.npmjs.org/
+          npm_config_fetch_retries: '5'
+          npm_config_fetch_retry_mintimeout: '20000'
+          npm_config_fetch_retry_maxtimeout: '120000'
+          npm_config_fetch_timeout: '180000'
+          npm_config_maxsockets: '8'
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "npm install attempt ${attempt}/3"
+            if npm install --include=dev --prefer-offline --no-audit --no-fund; then
+              echo "Dependencies installed successfully"
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "::error::npm install failed after three attempts; inspect npm network logs"
+              exit 1
+            fi
+            sleep $((attempt * 20))
+          done
       - name: Verify required modules
         run: |
           node -e "console.log('react-router-dom@' + require('./node_modules/react-router-dom/package.json').version)"
