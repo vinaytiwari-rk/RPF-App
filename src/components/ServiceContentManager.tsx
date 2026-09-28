@@ -63,7 +63,7 @@ export default function ServiceContentManager() {
       <div><label className="text-xs font-semibold text-slate-600 block mb-1">Content</label><textarea value={current.body || ""} onChange={(e) => updateCurrent({ body: e.target.value })} rows={8} className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 font-mono" placeholder="Enter the content for the selected language..." /></div>
       <div><label className="text-xs font-semibold text-slate-600 block mb-1">Action Button Label</label><input value={current.actionLabel || ""} onChange={(e) => updateCurrent({ actionLabel: e.target.value })} className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200" placeholder="Apply Now" /></div>
       <div><label className="text-xs font-semibold text-slate-600 block mb-1">Action URL</label><input value={actionUrl} onChange={(e) => setActionUrl(e.target.value)} className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200" placeholder="https://... or /internal-route" /></div>
-      <button type="button" onClick={save} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#000080] text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-60">{saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}{saving ? "Saving…" : "Save & Publish"}</button>
+      <button type="button" onClick={save} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#167C5A] text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-60">{saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}{saving ? "Saving…" : "Save & Publish"}</button>
     </>}
   </div>;
 }
