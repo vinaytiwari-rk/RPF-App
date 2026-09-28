@@ -132,17 +132,17 @@ export default function SosSystem() {
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans selection:bg-orange-100 animate-fadeIn">
       {/* Top Danger Banner Header */}
-      <div className="bg-gradient-to-r from-red-600 via-rose-700 to-red-800 p-6 text-white relative overflow-hidden shadow-lg">
+      <div className="border-b border-rose-200 bg-gradient-to-r from-[#FFF7E8] via-[#FFF0ED] to-[#F0FAF4] p-6 text-[#243B32] relative overflow-hidden shadow-lg">
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-[10px] font-black uppercase tracking-wider backdrop-blur-md border border-white/25 mb-3">
-            <ShieldAlert className="w-4 h-4 text-white animate-pulse" />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-3.5 py-1 text-[10px] font-black uppercase tracking-wider backdrop-blur-md border border-white/25 mb-3">
+            <ShieldAlert className="w-4 h-4 text-red-700 animate-pulse" />
             {isHi ? "आपातकालीन एस.ओ.एस प्रणाली" : "Live Emergency SOS System"}
           </div>
           <h1 className="text-2xl font-black tracking-tight leading-tight">
             {isHi ? "त्वरित एस.ओ.एस सहायता" : "Instant Emergency Help Dispatch"}
           </h1>
-          <p className="text-xs text-rose-100 font-medium mt-1 max-w-md mx-auto">
+          <p className="text-xs text-slate-600 font-medium mt-1 max-w-md mx-auto">
             {isHi ? "एक क्लिक में आपातकालीन कॉल एवं जीपीएस लोकेशन संदेश भेजें।" : "Trigger 1-tap emergency calls and broadcast live GPS coordinates."}
           </p>
         </div>
