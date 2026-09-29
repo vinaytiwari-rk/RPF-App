@@ -1,9 +1,12 @@
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { Calculator, Wrench, Smartphone, Wind, Clock3, HeartPulse, ReceiptIndianRupee, FileScan, Globe, ArrowRight, FileText, Image, QrCode, CalendarDays, NotebookPen, LockKeyhole } from "lucide-react";
+import { Calculator, Wrench, Smartphone, Wind, Clock3, HeartPulse, ReceiptIndianRupee, FileScan, Globe, ArrowRight, FileText, Image, QrCode, CalendarDays, NotebookPen, LockKeyhole, Bell, ArrowLeftRight } from "lucide-react";
 
 type Lang = "en" | "hi";
 const links = [
+  { path: "/utilities/everyday/pdf-compress", en: "PDF Optimizer", hi: "PDF ऑप्टिमाइज़र", desc: "Lossless PDF structure compression", icon: FileText },
+  { path: "/utilities/everyday/reminders", en: "Reminders", hi: "रिमाइंडर", desc: "Offline reminders, visible when app opens", icon: Bell },
+  { path: "/utilities/everyday/converter", en: "Unit Converter", hi: "यूनिट कन्वर्टर", desc: "Length and weight offline", icon: ArrowLeftRight },
   { path: "/utilities/everyday/notes", en: "Notes & Checklist", hi: "नोट्स और चेकलिस्ट", desc: "Saved offline on your device", icon: NotebookPen },
   { path: "/utilities/everyday/image", en: "Image Resize & Convert", hi: "फोटो Resize और Convert", desc: "Offline JPG conversion", icon: Image },
   { path: "/utilities/everyday/image-pdf", en: "Images to PDF", hi: "फोटो से PDF", desc: "Create PDF without upload", icon: FileText },
