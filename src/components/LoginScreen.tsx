@@ -45,22 +45,6 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [pendingLogin, setPendingLogin] = useState<{ role: string; details: { id: string; name: string; phone?: string; email?: string; role: string; token?: string; remember: boolean } } | null>(null);
-  const [savedUserId, setSavedUserId] = useState(() => { try { return localStorage.getItem('@rpf_saved_login_id') || ''; } catch { return ''; } });
-  useEffect(() => { if (savedUserId) setIdentifier(savedUserId); }, []);
-
-  const finishLogin = async (saveId: boolean) => {
-    if (!pendingLogin) return;
-    setLoading(true);
-    try {
-      if (saveId) { localStorage.setItem('@rpf_saved_login_id', identifier.trim()); setSavedUserId(identifier.trim()); }
-      else { localStorage.removeItem('@rpf_saved_login_id'); setSavedUserId(''); }
-      await onLoginSuccess(pendingLogin.role, pendingLogin.details);
-      setPendingLogin(null);
-      setPassword('');
-    } catch (err: any) { setError(err?.message || 'Could not complete login. Please retry.'); }
-    finally { setLoading(false); }
-  };
 
   const clear = () => setError('');
 
@@ -110,14 +94,10 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         token: responseData.token,
         remember,
       };
-      // Keep passwords out of app storage. Let the Android password manager
-      // offer credential saving; this prompt only remembers the User ID.
-      if (remember && normalized !== savedUserId) {
-        setPendingLogin({ role: roleCategory, details });
-      } else {
-        await onLoginSuccess(roleCategory, details);
-        setPassword('');
-      }
+      // Native Android Autofill / Password Manager owns credential saving.
+      // No app-authored credential popup or plaintext password storage.
+      await onLoginSuccess(roleCategory, details);
+      setPassword('');
     } catch (err: any) {
       const rawMsg = err.response?.data?.error || err.message || '';
       if (rawMsg.toLowerCase().includes('network error') || rawMsg.toLowerCase().includes('failed to fetch')) {
@@ -193,20 +173,6 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             </div>
           )}
 
-          {pendingLogin && (
-            <div role="dialog" aria-modal="true" aria-labelledby="save-id-title" className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-              <h3 id="save-id-title" className="text-sm font-black text-emerald-950">Save User ID on this device?</h3>
-              <p className="mt-2 text-xs leading-relaxed text-emerald-900">
-                Next time, your User ID will be filled automatically. Your password will not be saved by this app; use Android Password Manager for secure password autofill.
-              </p>
-              <div className="mt-3 flex gap-2">
-                <button type="button" disabled={loading} onClick={() => void finishLogin(true)}
-                  className="flex-1 rounded-xl bg-[#167C5A] px-3 py-2 text-xs font-black text-white">Save User ID</button>
-                <button type="button" disabled={loading} onClick={() => void finishLogin(false)}
-                  className="flex-1 rounded-xl border border-emerald-300 bg-white px-3 py-2 text-xs font-black text-emerald-950">Not now</button>
-              </div>
-            </div>
-          )}
           {mode === 'login' && (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
@@ -216,7 +182,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 <div>
                   <h3 className="font-black text-sm text-slate-800">Login to RPF समाहित</h3>
                   <p className="text-[9px] text-slate-400 uppercase tracking-wider">
-                    Keep this device signed in and save credentials securely
+                    Secure sign in
                   </p>
                 </div>
               </div>
@@ -266,7 +232,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                   Keep me logged in on this device
                 </label>
                 <p className="px-1 text-[9px] leading-relaxed text-slate-400">
-                  Keep me logged in saves your session. Android Password Manager controls secure password saving; the app can separately remember your User ID.
+                  Your device's password manager can offer to save your credentials. Keep me logged in remembers only your session.
                 </p>
                 <button
                   disabled={loading}
