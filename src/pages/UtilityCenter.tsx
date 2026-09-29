@@ -1,9 +1,17 @@
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { Calculator, Wrench, Smartphone, Wind, Clock3, HeartPulse, ReceiptIndianRupee, FileScan, Globe, ArrowRight } from "lucide-react";
+import { Calculator, Wrench, Smartphone, Wind, Clock3, HeartPulse, ReceiptIndianRupee, FileScan, Globe, ArrowRight, FileText, Image, QrCode, CalendarDays, NotebookPen, LockKeyhole } from "lucide-react";
 
 type Lang = "en" | "hi";
 const links = [
+  { path: "/utilities/everyday/notes", en: "Notes & Checklist", hi: "नोट्स और चेकलिस्ट", desc: "Saved offline on your device", icon: NotebookPen },
+  { path: "/utilities/everyday/image", en: "Image Resize & Convert", hi: "फोटो Resize और Convert", desc: "Offline JPG conversion", icon: Image },
+  { path: "/utilities/everyday/image-pdf", en: "Images to PDF", hi: "फोटो से PDF", desc: "Create PDF without upload", icon: FileText },
+  { path: "/utilities/everyday/pdf-merge", en: "Merge PDFs", hi: "PDF जोड़ें", desc: "Combine documents offline", icon: FileText },
+  { path: "/utilities/everyday/pdf-split", en: "Split PDF", hi: "PDF अलग करें", desc: "Download individual pages", icon: FileText },
+  { path: "/utilities/everyday/qr", en: "QR Generator", hi: "QR कोड बनाएं", desc: "Create QR offline", icon: QrCode },
+  { path: "/utilities/everyday/date", en: "Date Difference", hi: "तारीख का अंतर", desc: "Count days between dates", icon: CalendarDays },
+  { path: "/utilities/everyday/password", en: "Password Generator", hi: "पासवर्ड जनरेटर", desc: "Secure offline passwords", icon: LockKeyhole },
   { path: "/utilities/calculators", en: "100+ Calculator Directory", hi: "100+ कैलकुलेटर", desc: "Health, finance, maths, date, internet and more", icon: Calculator },
   { path: "/utilities/calculator", en: "Scientific Calculator", hi: "साइंटिफिक कैलकुलेटर", desc: "On-device calculation", icon: Calculator },
   { path: "/utilities/bmi-calculator", en: "BMI Calculator", hi: "BMI कैलकुलेटर", desc: "Body mass index", icon: HeartPulse },
