@@ -109,7 +109,7 @@ export default function InternetRadio() {
   }, []);
 
   const visibleStations = useMemo(() => stations.filter((s) => s.enabled !== false), [stations]);
-  const currentStation = activeRadio || visibleStations.find((s) => s.name.toLowerCase() === 'akashvani bhopal') || visibleStations[0];
+  const currentStation = (activeRadio && visibleStations.some((s) => s.url === activeRadio.url) ? activeRadio : null) || visibleStations.find((s) => s.name.toLowerCase() === 'akashvani bhopal') || visibleStations[0];
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return visibleStations.filter(
@@ -197,7 +197,7 @@ export default function InternetRadio() {
             </div>
           )}
           {radioError && (
-            <div className="mt-3 flex items-center gap-2 rounded-xl bg-red-500/20 px-3 py-2 text-[11px] font-bold text-red-200">
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-[11px] font-bold text-red-800">
               <WifiOff className="h-3.5 w-3.5" />
               {radioError}
             </div>
@@ -205,7 +205,7 @@ export default function InternetRadio() {
 
           <div className="mt-3 flex items-center gap-1.5">
             <span className={`h-2 w-2 rounded-full ${isRadioPlaying ? 'bg-[#FF9933] animate-pulse' : 'bg-white/30'}`} />
-            <span className="text-[10px] font-bold text-white/60">
+            <span className="text-[10px] font-bold text-slate-700">
               {isRadioPlaying ? (hi ? 'लाइव' : 'LIVE') : (hi ? 'रुका हुआ' : 'PAUSED')}
             </span>
             <Signal className="ml-auto h-3.5 w-3.5 text-white/30" />
