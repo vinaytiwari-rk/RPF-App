@@ -21,7 +21,7 @@ export default function EverydayToolPage() {
  const [reminderText,setReminderText]=useState(""); const [reminderDate,setReminderDate]=useState("");
  const [reminders,setReminders]=useState<{id:string;text:string;when:string}[]>(()=>{try{const x=JSON.parse(read("samahit-reminders-v1")||"[]");return Array.isArray(x)?x:[];}catch{return [];}});
  const [unitFrom,setUnitFrom]=useState("km"); const [unitTo,setUnitTo]=useState("mi"); const [unitAmount,setUnitAmount]=useState("1");
- const [pdfQuality,setPdfQuality]=useState(0.65);
+
  useEffect(()=>{setError("");setBusy(false);setImages([]);setPdfs([]);setFile(null);},[tool]);
  const run=async(fn:()=>Promise<void>)=>{setError("");setBusy(true);try{await fn();}catch(e){setError(e instanceof Error?e.message:"Unable to process this file");}finally{setBusy(false);}};
  const title:Record<string,string>={notes:"Notes & Checklist",password:"Password Generator",qr:"QR Code Generator",date:"Date Calculator",image:"Image Resize & Convert", "image-pdf":"Images to PDF","pdf-merge":"Merge PDF","pdf-split":"Split PDF","pdf-compress":"Compress PDF","reminders":"Reminders","converter":"Unit Converter"};
