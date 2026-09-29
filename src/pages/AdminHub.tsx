@@ -46,7 +46,7 @@ import {
   X
 } from "lucide-react";
 
-type Section = "overview" | "people" | "content" | "services" | "requests" | "system";
+type Section = "overview" | "people" | "cards" | "content" | "services" | "requests" | "system";
 type Row = Record<string, unknown>;
 
 type AdminState = {
@@ -84,12 +84,13 @@ type InstagramPost = {
 };
 
 const nav: Array<{ id: Section; label: string; icon: typeof Users; badge?: string }> = [
-  { id: "overview", label: "Command Center", icon: LayoutGrid, badge: "Live" },
-  { id: "people", label: "People & Data Studio", icon: Users },
-  { id: "content", label: "Content & Media Studio", icon: Images },
-  { id: "services", label: "Services & Helplines Studio", icon: BriefcaseBusiness },
-  { id: "requests", label: "Citizen Requests & Welfare", icon: ClipboardList },
-  { id: "system", label: "System Config & Audit", icon: Settings2 },
+  { id: "overview", label: "Dashboard", icon: LayoutGrid, badge: "Live" },
+  { id: "people", label: "People & Roles", icon: Users },
+  { id: "cards", label: "Jan Seva Cards", icon: CreditCard },
+  { id: "content", label: "CMS Studio", icon: Images },
+  { id: "services", label: "Services", icon: BriefcaseBusiness },
+  { id: "requests", label: "Welfare Operations", icon: ClipboardList },
+  { id: "system", label: "System & Security", icon: ShieldCheck },
 ];
 
 const emptyState: AdminState = {
@@ -702,7 +703,7 @@ export default function AdminHub() {
                 </button>
 
                 <button
-                  onClick={() => { setSection("people"); setPeopleTab("cards"); }}
+                  onClick={() => { setSection("cards"); setPeopleTab("cards"); }}
                   className="rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-sm hover:border-[#1E3A8A] hover:shadow-md transition group"
                 >
                   <div className="flex items-center justify-between">
@@ -763,7 +764,7 @@ export default function AdminHub() {
           )}
 
           {/* SECTION 2: PEOPLE & DATA STUDIO */}
-          {section === "people" && (
+          {(section === "people" || section === "cards") && (
             <div className="space-y-5">
               {/* SUB-TABS */}
               <div className="flex gap-2 border-b border-slate-200 pb-3">
@@ -784,7 +785,7 @@ export default function AdminHub() {
                   Volunteers Directory ({filterRows(data.volunteers).length})
                 </button>
                 <button
-                  onClick={() => setPeopleTab("cards")}
+                  onClick={() => { setSection("cards"); setPeopleTab("cards"); }}
                   className={`rounded-2xl px-4 py-2.5 text-xs font-bold transition ${
                     peopleTab === "cards" ? "bg-[#0A192F] text-white font-black shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                   }`}
@@ -794,7 +795,7 @@ export default function AdminHub() {
               </div>
 
               {/* TABLE 1: USERS */}
-              {peopleTab === "users" && (
+              {section === "people" && peopleTab === "users" && (
                 <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
                     <div>
@@ -871,7 +872,7 @@ export default function AdminHub() {
               )}
 
               {/* TABLE 2: VOLUNTEERS */}
-              {peopleTab === "volunteers" && (
+              {section === "people" && peopleTab === "volunteers" && (
                 <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
                   <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                     <h3 className="text-sm font-black text-[#0A192F]">Volunteers Desk Directory</h3>
@@ -927,7 +928,7 @@ export default function AdminHub() {
                 </div>
               )}
 
-              {peopleTab === "cards" && (
+              {(section === "cards") && (
                 <section className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                   <h3 className="text-sm font-black text-emerald-950">Jan Seva Card · Admin Import & Sync</h3>
                   <p className="mt-1 text-xs text-emerald-900">Import an authorized JSON export. All source fields are preserved; duplicate card numbers are updated. Maximum 25 MB per file.</p>
@@ -948,7 +949,7 @@ export default function AdminHub() {
                 </section>
               )}
               {/* TABLE 3: JAN SEVA CARDS */}
-              {peopleTab === "cards" && (
+              {section === "cards" && (
                 <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
                   <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                     <h3 className="text-sm font-black text-[#0A192F]">Jan Seva Smart Identity Cards</h3>
