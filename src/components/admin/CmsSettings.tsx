@@ -489,7 +489,6 @@ export const CmsSettings = () => {
             </div>
           </div>
 
-          {radioTestUrl && <p role="status" className="rounded-xl border border-sky-200 bg-sky-50 p-3 text-xs text-sky-900">{radioTestStatus} <span className="block break-all opacity-70">{radioTestUrl}</span></p>}
           <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-400 font-black uppercase tracking-wider">
@@ -528,6 +527,7 @@ export const CmsSettings = () => {
       )}
 
       {/* TAB 3: INTERNET RADIO STATIONS (VISUAL TABLE) */}
+      {radioTestUrl && activeTab === "radio" && <p role="status" className="rounded-xl border border-sky-200 bg-sky-50 p-3 text-xs text-sky-900">{radioTestStatus} <span className="block break-all opacity-70">{radioTestUrl}</span></p>}
       {activeTab === 'radio' && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
