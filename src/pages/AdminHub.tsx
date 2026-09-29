@@ -994,6 +994,11 @@ export default function AdminHub() {
           {/* SECTION 3: CONTENT & MEDIA STUDIO */}
           {section === "content" && (
             <div className="space-y-5">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                <h2 className="text-sm font-black text-emerald-900">CMS & Media Control</h2>
+                <p className="mt-1 text-xs text-emerald-800">Manage carousel, announcements, TV and Radio in this studio. Publish settings only after checking media URLs.</p>
+              </div>
+              <CmsSettings />
               <div className="flex gap-2 border-b border-slate-200 pb-3">
                 <button
                   onClick={() => setContentTab("carousel")}
@@ -1305,8 +1310,9 @@ export default function AdminHub() {
 
           {/* SECTION 6: SYSTEM CONFIG & AUDIT LOGS */}
           {section === "system" && (
-            <div className="space-y-6">
-              <CmsSettings />
+            <div className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 className="text-lg font-black text-slate-900">System & Security</h2>
+              <p className="text-sm text-slate-600">CMS and Radio management are available in CMS Studio. Production authentication and role security must be verified before release.</p>
             </div>
           )}
         </main>
