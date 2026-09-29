@@ -170,6 +170,22 @@ export const CmsSettings = () => {
     resetModalInputs();
   };
 
+  const editRadio = (index: number) => {
+    const station = radios[index];
+    const name = window.prompt('Station name', station.name);
+    if (name === null) return;
+    const url = window.prompt('Direct audio stream URL (MP3, AAC or HLS .m3u8)', station.url);
+    if (url === null) return;
+    let valid = false;
+    try { valid = ['http:', 'https:'].includes(new URL(url.trim()).protocol); } catch { valid = false; }
+    if (!name.trim() || !valid) { toast.error('Valid name and stream URL required'); return; }
+    set('internetRadioStations', radios.map((item, i) => i === index ? { ...item, name: name.trim(), url: url.trim() } : item));
+    toast('Station edited. Save All System Settings to publish.');
+  };
+  const toggleRadioStation = (index: number) => {
+    set('internetRadioStations', radios.map((item, i) => i === index ? { ...item, enabled: item.enabled === false } : item));
+  };
+
   const deleteRadio = (index: number) => {
     const next = [...radios];
     next.splice(index, 1);
@@ -533,6 +549,14 @@ export const CmsSettings = () => {
                     <td className="px-5 py-3 font-bold text-slate-900">{st.name}</td>
                     <td className="px-4 py-3 text-slate-500 break-all max-w-sm">{st.url}</td>
                     <td className="px-4 py-3 text-right">
+                      <button type="button" onClick={() => editRadio(index)}
+                        className="mr-2 rounded-lg bg-emerald-50 p-2 text-emerald-800" title="Edit Station">
+                        <Edit3 className="h-4 w-4" />
+                      </button>
+                      <button type="button" onClick={() => toggleRadioStation(index)}
+                        className={`mr-2 rounded-lg px-2 py-1 text-xs font-bold ${st.enabled === false ? 'bg-slate-100 text-slate-600' : 'bg-emerald-50 text-emerald-800'}`}>
+                        {st.enabled === false ? 'Disabled' : 'Enabled'}
+                      </button>
                       <button
                         onClick={() => deleteRadio(index)}
                         className="text-rose-600 hover:text-rose-800 font-bold text-xs p-1.5 rounded-xl hover:bg-rose-50"
