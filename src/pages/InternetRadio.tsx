@@ -8,7 +8,7 @@ import { useMedia } from '../context/MediaContext';
 interface RadioStation {
   name: string;
   url: string;
-  image: string;
+  image?: string;
   page?: string;
   enabled?: boolean;
   order?: number;
@@ -108,9 +108,8 @@ export default function InternetRadio() {
     };
   }, []);
 
-  const currentStation = activeRadio || stations.find((s) => s.name.toLowerCase() === 'akashvani bhopal') || stations[0];
-
   const visibleStations = useMemo(() => stations.filter((s) => s.enabled !== false), [stations]);
+  const currentStation = activeRadio || visibleStations.find((s) => s.name.toLowerCase() === 'akashvani bhopal') || visibleStations[0];
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return visibleStations.filter(
