@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useRef, useEffect } from 'r
 export interface RadioStation {
   name: string;
   url: string;
-  image: string;
+  image?: string;
   page?: string;
   enabled?: boolean;
 }
