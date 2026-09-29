@@ -343,6 +343,16 @@ router.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, r
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      // Serialize concurrent approvals for the same card, then reject a second owner.
+      await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [cardNo]);
+      const assigned = await client.query(
+        'SELECT "userId" FROM card_applications_v2 WHERE "cardNo" = $1 AND "userId" <> $2 LIMIT 1',
+        [cardNo, userId]
+      );
+      if (assigned.rows.length) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ success: false, error: 'This card is already linked to another account; manual verification required' });
+      }
       const application = await client.query(
         'UPDATE card_applications_v2 SET status = $1, "cardNo" = $2 WHERE "userId" = $3 RETURNING "userId"',
         ['approved', cardNo, userId]
