@@ -57,6 +57,8 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hlsRef = useRef<any>(null);
+  // Ignore late HLS callbacks when a listener switches stations or stops playback.
+  const playbackGeneration = useRef(0);
 
   // Initialize background audio element
   useEffect(() => {
@@ -93,6 +95,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const stopRadio = () => {
+    playbackGeneration.current += 1;
     if (hlsRef.current) {
       try {
         hlsRef.current.destroy();
@@ -112,6 +115,8 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
   };
 
   const playRadio = async (station: RadioStation) => {
+    const generation = ++playbackGeneration.current;
+    const isCurrent = () => playbackGeneration.current === generation;
     // If TV is active, close it
     if (isTvOpen) {
       closeTv();
@@ -147,6 +152,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         const Hls = (await import('hls.js')).default;
+        if (!isCurrent()) return;
         if (Hls.isSupported()) {
           const hls = new Hls({
             lowLatencyMode: true,
@@ -159,19 +165,21 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
           hls.loadSource(station.url);
           hls.attachMedia(audio);
           hls.on(Hls.Events.MANIFEST_PARSED, async () => {
+            if (!isCurrent()) return;
             try {
               await audio.play();
-              setIsRadioPlaying(true);
+              if (isCurrent()) setIsRadioPlaying(true);
             } catch {
+              if (!isCurrent()) return;
               setIsRadioPlaying(false);
               setRadioError('Tap play to start');
             } finally {
-              setIsRadioLoading(false);
+              if (isCurrent()) setIsRadioLoading(false);
             }
           });
           let recoveryAttempts = 0;
           hls.on(Hls.Events.ERROR, (_: any, data: any) => {
-            if (!data.fatal) return;
+            if (!isCurrent() || !data.fatal) return;
             if (recoveryAttempts++ < 2 && data.type === Hls.ErrorTypes.NETWORK_ERROR) {
               hls.startLoad();
               setRadioError('Radio connection interrupted. Retrying stream…');
@@ -199,11 +207,12 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
       }
 
       await audio.play();
-      setIsRadioPlaying(true);
+      if (isCurrent()) setIsRadioPlaying(true);
     } catch {
+      if (!isCurrent()) return;
       setRadioError('Could not start this stream. Please try another station or check your connection.');
     } finally {
-      if (!hlsRef.current) {
+      if (isCurrent() && !hlsRef.current) {
         setIsRadioLoading(false);
       }
     }
