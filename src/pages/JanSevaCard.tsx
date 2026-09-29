@@ -40,6 +40,23 @@ export default function JanSevaCard() {
   const { user, token, updateUser } = useAuth();
   const { settings, submitCardApplication } = useApp();
   
+
+  const [verifiedCard, setVerifiedCard] = useState<{ status: string; cardNo: string | null; name?: string; gender?: string; dob?: string; address?: string } | null>(null);
+  const [cardLookupDone, setCardLookupDone] = useState(false);
+  useEffect(() => {
+    if (!token || !user?.id) { setVerifiedCard(null); setCardLookupDone(true); return; }
+    let cancelled = false;
+    setCardLookupDone(false);
+    axios.get('/api/cards/my', { headers: { Authorization: `Bearer ${token}` }, timeout: 12000 })
+      .then(response => {
+        if (cancelled) return;
+        const record = response.data?.application;
+        setVerifiedCard(record && record.status === 'approved' && record.cardNo ? record : null);
+      })
+      .catch(() => { if (!cancelled) setVerifiedCard(null); })
+      .finally(() => { if (!cancelled) setCardLookupDone(true); });
+    return () => { cancelled = true; };
+  }, [token, user?.id]);
   const [view, setView] = useState<"home" | "apply">("home");
   const [step, setStep] = useState(0);
   const [subPage, setSubPage] = useState<"portal" | "tools">("portal");
@@ -170,7 +187,7 @@ export default function JanSevaCard() {
 
   // ✨ FIXED: PDF Download with front + back
   const handleSimulateDownload = async () => {
-    if (user?.janSevaCardStatus !== "approved" || !user?.janSevaCardNo) {
+    if (!cardLookupDone || !verifiedCard?.cardNo) {
       alert(lang === "hi" ? "सत्यापित कार्ड उपलब्ध नहीं है।" : "No verified card available.");
       return;
     }
@@ -220,11 +237,11 @@ export default function JanSevaCard() {
   };
 
   // Card details to render
-  const cardName = user?.name || "";
-  const cardGender = user?.gender || "";
-  const cardDob = user?.dob || "N/A";
-  const cardAddress = user?.address || "";
-  const cardNumber = user?.janSevaCardNo || "";
+  const cardName = verifiedCard?.name || user?.name || "";
+  const cardGender = verifiedCard?.gender || "";
+  const cardDob = verifiedCard?.dob || "";
+  const cardAddress = verifiedCard?.address || "";
+  const cardNumber = verifiedCard?.cardNo || "";
 
   const activeBenefits = lang === "hi" ? BENEFITS_HI : BENEFITS_EN;
 
@@ -308,7 +325,7 @@ export default function JanSevaCard() {
   }
 
   // ✨ FIXED: Approved Card with Flip UI
-  if (user?.janSevaCardStatus === "approved") {
+  if (cardLookupDone && verifiedCard?.cardNo) {
     return (
       <div className="p-4 space-y-4 animate-fadeIn pb-28 max-w-md mx-auto">
         
