@@ -163,31 +163,12 @@ export default function JanSevaCard() {
     }
   };
 
-  const handleAdminApprove = async () => {
-    const year = new Date().getFullYear();
-    const sequence = Math.floor(100000 + Math.random() * 900000);
-    const newCardNo = `JSC-${year}-${sequence}`;
-
-    await updateUser({ 
-      janSevaCardStatus: "approved",
-      janSevaCardNo: user?.janSevaCardNo || newCardNo
-    });
-  };
-
-  const handleResetCard = async () => {
-    if (window.confirm(lang === "hi" ? "क्या आप अपना कार्ड रीसेट करके फिर से आवेदन करना चाहते हैं?" : "Are you sure you want to reset your card and re-apply?")) {
-      await updateUser({ 
-        janSevaCardStatus: "none",
-        janSevaCardNo: undefined
-      });
-      setUploadedFile(null);
-      setStep(0);
-      setView("home");
-    }
-  };
-
   // ✨ FIXED: PDF Download with front + back
   const handleSimulateDownload = async () => {
+    if (user?.janSevaCardStatus !== "approved" || !user?.janSevaCardNo) {
+      alert(lang === "hi" ? "सत्यापित कार्ड उपलब्ध नहीं है।" : "No verified card available.");
+      return;
+    }
     setPdfLoading(true);
     try {
       const { jsPDF } = await import("jspdf");
@@ -234,11 +215,11 @@ export default function JanSevaCard() {
   };
 
   // Card details to render
-  const cardName = user?.name || "Vinay Kumar";
-  const cardGender = user?.gender || "Male";
+  const cardName = user?.name || "";
+  const cardGender = user?.gender || "";
   const cardDob = user?.dob || "N/A";
-  const cardAddress = user?.address || "Raj Colony Karond, Bhopal, Madhya Pradesh";
-  const cardNumber = user?.janSevaCardNo || "0001 0151 0001 9244";
+  const cardAddress = user?.address || "";
+  const cardNumber = user?.janSevaCardNo || "";
 
   const activeBenefits = lang === "hi" ? BENEFITS_HI : BENEFITS_EN;
 
