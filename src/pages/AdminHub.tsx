@@ -136,6 +136,48 @@ export default function AdminHub() {
   // Search & Filter
   const [globalSearch, setGlobalSearch] = useState("");
   const [peopleTab, setPeopleTab] = useState<"users" | "volunteers" | "cards">("users");
+  const [cardImportStatus, setCardImportStatus] = useState('');
+  const [cardImportBusy, setCardImportBusy] = useState(false);
+  const [cardSyncPage, setCardSyncPage] = useState(1);
+  const importCardJson = async (file?: File) => {
+    if (!file || !token) return;
+    setCardImportBusy(true);
+    setCardImportStatus('Reading card file...');
+    try {
+      if (file.size > 25 * 1024 * 1024) throw new Error('Maximum file size is 25 MB. Split larger exports.');
+      const parsed: unknown = JSON.parse(await file.text());
+      const records: unknown = Array.isArray(parsed) ? parsed : (parsed as any)?.patients;
+      if (!Array.isArray(records)) throw new Error('Expected a JSON array or an object with a patients array.');
+      let imported = 0, skipped = 0;
+      for (let i = 0; i < records.length; i += 200) {
+        const response = await axios.post('/api/admin/cards/import', { records: records.slice(i, i + 200) }, {
+          headers: { Authorization: `Bearer ${token}` }, timeout: 30000
+        });
+        imported += response.data.imported || 0;
+        skipped += response.data.skipped || 0;
+        setCardImportStatus(`Processed ${Math.min(i + 200, records.length)} / ${records.length}; imported ${imported}; skipped ${skipped}`);
+      }
+      if (!records.length) setCardImportStatus('File has no records.');
+    } catch (error: any) {
+      setCardImportStatus(error?.response?.data?.error || error?.message || 'Import failed');
+    } finally { setCardImportBusy(false); }
+  };
+  const syncCardPage = async () => {
+    if (!token) return;
+    setCardImportBusy(true);
+    setCardImportStatus(`Syncing external page ${cardSyncPage}...`);
+    try {
+      const response = await axios.post('/api/admin/cards/sync', { page: cardSyncPage, limit: 100 }, {
+        headers: { Authorization: `Bearer ${token}` }, timeout: 25000
+      });
+      const result = response.data;
+      setCardImportStatus(`Page ${cardSyncPage}: ${result.imported} imported, ${result.skipped} skipped; external total: ${result.totalPatients ?? 'unavailable'}`);
+      if (result.received > 0) setCardSyncPage(page => page + 1);
+    } catch (error: any) {
+      setCardImportStatus(error?.response?.data?.error || error?.message || 'External sync failed');
+    } finally { setCardImportBusy(false); }
+  };
+
   const [contentTab, setContentTab] = useState<"carousel" | "instagram" | "announcements" | "media">("carousel");
   const [requestTab, setRequestTab] = useState<"grievances" | "blood" | "jobs">("grievances");
   const [systemTab, setSystemTab] = useState<"settings" | "audit" | "export">("settings");
@@ -885,6 +927,26 @@ export default function AdminHub() {
                 </div>
               )}
 
+              {peopleTab === "cards" && (
+                <section className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                  <h3 className="text-sm font-black text-emerald-950">Jan Seva Card · Admin Import & Sync</h3>
+                  <p className="mt-1 text-xs text-emerald-900">Import an authorized JSON export. All source fields are preserved; duplicate card numbers are updated. Maximum 25 MB per file.</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <label className="cursor-pointer rounded-xl bg-[#167C5A] px-4 py-2 text-xs font-bold text-white">
+                      {cardImportBusy ? 'Processing...' : 'Bulk Upload JSON'}
+                      <input type="file" accept=".json,application/json" disabled={cardImportBusy}
+                        onChange={event => { void importCardJson(event.target.files?.[0]); event.target.value = ''; }}
+                        className="sr-only" />
+                    </label>
+                    <button type="button" disabled={cardImportBusy} onClick={() => void syncCardPage()}
+                      className="rounded-xl border border-emerald-300 bg-white px-4 py-2 text-xs font-bold text-emerald-950 disabled:opacity-50">
+                      Sync external API page {cardSyncPage}
+                    </button>
+                  </div>
+                  {cardImportStatus && <p role="status" className="mt-3 text-xs font-medium text-emerald-950">{cardImportStatus}</p>}
+                  <p className="mt-2 text-[11px] text-emerald-800">Only authorized administrators can import or sync. Card holders need separately verified accounts to sign in.</p>
+                </section>
+              )}
               {/* TABLE 3: JAN SEVA CARDS */}
               {peopleTab === "cards" && (
                 <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
