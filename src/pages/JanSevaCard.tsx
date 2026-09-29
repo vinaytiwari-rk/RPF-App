@@ -37,7 +37,7 @@ const BENEFITS_EN = [
 export default function JanSevaCard() {
   const navigate = useNavigate();
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
-  const { user, updateUser } = useAuth();
+  const { user, token, updateUser } = useAuth();
   const { settings, submitCardApplication } = useApp();
   
   const [view, setView] = useState<"home" | "apply">("home");
@@ -121,7 +121,8 @@ export default function JanSevaCard() {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (form.idNumber.length !== 12) {
+    if (!token || !user?.id) { setErrorMsg(lang === "hi" ? "आवेदन के लिए लॉगिन करें।" : "Please log in to apply."); return; }
+    if (!/^\d{12}$/.test(form.idNumber)) {
       setErrorMsg(lang === "hi" ? "कृपया 12 अंकों का आधार नंबर दर्ज करें।" : "Please enter a valid 12-digit Aadhaar number.");
       return;
     }
@@ -132,20 +133,20 @@ export default function JanSevaCard() {
     
     try {
       const res = await axios.post("/api/cards", {
-        userId: user?.id || "guest",
+        userId: user.id,
         name: form.name,
         gender: form.gender,
         dob: form.dob || "N/A",
         address: fullAddress,
         idType: "aadhaar",
         idNumber: form.idNumber
-      });
+      }, { headers: { Authorization: `Bearer ${token}` }, timeout: 20000 });
 
       if (res.data.success) {
         if (user) {
           await updateUser({ 
-            janSevaCardStatus: "approved",
-            janSevaCardNo: res.data.cardNo,
+            janSevaCardStatus: res.data.status === "approved" ? "approved" : "pending",
+            janSevaCardNo: res.data.cardNo || undefined,
             name: form.name,
             gender: form.gender,
             dob: form.dob || "N/A",
@@ -156,7 +157,7 @@ export default function JanSevaCard() {
       }
     } catch (err: any) {
       console.error("Card submission failed:", err);
-      setErrorMsg(err.response?.data?.error || "An error occurred during submission.");
+      setErrorMsg(err.response?.status === 401 ? (lang === "hi" ? "सेशन समाप्त हो गया है। दोबारा लॉगिन करें।" : "Session expired. Please log in again.") : (err.response?.data?.error || "An error occurred during submission."));
     } finally {
       setSubmitting(false);
     }
@@ -716,83 +717,41 @@ export default function JanSevaCard() {
     );
   }
 
-  // View: Card home / Apply portal page (No applied state)
+  // A simple service-first landing page; no simulated card or unverified benefits.
   return (
-    <div className="space-y-6 animate-fadeIn font-sans relative">
-      
-      {/* 3D Gold Accent card mockup */}
-      <div className="bg-gradient-to-tr from-[#000080] via-[#102A6A] to-[#1E3A8A] rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden border border-white/5 animate-float">
-        <div className="absolute top-0 right-0 w-36 h-36 bg-white/10 rounded-full blur-2xl transform translate-x-12 -translate-y-12"></div>
-        
-        <div className="flex justify-between items-start mb-6">
-          <div className="p-2 bg-white/10 rounded-xl backdrop-blur-md border border-white/10">
-            <QrCode className="w-9 h-9 text-white/90" />
-          </div>
-          <span className="bg-[#FF9933] text-white text-[7.5px] font-black uppercase px-2 py-0.5 rounded-full tracking-widest border border-white/20">
-            Jan Seva Identity
-          </span>
+    <div className="mx-auto max-w-md space-y-5 px-1 pb-8">
+      <section className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-[#F0FAF4] via-white to-[#FFF3E5] p-6 shadow-sm">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#245D45] shadow-sm">
+          <Shield className="h-4 w-4" /> RP Foundation · Jan Seva
         </div>
-
-        <div className="space-y-1.5">
-          <h2 className="font-display font-extrabold text-xl tracking-wide">
-            {lang === "hi" ? "डिजिटल जनसेवा कार्ड" : "Digital Jan Seva Card"}
-          </h2>
-          <p className="text-[10.5px] text-slate-200/90 leading-relaxed max-w-[260px] font-medium">
-            {lang === "hi" 
-              ? "पंजीकरण करके प्राथमिकता प्राप्त करें, निःशुल्क स्वास्थ्य शिविरों में भाग लें, और अपने सामाजिक योगदान को डिजिटल ट्रैक करें।"
-              : "Access direct community benefits, local emergency direct support, and digitized welfare priority index."}
-          </p>
+        <h2 className="text-2xl font-black tracking-tight text-[#243B32]">{lang === "hi" ? "आपका जन सेवा कार्ड" : "Your Jan Seva Card"}</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{lang === "hi" ? "आवेदन करें, अपने कार्ड की स्थिति देखें और उपलब्ध सेवाओं की जानकारी एक ही जगह पाएँ।" : "Apply, track your card and explore available services in one place."}</p>
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <button onClick={() => user ? setView("apply") : navigate("/login")} className="rounded-2xl bg-[#245D45] px-3 py-3.5 text-sm font-bold text-white">
+            {lang === "hi" ? "नया आवेदन" : "Apply now"}
+          </button>
+          <button onClick={() => user ? navigate("/profile") : navigate("/login")} className="rounded-2xl border border-[#245D45]/30 bg-white px-3 py-3.5 text-sm font-bold text-[#245D45]">
+            {lang === "hi" ? "मेरी प्रोफ़ाइल" : "My profile"}
+          </button>
         </div>
-      </div>
-
-      {/* Why Apply benefits cards */}
-      <div className="space-y-3.5">
-        <h3 className="font-display font-extrabold text-xs text-slate-800 uppercase tracking-widest border-b border-slate-200 pb-2">
-          {lang === "hi" ? "कार्ड प्राप्त करने के लाभ" : "Key Membership Perks"}
-        </h3>
-        
-        <div className="grid grid-cols-2 gap-3.5">
-          <div className="bg-white border border-slate-200 p-4.5 rounded-2xl shadow-xs text-center space-y-2">
-            <div className="w-10 h-10 bg-green-50 border border-green-150 rounded-full flex items-center justify-center mx-auto text-green-700">
-              <CheckCircle className="w-5 h-5" />
+      </section>
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h3 className="text-base font-black text-[#243B32]">{lang === "hi" ? "कैसे काम करता है?" : "How it works"}</h3>
+        <div className="mt-4 space-y-4">
+          {[
+            { n: "01", hi: "सही विवरण भरें", en: "Submit your details", hd: "नाम, पता और पहचान संबंधी आवश्यक जानकारी।", ed: "Provide the required personal and identity details." },
+            { n: "02", hi: "सत्यापन", en: "Verification", hd: "आपके आवेदन की जाँच अधिकृत टीम करेगी।", ed: "An authorized team reviews your application." },
+            { n: "03", hi: "कार्ड प्राप्त करें", en: "Receive your card", hd: "स्वीकृति के बाद कार्ड आपके खाते में दिखाई देगा।", ed: "Your card appears in your account after approval." }
+          ].map(item => (
+            <div key={item.n} className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F0FAF4] text-xs font-black text-[#245D45]">{item.n}</span>
+              <div><h4 className="text-sm font-bold text-[#243B32]">{lang === "hi" ? item.hi : item.en}</h4>
+                <p className="mt-1 text-xs leading-5 text-slate-500">{lang === "hi" ? item.hd : item.ed}</p></div>
             </div>
-            <h4 className="font-black text-xs text-slate-800 leading-none">Instant Access</h4>
-            <p className="text-[9.5px] text-slate-400 font-bold leading-tight">Priority pass at health camps</p>
-          </div>
-          
-          <div className="bg-white border border-slate-200 p-4.5 rounded-2xl shadow-xs text-center space-y-2">
-            <div className="w-10 h-10 bg-indigo-50 border border-indigo-150 rounded-full flex items-center justify-center mx-auto text-indigo-700">
-              <Award className="w-5 h-5" />
-            </div>
-            <h4 className="font-black text-xs text-slate-800 leading-none">Social Rewards</h4>
-            <p className="text-[9.5px] text-slate-400 font-bold leading-tight">Gain points and badges</p>
-          </div>
+          ))}
         </div>
-      </div>
-
-      {/* Disclaimer / Info */}
-      <div className="bg-blue-50/60 border border-blue-150 rounded-2xl p-4 flex gap-3 text-blue-900">
-        <Shield className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
-        <div className="space-y-0.5">
-          <span className="text-xs font-black uppercase tracking-wider block">Official Registration</span>
-          <p className="text-[10px] font-medium leading-relaxed opacity-90">
-            {lang === "hi" 
-              ? "कार्ड पूरी तरह से निःशुल्क है और केवल सामाजिक सेवा में सहायता हेतु है। आवेदन के लिए आपके आधार विवरण और पता प्रमाणीकरण आवश्यक है।"
-              : "Cards are issued free of charge to registered volunteers and beneficiaries. Standard KYC validation applies."}
-          </p>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="space-y-3.5">
-        <button 
-          onClick={() => setView("apply")}
-          className="w-full bg-[#FF9933] hover:bg-[#e68a2e] text-white font-black py-4.5 rounded-2xl shadow-lg hover:shadow-xl transition flex justify-center items-center gap-1.5 cursor-pointer uppercase tracking-wider text-xs"
-        >
-          <span>{lang === "hi" ? "जन सेवा कार्ड के लिए आवेदन करें" : "Apply for Membership Card"}</span>
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+      </section>
+      <p className="px-3 text-center text-xs leading-5 text-slate-500">{lang === "hi" ? "आवेदन निःशुल्क है। कार्ड केवल अधिकृत सत्यापन के बाद जारी किया जाता है।" : "Applications are free. Cards are issued only after authorized verification."}</p>
     </div>
   );
 };
