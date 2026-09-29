@@ -32,6 +32,100 @@ const setCached = (key: string, data: any, ttlMs = CACHE_TTL_MS) => {
  * 2. Regular USERS can ONLY view/search/download THEIR OWN Jan Seva Card (/api/cards/my).
  */
 
+// Preserve the upstream schema without guessing or dropping unknown Jan Seva fields.
+// Migration is idempotent; production deployments should provision this table before imports.
+const ensureMirror = async () => {
+  await pool.query(`CREATE TABLE IF NOT EXISTS jan_seva_card_mirror (
+    card_no TEXT PRIMARY KEY,
+    record JSONB NOT NULL,
+    source TEXT NOT NULL,
+    synced_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+};
+const cardNumber = (record: any): string | null => {
+  const value = record?.cardNo ?? record?.card_no ?? record?.janSevaCardNo;
+  return typeof value === 'string' || typeof value === 'number' ? String(value).trim() || null : null;
+};
+const writeMirror = async (records: any[], source: string) => {
+  await ensureMirror();
+  const client = await pool.connect();
+  let imported = 0, skipped = 0;
+  try {
+    await client.query('BEGIN');
+    for (const record of records) {
+      const number = record && typeof record === 'object' && !Array.isArray(record) ? cardNumber(record) : null;
+      if (!number) { skipped++; continue; }
+      await client.query(
+        `INSERT INTO jan_seva_card_mirror (card_no, record, source, synced_at)
+         VALUES ($1, $2::jsonb, $3, NOW())
+         ON CONFLICT (card_no) DO UPDATE SET record = EXCLUDED.record, source = EXCLUDED.source, synced_at = NOW()`,
+        [number, JSON.stringify(record), source]
+      );
+      imported++;
+    }
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally { client.release(); }
+  cardCache.clear();
+  return { imported, skipped };
+};
+
+// Explicit admin-only import: one batch at a time, no unbounded 66k-row request.
+// Accepts JSON arrays exported from the authorized Jan Seva system.
+router.post('/api/admin/cards/import', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const records = req.body?.records;
+    if (!Array.isArray(records) || records.length < 1 || records.length > 500)
+      return res.status(400).json({ success: false, error: 'Provide 1–500 card records per batch' });
+    const result = await writeMirror(records, 'admin-import');
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    console.error('Jan Seva card import failed:', error?.message);
+    res.status(500).json({ success: false, error: 'Card import failed' });
+  }
+});
+
+// The external endpoint's paging contract must be verified against the real API.
+// Stop if the response schema differs; never infer that 66k records were synced.
+router.post('/api/admin/cards/sync', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const page = Number(req.body?.page);
+    const limit = Number(req.body?.limit ?? 100);
+    if (!Number.isInteger(page) || page < 1 || !Number.isInteger(limit) || limit < 1 || limit > 500)
+      return res.status(400).json({ success: false, error: 'Valid page and limit (1–500) required' });
+    const headers = process.env.JAN_SEVA_API_TOKEN
+      ? { Authorization: `Bearer ${process.env.JAN_SEVA_API_TOKEN}` } : {};
+    const response = await axios.get(JAN_SEVA_API_BASE, { params: { page, limit }, headers, timeout: 15000 });
+    if (!Array.isArray(response.data?.patients))
+      return res.status(502).json({ success: false, error: 'External API schema not verified: expected patients array' });
+    const records = response.data.patients;
+    if (records.length > limit)
+      return res.status(502).json({ success: false, error: 'External API ignored requested page size' });
+    const result = records.length ? await writeMirror(records, 'external-api') : { imported: 0, skipped: 0 };
+    res.json({ success: true, page, limit, ...result, received: records.length,
+      totalPatients: Number.isFinite(Number(response.data.totalPatients)) ? Number(response.data.totalPatients) : null,
+      totalPages: Number.isFinite(Number(response.data.totalPages)) ? Number(response.data.totalPages) : null });
+  } catch (error: any) {
+    console.error('Jan Seva sync failed:', error?.message);
+    res.status(502).json({ success: false, error: 'External Jan Seva API unavailable or unauthorized' });
+  }
+});
+
+router.get('/api/admin/cards/mirror', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await ensureMirror();
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
+    const [rows, count] = await Promise.all([
+      pool.query('SELECT card_no, record, source, synced_at FROM jan_seva_card_mirror ORDER BY synced_at DESC LIMIT $1 OFFSET $2', [limit, (page - 1) * limit]),
+      pool.query('SELECT COUNT(*)::int AS total FROM jan_seva_card_mirror')
+    ]);
+    res.json({ success: true, records: rows.rows, total: count.rows[0]?.total || 0, page, limit });
+  } catch { res.status(500).json({ success: false, error: 'Card mirror unavailable' }); }
+});
+
 // Fetch all cards - STRICTLY ADMIN ONLY
 router.get("/api/cards", authenticateToken, requireAdmin, async (req, res) => {
   try {
