@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const router = express.Router();
 
-const JAN_SEVA_API_BASE = process.env.JAN_SEVA_API_URL || 'https://api.therpfoundation.org/api/patient';
+const JAN_SEVA_API_BASE = process.env.JAN_SEVA_API_URL || 'https://api.therpdoundation.org/api/patient';
 
 // Zero-Load In-Memory Caching (Prevents Server CPU/RAM Spikes & Rate Limits)
 const cardCache = new Map<string, { data: any, expiresAt: number }>();
