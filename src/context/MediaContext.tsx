@@ -138,6 +138,14 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
 
     try {
       if (/\.m3u8(?:\?|$)/i.test(station.url)) {
+        // Prefer native HLS (including Android WebViews that expose it) before
+        // importing hls.js. Native playback stays within the tap gesture.
+        if (audio.canPlayType('application/vnd.apple.mpegurl') || audio.canPlayType('application/x-mpegURL')) {
+          audio.src = station.url;
+          await audio.play();
+          setIsRadioPlaying(true);
+          return;
+        }
         const Hls = (await import('hls.js')).default;
         if (Hls.isSupported()) {
           const hls = new Hls({
