@@ -163,6 +163,11 @@ export default function JanSevaCard() {
     }
   };
 
+  const handleResetCard = () => {
+    // Only the authorized backend may change an application or issued card.
+    alert(lang === "hi" ? "आवेदन में बदलाव के लिए सहायता टीम से संपर्क करें।" : "Contact support to change an application.");
+  };
+
   // ✨ FIXED: PDF Download with front + back
   const handleSimulateDownload = async () => {
     if (user?.janSevaCardStatus !== "approved" || !user?.janSevaCardNo) {
