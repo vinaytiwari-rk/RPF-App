@@ -281,66 +281,50 @@ router.get("/api/cards/search", authenticateToken, async (req, res) => {
   }
 });
 
-// Create Jan Seva Card
-router.post("/api/cards", async (req, res) => {
+// Authenticated application. Never issue fabricated card numbers on upstream failure.
+router.post("/api/cards", authenticateToken, async (req: any, res) => {
   try {
-    const { userId, name, gender, dob, address, idType, idNumber, mobileNo, district, vidhanSabhaNo } = req.body;
-    
-    if (idType === "aadhaar" || idNumber) {
-      const existing = await pool.query('SELECT "cardNo" FROM card_applications_v2 WHERE "idNumber" = $1', [idNumber]);
-      if (existing.rows.length > 0) {
-         return res.status(400).json({ success: false, error: "A card with this ID number already exists.", cardNo: existing.rows[0].cardNo });
-      }
-    }
-
-    const submittedAt = new Date().toISOString();
-    const id = crypto.randomUUID();
-    const status = "approved"; // Instant generation
-
-    let cardNo = "";
-    try {
-      const apiResponse = await axios.post(`${JAN_SEVA_API_BASE}`, {
-        nameOfMember: name,
-        gender,
-        dob,
-        mobileNo,
-        aadhaarNo: idNumber,
-        district,
-        vidhanSabhaNo: vidhanSabhaNo || "0000",
-        addressType: "Urban",
-        createdBy: userId || "web_user"
-      }, { timeout: 4000 });
-
-      if (apiResponse.data && apiResponse.data.cardNo) {
-        cardNo = apiResponse.data.cardNo;
-      }
-    } catch (apiErr: any) {
-      console.warn("Failed to create on Mongo master API, generating local cardNo:", apiErr.message);
-    }
-
-    if (!cardNo) {
-      cardNo = `0001${(vidhanSabhaNo || '0000').padStart(4, '0')}0001${Math.floor(1000 + Math.random() * 9000)}`;
-    }
-
-    await pool.query(
-      `INSERT INTO card_applications_v2 
-       (id, "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt") 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-      [id, userId || "guest", name, gender, dob, address, idType || "aadhaar", idNumber, status, cardNo, submittedAt]
+    const actorId = String(req.user?.id || req.user?.userId || '');
+    if (!actorId) return res.status(401).json({ success: false, error: 'Login required' });
+    const { name, gender, dob, address, idType, idNumber, mobileNo, district, vidhanSabhaNo } = req.body || {};
+    if (!String(name || '').trim() || !/^\\d{12}$/.test(String(idNumber || '')))
+      return res.status(400).json({ success: false, error: 'Valid name and 12-digit identity number required' });
+    const existing = await pool.query(
+      'SELECT status, "cardNo" FROM card_applications_v2 WHERE "userId" = $1 OR "idNumber" = $2 LIMIT 1',
+      [actorId, idNumber]
     );
-
-    if (userId && userId !== "guest") {
-      await pool.query(
-        'UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
-        ["approved", cardNo, userId]
-      );
+    if (existing.rows.length) return res.status(409).json({
+      success: false, error: 'An application already exists. Contact support to update it.',
+      status: existing.rows[0].status
+    });
+    let cardNo: string | null = null;
+    try {
+      const headers = process.env.JAN_SEVA_API_TOKEN
+        ? { Authorization: `Bearer ${process.env.JAN_SEVA_API_TOKEN}` } : {};
+      const upstream = await axios.post(JAN_SEVA_API_BASE, {
+        nameOfMember: name, gender, dob, mobileNo, aadhaarNo: idNumber,
+        district, vidhanSabhaNo, addressType: 'Urban', createdBy: actorId
+      }, { headers, timeout: 12000 });
+      if (upstream.data?.cardNo) cardNo = String(upstream.data.cardNo);
+    } catch (error: any) {
+      console.warn('Jan Seva upstream application unavailable:', error?.response?.status || error?.code || 'unknown');
     }
-
-    cardCache.delete("cards:stats");
-    res.json({ success: true, cardNo });
+    const status = cardNo ? 'approved' : 'pending';
+    await pool.query(
+      `INSERT INTO card_applications_v2
+       (id, "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt")
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+      [crypto.randomUUID(), actorId, String(name).trim(), gender, dob, address, idType || 'aadhaar',
+        idNumber, status, cardNo, new Date().toISOString()]
+    );
+    await pool.query('UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
+      [status, cardNo, actorId]);
+    cardCache.clear();
+    res.status(cardNo ? 201 : 202).json({ success: true, status, cardNo,
+      message: cardNo ? 'Card issued by authorized API' : 'Application received; pending verification' });
   } catch (error: any) {
-    console.error("Error saving card application:", error);
-    res.status(500).json({ error: error.message });
+    console.error('Jan Seva application failed:', error?.code || error?.message);
+    res.status(500).json({ success: false, error: 'Unable to submit application' });
   }
 });
 
