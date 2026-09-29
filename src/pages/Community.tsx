@@ -37,6 +37,17 @@ export default function Community() {
   const [activeTab, setActiveTab] = useState<TabType>("stories");
   const [stories, setStories] = useState<SuccessStory[]>([]);
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+  const [cardImpact, setCardImpact] = useState<{ totalCards: number; scope: string } | null>(null);
+  useEffect(() => {
+    let active = true;
+    axios.get('/api/public/cards/impact', { timeout: 8000 }).then(({ data }) => {
+      if (active && data?.success && Number.isFinite(data.totalCards)) {
+        setCardImpact({ totalCards: data.totalCards, scope: data.scope });
+      }
+    }).catch(() => { /* Never show fabricated counts when API is unavailable. */ });
+    return () => { active = false; };
+  }, []);
+
   const [volunteerCityFilter, setVolunteerCityFilter] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +62,18 @@ export default function Community() {
     fetchSuccessStories();
     fetchVolunteers();
   }, []);
+
+  const cardImpactBanner = cardImpact ? (
+    <section aria-label="Jan Seva Card impact" className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
+      <p className="text-xs font-bold text-emerald-800">{isHi ? 'जन सेवा कार्ड' : 'Jan Seva Cards'}</p>
+      <p className="mt-1 text-3xl font-black text-emerald-950">{cardImpact.totalCards.toLocaleString('en-IN')}</p>
+      <p className="mt-1 text-xs text-emerald-800">
+        {cardImpact.scope === 'local-approved-only'
+          ? (isHi ? 'इस ऐप में स्वीकृत कार्ड' : 'Approved cards in this app')
+          : (isHi ? 'जन सेवा कार्ड सिस्टम द्वारा रिपोर्ट की गई संख्या' : 'Total reported by the Jan Seva Card system')}
+      </p>
+    </section>
+  ) : null;
 
   const fetchSuccessStories = async () => {
     try {
@@ -131,6 +154,8 @@ export default function Community() {
               : "Discover verified impact stories, ground health camps, and connect with volunteers across Madhya Pradesh."}
           </p>
         </section>
+
+        {cardImpactBanner}
 
         {/* Clean Segmented Tab Bar */}
         <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-200/60 border border-slate-200/80 text-xs font-bold">
