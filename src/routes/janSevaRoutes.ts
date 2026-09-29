@@ -331,20 +331,36 @@ router.post("/api/cards", authenticateToken, async (req: any, res) => {
 // Admin Approval & Management Routes
 router.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { userId } = req.body;
-    const cardNo = `000100000001${Math.floor(1000 + Math.random() * 9000)}`;
-    await pool.query(
-      'UPDATE card_applications_v2 SET status = $1, "cardNo" = $2 WHERE "userId" = $3',
-      ["approved", cardNo, userId]
-    );
-    await pool.query(
-      'UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
-      ["approved", cardNo, userId]
-    );
+    const userId = String(req.body?.userId || '').trim();
+    const cardNo = String(req.body?.cardNo || '').trim();
+    if (!userId || !cardNo || cardNo.length > 100)
+      return res.status(400).json({ success: false, error: 'Verified user ID and issued card number required' });
+    // Never mint a random card number. Match an already-issued upstream/mirrored record.
+    await ensureMirror();
+    const mirror = await pool.query('SELECT card_no FROM jan_seva_card_mirror WHERE card_no = $1 LIMIT 1', [cardNo]);
+    if (!mirror.rows.length)
+      return res.status(409).json({ success: false, error: 'Card number not found in synchronized Jan Seva records' });
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const application = await client.query(
+        'UPDATE card_applications_v2 SET status = $1, "cardNo" = $2 WHERE "userId" = $3 RETURNING "userId"',
+        ['approved', cardNo, userId]
+      );
+      if (!application.rowCount) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ success: false, error: 'Application not found' });
+      }
+      await client.query('UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
+        ['approved', cardNo, userId]);
+      await client.query('COMMIT');
+    } catch (error) { await client.query('ROLLBACK'); throw error; }
+    finally { client.release(); }
     cardCache.clear();
     res.json({ success: true, cardNo });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Jan Seva approval failed:', error?.code || error?.message);
+    res.status(500).json({ success: false, error: 'Approval failed' });
   }
 });
 
