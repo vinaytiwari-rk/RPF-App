@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const version = process.env.APP_VERSION || process.env.GITHUB_SHA || new Date().toISOString();
+const packageVersion = require('../package.json').version;
+const version = process.env.APP_VERSION || packageVersion;
 const payload = {
   version: String(version),
+  build: process.env.GITHUB_SHA || null,
   generatedAt: new Date().toISOString(),
 };
 
