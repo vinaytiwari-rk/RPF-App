@@ -153,10 +153,30 @@ export const CmsSettings = () => {
     toast.success("Channel removed. Tap 'Save Changes' to publish.");
   };
 
+  const validStreamUrl = (value: string) => {
+    try {
+      const parsed = new URL(value.trim());
+      return ['https:', 'http:'].includes(parsed.protocol) && Boolean(parsed.hostname);
+    } catch { return false; }
+  };
+  const [radioTestUrl, setRadioTestUrl] = useState<string | null>(null);
+  const [radioTestStatus, setRadioTestStatus] = useState('');
+  const testRadio = async (url: string) => {
+    setRadioTestUrl(url);
+    setRadioTestStatus('Checking stream response…');
+    try {
+      // Cross-origin stations may prohibit browser probing even when native audio plays.
+      const response = await fetch(url, { method: 'GET', mode: 'cors', headers: { Range: 'bytes=0-1023' }, signal: AbortSignal.timeout(8000) });
+      setRadioTestStatus(response.ok ? 'Stream endpoint responded; playback must still be checked on Android.' : `Stream returned HTTP ${response.status}`);
+      await response.body?.cancel();
+    } catch {
+      setRadioTestStatus('Browser check blocked or timed out. Verify playback in the app.');
+    }
+  };
   // 1-Click Operations for Radio
   const addRadio = () => {
-    if (!nameInput.trim() || !urlInput.trim()) {
-      toast.error("Station name and stream URL are required.");
+    if (!nameInput.trim() || !validStreamUrl(urlInput)) {
+      toast.error("Station name and a valid http/https stream URL are required.");
       return;
     }
     const newRadio: RadioStation = {
@@ -177,7 +197,7 @@ export const CmsSettings = () => {
     const url = window.prompt('Direct audio stream URL (MP3, AAC or HLS .m3u8)', station.url);
     if (url === null) return;
     let valid = false;
-    try { valid = ['http:', 'https:'].includes(new URL(url.trim()).protocol); } catch { valid = false; }
+    valid = validStreamUrl(url);
     if (!name.trim() || !valid) { toast.error('Valid name and stream URL required'); return; }
     set('internetRadioStations', radios.map((item, i) => i === index ? { ...item, name: name.trim(), url: url.trim() } : item));
     toast('Station edited. Save All System Settings to publish.');
@@ -469,6 +489,7 @@ export const CmsSettings = () => {
             </div>
           </div>
 
+          {radioTestUrl && <p role="status" className="rounded-xl border border-sky-200 bg-sky-50 p-3 text-xs text-sky-900">{radioTestStatus} <span className="block break-all opacity-70">{radioTestUrl}</span></p>}
           <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-400 font-black uppercase tracking-wider">
@@ -513,7 +534,7 @@ export const CmsSettings = () => {
             <div>
               <h3 className="text-sm font-black text-slate-900">Internet Radio Stations Directory</h3>
               <p className="text-xs text-slate-500 font-medium mt-0.5">
-                Add, edit or remove Radio stations. Instant live broadcast updates across the app.
+                Manage radio stations. Save changes to publish; test streams on Android before enabling.
               </p>
             </div>
             <div className="flex gap-2">
@@ -549,6 +570,8 @@ export const CmsSettings = () => {
                     <td className="px-5 py-3 font-bold text-slate-900">{st.name}</td>
                     <td className="px-4 py-3 text-slate-500 break-all max-w-sm">{st.url}</td>
                     <td className="px-4 py-3 text-right">
+                      <button type="button" onClick={() => void testRadio(st.url)}
+                        className="mr-2 rounded-lg bg-sky-50 px-2 py-1.5 text-xs font-bold text-sky-800" title="Check Stream">Check</button>
                       <button type="button" onClick={() => editRadio(index)}
                         className="mr-2 rounded-lg bg-emerald-50 p-2 text-emerald-800" title="Edit Station">
                         <Edit3 className="h-4 w-4" />
