@@ -75,6 +75,34 @@ router.get("/api/cards", authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
+// Public impact totals only. Never expose names, phone numbers, ID numbers or card records.
+router.get("/api/public/cards/impact", async (_req, res) => {
+  try {
+    const cached = getCached("cards:public-impact");
+    if (cached) return res.json(cached);
+    let total: number | null = null;
+    let source = "external";
+    try {
+      const response = await axios.get(`${JAN_SEVA_API_BASE}/stats`, { timeout: 5000 });
+      const data = response.data?.stats || response.data;
+      const value = data?.totalCards ?? data?.totalPatients ?? data?.total ?? data?.count;
+      if (value !== undefined && value !== null && Number.isFinite(Number(value)) && Number(value) >= 0) {
+        total = Number(value);
+      }
+    } catch { /* Use local count only when external stats cannot be reached. */ }
+    if (total === null) {
+      source = "local";
+      const local = await pool.query('SELECT COUNT(*)::int AS total FROM card_applications_v2 WHERE status = $1', ['approved']);
+      total = Number(local.rows[0]?.total || 0);
+    }
+    const payload = { success: true, totalCards: total, source, scope: source === 'local' ? 'local-approved-only' : 'external-reported', updatedAt: new Date().toISOString() };
+    setCached("cards:public-impact", payload, 120000);
+    res.json(payload);
+  } catch {
+    res.status(503).json({ success: false, error: 'Card totals temporarily unavailable' });
+  }
+});
+
 // Overall Stats - STRICTLY ADMIN ONLY
 router.get("/api/cards/stats", authenticateToken, requireAdmin, async (req, res) => {
   try {
