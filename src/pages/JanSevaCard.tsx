@@ -180,11 +180,6 @@ export default function JanSevaCard() {
     }
   };
 
-  const handleResetCard = () => {
-    // Only the authorized backend may change an application or issued card.
-    alert(lang === "hi" ? "आवेदन में बदलाव के लिए सहायता टीम से संपर्क करें।" : "Contact support to change an application.");
-  };
-
   // ✨ FIXED: PDF Download with front + back
   const handleSimulateDownload = async () => {
     if (!cardLookupDone || !verifiedCard?.cardNo) {
@@ -313,7 +308,7 @@ export default function JanSevaCard() {
           {/* Cancel & Re-apply button */}
           <div className="border-t border-slate-150 pt-5">
             <button 
-              onClick={handleResetCard}
+              onClick={() => alert(lang === "hi" ? "आवेदन में बदलाव के लिए सहायता टीम से संपर्क करें।" : "Contact support to change an application.")}
               className="w-full bg-slate-100 hover:bg-slate-150 border border-slate-200 text-slate-600 py-2.5 rounded-2xl font-bold text-xs transition cursor-pointer"
             >
               {lang === "hi" ? "आवेदन रद्द करें व फिर से भरें" : "Cancel & Re-apply"}
@@ -520,7 +515,7 @@ export default function JanSevaCard() {
 
         {/* Reset Button */}
         <button 
-          onClick={handleResetCard}
+          onClick={() => alert(lang === "hi" ? "आवेदन में बदलाव के लिए सहायता टीम से संपर्क करें।" : "Contact support to change an application.")}
           className="w-full bg-red-50 hover:bg-red-100 border border-red-150 text-red-700 py-3 rounded-2xl font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 no-print"
         >
           <RefreshCw className="w-3.5 h-3.5" />
