@@ -552,7 +552,7 @@ export default function JanSevaCard() {
               ))}</div>
             </fieldset>
             <label className="block text-xs font-bold text-slate-700">{lang === "hi" ? "जन्मतिथि" : "Date of birth"} *
-              <input required type="date" value={/^\\d{4}-\\d{2}-\\d{2}$/.test(form.dob) ? form.dob : ""} onChange={e => setForm({...form,dob:e.target.value})} className={inputClass} />
+              <input required type="date" value={/^\d{4}-\d{2}-\d{2}$/.test(form.dob) ? form.dob : ""} onChange={e => setForm({...form,dob:e.target.value})} className={inputClass} />
             </label>
           </section>
           <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -565,13 +565,13 @@ export default function JanSevaCard() {
               <label className="block text-xs font-bold text-slate-700">{lang === "hi" ? "राज्य" : "State"} *<input required value={form.state} onChange={e => setForm({...form,state:e.target.value})} className={inputClass} /></label>
             </div>
             <label className="block text-xs font-bold text-slate-700">{lang === "hi" ? "पिन कोड" : "PIN code"} *
-              <input required inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={form.pincode} onChange={e => setForm({...form,pincode:e.target.value.replace(/\\D/g,"")})} className={inputClass} />
+              <input required inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={form.pincode} onChange={e => setForm({...form,pincode:e.target.value.replace(/\D/g,"")})} className={inputClass} />
             </label>
           </section>
           <section className="space-y-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <h3 className="font-black text-[#243B32]">03 · {lang === "hi" ? "पहचान एवं सहमति" : "Identity & consent"}</h3>
             <label className="block text-xs font-bold text-slate-700">{lang === "hi" ? "आधार नंबर" : "Aadhaar number"} *
-              <input required inputMode="numeric" autoComplete="off" pattern="[0-9]{12}" maxLength={12} value={form.idNumber} onChange={e => setForm({...form,idNumber:e.target.value.replace(/\\D/g,"")})} className={inputClass} />
+              <input required inputMode="numeric" autoComplete="off" pattern="[0-9]{12}" maxLength={12} value={form.idNumber} onChange={e => setForm({...form,idNumber:e.target.value.replace(/\D/g,"")})} className={inputClass} />
             </label>
             <p className="text-xs leading-5 text-slate-500">{lang === "hi" ? "केवल अधिकृत पहचान सत्यापन के लिए। कृपया साझा डिवाइस पर आवेदन न करें।" : "For authorized identity verification only. Avoid submitting on shared devices."}</p>
             <label className="flex items-start gap-2 text-xs leading-5 text-slate-600"><input required type="checkbox" className="mt-1 accent-[#245D45]" />{lang === "hi" ? "मैं पुष्टि करता/करती हूँ कि ऊपर दी गई जानकारी सही है और सत्यापन के लिए सहमति देता/देती हूँ।" : "I confirm the information is accurate and consent to verification."}</label>
