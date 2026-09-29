@@ -1,3 +1,4 @@
+import { CORE_SERVICES } from '../../data/coreServices';
 import { SERVICE_GOV_LINKS, type GovLink } from "../../data/serviceGovLinks";
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -38,7 +39,7 @@ const FACT_CHECK_DEFAULTS = [
 
 export const CmsSettings = () => {
   const { token } = useAuth();
-  const { refreshData } = useApp();
+  const { refreshData, servicesList } = useApp();
   const [cms, setCms] = useState<CmsConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -85,10 +86,10 @@ export const CmsSettings = () => {
     : FACT_CHECK_DEFAULTS;
 
   const [selectedService, setSelectedService] = useState('blood');
-  const serviceOptions = Object.keys(SERVICE_GOV_LINKS).sort();
+  const serviceOptions = Array.from(new Set([...Object.keys(SERVICE_GOV_LINKS), ...CORE_SERVICES.map(s => s.id), ...servicesList.map((s: any) => s.id).filter(Boolean)])).sort();
   const websiteOverrides = ((cms as any)?.serviceWebsiteLinks || {}) as Record<string, GovLink[]>;
   const currentWebsites = Object.prototype.hasOwnProperty.call(websiteOverrides, selectedService)
-    ? websiteOverrides[selectedService] : SERVICE_GOV_LINKS[selectedService] || [];
+    ? websiteOverrides[selectedService] : (SERVICE_GOV_LINKS[selectedService] || []);
   const updateWebsites = (links: GovLink[]) =>
     set('serviceWebsiteLinks', { ...websiteOverrides, [selectedService]: links });
   const [websiteDraft, setWebsiteDraft] = useState<GovLink>({ title: '', titleHi: '', desc: '', descHi: '', url: '', isGov: false });
@@ -299,7 +300,7 @@ export const CmsSettings = () => {
           <label className="block text-sm font-semibold">Choose Service
             <select className="mt-2 w-full rounded-xl border border-slate-200 p-3" value={selectedService}
               onChange={e => { setSelectedService(e.target.value); setEditingWebsite(null); }}>
-              {serviceOptions.map(id => <option key={id} value={id}>{id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} ({(Object.prototype.hasOwnProperty.call(websiteOverrides, id) ? websiteOverrides[id] : SERVICE_GOV_LINKS[id]).length})</option>)}
+              {serviceOptions.map(id => <option key={id} value={id}>{id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} ({(Object.prototype.hasOwnProperty.call(websiteOverrides, id) ? websiteOverrides[id] : (SERVICE_GOV_LINKS[id] || [])).length})</option>)}
             </select>
           </label>
           <div className="space-y-2">{currentWebsites.map((link, index) => (
