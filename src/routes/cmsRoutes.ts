@@ -464,10 +464,27 @@ router.get("/api/cms", async (req, res) => {
 
 router.post("/api/cms", authenticateToken, requireAdmin, async (req, res) => {
   try {
+    const incoming = req.body;
+    if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) {
+      return res.status(400).json({ error: 'Invalid CMS payload' });
+    }
+    if (incoming.serviceWebsiteLinks !== undefined) {
+      if (!incoming.serviceWebsiteLinks || typeof incoming.serviceWebsiteLinks !== 'object' || Array.isArray(incoming.serviceWebsiteLinks)) {
+        return res.status(400).json({ error: 'Invalid service website links' });
+      }
+      for (const links of Object.values(incoming.serviceWebsiteLinks) as any[]) {
+        if (!Array.isArray(links) || links.some((link: any) => {
+          if (!link || typeof link.title !== 'string' || typeof link.url !== 'string') return true;
+          try { return !['http:', 'https:'].includes(new URL(link.url).protocol); }
+          catch { return true; }
+        })) return res.status(400).json({ error: 'Invalid website name or URL' });
+      }
+    }
     await pool.query(
-      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
-       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" = $1`,
-      [JSON.stringify(req.body)]
+      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1)
+       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" =
+       (COALESCE(NULLIF(settings."founderMessageEn", ''), '{}')::jsonb || $1::jsonb)::text`,
+      [JSON.stringify(incoming)]
     );
     res.json({ success: true });
   } catch (error: any) {
