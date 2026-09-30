@@ -150,7 +150,7 @@ export default function MyCertificates() {
                         <Award className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-[#14213D] truncate">
+                        <p className="text-xs font-bold text-[#243B32] break-words">
                           {hi ? cert.titleHi : cert.title}
                         </p>
                         <p className="text-[10px] text-slate-500 font-mono mt-0.5">
