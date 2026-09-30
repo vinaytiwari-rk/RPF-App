@@ -90,14 +90,6 @@ export default function ImpactPage() {
   const [activeMainTab, setActiveMainTab] = useState<MainTab>("impact");
   const [subTab, setSubTab] = useState<SubFilterTab>("all");
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
-  const [cardImpact, setCardImpact] = useState<{ totalCards: number; scope: string } | null>(null);
-  useEffect(() => {
-    let active = true;
-    axios.get('/api/public/cards/impact', { timeout: 8000 }).then(({ data }) => {
-      if (active && data?.success && Number.isFinite(data.totalCards)) setCardImpact({ totalCards: data.totalCards, scope: data.scope });
-    }).catch(() => {});
-    return () => { active = false; };
-  }, []);
 
   const [volunteerCityFilter, setVolunteerCityFilter] = useState("");
 
@@ -273,7 +265,7 @@ export default function ImpactPage() {
       { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित वृक्ष व पौधे", value: 50000, suffix: "+", iconName: "Trees" },
       { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: cardImpact?.totalCards || 120000, suffix: "+", iconName: "Award" }
     ];
-  }, [cmsConfig?.impactStats, cardImpact]);
+  }, [cmsConfig?.impactStats]);
 
   const liveDomains = useMemo(() => {
     if (Array.isArray(cmsConfig?.impactDomains) && cmsConfig.impactDomains.length > 0) {
@@ -313,7 +305,7 @@ export default function ImpactPage() {
             <Activity className="w-3.5 h-3.5 text-[#D97706]" />
             {isHi ? "सामाजिक प्रभाव" : "Impact"}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-[#245D45]">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight text-[#245D45]">
             {isHi ? "हमारा सामाजिक प्रभाव" : "Our Social Impact"}
           </h1>
           <p className="text-xs text-[#426B55] font-medium leading-relaxed max-w-xl">
@@ -411,7 +403,7 @@ export default function ImpactPage() {
                           )}
                         </div>
                         <div>
-                          <h3 className="text-sm font-black text-[#166534] line-clamp-1">
+                          <h3 className="text-sm font-bold leading-snug text-[#166534] break-words">
                             {isHi ? (domain.titleHi || domain.titleEn) : domain.titleEn}
                           </h3>
                           <span className="text-[9.5px] font-extrabold text-[#C2410C] uppercase tracking-wider">
