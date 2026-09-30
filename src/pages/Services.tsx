@@ -38,7 +38,7 @@ const FEATURED_SERVICES = [
 
 export default function Services() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
-  const { servicesList, isLoadingServices } = useApp();
+  const { servicesList, isLoadingServices, cmsConfig } = useApp();
   const navigate = useNavigate();
   const isHi = lang === "hi";
 
@@ -47,17 +47,10 @@ export default function Services() {
   const [webResults, setWebResults] = useState<any[]>([]);
   const [webLoading, setWebLoading] = useState(false);
 
-  const HEALTH_SERVICES = ["health-care", "women-safety", "seniors", "medicine", "blood", "food"];
-  const EDUCATION_SERVICES = ["education", "scholarships", "skills", "peoples-university"];
+  const HEALTH_SERVICES = ["health-care", "women-safety", "seniors", "medicine", "blood", "food", "bmi-calculator", "vitals", "breathing-meditator", "fasting-tracker"];
+  const EDUCATION_SERVICES = ["education", "scholarships", "skills", "peoples-university", "pomodoro", "morse-code", "typing-speed"];
   const GOV_SERVICES = ["card", "schemes", "farmer", "grievance", "disaster", "directory"];
-  const COMMUNITY_SERVICES = ["donations", "volunteers", "animals", "environment", "crowdfunding", "culture", "sos", "youth", "nation", "internet-radio", "epaper", "fact-check", "live-tv"];
-  const REMOVED_SERVICE_IDS = [
-    "gps-toolkit", "fuel-tracker", "earthquakes", "global-guide", "transit-planner", "news-feed", "hindu-calendar",
-    "audiobooks", "doc-scanner", "resume-builder", "ai-chat", "medical-dict", "vitals", "medications", "med-reminder",
-    "period-tracker", "child-tracker", "job-portal", "jobportal", "scholarships", "skills", "education-aid", "story-library",
-    "medical-aid", "utility-center", "device-tools", "pomodoro", "bmi-calculator", "split-bill", "decision-maker",
-    "morse-code", "habit-tracker", "fasting-tracker", "typing-speed", "quick-calculator", "calculator-center", "breathing-meditator"
-  ];
+  const COMMUNITY_SERVICES = ["donations", "volunteers", "animals", "environment", "crowdfunding", "culture", "sos", "youth", "nation", "internet-radio", "epaper", "fact-check", "live-tv", "hindu-calendar"];
 
   const categories = [
     { id: "all", en: "All Services", hi: "सभी सेवाएं" },
@@ -67,27 +60,42 @@ export default function Services() {
     { id: "government", en: "Government", hi: "सरकार" },
   ];
 
+  const hiddenIds = useMemo(() => {
+    return new Set<string>(
+      Array.isArray((cmsConfig as any)?.hiddenServiceIds) ? (cmsConfig as any).hiddenServiceIds : []
+    );
+  }, [cmsConfig]);
+
   const allServices = useMemo(() => {
     const base = Array.isArray(servicesList) ? servicesList : [];
-    const ids = new Set(base.map((s: any) => s?.id));
-    return [...base, ...EXPLORE_LINKS.filter((s) => !ids.has(s.id))];
-  }, [servicesList]);
+    const cmsUtils = Array.isArray((cmsConfig as any)?.exploreUtilities) ? (cmsConfig as any).exploreUtilities : [];
+    const combined = [...base, ...EXPLORE_LINKS, ...cmsUtils];
+    const seen = new Set<string>();
+    const list: any[] = [];
+    for (const item of combined) {
+      if (item && item.id && !seen.has(item.id)) {
+        seen.add(item.id);
+        list.push(item);
+      }
+    }
+    return list;
+  }, [servicesList, cmsConfig]);
 
   const filtered = useMemo(
     () =>
       allServices.filter((s: any) => {
-        if (!s || REMOVED_SERVICE_IDS.includes(s.id) || s.enabled === false || s.hidden === true || s.active === false)
+        if (!s || s.enabled === false || s.hidden === true || s.active === false || hiddenIds.has(s.id))
           return false;
         const matchesCat =
           category === "all" ||
-          (category === "health" && HEALTH_SERVICES.includes(s.id)) ||
-          (category === "education" && EDUCATION_SERVICES.includes(s.id)) ||
-          (category === "community" && COMMUNITY_SERVICES.includes(s.id)) ||
-          (category === "government" && GOV_SERVICES.includes(s.id));
+          (category === "health" && (HEALTH_SERVICES.includes(s.id) || s.category === "health")) ||
+          (category === "education" && (EDUCATION_SERVICES.includes(s.id) || s.category === "education")) ||
+          (category === "community" && (COMMUNITY_SERVICES.includes(s.id) || s.category === "community" || s.category === "culture")) ||
+          (category === "government" && (GOV_SERVICES.includes(s.id) || s.category === "government" || s.category === "welfare" || s.category === "civic"));
         const q = search.toLowerCase().trim();
         return matchesCat && (!q || (s.titleEn ?? "").toLowerCase().includes(q) || (s.titleHi ?? "").toLowerCase().includes(q));
       }),
-    [allServices, category, search]
+    [allServices, category, search, hiddenIds]
   );
 
   useEffect(() => {
