@@ -188,7 +188,7 @@ export default function MyCertificates() {
 
                   <div className="relative flex flex-col items-center gap-2">
                     <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-[#D7A93A] bg-white p-1 shadow-sm">
-                      <img src="/assets/rpf-samahit-icon.png" alt="RP Foundation" className="h-full w-full object-contain" />
+                      <img src="/assets/logo.png" alt="RP Foundation" className="h-full w-full object-contain" />
                     </div>
                     <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#167C5A]">RP Foundation Social Welfare Trust</p>
                     <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[#243B32]">{hi ? selectedCert.titleHi : selectedCert.title}</h3>
