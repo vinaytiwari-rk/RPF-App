@@ -68,21 +68,17 @@ export const VisualSettings: React.FC<VisualSettingsProps> = ({ settings, saveSe
               </h3>
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Notice Text (English)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Notice Text / सूचना संदेश</label>
                   <textarea
                     rows={3}
+                    placeholder="Enter marquee announcement or notice text (any language)..."
                     className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    value={settings.marquee_text_en || ''}
-                    onChange={(e) => saveSettings({ marquee_text_en: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Notice Text (Hindi)</label>
-                  <textarea
-                    rows={3}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    value={settings.marquee_text_hi || ''}
-                    onChange={(e) => saveSettings({ marquee_text_hi: e.target.value })}
+                    value={settings.marquee_text_hi || settings.marquee_text_en || settings.marquee_text || ''}
+                    onChange={(e) => saveSettings({ 
+                      marquee_text: e.target.value,
+                      marquee_text_en: e.target.value, 
+                      marquee_text_hi: e.target.value 
+                    })}
                   />
                 </div>
                 <div className="flex items-center gap-3 bg-indigo-50 text-indigo-800 p-4 rounded-lg border border-indigo-100">

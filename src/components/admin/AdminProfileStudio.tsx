@@ -88,16 +88,12 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
       : DEFAULT_HELPLINES;
   });
 
-  // 3. Policies & About State
+  // 3. Policies & About State (Universal language support)
   const [policies, setPolicies] = useState({
-    termsEn: cmsConfig?.termsEn || "Welcome to Samahit by RP Foundation. By using this application, citizens agree to adhere to transparent, lawful civic conduct.",
-    termsHi: cmsConfig?.termsHi || "आरपी फाउंडेशन के समाहित पोर्टल में आपका स्वागत है। इस एप्लिकेशन का उपयोग करने वाले सभी नागरिक निष्पक्ष व पारदर्शी सेवा नियमों का पालन करेंगे।",
-    privacyEn: cmsConfig?.privacyEn || "RP Foundation prioritizes citizen privacy. All personal and Aadhaar records are encrypted under high-grade security protocols.",
-    privacyHi: cmsConfig?.privacyHi || "आरपी फाउंडेशन नागरिकों की गोपनीयता का पूर्ण सम्मान करता है। सभी व्यक्तिगत पहचान डेटा सुरक्षित प्रोटोकॉल के अंतर्गत संग्रहित हैं।",
-    disclaimerEn: cmsConfig?.disclaimerEn || "Jan Seva Card is a digital welfare identity provided by RP Foundation. It does not replace any statutory government documents.",
-    disclaimerHi: cmsConfig?.disclaimerHi || "जन सेवा कार्ड आरपी फाउंडेशन द्वारा प्रदत्त डिजिटल कल्याण पहचान है। यह किसी भी वैधानिक सरकारी पहचान का स्थान नहीं लेता है।",
-    aboutEn: cmsConfig?.aboutTextEn || "RP Foundation is committed to grassroot community upliftment, educational scholarships, emergency healthcare support, and smart governance solutions.",
-    aboutHi: cmsConfig?.aboutTextHi || "आरपी फाउंडेशन समाज के कमजोर वर्गों को सशक्त बनाने, शिक्षा, स्वास्थ्य और आपातकालीन नागरिक राहत प्रदान करने के लिए समर्पित है।"
+    terms: cmsConfig?.terms || cmsConfig?.termsHi || cmsConfig?.termsEn || "Welcome to Samahit by RP Foundation. By using this application, citizens agree to adhere to transparent, lawful civic conduct.",
+    privacy: cmsConfig?.privacy || cmsConfig?.privacyHi || cmsConfig?.privacyEn || "RP Foundation prioritizes citizen privacy. All personal and Aadhaar records are encrypted under high-grade security protocols.",
+    disclaimer: cmsConfig?.disclaimer || cmsConfig?.disclaimerHi || cmsConfig?.disclaimerEn || "Jan Seva Card is a digital welfare identity provided by RP Foundation. It does not replace any statutory government documents.",
+    about: cmsConfig?.aboutText || cmsConfig?.aboutTextHi || cmsConfig?.aboutTextEn || "RP Foundation is committed to grassroot community upliftment, educational scholarships, emergency healthcare support, and smart governance solutions."
   });
 
   // 4. Version & Certificate Settings
@@ -106,8 +102,7 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
     minSupportedVersion: cmsConfig?.minSupportedVersion || "1.0.0",
     forceUpdateEnabled: Boolean(cmsConfig?.forceUpdateEnabled),
     apkDownloadUrl: cmsConfig?.apkDownloadUrl || "https://appapi.therpfoundation.org/download/rpf-app.apk",
-    releaseNotesEn: cmsConfig?.releaseNotesEn || "Major update with integrated Jan Seva Card sync, expanded Explore utilities, and performance boosts.",
-    releaseNotesHi: cmsConfig?.releaseNotesHi || "जन सेवा कार्ड सिंक, विस्तृत एक्सप्लोर उपयोगिताओं एवं उन्नत प्रदर्शन के साथ नया अपडेट।",
+    releaseNotes: cmsConfig?.releaseNotes || cmsConfig?.releaseNotesHi || cmsConfig?.releaseNotesEn || "Major update with integrated Jan Seva Card sync, expanded Explore utilities, and performance boosts.",
     certSignatoryName: cmsConfig?.certSignatoryName || "Rohit Pandit",
     certSignatoryTitle: cmsConfig?.certSignatoryTitle || "Founder & President, RP Foundation",
     certNgoRegNo: cmsConfig?.certNgoRegNo || "01/01/01/37198/22"
@@ -139,17 +134,19 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
   };
 
   const handleSaveActionModal = () => {
-    if (!actionModal.data.titleEn?.trim() || !actionModal.data.route?.trim()) {
-      toast.error("Title and Route are required");
+    const titleVal = actionModal.data.titleEn?.trim() || actionModal.data.titleHi?.trim() || "";
+    if (!titleVal || !actionModal.data.route?.trim()) {
+      toast.error("Action Title and Route are required");
       return;
     }
     const cleanId = actionModal.data.id || `act-${Date.now()}`;
+    const subVal = actionModal.data.subEn?.trim() || actionModal.data.subHi?.trim() || "";
     const item: ProfileActionItem = {
       id: cleanId,
-      titleEn: actionModal.data.titleEn.trim(),
-      titleHi: actionModal.data.titleHi?.trim() || actionModal.data.titleEn.trim(),
-      subEn: actionModal.data.subEn?.trim() || "",
-      subHi: actionModal.data.subHi?.trim() || "",
+      titleEn: titleVal,
+      titleHi: titleVal,
+      subEn: subVal,
+      subHi: subVal,
       route: actionModal.data.route.trim(),
       iconName: actionModal.data.iconName || "Layers",
       color: actionModal.data.color || "bg-[#14213D]",
@@ -179,15 +176,16 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
   };
 
   const handleSaveHelplineModal = () => {
-    if (!helplineModal.data.nameEn?.trim() || !helplineModal.data.number?.trim()) {
+    const nameVal = helplineModal.data.nameEn?.trim() || helplineModal.data.nameHi?.trim() || "";
+    if (!nameVal || !helplineModal.data.number?.trim()) {
       toast.error("Name and Phone Number are required");
       return;
     }
     const cleanId = helplineModal.data.id || `hl-${Date.now()}`;
     const item: HelplineItem = {
       id: cleanId,
-      nameEn: helplineModal.data.nameEn.trim(),
-      nameHi: helplineModal.data.nameHi?.trim() || helplineModal.data.nameEn.trim(),
+      nameEn: nameVal,
+      nameHi: nameVal,
       number: helplineModal.data.number.trim(),
       category: helplineModal.data.category || "civic",
       enabled: helplineModal.data.enabled !== false
@@ -211,20 +209,25 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
         ...cmsConfig,
         profileActions: actions,
         emergencyHelplines: helplines,
-        termsEn: policies.termsEn,
-        termsHi: policies.termsHi,
-        privacyEn: policies.privacyEn,
-        privacyHi: policies.privacyHi,
-        disclaimerEn: policies.disclaimerEn,
-        disclaimerHi: policies.disclaimerHi,
-        aboutTextEn: policies.aboutEn,
-        aboutTextHi: policies.aboutHi,
+        terms: policies.terms,
+        termsEn: policies.terms,
+        termsHi: policies.terms,
+        privacy: policies.privacy,
+        privacyEn: policies.privacy,
+        privacyHi: policies.privacy,
+        disclaimer: policies.disclaimer,
+        disclaimerEn: policies.disclaimer,
+        disclaimerHi: policies.disclaimer,
+        aboutText: policies.about,
+        aboutTextEn: policies.about,
+        aboutTextHi: policies.about,
         appVersion: versionConfig.appVersion,
         minSupportedVersion: versionConfig.minSupportedVersion,
         forceUpdateEnabled: versionConfig.forceUpdateEnabled,
         apkDownloadUrl: versionConfig.apkDownloadUrl,
-        releaseNotesEn: versionConfig.releaseNotesEn,
-        releaseNotesHi: versionConfig.releaseNotesHi,
+        releaseNotes: versionConfig.releaseNotes,
+        releaseNotesEn: versionConfig.releaseNotes,
+        releaseNotesHi: versionConfig.releaseNotes,
         certSignatoryName: versionConfig.certSignatoryName,
         certSignatoryTitle: versionConfig.certSignatoryTitle,
         certNgoRegNo: versionConfig.certNgoRegNo
@@ -497,30 +500,18 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
       {/* 3. LEGAL POLICIES & COMPLIANCE TAB                            */}
       {/* ───────────────────────────────────────────────────────────── */}
       {subTab === "policies" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="space-y-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           {/* Terms & Conditions */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-[#0A192F] flex items-center gap-2">
               <FileText className="w-4 h-4 text-orange-600" />
-              <span>Terms of Service (English)</span>
+              <span>Terms of Service / सेवा नियम एवं शर्तें</span>
             </label>
             <textarea
               rows={4}
-              value={policies.termsEn}
-              onChange={(e) => setPolicies({ ...policies, termsEn: e.target.value })}
-              className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-[#166534] flex items-center gap-2">
-              <FileText className="w-4 h-4 text-green-700" />
-              <span>नियम एवं शर्तें (Hindi)</span>
-            </label>
-            <textarea
-              rows={4}
-              value={policies.termsHi}
-              onChange={(e) => setPolicies({ ...policies, termsHi: e.target.value })}
+              value={policies.terms}
+              onChange={(e) => setPolicies({ ...policies, terms: e.target.value })}
+              placeholder="Terms of service details..."
               className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none"
             />
           </div>
@@ -529,25 +520,13 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
           <div className="space-y-2">
             <label className="text-xs font-bold text-[#0A192F] flex items-center gap-2">
               <Lock className="w-4 h-4 text-blue-600" />
-              <span>Privacy Policy (English)</span>
+              <span>Privacy Policy / गोपनीयता नीति</span>
             </label>
             <textarea
               rows={4}
-              value={policies.privacyEn}
-              onChange={(e) => setPolicies({ ...policies, privacyEn: e.target.value })}
-              className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-[#166534] flex items-center gap-2">
-              <Lock className="w-4 h-4 text-blue-600" />
-              <span>गोपनीयता नीति (Hindi)</span>
-            </label>
-            <textarea
-              rows={4}
-              value={policies.privacyHi}
-              onChange={(e) => setPolicies({ ...policies, privacyHi: e.target.value })}
+              value={policies.privacy}
+              onChange={(e) => setPolicies({ ...policies, privacy: e.target.value })}
+              placeholder="Privacy policy details..."
               className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none"
             />
           </div>
@@ -556,25 +535,28 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
           <div className="space-y-2">
             <label className="text-xs font-bold text-[#0A192F] flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
-              <span>Jan Seva Card Welfare Disclaimer (English)</span>
+              <span>Jan Seva Card Welfare Disclaimer / जन सेवा कार्ड कल्याण अस्वीकरण</span>
             </label>
             <textarea
               rows={3}
-              value={policies.disclaimerEn}
-              onChange={(e) => setPolicies({ ...policies, disclaimerEn: e.target.value })}
+              value={policies.disclaimer}
+              onChange={(e) => setPolicies({ ...policies, disclaimer: e.target.value })}
+              placeholder="Disclaimer and statutory legal notices..."
               className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none"
             />
           </div>
 
+          {/* About Text */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-[#166534] flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-500" />
-              <span>जन सेवा कार्ड अस्वीकरण (Hindi)</span>
+              <User className="w-4 h-4 text-[#166534]" />
+              <span>About Samahit & RP Foundation / संस्था एवं पोर्टल परिचय</span>
             </label>
             <textarea
               rows={3}
-              value={policies.disclaimerHi}
-              onChange={(e) => setPolicies({ ...policies, disclaimerHi: e.target.value })}
+              value={policies.about}
+              onChange={(e) => setPolicies({ ...policies, about: e.target.value })}
+              placeholder="About RP Foundation mission and values..."
               className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none"
             />
           </div>
@@ -644,25 +626,15 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700">Release Notes (English)</label>
-                <textarea
-                  rows={2}
-                  value={versionConfig.releaseNotesEn}
-                  onChange={(e) => setVersionConfig({ ...versionConfig, releaseNotesEn: e.target.value })}
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700">नवीनतम बदलाव (Hindi)</label>
-                <textarea
-                  rows={2}
-                  value={versionConfig.releaseNotesHi}
-                  onChange={(e) => setVersionConfig({ ...versionConfig, releaseNotesHi: e.target.value })}
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
+            <div>
+              <label className="text-xs font-bold text-slate-700">Release Notes / नवीनतम बदलाव (अपडेट विवरण)</label>
+              <textarea
+                rows={2}
+                value={versionConfig.releaseNotes}
+                onChange={(e) => setVersionConfig({ ...versionConfig, releaseNotes: e.target.value })}
+                placeholder="Major update details / अपडेट के मुख्य बदलाव..."
+                className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+              />
             </div>
           </div>
 
@@ -731,33 +703,17 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-700">Title (English)</label>
+                <label className="text-xs font-bold text-slate-700">Action Title / शीर्षक</label>
                 <input
                   type="text"
-                  value={actionModal.data.titleEn || ""}
+                  value={actionModal.data.titleEn || actionModal.data.titleHi || ""}
                   onChange={(e) =>
                     setActionModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, titleEn: e.target.value }
+                      data: { ...prev.data, titleEn: e.target.value, titleHi: e.target.value }
                     }))
                   }
-                  placeholder="e.g. My Certificates"
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Title (Hindi)</label>
-                <input
-                  type="text"
-                  value={actionModal.data.titleHi || ""}
-                  onChange={(e) =>
-                    setActionModal((prev) => ({
-                      ...prev,
-                      data: { ...prev.data, titleHi: e.target.value }
-                    }))
-                  }
-                  placeholder="e.g. मेरे प्रमाणपत्र"
+                  placeholder="e.g. My Certificates / मेरे प्रमाणपत्र"
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
@@ -833,33 +789,17 @@ export default function AdminProfileStudio({ cmsConfig, onSaveCms, isLoading = f
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-700">Helpline Name (English)</label>
+                <label className="text-xs font-bold text-slate-700">Helpline Name / हेल्पलाइन का नाम</label>
                 <input
                   type="text"
-                  value={helplineModal.data.nameEn || ""}
+                  value={helplineModal.data.nameHi || helplineModal.data.nameEn || ""}
                   onChange={(e) =>
                     setHelplineModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, nameEn: e.target.value }
+                      data: { ...prev.data, nameEn: e.target.value, nameHi: e.target.value }
                     }))
                   }
-                  placeholder="e.g. Women Helpline"
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Helpline Name (Hindi)</label>
-                <input
-                  type="text"
-                  value={helplineModal.data.nameHi || ""}
-                  onChange={(e) =>
-                    setHelplineModal((prev) => ({
-                      ...prev,
-                      data: { ...prev.data, nameHi: e.target.value }
-                    }))
-                  }
-                  placeholder="e.g. महिला हेल्पलाइन"
+                  placeholder="e.g. Women Helpline / महिला हेल्पलाइन"
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>

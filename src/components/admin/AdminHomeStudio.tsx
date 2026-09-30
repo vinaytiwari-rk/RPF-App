@@ -186,9 +186,8 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
   const [marquees, setMarquees] = useState<MarqueeItem[]>(initialMarquees);
   const [editingMarquee, setEditingMarquee] = useState<MarqueeItem | null>(null);
 
-  // Quote State
-  const [quoteEn, setQuoteEn] = useState(cms?.quoteOfTheDayEn || "Work is worship, and service is the greatest religion.");
-  const [quoteHi, setQuoteHi] = useState(cms?.quoteOfTheDayHi || "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।");
+  // Quote State (Universal language input - Hindi, English or any language)
+  const [quoteText, setQuoteText] = useState(cms?.quoteOfTheDay || cms?.quoteOfTheDayHi || cms?.quoteOfTheDayEn || "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।");
   const [quoteAuthor, setQuoteAuthor] = useState(cms?.quoteAuthor || "Rohit Pandit");
 
   // Social / Reels
@@ -283,11 +282,13 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
     await onSaveCms({ homeMarquees: updated }, "Marquee alert saved");
   };
 
-  // Handlers for Quote
+  // Handlers for Quote (Universal language input)
   const handleSaveQuote = async () => {
+    const q = quoteText.trim();
     await onSaveCms({
-      quoteOfTheDayEn: quoteEn.trim(),
-      quoteOfTheDayHi: quoteHi.trim(),
+      quoteOfTheDay: q,
+      quoteOfTheDayEn: q,
+      quoteOfTheDayHi: q,
       quoteAuthor: quoteAuthor.trim()
     }, "Thought of the day saved");
   };
@@ -613,29 +614,22 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
 
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-bold text-slate-700">Quote in English</label>
+              <label className="text-xs font-bold text-slate-700">Thought / Quote of the Day (सुविचार या प्रेरक विचार)</label>
               <textarea
-                value={quoteEn}
-                onChange={(e) => setQuoteEn(e.target.value)}
-                rows={2}
+                value={quoteText}
+                onChange={(e) => setQuoteText(e.target.value)}
+                placeholder="उदा. कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।"
+                rows={3}
                 className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#C2410C]"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700">Quote in Hindi</label>
-              <textarea
-                value={quoteHi}
-                onChange={(e) => setQuoteHi(e.target.value)}
-                rows={2}
-                className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#C2410C]"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-700">Author Name</label>
+              <label className="text-xs font-bold text-slate-700">Author Name / लेखक</label>
               <input
                 type="text"
                 value={quoteAuthor}
                 onChange={(e) => setQuoteAuthor(e.target.value)}
+                placeholder="Rohit Pandit"
                 className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#C2410C]"
               />
             </div>

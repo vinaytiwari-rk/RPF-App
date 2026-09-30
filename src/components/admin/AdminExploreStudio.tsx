@@ -277,19 +277,21 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
   };
 
   const handleSaveServiceModal = () => {
-    if (!serviceModal.data.titleEn?.trim() || !serviceModal.data.id?.trim()) {
-      toast.error("Service ID and English Title are required");
+    const titleVal = serviceModal.data.titleEn?.trim() || serviceModal.data.titleHi?.trim() || "";
+    if (!titleVal || !serviceModal.data.id?.trim()) {
+      toast.error("Service ID and Title are required");
       return;
     }
     const cleanId = serviceModal.data.id.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-");
+    const descVal = serviceModal.data.descEn?.trim() || serviceModal.data.descHi?.trim() || "";
     const item: ServiceItem = {
       id: cleanId,
       category: serviceModal.data.category || "welfare",
       iconName: serviceModal.data.iconName || "ShieldCheck",
-      titleEn: serviceModal.data.titleEn.trim(),
-      titleHi: serviceModal.data.titleHi?.trim() || serviceModal.data.titleEn.trim(),
-      descEn: serviceModal.data.descEn?.trim() || "",
-      descHi: serviceModal.data.descHi?.trim() || "",
+      titleEn: titleVal,
+      titleHi: titleVal,
+      descEn: descVal,
+      descHi: descVal,
       route: serviceModal.data.route?.trim(),
       url: serviceModal.data.url?.trim(),
       enabled: serviceModal.data.enabled !== false
@@ -341,10 +343,12 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
       toast.error("Please select a target service");
       return;
     }
-    if (!data.title?.trim() || !data.url?.trim()) {
+    const titleVal = data.title?.trim() || data.titleHi?.trim() || "";
+    if (!titleVal || !data.url?.trim()) {
       toast.error("Link title and URL are required");
       return;
     }
+
     try {
       new URL(data.url.trim());
     } catch {
@@ -352,12 +356,13 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
       return;
     }
 
+    const descVal = data.desc?.trim() || data.descHi?.trim() || "";
     const newLink: GovLink & { id: string; enabled: boolean } = {
       id: `${serviceId}-link-${Date.now()}`,
-      title: data.title.trim(),
-      titleHi: data.titleHi?.trim() || data.title.trim(),
-      desc: data.desc?.trim() || "",
-      descHi: data.descHi?.trim() || "",
+      title: titleVal,
+      titleHi: titleVal,
+      desc: descVal,
+      descHi: descVal,
       url: data.url.trim(),
       category: data.category || "government",
       isGov: data.isGov !== false,
@@ -395,19 +400,21 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
   };
 
   const handleSaveUtilityModal = () => {
-    if (!utilityModal.data.titleEn?.trim() || !utilityModal.data.id?.trim()) {
-      toast.error("Utility ID and English title are required");
+    const titleVal = utilityModal.data.titleEn?.trim() || utilityModal.data.titleHi?.trim() || "";
+    if (!titleVal || !utilityModal.data.id?.trim()) {
+      toast.error("Utility ID and Title are required");
       return;
     }
     const cleanId = utilityModal.data.id.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-");
+    const descVal = utilityModal.data.descEn?.trim() || utilityModal.data.descHi?.trim() || "";
     const item: UtilityItem = {
       id: cleanId,
       category: utilityModal.data.category || "tools",
       iconName: utilityModal.data.iconName || "Sparkles",
-      titleEn: utilityModal.data.titleEn.trim(),
-      titleHi: utilityModal.data.titleHi?.trim() || utilityModal.data.titleEn.trim(),
-      descEn: utilityModal.data.descEn?.trim() || "",
-      descHi: utilityModal.data.descHi?.trim() || "",
+      titleEn: titleVal,
+      titleHi: titleVal,
+      descEn: descVal,
+      descHi: descVal,
       route: utilityModal.data.route?.trim() || `/${cleanId}`,
       url: utilityModal.data.url?.trim(),
       enabled: utilityModal.data.enabled !== false
@@ -447,7 +454,8 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
   };
 
   const handleSaveFeedModal = () => {
-    if (!feedModal.data.name?.trim() || !feedModal.data.id?.trim() || !feedModal.data.url?.trim()) {
+    const nameVal = feedModal.data.name?.trim() || feedModal.data.nameHi?.trim() || "";
+    if (!nameVal || !feedModal.data.id?.trim() || !feedModal.data.url?.trim()) {
       toast.error("Feed ID, Title, and Feed URL are required");
       return;
     }
@@ -458,8 +466,8 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
     const cleanId = feedModal.data.id.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-");
     const item: RssFeedConfig = {
       id: cleanId,
-      name: feedModal.data.name.trim(),
-      nameHi: feedModal.data.nameHi?.trim() || feedModal.data.name.trim(),
+      name: nameVal,
+      nameHi: nameVal,
       url: feedModal.data.url.trim(),
       category: feedModal.data.category?.trim() || "National",
       enabled: feedModal.data.enabled !== false
@@ -1298,37 +1306,20 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Title (English)</label>
-                  <input
-                    type="text"
-                    value={serviceModal.data.titleEn || ""}
-                    onChange={(e) =>
-                      setServiceModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, titleEn: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. Healthcare Assistance"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Title (Hindi)</label>
-                  <input
-                    type="text"
-                    value={serviceModal.data.titleHi || ""}
-                    onChange={(e) =>
-                      setServiceModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, titleHi: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. स्वास्थ्य सहायता"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
+              <div>
+                <label className="text-xs font-bold text-slate-700">Service Title / सेवा का शीर्षक</label>
+                <input
+                  type="text"
+                  value={serviceModal.data.titleEn || serviceModal.data.titleHi || ""}
+                  onChange={(e) =>
+                    setServiceModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, titleEn: e.target.value, titleHi: e.target.value }
+                    }))
+                  }
+                  placeholder="e.g. Healthcare Assistance / स्वास्थ्य सहायता"
+                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -1369,33 +1360,17 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Description (English)</label>
+                <label className="text-xs font-bold text-slate-700">Description / सेवा का संक्षिप्त विवरण</label>
                 <textarea
                   rows={2}
-                  value={serviceModal.data.descEn || ""}
+                  value={serviceModal.data.descEn || serviceModal.data.descHi || ""}
                   onChange={(e) =>
                     setServiceModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, descEn: e.target.value }
+                      data: { ...prev.data, descEn: e.target.value, descHi: e.target.value }
                     }))
                   }
-                  placeholder="Short summary of welfare service..."
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Description (Hindi)</label>
-                <textarea
-                  rows={2}
-                  value={serviceModal.data.descHi || ""}
-                  onChange={(e) =>
-                    setServiceModal((prev) => ({
-                      ...prev,
-                      data: { ...prev.data, descHi: e.target.value }
-                    }))
-                  }
-                  placeholder="कल्याणकारी सेवा का संक्षिप्त विवरण..."
+                  placeholder="Summary of welfare service / सेवा का विवरण..."
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
@@ -1492,37 +1467,20 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Portal Title (English)</label>
-                  <input
-                    type="text"
-                    value={linkModal.data.title || ""}
-                    onChange={(e) =>
-                      setLinkModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, title: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. Ayushman Bharat PM-JAY"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Portal Title (Hindi)</label>
-                  <input
-                    type="text"
-                    value={linkModal.data.titleHi || ""}
-                    onChange={(e) =>
-                      setLinkModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, titleHi: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. आयुष्मान भारत पोर्टल"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
+              <div>
+                <label className="text-xs font-bold text-slate-700">Portal Title / पोर्टल का नाम</label>
+                <input
+                  type="text"
+                  value={linkModal.data.title || linkModal.data.titleHi || ""}
+                  onChange={(e) =>
+                    setLinkModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, title: e.target.value, titleHi: e.target.value }
+                    }))
+                  }
+                  placeholder="e.g. Ayushman Bharat PM-JAY / आयुष्मान भारत"
+                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                />
               </div>
 
               <div>
@@ -1542,33 +1500,17 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Description (English)</label>
+                <label className="text-xs font-bold text-slate-700">Description / पोर्टल का विवरण</label>
                 <textarea
                   rows={2}
-                  value={linkModal.data.desc || ""}
+                  value={linkModal.data.desc || linkModal.data.descHi || ""}
                   onChange={(e) =>
                     setLinkModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, desc: e.target.value }
+                      data: { ...prev.data, desc: e.target.value, descHi: e.target.value }
                     }))
                   }
-                  placeholder="Official government health insurance access..."
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Description (Hindi)</label>
-                <textarea
-                  rows={2}
-                  value={linkModal.data.descHi || ""}
-                  onChange={(e) =>
-                    setLinkModal((prev) => ({
-                      ...prev,
-                      data: { ...prev.data, descHi: e.target.value }
-                    }))
-                  }
-                  placeholder="आधिकारिक सरकारी स्वास्थ्य योजना..."
+                  placeholder="Summary of portal service / आधिकारिक पोर्टल का विवरण..."
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
@@ -1645,37 +1587,20 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Title (English)</label>
-                  <input
-                    type="text"
-                    value={utilityModal.data.titleEn || ""}
-                    onChange={(e) =>
-                      setUtilityModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, titleEn: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. Daily Utility Center"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Title (Hindi)</label>
-                  <input
-                    type="text"
-                    value={utilityModal.data.titleHi || ""}
-                    onChange={(e) =>
-                      setUtilityModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, titleHi: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. दैनिक उपयोगिता केंद्र"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
+              <div>
+                <label className="text-xs font-bold text-slate-700">Utility Title / टूल का शीर्षक</label>
+                <input
+                  type="text"
+                  value={utilityModal.data.titleEn || utilityModal.data.titleHi || ""}
+                  onChange={(e) =>
+                    setUtilityModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, titleEn: e.target.value, titleHi: e.target.value }
+                    }))
+                  }
+                  placeholder="e.g. Daily Utility Center / उपयोगिता केंद्र"
+                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -1732,33 +1657,17 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Description (English)</label>
+                <label className="text-xs font-bold text-slate-700">Description / उपयोगिता का विवरण</label>
                 <textarea
                   rows={2}
-                  value={utilityModal.data.descEn || ""}
+                  value={utilityModal.data.descEn || utilityModal.data.descHi || ""}
                   onChange={(e) =>
                     setUtilityModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, descEn: e.target.value }
+                      data: { ...prev.data, descEn: e.target.value, descHi: e.target.value }
                     }))
                   }
-                  placeholder="Utility functionality summary..."
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Description (Hindi)</label>
-                <textarea
-                  rows={2}
-                  value={utilityModal.data.descHi || ""}
-                  onChange={(e) =>
-                    setUtilityModal((prev) => ({
-                      ...prev,
-                      data: { ...prev.data, descHi: e.target.value }
-                    }))
-                  }
-                  placeholder="उपयोगिता उपकरण का विवरण..."
+                  placeholder="Utility functionality summary / टूल का विवरण..."
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
@@ -1823,37 +1732,20 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Channel Name (English)</label>
-                  <input
-                    type="text"
-                    value={feedModal.data.name || ""}
-                    onChange={(e) =>
-                      setFeedModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, name: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. PIB National Press"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Channel Name (Hindi)</label>
-                  <input
-                    type="text"
-                    value={feedModal.data.nameHi || ""}
-                    onChange={(e) =>
-                      setFeedModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, nameHi: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. प्रेस सूचना ब्यूरो"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
+              <div>
+                <label className="text-xs font-bold text-slate-700">Channel / Feed Name (चैनल या समाचार का नाम)</label>
+                <input
+                  type="text"
+                  value={feedModal.data.name || feedModal.data.nameHi || ""}
+                  onChange={(e) =>
+                    setFeedModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, name: e.target.value, nameHi: e.target.value }
+                    }))
+                  }
+                  placeholder="e.g. PIB National Press / राष्ट्रीय मुख्य समाचार"
+                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                />
               </div>
 
               <div>

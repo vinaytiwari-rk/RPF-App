@@ -312,21 +312,24 @@ export default function AdminImpactStudio({ cmsConfig, onSaveCms, isLoading = fa
   };
 
   const handleSaveDomainModal = () => {
-    if (!domainModal.data.titleEn?.trim() || !domainModal.data.id?.trim()) {
-      toast.error("ID and English Title are required");
+    const titleVal = domainModal.data.titleEn?.trim() || domainModal.data.titleHi?.trim() || "";
+    if (!titleVal || !domainModal.data.id?.trim()) {
+      toast.error("ID and Title are required");
       return;
     }
     const cleanId = domainModal.data.id.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-");
+    const descVal = domainModal.data.descEn?.trim() || domainModal.data.descHi?.trim() || "";
+    const badgeVal = domainModal.data.badgeEn?.trim() || domainModal.data.badgeHi?.trim() || "Impact";
     const item: ImpactDomainItem = {
       id: cleanId,
       tab: domainModal.data.tab || "active",
-      titleEn: domainModal.data.titleEn.trim(),
-      titleHi: domainModal.data.titleHi?.trim() || domainModal.data.titleEn.trim(),
-      descEn: domainModal.data.descEn?.trim() || "",
-      descHi: domainModal.data.descHi?.trim() || "",
+      titleEn: titleVal,
+      titleHi: titleVal,
+      descEn: descVal,
+      descHi: descVal,
       iconName: domainModal.data.iconName || "Sparkles",
-      badgeEn: domainModal.data.badgeEn?.trim() || "Impact",
-      badgeHi: domainModal.data.badgeHi?.trim() || "प्रभाव",
+      badgeEn: badgeVal,
+      badgeHi: badgeVal,
       color: domainModal.data.color || "bg-emerald-50 text-[#167C5A] border-emerald-200",
       enabled: domainModal.data.enabled !== false
     };
@@ -354,15 +357,16 @@ export default function AdminImpactStudio({ cmsConfig, onSaveCms, isLoading = fa
   };
 
   const handleSaveStatModal = () => {
-    if (!statModal.data.labelEn?.trim()) {
+    const labelVal = statModal.data.labelEn?.trim() || statModal.data.labelHi?.trim() || "";
+    if (!labelVal) {
       toast.error("Label is required");
       return;
     }
     const cleanId = statModal.data.id || `stat-${Date.now()}`;
     const item: ImpactStatItem = {
       id: cleanId,
-      labelEn: statModal.data.labelEn.trim(),
-      labelHi: statModal.data.labelHi?.trim() || statModal.data.labelEn.trim(),
+      labelEn: labelVal,
+      labelHi: labelVal,
       value: Number(statModal.data.value) || 0,
       suffix: statModal.data.suffix || "+",
       iconName: statModal.data.iconName || "TrendingUp",
@@ -392,19 +396,22 @@ export default function AdminImpactStudio({ cmsConfig, onSaveCms, isLoading = fa
   };
 
   const handleSaveStoryModal = () => {
-    if (!storyModal.data.nameEn?.trim() || !storyModal.data.quoteEn?.trim()) {
-      toast.error("Citizen Name and Quote are required");
+    const nameVal = storyModal.data.nameEn?.trim() || storyModal.data.nameHi?.trim() || "";
+    const quoteVal = storyModal.data.quoteEn?.trim() || storyModal.data.quoteHi?.trim() || "";
+    if (!nameVal || !quoteVal) {
+      toast.error("Citizen Name and Story are required");
       return;
     }
     const cleanId = storyModal.data.id || `story-${Date.now()}`;
+    const villageVal = storyModal.data.villageEn?.trim() || storyModal.data.villageHi?.trim() || "Madhya Pradesh";
     const item: TestimonialItem = {
       id: cleanId,
-      nameEn: storyModal.data.nameEn.trim(),
-      nameHi: storyModal.data.nameHi?.trim() || storyModal.data.nameEn.trim(),
-      villageEn: storyModal.data.villageEn?.trim() || "Madhya Pradesh",
-      villageHi: storyModal.data.villageHi?.trim() || "मध्य प्रदेश",
-      quoteEn: storyModal.data.quoteEn.trim(),
-      quoteHi: storyModal.data.quoteHi?.trim() || storyModal.data.quoteEn.trim(),
+      nameEn: nameVal,
+      nameHi: nameVal,
+      villageEn: villageVal,
+      villageHi: villageVal,
+      quoteEn: quoteVal,
+      quoteHi: quoteVal,
       enabled: storyModal.data.enabled !== false
     };
 
@@ -431,18 +438,20 @@ export default function AdminImpactStudio({ cmsConfig, onSaveCms, isLoading = fa
   };
 
   const handleSaveMilestoneModal = () => {
-    if (!milestoneModal.data.year?.trim() || !milestoneModal.data.titleEn?.trim()) {
+    const titleVal = milestoneModal.data.titleEn?.trim() || milestoneModal.data.titleHi?.trim() || "";
+    if (!milestoneModal.data.year?.trim() || !titleVal) {
       toast.error("Year and Title are required");
       return;
     }
     const cleanId = milestoneModal.data.id || `m-${Date.now()}`;
+    const descVal = milestoneModal.data.descEn?.trim() || milestoneModal.data.descHi?.trim() || "";
     const item: MilestoneItem = {
       id: cleanId,
       year: milestoneModal.data.year.trim(),
-      titleEn: milestoneModal.data.titleEn.trim(),
-      titleHi: milestoneModal.data.titleHi?.trim() || milestoneModal.data.titleEn.trim(),
-      descEn: milestoneModal.data.descEn?.trim() || "",
-      descHi: milestoneModal.data.descHi?.trim() || "",
+      titleEn: titleVal,
+      titleHi: titleVal,
+      descEn: descVal,
+      descHi: descVal,
       enabled: milestoneModal.data.enabled !== false
     };
 
@@ -960,52 +969,35 @@ export default function AdminImpactStudio({ cmsConfig, onSaveCms, isLoading = fa
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Title (English)</label>
-                  <input
-                    type="text"
-                    value={domainModal.data.titleEn || ""}
-                    onChange={(e) =>
-                      setDomainModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, titleEn: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. Free Rural Healthcare"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Title (Hindi)</label>
-                  <input
-                    type="text"
-                    value={domainModal.data.titleHi || ""}
-                    onChange={(e) =>
-                      setDomainModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, titleHi: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. ग्रामीण निःशुल्क चिकित्सा"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
+              <div>
+                <label className="text-xs font-bold text-slate-700">Initiative Title / पहल का शीर्षक</label>
+                <input
+                  type="text"
+                  value={domainModal.data.titleEn || domainModal.data.titleHi || ""}
+                  onChange={(e) =>
+                    setDomainModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, titleEn: e.target.value, titleHi: e.target.value }
+                    }))
+                  }
+                  placeholder="e.g. Free Rural Healthcare / ग्रामीण निःशुल्क चिकित्सा"
+                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700">Badge (English)</label>
+                  <label className="text-xs font-bold text-slate-700">Badge / विषय टैग</label>
                   <input
                     type="text"
-                    value={domainModal.data.badgeEn || ""}
+                    value={domainModal.data.badgeEn || domainModal.data.badgeHi || ""}
                     onChange={(e) =>
                       setDomainModal((prev) => ({
                         ...prev,
-                        data: { ...prev.data, badgeEn: e.target.value }
+                        data: { ...prev.data, badgeEn: e.target.value, badgeHi: e.target.value }
                       }))
                     }
-                    placeholder="e.g. Healthcare"
+                    placeholder="e.g. Healthcare / चिकित्सा"
                     className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                   />
                 </div>
@@ -1027,33 +1019,17 @@ export default function AdminImpactStudio({ cmsConfig, onSaveCms, isLoading = fa
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Description (English)</label>
+                <label className="text-xs font-bold text-slate-700">Description / पहल का विवरण</label>
                 <textarea
                   rows={2}
-                  value={domainModal.data.descEn || ""}
+                  value={domainModal.data.descEn || domainModal.data.descHi || ""}
                   onChange={(e) =>
                     setDomainModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, descEn: e.target.value }
+                      data: { ...prev.data, descEn: e.target.value, descHi: e.target.value }
                     }))
                   }
-                  placeholder="Initiative description..."
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Description (Hindi)</label>
-                <textarea
-                  rows={2}
-                  value={domainModal.data.descHi || ""}
-                  onChange={(e) =>
-                    setDomainModal((prev) => ({
-                      ...prev,
-                      data: { ...prev.data, descHi: e.target.value }
-                    }))
-                  }
-                  placeholder="पहल का विवरण..."
+                  placeholder="Initiative description / सामाजिक पहल का विवरण..."
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
@@ -1097,33 +1073,17 @@ export default function AdminImpactStudio({ cmsConfig, onSaveCms, isLoading = fa
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-700">Label (English)</label>
+                <label className="text-xs font-bold text-slate-700">Metric Label / आंकड़े का शीर्षक</label>
                 <input
                   type="text"
-                  value={statModal.data.labelEn || ""}
+                  value={statModal.data.labelEn || statModal.data.labelHi || ""}
                   onChange={(e) =>
                     setStatModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, labelEn: e.target.value }
+                      data: { ...prev.data, labelEn: e.target.value, labelHi: e.target.value }
                     }))
                   }
-                  placeholder="e.g. Beneficiaries Served"
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Label (Hindi)</label>
-                <input
-                  type="text"
-                  value={statModal.data.labelHi || ""}
-                  onChange={(e) =>
-                    setStatModal((prev) => ({
-                      ...prev,
-                      data: { ...prev.data, labelHi: e.target.value }
-                    }))
-                  }
-                  placeholder="e.g. कुल लाभान्वित नागरिक"
+                  placeholder="e.g. Beneficiaries Served / कुल लाभान्वित नागरिक"
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
@@ -1198,83 +1158,50 @@ export default function AdminImpactStudio({ cmsConfig, onSaveCms, isLoading = fa
             </div>
 
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Citizen Name (English)</label>
-                  <input
-                    type="text"
-                    value={storyModal.data.nameEn || ""}
-                    onChange={(e) =>
-                      setStoryModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, nameEn: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. Ramesh Patel"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-700">Citizen Name (Hindi)</label>
-                  <input
-                    type="text"
-                    value={storyModal.data.nameHi || ""}
-                    onChange={(e) =>
-                      setStoryModal((prev) => ({
-                        ...prev,
-                        data: { ...prev.data, nameHi: e.target.value }
-                      }))
-                    }
-                    placeholder="e.g. रमेश पटेल"
-                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                  />
-                </div>
-              </div>
-
               <div>
-                <label className="text-xs font-bold text-slate-700">Village / City</label>
+                <label className="text-xs font-bold text-slate-700">Citizen Name / नागरिक का नाम</label>
                 <input
                   type="text"
-                  value={storyModal.data.villageEn || ""}
+                  value={storyModal.data.nameEn || storyModal.data.nameHi || ""}
                   onChange={(e) =>
                     setStoryModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, villageEn: e.target.value }
+                      data: { ...prev.data, nameEn: e.target.value, nameHi: e.target.value }
                     }))
                   }
-                  placeholder="Sehore, Madhya Pradesh"
+                  placeholder="e.g. Ramesh Patel / रमेश पटेल"
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Quote / Story (English)</label>
-                <textarea
-                  rows={3}
-                  value={storyModal.data.quoteEn || ""}
+                <label className="text-xs font-bold text-slate-700">Village / City / स्थान</label>
+                <input
+                  type="text"
+                  value={storyModal.data.villageEn || storyModal.data.villageHi || ""}
                   onChange={(e) =>
                     setStoryModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, quoteEn: e.target.value }
+                      data: { ...prev.data, villageEn: e.target.value, villageHi: e.target.value }
                     }))
                   }
-                  placeholder="How RP Foundation helped..."
+                  placeholder="e.g. Sehore, Madhya Pradesh / सीहोर, म.प्र."
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Quote / Story (Hindi)</label>
+                <label className="text-xs font-bold text-slate-700">Quote / Story / नागरिक की कहानी या अनुभव</label>
                 <textarea
                   rows={3}
-                  value={storyModal.data.quoteHi || ""}
+                  value={storyModal.data.quoteEn || storyModal.data.quoteHi || ""}
                   onChange={(e) =>
                     setStoryModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, quoteHi: e.target.value }
+                      data: { ...prev.data, quoteEn: e.target.value, quoteHi: e.target.value }
                     }))
                   }
-                  placeholder="आरपी फाउंडेशन से प्राप्त सहायता..."
+                  placeholder="How RP Foundation helped / फाउंडेशन द्वारा प्राप्त सहायता का विवरण..."
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
@@ -1334,33 +1261,17 @@ export default function AdminImpactStudio({ cmsConfig, onSaveCms, isLoading = fa
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Title (English)</label>
+                <label className="text-xs font-bold text-slate-700">Milestone Title / उपलब्धि का शीर्षक</label>
                 <input
                   type="text"
-                  value={milestoneModal.data.titleEn || ""}
+                  value={milestoneModal.data.titleEn || milestoneModal.data.titleHi || ""}
                   onChange={(e) =>
                     setMilestoneModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, titleEn: e.target.value }
+                      data: { ...prev.data, titleEn: e.target.value, titleHi: e.target.value }
                     }))
                   }
-                  placeholder="e.g. State Relief Mission"
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Title (Hindi)</label>
-                <input
-                  type="text"
-                  value={milestoneModal.data.titleHi || ""}
-                  onChange={(e) =>
-                    setMilestoneModal((prev) => ({
-                      ...prev,
-                      data: { ...prev.data, titleHi: e.target.value }
-                    }))
-                  }
-                  placeholder="e.g. राज्य राहत मिशन"
+                  placeholder="e.g. State Relief Mission / राज्य राहत मिशन"
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
