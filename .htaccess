@@ -67,8 +67,13 @@ PassengerMaxPoolSize 2
   # Serve the compiled production SPA shell.
   RewriteRule ^$ dist/index.html [L]
 
-  # API requests must stay with CloudLinux Passenger/Express.
+  # Static uploaded media files must be served directly, never rewritten to SPA HTML
+  RewriteCond %{REQUEST_URI} ^/uploads/ [NC]
+  RewriteRule ^ - [L]
+
+  # API requests and static assets must stay with CloudLinux Passenger/Express or direct filesystem.
   RewriteCond %{REQUEST_URI} !^/api/
+  RewriteCond %{REQUEST_URI} !^/uploads/
   RewriteCond %{REQUEST_URI} !^/assets/
   RewriteCond %{REQUEST_URI} !^/src/
   RewriteCond %{REQUEST_URI} !^/dist/

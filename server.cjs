@@ -337349,15 +337349,20 @@ var handleUploadErrors = (err2, req2, res, next2) => {
   }
   next2();
 };
-var saveFileLocally = async (file) => {
+var saveFileLocally = async (file, req2) => {
   const ext = import_path4.default.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, "");
-  const filename = import_crypto19.default.randomUUID() + ext;
+  const filename = `${Date.now()}-${import_crypto19.default.randomUUID().slice(0, 8)}${ext || ".jpg"}`;
   const uploadDir = import_path4.default.join(process.cwd(), "uploads");
   if (!import_fs3.default.existsSync(uploadDir)) {
     import_fs3.default.mkdirSync(uploadDir, { recursive: true });
   }
   const filepath = import_path4.default.join(uploadDir, filename);
   import_fs3.default.writeFileSync(filepath, file.buffer);
+  if (req2) {
+    const proto2 = req2.headers["x-forwarded-proto"] || req2.protocol || "https";
+    const host = req2.headers["x-forwarded-host"] || req2.get("host") || "appapi.therpfoundation.org";
+    return `${proto2}://${host}/uploads/${filename}`;
+  }
   return "/uploads/" + filename;
 };
 var router26 = import_express26.default.Router();
@@ -337366,7 +337371,7 @@ router26.post("/api/upload/founder", authenticateToken, requireAdmin, uploadLimi
     if (!req2.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req2.file);
+    const fileUrl = await saveFileLocally(req2.file, req2);
     res.json({ success: true, url: fileUrl });
   } catch (error3) {
     console.error("Founder image upload failed:", error3);
@@ -337378,7 +337383,7 @@ router26.post("/api/upload/broadcast", authenticateToken, requireAdmin, uploadLi
     if (!req2.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req2.file);
+    const fileUrl = await saveFileLocally(req2.file, req2);
     res.json({ success: true, url: fileUrl });
   } catch (error3) {
     console.error("Broadcast image upload failed:", error3);
@@ -337390,7 +337395,7 @@ router26.post("/api/upload/image", authenticateToken, uploadLimiter, upload.sing
     if (!req2.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req2.file);
+    const fileUrl = await saveFileLocally(req2.file, req2);
     res.json({ success: true, url: fileUrl });
   } catch (error3) {
     console.error("Generic image upload failed:", error3);
@@ -337402,7 +337407,7 @@ router26.post("/api/upload/video", authenticateToken, requireAdmin, uploadLimite
     if (!req2.file) {
       return res.status(400).json({ error: "No video file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req2.file);
+    const fileUrl = await saveFileLocally(req2.file, req2);
     res.json({ success: true, url: fileUrl });
   } catch (error3) {
     console.error("Video upload failed:", error3);
@@ -337414,7 +337419,7 @@ router26.post("/api/profile/upload-dp", authenticateToken, uploadLimiter, upload
     if (!req2.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req2.file);
+    const fileUrl = await saveFileLocally(req2.file, req2);
     const userId = req2.user.id;
     await pool.query(`UPDATE users SET avatar = $1 WHERE id = $2`, [fileUrl, userId]);
     await pool.query(`UPDATE volunteers SET avatar = $1 WHERE id = $2`, [fileUrl, userId]);
@@ -337429,7 +337434,7 @@ router26.post("/api/profile/upload-cover", authenticateToken, uploadLimiter, upl
     if (!req2.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req2.file);
+    const fileUrl = await saveFileLocally(req2.file, req2);
     const userId = req2.user.id;
     await pool.query(`UPDATE users SET cover = $1 WHERE id = $2`, [fileUrl, userId]);
     await pool.query(`UPDATE volunteers SET cover = $1 WHERE id = $2`, [fileUrl, userId]);
@@ -339761,7 +339766,7 @@ var handleUploadErrors2 = (err2, req2, res, next2) => {
   }
   next2();
 };
-async function saveFileLocally2(file) {
+async function saveFileLocally2(file, req2) {
   const fileExt = import_path14.default.extname(file.originalname) || ".jpg";
   const filename = `${Date.now()}-${Math.round(Math.random() * 1e5)}${fileExt}`;
   const destDir = import_path14.default.join(process.cwd(), "uploads");
@@ -339770,6 +339775,11 @@ async function saveFileLocally2(file) {
   }
   const destFilePath = import_path14.default.join(destDir, filename);
   await import_fs10.default.promises.writeFile(destFilePath, file.buffer);
+  if (req2) {
+    const proto2 = req2.headers["x-forwarded-proto"] || req2.protocol || "https";
+    const host = req2.headers["x-forwarded-host"] || req2.get("host") || "appapi.therpfoundation.org";
+    return `${proto2}://${host}/uploads/${filename}`;
+  }
   return `/uploads/${filename}`;
 }
 app.post("/api/admin/upload", authenticateToken, requireAdmin, upload2.single("image"), handleUploadErrors2, async (req2, res) => {
@@ -339777,14 +339787,19 @@ app.post("/api/admin/upload", authenticateToken, requireAdmin, upload2.single("i
     if (!req2.file) {
       return res.status(400).json({ success: false, message: "No file uploaded" });
     }
-    const localUrl = await saveFileLocally2(req2.file);
+    const localUrl = await saveFileLocally2(req2.file, req2);
     res.json({ success: true, url: localUrl });
   } catch (error3) {
     console.error("Error uploading file:", error3);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
-app.use("/uploads", import_express32.default.static(import_path14.default.join(process.cwd(), "uploads")));
+app.use("/uploads", (req2, res, next2) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  next2();
+}, import_express32.default.static(import_path14.default.join(process.cwd(), "uploads")));
 app.use("/app", import_express32.default.static(import_path14.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req2, res) => {
   res.redirect("/app/");

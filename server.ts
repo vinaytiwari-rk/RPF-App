@@ -600,7 +600,7 @@ const handleUploadErrors = (err: any, req: any, res: any, next: any) => {
   next();
 };
 
-async function saveFileLocally(file: Express.Multer.File): Promise<string> {
+async function saveFileLocally(file: Express.Multer.File, req?: any): Promise<string> {
   const fileExt = path.extname(file.originalname) || ".jpg";
   const filename = `${Date.now()}-${Math.round(Math.random() * 100000)}${fileExt}`;
   
@@ -612,6 +612,11 @@ async function saveFileLocally(file: Express.Multer.File): Promise<string> {
   const destFilePath = path.join(destDir, filename);
   await fs.promises.writeFile(destFilePath, file.buffer);
   
+  if (req) {
+    const proto = req.headers["x-forwarded-proto"] || req.protocol || "https";
+    const host = req.headers["x-forwarded-host"] || req.get("host") || "appapi.therpfoundation.org";
+    return `${proto}://${host}/uploads/${filename}`;
+  }
   return `/uploads/${filename}`;
 }
 
@@ -621,27 +626,25 @@ app.post("/api/admin/upload", authenticateToken, requireAdmin, upload.single("im
     if (!req.file) {
       return res.status(400).json({ success: false, message: "No file uploaded" });
     }
-    const localUrl = await saveFileLocally(req.file);
+    const localUrl = await saveFileLocally(req.file, req);
     res.json({ success: true, url: localUrl });
   } catch (error) {
     console.error("Error uploading file:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
-});// Profile image management endpoints
-
-
-
-
-
-
-
+});
 
 // =============================================================================
 // SERVE STATIC FILES & APP STARTUP
 // =============================================================================
 
-// Serve static assets for uploads directory
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+// Serve static assets for uploads directory with full CORS & caching
+app.use("/uploads", (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  next();
+}, express.static(path.join(process.cwd(), "uploads")));
 
 // Serve Flutter web app statically at /app
 app.use("/app", express.static(path.join(process.cwd(), "public", "app")));

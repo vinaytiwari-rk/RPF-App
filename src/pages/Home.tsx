@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
+import { resolveMediaUrl } from "../utils/media";
 
 const fallbackSlides = [
   { image: "/assets/mega_camp_banner.png", titleEn: "Healthcare support for the community", subEn: "Health camps, medical support and community care.", route: "/health-care" },
@@ -287,7 +288,7 @@ export default function Home() {
     if (!sUrl || typeof sUrl !== "string") return fallbackSlides[idx % fallbackSlides.length].image;
     const t = sUrl.trim();
     if (!t) return fallbackSlides[idx % fallbackSlides.length].image;
-    return t.startsWith("assets/") ? `/${t}` : t;
+    return resolveMediaUrl(t);
   };
 
   return (

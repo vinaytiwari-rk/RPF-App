@@ -46,17 +46,22 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') checkForWebUpdate();
 });
 
-if (Capacitor.isNativePlatform()) {
+const isNative = Capacitor.isNativePlatform();
+const currentHost = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+const isSelfHostedBackend = currentHost === 'appapi.therpfoundation.org';
+const isLocalhost = currentHost === 'localhost' || currentHost === '127.0.0.1';
+
+// Always target the dedicated backend origin for Native App or when hosted on external frontend domains
+// (therpfoundation.org, jansevacard.therpfoundation.org, api.therpfoundation.org)
+if (isNative || (!isSelfHostedBackend && !isLocalhost)) {
   axios.defaults.baseURL = RPF_WEB_ORIGIN;
   axios.defaults.adapter = ['fetch', 'xhr', 'http'];
-  const originalFetch = window.fetch.bind(window);
 
+  const originalFetch = window.fetch.bind(window);
   window.fetch = function (input, init) {
     let resolvedInput: RequestInfo | URL = input;
     let url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input instanceof Request ? input.url : '';
 
-    // The live feed service is served by the cPanel PHP proxy. Route it directly
-    // instead of waiting for a Node route that may not exist in the native build.
     if (url.startsWith('/api/public/live-feeds')) url = `${RPF_WEB_ORIGIN}/rss-proxy.php${url.includes('?') ? url.slice(url.indexOf('?')) : ''}`;
     else if (url.startsWith('api/public/live-feeds')) url = `${RPF_WEB_ORIGIN}/rss-proxy.php`;
     else if (url.startsWith('/api/')) url = `${RPF_WEB_ORIGIN}${url}`;

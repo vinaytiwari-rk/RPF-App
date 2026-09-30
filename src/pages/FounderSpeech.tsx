@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, HeartHandshake, Quote } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { resolveMediaUrl } from "../utils/media";
 
 export default function FounderSpeech() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function FounderSpeech() {
   const message = hi ? settings.founderMessageHi : settings.founderMessageEn;
   const founderName = cmsConfig.founderName || "Rohit Pandit";
   const designation = cmsConfig.founderDesignation || "Founder, RP FOUNDATION";
-  const image = settings.founderImgUrl || cmsConfig.founderImgUrl || "/assets/founder.png";
+  const image = resolveMediaUrl(settings.founderImgUrl || cmsConfig.founderImgUrl || "/assets/founder.png");
 
   return <main className="min-h-full bg-[#f8fafc] pb-12"><div className="mx-auto max-w-3xl px-3.5 py-5 sm:px-6">
     <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-black text-slate-600 shadow-sm"><ArrowLeft className="h-4 w-4"/> {hi ? "वापस" : "Back"}</button>

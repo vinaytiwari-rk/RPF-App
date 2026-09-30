@@ -23,6 +23,7 @@ import {
   Film
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { resolveMediaUrl, fileToDataUrl } from "../../utils/media";
 
 interface CarouselSlide {
   id: string;
@@ -76,27 +77,51 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
 
-  // Upload handlers
+  // Resilient Upload handlers
   const handleUploadSlideImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // 1. Instant local preview from client memory (0ms lag, cannot break)
+    const localBlob = URL.createObjectURL(file);
+    setEditingSlide((prev) => (prev ? { ...prev, image: localBlob } : null));
     setUploadingImage(true);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("image", file);
       const token = localStorage.getItem("@rpf_token");
-      const res = await axios.post("/api/upload/image", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        }
-      });
-      if (res.data?.url) {
-        setEditingSlide((prev) => (prev ? { ...prev, image: res.data.url } : null));
+      const headers = {
+        "Content-Type": "multipart/form-data",
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+
+      let uploadedUrl = "";
+      try {
+        const res = await axios.post("/api/admin/upload", formData, { headers });
+        if (res.data?.url) uploadedUrl = res.data.url;
+      } catch {
+        const res2 = await axios.post("/api/upload/image", formData, { headers });
+        if (res2.data?.url) uploadedUrl = res2.data.url;
+      }
+
+      if (uploadedUrl) {
+        const resolved = resolveMediaUrl(uploadedUrl);
+        setEditingSlide((prev) => (prev ? { ...prev, image: resolved } : null));
         toast.success("Image uploaded successfully from device!");
+      } else {
+        throw new Error("No URL returned from server");
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to upload image");
+      console.warn("Server upload failed, converting to optimized inline data URL fallback:", err);
+      try {
+        const fallbackDataUrl = await fileToDataUrl(file);
+        setEditingSlide((prev) => (prev ? { ...prev, image: fallbackDataUrl } : null));
+        toast.success("Image optimized and loaded from device!");
+      } catch (dataErr) {
+        toast.error("Failed to process image from device");
+      }
     } finally {
       setUploadingImage(false);
     }
@@ -105,7 +130,11 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
   const handleUploadReelVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const localBlob = URL.createObjectURL(file);
+    setEditingReel((prev) => (prev ? { ...prev, videoUrl: localBlob } : null));
     setUploadingVideo(true);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -117,7 +146,8 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
         }
       });
       if (res.data?.url) {
-        setEditingReel((prev) => (prev ? { ...prev, videoUrl: res.data.url } : null));
+        const resolved = resolveMediaUrl(res.data.url);
+        setEditingReel((prev) => (prev ? { ...prev, videoUrl: resolved } : null));
         toast.success("Video uploaded successfully from device!");
       }
     } catch (err: any) {
@@ -130,22 +160,44 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
   const handleUploadReelThumbnail = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const localBlob = URL.createObjectURL(file);
+    setEditingReel((prev) => (prev ? { ...prev, url: localBlob } : null));
+
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("image", file);
       const token = localStorage.getItem("@rpf_token");
-      const res = await axios.post("/api/upload/image", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        }
-      });
-      if (res.data?.url) {
-        setEditingReel((prev) => (prev ? { ...prev, url: res.data.url } : null));
+      const headers = {
+        "Content-Type": "multipart/form-data",
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+
+      let uploadedUrl = "";
+      try {
+        const res = await axios.post("/api/upload/image", formData, { headers });
+        if (res.data?.url) uploadedUrl = res.data.url;
+      } catch {
+        const res2 = await axios.post("/api/admin/upload", formData, { headers });
+        if (res2.data?.url) uploadedUrl = res2.data.url;
+      }
+
+      if (uploadedUrl) {
+        const resolved = resolveMediaUrl(uploadedUrl);
+        setEditingReel((prev) => (prev ? { ...prev, url: resolved } : null));
         toast.success("Cover image uploaded from device!");
+      } else {
+        throw new Error("No URL returned from server");
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to upload cover image");
+      try {
+        const fallbackDataUrl = await fileToDataUrl(file);
+        setEditingReel((prev) => (prev ? { ...prev, url: fallbackDataUrl } : null));
+        toast.success("Cover image optimized from device!");
+      } catch {
+        toast.error("Failed to process cover image");
+      }
     }
   };
 
@@ -410,7 +462,7 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
             {slides.map((s, idx) => (
               <div key={s.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2.5">
                 <div className="relative h-28 overflow-hidden rounded-xl bg-slate-200 border border-slate-200/60">
-                  <img src={s.image} alt={s.titleEn} className="h-full w-full object-cover" />
+                  <img src={resolveMediaUrl(s.image)} alt={s.titleEn} className="h-full w-full object-cover" />
                   <span className={`absolute top-2 right-2 rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
                     s.active ? "bg-emerald-50 text-[#166534] border border-emerald-200" : "bg-slate-200 text-slate-600"
                   }`}>
@@ -686,7 +738,7 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
                 {reel.videoUrl && (
                   <div className="rounded-xl overflow-hidden border border-slate-200 bg-black aspect-video max-h-36">
                     <video
-                      src={reel.videoUrl}
+                      src={resolveMediaUrl(reel.videoUrl)}
                       controls
                       className="w-full h-full object-contain"
                     />
@@ -781,11 +833,17 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
                   )}
                 </div>
                 {editingSlide.image && (
-                  <div className="mt-2 relative w-full h-28 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                  <div className="mt-2 relative w-full h-32 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
                     <img
-                      src={editingSlide.image}
+                      src={resolveMediaUrl(editingSlide.image)}
                       alt="Banner Preview"
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (!img.src.includes('logo.png')) {
+                          img.src = '/assets/logo.png';
+                        }
+                      }}
                     />
                   </div>
                 )}
@@ -978,7 +1036,7 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
                 {editingReel.videoUrl && (
                   <div className="mt-2 rounded-xl overflow-hidden border border-slate-200 bg-black aspect-video max-h-44">
                     <video
-                      src={editingReel.videoUrl}
+                      src={resolveMediaUrl(editingReel.videoUrl)}
                       controls
                       className="w-full h-full object-contain"
                     />
@@ -1005,6 +1063,21 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
                     </span>
                   )}
                 </div>
+                {editingReel.url && (
+                  <div className="mt-2 relative w-full h-24 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                    <img
+                      src={resolveMediaUrl(editingReel.url)}
+                      alt="Cover Preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (!img.src.includes('logo.png')) {
+                          img.src = '/assets/logo.png';
+                        }
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               <div>

@@ -54,15 +54,21 @@ const handleUploadErrors = (err: any, req: any, res: any, next: any) => {
   next();
 };
 
-const saveFileLocally = async (file: Express.Multer.File): Promise<string> => {
+const saveFileLocally = async (file: Express.Multer.File, req?: any): Promise<string> => {
   const ext = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '');
-  const filename = crypto.randomUUID() + ext;
+  const filename = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext || '.jpg'}`;
   const uploadDir = path.join(process.cwd(), 'uploads');
   if (!fs_node.existsSync(uploadDir)) {
     fs_node.mkdirSync(uploadDir, { recursive: true });
   }
   const filepath = path.join(uploadDir, filename);
   fs_node.writeFileSync(filepath, file.buffer);
+
+  if (req) {
+    const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    const host = req.headers['x-forwarded-host'] || req.get('host') || 'appapi.therpfoundation.org';
+    return `${proto}://${host}/uploads/${filename}`;
+  }
   return '/uploads/' + filename;
 };
 
@@ -73,7 +79,7 @@ router.post("/api/upload/founder", authenticateToken, requireAdmin, uploadLimite
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file);
+    const fileUrl = await saveFileLocally(req.file, req);
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Founder image upload failed:", error);
@@ -86,7 +92,7 @@ router.post("/api/upload/broadcast", authenticateToken, requireAdmin, uploadLimi
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file);
+    const fileUrl = await saveFileLocally(req.file, req);
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Broadcast image upload failed:", error);
@@ -99,7 +105,7 @@ router.post("/api/upload/image", authenticateToken, uploadLimiter, upload.single
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file);
+    const fileUrl = await saveFileLocally(req.file, req);
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Generic image upload failed:", error);
@@ -112,7 +118,7 @@ router.post("/api/upload/video", authenticateToken, requireAdmin, uploadLimiter,
     if (!req.file) {
       return res.status(400).json({ error: "No video file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file);
+    const fileUrl = await saveFileLocally(req.file, req);
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Video upload failed:", error);
@@ -125,7 +131,7 @@ router.post("/api/profile/upload-dp", authenticateToken, uploadLimiter, upload.s
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file);
+    const fileUrl = await saveFileLocally(req.file, req);
     const userId = req.user.id;
 
     await pool.query(`UPDATE users SET avatar = $1 WHERE id = $2`, [fileUrl, userId]);
@@ -143,7 +149,7 @@ router.post("/api/profile/upload-cover", authenticateToken, uploadLimiter, uploa
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file);
+    const fileUrl = await saveFileLocally(req.file, req);
     const userId = req.user.id;
 
     await pool.query(`UPDATE users SET cover = $1 WHERE id = $2`, [fileUrl, userId]);

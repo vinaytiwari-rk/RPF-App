@@ -14,6 +14,18 @@ export default defineConfig(() => {
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      proxy: {
+        '/api': {
+          target: 'https://appapi.therpfoundation.org',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/uploads': {
+          target: 'https://appapi.therpfoundation.org',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     build: {
       target: 'es2022',
