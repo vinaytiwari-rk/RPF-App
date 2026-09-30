@@ -90,6 +90,16 @@ export default function ImpactPage() {
   const [activeMainTab, setActiveMainTab] = useState<MainTab>("impact");
   const [subTab, setSubTab] = useState<SubFilterTab>("all");
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+  const [cardImpact, setCardImpact] = useState<{ totalCards: number; scope: string } | null>(null);
+  useEffect(() => {
+    let active = true;
+    axios.get('/api/public/cards/impact', { timeout: 8000 }).then(({ data }) => {
+      if (active && data?.success && Number.isFinite(data.totalCards)) {
+        setCardImpact({ totalCards: data.totalCards, scope: data.scope });
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   const [volunteerCityFilter, setVolunteerCityFilter] = useState("");
 
@@ -263,9 +273,9 @@ export default function ImpactPage() {
       { id: "beneficiaries", labelEn: "Total Beneficiaries", labelHi: "कुल लाभार्थी नागरिक", value: 250000, suffix: "+", iconName: "Users" },
       { id: "health_camps", labelEn: "Health & Eye Camps", labelHi: "स्वास्थ्य एवं नेत्र शिविर", value: 450, suffix: "+", iconName: "Stethoscope" },
       { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित वृक्ष व पौधे", value: 50000, suffix: "+", iconName: "Trees" },
-      { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: 120000, suffix: "+", iconName: "Award" }
+      { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: cardImpact?.totalCards || 120000, suffix: "+", iconName: "Award" }
     ];
-  }, [cmsConfig?.impactStats]);
+  }, [cmsConfig?.impactStats, cardImpact]);
 
   const liveDomains = useMemo(() => {
     if (Array.isArray(cmsConfig?.impactDomains) && cmsConfig.impactDomains.length > 0) {
