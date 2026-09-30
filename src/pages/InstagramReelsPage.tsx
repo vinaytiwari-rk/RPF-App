@@ -8,6 +8,7 @@ export interface ReelItem {
   id: string;
   title: string;
   url: string;
+  videoUrl?: string;
   embedUrl?: string;
   caption: string;
   category: string;
@@ -72,6 +73,7 @@ export default function InstagramReelsPage() {
               id: item.id || `cms-${idx}`,
               title: item.title || "RP Foundation Reel",
               url: item.url || "https://www.instagram.com/therpfoundation/",
+              videoUrl: item.videoUrl,
               caption: item.caption || item.title || "RP Foundation Social Initiative",
               category: item.category || "General",
               thumbnail: item.thumbnail || defaultReels[idx % defaultReels.length].thumbnail
@@ -182,32 +184,47 @@ export default function InstagramReelsPage() {
 
       {/* Reel Card Viewport */}
       <div className="relative flex-1 w-full h-full flex items-center justify-center bg-slate-900 overflow-hidden">
-        <img
-          src={currentReel?.thumbnail || "/assets/founder.png"}
-          alt={currentReel?.title}
-          className="absolute inset-0 h-full w-full object-cover opacity-80"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+        {currentReel?.videoUrl ? (
+          <video
+            key={currentReel.id + currentReel.videoUrl}
+            src={currentReel.videoUrl}
+            poster={currentReel.thumbnail}
+            controls
+            autoPlay
+            loop
+            playsInline
+            className="absolute inset-0 h-full w-full object-contain bg-black"
+          />
+        ) : (
+          <>
+            <img
+              src={currentReel?.thumbnail || "/assets/founder.png"}
+              alt={currentReel?.title}
+              className="absolute inset-0 h-full w-full object-cover opacity-80"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-        {/* Play Icon / Open Trigger */}
-        <a
-          href={currentReel?.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="z-20 flex flex-col items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-md p-6 border border-white/10 hover:scale-105 transition-all shadow-xl text-center max-w-xs"
-        >
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white shadow-lg">
-            <Play className="h-7 w-7 fill-current ml-1" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-white leading-snug">
-              {currentReel?.title}
-            </p>
-            <p className="mt-1 text-[11px] text-pink-300 font-semibold inline-flex items-center gap-1">
-              Watch on Instagram <ExternalLink className="h-3.5 w-3.5" />
-            </p>
-          </div>
-        </a>
+            {/* Play Icon / Open Trigger */}
+            <a
+              href={currentReel?.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="z-20 flex flex-col items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-md p-6 border border-white/10 hover:scale-105 transition-all shadow-xl text-center max-w-xs"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white shadow-lg">
+                <Play className="h-7 w-7 fill-current ml-1" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white leading-snug">
+                  {currentReel?.title}
+                </p>
+                <p className="mt-1 text-[11px] text-pink-300 font-semibold inline-flex items-center gap-1">
+                  Watch on Instagram <ExternalLink className="h-3.5 w-3.5" />
+                </p>
+              </div>
+            </a>
+          </>
+        )}
       </div>
 
       {/* Bottom Info Overlay & Floating Controls */}

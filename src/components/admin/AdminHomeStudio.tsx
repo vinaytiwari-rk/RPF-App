@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import {
   Images,
   Plus,
@@ -17,7 +18,9 @@ import {
   Instagram,
   Check,
   X,
-  Compass
+  Compass,
+  Upload,
+  Film
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -70,6 +73,81 @@ interface AdminHomeStudioProps {
 
 export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStudioProps) {
   const [activeTab, setActiveTab] = useState<"carousel" | "actions" | "marquees" | "quote" | "social">("carousel");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+
+  // Upload handlers
+  const handleUploadSlideImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = localStorage.getItem("@rpf_token");
+      const res = await axios.post("/api/upload/image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+      });
+      if (res.data?.url) {
+        setEditingSlide((prev) => (prev ? { ...prev, image: res.data.url } : null));
+        toast.success("Image uploaded successfully from device!");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Failed to upload image");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleUploadReelVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingVideo(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = localStorage.getItem("@rpf_token");
+      const res = await axios.post("/api/upload/video", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+      });
+      if (res.data?.url) {
+        setEditingReel((prev) => (prev ? { ...prev, videoUrl: res.data.url } : null));
+        toast.success("Video uploaded successfully from device!");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Failed to upload video");
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
+  const handleUploadReelThumbnail = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = localStorage.getItem("@rpf_token");
+      const res = await axios.post("/api/upload/image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+      });
+      if (res.data?.url) {
+        setEditingReel((prev) => (prev ? { ...prev, url: res.data.url } : null));
+        toast.success("Cover image uploaded from device!");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Failed to upload cover image");
+    }
+  };
 
   // Slides State
   const initialSlides: CarouselSlide[] = Array.isArray(cms?.carouselSlides) && cms.carouselSlides.length > 0
@@ -602,7 +680,7 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
                     <span className="rounded-lg bg-pink-50 p-1.5 text-pink-600 border border-pink-200">
                       <Instagram className="h-4 w-4" />
                     </span>
-                    <p className="text-xs font-black text-[#0A192F]">{reel.title || "Instagram Post"}</p>
+                    <p className="text-xs font-black text-[#0A192F]">{reel.title || "Video Reel"}</p>
                   </div>
                   <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
                     reel.active ? "bg-emerald-50 text-[#166534] border border-emerald-200" : "bg-slate-200 text-slate-600"
@@ -611,8 +689,24 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
                   </span>
                 </div>
 
+                {reel.videoUrl && (
+                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-black aspect-video max-h-36">
+                    <video
+                      src={reel.videoUrl}
+                      controls
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                )}
+
                 <p className="text-xs text-slate-600 font-medium line-clamp-2">{reel.caption || "No caption"}</p>
-                <p className="text-[10px] text-slate-400 font-mono truncate">{reel.url}</p>
+                {reel.videoUrl ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-green-700 font-bold bg-green-50 px-2 py-0.5 rounded border border-green-200">
+                    <Film className="w-3 h-3" /> Device Video Attached
+                  </span>
+                ) : (
+                  <p className="text-[10px] text-slate-400 font-mono truncate">{reel.url}</p>
+                )}
 
                 <div className="flex items-center justify-between border-t border-slate-200/60 pt-2 text-xs">
                   <button
@@ -653,20 +747,12 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-700">Title (English)</label>
+                <label className="text-xs font-bold text-slate-700">Slide Title</label>
                 <input
                   type="text"
-                  value={editingSlide.titleEn}
-                  onChange={(e) => setEditingSlide({ ...editingSlide, titleEn: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-bold"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700">Title (Hindi)</label>
-                <input
-                  type="text"
-                  value={editingSlide.titleHi || ""}
-                  onChange={(e) => setEditingSlide({ ...editingSlide, titleHi: e.target.value })}
+                  value={editingSlide.titleEn || editingSlide.titleHi || ""}
+                  onChange={(e) => setEditingSlide({ ...editingSlide, titleEn: e.target.value, titleHi: e.target.value })}
+                  placeholder="Enter slide title..."
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-bold"
                 />
               </div>
@@ -674,20 +760,41 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
                 <label className="text-xs font-bold text-slate-700">Subtitle / Tagline</label>
                 <input
                   type="text"
-                  value={editingSlide.subEn}
-                  onChange={(e) => setEditingSlide({ ...editingSlide, subEn: e.target.value })}
+                  value={editingSlide.subEn || editingSlide.subHi || ""}
+                  onChange={(e) => setEditingSlide({ ...editingSlide, subEn: e.target.value, subHi: e.target.value })}
+                  placeholder="Brief description..."
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-medium"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-700">Image URL or Local Asset Path</label>
-                <input
-                  type="text"
-                  value={editingSlide.image}
-                  onChange={(e) => setEditingSlide({ ...editingSlide, image: e.target.value })}
-                  placeholder="/assets/mega_camp_banner.png"
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-mono"
-                />
+                <label className="text-xs font-bold text-slate-700">Banner Image (From Device)</label>
+                <div className="mt-1.5 flex items-center gap-3">
+                  <label className="cursor-pointer inline-flex items-center gap-2 rounded-xl bg-[#166534] px-3.5 py-2 text-xs font-bold text-white hover:bg-green-800 transition shadow-sm">
+                    <Upload className="h-4 w-4" />
+                    <span>{uploadingImage ? "Uploading..." : "Upload Image from Device"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadSlideImage}
+                      disabled={uploadingImage}
+                      className="hidden"
+                    />
+                  </label>
+                  {editingSlide.image && (
+                    <span className="text-[10px] text-slate-500 font-mono truncate max-w-[180px]">
+                      {editingSlide.image}
+                    </span>
+                  )}
+                </div>
+                {editingSlide.image && (
+                  <div className="mt-2 relative w-full h-28 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                    <img
+                      src={editingSlide.image}
+                      alt="Banner Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-700">Target App Route</label>
@@ -728,20 +835,11 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-700">Title (English)</label>
+                <label className="text-xs font-bold text-slate-700">Title</label>
                 <input
                   type="text"
-                  value={editingAction.titleEn}
-                  onChange={(e) => setEditingAction({ ...editingAction, titleEn: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-bold"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700">Title (Hindi)</label>
-                <input
-                  type="text"
-                  value={editingAction.titleHi || ""}
-                  onChange={(e) => setEditingAction({ ...editingAction, titleHi: e.target.value })}
+                  value={editingAction.titleEn || editingAction.titleHi || ""}
+                  onChange={(e) => setEditingAction({ ...editingAction, titleEn: e.target.value, titleHi: e.target.value })}
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-bold"
                 />
               </div>
@@ -749,8 +847,8 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
                 <label className="text-xs font-bold text-slate-700">Subtitle</label>
                 <input
                   type="text"
-                  value={editingAction.subtitleEn}
-                  onChange={(e) => setEditingAction({ ...editingAction, subtitleEn: e.target.value })}
+                  value={editingAction.subtitleEn || editingAction.subtitleHi || ""}
+                  onChange={(e) => setEditingAction({ ...editingAction, subtitleEn: e.target.value, subtitleHi: e.target.value })}
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-medium"
                 />
               </div>
@@ -798,25 +896,17 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-black text-[#0A192F]">Edit Marquee Alert</h3>
+              <h3 className="text-sm font-black text-[#0A192F]">Edit Broadcast Announcement</h3>
               <button onClick={() => setEditingMarquee(null)} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100">✕</button>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-700">Ticker Text (English)</label>
+                <label className="text-xs font-bold text-slate-700">Announcement / Alert Text</label>
                 <textarea
-                  value={editingMarquee.textEn}
-                  onChange={(e) => setEditingMarquee({ ...editingMarquee, textEn: e.target.value })}
+                  value={editingMarquee.textEn || editingMarquee.textHi || ""}
+                  onChange={(e) => setEditingMarquee({ ...editingMarquee, textEn: e.target.value, textHi: e.target.value })}
                   rows={2}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-medium"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700">Ticker Text (Hindi)</label>
-                <textarea
-                  value={editingMarquee.textHi || ""}
-                  onChange={(e) => setEditingMarquee({ ...editingMarquee, textHi: e.target.value })}
-                  rows={2}
+                  placeholder="Enter broadcast announcement..."
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-medium"
                 />
               </div>
@@ -844,7 +934,7 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
                 onClick={handleSaveMarqueeModal}
                 className="flex-1 rounded-xl bg-[#C2410C] py-2 text-xs font-black text-white hover:bg-orange-700"
               >
-                Save Ticker
+                Save Announcement
               </button>
             </div>
           </div>
@@ -861,31 +951,75 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-700">Title</label>
+                <label className="text-xs font-bold text-slate-700">Video Title</label>
                 <input
                   type="text"
                   value={editingReel.title}
                   onChange={(e) => setEditingReel({ ...editingReel, title: e.target.value })}
-                  placeholder="Campaign Title"
+                  placeholder="e.g. Free Health Camp in Sehore"
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-bold"
                 />
               </div>
+
               <div>
-                <label className="text-xs font-bold text-slate-700">Instagram Post / Reel URL</label>
-                <input
-                  type="text"
-                  value={editingReel.url}
-                  onChange={(e) => setEditingReel({ ...editingReel, url: e.target.value })}
-                  placeholder="https://www.instagram.com/p/..."
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-mono"
-                />
+                <label className="text-xs font-bold text-slate-700">Upload Video (From Device)</label>
+                <div className="mt-1 flex items-center gap-3">
+                  <label className="cursor-pointer inline-flex items-center gap-2 rounded-xl bg-[#0A192F] px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 transition shadow-sm">
+                    <Film className="h-4 w-4 text-[#FF9933]" />
+                    <span>{uploadingVideo ? "Uploading Video..." : "Select Video from Device"}</span>
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/quicktime,video/m4v"
+                      onChange={handleUploadReelVideo}
+                      disabled={uploadingVideo}
+                      className="hidden"
+                    />
+                  </label>
+                  {editingReel.videoUrl && (
+                    <span className="text-[10px] text-green-700 font-bold bg-green-50 px-2 py-1 rounded-md border border-green-200">
+                      Video Ready
+                    </span>
+                  )}
+                </div>
+                {editingReel.videoUrl && (
+                  <div className="mt-2 rounded-xl overflow-hidden border border-slate-200 bg-black aspect-video max-h-44">
+                    <video
+                      src={editingReel.videoUrl}
+                      controls
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                )}
               </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700">Cover / Poster Image (From Device)</label>
+                <div className="mt-1 flex items-center gap-3">
+                  <label className="cursor-pointer inline-flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition border border-slate-300">
+                    <Upload className="h-3.5 w-3.5" />
+                    <span>Select Poster Image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadReelThumbnail}
+                      className="hidden"
+                    />
+                  </label>
+                  {editingReel.url && (
+                    <span className="text-[10px] text-slate-500 font-mono truncate max-w-[200px]">
+                      {editingReel.url}
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <div>
                 <label className="text-xs font-bold text-slate-700">Caption / Description</label>
                 <textarea
                   value={editingReel.caption || ""}
                   onChange={(e) => setEditingReel({ ...editingReel, caption: e.target.value })}
                   rows={2}
+                  placeholder="Describe this social welfare activity..."
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-medium"
                 />
               </div>

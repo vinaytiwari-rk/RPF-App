@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import {
   Play,
@@ -21,15 +21,48 @@ import {
   Users,
   Search,
   Send,
-  Activity
+  Activity,
+  Award,
+  TrendingUp,
+  MessageSquareQuote
 } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { useApp } from "../context/AppContext";
 import InstagramApiFeed from "../components/InstagramApiFeed";
 
 type MainTab = "impact" | "volunteers" | "chat";
 type SubFilterTab = "all" | "community" | "care" | "active";
+
+const ICON_MAP: Record<string, any> = {
+  Trash2,
+  Droplets,
+  Briefcase,
+  Heart,
+  Wrench,
+  Stethoscope,
+  Trees,
+  Landmark,
+  GraduationCap,
+  Users,
+  Award,
+  ShieldCheck,
+  Sparkles,
+  HandHeart,
+  Activity,
+  TrendingUp
+};
+
+function renderDomainIcon(iconNameOrComp: any) {
+  if (!iconNameOrComp) return <Sparkles className="w-5 h-5 text-[#C2410C]" />;
+  if (typeof iconNameOrComp === "string") {
+    const Comp = ICON_MAP[iconNameOrComp] || Sparkles;
+    return <Comp className="w-5 h-5 text-[#C2410C]" />;
+  }
+  const Comp = iconNameOrComp;
+  return <Comp className="w-5 h-5 text-[#C2410C]" />;
+}
 
 interface ChatMessage {
   id: string;
@@ -50,6 +83,7 @@ export default function ImpactPage() {
   const navigate = useNavigate();
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const { user } = useAuth();
+  const { cmsConfig } = useApp();
   const isHi = lang === "hi";
 
   const [activeMainTab, setActiveMainTab] = useState<MainTab>("impact");
@@ -228,7 +262,34 @@ export default function ImpactPage() {
     }
   ];
 
-  const filteredDomains = IMPACT_DOMAINS.filter(d => subTab === "all" || d.tab === subTab);
+  const liveStats = useMemo(() => {
+    if (Array.isArray(cmsConfig?.impactStats) && cmsConfig.impactStats.length > 0) {
+      return cmsConfig.impactStats.filter((s: any) => s.enabled !== false);
+    }
+    return [
+      { id: "beneficiaries", labelEn: "Total Beneficiaries", labelHi: "कुल लाभार्थी नागरिक", value: 250000, suffix: "+", iconName: "Users" },
+      { id: "health_camps", labelEn: "Health & Eye Camps", labelHi: "स्वास्थ्य एवं नेत्र शिविर", value: 450, suffix: "+", iconName: "Stethoscope" },
+      { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित वृक्ष व पौधे", value: 50000, suffix: "+", iconName: "Trees" },
+      { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: cardImpact?.totalCards || 120000, suffix: "+", iconName: "Award" }
+    ];
+  }, [cmsConfig?.impactStats, cardImpact]);
+
+  const liveDomains = useMemo(() => {
+    if (Array.isArray(cmsConfig?.impactDomains) && cmsConfig.impactDomains.length > 0) {
+      const enabledOnly = cmsConfig.impactDomains.filter((d: any) => d.enabled !== false);
+      if (enabledOnly.length > 0) return enabledOnly;
+    }
+    return IMPACT_DOMAINS;
+  }, [cmsConfig?.impactDomains]);
+
+  const filteredDomains = liveDomains.filter((d: any) => subTab === "all" || d.tab === subTab);
+
+  const liveStories = useMemo(() => {
+    if (Array.isArray(cmsConfig?.testimonials) && cmsConfig.testimonials.length > 0) {
+      return cmsConfig.testimonials.filter((t: any) => t.enabled !== false);
+    }
+    return [];
+  }, [cmsConfig?.testimonials]);
 
   return (
     <div className="min-h-screen bg-transparent pb-28 font-sans selection:bg-orange-100 animate-fadeIn text-slate-800">
@@ -263,8 +324,38 @@ export default function ImpactPage() {
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
 
         {/* Tab 1: Field Impact & Relief */}
-        {(
+        {activeMainTab === "impact" && (
           <div className="space-y-5">
+            {/* LIVE IMPACT STATS COUNTERS (SYNCED DIRECTLY FROM CMS ADMIN) */}
+            <section className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-xs font-black uppercase tracking-wider text-[#166534]">
+                  {isHi ? "सामुदायिक प्रभाव आंकड़े" : "Key Impact Highlights"}
+                </h2>
+                <span className="text-[10px] font-bold text-slate-400">
+                  {isHi ? "प्रमाणित आंकड़े" : "Verified Metrics"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {liveStats.map((st: any) => (
+                  <div
+                    key={st.id}
+                    className="bg-white rounded-2xl border border-slate-200/90 p-3.5 shadow-2xs text-center space-y-1 hover:border-orange-300 transition-all"
+                  >
+                    <div className="w-8 h-8 mx-auto rounded-xl bg-orange-50 text-[#C2410C] flex items-center justify-center">
+                      {renderDomainIcon(st.iconName || st.icon)}
+                    </div>
+                    <p className="text-xl sm:text-2xl font-black text-[#0A192F]">
+                      {Number(st.value).toLocaleString("en-IN")}{st.suffix || "+"}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider line-clamp-1">
+                      {isHi ? (st.labelHi || st.labelEn) : st.labelEn}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             {/* Category Filter Pills: All, Community, Care, Active */}
             <section className="space-y-2">
               <div className="flex items-center justify-between px-1">
@@ -301,8 +392,7 @@ export default function ImpactPage() {
 
             {/* Detailed Impact Domain Cards */}
             <section className="space-y-3">
-              {filteredDomains.map((domain) => {
-                const Icon = domain.icon;
+              {filteredDomains.map((domain: any) => {
                 return (
                   <div 
                     key={domain.id} 
@@ -311,26 +401,61 @@ export default function ImpactPage() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         <div className="h-[66px] w-[66px] shrink-0" aria-hidden="true">
-                          {serviceArtFor(domain.id) ? <ServiceIllustration kind={serviceArtFor(domain.id)!} className="h-full w-full" /> : <div className={`h-full w-full rounded-2xl flex items-center justify-center border ${domain.color}`}><Icon className="h-7 w-7" /></div>}
+                          {serviceArtFor(domain.id) ? (
+                            <ServiceIllustration kind={serviceArtFor(domain.id)!} className="h-full w-full" />
+                          ) : (
+                            <div className={`h-full w-full rounded-2xl flex items-center justify-center border ${domain.color || "bg-orange-50 text-[#C2410C] border-orange-200"}`}>
+                              {renderDomainIcon(domain.iconName || domain.icon)}
+                            </div>
+                          )}
                         </div>
                         <div>
-                          <h3 className="text-sm font-black text-[#245D45] line-clamp-1">
-                            {isHi ? domain.titleHi : domain.titleEn}
+                          <h3 className="text-sm font-black text-[#166534] line-clamp-1">
+                            {isHi ? (domain.titleHi || domain.titleEn) : domain.titleEn}
                           </h3>
-                          <span className="text-[9.5px] font-extrabold text-[#D97706] uppercase tracking-wider">
-                            {isHi ? domain.badgeHi : domain.badgeEn}
+                          <span className="text-[9.5px] font-extrabold text-[#C2410C] uppercase tracking-wider">
+                            {isHi ? (domain.badgeHi || domain.badgeEn) : domain.badgeEn}
                           </span>
                         </div>
                       </div>
                     </div>
 
                     <p className="text-xs leading-relaxed text-slate-600 font-medium pl-1">
-                      {isHi ? domain.descHi : domain.descEn}
+                      {isHi ? (domain.descHi || domain.descEn) : domain.descEn}
                     </p>
                   </div>
                 );
               })}
             </section>
+
+            {/* Citizen Testimonials & Ground Stories */}
+            {liveStories.length > 0 && (
+              <section className="space-y-3 bg-white rounded-3xl border border-slate-200 p-5 shadow-xs">
+                <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                  <MessageSquareQuote className="w-4 h-4 text-[#C2410C]" />
+                  <h3 className="text-xs font-black text-[#0A192F] uppercase tracking-wider">
+                    {isHi ? "नागरिक अनुभव एवं जन समीक्षा" : "Ground Voices & Stories"}
+                  </h3>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {liveStories.map((story: any) => (
+                    <div key={story.id} className="p-3.5 rounded-2xl bg-amber-50/40 border border-amber-200/60 space-y-2">
+                      <p className="text-xs text-slate-700 italic leading-relaxed">
+                        “{isHi ? (story.quoteHi || story.quoteEn) : story.quoteEn}”
+                      </p>
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-[#0A192F]">
+                          {isHi ? (story.nameHi || story.nameEn) : story.nameEn}
+                        </p>
+                        <p className="text-[10px] text-slate-500">
+                          {isHi ? (story.villageHi || story.villageEn) : story.villageEn}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Featured Reel Card */}
             <section className="bg-gradient-to-br from-[#167C5A] via-emerald-700 to-teal-800 border border-emerald-600 rounded-3xl p-5 text-white shadow-md space-y-3">

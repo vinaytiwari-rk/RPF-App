@@ -337319,13 +337319,25 @@ var uploadLimiter = rate_limit_default({
 var storage = import_multer.default.memoryStorage();
 var upload = (0, import_multer.default)({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
+  // 10MB limit
   fileFilter: (req2, file, cb) => {
     if (file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/") || file.mimetype === "application/pdf") {
       cb(null, true);
     } else {
       cb(new Error("Invalid file type"));
+    }
+  }
+});
+var videoUpload = (0, import_multer.default)({
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+  // 50MB limit for videos
+  fileFilter: (req2, file, cb) => {
+    if (file.mimetype.startsWith("video/") || file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type: please upload MP4, WebM or video file"));
     }
   }
 });
@@ -337382,6 +337394,18 @@ router26.post("/api/upload/image", authenticateToken, uploadLimiter, upload.sing
     res.json({ success: true, url: fileUrl });
   } catch (error3) {
     console.error("Generic image upload failed:", error3);
+    res.status(500).json({ error: error3.message });
+  }
+});
+router26.post("/api/upload/video", authenticateToken, requireAdmin, uploadLimiter, videoUpload.single("file"), handleUploadErrors, async (req2, res) => {
+  try {
+    if (!req2.file) {
+      return res.status(400).json({ error: "No video file uploaded" });
+    }
+    const fileUrl = await saveFileLocally(req2.file);
+    res.json({ success: true, url: fileUrl });
+  } catch (error3) {
+    console.error("Video upload failed:", error3);
     res.status(500).json({ error: error3.message });
   }
 });

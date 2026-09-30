@@ -41,29 +41,7 @@ function parseFeedItems(items: unknown): string[] {
   }).filter((item) => item.length >= 15);
 }
 
-const defaultMarquee1 = [
-  "वीडियो कॉन्फ्रेंसिंग के ज़रिए खेलो इंडिया डायलॉग में प्रधानमंत्री नरेंद्र मोदी जी का मुख्य संबोधन",
-  "Union Home Minister Amit Shah addresses convocation of Gujarat Vidyapith in Ahmedabad",
-  "From Gandhi’s reconstruction to India@2047: HM Shah outlines vision for youth",
-  "मध्यप्रदेश शासन: मुख्यमंत्री डॉ. मोहन यादव ने विकास कार्यों एवं जनकल्याणकारी योजनाओं की समीक्षा की",
-  "12 Years of PMJDY: 59.09 Crore Accounts Opened, Deposits Reach ₹3.17 Lakh Crore"
-];
 
-const defaultMarquee2 = [
-  "River Gandak at Dumariaghat in Gopalganj district continues to flow in severe flood situation: NDMA Alert",
-  "IMD Bulletin: Heavy rainfall to very heavy rainfall forecast over North-East and East India districts in next 24 hours",
-  "IMD Guwahati: Thunderstorms with Lightning accompanied by light to moderate rain very likely over isolated places",
-  "Nepal flash floods: 63 Indian nationals rescued from Trishuli-1 power project site by emergency response team",
-  "NDMA Sachet Alert: High flood situation warning for Bihar and Eastern Uttar Pradesh river basins"
-];
-
-const defaultMarquee3 = [
-  "Nepal Flash Floods: Indian Pilgrims in China contactable, over 96 cross over safely",
-  "US senators seek West Bank killings report from Department of State",
-  "Devastating floods leave more than 1,300 missing along Nepal-China border",
-  "US Army bets $2.2 billion on microreactors for futuristic defense power systems",
-  "UN Security Council urges immediate ceasefire and humanitarian aid access in conflict zones"
-];
 
 const dailyQuotes = [
   { quote: "Work is worship, and service is the greatest religion.", author: "Rohit Pandit" },
@@ -201,10 +179,31 @@ export default function Home() {
   const { user } = useAuth();
   const { cmsConfig } = useApp();
   const [slide, setSlide] = useState(0);
-  const [marquee1, setMarquee1] = useState<string[]>(defaultMarquee1);
-  const [marquee2, setMarquee2] = useState<string[]>(defaultMarquee2);
-  const [, setMarquee3] = useState<string[]>(defaultMarquee3);
+  const [marquee1, setMarquee1] = useState<string[]>([]);
+  const [marquee2, setMarquee2] = useState<string[]>([]);
+  const [, setMarquee3] = useState<string[]>([]);
   const [quoteOfDay, setQuoteOfDay] = useState(dailyQuotes[0]);
+
+  // Broadcast Marquee from Admin CMS
+  const broadcastMarquee = useMemo(() => {
+    if (Array.isArray(cmsConfig?.homeMarquees)) {
+      return cmsConfig.homeMarquees
+        .filter((m: any) => m.active !== false && (m.textEn || m.textHi))
+        .map((m: any) => m.textEn || m.textHi);
+    }
+    return [];
+  }, [cmsConfig?.homeMarquees]);
+
+  // Thought of the Day: CMS Config takes priority over default/API
+  const currentQuote = useMemo(() => {
+    if (cmsConfig?.quoteOfTheDayEn || cmsConfig?.quoteOfTheDayHi || cmsConfig?.quoteOfTheDay) {
+      return {
+        quote: cmsConfig.quoteOfTheDayEn || cmsConfig.quoteOfTheDayHi || cmsConfig.quoteOfTheDay,
+        author: cmsConfig.quoteAuthor || "Rohit Pandit"
+      };
+    }
+    return quoteOfDay;
+  }, [cmsConfig, quoteOfDay]);
 
   const name = user?.name?.trim().split(/\s+/)[0] || "Guest";
   const hour = new Date().getHours();
@@ -245,7 +244,7 @@ export default function Home() {
     void loadQuote();
   }, []);
 
-  // Load 2 Marquees Live
+  // Load Marquees Live from RSS Pipeline
   useEffect(() => {
     let alive = true;
     const restore = (key: string, setter: (value: string[]) => void) => {
@@ -255,14 +254,21 @@ export default function Home() {
     restore("@rpf_marquee2_cache", setMarquee2);
 
     const load = async () => {
-      for (const url of ["/api/public/live-feed", "/api/public/news", "/rss-proxy.php", "https://samahit.rpfoundation.org/rss-proxy.php"]) {
+      for (const url of [
+        "/api/public/rss-feed?feedId=pib-national",
+        "/api/public/rss-feed?feedId=sarkari-jobs",
+        "/api/public/live-feed",
+        "/api/public/news",
+        "/rss-proxy.php",
+        "https://samahit.rpfoundation.org/rss-proxy.php"
+      ]) {
         try {
           const response = await timedFetch(url);
           if (!response.ok) continue;
           const json = await response.json();
           const data = json?.data ?? json;
-          const m1 = parseFeedItems(data?.marquee1 ?? data?.governmentNews ?? data?.pib ?? []);
-          const m2 = parseFeedItems(data?.marquee2 ?? data?.emergencyAlerts ?? data?.sachet ?? []);
+          const m1 = parseFeedItems(data?.items ?? data?.marquee1 ?? data?.governmentNews ?? data?.pib ?? []);
+          const m2 = parseFeedItems(data?.alerts ?? data?.marquee2 ?? data?.emergencyAlerts ?? data?.sachet ?? []);
           const m3 = parseFeedItems(data?.marquee3 ?? data?.worldNews ?? data?.news ?? []);
           if (!alive) return;
           if (m1.length) { setMarquee1(m1); try { localStorage.setItem("@rpf_marquee1_cache", JSON.stringify(m1)); } catch {} }
@@ -326,22 +332,27 @@ export default function Home() {
             <p className="text-[10px] font-bold uppercase tracking-widest">Thought of the Day</p>
           </div>
           <p className="mt-1 text-[13px] sm:text-[14px] font-semibold leading-relaxed text-[#14213D]">
-            “{quoteOfDay.quote}”
+            “{currentQuote.quote}”
           </p>
-          {quoteOfDay.author && (
+          {currentQuote.author && (
             <p className="mt-0.5 text-right text-[11px] font-bold text-[#D97706] italic">
-              — {quoteOfDay.author}
+              — {currentQuote.author}
             </p>
           )}
         </section>
 
-        {/* 3. TWO MARQUEES (FIRST IN GREEN, SECOND IN DARK SAFFRON) */}
+        {/* 3. BROADCAST ANNOUNCEMENTS & LIVE RSS NEWS MARQUEES */}
         
-        {/* MARQUEE 1: PIB + DD News + DD India + MP Info -> Right to Left (GREEN) */}
-        {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="green" />}
+        {/* BROADCAST ANNOUNCEMENTS CONFIGURED BY ADMIN */}
+        {broadcastMarquee.length > 0 && (
+          <MarqueeTrack items={broadcastMarquee} direction="rtl" variant="saffron" label="Announcement" />
+        )}
 
-        {/* MARQUEE 2: SACHET NDMA + IMD Weather Bulletin -> Left to Right (DARK SAFFRON) */}
-        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="saffron" />}
+        {/* MARQUEE 1: Live PIB / National Welfare News Feed -> Right to Left (GREEN) */}
+        {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="green" label="Live News" />}
+
+        {/* MARQUEE 2: Sarkari Opportunities & Alerts -> Left to Right (DARK SAFFRON) */}
+        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="saffron" label="Alerts & Info" />}
 
         {/* 4. CAROUSEL: RP FOUNDATION AT WORK (TRANSPARENT TEXT BACKGROUND) */}
         <section className="pt-1">
@@ -446,6 +457,46 @@ export default function Home() {
                   Read Founder’s Message & Values <ChevronRight className="h-3.5 w-3.5" />
                 </button>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. VERIFIED IMPACT HIGHLIGHTS (Directly synced with Admin Impact Studio) */}
+        <section className="pt-2">
+          <div className="rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between px-0.5">
+              <div className="flex items-center gap-1.5 text-[#166534]">
+                <UsersRound className="h-4 w-4 text-[#C2410C]" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#0A192F]">Ground Impact & Reach</h3>
+              </div>
+              <button
+                onClick={() => navigate("/impact")}
+                className="text-[11px] font-bold text-[#C2410C] hover:underline flex items-center gap-0.5 cursor-pointer"
+              >
+                <span>Full Impact Report</span>
+                <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {(Array.isArray(cmsConfig?.impactStats) && cmsConfig.impactStats.length > 0
+                ? cmsConfig.impactStats.filter((s: any) => s.enabled !== false).slice(0, 4)
+                : [
+                    { id: "beneficiaries", labelEn: "Beneficiaries", labelHi: "कुल लाभार्थी", value: 250000, suffix: "+" },
+                    { id: "health_camps", labelEn: "Health Camps", labelHi: "स्वास्थ्य शिविर", value: 450, suffix: "+" },
+                    { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित पौधे", value: 50000, suffix: "+" },
+                    { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड", value: 120000, suffix: "+" }
+                  ]
+              ).map((st: any) => (
+                <div key={st.id} className="rounded-xl bg-orange-50/50 border border-orange-100 p-2.5 text-center space-y-0.5">
+                  <p className="text-lg sm:text-xl font-black text-[#0A192F]">
+                    {Number(st.value).toLocaleString("en-IN")}{st.suffix || "+"}
+                  </p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight line-clamp-1">
+                    {st.labelEn || st.labelHi}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </section>

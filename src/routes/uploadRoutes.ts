@@ -18,16 +18,29 @@ const uploadLimiter = rateLimit({
   message: { success: false, error: 'Too many file uploads. Please try again later.' },
 });
 
-// Setup multer
+// Setup multer for images & documents (5MB)
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype === 'application/pdf') {
       cb(null, true);
     } else {
       cb(new Error('Invalid file type'));
+    }
+  }
+});
+
+// Setup multer for video uploads (50MB)
+const videoUpload = multer({
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit for videos
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('video/') || file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type: please upload MP4, WebM or video file'));
     }
   }
 });
@@ -90,6 +103,19 @@ router.post("/api/upload/image", authenticateToken, uploadLimiter, upload.single
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Generic image upload failed:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/api/upload/video", authenticateToken, requireAdmin, uploadLimiter, videoUpload.single("file"), handleUploadErrors, async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No video file uploaded" });
+    }
+    const fileUrl = await saveFileLocally(req.file);
+    res.json({ success: true, url: fileUrl });
+  } catch (error: any) {
+    console.error("Video upload failed:", error);
     res.status(500).json({ error: error.message });
   }
 });

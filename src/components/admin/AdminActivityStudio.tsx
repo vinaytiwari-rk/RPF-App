@@ -77,67 +77,6 @@ interface CommunityDriveItem {
   leadVolunteer?: string;
 }
 
-const DEFAULT_DRIVES: CommunityDriveItem[] = [
-  {
-    id: "camp-01",
-    titleEn: "Free Rural Health & Eye Screening Camp",
-    titleHi: "निःशुल्क ग्रामीण स्वास्थ्य एवं नेत्र परीक्षण शिविर",
-    location: "Community Hall, Sehore District",
-    date: "2026-10-15",
-    targetBeneficiaries: 350,
-    category: "health_camp",
-    status: "Upcoming",
-    leadVolunteer: "Dr. Alok Verma"
-  },
-  {
-    id: "camp-02",
-    titleEn: "Tree Plantation & Cleanliness Drive",
-    titleHi: "वृक्षारोपण एवं ग्राम स्वच्छता जन अभियान",
-    location: "Ward 12, Karond, Bhopal",
-    date: "2026-10-02",
-    targetBeneficiaries: 1200,
-    category: "plantation",
-    status: "Active",
-    leadVolunteer: "Suresh Meena"
-  },
-  {
-    id: "camp-03",
-    titleEn: "Winter Warmth & Blanket Distribution",
-    titleHi: "शीतकालीन राहत व कंबल वितरण",
-    location: "Slum Clusters, Hoshangabad Road",
-    date: "2026-11-20",
-    targetBeneficiaries: 500,
-    category: "relief",
-    status: "Upcoming",
-    leadVolunteer: "Anita Sharma"
-  }
-];
-
-const DEFAULT_BLOOD_REQUESTS: BloodRequestItem[] = [
-  {
-    id: "br-1",
-    patientName: "Rameshwar Sen",
-    bloodGroup: "O+",
-    hospital: "AIIMS Bhopal, Emergency Ward",
-    city: "Bhopal",
-    contactNumber: "9826012345",
-    unitsNeeded: 2,
-    status: "Urgent",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "br-2",
-    patientName: "Pooja Yadav",
-    bloodGroup: "B+",
-    hospital: "District Civil Hospital, Sehore",
-    city: "Sehore",
-    contactNumber: "9425098765",
-    unitsNeeded: 1,
-    status: "In Progress",
-    createdAt: new Date(Date.now() - 3600000 * 5).toISOString()
-  }
-];
-
 interface AdminActivityStudioProps {
   cmsConfig: any;
   onSaveCms: (cms: any) => Promise<void>;
@@ -158,17 +97,13 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
 
   // 3. Blood Requests State
   const [bloodRequests, setBloodRequests] = useState<BloodRequestItem[]>(() => {
-    return Array.isArray(cmsConfig?.bloodRequests) && cmsConfig.bloodRequests.length > 0
-      ? cmsConfig.bloodRequests
-      : DEFAULT_BLOOD_REQUESTS;
+    return Array.isArray(cmsConfig?.bloodRequests) ? cmsConfig.bloodRequests : [];
   });
   const [bloodGroupFilter, setBloodGroupFilter] = useState("all");
 
   // 4. Community Drives State
   const [drives, setDrives] = useState<CommunityDriveItem[]>(() => {
-    return Array.isArray(cmsConfig?.communityDrives) && cmsConfig.communityDrives.length > 0
-      ? cmsConfig.communityDrives
-      : DEFAULT_DRIVES;
+    return Array.isArray(cmsConfig?.communityDrives) ? cmsConfig.communityDrives : [];
   });
 
   // Modal State for Adding Community Drive
@@ -181,6 +116,27 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
     mode: "add",
     data: {}
   });
+
+  // Modal State for Adding/Editing Blood Request
+  const [bloodModal, setBloodModal] = useState<{
+    isOpen: boolean;
+    mode: "add" | "edit";
+    data: Partial<BloodRequestItem>;
+  }>({
+    isOpen: false,
+    mode: "add",
+    data: {}
+  });
+
+  // Sync with cmsConfig changes
+  useEffect(() => {
+    if (Array.isArray(cmsConfig?.bloodRequests)) {
+      setBloodRequests(cmsConfig.bloodRequests);
+    }
+    if (Array.isArray(cmsConfig?.communityDrives)) {
+      setDrives(cmsConfig.communityDrives);
+    }
+  }, [cmsConfig]);
 
   // Fetch Grievances and Volunteers on mount
   const loadData = async () => {
@@ -251,7 +207,7 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
   const handleDeleteGrievance = async (id: string) => {
     if (confirm("Are you sure you want to delete this grievance?")) {
       setGrievances((prev) => prev.filter((g) => g.id !== id));
-      toast.success("Grievance removed");
+      toast.success("Grievance deleted");
     }
   };
 
@@ -272,17 +228,59 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
     toast.success(`Blood request marked as ${status}`);
   };
 
+  // Save Blood Request Modal
+  const handleSaveBloodModal = async () => {
+    if (!bloodModal.data.patientName?.trim() || !bloodModal.data.bloodGroup || !bloodModal.data.contactNumber?.trim()) {
+      toast.error("Patient name, blood group, and contact number are required");
+      return;
+    }
+    let nextList = [...bloodRequests];
+    if (bloodModal.mode === "add") {
+      const newReq: BloodRequestItem = {
+        id: `br-${Date.now()}`,
+        patientName: bloodModal.data.patientName.trim(),
+        bloodGroup: bloodModal.data.bloodGroup || "O+",
+        hospital: bloodModal.data.hospital?.trim() || "Local Hospital",
+        city: bloodModal.data.city?.trim() || "City Center",
+        contactNumber: bloodModal.data.contactNumber.trim(),
+        unitsNeeded: Number(bloodModal.data.unitsNeeded) || 1,
+        status: (bloodModal.data.status as any) || "Urgent",
+        createdAt: new Date().toISOString()
+      };
+      nextList.unshift(newReq);
+    } else {
+      nextList = nextList.map((b) =>
+        b.id === bloodModal.data.id ? ({ ...b, ...bloodModal.data } as BloodRequestItem) : b
+      );
+    }
+    setBloodRequests(nextList);
+    await onSaveCms({ ...cmsConfig, bloodRequests: nextList });
+    toast.success(bloodModal.mode === "add" ? "Emergency request broadcasted" : "Blood request updated");
+    setBloodModal({ isOpen: false, mode: "add", data: {} });
+  };
+
+  // Delete Blood Request
+  const handleDeleteBloodRequest = async (id: string) => {
+    if (confirm("Are you sure you want to remove this blood request?")) {
+      const nextList = bloodRequests.filter((b) => b.id !== id);
+      setBloodRequests(nextList);
+      await onSaveCms({ ...cmsConfig, bloodRequests: nextList });
+      toast.success("Blood request removed");
+    }
+  };
+
   // Save Community Drives
   const handleSaveDriveModal = async () => {
-    if (!driveModal.data.titleEn?.trim() || !driveModal.data.location?.trim()) {
+    const title = driveModal.data.titleEn?.trim() || driveModal.data.titleHi?.trim();
+    if (!title || !driveModal.data.location?.trim()) {
       toast.error("Drive Title and Location are required");
       return;
     }
     const cleanId = driveModal.data.id || `drive-${Date.now()}`;
     const newDrive: CommunityDriveItem = {
       id: cleanId,
-      titleEn: driveModal.data.titleEn.trim(),
-      titleHi: driveModal.data.titleHi?.trim() || driveModal.data.titleEn.trim(),
+      titleEn: title,
+      titleHi: title,
       location: driveModal.data.location.trim(),
       date: driveModal.data.date || new Date().toISOString().split("T")[0],
       targetBeneficiaries: Number(driveModal.data.targetBeneficiaries) || 100,
@@ -716,59 +714,116 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
       {/* 3. EMERGENCY BLOOD & SOS TAB                                  */}
       {/* ───────────────────────────────────────────────────────────── */}
       {subTab === "blood" && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-700">
               Active Emergency Requests ({filteredBlood.length})
             </span>
+            <button
+              onClick={() =>
+                setBloodModal({
+                  isOpen: true,
+                  mode: "add",
+                  data: { bloodGroup: "O+", unitsNeeded: 1, status: "Urgent" }
+                })
+              }
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#C2410C] text-white hover:bg-[#9a3412] inline-flex items-center gap-1.5 shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Broadcast Blood Request</span>
+            </button>
           </div>
-          <div className="divide-y divide-slate-100">
-            {filteredBlood.map((b) => (
-              <div key={b.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-red-50 border border-red-200 text-red-600 flex flex-col items-center justify-center font-bold">
-                    <Droplet className="w-4 h-4 fill-red-600" />
-                    <span className="text-[11px]">{b.bloodGroup}</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#0A192F]">{b.patientName}</h4>
-                    <p className="text-xs text-slate-500">
-                      {b.hospital}, {b.city} ({b.unitsNeeded} Units Required)
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <a
-                        href={`tel:${b.contactNumber}`}
-                        className="text-xs font-mono text-blue-600 hover:underline flex items-center gap-1"
+
+          {filteredBlood.length === 0 ? (
+            <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 space-y-3">
+              <div className="w-12 h-12 mx-auto rounded-full bg-red-50 text-red-500 flex items-center justify-center">
+                <Droplet className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-bold text-slate-700">No Active Blood Requests</p>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                There are currently no emergency blood requests recorded. Click the button below to broadcast a donor appeal.
+              </p>
+              <button
+                onClick={() =>
+                  setBloodModal({
+                    isOpen: true,
+                    mode: "add",
+                    data: { bloodGroup: "O+", unitsNeeded: 1, status: "Urgent" }
+                  })
+                }
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#C2410C] text-white hover:bg-[#9a3412] inline-flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Broadcast Blood Request</span>
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="divide-y divide-slate-100">
+                {filteredBlood.map((b) => (
+                  <div key={b.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-red-50 border border-red-200 text-red-600 flex flex-col items-center justify-center font-bold shrink-0">
+                        <Droplet className="w-4 h-4 fill-red-600" />
+                        <span className="text-[11px]">{b.bloodGroup}</span>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-[#0A192F]">{b.patientName}</h4>
+                        <p className="text-xs text-slate-500">
+                          {b.hospital}, {b.city} ({b.unitsNeeded} Units Required)
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <a
+                            href={`tel:${b.contactNumber}`}
+                            className="text-xs font-mono text-blue-600 hover:underline flex items-center gap-1"
+                          >
+                            <Phone className="w-3 h-3" />
+                            <span>{b.contactNumber}</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end md:self-center">
+                      <select
+                        value={b.status}
+                        onChange={(e) =>
+                          handleUpdateBloodStatus(b.id, e.target.value as BloodRequestItem["status"])
+                        }
+                        className={`text-xs font-bold px-3 py-1.5 rounded-xl border outline-none ${
+                          b.status === "Fulfilled"
+                            ? "bg-green-50 text-[#166534] border-green-200"
+                            : b.status === "In Progress"
+                            ? "bg-amber-50 text-[#C2410C] border-amber-200"
+                            : "bg-red-50 text-red-600 border-red-200"
+                        }`}
                       >
-                        <Phone className="w-3 h-3" />
-                        <span>{b.contactNumber}</span>
-                      </a>
+                        <option value="Urgent">Urgent Needed</option>
+                        <option value="In Progress">Donor Dispatched</option>
+                        <option value="Fulfilled">Donation Fulfilled</option>
+                      </select>
+
+                      <button
+                        onClick={() => setBloodModal({ isOpen: true, mode: "edit", data: b })}
+                        className="p-2 rounded-xl text-slate-500 hover:text-[#0A192F] hover:bg-slate-100"
+                        title="Edit Request"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteBloodRequest(b.id)}
+                        className="p-2 rounded-xl text-red-500 hover:text-red-700 hover:bg-red-50"
+                        title="Delete Request"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 self-end md:self-center">
-                  <select
-                    value={b.status}
-                    onChange={(e) =>
-                      handleUpdateBloodStatus(b.id, e.target.value as BloodRequestItem["status"])
-                    }
-                    className={`text-xs font-bold px-3 py-1.5 rounded-xl border outline-none ${
-                      b.status === "Fulfilled"
-                        ? "bg-green-50 text-[#166534] border-green-200"
-                        : b.status === "In Progress"
-                        ? "bg-amber-50 text-[#C2410C] border-amber-200"
-                        : "bg-red-50 text-red-600 border-red-200"
-                    }`}
-                  >
-                    <option value="Urgent">Urgent Needed</option>
-                    <option value="In Progress">Donor Dispatched</option>
-                    <option value="Fulfilled">Donation Fulfilled</option>
-                  </select>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -776,61 +831,246 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
       {/* 4. COMMUNITY DRIVES & CAMPAIGNS TAB                           */}
       {/* ───────────────────────────────────────────────────────────── */}
       {subTab === "drives" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredDrives.map((d) => (
-            <div key={d.id} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
-              <div className="flex items-start justify-between">
+        <div>
+          {filteredDrives.length === 0 ? (
+            <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 space-y-3">
+              <div className="w-12 h-12 mx-auto rounded-full bg-green-50 text-[#166534] flex items-center justify-center">
+                <Calendar className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-bold text-slate-700">No Community Drives Scheduled</p>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Organize health camps, ration distribution, tree plantation, or relief missions for community empowerment.
+              </p>
+              <button
+                onClick={() =>
+                  setDriveModal({
+                    isOpen: true,
+                    mode: "add",
+                    data: { targetBeneficiaries: 100, status: "Upcoming", category: "health_camp" }
+                  })
+                }
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#166534] text-white hover:bg-green-800 inline-flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Schedule Campaign</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredDrives.map((d) => (
+                <div key={d.id} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-[#0A192F]">{d.titleEn || d.titleHi}</h4>
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        d.status === "Active"
+                          ? "bg-green-50 text-[#166534] border-green-200"
+                          : d.status === "Completed"
+                          ? "bg-slate-100 text-slate-600 border-slate-200"
+                          : "bg-amber-50 text-[#C2410C] border-amber-200"
+                      }`}
+                    >
+                      {d.status}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs text-slate-600">
+                    <div className="flex items-center gap-1.5 text-slate-500">
+                      <MapPin className="w-3.5 h-3.5 text-red-500" />
+                      <span>{d.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-500">
+                      <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                      <span>Date: {d.date}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-500">
+                      <Users className="w-3.5 h-3.5 text-green-600" />
+                      <span>Target: {d.targetBeneficiaries} Beneficiaries</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                    <span>Lead: {d.leadVolunteer || "RP Force"}</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setDriveModal({ isOpen: true, mode: "edit", data: d })}
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-[#0A192F] hover:bg-slate-100"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteDrive(d.id)}
+                        className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MODAL: BROADCAST / EDIT EMERGENCY BLOOD REQUEST                */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {bloodModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-base font-bold text-[#0A192F]">
+                {bloodModal.mode === "add" ? "Broadcast Emergency Blood Request" : "Edit Blood Request"}
+              </h3>
+              <button
+                onClick={() => setBloodModal({ isOpen: false, mode: "add", data: {} })}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-700">Patient Name</label>
+                <input
+                  type="text"
+                  value={bloodModal.data.patientName || ""}
+                  onChange={(e) =>
+                    setBloodModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, patientName: e.target.value }
+                    }))
+                  }
+                  placeholder="Patient or recipient name..."
+                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <h4 className="text-xs font-bold text-[#0A192F]">{d.titleEn}</h4>
-                  <p className="text-xs font-medium text-[#166534]">{d.titleHi}</p>
+                  <label className="text-xs font-bold text-slate-700">Blood Group</label>
+                  <select
+                    value={bloodModal.data.bloodGroup || "O+"}
+                    onChange={(e) =>
+                      setBloodModal((prev) => ({
+                        ...prev,
+                        data: { ...prev.data, bloodGroup: e.target.value }
+                      }))
+                    }
+                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white"
+                  >
+                    {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
+                      <option key={bg} value={bg}>
+                        {bg}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                    d.status === "Active"
-                      ? "bg-green-50 text-[#166534] border-green-200"
-                      : d.status === "Completed"
-                      ? "bg-slate-100 text-slate-600 border-slate-200"
-                      : "bg-amber-50 text-[#C2410C] border-amber-200"
-                  }`}
-                >
-                  {d.status}
-                </span>
+                <div>
+                  <label className="text-xs font-bold text-slate-700">Units Needed</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={bloodModal.data.unitsNeeded || 1}
+                    onChange={(e) =>
+                      setBloodModal((prev) => ({
+                        ...prev,
+                        data: { ...prev.data, unitsNeeded: Number(e.target.value) }
+                      }))
+                    }
+                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1.5 text-xs text-slate-600">
-                <div className="flex items-center gap-1.5 text-slate-500">
-                  <MapPin className="w-3.5 h-3.5 text-red-500" />
-                  <span>{d.location}</span>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700">Hospital / Ward</label>
+                  <input
+                    type="text"
+                    value={bloodModal.data.hospital || ""}
+                    onChange={(e) =>
+                      setBloodModal((prev) => ({
+                        ...prev,
+                        data: { ...prev.data, hospital: e.target.value }
+                      }))
+                    }
+                    placeholder="e.g. AIIMS Bhopal"
+                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                  />
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-500">
-                  <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                  <span>Date: {d.date}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-slate-500">
-                  <Users className="w-3.5 h-3.5 text-green-600" />
-                  <span>Target: {d.targetBeneficiaries} Beneficiaries</span>
+                <div>
+                  <label className="text-xs font-bold text-slate-700">City</label>
+                  <input
+                    type="text"
+                    value={bloodModal.data.city || ""}
+                    onChange={(e) =>
+                      setBloodModal((prev) => ({
+                        ...prev,
+                        data: { ...prev.data, city: e.target.value }
+                      }))
+                    }
+                    placeholder="e.g. Bhopal"
+                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                  />
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Lead: {d.leadVolunteer || "RP Force"}</span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setDriveModal({ isOpen: true, mode: "edit", data: d })}
-                    className="p-1.5 rounded-lg text-slate-500 hover:text-[#0A192F] hover:bg-slate-100"
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700">Contact Number</label>
+                  <input
+                    type="tel"
+                    value={bloodModal.data.contactNumber || ""}
+                    onChange={(e) =>
+                      setBloodModal((prev) => ({
+                        ...prev,
+                        data: { ...prev.data, contactNumber: e.target.value }
+                      }))
+                    }
+                    placeholder="Phone number..."
+                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700">Urgency Status</label>
+                  <select
+                    value={bloodModal.data.status || "Urgent"}
+                    onChange={(e) =>
+                      setBloodModal((prev) => ({
+                        ...prev,
+                        data: { ...prev.data, status: e.target.value as any }
+                      }))
+                    }
+                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white"
                   >
-                    <Edit3 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteDrive(d.id)}
-                    className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                    <option value="Urgent">Urgent Needed</option>
+                    <option value="In Progress">Donor Dispatched</option>
+                    <option value="Fulfilled">Donation Fulfilled</option>
+                  </select>
                 </div>
               </div>
             </div>
-          ))}
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t">
+              <button
+                onClick={() => setBloodModal({ isOpen: false, mode: "add", data: {} })}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveBloodModal}
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#C2410C] text-white hover:bg-[#9a3412] shadow"
+              >
+                {bloodModal.mode === "add" ? "Broadcast Request" : "Save Changes"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -854,33 +1094,17 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-slate-700">Campaign Title (English)</label>
+                <label className="text-xs font-bold text-slate-700">Campaign Title</label>
                 <input
                   type="text"
-                  value={driveModal.data.titleEn || ""}
+                  value={driveModal.data.titleEn || driveModal.data.titleHi || ""}
                   onChange={(e) =>
                     setDriveModal((prev) => ({
                       ...prev,
-                      data: { ...prev.data, titleEn: e.target.value }
+                      data: { ...prev.data, titleEn: e.target.value, titleHi: e.target.value }
                     }))
                   }
                   placeholder="e.g. Free Eye Checkup Camp"
-                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">Campaign Title (Hindi)</label>
-                <input
-                  type="text"
-                  value={driveModal.data.titleHi || ""}
-                  onChange={(e) =>
-                    setDriveModal((prev) => ({
-                      ...prev,
-                      data: { ...prev.data, titleHi: e.target.value }
-                    }))
-                  }
-                  placeholder="e.g. निःशुल्क नेत्र जांच शिविर"
                   className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
                 />
               </div>
