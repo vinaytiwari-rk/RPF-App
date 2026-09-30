@@ -22,7 +22,7 @@ type Certificate = {
 export default function MyCertificates() {
   const navigate = useNavigate();
   const outletContext = useOutletContext<{ lang?: "en" | "hi" }>();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const hi = outletContext?.lang === "hi";
 
   const [items, setItems] = useState<Certificate[]>([]);
@@ -63,7 +63,7 @@ export default function MyCertificates() {
     if (!selectedCert || downloadBusy) return;
     setDownloadBusy(true);
     try {
-      const response = await fetch(`/api/certificates/download/${encodeURIComponent(selectedCert.certificate_id)}`, { headers: { ...(user?.id ? {} : {}) } });
+      const response = await fetch(`/api/certificates/download/${encodeURIComponent(selectedCert.certificate_id)}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       if (!response.ok) throw new Error("Download failed");
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
