@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 import { resolveMediaUrl } from "../utils/media";
+import { RP_FOUNDATION_LOGO, ROHIT_PANDIT_PHOTO } from "../assets/foundationBrand";
 import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
 
 const fallbackSlides = [
