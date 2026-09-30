@@ -59,7 +59,7 @@ PassengerMaxPoolSize 2
   # Vite writes production assets inside dist/assets. Map public /assets/*
   # requests to the actual deployed files instead of returning the SPA/error HTML.
   RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
-  RewriteRule ^version\.json$ - [L]
+  RewriteRule ^version\.json$ dist/version.json [L]
 
   # Do not re-enter the rewrite rules for generated deployment files.
   RewriteRule ^dist/ - [L]
