@@ -334241,7 +334241,7 @@ var cultureRoutes_default = router10;
 var import_express11 = __toESM(require_express2(), 1);
 var import_crypto9 = __toESM(require("crypto"), 1);
 var router11 = import_express11.default.Router();
-var JAN_SEVA_API_BASE = process.env.JAN_SEVA_API_URL || "https://api.therpfoundation.org/api/patient";
+var JAN_SEVA_API_BASE = process.env.JAN_SEVA_API_URL || "https://api.therpdoundation.org/api/patient";
 var cardCache = /* @__PURE__ */ new Map();
 var CACHE_TTL_MS = 60 * 1e3;
 var getCached = (key) => {
@@ -334256,6 +334256,102 @@ var getCached = (key) => {
 var setCached = (key, data2, ttlMs = CACHE_TTL_MS) => {
   cardCache.set(key, { data: data2, expiresAt: Date.now() + ttlMs });
 };
+var ensureMirror = async () => {
+  await pool.query(`CREATE TABLE IF NOT EXISTS jan_seva_card_mirror (
+    card_no TEXT PRIMARY KEY,
+    record JSONB NOT NULL,
+    source TEXT NOT NULL,
+    synced_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+};
+var cardNumber = (record) => {
+  const value2 = record?.cardNo ?? record?.card_no ?? record?.janSevaCardNo;
+  return typeof value2 === "string" || typeof value2 === "number" ? String(value2).trim() || null : null;
+};
+var writeMirror = async (records, source) => {
+  await ensureMirror();
+  const client = await pool.connect();
+  let imported = 0, skipped = 0;
+  try {
+    await client.query("BEGIN");
+    for (const record of records) {
+      const number = record && typeof record === "object" && !Array.isArray(record) ? cardNumber(record) : null;
+      if (!number) {
+        skipped++;
+        continue;
+      }
+      await client.query(
+        `INSERT INTO jan_seva_card_mirror (card_no, record, source, synced_at)
+         VALUES ($1, $2::jsonb, $3, NOW())
+         ON CONFLICT (card_no) DO UPDATE SET record = EXCLUDED.record, source = EXCLUDED.source, synced_at = NOW()`,
+        [number, JSON.stringify(record), source]
+      );
+      imported++;
+    }
+    await client.query("COMMIT");
+  } catch (error3) {
+    await client.query("ROLLBACK");
+    throw error3;
+  } finally {
+    client.release();
+  }
+  cardCache.clear();
+  return { imported, skipped };
+};
+router11.post("/api/admin/cards/import", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    const records = req2.body?.records;
+    if (!Array.isArray(records) || records.length < 1 || records.length > 500)
+      return res.status(400).json({ success: false, error: "Provide 1\u2013500 card records per batch" });
+    const result = await writeMirror(records, "admin-import");
+    res.json({ success: true, ...result });
+  } catch (error3) {
+    console.error("Jan Seva card import failed:", error3?.message);
+    res.status(500).json({ success: false, error: "Card import failed" });
+  }
+});
+router11.post("/api/admin/cards/sync", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    const page = Number(req2.body?.page);
+    const limit = Number(req2.body?.limit ?? 100);
+    if (!Number.isInteger(page) || page < 1 || !Number.isInteger(limit) || limit < 1 || limit > 500)
+      return res.status(400).json({ success: false, error: "Valid page and limit (1\u2013500) required" });
+    const headers = process.env.JAN_SEVA_API_TOKEN ? { Authorization: `Bearer ${process.env.JAN_SEVA_API_TOKEN}` } : {};
+    const response = await axios_default.get(JAN_SEVA_API_BASE, { params: { page, limit }, headers, timeout: 15e3 });
+    if (!Array.isArray(response.data?.patients))
+      return res.status(502).json({ success: false, error: "External API schema not verified: expected patients array" });
+    const records = response.data.patients;
+    if (records.length > limit)
+      return res.status(502).json({ success: false, error: "External API ignored requested page size" });
+    const result = records.length ? await writeMirror(records, "external-api") : { imported: 0, skipped: 0 };
+    res.json({
+      success: true,
+      page,
+      limit,
+      ...result,
+      received: records.length,
+      totalPatients: Number.isFinite(Number(response.data.totalPatients)) ? Number(response.data.totalPatients) : null,
+      totalPages: Number.isFinite(Number(response.data.totalPages)) ? Number(response.data.totalPages) : null
+    });
+  } catch (error3) {
+    console.error("Jan Seva sync failed:", error3?.message);
+    res.status(502).json({ success: false, error: "External Jan Seva API unavailable or unauthorized" });
+  }
+});
+router11.get("/api/admin/cards/mirror", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    await ensureMirror();
+    const page = Math.max(1, Number(req2.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req2.query.limit) || 20));
+    const [rows, count] = await Promise.all([
+      pool.query("SELECT card_no, record, source, synced_at FROM jan_seva_card_mirror ORDER BY synced_at DESC LIMIT $1 OFFSET $2", [limit, (page - 1) * limit]),
+      pool.query("SELECT COUNT(*)::int AS total FROM jan_seva_card_mirror")
+    ]);
+    res.json({ success: true, records: rows.rows, total: count.rows[0]?.total || 0, page, limit });
+  } catch {
+    res.status(500).json({ success: false, error: "Card mirror unavailable" });
+  }
+});
 router11.get("/api/cards", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { search = "", page = 1, limit = 20 } = req2.query;
@@ -334292,6 +334388,33 @@ router11.get("/api/cards", authenticateToken, requireAdmin, async (req2, res) =>
   } catch (error3) {
     console.error("Error fetching card applications:", error3);
     res.status(500).json({ error: error3.message });
+  }
+});
+router11.get("/api/public/cards/impact", async (_req, res) => {
+  try {
+    const cached = getCached("cards:public-impact");
+    if (cached) return res.json(cached);
+    let total = null;
+    let source = "external";
+    try {
+      const response = await axios_default.get(`${JAN_SEVA_API_BASE}/stats`, { timeout: 5e3 });
+      const data2 = response.data?.stats || response.data;
+      const value2 = data2?.totalCards ?? data2?.totalPatients ?? data2?.total ?? data2?.count;
+      if (value2 !== void 0 && value2 !== null && Number.isFinite(Number(value2)) && Number(value2) >= 0) {
+        total = Number(value2);
+      }
+    } catch {
+    }
+    if (total === null) {
+      source = "local";
+      const local = await pool.query("SELECT COUNT(*)::int AS total FROM card_applications_v2 WHERE status = $1", ["approved"]);
+      total = Number(local.rows[0]?.total || 0);
+    }
+    const payload = { success: true, totalCards: total, source, scope: source === "local" ? "local-approved-only" : "external-reported", updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+    setCached("cards:public-impact", payload, 12e4);
+    res.json(payload);
+  } catch {
+    res.status(503).json({ success: false, error: "Card totals temporarily unavailable" });
   }
 });
 router11.get("/api/cards/stats", authenticateToken, requireAdmin, async (req2, res) => {
@@ -334357,75 +334480,121 @@ router11.get("/api/cards/search", authenticateToken, async (req2, res) => {
     res.status(500).json({ error: error3.message });
   }
 });
-router11.post("/api/cards", async (req2, res) => {
+router11.post("/api/cards", authenticateToken, async (req2, res) => {
   try {
-    const { userId, name, gender, dob, address, idType, idNumber, mobileNo, district, vidhanSabhaNo } = req2.body;
-    if (idType === "aadhaar" || idNumber) {
-      const existing = await pool.query('SELECT "cardNo" FROM card_applications_v2 WHERE "idNumber" = $1', [idNumber]);
-      if (existing.rows.length > 0) {
-        return res.status(400).json({ success: false, error: "A card with this ID number already exists.", cardNo: existing.rows[0].cardNo });
-      }
-    }
-    const submittedAt = (/* @__PURE__ */ new Date()).toISOString();
-    const id3 = import_crypto9.default.randomUUID();
-    const status2 = "approved";
-    let cardNo = "";
+    const actorId = String(req2.user?.id || req2.user?.userId || "");
+    if (!actorId) return res.status(401).json({ success: false, error: "Login required" });
+    const { name, gender, dob, address, idType, idNumber, mobileNo, district, vidhanSabhaNo } = req2.body || {};
+    if (!String(name || "").trim() || !/^\\d{12}$/.test(String(idNumber || "")))
+      return res.status(400).json({ success: false, error: "Valid name and 12-digit identity number required" });
+    const existing = await pool.query(
+      'SELECT status, "cardNo" FROM card_applications_v2 WHERE "userId" = $1 OR "idNumber" = $2 LIMIT 1',
+      [actorId, idNumber]
+    );
+    if (existing.rows.length) return res.status(409).json({
+      success: false,
+      error: "An application already exists. Contact support to update it.",
+      status: existing.rows[0].status
+    });
+    let cardNo = null;
     try {
-      const apiResponse = await axios_default.post(`${JAN_SEVA_API_BASE}`, {
+      const headers = process.env.JAN_SEVA_API_TOKEN ? { Authorization: `Bearer ${process.env.JAN_SEVA_API_TOKEN}` } : {};
+      const upstream = await axios_default.post(JAN_SEVA_API_BASE, {
         nameOfMember: name,
         gender,
         dob,
         mobileNo,
         aadhaarNo: idNumber,
         district,
-        vidhanSabhaNo: vidhanSabhaNo || "0000",
+        vidhanSabhaNo,
         addressType: "Urban",
-        createdBy: userId || "web_user"
-      }, { timeout: 4e3 });
-      if (apiResponse.data && apiResponse.data.cardNo) {
-        cardNo = apiResponse.data.cardNo;
-      }
-    } catch (apiErr) {
-      console.warn("Failed to create on Mongo master API, generating local cardNo:", apiErr.message);
+        createdBy: actorId
+      }, { headers, timeout: 12e3 });
+      if (upstream.data?.cardNo) cardNo = String(upstream.data.cardNo);
+    } catch (error3) {
+      console.warn("Jan Seva upstream application unavailable:", error3?.response?.status || error3?.code || "unknown");
     }
-    if (!cardNo) {
-      cardNo = `0001${(vidhanSabhaNo || "0000").padStart(4, "0")}0001${Math.floor(1e3 + Math.random() * 9e3)}`;
-    }
+    const status2 = cardNo ? "approved" : "pending";
     await pool.query(
-      `INSERT INTO card_applications_v2 
-       (id, "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt") 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-      [id3, userId || "guest", name, gender, dob, address, idType || "aadhaar", idNumber, status2, cardNo, submittedAt]
+      `INSERT INTO card_applications_v2
+       (id, "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt")
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+      [
+        import_crypto9.default.randomUUID(),
+        actorId,
+        String(name).trim(),
+        gender,
+        dob,
+        address,
+        idType || "aadhaar",
+        idNumber,
+        status2,
+        cardNo,
+        (/* @__PURE__ */ new Date()).toISOString()
+      ]
     );
-    if (userId && userId !== "guest") {
-      await pool.query(
-        'UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
-        ["approved", cardNo, userId]
-      );
-    }
-    cardCache.delete("cards:stats");
-    res.json({ success: true, cardNo });
+    await pool.query(
+      'UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
+      [status2, cardNo, actorId]
+    );
+    cardCache.clear();
+    res.status(cardNo ? 201 : 202).json({
+      success: true,
+      status: status2,
+      cardNo,
+      message: cardNo ? "Card issued by authorized API" : "Application received; pending verification"
+    });
   } catch (error3) {
-    console.error("Error saving card application:", error3);
-    res.status(500).json({ error: error3.message });
+    console.error("Jan Seva application failed:", error3?.code || error3?.message);
+    res.status(500).json({ success: false, error: "Unable to submit application" });
   }
 });
 router11.post("/api/cards/approve", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const { userId } = req2.body;
-    const cardNo = `000100000001${Math.floor(1e3 + Math.random() * 9e3)}`;
-    await pool.query(
-      'UPDATE card_applications_v2 SET status = $1, "cardNo" = $2 WHERE "userId" = $3',
-      ["approved", cardNo, userId]
-    );
-    await pool.query(
-      'UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
-      ["approved", cardNo, userId]
-    );
+    const userId = String(req2.body?.userId || "").trim();
+    const cardNo = String(req2.body?.cardNo || "").trim();
+    if (!userId || !cardNo || cardNo.length > 100)
+      return res.status(400).json({ success: false, error: "Verified user ID and issued card number required" });
+    await ensureMirror();
+    const mirror = await pool.query("SELECT card_no FROM jan_seva_card_mirror WHERE card_no = $1 LIMIT 1", [cardNo]);
+    if (!mirror.rows.length)
+      return res.status(409).json({ success: false, error: "Card number not found in synchronized Jan Seva records" });
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [cardNo]);
+      const assigned = await client.query(
+        'SELECT "userId" FROM card_applications_v2 WHERE "cardNo" = $1 AND "userId" <> $2 LIMIT 1',
+        [cardNo, userId]
+      );
+      if (assigned.rows.length) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ success: false, error: "This card is already linked to another account; manual verification required" });
+      }
+      const application = await client.query(
+        'UPDATE card_applications_v2 SET status = $1, "cardNo" = $2 WHERE "userId" = $3 RETURNING "userId"',
+        ["approved", cardNo, userId]
+      );
+      if (!application.rowCount) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ success: false, error: "Application not found" });
+      }
+      await client.query(
+        'UPDATE users SET "janSevaCardStatus" = $1, "janSevaCardNo" = $2 WHERE id = $3',
+        ["approved", cardNo, userId]
+      );
+      await client.query("COMMIT");
+    } catch (error3) {
+      await client.query("ROLLBACK");
+      throw error3;
+    } finally {
+      client.release();
+    }
     cardCache.clear();
     res.json({ success: true, cardNo });
   } catch (error3) {
-    res.status(500).json({ error: error3.message });
+    console.error("Jan Seva approval failed:", error3?.code || error3?.message);
+    res.status(500).json({ success: false, error: "Approval failed" });
   }
 });
 router11.post("/api/cards/reject", authenticateToken, requireAdmin, async (req2, res) => {
@@ -336152,10 +336321,32 @@ router22.get("/api/cms/config", async (req2, res) => {
 });
 router22.post("/api/cms/config", authenticateToken, requireAdmin, async (req2, res) => {
   try {
+    const incoming = req2.body;
+    if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) {
+      return res.status(400).json({ error: "Invalid CMS payload" });
+    }
+    if (incoming.serviceWebsiteLinks !== void 0) {
+      if (!incoming.serviceWebsiteLinks || typeof incoming.serviceWebsiteLinks !== "object" || Array.isArray(incoming.serviceWebsiteLinks)) {
+        return res.status(400).json({ error: "Invalid service website links" });
+      }
+      for (const links of Object.values(incoming.serviceWebsiteLinks)) {
+        if (!Array.isArray(links) || links.some((link) => {
+          if (!link || typeof link.title !== "string" || typeof link.url !== "string") return true;
+          try {
+            return !["http:", "https:"].includes(new URL(link.url).protocol);
+          } catch {
+            return true;
+          }
+        })) {
+          return res.status(400).json({ error: "Every website needs a name and valid http/https URL" });
+        }
+      }
+    }
     await pool.query(
-      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
-       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" = $1`,
-      [JSON.stringify(req2.body)]
+      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1)
+       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" =
+         (COALESCE(NULLIF(settings."founderMessageEn", ''), '{}')::jsonb || $1::jsonb)::text`,
+      [JSON.stringify(incoming)]
     );
     res.json({ success: true, data: req2.body });
   } catch (error3) {
@@ -336479,10 +336670,30 @@ router22.get("/api/cms", async (req2, res) => {
 });
 router22.post("/api/cms", authenticateToken, requireAdmin, async (req2, res) => {
   try {
+    const incoming = req2.body;
+    if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) {
+      return res.status(400).json({ error: "Invalid CMS payload" });
+    }
+    if (incoming.serviceWebsiteLinks !== void 0) {
+      if (!incoming.serviceWebsiteLinks || typeof incoming.serviceWebsiteLinks !== "object" || Array.isArray(incoming.serviceWebsiteLinks)) {
+        return res.status(400).json({ error: "Invalid service website links" });
+      }
+      for (const links of Object.values(incoming.serviceWebsiteLinks)) {
+        if (!Array.isArray(links) || links.some((link) => {
+          if (!link || typeof link.title !== "string" || typeof link.url !== "string") return true;
+          try {
+            return !["http:", "https:"].includes(new URL(link.url).protocol);
+          } catch {
+            return true;
+          }
+        })) return res.status(400).json({ error: "Invalid website name or URL" });
+      }
+    }
     await pool.query(
-      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1) 
-       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" = $1`,
-      [JSON.stringify(req2.body)]
+      `INSERT INTO settings (id, "founderMessageEn") VALUES ('cms_data', $1)
+       ON CONFLICT (id) DO UPDATE SET "founderMessageEn" =
+       (COALESCE(NULLIF(settings."founderMessageEn", ''), '{}')::jsonb || $1::jsonb)::text`,
+      [JSON.stringify(incoming)]
     );
     res.json({ success: true });
   } catch (error3) {

@@ -11,16 +11,19 @@ const RPF_VERSION_KEY = '@rpf_web_version';
 let updateCheckInFlight = false;
 
 async function checkForWebUpdate() {
-  if (!Capacitor.isNativePlatform() || updateCheckInFlight) return;
+  if (updateCheckInFlight) return;
   updateCheckInFlight = true;
   try {
-    const response = await fetch(`${RPF_WEB_ORIGIN}/version.json?ts=${Date.now()}`, {
+    const versionUrl = Capacitor.isNativePlatform()
+      ? `${RPF_WEB_ORIGIN}/version.json?ts=${Date.now()}`
+      : `/version.json?ts=${Date.now()}`;
+    const response = await fetch(versionUrl, {
       cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
+      headers: { 'Cache-Control': 'no-cache, no-store' },
     });
     if (!response.ok) return;
     const payload = await response.json();
-    const remoteVersion = String(payload?.version || '').trim();
+    const remoteVersion = String(payload?.build || payload?.generatedAt || payload?.version || '').trim();
     if (!remoteVersion) return;
     const localVersion = localStorage.getItem(RPF_VERSION_KEY);
     if (!localVersion) {
@@ -36,6 +39,12 @@ async function checkForWebUpdate() {
     updateCheckInFlight = false;
   }
 }
+
+window.setTimeout(checkForWebUpdate, 1500);
+window.setInterval(checkForWebUpdate, 60_000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') checkForWebUpdate();
+});
 
 if (Capacitor.isNativePlatform()) {
   axios.defaults.baseURL = RPF_WEB_ORIGIN;
@@ -65,12 +74,6 @@ if (Capacitor.isNativePlatform()) {
     const mergedInit: RequestInit = { ...(init || {}), signal: controller.signal };
     return originalFetch(resolvedInput, mergedInit).finally(() => window.clearTimeout(timer));
   };
-
-  window.setTimeout(checkForWebUpdate, 1500);
-  window.setInterval(checkForWebUpdate, 60_000);
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') checkForWebUpdate();
-  });
 }
 
 createRoot(document.getElementById('root')!).render(

@@ -95,10 +95,22 @@ async function main() {
       console.log('rss-proxy.php uploaded');
     }
 
+    await withFreshConnection('remote dist/dist cleanup', async (client) => {
+      try {
+        const list = await client.list('dist');
+        if (list.some((file) => file.name === 'dist' && file.isDirectory)) {
+          console.log('Cleaning up accidental nested dist/dist on remote server...');
+          await client.removeDir('dist/dist');
+        }
+      } catch (e) {
+        // Non-fatal if dist doesn't exist yet
+      }
+    });
+
     fs.writeFileSync('restart.txt', new Date().toISOString());
     await withFreshConnection('restart marker upload', async (client) => {
       await client.ensureDir('tmp');
-      await client.uploadFrom('restart.txt', 'restart.txt');
+      await client.uploadFrom('restart.txt', 'tmp/restart.txt');
     });
     console.log('Server deployment completed.');
   } catch (err) {
