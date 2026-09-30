@@ -33,6 +33,7 @@ export default function MyCertificates() {
   const [rules, setRules] = useState<CertificateRule[]>([]);
 
   const certRef = useRef<HTMLDivElement>(null);
+  const verificationBase = "https://appapi.therpfoundation.org/api/certificates/verify/";
 
   useEffect(() => {
     if (!user?.id) { setItems([]); setSelectedCert(null); setLoading(false); return; }
@@ -209,7 +210,7 @@ export default function MyCertificates() {
                   <div className="mt-6 grid grid-cols-[auto_1fr] items-end gap-5 border-t border-slate-200 pt-5 text-left">
                     <div className="rounded-xl border border-[#D8E8DB] bg-[#F0FAF4] p-2.5">
                       <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[#245D45]">{hi ? "सत्यापन" : "Verify"}</p>
-                      <QRCode value={`${window.location.origin}/api/certificates/verify/${selectedCert.certificate_id}`} size={78} bgColor="#ffffff" fgColor="#243B32" />
+                      <QRCode value={`${verificationBase}${selectedCert.certificate_id}`} size={78} bgColor="#ffffff" fgColor="#243B32" />
                     </div>
                     <div className="min-w-0 text-right">
                       <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">Certificate ID</p>
