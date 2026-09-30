@@ -46,6 +46,7 @@ import environmentRoutes from './src/routes/environmentRoutes.js';
 import educationRoutes from './src/routes/educationRoutes.js';
 import miscRoutes from './src/routes/miscRoutes.js';
 import volunteerRoutes from './src/routes/volunteerRoutes.js';
+import { ensureEligibleCertificates } from './src/lib/certificateAutomation.js';
 import certificateRoutes from './src/routes/certificateRoutes.js';
 import communityRoutes from './src/routes/communityRoutes.js';
 import jobRoutes from './src/routes/jobRoutes.js';
@@ -765,6 +766,7 @@ app.post("/api/volunteers/duty/clock-out", authenticateToken, requireVolunteer, 
       `UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2`,
       [Math.round(durationMinutes * 2), userId]
     );
+    await ensureEligibleCertificates(userId);
 
     res.json({ success: true, session: result.rows[0], durationMinutes });
   } catch (error: any) {
