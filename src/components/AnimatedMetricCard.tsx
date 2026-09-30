@@ -93,32 +93,32 @@ export function AnimatedMetricCard({
   const toneClasses = {
     saffron: {
       bg: "bg-orange-50/70 border-orange-200/80 hover:border-orange-300",
-      iconBg: "bg-[#C2410C] text-white shadow-xs shadow-orange-500/20",
-      numColor: "text-[#0A192F]",
+      iconBg: "bg-orange-100 text-[#C2410C]",
+      numColor: "text-[#243B32]",
       dot: "bg-[#C2410C]"
     },
     green: {
       bg: "bg-emerald-50/70 border-emerald-200/80 hover:border-emerald-300",
-      iconBg: "bg-[#166534] text-white shadow-xs shadow-green-500/20",
-      numColor: "text-[#0A192F]",
+      iconBg: "bg-emerald-100 text-[#166534]",
+      numColor: "text-[#243B32]",
       dot: "bg-[#166534]"
     },
     navy: {
       bg: "bg-blue-50/70 border-blue-200/80 hover:border-blue-300",
-      iconBg: "bg-[#0A192F] text-white shadow-xs shadow-slate-900/20",
-      numColor: "text-[#0A192F]",
+      iconBg: "bg-slate-100 text-[#243B32]",
+      numColor: "text-[#243B32]",
       dot: "bg-[#0A192F]"
     },
     gold: {
       bg: "bg-amber-50/70 border-amber-200/80 hover:border-amber-300",
-      iconBg: "bg-[#D97706] text-white shadow-xs shadow-amber-500/20",
-      numColor: "text-[#0A192F]",
+      iconBg: "bg-amber-100 text-[#B45309]",
+      numColor: "text-[#243B32]",
       dot: "bg-[#D97706]"
     },
     rose: {
       bg: "bg-rose-50/70 border-rose-200/80 hover:border-rose-300",
-      iconBg: "bg-rose-600 text-white shadow-xs shadow-rose-500/20",
-      numColor: "text-[#0A192F]",
+      iconBg: "bg-rose-100 text-rose-700",
+      numColor: "text-[#243B32]",
       dot: "bg-rose-600"
     }
   }[tone];
@@ -146,10 +146,10 @@ export function AnimatedMetricCard({
       </div>
 
       <div className="space-y-0.5">
-        <p className={`text-xl sm:text-2xl font-black tracking-tight ${toneClasses.numColor}`}>
+        <p className={`text-xl sm:text-2xl font-semibold tracking-tight ${toneClasses.numColor}`}>
           <AnimatedNumber end={value} prefix={prefix} suffix={suffix} />
         </p>
-        <p className="text-[11px] font-bold text-slate-700 line-clamp-1">
+        <p className="text-[11px] font-medium leading-snug text-slate-600 break-words">
           {label}
         </p>
         {subLabel && (
