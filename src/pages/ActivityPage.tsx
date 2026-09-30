@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { ClipboardList, Clock, Users, MessagesSquare, Search, Send, ArrowRight } from "lucide-react";
+import { ClipboardList, Clock, Users, MessagesSquare, Search, Send, ArrowRight, Award } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
@@ -11,13 +11,22 @@ export default function ActivityPage() {
   const hi = lang === "hi";
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [tab, setTab] = useState<"duty" | "reports" | "network" | "chat">("duty");
+  const [tab, setTab] = useState<"duty" | "reports" | "network" | "chat" | "certificates">("duty");
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Volunteer | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
+  const [certificateProgress, setCertificateProgress] = useState({ hours: 0, reports: 0, tasks: 0 });
+  const [certificateRules, setCertificateRules] = useState<any[]>([]);
+  useEffect(() => {
+    if (tab !== "certificates") return;
+    axios.get("/api/volunteers/me/certificates").then(r => {
+      setCertificateProgress({ hours: Number(r.data?.progress?.hours || 0), reports: Number(r.data?.progress?.reports || 0), tasks: Number(r.data?.progress?.tasks || 0) });
+      setCertificateRules(Array.isArray(r.data?.rules) ? r.data.rules : []);
+    }).catch(() => setError(hi ? "प्रमाणपत्र पात्रता अभी उपलब्ध नहीं है" : "Certificate eligibility is currently unavailable"));
+  }, [tab, hi]);
   useEffect(() => {
     if (tab !== "network") return;
     axios.get("/api/public/volunteers").then(r => setVolunteers(Array.isArray(r.data?.data) ? r.data.data : [])).catch(() => setError(hi ? "स्वयंसेवक सूची उपलब्ध नहीं है" : "Volunteer directory unavailable"));
@@ -46,7 +55,8 @@ export default function ActivityPage() {
     { id: "duty", en: "Live Volunteer Duty", hi: "लाइव स्वयंसेवक ड्यूटी", icon: Clock },
     { id: "reports", en: "Field Report", hi: "फील्ड रिपोर्ट", icon: ClipboardList },
     { id: "network", en: "Volunteer Network", hi: "स्वयंसेवक नेटवर्क", icon: Users },
-    { id: "chat", en: "Community Chat", hi: "सामुदायिक चैट", icon: MessagesSquare }
+    { id: "chat", en: "Community Chat", hi: "सामुदायिक चैट", icon: MessagesSquare },
+    { id: "certificates", en: "Certificates", hi: "प्रमाणपत्र", icon: Award }
   ] as const;
   return <main className="min-h-screen bg-[#FFF7E8] pb-24 text-[#245D45]">
     <header className="bg-gradient-to-r from-[#FFD49A] via-[#FFF7E8] to-[#B9E5CC] px-5 py-7">
@@ -63,6 +73,16 @@ export default function ActivityPage() {
       {tab === "network" && <section className="space-y-3">
         <label className="flex items-center gap-2 rounded-xl border border-[#B9E5CC] bg-white p-3"><Search size={18}/><input aria-label="Search volunteers" value={search} onChange={e => setSearch(e.target.value)} placeholder={hi ? "नाम, शहर या कौशल खोजें" : "Search name, city or skills"} className="w-full bg-transparent text-sm outline-none"/></label>
         {volunteers.filter(v => [v.name,v.city,Array.isArray(v.skills)?v.skills.join(" "):v.skills].join(" ").toLowerCase().includes(search.toLowerCase())).map(v => <article key={v.id} className="flex items-center justify-between rounded-xl border border-[#B9E5CC] bg-white p-4"><div><b>{v.name}</b><p className="text-xs">{v.city} · {v.role}</p></div><button className="rounded-xl bg-[#FFD49A] px-3 py-2 text-xs font-bold" onClick={() => { setSelected(v); setTab("chat"); }}>{hi ? "मैसेज" : "Message"}</button></article>)}
+      </section>}
+      {tab === "certificates" && <section className="rounded-2xl border border-[#B9E5CC] bg-white p-5">
+        <div className="flex items-center gap-3"><div className="rounded-xl bg-[#F0FAF4] p-3 text-[#245D45]"><Award size={20}/></div><div><h2 className="font-bold">{hi ? "प्रमाणपत्र पात्रता" : "Certificate Eligibility"}</h2><p className="text-xs text-slate-500">{hi ? "आपकी वास्तविक Activity से प्रमाणपत्र स्वतः जारी होंगे।" : "Certificates are issued automatically from your recorded Activity."}</p></div></div>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+          <div className="rounded-xl bg-[#F0FAF4] p-3"><b className="block text-lg">{certificateProgress.hours.toFixed(1)}</b><span className="text-[10px] text-slate-500">Hours</span></div>
+          <div className="rounded-xl bg-[#FFF7E8] p-3"><b className="block text-lg">{certificateProgress.reports}</b><span className="text-[10px] text-slate-500">Reports</span></div>
+          <div className="rounded-xl bg-slate-50 p-3"><b className="block text-lg">{certificateProgress.tasks}</b><span className="text-[10px] text-slate-500">Tasks</span></div>
+        </div>
+        <div className="mt-4 space-y-2">{certificateRules.map(rule => <div key={rule.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs"><b>{hi ? (rule.title_hi || rule.title) : rule.title}</b><p className="mt-1 text-slate-500">≥ {rule.min_hours} hours · ≥ {rule.min_reports} reports · ≥ {rule.min_tasks} completed tasks</p></div>)}</div>
+        <button onClick={() => navigate("/my-certificates")} className="mt-4 rounded-xl bg-[#245D45] px-4 py-3 text-sm font-bold text-white">{hi ? "मेरे प्रमाणपत्र देखें" : "View My Certificates"}</button>
       </section>}
       {tab === "chat" && <section className="rounded-2xl border border-[#B9E5CC] bg-white p-4">
         <div className="mb-3 flex items-center justify-between"><h2 className="font-bold">{selected ? selected.name : (hi ? "सामुदायिक चैट" : "Community Chat")}</h2>{selected && <button onClick={() => setSelected(null)} className="text-xs underline">{hi ? "ओपन चैट" : "Open chat"}</button>}</div>
