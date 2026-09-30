@@ -7,6 +7,7 @@ import BrandLoader from "../components/BrandLoader";
 import { toast } from "react-hot-toast";
 import QRCode from "react-qr-code";
 
+type CertificateRule = { id:string; title:string; title_hi?:string; min_hours:number; min_reports:number; min_tasks:number; active:boolean };
 type Certificate = {
   id: string;
   certificate_id: string;
@@ -28,6 +29,8 @@ export default function MyCertificates() {
   const [loading, setLoading] = useState(true);
   const [selectedCert, setSelectedCert] = useState<Certificate | null>(null);
   const [downloadBusy, setDownloadBusy] = useState(false);
+  const [progress, setProgress] = useState({ hours: 0, reports: 0, tasks: 0 });
+  const [rules, setRules] = useState<CertificateRule[]>([]);
 
   const certRef = useRef<HTMLDivElement>(null);
 
@@ -36,6 +39,8 @@ export default function MyCertificates() {
     fetch(`/api/volunteers/me/certificates?volunteer_id=${encodeURIComponent(user.id)}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => {
+        setProgress({ hours: Number(d.progress?.hours || 0), reports: Number(d.progress?.reports || 0), tasks: Number(d.progress?.tasks || 0) });
+        setRules(Array.isArray(d.rules) ? d.rules : []);
         const mapped: Certificate[] = Array.isArray(d.certificates) ? d.certificates.map((x: any) => ({
           id: x.id,
           certificate_id: x.certificate_id,
@@ -110,6 +115,19 @@ export default function MyCertificates() {
           </div>
         ) : (
           <>
+            {items.length === 0 && (
+              <section className="rounded-2xl border border-[#D8E8DB] bg-white p-5 shadow-sm">
+                <h2 className="text-base font-bold text-[#243B32]">{hi ? "अभी कोई प्रमाणपत्र जारी नहीं हुआ" : "No certificate has been issued yet"}</h2>
+                <p className="mt-1 text-sm text-slate-500">{hi ? "आपकी Activity के वास्तविक सेवा रिकॉर्ड के आधार पर पात्रता पूरी होने पर प्रमाणपत्र स्वतः बनेगा।" : "Certificates are generated automatically when your recorded Activity meets a configured condition."}</p>
+                <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-xl bg-[#F0FAF4] p-3"><b className="block text-lg text-[#245D45]">{progress.hours.toFixed(1)}</b><span className="text-[10px] text-slate-500">Hours</span></div>
+                  <div className="rounded-xl bg-[#FFF7E8] p-3"><b className="block text-lg text-[#B45309]">{progress.reports}</b><span className="text-[10px] text-slate-500">Reports</span></div>
+                  <div className="rounded-xl bg-slate-50 p-3"><b className="block text-lg text-[#243B32]">{progress.tasks}</b><span className="text-[10px] text-slate-500">Tasks</span></div>
+                </div>
+                {rules.length > 0 && <div className="mt-4 space-y-2"><p className="text-[10px] font-bold uppercase tracking-wider text-[#245D45]">{hi ? "पात्रता की शर्तें" : "Eligibility conditions"}</p>{rules.map(rule => <div key={rule.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600"><b className="text-[#243B32]">{hi ? (rule.title_hi || rule.title) : rule.title}</b><div className="mt-1">≥ {rule.min_hours} hours · ≥ {rule.min_reports} reports · ≥ {rule.min_tasks} completed tasks</div></div>)}</div>}
+              </section>
+            )}
+
             {/* Certificate List Selector */}
             <div className="space-y-2">
               <p className="text-[10.5px] font-extrabold uppercase tracking-wider text-[#D97706]">
