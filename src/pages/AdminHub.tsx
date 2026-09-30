@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import ServicesManager from "../components/ServicesManager";
 import ServiceContentManager from "../components/ServiceContentManager";
 import { CmsSettings } from "../components/admin/CmsSettings";
+import JanSevaSyncStudio from "../components/admin/JanSevaSyncStudio";
 import FileUpload from "../components/FileUpload";
 import {
   AlertTriangle,
@@ -928,65 +929,13 @@ export default function AdminHub() {
                 </div>
               )}
 
-              {(section === "cards") && (
-                <section className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                  <h3 className="text-sm font-black text-emerald-950">Jan Seva Card · Admin Import & Sync</h3>
-                  <p className="mt-1 text-xs text-emerald-900">Import an authorized JSON export. All source fields are preserved; duplicate card numbers are updated. Maximum 25 MB per file.</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
-                    <label className="cursor-pointer rounded-xl bg-[#167C5A] px-4 py-2 text-xs font-bold text-white">
-                      {cardImportBusy ? 'Processing...' : 'Bulk Upload JSON'}
-                      <input type="file" accept=".json,application/json" disabled={cardImportBusy}
-                        onChange={event => { void importCardJson(event.target.files?.[0]); event.target.value = ''; }}
-                        className="sr-only" />
-                    </label>
-                    <button type="button" disabled={cardImportBusy} onClick={() => void syncCardPage()}
-                      className="rounded-xl border border-emerald-300 bg-white px-4 py-2 text-xs font-bold text-emerald-950 disabled:opacity-50">
-                      Sync external API page {cardSyncPage}
-                    </button>
-                  </div>
-                  {cardImportStatus && <p role="status" className="mt-3 text-xs font-medium text-emerald-950">{cardImportStatus}</p>}
-                  <p className="mt-2 text-[11px] text-emerald-800">Only authorized administrators can import or sync. Card holders need separately verified accounts to sign in.</p>
-                </section>
-              )}
-              {/* TABLE 3: JAN SEVA CARDS */}
-              {section === "cards" && (
-                <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                  <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-                    <h3 className="text-sm font-black text-[#0A192F]">Jan Seva Smart Identity Cards</h3>
-                    <button
-                      onClick={() => exportCsv("cards", "rpf_jan_seva_cards")}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-xs"
-                    >
-                      <Download className="h-3.5 w-3.5 text-[#C2410C]" /> Export CSV
-                    </button>
-                  </div>
-                  <div className="divide-y divide-slate-100">
-                    {filterRows(data.cards).map((row, index) => (
-                      <div key={String(row.id || index)} className="flex items-center justify-between px-5 py-4 hover:bg-slate-50/70 transition">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-bold text-[#0A192F]">{firstText(row, ["name", "userId"])}</p>
-                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase text-[#166534] border border-emerald-200">
-                              {firstText(row, ["status"])}
-                            </span>
-                          </div>
-                          <p className="mt-1 text-xs text-slate-500 font-mono">Card No: {firstText(row, ["cardNo"])} · DOB: {firstText(row, ["dob"])}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => navigate("/jan-seva-card")}
-                            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-[#0A192F] hover:bg-slate-50 transition shadow-xs"
-                          >
-                            View Card
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {!filterRows(data.cards).length && (
-                      <p className="p-8 text-center text-xs text-slate-400">No card records found matching search filter.</p>
-                    )}
-                  </div>
-                </div>
+              {((section === "people" && peopleTab === "cards") || section === "cards") && (
+                <JanSevaSyncStudio
+                  cards={data.cards}
+                  token={token || ""}
+                  onRefresh={load}
+                  exportCsv={exportCsv}
+                />
               )}
             </div>
           )}

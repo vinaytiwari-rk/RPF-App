@@ -334241,7 +334241,10 @@ var cultureRoutes_default = router10;
 var import_express11 = __toESM(require_express2(), 1);
 var import_crypto9 = __toESM(require("crypto"), 1);
 var router11 = import_express11.default.Router();
-var JAN_SEVA_API_BASE = process.env.JAN_SEVA_API_URL || "https://api.therpdoundation.org/api/patient";
+var PRIMARY_JAN_SEVA_API = process.env.JAN_SEVA_API_URL || "https://api.therpfoundation.org/api/patient";
+var FALLBACK_JAN_SEVA_API = "https://www.api.therpfoundation.org/api/patient";
+var JAN_SEVA_ROOT_URL = "https://api.therpfoundation.org";
+var JAN_SEVA_PORTAL_URL = "https://jansevacard.therpfoundation.org";
 var cardCache = /* @__PURE__ */ new Map();
 var CACHE_TTL_MS = 60 * 1e3;
 var getCached = (key) => {
@@ -334256,6 +334259,39 @@ var getCached = (key) => {
 var setCached = (key, data2, ttlMs = CACHE_TTL_MS) => {
   cardCache.set(key, { data: data2, expiresAt: Date.now() + ttlMs });
 };
+async function callJanSevaApi(subPath = "", options2 = {}) {
+  const timeout2 = options2.timeout || 7e3;
+  const headers = {
+    "User-Agent": "Samahit-AppAPI/2.5 (+https://appapi.therpfoundation.org)",
+    ...process.env.JAN_SEVA_API_TOKEN ? { Authorization: `Bearer ${process.env.JAN_SEVA_API_TOKEN}` } : {},
+    ...options2.headers || {}
+  };
+  const cleanSubPath = subPath ? subPath.startsWith("/") ? subPath : `/${subPath}` : "";
+  const endpoints = [
+    `${PRIMARY_JAN_SEVA_API}${cleanSubPath}`,
+    `${FALLBACK_JAN_SEVA_API}${cleanSubPath}`
+  ];
+  let lastError = null;
+  for (const endpoint of endpoints) {
+    try {
+      const response = await axios_default({
+        method: options2.method || "GET",
+        url: endpoint,
+        params: options2.params,
+        data: options2.data,
+        headers,
+        timeout: timeout2
+      });
+      return response;
+    } catch (err2) {
+      lastError = err2;
+      if (err2.response && (err2.response.status === 400 || err2.response.status === 404)) {
+        throw err2;
+      }
+    }
+  }
+  throw lastError;
+}
 var ensureMirror = async () => {
   await pool.query(`CREATE TABLE IF NOT EXISTS jan_seva_card_mirror (
     card_no TEXT PRIMARY KEY,
@@ -334264,8 +334300,8 @@ var ensureMirror = async () => {
     synced_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`);
 };
-var cardNumber = (record) => {
-  const value2 = record?.cardNo ?? record?.card_no ?? record?.janSevaCardNo;
+var extractCardNumber = (record) => {
+  const value2 = record?.cardNo ?? record?.card_no ?? record?.janSevaCardNo ?? record?._id;
   return typeof value2 === "string" || typeof value2 === "number" ? String(value2).trim() || null : null;
 };
 var writeMirror = async (records, source) => {
@@ -334275,7 +334311,7 @@ var writeMirror = async (records, source) => {
   try {
     await client.query("BEGIN");
     for (const record of records) {
-      const number = record && typeof record === "object" && !Array.isArray(record) ? cardNumber(record) : null;
+      const number = record && typeof record === "object" && !Array.isArray(record) ? extractCardNumber(record) : null;
       if (!number) {
         skipped++;
         continue;
@@ -334298,6 +334334,91 @@ var writeMirror = async (records, source) => {
   cardCache.clear();
   return { imported, skipped };
 };
+var getIntegrationHealth = async (_req, res) => {
+  const t0 = Date.now();
+  let apiHealth = {
+    url: JAN_SEVA_ROOT_URL,
+    status: "offline",
+    latencyMs: 0,
+    httpStatus: 0,
+    message: ""
+  };
+  let portalHealth = {
+    url: JAN_SEVA_PORTAL_URL,
+    status: "offline",
+    latencyMs: 0,
+    httpStatus: 0
+  };
+  try {
+    const start = Date.now();
+    const r5 = await axios_default.get(JAN_SEVA_ROOT_URL, { timeout: 4e3 });
+    apiHealth = {
+      url: JAN_SEVA_ROOT_URL,
+      status: r5.status >= 200 && r5.status < 400 ? "online" : "degraded",
+      latencyMs: Date.now() - start,
+      httpStatus: r5.status,
+      message: r5.data?.message || "RP_Card_Backend responding"
+    };
+  } catch (err2) {
+    apiHealth = {
+      url: JAN_SEVA_ROOT_URL,
+      status: "offline",
+      latencyMs: Date.now() - t0,
+      httpStatus: err2.response?.status || 504,
+      message: err2.message || "Connection timed out"
+    };
+  }
+  try {
+    const start = Date.now();
+    const r5 = await axios_default.get(JAN_SEVA_PORTAL_URL, { timeout: 4e3 });
+    portalHealth = {
+      url: JAN_SEVA_PORTAL_URL,
+      status: r5.status >= 200 && r5.status < 400 ? "online" : "degraded",
+      latencyMs: Date.now() - start,
+      httpStatus: r5.status
+    };
+  } catch (err2) {
+    portalHealth = {
+      url: JAN_SEVA_PORTAL_URL,
+      status: "offline",
+      latencyMs: 0,
+      httpStatus: err2.response?.status || 504
+    };
+  }
+  let mirrorStats = {
+    totalMirrored: 0,
+    lastSyncedAt: null,
+    sources: {},
+    localApproved: 0,
+    localPending: 0
+  };
+  try {
+    await ensureMirror();
+    const [mirrorCount, mirrorLatest, localCounts] = await Promise.all([
+      pool.query("SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror"),
+      pool.query("SELECT MAX(synced_at) AS last_sync FROM jan_seva_card_mirror"),
+      pool.query(`SELECT 
+        COUNT(*) FILTER (WHERE status = 'approved')::int as approved,
+        COUNT(*) FILTER (WHERE status = 'pending')::int as pending
+        FROM card_applications_v2`)
+    ]);
+    mirrorStats.totalMirrored = mirrorCount.rows[0]?.count || 0;
+    mirrorStats.lastSyncedAt = mirrorLatest.rows[0]?.last_sync ? new Date(mirrorLatest.rows[0].last_sync).toISOString() : null;
+    mirrorStats.localApproved = localCounts.rows[0]?.approved || 0;
+    mirrorStats.localPending = localCounts.rows[0]?.pending || 0;
+  } catch (dbErr) {
+    console.warn("Mirror stats lookup warning:", dbErr.message);
+  }
+  res.json({
+    success: true,
+    timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+    apiServer: apiHealth,
+    portal: portalHealth,
+    mirror: mirrorStats
+  });
+};
+router11.get("/api/admin/cards/health", authenticateToken, requireAdmin, getIntegrationHealth);
+router11.get("/api/admin/external/health", authenticateToken, requireAdmin, getIntegrationHealth);
 router11.post("/api/admin/cards/import", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const records = req2.body?.records;
@@ -334312,17 +334433,21 @@ router11.post("/api/admin/cards/import", authenticateToken, requireAdmin, async 
 });
 router11.post("/api/admin/cards/sync", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const page = Number(req2.body?.page);
+    const page = Number(req2.body?.page || 1);
     const limit = Number(req2.body?.limit ?? 100);
     if (!Number.isInteger(page) || page < 1 || !Number.isInteger(limit) || limit < 1 || limit > 500)
-      return res.status(400).json({ success: false, error: "Valid page and limit (1\u2013500) required" });
-    const headers = process.env.JAN_SEVA_API_TOKEN ? { Authorization: `Bearer ${process.env.JAN_SEVA_API_TOKEN}` } : {};
-    const response = await axios_default.get(JAN_SEVA_API_BASE, { params: { page, limit }, headers, timeout: 15e3 });
-    if (!Array.isArray(response.data?.patients))
-      return res.status(502).json({ success: false, error: "External API schema not verified: expected patients array" });
+      return res.status(400).json({ success: false, error: "Valid page (>=1) and limit (1\u2013500) required" });
+    const response = await callJanSevaApi("", {
+      params: { page, limit },
+      timeout: 1e4
+    });
+    if (!Array.isArray(response.data?.patients)) {
+      return res.status(502).json({
+        success: false,
+        error: "External API schema mismatch: patients array expected"
+      });
+    }
     const records = response.data.patients;
-    if (records.length > limit)
-      return res.status(502).json({ success: false, error: "External API ignored requested page size" });
     const result = records.length ? await writeMirror(records, "external-api") : { imported: 0, skipped: 0 };
     res.json({
       success: true,
@@ -334335,7 +334460,58 @@ router11.post("/api/admin/cards/sync", authenticateToken, requireAdmin, async (r
     });
   } catch (error3) {
     console.error("Jan Seva sync failed:", error3?.message);
-    res.status(502).json({ success: false, error: "External Jan Seva API unavailable or unauthorized" });
+    res.status(502).json({
+      success: false,
+      error: "External Jan Seva API unavailable or currently buffering: " + (error3?.response?.data?.message || error3?.message || "Connection error")
+    });
+  }
+});
+router11.post("/api/admin/cards/sync-all", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    const maxPages = Math.min(20, Math.max(1, Number(req2.body?.maxPages) || 5));
+    const limit = Math.min(200, Math.max(20, Number(req2.body?.limit) || 100));
+    let totalImported = 0;
+    let totalSkipped = 0;
+    let pagesProcessed = 0;
+    let externalTotal = 0;
+    let stopReason = "completed";
+    for (let page = 1; page <= maxPages; page++) {
+      try {
+        const response = await callJanSevaApi("", {
+          params: { page, limit },
+          timeout: 8e3
+        });
+        const patients = response.data?.patients;
+        if (!Array.isArray(patients) || patients.length === 0) {
+          stopReason = "end-of-records";
+          break;
+        }
+        externalTotal = Number(response.data?.totalPatients) || externalTotal;
+        const result = await writeMirror(patients, "external-api");
+        totalImported += result.imported;
+        totalSkipped += result.skipped;
+        pagesProcessed++;
+        if (patients.length < limit) {
+          stopReason = "last-page";
+          break;
+        }
+      } catch (pageErr) {
+        stopReason = "external-timeout-or-error";
+        console.warn(`Sync stopped at page ${page}:`, pageErr.message);
+        break;
+      }
+    }
+    res.json({
+      success: true,
+      pagesProcessed,
+      totalImported,
+      totalSkipped,
+      externalTotal,
+      stopReason,
+      message: pagesProcessed > 0 ? `Successfully synchronized ${totalImported} records across ${pagesProcessed} pages.` : `External API is currently buffering or unreachable. Local records preserved.`
+    });
+  } catch (error3) {
+    res.status(500).json({ success: false, error: error3?.message || "Sync runner failed" });
   }
 });
 router11.get("/api/admin/cards/mirror", authenticateToken, requireAdmin, async (req2, res) => {
@@ -334343,47 +334519,197 @@ router11.get("/api/admin/cards/mirror", authenticateToken, requireAdmin, async (
     await ensureMirror();
     const page = Math.max(1, Number(req2.query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(req2.query.limit) || 20));
+    const search = String(req2.query.search || "").trim().toLowerCase();
+    let query = "SELECT card_no, record, source, synced_at FROM jan_seva_card_mirror";
+    const params = [];
+    if (search) {
+      params.push(`%${search}%`);
+      query += ` WHERE LOWER(card_no) LIKE $1 OR LOWER(record::text) LIKE $1`;
+    }
+    const countQuery = search ? "SELECT COUNT(*)::int AS total FROM jan_seva_card_mirror WHERE LOWER(card_no) LIKE $1 OR LOWER(record::text) LIKE $1" : "SELECT COUNT(*)::int AS total FROM jan_seva_card_mirror";
+    params.push(limit);
+    params.push((page - 1) * limit);
+    query += ` ORDER BY synced_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`;
     const [rows, count] = await Promise.all([
-      pool.query("SELECT card_no, record, source, synced_at FROM jan_seva_card_mirror ORDER BY synced_at DESC LIMIT $1 OFFSET $2", [limit, (page - 1) * limit]),
+      pool.query(query, params),
+      pool.query(countQuery, search ? [`%${search}%`] : [])
+    ]);
+    res.json({
+      success: true,
+      records: rows.rows,
+      total: count.rows[0]?.total || 0,
+      page,
+      limit
+    });
+  } catch (err2) {
+    res.status(500).json({ success: false, error: "Card mirror query failed: " + err2.message });
+  }
+});
+router11.get("/api/janseva/verify/:id", async (req2, res) => {
+  try {
+    const rawId = String(req2.params.id || "").trim();
+    if (!rawId) return res.status(400).json({ success: false, error: "Card number or ID required" });
+    await ensureMirror();
+    const mirrorRes = await pool.query(
+      `SELECT card_no, record, source, synced_at FROM jan_seva_card_mirror 
+       WHERE card_no = $1 OR LOWER(record->>'aadhaarNo') = LOWER($1) OR LOWER(record->>'mobileNo') = LOWER($1) 
+       LIMIT 1`,
+      [rawId]
+    );
+    if (mirrorRes.rows.length > 0) {
+      const rec = mirrorRes.rows[0].record;
+      return res.json({
+        success: true,
+        verified: true,
+        source: "local-mirror",
+        cardNo: mirrorRes.rows[0].card_no,
+        member: {
+          name: rec.nameOfMember || rec.name || "Beneficiary",
+          gender: rec.gender,
+          dob: rec.dob,
+          district: rec.district,
+          vidhanSabhaNo: rec.vidhanSabhaNo,
+          mobileNo: rec.mobileNo ? `******${String(rec.mobileNo).slice(-4)}` : null,
+          status: "verified"
+        },
+        portalUrl: `${JAN_SEVA_PORTAL_URL}/verify?id=${encodeURIComponent(mirrorRes.rows[0].card_no)}`,
+        syncedAt: mirrorRes.rows[0].synced_at
+      });
+    }
+    const appRes = await pool.query(
+      `SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" 
+       FROM card_applications_v2 
+       WHERE "cardNo" = $1 OR "idNumber" = $1 OR "userId" = $1 
+       LIMIT 1`,
+      [rawId]
+    );
+    if (appRes.rows.length > 0) {
+      const app2 = appRes.rows[0];
+      return res.json({
+        success: true,
+        verified: app2.status === "approved",
+        source: "local-application",
+        cardNo: app2.cardNo || null,
+        member: {
+          name: app2.name,
+          gender: app2.gender,
+          dob: app2.dob,
+          status: app2.status
+        },
+        portalUrl: app2.cardNo ? `${JAN_SEVA_PORTAL_URL}/verify?id=${encodeURIComponent(app2.cardNo)}` : null,
+        submittedAt: app2.submittedAt
+      });
+    }
+    try {
+      const extRes = await callJanSevaApi(`/${encodeURIComponent(rawId)}`, { timeout: 4e3 });
+      if (extRes.data) {
+        return res.json({
+          success: true,
+          verified: true,
+          source: "external-api",
+          cardNo: extRes.data.cardNo || rawId,
+          member: extRes.data,
+          portalUrl: `${JAN_SEVA_PORTAL_URL}/verify?id=${encodeURIComponent(extRes.data.cardNo || rawId)}`
+        });
+      }
+    } catch {
+    }
+    res.status(404).json({
+      success: false,
+      verified: false,
+      error: "Jan Seva Card record not found in verified registry",
+      portalUrl: `${JAN_SEVA_PORTAL_URL}/verify?id=${encodeURIComponent(rawId)}`
+    });
+  } catch (error3) {
+    res.status(500).json({ success: false, error: error3.message });
+  }
+});
+router11.get("/api/patient", async (req2, res) => {
+  try {
+    const page = Math.max(1, Number(req2.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req2.query.limit) || 20));
+    const search = String(req2.query.search || "").trim();
+    try {
+      const extRes = await callJanSevaApi("", {
+        params: { page, limit, search },
+        timeout: 4e3
+      });
+      if (extRes.data && Array.isArray(extRes.data.patients)) {
+        return res.json(extRes.data);
+      }
+    } catch {
+    }
+    await ensureMirror();
+    const offset2 = (page - 1) * limit;
+    const [mirrorRows, totalRes] = await Promise.all([
+      pool.query("SELECT record FROM jan_seva_card_mirror ORDER BY synced_at DESC LIMIT $1 OFFSET $2", [limit, offset2]),
       pool.query("SELECT COUNT(*)::int AS total FROM jan_seva_card_mirror")
     ]);
-    res.json({ success: true, records: rows.rows, total: count.rows[0]?.total || 0, page, limit });
-  } catch {
-    res.status(500).json({ success: false, error: "Card mirror unavailable" });
+    const patients = mirrorRows.rows.map((r5) => r5.record);
+    res.json({
+      success: true,
+      patients,
+      totalPatients: totalRes.rows[0]?.total || patients.length,
+      totalPages: Math.ceil((totalRes.rows[0]?.total || patients.length) / limit),
+      page,
+      source: "local-mirror"
+    });
+  } catch (error3) {
+    res.status(500).json({ success: false, error: error3.message });
   }
 });
 router11.get("/api/cards", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const { search = "", page = 1, limit = 20 } = req2.query;
+    const { search = "", page = 1, limit = 50 } = req2.query;
     const cacheKey = `cards:admin:${search}:${page}:${limit}`;
     const cachedData = getCached(cacheKey);
     if (cachedData) {
       return res.json(cachedData);
     }
-    try {
-      const response = await axios_default.get(`${JAN_SEVA_API_BASE}`, {
-        params: { search, page, limit },
-        timeout: 4e3
-      });
-      if (response.data && response.data.patients) {
-        const payload2 = {
-          success: true,
-          applications: response.data.patients,
-          totalPatients: response.data.totalPatients,
-          totalPages: response.data.totalPages
-        };
-        setCached(cacheKey, payload2, 30 * 1e3);
-        return res.json(payload2);
-      }
-    } catch (apiErr) {
-      console.warn("Jan Seva external API query failed, falling back to local PG:", apiErr.message);
-    }
-    const result = await pool.query(
-      'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2 ORDER BY "submittedAt" DESC LIMIT $1 OFFSET $2',
-      [limit, (Number(page) - 1) * Number(limit)]
+    const localApps = await pool.query(
+      `SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" 
+       FROM card_applications_v2 
+       ORDER BY "submittedAt" DESC LIMIT $1 OFFSET $2`,
+      [Number(limit), (Number(page) - 1) * Number(limit)]
     );
-    const payload = { success: true, applications: result.rows };
-    setCached(cacheKey, payload, 10 * 1e3);
+    await ensureMirror();
+    const mirrorApps = await pool.query(
+      `SELECT card_no, record, source, synced_at 
+       FROM jan_seva_card_mirror 
+       ORDER BY synced_at DESC LIMIT $1 OFFSET $2`,
+      [Number(limit), (Number(page) - 1) * Number(limit)]
+    );
+    const formattedMirror = mirrorApps.rows.map((m6) => {
+      const rec = m6.record || {};
+      return {
+        userId: rec.createdBy || m6.card_no,
+        name: rec.nameOfMember || rec.name || "Mirrored Beneficiary",
+        gender: rec.gender || "\u2014",
+        dob: rec.dob || "\u2014",
+        address: rec.address || `${rec.district || ""} ${rec.vidhanSabhaNo || ""}`.trim() || "\u2014",
+        idType: "Aadhaar",
+        idNumber: rec.aadhaarNo ? `******${String(rec.aadhaarNo).slice(-4)}` : "\u2014",
+        status: "approved",
+        cardNo: m6.card_no,
+        submittedAt: m6.synced_at,
+        source: m6.source
+      };
+    });
+    const combined = [...localApps.rows];
+    const seenCards = new Set(localApps.rows.map((r5) => r5.cardNo).filter(Boolean));
+    for (const item of formattedMirror) {
+      if (!seenCards.has(item.cardNo)) {
+        combined.push(item);
+        seenCards.add(item.cardNo);
+      }
+    }
+    const payload = {
+      success: true,
+      applications: combined,
+      totalLocal: localApps.rowCount,
+      totalMirrored: mirrorApps.rowCount
+    };
+    setCached(cacheKey, payload, 15 * 1e3);
     res.json(payload);
   } catch (error3) {
     console.error("Error fetching card applications:", error3);
@@ -334394,46 +334720,58 @@ router11.get("/api/public/cards/impact", async (_req, res) => {
   try {
     const cached = getCached("cards:public-impact");
     if (cached) return res.json(cached);
-    let total = null;
-    let source = "external";
+    let total = 0;
+    let source = "mirror";
     try {
-      const response = await axios_default.get(`${JAN_SEVA_API_BASE}/stats`, { timeout: 5e3 });
-      const data2 = response.data?.stats || response.data;
-      const value2 = data2?.totalCards ?? data2?.totalPatients ?? data2?.total ?? data2?.count;
-      if (value2 !== void 0 && value2 !== null && Number.isFinite(Number(value2)) && Number(value2) >= 0) {
-        total = Number(value2);
-      }
+      await ensureMirror();
+      const [mirrorCount, localApproved] = await Promise.all([
+        pool.query("SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror"),
+        pool.query("SELECT COUNT(*)::int AS count FROM card_applications_v2 WHERE status = 'approved'")
+      ]);
+      total = (mirrorCount.rows[0]?.count || 0) + (localApproved.rows[0]?.count || 0);
     } catch {
     }
-    if (total === null) {
-      source = "local";
-      const local = await pool.query("SELECT COUNT(*)::int AS total FROM card_applications_v2 WHERE status = $1", ["approved"]);
-      total = Number(local.rows[0]?.total || 0);
-    }
-    const payload = { success: true, totalCards: total, source, scope: source === "local" ? "local-approved-only" : "external-reported", updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+    const payload = {
+      success: true,
+      totalCards: total,
+      source,
+      portalUrl: JAN_SEVA_PORTAL_URL,
+      updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
     setCached("cards:public-impact", payload, 12e4);
     res.json(payload);
   } catch {
     res.status(503).json({ success: false, error: "Card totals temporarily unavailable" });
   }
 });
-router11.get("/api/cards/stats", authenticateToken, requireAdmin, async (req2, res) => {
+router11.get("/api/cards/stats", authenticateToken, requireAdmin, async (_req, res) => {
   try {
     const cacheKey = "cards:stats";
     const cachedStats = getCached(cacheKey);
-    if (cachedStats) {
-      return res.json(cachedStats);
-    }
-    let statsData = null;
-    try {
-      const response = await axios_default.get(`${JAN_SEVA_API_BASE}/stats`, { timeout: 4e3 });
-      statsData = response.data;
-    } catch (error3) {
-      const pgCount = await pool.query("SELECT COUNT(*) FROM card_applications_v2");
-      statsData = { total: parseInt(pgCount.rows[0]?.count || "0", 10), newToday: 0, thisWeek: 0 };
-    }
-    const payload = { success: true, stats: statsData };
-    setCached(cacheKey, payload, 120 * 1e3);
+    if (cachedStats) return res.json(cachedStats);
+    await ensureMirror();
+    const [mirrorCount, pgStats] = await Promise.all([
+      pool.query("SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror"),
+      pool.query(`SELECT 
+        COUNT(*)::int as total,
+        COUNT(*) FILTER (WHERE status = 'approved')::int as approved,
+        COUNT(*) FILTER (WHERE status = 'pending')::int as pending,
+        COUNT(*) FILTER (WHERE status = 'rejected')::int as rejected
+        FROM card_applications_v2`)
+    ]);
+    const payload = {
+      success: true,
+      stats: {
+        totalMirrored: mirrorCount.rows[0]?.count || 0,
+        totalLocal: pgStats.rows[0]?.total || 0,
+        approved: pgStats.rows[0]?.approved || 0,
+        pending: pgStats.rows[0]?.pending || 0,
+        rejected: pgStats.rows[0]?.rejected || 0,
+        portalUrl: JAN_SEVA_PORTAL_URL,
+        apiUrl: PRIMARY_JAN_SEVA_API
+      }
+    };
+    setCached(cacheKey, payload, 30 * 1e3);
     return res.json(payload);
   } catch (error3) {
     res.status(500).json({ error: error3.message });
@@ -334462,14 +334800,26 @@ router11.get("/api/cards/search", authenticateToken, async (req2, res) => {
       [q2]
     );
     if (pgResult.rows.length > 0) {
-      const payload = { success: true, patient: pgResult.rows[0] };
+      const payload = { success: true, patient: pgResult.rows[0], source: "local-application" };
+      setCached(cacheKey, payload, 60 * 1e3);
+      return res.json(payload);
+    }
+    await ensureMirror();
+    const mirrorResult = await pool.query(
+      `SELECT card_no, record, source, synced_at FROM jan_seva_card_mirror 
+       WHERE card_no = $1 OR LOWER(record->>'aadhaarNo') = LOWER($1) OR LOWER(record->>'mobileNo') = LOWER($1) 
+       LIMIT 1`,
+      [q2]
+    );
+    if (mirrorResult.rows.length > 0) {
+      const payload = { success: true, patient: mirrorResult.rows[0].record, source: "local-mirror" };
       setCached(cacheKey, payload, 60 * 1e3);
       return res.json(payload);
     }
     try {
-      const response = await axios_default.get(`${JAN_SEVA_API_BASE}/${q2}`, { timeout: 4e3 });
+      const response = await callJanSevaApi(`/${encodeURIComponent(q2)}`, { timeout: 4e3 });
       if (response.data) {
-        const payload = { success: true, patient: response.data };
+        const payload = { success: true, patient: response.data, source: "external-api" };
         setCached(cacheKey, payload, 60 * 1e3);
         return res.json(payload);
       }
@@ -334485,7 +334835,7 @@ router11.post("/api/cards", authenticateToken, async (req2, res) => {
     const actorId = String(req2.user?.id || req2.user?.userId || "");
     if (!actorId) return res.status(401).json({ success: false, error: "Login required" });
     const { name, gender, dob, address, idType, idNumber, mobileNo, district, vidhanSabhaNo } = req2.body || {};
-    if (!String(name || "").trim() || !/^\\d{12}$/.test(String(idNumber || "")))
+    if (!String(name || "").trim() || !/^\d{12}$/.test(String(idNumber || "")))
       return res.status(400).json({ success: false, error: "Valid name and 12-digit identity number required" });
     const existing = await pool.query(
       'SELECT status, "cardNo" FROM card_applications_v2 WHERE "userId" = $1 OR "idNumber" = $2 LIMIT 1',
@@ -334498,21 +334848,24 @@ router11.post("/api/cards", authenticateToken, async (req2, res) => {
     });
     let cardNo = null;
     try {
-      const headers = process.env.JAN_SEVA_API_TOKEN ? { Authorization: `Bearer ${process.env.JAN_SEVA_API_TOKEN}` } : {};
-      const upstream = await axios_default.post(JAN_SEVA_API_BASE, {
-        nameOfMember: name,
-        gender,
-        dob,
-        mobileNo,
-        aadhaarNo: idNumber,
-        district,
-        vidhanSabhaNo,
-        addressType: "Urban",
-        createdBy: actorId
-      }, { headers, timeout: 12e3 });
+      const upstream = await callJanSevaApi("", {
+        method: "POST",
+        data: {
+          nameOfMember: name,
+          gender,
+          dob,
+          mobileNo,
+          aadhaarNo: idNumber,
+          district,
+          vidhanSabhaNo,
+          addressType: "Urban",
+          createdBy: actorId
+        },
+        timeout: 1e4
+      });
       if (upstream.data?.cardNo) cardNo = String(upstream.data.cardNo);
     } catch (error3) {
-      console.warn("Jan Seva upstream application unavailable:", error3?.response?.status || error3?.code || "unknown");
+      console.warn("Jan Seva upstream application submission fallback:", error3?.message);
     }
     const status2 = cardNo ? "approved" : "pending";
     await pool.query(
@@ -334542,6 +334895,7 @@ router11.post("/api/cards", authenticateToken, async (req2, res) => {
       success: true,
       status: status2,
       cardNo,
+      portalUrl: cardNo ? `${JAN_SEVA_PORTAL_URL}/verify?id=${encodeURIComponent(cardNo)}` : null,
       message: cardNo ? "Card issued by authorized API" : "Application received; pending verification"
     });
   } catch (error3) {
@@ -334555,10 +334909,6 @@ router11.post("/api/cards/approve", authenticateToken, requireAdmin, async (req2
     const cardNo = String(req2.body?.cardNo || "").trim();
     if (!userId || !cardNo || cardNo.length > 100)
       return res.status(400).json({ success: false, error: "Verified user ID and issued card number required" });
-    await ensureMirror();
-    const mirror = await pool.query("SELECT card_no FROM jan_seva_card_mirror WHERE card_no = $1 LIMIT 1", [cardNo]);
-    if (!mirror.rows.length)
-      return res.status(409).json({ success: false, error: "Card number not found in synchronized Jan Seva records" });
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
@@ -334569,7 +334919,7 @@ router11.post("/api/cards/approve", authenticateToken, requireAdmin, async (req2
       );
       if (assigned.rows.length) {
         await client.query("ROLLBACK");
-        return res.status(409).json({ success: false, error: "This card is already linked to another account; manual verification required" });
+        return res.status(409).json({ success: false, error: "This card is already linked to another account" });
       }
       const application = await client.query(
         'UPDATE card_applications_v2 SET status = $1, "cardNo" = $2 WHERE "userId" = $3 RETURNING "userId"',
@@ -334591,7 +334941,11 @@ router11.post("/api/cards/approve", authenticateToken, requireAdmin, async (req2
       client.release();
     }
     cardCache.clear();
-    res.json({ success: true, cardNo });
+    res.json({
+      success: true,
+      cardNo,
+      portalUrl: `${JAN_SEVA_PORTAL_URL}/verify?id=${encodeURIComponent(cardNo)}`
+    });
   } catch (error3) {
     console.error("Jan Seva approval failed:", error3?.code || error3?.message);
     res.status(500).json({ success: false, error: "Approval failed" });
@@ -334640,7 +334994,12 @@ router11.get("/api/cards/my", authenticateToken, async (req2, res) => {
       'SELECT "userId", name, gender, dob, address, "idType", "idNumber", status, "cardNo", "submittedAt" FROM card_applications_v2 WHERE "userId" = $1',
       [requestedUserId]
     );
-    const payload = { success: true, application: result.rows[0] || null };
+    const app2 = result.rows[0] || null;
+    const payload = {
+      success: true,
+      application: app2,
+      portalUrl: app2?.cardNo ? `${JAN_SEVA_PORTAL_URL}/verify?id=${encodeURIComponent(app2.cardNo)}` : null
+    };
     setCached(cacheKey, payload, 30 * 1e3);
     res.json(payload);
   } catch (error3) {
