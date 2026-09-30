@@ -19,7 +19,7 @@ router.get("/api/certificates/verify/:certificate_id", async (req, res) => {
     if (certRes.rows.length === 0) return res.status(404).json({ error: "Certificate not found or invalid." });
     
     const cert = certRes.rows[0];
-    const volRes = await pool.query(`SELECT full_name, registration_number, city, state FROM volunteers WHERE id = $1`, [cert.volunteer_id]);
+    const volRes = await pool.query(`SELECT full_name, registration_number, city FROM volunteers WHERE id = $1`, [cert.volunteer_id]);
     if (volRes.rows.length === 0) return res.status(404).json({ error: "Volunteer not found" });
     const vol = volRes.rows[0];
 
@@ -29,9 +29,9 @@ router.get("/api/certificates/verify/:certificate_id", async (req, res) => {
         certificate_id: cert.certificate_id,
         volunteer_name: vol.full_name,
         registration_number: vol.registration_number,
-        service_name: cert.service_id.replace(/-/g, ' ').toUpperCase(),
+        service_name: cert.title,
         issue_date: cert.issue_date,
-        location: `${vol.city}, ${vol.state}`
+        location: vol.city || ""
       }
     });
   } catch (err: any) {
@@ -107,7 +107,7 @@ router.get("/api/certificates/download/:id", authenticateToken, async (req: any,
     const serviceName = String(cert.title || 'Community Service').toUpperCase();
     const svcWidth = font.widthOfTextAtSize(serviceName, 16);
     page.drawText(serviceName, { x: (width - svcWidth) / 2, y: height - 400, size: 16, font, color: rgb(0.08, 0.35, 0.24) });
-    page.drawText(`Verified through certificate ID: ${cert.certificate_id}`, { x: width / 2 - 145, y: 55, size: 9, font: fontNormal, color: rgb(0.35, 0.4, 0.45) });
+    page.drawText(`Verified Certificate ID: ${cert.certificate_id}`, { x: width / 2 - 145, y: 55, size: 9, font: fontNormal, color: rgb(0.35, 0.4, 0.45) });
 
     // Signatures
     page.drawLine({ start: { x: 100, y: 120 }, end: { x: 300, y: 120 }, thickness: 1, color: rgb(0,0,0) });
