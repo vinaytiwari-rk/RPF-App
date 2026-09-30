@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 import { resolveMediaUrl } from "../utils/media";
+import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
 
 const fallbackSlides = [
   { image: "/assets/mega_camp_banner.png", titleEn: "Healthcare support for the community", subEn: "Health camps, medical support and community care.", route: "/health-care" },
@@ -488,16 +489,21 @@ export default function Home() {
                     { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित पौधे", value: 50000, suffix: "+" },
                     { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड", value: 120000, suffix: "+" }
                   ]
-              ).map((st: any) => (
-                <div key={st.id} className="rounded-xl bg-orange-50/50 border border-orange-100 p-2.5 text-center space-y-0.5">
-                  <p className="text-lg sm:text-xl font-black text-[#0A192F]">
-                    {Number(st.value).toLocaleString("en-IN")}{st.suffix || "+"}
-                  </p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight line-clamp-1">
-                    {st.labelEn || st.labelHi}
-                  </p>
-                </div>
-              ))}
+              ).map((st: any, idx: number) => {
+                const tones: ("saffron" | "green" | "gold" | "navy")[] = ["saffron", "green", "gold", "navy"];
+                const tone = tones[idx % tones.length];
+                return (
+                  <AnimatedMetricCard
+                    key={st.id || idx}
+                    label={st.labelEn || st.labelHi}
+                    value={Number(st.value) || 0}
+                    suffix={st.suffix || "+"}
+                    tone={tone}
+                    delay={idx * 0.08}
+                    onClick={() => navigate("/impact")}
+                  />
+                );
+              })}
             </div>
           </div>
         </section>

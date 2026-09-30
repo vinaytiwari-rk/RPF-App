@@ -31,6 +31,7 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 import InstagramApiFeed from "../components/InstagramApiFeed";
+import { AnimatedMetricCard, AnimatedNumber } from "../components/AnimatedMetricCard";
 
 type MainTab = "impact" | "volunteers" | "chat";
 type SubFilterTab = "all" | "community" | "care" | "active";
@@ -296,7 +297,9 @@ export default function ImpactPage() {
       {cardImpact && (
         <section aria-label="Jan Seva Card impact" className="mx-4 mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
           <p className="text-xs font-bold text-emerald-800">{isHi ? 'जन सेवा कार्ड' : 'Jan Seva Cards'}</p>
-          <p className="mt-1 text-3xl font-black text-emerald-950">{cardImpact.totalCards.toLocaleString('en-IN')}</p>
+          <p className="mt-1 text-3xl font-black text-emerald-950">
+            <AnimatedNumber end={cardImpact.totalCards} />
+          </p>
           <p className="mt-1 text-xs text-emerald-800">{cardImpact.scope === 'local-approved-only'
             ? (isHi ? 'इस ऐप में स्वीकृत कार्ड' : 'Approved cards in this app')
             : (isHi ? 'जन सेवा कार्ड सिस्टम द्वारा रिपोर्ट की गई संख्या' : 'Reported by the Jan Seva Card system')}</p>
@@ -337,22 +340,20 @@ export default function ImpactPage() {
                 </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {liveStats.map((st: any) => (
-                  <div
-                    key={st.id}
-                    className="bg-white rounded-2xl border border-slate-200/90 p-3.5 shadow-2xs text-center space-y-1 hover:border-orange-300 transition-all"
-                  >
-                    <div className="w-8 h-8 mx-auto rounded-xl bg-orange-50 text-[#C2410C] flex items-center justify-center">
-                      {renderDomainIcon(st.iconName || st.icon)}
-                    </div>
-                    <p className="text-xl sm:text-2xl font-black text-[#0A192F]">
-                      {Number(st.value).toLocaleString("en-IN")}{st.suffix || "+"}
-                    </p>
-                    <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider line-clamp-1">
-                      {isHi ? (st.labelHi || st.labelEn) : st.labelEn}
-                    </p>
-                  </div>
-                ))}
+                {liveStats.map((st: any, idx: number) => {
+                  const tones: ("saffron" | "green" | "gold" | "navy")[] = ["saffron", "green", "gold", "navy"];
+                  const tone = tones[idx % tones.length];
+                  return (
+                    <AnimatedMetricCard
+                      key={st.id || idx}
+                      label={isHi ? (st.labelHi || st.labelEn) : st.labelEn}
+                      value={Number(st.value) || 0}
+                      suffix={st.suffix || "+"}
+                      tone={tone}
+                      delay={idx * 0.08}
+                    />
+                  );
+                })}
               </div>
             </section>
 
