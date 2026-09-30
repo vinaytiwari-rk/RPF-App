@@ -116,7 +116,7 @@ export default function Profile() {
     { icon: User, title: hi ? "प्रोफाइल संपादित करें" : "Edit Profile", sub: hi ? "अपनी व्यक्तिगत जानकारी अपडेट करें" : "Update your personal information", route: "/profile?edit=1", color: "bg-[#245D45]" },
     { icon: Award, title: hi ? "मेरे प्रमाणपत्र" : "My Certificates", sub: hi ? "सेवा एवं भागीदारी प्रमाणपत्र" : "Certificates of service & impact", route: "/my-certificates", color: "bg-[#7C5C9E]" },
     { icon: Settings, title: hi ? "ऐप सेटिंग्स" : "App Settings", sub: hi ? "भाषा, सूचनाएं और ऐप प्राथमिकताएं" : "Language, notifications & preferences", route: "/settings", color: "bg-[#245D45]" },
-    { icon: HelpCircle, title: hi ? "सहायता एवं संपर्क" : "Help & Support", sub: hi ? "समस्या रिपोर्ट करें या सहायता लें" : "Get help or report a problem", route: "/support", color: "bg-[#167C5A]" },
+    { icon: HelpCircle, title: hi ? "सूचनाएं" : "Notifications", sub: hi ? "महत्वपूर्ण अपडेट और घोषणाएं" : "Important updates and announcements", route: "/notifications", color: "bg-[#167C5A]" },
   ], [hi]);
 
   const legalItems = [
