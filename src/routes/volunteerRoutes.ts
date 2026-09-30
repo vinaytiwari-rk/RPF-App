@@ -17,7 +17,59 @@ router.get("/api/volunteers/me", authenticateToken, async (req: any, res) => {
   } catch (error: any) { res.status(500).json({ success: false, error: error.message }); }
 });
 
-router.get("/api/volunteers/me/certificates", authenticateToken, async (req: any, res) => { try { const result = await pool.query(`SELECT * FROM certificates WHERE volunteer_id = $1 ORDER BY issue_date DESC`, [req.user.id]); res.json({ success: true, certificates: result.rows }); } catch (err: any) { res.status(500).json({ error: err.message }); } });
+async function ensureEligibleCertificates(userId: string) {
+  const rules = await pool.query(`SELECT * FROM certificate_rules WHERE active = TRUE ORDER BY min_hours ASC, min_reports ASC, min_tasks ASC`);
+  const hoursRes = await pool.query(`SELECT COALESCE(SUM(duration_minutes),0) / 60.0 AS hours FROM volunteer_duty_sessions WHERE user_id = $1 AND status = 'completed'`, [userId]);
+  const reportsRes = await pool.query(`SELECT COUNT(*)::int AS count FROM volunteer_reports WHERE volunteer_id = $1`, [userId]);
+  const tasksRes = await pool.query(`SELECT COUNT(*)::int AS count FROM volunteer_tasks WHERE "volunteerId" = $1 AND status = 'completed'`, [userId]);
+  const hours = Number(hoursRes.rows[0]?.hours || 0), reports = Number(reportsRes.rows[0]?.count || 0), tasks = Number(tasksRes.rows[0]?.count || 0);
+  const volunteer = await pool.query(`SELECT full_name, registration_number FROM volunteers WHERE id = $1 LIMIT 1`, [userId]);
+  if (!volunteer.rows[0]) return;
+  for (const rule of rules.rows) {
+    if (hours < Number(rule.min_hours || 0) || reports < Number(rule.min_reports || 0) || tasks < Number(rule.min_tasks || 0)) continue;
+    const exists = await pool.query(`SELECT id FROM certificates WHERE volunteer_id = $1 AND rule_id = $2 LIMIT 1`, [userId, rule.id]);
+    if (exists.rows.length) continue;
+    const certificateId = `RPF-${String(rule.id).toUpperCase().replace(/[^A-Z0-9]+/g,'-').slice(0,24)}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+    await pool.query(
+      `INSERT INTO certificates (id, certificate_id, volunteer_id, rule_id, title, title_hi, recipient_name, role, duty_hours)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [crypto.randomUUID(), certificateId, userId, rule.id, rule.title, rule.title_hi, volunteer.rows[0].full_name, 'Verified Volunteer', Math.round(hours * 100) / 100]
+    );
+  }
+}
+
+router.get("/api/volunteers/me/certificates", authenticateToken, async (req: any, res) => {
+  try {
+    await ensureEligibleCertificates(req.user.id);
+    const result = await pool.query(`SELECT * FROM certificates WHERE volunteer_id = $1 ORDER BY issue_date DESC`, [req.user.id]);
+    const progress = await pool.query(`SELECT
+      (SELECT COALESCE(SUM(duration_minutes),0) / 60.0 FROM volunteer_duty_sessions WHERE user_id = $1 AND status = 'completed') AS hours,
+      (SELECT COUNT(*) FROM volunteer_reports WHERE volunteer_id = $1) AS reports,
+      (SELECT COUNT(*) FROM volunteer_tasks WHERE "volunteerId" = $1 AND status = 'completed') AS tasks
+    `, [req.user.id]);
+    const rules = await pool.query(`SELECT id,title,title_hi,min_hours,min_reports,min_tasks,active FROM certificate_rules WHERE active = TRUE ORDER BY min_hours ASC`);
+    res.json({ success: true, certificates: result.rows, progress: progress.rows[0], rules: rules.rows });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+router.get("/api/certificate-rules", authenticateToken, async (_req: any, res) => {
+  try {
+    const result = await pool.query(`SELECT id,title,title_hi,min_hours,min_reports,min_tasks,active FROM certificate_rules WHERE active = TRUE ORDER BY min_hours ASC`);
+    res.json({ success: true, rules: result.rows });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+router.put("/api/admin/certificate-rules/:id", authenticateToken, requireAdmin, async (req: any, res) => {
+  try {
+    const { min_hours, min_reports, min_tasks, active, title, title_hi } = req.body;
+    const result = await pool.query(
+      `UPDATE certificate_rules SET min_hours = COALESCE($1,min_hours), min_reports = COALESCE($2,min_reports), min_tasks = COALESCE($3,min_tasks), active = COALESCE($4,active), title = COALESCE($5,title), title_hi = COALESCE($6,title_hi), updated_at = NOW() WHERE id = $7 RETURNING *`,
+      [min_hours, min_reports, min_tasks, active, title, title_hi, req.params.id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ success: false, error: "Certificate rule not found" });
+    res.json({ success: true, rule: result.rows[0] });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
 router.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (req, res) => { try { const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi } = req.body; await pool.query('INSERT INTO volunteer_tasks ("volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", status) VALUES ($1, $2, $3, $4, $5, $6)', [volunteerId, titleEn, titleHi, descriptionEn, descriptionHi || 10, 'assigned']); res.json({ success: true, message: "Task assigned successfully" }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
 router.get("/api/volunteer_tasks", authenticateToken, async (req: any, res) => { try { const result = await pool.query('SELECT id, "volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", status, "createdAt" FROM volunteer_tasks WHERE "volunteerId" = $1', [req.user.id]); res.json({ success: true, tasks: result.rows }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
 router.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin, async (req, res) => { try { const { id } = req.params; const { status } = req.body; const taskRes = await pool.query('UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId"', [status, id]); if (taskRes.rows.length > 0 && status === "completed") { await pool.query('UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2', [10, taskRes.rows[0].volunteerId]); } res.json({ success: true, message: "Task status updated" }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
