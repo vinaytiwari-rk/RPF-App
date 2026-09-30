@@ -150,68 +150,61 @@ export default function MyCertificates() {
             {/* Official Printable Certificate Canvas View */}
             {selectedCert && (
               <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold text-[#14213D]">
-                    {hi ? "प्रमाणपत्र पूर्वावलोकन (Preview)" : "Certificate Official Document"}
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-base font-bold text-[#243B32]">
+                    {hi ? "प्रमाणपत्र पूर्वावलोकन" : "Certificate Preview"}
                   </h2>
-                  <button
-                    onClick={handleDownload} disabled={downloadBusy}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#167C5A] px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-slate-800 transition-all"
-                  >
-                    <Printer className="h-4 w-4" />
-                    {downloadBusy ? (hi ? "PDF तैयार हो रहा है..." : "Preparing PDF...") : (hi ? "PDF डाउनलोड" : "Download PDF")}
-                  </button>\n                  </div>\n                </div>\n\n                <div\n                  ref={certRef}
-                  className="overflow-hidden rounded-[28px] border-4 border-[#D7A93A] bg-white p-6 sm:p-8 shadow-sm relative text-center text-[#243B32] space-y-5 print:rounded-none print:shadow-none"
-                >
-                  {/* Decorative Border Frame */}
-                  <div className="absolute inset-2 border-2 border-amber-400/40 rounded-[22px] pointer-events-none" />
+                  <div className="flex items-center gap-2">
+                    <button onClick={handlePrint} className="inline-flex items-center gap-1.5 rounded-xl border border-[#B9E5CC] bg-white px-3 py-2 text-xs font-bold text-[#245D45]">
+                      <Printer className="h-4 w-4" /> {hi ? "प्रिंट" : "Print"}
+                    </button>
+                    <button onClick={handleDownload} disabled={downloadBusy} className="inline-flex items-center gap-1.5 rounded-xl bg-[#245D45] px-3 py-2 text-xs font-bold text-white shadow-sm disabled:opacity-60">
+                      <Download className="h-4 w-4" /> {downloadBusy ? "PDF..." : (hi ? "PDF" : "Download PDF")}
+                    </button>
+                  </div>
+                </div>
 
-                  {/* Header Badge */}
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-[#D7A93A] bg-white shadow-sm">\n                      <img src="/assets/rpf-samahit-icon.png" alt="RP Foundation" className="h-full w-full object-contain" />
-                      <Sparkles className="h-6 w-6" />
+                <div ref={certRef} className="relative overflow-hidden rounded-[28px] border-4 border-[#D7A93A] bg-white p-6 sm:p-8 shadow-sm text-center text-[#243B32] print:rounded-none print:shadow-none">
+                  <div className="pointer-events-none absolute inset-2 rounded-[22px] border-2 border-[#E7C65A]/70" />
+
+                  <div className="relative flex flex-col items-center gap-2">
+                    <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-[#D7A93A] bg-white p-1 shadow-sm">
+                      <img src="/assets/rpf-samahit-icon.png" alt="RP Foundation" className="h-full w-full object-contain" />
                     </div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#D97706] mt-2">
-                      RP Foundation Social Welfare Trust
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[#243B32]">
-                      {hi ? selectedCert.titleHi : selectedCert.title}
-                    </h3>
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#167C5A]">RP Foundation Social Welfare Trust</p>
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[#243B32]">{hi ? selectedCert.titleHi : selectedCert.title}</h3>
                   </div>
 
-                  <p className="text-xs sm:text-sm text-slate-600 italic">
+                  <p className="mt-6 text-xs sm:text-sm text-slate-500 italic">
                     {hi ? "यह प्रमाणपत्र गर्वपूर्वक प्रदान किया जाता है:" : "This certificate is proudly awarded to:"}
                   </p>
+                  <h2 className="mx-auto mt-2 max-w-xl border-b-2 border-[#D7A93A] pb-2 text-2xl sm:text-3xl font-bold text-[#243B32]">
+                    {selectedCert.recipient_name}
+                  </h2>
 
-                  <div className="border-b-2 border-amber-400/80 pb-2 max-w-md mx-auto">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-[#14213D]">
-                      {selectedCert.recipient_name}
-                    </h2>
-                  </div>
-
-                  <p className="text-xs sm:text-[13px] leading-relaxed text-slate-600 max-w-lg mx-auto font-medium">
+                  <p className="mx-auto mt-5 max-w-2xl text-xs sm:text-sm leading-7 text-slate-600">
                     {hi
-                      ? `आरपी फाउंडेशन के तहत जन सेवा, समाज कल्याण एवं स्वास्थ्य अभियानों में निष्ठापूर्वक ${selectedCert.duty_hours} घंटे का योगदान देने के लिए सम्मानित किया जाता है।`
-                      : `In recognition of dedicated service, leadership, and ${selectedCert.duty_hours} hours of volunteer contribution towards community welfare initiatives.`}
+                      ? `समुदाय सेवा में ${selectedCert.duty_hours || 0} घंटे के समर्पित योगदान के लिए यह प्रमाणपत्र प्रदान किया जाता है।`
+                      : `This certificate recognizes dedicated contribution to community welfare, including ${selectedCert.duty_hours || 0} recorded volunteer hours.`}
                   </p>
 
-                  <div className="flex items-end justify-between gap-4 pt-2 text-left">\n                    <div className="rounded-xl bg-[#F0FAF4] p-2.5 text-left">\n                      <p className="text-[9px] font-bold uppercase tracking-wider text-[#245D45]">Verify Certificate</p>\n                      <QRCode value={`${window.location.origin}/api/certificates/verify/${selectedCert.certificate_id}`} size={72} bgColor="#ffffff" fgColor="#243B32" />\n                    </div>\n                    <div className="min-w-0 flex-1 text-right">\n                      <p className="text-[9px] uppercase tracking-wider text-slate-400">Certificate ID</p>\n                      <p className="break-all font-mono text-xs font-semibold text-[#243B32]">{selectedCert.certificate_id}</p>\n                      <p className="mt-1 text-[10px] text-slate-500">{new Date(selectedCert.issue_date).toLocaleDateString("en-IN")}</p>\n                    </div>\n                  </div>\n\n                  {/* Certificate Footer Meta & Signatures */}
-                  <div className="pt-4 border-t border-slate-200/80 flex items-center justify-between text-left text-xs font-bold text-slate-700">
-                    <div>
-                      <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Certificate ID</p>
-                      <p className="font-mono text-[#14213D]">{selectedCert.certificate_id}</p>
-                      <p className="text-[10px] text-slate-400 mt-1">Date: {new Date(selectedCert.issue_date).toLocaleDateString("en-IN")}</p>
+                  <div className="mt-6 grid grid-cols-[auto_1fr] items-end gap-5 border-t border-slate-200 pt-5 text-left">
+                    <div className="rounded-xl border border-[#D8E8DB] bg-[#F0FAF4] p-2.5">
+                      <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[#245D45]">{hi ? "सत्यापन" : "Verify"}</p>
+                      <QRCode value={`${window.location.origin}/api/certificates/verify/${selectedCert.certificate_id}`} size={78} bgColor="#ffffff" fgColor="#243B32" />
                     </div>
-
-                    <div className="text-right">
-                      <div className="inline-block border-b border-slate-400 pb-1 font-serif text-sm font-extrabold text-[#14213D]">
-                        Rohit Pandit
+                    <div className="min-w-0 text-right">
+                      <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">Certificate ID</p>
+                      <p className="break-all font-mono text-xs font-bold text-[#243B32]">{selectedCert.certificate_id}</p>
+                      <p className="mt-1 text-[10px] text-slate-500">Issued: {new Date(selectedCert.issue_date).toLocaleDateString("en-IN")}</p>
+                      <div className="mt-6 ml-auto w-fit border-t border-slate-400 pt-1">
+                        <p className="font-serif text-sm font-bold text-[#243B32]">Rohit Pandit</p>
+                        <p className="text-[9px] font-bold uppercase tracking-wider text-[#B45309]">Founder, RP Foundation</p>
                       </div>
-                      <p className="text-[10px] text-[#D97706] font-bold uppercase tracking-wider mt-0.5">
-                        Founder, RP Foundation
-                      </p>
                     </div>
                   </div>
+
+                  <p className="mt-4 text-[9px] text-slate-400">Verification is based on the certificate record stored by Samahit.</p>
                 </div>
               </section>
             )}
