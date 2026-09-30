@@ -113,10 +113,10 @@ export default function Profile() {
   }, [volunteerDutyHours, volunteerReportsCount]);
 
   const accountItems = useMemo(() => [
-    { icon: IdCard, title: hi ? "जन सेवा कार्ड" : "Jan Seva Card", sub: hi ? "डिजिटल सेवा पहचान कार्ड" : "Digital seva identity card", route: "/jan-seva-card", color: "bg-[#D97706]" },
+    { icon: User, title: hi ? "प्रोफाइल संपादित करें" : "Edit Profile", sub: hi ? "अपनी व्यक्तिगत जानकारी अपडेट करें" : "Update your personal information", route: "/profile?edit=1", color: "bg-[#245D45]" },
     { icon: Award, title: hi ? "मेरे प्रमाणपत्र" : "My Certificates", sub: hi ? "सेवा एवं भागीदारी प्रमाणपत्र" : "Certificates of service & impact", route: "/my-certificates", color: "bg-[#7C5C9E]" },
-    { icon: HeartHandshake, title: hi ? "स्वयंसेवक ड्यूटी" : "Volunteer Duty", sub: hi ? "ड्यूटी ट्रैकर व रिपोर्ट" : "Duty clock-in & reports", route: "/volunteer-duty", color: "bg-[#167C5A]" },
-    { icon: Settings, title: hi ? "ऐप सेटिंग्स" : "App Settings", sub: hi ? "भाषा व थीम प्राथमिकताएं" : "Language & theme preferences", route: "/settings", color: "bg-[#245D45]" },
+    { icon: Settings, title: hi ? "ऐप सेटिंग्स" : "App Settings", sub: hi ? "भाषा, सूचनाएं और ऐप प्राथमिकताएं" : "Language, notifications & preferences", route: "/settings", color: "bg-[#245D45]" },
+    { icon: HelpCircle, title: hi ? "सहायता एवं संपर्क" : "Help & Support", sub: hi ? "समस्या रिपोर्ट करें या सहायता लें" : "Get help or report a problem", route: "/support", color: "bg-[#167C5A]" },
   ], [hi]);
 
   const legalItems = [
@@ -176,31 +176,7 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Volunteer Status Badge Strip */}
-          {isVolunteer && (
-            <div className="mt-5 rounded-2xl border border-[#F1D6AE] bg-[#FFF7E8] p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#D97706] text-white shadow-sm">
-                  <IdCard className="h-5 w-5" />
-                </div>
-                <div className="text-left">
-                  <p className="text-xs font-semibold text-[#243B32]">{hi ? "जन सेवा पंजीकरण क्रमांक" : "Registration Number"}</p>
-                  <p className="text-[11px] font-semibold text-[#B45309] tracking-wide">{registrationNo}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-medium text-slate-500">{hi ? "सेवा अवधि:" : "Serving:"} {volunteerSince}</span>
-                <button 
-                  onClick={() => navigate("/jan-seva-card")}
-                  className="rounded-xl bg-[#245D45] px-3 py-1.5 text-[11px] font-bold text-white shadow-sm hover:bg-[#1d4f3a] transition-colors flex items-center gap-1"
-                >
-                  {hi ? "कार्ड देखें" : "View Card"} <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          )}
-        </motion.section>
+          </motion.section>
 
         {/* Animated Seva Metrics Dashboard (User/Volunteer/Citizen) */}
         <section className="space-y-2.5">
@@ -216,7 +192,7 @@ export default function Profile() {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <p className="px-1 text-[10px] font-medium text-slate-500">{hi ? "यहाँ केवल आपकी व्यक्तिगत प्रोफाइल और खाता विकल्प हैं। स्वयंसेवक ड्यूटी Activity में और Jan Seva Card Explore में मिलेगा।" : "This area contains only your personal profile and account options. Volunteer Duty belongs in Activity and Jan Seva Card is available in Explore."}</p>\n\n          <div className="grid grid-cols-2 gap-3">
             {isVolunteer ? (
               <>
                 <AnimatedMetricCard
@@ -311,7 +287,7 @@ export default function Profile() {
         {/* Quick Access Menu Grid */}
         <section className="space-y-2.5">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-[#243B32] px-1">
-            {hi ? "त्वरित सेवाएं व कार्य" : "Quick Services & Actions"}
+            {hi ? "मेरी प्रोफाइल और खाता" : "My Profile & Account"}
           </h2>
 
           <div className="grid grid-cols-2 gap-3">
