@@ -14173,7 +14173,7 @@ var require_websocket2 = __commonJS({
   "node_modules/ws/lib/websocket.js"(exports2, module2) {
     "use strict";
     var EventEmitter3 = require("events");
-    var https6 = require("https");
+    var https7 = require("https");
     var http7 = require("http");
     var net2 = require("net");
     var tls2 = require("tls");
@@ -14716,7 +14716,7 @@ var require_websocket2 = __commonJS({
       }
       const defaultPort = isSecure ? 443 : 80;
       const key = randomBytes3(16).toString("base64");
-      const request = isSecure ? https6.request : http7.request;
+      const request = isSecure ? https7.request : http7.request;
       const protocolSet = /* @__PURE__ */ new Set();
       let perMessageDeflate;
       opts.createConnection = opts.createConnection || (isSecure ? tlsConnect2 : netConnect2);
@@ -23910,7 +23910,7 @@ var require_form_data = __commonJS({
     var util6 = require("util");
     var path12 = require("path");
     var http7 = require("http");
-    var https6 = require("https");
+    var https7 = require("https");
     var parseUrl3 = require("url").parse;
     var fs9 = require("fs");
     var Stream4 = require("stream").Stream;
@@ -24182,7 +24182,7 @@ var require_form_data = __commonJS({
       }
       options2.headers = this.getHeaders(params.headers);
       if (options2.protocol === "https:") {
-        request = https6.request(options2);
+        request = https7.request(options2);
       } else {
         request = http7.request(options2);
       }
@@ -24700,7 +24700,7 @@ var require_follow_redirects = __commonJS({
     var url3 = require("url");
     var URL3 = url3.URL;
     var http7 = require("http");
-    var https6 = require("https");
+    var https7 = require("https");
     var Writable2 = require("stream").Writable;
     var assert2 = require("assert");
     var debug2 = require_debug();
@@ -25200,7 +25200,7 @@ var require_follow_redirects = __commonJS({
     function escapeRegex3(regex) {
       return regex.replace(/[\]\\/()*+?.$]/g, "\\$&");
     }
-    module2.exports = wrap3({ http: http7, https: https6 });
+    module2.exports = wrap3({ http: http7, https: https7 });
     module2.exports.wrap = wrap3;
   }
 });
@@ -34607,17 +34607,17 @@ var require_router = __commonJS({
     var toString7 = Object.prototype.toString;
     var proto2 = module2.exports = function(options2) {
       var opts = options2 || {};
-      function router31(req2, res, next2) {
-        router31.handle(req2, res, next2);
+      function router32(req2, res, next2) {
+        router32.handle(req2, res, next2);
       }
-      setPrototypeOf(router31, proto2);
-      router31.params = {};
-      router31._params = [];
-      router31.caseSensitive = opts.caseSensitive;
-      router31.mergeParams = opts.mergeParams;
-      router31.strict = opts.strict;
-      router31.stack = [];
-      return router31;
+      setPrototypeOf(router32, proto2);
+      router32.params = {};
+      router32._params = [];
+      router32.caseSensitive = opts.caseSensitive;
+      router32.mergeParams = opts.mergeParams;
+      router32.strict = opts.strict;
+      router32.stack = [];
+      return router32;
     };
     proto2.param = function param(name, fn3) {
       if (typeof name === "function") {
@@ -37592,17 +37592,17 @@ var require_application = __commonJS({
       }
     };
     app2.handle = function handle2(req2, res, callback2) {
-      var router31 = this._router;
+      var router32 = this._router;
       var done = callback2 || finalhandler2(req2, res, {
         env: this.get("env"),
         onerror: logerror2.bind(this)
       });
-      if (!router31) {
+      if (!router32) {
         debug2("no routes defined on app");
         done();
         return;
       }
-      router31.handle(req2, res, done);
+      router32.handle(req2, res, done);
     };
     app2.use = function use2(fn3) {
       var offset2 = 0;
@@ -37622,15 +37622,15 @@ var require_application = __commonJS({
         throw new TypeError("app.use() requires a middleware function");
       }
       this.lazyrouter();
-      var router31 = this._router;
+      var router32 = this._router;
       fns.forEach(function(fn4) {
         if (!fn4 || !fn4.handle || !fn4.set) {
-          return router31.use(path12, fn4);
+          return router32.use(path12, fn4);
         }
         debug2(".use app under %s", path12);
         fn4.mountpath = path12;
         fn4.parent = this;
-        router31.use(path12, function mounted_app(req2, res, next2) {
+        router32.use(path12, function mounted_app(req2, res, next2) {
           var orig = req2.app;
           fn4.handle(req2, res, function(err2) {
             setPrototypeOf(req2, orig.request);
@@ -43660,7 +43660,7 @@ var require_parser = __commonJS({
     var HEADER_LENGTH = CODE_LENGTH + LEN_LENGTH;
     var LATEINIT_LENGTH = -1;
     var emptyBuffer = Buffer.allocUnsafe(0);
-    var Parser6 = class {
+    var Parser7 = class {
       constructor(opts) {
         this.buffer = emptyBuffer;
         this.bufferLength = 0;
@@ -43802,7 +43802,7 @@ var require_parser = __commonJS({
         return message;
       }
     };
-    exports2.Parser = Parser6;
+    exports2.Parser = Parser7;
     var parseReadyForQueryMessage = (reader) => {
       const status2 = reader.string(1);
       return new messages_1.ReadyForQueryMessage(LATEINIT_LENGTH, status2);
@@ -96732,7 +96732,7 @@ var require_client_h1 = __commonJS({
     var TIMEOUT_HEADERS = 2 | USE_FAST_TIMER;
     var TIMEOUT_BODY = 4 | USE_FAST_TIMER;
     var TIMEOUT_KEEP_ALIVE = 8 | USE_NATIVE_TIMER;
-    var Parser6 = class {
+    var Parser7 = class {
       /**
          * @param {import('./client.js')} client
          * @param {import('net').Socket} socket
@@ -97212,7 +97212,7 @@ var require_client_h1 = __commonJS({
       socket[kIdleSocketValidation] = 0;
       socket[kIdleSocketValidationTimeout] = null;
       socket[kSocketUsed] = false;
-      socket[kParser] = new Parser6(client, socket, llhttpInstance);
+      socket[kParser] = new Parser7(client, socket, llhttpInstance);
       util6.addListener(socket, "error", onHttpSocketError);
       util6.addListener(socket, "readable", onHttpSocketReadable);
       util6.addListener(socket, "end", onHttpSocketEnd);
@@ -116308,7 +116308,7 @@ var require_helpers2 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.req = exports2.json = exports2.toBuffer = void 0;
     var http7 = __importStar4(require("http"));
-    var https6 = __importStar4(require("https"));
+    var https7 = __importStar4(require("https"));
     async function toBuffer3(stream6) {
       let length = 0;
       const chunks = [];
@@ -116333,7 +116333,7 @@ var require_helpers2 = __commonJS({
     exports2.json = json2;
     function req2(url3, opts = {}) {
       const href = typeof url3 === "string" ? url3 : url3.href;
-      const req3 = (href.startsWith("https:") ? https6 : http7).request(url3, opts);
+      const req3 = (href.startsWith("https:") ? https7 : http7).request(url3, opts);
       const promise2 = new Promise((resolve8, reject) => {
         req3.once("response", resolve8).once("error", reject).end();
       });
@@ -123340,7 +123340,7 @@ var require_certificatesubjecttokensupplier = __commonJS({
     var util_1 = require_util8();
     var fs9 = require("fs");
     var crypto_1 = require("crypto");
-    var https6 = require("https");
+    var https7 = require("https");
     exports2.CERTIFICATE_CONFIGURATION_ENV_VARIABLE = "GOOGLE_API_CERTIFICATE_CONFIG";
     var CertificateSourceUnavailableError = class extends Error {
       constructor(message) {
@@ -123383,7 +123383,7 @@ var require_certificatesubjecttokensupplier = __commonJS({
         if (!this.key || !this.cert) {
           throw new InvalidConfigurationError("Cannot create mTLS Agent with missing certificate or key");
         }
-        return new https6.Agent({ key: this.key, cert: this.cert });
+        return new https7.Agent({ key: this.key, cert: this.cert });
       }
       /**
        * Constructs the subject token, which is the base64-encoded certificate chain.
@@ -124689,7 +124689,7 @@ var require_gdchclient = __commonJS({
     exports2.GdchClient = exports2.GDCH_SERVICE_ACCOUNT_TYPE = void 0;
     var crypto24 = require("crypto");
     var fs9 = require("fs");
-    var https6 = require("https");
+    var https7 = require("https");
     var oauth2client_1 = require_oauth2client();
     var DEFAULT_LIFETIME_IN_SECONDS = 3600;
     exports2.GDCH_SERVICE_ACCOUNT_TYPE = "gdch_service_account";
@@ -124912,7 +124912,7 @@ var require_gdchclient = __commonJS({
         this.caAgentPromise = (async () => {
           try {
             const ca = await fs9.promises.readFile(currentPath);
-            return new https6.Agent({ ca });
+            return new https7.Agent({ ca });
           } catch (err2) {
             if (this.cachedCaCertPath === currentPath) {
               this.caAgentPromise = void 0;
@@ -160910,7 +160910,7 @@ var require_api_request2 = __commonJS({
     var error_2 = require_error2();
     var validator = require_validator();
     var http7 = require("http");
-    var https6 = require("https");
+    var https7 = require("https");
     var http23 = require("http2");
     var events_1 = require("events");
     var credential_internal_1 = require_credential_internal();
@@ -161383,7 +161383,7 @@ var require_api_request2 = __commonJS({
         }
       }
       execute() {
-        const transport = this.options.protocol === "https:" ? https6 : http7;
+        const transport = this.options.protocol === "https:" ? https7 : http7;
         const req2 = transport.request(this.options, (res) => {
           this.handleResponse(res, req2);
         });
@@ -168198,8 +168198,8 @@ var require_parser4 = __commonJS({
         return item;
       };
       exports2.Parser = (function(superClass) {
-        extend2(Parser6, superClass);
-        function Parser6(opts) {
+        extend2(Parser7, superClass);
+        function Parser7(opts) {
           this.parseStringPromise = bind2(this.parseStringPromise, this);
           this.parseString = bind2(this.parseString, this);
           this.reset = bind2(this.reset, this);
@@ -168232,7 +168232,7 @@ var require_parser4 = __commonJS({
           }
           this.reset();
         }
-        Parser6.prototype.processAsync = function() {
+        Parser7.prototype.processAsync = function() {
           var chunk, err2;
           try {
             if (this.remaining.length <= this.options.chunkSize) {
@@ -168254,7 +168254,7 @@ var require_parser4 = __commonJS({
             }
           }
         };
-        Parser6.prototype.assignOrPush = function(obj, key, newValue) {
+        Parser7.prototype.assignOrPush = function(obj, key, newValue) {
           if (!(key in obj)) {
             if (!this.options.explicitArray) {
               return obj[key] = newValue;
@@ -168268,7 +168268,7 @@ var require_parser4 = __commonJS({
             return obj[key].push(newValue);
           }
         };
-        Parser6.prototype.reset = function() {
+        Parser7.prototype.reset = function() {
           var attrkey, charkey, ontext, stack;
           this.removeAllListeners();
           this.saxParser = sax.parser(this.options.strict, {
@@ -168461,7 +168461,7 @@ var require_parser4 = __commonJS({
             };
           })(this);
         };
-        Parser6.prototype.parseString = function(str2, cb) {
+        Parser7.prototype.parseString = function(str2, cb) {
           var err2;
           if (cb != null && typeof cb === "function") {
             this.on("end", function(result) {
@@ -168496,7 +168496,7 @@ var require_parser4 = __commonJS({
             }
           }
         };
-        Parser6.prototype.parseStringPromise = function(str2) {
+        Parser7.prototype.parseStringPromise = function(str2) {
           return new Promise(/* @__PURE__ */ (function(_this) {
             return function(resolve8, reject) {
               return _this.parseString(str2, function(err2, value2) {
@@ -168509,7 +168509,7 @@ var require_parser4 = __commonJS({
             };
           })(this));
         };
-        return Parser6;
+        return Parser7;
       })(events2);
       exports2.parseString = function(str2, a6, b2) {
         var cb, options2, parser2;
@@ -169028,7 +169028,7 @@ var require_parser5 = __commonJS({
   "node_modules/rss-parser/lib/parser.js"(exports2, module2) {
     "use strict";
     var http7 = require("http");
-    var https6 = require("https");
+    var https7 = require("https");
     var xml2js = require_xml2js();
     var url3 = require("url");
     var fields = require_fields();
@@ -169039,7 +169039,7 @@ var require_parser5 = __commonJS({
     };
     var DEFAULT_MAX_REDIRECTS = 5;
     var DEFAULT_TIMEOUT = 6e4;
-    var Parser6 = class {
+    var Parser7 = class {
       constructor(options2 = {}) {
         options2.headers = options2.headers || {};
         options2.xml2js = options2.xml2js || {};
@@ -169093,7 +169093,7 @@ var require_parser5 = __commonJS({
       }
       parseURL(feedUrl, callback2, redirectCount = 0) {
         let xml2 = "";
-        let get3 = feedUrl.indexOf("https") === 0 ? https6.get : http7.get;
+        let get3 = feedUrl.indexOf("https") === 0 ? https7.get : http7.get;
         let urlParts = url3.parse(feedUrl);
         let headers = Object.assign({}, DEFAULT_HEADERS, this.options.headers);
         let timeout2 = null;
@@ -169344,7 +169344,7 @@ var require_parser5 = __commonJS({
         }, {});
       }
     };
-    module2.exports = Parser6;
+    module2.exports = Parser7;
   }
 });
 
@@ -188436,7 +188436,7 @@ var init_jiti = __esm({
 var dep_CvfTChi5_exports = {};
 __export(dep_CvfTChi5_exports, {
   ErrorCodes: () => ERR3,
-  Parser: () => Parser4,
+  Parser: () => Parser5,
   Tokenizer: () => Tokenizer3,
   TokenizerMode: () => TokenizerMode2,
   defaultTreeAdapter: () => defaultTreeAdapter2,
@@ -190551,9 +190551,9 @@ function endTagInForeignContent2(p5, token) {
   }
 }
 function parse10(html3, options2) {
-  return Parser4.parse(html3, options2);
+  return Parser5.parse(html3, options2);
 }
-var UNDEFINED_CODE_POINTS2, REPLACEMENT_CHARACTER2, CODE_POINTS2, SEQUENCES2, ERR3, DEFAULT_BUFFER_WATERLINE2, Preprocessor2, TokenType2, htmlDecodeTree3, decodeMap5, CharCodes5, TO_LOWER_BIT4, BinTrieFlags4, EntityDecoderState4, DecodingMode4, EntityDecoder4, NS2, ATTRS2, DOCUMENT_MODE2, TAG_NAMES2, TAG_ID2, TAG_NAME_TO_ID2, $3, SPECIAL_ELEMENTS2, NUMBERED_HEADERS2, State4, TokenizerMode2, Tokenizer3, IMPLICIT_END_TAG_REQUIRED2, IMPLICIT_END_TAG_REQUIRED_THOROUGHLY2, SCOPING_ELEMENTS_HTML2, SCOPING_ELEMENTS_HTML_LIST2, SCOPING_ELEMENTS_HTML_BUTTON2, SCOPING_ELEMENTS_MATHML2, SCOPING_ELEMENTS_SVG2, TABLE_ROW_CONTEXT2, TABLE_BODY_CONTEXT2, TABLE_CONTEXT2, TABLE_CELLS2, OpenElementStack2, NOAH_ARK_CAPACITY2, EntryType2, MARKER2, FormattingElementList2, defaultTreeAdapter2, VALID_DOCTYPE_NAME2, VALID_SYSTEM_ID2, QUIRKS_MODE_SYSTEM_ID2, QUIRKS_MODE_PUBLIC_ID_PREFIXES2, QUIRKS_MODE_NO_SYSTEM_ID_PUBLIC_ID_PREFIXES2, QUIRKS_MODE_PUBLIC_IDS2, LIMITED_QUIRKS_PUBLIC_ID_PREFIXES2, LIMITED_QUIRKS_WITH_SYSTEM_ID_PUBLIC_ID_PREFIXES2, MIME_TYPES2, DEFINITION_URL_ATTR2, ADJUSTED_DEFINITION_URL_ATTR2, SVG_ATTRS_ADJUSTMENT_MAP2, XML_ATTRS_ADJUSTMENT_MAP2, SVG_TAG_NAMES_ADJUSTMENT_MAP2, EXITS_FOREIGN_CONTENT2, HIDDEN_INPUT_TYPE2, AA_OUTER_LOOP_ITER2, AA_INNER_LOOP_ITER2, InsertionMode2, BASE_LOC2, TABLE_STRUCTURE_TAGS2, defaultParserOptions2, Parser4, TABLE_VOID_ELEMENTS2;
+var UNDEFINED_CODE_POINTS2, REPLACEMENT_CHARACTER2, CODE_POINTS2, SEQUENCES2, ERR3, DEFAULT_BUFFER_WATERLINE2, Preprocessor2, TokenType2, htmlDecodeTree3, decodeMap5, CharCodes5, TO_LOWER_BIT4, BinTrieFlags4, EntityDecoderState4, DecodingMode4, EntityDecoder4, NS2, ATTRS2, DOCUMENT_MODE2, TAG_NAMES2, TAG_ID2, TAG_NAME_TO_ID2, $3, SPECIAL_ELEMENTS2, NUMBERED_HEADERS2, State4, TokenizerMode2, Tokenizer3, IMPLICIT_END_TAG_REQUIRED2, IMPLICIT_END_TAG_REQUIRED_THOROUGHLY2, SCOPING_ELEMENTS_HTML2, SCOPING_ELEMENTS_HTML_LIST2, SCOPING_ELEMENTS_HTML_BUTTON2, SCOPING_ELEMENTS_MATHML2, SCOPING_ELEMENTS_SVG2, TABLE_ROW_CONTEXT2, TABLE_BODY_CONTEXT2, TABLE_CONTEXT2, TABLE_CELLS2, OpenElementStack2, NOAH_ARK_CAPACITY2, EntryType2, MARKER2, FormattingElementList2, defaultTreeAdapter2, VALID_DOCTYPE_NAME2, VALID_SYSTEM_ID2, QUIRKS_MODE_SYSTEM_ID2, QUIRKS_MODE_PUBLIC_ID_PREFIXES2, QUIRKS_MODE_NO_SYSTEM_ID_PUBLIC_ID_PREFIXES2, QUIRKS_MODE_PUBLIC_IDS2, LIMITED_QUIRKS_PUBLIC_ID_PREFIXES2, LIMITED_QUIRKS_WITH_SYSTEM_ID_PUBLIC_ID_PREFIXES2, MIME_TYPES2, DEFINITION_URL_ATTR2, ADJUSTED_DEFINITION_URL_ATTR2, SVG_ATTRS_ADJUSTMENT_MAP2, XML_ATTRS_ADJUSTMENT_MAP2, SVG_TAG_NAMES_ADJUSTMENT_MAP2, EXITS_FOREIGN_CONTENT2, HIDDEN_INPUT_TYPE2, AA_OUTER_LOOP_ITER2, AA_INNER_LOOP_ITER2, InsertionMode2, BASE_LOC2, TABLE_STRUCTURE_TAGS2, defaultParserOptions2, Parser5, TABLE_VOID_ELEMENTS2;
 var init_dep_CvfTChi5 = __esm({
   "node_modules/vite/dist/node/chunks/dep-CvfTChi5.js"() {
     UNDEFINED_CODE_POINTS2 = /* @__PURE__ */ new Set([
@@ -195131,7 +195131,7 @@ var init_dep_CvfTChi5 = __esm({
       treeAdapter: defaultTreeAdapter2,
       onParseError: null
     };
-    Parser4 = class {
+    Parser5 = class {
       constructor(options2, document3, fragmentContext = null, scriptHandler = null) {
         this.fragmentContext = fragmentContext;
         this.scriptHandler = scriptHandler;
@@ -230529,7 +230529,7 @@ var require_parser6 = __commonJS({
       for (let i6 = from; i6 < to; i6++) result += tokens[i6][1];
       return result;
     }
-    var Parser6 = class {
+    var Parser7 = class {
       constructor(input) {
         this.input = input;
         this.root = new Root3();
@@ -231039,7 +231039,7 @@ var require_parser6 = __commonJS({
         );
       }
     };
-    module2.exports = Parser6;
+    module2.exports = Parser7;
   }
 });
 
@@ -231049,10 +231049,10 @@ var require_parse7 = __commonJS({
     "use strict";
     var Container2 = require_container();
     var Input2 = require_input();
-    var Parser6 = require_parser6();
+    var Parser7 = require_parser6();
     function parse16(css2, opts) {
       let input = new Input2(css2, opts);
-      let parser2 = new Parser6(input);
+      let parser2 = new Parser7(input);
       try {
         parser2.parse();
       } catch (e6) {
@@ -233197,7 +233197,7 @@ function makePlugin(opts) {
     }
   };
 }
-var import_fs8, import_path12, import_crypto22, import_util5, build2, fs6, fileSystem, pluginFactory, unquote$1, reg, Parser$1, matchValueName, replaceValueSymbols$2, replaceValueSymbols_1, replaceValueSymbols$1, replaceSymbols$1, replaceSymbols_1, importPattern, balancedQuotes, getDeclsObject, extractICSS$2, extractICSS_1, createImports, createExports, createICSSRules$1, createICSSRules_1, replaceValueSymbols, replaceSymbols, extractICSS$1, createICSSRules, src$4, _icssUtils, importRegexp, Parser5, saveJSON$1, _fs$2, localsConvention, symbolTag, reAsciiWord, reLatin, rsAstralRange, rsComboMarksRange, rsComboSymbolsRange, rsDingbatRange, rsLowerRange, rsMathOpRange, rsNonCharRange, rsPunctuationRange, rsSpaceRange, rsUpperRange, rsVarRange, rsBreakRange, rsApos, rsAstral, rsBreak, rsCombo, rsDigits, rsDingbat, rsLower, rsMisc, rsFitz, rsModifier, rsNonAstral, rsRegional, rsSurrPair, rsUpper, rsZWJ, rsLowerMisc, rsUpperMisc, rsOptLowerContr, rsOptUpperContr, reOptMod, rsOptVar, rsOptJoin, rsSeq, rsEmoji, rsSymbol, reApos, reComboMark, reUnicode, reUnicodeWord, reHasUnicode, reHasUnicodeWord, deburredLetters, freeGlobal, freeSelf, root$2, deburrLetter, objectProto, objectToString, Symbol$1, symbolProto, symbolToString, camelCase2, upperFirst, lodash_camelcase, _lodash, FileSystemLoader$1, _postcss$1, _path, _Parser$1, _fs$1, Core, traceKeySorter, FileSystemLoader, scoping, src$3, PERMANENT_MARKER, TEMPORARY_MARKER, topologicalSort_1, topologicalSort, matchImports$1, icssImport, VISITED_MARKER, srcExports$2, wasmHash, hasRequiredWasmHash, xxhash64_1, hasRequiredXxhash64, BatchedHash_1, hasRequiredBatchedHash, md4_1, hasRequiredMd4, BulkUpdateDecorator_1, hasRequiredBulkUpdateDecorator, baseEncodeTables, crypto22, createXXHash64, createMd4, BatchedHash, BulkUpdateDecorator, getHashDigest_1, path$12, getHashDigest, interpolateName_1, interpolateName, path9, genericNames, src$2, dist, processor, parser, root$1, container, node$1, util4, unesc, unescExports, getProp2, getPropExports, ensureObject, ensureObjectExports, stripComments, stripCommentsExports, _unesc, _getProp, _ensureObject, _stripComments, nodeExports, types4, TAG, STRING, SELECTOR, ROOT, PSEUDO, NESTING, ID, COMMENT, COMBINATOR, CLASS, ATTRIBUTE, UNIVERSAL, containerExports, rootExports, selector$1, selectorExports, className$1, object, hasOwnProperty$1, merge3, regexAnySingleEscape, regexSingleEscape, regexExcessiveSpaces, cssesc, cssesc_1, classNameExports, comment$2, commentExports, id$1, idExports, tag$1, namespace, namespaceExports, tagExports, string$1, stringExports, pseudo$1, pseudoExports, attribute$1, node, universal$1, universalExports, combinator$2, combinatorExports, nesting$1, nestingExports, sortAscending, sortAscendingExports, tokenize, tokenTypes, ampersand, asterisk, at3, comma4, colon2, semicolon2, openParenthesis, closeParenthesis, openSquare, closeSquare, dollar, tilde, caret, plus2, equals, pipe, greaterThan, space, singleQuote2, doubleQuote2, slash3, bang, backslash2, cr2, feed, newline, tab, str, comment$1, word, combinator$1, parserExports, processorExports, selectors, constructors, _attribute, _className, _combinator, _comment, _id, _nesting, _pseudo, _root, _selector, _string, _tag, _universal, attribute, className, combinator, comment2, id, nesting, pseudo, root3, selector, string, tag, universal, guards, _types, _IS_TYPE, IS_TYPE, isAttribute, isClassName, isCombinator, isComment2, isIdentifier, isNesting, isPseudo, isRoot2, isSelector, isString2, isTag3, isUniversal, distExports, selectorParser$1, valueParser2, extractICSS, IGNORE_FILE_MARKER, IGNORE_NEXT_LINE_MARKER, isSpacing, isPureCheckDisabled, isPureSelectorSymbol, specialKeywords, validIdent, animationKeywords, isPureSelector, isNodeWithoutDeclarations, srcExports$1, selectorParser, hasOwnProperty2, whitespace2, unescapeRegExp, plugin2, src$1, stringHash, src, ICSSUtils, matchImports, matchValueDefinition, matchImport, srcExports, _postcssModulesExtractImports, _genericNames, _postcssModulesLocalByDefault, _postcssModulesScope, _stringHash, _postcssModulesValues, behaviours, _postcss, _unquote, _Parser, _saveJSON, _localsConvention, _FileSystemLoader, _scoping, PLUGIN_NAME, _fs, _fs2, _pluginFactory, postcss2, buildExports, index3, index$12;
+var import_fs8, import_path12, import_crypto22, import_util5, build2, fs6, fileSystem, pluginFactory, unquote$1, reg, Parser$1, matchValueName, replaceValueSymbols$2, replaceValueSymbols_1, replaceValueSymbols$1, replaceSymbols$1, replaceSymbols_1, importPattern, balancedQuotes, getDeclsObject, extractICSS$2, extractICSS_1, createImports, createExports, createICSSRules$1, createICSSRules_1, replaceValueSymbols, replaceSymbols, extractICSS$1, createICSSRules, src$4, _icssUtils, importRegexp, Parser6, saveJSON$1, _fs$2, localsConvention, symbolTag, reAsciiWord, reLatin, rsAstralRange, rsComboMarksRange, rsComboSymbolsRange, rsDingbatRange, rsLowerRange, rsMathOpRange, rsNonCharRange, rsPunctuationRange, rsSpaceRange, rsUpperRange, rsVarRange, rsBreakRange, rsApos, rsAstral, rsBreak, rsCombo, rsDigits, rsDingbat, rsLower, rsMisc, rsFitz, rsModifier, rsNonAstral, rsRegional, rsSurrPair, rsUpper, rsZWJ, rsLowerMisc, rsUpperMisc, rsOptLowerContr, rsOptUpperContr, reOptMod, rsOptVar, rsOptJoin, rsSeq, rsEmoji, rsSymbol, reApos, reComboMark, reUnicode, reUnicodeWord, reHasUnicode, reHasUnicodeWord, deburredLetters, freeGlobal, freeSelf, root$2, deburrLetter, objectProto, objectToString, Symbol$1, symbolProto, symbolToString, camelCase2, upperFirst, lodash_camelcase, _lodash, FileSystemLoader$1, _postcss$1, _path, _Parser$1, _fs$1, Core, traceKeySorter, FileSystemLoader, scoping, src$3, PERMANENT_MARKER, TEMPORARY_MARKER, topologicalSort_1, topologicalSort, matchImports$1, icssImport, VISITED_MARKER, srcExports$2, wasmHash, hasRequiredWasmHash, xxhash64_1, hasRequiredXxhash64, BatchedHash_1, hasRequiredBatchedHash, md4_1, hasRequiredMd4, BulkUpdateDecorator_1, hasRequiredBulkUpdateDecorator, baseEncodeTables, crypto22, createXXHash64, createMd4, BatchedHash, BulkUpdateDecorator, getHashDigest_1, path$12, getHashDigest, interpolateName_1, interpolateName, path9, genericNames, src$2, dist, processor, parser, root$1, container, node$1, util4, unesc, unescExports, getProp2, getPropExports, ensureObject, ensureObjectExports, stripComments, stripCommentsExports, _unesc, _getProp, _ensureObject, _stripComments, nodeExports, types4, TAG, STRING, SELECTOR, ROOT, PSEUDO, NESTING, ID, COMMENT, COMBINATOR, CLASS, ATTRIBUTE, UNIVERSAL, containerExports, rootExports, selector$1, selectorExports, className$1, object, hasOwnProperty$1, merge3, regexAnySingleEscape, regexSingleEscape, regexExcessiveSpaces, cssesc, cssesc_1, classNameExports, comment$2, commentExports, id$1, idExports, tag$1, namespace, namespaceExports, tagExports, string$1, stringExports, pseudo$1, pseudoExports, attribute$1, node, universal$1, universalExports, combinator$2, combinatorExports, nesting$1, nestingExports, sortAscending, sortAscendingExports, tokenize, tokenTypes, ampersand, asterisk, at3, comma4, colon2, semicolon2, openParenthesis, closeParenthesis, openSquare, closeSquare, dollar, tilde, caret, plus2, equals, pipe, greaterThan, space, singleQuote2, doubleQuote2, slash3, bang, backslash2, cr2, feed, newline, tab, str, comment$1, word, combinator$1, parserExports, processorExports, selectors, constructors, _attribute, _className, _combinator, _comment, _id, _nesting, _pseudo, _root, _selector, _string, _tag, _universal, attribute, className, combinator, comment2, id, nesting, pseudo, root3, selector, string, tag, universal, guards, _types, _IS_TYPE, IS_TYPE, isAttribute, isClassName, isCombinator, isComment2, isIdentifier, isNesting, isPseudo, isRoot2, isSelector, isString2, isTag3, isUniversal, distExports, selectorParser$1, valueParser2, extractICSS, IGNORE_FILE_MARKER, IGNORE_NEXT_LINE_MARKER, isSpacing, isPureCheckDisabled, isPureSelectorSymbol, specialKeywords, validIdent, animationKeywords, isPureSelector, isNodeWithoutDeclarations, srcExports$1, selectorParser, hasOwnProperty2, whitespace2, unescapeRegExp, plugin2, src$1, stringHash, src, ICSSUtils, matchImports, matchValueDefinition, matchImport, srcExports, _postcssModulesExtractImports, _genericNames, _postcssModulesLocalByDefault, _postcssModulesScope, _stringHash, _postcssModulesValues, behaviours, _postcss, _unquote, _Parser, _saveJSON, _localsConvention, _FileSystemLoader, _scoping, PLUGIN_NAME, _fs, _fs2, _pluginFactory, postcss2, buildExports, index3, index$12;
 var init_dep_DDtvSN7 = __esm({
   "node_modules/vite/dist/node/chunks/dep-DDtvSN7_.js"() {
     init_dep_Dm0c1Wj2();
@@ -233382,7 +233382,7 @@ var init_dep_DDtvSN7 = __esm({
     Parser$1.default = void 0;
     _icssUtils = src$4;
     importRegexp = /^:import\((.+)\)$/;
-    Parser5 = class {
+    Parser6 = class {
       constructor(pathFetcher, trace) {
         this.pathFetcher = pathFetcher;
         this.plugin = this.plugin.bind(this);
@@ -233445,7 +233445,7 @@ var init_dep_DDtvSN7 = __esm({
         }
       }
     };
-    Parser$1.default = Parser5;
+    Parser$1.default = Parser6;
     saveJSON$1 = {};
     Object.defineProperty(saveJSON$1, "__esModule", {
       value: true
@@ -236243,8 +236243,8 @@ var init_dep_DDtvSN7 = __esm({
           return i6 === list2.indexOf(item);
         });
       }
-      var Parser6 = /* @__PURE__ */ (function() {
-        function Parser7(rule2, options2) {
+      var Parser7 = /* @__PURE__ */ (function() {
+        function Parser8(rule2, options2) {
           if (options2 === void 0) {
             options2 = {};
           }
@@ -236278,7 +236278,7 @@ var init_dep_DDtvSN7 = __esm({
           this.current = selector3;
           this.loop();
         }
-        var _proto = Parser7.prototype;
+        var _proto = Parser8.prototype;
         _proto._errorGenerator = function _errorGenerator() {
           var _this = this;
           return function(message, errorOptions) {
@@ -237097,7 +237097,7 @@ var init_dep_DDtvSN7 = __esm({
           }
           return -1;
         };
-        _createClass(Parser7, [{
+        _createClass(Parser8, [{
           key: "currToken",
           get: function get3() {
             return this.tokens[this.position];
@@ -237113,9 +237113,9 @@ var init_dep_DDtvSN7 = __esm({
             return this.tokens[this.position - 1];
           }
         }]);
-        return Parser7;
+        return Parser8;
       })();
-      exports2["default"] = Parser6;
+      exports2["default"] = Parser7;
       module2.exports = exports2.default;
     })(parser, parser.exports);
     parserExports = parser.exports;
@@ -250225,15 +250225,15 @@ async function resolveHttpServer({ proxy }, app2, httpsOptions) {
     );
   }
 }
-async function resolveHttpsConfig(https6) {
-  if (!https6) return void 0;
+async function resolveHttpsConfig(https7) {
+  if (!https7) return void 0;
   const [ca, cert2, key, pfx] = await Promise.all([
-    readFileIfExists(https6.ca),
-    readFileIfExists(https6.cert),
-    readFileIfExists(https6.key),
-    readFileIfExists(https6.pfx)
+    readFileIfExists(https7.ca),
+    readFileIfExists(https7.cert),
+    readFileIfExists(https7.key),
+    readFileIfExists(https7.pfx)
   ]);
-  return { ...https6, ca, cert: cert2, key, pfx };
+  return { ...https7, ca, cert: cert2, key, pfx };
 }
 async function readFileIfExists(value2) {
   if (typeof value2 === "string") {
@@ -263972,7 +263972,7 @@ function optimizeDepsDisabledBackwardCompatibility(resolved, optimizeDeps2, opti
     }
   }
 }
-var fs$8, import_node_fs5, import_node_path10, import_promises3, import_node_url5, import_node_util6, import_node_perf_hooks2, import_node_module4, import_node_crypto3, import_picomatch2, import_esbuild3, import_path13, import_fs9, import_node_child_process2, import_node_http3, import_node_https2, import_tty, import_util6, import_net, import_events3, import_url5, import_http4, import_stream7, import_os3, import_child_process, import_node_os4, import_node_net6, import_node_dns, import_node_buffer4, import_module3, import_node_readline, import_node_process3, import_node_events, import_crypto23, import_node_assert, import_node_v8, import_node_worker_threads, import_https4, import_tls, import_zlib2, import_buffer, import_assert, qs, import_node_zlib2, import_node_module5, import_meta7, __require3, commonjsGlobal, picocolors2, p4, argv, env$1, isColorSupported, formatter, replaceClose, createColors, picocolorsExports2, colors$1, VALID_ID_PREFIX2, NULL_BYTE_PLACEHOLDER2, SOURCEMAPPING_URL3, MODULE_RUNNER_SOURCEMAPPING_SOURCE, ERR_OUTDATED_OPTIMIZED_DEP2, isWindows$3, windowsSlashRE2, postfixRE2, WalkerBase$1, SyncWalker$1, extractors2, extractAssignedNames3, blockDeclarations, Scope2, attachScopes, normalizePathRegExp2, normalizePath$5, createFilter$2, reservedWords2, builtins2, forbiddenIdentifiers2, makeLegalIdentifier, hasStringIsWellFormed, dataToEsm, path$a, commondir2, getCommonDir, comma5, semicolon3, chars$12, intToChar3, charToInt3, bufLength2, td2, StringWriter2, StringReader3, BitSet2, Chunk3, btoa$1, SourceMap$1, toString$1, wordRegex2, Mappings2, n$1, warned2, MagicString2, version$2, peerDependencies, firstpassGlobal, firstpassNoGlobal, getVirtualPathForDynamicRequirePath, FAILED_REQUIRE_ERROR, COMMONJS_REQUIRE_EXPORT, CREATE_COMMONJS_REQUIRE_EXPORT, isWrappedId, wrapId, unwrapId2, PROXY_SUFFIX, WRAPPED_SUFFIX, EXTERNAL_SUFFIX, EXPORTS_SUFFIX, MODULE_SUFFIX, ENTRY_SUFFIX, ES_IMPORT_SUFFIX, DYNAMIC_MODULES_ID, HELPERS_ID, IS_WRAPPED_COMMONJS, HELPERS, operators, KEY_COMPILED_ESM, reservedMethod, exportsPattern, functionType, PLUGIN_NAME2, schemeRegex, urlRegex, fileRegex, COLUMN$1, SOURCES_INDEX$1, SOURCE_LINE$1, SOURCE_COLUMN$1, NAMES_INDEX$1, found2, LINE_GTR_ZERO2, COL_GTR_EQ_ZERO2, LEAST_UPPER_BOUND2, GREATEST_LOWER_BOUND2, TraceMap, SetArray, COLUMN2, SOURCES_INDEX2, SOURCE_LINE2, SOURCE_COLUMN2, NAMES_INDEX2, NO_NAME, GenMapping, maybeAddSegment, SOURCELESS_MAPPING, EMPTY_SOURCES, SourceMap3, node$12, ms$1, hasRequiredMs, common$4, hasRequiredCommon, nodeExports$1, debug$j, pnp, createFilter$12, replaceSlashOrColonRE, replaceDotRE, replaceNestedIdRE, replaceHashRE, flattenId, FLATTEN_ID_HASH_LENGTH, FLATTEN_ID_MAX_FILE_LENGTH, limitFlattenIdLength, normalizeId, NODE_BUILTIN_NAMESPACE, NPM_BUILTIN_NAMESPACE, BUN_BUILTIN_NAMESPACE, nodeBuiltins2, isBuiltinCache, nodeLikeBuiltins, bareImportRE, deepImportRE, _require$1, _dirname, rollupVersion2, filter5, DEBUG, urlCanParse, isCaseInsensitiveFS, VOLUME_RE, externalRE, isExternalUrl, dataUrlRE, isDataUrl, virtualModuleRE, virtualModulePrefix, knownJsSrcRE, isJSRequest, importQueryRE, directRequestRE$1, internalPrefixes, InternalPrefixRE, trailingSeparatorRE, isImportRequest, isInternalRequest, urlRE$1, rawRE$1, timestampRE, splitRE, range, splitFirstDirRE, ERR_SYMLINK_IN_RECURSIVE_READDIR, safeRealpathSync, windowsNetworkMap, parseNetUseRE, firstSafeRealPathSyncRun, imageCandidateRegex, escapedSpaceCharacters, windowsDriveRE$1, replaceWindowsDriveRE, linuxAbsolutePathRE, revertWindowsDriveRE, nullSourceMap, multilineCommentsRE, singlelineCommentsRE, requestQuerySplitRE, requestQueryMaybeEscapedSplitRE, blankReplacer, hash$1, requireResolveFromRootWithFallback, windowsDrivePathPrefixRE, isNonDriveRelativeAbsolutePath, escapeRegexRE, sigtermCallbacks, parentSigtermCallback, setupSIGTERMListener, teardownSIGTERMListener, LogLevels, lastType, lastMsg, sameCount, timeFormatter, groups, COMPRESSIBLE_ASSETS_RE, POSIX_SEP_RE, NATIVE_SEP_RE, PATTERN_REGEX_CACHE, GLOB_ALL_PATTERN, TS_EXTENSIONS, JS_EXTENSIONS, TSJS_EXTENSIONS, TS_EXTENSIONS_RE_GROUP, TSJS_EXTENSIONS_RE_GROUP, IS_POSIX, isInNodeModules, posix2native, native2posix, resolve2posix, singleComment, multiComment, not_found_result, EXTENDABLE_KEYS, REBASE_KEYS, TSConfckParseError, DEFAULT_JSCONFIG_COMPILER_OPTIONS, TSConfckCache, debug$i, IIFE_BEGIN_RE, validExtensionRE, jsxExtensionsRE, defaultEsbuildSupported, rollupToEsbuildFormatMap, buildEsbuildPlugin, globalTSConfckCache, tsconfckCacheMap, AsyncFunction2, codeToDataUrl, viteSsrDynamicImport, Worker, importRe, internalImportName, FakeWorker, WorkerWithFallback, terserPath, loadTerserPath, mimes, publicFilesMap, assetUrlRE, jsSourceMapRE, noInlineRE, inlineRE$3, svgExtRE, assetCache, cssEntriesMap, publicAssetUrlCache, publicAssetUrlRE, GIT_LFS_PREFIX, nestedQuotesRE, endsWithJSRE, dataUriRE, base64RE, dataUriPrefix, ImportType, A3, C3, E2, init, convertSourceMap$1, convertSourceMap, debug$h, virtualSourceRE, src$12, path$9, fs$7, os$2, url$3, fsReadFileAsync, jsonLoader, requireFunc, defaultLoadersSync, dynamicImport, defaultLoaders, makeEmplace, createRequire3, fileURLToPath4, pathToFileURL, TS_EXT_RE, tsx, jiti, importError, req_1, req$2, options_1, req$1, plugins_1, resolve7, config$1, loadOptions, loadPlugins, req, interopRequireDefault, yaml, withLoaders, src2, postcssrc, jsonExtRE, jsonObjRE, jsonLangs, jsonLangRE, isJSONRequest, HASH_RE, AMPERSAND_RE, SLASH_RE, EQUAL_RE, PLUS_RE, ENC_CARET_RE, ENC_BACKTICK_RE, ENC_PIPE_RE, ENC_SPACE_RE, own$1, classRegExp, kTypes, messages, nodeInternalPrefix, userStackTraceLimit, captureLargerStackTrace, ESM_STATIC_IMPORT_RE, TYPE_RE, ESM_RE, COMMENT_RE, externalWithConversionNamespace, convertedExternalPrefix, cjsExternalFacadeNamespace, nonFacadePrefix, externalTypes, matchesEntireLine, environmentColors, PartialEnvironment, BaseEnvironment, HashbangComment, Identifier3, JSXIdentifier2, JSXPunctuator, JSXString, JSXText2, KeywordsWithExpressionAfter, KeywordsWithNoLineTerminatorAfter, LineTerminatorSequence, MultiLineComment, Newline, NumericLiteral, Punctuator, RegularExpressionLiteral, SingleLineComment, StringLiteral, Template, TokensNotPrecedingObjectLiteral, TokensPrecedingExpression, WhiteSpace, jsTokens_1, jsTokens, importGlobRE, objectKeysRE, objectValuesRE, knownOptions, forceDefaultAs, importPrefix, basename6, dirname5, relative4, ScanEnvironment, debug$g, htmlTypesRE, importsRE, scriptRE, commentRE$1, srcRE, typeRE, langRE, svelteScriptModuleRE, svelteModuleRE, debug$f, jsExtensionRE, jsMapExtensionRE, firstLoadCachedDepOptimizationMetadata, lockfileFormats, lockfilePaths, MAX_TEMP_DIR_AGE_MS, GRACEFUL_RENAME_TIMEOUT, safeRename, debug$e, isExternalCache, normalizedClientEntry$1, normalizedEnvEntry$1, ERR_RESOLVE_PACKAGE_ENTRY_FAIL, browserExternalId, optionalPeerDepId, subpathImportsPrefix, startsWithWordCharRE, debug$d, knownTsOutputRE, isPossibleTsOutput, debug$c, main, version$1, require$$4, fs$6, path$8, os$1, crypto$1, packageJson, version3, LINE, DotenvModule, parse_1$22, expand_1$1, debug$b, docsURL, deprecationCode, deprecationMessages, _ignoreDeprecationWarnings, node2, debug$a, s5, m5, h3, d3, y2, ms, debugExports, nodeExports2, encodeurl, ENCODE_CHARS_REGEXP, UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE, matchHtmlRegExp, escapeHtml_1, escapeHtml$2, onFinished$2, eeFirst, first2, defer$2, onFinishedExports, parseurl$1, url$2, parse$a, Url, parseurlExports, require$$0$13, codes, statuses$1, unpipe_1, debug$9, encodeUrl, escapeHtml, onFinished, parseUrl$2, statuses, unpipe, DOUBLE_SPACE_REGEXP, NEWLINE_REGEXP, defer$1, isFinished, finalhandler_1, utilsMerge, utilsMergeExports, debug$8, EventEmitter$3, finalhandler, http$4, merge5, parseUrl$1, connect, env3, proto, defer, connect$1, lib2, getOwnPropertySymbols, hasOwnProperty3, propIsEnumerable, objectAssign, vary$1, FIELD_NAME_REGEXP, varyExports, libExports, corsMiddleware, chokidar2, fs$5, Readable3, sysPath$3, promisify$3, picomatch$12, readdir$1, stat$3, lstat$2, realpath$1, BANG$2, RECURSIVE_ERROR_CODE, NORMAL_FLOW_ERRORS, FILE_TYPE, DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE, ALL_TYPES, isNormalFlowError, maj, min, wantBigintFsStats, normalizeFilter$1, ReaddirpStream, readdirp$1, readdirpPromise, readdirp_12, anymatch$2, normalizePath$2, anymatch_12, picomatch4, normalizePath$1, BANG$1, DEFAULT_OPTIONS, arrify$1, createPattern, matchPatterns, anymatch$1, anymatchExports, isExtglob$1, isExtglob3, chars4, strictCheck, relaxedCheck, isGlob$2, isGlob$1, pathPosixDirname, isWin32, slash4, backslash3, enclosure, globby, escaped, globParent$1, utils$3, utils$22, stringify$4, isNumber$2, isNumber$1, toRegexRange$1, toRegexRange_12, util5, toRegexRange, isObject3, transform3, isValidValue, isNumber7, zeros, stringify$3, pad, toMaxLen, toSequence, toRange, toRegex, rangeError, invalidRange, invalidStep, fillNumbers, fillLetters, fill$2, fillRange2, fill$1, utils$12, compile$1, compile_12, fill, stringify$2, utils3, append4, expand$1, expand_12, constants$22, stringify$12, MAX_LENGTH, CHAR_BACKSLASH, CHAR_BACKTICK, CHAR_COMMA, CHAR_DOT, CHAR_LEFT_PARENTHESES, CHAR_RIGHT_PARENTHESES, CHAR_LEFT_CURLY_BRACE, CHAR_RIGHT_CURLY_BRACE, CHAR_LEFT_SQUARE_BRACKET, CHAR_RIGHT_SQUARE_BRACKET, CHAR_DOUBLE_QUOTE, CHAR_SINGLE_QUOTE, CHAR_NO_BREAK_SPACE, CHAR_ZERO_WIDTH_NOBREAK_SPACE, parse$8, parse_1$12, stringify6, compile4, expand, parse$7, braces$1, braces_12, require$$03, binaryExtensions$1, path$7, binaryExtensions2, extensions, isBinaryPath$1, constants$12, fs$4, sysPath$2, promisify$2, isBinaryPath2, isWindows$2, isLinux, EMPTY_FN$2, EMPTY_STR$1, KEY_LISTENERS, KEY_ERR, KEY_RAW, HANDLER_KEYS, EV_CHANGE$2, EV_ADD$2, EV_ADD_DIR$2, EV_ERROR$2, STR_DATA$1, STR_END$2, BRACE_START$1, STAR, THROTTLE_MODE_WATCH, open$1, stat$2, lstat$1, close, fsrealpath, statMethods$1, foreach, addAndConvert, clearItem, delFromSet, isEmptySet, FsWatchInstances, fsWatchBroadcast, setFsWatchListener, FsWatchFileInstances, setFsWatchFileListener, NodeFsHandler$1, nodefsHandler2, fseventsHandler2, fs$3, sysPath$1, promisify$1, fsevents, EV_ADD$1, EV_CHANGE$1, EV_ADD_DIR$1, EV_UNLINK$1, EV_ERROR$1, STR_DATA, STR_END$1, FSEVENT_CREATED, FSEVENT_MODIFIED, FSEVENT_DELETED, FSEVENT_MOVED, FSEVENT_UNKNOWN, FSEVENT_FLAG_MUST_SCAN_SUBDIRS, FSEVENT_TYPE_FILE, FSEVENT_TYPE_DIRECTORY, FSEVENT_TYPE_SYMLINK, ROOT_GLOBSTAR, DIR_SUFFIX, DOT_SLASH, FUNCTION_TYPE$1, EMPTY_FN$1, IDENTITY_FN, Depth, stat$1, lstat, realpath2, statMethods, FSEventsWatchers, consolidateThreshhold, wrongEventFlags, createFSEventsInstance, couldConsolidate, canUse, calcDepth, sameTypes, FsEventsHandler$1, fseventsHandlerExports, EventEmitter$2, fs$2, sysPath, promisify3, readdirp, anymatch2, globParent3, isGlob3, braces, normalizePath6, NodeFsHandler2, FsEventsHandler2, EV_ALL, EV_READY, EV_ADD, EV_CHANGE, EV_UNLINK, EV_ADD_DIR, EV_UNLINK_DIR, EV_RAW, EV_ERROR, STR_CLOSE, STR_END, BACK_SLASH_RE, DOUBLE_SLASH_RE, SLASH_OR_BACK_SLASH_RE, DOT_RE, REPLACER_RE, SLASH, SLASH_SLASH, BRACE_START, BANG, ONE_DOT, TWO_DOTS, GLOBSTAR, SLASH_GLOBSTAR, ANYMATCH_OPTS, STRING_TYPE, FUNCTION_TYPE, EMPTY_STR, EMPTY_FN, isWindows$1, isMacos, isIBMi, stat4, readdir2, arrify, flatten, unifyPaths, toUnix, normalizePathToUnix, normalizeIgnored, getAbsolutePath, undef, DirEntry, STAT_METHOD_F, STAT_METHOD_L, WatchHelper, FSWatcher, watch2, guess, shellQuote$1, OPS, LINE_TERMINATORS, GLOB_SHELL_SPECIAL, quote, CONTROL, controlRE, META, SINGLE_QUOTE, DOUBLE_QUOTE, hash3, SQ, DQ, DS, TOKEN, mult, i6, startsWithToken, parse$6, macos, linux, windows$1, path$6, shellQuote, childProcess$1, COMMON_EDITORS_MACOS, COMMON_EDITORS_LINUX, COMMON_EDITORS_WIN, guessExports, path$5, getArgs, fs$1, os, path$4, colors, childProcess, guessEditor, getArgumentsForPosition2, positionRE, currentChildProcess, launchEditor_1, path$3, launch, launchEditorMiddleware, launchEditorMiddleware$1, offset, rewroteStacktraces, prepareStackTrace2, createServerModuleRunnerTransport, SSRCompatModuleRunner, WalkerBase2, SyncWalker2, ssrModuleExportsKey2, ssrImportKey2, ssrDynamicImportKey2, ssrExportAllKey2, ssrImportMetaKey2, hashbangRE, isNodeInPatternWeakSet, setIsNodeInPattern, isNodeInPattern, isStaticProperty, isStaticPropertyKey, functionNodeTypeRE, blockNodeTypeRE, isDockerCached, cachedResult, hasContainerEnv, isWsl, isWsl$1, execFileAsync$3, execFileAsync$2, execFileAsync$1, windowsBrowserProgIds, UnknownBrowserError, execFileAsync2, titleize, __dirname2, localXdgOpenPath, platform2, arch, getWslDrivesMountPoint, pTryEach, baseOpen, open2, apps, crossSpawn, windows, hasRequiredWindows, mode, hasRequiredMode, core, isexe_1, isWindows2, path$22, COLON2, isexe, getNotFoundError, getPathInfo, which$1, whichSync, which_1, pathKey$1, pathKey, pathKeyExports, path$13, which, getPathKey, resolveCommand_1, _escape, metaCharsRegExp, shebangRegex$1, shebangRegex, shebangCommand$1, fs7, shebangCommand, readShebang_1, path10, resolveCommand, escape$1, readShebang, isWin$1, isExecutableRegExp, isCmdShimRegExp, parse_13, isWin2, enoent$1, cp, parse$4, enoent, crossSpawnExports, spawn$1, supportedChromiumBrowsers, BASE_DEV_SHORTCUTS, BASE_PREVIEW_SHORTCUTS, NoopWatcher, bufferUtil$1, BINARY_TYPES$2, hasBlob$1, constants3, EMPTY_BUFFER$3, FastBuffer$2, bufferUtilExports, kDone, kRun, Limiter$1, limiter, zlib3, bufferUtil, Limiter2, kStatusCode$2, FastBuffer$1, TRAILER, kPerMessageDeflate, kTotalLength, kCallback, kBuffers, kError$1, zlibLimiter, PerMessageDeflate$4, permessageDeflate, validation, isUtf8, hasBlob, tokenChars$2, validationExports, Writable$1, PerMessageDeflate$3, BINARY_TYPES$1, EMPTY_BUFFER$2, kStatusCode$1, kWebSocket$3, concat3, toArrayBuffer2, unmask, isValidStatusCode$1, isValidUTF8, FastBuffer, GET_INFO, GET_PAYLOAD_LENGTH_16, GET_PAYLOAD_LENGTH_64, GET_MASK, GET_DATA, INFLATING, DEFER_EVENT, Receiver$1, receiver, randomFillSync, PerMessageDeflate$2, EMPTY_BUFFER$1, kWebSocket$2, NOOP$2, isBlob$1, isValidStatusCode, applyMask, toBuffer$1, kByteLength, maskBuffer, RANDOM_POOL_SIZE, randomPool, randomPoolPointer, DEFAULT, DEFLATING, GET_BLOB_DATA, Sender$1, sender, kForOnEventAttribute$1, kListener$1, kCode, kData, kError, kMessage, kReason, kTarget, kType, kWasClean, Event$1, CloseEvent, ErrorEvent, MessageEvent, EventTarget2, eventTarget, tokenChars$1, extension$1, EventEmitter$1, https$2, http$3, net, tls, randomBytes2, createHash$1, URL$2, PerMessageDeflate$1, Receiver3, Sender3, isBlob3, BINARY_TYPES, EMPTY_BUFFER, GUID$1, kForOnEventAttribute, kListener, kStatusCode, kWebSocket$1, NOOP$1, addEventListener, removeEventListener, format2, parse$2, toBuffer2, closeTimeout, kAborted, protocolVersions, readyStates, subprotocolRegex, WebSocket$1, websocket, tokenChars, subprotocol$1, EventEmitter2, http$2, createHash2, extension2, PerMessageDeflate3, subprotocol2, WebSocket3, GUID, kWebSocket, keyRegex, RUNNING, CLOSING, CLOSED, WebSocketServer2, websocketServer, WebSocketServerRaw_, allowedHostsServerCache, allowedHostsPreviewCache, isFileOrExtensionProtocolRE, WebSocketServerRaw, HMR_HEADER, isWebSocketServer, wsServerEvents, httpProxy$3, eventemitter3, eventemitter3Exports, common$3, requiresPort, url$1, common$2, redirectRegex, webOutgoing, followRedirects$1, debug$7, debug_1, url2, URL$1, http$1, https$1, Writable, assert, debug$6, useNativeURL, preservedUrlFields, events, eventHandlers, InvalidUrlError, RedirectionError, TooManyRedirectsError, MaxBodyLengthExceededError, WriteAfterEndError, destroy, followRedirectsExports, httpNative, httpsNative, web_o, common$1, followRedirects2, nativeAgents, webIncoming, http5, https5, common, wsIncoming, httpProxyExports, ProxyServer, httpProxy$2, httpProxy, httpProxy$1, debug$5, rewriteOriginHeader, debug$4, etag_1, crypto23, Stats, toString6, getEtag, debug$3, alias, noop4, ENCODING, knownJavascriptExtensionRE, ERR_DENIED_FILE, sirvOptions, windowsDriveRE, ERR_LOAD_URL, ERR_LOAD_PUBLIC_URL, ERR_DENIED_ID, debugLoad, debugTransform, debugCache$1, ALLOWED_META_NAME, ALLOWED_META_PROPERTY, DEFAULT_HTML_ASSET_SOURCES, modulePreloadPolyfillId, resolvedModulePreloadPolyfillId, htmlProxyRE$1, isHtmlProxyRE, inlineCSSRE$1, inlineImportRE, htmlLangRE, spaceRe, importMapRE, moduleScriptRE, modulePreloadLinkRE, importMapAppendRE, isHTMLProxy, isHTMLRequest, htmlProxyMap, htmlProxyResult, noInlineLinkRels, isAsyncScriptMap, attrValueStartRE, elementsAllowedInHead, importRE, commentRE, headInjectRE, headPrependInjectRE, htmlInjectRE, htmlPrependInjectRE, bodyInjectRE, bodyPrependInjectRE, doctypePrependInjectRE, unaryTags, debugCache, knownIgnoreList, trailingQuerySeparatorsRE, urlRE, rawRE, inlineRE$2, svgRE, wordCharRE, processNodeUrl, devHtmlHook, logTime, EMPTY_OBJECT$1, ModuleNode, ModuleGraph, DualWeakMap, ROOT_FILES, usedConfigs, serverConfigDefaults, debugHmr, whitespaceRE, normalizedClientDir, normalizeHotChannel, sortedHotUpdatePluginsCache, nonJsRe, isNonJsRequest, importMetaEnvMarker, importMetaEnvKeyReCache, workerOrSharedWorkerRE, workerFileRE, inlineRE$1, WORKER_FILE_ID, workerCache, workerAssetUrlRE, debug$2, clientDir, skipRE, canSkipImportAnalysis, optimizedDepChunkRE, optimizedDepDynamicRE, hasViteIgnoreRE, urlIsStringRE, templateLiteralRE, interopHelper, normalizedClientEntry, normalizedEnvEntry, wasmHelperId, wasmInitRE, wasmHelper, wasmHelperCode, wasmHelperPlugin, wasmFallbackPlugin, VariableDynamicImportError, example, defaultProtocol, ignoredProtocols, dynamicImportHelperId, relativePathRE, hasDynamicImportRE, dynamicImportHelper, filterForPlugin, viteAliasCustomResolver, EMPTY_OBJECT2, debugSourcemapCombineFilter, debugSourcemapCombine, debugResolve, debugPluginResolve, debugPluginTransform, debugPluginContainerContext, ERR_CLOSED_SERVER, EnvironmentPluginContainer, MinimalPluginContext, PluginContext, ResolveIdContext, LoadPluginContext, TransformPluginContext, PluginContainer, decoder, cssConfigDefaults, cssModuleRE, directRequestRE, htmlProxyRE, htmlProxyIndexRE, commonjsProxyRE, inlineRE, inlineCSSRE, styleAttrRE, functionCallRE, transformOnlyRE, nonEscapedDoubleQuoteRe, defaultCssBundleName, isCSSRequest, isModuleCSSRequest, isDirectCSSRequest, isDirectRequest, cssModulesCache, removedPureCssFilesCache, cssBundleNameCache, postcssConfigCache, cssUrlAssetRE, fileURLWithWindowsDriveRE, configToAtImportResolvers, importPostcssImport, importPostcssModules, importPostcss, preprocessorWorkerControllerCache, alwaysFakeWorkerWorkerControllerCache, viteHashUpdateMarker, viteHashUpdateMarkerRE, cssUrlRE, cssDataUriRE, importCssRE, cssImageSetRE, UrlRewritePostcssPlugin, cssNotProcessedRE, atImportRE, atCharsetRE, loadedPreprocessorPath, cachedSss, makeScssWorker, makeModernScssWorker, makeModernCompilerScssWorker, scssProcessor, makeLessWorker, lessProcessor, makeStylWorker, stylProcessor, createPreprocessorWorkerController, normalizeMaxWorkers, preprocessorSet, importLightningCSS, map2, esMap, esRE, versionRE, convertTargetsCache, convertTargets, isModernFlag, preloadMethod, preloadMarker, preloadHelperId, preloadMarkerRE, dynamicImportPrefixRE, dynamicImportTreeshakenRE, buildEnvironmentOptionsDefaults, warningIgnoreList, dynamicImportWarningIgnoreList, normalizeLog2, needsEscapeRegEx2, quoteNewlineRegEx2, backSlashRegEx2, getResolveUrl2, getRelativeUrlFromDocument2, getFileUrlFromFullPath2, getFileUrlFromRelativePath2, relativeUrlMechanisms2, customRelativeUrlMechanisms, toOutputFilePathInCss, toOutputFilePathInHtml, BuildEnvironment, builderOptionsDefaults, build$12, OTHER_SOURCE_MAP_REGEXP, debug$1, debounceMs, EnvironmentModuleNode, EnvironmentModuleGraph, DevEnvironment, callCrawlEndIfIdleAfterMs, RunnableDevEnvironment, NOOP, MIMES, ssrConfigDefaults, debug, promisifiedRealpath, SYMBOL_RESOLVED_CONFIG, configDefaults, clientAlias, _require;
+var fs$8, import_node_fs5, import_node_path10, import_promises3, import_node_url5, import_node_util6, import_node_perf_hooks2, import_node_module4, import_node_crypto3, import_picomatch2, import_esbuild3, import_path13, import_fs9, import_node_child_process2, import_node_http3, import_node_https2, import_tty, import_util6, import_net, import_events3, import_url5, import_http4, import_stream7, import_os3, import_child_process, import_node_os4, import_node_net6, import_node_dns, import_node_buffer4, import_module3, import_node_readline, import_node_process3, import_node_events, import_crypto23, import_node_assert, import_node_v8, import_node_worker_threads, import_https5, import_tls, import_zlib2, import_buffer, import_assert, qs, import_node_zlib2, import_node_module5, import_meta7, __require3, commonjsGlobal, picocolors2, p4, argv, env$1, isColorSupported, formatter, replaceClose, createColors, picocolorsExports2, colors$1, VALID_ID_PREFIX2, NULL_BYTE_PLACEHOLDER2, SOURCEMAPPING_URL3, MODULE_RUNNER_SOURCEMAPPING_SOURCE, ERR_OUTDATED_OPTIMIZED_DEP2, isWindows$3, windowsSlashRE2, postfixRE2, WalkerBase$1, SyncWalker$1, extractors2, extractAssignedNames3, blockDeclarations, Scope2, attachScopes, normalizePathRegExp2, normalizePath$5, createFilter$2, reservedWords2, builtins2, forbiddenIdentifiers2, makeLegalIdentifier, hasStringIsWellFormed, dataToEsm, path$a, commondir2, getCommonDir, comma5, semicolon3, chars$12, intToChar3, charToInt3, bufLength2, td2, StringWriter2, StringReader3, BitSet2, Chunk3, btoa$1, SourceMap$1, toString$1, wordRegex2, Mappings2, n$1, warned2, MagicString2, version$2, peerDependencies, firstpassGlobal, firstpassNoGlobal, getVirtualPathForDynamicRequirePath, FAILED_REQUIRE_ERROR, COMMONJS_REQUIRE_EXPORT, CREATE_COMMONJS_REQUIRE_EXPORT, isWrappedId, wrapId, unwrapId2, PROXY_SUFFIX, WRAPPED_SUFFIX, EXTERNAL_SUFFIX, EXPORTS_SUFFIX, MODULE_SUFFIX, ENTRY_SUFFIX, ES_IMPORT_SUFFIX, DYNAMIC_MODULES_ID, HELPERS_ID, IS_WRAPPED_COMMONJS, HELPERS, operators, KEY_COMPILED_ESM, reservedMethod, exportsPattern, functionType, PLUGIN_NAME2, schemeRegex, urlRegex, fileRegex, COLUMN$1, SOURCES_INDEX$1, SOURCE_LINE$1, SOURCE_COLUMN$1, NAMES_INDEX$1, found2, LINE_GTR_ZERO2, COL_GTR_EQ_ZERO2, LEAST_UPPER_BOUND2, GREATEST_LOWER_BOUND2, TraceMap, SetArray, COLUMN2, SOURCES_INDEX2, SOURCE_LINE2, SOURCE_COLUMN2, NAMES_INDEX2, NO_NAME, GenMapping, maybeAddSegment, SOURCELESS_MAPPING, EMPTY_SOURCES, SourceMap3, node$12, ms$1, hasRequiredMs, common$4, hasRequiredCommon, nodeExports$1, debug$j, pnp, createFilter$12, replaceSlashOrColonRE, replaceDotRE, replaceNestedIdRE, replaceHashRE, flattenId, FLATTEN_ID_HASH_LENGTH, FLATTEN_ID_MAX_FILE_LENGTH, limitFlattenIdLength, normalizeId, NODE_BUILTIN_NAMESPACE, NPM_BUILTIN_NAMESPACE, BUN_BUILTIN_NAMESPACE, nodeBuiltins2, isBuiltinCache, nodeLikeBuiltins, bareImportRE, deepImportRE, _require$1, _dirname, rollupVersion2, filter5, DEBUG, urlCanParse, isCaseInsensitiveFS, VOLUME_RE, externalRE, isExternalUrl, dataUrlRE, isDataUrl, virtualModuleRE, virtualModulePrefix, knownJsSrcRE, isJSRequest, importQueryRE, directRequestRE$1, internalPrefixes, InternalPrefixRE, trailingSeparatorRE, isImportRequest, isInternalRequest, urlRE$1, rawRE$1, timestampRE, splitRE, range, splitFirstDirRE, ERR_SYMLINK_IN_RECURSIVE_READDIR, safeRealpathSync, windowsNetworkMap, parseNetUseRE, firstSafeRealPathSyncRun, imageCandidateRegex, escapedSpaceCharacters, windowsDriveRE$1, replaceWindowsDriveRE, linuxAbsolutePathRE, revertWindowsDriveRE, nullSourceMap, multilineCommentsRE, singlelineCommentsRE, requestQuerySplitRE, requestQueryMaybeEscapedSplitRE, blankReplacer, hash$1, requireResolveFromRootWithFallback, windowsDrivePathPrefixRE, isNonDriveRelativeAbsolutePath, escapeRegexRE, sigtermCallbacks, parentSigtermCallback, setupSIGTERMListener, teardownSIGTERMListener, LogLevels, lastType, lastMsg, sameCount, timeFormatter, groups, COMPRESSIBLE_ASSETS_RE, POSIX_SEP_RE, NATIVE_SEP_RE, PATTERN_REGEX_CACHE, GLOB_ALL_PATTERN, TS_EXTENSIONS, JS_EXTENSIONS, TSJS_EXTENSIONS, TS_EXTENSIONS_RE_GROUP, TSJS_EXTENSIONS_RE_GROUP, IS_POSIX, isInNodeModules, posix2native, native2posix, resolve2posix, singleComment, multiComment, not_found_result, EXTENDABLE_KEYS, REBASE_KEYS, TSConfckParseError, DEFAULT_JSCONFIG_COMPILER_OPTIONS, TSConfckCache, debug$i, IIFE_BEGIN_RE, validExtensionRE, jsxExtensionsRE, defaultEsbuildSupported, rollupToEsbuildFormatMap, buildEsbuildPlugin, globalTSConfckCache, tsconfckCacheMap, AsyncFunction2, codeToDataUrl, viteSsrDynamicImport, Worker, importRe, internalImportName, FakeWorker, WorkerWithFallback, terserPath, loadTerserPath, mimes, publicFilesMap, assetUrlRE, jsSourceMapRE, noInlineRE, inlineRE$3, svgExtRE, assetCache, cssEntriesMap, publicAssetUrlCache, publicAssetUrlRE, GIT_LFS_PREFIX, nestedQuotesRE, endsWithJSRE, dataUriRE, base64RE, dataUriPrefix, ImportType, A3, C3, E2, init, convertSourceMap$1, convertSourceMap, debug$h, virtualSourceRE, src$12, path$9, fs$7, os$2, url$3, fsReadFileAsync, jsonLoader, requireFunc, defaultLoadersSync, dynamicImport, defaultLoaders, makeEmplace, createRequire3, fileURLToPath4, pathToFileURL, TS_EXT_RE, tsx, jiti, importError, req_1, req$2, options_1, req$1, plugins_1, resolve7, config$1, loadOptions, loadPlugins, req, interopRequireDefault, yaml, withLoaders, src2, postcssrc, jsonExtRE, jsonObjRE, jsonLangs, jsonLangRE, isJSONRequest, HASH_RE, AMPERSAND_RE, SLASH_RE, EQUAL_RE, PLUS_RE, ENC_CARET_RE, ENC_BACKTICK_RE, ENC_PIPE_RE, ENC_SPACE_RE, own$1, classRegExp, kTypes, messages, nodeInternalPrefix, userStackTraceLimit, captureLargerStackTrace, ESM_STATIC_IMPORT_RE, TYPE_RE, ESM_RE, COMMENT_RE, externalWithConversionNamespace, convertedExternalPrefix, cjsExternalFacadeNamespace, nonFacadePrefix, externalTypes, matchesEntireLine, environmentColors, PartialEnvironment, BaseEnvironment, HashbangComment, Identifier3, JSXIdentifier2, JSXPunctuator, JSXString, JSXText2, KeywordsWithExpressionAfter, KeywordsWithNoLineTerminatorAfter, LineTerminatorSequence, MultiLineComment, Newline, NumericLiteral, Punctuator, RegularExpressionLiteral, SingleLineComment, StringLiteral, Template, TokensNotPrecedingObjectLiteral, TokensPrecedingExpression, WhiteSpace, jsTokens_1, jsTokens, importGlobRE, objectKeysRE, objectValuesRE, knownOptions, forceDefaultAs, importPrefix, basename6, dirname5, relative4, ScanEnvironment, debug$g, htmlTypesRE, importsRE, scriptRE, commentRE$1, srcRE, typeRE, langRE, svelteScriptModuleRE, svelteModuleRE, debug$f, jsExtensionRE, jsMapExtensionRE, firstLoadCachedDepOptimizationMetadata, lockfileFormats, lockfilePaths, MAX_TEMP_DIR_AGE_MS, GRACEFUL_RENAME_TIMEOUT, safeRename, debug$e, isExternalCache, normalizedClientEntry$1, normalizedEnvEntry$1, ERR_RESOLVE_PACKAGE_ENTRY_FAIL, browserExternalId, optionalPeerDepId, subpathImportsPrefix, startsWithWordCharRE, debug$d, knownTsOutputRE, isPossibleTsOutput, debug$c, main, version$1, require$$4, fs$6, path$8, os$1, crypto$1, packageJson, version3, LINE, DotenvModule, parse_1$22, expand_1$1, debug$b, docsURL, deprecationCode, deprecationMessages, _ignoreDeprecationWarnings, node2, debug$a, s5, m5, h3, d3, y2, ms, debugExports, nodeExports2, encodeurl, ENCODE_CHARS_REGEXP, UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE, matchHtmlRegExp, escapeHtml_1, escapeHtml$2, onFinished$2, eeFirst, first2, defer$2, onFinishedExports, parseurl$1, url$2, parse$a, Url, parseurlExports, require$$0$13, codes, statuses$1, unpipe_1, debug$9, encodeUrl, escapeHtml, onFinished, parseUrl$2, statuses, unpipe, DOUBLE_SPACE_REGEXP, NEWLINE_REGEXP, defer$1, isFinished, finalhandler_1, utilsMerge, utilsMergeExports, debug$8, EventEmitter$3, finalhandler, http$4, merge5, parseUrl$1, connect, env3, proto, defer, connect$1, lib2, getOwnPropertySymbols, hasOwnProperty3, propIsEnumerable, objectAssign, vary$1, FIELD_NAME_REGEXP, varyExports, libExports, corsMiddleware, chokidar2, fs$5, Readable3, sysPath$3, promisify$3, picomatch$12, readdir$1, stat$3, lstat$2, realpath$1, BANG$2, RECURSIVE_ERROR_CODE, NORMAL_FLOW_ERRORS, FILE_TYPE, DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE, ALL_TYPES, isNormalFlowError, maj, min, wantBigintFsStats, normalizeFilter$1, ReaddirpStream, readdirp$1, readdirpPromise, readdirp_12, anymatch$2, normalizePath$2, anymatch_12, picomatch4, normalizePath$1, BANG$1, DEFAULT_OPTIONS, arrify$1, createPattern, matchPatterns, anymatch$1, anymatchExports, isExtglob$1, isExtglob3, chars4, strictCheck, relaxedCheck, isGlob$2, isGlob$1, pathPosixDirname, isWin32, slash4, backslash3, enclosure, globby, escaped, globParent$1, utils$3, utils$22, stringify$4, isNumber$2, isNumber$1, toRegexRange$1, toRegexRange_12, util5, toRegexRange, isObject3, transform3, isValidValue, isNumber7, zeros, stringify$3, pad, toMaxLen, toSequence, toRange, toRegex, rangeError, invalidRange, invalidStep, fillNumbers, fillLetters, fill$2, fillRange2, fill$1, utils$12, compile$1, compile_12, fill, stringify$2, utils3, append4, expand$1, expand_12, constants$22, stringify$12, MAX_LENGTH, CHAR_BACKSLASH, CHAR_BACKTICK, CHAR_COMMA, CHAR_DOT, CHAR_LEFT_PARENTHESES, CHAR_RIGHT_PARENTHESES, CHAR_LEFT_CURLY_BRACE, CHAR_RIGHT_CURLY_BRACE, CHAR_LEFT_SQUARE_BRACKET, CHAR_RIGHT_SQUARE_BRACKET, CHAR_DOUBLE_QUOTE, CHAR_SINGLE_QUOTE, CHAR_NO_BREAK_SPACE, CHAR_ZERO_WIDTH_NOBREAK_SPACE, parse$8, parse_1$12, stringify6, compile4, expand, parse$7, braces$1, braces_12, require$$03, binaryExtensions$1, path$7, binaryExtensions2, extensions, isBinaryPath$1, constants$12, fs$4, sysPath$2, promisify$2, isBinaryPath2, isWindows$2, isLinux, EMPTY_FN$2, EMPTY_STR$1, KEY_LISTENERS, KEY_ERR, KEY_RAW, HANDLER_KEYS, EV_CHANGE$2, EV_ADD$2, EV_ADD_DIR$2, EV_ERROR$2, STR_DATA$1, STR_END$2, BRACE_START$1, STAR, THROTTLE_MODE_WATCH, open$1, stat$2, lstat$1, close, fsrealpath, statMethods$1, foreach, addAndConvert, clearItem, delFromSet, isEmptySet, FsWatchInstances, fsWatchBroadcast, setFsWatchListener, FsWatchFileInstances, setFsWatchFileListener, NodeFsHandler$1, nodefsHandler2, fseventsHandler2, fs$3, sysPath$1, promisify$1, fsevents, EV_ADD$1, EV_CHANGE$1, EV_ADD_DIR$1, EV_UNLINK$1, EV_ERROR$1, STR_DATA, STR_END$1, FSEVENT_CREATED, FSEVENT_MODIFIED, FSEVENT_DELETED, FSEVENT_MOVED, FSEVENT_UNKNOWN, FSEVENT_FLAG_MUST_SCAN_SUBDIRS, FSEVENT_TYPE_FILE, FSEVENT_TYPE_DIRECTORY, FSEVENT_TYPE_SYMLINK, ROOT_GLOBSTAR, DIR_SUFFIX, DOT_SLASH, FUNCTION_TYPE$1, EMPTY_FN$1, IDENTITY_FN, Depth, stat$1, lstat, realpath2, statMethods, FSEventsWatchers, consolidateThreshhold, wrongEventFlags, createFSEventsInstance, couldConsolidate, canUse, calcDepth, sameTypes, FsEventsHandler$1, fseventsHandlerExports, EventEmitter$2, fs$2, sysPath, promisify3, readdirp, anymatch2, globParent3, isGlob3, braces, normalizePath6, NodeFsHandler2, FsEventsHandler2, EV_ALL, EV_READY, EV_ADD, EV_CHANGE, EV_UNLINK, EV_ADD_DIR, EV_UNLINK_DIR, EV_RAW, EV_ERROR, STR_CLOSE, STR_END, BACK_SLASH_RE, DOUBLE_SLASH_RE, SLASH_OR_BACK_SLASH_RE, DOT_RE, REPLACER_RE, SLASH, SLASH_SLASH, BRACE_START, BANG, ONE_DOT, TWO_DOTS, GLOBSTAR, SLASH_GLOBSTAR, ANYMATCH_OPTS, STRING_TYPE, FUNCTION_TYPE, EMPTY_STR, EMPTY_FN, isWindows$1, isMacos, isIBMi, stat4, readdir2, arrify, flatten, unifyPaths, toUnix, normalizePathToUnix, normalizeIgnored, getAbsolutePath, undef, DirEntry, STAT_METHOD_F, STAT_METHOD_L, WatchHelper, FSWatcher, watch2, guess, shellQuote$1, OPS, LINE_TERMINATORS, GLOB_SHELL_SPECIAL, quote, CONTROL, controlRE, META, SINGLE_QUOTE, DOUBLE_QUOTE, hash3, SQ, DQ, DS, TOKEN, mult, i6, startsWithToken, parse$6, macos, linux, windows$1, path$6, shellQuote, childProcess$1, COMMON_EDITORS_MACOS, COMMON_EDITORS_LINUX, COMMON_EDITORS_WIN, guessExports, path$5, getArgs, fs$1, os, path$4, colors, childProcess, guessEditor, getArgumentsForPosition2, positionRE, currentChildProcess, launchEditor_1, path$3, launch, launchEditorMiddleware, launchEditorMiddleware$1, offset, rewroteStacktraces, prepareStackTrace2, createServerModuleRunnerTransport, SSRCompatModuleRunner, WalkerBase2, SyncWalker2, ssrModuleExportsKey2, ssrImportKey2, ssrDynamicImportKey2, ssrExportAllKey2, ssrImportMetaKey2, hashbangRE, isNodeInPatternWeakSet, setIsNodeInPattern, isNodeInPattern, isStaticProperty, isStaticPropertyKey, functionNodeTypeRE, blockNodeTypeRE, isDockerCached, cachedResult, hasContainerEnv, isWsl, isWsl$1, execFileAsync$3, execFileAsync$2, execFileAsync$1, windowsBrowserProgIds, UnknownBrowserError, execFileAsync2, titleize, __dirname2, localXdgOpenPath, platform2, arch, getWslDrivesMountPoint, pTryEach, baseOpen, open2, apps, crossSpawn, windows, hasRequiredWindows, mode, hasRequiredMode, core, isexe_1, isWindows2, path$22, COLON2, isexe, getNotFoundError, getPathInfo, which$1, whichSync, which_1, pathKey$1, pathKey, pathKeyExports, path$13, which, getPathKey, resolveCommand_1, _escape, metaCharsRegExp, shebangRegex$1, shebangRegex, shebangCommand$1, fs7, shebangCommand, readShebang_1, path10, resolveCommand, escape$1, readShebang, isWin$1, isExecutableRegExp, isCmdShimRegExp, parse_13, isWin2, enoent$1, cp, parse$4, enoent, crossSpawnExports, spawn$1, supportedChromiumBrowsers, BASE_DEV_SHORTCUTS, BASE_PREVIEW_SHORTCUTS, NoopWatcher, bufferUtil$1, BINARY_TYPES$2, hasBlob$1, constants3, EMPTY_BUFFER$3, FastBuffer$2, bufferUtilExports, kDone, kRun, Limiter$1, limiter, zlib3, bufferUtil, Limiter2, kStatusCode$2, FastBuffer$1, TRAILER, kPerMessageDeflate, kTotalLength, kCallback, kBuffers, kError$1, zlibLimiter, PerMessageDeflate$4, permessageDeflate, validation, isUtf8, hasBlob, tokenChars$2, validationExports, Writable$1, PerMessageDeflate$3, BINARY_TYPES$1, EMPTY_BUFFER$2, kStatusCode$1, kWebSocket$3, concat3, toArrayBuffer2, unmask, isValidStatusCode$1, isValidUTF8, FastBuffer, GET_INFO, GET_PAYLOAD_LENGTH_16, GET_PAYLOAD_LENGTH_64, GET_MASK, GET_DATA, INFLATING, DEFER_EVENT, Receiver$1, receiver, randomFillSync, PerMessageDeflate$2, EMPTY_BUFFER$1, kWebSocket$2, NOOP$2, isBlob$1, isValidStatusCode, applyMask, toBuffer$1, kByteLength, maskBuffer, RANDOM_POOL_SIZE, randomPool, randomPoolPointer, DEFAULT, DEFLATING, GET_BLOB_DATA, Sender$1, sender, kForOnEventAttribute$1, kListener$1, kCode, kData, kError, kMessage, kReason, kTarget, kType, kWasClean, Event$1, CloseEvent, ErrorEvent, MessageEvent, EventTarget2, eventTarget, tokenChars$1, extension$1, EventEmitter$1, https$2, http$3, net, tls, randomBytes2, createHash$1, URL$2, PerMessageDeflate$1, Receiver3, Sender3, isBlob3, BINARY_TYPES, EMPTY_BUFFER, GUID$1, kForOnEventAttribute, kListener, kStatusCode, kWebSocket$1, NOOP$1, addEventListener, removeEventListener, format2, parse$2, toBuffer2, closeTimeout, kAborted, protocolVersions, readyStates, subprotocolRegex, WebSocket$1, websocket, tokenChars, subprotocol$1, EventEmitter2, http$2, createHash2, extension2, PerMessageDeflate3, subprotocol2, WebSocket3, GUID, kWebSocket, keyRegex, RUNNING, CLOSING, CLOSED, WebSocketServer2, websocketServer, WebSocketServerRaw_, allowedHostsServerCache, allowedHostsPreviewCache, isFileOrExtensionProtocolRE, WebSocketServerRaw, HMR_HEADER, isWebSocketServer, wsServerEvents, httpProxy$3, eventemitter3, eventemitter3Exports, common$3, requiresPort, url$1, common$2, redirectRegex, webOutgoing, followRedirects$1, debug$7, debug_1, url2, URL$1, http$1, https$1, Writable, assert, debug$6, useNativeURL, preservedUrlFields, events, eventHandlers, InvalidUrlError, RedirectionError, TooManyRedirectsError, MaxBodyLengthExceededError, WriteAfterEndError, destroy, followRedirectsExports, httpNative, httpsNative, web_o, common$1, followRedirects2, nativeAgents, webIncoming, http5, https6, common, wsIncoming, httpProxyExports, ProxyServer, httpProxy$2, httpProxy, httpProxy$1, debug$5, rewriteOriginHeader, debug$4, etag_1, crypto23, Stats, toString6, getEtag, debug$3, alias, noop4, ENCODING, knownJavascriptExtensionRE, ERR_DENIED_FILE, sirvOptions, windowsDriveRE, ERR_LOAD_URL, ERR_LOAD_PUBLIC_URL, ERR_DENIED_ID, debugLoad, debugTransform, debugCache$1, ALLOWED_META_NAME, ALLOWED_META_PROPERTY, DEFAULT_HTML_ASSET_SOURCES, modulePreloadPolyfillId, resolvedModulePreloadPolyfillId, htmlProxyRE$1, isHtmlProxyRE, inlineCSSRE$1, inlineImportRE, htmlLangRE, spaceRe, importMapRE, moduleScriptRE, modulePreloadLinkRE, importMapAppendRE, isHTMLProxy, isHTMLRequest, htmlProxyMap, htmlProxyResult, noInlineLinkRels, isAsyncScriptMap, attrValueStartRE, elementsAllowedInHead, importRE, commentRE, headInjectRE, headPrependInjectRE, htmlInjectRE, htmlPrependInjectRE, bodyInjectRE, bodyPrependInjectRE, doctypePrependInjectRE, unaryTags, debugCache, knownIgnoreList, trailingQuerySeparatorsRE, urlRE, rawRE, inlineRE$2, svgRE, wordCharRE, processNodeUrl, devHtmlHook, logTime, EMPTY_OBJECT$1, ModuleNode, ModuleGraph, DualWeakMap, ROOT_FILES, usedConfigs, serverConfigDefaults, debugHmr, whitespaceRE, normalizedClientDir, normalizeHotChannel, sortedHotUpdatePluginsCache, nonJsRe, isNonJsRequest, importMetaEnvMarker, importMetaEnvKeyReCache, workerOrSharedWorkerRE, workerFileRE, inlineRE$1, WORKER_FILE_ID, workerCache, workerAssetUrlRE, debug$2, clientDir, skipRE, canSkipImportAnalysis, optimizedDepChunkRE, optimizedDepDynamicRE, hasViteIgnoreRE, urlIsStringRE, templateLiteralRE, interopHelper, normalizedClientEntry, normalizedEnvEntry, wasmHelperId, wasmInitRE, wasmHelper, wasmHelperCode, wasmHelperPlugin, wasmFallbackPlugin, VariableDynamicImportError, example, defaultProtocol, ignoredProtocols, dynamicImportHelperId, relativePathRE, hasDynamicImportRE, dynamicImportHelper, filterForPlugin, viteAliasCustomResolver, EMPTY_OBJECT2, debugSourcemapCombineFilter, debugSourcemapCombine, debugResolve, debugPluginResolve, debugPluginTransform, debugPluginContainerContext, ERR_CLOSED_SERVER, EnvironmentPluginContainer, MinimalPluginContext, PluginContext, ResolveIdContext, LoadPluginContext, TransformPluginContext, PluginContainer, decoder, cssConfigDefaults, cssModuleRE, directRequestRE, htmlProxyRE, htmlProxyIndexRE, commonjsProxyRE, inlineRE, inlineCSSRE, styleAttrRE, functionCallRE, transformOnlyRE, nonEscapedDoubleQuoteRe, defaultCssBundleName, isCSSRequest, isModuleCSSRequest, isDirectCSSRequest, isDirectRequest, cssModulesCache, removedPureCssFilesCache, cssBundleNameCache, postcssConfigCache, cssUrlAssetRE, fileURLWithWindowsDriveRE, configToAtImportResolvers, importPostcssImport, importPostcssModules, importPostcss, preprocessorWorkerControllerCache, alwaysFakeWorkerWorkerControllerCache, viteHashUpdateMarker, viteHashUpdateMarkerRE, cssUrlRE, cssDataUriRE, importCssRE, cssImageSetRE, UrlRewritePostcssPlugin, cssNotProcessedRE, atImportRE, atCharsetRE, loadedPreprocessorPath, cachedSss, makeScssWorker, makeModernScssWorker, makeModernCompilerScssWorker, scssProcessor, makeLessWorker, lessProcessor, makeStylWorker, stylProcessor, createPreprocessorWorkerController, normalizeMaxWorkers, preprocessorSet, importLightningCSS, map2, esMap, esRE, versionRE, convertTargetsCache, convertTargets, isModernFlag, preloadMethod, preloadMarker, preloadHelperId, preloadMarkerRE, dynamicImportPrefixRE, dynamicImportTreeshakenRE, buildEnvironmentOptionsDefaults, warningIgnoreList, dynamicImportWarningIgnoreList, normalizeLog2, needsEscapeRegEx2, quoteNewlineRegEx2, backSlashRegEx2, getResolveUrl2, getRelativeUrlFromDocument2, getFileUrlFromFullPath2, getFileUrlFromRelativePath2, relativeUrlMechanisms2, customRelativeUrlMechanisms, toOutputFilePathInCss, toOutputFilePathInHtml, BuildEnvironment, builderOptionsDefaults, build$12, OTHER_SOURCE_MAP_REGEXP, debug$1, debounceMs, EnvironmentModuleNode, EnvironmentModuleGraph, DevEnvironment, callCrawlEndIfIdleAfterMs, RunnableDevEnvironment, NOOP, MIMES, ssrConfigDefaults, debug, promisifiedRealpath, SYMBOL_RESOLVED_CONFIG, configDefaults, clientAlias, _require;
 var init_dep_Dm0c1Wj2 = __esm({
   "node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js"() {
     fs$8 = __toESM(require("node:fs"), 1);
@@ -264017,7 +264017,7 @@ var init_dep_Dm0c1Wj2 = __esm({
     import_node_assert = __toESM(require("node:assert"), 1);
     import_node_v8 = __toESM(require("node:v8"), 1);
     import_node_worker_threads = require("node:worker_threads");
-    import_https4 = __toESM(require("https"), 1);
+    import_https5 = __toESM(require("https"), 1);
     import_tls = __toESM(require("tls"), 1);
     import_zlib2 = __toESM(require("zlib"), 1);
     import_buffer = __toESM(require("buffer"), 1);
@@ -275221,7 +275221,7 @@ ${e6.message}`);
     ({ tokenChars: tokenChars$1 } = validationExports);
     extension$1 = { format: format$1, parse: parse$3 };
     EventEmitter$1 = import_events3.default;
-    https$2 = import_https4.default;
+    https$2 = import_https5.default;
     http$3 = import_http4.default;
     net = import_net.default;
     tls = import_tls.default;
@@ -276463,7 +276463,7 @@ ${e6.message}`);
     url2 = import_url5.default;
     URL$1 = url2.URL;
     http$1 = import_http4.default;
-    https$1 = import_https4.default;
+    https$1 = import_https5.default;
     Writable = import_stream7.default.Writable;
     assert = import_assert.default;
     debug$6 = debug_1;
@@ -276785,7 +276785,7 @@ ${e6.message}`);
     followRedirects$1.exports.wrap = wrap2;
     followRedirectsExports = followRedirects$1.exports;
     httpNative = import_http4.default;
-    httpsNative = import_https4.default;
+    httpsNative = import_https5.default;
     web_o = webOutgoing;
     common$1 = common$3;
     followRedirects2 = followRedirectsExports;
@@ -276860,9 +276860,9 @@ ${e6.message}`);
         server.emit("start", req2, res, options2.target || options2.forward);
         var agents = options2.followRedirects ? followRedirects2 : nativeAgents;
         var http7 = agents.http;
-        var https6 = agents.https;
+        var https7 = agents.https;
         if (options2.forward) {
-          var forwardReq = (options2.forward.protocol === "https:" ? https6 : http7).request(
+          var forwardReq = (options2.forward.protocol === "https:" ? https7 : http7).request(
             common$1.setupOutgoing(options2.ssl || {}, options2, req2, "forward")
           );
           var forwardError = createErrorHandler(forwardReq, options2.forward);
@@ -276873,7 +276873,7 @@ ${e6.message}`);
             return res.end();
           }
         }
-        var proxyReq = (options2.target.protocol === "https:" ? https6 : http7).request(
+        var proxyReq = (options2.target.protocol === "https:" ? https7 : http7).request(
           common$1.setupOutgoing(options2.ssl || {}, options2, req2)
         );
         proxyReq.on("socket", function(socket) {
@@ -276929,7 +276929,7 @@ ${e6.message}`);
       }
     };
     http5 = import_http4.default;
-    https5 = import_https4.default;
+    https6 = import_https5.default;
     common = common$3;
     wsIncoming = {
       /**
@@ -276997,7 +276997,7 @@ ${e6.message}`);
         };
         common.setupSocket(socket);
         if (head && head.length) socket.unshift(head);
-        var proxyReq = (common.isSSL.test(options2.target.protocol) ? https5 : http5).request(
+        var proxyReq = (common.isSSL.test(options2.target.protocol) ? https6 : http5).request(
           common.setupOutgoing(options2.ssl || {}, options2, req2)
         );
         if (server) {
@@ -277037,7 +277037,7 @@ ${e6.message}`);
       }
     };
     (function(module2) {
-      var httpProxy2 = module2.exports, parse_url = import_url5.default.parse, EE3 = eventemitter3Exports, http7 = import_http4.default, https6 = import_https4.default, web = webIncoming, ws = wsIncoming;
+      var httpProxy2 = module2.exports, parse_url = import_url5.default.parse, EE3 = eventemitter3Exports, http7 = import_http4.default, https7 = import_https5.default, web = webIncoming, ws = wsIncoming;
       httpProxy2.Server = ProxyServer2;
       function createRightProxy(type) {
         return function(options2) {
@@ -277097,7 +277097,7 @@ ${e6.message}`);
         var self2 = this, closure = function(req2, res) {
           self2.web(req2, res);
         };
-        this._server = this.options.ssl ? https6.createServer(this.options.ssl, closure) : http7.createServer(closure);
+        this._server = this.options.ssl ? https7.createServer(this.options.ssl, closure) : http7.createServer(closure);
         if (this.options.ws) {
           this._server.on("upgrade", function(req2, socket, head) {
             self2.ws(req2, socket, head);
@@ -283553,7 +283553,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config2) {
     if (httpVersion === void 0) httpVersion = 1;
     let http2Options = own2("http2Options");
     const httpAgent = own2("httpAgent");
-    const httpsAgent3 = own2("httpsAgent");
+    const httpsAgent4 = own2("httpsAgent");
     const configProxy = own2("proxy");
     const responseType = own2("responseType");
     const responseEncoding = own2("responseEncoding");
@@ -283832,7 +283832,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config2) {
       path: path12,
       method,
       headers: toByteStringHeaderObject(headers),
-      agents: { http: httpAgent, https: httpsAgent3 },
+      agents: { http: httpAgent, https: httpsAgent4 },
       auth,
       protocol,
       family,
@@ -283873,7 +283873,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config2) {
         configProxy,
         protocol + "//" + parsed.hostname + (parsed.port ? ":" + parsed.port : "") + options2.path,
         false,
-        httpsAgent3,
+        httpsAgent4,
         httpAgent
       );
     }
@@ -283882,7 +283882,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config2) {
     let transportEnforcesMaxBodyLength = false;
     const isHttpsRequest = isHttps.test(options2.protocol);
     if (options2.agent == null) {
-      options2.agent = isHttpsRequest ? httpsAgent3 : httpAgent;
+      options2.agent = isHttpsRequest ? httpsAgent4 : httpAgent;
     }
     if (isHttp2) {
       transport = http2Transport;
@@ -286202,7 +286202,7 @@ function resolveConstituency(pincode, district, areas = [], state) {
 }
 
 // server.ts
-var import_express31 = __toESM(require_express2(), 1);
+var import_express32 = __toESM(require_express2(), 1);
 
 // node_modules/express-rate-limit/dist/index.mjs
 var import_node_net = require("node:net");
@@ -339243,6 +339243,280 @@ router30.delete("/api/admin/global_guide/:id", authenticateToken, requireAdmin, 
 });
 var adminDynamicRoutes_default = router30;
 
+// src/routes/rssFeedRoutes.ts
+var import_express31 = __toESM(require_express2(), 1);
+var import_rss_parser2 = __toESM(require_rss_parser(), 1);
+var import_https4 = __toESM(require("https"), 1);
+var router31 = import_express31.default.Router();
+var rssParser2 = new import_rss_parser2.default({
+  customFields: {
+    item: [
+      ["media:content", "mediaContent", { keepArray: false }],
+      ["media:thumbnail", "mediaThumbnail", { keepArray: false }],
+      ["enclosure", "enclosure"],
+      ["content:encoded", "contentEncoded"]
+    ]
+  }
+});
+var httpsAgent3 = new import_https4.default.Agent({ rejectUnauthorized: false });
+var customHeaders2 = {
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+};
+var DEFAULT_RSS_FEEDS = [
+  {
+    id: "pib-hindi",
+    name: "PIB National (\u092A\u094D\u0930\u0947\u0938 \u0938\u0942\u091A\u0928\u093E \u092C\u094D\u092F\u0942\u0930\u094B)",
+    nameHi: "\u092A\u094D\u0930\u0947\u0938 \u0938\u0942\u091A\u0928\u093E \u092C\u094D\u092F\u0942\u0930\u094B (\u092D\u093E\u0930\u0924 \u0938\u0930\u0915\u093E\u0930)",
+    url: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
+    category: "Government",
+    enabled: true
+  },
+  {
+    id: "google-news-hindi",
+    name: "Google News India (Hindi)",
+    nameHi: "\u0917\u0942\u0917\u0932 \u0938\u092E\u093E\u091A\u093E\u0930 \u092D\u093E\u0930\u0924 (\u0939\u093F\u0902\u0926\u0940)",
+    url: "https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi",
+    category: "National",
+    enabled: true
+  },
+  {
+    id: "sarkari-jobs",
+    name: "Sarkari Naukri & Employment Alerts",
+    nameHi: "\u0938\u0930\u0915\u093E\u0930\u0940 \u0928\u094C\u0915\u0930\u0940 \u090F\u0935\u0902 \u0930\u094B\u091C\u0917\u093E\u0930 \u0905\u0932\u0930\u094D\u091F",
+    url: "https://news.google.com/rss/search?q=Sarkari+Naukri+India+Jobs&hl=hi&gl=IN&ceid=IN:hi",
+    category: "Employment",
+    enabled: true
+  },
+  {
+    id: "mp-news",
+    name: "Madhya Pradesh Regional News",
+    nameHi: "\u092E\u0927\u094D\u092F \u092A\u094D\u0930\u0926\u0947\u0936 \u092A\u094D\u0930\u093E\u0926\u0947\u0936\u093F\u0915 \u0938\u092E\u093E\u091A\u093E\u0930",
+    url: "https://news.google.com/rss/search?q=Madhya+Pradesh+Bhopal+News&hl=hi&gl=IN&ceid=IN:hi",
+    category: "State (MP)",
+    enabled: true
+  },
+  {
+    id: "kisan-agriculture",
+    name: "Kisan & Agriculture Welfare Feed",
+    nameHi: "\u0915\u093F\u0938\u093E\u0928 \u090F\u0935\u0902 \u0915\u0943\u0937\u093F \u0915\u0932\u094D\u092F\u093E\u0923 \u0938\u092E\u093E\u091A\u093E\u0930",
+    url: "https://news.google.com/rss/search?q=PM+Kisan+Krishi+Agriculture+Yojana&hl=hi&gl=IN&ceid=IN:hi",
+    category: "Agriculture",
+    enabled: true
+  },
+  {
+    id: "national-english",
+    name: "National Headline News (English)",
+    nameHi: "\u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u092E\u0941\u0916\u094D\u092F \u0938\u092E\u093E\u091A\u093E\u0930 (\u0905\u0902\u0917\u094D\u0930\u0947\u091C\u093C\u0940)",
+    url: "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en",
+    category: "National",
+    enabled: true
+  }
+];
+var feedMemoryCache = /* @__PURE__ */ new Map();
+var CACHE_TTL_MS2 = 8 * 60 * 1e3;
+function cleanSnippet(raw = "") {
+  if (!raw) return "";
+  return raw.replace(/<[^>]*>/g, " ").replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&quot;/gi, '"').replace(/&#39;/gi, "'").replace(/\s+/g, " ").trim();
+}
+function extractImageUrl(item) {
+  if (item.enclosure?.url && typeof item.enclosure.url === "string") {
+    return item.enclosure.url;
+  }
+  if (item.mediaContent?.$?.url) {
+    return item.mediaContent.$.url;
+  }
+  if (item.mediaThumbnail?.$?.url) {
+    return item.mediaThumbnail.$.url;
+  }
+  const htmlToScan = item.contentEncoded || item.content || item.description || "";
+  if (typeof htmlToScan === "string" && htmlToScan.includes("<img")) {
+    try {
+      const $4 = load(htmlToScan);
+      const src3 = $4("img").first().attr("src");
+      if (src3 && /^https?:\/\//i.test(src3)) {
+        return src3;
+      }
+    } catch {
+    }
+  }
+  return void 0;
+}
+async function fetchAndParseFeed(feedUrl, feedName, category) {
+  const cached = feedMemoryCache.get(feedUrl);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS2) {
+    return cached.data;
+  }
+  try {
+    const response = await axios_default.get(feedUrl, {
+      headers: customHeaders2,
+      httpsAgent: httpsAgent3,
+      timeout: 9e3,
+      responseType: "text"
+    });
+    const parsed = await rssParser2.parseString(response.data);
+    const channelTitle = cleanSnippet(parsed.title || feedName);
+    const items = (parsed.items || []).slice(0, 25).map((item, idx) => {
+      const cleanTitle = cleanSnippet(item.title || "News Update");
+      const cleanDesc = cleanSnippet(item.contentSnippet || item.content || item.description || "");
+      const link = item.link || item.guid || feedUrl;
+      const pubDate = item.pubDate ? new Date(item.pubDate).toISOString() : (/* @__PURE__ */ new Date()).toISOString();
+      const imageUrl = extractImageUrl(item);
+      return {
+        id: `${feedName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${idx}-${Date.now()}`,
+        title: cleanTitle,
+        link,
+        pubDate,
+        source: channelTitle,
+        description: cleanDesc.length > 280 ? `${cleanDesc.substring(0, 277)}...` : cleanDesc,
+        image_url: imageUrl,
+        category: category || "News"
+      };
+    });
+    feedMemoryCache.set(feedUrl, { data: items, timestamp: Date.now() });
+    return items;
+  } catch (error3) {
+    if (cached?.data?.length) {
+      return cached.data;
+    }
+    console.warn(`[RSS Parser] Could not fetch ${feedUrl}:`, error3.message);
+    return [];
+  }
+}
+async function getActiveRssFeeds() {
+  try {
+    const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
+    if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
+      const cms = JSON.parse(result.rows[0].founderMessageEn);
+      if (Array.isArray(cms.rssFeeds) && cms.rssFeeds.length > 0) {
+        return cms.rssFeeds;
+      }
+    }
+  } catch (e6) {
+    console.warn("Could not load rssFeeds from cms_data:", e6);
+  }
+  return DEFAULT_RSS_FEEDS;
+}
+router31.get("/api/public/rss-feeds", async (_req, res) => {
+  try {
+    const feeds = await getActiveRssFeeds();
+    return res.json({ success: true, data: feeds });
+  } catch (err2) {
+    return res.status(500).json({ success: false, error: err2.message });
+  }
+});
+router31.get("/api/public/rss-feed", async (req2, res) => {
+  try {
+    const { feedId, url: url3, category } = req2.query;
+    const allFeeds = await getActiveRssFeeds();
+    const activeFeeds = allFeeds.filter((f5) => f5.enabled !== false);
+    if (typeof url3 === "string" && url3.trim()) {
+      const items = await fetchAndParseFeed(url3.trim(), "Custom RSS Feed", String(category || "News"));
+      return res.json({ success: true, data: items });
+    }
+    if (typeof feedId === "string" && feedId.trim()) {
+      const target = allFeeds.find((f5) => f5.id === feedId.trim());
+      if (target) {
+        const items = await fetchAndParseFeed(target.url, target.name, target.category);
+        return res.json({ success: true, data: items, feed: target });
+      }
+    }
+    const feedPromises = activeFeeds.map(
+      (feed2) => fetchAndParseFeed(feed2.url, feed2.name, feed2.category)
+    );
+    const results = await Promise.allSettled(feedPromises);
+    const aggregated = [];
+    results.forEach((r5) => {
+      if (r5.status === "fulfilled" && Array.isArray(r5.value)) {
+        aggregated.push(...r5.value);
+      }
+    });
+    aggregated.sort((a6, b2) => new Date(b2.pubDate).getTime() - new Date(a6.pubDate).getTime());
+    const seenTitles = /* @__PURE__ */ new Set();
+    const deduplicated = aggregated.filter((item) => {
+      const key = item.title.toLowerCase().substring(0, 40);
+      if (seenTitles.has(key)) return false;
+      seenTitles.add(key);
+      return true;
+    });
+    return res.json({
+      success: true,
+      data: deduplicated.slice(0, 50),
+      feedsCount: activeFeeds.length
+    });
+  } catch (err2) {
+    console.error("RSS Feed Aggregation error:", err2);
+    return res.status(500).json({ success: false, error: "Failed to load RSS feeds" });
+  }
+});
+router31.get("/api/public/news-rss", async (_req, res) => {
+  try {
+    const allFeeds = await getActiveRssFeeds();
+    const activeFeeds = allFeeds.filter((f5) => f5.enabled !== false);
+    const feedPromises = activeFeeds.map(
+      (feed2) => fetchAndParseFeed(feed2.url, feed2.name, feed2.category)
+    );
+    const results = await Promise.allSettled(feedPromises);
+    const aggregated = [];
+    results.forEach((r5) => {
+      if (r5.status === "fulfilled" && Array.isArray(r5.value)) {
+        aggregated.push(...r5.value);
+      }
+    });
+    aggregated.sort((a6, b2) => new Date(b2.pubDate).getTime() - new Date(a6.pubDate).getTime());
+    return res.json({
+      success: true,
+      data: aggregated.slice(0, 50)
+    });
+  } catch (err2) {
+    return res.status(500).json({ success: false, error: err2.message });
+  }
+});
+router31.post("/api/admin/rss/test", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    const { url: url3 } = req2.body;
+    if (!url3 || typeof url3 !== "string" || !/^https?:\/\//i.test(url3.trim())) {
+      return res.status(400).json({ success: false, error: "Please enter a valid HTTP/HTTPS RSS feed URL." });
+    }
+    const testUrl = url3.trim();
+    const response = await axios_default.get(testUrl, {
+      headers: customHeaders2,
+      httpsAgent: httpsAgent3,
+      timeout: 1e4,
+      responseType: "text"
+    });
+    const parsed = await rssParser2.parseString(response.data);
+    const items = parsed.items || [];
+    if (items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Valid XML was found, but no news/article items (<item> or <entry>) were discovered."
+      });
+    }
+    const firstItem = items[0];
+    return res.json({
+      success: true,
+      feedTitle: parsed.title || "Untitled Feed",
+      feedDescription: parsed.description || "",
+      itemCount: items.length,
+      sample: {
+        title: cleanSnippet(firstItem.title || "No Title"),
+        link: firstItem.link || testUrl,
+        pubDate: firstItem.pubDate || (/* @__PURE__ */ new Date()).toISOString(),
+        description: cleanSnippet(firstItem.contentSnippet || firstItem.description || ""),
+        imageUrl: extractImageUrl(firstItem)
+      }
+    });
+  } catch (error3) {
+    console.error("RSS Feed Test Error:", error3.message);
+    return res.status(400).json({
+      success: false,
+      error: `Could not connect or parse feed: ${error3.message}`
+    });
+  }
+});
+var rssFeedRoutes_default = router31;
+
 // src/db/migrationRunner.ts
 var import_fs4 = __toESM(require("fs"), 1);
 var import_path5 = __toESM(require("path"), 1);
@@ -339318,7 +339592,7 @@ async function runMigrationsOnPool(pool4) {
 
 // server.ts
 var import_jsonwebtoken4 = __toESM(require_jsonwebtoken(), 1);
-var app = (0, import_express31.default)();
+var app = (0, import_express32.default)();
 app.set("trust proxy", 1);
 app.use("/api/iptv", iptvRoutes_default);
 import_dotenv2.default.config();
@@ -339338,8 +339612,8 @@ app.use((req2, res, next2) => {
   }
   next2();
 });
-app.use(import_express31.default.json({ limit: "2mb" }));
-app.use(import_express31.default.urlencoded({ limit: "2mb", extended: true }));
+app.use(import_express32.default.json({ limit: "2mb" }));
+app.use(import_express32.default.urlencoded({ limit: "2mb", extended: true }));
 var limiter2 = rate_limit_default({
   windowMs: 15 * 60 * 1e3,
   max: 500,
@@ -339387,6 +339661,7 @@ app.use(publicGovRoutes_default);
 app.use(publicExternalRoutes_default);
 app.use(adminHqExtraRoutes_default);
 app.use(adminDynamicRoutes_default);
+app.use("/", rssFeedRoutes_default);
 var rpID2 = process.env.WEBAUTHN_RP_ID || "localhost";
 var originUrl2 = `https://${rpID2}`;
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
@@ -339485,8 +339760,8 @@ app.post("/api/admin/upload", authenticateToken, requireAdmin, upload2.single("i
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
-app.use("/uploads", import_express31.default.static(import_path14.default.join(process.cwd(), "uploads")));
-app.use("/app", import_express31.default.static(import_path14.default.join(process.cwd(), "public", "app")));
+app.use("/uploads", import_express32.default.static(import_path14.default.join(process.cwd(), "uploads")));
+app.use("/app", import_express32.default.static(import_path14.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req2, res) => {
   res.redirect("/app/");
 });
@@ -339691,7 +339966,7 @@ async function startServer2() {
     app.use(vite.middlewares);
   } else {
     if (import_fs10.default.existsSync(distPath)) {
-      app.use(import_express31.default.static(distPath));
+      app.use(import_express32.default.static(distPath));
     }
     app.get("*", (req2, res, next2) => {
       if (req2.path.startsWith("/api/")) return next2();

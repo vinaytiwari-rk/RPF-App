@@ -19,11 +19,76 @@ import {
   Filter,
   Layers,
   Sparkles,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Rss,
+  PlayCircle,
+  Eye,
+  AlertCircle
 } from "lucide-react";
+import axios from "axios";
 import { toast } from "react-hot-toast";
 import { CORE_SERVICES } from "../../data/coreServices";
 import { SERVICE_GOV_LINKS, GovLink } from "../../data/serviceGovLinks";
+
+export interface RssFeedConfig {
+  id: string;
+  name: string;
+  nameHi: string;
+  url: string;
+  category: string;
+  enabled: boolean;
+}
+
+export const DEFAULT_RSS_FEEDS: RssFeedConfig[] = [
+  {
+    id: "pib-hindi",
+    name: "PIB National (प्रेस सूचना ब्यूरो)",
+    nameHi: "प्रेस सूचना ब्यूरो (भारत सरकार)",
+    url: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
+    category: "Government",
+    enabled: true
+  },
+  {
+    id: "google-news-hindi",
+    name: "Google News India (Hindi)",
+    nameHi: "गूगल समाचार भारत (हिंदी)",
+    url: "https://news.google.com/rss?hl=hi&gl=IN&ceid=IN:hi",
+    category: "National",
+    enabled: true
+  },
+  {
+    id: "sarkari-jobs",
+    name: "Sarkari Naukri & Employment Alerts",
+    nameHi: "सरकारी नौकरी एवं रोजगार अलर्ट",
+    url: "https://news.google.com/rss/search?q=Sarkari+Naukri+India+Jobs&hl=hi&gl=IN&ceid=IN:hi",
+    category: "Employment",
+    enabled: true
+  },
+  {
+    id: "mp-news",
+    name: "Madhya Pradesh Regional News",
+    nameHi: "मध्य प्रदेश प्रादेशिक समाचार",
+    url: "https://news.google.com/rss/search?q=Madhya+Pradesh+Bhopal+News&hl=hi&gl=IN&ceid=IN:hi",
+    category: "State (MP)",
+    enabled: true
+  },
+  {
+    id: "kisan-agriculture",
+    name: "Kisan & Agriculture Welfare Feed",
+    nameHi: "किसान एवं कृषि कल्याण समाचार",
+    url: "https://news.google.com/rss/search?q=PM+Kisan+Krishi+Agriculture+Yojana&hl=hi&gl=IN&ceid=IN:hi",
+    category: "Agriculture",
+    enabled: true
+  },
+  {
+    id: "national-english",
+    name: "National Headline News (English)",
+    nameHi: "राष्ट्रीय मुख्य समाचार (अंग्रेज़ी)",
+    url: "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en",
+    category: "National",
+    enabled: true
+  }
+];
 
 interface ServiceItem {
   id: string;
@@ -79,7 +144,7 @@ interface AdminExploreStudioProps {
 }
 
 export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = false }: AdminExploreStudioProps) {
-  const [subTab, setSubTab] = useState<"services" | "links" | "utilities">("services");
+  const [subTab, setSubTab] = useState<"services" | "links" | "utilities" | "feeds">("services");
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedServiceForLinks, setSelectedServiceForLinks] = useState<string>("all");
@@ -142,6 +207,14 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
     return DEFAULT_UTILITIES;
   });
 
+  // 4. RSS News Feeds State
+  const [rssFeeds, setRssFeeds] = useState<RssFeedConfig[]>(() => {
+    if (Array.isArray(cmsConfig?.rssFeeds) && cmsConfig.rssFeeds.length > 0) {
+      return cmsConfig.rssFeeds;
+    }
+    return DEFAULT_RSS_FEEDS;
+  });
+
   // Modal Dialogs
   const [serviceModal, setServiceModal] = useState<{ isOpen: boolean; mode: "add" | "edit"; data: Partial<ServiceItem> }>({
     isOpen: false,
@@ -167,6 +240,27 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
     mode: "add",
     data: {}
   });
+
+  const [feedModal, setFeedModal] = useState<{
+    isOpen: boolean;
+    mode: "add" | "edit";
+    data: Partial<RssFeedConfig>;
+  }>({
+    isOpen: false,
+    mode: "add",
+    data: {}
+  });
+
+  const [testingFeedUrl, setTestingFeedUrl] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{
+    isOpen: boolean;
+    feedUrl: string;
+    success?: boolean;
+    feedTitle?: string;
+    itemCount?: number;
+    sample?: any;
+    error?: string;
+  } | null>(null);
 
   // Primary Services handlers
   const handleToggleService = (id: string) => {
@@ -333,6 +427,100 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
     setUtilityModal({ isOpen: false, mode: "add", data: {} });
   };
 
+  // 4. RSS Feed Handlers
+  const getAdminHeaders = () => {
+    const token = localStorage.getItem("@rpf_token") || localStorage.getItem("token") || localStorage.getItem("adminToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  const handleToggleFeed = (id: string) => {
+    setRssFeeds((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, enabled: !f.enabled } : f))
+    );
+  };
+
+  const handleDeleteFeed = (id: string) => {
+    if (confirm("Are you sure you want to remove this RSS feed?")) {
+      setRssFeeds((prev) => prev.filter((f) => f.id !== id));
+      toast.success("RSS feed removed");
+    }
+  };
+
+  const handleSaveFeedModal = () => {
+    if (!feedModal.data.name?.trim() || !feedModal.data.id?.trim() || !feedModal.data.url?.trim()) {
+      toast.error("Feed ID, Title, and Feed URL are required");
+      return;
+    }
+    if (!/^https?:\/\//i.test(feedModal.data.url.trim())) {
+      toast.error("Please enter a valid HTTP or HTTPS feed URL");
+      return;
+    }
+    const cleanId = feedModal.data.id.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-");
+    const item: RssFeedConfig = {
+      id: cleanId,
+      name: feedModal.data.name.trim(),
+      nameHi: feedModal.data.nameHi?.trim() || feedModal.data.name.trim(),
+      url: feedModal.data.url.trim(),
+      category: feedModal.data.category?.trim() || "National",
+      enabled: feedModal.data.enabled !== false
+    };
+
+    if (feedModal.mode === "add") {
+      if (rssFeeds.some((f) => f.id === cleanId)) {
+        toast.error("Feed ID already exists!");
+        return;
+      }
+      setRssFeeds((prev) => [...prev, item]);
+      toast.success("RSS Feed added");
+    } else {
+      setRssFeeds((prev) => prev.map((f) => (f.id === cleanId ? item : f)));
+      toast.success("RSS Feed updated");
+    }
+    setFeedModal({ isOpen: false, mode: "add", data: {} });
+  };
+
+  const handleTestFeed = async (url: string) => {
+    if (!url || !/^https?:\/\//i.test(url.trim())) {
+      toast.error("Please provide a valid HTTP/HTTPS URL");
+      return;
+    }
+    setTestingFeedUrl(url);
+    try {
+      const headers = getAdminHeaders();
+      const res = await axios.post("/api/admin/rss/test", { url: url.trim() }, { headers });
+      if (res.data?.success) {
+        toast.success(`Feed OK! Found ${res.data.itemCount} articles.`);
+        setTestResult({
+          isOpen: true,
+          feedUrl: url,
+          success: true,
+          feedTitle: res.data.feedTitle,
+          itemCount: res.data.itemCount,
+          sample: res.data.sample
+        });
+      } else {
+        toast.error(res.data?.error || "Feed test returned an error");
+        setTestResult({
+          isOpen: true,
+          feedUrl: url,
+          success: false,
+          error: res.data?.error || "Failed to parse feed"
+        });
+      }
+    } catch (err: any) {
+      const errMsg = err.response?.data?.error || err.message || "Failed to reach feed server";
+      toast.error(errMsg);
+      setTestResult({
+        isOpen: true,
+        feedUrl: url,
+        success: false,
+        error: errMsg
+      });
+    } finally {
+      setTestingFeedUrl(null);
+    }
+  };
+
   // Persist all changes to backend CMS
   const handleSaveAllExplore = async () => {
     setIsSaving(true);
@@ -363,7 +551,8 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
         hiddenServiceIds,
         customServices,
         serviceWebsiteLinks: cleanServiceLinks,
-        exploreUtilities: utilities
+        exploreUtilities: utilities,
+        rssFeeds: rssFeeds
       };
 
       await onSaveCms(updatedCms);
@@ -426,6 +615,23 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
       return matchesCategory && matchesSearch;
     });
   }, [utilities, selectedCategory, search]);
+
+  const filteredRssFeeds = useMemo(() => {
+    return rssFeeds.filter((f) => {
+      const matchesCategory =
+        selectedCategory === "all" ||
+        f.category.toLowerCase() === selectedCategory.toLowerCase();
+      const q = search.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        f.name.toLowerCase().includes(q) ||
+        f.nameHi.toLowerCase().includes(q) ||
+        f.url.toLowerCase().includes(q) ||
+        f.id.toLowerCase().includes(q) ||
+        f.category.toLowerCase().includes(q);
+      return matchesCategory && matchesSearch;
+    });
+  }, [rssFeeds, selectedCategory, search]);
 
   return (
     <div className="space-y-6">
@@ -502,6 +708,21 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
         >
           <Wrench className="w-4 h-4 text-amber-500" />
           <span>Local Utilities & Tools ({utilities.length})</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setSubTab("feeds");
+            setSearch("");
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+            subTab === "feeds"
+              ? "bg-[#0A192F] text-white shadow-sm"
+              : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+          }`}
+        >
+          <Rss className="w-4 h-4 text-orange-500" />
+          <span>RSS News Feeds ({rssFeeds.length})</span>
         </button>
       </div>
 
@@ -611,6 +832,37 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Utility</span>
+              </button>
+            </>
+          )}
+
+          {subTab === "feeds" && (
+            <>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[#0A192F] font-medium outline-none"
+              >
+                <option value="all">All Feed Categories</option>
+                <option value="Government">Government / PIB</option>
+                <option value="National">National News</option>
+                <option value="Employment">Employment & Jobs</option>
+                <option value="State (MP)">State / MP News</option>
+                <option value="Agriculture">Agriculture & Kisan</option>
+                <option value="Health">Health & Welfare</option>
+              </select>
+              <button
+                onClick={() =>
+                  setFeedModal({
+                    isOpen: true,
+                    mode: "add",
+                    data: { category: "National", enabled: true }
+                  })
+                }
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#166534] hover:bg-green-800 text-white rounded-xl text-xs font-bold shadow-sm transition"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add RSS Feed</span>
               </button>
             </>
           )}
@@ -874,6 +1126,139 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 4. RSS NEWS FEEDS TAB CONTENT                                */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {subTab === "feeds" && (
+        <div className="space-y-4">
+          <div className="p-4 bg-orange-50/60 rounded-2xl border border-orange-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="p-2.5 rounded-xl bg-white border border-orange-200 text-[#C2410C] shadow-sm">
+                <Rss className="w-5 h-5" />
+              </span>
+              <div>
+                <h4 className="text-sm font-bold text-[#0A192F]">Live RSS Feeds & Aggregation Engine</h4>
+                <p className="text-xs text-slate-600">
+                  Manage active XML/RSS sources. You can live-test any RSS URL before publishing to verify headers and article extraction.
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-semibold px-3 py-1 bg-white rounded-full border border-orange-200 text-[#C2410C] self-start sm:self-auto">
+              {rssFeeds.filter(f => f.enabled).length} of {rssFeeds.length} Feeds Active
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredRssFeeds.map((feed) => (
+              <div
+                key={feed.id}
+                className={`p-4 rounded-2xl border transition-all ${
+                  feed.enabled
+                    ? "bg-white border-slate-200 shadow-sm"
+                    : "bg-slate-50/70 border-slate-200 opacity-60"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className={`p-2.5 rounded-xl border shrink-0 ${
+                        feed.enabled
+                          ? "bg-orange-50 border-orange-200 text-[#C2410C]"
+                          : "bg-slate-100 border-slate-300 text-slate-400"
+                      }`}
+                    >
+                      <Rss className="w-5 h-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold text-[#0A192F] truncate">{feed.name}</h4>
+                      <p className="text-xs font-medium text-[#166534] truncate">{feed.nameHi}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleToggleFeed(feed.id)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 transition ${
+                      feed.enabled
+                        ? "bg-green-50 text-[#166534] border-green-200 hover:bg-green-100"
+                        : "bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200"
+                    }`}
+                  >
+                    {feed.enabled ? "Active" : "Disabled"}
+                  </button>
+                </div>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-[#1E3A8A] border border-blue-100">
+                    {feed.category}
+                  </span>
+                  <span className="font-mono text-[10px] text-slate-400">ID: {feed.id}</span>
+                </div>
+
+                <div className="mt-2.5 p-2 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600 font-mono break-all line-clamp-2">
+                  {feed.url}
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <button
+                    onClick={() => handleTestFeed(feed.url)}
+                    disabled={testingFeedUrl === feed.url}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-orange-50 hover:bg-orange-100 text-[#C2410C] border border-orange-200 transition disabled:opacity-50"
+                    title="Test feed connectivity & view latest headline"
+                  >
+                    {testingFeedUrl === feed.url ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <PlayCircle className="w-3.5 h-3.5" />
+                    )}
+                    <span>{testingFeedUrl === feed.url ? "Testing..." : "Test Feed"}</span>
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    <a
+                      href={feed.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-[#0A192F] hover:bg-slate-100 transition"
+                      title="Open XML in new tab"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                    <button
+                      onClick={() =>
+                        setFeedModal({
+                          isOpen: true,
+                          mode: "edit",
+                          data: { ...feed }
+                        })
+                      }
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-[#0A192F] hover:bg-slate-100 transition"
+                      title="Edit RSS Feed"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteFeed(feed.id)}
+                      className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition"
+                      title="Delete RSS Feed"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredRssFeeds.length === 0 && (
+            <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-500">
+              <Rss className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm font-bold text-slate-700">No RSS Feeds Found</p>
+              <p className="text-xs text-slate-400 mt-1">Try clearing filters or add a new RSS news feed.</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -1391,6 +1776,278 @@ export default function AdminExploreStudio({ cmsConfig, onSaveCms, isLoading = f
                 className="px-5 py-2 rounded-xl text-xs font-bold bg-[#166534] text-white hover:bg-green-800 shadow"
               >
                 {utilityModal.mode === "add" ? "Add Utility" : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MODAL 4: ADD / EDIT RSS NEWS FEED                             */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {feedModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div className="flex items-center gap-2">
+                <span className="p-2 rounded-xl bg-orange-50 border border-orange-200 text-[#C2410C]">
+                  <Rss className="w-5 h-5" />
+                </span>
+                <h3 className="text-base font-bold text-[#0A192F]">
+                  {feedModal.mode === "add" ? "Add New RSS Feed" : "Edit RSS Feed"}
+                </h3>
+              </div>
+              <button
+                onClick={() => setFeedModal({ isOpen: false, mode: "add", data: {} })}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-700">Feed Unique ID (Slug)</label>
+                <input
+                  type="text"
+                  disabled={feedModal.mode === "edit"}
+                  value={feedModal.data.id || ""}
+                  onChange={(e) =>
+                    setFeedModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, id: e.target.value }
+                    }))
+                  }
+                  placeholder="e.g. state-bhopal-news, pib-english"
+                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 disabled:bg-slate-100"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700">Channel Name (English)</label>
+                  <input
+                    type="text"
+                    value={feedModal.data.name || ""}
+                    onChange={(e) =>
+                      setFeedModal((prev) => ({
+                        ...prev,
+                        data: { ...prev.data, name: e.target.value }
+                      }))
+                    }
+                    placeholder="e.g. PIB National Press"
+                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700">Channel Name (Hindi)</label>
+                  <input
+                    type="text"
+                    value={feedModal.data.nameHi || ""}
+                    onChange={(e) =>
+                      setFeedModal((prev) => ({
+                        ...prev,
+                        data: { ...prev.data, nameHi: e.target.value }
+                      }))
+                    }
+                    placeholder="e.g. प्रेस सूचना ब्यूरो"
+                    className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700">Category</label>
+                <select
+                  value={feedModal.data.category || "National"}
+                  onChange={(e) =>
+                    setFeedModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, category: e.target.value }
+                    }))
+                  }
+                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white"
+                >
+                  <option value="Government">Government / Official (PIB, Press)</option>
+                  <option value="National">National Headlines (देश-विदेश)</option>
+                  <option value="Employment">Employment & Recruitment (नौकरी)</option>
+                  <option value="State (MP)">Madhya Pradesh Regional (मध्य प्रदेश)</option>
+                  <option value="Agriculture">Agriculture & Kisan (किसान कल्याण)</option>
+                  <option value="Health">Healthcare & Social Aid (स्वास्थ्य)</option>
+                  <option value="General">General News & Updates</option>
+                </select>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-700">XML/RSS Feed Endpoint URL</label>
+                  {feedModal.data.url && (
+                    <button
+                      type="button"
+                      onClick={() => handleTestFeed(feedModal.data.url || "")}
+                      disabled={testingFeedUrl === feedModal.data.url}
+                      className="text-[11px] font-bold text-[#C2410C] hover:underline flex items-center gap-1"
+                    >
+                      <PlayCircle className="w-3 h-3" />
+                      <span>{testingFeedUrl === feedModal.data.url ? "Testing..." : "Test URL Live"}</span>
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="url"
+                  value={feedModal.data.url || ""}
+                  onChange={(e) =>
+                    setFeedModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, url: e.target.value }
+                    }))
+                  }
+                  placeholder="https://example.com/rss.xml"
+                  className="mt-1 w-full text-xs p-2.5 rounded-xl border border-slate-200 font-mono"
+                />
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Must be a reachable standard RSS or Atom XML link.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="feedEnabledCheckbox"
+                  checked={feedModal.data.enabled !== false}
+                  onChange={(e) =>
+                    setFeedModal((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, enabled: e.target.checked }
+                    }))
+                  }
+                  className="rounded text-[#166534] focus:ring-[#166534]"
+                />
+                <label htmlFor="feedEnabledCheckbox" className="text-xs font-medium text-slate-700">
+                  Enable feed in public news stream immediately
+                </label>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t">
+              <button
+                onClick={() => setFeedModal({ isOpen: false, mode: "add", data: {} })}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveFeedModal}
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#166534] text-white hover:bg-green-800 shadow"
+              >
+                {feedModal.mode === "add" ? "Add Feed" : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MODAL 5: RSS FEED LIVE TEST RESULT PREVIEW                    */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {testResult?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`p-2 rounded-xl border ${
+                    testResult.success
+                      ? "bg-green-50 border-green-200 text-[#166534]"
+                      : "bg-red-50 border-red-200 text-red-600"
+                  }`}
+                >
+                  {testResult.success ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                </span>
+                <h3 className="text-base font-bold text-[#0A192F]">
+                  {testResult.success ? "RSS Feed Verification Passed" : "RSS Feed Test Failed"}
+                </h3>
+              </div>
+              <button
+                onClick={() => setTestResult(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {testResult.success ? (
+              <div className="space-y-3">
+                <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-xs text-[#166534]">
+                  <p className="font-bold">100% Reachable & Verified!</p>
+                  <p className="mt-0.5">
+                    Found <strong>{testResult.itemCount}</strong> valid news items in this feed.
+                  </p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Channel Title</span>
+                  <p className="text-sm font-bold text-[#0A192F]">{testResult.feedTitle}</p>
+                </div>
+
+                {testResult.sample && (
+                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                      Sample Article Preview
+                    </span>
+                    <h5 className="text-xs font-bold text-[#0A192F] leading-snug">
+                      {testResult.sample.title}
+                    </h5>
+                    {testResult.sample.imageUrl && (
+                      <div className="w-full h-32 rounded-lg overflow-hidden bg-slate-200">
+                        <img
+                          src={testResult.sample.imageUrl}
+                          alt="Feed thumbnail"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      </div>
+                    )}
+                    {testResult.sample.description && (
+                      <p className="text-xs text-slate-600 line-clamp-3">
+                        {testResult.sample.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                      <span>{new Date(testResult.sample.pubDate).toLocaleString()}</span>
+                      <a
+                        href={testResult.sample.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#C2410C] font-semibold hover:underline flex items-center gap-1"
+                      >
+                        <span>Open Article</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 space-y-1">
+                  <p className="font-bold">Connection or XML Parse Error</p>
+                  <p className="break-words font-mono text-[11px]">{testResult.error}</p>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Please verify that the feed URL is a valid XML, RSS, or Atom link that returns standard XML content with CORS or standard GET headers.
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end pt-3 border-t">
+              <button
+                onClick={() => setTestResult(null)}
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#0A192F] text-white hover:bg-slate-800 transition"
+              >
+                Close Preview
               </button>
             </div>
           </div>
