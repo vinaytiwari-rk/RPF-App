@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Award, ArrowLeft, Download, FileText, Sparkles, ShieldCheck, Printer, CheckCircle2, User } from "lucide-react";
+import { Award, ArrowLeft, Download, Printer, CheckCircle2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -37,7 +37,7 @@ export default function MyCertificates() {
 
   useEffect(() => {
     if (!user?.id) { setItems([]); setSelectedCert(null); setLoading(false); return; }
-    fetch(`/api/volunteers/me/certificates?volunteer_id=${encodeURIComponent(user.id)}`)
+    fetch("/api/volunteers/me/certificates")
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => {
         setProgress({ hours: Number(d.progress?.hours || 0), reports: Number(d.progress?.reports || 0), tasks: Number(d.progress?.tasks || 0) });
