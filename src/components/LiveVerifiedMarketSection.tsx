@@ -104,7 +104,13 @@ type ActiveSheet = null | "panchang" | "bullion" | "vegetables" | "mandi" | "fue
 
 export default function LiveVerifiedMarketSection() {
   const [cities, setCities] = useState<CityItem[]>(FALLBACK_CITIES);
-  const [selectedState, setSelectedState] = useState<string>(() => localStorage.getItem("@rpf_selected_market_state") || "Madhya Pradesh");
+  const [selectedState, setSelectedState] = useState<string>(() => {
+    try {
+      return localStorage.getItem("@rpf_selected_market_state") || "Madhya Pradesh";
+    } catch {
+      return "Madhya Pradesh";
+    }
+  });
   const [selectedCity, setSelectedCity] = useState<CityItem>(() => {
     try {
       const saved = localStorage.getItem("@rpf_selected_market_city");
