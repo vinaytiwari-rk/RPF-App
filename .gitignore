@@ -17,3 +17,4 @@ scratch/
 
 !.env.production
 save_env.cjs
+well-known*
