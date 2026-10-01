@@ -35,6 +35,12 @@ interface ReelsVerticalViewerProps {
   onClose: () => void;
 }
 
+function extractYouTubeId(url: string = ""): string | undefined {
+  if (!url) return undefined;
+  const match = url.match(/(?:shorts\/|watch\?v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
+  return match ? match[1] : undefined;
+}
+
 export default function ReelsVerticalViewer({
   reels,
   initialIndex = 0,
@@ -124,6 +130,7 @@ export default function ReelsVerticalViewer({
         {reels.map((reel, idx) => {
           const isLiked = likedMap[reel.id];
           const isActive = idx === currentIndex;
+          const ytId = reel.videoId || extractYouTubeId(reel.videoUrl) || extractYouTubeId(reel.url);
 
           return (
             <div
@@ -131,10 +138,10 @@ export default function ReelsVerticalViewer({
               className="relative w-full h-full snap-start snap-always flex items-center justify-center bg-black overflow-hidden"
             >
               {/* VIDEO PLAYBACK / MEDIA LAYER */}
-              {isActive && reel.videoId ? (
+              {isActive && ytId ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black">
                   <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${reel.videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`}
+                    src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`}
                     title={reel.title}
                     className="w-full h-full max-w-lg aspect-[9/16] border-0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

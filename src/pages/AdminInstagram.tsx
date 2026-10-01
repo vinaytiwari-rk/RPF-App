@@ -330,9 +330,25 @@ export default function AdminInstagram() {
                       )}
                     </div>
 
+                    {/* External Zero-Storage Video Link */}
+                    <div className="pt-2.5 border-t border-rose-100">
+                      <label className="block text-[11px] font-bold text-slate-700">
+                        Or Paste Video Link (YouTube Shorts / Cloud CDN — 0 MB Server Space!)
+                        <input
+                          value={p.videoUrl && p.videoUrl.startsWith("http") ? p.videoUrl : ""}
+                          onChange={(e) => patch(selected, { videoUrl: e.target.value })}
+                          placeholder="e.g. https://www.youtube.com/shorts/SUQQ919wFs0 or Cloud MP4"
+                          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-rose-400"
+                        />
+                      </label>
+                      <p className="mt-1 text-[10px] text-emerald-700 font-semibold">
+                        💡 Tip: Uses 0 MB cPanel disk space! Streams 24/7 directly from Google's high-speed CDN.
+                      </p>
+                    </div>
+
                     {p.videoUrl && (
                       <p className="text-[10px] font-mono text-slate-500 truncate" title={p.videoUrl}>
-                        {p.videoUrl}
+                        Active Stream: {p.videoUrl}
                       </p>
                     )}
                   </div>
