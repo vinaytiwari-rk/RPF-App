@@ -9240,7 +9240,7 @@ var require_accepts = __commonJS({
 // node_modules/base64id/lib/base64id.js
 var require_base64id = __commonJS({
   "node_modules/base64id/lib/base64id.js"(exports2, module2) {
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     var Base64Id = function() {
     };
     Base64Id.prototype.getRandomBytes = function(bytes) {
@@ -9248,12 +9248,12 @@ var require_base64id = __commonJS({
       var self2 = this;
       bytes = bytes || 12;
       if (bytes > BUFFER_SIZE) {
-        return crypto24.randomBytes(bytes);
+        return crypto25.randomBytes(bytes);
       }
       var bytesInBuffer = parseInt(BUFFER_SIZE / bytes);
       var threshold = parseInt(bytesInBuffer * 0.85);
       if (!threshold) {
-        return crypto24.randomBytes(bytes);
+        return crypto25.randomBytes(bytes);
       }
       if (this.bytesBufferIndex == null) {
         this.bytesBufferIndex = -1;
@@ -9265,14 +9265,14 @@ var require_base64id = __commonJS({
       if (this.bytesBufferIndex == -1 || this.bytesBufferIndex > threshold) {
         if (!this.isGeneratingBytes) {
           this.isGeneratingBytes = true;
-          crypto24.randomBytes(BUFFER_SIZE, function(err2, bytes2) {
+          crypto25.randomBytes(BUFFER_SIZE, function(err2, bytes2) {
             self2.bytesBuffer = bytes2;
             self2.bytesBufferIndex = 0;
             self2.isGeneratingBytes = false;
           });
         }
         if (this.bytesBufferIndex == -1) {
-          return crypto24.randomBytes(bytes);
+          return crypto25.randomBytes(bytes);
         }
       }
       var result = this.bytesBuffer.slice(bytes * this.bytesBufferIndex, bytes * (this.bytesBufferIndex + 1));
@@ -9286,7 +9286,7 @@ var require_base64id = __commonJS({
       }
       this.sequenceNumber = this.sequenceNumber + 1 | 0;
       rand.writeInt32BE(this.sequenceNumber, 11);
-      if (crypto24.randomBytes) {
+      if (crypto25.randomBytes) {
         this.getRandomBytes(12).copy(rand);
       } else {
         [0, 4, 8].forEach(function(i6) {
@@ -23912,9 +23912,9 @@ var require_form_data = __commonJS({
     var http7 = require("http");
     var https7 = require("https");
     var parseUrl3 = require("url").parse;
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var Stream4 = require("stream").Stream;
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     var mime = require_mime_types();
     var asynckit = require_asynckit();
     var setToStringTag = require_es_set_tostringtag();
@@ -23982,7 +23982,7 @@ var require_form_data = __commonJS({
         if (value2.end != void 0 && value2.end != Infinity && value2.start != void 0) {
           callback2(null, value2.end + 1 - (value2.start ? value2.start : 0));
         } else {
-          fs9.stat(value2.path, function(err2, stat5) {
+          fs10.stat(value2.path, function(err2, stat5) {
             if (err2) {
               callback2(err2);
               return;
@@ -24123,7 +24123,7 @@ var require_form_data = __commonJS({
       return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
     };
     FormData5.prototype._generateBoundary = function() {
-      this._boundary = "--------------------------" + crypto24.randomBytes(12).toString("hex");
+      this._boundary = "--------------------------" + crypto25.randomBytes(12).toString("hex");
     };
     FormData5.prototype.getLengthSync = function() {
       var knownLength = this._overheadLength + this._valueLength;
@@ -26465,8 +26465,8 @@ var require_node2 = __commonJS({
           }
           break;
         case "FILE":
-          var fs9 = require("fs");
-          stream7 = new fs9.SyncWriteStream(fd2, { autoClose: false });
+          var fs10 = require("fs");
+          stream7 = new fs10.SyncWriteStream(fd2, { autoClose: false });
           stream7._type = "fs";
           break;
         case "PIPE":
@@ -33412,8 +33412,8 @@ var require_node3 = __commonJS({
           }
           break;
         case "FILE":
-          var fs9 = require("fs");
-          stream7 = new fs9.SyncWriteStream(fd2, { autoClose: false });
+          var fs10 = require("fs");
+          stream7 = new fs10.SyncWriteStream(fd2, { autoClose: false });
           stream7._type = "fs";
           break;
         case "PIPE":
@@ -34131,8 +34131,8 @@ var require_node4 = __commonJS({
           }
           break;
         case "FILE":
-          var fs9 = require("fs");
-          stream7 = new fs9.SyncWriteStream(fd2, { autoClose: false });
+          var fs10 = require("fs");
+          stream7 = new fs10.SyncWriteStream(fd2, { autoClose: false });
           stream7._type = "fs";
           break;
         case "PIPE":
@@ -35026,7 +35026,7 @@ var require_view = __commonJS({
     "use strict";
     var debug2 = require_src5()("express:view");
     var path12 = require("path");
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var dirname6 = path12.dirname;
     var basename7 = path12.basename;
     var extname4 = path12.extname;
@@ -35092,7 +35092,7 @@ var require_view = __commonJS({
     function tryStat(path13) {
       debug2('stat "%s"', path13);
       try {
-        return fs9.statSync(path13);
+        return fs10.statSync(path13);
       } catch (e6) {
         return void 0;
       }
@@ -35697,8 +35697,8 @@ var require_node5 = __commonJS({
           }
           break;
         case "FILE":
-          var fs9 = require("fs");
-          stream7 = new fs9.SyncWriteStream(fd2, { autoClose: false });
+          var fs10 = require("fs");
+          stream7 = new fs10.SyncWriteStream(fd2, { autoClose: false });
           stream7._type = "fs";
           break;
         case "PIPE":
@@ -35750,14 +35750,14 @@ var require_etag = __commonJS({
   "node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag2;
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     var Stats2 = require("fs").Stats;
     var toString7 = Object.prototype.toString;
     function entitytag2(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash4 = crypto24.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash4 = crypto25.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash4 + '"';
     }
@@ -35871,7 +35871,7 @@ var require_types = __commonJS({
 var require_mime = __commonJS({
   "node_modules/mime/mime.js"(exports2, module2) {
     var path12 = require("path");
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     function Mime() {
       this.types = /* @__PURE__ */ Object.create(null);
       this.extensions = /* @__PURE__ */ Object.create(null);
@@ -35892,7 +35892,7 @@ var require_mime = __commonJS({
     };
     Mime.prototype.load = function(file) {
       this._loading = file;
-      var map3 = {}, content = fs9.readFileSync(file, "ascii"), lines = content.split(/[\r\n]+/);
+      var map3 = {}, content = fs10.readFileSync(file, "ascii"), lines = content.split(/[\r\n]+/);
       lines.forEach(function(line) {
         var fields = line.replace(/\s*#.*|^\s*|\s*$/g, "").split(/\s+/);
         map3[fields.shift()] = fields;
@@ -36014,7 +36014,7 @@ var require_send = __commonJS({
     var escapeHtml2 = require_escape_html();
     var etag2 = require_etag();
     var fresh2 = require_fresh();
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var mime = require_mime();
     var ms2 = require_ms();
     var onFinished2 = require_on_finished();
@@ -36347,7 +36347,7 @@ var require_send = __commonJS({
       var i6 = 0;
       var self2 = this;
       debug2('stat "%s"', path13);
-      fs9.stat(path13, function onstat(err2, stat5) {
+      fs10.stat(path13, function onstat(err2, stat5) {
         if (err2 && err2.code === "ENOENT" && !extname4(path13) && path13[path13.length - 1] !== sep3) {
           return next2(err2);
         }
@@ -36362,7 +36362,7 @@ var require_send = __commonJS({
         }
         var p5 = path13 + "." + self2._extensions[i6++];
         debug2('stat "%s"', p5);
-        fs9.stat(p5, function(err3, stat5) {
+        fs10.stat(p5, function(err3, stat5) {
           if (err3) return next2(err3);
           if (stat5.isDirectory()) return next2();
           self2.emit("file", p5, stat5);
@@ -36380,7 +36380,7 @@ var require_send = __commonJS({
         }
         var p5 = join3(path13, self2._index[i6]);
         debug2('stat "%s"', p5);
-        fs9.stat(p5, function(err3, stat5) {
+        fs10.stat(p5, function(err3, stat5) {
           if (err3) return next2(err3);
           if (stat5.isDirectory()) return next2();
           self2.emit("file", p5, stat5);
@@ -36392,7 +36392,7 @@ var require_send = __commonJS({
     SendStream.prototype.stream = function stream6(path13, options2) {
       var self2 = this;
       var res = this.res;
-      var stream7 = fs9.createReadStream(path13, options2);
+      var stream7 = fs10.createReadStream(path13, options2);
       this.emit("stream", stream7);
       stream7.pipe(res);
       function cleanup() {
@@ -37956,11 +37956,11 @@ var require_request = __commonJS({
 // node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/cookie-signature/index.js"(exports2) {
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     exports2.sign = function(val2, secret) {
       if ("string" !== typeof val2) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val2 + "." + crypto24.createHmac("sha256", secret).update(val2).digest("base64").replace(/\=+$/, "");
+      return val2 + "." + crypto25.createHmac("sha256", secret).update(val2).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val2, secret) {
       if ("string" !== typeof val2) throw new TypeError("Signed cookie string must be provided.");
@@ -37969,7 +37969,7 @@ var require_cookie_signature = __commonJS({
       return sha12(mac) == sha12(val2) ? str2 : false;
     };
     function sha12(str2) {
-      return crypto24.createHash("sha1").update(str2).digest("hex");
+      return crypto25.createHash("sha1").update(str2).digest("hex");
     }
   }
 });
@@ -40619,10 +40619,10 @@ var require_ip_address = __commonJS({
 // node_modules/dotenv/lib/main.js
 var require_main = __commonJS({
   "node_modules/dotenv/lib/main.js"(exports2, module2) {
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var path12 = require("path");
     var os2 = require("os");
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     var TIPS = [
       "\u25C8 encrypted .env [www.dotenvx.com]",
       "\u25C8 secrets for agents [www.dotenvx.com]",
@@ -40751,7 +40751,7 @@ var require_main = __commonJS({
       if (options2 && options2.path && options2.path.length > 0) {
         if (Array.isArray(options2.path)) {
           for (const filepath of options2.path) {
-            if (fs9.existsSync(filepath)) {
+            if (fs10.existsSync(filepath)) {
               possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
             }
           }
@@ -40761,7 +40761,7 @@ var require_main = __commonJS({
       } else {
         possibleVaultPath = path12.resolve(process.cwd(), ".env.vault");
       }
-      if (fs9.existsSync(possibleVaultPath)) {
+      if (fs10.existsSync(possibleVaultPath)) {
         return possibleVaultPath;
       }
       return null;
@@ -40814,7 +40814,7 @@ var require_main = __commonJS({
       const parsedAll = {};
       for (const path13 of optionPaths) {
         try {
-          const parsed = DotenvModule2.parse(fs9.readFileSync(path13, { encoding }));
+          const parsed = DotenvModule2.parse(fs10.readFileSync(path13, { encoding }));
           DotenvModule2.populate(parsedAll, parsed, options2);
         } catch (e6) {
           if (debug2) {
@@ -40866,7 +40866,7 @@ var require_main = __commonJS({
       const authTag = ciphertext.subarray(-16);
       ciphertext = ciphertext.subarray(12, -16);
       try {
-        const aesgcm = crypto24.createDecipheriv("aes-256-gcm", key, nonce);
+        const aesgcm = crypto25.createDecipheriv("aes-256-gcm", key, nonce);
         aesgcm.setAuthTag(authTag);
         return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
       } catch (error3) {
@@ -42252,7 +42252,7 @@ var require_cert_signatures = __commonJS({
 var require_sasl = __commonJS({
   "node_modules/pg/lib/crypto/sasl.js"(exports2, module2) {
     "use strict";
-    var crypto24 = require_utils4();
+    var crypto25 = require_utils4();
     var { signatureAlgorithmHashFromCertificate } = require_cert_signatures();
     function saslprep(password) {
       const nonAsciiSpace = /[\u00A0\u1680\u2000-\u200B\u202F\u205F\u3000]/g;
@@ -42270,7 +42270,7 @@ var require_sasl = __commonJS({
       if (mechanism === "SCRAM-SHA-256-PLUS" && typeof stream6.getPeerCertificate !== "function") {
         throw new Error("SASL: Mechanism SCRAM-SHA-256-PLUS requires a certificate");
       }
-      const clientNonce = crypto24.randomBytes(18).toString("base64");
+      const clientNonce = crypto25.randomBytes(18).toString("base64");
       const gs2Header = mechanism === "SCRAM-SHA-256-PLUS" ? "p=tls-server-end-point" : stream6 ? "y" : "n";
       return {
         mechanism,
@@ -42312,20 +42312,20 @@ var require_sasl = __commonJS({
         const peerCert = stream6.getPeerCertificate().raw;
         let hashName = signatureAlgorithmHashFromCertificate(peerCert);
         if (hashName === "MD5" || hashName === "SHA-1") hashName = "SHA-256";
-        const certHash = await crypto24.hashByName(hashName, peerCert);
+        const certHash = await crypto25.hashByName(hashName, peerCert);
         const bindingData = Buffer.concat([Buffer.from("p=tls-server-end-point,,"), Buffer.from(certHash)]);
         channelBinding = bindingData.toString("base64");
       }
       const clientFinalMessageWithoutProof = "c=" + channelBinding + ",r=" + sv.nonce;
       const authMessage = clientFirstMessageBare + "," + serverFirstMessage + "," + clientFinalMessageWithoutProof;
       const saltBytes = Buffer.from(sv.salt, "base64");
-      const saltedPassword = await crypto24.deriveKey(saslprep(password), saltBytes, sv.iteration);
-      const clientKey = await crypto24.hmacSha256(saltedPassword, "Client Key");
-      const storedKey = await crypto24.sha256(clientKey);
-      const clientSignature = await crypto24.hmacSha256(storedKey, authMessage);
+      const saltedPassword = await crypto25.deriveKey(saslprep(password), saltBytes, sv.iteration);
+      const clientKey = await crypto25.hmacSha256(saltedPassword, "Client Key");
+      const storedKey = await crypto25.sha256(clientKey);
+      const clientSignature = await crypto25.hmacSha256(storedKey, authMessage);
       const clientProof = xorBuffers(Buffer.from(clientKey), Buffer.from(clientSignature)).toString("base64");
-      const serverKey = await crypto24.hmacSha256(saltedPassword, "Server Key");
-      const serverSignatureBytes = await crypto24.hmacSha256(serverKey, authMessage);
+      const serverKey = await crypto25.hmacSha256(saltedPassword, "Server Key");
+      const serverSignatureBytes = await crypto25.hmacSha256(serverKey, authMessage);
       session.message = "SASLResponse";
       session.serverSignature = Buffer.from(serverSignatureBytes).toString("base64");
       session.response = clientFinalMessageWithoutProof + ",p=" + clientProof;
@@ -42528,15 +42528,15 @@ var require_pg_connection_string = __commonJS({
       if (config2.sslnegotiation === "direct" && config2.ssl === void 0) {
         config2.ssl = true;
       }
-      const fs9 = config2.sslcert || config2.sslkey || config2.sslrootcert ? require("fs") : null;
+      const fs10 = config2.sslcert || config2.sslkey || config2.sslrootcert ? require("fs") : null;
       if (config2.sslcert) {
-        config2.ssl.cert = fs9.readFileSync(config2.sslcert).toString();
+        config2.ssl.cert = fs10.readFileSync(config2.sslcert).toString();
       }
       if (config2.sslkey) {
-        config2.ssl.key = fs9.readFileSync(config2.sslkey).toString();
+        config2.ssl.key = fs10.readFileSync(config2.sslkey).toString();
       }
       if (config2.sslrootcert) {
-        config2.ssl.ca = fs9.readFileSync(config2.sslrootcert).toString();
+        config2.ssl.ca = fs10.readFileSync(config2.sslrootcert).toString();
       }
       if (options2.useLibpqCompat && config2.uselibpqcompat) {
         throw new Error("Both useLibpqCompat and uselibpqcompat are set. Please use only one of them.");
@@ -44527,15 +44527,15 @@ var require_lib4 = __commonJS({
   "node_modules/pgpass/lib/index.js"(exports2, module2) {
     "use strict";
     var path12 = require("path");
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var helper = require_helper();
     module2.exports = function(connInfo, cb) {
       var file = helper.getFileName();
-      fs9.stat(file, function(err2, stat5) {
+      fs10.stat(file, function(err2, stat5) {
         if (err2 || !helper.usePgPass(stat5, file)) {
           return cb(void 0);
         }
-        var st3 = fs9.createReadStream(file);
+        var st3 = fs10.createReadStream(file);
         helper.getPassword(connInfo, st3, cb);
       });
     };
@@ -44555,7 +44555,7 @@ var require_client2 = __commonJS({
     var Query2 = require_query2();
     var defaults3 = require_defaults();
     var Connection2 = require_connection();
-    var crypto24 = require_utils4();
+    var crypto25 = require_utils4();
     var activeQueryDeprecationNotice = nodeUtils.deprecate(
       () => {
       },
@@ -44806,7 +44806,7 @@ var require_client2 = __commonJS({
       _handleAuthMD5Password(msg) {
         this._getPassword(async () => {
           try {
-            const hashedPassword = await crypto24.postgresMd5PasswordHash(this.user, this.password, msg.salt);
+            const hashedPassword = await crypto25.postgresMd5PasswordHash(this.user, this.password, msg.salt);
             this.connection.password(hashedPassword);
           } catch (e6) {
             this.emit("error", e6);
@@ -46335,14 +46335,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer5 = require_safe_buffer().Buffer;
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util6 = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto24.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto25.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -46432,17 +46432,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto24.createHmac("sha" + bits, secret);
+        var hmac = crypto25.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto24 ? function timingSafeEqual2(a6, b2) {
+    var timingSafeEqual = "timingSafeEqual" in crypto25 ? function timingSafeEqual2(a6, b2) {
       if (a6.byteLength !== b2.byteLength) {
         return false;
       }
-      return crypto24.timingSafeEqual(a6, b2);
+      return crypto25.timingSafeEqual(a6, b2);
     } : function timingSafeEqual2(a6, b2) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -46459,7 +46459,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto24.createSign("RSA-SHA" + bits);
+        var signer = crypto25.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -46469,7 +46469,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase643(signature);
-        var verifier = crypto24.createVerify("RSA-SHA" + bits);
+        var verifier = crypto25.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -46478,11 +46478,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto24.createSign("RSA-SHA" + bits);
+        var signer = crypto25.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto24.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto24.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto25.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto25.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -46492,12 +46492,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase643(signature);
-        var verifier = crypto24.createVerify("RSA-SHA" + bits);
+        var verifier = crypto25.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto24.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto24.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto25.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto25.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -54082,12 +54082,12 @@ var require_make_middleware = __commonJS({
 // node_modules/multer/storage/disk.js
 var require_disk = __commonJS({
   "node_modules/multer/storage/disk.js"(exports2, module2) {
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var os2 = require("os");
     var path12 = require("path");
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     function getFilename(req2, file, cb) {
-      crypto24.randomBytes(16, function(err2, raw) {
+      crypto25.randomBytes(16, function(err2, raw) {
         cb(err2, err2 ? void 0 : raw.toString("hex"));
       });
     }
@@ -54097,7 +54097,7 @@ var require_disk = __commonJS({
     function DiskStorage(opts) {
       this.getFilename = opts.filename || getFilename;
       if (typeof opts.destination === "string") {
-        fs9.mkdirSync(opts.destination, { recursive: true });
+        fs10.mkdirSync(opts.destination, { recursive: true });
         this.getDestination = function($0, $1, cb) {
           cb(null, opts.destination);
         };
@@ -54113,7 +54113,7 @@ var require_disk = __commonJS({
           if (err3) return cb(err3);
           var finalPath = path12.join(destination, filename);
           if (file.stream.destroyed) return;
-          var outStream = fs9.createWriteStream(finalPath);
+          var outStream = fs10.createWriteStream(finalPath);
           file.path = finalPath;
           file.stream.pipe(outStream);
           outStream.on("error", cb);
@@ -54133,7 +54133,7 @@ var require_disk = __commonJS({
       delete file.destination;
       delete file.filename;
       delete file.path;
-      fs9.unlink(path13, cb);
+      fs10.unlink(path13, cb);
     };
     module2.exports = function(opts) {
       return new DiskStorage(opts);
@@ -79323,11 +79323,11 @@ var require_x509_cjs = __commonJS({
         return this.items[Symbol.iterator]();
       }
       get(key = _CryptoProvider.DEFAULT) {
-        const crypto24 = this.items.get(key.toLowerCase());
-        if (!crypto24) {
+        const crypto25 = this.items.get(key.toLowerCase());
+        if (!crypto25) {
           throw new Error(`Cannot get Crypto by name '${key}'`);
         }
-        return crypto24;
+        return crypto25;
       }
       set(key, value2) {
         if (typeof key === "string") {
@@ -79555,15 +79555,15 @@ var require_x509_cjs = __commonJS({
       }
       async getThumbprint(...args) {
         var _a7;
-        let crypto24;
+        let crypto25;
         let algorithm = "SHA-1";
         if (args.length >= 1 && !((_a7 = args[0]) === null || _a7 === void 0 ? void 0 : _a7.subtle)) {
           algorithm = args[0] || algorithm;
-          crypto24 = args[1] || cryptoProvider.get();
+          crypto25 = args[1] || cryptoProvider.get();
         } else {
-          crypto24 = args[0] || cryptoProvider.get();
+          crypto25 = args[0] || cryptoProvider.get();
         }
-        return await crypto24.subtle.digest(algorithm, this.toArrayBuffer());
+        return await crypto25.subtle.digest(algorithm, this.toArrayBuffer());
       }
     };
     var ERR_GN_CONSTRUCTOR = "Cannot initialize GeneralName from ASN.1 data.";
@@ -79964,14 +79964,14 @@ var require_x509_cjs = __commonJS({
       }
     };
     var PublicKey = class _PublicKey extends PemData {
-      static async create(data2, crypto24 = cryptoProvider.get()) {
+      static async create(data2, crypto25 = cryptoProvider.get()) {
         if (data2 instanceof _PublicKey) {
           return data2;
         } else if (CryptoProvider.isCryptoKey(data2)) {
           if (data2.type !== "public") {
             throw new TypeError("Public key is required");
           }
-          const spki = await crypto24.subtle.exportKey("spki", data2);
+          const spki = await crypto25.subtle.exportKey("spki", data2);
           return new _PublicKey(spki);
         } else if (data2.publicKey) {
           return data2.publicKey;
@@ -79990,7 +79990,7 @@ var require_x509_cjs = __commonJS({
         this.tag = PemConverter.PublicKeyTag;
       }
       async export(...args) {
-        let crypto24;
+        let crypto25;
         let keyUsages = ["verify"];
         let algorithm = {
           hash: "SHA-256",
@@ -79999,16 +79999,16 @@ var require_x509_cjs = __commonJS({
         if (args.length > 1) {
           algorithm = args[0] || algorithm;
           keyUsages = args[1] || keyUsages;
-          crypto24 = args[2] || cryptoProvider.get();
+          crypto25 = args[2] || cryptoProvider.get();
         } else {
-          crypto24 = args[0] || cryptoProvider.get();
+          crypto25 = args[0] || cryptoProvider.get();
         }
         let raw = this.rawData;
         const asnSpki = asn1Schema.AsnConvert.parse(this.rawData, asn1X509.SubjectPublicKeyInfo);
         if (asnSpki.algorithm.algorithm === asn1Rsa.id_RSASSA_PSS) {
           raw = convertSpkiToRsaPkcs1(asnSpki, raw);
         }
-        return crypto24.subtle.importKey("spki", raw, algorithm, true, keyUsages);
+        return crypto25.subtle.importKey("spki", raw, algorithm, true, keyUsages);
       }
       onInit(asn) {
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
@@ -80025,34 +80025,34 @@ var require_x509_cjs = __commonJS({
       }
       async getThumbprint(...args) {
         var _a7;
-        let crypto24;
+        let crypto25;
         let algorithm = "SHA-1";
         if (args.length >= 1 && !((_a7 = args[0]) === null || _a7 === void 0 ? void 0 : _a7.subtle)) {
           algorithm = args[0] || algorithm;
-          crypto24 = args[1] || cryptoProvider.get();
+          crypto25 = args[1] || cryptoProvider.get();
         } else {
-          crypto24 = args[0] || cryptoProvider.get();
+          crypto25 = args[0] || cryptoProvider.get();
         }
-        return await crypto24.subtle.digest(algorithm, this.rawData);
+        return await crypto25.subtle.digest(algorithm, this.rawData);
       }
       async getKeyIdentifier(...args) {
-        let crypto24;
+        let crypto25;
         let algorithm = "SHA-1";
         if (args.length === 1) {
           if (typeof args[0] === "string") {
             algorithm = args[0];
-            crypto24 = cryptoProvider.get();
+            crypto25 = cryptoProvider.get();
           } else {
-            crypto24 = args[0];
+            crypto25 = args[0];
           }
         } else if (args.length === 2) {
           algorithm = args[0];
-          crypto24 = args[1];
+          crypto25 = args[1];
         } else {
-          crypto24 = cryptoProvider.get();
+          crypto25 = cryptoProvider.get();
         }
         const asn = asn1Schema.AsnConvert.parse(this.rawData, asn1X509.SubjectPublicKeyInfo);
-        return await crypto24.subtle.digest(algorithm, asn.subjectPublicKey);
+        return await crypto25.subtle.digest(algorithm, asn.subjectPublicKey);
       }
       toTextObject() {
         const obj = this.toTextObjectEmpty();
@@ -80078,12 +80078,12 @@ var require_x509_cjs = __commonJS({
       return raw;
     }
     var AuthorityKeyIdentifierExtension2 = class _AuthorityKeyIdentifierExtension extends Extension2 {
-      static async create(param, critical = false, crypto24 = cryptoProvider.get()) {
+      static async create(param, critical = false, crypto25 = cryptoProvider.get()) {
         if ("name" in param && "serialNumber" in param) {
           return new _AuthorityKeyIdentifierExtension(param, critical);
         }
-        const key = await PublicKey.create(param, crypto24);
-        const id3 = await key.getKeyIdentifier(crypto24);
+        const key = await PublicKey.create(param, crypto25);
+        const id3 = await key.getKeyIdentifier(crypto25);
         return new _AuthorityKeyIdentifierExtension(pvtsutils.Convert.ToHex(id3), critical);
       }
       constructor(...args) {
@@ -80221,9 +80221,9 @@ var require_x509_cjs = __commonJS({
     };
     KeyUsagesExtension.NAME = "Key Usages";
     var SubjectKeyIdentifierExtension2 = class _SubjectKeyIdentifierExtension extends Extension2 {
-      static async create(publicKey, critical = false, crypto24 = cryptoProvider.get()) {
-        const key = await PublicKey.create(publicKey, crypto24);
-        const id3 = await key.getKeyIdentifier(crypto24);
+      static async create(publicKey, critical = false, crypto25 = cryptoProvider.get()) {
+        const key = await PublicKey.create(publicKey, crypto25);
+        const id3 = await key.getKeyIdentifier(crypto25);
         return new _SubjectKeyIdentifierExtension(pvtsutils.Convert.ToHex(id3), critical);
       }
       constructor(...args) {
@@ -80961,12 +80961,12 @@ var require_x509_cjs = __commonJS({
       getExtensions(type) {
         return this.extensions.filter((o6) => o6.type === type);
       }
-      async verify(crypto24 = cryptoProvider.get()) {
+      async verify(crypto25 = cryptoProvider.get()) {
         const algorithm = {
           ...this.publicKey.algorithm,
           ...this.signatureAlgorithm
         };
-        const publicKey = await this.publicKey.export(algorithm, ["verify"], crypto24);
+        const publicKey = await this.publicKey.export(algorithm, ["verify"], crypto25);
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let signature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -80978,7 +80978,7 @@ var require_x509_cjs = __commonJS({
         if (!signature) {
           throw Error("Cannot convert WebCrypto signature value to ASN.1 format");
         }
-        const ok = await crypto24.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
+        const ok = await crypto25.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
         return ok;
       }
       toTextObject() {
@@ -81009,14 +81009,14 @@ var require_x509_cjs = __commonJS({
     _Pkcs10CertificateRequest_tbs = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_subjectName = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_subject = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_signatureAlgorithm = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_signature = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_publicKey = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_attributes = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_extensions = /* @__PURE__ */ new WeakMap();
     Pkcs10CertificateRequest.NAME = "PKCS#10 Certificate Request";
     var Pkcs10CertificateRequestGenerator = class {
-      static async create(params, crypto24 = cryptoProvider.get()) {
+      static async create(params, crypto25 = cryptoProvider.get()) {
         if (!params.keys.privateKey) {
           throw new Error("Bad field 'keys' in 'params' argument. 'privateKey' is empty");
         }
         if (!params.keys.publicKey) {
           throw new Error("Bad field 'keys' in 'params' argument. 'publicKey' is empty");
         }
-        const spki = await crypto24.subtle.exportKey("spki", params.keys.publicKey);
+        const spki = await crypto25.subtle.exportKey("spki", params.keys.publicKey);
         const asnReq = new asn1Csr.CertificationRequest({
           certificationRequestInfo: new asn1Csr.CertificationRequestInfo({ subjectPKInfo: asn1Schema.AsnConvert.parse(spki, asn1X509.SubjectPublicKeyInfo) })
         });
@@ -81045,7 +81045,7 @@ var require_x509_cjs = __commonJS({
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
         asnReq.signatureAlgorithm = algProv.toAsnAlgorithm(signingAlgorithm);
         const tbs = asn1Schema.AsnConvert.serialize(asnReq.certificationRequestInfo);
-        const signature = await crypto24.subtle.sign(signingAlgorithm, params.keys.privateKey, tbs);
+        const signature = await crypto25.subtle.sign(signingAlgorithm, params.keys.privateKey, tbs);
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let asnSignature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -81205,7 +81205,7 @@ var require_x509_cjs = __commonJS({
           }
         });
       }
-      async verify(params = {}, crypto24 = cryptoProvider.get()) {
+      async verify(params = {}, crypto25 = cryptoProvider.get()) {
         let keyAlgorithm;
         let publicKey;
         const paramsKey = params.publicKey;
@@ -81215,26 +81215,26 @@ var require_x509_cjs = __commonJS({
               ...this.publicKey.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await this.publicKey.export(keyAlgorithm, ["verify"], crypto24);
+            publicKey = await this.publicKey.export(keyAlgorithm, ["verify"], crypto25);
           } else if ("publicKey" in paramsKey) {
             keyAlgorithm = {
               ...paramsKey.publicKey.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await paramsKey.publicKey.export(keyAlgorithm, ["verify"], crypto24);
+            publicKey = await paramsKey.publicKey.export(keyAlgorithm, ["verify"], crypto25);
           } else if (paramsKey instanceof PublicKey) {
             keyAlgorithm = {
               ...paramsKey.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await paramsKey.export(keyAlgorithm, ["verify"], crypto24);
+            publicKey = await paramsKey.export(keyAlgorithm, ["verify"], crypto25);
           } else if (pvtsutils.BufferSourceConverter.isBufferSource(paramsKey)) {
             const key = new PublicKey(paramsKey);
             keyAlgorithm = {
               ...key.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await key.export(keyAlgorithm, ["verify"], crypto24);
+            publicKey = await key.export(keyAlgorithm, ["verify"], crypto25);
           } else {
             keyAlgorithm = {
               ...paramsKey.algorithm,
@@ -81256,7 +81256,7 @@ var require_x509_cjs = __commonJS({
         if (!signature) {
           throw Error("Cannot convert ASN.1 signature value to WebCrypto format");
         }
-        const ok = await crypto24.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
+        const ok = await crypto25.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
         if (params.signatureOnly) {
           return ok;
         } else {
@@ -81266,21 +81266,21 @@ var require_x509_cjs = __commonJS({
         }
       }
       async getThumbprint(...args) {
-        let crypto24;
+        let crypto25;
         let algorithm = "SHA-1";
         if (args[0]) {
           if (!args[0].subtle) {
             algorithm = args[0] || algorithm;
-            crypto24 = args[1];
+            crypto25 = args[1];
           } else {
-            crypto24 = args[0];
+            crypto25 = args[0];
           }
         }
-        crypto24 !== null && crypto24 !== void 0 ? crypto24 : crypto24 = cryptoProvider.get();
-        return await crypto24.subtle.digest(algorithm, this.rawData);
+        crypto25 !== null && crypto25 !== void 0 ? crypto25 : crypto25 = cryptoProvider.get();
+        return await crypto25.subtle.digest(algorithm, this.rawData);
       }
-      async isSelfSigned(crypto24 = cryptoProvider.get()) {
-        return this.subject === this.issuer && await this.verify({ signatureOnly: true }, crypto24);
+      async isSelfSigned(crypto25 = cryptoProvider.get()) {
+        return this.subject === this.issuer && await this.verify({ signatureOnly: true }, crypto25);
       }
       toTextObject() {
         const obj = this.toTextObjectEmpty();
@@ -81410,13 +81410,13 @@ var require_x509_cjs = __commonJS({
           this.certificates = params.certificates;
         }
       }
-      async build(cert2, crypto24 = cryptoProvider.get()) {
+      async build(cert2, crypto25 = cryptoProvider.get()) {
         const chain = new X509Certificates(cert2);
         let current = cert2;
-        while (current = await this.findIssuer(current, crypto24)) {
-          const thumbprint = await current.getThumbprint(crypto24);
+        while (current = await this.findIssuer(current, crypto25)) {
+          const thumbprint = await current.getThumbprint(crypto25);
           for (const item of chain) {
-            const thumbprint2 = await item.getThumbprint(crypto24);
+            const thumbprint2 = await item.getThumbprint(crypto25);
             if (pvtsutils.isEqual(thumbprint, thumbprint2)) {
               throw new Error("Cannot build a certificate chain. Circular dependency.");
             }
@@ -81425,8 +81425,8 @@ var require_x509_cjs = __commonJS({
         }
         return chain;
       }
-      async findIssuer(cert2, crypto24 = cryptoProvider.get()) {
-        if (!await cert2.isSelfSigned(crypto24)) {
+      async findIssuer(cert2, crypto25 = cryptoProvider.get()) {
+        if (!await cert2.isSelfSigned(crypto25)) {
           const akiExt = cert2.getExtension(asn1X509__namespace.id_ce_authorityKeyIdentifier);
           for (const item of this.certificates) {
             if (item.subject !== cert2.issuer) {
@@ -81450,11 +81450,11 @@ var require_x509_cjs = __commonJS({
                 ...item.publicKey.algorithm,
                 ...cert2.signatureAlgorithm
               };
-              const publicKey = await item.publicKey.export(algorithm, ["verify"], crypto24);
+              const publicKey = await item.publicKey.export(algorithm, ["verify"], crypto25);
               const ok = await cert2.verify({
                 publicKey,
                 signatureOnly: true
-              }, crypto24);
+              }, crypto25);
               if (!ok) {
                 continue;
               }
@@ -81467,11 +81467,11 @@ var require_x509_cjs = __commonJS({
         return null;
       }
     };
-    function generateCertificateSerialNumber(input, crypto24 = cryptoProvider.get()) {
+    function generateCertificateSerialNumber(input, crypto25 = cryptoProvider.get()) {
       const inputView = pvtsutils.BufferSourceConverter.toUint8Array(pvtsutils.Convert.FromHex(input || ""));
       let serialNumber = inputView && inputView.length && inputView.some((o6) => o6 > 0) ? new Uint8Array(inputView) : void 0;
       if (!serialNumber) {
-        serialNumber = crypto24.getRandomValues(new Uint8Array(16));
+        serialNumber = crypto25.getRandomValues(new Uint8Array(16));
       }
       let firstNonZero = 0;
       while (firstNonZero < serialNumber.length - 1 && serialNumber[firstNonZero] === 0) {
@@ -81487,7 +81487,7 @@ var require_x509_cjs = __commonJS({
       return serialNumber.buffer;
     }
     var X509CertificateGenerator = class {
-      static async createSelfSigned(params, crypto24 = cryptoProvider.get()) {
+      static async createSelfSigned(params, crypto25 = cryptoProvider.get()) {
         if (!params.keys.privateKey) {
           throw new Error("Bad field 'keys' in 'params' argument. 'privateKey' is empty");
         }
@@ -81504,9 +81504,9 @@ var require_x509_cjs = __commonJS({
           signingKey: params.keys.privateKey,
           signingAlgorithm: params.signingAlgorithm,
           extensions: params.extensions
-        }, crypto24);
+        }, crypto25);
       }
-      static async create(params, crypto24 = cryptoProvider.get()) {
+      static async create(params, crypto25 = cryptoProvider.get()) {
         var _a7;
         let spki;
         if (params.publicKey instanceof PublicKey) {
@@ -81516,9 +81516,9 @@ var require_x509_cjs = __commonJS({
         } else if (pvtsutils.BufferSourceConverter.isBufferSource(params.publicKey)) {
           spki = params.publicKey;
         } else {
-          spki = await crypto24.subtle.exportKey("spki", params.publicKey);
+          spki = await crypto25.subtle.exportKey("spki", params.publicKey);
         }
-        const serialNumber = generateCertificateSerialNumber(params.serialNumber, crypto24);
+        const serialNumber = generateCertificateSerialNumber(params.serialNumber, crypto25);
         const notBefore = params.notBefore || /* @__PURE__ */ new Date();
         const notAfter = params.notAfter || new Date(notBefore.getTime() + 31536e6);
         const asnX509 = new asn1X509__namespace.Certificate({
@@ -81553,7 +81553,7 @@ var require_x509_cjs = __commonJS({
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
         asnX509.tbsCertificate.signature = asnX509.signatureAlgorithm = algProv.toAsnAlgorithm(signatureAlgorithm);
         const tbs = asn1Schema.AsnConvert.serialize(asnX509.tbsCertificate);
-        const signatureValue = "signingKey" in params ? await crypto24.subtle.sign(signatureAlgorithm, params.signingKey, tbs) : params.signature;
+        const signatureValue = "signingKey" in params ? await crypto25.subtle.sign(signatureAlgorithm, params.signingKey, tbs) : params.signature;
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let asnSignature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -81774,7 +81774,7 @@ var require_x509_cjs = __commonJS({
           }
         });
       }
-      async verify(params, crypto24 = cryptoProvider.get()) {
+      async verify(params, crypto25 = cryptoProvider.get()) {
         if (!this.certListSignatureAlgorithm.isEqual(this.tbsCertListSignatureAlgorithm)) {
           throw new Error("algorithm identifier in the sequence tbsCertList and CertificateList mismatch");
         }
@@ -81815,21 +81815,21 @@ var require_x509_cjs = __commonJS({
         if (!signature) {
           throw Error("Cannot convert ASN.1 signature value to WebCrypto format");
         }
-        return await crypto24.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
+        return await crypto25.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
       }
       async getThumbprint(...args) {
-        let crypto24;
+        let crypto25;
         let algorithm = "SHA-1";
         if (args[0]) {
           if (!args[0].subtle) {
             algorithm = args[0] || algorithm;
-            crypto24 = args[1];
+            crypto25 = args[1];
           } else {
-            crypto24 = args[0];
+            crypto25 = args[0];
           }
         }
-        crypto24 !== null && crypto24 !== void 0 ? crypto24 : crypto24 = cryptoProvider.get();
-        return await crypto24.subtle.digest(algorithm, this.rawData);
+        crypto25 !== null && crypto25 !== void 0 ? crypto25 : crypto25 = cryptoProvider.get();
+        return await crypto25.subtle.digest(algorithm, this.rawData);
       }
       findRevoked(certOrSerialNumber) {
         const serialNumber = typeof certOrSerialNumber === "string" ? certOrSerialNumber : certOrSerialNumber.serialNumber;
@@ -81844,7 +81844,7 @@ var require_x509_cjs = __commonJS({
     };
     _X509Crl_tbs = /* @__PURE__ */ new WeakMap(), _X509Crl_signatureAlgorithm = /* @__PURE__ */ new WeakMap(), _X509Crl_issuerName = /* @__PURE__ */ new WeakMap(), _X509Crl_thisUpdate = /* @__PURE__ */ new WeakMap(), _X509Crl_nextUpdate = /* @__PURE__ */ new WeakMap(), _X509Crl_entries = /* @__PURE__ */ new WeakMap(), _X509Crl_extensions = /* @__PURE__ */ new WeakMap();
     var X509CrlGenerator = class {
-      static async create(params, crypto24 = cryptoProvider.get()) {
+      static async create(params, crypto25 = cryptoProvider.get()) {
         var _a7;
         const name = params.issuer instanceof Name3 ? params.issuer : new Name3(params.issuer);
         const asnX509Crl = new asn1X509__namespace.CertificateList({
@@ -81911,7 +81911,7 @@ var require_x509_cjs = __commonJS({
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
         asnX509Crl.tbsCertList.signature = asnX509Crl.signatureAlgorithm = algProv.toAsnAlgorithm(signingAlgorithm);
         const tbs = asn1Schema.AsnConvert.serialize(asnX509Crl.tbsCertList);
-        const signature = await crypto24.subtle.sign(signingAlgorithm, params.signingKey, tbs);
+        const signature = await crypto25.subtle.sign(signingAlgorithm, params.signingKey, tbs);
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let asnSignature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -103638,8 +103638,8 @@ var require_snapshot_utils = __commonJS({
         match: new Set(matchHeaders.map((header) => caseSensitive ? header : header.toLowerCase()))
       };
     }
-    var crypto24 = runtimeFeatures.has("crypto") ? require("node:crypto") : null;
-    var hashId = crypto24?.hash ? (value2) => crypto24.hash("sha256", value2, "base64url") : (value2) => Buffer.from(value2).toString("base64url");
+    var crypto25 = runtimeFeatures.has("crypto") ? require("node:crypto") : null;
+    var hashId = crypto25?.hash ? (value2) => crypto25.hash("sha256", value2, "base64url") : (value2) => Buffer.from(value2).toString("base64url");
     function isUndiciHeaders(headers) {
       return Array.isArray(headers) && (headers.length & 1) === 0;
     }
@@ -109707,10 +109707,10 @@ var require_subresource_integrity = __commonJS({
     var assert2 = require("node:assert");
     var { runtimeFeatures } = require_runtime_features();
     var validSRIHashAlgorithmTokenSet = /* @__PURE__ */ new Map([["sha256", 0], ["sha384", 1], ["sha512", 2]]);
-    var crypto24;
+    var crypto25;
     if (runtimeFeatures.has("crypto")) {
-      crypto24 = require("node:crypto");
-      const cryptoHashes = crypto24.getHashes();
+      crypto25 = require("node:crypto");
+      const cryptoHashes = crypto25.getHashes();
       if (cryptoHashes.length === 0) {
         validSRIHashAlgorithmTokenSet.clear();
       }
@@ -109800,7 +109800,7 @@ var require_subresource_integrity = __commonJS({
       return result;
     }
     var applyAlgorithmToBytes = (algorithm, bytes) => {
-      return crypto24.hash(algorithm, bytes, "base64");
+      return crypto25.hash(algorithm, bytes, "base64");
     };
     function caseSensitiveMatch(actualValue, expectedValue) {
       let actualValueLength = actualValue.length;
@@ -112745,7 +112745,7 @@ var require_connection2 = __commonJS({
     var { WebsocketFrameSend } = require_frame();
     var assert2 = require("node:assert");
     var { runtimeFeatures } = require_runtime_features();
-    var crypto24 = runtimeFeatures.has("crypto") ? require("node:crypto") : null;
+    var crypto25 = runtimeFeatures.has("crypto") ? require("node:crypto") : null;
     var warningEmitted = false;
     function establishWebSocketConnection(url3, protocols, client, handler, options2) {
       const requestURL = url3;
@@ -112765,7 +112765,7 @@ var require_connection2 = __commonJS({
         const headersList = getHeadersList(new Headers3(options2.headers));
         request.headersList = headersList;
       }
-      const keyValue = crypto24.randomBytes(16).toString("base64");
+      const keyValue = crypto25.randomBytes(16).toString("base64");
       request.headersList.append("sec-websocket-key", keyValue, true);
       request.headersList.append("sec-websocket-version", "13", true);
       for (const protocol of protocols) {
@@ -112805,7 +112805,7 @@ var require_connection2 = __commonJS({
             return;
           }
           const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
-          const digest2 = crypto24.hash("sha1", keyValue + uid, "base64");
+          const digest2 = crypto25.hash("sha1", keyValue + uid, "base64");
           if (secWSAccept !== digest2) {
             failWebsocketConnection(handler, 1002, "Incorrect hash received in Sec-WebSocket-Accept header.");
             return;
@@ -119923,22 +119923,22 @@ var require_crypto2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NodeCrypto = void 0;
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     var NodeCrypto = class {
       async sha256DigestBase64(str2) {
-        return crypto24.createHash("sha256").update(str2).digest("base64");
+        return crypto25.createHash("sha256").update(str2).digest("base64");
       }
       randomBytesBase64(count) {
-        return crypto24.randomBytes(count).toString("base64");
+        return crypto25.randomBytes(count).toString("base64");
       }
       async verify(pubkey, data2, signature) {
-        const verifier = crypto24.createVerify("RSA-SHA256");
+        const verifier = crypto25.createVerify("RSA-SHA256");
         verifier.update(data2);
         verifier.end();
         return verifier.verify(pubkey, signature, "base64");
       }
       async sign(privateKey, data2) {
-        const signer = crypto24.createSign("RSA-SHA256");
+        const signer = crypto25.createSign("RSA-SHA256");
         signer.update(data2);
         signer.end();
         return signer.sign(privateKey, "base64");
@@ -119956,7 +119956,7 @@ var require_crypto2 = __commonJS({
        *   string in hexadecimal encoding.
        */
       async sha256DigestHex(str2) {
-        return crypto24.createHash("sha256").update(str2).digest("hex");
+        return crypto25.createHash("sha256").update(str2).digest("hex");
       }
       /**
        * Computes the HMAC hash of a message using the provided crypto key and the
@@ -119968,7 +119968,7 @@ var require_crypto2 = __commonJS({
        */
       async signWithHmacSha256(key, msg) {
         const cryptoKey = typeof key === "string" ? key : toBuffer3(key);
-        return toArrayBuffer3(crypto24.createHmac("sha256", cryptoKey).update(msg).digest());
+        return toArrayBuffer3(crypto25.createHmac("sha256", cryptoKey).update(msg).digest());
       }
     };
     exports2.NodeCrypto = NodeCrypto;
@@ -120035,7 +120035,7 @@ var require_util8 = __commonJS({
     exports2.removeUndefinedValuesInObject = removeUndefinedValuesInObject;
     exports2.isValidFile = isValidFile;
     exports2.getWellKnownCertificateConfigFileLocation = getWellKnownCertificateConfigFileLocation;
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var os2 = require("os");
     var path12 = require("path");
     var WELL_KNOWN_CERTIFICATE_CONFIG_FILE = "certificate_config.json";
@@ -120123,7 +120123,7 @@ var require_util8 = __commonJS({
     }
     async function isValidFile(filePath) {
       try {
-        const stats = await fs9.promises.lstat(filePath);
+        const stats = await fs10.promises.lstat(filePath);
         return stats.isFile();
       } catch (e6) {
         return false;
@@ -120659,10 +120659,10 @@ var require_oauth2client = __commonJS({
        * https://github.com/googleapis/google-auth-library-nodejs/blob/main/samples/oauth2-codeVerifier.js
        */
       async generateCodeVerifierAsync() {
-        const crypto24 = (0, crypto_1.createCrypto)();
-        const randomString = crypto24.randomBytesBase64(96);
+        const crypto25 = (0, crypto_1.createCrypto)();
+        const randomString = crypto25.randomBytesBase64(96);
         const codeVerifier = randomString.replace(/\+/g, "~").replace(/=/g, "_").replace(/\//g, "-");
-        const unencodedCodeChallenge = await crypto24.sha256DigestBase64(codeVerifier);
+        const unencodedCodeChallenge = await crypto25.sha256DigestBase64(codeVerifier);
         const codeChallenge = unencodedCodeChallenge.split("=")[0].replace(/\+/g, "-").replace(/\//g, "_");
         return { codeVerifier, codeChallenge };
       }
@@ -121103,7 +121103,7 @@ var require_oauth2client = __commonJS({
        * @return Returns a promise resolving to LoginTicket on verification.
        */
       async verifySignedJwtWithCertsAsync(jwt5, certs, requiredAudience, issuers, maxExpiry) {
-        const crypto24 = (0, crypto_1.createCrypto)();
+        const crypto25 = (0, crypto_1.createCrypto)();
         if (!maxExpiry) {
           maxExpiry = _OAuth2Client.DEFAULT_MAX_TOKEN_LIFETIME_SECS_;
         }
@@ -121116,7 +121116,7 @@ var require_oauth2client = __commonJS({
         let envelope;
         let payload;
         try {
-          envelope = JSON.parse(crypto24.decodeBase64StringUtf8(segments[0]));
+          envelope = JSON.parse(crypto25.decodeBase64StringUtf8(segments[0]));
         } catch (err2) {
           if (err2 instanceof Error) {
             err2.message = `Can't parse token envelope: ${segments[0]}': ${err2.message}`;
@@ -121127,7 +121127,7 @@ var require_oauth2client = __commonJS({
           throw new Error("Can't parse token envelope: " + segments[0]);
         }
         try {
-          payload = JSON.parse(crypto24.decodeBase64StringUtf8(segments[1]));
+          payload = JSON.parse(crypto25.decodeBase64StringUtf8(segments[1]));
         } catch (err2) {
           if (err2 instanceof Error) {
             err2.message = `Can't parse token payload '${segments[0]}`;
@@ -121144,7 +121144,7 @@ var require_oauth2client = __commonJS({
         if (envelope.alg === "ES256") {
           signature = formatEcdsa.joseToDer(signature, "ES256").toString("base64");
         }
-        const verified = await crypto24.verify(cert2, signed, signature);
+        const verified = await crypto25.verify(cert2, signed, signature);
         if (!verified) {
           throw new Error("Invalid token signature: " + jwt5);
         }
@@ -121535,10 +121535,10 @@ var require_getCredentials = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getCredentials = getCredentials;
     var path12 = require("path");
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var util_1 = require("util");
     var errorWithCode_1 = require_errorWithCode();
-    var readFile = fs9.readFile ? (0, util_1.promisify)(fs9.readFile) : async () => {
+    var readFile = fs10.readFile ? (0, util_1.promisify)(fs10.readFile) : async () => {
       throw new errorWithCode_1.ErrorWithCode("use key rather than keyFile.", "MISSING_CREDENTIALS");
     };
     var ExtensionFiles;
@@ -123215,12 +123215,12 @@ var require_filesubjecttokensupplier = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.FileSubjectTokenSupplier = void 0;
     var util_1 = require("util");
-    var fs9 = require("fs");
-    var readFile = (0, util_1.promisify)(fs9.readFile ?? (() => {
+    var fs10 = require("fs");
+    var readFile = (0, util_1.promisify)(fs10.readFile ?? (() => {
     }));
-    var realpath3 = (0, util_1.promisify)(fs9.realpath ?? (() => {
+    var realpath3 = (0, util_1.promisify)(fs10.realpath ?? (() => {
     }));
-    var lstat2 = (0, util_1.promisify)(fs9.lstat ?? (() => {
+    var lstat2 = (0, util_1.promisify)(fs10.lstat ?? (() => {
     }));
     var FileSubjectTokenSupplier = class {
       filePath;
@@ -123338,7 +123338,7 @@ var require_certificatesubjecttokensupplier = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.CertificateSubjectTokenSupplier = exports2.InvalidConfigurationError = exports2.CertificateSourceUnavailableError = exports2.CERTIFICATE_CONFIGURATION_ENV_VARIABLE = void 0;
     var util_1 = require_util8();
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var crypto_1 = require("crypto");
     var https7 = require("https");
     exports2.CERTIFICATE_CONFIGURATION_ENV_VARIABLE = "GOOGLE_API_CERTIFICATE_CONFIG";
@@ -123432,7 +123432,7 @@ var require_certificatesubjecttokensupplier = __commonJS({
         const configPath = this.certificateConfigPath;
         let fileContents;
         try {
-          fileContents = await fs9.promises.readFile(configPath, "utf8");
+          fileContents = await fs10.promises.readFile(configPath, "utf8");
         } catch (err2) {
           throw new CertificateSourceUnavailableError(`Failed to read certificate config file at: ${configPath}`);
         }
@@ -123457,14 +123457,14 @@ var require_certificatesubjecttokensupplier = __commonJS({
       async #getKeyAndCert(certPath, keyPath) {
         let cert2, key;
         try {
-          cert2 = await fs9.promises.readFile(certPath);
+          cert2 = await fs10.promises.readFile(certPath);
           new crypto_1.X509Certificate(cert2);
         } catch (err2) {
           const message = err2 instanceof Error ? err2.message : String(err2);
           throw new CertificateSourceUnavailableError(`Failed to read certificate file at ${certPath}: ${message}`);
         }
         try {
-          key = await fs9.promises.readFile(keyPath);
+          key = await fs10.promises.readFile(keyPath);
           (0, crypto_1.createPrivateKey)(key);
         } catch (err2) {
           const message = err2 instanceof Error ? err2.message : String(err2);
@@ -123483,7 +123483,7 @@ var require_certificatesubjecttokensupplier = __commonJS({
           return JSON.stringify([leafCert.raw.toString("base64")]);
         }
         try {
-          const chainPems = await fs9.promises.readFile(this.trustChainPath, "utf8");
+          const chainPems = await fs10.promises.readFile(this.trustChainPath, "utf8");
           const pemBlocks = chainPems.match(/-----BEGIN CERTIFICATE-----[^-]+-----END CERTIFICATE-----/g) ?? [];
           const chainCerts = pemBlocks.map((pem, index5) => {
             try {
@@ -123714,14 +123714,14 @@ var require_awsrequestsigner = __commonJS({
       }
     };
     exports2.AwsRequestSigner = AwsRequestSigner;
-    async function sign(crypto24, key, msg) {
-      return await crypto24.signWithHmacSha256(key, msg);
+    async function sign(crypto25, key, msg) {
+      return await crypto25.signWithHmacSha256(key, msg);
     }
-    async function getSigningKey(crypto24, key, dateStamp, region, serviceName) {
-      const kDate = await sign(crypto24, `AWS4${key}`, dateStamp);
-      const kRegion = await sign(crypto24, kDate, region);
-      const kService = await sign(crypto24, kRegion, serviceName);
-      const kSigning = await sign(crypto24, kService, "aws4_request");
+    async function getSigningKey(crypto25, key, dateStamp, region, serviceName) {
+      const kDate = await sign(crypto25, `AWS4${key}`, dateStamp);
+      const kRegion = await sign(crypto25, kDate, region);
+      const kService = await sign(crypto25, kRegion, serviceName);
+      const kSigning = await sign(crypto25, kService, "aws4_request");
       return kSigning;
     }
     async function generateAuthenticationHeaderMap(options2) {
@@ -124185,7 +124185,7 @@ var require_pluggable_auth_handler = __commonJS({
     exports2.PluggableAuthHandler = exports2.ExecutableError = void 0;
     var executable_response_1 = require_executable_response();
     var childProcess2 = require("child_process");
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var ExecutableError = class extends Error {
       /**
        * The exit code returned by the executable.
@@ -124270,14 +124270,14 @@ var require_pluggable_auth_handler = __commonJS({
         }
         let filePath;
         try {
-          filePath = await fs9.promises.realpath(this.outputFile);
+          filePath = await fs10.promises.realpath(this.outputFile);
         } catch {
           return void 0;
         }
-        if (!(await fs9.promises.lstat(filePath)).isFile()) {
+        if (!(await fs10.promises.lstat(filePath)).isFile()) {
           return void 0;
         }
-        const responseString = await fs9.promises.readFile(filePath, {
+        const responseString = await fs10.promises.readFile(filePath, {
           encoding: "utf8"
         });
         if (responseString === "") {
@@ -124687,8 +124687,8 @@ var require_gdchclient = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.GdchClient = exports2.GDCH_SERVICE_ACCOUNT_TYPE = void 0;
-    var crypto24 = require("crypto");
-    var fs9 = require("fs");
+    var crypto25 = require("crypto");
+    var fs10 = require("fs");
     var https7 = require("https");
     var oauth2client_1 = require_oauth2client();
     var DEFAULT_LIFETIME_IN_SECONDS = 3600;
@@ -124878,7 +124878,7 @@ var require_gdchclient = __commonJS({
         const encodedHeader = this.base64UrlEncode(JSON.stringify(header));
         const encodedPayload = this.base64UrlEncode(JSON.stringify(payload));
         const signingInput = `${encodedHeader}.${encodedPayload}`;
-        const signature = crypto24.sign("sha256", Buffer.from(signingInput), {
+        const signature = crypto25.sign("sha256", Buffer.from(signingInput), {
           key: this.privateKey,
           dsaEncoding: "ieee-p1363"
         });
@@ -124911,7 +124911,7 @@ var require_gdchclient = __commonJS({
         const currentPath = this.caCertPath;
         this.caAgentPromise = (async () => {
           try {
-            const ca = await fs9.promises.readFile(currentPath);
+            const ca = await fs10.promises.readFile(currentPath);
             return new https7.Agent({ ca });
           } catch (err2) {
             if (this.cachedCaCertPath === currentPath) {
@@ -124971,7 +124971,7 @@ var require_googleauth = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.GoogleAuth = exports2.GoogleAuthExceptionMessages = void 0;
     var child_process_1 = require("child_process");
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var gaxios_1 = require_src7();
     var gcpMetadata = require_src9();
     var os2 = require("os");
@@ -125267,7 +125267,7 @@ var require_googleauth = __commonJS({
         }
         if (location2) {
           location2 = path12.join(location2, "gcloud", "application_default_credentials.json");
-          if (!fs9.existsSync(location2)) {
+          if (!fs10.existsSync(location2)) {
             location2 = null;
           }
         }
@@ -125288,8 +125288,8 @@ var require_googleauth = __commonJS({
           throw new Error("The file path is invalid.");
         }
         try {
-          filePath = fs9.realpathSync(filePath);
-          if (!fs9.lstatSync(filePath).isFile()) {
+          filePath = fs10.realpathSync(filePath);
+          if (!fs10.lstatSync(filePath).isFile()) {
             throw new Error();
           }
         } catch (err2) {
@@ -125298,7 +125298,7 @@ var require_googleauth = __commonJS({
           }
           throw err2;
         }
-        const readStream2 = fs9.createReadStream(filePath);
+        const readStream2 = fs10.createReadStream(filePath);
         return this.fromStream(readStream2, options2);
       }
       /**
@@ -125626,7 +125626,7 @@ var require_googleauth = __commonJS({
           return this._cacheClientFromJSON(this.jsonContent, this.clientOptions);
         } else if (this.keyFilename) {
           const filePath = path12.resolve(this.keyFilename);
-          const stream6 = fs9.createReadStream(filePath);
+          const stream6 = fs10.createReadStream(filePath);
           return await this.fromStreamAsync(stream6, this.clientOptions);
         } else if (this.apiKey) {
           const client = await this.fromAPIKey(this.apiKey, this.clientOptions);
@@ -125739,24 +125739,24 @@ var require_googleauth = __commonJS({
           const signed = await client.sign(data2);
           return signed.signedBlob;
         }
-        const crypto24 = (0, crypto_1.createCrypto)();
+        const crypto25 = (0, crypto_1.createCrypto)();
         if (client instanceof jwtclient_1.JWT && client.key) {
-          const sign = await crypto24.sign(client.key, data2);
+          const sign = await crypto25.sign(client.key, data2);
           return sign;
         }
         const creds = await this.getCredentials();
         if (!creds.client_email) {
           throw new Error("Cannot sign data without `client_email`.");
         }
-        return this.signBlob(crypto24, creds.client_email, data2, endpoint);
+        return this.signBlob(crypto25, creds.client_email, data2, endpoint);
       }
-      async signBlob(crypto24, emailOrUniqueId, data2, endpoint) {
+      async signBlob(crypto25, emailOrUniqueId, data2, endpoint) {
         const url3 = new URL(endpoint + `${emailOrUniqueId}:signBlob`);
         const res = await this.request({
           method: "POST",
           url: url3.href,
           data: {
-            payload: crypto24.encodeBase64StringUtf8(data2)
+            payload: crypto25.encodeBase64StringUtf8(data2)
           },
           retry: true,
           retryConfig: {
@@ -156855,7 +156855,7 @@ var require_credential_internal = __commonJS({
     exports2.ImpersonatedServiceAccountCredential = exports2.RefreshTokenCredential = exports2.ServiceAccountCredential = exports2.ApplicationDefaultCredential = void 0;
     exports2.isApplicationDefault = isApplicationDefault;
     exports2.getApplicationDefault = getApplicationDefault;
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var node_crypto_1 = require("node:crypto");
     var google_auth_library_1 = require_src10();
     var error_1 = require_error2();
@@ -156973,7 +156973,7 @@ var require_credential_internal = __commonJS({
     var ServiceAccount = class _ServiceAccount {
       static fromPath(filePath) {
         try {
-          return new _ServiceAccount(JSON.parse(fs9.readFileSync(filePath, "utf8")));
+          return new _ServiceAccount(JSON.parse(fs10.readFileSync(filePath, "utf8")));
         } catch (error3) {
           throw new error_1.FirebaseAppError({
             code: error_1.AppErrorCode.INVALID_CREDENTIAL,
@@ -157059,7 +157059,7 @@ var require_credential_internal = __commonJS({
        */
       static validateFromPath(filePath) {
         try {
-          _RefreshToken.validateFromJSON(JSON.parse(fs9.readFileSync(filePath, "utf8")));
+          _RefreshToken.validateFromJSON(JSON.parse(fs10.readFileSync(filePath, "utf8")));
         } catch (error3) {
           throw new error_1.FirebaseAppError({
             code: error_1.AppErrorCode.INVALID_CREDENTIAL,
@@ -157134,7 +157134,7 @@ var require_credential_internal = __commonJS({
        */
       static validateFromPath(filePath) {
         try {
-          _ImpersonatedServiceAccount.validateFromJSON(JSON.parse(fs9.readFileSync(filePath, "utf8")));
+          _ImpersonatedServiceAccount.validateFromJSON(JSON.parse(fs10.readFileSync(filePath, "utf8")));
         } catch (error3) {
           throw new error_1.FirebaseAppError({
             code: error_1.AppErrorCode.INVALID_CREDENTIAL,
@@ -157952,7 +157952,7 @@ var require_lifecycle2 = __commonJS({
     exports2.getApp = getApp2;
     exports2.getApps = getApps2;
     exports2.deleteApp = deleteApp2;
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var validator = require_validator();
     var error_1 = require_error2();
     var credential_internal_1 = require_credential_internal();
@@ -158086,7 +158086,7 @@ var require_lifecycle2 = __commonJS({
         return {};
       }
       try {
-        const contents3 = config2.startsWith("{") ? config2 : fs9.readFileSync(config2, "utf8");
+        const contents3 = config2.startsWith("{") ? config2 : fs10.readFileSync(config2, "utf8");
         return JSON.parse(contents3);
       } catch (error3) {
         throw new error_1.FirebaseAppError({
@@ -174948,7 +174948,7 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e6.text}`;
       if (regexp.flags) result = `(?${regexp.flags})${result}`;
       return result;
     }
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var os2 = require("os");
     var path12 = require("path");
     var ESBUILD_BINARY_PATH = process.env.ESBUILD_BINARY_PATH || ESBUILD_BINARY_PATH;
@@ -175014,14 +175014,14 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e6.text}`;
         for (const unixKey in knownUnixlikePackages) {
           try {
             const pkg = knownUnixlikePackages[unixKey];
-            if (fs9.existsSync(path12.join(nodeModulesDirectory, pkg))) return pkg;
+            if (fs10.existsSync(path12.join(nodeModulesDirectory, pkg))) return pkg;
           } catch {
           }
         }
         for (const windowsKey in knownWindowsPackages) {
           try {
             const pkg = knownWindowsPackages[windowsKey];
-            if (fs9.existsSync(path12.join(nodeModulesDirectory, pkg))) return pkg;
+            if (fs10.existsSync(path12.join(nodeModulesDirectory, pkg))) return pkg;
           } catch {
           }
         }
@@ -175034,7 +175034,7 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e6.text}`;
     }
     function generateBinPath() {
       if (isValidBinaryPath(ESBUILD_BINARY_PATH)) {
-        if (!fs9.existsSync(ESBUILD_BINARY_PATH)) {
+        if (!fs10.existsSync(ESBUILD_BINARY_PATH)) {
           console.warn(`[esbuild] Ignoring bad configuration: ESBUILD_BINARY_PATH=${ESBUILD_BINARY_PATH}`);
         } else {
           return { binPath: ESBUILD_BINARY_PATH, isWASM: false };
@@ -175046,7 +175046,7 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e6.text}`;
         binPath = require.resolve(`${pkg}/${subpath}`);
       } catch (e6) {
         binPath = downloadedBinPath(pkg, subpath);
-        if (!fs9.existsSync(binPath)) {
+        if (!fs10.existsSync(binPath)) {
           try {
             require.resolve(pkg);
           } catch {
@@ -175127,10 +175127,10 @@ for your current platform.`);
             "esbuild",
             `pnpapi-${pkg.replace("/", "-")}-${"0.25.12"}-${path12.basename(subpath)}`
           );
-          if (!fs9.existsSync(binTargetPath)) {
-            fs9.mkdirSync(path12.dirname(binTargetPath), { recursive: true });
-            fs9.copyFileSync(binPath, binTargetPath);
-            fs9.chmodSync(binTargetPath, 493);
+          if (!fs10.existsSync(binTargetPath)) {
+            fs10.mkdirSync(path12.dirname(binTargetPath), { recursive: true });
+            fs10.copyFileSync(binPath, binTargetPath);
+            fs10.chmodSync(binTargetPath, 493);
           }
           return { binPath: binTargetPath, isWASM };
         }
@@ -175138,7 +175138,7 @@ for your current platform.`);
       return { binPath, isWASM };
     }
     var child_process = require("child_process");
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     var path22 = require("path");
     var fs22 = require("fs");
     var os22 = require("os");
@@ -175446,7 +175446,7 @@ More information: The file containing the code for esbuild's JavaScript API (${_
       afterClose(null);
     };
     var randomFileName = () => {
-      return path22.join(os22.tmpdir(), `esbuild-${crypto24.randomBytes(32).toString("hex")}`);
+      return path22.join(os22.tmpdir(), `esbuild-${crypto25.randomBytes(32).toString("hex")}`);
     };
     var workerThreadService = null;
     var startWorkerThreadService = (worker_threads2) => {
@@ -175905,11 +175905,11 @@ var init_dist2 = __esm({
     empty2 = () => {
     };
     resolveSymlinksAsync = function(path12, state, callback$1) {
-      const { queue, fs: fs9, options: { suppressErrors } } = state;
+      const { queue, fs: fs10, options: { suppressErrors } } = state;
       queue.enqueue();
-      fs9.realpath(path12, (error3, resolvedPath) => {
+      fs10.realpath(path12, (error3, resolvedPath) => {
         if (error3) return queue.dequeue(suppressErrors ? null : error3, state);
-        fs9.stat(resolvedPath, (error$1, stat5) => {
+        fs10.stat(resolvedPath, (error$1, stat5) => {
           if (error$1) return queue.dequeue(suppressErrors ? null : error$1, state);
           if (stat5.isDirectory() && isRecursive(path12, resolvedPath, state)) return queue.dequeue(null, state);
           callback$1(stat5, resolvedPath);
@@ -175918,11 +175918,11 @@ var init_dist2 = __esm({
       });
     };
     resolveSymlinks = function(path12, state, callback$1) {
-      const { queue, fs: fs9, options: { suppressErrors } } = state;
+      const { queue, fs: fs10, options: { suppressErrors } } = state;
       queue.enqueue();
       try {
-        const resolvedPath = fs9.realpathSync(path12);
-        const stat5 = fs9.statSync(resolvedPath);
+        const resolvedPath = fs10.realpathSync(path12);
+        const stat5 = fs10.statSync(resolvedPath);
         if (stat5.isDirectory() && isRecursive(path12, resolvedPath, state)) return;
         callback$1(stat5, resolvedPath);
       } catch (e6) {
@@ -175961,22 +175961,22 @@ var init_dist2 = __esm({
     walkAsync = (state, crawlPath, directoryPath, currentDepth, callback$1) => {
       state.queue.enqueue();
       if (currentDepth < 0) return state.queue.dequeue(null, state);
-      const { fs: fs9 } = state;
+      const { fs: fs10 } = state;
       state.visited.push(crawlPath);
       state.counts.directories++;
-      fs9.readdir(crawlPath || ".", readdirOpts, (error3, entries = []) => {
+      fs10.readdir(crawlPath || ".", readdirOpts, (error3, entries = []) => {
         callback$1(entries, directoryPath, currentDepth);
         state.queue.dequeue(state.options.suppressErrors ? null : error3, state);
       });
     };
     walkSync = (state, crawlPath, directoryPath, currentDepth, callback$1) => {
-      const { fs: fs9 } = state;
+      const { fs: fs10 } = state;
       if (currentDepth < 0) return;
       state.visited.push(crawlPath);
       state.counts.directories++;
       let entries = [];
       try {
-        entries = fs9.readdirSync(crawlPath || ".", readdirOpts);
+        entries = fs10.readdirSync(crawlPath || ".", readdirOpts);
       } catch (e6) {
         if (!state.options.suppressErrors) throw e6;
       }
@@ -177766,12 +177766,12 @@ function getOptions(options2) {
   opts.cwd = (opts.cwd instanceof URL ? (0, import_url4.fileURLToPath)(opts.cwd) : (0, import_path7.resolve)(opts.cwd || process.cwd())).replace(BACKSLASHES, "/");
   opts.ignore = ensureStringArray(opts.ignore);
   opts.fs && (opts.fs = {
-    readdir: opts.fs.readdir || import_fs5.readdir,
-    readdirSync: opts.fs.readdirSync || import_fs5.readdirSync,
-    realpath: opts.fs.realpath || import_fs5.realpath,
-    realpathSync: opts.fs.realpathSync || import_fs5.realpathSync,
-    stat: opts.fs.stat || import_fs5.stat,
-    statSync: opts.fs.statSync || import_fs5.statSync
+    readdir: opts.fs.readdir || import_fs6.readdir,
+    readdirSync: opts.fs.readdirSync || import_fs6.readdirSync,
+    realpath: opts.fs.realpath || import_fs6.realpath,
+    realpathSync: opts.fs.realpathSync || import_fs6.realpathSync,
+    stat: opts.fs.stat || import_fs6.stat,
+    statSync: opts.fs.statSync || import_fs6.statSync
   });
   if (opts.debug) log2("globbing with options:", opts);
   return opts;
@@ -177792,10 +177792,10 @@ function globSync(globInput, options2) {
   const [crawler, relative5] = getCrawler(globInput, options2);
   return crawler ? formatPaths(crawler.sync(), relative5) : [];
 }
-var import_fs5, import_path7, import_url4, import_picomatch, isReadonlyArray, BACKSLASHES, DRIVE_RELATIVE_PATH, isWin, ONLY_PARENT_DIRECTORIES, WIN32_ROOT_DIR, isRoot, splitPatternOptions, POSIX_UNESCAPED_GLOB_SYMBOLS, WIN32_UNESCAPED_GLOB_SYMBOLS, escapePosixPath, escapeWin32Path, escapePath, PARENT_DIRECTORY, ESCAPING_BACKSLASHES, defaultOptions2;
+var import_fs6, import_path7, import_url4, import_picomatch, isReadonlyArray, BACKSLASHES, DRIVE_RELATIVE_PATH, isWin, ONLY_PARENT_DIRECTORIES, WIN32_ROOT_DIR, isRoot, splitPatternOptions, POSIX_UNESCAPED_GLOB_SYMBOLS, WIN32_UNESCAPED_GLOB_SYMBOLS, escapePosixPath, escapeWin32Path, escapePath, PARENT_DIRECTORY, ESCAPING_BACKSLASHES, defaultOptions2;
 var init_dist3 = __esm({
   "node_modules/tinyglobby/dist/index.mjs"() {
-    import_fs5 = require("fs");
+    import_fs6 = require("fs");
     import_path7 = require("path");
     import_url4 = require("url");
     init_dist2();
@@ -179728,7 +179728,7 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e6.text}`;
       }
       return JSON.parse(text3);
     }
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var os2 = require("os");
     var path12 = require("path");
     var ESBUILD_BINARY_PATH = process.env.ESBUILD_BINARY_PATH || ESBUILD_BINARY_PATH;
@@ -179794,14 +179794,14 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e6.text}`;
         for (const unixKey in knownUnixlikePackages) {
           try {
             const pkg = knownUnixlikePackages[unixKey];
-            if (fs9.existsSync(path12.join(nodeModulesDirectory, pkg))) return pkg;
+            if (fs10.existsSync(path12.join(nodeModulesDirectory, pkg))) return pkg;
           } catch {
           }
         }
         for (const windowsKey in knownWindowsPackages) {
           try {
             const pkg = knownWindowsPackages[windowsKey];
-            if (fs9.existsSync(path12.join(nodeModulesDirectory, pkg))) return pkg;
+            if (fs10.existsSync(path12.join(nodeModulesDirectory, pkg))) return pkg;
           } catch {
           }
         }
@@ -179814,7 +179814,7 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e6.text}`;
     }
     function generateBinPath() {
       if (isValidBinaryPath(ESBUILD_BINARY_PATH)) {
-        if (!fs9.existsSync(ESBUILD_BINARY_PATH)) {
+        if (!fs10.existsSync(ESBUILD_BINARY_PATH)) {
           console.warn(`[esbuild] Ignoring bad configuration: ESBUILD_BINARY_PATH=${ESBUILD_BINARY_PATH}`);
         } else {
           return { binPath: ESBUILD_BINARY_PATH, isWASM: false };
@@ -179826,7 +179826,7 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e6.text}`;
         binPath = require.resolve(`${pkg}/${subpath}`);
       } catch (e6) {
         binPath = downloadedBinPath(pkg, subpath);
-        if (!fs9.existsSync(binPath)) {
+        if (!fs10.existsSync(binPath)) {
           try {
             require.resolve(pkg);
           } catch {
@@ -179907,10 +179907,10 @@ for your current platform.`);
             "esbuild",
             `pnpapi-${pkg.replace("/", "-")}-${"0.28.2"}-${path12.basename(subpath)}`
           );
-          if (!fs9.existsSync(binTargetPath)) {
-            fs9.mkdirSync(path12.dirname(binTargetPath), { recursive: true });
-            fs9.copyFileSync(binPath, binTargetPath);
-            fs9.chmodSync(binTargetPath, 493);
+          if (!fs10.existsSync(binTargetPath)) {
+            fs10.mkdirSync(path12.dirname(binTargetPath), { recursive: true });
+            fs10.copyFileSync(binPath, binTargetPath);
+            fs10.chmodSync(binTargetPath, 493);
           }
           return { binPath: binTargetPath, isWASM };
         }
@@ -179918,7 +179918,7 @@ for your current platform.`);
       return { binPath, isWASM };
     }
     var child_process = require("child_process");
-    var crypto24 = require("crypto");
+    var crypto25 = require("crypto");
     var path22 = require("path");
     var fs22 = require("fs");
     var os22 = require("os");
@@ -180226,7 +180226,7 @@ More information: The file containing the code for esbuild's JavaScript API (${_
       afterClose(null);
     };
     var randomFileName = () => {
-      return path22.join(os22.tmpdir(), `esbuild-${crypto24.randomBytes(32).toString("hex")}`);
+      return path22.join(os22.tmpdir(), `esbuild-${crypto25.randomBytes(32).toString("hex")}`);
     };
     var workerThreadService = null;
     var startWorkerThreadService = (worker_threads2) => {
@@ -183601,7 +183601,7 @@ function Be(e6, t7, r5 = ne2.DEFAULT) {
   }
   return p3(Z3, "H"), c3(Z3, "parseValue"), x2(), n5.getToken() === 17 ? r5.allowEmptyContent ? true : (w(4, [], []), false) : Z3() ? (n5.getToken() !== 17 && w(9, [], []), true) : (w(4, [], []), false);
 }
-var import_node_module, import_node_path7, import_node_url4, import_node_fs4, import_fs6, import_os, import_path8, import_node_util5, wt2, p3, De, Le2, Ue, B2, Re2, ue2, It, Nt, Wt, Bt, Fe2, fe2, G3, Mt, Vt2, Qt2, Gt, Kt, c3, zt, _2, K, Ne2, J2, ne2, Me2, Je2, Ht, Ve2, de, Qe2, Xt, Yt2, N, re, Zt2, me, qt, en2, he, U2, ge, se2, tn, nn, rn2, sn, on2, an2, cn2, ln2, pn2, ye, Ge2, Ke2, un2, ze2, oe2, fn2, dn2, mn2, ke, hn2, ae2, He2, be, Xe2, gn2, yn2, Ye2, we, kn2, bn2, Ze2, wn2, xe2, xn2, qe2, ie, Ee2, et2, En2, tt2, ve2, nt2, vn2, Cn2, jn2, rt2, Tn2, Sn2, On2, An2, st2, ot2, at2, $n2, it2, Ce, z2, H, Pn2, _n2, je2, V2, X, ct2, ce2, lt2, Te, le2, pt2, Q3, In2, R4, Nn2, Wn2, Bn2, ut2, Mn2, Jn2, Vn2, ft2, dt2, Qn2, Gn2, Kn2, Y3, zn2, mt2, Se2, Hn2, Xn2, ht2, gt3, Yn2, yt2, Oe2, Zn2, qn2, er2, pe, tr2, kt2, nr2, rr2, sr2, or2, bt2, ar2;
+var import_node_module, import_node_path7, import_node_url4, import_node_fs4, import_fs7, import_os, import_path8, import_node_util5, wt2, p3, De, Le2, Ue, B2, Re2, ue2, It, Nt, Wt, Bt, Fe2, fe2, G3, Mt, Vt2, Qt2, Gt, Kt, c3, zt, _2, K, Ne2, J2, ne2, Me2, Je2, Ht, Ve2, de, Qe2, Xt, Yt2, N, re, Zt2, me, qt, en2, he, U2, ge, se2, tn, nn, rn2, sn, on2, an2, cn2, ln2, pn2, ye, Ge2, Ke2, un2, ze2, oe2, fn2, dn2, mn2, ke, hn2, ae2, He2, be, Xe2, gn2, yn2, Ye2, we, kn2, bn2, Ze2, wn2, xe2, xn2, qe2, ie, Ee2, et2, En2, tt2, ve2, nt2, vn2, Cn2, jn2, rt2, Tn2, Sn2, On2, An2, st2, ot2, at2, $n2, it2, Ce, z2, H, Pn2, _n2, je2, V2, X, ct2, ce2, lt2, Te, le2, pt2, Q3, In2, R4, Nn2, Wn2, Bn2, ut2, Mn2, Jn2, Vn2, ft2, dt2, Qn2, Gn2, Kn2, Y3, zn2, mt2, Se2, Hn2, Xn2, ht2, gt3, Yn2, yt2, Oe2, Zn2, qn2, er2, pe, tr2, kt2, nr2, rr2, sr2, or2, bt2, ar2;
 var init_register_DHgpdRjs = __esm({
   "node_modules/tsx/dist/register-DHgpdRjs.mjs"() {
     init_get_pipe_path_tAJyU_v();
@@ -183609,7 +183609,7 @@ var init_register_DHgpdRjs = __esm({
     import_node_path7 = __toESM(require("node:path"), 1);
     import_node_url4 = require("node:url");
     import_node_fs4 = __toESM(require("node:fs"), 1);
-    import_fs6 = __toESM(require("fs"), 1);
+    import_fs7 = __toESM(require("fs"), 1);
     import_os = __toESM(require("os"), 1);
     import_path8 = __toESM(require("path"), 1);
     init_index_DCefr8NP();
@@ -184082,7 +184082,7 @@ var init_register_DHgpdRjs = __esm({
         throw n5;
       }
     }, "checkDirectoryCaseWithFallback");
-    yn2 = ae2((e6, t7 = import_fs6.default, r5 = true) => {
+    yn2 = ae2((e6, t7 = import_fs7.default, r5 = true) => {
       const n5 = e6 ?? process.cwd();
       if (r5 && be.has(n5)) return be.get(n5);
       let s6;
@@ -197921,15 +197921,15 @@ function requirePicomatch$2() {
 function requireReaddirp() {
   if (hasRequiredReaddirp) return readdirp_1;
   hasRequiredReaddirp = 1;
-  const fs9 = import_fs7.default;
+  const fs10 = import_fs8.default;
   const { Readable: Readable4 } = import_stream6.default;
   const sysPath2 = import_path9.default;
   const { promisify: promisify4 } = import_util4.default;
   const picomatch5 = /* @__PURE__ */ requirePicomatch$2();
-  const readdir3 = promisify4(fs9.readdir);
-  const stat5 = promisify4(fs9.stat);
-  const lstat2 = promisify4(fs9.lstat);
-  const realpath3 = promisify4(fs9.realpath);
+  const readdir3 = promisify4(fs10.readdir);
+  const stat5 = promisify4(fs10.stat);
+  const lstat2 = promisify4(fs10.lstat);
+  const realpath3 = promisify4(fs10.realpath);
   const BANG2 = "!";
   const RECURSIVE_ERROR_CODE2 = "READDIRP_RECURSIVE_ERROR";
   const NORMAL_FLOW_ERRORS2 = /* @__PURE__ */ new Set(["ENOENT", "EPERM", "EACCES", "ELOOP", RECURSIVE_ERROR_CODE2]);
@@ -198003,7 +198003,7 @@ function requireReaddirp() {
       this._wantsFile = [FILE_TYPE2, FILE_DIR_TYPE2, EVERYTHING_TYPE2].includes(type);
       this._wantsEverything = type === EVERYTHING_TYPE2;
       this._root = sysPath2.resolve(root5);
-      this._isDirent = "Dirent" in fs9 && !opts.alwaysStat;
+      this._isDirent = "Dirent" in fs10 && !opts.alwaysStat;
       this._statsProp = this._isDirent ? "dirent" : "stats";
       this._rdOptions = { encoding: "utf8", withFileTypes: this._isDirent };
       this.parents = [this._exploreDir(root5, 1)];
@@ -201284,7 +201284,7 @@ function requireConstants() {
 function requireNodefsHandler() {
   if (hasRequiredNodefsHandler) return nodefsHandler;
   hasRequiredNodefsHandler = 1;
-  const fs9 = import_fs7.default;
+  const fs10 = import_fs8.default;
   const sysPath2 = import_path9.default;
   const { promisify: promisify4 } = import_util4.default;
   const isBinaryPath3 = /* @__PURE__ */ requireIsBinaryPath();
@@ -201307,11 +201307,11 @@ function requireNodefsHandler() {
     STAR: STAR2
   } = /* @__PURE__ */ requireConstants();
   const THROTTLE_MODE_WATCH2 = "watch";
-  const open3 = promisify4(fs9.open);
-  const stat5 = promisify4(fs9.stat);
-  const lstat2 = promisify4(fs9.lstat);
-  const close2 = promisify4(fs9.close);
-  const fsrealpath2 = promisify4(fs9.realpath);
+  const open3 = promisify4(fs10.open);
+  const stat5 = promisify4(fs10.stat);
+  const lstat2 = promisify4(fs10.lstat);
+  const close2 = promisify4(fs10.close);
+  const fsrealpath2 = promisify4(fs10.realpath);
   const statMethods2 = { lstat: lstat2, stat: stat5 };
   const foreach2 = (val2, fn3) => {
     if (val2 instanceof Set) {
@@ -201358,7 +201358,7 @@ function requireNodefsHandler() {
       }
     };
     try {
-      return fs9.watch(path12, options2, handleEvent);
+      return fs10.watch(path12, options2, handleEvent);
     } catch (error3) {
       errHandler(error3);
     }
@@ -201439,7 +201439,7 @@ function requireNodefsHandler() {
     let cont = FsWatchFileInstances2.get(fullPath);
     const copts = cont && cont.options;
     if (copts && (copts.persistent < options2.persistent || copts.interval > options2.interval)) {
-      fs9.unwatchFile(fullPath);
+      fs10.unwatchFile(fullPath);
       cont = void 0;
     }
     if (cont) {
@@ -201450,7 +201450,7 @@ function requireNodefsHandler() {
         listeners: listener2,
         rawEmitters: rawEmitter,
         options: options2,
-        watcher: fs9.watchFile(fullPath, options2, (curr, prev2) => {
+        watcher: fs10.watchFile(fullPath, options2, (curr, prev2) => {
           foreach2(cont.rawEmitters, (rawEmitter2) => {
             rawEmitter2(EV_CHANGE2, fullPath, { curr, prev: prev2 });
           });
@@ -201467,7 +201467,7 @@ function requireNodefsHandler() {
       delFromSet2(cont, KEY_RAW2, rawEmitter);
       if (isEmptySet2(cont.listeners)) {
         FsWatchFileInstances2.delete(fullPath);
-        fs9.unwatchFile(fullPath);
+        fs10.unwatchFile(fullPath);
         cont.options = cont.watcher = void 0;
         Object.freeze(cont);
       }
@@ -201769,7 +201769,7 @@ function requireNodefsHandler() {
 function requireFseventsHandler() {
   if (hasRequiredFseventsHandler) return fseventsHandler.exports;
   hasRequiredFseventsHandler = 1;
-  const fs9 = import_fs7.default;
+  const fs10 = import_fs8.default;
   const sysPath2 = import_path9.default;
   const { promisify: promisify4 } = import_util4.default;
   let fsevents2;
@@ -201814,9 +201814,9 @@ function requireFseventsHandler() {
     IDENTITY_FN: IDENTITY_FN2
   } = /* @__PURE__ */ requireConstants();
   const Depth2 = (value2) => isNaN(value2) ? {} : { depth: value2 };
-  const stat5 = promisify4(fs9.stat);
-  const lstat2 = promisify4(fs9.lstat);
-  const realpath3 = promisify4(fs9.realpath);
+  const stat5 = promisify4(fs10.stat);
+  const lstat2 = promisify4(fs10.lstat);
+  const realpath3 = promisify4(fs10.realpath);
   const statMethods2 = { stat: stat5, lstat: lstat2 };
   const FSEventsWatchers2 = /* @__PURE__ */ new Map();
   const consolidateThreshhold2 = 10;
@@ -202164,7 +202164,7 @@ function requireChokidar() {
   if (hasRequiredChokidar) return chokidar$1;
   hasRequiredChokidar = 1;
   const { EventEmitter: EventEmitter3 } = import_events2.default;
-  const fs9 = import_fs7.default;
+  const fs10 = import_fs8.default;
   const sysPath2 = import_path9.default;
   const { promisify: promisify4 } = import_util4.default;
   const readdirp2 = /* @__PURE__ */ requireReaddirp();
@@ -202209,8 +202209,8 @@ function requireChokidar() {
     isMacos: isMacos2,
     isIBMi: isIBMi2
   } = /* @__PURE__ */ requireConstants();
-  const stat5 = promisify4(fs9.stat);
-  const readdir3 = promisify4(fs9.readdir);
+  const stat5 = promisify4(fs10.stat);
+  const readdir3 = promisify4(fs10.readdir);
   const arrify2 = (value2 = []) => Array.isArray(value2) ? value2 : [value2];
   const flatten2 = (list2, result = []) => {
     list2.forEach((item) => {
@@ -202704,7 +202704,7 @@ function requireChokidar() {
       }
       const now = /* @__PURE__ */ new Date();
       const awaitWriteFinish = (prevStat) => {
-        fs9.stat(fullPath, (err2, curStat) => {
+        fs10.stat(fullPath, (err2, curStat) => {
           if (err2 || !this._pendingWrites.has(path12)) {
             if (err2 && err2.code !== "ENOENT") awfEmit(err2);
             return;
@@ -202903,14 +202903,14 @@ function requireChokidar() {
   chokidar$1.watch = watch3;
   return chokidar$1;
 }
-var import_node_path8, import_node_process, import_path9, import_fs7, import_util4, import_stream6, import_os2, import_events2, import_node_os3, import_native3, chokidar$1, utils$2, constants$3, hasRequiredConstants$3, hasRequiredUtils$2, scan_1$1, hasRequiredScan$1, parse_1$2, hasRequiredParse$2, picomatch_1$1, hasRequiredPicomatch$3, picomatch$1, hasRequiredPicomatch$2, readdirp_1, hasRequiredReaddirp, anymatch, utils$1, constants$2, hasRequiredConstants$2, hasRequiredUtils$1, scan_1, hasRequiredScan, parse_1$1, hasRequiredParse$1, picomatch_1, hasRequiredPicomatch$1, picomatch2, hasRequiredPicomatch, normalizePath2, hasRequiredNormalizePath, anymatch_1, hasRequiredAnymatch, isExtglob, hasRequiredIsExtglob, isGlob, hasRequiredIsGlob, globParent, hasRequiredGlobParent, utils, hasRequiredUtils, stringify2, hasRequiredStringify, isNumber6, hasRequiredIsNumber, toRegexRange_1, hasRequiredToRegexRange, fillRange, hasRequiredFillRange, compile_1, hasRequiredCompile, expand_1, hasRequiredExpand, constants$1, hasRequiredConstants$1, parse_1, hasRequiredParse, braces_1, hasRequiredBraces, require$$0, binaryExtensions, hasRequiredBinaryExtensions, isBinaryPath, hasRequiredIsBinaryPath, constants, hasRequiredConstants, nodefsHandler, hasRequiredNodefsHandler, fseventsHandler, require$$3, hasRequiredFseventsHandler, hasRequiredChokidar, chokidarExports, chokidar, FileWatcher, eventsRewrites, Watcher, Task;
+var import_node_path8, import_node_process, import_path9, import_fs8, import_util4, import_stream6, import_os2, import_events2, import_node_os3, import_native3, chokidar$1, utils$2, constants$3, hasRequiredConstants$3, hasRequiredUtils$2, scan_1$1, hasRequiredScan$1, parse_1$2, hasRequiredParse$2, picomatch_1$1, hasRequiredPicomatch$3, picomatch$1, hasRequiredPicomatch$2, readdirp_1, hasRequiredReaddirp, anymatch, utils$1, constants$2, hasRequiredConstants$2, hasRequiredUtils$1, scan_1, hasRequiredScan, parse_1$1, hasRequiredParse$1, picomatch_1, hasRequiredPicomatch$1, picomatch2, hasRequiredPicomatch, normalizePath2, hasRequiredNormalizePath, anymatch_1, hasRequiredAnymatch, isExtglob, hasRequiredIsExtglob, isGlob, hasRequiredIsGlob, globParent, hasRequiredGlobParent, utils, hasRequiredUtils, stringify2, hasRequiredStringify, isNumber6, hasRequiredIsNumber, toRegexRange_1, hasRequiredToRegexRange, fillRange, hasRequiredFillRange, compile_1, hasRequiredCompile, expand_1, hasRequiredExpand, constants$1, hasRequiredConstants$1, parse_1, hasRequiredParse, braces_1, hasRequiredBraces, require$$0, binaryExtensions, hasRequiredBinaryExtensions, isBinaryPath, hasRequiredIsBinaryPath, constants, hasRequiredConstants, nodefsHandler, hasRequiredNodefsHandler, fseventsHandler, require$$3, hasRequiredFseventsHandler, hasRequiredChokidar, chokidarExports, chokidar, FileWatcher, eventsRewrites, Watcher, Task;
 var init_watch = __esm({
   "node_modules/rollup/dist/es/shared/watch.js"() {
     init_node_entry();
     import_node_path8 = __toESM(require("node:path"), 1);
     import_node_process = __toESM(require("node:process"), 1);
     import_path9 = __toESM(require("path"), 1);
-    import_fs7 = __toESM(require("fs"), 1);
+    import_fs8 = __toESM(require("fs"), 1);
     import_util4 = __toESM(require("util"), 1);
     import_stream6 = __toESM(require("stream"), 1);
     import_os2 = __toESM(require("os"), 1);
@@ -208327,7 +208327,7 @@ function resolveIdViaPlugins(source, importer, pluginDriver, moduleLoaderResolve
   }
   return pluginDriver.hookFirstAndGetPlugin("resolveId", [source, importer, { attributes: attributes2, custom: customOptions, importerAttributes, isEntry }], replaceContext, skipped);
 }
-async function resolveId(source, importer, preserveSymlinks, pluginDriver, moduleLoaderResolveId, skip, customOptions, isEntry, attributes2, importerAttributes, fs9) {
+async function resolveId(source, importer, preserveSymlinks, pluginDriver, moduleLoaderResolveId, skip, customOptions, isEntry, attributes2, importerAttributes, fs10) {
   const pluginResult = await resolveIdViaPlugins(source, importer, pluginDriver, moduleLoaderResolveId, skip, customOptions, isEntry, attributes2, importerAttributes);
   if (pluginResult != null) {
     const [resolveIdResult, plugin3] = pluginResult;
@@ -208347,19 +208347,19 @@ async function resolveId(source, importer, preserveSymlinks, pluginDriver, modul
   }
   if (importer !== void 0 && !isAbsolute(source) && source[0] !== ".")
     return null;
-  return addJsExtensionIfNecessary(importer ? (0, import_node_path9.resolve)((0, import_node_path9.dirname)(importer), source) : (0, import_node_path9.resolve)(source), preserveSymlinks, fs9);
+  return addJsExtensionIfNecessary(importer ? (0, import_node_path9.resolve)((0, import_node_path9.dirname)(importer), source) : (0, import_node_path9.resolve)(source), preserveSymlinks, fs10);
 }
-async function addJsExtensionIfNecessary(file, preserveSymlinks, fs9) {
-  return await findFile(file, preserveSymlinks, fs9) ?? await findFile(file + ".mjs", preserveSymlinks, fs9) ?? await findFile(file + ".js", preserveSymlinks, fs9);
+async function addJsExtensionIfNecessary(file, preserveSymlinks, fs10) {
+  return await findFile(file, preserveSymlinks, fs10) ?? await findFile(file + ".mjs", preserveSymlinks, fs10) ?? await findFile(file + ".js", preserveSymlinks, fs10);
 }
-async function findFile(file, preserveSymlinks, fs9) {
+async function findFile(file, preserveSymlinks, fs10) {
   try {
-    const stats = await fs9.lstat(file);
+    const stats = await fs10.lstat(file);
     if (!preserveSymlinks && stats.isSymbolicLink())
-      return await findFile(await fs9.realpath(file), preserveSymlinks, fs9);
+      return await findFile(await fs10.realpath(file), preserveSymlinks, fs10);
     if (preserveSymlinks && stats.isSymbolicLink() || stats.isFile()) {
       const name = (0, import_node_path9.basename)(file);
-      const files = await fs9.readdir((0, import_node_path9.dirname)(file));
+      const files = await fs10.readdir((0, import_node_path9.dirname)(file));
       if (files.includes(name))
         return file;
     }
@@ -208995,7 +208995,7 @@ async function normalizeInputOptions(config2, watchMode) {
     experimentalCacheExpiry: config2.experimentalCacheExpiry ?? 10,
     experimentalLogSideEffects: config2.experimentalLogSideEffects || false,
     external: getIdMatcher(config2.external),
-    fs: config2.fs ?? fs5,
+    fs: config2.fs ?? fs6,
     input: getInput(config2),
     jsx: getJsx(config2),
     logLevel,
@@ -209573,7 +209573,7 @@ async function watchInternal(configs, emitter) {
   const { Watcher: Watcher2 } = await Promise.resolve().then(() => (init_watch(), watch_exports));
   new Watcher2(watchOptionsList, emitter);
 }
-var import_node_path9, import_path10, import_native4, import_node_process2, import_node_perf_hooks, promises, version2, package_, comma2, semicolon, chars$1, intToChar2, charToInt2, bufLength, td, StringWriter, StringReader2, BitSet, Chunk$1, btoa2, SourceMap, toString4, wordRegex, Mappings, n3, warned, MagicString, hasOwnProp, Bundle$1, NO_SEMICOLON, NON_WHITESPACE, WHITESPACE, UnknownKey, UnknownNonAccessorKey, UnknownInteger, UnknownWellKnown, SymbolToStringTag, SymbolDispose, SymbolAsyncDispose, SymbolHasInstance, WELL_KNOWN_SYMBOLS_LIST, WELL_KNOWN_SYMBOLS, isAnyWellKnown, TREE_SHAKEABLE_SYMBOLS_LIST, TREE_SHAKEABLE_SYMBOLS, isConcreteKey, EMPTY_PATH, UNKNOWN_PATH, UNKNOWN_NON_ACCESSOR_PATH, UNKNOWN_INTEGER_PATH, INSTANCEOF_PATH, EntitiesKey, EntityPathTracker, SHARED_RECURSION_TRACKER, DiscriminatedPathTracker, UNKNOWN_INCLUDED_PATH, IncludedFullPathTracker, UNKNOWN_INCLUDED_TOP_LEVEL_PATH, IncludedTopLevelPathTracker, UnknownValue, UnknownTruthyValue, UnknownFalsyValue, ExpressionEntity, UNKNOWN_EXPRESSION, UNKNOWN_RETURN_EXPRESSION, deoptimizeInteraction, includeInteraction, includeInteractionWithoutThis, INTERACTION_ACCESSED, INTERACTION_ASSIGNED, INTERACTION_CALLED, NODE_INTERACTION_UNKNOWN_ACCESS, NODE_INTERACTION_UNKNOWN_ASSIGNMENT, NODE_INTERACTION_UNKNOWN_CALL, PureFunctionKey, getPureFunctions, Variable, SOURCE_PHASE_IMPORT, ExternalVariable, RESERVED_NAMES, illegalCharacters, startsWithDigit, needsEscape, VALID_IDENTIFIER_REGEXP, NUMBER_REGEXP, ExternalModule, doNothing, childNodeKeys, INCLUDE_PARAMETERS, IS_SKIPPED_CHAIN, NodeBase, UNDEFINED_EXPRESSION, returnsUnknown, UNKNOWN_LITERAL_BOOLEAN, returnsBoolean, UNKNOWN_LITERAL_NUMBER, returnsNumber, UNKNOWN_LITERAL_STRING, returnsString, stringReplace, objectMembers, literalBooleanMembers, literalNumberMembers, literalRegExpMembers, literalStringMembers, Method, METHOD_RETURNS_BOOLEAN, METHOD_RETURNS_STRING, METHOD_RETURNS_NUMBER, METHOD_RETURNS_UNKNOWN, INTEGER_REG_EXP, ObjectEntity, isInteger, OBJECT_PROTOTYPE_FALLBACK, OBJECT_PROTOTYPE, NEW_ARRAY_PROPERTIES, METHOD_CALLS_ARG_DEOPTS_SELF_RETURNS_BOOLEAN, METHOD_CALLS_ARG_DEOPTS_SELF_RETURNS_NUMBER, METHOD_MUTATES_SELF_RETURNS_NEW_ARRAY, METHOD_DEOPTS_SELF_RETURNS_NEW_ARRAY, METHOD_CALLS_ARG_DEOPTS_SELF_RETURNS_NEW_ARRAY, METHOD_MUTATES_SELF_AND_ARGS_RETURNS_NUMBER, METHOD_MUTATES_SELF_RETURNS_UNKNOWN, METHOD_DEOPTS_SELF_RETURNS_UNKNOWN, METHOD_CALLS_ARG_DEOPTS_SELF_RETURNS_UNKNOWN, METHOD_MUTATES_SELF_RETURNS_SELF, METHOD_CALLS_ARG_MUTATES_SELF_RETURNS_SELF, ARRAY_PROTOTYPE, SpreadElement, ArrayExpression, ValueProperties, getUnknownValue, returnFalse, returnTrue, getWellKnownSymbol, PURE, IMPURE, PURE_WITH_ARRAY, GETTER_ACCESS, O2, PF, PF_NO_GETTER, MUTATES_ARG_WITHOUT_ACCESSOR, C2, PC, PC_WITH_ARRAY, ARRAY_TYPE, INTL_MEMBER, UNKNOWN_WELL_KNOWN, knownGlobals, GlobalVariable, MAX_PATH_DEPTH, limitConcatenatedPathDepth, LocalVariable, tdzVariableKinds, IdentifierBase, ObjectMember, Identifier2, chars3, base, Scope, ChildScope, MethodBase, MethodDefinition, BlockScope, StaticBlock2, ClassNode, ClassDeclaration, ArgumentsVariable, MAX_TRACKED_INTERACTIONS, NO_INTERACTIONS, UNKNOWN_DEOPTIMIZED_FIELD, EMPTY_PATH_TRACKER, UNKNOWN_DEOPTIMIZED_ENTITY, ParameterVariable, ThisVariable, CatchBodyScope, FunctionBodyScope, ParameterScope, ReturnValueScope, FunctionScope, ExpressionStatement2, BlockStatement2, RestElement2, getIncludedPatternPath$1, FunctionBase, FunctionNode, FunctionDeclaration, ExportDefaultDeclaration2, needsEscapeRegEx, quoteNewlineRegEx, backSlashRegEx, INTEROP_DEFAULT_VARIABLE, INTEROP_DEFAULT_COMPAT_VARIABLE, INTEROP_NAMESPACE_VARIABLE, INTEROP_NAMESPACE_COMPAT_VARIABLE, INTEROP_NAMESPACE_DEFAULT_VARIABLE, INTEROP_NAMESPACE_DEFAULT_ONLY_VARIABLE, MERGE_NAMESPACES_VARIABLE, DOCUMENT_CURRENT_SCRIPT, defaultInteropHelpersByInteropType, isDefaultAProperty, namespaceInteropHelpersByInteropType, canDefaultBeTakenFromNamespace, getHelpersBlock, HELPER_GENERATORS, getDefaultLiveBinding, getDefaultStatic, getIsCompatNamespace, createNamespaceObject, loopOverKeys, loopOverNamespaces, copyNonDefaultOwnPropertyLiveBinding, copyOwnPropertyLiveBinding, copyPropertyLiveBinding, copyPropertyStatic, getFrozen, getWithToStringTag, HELPER_NAMES, Literal2, MemberExpression2, FILE_PREFIX, FILE_OBJ_PREFIX, IMPORT, MetaProperty, formatsMaybeAccessDocumentCurrentScript, accessedMetaUrlGlobals, accessedFileUrlGlobals, getResolveUrl, getRelativeUrlFromDocument, getGenericImportMetaMechanism, getFileUrlFromFullPath, getFileUrlFromRelativePath, getUrlFromDocument, relativeUrlMechanisms, importMetaMechanisms, UndefinedVariable, ExportDefaultVariable, NamespaceVariable, getDynamicNamespaceVariable, SyntheticNamedExportVariable, ExternalChunk, getDefineProperty, builtinModules, nodeBuiltins, keypath, MISSING_EXPORT_SHIM_VARIABLE, getStarExcludes, getStarExcludesBlock, getImportBindingsBlock, getHoistedExportsBlock, getSyntheticExportsBlock, getMissingExportsBlock, finalisers, utils2, constants2, hasRequiredConstants2, hasRequiredUtils2, scan_12, hasRequiredScan2, parse_12, hasRequiredParse2, picomatch_1$12, hasRequiredPicomatch$12, picomatch_12, hasRequiredPicomatch2, picomatchExports, picomatch3, extractors, extractAssignedNames, normalizePathRegExp, normalizePath3, createFilter$1, reservedWords, builtins, forbiddenIdentifiers, ArrayPattern, getIncludedPatternPath, ArrowFunctionExpression2, ObjectPattern, AssignmentExpression, AssignmentPattern, AwaitExpression2, THEN_PATH, binaryOperators, UNASSIGNED$1, BinaryExpression, BreakStatement, CallExpressionBase, CallExpression2, CatchClause2, ChainExpression, ClassBodyScope, ClassBody, ClassExpression, MultiExpression, ConditionalExpression, ContinueStatement, DebuggerStatement, Decorator, DoWhileStatement, EmptyStatement, ExportAllDeclaration, ExportNamedDeclaration, ExportSpecifier, ForInStatement, ForOfStatement, ForStatement, FunctionExpression2, TrackingScope, unset, IfStatement, ImportAttribute, ImportDeclaration, ImportDefaultSpecifier, ObjectPromiseHandler, EmptyPromiseHandler, ImportExpression, accessedImportGlobals, ImportNamespaceSpecifier, ImportSpecifier, JSXIdentifier, JSXAttribute, JSXClosingBase, JSXClosingElement, JSXClosingFragment, JSXSpreadAttribute, JSXEmptyExpression, JSXExpressionContainer, RE_WHITESPACE_TRIM, RE_WHITESPACE_MERGE, JSXText, JSXElementBase, JSXElement, JSXFragment, JSXMemberExpression, JSXNamespacedName, JSXOpeningElement, JSXOpeningFragment, JSXSpreadChild, LabeledStatement, LogicalExpression, NewExpression, ObjectExpression2, PanicError2, ParseError2, PrivateIdentifier, Program2, Property2, PropertyDefinition, ReturnStatement2, SequenceExpression, Super, SwitchCase, SwitchStatement, TaggedTemplateExpression, TemplateElement, TemplateLiteral2, ModuleScope, ThisExpression, ThrowStatement, TryStatement, unaryOperators, UNASSIGNED, UnaryExpression, CHARACTERS_THAT_DO_NOT_REQUIRE_SPACE, UpdateExpression, VariableDeclaration, VariableDeclarator2, SYMBOL_DISPOSE_PATH, SYMBOL_ASYNC_DISPOSE_PATH, WhileStatement, YieldExpression, nodeTypeStrings, nodeConstructors$1, bufferParsers, UnknownNode, nodeConstructors, ExportShimVariable, BuildPhase, sourceMapCache2, ATTRIBUTE_KEYWORDS, getPropertyKey, timers, timeStart, timeEnd, TIMED_PLUGIN_HOOKS, MISSING_EXPORT_SHIM_DESCRIPTION, Module, copyNameToModulesMap, sortExportedVariables, concatSeparator, concatDblSeparator, DECONFLICT_IMPORTED_VARIABLES_BY_FORMAT, hashPlaceholderLeft, hashPlaceholderRight, hashPlaceholderOverhead, MAX_HASH_SIZE, DEFAULT_HASH_SIZE, getHashPlaceholderGenerator, REPLACER_REGEX, replacePlaceholders, replaceSinglePlaceholder, replacePlaceholdersWithDefaultAndGetContainedPlaceholders, lowercaseBundleKeys, FILE_PLACEHOLDER, getOutputBundle, removeUnreferencedAssets, RESERVED_USED_NAMES, NON_ASSET_EXTENSIONS, Chunk2, QUERY_HASH_REGEX, resolveFileName, compareExecIndex, wrapIfNeeded, Source, Link, textEncoder2, getHash64, getHash36, getHash16, hasherByType, SOURCEMAPPING_URL2, Bundle2, GlobalScope, getOnLog, getDefaultOnLog, addLogToString, normalizeLog, defaultPrintLog, treeshakePresets, jsxPresets, generatedCodePresets, objectifyOption, objectifyOptionWithPresets, getOptionWithPreset, normalizePluginOption, ANONYMOUS_PLUGIN_PREFIX, ANONYMOUS_OUTPUT_PLUGIN_PREFIX, NO_CACHE, RESOLVE_DEPENDENCIES, ModuleLoader, emittedFileTypes, FileEmitter, rollupVersion$2, inputHookNames, inputHooks, PluginDriver, Queue3, Graph, handleBeforeExit, rejectByPluginDriver, rollupVersion$1, fs5, getCache, getIdMatcher, getInput, getJsx, getMaxParallelFileOps, getModuleContext, getTreeshake, getHasModuleSideEffects, INVALID_CHAR_REGEX, DRIVE_LETTER_REGEX, getFile, getFormat, getInlineDynamicImports, getPreserveModules, getPreserveModulesRoot, getAmd, getAddon, getDir, getEntryFileNames, getExternalImportAttributes, getGeneratedCode, getIndent, ALLOWED_INTEROP_TYPES, getInterop, validateInterop, getManualChunks, getMinifyInternalExports, getSourcemapFileNames, getSourcemapBaseUrl, rollupVersion, SortingFileType, picocolors, hasRequiredPicocolors, picocolorsExports, pc, bold, cyan, dim, red, stderr, commandAliases, EMPTY_COMMAND_OPTIONS, getExternal, getObjectOption, getWatch, normalizeObjectOptionValue, fsEvents, fsEventsImportError, fseventsImporter, WatchEmitter, VERSION4;
+var import_node_path9, import_path10, import_native4, import_node_process2, import_node_perf_hooks, promises, version2, package_, comma2, semicolon, chars$1, intToChar2, charToInt2, bufLength, td, StringWriter, StringReader2, BitSet, Chunk$1, btoa2, SourceMap, toString4, wordRegex, Mappings, n3, warned, MagicString, hasOwnProp, Bundle$1, NO_SEMICOLON, NON_WHITESPACE, WHITESPACE, UnknownKey, UnknownNonAccessorKey, UnknownInteger, UnknownWellKnown, SymbolToStringTag, SymbolDispose, SymbolAsyncDispose, SymbolHasInstance, WELL_KNOWN_SYMBOLS_LIST, WELL_KNOWN_SYMBOLS, isAnyWellKnown, TREE_SHAKEABLE_SYMBOLS_LIST, TREE_SHAKEABLE_SYMBOLS, isConcreteKey, EMPTY_PATH, UNKNOWN_PATH, UNKNOWN_NON_ACCESSOR_PATH, UNKNOWN_INTEGER_PATH, INSTANCEOF_PATH, EntitiesKey, EntityPathTracker, SHARED_RECURSION_TRACKER, DiscriminatedPathTracker, UNKNOWN_INCLUDED_PATH, IncludedFullPathTracker, UNKNOWN_INCLUDED_TOP_LEVEL_PATH, IncludedTopLevelPathTracker, UnknownValue, UnknownTruthyValue, UnknownFalsyValue, ExpressionEntity, UNKNOWN_EXPRESSION, UNKNOWN_RETURN_EXPRESSION, deoptimizeInteraction, includeInteraction, includeInteractionWithoutThis, INTERACTION_ACCESSED, INTERACTION_ASSIGNED, INTERACTION_CALLED, NODE_INTERACTION_UNKNOWN_ACCESS, NODE_INTERACTION_UNKNOWN_ASSIGNMENT, NODE_INTERACTION_UNKNOWN_CALL, PureFunctionKey, getPureFunctions, Variable, SOURCE_PHASE_IMPORT, ExternalVariable, RESERVED_NAMES, illegalCharacters, startsWithDigit, needsEscape, VALID_IDENTIFIER_REGEXP, NUMBER_REGEXP, ExternalModule, doNothing, childNodeKeys, INCLUDE_PARAMETERS, IS_SKIPPED_CHAIN, NodeBase, UNDEFINED_EXPRESSION, returnsUnknown, UNKNOWN_LITERAL_BOOLEAN, returnsBoolean, UNKNOWN_LITERAL_NUMBER, returnsNumber, UNKNOWN_LITERAL_STRING, returnsString, stringReplace, objectMembers, literalBooleanMembers, literalNumberMembers, literalRegExpMembers, literalStringMembers, Method, METHOD_RETURNS_BOOLEAN, METHOD_RETURNS_STRING, METHOD_RETURNS_NUMBER, METHOD_RETURNS_UNKNOWN, INTEGER_REG_EXP, ObjectEntity, isInteger, OBJECT_PROTOTYPE_FALLBACK, OBJECT_PROTOTYPE, NEW_ARRAY_PROPERTIES, METHOD_CALLS_ARG_DEOPTS_SELF_RETURNS_BOOLEAN, METHOD_CALLS_ARG_DEOPTS_SELF_RETURNS_NUMBER, METHOD_MUTATES_SELF_RETURNS_NEW_ARRAY, METHOD_DEOPTS_SELF_RETURNS_NEW_ARRAY, METHOD_CALLS_ARG_DEOPTS_SELF_RETURNS_NEW_ARRAY, METHOD_MUTATES_SELF_AND_ARGS_RETURNS_NUMBER, METHOD_MUTATES_SELF_RETURNS_UNKNOWN, METHOD_DEOPTS_SELF_RETURNS_UNKNOWN, METHOD_CALLS_ARG_DEOPTS_SELF_RETURNS_UNKNOWN, METHOD_MUTATES_SELF_RETURNS_SELF, METHOD_CALLS_ARG_MUTATES_SELF_RETURNS_SELF, ARRAY_PROTOTYPE, SpreadElement, ArrayExpression, ValueProperties, getUnknownValue, returnFalse, returnTrue, getWellKnownSymbol, PURE, IMPURE, PURE_WITH_ARRAY, GETTER_ACCESS, O2, PF, PF_NO_GETTER, MUTATES_ARG_WITHOUT_ACCESSOR, C2, PC, PC_WITH_ARRAY, ARRAY_TYPE, INTL_MEMBER, UNKNOWN_WELL_KNOWN, knownGlobals, GlobalVariable, MAX_PATH_DEPTH, limitConcatenatedPathDepth, LocalVariable, tdzVariableKinds, IdentifierBase, ObjectMember, Identifier2, chars3, base, Scope, ChildScope, MethodBase, MethodDefinition, BlockScope, StaticBlock2, ClassNode, ClassDeclaration, ArgumentsVariable, MAX_TRACKED_INTERACTIONS, NO_INTERACTIONS, UNKNOWN_DEOPTIMIZED_FIELD, EMPTY_PATH_TRACKER, UNKNOWN_DEOPTIMIZED_ENTITY, ParameterVariable, ThisVariable, CatchBodyScope, FunctionBodyScope, ParameterScope, ReturnValueScope, FunctionScope, ExpressionStatement2, BlockStatement2, RestElement2, getIncludedPatternPath$1, FunctionBase, FunctionNode, FunctionDeclaration, ExportDefaultDeclaration2, needsEscapeRegEx, quoteNewlineRegEx, backSlashRegEx, INTEROP_DEFAULT_VARIABLE, INTEROP_DEFAULT_COMPAT_VARIABLE, INTEROP_NAMESPACE_VARIABLE, INTEROP_NAMESPACE_COMPAT_VARIABLE, INTEROP_NAMESPACE_DEFAULT_VARIABLE, INTEROP_NAMESPACE_DEFAULT_ONLY_VARIABLE, MERGE_NAMESPACES_VARIABLE, DOCUMENT_CURRENT_SCRIPT, defaultInteropHelpersByInteropType, isDefaultAProperty, namespaceInteropHelpersByInteropType, canDefaultBeTakenFromNamespace, getHelpersBlock, HELPER_GENERATORS, getDefaultLiveBinding, getDefaultStatic, getIsCompatNamespace, createNamespaceObject, loopOverKeys, loopOverNamespaces, copyNonDefaultOwnPropertyLiveBinding, copyOwnPropertyLiveBinding, copyPropertyLiveBinding, copyPropertyStatic, getFrozen, getWithToStringTag, HELPER_NAMES, Literal2, MemberExpression2, FILE_PREFIX, FILE_OBJ_PREFIX, IMPORT, MetaProperty, formatsMaybeAccessDocumentCurrentScript, accessedMetaUrlGlobals, accessedFileUrlGlobals, getResolveUrl, getRelativeUrlFromDocument, getGenericImportMetaMechanism, getFileUrlFromFullPath, getFileUrlFromRelativePath, getUrlFromDocument, relativeUrlMechanisms, importMetaMechanisms, UndefinedVariable, ExportDefaultVariable, NamespaceVariable, getDynamicNamespaceVariable, SyntheticNamedExportVariable, ExternalChunk, getDefineProperty, builtinModules, nodeBuiltins, keypath, MISSING_EXPORT_SHIM_VARIABLE, getStarExcludes, getStarExcludesBlock, getImportBindingsBlock, getHoistedExportsBlock, getSyntheticExportsBlock, getMissingExportsBlock, finalisers, utils2, constants2, hasRequiredConstants2, hasRequiredUtils2, scan_12, hasRequiredScan2, parse_12, hasRequiredParse2, picomatch_1$12, hasRequiredPicomatch$12, picomatch_12, hasRequiredPicomatch2, picomatchExports, picomatch3, extractors, extractAssignedNames, normalizePathRegExp, normalizePath3, createFilter$1, reservedWords, builtins, forbiddenIdentifiers, ArrayPattern, getIncludedPatternPath, ArrowFunctionExpression2, ObjectPattern, AssignmentExpression, AssignmentPattern, AwaitExpression2, THEN_PATH, binaryOperators, UNASSIGNED$1, BinaryExpression, BreakStatement, CallExpressionBase, CallExpression2, CatchClause2, ChainExpression, ClassBodyScope, ClassBody, ClassExpression, MultiExpression, ConditionalExpression, ContinueStatement, DebuggerStatement, Decorator, DoWhileStatement, EmptyStatement, ExportAllDeclaration, ExportNamedDeclaration, ExportSpecifier, ForInStatement, ForOfStatement, ForStatement, FunctionExpression2, TrackingScope, unset, IfStatement, ImportAttribute, ImportDeclaration, ImportDefaultSpecifier, ObjectPromiseHandler, EmptyPromiseHandler, ImportExpression, accessedImportGlobals, ImportNamespaceSpecifier, ImportSpecifier, JSXIdentifier, JSXAttribute, JSXClosingBase, JSXClosingElement, JSXClosingFragment, JSXSpreadAttribute, JSXEmptyExpression, JSXExpressionContainer, RE_WHITESPACE_TRIM, RE_WHITESPACE_MERGE, JSXText, JSXElementBase, JSXElement, JSXFragment, JSXMemberExpression, JSXNamespacedName, JSXOpeningElement, JSXOpeningFragment, JSXSpreadChild, LabeledStatement, LogicalExpression, NewExpression, ObjectExpression2, PanicError2, ParseError2, PrivateIdentifier, Program2, Property2, PropertyDefinition, ReturnStatement2, SequenceExpression, Super, SwitchCase, SwitchStatement, TaggedTemplateExpression, TemplateElement, TemplateLiteral2, ModuleScope, ThisExpression, ThrowStatement, TryStatement, unaryOperators, UNASSIGNED, UnaryExpression, CHARACTERS_THAT_DO_NOT_REQUIRE_SPACE, UpdateExpression, VariableDeclaration, VariableDeclarator2, SYMBOL_DISPOSE_PATH, SYMBOL_ASYNC_DISPOSE_PATH, WhileStatement, YieldExpression, nodeTypeStrings, nodeConstructors$1, bufferParsers, UnknownNode, nodeConstructors, ExportShimVariable, BuildPhase, sourceMapCache2, ATTRIBUTE_KEYWORDS, getPropertyKey, timers, timeStart, timeEnd, TIMED_PLUGIN_HOOKS, MISSING_EXPORT_SHIM_DESCRIPTION, Module, copyNameToModulesMap, sortExportedVariables, concatSeparator, concatDblSeparator, DECONFLICT_IMPORTED_VARIABLES_BY_FORMAT, hashPlaceholderLeft, hashPlaceholderRight, hashPlaceholderOverhead, MAX_HASH_SIZE, DEFAULT_HASH_SIZE, getHashPlaceholderGenerator, REPLACER_REGEX, replacePlaceholders, replaceSinglePlaceholder, replacePlaceholdersWithDefaultAndGetContainedPlaceholders, lowercaseBundleKeys, FILE_PLACEHOLDER, getOutputBundle, removeUnreferencedAssets, RESERVED_USED_NAMES, NON_ASSET_EXTENSIONS, Chunk2, QUERY_HASH_REGEX, resolveFileName, compareExecIndex, wrapIfNeeded, Source, Link, textEncoder2, getHash64, getHash36, getHash16, hasherByType, SOURCEMAPPING_URL2, Bundle2, GlobalScope, getOnLog, getDefaultOnLog, addLogToString, normalizeLog, defaultPrintLog, treeshakePresets, jsxPresets, generatedCodePresets, objectifyOption, objectifyOptionWithPresets, getOptionWithPreset, normalizePluginOption, ANONYMOUS_PLUGIN_PREFIX, ANONYMOUS_OUTPUT_PLUGIN_PREFIX, NO_CACHE, RESOLVE_DEPENDENCIES, ModuleLoader, emittedFileTypes, FileEmitter, rollupVersion$2, inputHookNames, inputHooks, PluginDriver, Queue3, Graph, handleBeforeExit, rejectByPluginDriver, rollupVersion$1, fs6, getCache, getIdMatcher, getInput, getJsx, getMaxParallelFileOps, getModuleContext, getTreeshake, getHasModuleSideEffects, INVALID_CHAR_REGEX, DRIVE_LETTER_REGEX, getFile, getFormat, getInlineDynamicImports, getPreserveModules, getPreserveModulesRoot, getAmd, getAddon, getDir, getEntryFileNames, getExternalImportAttributes, getGeneratedCode, getIndent, ALLOWED_INTEROP_TYPES, getInterop, validateInterop, getManualChunks, getMinifyInternalExports, getSourcemapFileNames, getSourcemapBaseUrl, rollupVersion, SortingFileType, picocolors, hasRequiredPicocolors, picocolorsExports, pc, bold, cyan, dim, red, stderr, commandAliases, EMPTY_COMMAND_OPTIONS, getExternal, getObjectOption, getWatch, normalizeObjectOptionValue, fsEvents, fsEventsImportError, fseventsImporter, WatchEmitter, VERSION4;
 var init_node_entry = __esm({
   "node_modules/rollup/dist/es/shared/node-entry.js"() {
     init_parseAst();
@@ -224590,7 +224590,7 @@ var init_node_entry = __esm({
     handleBeforeExit = null;
     rejectByPluginDriver = /* @__PURE__ */ new Map();
     rollupVersion$1 = package_.version;
-    fs5 = /* @__PURE__ */ _mergeNamespaces({
+    fs6 = /* @__PURE__ */ _mergeNamespaces({
       __proto__: null
     }, [promises]);
     getCache = (config2) => config2.cache === true ? void 0 : config2.cache?.cache || config2.cache;
@@ -231990,9 +231990,9 @@ function _mergeNamespaces3(n5, m6) {
   }
   return n5;
 }
-function setFileSystem(fs9) {
-  fileSystem.readFile = fs9.readFile;
-  fileSystem.writeFile = fs9.writeFile;
+function setFileSystem(fs10) {
+  fileSystem.readFile = fs10.readFile;
+  fileSystem.writeFile = fs10.writeFile;
 }
 function getFileSystem() {
   return fileSystem;
@@ -232585,22 +232585,22 @@ function getHashDigest$1(buffer, algorithm, digestType, maxLength) {
     }
     hash4 = new BatchedHash(createMd4());
   } else if (algorithm === "native-md4") {
-    if (typeof crypto22 === "undefined") {
-      crypto22 = import_crypto22.default;
+    if (typeof crypto23 === "undefined") {
+      crypto23 = import_crypto23.default;
       if (BulkUpdateDecorator === void 0) {
         BulkUpdateDecorator = requireBulkUpdateDecorator();
       }
     }
-    hash4 = new BulkUpdateDecorator(() => crypto22.createHash("md4"), "md4");
+    hash4 = new BulkUpdateDecorator(() => crypto23.createHash("md4"), "md4");
   } else {
-    if (typeof crypto22 === "undefined") {
-      crypto22 = import_crypto22.default;
+    if (typeof crypto23 === "undefined") {
+      crypto23 = import_crypto23.default;
       if (BulkUpdateDecorator === void 0) {
         BulkUpdateDecorator = requireBulkUpdateDecorator();
       }
     }
     hash4 = new BulkUpdateDecorator(
-      () => crypto22.createHash(algorithm),
+      () => crypto23.createHash(algorithm),
       algorithm
     );
   }
@@ -233197,23 +233197,23 @@ function makePlugin(opts) {
     }
   };
 }
-var import_fs8, import_path12, import_crypto22, import_util5, build2, fs6, fileSystem, pluginFactory, unquote$1, reg, Parser$1, matchValueName, replaceValueSymbols$2, replaceValueSymbols_1, replaceValueSymbols$1, replaceSymbols$1, replaceSymbols_1, importPattern, balancedQuotes, getDeclsObject, extractICSS$2, extractICSS_1, createImports, createExports, createICSSRules$1, createICSSRules_1, replaceValueSymbols, replaceSymbols, extractICSS$1, createICSSRules, src$4, _icssUtils, importRegexp, Parser6, saveJSON$1, _fs$2, localsConvention, symbolTag, reAsciiWord, reLatin, rsAstralRange, rsComboMarksRange, rsComboSymbolsRange, rsDingbatRange, rsLowerRange, rsMathOpRange, rsNonCharRange, rsPunctuationRange, rsSpaceRange, rsUpperRange, rsVarRange, rsBreakRange, rsApos, rsAstral, rsBreak, rsCombo, rsDigits, rsDingbat, rsLower, rsMisc, rsFitz, rsModifier, rsNonAstral, rsRegional, rsSurrPair, rsUpper, rsZWJ, rsLowerMisc, rsUpperMisc, rsOptLowerContr, rsOptUpperContr, reOptMod, rsOptVar, rsOptJoin, rsSeq, rsEmoji, rsSymbol, reApos, reComboMark, reUnicode, reUnicodeWord, reHasUnicode, reHasUnicodeWord, deburredLetters, freeGlobal, freeSelf, root$2, deburrLetter, objectProto, objectToString, Symbol$1, symbolProto, symbolToString, camelCase2, upperFirst, lodash_camelcase, _lodash, FileSystemLoader$1, _postcss$1, _path, _Parser$1, _fs$1, Core, traceKeySorter, FileSystemLoader, scoping, src$3, PERMANENT_MARKER, TEMPORARY_MARKER, topologicalSort_1, topologicalSort, matchImports$1, icssImport, VISITED_MARKER, srcExports$2, wasmHash, hasRequiredWasmHash, xxhash64_1, hasRequiredXxhash64, BatchedHash_1, hasRequiredBatchedHash, md4_1, hasRequiredMd4, BulkUpdateDecorator_1, hasRequiredBulkUpdateDecorator, baseEncodeTables, crypto22, createXXHash64, createMd4, BatchedHash, BulkUpdateDecorator, getHashDigest_1, path$12, getHashDigest, interpolateName_1, interpolateName, path9, genericNames, src$2, dist, processor, parser, root$1, container, node$1, util4, unesc, unescExports, getProp2, getPropExports, ensureObject, ensureObjectExports, stripComments, stripCommentsExports, _unesc, _getProp, _ensureObject, _stripComments, nodeExports, types4, TAG, STRING, SELECTOR, ROOT, PSEUDO, NESTING, ID, COMMENT, COMBINATOR, CLASS, ATTRIBUTE, UNIVERSAL, containerExports, rootExports, selector$1, selectorExports, className$1, object, hasOwnProperty$1, merge3, regexAnySingleEscape, regexSingleEscape, regexExcessiveSpaces, cssesc, cssesc_1, classNameExports, comment$2, commentExports, id$1, idExports, tag$1, namespace, namespaceExports, tagExports, string$1, stringExports, pseudo$1, pseudoExports, attribute$1, node, universal$1, universalExports, combinator$2, combinatorExports, nesting$1, nestingExports, sortAscending, sortAscendingExports, tokenize, tokenTypes, ampersand, asterisk, at3, comma4, colon2, semicolon2, openParenthesis, closeParenthesis, openSquare, closeSquare, dollar, tilde, caret, plus2, equals, pipe, greaterThan, space, singleQuote2, doubleQuote2, slash3, bang, backslash2, cr2, feed, newline, tab, str, comment$1, word, combinator$1, parserExports, processorExports, selectors, constructors, _attribute, _className, _combinator, _comment, _id, _nesting, _pseudo, _root, _selector, _string, _tag, _universal, attribute, className, combinator, comment2, id, nesting, pseudo, root3, selector, string, tag, universal, guards, _types, _IS_TYPE, IS_TYPE, isAttribute, isClassName, isCombinator, isComment2, isIdentifier, isNesting, isPseudo, isRoot2, isSelector, isString2, isTag3, isUniversal, distExports, selectorParser$1, valueParser2, extractICSS, IGNORE_FILE_MARKER, IGNORE_NEXT_LINE_MARKER, isSpacing, isPureCheckDisabled, isPureSelectorSymbol, specialKeywords, validIdent, animationKeywords, isPureSelector, isNodeWithoutDeclarations, srcExports$1, selectorParser, hasOwnProperty2, whitespace2, unescapeRegExp, plugin2, src$1, stringHash, src, ICSSUtils, matchImports, matchValueDefinition, matchImport, srcExports, _postcssModulesExtractImports, _genericNames, _postcssModulesLocalByDefault, _postcssModulesScope, _stringHash, _postcssModulesValues, behaviours, _postcss, _unquote, _Parser, _saveJSON, _localsConvention, _FileSystemLoader, _scoping, PLUGIN_NAME, _fs, _fs2, _pluginFactory, postcss2, buildExports, index3, index$12;
+var import_fs9, import_path12, import_crypto23, import_util5, build2, fs7, fileSystem, pluginFactory, unquote$1, reg, Parser$1, matchValueName, replaceValueSymbols$2, replaceValueSymbols_1, replaceValueSymbols$1, replaceSymbols$1, replaceSymbols_1, importPattern, balancedQuotes, getDeclsObject, extractICSS$2, extractICSS_1, createImports, createExports, createICSSRules$1, createICSSRules_1, replaceValueSymbols, replaceSymbols, extractICSS$1, createICSSRules, src$4, _icssUtils, importRegexp, Parser6, saveJSON$1, _fs$2, localsConvention, symbolTag, reAsciiWord, reLatin, rsAstralRange, rsComboMarksRange, rsComboSymbolsRange, rsDingbatRange, rsLowerRange, rsMathOpRange, rsNonCharRange, rsPunctuationRange, rsSpaceRange, rsUpperRange, rsVarRange, rsBreakRange, rsApos, rsAstral, rsBreak, rsCombo, rsDigits, rsDingbat, rsLower, rsMisc, rsFitz, rsModifier, rsNonAstral, rsRegional, rsSurrPair, rsUpper, rsZWJ, rsLowerMisc, rsUpperMisc, rsOptLowerContr, rsOptUpperContr, reOptMod, rsOptVar, rsOptJoin, rsSeq, rsEmoji, rsSymbol, reApos, reComboMark, reUnicode, reUnicodeWord, reHasUnicode, reHasUnicodeWord, deburredLetters, freeGlobal, freeSelf, root$2, deburrLetter, objectProto, objectToString, Symbol$1, symbolProto, symbolToString, camelCase2, upperFirst, lodash_camelcase, _lodash, FileSystemLoader$1, _postcss$1, _path, _Parser$1, _fs$1, Core, traceKeySorter, FileSystemLoader, scoping, src$3, PERMANENT_MARKER, TEMPORARY_MARKER, topologicalSort_1, topologicalSort, matchImports$1, icssImport, VISITED_MARKER, srcExports$2, wasmHash, hasRequiredWasmHash, xxhash64_1, hasRequiredXxhash64, BatchedHash_1, hasRequiredBatchedHash, md4_1, hasRequiredMd4, BulkUpdateDecorator_1, hasRequiredBulkUpdateDecorator, baseEncodeTables, crypto23, createXXHash64, createMd4, BatchedHash, BulkUpdateDecorator, getHashDigest_1, path$12, getHashDigest, interpolateName_1, interpolateName, path9, genericNames, src$2, dist, processor, parser, root$1, container, node$1, util4, unesc, unescExports, getProp2, getPropExports, ensureObject, ensureObjectExports, stripComments, stripCommentsExports, _unesc, _getProp, _ensureObject, _stripComments, nodeExports, types4, TAG, STRING, SELECTOR, ROOT, PSEUDO, NESTING, ID, COMMENT, COMBINATOR, CLASS, ATTRIBUTE, UNIVERSAL, containerExports, rootExports, selector$1, selectorExports, className$1, object, hasOwnProperty$1, merge3, regexAnySingleEscape, regexSingleEscape, regexExcessiveSpaces, cssesc, cssesc_1, classNameExports, comment$2, commentExports, id$1, idExports, tag$1, namespace, namespaceExports, tagExports, string$1, stringExports, pseudo$1, pseudoExports, attribute$1, node, universal$1, universalExports, combinator$2, combinatorExports, nesting$1, nestingExports, sortAscending, sortAscendingExports, tokenize, tokenTypes, ampersand, asterisk, at3, comma4, colon2, semicolon2, openParenthesis, closeParenthesis, openSquare, closeSquare, dollar, tilde, caret, plus2, equals, pipe, greaterThan, space, singleQuote2, doubleQuote2, slash3, bang, backslash2, cr2, feed, newline, tab, str, comment$1, word, combinator$1, parserExports, processorExports, selectors, constructors, _attribute, _className, _combinator, _comment, _id, _nesting, _pseudo, _root, _selector, _string, _tag, _universal, attribute, className, combinator, comment2, id, nesting, pseudo, root3, selector, string, tag, universal, guards, _types, _IS_TYPE, IS_TYPE, isAttribute, isClassName, isCombinator, isComment2, isIdentifier, isNesting, isPseudo, isRoot2, isSelector, isString2, isTag3, isUniversal, distExports, selectorParser$1, valueParser2, extractICSS, IGNORE_FILE_MARKER, IGNORE_NEXT_LINE_MARKER, isSpacing, isPureCheckDisabled, isPureSelectorSymbol, specialKeywords, validIdent, animationKeywords, isPureSelector, isNodeWithoutDeclarations, srcExports$1, selectorParser, hasOwnProperty2, whitespace2, unescapeRegExp, plugin2, src$1, stringHash, src, ICSSUtils, matchImports, matchValueDefinition, matchImport, srcExports, _postcssModulesExtractImports, _genericNames, _postcssModulesLocalByDefault, _postcssModulesScope, _stringHash, _postcssModulesValues, behaviours, _postcss, _unquote, _Parser, _saveJSON, _localsConvention, _FileSystemLoader, _scoping, PLUGIN_NAME, _fs, _fs2, _pluginFactory, postcss2, buildExports, index3, index$12;
 var init_dep_DDtvSN7 = __esm({
   "node_modules/vite/dist/node/chunks/dep-DDtvSN7_.js"() {
     init_dep_Dm0c1Wj2();
-    import_fs8 = __toESM(require("fs"), 1);
+    import_fs9 = __toESM(require("fs"), 1);
     init_postcss();
     import_path12 = __toESM(require("path"), 1);
-    import_crypto22 = __toESM(require("crypto"), 1);
+    import_crypto23 = __toESM(require("crypto"), 1);
     import_util5 = __toESM(require("util"), 1);
     init_dep_3RmXg9uo();
     build2 = { exports: {} };
-    fs6 = {};
-    Object.defineProperty(fs6, "__esModule", {
+    fs7 = {};
+    Object.defineProperty(fs7, "__esModule", {
       value: true
     });
-    fs6.getFileSystem = getFileSystem;
-    fs6.setFileSystem = setFileSystem;
+    fs7.getFileSystem = getFileSystem;
+    fs7.setFileSystem = setFileSystem;
     fileSystem = {
       readFile: () => {
         throw Error("readFile not implemented");
@@ -233451,7 +233451,7 @@ var init_dep_DDtvSN7 = __esm({
       value: true
     });
     saveJSON$1.default = saveJSON;
-    _fs$2 = fs6;
+    _fs$2 = fs7;
     localsConvention = {};
     symbolTag = "[object Symbol]";
     reAsciiWord = /[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g;
@@ -233728,7 +233728,7 @@ var init_dep_DDtvSN7 = __esm({
     _postcss$1 = _interopRequireDefault$4(postcss_default);
     _path = _interopRequireDefault$4(import_path12.default);
     _Parser$1 = _interopRequireDefault$4(Parser$1);
-    _fs$1 = fs6;
+    _fs$1 = fs7;
     Core = class _Core {
       constructor(plugins2) {
         this.plugins = plugins2 || _Core.defaultPlugins;
@@ -233968,7 +233968,7 @@ var init_dep_DDtvSN7 = __esm({
       62: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
       64: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
     };
-    crypto22 = void 0;
+    crypto23 = void 0;
     createXXHash64 = void 0;
     createMd4 = void 0;
     BatchedHash = void 0;
@@ -237992,8 +237992,8 @@ var init_dep_DDtvSN7 = __esm({
     _FileSystemLoader = _interopRequireDefault(FileSystemLoader$1);
     _scoping = scoping;
     PLUGIN_NAME = "postcss-modules";
-    _fs = import_fs8.default;
-    _fs2 = fs6;
+    _fs = import_fs9.default;
+    _fs2 = fs7;
     _pluginFactory = pluginFactory;
     (0, _fs2.setFileSystem)({
       readFile: _fs.readFile,
@@ -238046,27 +238046,27 @@ var require_process = __commonJS({
 var require_filesystem = __commonJS({
   "node_modules/detect-libc/lib/filesystem.js"(exports2, module2) {
     "use strict";
-    var fs9 = require("fs");
+    var fs10 = require("fs");
     var LDD_PATH = "/usr/bin/ldd";
     var SELF_PATH = "/proc/self/exe";
     var MAX_LENGTH2 = 2048;
     var readFileSync3 = (path12) => {
-      const fd = fs9.openSync(path12, "r");
+      const fd = fs10.openSync(path12, "r");
       const buffer = Buffer.alloc(MAX_LENGTH2);
-      const bytesRead = fs9.readSync(fd, buffer, 0, MAX_LENGTH2, 0);
-      fs9.close(fd, () => {
+      const bytesRead = fs10.readSync(fd, buffer, 0, MAX_LENGTH2, 0);
+      fs10.close(fd, () => {
       });
       return buffer.subarray(0, bytesRead);
     };
     var readFile = (path12) => new Promise((resolve8, reject) => {
-      fs9.open(path12, "r", (err2, fd) => {
+      fs10.open(path12, "r", (err2, fd) => {
         if (err2) {
           reject(err2);
         } else {
           const buffer = Buffer.alloc(MAX_LENGTH2);
-          fs9.read(fd, buffer, 0, MAX_LENGTH2, 0, (_3, bytesRead) => {
+          fs10.read(fd, buffer, 0, MAX_LENGTH2, 0, (_3, bytesRead) => {
             resolve8(buffer.subarray(0, bytesRead));
-            fs9.close(fd, () => {
+            fs10.close(fd, () => {
             });
           });
         }
@@ -239330,8 +239330,8 @@ function getStrictRequiresFilter({ strictRequires }) {
 function getPackageEntryPoint(dirPath) {
   let entryPoint = "index.js";
   try {
-    if ((0, import_fs9.existsSync)((0, import_path13.join)(dirPath, "package.json"))) {
-      entryPoint = JSON.parse((0, import_fs9.readFileSync)((0, import_path13.join)(dirPath, "package.json"), { encoding: "utf8" })).main || entryPoint;
+    if ((0, import_fs10.existsSync)((0, import_path13.join)(dirPath, "package.json"))) {
+      entryPoint = JSON.parse((0, import_fs10.readFileSync)((0, import_path13.join)(dirPath, "package.json"), { encoding: "utf8" })).main || entryPoint;
     }
   } catch (ignored) {
   }
@@ -239339,7 +239339,7 @@ function getPackageEntryPoint(dirPath) {
 }
 function isDirectory$1(path12) {
   try {
-    if ((0, import_fs9.statSync)(path12).isDirectory()) return true;
+    if ((0, import_fs10.statSync)(path12).isDirectory()) return true;
   } catch (ignored) {
   }
   return false;
@@ -239564,7 +239564,7 @@ function resolveExtensions(importee, importer, extensions2) {
   const candidates = getCandidates(resolved, extensions2);
   for (let i6 = 0; i6 < candidates.length; i6 += 1) {
     try {
-      const stats = (0, import_fs9.statSync)(candidates[i6]);
+      const stats = (0, import_fs10.statSync)(candidates[i6]);
       if (stats.isFile()) return { id: candidates[i6] };
     } catch (err2) {
     }
@@ -251067,7 +251067,7 @@ function requireWindows() {
   hasRequiredWindows = 1;
   windows = isexe2;
   isexe2.sync = sync3;
-  var fs9 = import_fs9.default;
+  var fs10 = import_fs10.default;
   function checkPathExt(path12, options2) {
     var pathext = options2.pathExt !== void 0 ? options2.pathExt : process.env.PATHEXT;
     if (!pathext) {
@@ -251092,12 +251092,12 @@ function requireWindows() {
     return checkPathExt(path12, options2);
   }
   function isexe2(path12, options2, cb) {
-    fs9.stat(path12, function(er3, stat5) {
+    fs10.stat(path12, function(er3, stat5) {
       cb(er3, er3 ? false : checkStat(stat5, path12, options2));
     });
   }
   function sync3(path12, options2) {
-    return checkStat(fs9.statSync(path12), path12, options2);
+    return checkStat(fs10.statSync(path12), path12, options2);
   }
   return windows;
 }
@@ -251106,14 +251106,14 @@ function requireMode() {
   hasRequiredMode = 1;
   mode = isexe2;
   isexe2.sync = sync3;
-  var fs9 = import_fs9.default;
+  var fs10 = import_fs10.default;
   function isexe2(path12, options2, cb) {
-    fs9.stat(path12, function(er3, stat5) {
+    fs10.stat(path12, function(er3, stat5) {
       cb(er3, er3 ? false : checkStat(stat5, options2));
     });
   }
   function sync3(path12, options2) {
-    return checkStat(fs9.statSync(path12), options2);
+    return checkStat(fs10.statSync(path12), options2);
   }
   function checkStat(stat5, options2) {
     return stat5.isFile() && checkMode(stat5, options2);
@@ -251224,9 +251224,9 @@ function readShebang$1(command) {
   const buffer = Buffer.alloc(size);
   let fd;
   try {
-    fd = fs7.openSync(command, "r");
-    fs7.readSync(fd, buffer, 0, size, 0);
-    fs7.closeSync(fd);
+    fd = fs8.openSync(command, "r");
+    fs8.readSync(fd, buffer, 0, size, 0);
+    fs8.closeSync(fd);
   } catch (e6) {
   }
   return shebangCommand(buffer.toString());
@@ -253036,7 +253036,7 @@ function entitytag(entity) {
   if (entity.length === 0) {
     return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
   }
-  var hash4 = crypto23.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+  var hash4 = crypto24.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
   var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
   return '"' + len.toString(16) + "-" + hash4 + '"';
 }
@@ -253114,11 +253114,11 @@ function send$1(req2, res, content, type, options2) {
 }
 function totalist(dir, callback2, pre = "") {
   dir = (0, import_path13.resolve)(".", dir);
-  let arr = (0, import_fs9.readdirSync)(dir);
+  let arr = (0, import_fs10.readdirSync)(dir);
   let i6 = 0, abs, stats;
   for (; i6 < arr.length; i6++) {
     abs = (0, import_path13.join)(dir, arr[i6]);
-    stats = (0, import_fs9.statSync)(abs);
+    stats = (0, import_fs10.statSync)(abs);
     stats.isDirectory() ? totalist(abs, callback2, (0, import_path13.join)(pre, arr[i6])) : callback2((0, import_path13.join)(pre, arr[i6]), abs, stats);
   }
 }
@@ -253410,8 +253410,8 @@ function isUriInFilePath(uri, filePath) {
   return isSameFileUri(uri, filePath) || isParentDirectory(uri, filePath);
 }
 function isFileLoadingAllowed(config2, filePath) {
-  const { fs: fs9 } = config2.server;
-  if (!fs9.strict) return true;
+  const { fs: fs10 } = config2.server;
+  if (!fs10.strict) return true;
   if (isWindows$3 && filePath.includes("~")) {
     return false;
   }
@@ -253423,7 +253423,7 @@ function isFileLoadingAllowed(config2, filePath) {
   const filePathWithoutTrailingSlash = filePath.endsWith("/") ? filePath.slice(0, -1) : filePath;
   if (config2.fsDenyGlob(filePathWithoutTrailingSlash)) return false;
   if (config2.safeModulePaths.has(filePath)) return true;
-  if (fs9.allow.some((uri) => isUriInFilePath(uri, filePath))) return true;
+  if (fs10.allow.some((uri) => isUriInFilePath(uri, filePath))) return true;
   return false;
 }
 function checkLoadingAccess(config2, path22) {
@@ -263972,7 +263972,7 @@ function optimizeDepsDisabledBackwardCompatibility(resolved, optimizeDeps2, opti
     }
   }
 }
-var fs$8, import_node_fs5, import_node_path10, import_promises3, import_node_url5, import_node_util6, import_node_perf_hooks2, import_node_module4, import_node_crypto3, import_picomatch2, import_esbuild3, import_path13, import_fs9, import_node_child_process2, import_node_http3, import_node_https2, import_tty, import_util6, import_net, import_events3, import_url5, import_http4, import_stream7, import_os3, import_child_process, import_node_os4, import_node_net6, import_node_dns, import_node_buffer4, import_module3, import_node_readline, import_node_process3, import_node_events, import_crypto23, import_node_assert, import_node_v8, import_node_worker_threads, import_https5, import_tls, import_zlib2, import_buffer, import_assert, qs, import_node_zlib2, import_node_module5, import_meta7, __require3, commonjsGlobal, picocolors2, p4, argv, env$1, isColorSupported, formatter, replaceClose, createColors, picocolorsExports2, colors$1, VALID_ID_PREFIX2, NULL_BYTE_PLACEHOLDER2, SOURCEMAPPING_URL3, MODULE_RUNNER_SOURCEMAPPING_SOURCE, ERR_OUTDATED_OPTIMIZED_DEP2, isWindows$3, windowsSlashRE2, postfixRE2, WalkerBase$1, SyncWalker$1, extractors2, extractAssignedNames3, blockDeclarations, Scope2, attachScopes, normalizePathRegExp2, normalizePath$5, createFilter$2, reservedWords2, builtins2, forbiddenIdentifiers2, makeLegalIdentifier, hasStringIsWellFormed, dataToEsm, path$a, commondir2, getCommonDir, comma5, semicolon3, chars$12, intToChar3, charToInt3, bufLength2, td2, StringWriter2, StringReader3, BitSet2, Chunk3, btoa$1, SourceMap$1, toString$1, wordRegex2, Mappings2, n$1, warned2, MagicString2, version$2, peerDependencies, firstpassGlobal, firstpassNoGlobal, getVirtualPathForDynamicRequirePath, FAILED_REQUIRE_ERROR, COMMONJS_REQUIRE_EXPORT, CREATE_COMMONJS_REQUIRE_EXPORT, isWrappedId, wrapId, unwrapId2, PROXY_SUFFIX, WRAPPED_SUFFIX, EXTERNAL_SUFFIX, EXPORTS_SUFFIX, MODULE_SUFFIX, ENTRY_SUFFIX, ES_IMPORT_SUFFIX, DYNAMIC_MODULES_ID, HELPERS_ID, IS_WRAPPED_COMMONJS, HELPERS, operators, KEY_COMPILED_ESM, reservedMethod, exportsPattern, functionType, PLUGIN_NAME2, schemeRegex, urlRegex, fileRegex, COLUMN$1, SOURCES_INDEX$1, SOURCE_LINE$1, SOURCE_COLUMN$1, NAMES_INDEX$1, found2, LINE_GTR_ZERO2, COL_GTR_EQ_ZERO2, LEAST_UPPER_BOUND2, GREATEST_LOWER_BOUND2, TraceMap, SetArray, COLUMN2, SOURCES_INDEX2, SOURCE_LINE2, SOURCE_COLUMN2, NAMES_INDEX2, NO_NAME, GenMapping, maybeAddSegment, SOURCELESS_MAPPING, EMPTY_SOURCES, SourceMap3, node$12, ms$1, hasRequiredMs, common$4, hasRequiredCommon, nodeExports$1, debug$j, pnp, createFilter$12, replaceSlashOrColonRE, replaceDotRE, replaceNestedIdRE, replaceHashRE, flattenId, FLATTEN_ID_HASH_LENGTH, FLATTEN_ID_MAX_FILE_LENGTH, limitFlattenIdLength, normalizeId, NODE_BUILTIN_NAMESPACE, NPM_BUILTIN_NAMESPACE, BUN_BUILTIN_NAMESPACE, nodeBuiltins2, isBuiltinCache, nodeLikeBuiltins, bareImportRE, deepImportRE, _require$1, _dirname, rollupVersion2, filter5, DEBUG, urlCanParse, isCaseInsensitiveFS, VOLUME_RE, externalRE, isExternalUrl, dataUrlRE, isDataUrl, virtualModuleRE, virtualModulePrefix, knownJsSrcRE, isJSRequest, importQueryRE, directRequestRE$1, internalPrefixes, InternalPrefixRE, trailingSeparatorRE, isImportRequest, isInternalRequest, urlRE$1, rawRE$1, timestampRE, splitRE, range, splitFirstDirRE, ERR_SYMLINK_IN_RECURSIVE_READDIR, safeRealpathSync, windowsNetworkMap, parseNetUseRE, firstSafeRealPathSyncRun, imageCandidateRegex, escapedSpaceCharacters, windowsDriveRE$1, replaceWindowsDriveRE, linuxAbsolutePathRE, revertWindowsDriveRE, nullSourceMap, multilineCommentsRE, singlelineCommentsRE, requestQuerySplitRE, requestQueryMaybeEscapedSplitRE, blankReplacer, hash$1, requireResolveFromRootWithFallback, windowsDrivePathPrefixRE, isNonDriveRelativeAbsolutePath, escapeRegexRE, sigtermCallbacks, parentSigtermCallback, setupSIGTERMListener, teardownSIGTERMListener, LogLevels, lastType, lastMsg, sameCount, timeFormatter, groups, COMPRESSIBLE_ASSETS_RE, POSIX_SEP_RE, NATIVE_SEP_RE, PATTERN_REGEX_CACHE, GLOB_ALL_PATTERN, TS_EXTENSIONS, JS_EXTENSIONS, TSJS_EXTENSIONS, TS_EXTENSIONS_RE_GROUP, TSJS_EXTENSIONS_RE_GROUP, IS_POSIX, isInNodeModules, posix2native, native2posix, resolve2posix, singleComment, multiComment, not_found_result, EXTENDABLE_KEYS, REBASE_KEYS, TSConfckParseError, DEFAULT_JSCONFIG_COMPILER_OPTIONS, TSConfckCache, debug$i, IIFE_BEGIN_RE, validExtensionRE, jsxExtensionsRE, defaultEsbuildSupported, rollupToEsbuildFormatMap, buildEsbuildPlugin, globalTSConfckCache, tsconfckCacheMap, AsyncFunction2, codeToDataUrl, viteSsrDynamicImport, Worker, importRe, internalImportName, FakeWorker, WorkerWithFallback, terserPath, loadTerserPath, mimes, publicFilesMap, assetUrlRE, jsSourceMapRE, noInlineRE, inlineRE$3, svgExtRE, assetCache, cssEntriesMap, publicAssetUrlCache, publicAssetUrlRE, GIT_LFS_PREFIX, nestedQuotesRE, endsWithJSRE, dataUriRE, base64RE, dataUriPrefix, ImportType, A3, C3, E2, init, convertSourceMap$1, convertSourceMap, debug$h, virtualSourceRE, src$12, path$9, fs$7, os$2, url$3, fsReadFileAsync, jsonLoader, requireFunc, defaultLoadersSync, dynamicImport, defaultLoaders, makeEmplace, createRequire3, fileURLToPath4, pathToFileURL, TS_EXT_RE, tsx, jiti, importError, req_1, req$2, options_1, req$1, plugins_1, resolve7, config$1, loadOptions, loadPlugins, req, interopRequireDefault, yaml, withLoaders, src2, postcssrc, jsonExtRE, jsonObjRE, jsonLangs, jsonLangRE, isJSONRequest, HASH_RE, AMPERSAND_RE, SLASH_RE, EQUAL_RE, PLUS_RE, ENC_CARET_RE, ENC_BACKTICK_RE, ENC_PIPE_RE, ENC_SPACE_RE, own$1, classRegExp, kTypes, messages, nodeInternalPrefix, userStackTraceLimit, captureLargerStackTrace, ESM_STATIC_IMPORT_RE, TYPE_RE, ESM_RE, COMMENT_RE, externalWithConversionNamespace, convertedExternalPrefix, cjsExternalFacadeNamespace, nonFacadePrefix, externalTypes, matchesEntireLine, environmentColors, PartialEnvironment, BaseEnvironment, HashbangComment, Identifier3, JSXIdentifier2, JSXPunctuator, JSXString, JSXText2, KeywordsWithExpressionAfter, KeywordsWithNoLineTerminatorAfter, LineTerminatorSequence, MultiLineComment, Newline, NumericLiteral, Punctuator, RegularExpressionLiteral, SingleLineComment, StringLiteral, Template, TokensNotPrecedingObjectLiteral, TokensPrecedingExpression, WhiteSpace, jsTokens_1, jsTokens, importGlobRE, objectKeysRE, objectValuesRE, knownOptions, forceDefaultAs, importPrefix, basename6, dirname5, relative4, ScanEnvironment, debug$g, htmlTypesRE, importsRE, scriptRE, commentRE$1, srcRE, typeRE, langRE, svelteScriptModuleRE, svelteModuleRE, debug$f, jsExtensionRE, jsMapExtensionRE, firstLoadCachedDepOptimizationMetadata, lockfileFormats, lockfilePaths, MAX_TEMP_DIR_AGE_MS, GRACEFUL_RENAME_TIMEOUT, safeRename, debug$e, isExternalCache, normalizedClientEntry$1, normalizedEnvEntry$1, ERR_RESOLVE_PACKAGE_ENTRY_FAIL, browserExternalId, optionalPeerDepId, subpathImportsPrefix, startsWithWordCharRE, debug$d, knownTsOutputRE, isPossibleTsOutput, debug$c, main, version$1, require$$4, fs$6, path$8, os$1, crypto$1, packageJson, version3, LINE, DotenvModule, parse_1$22, expand_1$1, debug$b, docsURL, deprecationCode, deprecationMessages, _ignoreDeprecationWarnings, node2, debug$a, s5, m5, h3, d3, y2, ms, debugExports, nodeExports2, encodeurl, ENCODE_CHARS_REGEXP, UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE, matchHtmlRegExp, escapeHtml_1, escapeHtml$2, onFinished$2, eeFirst, first2, defer$2, onFinishedExports, parseurl$1, url$2, parse$a, Url, parseurlExports, require$$0$13, codes, statuses$1, unpipe_1, debug$9, encodeUrl, escapeHtml, onFinished, parseUrl$2, statuses, unpipe, DOUBLE_SPACE_REGEXP, NEWLINE_REGEXP, defer$1, isFinished, finalhandler_1, utilsMerge, utilsMergeExports, debug$8, EventEmitter$3, finalhandler, http$4, merge5, parseUrl$1, connect, env3, proto, defer, connect$1, lib2, getOwnPropertySymbols, hasOwnProperty3, propIsEnumerable, objectAssign, vary$1, FIELD_NAME_REGEXP, varyExports, libExports, corsMiddleware, chokidar2, fs$5, Readable3, sysPath$3, promisify$3, picomatch$12, readdir$1, stat$3, lstat$2, realpath$1, BANG$2, RECURSIVE_ERROR_CODE, NORMAL_FLOW_ERRORS, FILE_TYPE, DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE, ALL_TYPES, isNormalFlowError, maj, min, wantBigintFsStats, normalizeFilter$1, ReaddirpStream, readdirp$1, readdirpPromise, readdirp_12, anymatch$2, normalizePath$2, anymatch_12, picomatch4, normalizePath$1, BANG$1, DEFAULT_OPTIONS, arrify$1, createPattern, matchPatterns, anymatch$1, anymatchExports, isExtglob$1, isExtglob3, chars4, strictCheck, relaxedCheck, isGlob$2, isGlob$1, pathPosixDirname, isWin32, slash4, backslash3, enclosure, globby, escaped, globParent$1, utils$3, utils$22, stringify$4, isNumber$2, isNumber$1, toRegexRange$1, toRegexRange_12, util5, toRegexRange, isObject3, transform3, isValidValue, isNumber7, zeros, stringify$3, pad, toMaxLen, toSequence, toRange, toRegex, rangeError, invalidRange, invalidStep, fillNumbers, fillLetters, fill$2, fillRange2, fill$1, utils$12, compile$1, compile_12, fill, stringify$2, utils3, append4, expand$1, expand_12, constants$22, stringify$12, MAX_LENGTH, CHAR_BACKSLASH, CHAR_BACKTICK, CHAR_COMMA, CHAR_DOT, CHAR_LEFT_PARENTHESES, CHAR_RIGHT_PARENTHESES, CHAR_LEFT_CURLY_BRACE, CHAR_RIGHT_CURLY_BRACE, CHAR_LEFT_SQUARE_BRACKET, CHAR_RIGHT_SQUARE_BRACKET, CHAR_DOUBLE_QUOTE, CHAR_SINGLE_QUOTE, CHAR_NO_BREAK_SPACE, CHAR_ZERO_WIDTH_NOBREAK_SPACE, parse$8, parse_1$12, stringify6, compile4, expand, parse$7, braces$1, braces_12, require$$03, binaryExtensions$1, path$7, binaryExtensions2, extensions, isBinaryPath$1, constants$12, fs$4, sysPath$2, promisify$2, isBinaryPath2, isWindows$2, isLinux, EMPTY_FN$2, EMPTY_STR$1, KEY_LISTENERS, KEY_ERR, KEY_RAW, HANDLER_KEYS, EV_CHANGE$2, EV_ADD$2, EV_ADD_DIR$2, EV_ERROR$2, STR_DATA$1, STR_END$2, BRACE_START$1, STAR, THROTTLE_MODE_WATCH, open$1, stat$2, lstat$1, close, fsrealpath, statMethods$1, foreach, addAndConvert, clearItem, delFromSet, isEmptySet, FsWatchInstances, fsWatchBroadcast, setFsWatchListener, FsWatchFileInstances, setFsWatchFileListener, NodeFsHandler$1, nodefsHandler2, fseventsHandler2, fs$3, sysPath$1, promisify$1, fsevents, EV_ADD$1, EV_CHANGE$1, EV_ADD_DIR$1, EV_UNLINK$1, EV_ERROR$1, STR_DATA, STR_END$1, FSEVENT_CREATED, FSEVENT_MODIFIED, FSEVENT_DELETED, FSEVENT_MOVED, FSEVENT_UNKNOWN, FSEVENT_FLAG_MUST_SCAN_SUBDIRS, FSEVENT_TYPE_FILE, FSEVENT_TYPE_DIRECTORY, FSEVENT_TYPE_SYMLINK, ROOT_GLOBSTAR, DIR_SUFFIX, DOT_SLASH, FUNCTION_TYPE$1, EMPTY_FN$1, IDENTITY_FN, Depth, stat$1, lstat, realpath2, statMethods, FSEventsWatchers, consolidateThreshhold, wrongEventFlags, createFSEventsInstance, couldConsolidate, canUse, calcDepth, sameTypes, FsEventsHandler$1, fseventsHandlerExports, EventEmitter$2, fs$2, sysPath, promisify3, readdirp, anymatch2, globParent3, isGlob3, braces, normalizePath6, NodeFsHandler2, FsEventsHandler2, EV_ALL, EV_READY, EV_ADD, EV_CHANGE, EV_UNLINK, EV_ADD_DIR, EV_UNLINK_DIR, EV_RAW, EV_ERROR, STR_CLOSE, STR_END, BACK_SLASH_RE, DOUBLE_SLASH_RE, SLASH_OR_BACK_SLASH_RE, DOT_RE, REPLACER_RE, SLASH, SLASH_SLASH, BRACE_START, BANG, ONE_DOT, TWO_DOTS, GLOBSTAR, SLASH_GLOBSTAR, ANYMATCH_OPTS, STRING_TYPE, FUNCTION_TYPE, EMPTY_STR, EMPTY_FN, isWindows$1, isMacos, isIBMi, stat4, readdir2, arrify, flatten, unifyPaths, toUnix, normalizePathToUnix, normalizeIgnored, getAbsolutePath, undef, DirEntry, STAT_METHOD_F, STAT_METHOD_L, WatchHelper, FSWatcher, watch2, guess, shellQuote$1, OPS, LINE_TERMINATORS, GLOB_SHELL_SPECIAL, quote, CONTROL, controlRE, META, SINGLE_QUOTE, DOUBLE_QUOTE, hash3, SQ, DQ, DS, TOKEN, mult, i6, startsWithToken, parse$6, macos, linux, windows$1, path$6, shellQuote, childProcess$1, COMMON_EDITORS_MACOS, COMMON_EDITORS_LINUX, COMMON_EDITORS_WIN, guessExports, path$5, getArgs, fs$1, os, path$4, colors, childProcess, guessEditor, getArgumentsForPosition2, positionRE, currentChildProcess, launchEditor_1, path$3, launch, launchEditorMiddleware, launchEditorMiddleware$1, offset, rewroteStacktraces, prepareStackTrace2, createServerModuleRunnerTransport, SSRCompatModuleRunner, WalkerBase2, SyncWalker2, ssrModuleExportsKey2, ssrImportKey2, ssrDynamicImportKey2, ssrExportAllKey2, ssrImportMetaKey2, hashbangRE, isNodeInPatternWeakSet, setIsNodeInPattern, isNodeInPattern, isStaticProperty, isStaticPropertyKey, functionNodeTypeRE, blockNodeTypeRE, isDockerCached, cachedResult, hasContainerEnv, isWsl, isWsl$1, execFileAsync$3, execFileAsync$2, execFileAsync$1, windowsBrowserProgIds, UnknownBrowserError, execFileAsync2, titleize, __dirname2, localXdgOpenPath, platform2, arch, getWslDrivesMountPoint, pTryEach, baseOpen, open2, apps, crossSpawn, windows, hasRequiredWindows, mode, hasRequiredMode, core, isexe_1, isWindows2, path$22, COLON2, isexe, getNotFoundError, getPathInfo, which$1, whichSync, which_1, pathKey$1, pathKey, pathKeyExports, path$13, which, getPathKey, resolveCommand_1, _escape, metaCharsRegExp, shebangRegex$1, shebangRegex, shebangCommand$1, fs7, shebangCommand, readShebang_1, path10, resolveCommand, escape$1, readShebang, isWin$1, isExecutableRegExp, isCmdShimRegExp, parse_13, isWin2, enoent$1, cp, parse$4, enoent, crossSpawnExports, spawn$1, supportedChromiumBrowsers, BASE_DEV_SHORTCUTS, BASE_PREVIEW_SHORTCUTS, NoopWatcher, bufferUtil$1, BINARY_TYPES$2, hasBlob$1, constants3, EMPTY_BUFFER$3, FastBuffer$2, bufferUtilExports, kDone, kRun, Limiter$1, limiter, zlib3, bufferUtil, Limiter2, kStatusCode$2, FastBuffer$1, TRAILER, kPerMessageDeflate, kTotalLength, kCallback, kBuffers, kError$1, zlibLimiter, PerMessageDeflate$4, permessageDeflate, validation, isUtf8, hasBlob, tokenChars$2, validationExports, Writable$1, PerMessageDeflate$3, BINARY_TYPES$1, EMPTY_BUFFER$2, kStatusCode$1, kWebSocket$3, concat3, toArrayBuffer2, unmask, isValidStatusCode$1, isValidUTF8, FastBuffer, GET_INFO, GET_PAYLOAD_LENGTH_16, GET_PAYLOAD_LENGTH_64, GET_MASK, GET_DATA, INFLATING, DEFER_EVENT, Receiver$1, receiver, randomFillSync, PerMessageDeflate$2, EMPTY_BUFFER$1, kWebSocket$2, NOOP$2, isBlob$1, isValidStatusCode, applyMask, toBuffer$1, kByteLength, maskBuffer, RANDOM_POOL_SIZE, randomPool, randomPoolPointer, DEFAULT, DEFLATING, GET_BLOB_DATA, Sender$1, sender, kForOnEventAttribute$1, kListener$1, kCode, kData, kError, kMessage, kReason, kTarget, kType, kWasClean, Event$1, CloseEvent, ErrorEvent, MessageEvent, EventTarget2, eventTarget, tokenChars$1, extension$1, EventEmitter$1, https$2, http$3, net, tls, randomBytes2, createHash$1, URL$2, PerMessageDeflate$1, Receiver3, Sender3, isBlob3, BINARY_TYPES, EMPTY_BUFFER, GUID$1, kForOnEventAttribute, kListener, kStatusCode, kWebSocket$1, NOOP$1, addEventListener, removeEventListener, format2, parse$2, toBuffer2, closeTimeout, kAborted, protocolVersions, readyStates, subprotocolRegex, WebSocket$1, websocket, tokenChars, subprotocol$1, EventEmitter2, http$2, createHash2, extension2, PerMessageDeflate3, subprotocol2, WebSocket3, GUID, kWebSocket, keyRegex, RUNNING, CLOSING, CLOSED, WebSocketServer2, websocketServer, WebSocketServerRaw_, allowedHostsServerCache, allowedHostsPreviewCache, isFileOrExtensionProtocolRE, WebSocketServerRaw, HMR_HEADER, isWebSocketServer, wsServerEvents, httpProxy$3, eventemitter3, eventemitter3Exports, common$3, requiresPort, url$1, common$2, redirectRegex, webOutgoing, followRedirects$1, debug$7, debug_1, url2, URL$1, http$1, https$1, Writable, assert, debug$6, useNativeURL, preservedUrlFields, events, eventHandlers, InvalidUrlError, RedirectionError, TooManyRedirectsError, MaxBodyLengthExceededError, WriteAfterEndError, destroy, followRedirectsExports, httpNative, httpsNative, web_o, common$1, followRedirects2, nativeAgents, webIncoming, http5, https6, common, wsIncoming, httpProxyExports, ProxyServer, httpProxy$2, httpProxy, httpProxy$1, debug$5, rewriteOriginHeader, debug$4, etag_1, crypto23, Stats, toString6, getEtag, debug$3, alias, noop4, ENCODING, knownJavascriptExtensionRE, ERR_DENIED_FILE, sirvOptions, windowsDriveRE, ERR_LOAD_URL, ERR_LOAD_PUBLIC_URL, ERR_DENIED_ID, debugLoad, debugTransform, debugCache$1, ALLOWED_META_NAME, ALLOWED_META_PROPERTY, DEFAULT_HTML_ASSET_SOURCES, modulePreloadPolyfillId, resolvedModulePreloadPolyfillId, htmlProxyRE$1, isHtmlProxyRE, inlineCSSRE$1, inlineImportRE, htmlLangRE, spaceRe, importMapRE, moduleScriptRE, modulePreloadLinkRE, importMapAppendRE, isHTMLProxy, isHTMLRequest, htmlProxyMap, htmlProxyResult, noInlineLinkRels, isAsyncScriptMap, attrValueStartRE, elementsAllowedInHead, importRE, commentRE, headInjectRE, headPrependInjectRE, htmlInjectRE, htmlPrependInjectRE, bodyInjectRE, bodyPrependInjectRE, doctypePrependInjectRE, unaryTags, debugCache, knownIgnoreList, trailingQuerySeparatorsRE, urlRE, rawRE, inlineRE$2, svgRE, wordCharRE, processNodeUrl, devHtmlHook, logTime, EMPTY_OBJECT$1, ModuleNode, ModuleGraph, DualWeakMap, ROOT_FILES, usedConfigs, serverConfigDefaults, debugHmr, whitespaceRE, normalizedClientDir, normalizeHotChannel, sortedHotUpdatePluginsCache, nonJsRe, isNonJsRequest, importMetaEnvMarker, importMetaEnvKeyReCache, workerOrSharedWorkerRE, workerFileRE, inlineRE$1, WORKER_FILE_ID, workerCache, workerAssetUrlRE, debug$2, clientDir, skipRE, canSkipImportAnalysis, optimizedDepChunkRE, optimizedDepDynamicRE, hasViteIgnoreRE, urlIsStringRE, templateLiteralRE, interopHelper, normalizedClientEntry, normalizedEnvEntry, wasmHelperId, wasmInitRE, wasmHelper, wasmHelperCode, wasmHelperPlugin, wasmFallbackPlugin, VariableDynamicImportError, example, defaultProtocol, ignoredProtocols, dynamicImportHelperId, relativePathRE, hasDynamicImportRE, dynamicImportHelper, filterForPlugin, viteAliasCustomResolver, EMPTY_OBJECT2, debugSourcemapCombineFilter, debugSourcemapCombine, debugResolve, debugPluginResolve, debugPluginTransform, debugPluginContainerContext, ERR_CLOSED_SERVER, EnvironmentPluginContainer, MinimalPluginContext, PluginContext, ResolveIdContext, LoadPluginContext, TransformPluginContext, PluginContainer, decoder, cssConfigDefaults, cssModuleRE, directRequestRE, htmlProxyRE, htmlProxyIndexRE, commonjsProxyRE, inlineRE, inlineCSSRE, styleAttrRE, functionCallRE, transformOnlyRE, nonEscapedDoubleQuoteRe, defaultCssBundleName, isCSSRequest, isModuleCSSRequest, isDirectCSSRequest, isDirectRequest, cssModulesCache, removedPureCssFilesCache, cssBundleNameCache, postcssConfigCache, cssUrlAssetRE, fileURLWithWindowsDriveRE, configToAtImportResolvers, importPostcssImport, importPostcssModules, importPostcss, preprocessorWorkerControllerCache, alwaysFakeWorkerWorkerControllerCache, viteHashUpdateMarker, viteHashUpdateMarkerRE, cssUrlRE, cssDataUriRE, importCssRE, cssImageSetRE, UrlRewritePostcssPlugin, cssNotProcessedRE, atImportRE, atCharsetRE, loadedPreprocessorPath, cachedSss, makeScssWorker, makeModernScssWorker, makeModernCompilerScssWorker, scssProcessor, makeLessWorker, lessProcessor, makeStylWorker, stylProcessor, createPreprocessorWorkerController, normalizeMaxWorkers, preprocessorSet, importLightningCSS, map2, esMap, esRE, versionRE, convertTargetsCache, convertTargets, isModernFlag, preloadMethod, preloadMarker, preloadHelperId, preloadMarkerRE, dynamicImportPrefixRE, dynamicImportTreeshakenRE, buildEnvironmentOptionsDefaults, warningIgnoreList, dynamicImportWarningIgnoreList, normalizeLog2, needsEscapeRegEx2, quoteNewlineRegEx2, backSlashRegEx2, getResolveUrl2, getRelativeUrlFromDocument2, getFileUrlFromFullPath2, getFileUrlFromRelativePath2, relativeUrlMechanisms2, customRelativeUrlMechanisms, toOutputFilePathInCss, toOutputFilePathInHtml, BuildEnvironment, builderOptionsDefaults, build$12, OTHER_SOURCE_MAP_REGEXP, debug$1, debounceMs, EnvironmentModuleNode, EnvironmentModuleGraph, DevEnvironment, callCrawlEndIfIdleAfterMs, RunnableDevEnvironment, NOOP, MIMES, ssrConfigDefaults, debug, promisifiedRealpath, SYMBOL_RESOLVED_CONFIG, configDefaults, clientAlias, _require;
+var fs$8, import_node_fs5, import_node_path10, import_promises3, import_node_url5, import_node_util6, import_node_perf_hooks2, import_node_module4, import_node_crypto3, import_picomatch2, import_esbuild3, import_path13, import_fs10, import_node_child_process2, import_node_http3, import_node_https2, import_tty, import_util6, import_net, import_events3, import_url5, import_http4, import_stream7, import_os3, import_child_process, import_node_os4, import_node_net6, import_node_dns, import_node_buffer4, import_module3, import_node_readline, import_node_process3, import_node_events, import_crypto24, import_node_assert, import_node_v8, import_node_worker_threads, import_https5, import_tls, import_zlib2, import_buffer, import_assert, qs, import_node_zlib2, import_node_module5, import_meta7, __require3, commonjsGlobal, picocolors2, p4, argv, env$1, isColorSupported, formatter, replaceClose, createColors, picocolorsExports2, colors$1, VALID_ID_PREFIX2, NULL_BYTE_PLACEHOLDER2, SOURCEMAPPING_URL3, MODULE_RUNNER_SOURCEMAPPING_SOURCE, ERR_OUTDATED_OPTIMIZED_DEP2, isWindows$3, windowsSlashRE2, postfixRE2, WalkerBase$1, SyncWalker$1, extractors2, extractAssignedNames3, blockDeclarations, Scope2, attachScopes, normalizePathRegExp2, normalizePath$5, createFilter$2, reservedWords2, builtins2, forbiddenIdentifiers2, makeLegalIdentifier, hasStringIsWellFormed, dataToEsm, path$a, commondir2, getCommonDir, comma5, semicolon3, chars$12, intToChar3, charToInt3, bufLength2, td2, StringWriter2, StringReader3, BitSet2, Chunk3, btoa$1, SourceMap$1, toString$1, wordRegex2, Mappings2, n$1, warned2, MagicString2, version$2, peerDependencies, firstpassGlobal, firstpassNoGlobal, getVirtualPathForDynamicRequirePath, FAILED_REQUIRE_ERROR, COMMONJS_REQUIRE_EXPORT, CREATE_COMMONJS_REQUIRE_EXPORT, isWrappedId, wrapId, unwrapId2, PROXY_SUFFIX, WRAPPED_SUFFIX, EXTERNAL_SUFFIX, EXPORTS_SUFFIX, MODULE_SUFFIX, ENTRY_SUFFIX, ES_IMPORT_SUFFIX, DYNAMIC_MODULES_ID, HELPERS_ID, IS_WRAPPED_COMMONJS, HELPERS, operators, KEY_COMPILED_ESM, reservedMethod, exportsPattern, functionType, PLUGIN_NAME2, schemeRegex, urlRegex, fileRegex, COLUMN$1, SOURCES_INDEX$1, SOURCE_LINE$1, SOURCE_COLUMN$1, NAMES_INDEX$1, found2, LINE_GTR_ZERO2, COL_GTR_EQ_ZERO2, LEAST_UPPER_BOUND2, GREATEST_LOWER_BOUND2, TraceMap, SetArray, COLUMN2, SOURCES_INDEX2, SOURCE_LINE2, SOURCE_COLUMN2, NAMES_INDEX2, NO_NAME, GenMapping, maybeAddSegment, SOURCELESS_MAPPING, EMPTY_SOURCES, SourceMap3, node$12, ms$1, hasRequiredMs, common$4, hasRequiredCommon, nodeExports$1, debug$j, pnp, createFilter$12, replaceSlashOrColonRE, replaceDotRE, replaceNestedIdRE, replaceHashRE, flattenId, FLATTEN_ID_HASH_LENGTH, FLATTEN_ID_MAX_FILE_LENGTH, limitFlattenIdLength, normalizeId, NODE_BUILTIN_NAMESPACE, NPM_BUILTIN_NAMESPACE, BUN_BUILTIN_NAMESPACE, nodeBuiltins2, isBuiltinCache, nodeLikeBuiltins, bareImportRE, deepImportRE, _require$1, _dirname, rollupVersion2, filter5, DEBUG, urlCanParse, isCaseInsensitiveFS, VOLUME_RE, externalRE, isExternalUrl, dataUrlRE, isDataUrl, virtualModuleRE, virtualModulePrefix, knownJsSrcRE, isJSRequest, importQueryRE, directRequestRE$1, internalPrefixes, InternalPrefixRE, trailingSeparatorRE, isImportRequest, isInternalRequest, urlRE$1, rawRE$1, timestampRE, splitRE, range, splitFirstDirRE, ERR_SYMLINK_IN_RECURSIVE_READDIR, safeRealpathSync, windowsNetworkMap, parseNetUseRE, firstSafeRealPathSyncRun, imageCandidateRegex, escapedSpaceCharacters, windowsDriveRE$1, replaceWindowsDriveRE, linuxAbsolutePathRE, revertWindowsDriveRE, nullSourceMap, multilineCommentsRE, singlelineCommentsRE, requestQuerySplitRE, requestQueryMaybeEscapedSplitRE, blankReplacer, hash$1, requireResolveFromRootWithFallback, windowsDrivePathPrefixRE, isNonDriveRelativeAbsolutePath, escapeRegexRE, sigtermCallbacks, parentSigtermCallback, setupSIGTERMListener, teardownSIGTERMListener, LogLevels, lastType, lastMsg, sameCount, timeFormatter, groups, COMPRESSIBLE_ASSETS_RE, POSIX_SEP_RE, NATIVE_SEP_RE, PATTERN_REGEX_CACHE, GLOB_ALL_PATTERN, TS_EXTENSIONS, JS_EXTENSIONS, TSJS_EXTENSIONS, TS_EXTENSIONS_RE_GROUP, TSJS_EXTENSIONS_RE_GROUP, IS_POSIX, isInNodeModules, posix2native, native2posix, resolve2posix, singleComment, multiComment, not_found_result, EXTENDABLE_KEYS, REBASE_KEYS, TSConfckParseError, DEFAULT_JSCONFIG_COMPILER_OPTIONS, TSConfckCache, debug$i, IIFE_BEGIN_RE, validExtensionRE, jsxExtensionsRE, defaultEsbuildSupported, rollupToEsbuildFormatMap, buildEsbuildPlugin, globalTSConfckCache, tsconfckCacheMap, AsyncFunction2, codeToDataUrl, viteSsrDynamicImport, Worker, importRe, internalImportName, FakeWorker, WorkerWithFallback, terserPath, loadTerserPath, mimes, publicFilesMap, assetUrlRE, jsSourceMapRE, noInlineRE, inlineRE$3, svgExtRE, assetCache, cssEntriesMap, publicAssetUrlCache, publicAssetUrlRE, GIT_LFS_PREFIX, nestedQuotesRE, endsWithJSRE, dataUriRE, base64RE, dataUriPrefix, ImportType, A3, C3, E2, init, convertSourceMap$1, convertSourceMap, debug$h, virtualSourceRE, src$12, path$9, fs$7, os$2, url$3, fsReadFileAsync, jsonLoader, requireFunc, defaultLoadersSync, dynamicImport, defaultLoaders, makeEmplace, createRequire3, fileURLToPath4, pathToFileURL, TS_EXT_RE, tsx, jiti, importError, req_1, req$2, options_1, req$1, plugins_1, resolve7, config$1, loadOptions, loadPlugins, req, interopRequireDefault, yaml, withLoaders, src2, postcssrc, jsonExtRE, jsonObjRE, jsonLangs, jsonLangRE, isJSONRequest, HASH_RE, AMPERSAND_RE, SLASH_RE, EQUAL_RE, PLUS_RE, ENC_CARET_RE, ENC_BACKTICK_RE, ENC_PIPE_RE, ENC_SPACE_RE, own$1, classRegExp, kTypes, messages, nodeInternalPrefix, userStackTraceLimit, captureLargerStackTrace, ESM_STATIC_IMPORT_RE, TYPE_RE, ESM_RE, COMMENT_RE, externalWithConversionNamespace, convertedExternalPrefix, cjsExternalFacadeNamespace, nonFacadePrefix, externalTypes, matchesEntireLine, environmentColors, PartialEnvironment, BaseEnvironment, HashbangComment, Identifier3, JSXIdentifier2, JSXPunctuator, JSXString, JSXText2, KeywordsWithExpressionAfter, KeywordsWithNoLineTerminatorAfter, LineTerminatorSequence, MultiLineComment, Newline, NumericLiteral, Punctuator, RegularExpressionLiteral, SingleLineComment, StringLiteral, Template, TokensNotPrecedingObjectLiteral, TokensPrecedingExpression, WhiteSpace, jsTokens_1, jsTokens, importGlobRE, objectKeysRE, objectValuesRE, knownOptions, forceDefaultAs, importPrefix, basename6, dirname5, relative4, ScanEnvironment, debug$g, htmlTypesRE, importsRE, scriptRE, commentRE$1, srcRE, typeRE, langRE, svelteScriptModuleRE, svelteModuleRE, debug$f, jsExtensionRE, jsMapExtensionRE, firstLoadCachedDepOptimizationMetadata, lockfileFormats, lockfilePaths, MAX_TEMP_DIR_AGE_MS, GRACEFUL_RENAME_TIMEOUT, safeRename, debug$e, isExternalCache, normalizedClientEntry$1, normalizedEnvEntry$1, ERR_RESOLVE_PACKAGE_ENTRY_FAIL, browserExternalId, optionalPeerDepId, subpathImportsPrefix, startsWithWordCharRE, debug$d, knownTsOutputRE, isPossibleTsOutput, debug$c, main, version$1, require$$4, fs$6, path$8, os$1, crypto$1, packageJson, version3, LINE, DotenvModule, parse_1$22, expand_1$1, debug$b, docsURL, deprecationCode, deprecationMessages, _ignoreDeprecationWarnings, node2, debug$a, s5, m5, h3, d3, y2, ms, debugExports, nodeExports2, encodeurl, ENCODE_CHARS_REGEXP, UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE, matchHtmlRegExp, escapeHtml_1, escapeHtml$2, onFinished$2, eeFirst, first2, defer$2, onFinishedExports, parseurl$1, url$2, parse$a, Url, parseurlExports, require$$0$13, codes, statuses$1, unpipe_1, debug$9, encodeUrl, escapeHtml, onFinished, parseUrl$2, statuses, unpipe, DOUBLE_SPACE_REGEXP, NEWLINE_REGEXP, defer$1, isFinished, finalhandler_1, utilsMerge, utilsMergeExports, debug$8, EventEmitter$3, finalhandler, http$4, merge5, parseUrl$1, connect, env3, proto, defer, connect$1, lib2, getOwnPropertySymbols, hasOwnProperty3, propIsEnumerable, objectAssign, vary$1, FIELD_NAME_REGEXP, varyExports, libExports, corsMiddleware, chokidar2, fs$5, Readable3, sysPath$3, promisify$3, picomatch$12, readdir$1, stat$3, lstat$2, realpath$1, BANG$2, RECURSIVE_ERROR_CODE, NORMAL_FLOW_ERRORS, FILE_TYPE, DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE, ALL_TYPES, isNormalFlowError, maj, min, wantBigintFsStats, normalizeFilter$1, ReaddirpStream, readdirp$1, readdirpPromise, readdirp_12, anymatch$2, normalizePath$2, anymatch_12, picomatch4, normalizePath$1, BANG$1, DEFAULT_OPTIONS, arrify$1, createPattern, matchPatterns, anymatch$1, anymatchExports, isExtglob$1, isExtglob3, chars4, strictCheck, relaxedCheck, isGlob$2, isGlob$1, pathPosixDirname, isWin32, slash4, backslash3, enclosure, globby, escaped, globParent$1, utils$3, utils$22, stringify$4, isNumber$2, isNumber$1, toRegexRange$1, toRegexRange_12, util5, toRegexRange, isObject3, transform3, isValidValue, isNumber7, zeros, stringify$3, pad, toMaxLen, toSequence, toRange, toRegex, rangeError, invalidRange, invalidStep, fillNumbers, fillLetters, fill$2, fillRange2, fill$1, utils$12, compile$1, compile_12, fill, stringify$2, utils3, append4, expand$1, expand_12, constants$22, stringify$12, MAX_LENGTH, CHAR_BACKSLASH, CHAR_BACKTICK, CHAR_COMMA, CHAR_DOT, CHAR_LEFT_PARENTHESES, CHAR_RIGHT_PARENTHESES, CHAR_LEFT_CURLY_BRACE, CHAR_RIGHT_CURLY_BRACE, CHAR_LEFT_SQUARE_BRACKET, CHAR_RIGHT_SQUARE_BRACKET, CHAR_DOUBLE_QUOTE, CHAR_SINGLE_QUOTE, CHAR_NO_BREAK_SPACE, CHAR_ZERO_WIDTH_NOBREAK_SPACE, parse$8, parse_1$12, stringify6, compile4, expand, parse$7, braces$1, braces_12, require$$03, binaryExtensions$1, path$7, binaryExtensions2, extensions, isBinaryPath$1, constants$12, fs$4, sysPath$2, promisify$2, isBinaryPath2, isWindows$2, isLinux, EMPTY_FN$2, EMPTY_STR$1, KEY_LISTENERS, KEY_ERR, KEY_RAW, HANDLER_KEYS, EV_CHANGE$2, EV_ADD$2, EV_ADD_DIR$2, EV_ERROR$2, STR_DATA$1, STR_END$2, BRACE_START$1, STAR, THROTTLE_MODE_WATCH, open$1, stat$2, lstat$1, close, fsrealpath, statMethods$1, foreach, addAndConvert, clearItem, delFromSet, isEmptySet, FsWatchInstances, fsWatchBroadcast, setFsWatchListener, FsWatchFileInstances, setFsWatchFileListener, NodeFsHandler$1, nodefsHandler2, fseventsHandler2, fs$3, sysPath$1, promisify$1, fsevents, EV_ADD$1, EV_CHANGE$1, EV_ADD_DIR$1, EV_UNLINK$1, EV_ERROR$1, STR_DATA, STR_END$1, FSEVENT_CREATED, FSEVENT_MODIFIED, FSEVENT_DELETED, FSEVENT_MOVED, FSEVENT_UNKNOWN, FSEVENT_FLAG_MUST_SCAN_SUBDIRS, FSEVENT_TYPE_FILE, FSEVENT_TYPE_DIRECTORY, FSEVENT_TYPE_SYMLINK, ROOT_GLOBSTAR, DIR_SUFFIX, DOT_SLASH, FUNCTION_TYPE$1, EMPTY_FN$1, IDENTITY_FN, Depth, stat$1, lstat, realpath2, statMethods, FSEventsWatchers, consolidateThreshhold, wrongEventFlags, createFSEventsInstance, couldConsolidate, canUse, calcDepth, sameTypes, FsEventsHandler$1, fseventsHandlerExports, EventEmitter$2, fs$2, sysPath, promisify3, readdirp, anymatch2, globParent3, isGlob3, braces, normalizePath6, NodeFsHandler2, FsEventsHandler2, EV_ALL, EV_READY, EV_ADD, EV_CHANGE, EV_UNLINK, EV_ADD_DIR, EV_UNLINK_DIR, EV_RAW, EV_ERROR, STR_CLOSE, STR_END, BACK_SLASH_RE, DOUBLE_SLASH_RE, SLASH_OR_BACK_SLASH_RE, DOT_RE, REPLACER_RE, SLASH, SLASH_SLASH, BRACE_START, BANG, ONE_DOT, TWO_DOTS, GLOBSTAR, SLASH_GLOBSTAR, ANYMATCH_OPTS, STRING_TYPE, FUNCTION_TYPE, EMPTY_STR, EMPTY_FN, isWindows$1, isMacos, isIBMi, stat4, readdir2, arrify, flatten, unifyPaths, toUnix, normalizePathToUnix, normalizeIgnored, getAbsolutePath, undef, DirEntry, STAT_METHOD_F, STAT_METHOD_L, WatchHelper, FSWatcher, watch2, guess, shellQuote$1, OPS, LINE_TERMINATORS, GLOB_SHELL_SPECIAL, quote, CONTROL, controlRE, META, SINGLE_QUOTE, DOUBLE_QUOTE, hash3, SQ, DQ, DS, TOKEN, mult, i6, startsWithToken, parse$6, macos, linux, windows$1, path$6, shellQuote, childProcess$1, COMMON_EDITORS_MACOS, COMMON_EDITORS_LINUX, COMMON_EDITORS_WIN, guessExports, path$5, getArgs, fs$1, os, path$4, colors, childProcess, guessEditor, getArgumentsForPosition2, positionRE, currentChildProcess, launchEditor_1, path$3, launch, launchEditorMiddleware, launchEditorMiddleware$1, offset, rewroteStacktraces, prepareStackTrace2, createServerModuleRunnerTransport, SSRCompatModuleRunner, WalkerBase2, SyncWalker2, ssrModuleExportsKey2, ssrImportKey2, ssrDynamicImportKey2, ssrExportAllKey2, ssrImportMetaKey2, hashbangRE, isNodeInPatternWeakSet, setIsNodeInPattern, isNodeInPattern, isStaticProperty, isStaticPropertyKey, functionNodeTypeRE, blockNodeTypeRE, isDockerCached, cachedResult, hasContainerEnv, isWsl, isWsl$1, execFileAsync$3, execFileAsync$2, execFileAsync$1, windowsBrowserProgIds, UnknownBrowserError, execFileAsync2, titleize, __dirname2, localXdgOpenPath, platform2, arch, getWslDrivesMountPoint, pTryEach, baseOpen, open2, apps, crossSpawn, windows, hasRequiredWindows, mode, hasRequiredMode, core, isexe_1, isWindows2, path$22, COLON2, isexe, getNotFoundError, getPathInfo, which$1, whichSync, which_1, pathKey$1, pathKey, pathKeyExports, path$13, which, getPathKey, resolveCommand_1, _escape, metaCharsRegExp, shebangRegex$1, shebangRegex, shebangCommand$1, fs8, shebangCommand, readShebang_1, path10, resolveCommand, escape$1, readShebang, isWin$1, isExecutableRegExp, isCmdShimRegExp, parse_13, isWin2, enoent$1, cp, parse$4, enoent, crossSpawnExports, spawn$1, supportedChromiumBrowsers, BASE_DEV_SHORTCUTS, BASE_PREVIEW_SHORTCUTS, NoopWatcher, bufferUtil$1, BINARY_TYPES$2, hasBlob$1, constants3, EMPTY_BUFFER$3, FastBuffer$2, bufferUtilExports, kDone, kRun, Limiter$1, limiter, zlib3, bufferUtil, Limiter2, kStatusCode$2, FastBuffer$1, TRAILER, kPerMessageDeflate, kTotalLength, kCallback, kBuffers, kError$1, zlibLimiter, PerMessageDeflate$4, permessageDeflate, validation, isUtf8, hasBlob, tokenChars$2, validationExports, Writable$1, PerMessageDeflate$3, BINARY_TYPES$1, EMPTY_BUFFER$2, kStatusCode$1, kWebSocket$3, concat3, toArrayBuffer2, unmask, isValidStatusCode$1, isValidUTF8, FastBuffer, GET_INFO, GET_PAYLOAD_LENGTH_16, GET_PAYLOAD_LENGTH_64, GET_MASK, GET_DATA, INFLATING, DEFER_EVENT, Receiver$1, receiver, randomFillSync, PerMessageDeflate$2, EMPTY_BUFFER$1, kWebSocket$2, NOOP$2, isBlob$1, isValidStatusCode, applyMask, toBuffer$1, kByteLength, maskBuffer, RANDOM_POOL_SIZE, randomPool, randomPoolPointer, DEFAULT, DEFLATING, GET_BLOB_DATA, Sender$1, sender, kForOnEventAttribute$1, kListener$1, kCode, kData, kError, kMessage, kReason, kTarget, kType, kWasClean, Event$1, CloseEvent, ErrorEvent, MessageEvent, EventTarget2, eventTarget, tokenChars$1, extension$1, EventEmitter$1, https$2, http$3, net, tls, randomBytes2, createHash$1, URL$2, PerMessageDeflate$1, Receiver3, Sender3, isBlob3, BINARY_TYPES, EMPTY_BUFFER, GUID$1, kForOnEventAttribute, kListener, kStatusCode, kWebSocket$1, NOOP$1, addEventListener, removeEventListener, format2, parse$2, toBuffer2, closeTimeout, kAborted, protocolVersions, readyStates, subprotocolRegex, WebSocket$1, websocket, tokenChars, subprotocol$1, EventEmitter2, http$2, createHash2, extension2, PerMessageDeflate3, subprotocol2, WebSocket3, GUID, kWebSocket, keyRegex, RUNNING, CLOSING, CLOSED, WebSocketServer2, websocketServer, WebSocketServerRaw_, allowedHostsServerCache, allowedHostsPreviewCache, isFileOrExtensionProtocolRE, WebSocketServerRaw, HMR_HEADER, isWebSocketServer, wsServerEvents, httpProxy$3, eventemitter3, eventemitter3Exports, common$3, requiresPort, url$1, common$2, redirectRegex, webOutgoing, followRedirects$1, debug$7, debug_1, url2, URL$1, http$1, https$1, Writable, assert, debug$6, useNativeURL, preservedUrlFields, events, eventHandlers, InvalidUrlError, RedirectionError, TooManyRedirectsError, MaxBodyLengthExceededError, WriteAfterEndError, destroy, followRedirectsExports, httpNative, httpsNative, web_o, common$1, followRedirects2, nativeAgents, webIncoming, http5, https6, common, wsIncoming, httpProxyExports, ProxyServer, httpProxy$2, httpProxy, httpProxy$1, debug$5, rewriteOriginHeader, debug$4, etag_1, crypto24, Stats, toString6, getEtag, debug$3, alias, noop4, ENCODING, knownJavascriptExtensionRE, ERR_DENIED_FILE, sirvOptions, windowsDriveRE, ERR_LOAD_URL, ERR_LOAD_PUBLIC_URL, ERR_DENIED_ID, debugLoad, debugTransform, debugCache$1, ALLOWED_META_NAME, ALLOWED_META_PROPERTY, DEFAULT_HTML_ASSET_SOURCES, modulePreloadPolyfillId, resolvedModulePreloadPolyfillId, htmlProxyRE$1, isHtmlProxyRE, inlineCSSRE$1, inlineImportRE, htmlLangRE, spaceRe, importMapRE, moduleScriptRE, modulePreloadLinkRE, importMapAppendRE, isHTMLProxy, isHTMLRequest, htmlProxyMap, htmlProxyResult, noInlineLinkRels, isAsyncScriptMap, attrValueStartRE, elementsAllowedInHead, importRE, commentRE, headInjectRE, headPrependInjectRE, htmlInjectRE, htmlPrependInjectRE, bodyInjectRE, bodyPrependInjectRE, doctypePrependInjectRE, unaryTags, debugCache, knownIgnoreList, trailingQuerySeparatorsRE, urlRE, rawRE, inlineRE$2, svgRE, wordCharRE, processNodeUrl, devHtmlHook, logTime, EMPTY_OBJECT$1, ModuleNode, ModuleGraph, DualWeakMap, ROOT_FILES, usedConfigs, serverConfigDefaults, debugHmr, whitespaceRE, normalizedClientDir, normalizeHotChannel, sortedHotUpdatePluginsCache, nonJsRe, isNonJsRequest, importMetaEnvMarker, importMetaEnvKeyReCache, workerOrSharedWorkerRE, workerFileRE, inlineRE$1, WORKER_FILE_ID, workerCache, workerAssetUrlRE, debug$2, clientDir, skipRE, canSkipImportAnalysis, optimizedDepChunkRE, optimizedDepDynamicRE, hasViteIgnoreRE, urlIsStringRE, templateLiteralRE, interopHelper, normalizedClientEntry, normalizedEnvEntry, wasmHelperId, wasmInitRE, wasmHelper, wasmHelperCode, wasmHelperPlugin, wasmFallbackPlugin, VariableDynamicImportError, example, defaultProtocol, ignoredProtocols, dynamicImportHelperId, relativePathRE, hasDynamicImportRE, dynamicImportHelper, filterForPlugin, viteAliasCustomResolver, EMPTY_OBJECT2, debugSourcemapCombineFilter, debugSourcemapCombine, debugResolve, debugPluginResolve, debugPluginTransform, debugPluginContainerContext, ERR_CLOSED_SERVER, EnvironmentPluginContainer, MinimalPluginContext, PluginContext, ResolveIdContext, LoadPluginContext, TransformPluginContext, PluginContainer, decoder, cssConfigDefaults, cssModuleRE, directRequestRE, htmlProxyRE, htmlProxyIndexRE, commonjsProxyRE, inlineRE, inlineCSSRE, styleAttrRE, functionCallRE, transformOnlyRE, nonEscapedDoubleQuoteRe, defaultCssBundleName, isCSSRequest, isModuleCSSRequest, isDirectCSSRequest, isDirectRequest, cssModulesCache, removedPureCssFilesCache, cssBundleNameCache, postcssConfigCache, cssUrlAssetRE, fileURLWithWindowsDriveRE, configToAtImportResolvers, importPostcssImport, importPostcssModules, importPostcss, preprocessorWorkerControllerCache, alwaysFakeWorkerWorkerControllerCache, viteHashUpdateMarker, viteHashUpdateMarkerRE, cssUrlRE, cssDataUriRE, importCssRE, cssImageSetRE, UrlRewritePostcssPlugin, cssNotProcessedRE, atImportRE, atCharsetRE, loadedPreprocessorPath, cachedSss, makeScssWorker, makeModernScssWorker, makeModernCompilerScssWorker, scssProcessor, makeLessWorker, lessProcessor, makeStylWorker, stylProcessor, createPreprocessorWorkerController, normalizeMaxWorkers, preprocessorSet, importLightningCSS, map2, esMap, esRE, versionRE, convertTargetsCache, convertTargets, isModernFlag, preloadMethod, preloadMarker, preloadHelperId, preloadMarkerRE, dynamicImportPrefixRE, dynamicImportTreeshakenRE, buildEnvironmentOptionsDefaults, warningIgnoreList, dynamicImportWarningIgnoreList, normalizeLog2, needsEscapeRegEx2, quoteNewlineRegEx2, backSlashRegEx2, getResolveUrl2, getRelativeUrlFromDocument2, getFileUrlFromFullPath2, getFileUrlFromRelativePath2, relativeUrlMechanisms2, customRelativeUrlMechanisms, toOutputFilePathInCss, toOutputFilePathInHtml, BuildEnvironment, builderOptionsDefaults, build$12, OTHER_SOURCE_MAP_REGEXP, debug$1, debounceMs, EnvironmentModuleNode, EnvironmentModuleGraph, DevEnvironment, callCrawlEndIfIdleAfterMs, RunnableDevEnvironment, NOOP, MIMES, ssrConfigDefaults, debug, promisifiedRealpath, SYMBOL_RESOLVED_CONFIG, configDefaults, clientAlias, _require;
 var init_dep_Dm0c1Wj2 = __esm({
   "node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js"() {
     fs$8 = __toESM(require("node:fs"), 1);
@@ -263988,7 +263988,7 @@ var init_dep_Dm0c1Wj2 = __esm({
     import_esbuild3 = __toESM(require_main2(), 1);
     init_constants();
     import_path13 = __toESM(require("path"), 1);
-    import_fs9 = __toESM(require("fs"), 1);
+    import_fs10 = __toESM(require("fs"), 1);
     init_dist2();
     import_node_child_process2 = __toESM(require("node:child_process"), 1);
     import_node_http3 = require("node:http");
@@ -264013,7 +264013,7 @@ var init_dep_Dm0c1Wj2 = __esm({
     import_node_process3 = __toESM(require("node:process"), 1);
     import_node_events = require("node:events");
     init_dist3();
-    import_crypto23 = __toESM(require("crypto"), 1);
+    import_crypto24 = __toESM(require("crypto"), 1);
     import_node_assert = __toESM(require("node:assert"), 1);
     import_node_v8 = __toESM(require("node:v8"), 1);
     import_node_worker_threads = require("node:worker_threads");
@@ -267084,7 +267084,7 @@ ${e6.message}`);
     virtualSourceRE = /^(?:dep:|browser-external:|virtual:)|\0/;
     src$12 = {};
     path$9 = import_path13.default;
-    fs$7 = import_fs9.default;
+    fs$7 = import_fs10.default;
     os$2 = import_os3.default;
     url$3 = import_url5.default;
     fsReadFileAsync = fs$7.promises.readFile;
@@ -268369,10 +268369,10 @@ ${e6.message}`);
     require$$4 = {
       version: version$1
     };
-    fs$6 = import_fs9.default;
+    fs$6 = import_fs10.default;
     path$8 = import_path13.default;
     os$1 = import_os3.default;
-    crypto$1 = import_crypto23.default;
+    crypto$1 = import_crypto24.default;
     packageJson = require$$4;
     version3 = packageJson.version;
     LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
@@ -268615,8 +268615,8 @@ ${e6.message}`);
             }
             break;
           case "FILE":
-            var fs9 = import_fs9.default;
-            stream7 = new fs9.SyncWriteStream(fd2, { autoClose: false });
+            var fs10 = import_fs10.default;
+            stream7 = new fs10.SyncWriteStream(fd2, { autoClose: false });
             stream7._type = "fs";
             break;
           case "PIPE":
@@ -269112,7 +269112,7 @@ ${e6.message}`);
     libExports = lib2.exports;
     corsMiddleware = /* @__PURE__ */ getDefaultExportFromCjs2(libExports);
     chokidar2 = {};
-    fs$5 = import_fs9.default;
+    fs$5 = import_fs10.default;
     ({ Readable: Readable3 } = import_stream7.default);
     sysPath$3 = import_path13.default;
     ({ promisify: promisify$3 } = import_util6.default);
@@ -270742,7 +270742,7 @@ ${e6.message}`);
       exports2.isLinux = platform3 === "linux";
       exports2.isIBMi = os2.type() === "OS400";
     })(constants$12);
-    fs$4 = import_fs9.default;
+    fs$4 = import_fs10.default;
     sysPath$2 = import_path13.default;
     ({ promisify: promisify$2 } = import_util6.default);
     isBinaryPath2 = isBinaryPath$1;
@@ -271205,7 +271205,7 @@ ${e6.message}`);
     };
     nodefsHandler2 = NodeFsHandler$1;
     fseventsHandler2 = { exports: {} };
-    fs$3 = import_fs9.default;
+    fs$3 = import_fs10.default;
     sysPath$1 = import_path13.default;
     ({ promisify: promisify$1 } = import_util6.default);
     try {
@@ -271545,7 +271545,7 @@ ${e6.message}`);
     fseventsHandler2.exports.canUse = canUse;
     fseventsHandlerExports = fseventsHandler2.exports;
     ({ EventEmitter: EventEmitter$2 } = import_events3.default);
-    fs$2 = import_fs9.default;
+    fs$2 = import_fs10.default;
     sysPath = import_path13.default;
     ({ promisify: promisify3 } = import_util6.default);
     readdirp = readdirp_12;
@@ -272556,7 +272556,7 @@ ${e6.message}`);
       }
       return [fileName];
     };
-    fs$1 = import_fs9.default;
+    fs$1 = import_fs10.default;
     os = import_os3.default;
     path$4 = import_path13.default;
     colors = picocolorsExports2;
@@ -273233,7 +273233,7 @@ ${e6.message}`);
       }
       return argument ? `${binary} ${argument}` : binary;
     };
-    fs7 = import_fs9.default;
+    fs8 = import_fs10.default;
     shebangCommand = shebangCommand$1;
     readShebang_1 = readShebang$1;
     path10 = import_path13.default;
@@ -274540,7 +274540,7 @@ ${e6.message}`);
       }
     };
     receiver = Receiver$1;
-    ({ randomFillSync } = import_crypto23.default);
+    ({ randomFillSync } = import_crypto24.default);
     PerMessageDeflate$2 = permessageDeflate;
     ({ EMPTY_BUFFER: EMPTY_BUFFER$1, kWebSocket: kWebSocket$2, NOOP: NOOP$2 } = constants3);
     ({ isBlob: isBlob$1, isValidStatusCode } = validationExports);
@@ -275225,7 +275225,7 @@ ${e6.message}`);
     http$3 = import_http4.default;
     net = import_net.default;
     tls = import_tls.default;
-    ({ randomBytes: randomBytes2, createHash: createHash$1 } = import_crypto23.default);
+    ({ randomBytes: randomBytes2, createHash: createHash$1 } = import_crypto24.default);
     ({ URL: URL$2 } = import_url5.default);
     PerMessageDeflate$1 = permessageDeflate;
     Receiver3 = receiver;
@@ -275693,7 +275693,7 @@ ${e6.message}`);
     subprotocol$1 = { parse: parse$12 };
     EventEmitter2 = import_events3.default;
     http$2 = import_http4.default;
-    ({ createHash: createHash2 } = import_crypto23.default);
+    ({ createHash: createHash2 } = import_crypto24.default);
     extension2 = extension$1;
     PerMessageDeflate3 = permessageDeflate;
     subprotocol2 = subprotocol$1;
@@ -277169,8 +277169,8 @@ ${e6.message}`);
     };
     debug$4 = createDebugger("vite:html-fallback");
     etag_1 = etag;
-    crypto23 = import_crypto23.default;
-    Stats = import_fs9.default.Stats;
+    crypto24 = import_crypto24.default;
+    Stats = import_fs10.default.Stats;
     toString6 = Object.prototype.toString;
     getEtag = /* @__PURE__ */ getDefaultExportFromCjs2(etag_1);
     debug$3 = createDebugger("vite:send", {
@@ -287367,7 +287367,7 @@ var auditEvent = async ({
 };
 
 // server.ts
-var import_fs10 = __toESM(require("fs"), 1);
+var import_fs11 = __toESM(require("fs"), 1);
 var import_multer2 = __toESM(require_multer(), 1);
 
 // src/routes/adminHqRoutes.ts
@@ -289191,9 +289191,9 @@ async function writeCms(payload) {
 }
 async function createCmsSnapshot(req2, payload, label) {
   await ensureControlTables();
-  const crypto24 = await import("node:crypto");
+  const crypto25 = await import("node:crypto");
   const serialized = JSON.stringify(payload);
-  const checksum = crypto24.createHash("sha256").update(serialized).digest("hex");
+  const checksum = crypto25.createHash("sha256").update(serialized).digest("hex");
   const existing = await pool.query("SELECT id FROM admin_cms_versions WHERE checksum=$1 LIMIT 1", [checksum]);
   if (existing.rows.length) return { id: existing.rows[0].id, duplicate: true, checksum };
   const result = await pool.query(
@@ -335880,7 +335880,34 @@ var miscRoutes_default = router16;
 
 // src/routes/volunteerRoutes.ts
 var import_express17 = __toESM(require_express2(), 1);
+var import_crypto14 = __toESM(require("crypto"), 1);
+
+// src/lib/certificateAutomation.ts
 var import_crypto13 = __toESM(require("crypto"), 1);
+async function ensureEligibleCertificates(userId) {
+  const rules = await pool.query(`SELECT * FROM certificate_rules WHERE active = TRUE ORDER BY min_hours ASC, min_reports ASC, min_tasks ASC`);
+  const hoursRes = await pool.query(`SELECT COALESCE(SUM(duration_minutes),0) / 60.0 AS hours FROM volunteer_duty_sessions WHERE user_id = $1 AND status = 'completed'`, [userId]);
+  const reportsRes = await pool.query(`SELECT COUNT(*)::int AS count FROM volunteer_reports WHERE volunteer_id = $1`, [userId]);
+  const tasksRes = await pool.query(`SELECT COUNT(*)::int AS count FROM volunteer_tasks WHERE "volunteerId" = $1 AND status = 'completed'`, [userId]);
+  const hours = Number(hoursRes.rows[0]?.hours || 0);
+  const reports = Number(reportsRes.rows[0]?.count || 0);
+  const tasks = Number(tasksRes.rows[0]?.count || 0);
+  const volunteer = await pool.query(`SELECT full_name, registration_number FROM volunteers WHERE id = $1 LIMIT 1`, [userId]);
+  if (!volunteer.rows[0]) return;
+  for (const rule2 of rules.rows) {
+    if (hours < Number(rule2.min_hours || 0) || reports < Number(rule2.min_reports || 0) || tasks < Number(rule2.min_tasks || 0)) continue;
+    const exists = await pool.query(`SELECT id FROM certificates WHERE volunteer_id = $1 AND rule_id = $2 LIMIT 1`, [userId, rule2.id]);
+    if (exists.rows.length) continue;
+    const certificateId = `RPF-${String(rule2.id).toUpperCase().replace(/[^A-Z0-9]+/g, "-").slice(0, 24)}-${import_crypto13.default.randomBytes(4).toString("hex").toUpperCase()}`;
+    await pool.query(
+      `INSERT INTO certificates (id, certificate_id, volunteer_id, rule_id, title, title_hi, recipient_name, role, duty_hours)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [import_crypto13.default.randomUUID(), certificateId, userId, rule2.id, rule2.title, rule2.title_hi, volunteer.rows[0].full_name, "Verified Volunteer", Math.round(hours * 100) / 100]
+    );
+  }
+}
+
+// src/routes/volunteerRoutes.ts
 var router17 = import_express17.default.Router();
 router17.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req2, res) => {
   try {
@@ -335905,7 +335932,8 @@ router17.put("/api/volunteers/:id/allocate", authenticateToken, requireAdmin, as
 router17.post("/api/volunteers/report", authenticateToken, async (req2, res) => {
   try {
     const { volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng } = req2.body;
-    await pool.query(`INSERT INTO volunteer_reports (id, volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [import_crypto13.default.randomUUID(), volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng]);
+    await pool.query(`INSERT INTO volunteer_reports (id, volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [import_crypto14.default.randomUUID(), volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng]);
+    await ensureEligibleCertificates(req2.user.id);
     res.json({ success: true, message: "Report submitted" });
   } catch (error3) {
     res.status(500).json({ success: false, error: error3.message });
@@ -335922,8 +335950,36 @@ router17.get("/api/volunteers/me", authenticateToken, async (req2, res) => {
 });
 router17.get("/api/volunteers/me/certificates", authenticateToken, async (req2, res) => {
   try {
+    await ensureEligibleCertificates(req2.user.id);
     const result = await pool.query(`SELECT * FROM certificates WHERE volunteer_id = $1 ORDER BY issue_date DESC`, [req2.user.id]);
-    res.json({ success: true, certificates: result.rows });
+    const progress = await pool.query(`SELECT
+      (SELECT COALESCE(SUM(duration_minutes),0) / 60.0 FROM volunteer_duty_sessions WHERE user_id = $1 AND status = 'completed') AS hours,
+      (SELECT COUNT(*) FROM volunteer_reports WHERE volunteer_id = $1) AS reports,
+      (SELECT COUNT(*) FROM volunteer_tasks WHERE "volunteerId" = $1 AND status = 'completed') AS tasks
+    `, [req2.user.id]);
+    const rules = await pool.query(`SELECT id,title,title_hi,min_hours,min_reports,min_tasks,active FROM certificate_rules WHERE active = TRUE ORDER BY min_hours ASC`);
+    res.json({ success: true, certificates: result.rows, progress: progress.rows[0], rules: rules.rows });
+  } catch (err2) {
+    res.status(500).json({ error: err2.message });
+  }
+});
+router17.get("/api/certificate-rules", authenticateToken, async (_req, res) => {
+  try {
+    const result = await pool.query(`SELECT id,title,title_hi,min_hours,min_reports,min_tasks,active FROM certificate_rules WHERE active = TRUE ORDER BY min_hours ASC`);
+    res.json({ success: true, rules: result.rows });
+  } catch (err2) {
+    res.status(500).json({ error: err2.message });
+  }
+});
+router17.put("/api/admin/certificate-rules/:id", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    const { min_hours, min_reports, min_tasks, active, title, title_hi } = req2.body;
+    const result = await pool.query(
+      `UPDATE certificate_rules SET min_hours = COALESCE($1,min_hours), min_reports = COALESCE($2,min_reports), min_tasks = COALESCE($3,min_tasks), active = COALESCE($4,active), title = COALESCE($5,title), title_hi = COALESCE($6,title_hi), updated_at = NOW() WHERE id = $7 RETURNING *`,
+      [min_hours, min_reports, min_tasks, active, title, title_hi, req2.params.id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ success: false, error: "Certificate rule not found" });
+    res.json({ success: true, rule: result.rows[0] });
   } catch (err2) {
     res.status(500).json({ error: err2.message });
   }
@@ -335952,6 +336008,7 @@ router17.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmi
     const taskRes = await pool.query('UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId"', [status2, id3]);
     if (taskRes.rows.length > 0 && status2 === "completed") {
       await pool.query("UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2", [10, taskRes.rows[0].volunteerId]);
+      await ensureEligibleCertificates(taskRes.rows[0].volunteerId);
     }
     res.json({ success: true, message: "Task status updated" });
   } catch (error3) {
@@ -336030,6 +336087,7 @@ var volunteerRoutes_default = router17;
 var import_express18 = __toESM(require_express2(), 1);
 var import_pdf_lib = __toESM(require_cjs15(), 1);
 var import_path3 = __toESM(require("path"), 1);
+var import_fs3 = __toESM(require("fs"), 1);
 var router18 = import_express18.default.Router();
 router18.get("/api/certificates/verify/:certificate_id", async (req2, res) => {
   try {
@@ -336037,7 +336095,7 @@ router18.get("/api/certificates/verify/:certificate_id", async (req2, res) => {
     const certRes = await pool.query(`SELECT * FROM certificates WHERE certificate_id = $1`, [certId]);
     if (certRes.rows.length === 0) return res.status(404).json({ error: "Certificate not found or invalid." });
     const cert2 = certRes.rows[0];
-    const volRes = await pool.query(`SELECT full_name, registration_number, city, state FROM volunteers WHERE id = $1`, [cert2.volunteer_id]);
+    const volRes = await pool.query(`SELECT full_name, registration_number, city FROM volunteers WHERE id = $1`, [cert2.volunteer_id]);
     if (volRes.rows.length === 0) return res.status(404).json({ error: "Volunteer not found" });
     const vol = volRes.rows[0];
     res.json({
@@ -336046,27 +336104,31 @@ router18.get("/api/certificates/verify/:certificate_id", async (req2, res) => {
         certificate_id: cert2.certificate_id,
         volunteer_name: vol.full_name,
         registration_number: vol.registration_number,
-        service_name: cert2.service_id.replace(/-/g, " ").toUpperCase(),
+        service_name: cert2.title,
         issue_date: cert2.issue_date,
-        location: `${vol.city}, ${vol.state}`
+        location: vol.city || ""
       }
     });
   } catch (err2) {
     res.status(500).json({ error: err2.message });
   }
 });
-router18.get("/api/certificates/download/:id", async (req2, res) => {
+router18.get("/api/certificates/download/:id", authenticateToken, async (req2, res) => {
   try {
     const certId = req2.params.id;
     const certRes = await pool.query(`SELECT * FROM certificates WHERE id = $1 OR certificate_id = $1`, [certId]);
     if (certRes.rows.length === 0) return res.status(404).json({ error: "Certificate not found" });
     const cert2 = certRes.rows[0];
+    if (String(cert2.volunteer_id) !== String(req2.user.id) && !["admin", "super_admin", "superadmin"].includes(req2.user.role)) return res.status(403).json({ error: "You are not authorized to download this certificate." });
     const volRes = await pool.query(`SELECT full_name, registration_number, city, state FROM volunteers WHERE id = $1`, [cert2.volunteer_id]);
     if (volRes.rows.length === 0) return res.status(404).json({ error: "Volunteer not found" });
     const vol = volRes.rows[0];
-    let sigs = { signatory_1_name: "Rohit Pandit", signatory_1_designation: "Founder", signatory_2_name: "", signatory_2_designation: "" };
-    const sigRes = await pool.query(`SELECT * FROM service_signatures WHERE service_id = $1`, [cert2.service_id]);
-    if (sigRes.rows.length > 0) sigs = sigRes.rows[0];
+    let sigs = { signatory_1_name: "Rohit Pandit", signatory_1_designation: "Founder, RP Foundation", signatory_2_name: "", signatory_2_designation: "" };
+    try {
+      const sigRes = await pool.query(`SELECT signatory_1_name, signatory_1_designation, signatory_2_name, signatory_2_designation FROM service_signatures WHERE service_id = $1 LIMIT 1`, [cert2.certificate_id]);
+      if (sigRes.rows.length > 0) sigs = { ...sigs, ...sigRes.rows[0] };
+    } catch {
+    }
     const pdfDoc = await import_pdf_lib.PDFDocument.create();
     const page = pdfDoc.addPage([842, 595]);
     const { width, height } = page.getSize();
@@ -336075,9 +336137,10 @@ router18.get("/api/certificates/download/:id", async (req2, res) => {
     const fontItalic = await pdfDoc.embedFont(import_pdf_lib.StandardFonts.HelveticaOblique);
     page.drawRectangle({ x: 20, y: 20, width: width - 40, height: height - 40, borderColor: (0, import_pdf_lib.rgb)(0.1, 0.3, 0.6), borderWidth: 4 });
     page.drawRectangle({ x: 25, y: 25, width: width - 50, height: height - 50, borderColor: (0, import_pdf_lib.rgb)(0.8, 0.6, 0.2), borderWidth: 2 });
-    const logoPath = import_path3.default.join(process.cwd(), "public", "assets", "logo.png");
-    if (require("fs").existsSync(logoPath)) {
-      const logoImageBytes = require("fs").readFileSync(logoPath);
+    const logoCandidates = [import_path3.default.join(process.cwd(), "public", "assets", "logo.png"), import_path3.default.join(process.cwd(), "public", "assets", "rpf-samahit-icon.png")];
+    const logoPath = logoCandidates.find((candidate) => import_fs3.default.existsSync(candidate));
+    if (logoPath) {
+      const logoImageBytes = import_fs3.default.readFileSync(logoPath);
       const logoImage = await pdfDoc.embedPng(logoImageBytes);
       const logoDims = logoImage.scale(0.15);
       page.drawImage(logoImage, {
@@ -336087,19 +336150,22 @@ router18.get("/api/certificates/download/:id", async (req2, res) => {
         height: logoDims.height
       });
     }
-    page.drawText("RP FOUNDATION", { x: width / 2 - 120, y: height - 120, size: 30, font, color: (0, import_pdf_lib.rgb)(0.1, 0.2, 0.5) });
-    page.drawText("CERTIFICATE OF APPRECIATION", { x: width / 2 - 200, y: height - 160, size: 24, font, color: (0, import_pdf_lib.rgb)(0.8, 0.6, 0.2) });
-    page.drawText("CERTIFICATE OF APPRECIATION", { x: width / 2 - 200, y: height - 160, size: 24, font, color: (0, import_pdf_lib.rgb)(0.8, 0.6, 0.2) });
+    page.drawText("RP FOUNDATION SOCIAL WELFARE TRUST", { x: width / 2 - 190, y: height - 120, size: 24, font, color: (0, import_pdf_lib.rgb)(0.08, 0.35, 0.24) });
+    const certTitle = String(cert2.title || "Certificate of Appreciation");
+    const titleWidth = font.widthOfTextAtSize(certTitle, 22);
+    page.drawText(certTitle, { x: (width - titleWidth) / 2, y: height - 160, size: 22, font, color: (0, import_pdf_lib.rgb)(0.75, 0.43, 0.05) });
     page.drawText(`Certificate ID: ${cert2.certificate_id}`, { x: 50, y: height - 80, size: 10, font: fontNormal });
     page.drawText(`Date: ${new Date(cert2.issue_date).toLocaleDateString()}`, { x: width - 150, y: height - 80, size: 10, font: fontNormal });
     page.drawText("This is proudly presented to", { x: width / 2 - 100, y: height - 230, size: 14, font: fontItalic });
     const nameWidth = font.widthOfTextAtSize(vol.full_name, 36);
     page.drawText(vol.full_name, { x: (width - nameWidth) / 2, y: height - 320, size: 36, font, color: (0, import_pdf_lib.rgb)(0.1, 0.1, 0.1) });
-    page.drawText(`Reg No: ${vol.registration_number} | ${vol.city}, ${vol.state}`, { x: width / 2 - 120, y: height - 320, size: 12, font: fontNormal });
-    page.drawText(`In recognition of their outstanding contribution and dedication to the`, { x: width / 2 - 200, y: height - 400, size: 14, font: fontNormal });
-    const serviceName = cert2.service_id.replace(/-/g, " ").toUpperCase() + " SERVICE";
-    const svcWidth = font.widthOfTextAtSize(serviceName, 18);
-    page.drawText(serviceName, { x: (width - svcWidth) / 2, y: height - 400, size: 18, font, color: (0, import_pdf_lib.rgb)(0.1, 0.3, 0.6) });
+    const regLine = vol.registration_number ? `Volunteer No: ${vol.registration_number}` : "Verified Volunteer Record";
+    const regWidth = fontNormal.widthOfTextAtSize(regLine, 12);
+    page.drawText(regLine, { x: (width - regWidth) / 2, y: height - 350, size: 12, font: fontNormal, color: (0, import_pdf_lib.rgb)(0.35, 0.4, 0.45) });
+    const serviceName = String(cert2.title || "Community Service").toUpperCase();
+    const svcWidth = font.widthOfTextAtSize(serviceName, 16);
+    page.drawText(serviceName, { x: (width - svcWidth) / 2, y: height - 400, size: 16, font, color: (0, import_pdf_lib.rgb)(0.08, 0.35, 0.24) });
+    page.drawText(`Verified Certificate ID: ${cert2.certificate_id}`, { x: width / 2 - 145, y: 55, size: 9, font: fontNormal, color: (0, import_pdf_lib.rgb)(0.35, 0.4, 0.45) });
     page.drawLine({ start: { x: 100, y: 120 }, end: { x: 300, y: 120 }, thickness: 1, color: (0, import_pdf_lib.rgb)(0, 0, 0) });
     page.drawText(sigs.signatory_1_name, { x: 110, y: 100, size: 12, font });
     page.drawText(sigs.signatory_1_designation, { x: 110, y: 85, size: 10, font: fontItalic, color: (0, import_pdf_lib.rgb)(0.3, 0.3, 0.3) });
@@ -336120,7 +336186,7 @@ var certificateRoutes_default = router18;
 
 // src/routes/communityRoutes.ts
 var import_express19 = __toESM(require_express2(), 1);
-var import_crypto14 = __toESM(require("crypto"), 1);
+var import_crypto15 = __toESM(require("crypto"), 1);
 var router19 = import_express19.default.Router();
 router19.get("/api/community_posts", async (req2, res) => {
   try {
@@ -336133,7 +336199,7 @@ router19.get("/api/community_posts", async (req2, res) => {
 router19.post("/api/community_posts", async (req2, res) => {
   try {
     const { authorName, authorPhone, authorRole, textEn, textHi, segment, location: location2, imageUrl, likes, likedByMe, createdAt } = req2.body;
-    const id3 = import_crypto14.default.randomUUID();
+    const id3 = import_crypto15.default.randomUUID();
     await pool.query(
       `INSERT INTO community_posts (id, "authorName", "authorPhone", "authorRole", "textEn", "textHi", segment, location, "imageUrl", likes, "likedByMe", "createdAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
@@ -336173,7 +336239,7 @@ router19.post("/api/blogs", authenticateToken, async (req2, res) => {
   try {
     const { title, content } = req2.body;
     if (!title || !content) return res.status(400).json({ success: false, error: "Title and Content are required" });
-    const id3 = import_crypto14.default.randomUUID();
+    const id3 = import_crypto15.default.randomUUID();
     const authorName = req2.user.displayName || req2.user.name || "Anonymous Volunteer";
     const authorId = req2.user.id;
     await pool.query(
@@ -336215,7 +336281,7 @@ router19.get("/api/social", async (req2, res) => {
 router19.post("/api/social", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { author, role, avatar, textEn, textHi, image, platform: platform3, link } = req2.body;
-    const id3 = import_crypto14.default.randomUUID();
+    const id3 = import_crypto15.default.randomUUID();
     await pool.query(
       `INSERT INTO social_posts 
        (id, author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link, "createdAt") 
@@ -336284,7 +336350,7 @@ var communityRoutes_default = router19;
 
 // src/routes/jobRoutes.ts
 var import_express20 = __toESM(require_express2(), 1);
-var import_crypto15 = __toESM(require("crypto"), 1);
+var import_crypto16 = __toESM(require("crypto"), 1);
 var router20 = import_express20.default.Router();
 var jobsQuery = 'SELECT id, "titleEn", "titleHi", "company", "locEn", "locHi", "salary", "typeEn", "typeHi", "postedAt" FROM jobs ORDER BY "postedAt" DESC';
 router20.get("/api/jobs", async (req2, res) => {
@@ -336308,7 +336374,7 @@ router20.get("/api/admin/jobs", authenticateToken, requireAdmin, async (req2, re
 router20.post("/api/jobs", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { titleEn, titleHi, locEn, locHi, salary, typeEn, typeHi, company } = req2.body;
-    const id3 = import_crypto15.default.randomUUID();
+    const id3 = import_crypto16.default.randomUUID();
     const result = await pool.query(`INSERT INTO jobs (id, "titleEn", "titleHi", "company", "locEn", "locHi", "salary", "typeEn", "typeHi", "postedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`, [id3, titleEn, titleHi, company, locEn, locHi, salary, typeEn, typeHi, (/* @__PURE__ */ new Date()).toISOString()]);
     res.json({ success: true, id: result.rows[0].id });
   } catch (error3) {
@@ -336336,7 +336402,7 @@ router20.post("/api/jobs/:id/edit", authenticateToken, requireAdmin, async (req2
 router20.post("/api/job_applications", async (req2, res) => {
   try {
     const { jobId, jobTitle, fullName, phone, resume: resume2 } = req2.body;
-    const id3 = import_crypto15.default.randomUUID();
+    const id3 = import_crypto16.default.randomUUID();
     await pool.query(`INSERT INTO job_applications (id, "jobId", "jobTitle", "fullName", phone, resume, "createdAt") VALUES ($1,$2,$3,$4,$5,$6,$7)`, [id3, jobId, jobTitle, fullName, phone, resume2 || "", (/* @__PURE__ */ new Date()).toISOString()]);
     res.json({ success: true });
   } catch (error3) {
@@ -336389,7 +336455,7 @@ var sendPushNotification = async (fcmToken, title, body) => {
 
 // src/routes/donationRoutes.ts
 var import_express21 = __toESM(require_express2(), 1);
-var import_crypto16 = __toESM(require("crypto"), 1);
+var import_crypto17 = __toESM(require("crypto"), 1);
 var router21 = import_express21.default.Router();
 var BLOOD_GROUPS = /* @__PURE__ */ new Set(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]);
 var VALID_URGENCY = /* @__PURE__ */ new Set(["Normal", "Urgent", "Emergency"]);
@@ -336503,7 +336569,7 @@ router21.post("/api/volunteer-registration/submit", async (req2, res) => {
       [mobile, email, username]
     );
     if (duplicate.rows.length) return res.status(409).json({ success: false, error: "This User ID, mobile number, or email is already registered." });
-    const id3 = import_crypto16.default.randomUUID();
+    const id3 = import_crypto17.default.randomUUID();
     const registrationNumber = `RPF/VOL/${(/* @__PURE__ */ new Date()).getFullYear().toString().slice(-2)}/${Math.floor(1e5 + Math.random() * 9e5)}`;
     const passwordHash = await bcryptjs_default.hash(password, 12);
     await pool.query("BEGIN");
@@ -336597,7 +336663,7 @@ router21.post("/api/blood-network/requests", async (req2, res) => {
       const body = group + " blood is required at " + request.hospital_name + ". Tap to Accept.";
       await pool.query(
         `INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_request',$5)`,
-        [import_crypto16.default.randomUUID(), match2.volunteer_id, title, body, request.id]
+        [import_crypto17.default.randomUUID(), match2.volunteer_id, title, body, request.id]
       );
       try {
         const t7 = await pool.query("SELECT fcm_token FROM volunteers WHERE id=$1", [match2.volunteer_id]);
@@ -336641,13 +336707,13 @@ router21.post("/api/blood-network/requests/:id/accept", async (req2, res) => {
     if (request.requester_id === volunteer.id) return res.status(400).json({ success: false, error: "You cannot accept your own requisition." });
     await pool.query(
       `INSERT INTO blood_request_acceptances(id,request_id,volunteer_id,status,expires_at) VALUES($1,$2,$3,'accepted',NOW()+INTERVAL '24 hours') ON CONFLICT(request_id,volunteer_id) DO UPDATE SET status='accepted',expires_at=NOW()+INTERVAL '24 hours'`,
-      [import_crypto16.default.randomUUID(), request.id, volunteer.id]
+      [import_crypto17.default.randomUUID(), request.id, volunteer.id]
     );
     const title = "Blood Request Accepted";
     const body = (volunteer.full_name || "A user") + " has accepted your " + request.blood_group + " blood request.";
     await pool.query(
       `INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_acceptance',$5)`,
-      [import_crypto16.default.randomUUID(), request.requester_id, title, body, String(request.id)]
+      [import_crypto17.default.randomUUID(), request.requester_id, title, body, String(request.id)]
     );
     res.json({ success: true });
   } catch (error3) {
@@ -337151,7 +337217,7 @@ var cmsRoutes_default = router22;
 
 // src/routes/campaignRoutes.ts
 var import_express23 = __toESM(require_express2(), 1);
-var import_crypto17 = __toESM(require("crypto"), 1);
+var import_crypto18 = __toESM(require("crypto"), 1);
 var router23 = import_express23.default.Router();
 router23.get("/api/campaigns", async (req2, res) => {
   const cached = apiCache.get("/api/campaigns");
@@ -337173,7 +337239,7 @@ router23.get("/api/campaigns", async (req2, res) => {
 router23.post("/api/campaigns", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { titleEn, titleHi, goalAmount, raisedAmount, imageUrl, urgent } = req2.body;
-    const id3 = import_crypto17.default.randomUUID();
+    const id3 = import_crypto18.default.randomUUID();
     await pool.query(
       `INSERT INTO campaigns 
        (id, "titleEn", "titleHi", "goalAmount", "raisedAmount", "imageUrl", "coverImgUrl", urgent, "createdAt") 
@@ -337233,7 +337299,7 @@ var campaignRoutes_default = router23;
 
 // src/routes/submissionRoutes.ts
 var import_express24 = __toESM(require_express2(), 1);
-var import_crypto18 = __toESM(require("crypto"), 1);
+var import_crypto19 = __toESM(require("crypto"), 1);
 var router24 = import_express24.default.Router();
 router24.get("/api/submissions", async (req2, res) => {
   try {
@@ -337255,7 +337321,7 @@ router24.post("/api/submissions", async (req2, res) => {
       body = body[0];
     }
     const { userId, citizenName, citizenPhone, serviceName, submissionData, status: status2, latitude, longitude, timestamp } = body;
-    const id3 = import_crypto18.default.randomUUID();
+    const id3 = import_crypto19.default.randomUUID();
     const result = await pool.query(
       `INSERT INTO service_submissions_v2 
        (id, "userId", "serviceNameEn", "serviceName", "citizenName", "citizenPhone", "submissionData", status, latitude, longitude, "createdAt", timestamp) 
@@ -337393,10 +337459,10 @@ var userRoutes_default = router25;
 
 // src/routes/uploadRoutes.ts
 var import_express26 = __toESM(require_express2(), 1);
-var import_crypto19 = __toESM(require("crypto"), 1);
+var import_crypto20 = __toESM(require("crypto"), 1);
 var import_multer = __toESM(require_multer(), 1);
 var import_path4 = __toESM(require("path"), 1);
-var import_fs3 = __toESM(require("fs"), 1);
+var import_fs4 = __toESM(require("fs"), 1);
 var uploadLimiter = rate_limit_default({
   windowMs: 15 * 60 * 1e3,
   max: 30,
@@ -337447,13 +337513,13 @@ var saveFileLocally = async (file, req2) => {
     else if (file.mimetype.includes("png")) ext = ".png";
     else ext = ".jpg";
   }
-  const filename = `${Date.now()}-${import_crypto19.default.randomUUID().slice(0, 8)}${ext}`;
+  const filename = `${Date.now()}-${import_crypto20.default.randomUUID().slice(0, 8)}${ext}`;
   const uploadDir = import_path4.default.join(process.cwd(), "uploads");
-  if (!import_fs3.default.existsSync(uploadDir)) {
-    import_fs3.default.mkdirSync(uploadDir, { recursive: true });
+  if (!import_fs4.default.existsSync(uploadDir)) {
+    import_fs4.default.mkdirSync(uploadDir, { recursive: true });
   }
   const filepath = import_path4.default.join(uploadDir, filename);
-  import_fs3.default.writeFileSync(filepath, file.buffer);
+  import_fs4.default.writeFileSync(filepath, file.buffer);
   if (req2) {
     const proto2 = req2.headers["x-forwarded-proto"] || req2.protocol || "https";
     const host = req2.headers["x-forwarded-host"] || req2.get("host") || "appapi.therpfoundation.org";
@@ -338077,38 +338143,54 @@ router28.get("/api/public/news", async (_req, res) => {
 });
 router28.get("/api/public/quote-of-day", async (_req, res) => {
   try {
-    const c4 = cache("quote_of_day_v2", 216e5);
-    if (c4) return res.json({ success: true, data: c4 });
-    const feeds = ["https://www.brainyquote.com/link/quotebr.rss", "http://feeds.feedburner.com/azquotes/quoteoftheday"];
-    for (const url3 of feeds) {
-      try {
-        const feed2 = await fetchRssFeed(url3);
-        const item = feed2.items[0];
-        if (!item) continue;
-        const title = cleanText(item.title || "");
-        const body = cleanText(item.contentSnippet || item.content || item.description || "");
-        const explicitAuthor = cleanText(item.creator || item.author || "");
-        let quote3 = body;
-        let author = explicitAuthor;
-        if (!author && body && title && body !== title) author = title;
-        if (!quote3 && title) {
-          const parts = title.split(/\s[-–—|:]\s/);
-          if (parts.length > 1) {
-            author = author || parts[parts.length - 1].trim();
-            quote3 = parts.slice(0, -1).join(" - ").trim();
-          } else quote3 = title;
+    let items = cache("quote_feed_items", 36e5);
+    if (!items || !items.length) {
+      const feeds = [
+        "https://www.brainyquote.com/link/quotebr.rss",
+        "http://feeds.feedburner.com/azquotes/quoteoftheday"
+      ];
+      items = [];
+      for (const url3 of feeds) {
+        try {
+          const feed2 = await fetchRssFeed(url3);
+          if (feed2.items && feed2.items.length) {
+            items.push(...feed2.items);
+          }
+        } catch {
         }
-        if (quote3 === title && /\s[-–—|:]\s/.test(title)) {
-          const parts = title.split(/\s[-–—|:]\s/);
-          quote3 = parts.slice(0, -1).join(" - ").trim();
+      }
+      if (items.length) {
+        save("quote_feed_items", items);
+      }
+    }
+    if (items && items.length) {
+      const randomIndex = Math.floor(Math.random() * items.length);
+      const item = items[randomIndex];
+      const title = cleanText(item.title || "");
+      const body = cleanText(item.contentSnippet || item.content || item.description || "");
+      const explicitAuthor = cleanText(item.creator || item.author || "");
+      let quote3 = body;
+      let author = explicitAuthor;
+      if (!author && body && title && body !== title) author = title;
+      if (!quote3 && title) {
+        const parts = title.split(/\s[-–—|:]\s/);
+        if (parts.length > 1) {
           author = author || parts[parts.length - 1].trim();
+          quote3 = parts.slice(0, -1).join(" - ").trim();
+        } else {
+          quote3 = title;
         }
-        if (quote3) {
-          const data2 = { quote: quote3, author: author || "", link: item.link || (url3.includes("brainyquote") ? "https://www.brainyquote.com/quote_of_the_day" : "https://www.azquotes.com/quote_of_the_day.html") };
-          save("quote_of_day_v2", data2);
-          return res.json({ success: true, data: data2 });
-        }
-      } catch {
+      }
+      if (quote3 === title && /\s[-–—|:]\s/.test(title)) {
+        const parts = title.split(/\s[-–—|:]\s/);
+        quote3 = parts.slice(0, -1).join(" - ").trim();
+        author = author || parts[parts.length - 1].trim();
+      }
+      if (quote3) {
+        return res.json({
+          success: true,
+          data: { quote: quote3, author: author || "Daily Thought", link: item.link || "" }
+        });
       }
     }
     return res.status(503).json({ success: false, error: "Quote temporarily unavailable" });
@@ -338344,7 +338426,7 @@ var publicExternalRoutes_default = router28;
 
 // src/routes/adminHqExtraRoutes.ts
 var import_express29 = __toESM(require_express2(), 1);
-var import_crypto20 = __toESM(require("crypto"), 1);
+var import_crypto21 = __toESM(require("crypto"), 1);
 var router29 = import_express29.default.Router();
 router29.all("/api/admin-setup", (_req, res) => {
   return res.status(410).json({
@@ -338405,7 +338487,7 @@ router29.post("/api/admin/hq/certificates/issue", async (req2, res) => {
   try {
     const { volunteer_id, service_id } = req2.body || {};
     if (!volunteer_id || !service_id) return res.status(400).json({ success: false, error: "Volunteer and service are required." });
-    const certId = `RP-${(/* @__PURE__ */ new Date()).getFullYear()}-${import_crypto20.default.randomBytes(6).toString("hex").toUpperCase()}`;
+    const certId = `RP-${(/* @__PURE__ */ new Date()).getFullYear()}-${import_crypto21.default.randomBytes(6).toString("hex").toUpperCase()}`;
     const volRes = await pool.query(`SELECT id FROM volunteers WHERE id = $1 OR username = $1 OR registration_number = $1`, [volunteer_id]);
     if (volRes.rows.length === 0) return res.status(404).json({ success: false, error: "Volunteer not found." });
     const realVolId = volRes.rows[0].id;
@@ -338482,7 +338564,7 @@ var adminHqExtraRoutes_default = router29;
 
 // src/routes/adminDynamicRoutes.ts
 var import_express30 = __toESM(require_express2(), 1);
-var import_crypto21 = __toESM(require("crypto"), 1);
+var import_crypto22 = __toESM(require("crypto"), 1);
 var router30 = import_express30.default.Router();
 router30.get("/api/admin-setup", async (req2, res) => {
   return res.status(410).json({ success: false, error: "This setup endpoint has been permanently retired for security." });
@@ -338600,7 +338682,7 @@ router30.post("/api/admin/users", authenticateToken, requireAdmin, async (req2, 
         return res.status(409).json({ success: false, error: "Username is already in use" });
       }
     }
-    const userId = import_crypto21.default.randomUUID();
+    const userId = import_crypto22.default.randomUUID();
     const passwordHash = password && password.trim() ? await bcryptjs_default.hash(password.trim(), 10) : await bcryptjs_default.hash("RPF@12345", 10);
     const safeUsername = username && username.trim() ? username.trim().toLowerCase() : phone && phone.trim() ? phone.trim() : `user_${userId.slice(0, 8)}`;
     const result = await pool.query(
@@ -339645,7 +339727,7 @@ router31.post("/api/admin/rss/test", authenticateToken, requireAdmin, async (req
 var rssFeedRoutes_default = router31;
 
 // src/db/migrationRunner.ts
-var import_fs4 = __toESM(require("fs"), 1);
+var import_fs5 = __toESM(require("fs"), 1);
 var import_path5 = __toESM(require("path"), 1);
 var import_url3 = require("url");
 var import_meta = {};
@@ -339665,12 +339747,12 @@ async function runMigrationsOnPool(pool4) {
     import_path5.default.resolve(process.cwd(), "migrations"),
     import_path5.default.resolve(import_path5.default.dirname(process.argv[1] || ""), "migrations")
   ];
-  const migrationsDir = candidates.find((dir) => import_fs4.default.existsSync(dir)) || candidates[0];
-  if (!import_fs4.default.existsSync(migrationsDir)) {
+  const migrationsDir = candidates.find((dir) => import_fs5.default.existsSync(dir)) || candidates[0];
+  if (!import_fs5.default.existsSync(migrationsDir)) {
     console.log("No migrations directory found on server boot. Checked paths:", candidates.join(", "));
     return;
   }
-  const files = import_fs4.default.readdirSync(migrationsDir).filter((name) => /^\d{4}[-_]\d{2}[-_]\d{2}.*\.sql$/.test(name)).sort();
+  const files = import_fs5.default.readdirSync(migrationsDir).filter((name) => /^\d{4}[-_]\d{2}[-_]\d{2}.*\.sql$/.test(name)).sort();
   if (files.length === 0) {
     console.log("No dated SQL migrations found.");
     return;
@@ -339693,7 +339775,7 @@ async function runMigrationsOnPool(pool4) {
         continue;
       }
       console.log(`Applying server boot migration: ${file}...`);
-      const sql = import_fs4.default.readFileSync(import_path5.default.join(migrationsDir, file), "utf8");
+      const sql = import_fs5.default.readFileSync(import_path5.default.join(migrationsDir, file), "utf8");
       await client.query("BEGIN");
       await client.query(sql);
       await client.query("INSERT INTO schema_migrations (name) VALUES ($1)", [file]);
@@ -339868,11 +339950,11 @@ async function saveFileLocally2(file, req2) {
   const fileExt = import_path14.default.extname(file.originalname) || ".jpg";
   const filename = `${Date.now()}-${Math.round(Math.random() * 1e5)}${fileExt}`;
   const destDir = import_path14.default.join(process.cwd(), "uploads");
-  if (!import_fs10.default.existsSync(destDir)) {
-    import_fs10.default.mkdirSync(destDir, { recursive: true });
+  if (!import_fs11.default.existsSync(destDir)) {
+    import_fs11.default.mkdirSync(destDir, { recursive: true });
   }
   const destFilePath = import_path14.default.join(destDir, filename);
-  await import_fs10.default.promises.writeFile(destFilePath, file.buffer);
+  await import_fs11.default.promises.writeFile(destFilePath, file.buffer);
   if (req2) {
     const proto2 = req2.headers["x-forwarded-proto"] || req2.protocol || "https";
     const host = req2.headers["x-forwarded-host"] || req2.get("host") || "appapi.therpfoundation.org";
@@ -339980,6 +340062,7 @@ app.post("/api/volunteers/duty/clock-out", authenticateToken, requireVolunteer, 
       `UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2`,
       [Math.round(durationMinutes * 2), userId]
     );
+    await ensureEligibleCertificates(userId);
     res.json({ success: true, session: result.rows[0], durationMinutes });
   } catch (error3) {
     console.error("Clock-out error:", error3);
@@ -340102,13 +340185,13 @@ async function startServer2() {
     });
     app.use(vite.middlewares);
   } else {
-    if (import_fs10.default.existsSync(distPath)) {
+    if (import_fs11.default.existsSync(distPath)) {
       app.use(import_express32.default.static(distPath));
     }
     app.get("*", (req2, res, next2) => {
       if (req2.path.startsWith("/api/")) return next2();
-      const indexPath = import_fs10.default.existsSync(import_path14.default.join(distPath, "index.html")) ? import_path14.default.join(distPath, "index.html") : import_path14.default.join(process.cwd(), "index.html");
-      if (import_fs10.default.existsSync(indexPath)) {
+      const indexPath = import_fs11.default.existsSync(import_path14.default.join(distPath, "index.html")) ? import_path14.default.join(distPath, "index.html") : import_path14.default.join(process.cwd(), "index.html");
+      if (import_fs11.default.existsSync(indexPath)) {
         return res.sendFile(indexPath);
       }
       res.status(404).send("Application frontend index.html not found.");

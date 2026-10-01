@@ -1,6 +1,6 @@
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
-import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, RefreshCw, Sparkles } from "lucide-react";
+import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -193,8 +193,9 @@ export default function Home() {
   const [slide, setSlide] = useState(0);
   const [marquee1, setMarquee1] = useState<string[]>([]);
   const [marquee2, setMarquee2] = useState<string[]>([]);
-  const [, setMarquee3] = useState<string[]>([]);
-  const [quoteOfDay, setQuoteOfDay] = useState(dailyQuotes[0]);
+  const [quoteOfDay, setQuoteOfDay] = useState(() => {
+    return dailyQuotes[Math.floor(Math.random() * dailyQuotes.length)];
+  });
 
   // Broadcast Marquee from Admin CMS
   const broadcastMarquee = useMemo(() => {
@@ -207,13 +208,6 @@ export default function Home() {
   }, [cmsConfig?.homeMarquees]);
 
   // Thought of the Day: CMS Config takes priority over default/API
-  const [quoteIndex, setQuoteIndex] = useState(0);
-
-  const cycleNextQuote = () => {
-    setQuoteIndex((prev) => (prev + 1) % dailyQuotes.length);
-    setQuoteOfDay(dailyQuotes[(quoteIndex + 1) % dailyQuotes.length]);
-  };
-
   const currentQuote = useMemo(() => {
     const cmsQuote = cmsConfig?.quoteOfTheDay || cmsConfig?.quoteOfTheDayHi || cmsConfig?.quoteOfTheDayEn || (cmsConfig as any)?.thoughtOfDay?.quote || (cmsConfig as any)?.thought_of_the_day;
     if (cmsQuote) {
@@ -245,7 +239,7 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, [slides.length]);
 
-  // Load Thought of the Day live
+  // Load Thought of the Day live from RSS Feed
   useEffect(() => {
     const loadQuote = async () => {
       try {
@@ -258,8 +252,8 @@ export default function Home() {
           }
         }
       } catch {}
-      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-      setQuoteOfDay(dailyQuotes[dayOfYear % dailyQuotes.length]);
+      const randomIndex = Math.floor(Math.random() * dailyQuotes.length);
+      setQuoteOfDay(dailyQuotes[randomIndex]);
     };
     void loadQuote();
   }, []);
@@ -289,11 +283,9 @@ export default function Home() {
           const data = json?.data ?? json;
           const m1 = parseFeedItems(data?.items ?? data?.marquee1 ?? data?.governmentNews ?? data?.pib ?? []);
           const m2 = parseFeedItems(data?.alerts ?? data?.marquee2 ?? data?.emergencyAlerts ?? data?.sachet ?? []);
-          const m3 = parseFeedItems(data?.marquee3 ?? data?.worldNews ?? data?.news ?? []);
           if (!alive) return;
           if (m1.length) { setMarquee1(m1); try { localStorage.setItem("@rpf_marquee1_cache", JSON.stringify(m1)); } catch {} }
           if (m2.length) { setMarquee2(m2); try { localStorage.setItem("@rpf_marquee2_cache", JSON.stringify(m2)); } catch {} }
-          if (m3.length) { setMarquee3(m3); try { localStorage.setItem("@rpf_marquee3_cache", JSON.stringify(m3)); } catch {} }
           if (m1.length || m2.length) break;
         } catch {}
       }
@@ -347,19 +339,9 @@ export default function Home() {
 
         {/* 2. THOUGHT OF THE DAY (IMMEDIATELY AFTER GREETING) */}
         <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3 shadow-2xs">
-          <div className="flex items-center justify-between text-[#D97706]">
-            <div className="flex items-center gap-1.5">
-              <Quote className="h-3.5 w-3.5" />
-              <p className="text-[10px] font-bold uppercase tracking-widest">Thought of the Day</p>
-            </div>
-            <button
-              onClick={cycleNextQuote}
-              title="Next Thought / अगला विचार"
-              className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-amber-100/70 hover:bg-amber-200/80 text-amber-800 transition active:scale-95"
-            >
-              <RefreshCw className="h-3 w-3" />
-              <span>Next</span>
-            </button>
+          <div className="flex items-center gap-1.5 text-[#D97706]">
+            <Quote className="h-3.5 w-3.5" />
+            <p className="text-[10px] font-bold uppercase tracking-widest">Thought of the Day</p>
           </div>
           <p className="mt-1 text-[13px] sm:text-[14px] font-semibold leading-relaxed text-[#14213D]">
             “{currentQuote.quote}”
@@ -371,18 +353,48 @@ export default function Home() {
           )}
         </section>
 
-        {/* 3. BROADCAST ANNOUNCEMENTS & LIVE RSS NEWS MARQUEES */}
-        
-        {/* BROADCAST ANNOUNCEMENTS CONFIGURED BY ADMIN */}
-        {broadcastMarquee.length > 0 && (
-          <MarqueeTrack items={broadcastMarquee} direction="rtl" variant="saffron" label="Announcement" onClick={() => navigate("/news")} />
+        {/* 3. LIVE RSS NEWS & UPDATE MARQUEES (EXACTLY 2 MARQUEES) */}
+        {broadcastMarquee.length > 0 ? (
+          <>
+            <MarqueeTrack
+              items={broadcastMarquee}
+              direction="rtl"
+              variant="saffron"
+              label="Announcement"
+              onClick={() => navigate("/news")}
+            />
+            {(marquee1.length > 0 || marquee2.length > 0) && (
+              <MarqueeTrack
+                items={marquee1.length > 0 ? marquee1 : marquee2}
+                direction="ltr"
+                variant="green"
+                label="Live News"
+                onClick={() => navigate("/news")}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            {marquee1.length > 0 && (
+              <MarqueeTrack
+                items={marquee1}
+                direction="rtl"
+                variant="green"
+                label="Live News"
+                onClick={() => navigate("/news")}
+              />
+            )}
+            {marquee2.length > 0 && (
+              <MarqueeTrack
+                items={marquee2}
+                direction="ltr"
+                variant="saffron"
+                label="Alerts & Info"
+                onClick={() => navigate("/news")}
+              />
+            )}
+          </>
         )}
-
-        {/* MARQUEE 1: Live PIB / National Welfare News Feed -> Right to Left (GREEN) */}
-        {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="green" label="Live News" onClick={() => navigate("/news")} />}
-
-        {/* MARQUEE 2: Sarkari Opportunities & Alerts -> Left to Right (DARK SAFFRON) */}
-        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="saffron" label="Alerts & Info" onClick={() => navigate("/news")} />}
 
         {/* 4. CAROUSEL: RP FOUNDATION AT WORK (TRANSPARENT TEXT BACKGROUND) */}
         <section className="pt-1">
@@ -618,22 +630,21 @@ export default function Home() {
                 <span>All Tools ({">"})</span>
               </button>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <div className="grid grid-cols-5 gap-2">
               {[
                 { name: "Fasting", route: "/utilities/fasting-tracker", emoji: "🧘" },
                 { name: "GST Calc", route: "/utilities/gst-calculator", emoji: "🧮" },
                 { name: "Split Bill", route: "/utilities/split-bill", emoji: "⚖️" },
                 { name: "BMI Calc", route: "/utilities/bmi-calculator", emoji: "🏃" },
                 { name: "Pomodoro", route: "/utilities/pomodoro", emoji: "⏱️" },
-                { name: "Calculator", route: "/utilities/calculator", emoji: "🔢" },
               ].map((tool) => (
                 <button
                   key={tool.name}
                   onClick={() => navigate(tool.route)}
-                  className="flex flex-col items-center justify-center py-2 px-1.5 rounded-xl bg-white border border-slate-200/90 hover:border-[#C2410C] active:scale-95 transition shadow-2xs group"
+                  className="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white border border-slate-200/90 hover:border-[#C2410C] active:scale-95 transition shadow-2xs group"
                 >
                   <span className="text-base group-hover:scale-110 transition-transform">{tool.emoji}</span>
-                  <span className="text-[10px] font-bold text-[#0A192F] mt-1 tracking-tight truncate max-w-full">{tool.name}</span>
+                  <span className="text-[10px] font-bold text-[#0A192F] mt-1 tracking-tight truncate max-w-full text-center">{tool.name}</span>
                 </button>
               ))}
             </div>

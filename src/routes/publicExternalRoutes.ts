@@ -247,12 +247,63 @@ router.get("/api/public/news", async (_req, res) => {
   }
 });
 
-router.get("/api/public/quote-of-day", async (_req,res) => { try { const c=cache("quote_of_day_v2",21600000); if(c) return res.json({success:true,data:c}); const feeds=["https://www.brainyquote.com/link/quotebr.rss","http://feeds.feedburner.com/azquotes/quoteoftheday"]; for(const url of feeds){ try { const feed=await fetchRssFeed(url); const item=feed.items[0]; if(!item) continue; const title=cleanText(item.title || ""); const body=cleanText(item.contentSnippet || item.content || item.description || ""); const explicitAuthor=cleanText(item.creator || item.author || ""); let quote=body; let author=explicitAuthor;
-          if(!author && body && title && body !== title) author=title;
-          if(!quote && title){ const parts=title.split(/\s[-–—|:]\s/); if(parts.length > 1){ author=author || parts[parts.length - 1].trim(); quote=parts.slice(0,-1).join(" - ").trim(); } else quote=title; }
-          if(quote === title && /\s[-–—|:]\s/.test(title)){ const parts=title.split(/\s[-–—|:]\s/); quote=parts.slice(0,-1).join(" - ").trim(); author=author || parts[parts.length-1].trim(); }
-          if(quote){ const data={quote,author:author || "",link:item.link || (url.includes("brainyquote") ? "https://www.brainyquote.com/quote_of_the_day" : "https://www.azquotes.com/quote_of_the_day.html")}; save("quote_of_day_v2",data); return res.json({success:true,data}); }
-        } catch { /* try next provider */ } } return res.status(503).json({success:false,error:"Quote temporarily unavailable"}); } catch { return res.status(503).json({success:false,error:"Quote temporarily unavailable"}); } });
+router.get("/api/public/quote-of-day", async (_req, res) => {
+  try {
+    let items: any[] = cache("quote_feed_items", 3600000) as any;
+    if (!items || !items.length) {
+      const feeds = [
+        "https://www.brainyquote.com/link/quotebr.rss",
+        "http://feeds.feedburner.com/azquotes/quoteoftheday"
+      ];
+      items = [];
+      for (const url of feeds) {
+        try {
+          const feed = await fetchRssFeed(url);
+          if (feed.items && feed.items.length) {
+            items.push(...feed.items);
+          }
+        } catch {}
+      }
+      if (items.length) {
+        save("quote_feed_items", items);
+      }
+    }
+
+    if (items && items.length) {
+      const randomIndex = Math.floor(Math.random() * items.length);
+      const item = items[randomIndex];
+      const title = cleanText(item.title || "");
+      const body = cleanText(item.contentSnippet || item.content || item.description || "");
+      const explicitAuthor = cleanText(item.creator || item.author || "");
+      let quote = body;
+      let author = explicitAuthor;
+      if (!author && body && title && body !== title) author = title;
+      if (!quote && title) {
+        const parts = title.split(/\s[-–—|:]\s/);
+        if (parts.length > 1) {
+          author = author || parts[parts.length - 1].trim();
+          quote = parts.slice(0, -1).join(" - ").trim();
+        } else {
+          quote = title;
+        }
+      }
+      if (quote === title && /\s[-–—|:]\s/.test(title)) {
+        const parts = title.split(/\s[-–—|:]\s/);
+        quote = parts.slice(0, -1).join(" - ").trim();
+        author = author || parts[parts.length - 1].trim();
+      }
+      if (quote) {
+        return res.json({
+          success: true,
+          data: { quote, author: author || "Daily Thought", link: item.link || "" }
+        });
+      }
+    }
+    return res.status(503).json({ success: false, error: "Quote temporarily unavailable" });
+  } catch {
+    return res.status(503).json({ success: false, error: "Quote temporarily unavailable" });
+  }
+});
 router.get("/api/public/calendar/panchang", async (_req,res) => { try { const c=cache("panchang_rss",3600000); if(c) return res.json({success:true,data:c}); const feed=await fetchRssFeed("https://hinducalendar.app/feed/panchang.xml"); const data=feed.items.map(i=>({title:i.title,description:i.contentSnippet||i.content||"",pubDate:i.pubDate,category:i.categories?.[0]||""})); save("panchang_rss",data); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Panchang temporarily unavailable"}); } });
 router.get("/api/public/calendar/highlights", async (_req,res) => { try { const c=cache("calendar_highlights",3600000); if(c) return res.json({success:true,data:c}); const feed=await fetchRssFeed("https://hinducalendar.app/feed/highlights.xml"); const data=feed.items.map(i=>({title:i.title,description:i.contentSnippet||i.content||"",pubDate:i.pubDate})); save("calendar_highlights",data); return res.json({success:true,data}); } catch { return res.status(503).json({success:false,error:"Calendar highlights temporarily unavailable"}); } });
 router.get("/api/public/calendar/digest", async (_req,res) => { try { const {data}=await axios.get("https://hinducalendar.app/feed/digest.txt",{responseType:"text",timeout:8000}); return res.type("text/plain").send(data); } catch { return res.status(503).send("Digest temporarily unavailable"); } });
