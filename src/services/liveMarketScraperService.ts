@@ -121,6 +121,7 @@ const STATE_MARKET_SOURCES: Record<string, StateMarketSource> = {
 };
 
 const cityCatalogCache = new Map<string, { data: Record<string, CityLocationInfo>; timestamp: number }>();
+let cityCatalogPromise: Promise<Record<string, CityLocationInfo>> | null = null;
 
 function slugifyCity(value: string) {
   return value.toLowerCase().trim().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -155,12 +156,22 @@ async function ensureCityCatalog() {
     Object.assign(SUPPORTED_CITIES, cached.data);
     return cached.data;
   }
-  const discovered: Record<string, CityLocationInfo> = { ...SUPPORTED_CITIES };
-  const groups = await Promise.all(Object.values(STATE_MARKET_SOURCES).map(discoverCitiesFromState));
-  groups.forEach(group => Object.assign(discovered, group));
-  Object.assign(SUPPORTED_CITIES, discovered);
-  cityCatalogCache.set("all", { data: discovered, timestamp: Date.now() });
-  return discovered;
+  if (cityCatalogPromise) return cityCatalogPromise;
+
+  cityCatalogPromise = (async () => {
+    const discovered: Record<string, CityLocationInfo> = { ...SUPPORTED_CITIES };
+    const groups = await Promise.all(Object.values(STATE_MARKET_SOURCES).map(discoverCitiesFromState));
+    groups.forEach(group => Object.assign(discovered, group));
+    Object.assign(SUPPORTED_CITIES, discovered);
+    cityCatalogCache.set("all", { data: discovered, timestamp: Date.now() });
+    return discovered;
+  })();
+
+  try {
+    return await cityCatalogPromise;
+  } finally {
+    cityCatalogPromise = null;
+  }
 }
 
 export async function getSupportedMarketCities() {
