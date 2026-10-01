@@ -41,6 +41,7 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           FTP_SECURE: ${{ secrets.FTP_SECURE }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
+          FTP_INCREMENTAL: "true"
         run: node deploy.cjs
 
       - name: Production liveness (wait for Passenger restart)
@@ -55,5 +56,5 @@ jobs:
             fi
             if [ "$attempt" -lt 8 ]; then sleep 8; fi
           done
-          echo "::error::Backend remained unavailable after 72 seconds; inspect cPanel Passenger logs and process limits."
+          echo "::error::Backend remained unavailable after roughly 2 minutes; inspect cPanel Passenger logs and process limits."
           exit 1
