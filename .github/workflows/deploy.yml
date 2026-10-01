@@ -6,13 +6,16 @@ on:
       - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+
       - name: Install dependencies
         env:
           npm_config_fetch_retries: "5"
@@ -20,42 +23,17 @@ jobs:
           npm_config_fetch_retry_maxtimeout: "120000"
           npm_config_fetch_timeout: "180000"
         run: npm ci --include=dev --no-audit --no-fund
+
       - name: Type check
         run: npm run lint
+
       - name: Build application
         run: npm run build
+
       - name: Verify generated assets
         run: node -e "const fs=require('fs'),p=require('path');const h=fs.readFileSync('dist/index.html','utf8');const refs=[...h.matchAll(/(?:src|href)=\\\"([^\\\"]+\\.(?:js|css))\\\"/g)].map(m=>m[1].replace(/^\\//,''));if(!refs.length)throw new Error('No JS/CSS assets');for(const r of refs){if(!fs.existsSync(p.join('dist',r)))throw new Error('Missing '+r)}console.log('Assets verified',refs.length)"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: deployment-dist
-          path: |
-            dist/
-            server.cjs
-          if-no-files-found: error
 
-  deploy-cpanel:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Install dependencies
-        run: npm install --include=dev --no-audit --no-fund
-      - name: Clean build directory
-        run: rm -rf dist
-      - uses: actions/download-artifact@v4
-        with:
-          name: deployment-dist
-          path: .
-      - name: Verify downloaded deployment artifacts
-        run: |
-          if [ ! -f "dist/index.html" ]; then echo "Missing dist/index.html" && exit 1; fi
-          if [ ! -f "server.cjs" ]; then echo "Missing server.cjs" && exit 1; fi
-          echo "Verified dist/index.html and server.cjs are present at root"
-      - name: Deploy
+      - name: Deploy to cPanel
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_PORT: ${{ secrets.FTP_PORT }}
@@ -64,17 +42,18 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
         run: node deploy.cjs
+
       - name: Production liveness (wait for Passenger restart)
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 12); do
-            echo "Liveness attempt ${attempt}/12"
-            if node -e "const https=require('https');const req=https.get('https://appapi.therpfoundation.org/api/liveness',{timeout:12000},r=>{console.log('HTTP',r.statusCode);r.resume();process.exit(r.statusCode===200?0:1)});req.on('timeout',()=>req.destroy(new Error('liveness timeout')));req.on('error',e=>{console.error(e.message);process.exit(1)})"; then
+          for attempt in $(seq 1 8); do
+            echo "Liveness attempt ${attempt}/8"
+            if node -e "const https=require('https');const req=https.get('https://appapi.therpfoundation.org/api/liveness',{timeout:10000},r=>{console.log('HTTP',r.statusCode);r.resume();process.exit(r.statusCode===200?0:1)});req.on('timeout',()=>req.destroy(new Error('liveness timeout')));req.on('error',e=>{console.error(e.message);process.exit(1)})"; then
               echo "Production backend is live"
               exit 0
             fi
-            if [ "$attempt" -lt 12 ]; then sleep 10; fi
+            if [ "$attempt" -lt 8 ]; then sleep 8; fi
           done
-          echo "::error::Backend remained unavailable after 120 seconds; inspect cPanel Passenger logs and process limits."
+          echo "::error::Backend remained unavailable after 72 seconds; inspect cPanel Passenger logs and process limits."
           exit 1
