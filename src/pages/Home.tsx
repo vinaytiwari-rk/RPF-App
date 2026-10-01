@@ -468,8 +468,8 @@ export default function Home() {
           <div className="rounded-[24px] border border-slate-200/80 bg-transparent backdrop-blur-xs p-5 shadow-2xs space-y-4">
             {/* Vision Narrative */}
             <div className="flex items-start gap-3.5">
-              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl bg-white border border-emerald-500/20 p-1.5 shadow-sm">
-                <img src="/assets/logo.png" alt="RP Foundation" className="h-full w-full object-contain" />
+              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-white border border-emerald-500/20 p-1.5 shadow-sm">
+                <img src="/assets/rp-foundation-logo.webp" alt="RP Foundation" className="h-full w-full object-contain" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-[16px] font-bold text-[#14213D]">Empowering Communities Through Direct Ground Action</h3>
@@ -489,8 +489,8 @@ export default function Home() {
 
             {/* Founder's Message Narrative */}
             <div className="flex items-start gap-3.5">
-              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-amber-500/30 bg-white shadow-sm">
-                <img src="/assets/founder.png" alt="Rohit Pandit, Founder of RP Foundation" className="h-full w-full object-cover object-top" />
+              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-amber-500/30 bg-white shadow-sm">
+                <img src="/assets/rohit-pandit.webp" alt="Rohit Pandit, Founder of RP Foundation" className="h-full w-full object-cover object-top" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-[16px] font-bold text-[#14213D]">Message from Founder Rohit Pandit</h3>
