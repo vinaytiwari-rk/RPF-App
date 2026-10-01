@@ -7,22 +7,23 @@ import multer from 'multer';
 
 import path from 'path';
 import fs_node from 'fs';
+import { uploadStreamToCloudinary } from '../lib/cloudinary.js';
 
 // Uploaded files are stored on local disk, so an authenticated client could
 // otherwise exhaust storage by repeatedly uploading 5MB files.
 const uploadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many file uploads. Please try again later.' },
 });
 
-// Setup multer for images & documents (5MB)
+// Setup multer for images & documents (15MB)
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype === 'application/pdf') {
       cb(null, true);
@@ -32,10 +33,10 @@ const upload = multer({
   }
 });
 
-// Setup multer for video uploads (50MB)
+// Setup multer for video uploads (100MB - hosted on Cloudinary with 0 MB cPanel usage)
 const videoUpload = multer({
   storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit for videos
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit for videos
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('video/') || file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -80,6 +81,29 @@ const saveFileLocally = async (file: Express.Multer.File, req?: any): Promise<st
   return '/uploads/' + filename;
 };
 
+/**
+ * Universal media saver:
+ * 1. Automatically uploads to Cloudinary CDN (0 MB cPanel disk usage, high-speed CDN delivery)
+ * 2. Falls back to local storage if Cloudinary is unreachable or fails.
+ */
+const saveFile = async (
+  file: Express.Multer.File,
+  req?: any,
+  resourceType: 'auto' | 'image' | 'video' = 'auto',
+  folder = 'rpf_media'
+): Promise<string> => {
+  try {
+    const cloudUrl = await uploadStreamToCloudinary(file.buffer, {
+      folder,
+      resource_type: resourceType,
+    });
+    return cloudUrl;
+  } catch (cloudErr) {
+    console.warn('[Cloudinary] Cloud upload failed, falling back to local disk:', cloudErr);
+    return await saveFileLocally(file, req);
+  }
+};
+
 const router = express.Router();
 
 router.post("/api/upload/founder", authenticateToken, requireAdmin, uploadLimiter, upload.single("file"), handleUploadErrors, async (req, res) => {
@@ -87,7 +111,7 @@ router.post("/api/upload/founder", authenticateToken, requireAdmin, uploadLimite
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file, req);
+    const fileUrl = await saveFile(req.file, req, 'image', 'rpf_founder');
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Founder image upload failed:", error);
@@ -100,7 +124,7 @@ router.post("/api/upload/broadcast", authenticateToken, requireAdmin, uploadLimi
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file, req);
+    const fileUrl = await saveFile(req.file, req, 'image', 'rpf_broadcasts');
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Broadcast image upload failed:", error);
@@ -114,7 +138,7 @@ router.post("/api/upload/image", authenticateToken, uploadLimiter, upload.fields
     if (!file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(file, req);
+    const fileUrl = await saveFile(file, req, 'image', 'rpf_images');
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Generic image upload failed:", error);
@@ -128,7 +152,7 @@ router.post("/api/upload/video", authenticateToken, requireAdmin, uploadLimiter,
     if (!file) {
       return res.status(400).json({ error: "No video file uploaded" });
     }
-    const fileUrl = await saveFileLocally(file, req);
+    const fileUrl = await saveFile(file, req, 'video', 'rpf_reels');
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Video upload failed:", error);
@@ -141,7 +165,7 @@ router.post("/api/profile/upload-dp", authenticateToken, uploadLimiter, upload.s
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file, req);
+    const fileUrl = await saveFile(req.file, req, 'image', 'rpf_profiles');
     const userId = req.user.id;
 
     await pool.query(`UPDATE users SET avatar = $1 WHERE id = $2`, [fileUrl, userId]);
@@ -159,7 +183,7 @@ router.post("/api/profile/upload-cover", authenticateToken, uploadLimiter, uploa
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file, req);
+    const fileUrl = await saveFile(req.file, req, 'image', 'rpf_covers');
     const userId = req.user.id;
 
     await pool.query(`UPDATE users SET cover = $1 WHERE id = $2`, [fileUrl, userId]);

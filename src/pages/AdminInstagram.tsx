@@ -112,8 +112,8 @@ export default function AdminInstagram() {
     const file = e.target.files?.[0];
     if (!file || selected === null) return;
 
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error("Video file size exceeds 50MB limit. Please select a shorter video.");
+    if (file.size > 100 * 1024 * 1024) {
+      toast.error("Video file size exceeds 100MB limit. Please select a shorter video.");
       e.target.value = "";
       return;
     }
@@ -293,17 +293,17 @@ export default function AdminInstagram() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Film className="h-4 w-4 text-rose-600" />
-                        <span className="text-xs font-black text-[#0A192F]">Device Video Upload (MP4 / WebM)</span>
+                        <span className="text-xs font-black text-[#0A192F]">Device Video Upload (MP4 / WebM / MOV)</span>
                       </div>
                       {p.videoUrl && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                          <CheckCircle2 className="h-3 w-3" /> Ready
+                          <CheckCircle2 className="h-3 w-3" /> {p.videoUrl.includes('cloudinary.com') ? "Cloudinary CDN (0 MB Host)" : "Video Ready"}
                         </span>
                       )}
                     </div>
                     
                     <p className="text-[11px] text-slate-500">
-                      Upload video directly from your device (Max 50MB). Videos play with 100% reliability in the in-app player.
+                      Upload video directly from your device (Max 100MB). Videos stream via fast Cloudinary CDN with <strong>0 MB host disk space</strong>.
                     </p>
 
                     <div className="flex flex-wrap items-center gap-2.5">

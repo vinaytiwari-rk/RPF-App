@@ -56,6 +56,7 @@ import campaignRoutes from './src/routes/campaignRoutes.js';
 import submissionRoutes from './src/routes/submissionRoutes.js';
 import userRoutes from './src/routes/userRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
+import { uploadStreamToCloudinary } from './src/lib/cloudinary.js';
 import publicGovRoutes from './src/routes/publicGovRoutes.js';
 import publicExternalRoutes from './src/routes/publicExternalRoutes.js';
 import adminHqExtraRoutes from './src/routes/adminHqExtraRoutes.js';
@@ -625,14 +626,20 @@ async function saveFileLocally(file: Express.Multer.File, req?: any): Promise<st
   return `/uploads/${filename}`;
 }
 
-// General upload endpoint for Admin Panel
+// General upload endpoint for Admin Panel (Powered by Cloudinary CDN - 0 MB cPanel Disk Space)
 app.post("/api/admin/upload", authenticateToken, requireAdmin, upload.single("image"), handleUploadErrors, async (req: any, res: any) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: "No file uploaded" });
     }
-    const localUrl = await saveFileLocally(req.file, req);
-    res.json({ success: true, url: localUrl });
+    let mediaUrl = "";
+    try {
+      mediaUrl = await uploadStreamToCloudinary(req.file.buffer, { folder: "rpf_admin", resource_type: "auto" });
+    } catch (cErr) {
+      console.warn("[Cloudinary] Admin upload fallback to local storage:", cErr);
+      mediaUrl = await saveFileLocally(req.file, req);
+    }
+    res.json({ success: true, url: mediaUrl });
   } catch (error) {
     console.error("Error uploading file:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
