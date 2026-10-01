@@ -323,28 +323,64 @@ const SHLOKAS = [
   }
 ];
 
-export function getTodayPanchang(): DailyPanchang {
-  const today = new Date();
-  const dayIndex = today.getDate() % SHLOKAS.length;
+export function getTodayPanchang(date = new Date()): DailyPanchang {
+  const year = date.getFullYear();
+  const month = date.getMonth(); // 0 = Jan, 9 = Oct
+  const day = date.getDate();
+
+  // Vikram Samvat calculation:
+  // Starts around late March (Chaitra Shukla Pratipada)
+  const isPostChaitra = month > 2 || (month === 2 && day >= 22);
+  const vikramSamvatNumber = isPostChaitra ? year + 57 : year + 56;
+  const samvatName = "Siddharthi";
+
+  // Synodic lunar calculation (Reference: New Moon on Jan 18, 2026, 08:52 UTC)
+  const refNewMoon = new Date("2026-01-18T08:52:00Z").getTime();
+  const now = date.getTime();
+  const synodicMonthMs = 29.53058867 * 86400000;
+  const elapsed = (now - refNewMoon) / synodicMonthMs;
+  const cycleFraction = elapsed - Math.floor(elapsed);
+  const tithiIndex = Math.floor(cycleFraction * 30) + 1; // 1 to 30
+
+  const isShukla = tithiIndex <= 15;
+  const paksha = isShukla ? "Shukla Paksha" : "Krishna Paksha";
+  const tithiNumber = isShukla ? tithiIndex : tithiIndex - 15;
+
+  const tithiNames = [
+    "Pratipada", "Dwitiya", "Tritiya", "Chaturthi", "Panchami",
+    "Shashti", "Saptami", "Ashtami", "Navami", "Dashami",
+    "Ekadashi", "Dwadashi", "Trayodashi", "Chaturdashi", isShukla ? "Purnima" : "Amavasya"
+  ];
+  const tithiName = tithiNames[tithiNumber - 1] || "Panchami";
+
+  // Hindu Lunar Months (Amanta/Purnimanta system)
+  // For October: Ashwina
+  const hinduMonths = [
+    "Magha / Phalguna", "Phalguna / Chaitra", "Chaitra", "Vaishakha", "Jyeshtha", "Ashadha",
+    "Shravana", "Bhadrapada", "Ashwina", "Kartika", "Margashirsha", "Pausha"
+  ];
+  const currentMonthName = hinduMonths[month] || "Ashwina";
+
+  const dayIndex = day % SHLOKAS.length;
 
   return {
-    samvat: "विक्रम संवत 2082 (कालयुक्त) / शक 1946",
-    month: "चैत्र / वैशाख",
-    paksha: "शुक्ल पक्ष",
-    tithi: "नवमी तिथि",
-    tithiTill: "सायं 06:45 बजे तक",
-    nakshatra: "पुनर्वसु नक्षत्र",
-    nakshatraTill: "रात्रि 08:20 बजे तक",
-    yoga: "सुकर्मा योग",
-    karana: "बालव करण",
-    rahukaal: "दोपहर 01:30 से 03:00 बजे तक (अशुभ काल)",
-    abhijitMuhurat: "पूर्वाह्न 11:46 से दोपहर 12:35 तक (सर्वश्रेष्ठ शुभ काल)",
-    amritKaal: "प्रातः 07:15 से 08:45 तक",
-    brahmaMuhurat: "प्रातः 04:32 से 05:20 तक",
-    sunrise: "प्रातः 06:08 बजे",
-    sunset: "सायं 06:34 बजे",
-    moonrise: "दोपहर 01:10 बजे",
-    specialVrat: "मां दुर्गा / श्रीराम उपासना दिवस",
+    samvat: `Vikram Samvat ${vikramSamvatNumber} (${samvatName}) / Saka 1948`,
+    month: `${String(day).padStart(2, "0")}, ${currentMonthName}`,
+    paksha,
+    tithi: `${paksha}, ${tithiName} (Tithi ${tithiNumber})`,
+    tithiTill: "Until 12:34 PM IST",
+    nakshatra: "Rohini Nakshatra",
+    nakshatraTill: "Until 06:01 PM IST",
+    yoga: "Siddhi Yoga",
+    karana: "Taitula / Garaja Karana",
+    rahukaal: "01:30 PM to 03:00 PM (Inauspicious Period)",
+    abhijitMuhurat: "11:46 AM to 12:34 PM (Most Auspicious Time)",
+    amritKaal: "07:15 AM to 08:45 AM",
+    brahmaMuhurat: "04:32 AM to 05:20 AM",
+    sunrise: "06:14 AM",
+    sunset: "06:05 PM",
+    moonrise: "01:10 PM",
+    specialVrat: "New Delhi, India • Daily Vedic Observance",
     shlokaOfDay: SHLOKAS[dayIndex]
   };
 }
@@ -506,32 +542,36 @@ export async function getDailyEssentialsSummary() {
   return {
     mandiSummary: {
       topCrops: mandiRes.rates.slice(0, 4).map(r => ({
-        crop: r.cropHi,
-        rate: `${r.modalPrice} ${r.unit}`,
+        crop: r.crop,
+        cropHi: r.cropHi,
+        rate: `₹${r.modalPrice}/Quintal`,
         mandi: r.mandi,
         trend: r.trend
       })),
       totalCropsTracked: mandiRes.rates.length
     },
     fuelSummary: {
-      bhopalPetrol: `₹${fuelRes.cities.find(c => c.city === "Bhopal")?.petrol || 106.47}`,
-      bhopalDiesel: `₹${fuelRes.cities.find(c => c.city === "Bhopal")?.diesel || 91.84}`,
+      bhopalPetrol: `₹${fuelRes.cities.find(c => c.city === "Bhopal")?.petrol || 106.47}/L`,
+      bhopalDiesel: `₹${fuelRes.cities.find(c => c.city === "Bhopal")?.diesel || 91.84}/L`,
       gold24k: `₹${fuelRes.bullion.gold24k.toLocaleString("en-IN")}/10g`,
       silver: `₹${fuelRes.bullion.silver.toLocaleString("en-IN")}/kg`,
       trend: fuelRes.bullion.trend
     },
     panchangSummary: {
+      date: panchang.month,
       tithi: panchang.tithi,
       paksha: panchang.paksha,
+      samvat: panchang.samvat,
       abhijitMuhurat: panchang.abhijitMuhurat,
       rahukaal: panchang.rahukaal,
       shloka: panchang.shlokaOfDay.sanskrit,
       shlokaMeaning: panchang.shlokaOfDay.hindi
     },
     jobsSummary: {
-      latestNotice: jobs[0]?.titleHi || "म.प्र. पुलिस व कर्मचारी चयन मंडल भर्ती",
-      lastDate: jobs[0]?.lastDate || "28 अक्टूबर 2026",
-      vacancies: jobs[0]?.vacancies || "7,500+ पद",
+      latestNotice: jobs[0]?.title || "MP Police Constable & Sub Inspector Recruitment",
+      latestNoticeHi: jobs[0]?.titleHi || "म.प्र. पुलिस आरक्षक भर्ती",
+      lastDate: jobs[0]?.lastDate || "28 October 2026",
+      vacancies: jobs[0]?.vacancies || "7,500+ Posts",
       totalActiveJobs: jobs.length
     },
     updatedAt: new Date().toISOString()

@@ -24,7 +24,7 @@ import { openExternalLink } from "../utils/browser";
 
 interface DailySummary {
   mandiSummary: {
-    topCrops: { crop: string; rate: string; mandi: string; trend: "up" | "down" | "stable" }[];
+    topCrops: { crop: string; cropHi?: string; rate: string; mandi: string; trend: "up" | "down" | "stable" }[];
     totalCropsTracked: number;
   };
   fuelSummary: {
@@ -35,8 +35,10 @@ interface DailySummary {
     trend: "up" | "down" | "stable";
   };
   panchangSummary: {
+    date?: string;
     tithi: string;
     paksha: string;
+    samvat?: string;
     abhijitMuhurat: string;
     rahukaal: string;
     shloka: string;
@@ -44,6 +46,7 @@ interface DailySummary {
   };
   jobsSummary: {
     latestNotice: string;
+    latestNoticeHi?: string;
     lastDate: string;
     vacancies: string;
     totalActiveJobs: number;
@@ -56,7 +59,7 @@ type ActiveSheet = null | "mandi" | "fuel" | "panchang" | "jobs";
 export default function DailyEssentialsSection() {
   const [summary, setSummary] = useState<DailySummary | null>(() => {
     try {
-      const cached = localStorage.getItem("@rpf_daily_essentials_cache");
+      const cached = localStorage.getItem("@rpf_daily_essentials_cache_v2");
       if (cached) return JSON.parse(cached);
     } catch {}
     return null;
@@ -77,7 +80,7 @@ export default function DailyEssentialsSection() {
         if (res.data?.success && res.data?.data) {
           setSummary(res.data.data);
           try {
-            localStorage.setItem("@rpf_daily_essentials_cache", JSON.stringify(res.data.data));
+            localStorage.setItem("@rpf_daily_essentials_cache_v2", JSON.stringify(res.data.data));
           } catch {}
         }
       })
@@ -125,19 +128,19 @@ export default function DailyEssentialsSection() {
       <div className="mb-2 flex items-center justify-between px-0.5">
         <div className="flex items-center gap-1.5">
           <Sparkles className="h-4 w-4 text-[#D97706]" />
-          <h2 className="text-[14px] sm:text-[15px] font-black uppercase tracking-wider text-[#14213D]">
-            दैनिक जीवन सेवाएं (Daily Essentials)
+          <h2 className="text-[13.5px] sm:text-[14.5px] font-black uppercase tracking-wider text-[#14213D]">
+            Daily Essentials & Live Rates
           </h2>
         </div>
         <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          लाइव दरें
+          Live Data
         </span>
       </div>
 
       {/* HORIZONTAL SWIPEABLE CARDS */}
       <div className="flex gap-2.5 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none snap-x snap-mandatory">
-        {/* CARD 1: MANDI BHAV */}
+        {/* CARD 1: MANDI RATES */}
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => openSheet("mandi")}
@@ -146,7 +149,7 @@ export default function DailyEssentialsSection() {
           <div className="flex items-center justify-between text-[#B45309]">
             <div className="flex items-center gap-1.5">
               <Wheat className="h-4 w-4 text-[#D97706]" />
-              <span className="text-[11px] font-extrabold uppercase tracking-wider">म.प्र. मंडी भाव</span>
+              <span className="text-[11px] font-extrabold uppercase tracking-wider">MP Mandi Rates</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
           </div>
@@ -154,9 +157,9 @@ export default function DailyEssentialsSection() {
           <div className="mt-2 space-y-1">
             {summary?.mandiSummary?.topCrops?.slice(0, 2).map((c, i) => (
               <div key={i} className="flex items-center justify-between text-[12px]">
-                <span className="font-semibold text-slate-700 truncate max-w-[110px]">{c.crop}</span>
+                <span className="font-semibold text-slate-700 truncate max-w-[110px]">{c.crop || c.cropHi}</span>
                 <span className="font-bold text-[#14213D] flex items-center gap-0.5">
-                  {c.rate.split(" ")[0]}
+                  {c.rate.split("/")[0]}
                   {c.trend === "up" ? (
                     <TrendingUp className="h-3 w-3 text-emerald-600 inline" />
                   ) : (
@@ -165,14 +168,14 @@ export default function DailyEssentialsSection() {
                 </span>
               </div>
             )) || (
-              <div className="text-[12px] text-slate-500 py-1 font-medium">सोयाबीन, गेहूं, चना भाव...</div>
+              <div className="text-[12px] text-slate-500 py-1 font-medium">Soybean, Wheat, Gram...</div>
             )}
           </div>
 
           <div className="mt-2.5 pt-1.5 border-t border-amber-100 flex items-center justify-between text-[10.5px]">
-            <span className="text-amber-800 font-bold">इंदौर / उज्जैन / नीमच</span>
+            <span className="text-amber-800 font-bold">Indore / Ujjain / Neemuch</span>
             <span className="text-[#C2410C] font-extrabold flex items-center">
-              सभी भाव देखें <ChevronRight className="h-3 w-3" />
+              View All <ChevronRight className="h-3 w-3" />
             </span>
           </div>
         </motion.div>
@@ -186,26 +189,26 @@ export default function DailyEssentialsSection() {
           <div className="flex items-center justify-between text-[#0369A1]">
             <div className="flex items-center gap-1.5">
               <Fuel className="h-4 w-4 text-[#0284C7]" />
-              <span className="text-[11px] font-extrabold uppercase tracking-wider">पेट्रोल व सोना भाव</span>
+              <span className="text-[11px] font-extrabold uppercase tracking-wider">Fuel & Gold Rates</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
           </div>
 
           <div className="mt-2 space-y-1 text-[12px]">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-700">पेट्रोल (भोपाल)</span>
-              <span className="font-bold text-[#14213D]">{summary?.fuelSummary?.bhopalPetrol || "₹106.47"}/L</span>
+              <span className="font-semibold text-slate-700">Petrol (Bhopal)</span>
+              <span className="font-bold text-[#14213D]">{summary?.fuelSummary?.bhopalPetrol || "₹106.47/L"}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-700">24K सोना (10g)</span>
-              <span className="font-bold text-amber-700">{summary?.fuelSummary?.gold24k || "₹73,450"}</span>
+              <span className="font-semibold text-slate-700">24K Gold (10g)</span>
+              <span className="font-bold text-amber-700">{summary?.fuelSummary?.gold24k || "₹73,450/10g"}</span>
             </div>
           </div>
 
           <div className="mt-2.5 pt-1.5 border-t border-sky-100 flex items-center justify-between text-[10.5px]">
-            <span className="text-sky-800 font-bold">डीजल / चांदी / LPG</span>
+            <span className="text-sky-800 font-bold">Diesel / Silver / LPG</span>
             <span className="text-[#0284C7] font-extrabold flex items-center">
-              विस्तार से <ChevronRight className="h-3 w-3" />
+              Details <ChevronRight className="h-3 w-3" />
             </span>
           </div>
         </motion.div>
@@ -219,29 +222,29 @@ export default function DailyEssentialsSection() {
           <div className="flex items-center justify-between text-[#15803D]">
             <div className="flex items-center gap-1.5">
               <Sun className="h-4 w-4 text-[#16A34A]" />
-              <span className="text-[11px] font-extrabold uppercase tracking-wider">आज का पंचांग</span>
+              <span className="text-[11px] font-extrabold uppercase tracking-wider">Daily Panchang</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
           </div>
 
           <div className="mt-2 space-y-1 text-[12px]">
             <div className="font-bold text-[#14213D] truncate">
-              {summary?.panchangSummary?.paksha || "शुक्ल पक्ष"} • {summary?.panchangSummary?.tithi || "नवमी तिथि"}
+              {summary?.panchangSummary?.date || "05, Ashwina"} • {summary?.panchangSummary?.tithi || "Krishna Paksha, Panchami"}
             </div>
             <div className="text-[11px] text-emerald-800 font-medium truncate">
-              शुभ काल: पूर्वाह्न 11:46 - 12:35 PM
+              Auspicious: {summary?.panchangSummary?.abhijitMuhurat?.split("(")[0]?.trim() || "11:46 AM - 12:34 PM"}
             </div>
           </div>
 
           <div className="mt-2.5 pt-1.5 border-t border-emerald-100 flex items-center justify-between text-[10.5px]">
-            <span className="text-emerald-800 font-bold">राहुकाल व श्लोक</span>
+            <span className="text-emerald-800 font-bold">Rahu Kaal & Muhurat</span>
             <span className="text-[#15803D] font-extrabold flex items-center">
-              पंचांग देखें <ChevronRight className="h-3 w-3" />
+              View <ChevronRight className="h-3 w-3" />
             </span>
           </div>
         </motion.div>
 
-        {/* CARD 4: SARKARI JOBS & RECRUITMENT */}
+        {/* CARD 4: GOVERNMENT JOB NOTICES */}
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => openSheet("jobs")}
@@ -250,24 +253,24 @@ export default function DailyEssentialsSection() {
           <div className="flex items-center justify-between text-[#4338CA]">
             <div className="flex items-center gap-1.5">
               <Briefcase className="h-4 w-4 text-[#4F46E5]" />
-              <span className="text-[11px] font-extrabold uppercase tracking-wider">सरकारी भर्ती सूचना</span>
+              <span className="text-[11px] font-extrabold uppercase tracking-wider">Govt Job Alerts</span>
             </div>
             <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
           </div>
 
           <div className="mt-2 space-y-0.5 text-[12px]">
             <div className="font-bold text-[#14213D] line-clamp-1">
-              {summary?.jobsSummary?.latestNotice || "MP पुलिस आरक्षक भर्ती"}
+              {summary?.jobsSummary?.latestNotice || "MP Police Constable Recruitment"}
             </div>
             <div className="text-[11px] text-indigo-700 font-semibold">
-              अंतिम तिथि: {summary?.jobsSummary?.lastDate || "28 अक्टूबर"} ({summary?.jobsSummary?.vacancies || "7,500 पद"})
+              Last Date: {summary?.jobsSummary?.lastDate || "28 Oct"} ({summary?.jobsSummary?.vacancies || "7,500+ Posts"})
             </div>
           </div>
 
           <div className="mt-2.5 pt-1.5 border-t border-indigo-100 flex items-center justify-between text-[10.5px]">
-            <span className="text-indigo-800 font-bold">{summary?.jobsSummary?.totalActiveJobs || 6} नई भर्तियां</span>
+            <span className="text-indigo-800 font-bold">{summary?.jobsSummary?.totalActiveJobs || 6} Open Vacancies</span>
             <span className="text-[#4338CA] font-extrabold flex items-center">
-              आवेदन करें <ChevronRight className="h-3 w-3" />
+              Apply Now <ChevronRight className="h-3 w-3" />
             </span>
           </div>
         </motion.div>
@@ -291,16 +294,16 @@ export default function DailyEssentialsSection() {
                   {activeSheet === "fuel" && <Fuel className="h-5 w-5 text-sky-600" />}
                   {activeSheet === "panchang" && <Sun className="h-5 w-5 text-emerald-600" />}
                   {activeSheet === "jobs" && <Briefcase className="h-5 w-5 text-indigo-600" />}
-                  <h3 className="text-[17px] font-bold text-[#14213D]">
-                    {activeSheet === "mandi" && "म.प्र. कृषि उपज मंडी भाव"}
-                    {activeSheet === "fuel" && "ईंधन दरें एवं सोना-चांदी भाव"}
-                    {activeSheet === "panchang" && "दैनिक पंचांग व शुभ मुहूर्त"}
-                    {activeSheet === "jobs" && "ताज़ा सरकारी नौकरी एवं भर्ती"}
+                  <h3 className="text-[16.5px] font-bold text-[#14213D]">
+                    {activeSheet === "mandi" && "Madhya Pradesh Mandi Rates"}
+                    {activeSheet === "fuel" && "Fuel & Bullion Market Rates"}
+                    {activeSheet === "panchang" && "Daily Hindu Panchang & Timings"}
+                    {activeSheet === "jobs" && "Latest Government Job Alerts"}
                   </h3>
                 </div>
                 <button
                   onClick={closeSheet}
-                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -317,13 +320,13 @@ export default function DailyEssentialsSection() {
                         <button
                           key={m.id}
                           onClick={() => setMandiDistrict(m.id)}
-                          className={`px-3 py-1 text-xs font-bold rounded-lg shrink-0 transition-colors ${
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg shrink-0 transition-colors ${
                             mandiDistrict === m.id
                               ? "bg-amber-600 text-white shadow-xs"
                               : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                           }`}
                         >
-                          {m.nameHi || m.name}
+                          {m.name}
                         </button>
                       ))}
                     </div>
@@ -333,7 +336,7 @@ export default function DailyEssentialsSection() {
                       <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                       <input
                         type="text"
-                        placeholder="फसल खोजें (उदा. सोयाबीन, गेहूं, चना, लहसुन)..."
+                        placeholder="Search crop (e.g. Soybean, Wheat, Garlic, Gram)..."
                         value={mandiSearch}
                         onChange={(e) => setMandiSearch(e.target.value)}
                         className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
@@ -348,7 +351,7 @@ export default function DailyEssentialsSection() {
                           const matchesSearch =
                             !mandiSearch ||
                             r.crop.toLowerCase().includes(mandiSearch.toLowerCase()) ||
-                            r.cropHi.includes(mandiSearch) ||
+                            r.cropHi?.includes(mandiSearch) ||
                             r.mandi.toLowerCase().includes(mandiSearch.toLowerCase());
                           return matchesDistrict && matchesSearch;
                         })
@@ -359,11 +362,11 @@ export default function DailyEssentialsSection() {
                           >
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-[13px] text-[#14213D]">{r.cropHi}</span>
-                                <span className="text-[10px] text-slate-500">({r.mandi})</span>
+                                <span className="font-bold text-[13px] text-[#14213D]">{r.crop}</span>
+                                <span className="text-[10.5px] text-slate-500">({r.mandi} Mandi)</span>
                               </div>
                               <div className="text-[11px] text-slate-500 mt-0.5">
-                                न्यूनतम: ₹{r.minPrice} | अधिकतम: ₹{r.maxPrice} | आवक: {r.arrival || "उपलब्ध"}
+                                Min: ₹{r.minPrice} | Max: ₹{r.maxPrice} | Arrival: {r.arrival || "Available"}
                               </div>
                             </div>
                             <div className="text-right">
@@ -384,19 +387,19 @@ export default function DailyEssentialsSection() {
                     {/* Bullion Highlight */}
                     <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/10 border border-amber-300/60">
                       <div className="text-center">
-                        <div className="text-[10px] font-bold text-amber-800 uppercase">24K सोना (10g)</div>
+                        <div className="text-[10px] font-bold text-amber-800 uppercase">24K Gold (10g)</div>
                         <div className="text-[14px] font-black text-amber-900 mt-0.5">
                           ₹{detailData?.bullion?.gold24k?.toLocaleString("en-IN") || "73,450"}
                         </div>
                       </div>
                       <div className="text-center border-x border-amber-300/40">
-                        <div className="text-[10px] font-bold text-amber-800 uppercase">22K सोना (10g)</div>
+                        <div className="text-[10px] font-bold text-amber-800 uppercase">22K Gold (10g)</div>
                         <div className="text-[14px] font-black text-amber-900 mt-0.5">
                           ₹{detailData?.bullion?.gold22k?.toLocaleString("en-IN") || "67,350"}
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] font-bold text-slate-700 uppercase">चांदी (1 Kg)</div>
+                        <div className="text-[10px] font-bold text-slate-700 uppercase">Silver (1 Kg)</div>
                         <div className="text-[14px] font-black text-slate-800 mt-0.5">
                           ₹{detailData?.bullion?.silver?.toLocaleString("en-IN") || "84,500"}
                         </div>
@@ -408,16 +411,16 @@ export default function DailyEssentialsSection() {
                       <table className="w-full text-left text-xs">
                         <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
                           <tr>
-                            <th className="p-2.5">शहर / जिला</th>
-                            <th className="p-2.5">पेट्रोल (₹/L)</th>
-                            <th className="p-2.5">डीजल (₹/L)</th>
+                            <th className="p-2.5">City / District</th>
+                            <th className="p-2.5">Petrol (₹/L)</th>
+                            <th className="p-2.5">Diesel (₹/L)</th>
                             <th className="p-2.5">LPG (14.2kg)</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                           {(detailData?.cities || []).map((c: any) => (
                             <tr key={c.city} className="hover:bg-slate-50">
-                              <td className="p-2.5 font-bold text-slate-800">{c.cityHi || c.city}</td>
+                              <td className="p-2.5 font-bold text-slate-800">{c.city}</td>
                               <td className="p-2.5 font-semibold text-rose-700">₹{c.petrol.toFixed(2)}</td>
                               <td className="p-2.5 font-semibold text-blue-700">₹{c.diesel.toFixed(2)}</td>
                               <td className="p-2.5 text-slate-600">₹{c.lpg.toFixed(2)}</td>
@@ -435,34 +438,34 @@ export default function DailyEssentialsSection() {
                     {/* Samvat & Tithi */}
                     <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200">
                       <div className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
-                        {detailData?.samvat || "विक्रम संवत 2082"}
+                        {detailData?.samvat || "Vikram Samvat 2083 (Siddharthi)"}
                       </div>
                       <div className="text-[16px] font-black text-[#14213D] mt-0.5">
-                        {detailData?.paksha} • {detailData?.tithi}
+                        {detailData?.month} • {detailData?.tithi}
                       </div>
                       <div className="text-xs text-emerald-700 font-medium mt-0.5">
-                        नक्षत्र: {detailData?.nakshatra} ({detailData?.nakshatraTill})
+                        Nakshatra: {detailData?.nakshatra} ({detailData?.nakshatraTill})
                       </div>
                     </div>
 
                     {/* Timings Grid */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                        <div className="text-[10px] font-bold text-emerald-700 uppercase">अभिजीत मुहूर्त (शुभ काल)</div>
+                        <div className="text-[10px] font-bold text-emerald-700 uppercase">Abhijit Muhurat (Auspicious)</div>
                         <div className="font-extrabold text-slate-800 mt-0.5">{detailData?.abhijitMuhurat}</div>
                       </div>
                       <div className="p-3 rounded-xl bg-rose-50/60 border border-rose-200">
-                        <div className="text-[10px] font-bold text-rose-700 uppercase">राहुकाल (त्याज्य काल)</div>
+                        <div className="text-[10px] font-bold text-rose-700 uppercase">Rahu Kaal (Inauspicious)</div>
                         <div className="font-extrabold text-rose-900 mt-0.5">{detailData?.rahukaal}</div>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                        <div className="text-[10px] font-bold text-slate-600 uppercase">सूर्योदय / सूर्यास्त</div>
+                        <div className="text-[10px] font-bold text-slate-600 uppercase">Sunrise / Sunset</div>
                         <div className="font-extrabold text-slate-800 mt-0.5">
                           {detailData?.sunrise} / {detailData?.sunset}
                         </div>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                        <div className="text-[10px] font-bold text-slate-600 uppercase">योग व करण</div>
+                        <div className="text-[10px] font-bold text-slate-600 uppercase">Yoga & Karana</div>
                         <div className="font-extrabold text-slate-800 mt-0.5">
                           {detailData?.yoga} • {detailData?.karana}
                         </div>
@@ -473,13 +476,13 @@ export default function DailyEssentialsSection() {
                     {detailData?.shlokaOfDay && (
                       <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/50">
                         <div className="text-[10.5px] font-bold text-amber-800 uppercase tracking-wider">
-                          दैनिक वैदिक सुभाषितम् ({detailData.shlokaOfDay.source})
+                          Daily Vedic Subhashitam ({detailData.shlokaOfDay.source})
                         </div>
                         <div className="mt-1 font-serif text-[13px] font-bold text-[#14213D] leading-relaxed">
                           {detailData.shlokaOfDay.sanskrit}
                         </div>
                         <div className="mt-1.5 text-xs text-slate-700 leading-relaxed font-medium">
-                          <span className="font-bold text-amber-900">भावार्थ: </span>
+                          <span className="font-bold text-amber-900">Translation: </span>
                           {detailData.shlokaOfDay.hindi}
                         </div>
                       </div>
@@ -503,9 +506,9 @@ export default function DailyEssentialsSection() {
                                   NEW
                                 </span>
                               )}
-                              <span className="text-[11px] font-bold text-indigo-700">{job.departmentHi || job.department}</span>
+                              <span className="text-[11px] font-bold text-indigo-700">{job.department}</span>
                             </div>
-                            <h4 className="text-[13.5px] font-bold text-[#14213D] mt-0.5">{job.titleHi || job.title}</h4>
+                            <h4 className="text-[13.5px] font-bold text-[#14213D] mt-0.5">{job.title}</h4>
                           </div>
                           <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
                             {job.vacancies}
@@ -514,11 +517,11 @@ export default function DailyEssentialsSection() {
 
                         <div className="text-xs text-slate-600 space-y-0.5">
                           <div>
-                            <span className="font-semibold text-slate-700">योग्यता: </span>
-                            {job.qualificationHi || job.qualification}
+                            <span className="font-semibold text-slate-700">Eligibility: </span>
+                            {job.qualification}
                           </div>
                           <div>
-                            <span className="font-semibold text-slate-700">अंतिम तिथि: </span>
+                            <span className="font-semibold text-slate-700">Last Date: </span>
                             <span className="font-bold text-rose-700">{job.lastDate}</span>
                           </div>
                         </div>
@@ -526,9 +529,9 @@ export default function DailyEssentialsSection() {
                         <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                           <button
                             onClick={() => openExternalLink(job.applyUrl)}
-                            className="flex-1 py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors"
+                            className="flex-1 py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                           >
-                            <span>पोर्टल पर आवेदन करें</span>
+                            <span>Apply on Portal</span>
                             <ExternalLink className="h-3 w-3" />
                           </button>
                         </div>
