@@ -31,7 +31,7 @@ interface CityItem {
   lon: number;
 }
 
-const CITIES: CityItem[] = [
+const FALLBACK_CITIES: CityItem[] = [
   { id: "indore", name: "Indore", state: "Madhya Pradesh", lat: 22.7196, lon: 75.8577 },
   { id: "bhopal", name: "Bhopal", state: "Madhya Pradesh", lat: 23.2599, lon: 77.4126 },
   { id: "lucknow", name: "Lucknow", state: "Uttar Pradesh", lat: 26.8467, lon: 80.9462 },
@@ -40,14 +40,16 @@ const CITIES: CityItem[] = [
   { id: "ujjain", name: "Ujjain", state: "Madhya Pradesh", lat: 23.1765, lon: 75.7885 },
   { id: "jabalpur", name: "Jabalpur", state: "Madhya Pradesh", lat: 23.1815, lon: 79.9864 },
   { id: "kanpur", name: "Kanpur", state: "Uttar Pradesh", lat: 26.4499, lon: 80.3319 },
+  { id: "varanasi", name: "Varanasi", state: "Uttar Pradesh", lat: 25.3176, lon: 82.9739 },
   { id: "jaipur", name: "Jaipur", state: "Rajasthan", lat: 26.9124, lon: 75.7873 },
-  { id: "mumbai", name: "Mumbai", state: "Maharashtra", lat: 19.0760, lon: 72.8777 }
+  { id: "mumbai", name: "Mumbai", state: "Maharashtra", lat: 19.0760, lon: 72.8777 },
+  { id: "raipur", name: "Raipur", state: "Chhattisgarh", lat: 21.2514, lon: 81.6296 }
 ];
 
 function findNearestCity(lat: number, lon: number): CityItem {
-  let closest = CITIES[0];
+  let closest = FALLBACK_CITIES[0];
   let minDiff = Infinity;
-  for (const c of CITIES) {
+  for (const c of FALLBACK_CITIES) {
     const d = (c.lat - lat) ** 2 + (c.lon - lon) ** 2;
     if (d < minDiff) {
       minDiff = d;
@@ -101,15 +103,15 @@ interface MarketSummary {
 type ActiveSheet = null | "panchang" | "bullion" | "vegetables" | "mandi" | "fuel";
 
 export default function LiveVerifiedMarketSection() {
-  const [selectedCity, setSelectedCity] = useState<CityItem>(() => {
+  const [cities, setCities] = useState<CityItem[]>(FALLBACK_CITIES);\n  const [selectedState, setSelectedState] = useState<string>(() => localStorage.getItem("@rpf_selected_market_state") || "Madhya Pradesh");\n  const [selectedCity, setSelectedCity] = useState<CityItem>(() => {
     try {
       const saved = localStorage.getItem("@rpf_selected_market_city");
       if (saved) {
-        const found = CITIES.find((c) => c.id === saved);
+        const found = FALLBACK_CITIES.find((c) => c.id === saved);
         if (found) return found;
       }
     } catch {}
-    return CITIES[0]; // Default Indore
+    return FALLBACK_CITIES[0]; // Default Indore
   });
 
   const [data, setData] = useState<MarketSummary | null>(() => {
@@ -124,6 +126,8 @@ export default function LiveVerifiedMarketSection() {
   const [showCityPicker, setShowCityPicker] = useState<boolean>(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState<boolean>(false);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
+  const availableStates = Array.from(new Set(cities.map((c) => c.state))).sort();
+  const citiesInState = cities.filter((c) => c.state === selectedState).sort((a, b) => a.name.localeCompare(b.name));
 
   const fetchMarketData = useCallback((cityId: string) => {
     setIsLoadingData(true);
@@ -143,6 +147,31 @@ export default function LiveVerifiedMarketSection() {
       .finally(() => {
         setIsLoadingData(false);
       });
+  }, []);
+
+  useEffect(() => {
+    axios.get("/api/public/market-cities")
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          const discovered = res.data.data.map((c: any) => ({
+            id: c.id, name: c.name, state: c.state
+          })) as CityItem[];
+          if (discovered.length) {
+            setCities(discovered);
+            const saved = localStorage.getItem("@rpf_selected_market_city");
+            const savedCity = discovered.find((c) => c.id === saved);
+            if (savedCity) {
+              setSelectedCity(savedCity);
+              setSelectedState(savedCity.state);
+            } else if (!discovered.some((c) => c.id === selectedCity.id)) {
+              const fallback = discovered.find((c) => c.id === "indore") || discovered[0];
+              setSelectedCity(fallback);
+              setSelectedState(fallback.state);
+            }
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -173,6 +202,8 @@ export default function LiveVerifiedMarketSection() {
 
   const handleSelectCity = (city: CityItem) => {
     setSelectedCity(city);
+    setSelectedState(city.state);
+    try { localStorage.setItem("@rpf_selected_market_state", city.state); } catch {}
     setShowCityPicker(false);
     try {
       localStorage.setItem("@rpf_selected_market_city", city.id);
@@ -383,7 +414,7 @@ export default function LiveVerifiedMarketSection() {
             <div className="flex items-center justify-between text-[#4338CA]">
               <div className="flex items-center gap-1.5">
                 <Wheat className="h-4 w-4 text-[#4F46E5]" />
-                <span className="text-[11px] font-extrabold uppercase tracking-wider">Mandi Pulse</span>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider">Mandi Prices</span>
               </div>
               <span className="text-[9px] font-bold text-indigo-800 bg-indigo-100/70 px-1.5 py-0.5 rounded-md">
                 MandiPulse
@@ -465,11 +496,22 @@ export default function LiveVerifiedMarketSection() {
                 </button>
 
                 <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1 pt-1">
-                  Available Cities
+                  Select State & City
                 </div>
 
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  {availableStates.map((state) => (
+                    <button key={state} type="button" onClick={() => setSelectedState(state)}
+                      className={`shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all ${selectedState === state ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-slate-700 border-slate-200"}`}>
+                      {state}
+                    </button>
+                  ))}
+                </div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1 pt-1">
+                  {selectedState} — Cities ({citiesInState.length})
+                </div>
                 <div className="grid grid-cols-2 gap-2 max-h-[40vh] overflow-y-auto pr-0.5">
-                  {CITIES.map((c) => {
+                  {citiesInState.map((c) => {
                     const isSelected = c.id === selectedCity.id;
                     return (
                       <button
@@ -525,7 +567,7 @@ export default function LiveVerifiedMarketSection() {
                       {activeSheet === "panchang" && "Drik Panchang Live Details"}
                       {activeSheet === "bullion" && "Live Gold & Silver Bullion Rates"}
                       {activeSheet === "vegetables" && `${selectedCity.name} Vegetable Mandi Prices`}
-                      {activeSheet === "mandi" && "Mandi Pulse Agricultural Updates"}
+                      {activeSheet === "mandi" && "Mandi Prices"}
                       {activeSheet === "fuel" && `${selectedCity.name} Fuel & Gas Prices`}
                     </h3>
                     <p className="text-[11px] text-slate-500 font-medium">
@@ -533,8 +575,8 @@ export default function LiveVerifiedMarketSection() {
                       {activeSheet === "panchang" && "DrikPanchang.com"}
                       {activeSheet === "bullion" && "AllIndiaBullion.com"}
                       {activeSheet === "vegetables" && `RozKaBhav.com (${selectedCity.name})`}
-                      {activeSheet === "mandi" && "MandiPulse.com"}
-                      {activeSheet === "fuel" && "GoodReturns.in"}
+                      {activeSheet === "mandi" && "RozKaBhav.com"}
+                      {activeSheet === "fuel" && "RozKaBhav.com"}
                     </p>
                   </div>
                 </div>
