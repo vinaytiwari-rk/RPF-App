@@ -27,8 +27,8 @@ interface CityItem {
   id: string;
   name: string;
   state: string;
-  lat: number;
-  lon: number;
+  lat?: number;
+  lon?: number;
 }
 
 const FALLBACK_CITIES: CityItem[] = [
@@ -103,7 +103,9 @@ interface MarketSummary {
 type ActiveSheet = null | "panchang" | "bullion" | "vegetables" | "mandi" | "fuel";
 
 export default function LiveVerifiedMarketSection() {
-  const [cities, setCities] = useState<CityItem[]>(FALLBACK_CITIES);\n  const [selectedState, setSelectedState] = useState<string>(() => localStorage.getItem("@rpf_selected_market_state") || "Madhya Pradesh");\n  const [selectedCity, setSelectedCity] = useState<CityItem>(() => {
+  const [cities, setCities] = useState<CityItem[]>(FALLBACK_CITIES);
+  const [selectedState, setSelectedState] = useState<string>(() => localStorage.getItem("@rpf_selected_market_state") || "Madhya Pradesh");
+  const [selectedCity, setSelectedCity] = useState<CityItem>(() => {
     try {
       const saved = localStorage.getItem("@rpf_selected_market_city");
       if (saved) {
