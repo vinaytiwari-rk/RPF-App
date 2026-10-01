@@ -270,10 +270,10 @@ export default function Home() {
 
     const load = async () => {
       for (const url of [
-        "/api/public/rss-feed?feedId=pib-national",
-        "/api/public/rss-feed?feedId=sarkari-jobs",
         "/api/public/live-feed",
         "/api/public/news",
+        "/api/public/rss-feed?feedId=pib-national",
+        "/api/public/rss-feed?feedId=sarkari-jobs",
         "/rss-proxy.php",
         "https://samahit.rpfoundation.org/rss-proxy.php"
       ]) {
@@ -282,8 +282,8 @@ export default function Home() {
           if (!response.ok) continue;
           const json = await response.json();
           const data = json?.data ?? json;
-          const m1 = parseFeedItems(data?.items ?? data?.marquee1 ?? data?.governmentNews ?? data?.pib ?? []);
-          const m2 = parseFeedItems(data?.alerts ?? data?.marquee2 ?? data?.emergencyAlerts ?? data?.sachet ?? []);
+          const m1 = parseFeedItems(data?.marquee1 ?? data?.nationalAndWorldNews ?? data?.nationalNews ?? data?.items ?? data?.governmentNews ?? []);
+          const m2 = parseFeedItems(data?.marquee2 ?? data?.mpNews ?? data?.alerts ?? data?.emergencyAlerts ?? []);
           if (!alive) return;
           if (m1.length) { setMarquee1(m1); try { localStorage.setItem("@rpf_marquee1_cache", JSON.stringify(m1)); } catch {} }
           if (m2.length) { setMarquee2(m2); try { localStorage.setItem("@rpf_marquee2_cache", JSON.stringify(m2)); } catch {} }
@@ -354,47 +354,37 @@ export default function Home() {
           )}
         </section>
 
-        {/* 3. LIVE RSS NEWS & UPDATE MARQUEES (EXACTLY 2 MARQUEES) */}
-        {broadcastMarquee.length > 0 ? (
-          <>
-            <MarqueeTrack
-              items={broadcastMarquee}
-              direction="rtl"
-              variant="saffron"
-              label="Announcement"
-              onClick={() => navigate("/news")}
-            />
-            {(marquee1.length > 0 || marquee2.length > 0) && (
-              <MarqueeTrack
-                items={marquee1.length > 0 ? marquee1 : marquee2}
-                direction="ltr"
-                variant="green"
-                label="Live News"
-                onClick={() => navigate("/news")}
-              />
-            )}
-          </>
-        ) : (
-          <>
-            {marquee1.length > 0 && (
-              <MarqueeTrack
-                items={marquee1}
-                direction="rtl"
-                variant="green"
-                label="Live News"
-                onClick={() => navigate("/news")}
-              />
-            )}
-            {marquee2.length > 0 && (
-              <MarqueeTrack
-                items={marquee2}
-                direction="ltr"
-                variant="saffron"
-                label="Alerts & Info"
-                onClick={() => navigate("/news")}
-              />
-            )}
-          </>
+        {/* 3. LIVE RSS NEWS MARQUEES: TOP = NATIONAL & GLOBAL (DARK SAFFRON), BOTTOM = MADHYA PRADESH (GREEN) */}
+        {broadcastMarquee.length > 0 && (
+          <MarqueeTrack
+            items={broadcastMarquee}
+            direction="rtl"
+            variant="saffron"
+            label="Announcement"
+            onClick={() => navigate("/news")}
+          />
+        )}
+
+        {/* TOP MARQUEE: National & International News (DARK SAFFRON) */}
+        {marquee1.length > 0 && (
+          <MarqueeTrack
+            items={marquee1}
+            direction="rtl"
+            variant="saffron"
+            label="National & Global"
+            onClick={() => navigate("/news")}
+          />
+        )}
+
+        {/* BOTTOM MARQUEE: Madhya Pradesh News (GREEN) */}
+        {marquee2.length > 0 && (
+          <MarqueeTrack
+            items={marquee2}
+            direction="ltr"
+            variant="green"
+            label="Madhya Pradesh"
+            onClick={() => navigate("/news")}
+          />
         )}
 
         {/* 4. CAROUSEL: RP FOUNDATION AT WORK (TRANSPARENT TEXT BACKGROUND) */}

@@ -337972,15 +337972,13 @@ router28.get("/api/public/pib-news", async (_req, res) => {
     return res.status(503).json({ success: false, error: "PIB news temporarily unavailable" });
   }
 });
-var fetchGovernmentNews = async () => {
+var fetchNationalAndWorldNews = async () => {
   const headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
   };
-  const pibItems = [];
-  const ddNewsItems = [];
-  const ddIndiaItems = [];
-  let mpInfoItems = [];
+  const nationalItems = [];
+  const worldItems = [];
   try {
     const { data: html3 } = await axios_default.get("https://www.pib.gov.in/Allrel.aspx?reg=48&lang=1", { headers, timeout: 8e3 });
     const $4 = load(html3);
@@ -337990,11 +337988,21 @@ var fetchGovernmentNews = async () => {
       const titleAttr = $4(el).attr("title") || "";
       let fullTitle = titleAttr.length > t7.length ? cleanText(titleAttr) : t7;
       if ((h4.includes("PRID") || h4.includes("Release") || h4.includes("PressReleaseDetail")) && fullTitle.length > 15) {
-        if (!pibItems.includes(fullTitle) && !/^(सब्सक्राइब|subscribe|विज्ञप्ति)/i.test(fullTitle)) {
-          pibItems.push(fullTitle);
+        if (!nationalItems.includes(fullTitle) && !/^(सब्सक्राइब|subscribe|विज्ञप्ति)/i.test(fullTitle)) {
+          nationalItems.push(fullTitle);
         }
       }
     });
+  } catch {
+  }
+  try {
+    const feed2 = await fetchRssFeed("https://news.google.com/rss/headlines/section/topic/NATION?hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed2.items || []) {
+      const t7 = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t7.length > 15 && !nationalItems.includes(t7)) {
+        nationalItems.push(t7);
+      }
+    }
   } catch {
   }
   try {
@@ -338002,125 +338010,107 @@ var fetchGovernmentNews = async () => {
     const $4 = load(html3);
     $4("h2 a, h3 a, h4 a, .post-title a, article a").each((_3, el) => {
       let t7 = cleanText($4(el).text());
-      if (t7.length > 20 && !ddNewsItems.includes(t7) && !/^(read more|national|latest|home)$/i.test(t7)) {
-        ddNewsItems.push(t7);
+      if (t7.length > 20 && !nationalItems.includes(t7) && !/^(read more|national|latest|home)$/i.test(t7)) {
+        nationalItems.push(t7);
       }
     });
   } catch {
   }
   try {
-    const { data: html3 } = await axios_default.get("https://ddindia.co.in/category/india/", { headers, timeout: 8e3 });
-    const $4 = load(html3);
-    $4("h2.entry-title a, h3.entry-title a, article a, .post-title a").each((_3, el) => {
-      let t7 = cleanText($4(el).text());
-      if (t7.length > 20 && !ddIndiaItems.includes(t7) && !/^(read more|latest|india|world)$/i.test(t7)) {
-        ddIndiaItems.push(t7);
+    const feed2 = await fetchRssFeed("https://news.google.com/rss/headlines/section/topic/WORLD?hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed2.items || []) {
+      const t7 = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t7.length > 15 && !worldItems.includes(t7)) {
+        worldItems.push(t7);
       }
-    });
-  } catch {
-  }
-  try {
-    const feed2 = await fetchRssFeed("https://mpinfo.org/RSSFeed/RSSFeed_News.xml");
-    mpInfoItems = (feed2.items || []).map((i6) => cleanText(i6.title || "")).filter((t7) => t7.length > 12);
-  } catch {
-  }
-  return { pib: pibItems, ddNews: ddNewsItems, ddIndia: ddIndiaItems, mpInfo: mpInfoItems };
-};
-var fetchEmergencyAlerts = async () => {
-  let sachetItems = [];
-  let imdItems = [];
-  try {
-    const feed2 = await fetchRssFeed("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml");
-    sachetItems = (feed2.items || []).map((i6) => cleanText(i6.title || "")).filter((t7) => t7.length > 12);
-  } catch {
-  }
-  try {
-    const headers = {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-    };
-    const { data: html3 } = await axios_default.get("https://mausam.imd.gov.in/imd_latest/contents/all_india_forcast_bulletin.php", { headers, timeout: 8e3 });
-    const $4 = load(html3);
-    $4("p, td, div.content, .bulletin, table").each((_3, el) => {
-      const t7 = cleanText($4(el).text());
-      if ((t7.includes("Heavy rainfall") || t7.includes("Thunderstorm") || t7.includes("warning") || t7.includes("Forecast") || t7.includes("Depression") || t7.includes("cyclone")) && t7.length > 25 && t7.length < 300) {
-        if (!imdItems.includes(t7)) imdItems.push(t7);
-      }
-    });
-  } catch {
-  }
-  if (imdItems.length === 0) {
-    try {
-      const imdFeed = await fetchRssFeed("https://news.google.com/rss/search?q=IMD+Weather+Forecast+India&hl=en-IN&gl=IN&ceid=IN:en");
-      imdItems = (imdFeed.items || []).map((i6) => cleanText(i6.title || "").replace(/\s*-\s*[^-]+$/i, "")).filter((t7) => t7.length > 15);
-    } catch {
     }
+  } catch {
   }
-  return { sachet: sachetItems, imd: imdItems };
-};
-var fetchWorldNews = async () => {
-  let ndtvItems = [];
-  let toiItems = [];
-  let aniItems = [];
   try {
     const feed2 = await fetchRssFeed("https://feeds.feedburner.com/ndtvnews-world-news");
-    ndtvItems = (feed2.items || []).map((i6) => cleanText(i6.title || "")).filter((t7) => t7.length > 12);
+    for (const item of feed2.items || []) {
+      const t7 = cleanText(item.title || "");
+      if (t7.length > 12 && !worldItems.includes(t7)) {
+        worldItems.push(t7);
+      }
+    }
   } catch {
   }
   try {
     const feed2 = await fetchRssFeed("https://timesofindia.indiatimes.com/rssfeeds/296589292.cms");
-    toiItems = (feed2.items || []).map((i6) => cleanText(i6.title || "")).filter((t7) => t7.length > 12);
+    for (const item of feed2.items || []) {
+      const t7 = cleanText(item.title || "");
+      if (t7.length > 12 && !worldItems.includes(t7)) {
+        worldItems.push(t7);
+      }
+    }
+  } catch {
+  }
+  const combined = [];
+  const maxLen = Math.max(nationalItems.length, worldItems.length);
+  for (let i6 = 0; i6 < maxLen; i6++) {
+    if (i6 < nationalItems.length) combined.push(nationalItems[i6]);
+    if (i6 < worldItems.length) combined.push(worldItems[i6]);
+  }
+  return { national: nationalItems, world: worldItems, combined };
+};
+var fetchMadhyaPradeshNews = async () => {
+  const mpItems = [];
+  try {
+    const feed2 = await fetchRssFeed("https://news.google.com/rss/search?q=%E0%A4%AE%E0%A4%A7%E0%A4%8F+%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%A6%E0%A5%87%E0%A4%B6&hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed2.items || []) {
+      const t7 = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t7.length > 15 && !mpItems.includes(t7)) {
+        mpItems.push(t7);
+      }
+    }
   } catch {
   }
   try {
-    const feed2 = await fetchRssFeed("https://news.google.com/rss/search?q=site:aninews.in+World&hl=en-IN&gl=IN&ceid=IN:en");
-    aniItems = (feed2.items || []).map((i6) => cleanText(i6.title || "").replace(/\s*-\s*ANI News$/i, "").replace(/\s*-\s*ANI$/i, "")).filter((t7) => t7.length > 12);
+    const feed2 = await fetchRssFeed("https://news.google.com/rss/search?q=Bhopal+Indore+Jabalpur+Gwalior+Ujjain&hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed2.items || []) {
+      const t7 = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t7.length > 15 && !mpItems.includes(t7)) {
+        mpItems.push(t7);
+      }
+    }
   } catch {
   }
-  return { ndtv: ndtvItems, toi: toiItems, ani: aniItems };
+  try {
+    const feed2 = await fetchRssFeed("https://mpinfo.org/RSSFeed/RSSFeed_News.xml");
+    for (const item of feed2.items || []) {
+      const t7 = cleanText(item.title || "");
+      if (t7.length > 12 && !mpItems.includes(t7)) {
+        mpItems.push(t7);
+      }
+    }
+  } catch {
+  }
+  return mpItems;
 };
 var getUnifiedLiveFeed = async () => {
   const cached = cache("unified_live_feed", 12e4);
   if (cached) return cached;
-  const [govRes, emergencyRes, worldRes] = await Promise.all([
-    fetchGovernmentNews(),
-    fetchEmergencyAlerts(),
-    fetchWorldNews()
+  const [nationalAndWorldRes, mpRes] = await Promise.all([
+    fetchNationalAndWorldNews(),
+    fetchMadhyaPradeshNews()
   ]);
-  const marquee1Items = [];
-  const max1 = Math.max(govRes.pib.length, govRes.ddNews.length, govRes.ddIndia.length, govRes.mpInfo.length);
-  for (let i6 = 0; i6 < max1; i6++) {
-    if (i6 < govRes.pib.length) marquee1Items.push(govRes.pib[i6]);
-    if (i6 < govRes.ddNews.length) marquee1Items.push(govRes.ddNews[i6]);
-    if (i6 < govRes.ddIndia.length) marquee1Items.push(govRes.ddIndia[i6]);
-    if (i6 < govRes.mpInfo.length) marquee1Items.push(govRes.mpInfo[i6]);
-  }
-  const marquee2Items = [];
-  const max2 = Math.max(emergencyRes.sachet.length, emergencyRes.imd.length);
-  for (let i6 = 0; i6 < max2; i6++) {
-    if (i6 < emergencyRes.sachet.length) marquee2Items.push(emergencyRes.sachet[i6]);
-    if (i6 < emergencyRes.imd.length) marquee2Items.push(emergencyRes.imd[i6]);
-  }
-  const marquee3Items = [];
-  const max3 = Math.max(worldRes.ndtv.length, worldRes.toi.length, worldRes.ani.length);
-  for (let i6 = 0; i6 < max3; i6++) {
-    if (i6 < worldRes.ndtv.length) marquee3Items.push(worldRes.ndtv[i6]);
-    if (i6 < worldRes.toi.length) marquee3Items.push(worldRes.toi[i6]);
-    if (i6 < worldRes.ani.length) marquee3Items.push(worldRes.ani[i6]);
-  }
   const payload = {
-    governmentNews: govRes,
-    emergencyAlerts: emergencyRes,
-    worldNews: worldRes,
-    marquee1: marquee1Items,
-    // PIB + DD News + DD India + MP Info (Right to Left)
-    marquee2: marquee2Items,
-    // SACHET NDMA + IMD Weather (Left to Right)
-    marquee3: marquee3Items,
-    // NDTV + TOI + ANI World (Up to Down)
-    // Legacy backward compatibility
-    pib: marquee1Items,
-    sachet: marquee2Items,
-    news: marquee3Items
+    nationalAndWorldNews: nationalAndWorldRes.combined,
+    nationalNews: nationalAndWorldRes.national,
+    worldNews: nationalAndWorldRes.world,
+    mpNews: mpRes,
+    marquee1: nationalAndWorldRes.combined,
+    // Top: National & International News (Dark Saffron)
+    marquee2: mpRes,
+    // Bottom: Madhya Pradesh News (Green)
+    marquee3: nationalAndWorldRes.world,
+    // backward compatibility
+    governmentNews: { pib: nationalAndWorldRes.national, mpInfo: mpRes },
+    emergencyAlerts: { sachet: mpRes },
+    pib: nationalAndWorldRes.combined,
+    sachet: mpRes,
+    news: nationalAndWorldRes.world
   };
   save("unified_live_feed", payload);
   return payload;

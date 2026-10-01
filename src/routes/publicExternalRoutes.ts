@@ -50,19 +50,17 @@ router.get("/api/public/pib-news", async (_req, res) => {
   }
 });
 
-// MARQUEE 1: PIB + DD News + DD India + MP Info
-const fetchGovernmentNews = async () => {
+// TOP MARQUEE: National & International News (PIB + DD News + Google National + NDTV/TOI World + Google World)
+const fetchNationalAndWorldNews = async () => {
   const headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
   };
 
-  const pibItems: string[] = [];
-  const ddNewsItems: string[] = [];
-  const ddIndiaItems: string[] = [];
-  let mpInfoItems: string[] = [];
+  const nationalItems: string[] = [];
+  const worldItems: string[] = [];
 
-  // 1. PIB Hindi (reg=48, lang=1)
+  // 1. PIB Press Releases (Hindi)
   try {
     const { data: html } = await axios.get("https://www.pib.gov.in/Allrel.aspx?reg=48&lang=1", { headers, timeout: 8000 });
     const $ = load(html);
@@ -72,157 +70,143 @@ const fetchGovernmentNews = async () => {
       const titleAttr = $(el).attr("title") || "";
       let fullTitle = titleAttr.length > t.length ? cleanText(titleAttr) : t;
       if ((h.includes("PRID") || h.includes("Release") || h.includes("PressReleaseDetail")) && fullTitle.length > 15) {
-        if (!pibItems.includes(fullTitle) && !/^(सब्सक्राइब|subscribe|विज्ञप्ति)/i.test(fullTitle)) {
-          pibItems.push(fullTitle);
+        if (!nationalItems.includes(fullTitle) && !/^(सब्सक्राइब|subscribe|विज्ञप्ति)/i.test(fullTitle)) {
+          nationalItems.push(fullTitle);
         }
       }
     });
   } catch {}
 
-  // 2. DD News (National)
+  // 2. Google News National Topic (Hindi)
+  try {
+    const feed = await fetchRssFeed("https://news.google.com/rss/headlines/section/topic/NATION?hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed.items || []) {
+      const t = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t.length > 15 && !nationalItems.includes(t)) {
+        nationalItems.push(t);
+      }
+    }
+  } catch {}
+
+  // 3. DD News (National)
   try {
     const { data: html } = await axios.get("https://ddnews.gov.in/en/category/national/", { headers, timeout: 8000 });
     const $ = load(html);
     $("h2 a, h3 a, h4 a, .post-title a, article a").each((_, el) => {
       let t = cleanText($(el).text());
-      if (t.length > 20 && !ddNewsItems.includes(t) && !/^(read more|national|latest|home)$/i.test(t)) {
-        ddNewsItems.push(t);
+      if (t.length > 20 && !nationalItems.includes(t) && !/^(read more|national|latest|home)$/i.test(t)) {
+        nationalItems.push(t);
       }
     });
   } catch {}
 
-  // 3. DD India
+  // 4. Google News World Topic (Hindi)
   try {
-    const { data: html } = await axios.get("https://ddindia.co.in/category/india/", { headers, timeout: 8000 });
-    const $ = load(html);
-    $("h2.entry-title a, h3.entry-title a, article a, .post-title a").each((_, el) => {
-      let t = cleanText($(el).text());
-      if (t.length > 20 && !ddIndiaItems.includes(t) && !/^(read more|latest|india|world)$/i.test(t)) {
-        ddIndiaItems.push(t);
+    const feed = await fetchRssFeed("https://news.google.com/rss/headlines/section/topic/WORLD?hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed.items || []) {
+      const t = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t.length > 15 && !worldItems.includes(t)) {
+        worldItems.push(t);
       }
-    });
+    }
   } catch {}
 
-  // 4. MP Info RSS
-  try {
-    const feed = await fetchRssFeed("https://mpinfo.org/RSSFeed/RSSFeed_News.xml");
-    mpInfoItems = (feed.items || []).map((i) => cleanText(i.title || "")).filter((t) => t.length > 12);
-  } catch {}
-
-  return { pib: pibItems, ddNews: ddNewsItems, ddIndia: ddIndiaItems, mpInfo: mpInfoItems };
-};
-
-// MARQUEE 2: SACHET NDMA + IMD Weather Bulletin
-const fetchEmergencyAlerts = async () => {
-  let sachetItems: string[] = [];
-  let imdItems: string[] = [];
-
-  // 1. SACHET NDMA RSS
-  try {
-    const feed = await fetchRssFeed("https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml");
-    sachetItems = (feed.items || []).map((i) => cleanText(i.title || "")).filter((t) => t.length > 12);
-  } catch {}
-
-  // 2. IMD Weather Forecast Bulletin / Google News IMD RSS
-  try {
-    const headers = {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-    };
-    const { data: html } = await axios.get("https://mausam.imd.gov.in/imd_latest/contents/all_india_forcast_bulletin.php", { headers, timeout: 8000 });
-    const $ = load(html);
-    $("p, td, div.content, .bulletin, table").each((_, el) => {
-      const t = cleanText($(el).text());
-      if ((t.includes("Heavy rainfall") || t.includes("Thunderstorm") || t.includes("warning") || t.includes("Forecast") || t.includes("Depression") || t.includes("cyclone")) && t.length > 25 && t.length < 300) {
-        if (!imdItems.includes(t)) imdItems.push(t);
-      }
-    });
-  } catch {}
-
-  if (imdItems.length === 0) {
-    try {
-      const imdFeed = await fetchRssFeed("https://news.google.com/rss/search?q=IMD+Weather+Forecast+India&hl=en-IN&gl=IN&ceid=IN:en");
-      imdItems = (imdFeed.items || []).map((i) => cleanText(i.title || "").replace(/\s*-\s*[^-]+$/i, "")).filter((t) => t.length > 15);
-    } catch {}
-  }
-
-  return { sachet: sachetItems, imd: imdItems };
-};
-
-// MARQUEE 3: International / World News (NDTV World + TOI World + ANI World)
-const fetchWorldNews = async () => {
-  let ndtvItems: string[] = [];
-  let toiItems: string[] = [];
-  let aniItems: string[] = [];
-
-  // 1. NDTV World RSS
+  // 5. NDTV World RSS
   try {
     const feed = await fetchRssFeed("https://feeds.feedburner.com/ndtvnews-world-news");
-    ndtvItems = (feed.items || []).map((i) => cleanText(i.title || "")).filter((t) => t.length > 12);
+    for (const item of feed.items || []) {
+      const t = cleanText(item.title || "");
+      if (t.length > 12 && !worldItems.includes(t)) {
+        worldItems.push(t);
+      }
+    }
   } catch {}
 
-  // 2. TOI World RSS
+  // 6. TOI World RSS
   try {
     const feed = await fetchRssFeed("https://timesofindia.indiatimes.com/rssfeeds/296589292.cms");
-    toiItems = (feed.items || []).map((i) => cleanText(i.title || "")).filter((t) => t.length > 12);
+    for (const item of feed.items || []) {
+      const t = cleanText(item.title || "");
+      if (t.length > 12 && !worldItems.includes(t)) {
+        worldItems.push(t);
+      }
+    }
   } catch {}
 
-  // 3. ANI World RSS / Google News query
+  // Interleave National and International News
+  const combined: string[] = [];
+  const maxLen = Math.max(nationalItems.length, worldItems.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (i < nationalItems.length) combined.push(nationalItems[i]);
+    if (i < worldItems.length) combined.push(worldItems[i]);
+  }
+
+  return { national: nationalItems, world: worldItems, combined };
+};
+
+// BOTTOM MARQUEE: Madhya Pradesh News (Google News MP + MP Major Cities + MP Info)
+const fetchMadhyaPradeshNews = async () => {
+  const mpItems: string[] = [];
+
+  // 1. Google News MP State (Hindi)
   try {
-    const feed = await fetchRssFeed("https://news.google.com/rss/search?q=site:aninews.in+World&hl=en-IN&gl=IN&ceid=IN:en");
-    aniItems = (feed.items || []).map((i) => cleanText(i.title || "").replace(/\s*-\s*ANI News$/i, "").replace(/\s*-\s*ANI$/i, "")).filter((t) => t.length > 12);
+    const feed = await fetchRssFeed("https://news.google.com/rss/search?q=%E0%A4%AE%E0%A4%A7%E0%A4%8F+%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%A6%E0%A5%87%E0%A4%B6&hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed.items || []) {
+      const t = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t.length > 15 && !mpItems.includes(t)) {
+        mpItems.push(t);
+      }
+    }
   } catch {}
 
-  return { ndtv: ndtvItems, toi: toiItems, ani: aniItems };
+  // 2. Google News MP Major Cities (Bhopal, Indore, Jabalpur, Gwalior, Ujjain)
+  try {
+    const feed = await fetchRssFeed("https://news.google.com/rss/search?q=Bhopal+Indore+Jabalpur+Gwalior+Ujjain&hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed.items || []) {
+      const t = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t.length > 15 && !mpItems.includes(t)) {
+        mpItems.push(t);
+      }
+    }
+  } catch {}
+
+  // 3. MP Info RSS
+  try {
+    const feed = await fetchRssFeed("https://mpinfo.org/RSSFeed/RSSFeed_News.xml");
+    for (const item of feed.items || []) {
+      const t = cleanText(item.title || "");
+      if (t.length > 12 && !mpItems.includes(t)) {
+        mpItems.push(t);
+      }
+    }
+  } catch {}
+
+  return mpItems;
 };
 
 const getUnifiedLiveFeed = async () => {
   const cached = cache("unified_live_feed", 120000);
   if (cached) return cached;
 
-  const [govRes, emergencyRes, worldRes] = await Promise.all([
-    fetchGovernmentNews(),
-    fetchEmergencyAlerts(),
-    fetchWorldNews()
+  const [nationalAndWorldRes, mpRes] = await Promise.all([
+    fetchNationalAndWorldNews(),
+    fetchMadhyaPradeshNews()
   ]);
 
-  // MARQUEE 1 (Top): PIB + DD News + DD India + MP Info
-  const marquee1Items: string[] = [];
-  const max1 = Math.max(govRes.pib.length, govRes.ddNews.length, govRes.ddIndia.length, govRes.mpInfo.length);
-  for (let i = 0; i < max1; i++) {
-    if (i < govRes.pib.length) marquee1Items.push(govRes.pib[i]);
-    if (i < govRes.ddNews.length) marquee1Items.push(govRes.ddNews[i]);
-    if (i < govRes.ddIndia.length) marquee1Items.push(govRes.ddIndia[i]);
-    if (i < govRes.mpInfo.length) marquee1Items.push(govRes.mpInfo[i]);
-  }
-
-  // MARQUEE 2 (Middle): SACHET NDMA + IMD Weather Bulletin
-  const marquee2Items: string[] = [];
-  const max2 = Math.max(emergencyRes.sachet.length, emergencyRes.imd.length);
-  for (let i = 0; i < max2; i++) {
-    if (i < emergencyRes.sachet.length) marquee2Items.push(emergencyRes.sachet[i]);
-    if (i < emergencyRes.imd.length) marquee2Items.push(emergencyRes.imd[i]);
-  }
-
-  // MARQUEE 3 (Bottom): NDTV World + TOI World + ANI World
-  const marquee3Items: string[] = [];
-  const max3 = Math.max(worldRes.ndtv.length, worldRes.toi.length, worldRes.ani.length);
-  for (let i = 0; i < max3; i++) {
-    if (i < worldRes.ndtv.length) marquee3Items.push(worldRes.ndtv[i]);
-    if (i < worldRes.toi.length) marquee3Items.push(worldRes.toi[i]);
-    if (i < worldRes.ani.length) marquee3Items.push(worldRes.ani[i]);
-  }
-
   const payload = {
-    governmentNews: govRes,
-    emergencyAlerts: emergencyRes,
-    worldNews: worldRes,
-    marquee1: marquee1Items, // PIB + DD News + DD India + MP Info (Right to Left)
-    marquee2: marquee2Items, // SACHET NDMA + IMD Weather (Left to Right)
-    marquee3: marquee3Items, // NDTV + TOI + ANI World (Up to Down)
-    // Legacy backward compatibility
-    pib: marquee1Items,
-    sachet: marquee2Items,
-    news: marquee3Items
+    nationalAndWorldNews: nationalAndWorldRes.combined,
+    nationalNews: nationalAndWorldRes.national,
+    worldNews: nationalAndWorldRes.world,
+    mpNews: mpRes,
+    marquee1: nationalAndWorldRes.combined, // Top: National & International News (Dark Saffron)
+    marquee2: mpRes,                        // Bottom: Madhya Pradesh News (Green)
+    marquee3: nationalAndWorldRes.world,
+    // backward compatibility
+    governmentNews: { pib: nationalAndWorldRes.national, mpInfo: mpRes },
+    emergencyAlerts: { sachet: mpRes },
+    pib: nationalAndWorldRes.combined,
+    sachet: mpRes,
+    news: nationalAndWorldRes.world
   };
 
   save("unified_live_feed", payload);
