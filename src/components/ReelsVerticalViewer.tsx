@@ -17,6 +17,8 @@ export interface ReelItem {
   id: string;
   url: string;
   videoUrl?: string;
+  videoId?: string;
+  embedUrl?: string;
   thumbnailUrl: string;
   title: string;
   caption: string;
@@ -24,6 +26,7 @@ export interface ReelItem {
   shares?: string;
   author: string;
   authorAvatar?: string;
+  platform?: "youtube" | "instagram" | "facebook" | "x";
 }
 
 interface ReelsVerticalViewerProps {
@@ -88,21 +91,23 @@ export default function ReelsVerticalViewer({
             />
           </div>
           <div>
-            <p className="text-xs font-black text-white tracking-wide">RP Foundation Live Reels</p>
-            <p className="text-[10px] text-orange-300 font-semibold">@rpfoundationofficial</p>
+            <p className="text-xs font-black text-white tracking-wide">RP Foundation Live Feed</p>
+            <p className="text-[10px] text-orange-300 font-semibold">
+              {reels[currentIndex]?.platform === "youtube" ? "@rpfoundationofficial (YouTube)" : "@rpfoundationofficial (Instagram)"}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsMuted((m) => !m)}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/20 active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/20 active:scale-95 cursor-pointer"
           >
             {isMuted ? <VolumeX className="h-4.5 w-4.5" /> : <Volume2 className="h-4.5 w-4.5" />}
           </button>
           <button
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/20 active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/20 active:scale-95 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -118,30 +123,62 @@ export default function ReelsVerticalViewer({
       >
         {reels.map((reel, idx) => {
           const isLiked = likedMap[reel.id];
+          const isActive = idx === currentIndex;
+
           return (
             <div
               key={reel.id || idx}
               className="relative w-full h-full snap-start snap-always flex items-center justify-center bg-black overflow-hidden"
             >
-              {/* Thumbnail / Video Stream */}
-              <img
-                src={reel.thumbnailUrl}
-                alt={reel.title}
-                className="absolute inset-0 h-full w-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = "/assets/rpf-samahit-icon.png";
-                }}
-              />
-
-              {/* Dark Gradient Overlay for High Contrast */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90" />
-
-              {/* Play Badge Icon */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 animate-pulse">
-                  <Play className="h-8 w-8 fill-white ml-1" />
+              {/* VIDEO PLAYBACK / MEDIA LAYER */}
+              {isActive && reel.videoId ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-black">
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${reel.videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`}
+                    title={reel.title}
+                    className="w-full h-full max-w-lg aspect-[9/16] border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </div>
-              </div>
+              ) : isActive && reel.videoUrl ? (
+                <video
+                  src={reel.videoUrl}
+                  poster={reel.thumbnailUrl}
+                  controls
+                  autoPlay
+                  loop
+                  playsInline
+                  muted={isMuted}
+                  className="absolute inset-0 h-full w-full object-contain bg-black"
+                />
+              ) : isActive && reel.embedUrl ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-black">
+                  <iframe
+                    src={reel.embedUrl}
+                    title={reel.title}
+                    className="w-full h-full max-w-lg aspect-[9/16] border-0"
+                    allowTransparency
+                  />
+                </div>
+              ) : (
+                <>
+                  <img
+                    src={reel.thumbnailUrl}
+                    alt={reel.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/assets/rpf-samahit-icon.png";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90" />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 animate-pulse">
+                      <Play className="h-8 w-8 fill-white ml-1" />
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Right Action Bar (Instagram Reels Style) */}
               <div className="absolute right-4 bottom-24 z-20 flex flex-col items-center gap-5">
@@ -175,18 +212,18 @@ export default function ReelsVerticalViewer({
                   <span className="text-[10px] font-black tracking-wider text-white">Share</span>
                 </button>
 
-                {/* Open in App Player */}
+                {/* Open in External/Official App */}
                 <button
-                  onClick={() => {
-                    onClose();
-                    navigate("/instagram");
-                  }}
-                  className="flex flex-col items-center gap-1 active:scale-95 transition"
+                  type="button"
+                  onClick={() => openExternalLink(reel.url)}
+                  className="flex flex-col items-center gap-1 active:scale-95 transition cursor-pointer"
                 >
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF9933] to-[#138808] text-white shadow-lg">
-                    <Instagram className="h-5 w-5" />
+                    {reel.platform === "youtube" ? <Play className="h-5 w-5 fill-white" /> : <Instagram className="h-5 w-5" />}
                   </div>
-                  <span className="text-[9px] font-black tracking-wider text-orange-300">Reels</span>
+                  <span className="text-[9px] font-black tracking-wider text-orange-300">
+                    {reel.platform === "youtube" ? "YouTube" : "Instagram"}
+                  </span>
                 </button>
               </div>
 

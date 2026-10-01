@@ -484,8 +484,10 @@ export default function ImpactPage() {
                     <Instagram className="h-4.5 w-4.5" />
                   </div>
                   <div>
-                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">{isHi ? "लाइव रील्स एवं पोस्ट्स" : "Live Instagram Feed"}</h3>
-                    <p className="text-[10px] text-slate-400 font-bold">@rpfoundationofficial</p>
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                      {isHi ? "लाइव रील्स एवं वीडियो फ़ीड" : "Live Reels & Video Feed"}
+                    </h3>
+                    <p className="text-[10px] text-slate-400 font-bold">@rpfoundationofficial • Official RSS Stream</p>
                   </div>
                 </div>
                 <a

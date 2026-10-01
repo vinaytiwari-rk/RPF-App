@@ -340166,7 +340166,9 @@ async function getYouTubeItems() {
         pubDate: it3.pubDate ? new Date(it3.pubDate).toUTCString() : (/* @__PURE__ */ new Date()).toUTCString(),
         author: "RP Foundation",
         thumbnailUrl: thumb,
-        category: "Video"
+        category: "Video",
+        videoId: videoId || void 0,
+        embedUrl: videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0` : void 0
       };
     });
     youtubeCache = { items, rawXml: res.data, timestamp: now };
@@ -340183,17 +340185,25 @@ async function getInstagramItems() {
     if (cmsRes.rows.length > 0) {
       const cms = typeof cmsRes.rows[0].data === "string" ? JSON.parse(cmsRes.rows[0].data) : cmsRes.rows[0].data;
       if (Array.isArray(cms?.instagramPosts) && cms.instagramPosts.length > 0) {
-        return cms.instagramPosts.map((post, idx) => ({
-          id: post.id || `ig-${idx}`,
-          platform: "instagram",
-          title: post.title || "RP Foundation Instagram Reel",
-          link: post.url || "https://www.instagram.com/rpfoundationofficial/",
-          description: post.caption || post.title || "Follow @rpfoundationofficial on Instagram for live updates and reels.",
-          pubDate: new Date(Date.now() - idx * 864e5).toUTCString(),
-          author: "@rpfoundationofficial",
-          thumbnailUrl: post.videoUrl ? "" : void 0,
-          category: post.category || "Reels"
-        }));
+        return cms.instagramPosts.map((post, idx) => {
+          const postUrl = post.url || "https://www.instagram.com/rpfoundationofficial/";
+          const igMatch = String(postUrl).match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+          const shortcode = igMatch ? igMatch[2] : "";
+          const embedUrl = shortcode ? `https://www.instagram.com/p/${shortcode}/embed/captioned/` : void 0;
+          return {
+            id: post.id || `ig-${idx}`,
+            platform: "instagram",
+            title: post.title || "RP Foundation Instagram Reel",
+            link: postUrl,
+            description: post.caption || post.title || "Follow @rpfoundationofficial on Instagram for live updates and reels.",
+            pubDate: new Date(Date.now() - idx * 864e5).toUTCString(),
+            author: "@rpfoundationofficial",
+            thumbnailUrl: post.thumbnail || post.thumbnailUrl || (shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : void 0),
+            category: post.category || "Reels",
+            videoUrl: post.videoUrl || void 0,
+            embedUrl
+          };
+        });
       }
     }
   } catch (err2) {
