@@ -5,7 +5,6 @@ import {
   getLiveBullionRates,
   getLiveVegetablePrices,
   getLiveMandiPulse,
-  SUPPORTED_CITIES,
   getSupportedMarketCities
 } from "../services/liveMarketScraperService.js";
 
