@@ -1,6 +1,6 @@
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
-import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote } from "lucide-react";
+import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, RefreshCw, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -47,12 +47,16 @@ function parseFeedItems(items: unknown): string[] {
 
 
 const dailyQuotes = [
-  { quote: "Work is worship, and service is the greatest religion.", author: "Rohit Pandit" },
+  { quote: "कर्म ही पूजा है, और समाज के अंतिम व्यक्ति की सेवा ही सबसे बड़ा धर्म है।", author: "रोहित पंडित" },
+  { quote: "Work is worship, and selfless service to society is the highest virtue.", author: "Rohit Pandit" },
+  { quote: "उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।", author: "स्वामी विवेकानंद" },
   { quote: "The best way to find yourself is to lose yourself in the service of others.", author: "Mahatma Gandhi" },
-  { quote: "Arise, awake, and stop not till the goal is reached.", author: "Swami Vivekananda" },
-  { quote: "Service to man is service to God.", author: "Swami Vivekananda" },
+  { quote: "नर सेवा ही नारायण सेवा है। पीड़ितों की सेवा से बढ़कर कोई साधना नहीं।", author: "स्वामी विवेकानंद" },
+  { quote: "सपने वो नहीं जो हम सोते हुए देखते हैं, सपने वो हैं जो हमें सोने नहीं देते।", author: "डॉ. एपीजे अब्दुल कलाम" },
   { quote: "Be the change that you wish to see in the world.", author: "Mahatma Gandhi" },
-  { quote: "We rise by lifting others.", author: "Robert Ingersoll" }
+  { quote: "हम दूसरों को उठाकर ही स्वयं ऊपर उठते हैं।", author: "रॉबर्ट इंगरसोल" },
+  { quote: "परहित सरिस धर्म नहिं भाई, पर पीड़ा सम नहिं अधमाई।", author: "गोस्वामी तुलसीदास" },
+  { quote: "Where there is unity, there is always victory and welfare.", author: "Sardar Vallabhbhai Patel" }
 ];
 
 function cleanHeadline(str: unknown): string {
@@ -73,12 +77,14 @@ function MarqueeTrack({
   items,
   direction = "rtl",
   variant = "saffron",
-  label = ""
+  label = "",
+  onClick
 }: {
   items: string[];
   direction?: "rtl" | "ltr" | "utd";
   variant?: "saffron" | "red" | "green";
   label?: string;
+  onClick?: () => void;
 }) {
   const cleanItems = useMemo(() => {
     return (items || [])
@@ -154,7 +160,10 @@ function MarqueeTrack({
   const animationName = direction === "ltr" ? "rpf-marquee-ltr" : "rpf-marquee-rtl";
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-xs py-2.5 group ${containerClasses}`}>
+    <div 
+      onClick={onClick}
+      className={`relative overflow-hidden rounded-2xl border backdrop-blur-xs py-2.5 group ${containerClasses} ${onClick ? "cursor-pointer hover:border-orange-300 transition-all" : ""}`}
+    >
       <div
         className="flex whitespace-nowrap min-w-max items-center transition-transform group-hover:[animation-play-state:paused]"
         style={{
@@ -198,11 +207,19 @@ export default function Home() {
   }, [cmsConfig?.homeMarquees]);
 
   // Thought of the Day: CMS Config takes priority over default/API
+  const [quoteIndex, setQuoteIndex] = useState(0);
+
+  const cycleNextQuote = () => {
+    setQuoteIndex((prev) => (prev + 1) % dailyQuotes.length);
+    setQuoteOfDay(dailyQuotes[(quoteIndex + 1) % dailyQuotes.length]);
+  };
+
   const currentQuote = useMemo(() => {
-    if (cmsConfig?.quoteOfTheDayEn || cmsConfig?.quoteOfTheDayHi || cmsConfig?.quoteOfTheDay) {
+    const cmsQuote = cmsConfig?.quoteOfTheDay || cmsConfig?.quoteOfTheDayHi || cmsConfig?.quoteOfTheDayEn || (cmsConfig as any)?.thoughtOfDay?.quote || (cmsConfig as any)?.thought_of_the_day;
+    if (cmsQuote) {
       return {
-        quote: cmsConfig.quoteOfTheDayEn || cmsConfig.quoteOfTheDayHi || cmsConfig.quoteOfTheDay,
-        author: cmsConfig.quoteAuthor || "Rohit Pandit"
+        quote: cmsQuote,
+        author: cmsConfig?.quoteAuthor || (cmsConfig as any)?.thoughtOfDay?.author || "Rohit Pandit"
       };
     }
     return quoteOfDay;
@@ -330,9 +347,19 @@ export default function Home() {
 
         {/* 2. THOUGHT OF THE DAY (IMMEDIATELY AFTER GREETING) */}
         <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3 shadow-2xs">
-          <div className="flex items-center gap-1.5 text-[#D97706]">
-            <Quote className="h-3.5 w-3.5" />
-            <p className="text-[10px] font-bold uppercase tracking-widest">Thought of the Day</p>
+          <div className="flex items-center justify-between text-[#D97706]">
+            <div className="flex items-center gap-1.5">
+              <Quote className="h-3.5 w-3.5" />
+              <p className="text-[10px] font-bold uppercase tracking-widest">Thought of the Day</p>
+            </div>
+            <button
+              onClick={cycleNextQuote}
+              title="Next Thought / अगला विचार"
+              className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-amber-100/70 hover:bg-amber-200/80 text-amber-800 transition active:scale-95"
+            >
+              <RefreshCw className="h-3 w-3" />
+              <span>Next</span>
+            </button>
           </div>
           <p className="mt-1 text-[13px] sm:text-[14px] font-semibold leading-relaxed text-[#14213D]">
             “{currentQuote.quote}”
@@ -348,14 +375,14 @@ export default function Home() {
         
         {/* BROADCAST ANNOUNCEMENTS CONFIGURED BY ADMIN */}
         {broadcastMarquee.length > 0 && (
-          <MarqueeTrack items={broadcastMarquee} direction="rtl" variant="saffron" label="Announcement" />
+          <MarqueeTrack items={broadcastMarquee} direction="rtl" variant="saffron" label="Announcement" onClick={() => navigate("/news")} />
         )}
 
         {/* MARQUEE 1: Live PIB / National Welfare News Feed -> Right to Left (GREEN) */}
-        {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="green" label="Live News" />}
+        {marquee1.length > 0 && <MarqueeTrack items={marquee1} direction="rtl" variant="green" label="Live News" onClick={() => navigate("/news")} />}
 
         {/* MARQUEE 2: Sarkari Opportunities & Alerts -> Left to Right (DARK SAFFRON) */}
-        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="saffron" label="Alerts & Info" />}
+        {marquee2.length > 0 && <MarqueeTrack items={marquee2} direction="ltr" variant="saffron" label="Alerts & Info" onClick={() => navigate("/news")} />}
 
         {/* 4. CAROUSEL: RP FOUNDATION AT WORK (TRANSPARENT TEXT BACKGROUND) */}
         <section className="pt-1">
@@ -544,6 +571,20 @@ export default function Home() {
                 icon: ClipboardList,
                 route: "/grievance",
                 accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20"
+              },
+              {
+                title: "Samahit Utilities",
+                subtitle: "Everyday tools, fasting tracker, breathing & digital utilities",
+                icon: Wrench,
+                route: "/utilities",
+                accent: "text-[#0A192F] bg-blue-500/10 border border-blue-500/20"
+              },
+              {
+                title: "Smart Calculators",
+                subtitle: "GST, split bill, BMI, loan EMI & all-in-one calculators",
+                icon: Calculator,
+                route: "/utilities/calculators",
+                accent: "text-[#C2410C] bg-orange-500/10 border border-orange-500/20"
               }
             ].map(({ title, subtitle, icon: Icon, route, accent }) => (
               <motion.button
@@ -559,6 +600,43 @@ export default function Home() {
                 </div>
               </motion.button>
             ))}
+          </div>
+
+          {/* Quick 1-Tap Samahit Tools & Calculators Launch Strip */}
+          <div className="mt-3 rounded-2xl border border-orange-200/70 bg-gradient-to-r from-orange-50/60 via-amber-50/40 to-emerald-50/60 p-3 shadow-2xs">
+            <div className="flex items-center justify-between mb-2 px-0.5">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-[#C2410C]" />
+                <h3 className="text-[11px] font-black text-[#0A192F] uppercase tracking-wider">
+                  Quick Utility & Calculator Launch
+                </h3>
+              </div>
+              <button
+                onClick={() => navigate("/utilities")}
+                className="text-[10px] font-bold text-[#C2410C] hover:underline flex items-center gap-0.5"
+              >
+                <span>All Tools ({">"})</span>
+              </button>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {[
+                { name: "Fasting", route: "/utilities/fasting-tracker", emoji: "🧘" },
+                { name: "GST Calc", route: "/utilities/gst-calculator", emoji: "🧮" },
+                { name: "Split Bill", route: "/utilities/split-bill", emoji: "⚖️" },
+                { name: "BMI Calc", route: "/utilities/bmi-calculator", emoji: "🏃" },
+                { name: "Pomodoro", route: "/utilities/pomodoro", emoji: "⏱️" },
+                { name: "Calculator", route: "/utilities/calculator", emoji: "🔢" },
+              ].map((tool) => (
+                <button
+                  key={tool.name}
+                  onClick={() => navigate(tool.route)}
+                  className="flex flex-col items-center justify-center py-2 px-1.5 rounded-xl bg-white border border-slate-200/90 hover:border-[#C2410C] active:scale-95 transition shadow-2xs group"
+                >
+                  <span className="text-base group-hover:scale-110 transition-transform">{tool.emoji}</span>
+                  <span className="text-[10px] font-bold text-[#0A192F] mt-1 tracking-tight truncate max-w-full">{tool.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 

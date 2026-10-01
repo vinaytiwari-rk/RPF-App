@@ -55,8 +55,16 @@ const handleUploadErrors = (err: any, req: any, res: any, next: any) => {
 };
 
 const saveFileLocally = async (file: Express.Multer.File, req?: any): Promise<string> => {
-  const ext = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '');
-  const filename = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext || '.jpg'}`;
+  let ext = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '');
+  if (!ext) {
+    if (file.mimetype.includes('video/mp4')) ext = '.mp4';
+    else if (file.mimetype.includes('video/webm')) ext = '.webm';
+    else if (file.mimetype.includes('video/quicktime') || file.mimetype.includes('video/mov')) ext = '.mov';
+    else if (file.mimetype.includes('video')) ext = '.mp4';
+    else if (file.mimetype.includes('png')) ext = '.png';
+    else ext = '.jpg';
+  }
+  const filename = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext}`;
   const uploadDir = path.join(process.cwd(), 'uploads');
   if (!fs_node.existsSync(uploadDir)) {
     fs_node.mkdirSync(uploadDir, { recursive: true });
@@ -100,12 +108,13 @@ router.post("/api/upload/broadcast", authenticateToken, requireAdmin, uploadLimi
   }
 });
 
-router.post("/api/upload/image", authenticateToken, uploadLimiter, upload.single("file"), handleUploadErrors, async (req, res) => {
+router.post("/api/upload/image", authenticateToken, uploadLimiter, upload.fields([{ name: 'file', maxCount: 1 }, { name: 'image', maxCount: 1 }]), handleUploadErrors, async (req: any, res) => {
   try {
-    if (!req.file) {
+    const file = req.file || req.files?.file?.[0] || req.files?.image?.[0];
+    if (!file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file, req);
+    const fileUrl = await saveFileLocally(file, req);
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Generic image upload failed:", error);
@@ -113,12 +122,13 @@ router.post("/api/upload/image", authenticateToken, uploadLimiter, upload.single
   }
 });
 
-router.post("/api/upload/video", authenticateToken, requireAdmin, uploadLimiter, videoUpload.single("file"), handleUploadErrors, async (req, res) => {
+router.post("/api/upload/video", authenticateToken, requireAdmin, uploadLimiter, videoUpload.fields([{ name: 'file', maxCount: 1 }, { name: 'video', maxCount: 1 }]), handleUploadErrors, async (req: any, res) => {
   try {
-    if (!req.file) {
+    const file = req.file || req.files?.file?.[0] || req.files?.video?.[0];
+    if (!file) {
       return res.status(400).json({ error: "No video file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req.file, req);
+    const fileUrl = await saveFileLocally(file, req);
     res.json({ success: true, url: fileUrl });
   } catch (error: any) {
     console.error("Video upload failed:", error);

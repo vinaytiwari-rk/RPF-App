@@ -334466,6 +334466,56 @@ router11.post("/api/admin/cards/sync", authenticateToken, requireAdmin, async (r
     });
   }
 });
+router11.post("/api/admin/cards/sync-local", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    await ensureMirror();
+    const approvedRes = await pool.query(`
+      SELECT application_id, user_id, full_name, mobile_number, aadhaar_number,
+             father_or_husband_name, district, state, village_or_city, pincode,
+             occupation, gender, date_of_birth, photo_url, jan_seva_card_no,
+             status, created_at, updated_at
+      FROM card_applications_v2
+      WHERE status = 'approved'
+    `);
+    let localImported = 0;
+    if (approvedRes.rows.length > 0) {
+      const recordsToMirror = approvedRes.rows.map((r5) => ({
+        cardNo: r5.jan_seva_card_no || r5.application_id,
+        name: r5.full_name,
+        nameOfMember: r5.full_name,
+        mobileNo: r5.mobile_number,
+        phone: r5.mobile_number,
+        fatherOrHusbandName: r5.father_or_husband_name,
+        district: r5.district,
+        state: r5.state,
+        villageOrCity: r5.village_or_city,
+        pincode: r5.pincode,
+        occupation: r5.occupation,
+        gender: r5.gender,
+        dateOfBirth: r5.date_of_birth,
+        photoUrl: r5.photo_url,
+        status: "approved",
+        source: "local-approved-db",
+        applicationId: r5.application_id,
+        updatedAt: r5.updated_at || r5.created_at
+      }));
+      const writeResult = await writeMirror(recordsToMirror, "local-approved-db");
+      localImported = writeResult.imported;
+    }
+    const mirrorCountRes = await pool.query("SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror");
+    const totalMirrored = mirrorCountRes.rows[0]?.count || 0;
+    res.json({
+      success: true,
+      imported: localImported,
+      totalMirrored,
+      approvedApplicationsCount: approvedRes.rows.length,
+      message: `Local PostgreSQL database synchronized! ${totalMirrored} total verified cards available in local mirror.`
+    });
+  } catch (error3) {
+    console.error("Local sync failed:", error3?.message);
+    res.status(500).json({ success: false, error: "Local database sync failed: " + error3.message });
+  }
+});
 router11.post("/api/admin/cards/sync-all", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const maxPages = Math.min(20, Math.max(1, Number(req2.body?.maxPages) || 5));
@@ -334500,6 +334550,44 @@ router11.post("/api/admin/cards/sync-all", authenticateToken, requireAdmin, asyn
         console.warn(`Sync stopped at page ${page}:`, pageErr.message);
         break;
       }
+    }
+    if (pagesProcessed === 0) {
+      await ensureMirror();
+      const approvedRes = await pool.query(`
+        SELECT application_id, user_id, full_name, mobile_number, aadhaar_number,
+               father_or_husband_name, district, state, village_or_city, pincode,
+               occupation, gender, date_of_birth, photo_url, jan_seva_card_no,
+               status, created_at, updated_at
+        FROM card_applications_v2
+        WHERE status = 'approved'
+      `);
+      if (approvedRes.rows.length > 0) {
+        const recordsToMirror = approvedRes.rows.map((r5) => ({
+          cardNo: r5.jan_seva_card_no || r5.application_id,
+          name: r5.full_name,
+          mobileNo: r5.mobile_number,
+          district: r5.district,
+          state: r5.state,
+          status: "approved",
+          source: "local-approved-db",
+          applicationId: r5.application_id
+        }));
+        const localWrite = await writeMirror(recordsToMirror, "local-approved-db");
+        totalImported = localWrite.imported;
+      }
+      const mirrorCountRes = await pool.query("SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror");
+      const totalMirrored = mirrorCountRes.rows[0]?.count || 0;
+      return res.json({
+        success: true,
+        pagesProcessed: 0,
+        totalImported,
+        totalSkipped: 0,
+        externalTotal: 0,
+        stopReason: "api-offline-fallback-to-local",
+        isExternalOffline: true,
+        totalMirrored,
+        message: `api.therpfoundation.org is currently offline. Operating on Local Postgres Database Mirror (${totalMirrored} cards verified).`
+      });
     }
     res.json({
       success: true,
@@ -337350,8 +337438,16 @@ var handleUploadErrors = (err2, req2, res, next2) => {
   next2();
 };
 var saveFileLocally = async (file, req2) => {
-  const ext = import_path4.default.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, "");
-  const filename = `${Date.now()}-${import_crypto19.default.randomUUID().slice(0, 8)}${ext || ".jpg"}`;
+  let ext = import_path4.default.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, "");
+  if (!ext) {
+    if (file.mimetype.includes("video/mp4")) ext = ".mp4";
+    else if (file.mimetype.includes("video/webm")) ext = ".webm";
+    else if (file.mimetype.includes("video/quicktime") || file.mimetype.includes("video/mov")) ext = ".mov";
+    else if (file.mimetype.includes("video")) ext = ".mp4";
+    else if (file.mimetype.includes("png")) ext = ".png";
+    else ext = ".jpg";
+  }
+  const filename = `${Date.now()}-${import_crypto19.default.randomUUID().slice(0, 8)}${ext}`;
   const uploadDir = import_path4.default.join(process.cwd(), "uploads");
   if (!import_fs3.default.existsSync(uploadDir)) {
     import_fs3.default.mkdirSync(uploadDir, { recursive: true });
@@ -337390,24 +337486,26 @@ router26.post("/api/upload/broadcast", authenticateToken, requireAdmin, uploadLi
     res.status(500).json({ error: error3.message });
   }
 });
-router26.post("/api/upload/image", authenticateToken, uploadLimiter, upload.single("file"), handleUploadErrors, async (req2, res) => {
+router26.post("/api/upload/image", authenticateToken, uploadLimiter, upload.fields([{ name: "file", maxCount: 1 }, { name: "image", maxCount: 1 }]), handleUploadErrors, async (req2, res) => {
   try {
-    if (!req2.file) {
+    const file = req2.file || req2.files?.file?.[0] || req2.files?.image?.[0];
+    if (!file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req2.file, req2);
+    const fileUrl = await saveFileLocally(file, req2);
     res.json({ success: true, url: fileUrl });
   } catch (error3) {
     console.error("Generic image upload failed:", error3);
     res.status(500).json({ error: error3.message });
   }
 });
-router26.post("/api/upload/video", authenticateToken, requireAdmin, uploadLimiter, videoUpload.single("file"), handleUploadErrors, async (req2, res) => {
+router26.post("/api/upload/video", authenticateToken, requireAdmin, uploadLimiter, videoUpload.fields([{ name: "file", maxCount: 1 }, { name: "video", maxCount: 1 }]), handleUploadErrors, async (req2, res) => {
   try {
-    if (!req2.file) {
+    const file = req2.file || req2.files?.file?.[0] || req2.files?.video?.[0];
+    if (!file) {
       return res.status(400).json({ error: "No video file uploaded" });
     }
-    const fileUrl = await saveFileLocally(req2.file, req2);
+    const fileUrl = await saveFileLocally(file, req2);
     res.json({ success: true, url: fileUrl });
   } catch (error3) {
     console.error("Video upload failed:", error3);

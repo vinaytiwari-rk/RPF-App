@@ -18,6 +18,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "motion/react";
 import BrandLoader from "../components/BrandLoader";
 import { toast } from "react-hot-toast";
+import { openExternalLink } from "../utils/browser";
 
 interface NewsArticle {
   id?: string;
@@ -130,6 +131,13 @@ const NewsFeed: React.FC = () => {
       navigator.clipboard.writeText(`${article.title}\n${article.link}`);
       toast.success("Link copied to clipboard!");
     }
+  };
+
+  const handleOpenArticle = (e: React.MouseEvent, article: NewsArticle) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!article.link) return;
+    void openExternalLink(article.link, navigate, article.title);
   };
 
   // Filter categories dynamically
@@ -346,7 +354,10 @@ const NewsFeed: React.FC = () => {
                   >
                     {/* Optional Thumbnail Image */}
                     {article.image_url && (
-                      <div className="w-full sm:w-44 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-slate-100 border border-slate-100">
+                      <div 
+                        onClick={(e) => handleOpenArticle(e, article)}
+                        className="w-full sm:w-44 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-slate-100 border border-slate-100 cursor-pointer"
+                      >
                         <img
                           src={article.image_url}
                           alt={article.title}
@@ -382,13 +393,19 @@ const NewsFeed: React.FC = () => {
                         </div>
 
                         {/* Title */}
-                        <h2 className="text-sm sm:text-base font-bold text-[#0A192F] group-hover:text-[#C2410C] transition leading-snug line-clamp-2">
+                        <h2 
+                          onClick={(e) => handleOpenArticle(e, article)}
+                          className="text-sm sm:text-base font-bold text-[#0A192F] group-hover:text-[#C2410C] transition leading-snug line-clamp-2 cursor-pointer"
+                        >
                           {article.title}
                         </h2>
 
                         {/* Excerpt */}
                         {article.description && (
-                          <p className="mt-1.5 text-xs text-slate-600 leading-relaxed line-clamp-2">
+                          <p 
+                            onClick={(e) => handleOpenArticle(e, article)}
+                            className="mt-1.5 text-xs text-slate-600 leading-relaxed line-clamp-2 cursor-pointer"
+                          >
                             {article.description}
                           </p>
                         )}
@@ -396,15 +413,14 @@ const NewsFeed: React.FC = () => {
 
                       {/* Footer Actions */}
                       <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-                        <a
-                          href={article.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#166534] hover:text-green-800 transition"
+                        <button
+                          type="button"
+                          onClick={(e) => handleOpenArticle(e, article)}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#166534] hover:text-green-800 transition cursor-pointer"
                         >
-                          <span>पूरा पढ़ें (Read Full)</span>
+                          <span>पूरा पढ़ें (Read Full in App)</span>
                           <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                        </button>
 
                         <button
                           onClick={(e) => handleShare(e, article)}

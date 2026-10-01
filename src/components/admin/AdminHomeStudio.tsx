@@ -131,6 +131,12 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("Video file size exceeds 50MB limit. Please select a shorter video.");
+      e.target.value = "";
+      return;
+    }
+
     const localBlob = URL.createObjectURL(file);
     setEditingReel((prev) => (prev ? { ...prev, videoUrl: localBlob } : null));
     setUploadingVideo(true);
@@ -138,10 +144,11 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const token = localStorage.getItem("@rpf_token");
+      formData.append("video", file);
+      const token = localStorage.getItem("@rpf_token") || sessionStorage.getItem("@rpf_token");
+      
       const res = await axios.post("/api/upload/video", formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }
       });
@@ -149,11 +156,15 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
         const resolved = resolveMediaUrl(res.data.url);
         setEditingReel((prev) => (prev ? { ...prev, videoUrl: resolved } : null));
         toast.success("Video uploaded successfully from device!");
+      } else {
+        throw new Error("No URL returned from server");
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to upload video");
+      console.warn("Video upload error:", err);
+      toast.error(err.response?.data?.error || err.message || "Failed to upload video");
     } finally {
       setUploadingVideo(false);
+      e.target.value = "";
     }
   };
 
@@ -168,9 +179,8 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
       const formData = new FormData();
       formData.append("file", file);
       formData.append("image", file);
-      const token = localStorage.getItem("@rpf_token");
+      const token = localStorage.getItem("@rpf_token") || sessionStorage.getItem("@rpf_token");
       const headers = {
-        "Content-Type": "multipart/form-data",
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       };
 
@@ -220,7 +230,9 @@ export default function AdminHomeStudio({ cms, onSaveCms, saving }: AdminHomeStu
         { id: "a1", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", subtitleEn: "Your digital service identity", subtitleHi: "आपकी डिजिटल पहचान", route: "/jan-seva-card", iconName: "BadgePlus", accent: "text-[#C2410C] bg-orange-50 border-orange-200", active: true },
         { id: "a2", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", subtitleEn: "Health camps & hospital locator", subtitleHi: "स्वास्थ्य शिविर और अस्पताल", route: "/health-care", iconName: "HeartPulse", accent: "text-[#DC2626] bg-red-50 border-red-200", active: true },
         { id: "a3", titleEn: "Employment", titleHi: "रोजगार पोर्टल", subtitleEn: "Jobs, skills & opportunities", subtitleHi: "नौकरियां और अवसर", route: "/employment", iconName: "BriefcaseBusiness", accent: "text-[#166534] bg-emerald-50 border-emerald-200", active: true },
-        { id: "a4", titleEn: "Grievance", titleHi: "शिकायत समाधान", subtitleEn: "Submit and track an issue", subtitleHi: "शिकायत दर्ज करें और ट्रैक करें", route: "/grievance", iconName: "ClipboardList", accent: "text-[#0A192F] bg-slate-50 border-slate-200", active: true }
+        { id: "a4", titleEn: "Grievance", titleHi: "शिकायत समाधान", subtitleEn: "Submit and track an issue", subtitleHi: "शिकायत दर्ज करें और ट्रैक करें", route: "/grievance", iconName: "ClipboardList", accent: "text-[#0A192F] bg-slate-50 border-slate-200", active: true },
+        { id: "a5", titleEn: "Samahit Utilities", titleHi: "समाहित यूटिलिटी टूल्स", subtitleEn: "Everyday tools, fasting & utilities", subtitleHi: "दैनिक जीवन उपयोगी टूल्स", route: "/utilities", iconName: "Wrench", accent: "text-[#0A192F] bg-blue-50 border-blue-200", active: true },
+        { id: "a6", titleEn: "Smart Calculators", titleHi: "स्मार्ट कैलकुलेटर", subtitleEn: "GST, split bill, BMI & calculators", subtitleHi: "जीएसटी, बीएमआई व कैलकुलेटर", route: "/utilities/calculators", iconName: "Calculator", accent: "text-[#C2410C] bg-orange-50 border-orange-200", active: true }
       ];
 
   const [actions, setActions] = useState<QuickAction[]>(initialActions);

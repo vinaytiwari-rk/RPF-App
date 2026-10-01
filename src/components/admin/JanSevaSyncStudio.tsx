@@ -106,7 +106,36 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
     void fetchHealth();
   }, [fetchHealth]);
 
-  // Run Automated Multi-Page Sync from api.therpfoundation.org
+  // Run Local Database & Mirror Sync (Offline-Ready)
+  const handleRunLocalSync = async () => {
+    if (!token) return;
+    setSyncBusy(true);
+    setSyncStatus("Syncing approved cards with local database mirror...");
+    try {
+      const res = await axios.post("/api/admin/cards/sync-local", {}, {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 15000
+      });
+
+      if (res.data?.success) {
+        toast.success(res.data.message || "Local mirror synced successfully!");
+        setSyncStatus(`Local sync complete: ${res.data.totalMirrored} approved cards mirrored locally.`);
+        await onRefresh();
+        await fetchHealth();
+      } else {
+        toast.error(res.data?.error || "Local sync failed");
+        setSyncStatus(`Sync error: ${res.data?.error}`);
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || err.message || "Local sync failed";
+      toast.error(msg);
+      setSyncStatus(`Local sync error: ${msg}`);
+    } finally {
+      setSyncBusy(false);
+    }
+  };
+
+  // Run Automated Multi-Page Sync from api.therpfoundation.org (with automatic local fallback)
   const handleRunSyncAll = async () => {
     if (!token) return;
     setSyncBusy(true);
@@ -118,8 +147,16 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
       });
 
       if (res.data?.success) {
-        toast.success(res.data.message || "Sync finished successfully!");
-        setSyncStatus(`Sync result: ${res.data.totalImported} imported across ${res.data.pagesProcessed} pages.`);
+        if (res.data?.isExternalOffline) {
+          toast("api.therpfoundation.org is offline — Resilient Local Mirror Sync completed!", {
+            icon: "⚡",
+            duration: 5000
+          });
+          setSyncStatus(`Notice: api.therpfoundation.org is offline. Synchronized ${res.data.totalImported} cards via local mirror.`);
+        } else {
+          toast.success(res.data.message || "Sync finished successfully!");
+          setSyncStatus(`Sync result: ${res.data.totalImported} imported across ${res.data.pagesProcessed} pages.`);
+        }
         await onRefresh();
         await fetchHealth();
       } else {
@@ -128,8 +165,10 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
       }
     } catch (err: any) {
       const msg = err?.response?.data?.error || err.message || "Sync failed";
-      toast.error(msg);
-      setSyncStatus(`Sync error: ${msg}`);
+      // If network failure to external API, offer automatic local sync
+      toast.error(`External sync unavailable (${msg}). Switching to local mirror sync...`);
+      setSyncStatus(`External API offline. Running local database sync...`);
+      await handleRunLocalSync();
     } finally {
       setSyncBusy(false);
     }
@@ -369,9 +408,20 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
               onClick={handleRunSyncAll}
               disabled={syncBusy}
               className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#C2410C] to-[#EA580C] px-4 py-2 text-xs font-black text-white hover:brightness-105 transition shadow-sm disabled:opacity-50"
+              title="Sync with external API (falls back automatically to local mirror if offline)"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${syncBusy ? "animate-spin" : ""}`} />
               {syncBusy ? "Syncing in progress..." : "⚡ Sync with api.therpfoundation.org"}
+            </button>
+
+            <button
+              onClick={handleRunLocalSync}
+              disabled={syncBusy}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-[#166534] hover:bg-emerald-100 transition shadow-2xs disabled:opacity-50"
+              title="Sync all approved applications directly into local mirror cache (works 100% offline)"
+            >
+              <Database className="h-3.5 w-3.5 text-[#166534]" />
+              <span>⚡ Local Mirror Sync (Offline Ready)</span>
             </button>
 
             <label className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer transition shadow-2xs">

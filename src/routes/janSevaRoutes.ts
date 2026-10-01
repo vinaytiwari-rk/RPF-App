@@ -281,6 +281,61 @@ router.post('/api/admin/cards/sync', authenticateToken, requireAdmin, async (req
   }
 });
 
+// Local Database & Mirror Sync (100% resilient when external api is down)
+router.post('/api/admin/cards/sync-local', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await ensureMirror();
+    const approvedRes = await pool.query(`
+      SELECT application_id, user_id, full_name, mobile_number, aadhaar_number,
+             father_or_husband_name, district, state, village_or_city, pincode,
+             occupation, gender, date_of_birth, photo_url, jan_seva_card_no,
+             status, created_at, updated_at
+      FROM card_applications_v2
+      WHERE status = 'approved'
+    `);
+
+    let localImported = 0;
+    if (approvedRes.rows.length > 0) {
+      const recordsToMirror = approvedRes.rows.map(r => ({
+        cardNo: r.jan_seva_card_no || r.application_id,
+        name: r.full_name,
+        nameOfMember: r.full_name,
+        mobileNo: r.mobile_number,
+        phone: r.mobile_number,
+        fatherOrHusbandName: r.father_or_husband_name,
+        district: r.district,
+        state: r.state,
+        villageOrCity: r.village_or_city,
+        pincode: r.pincode,
+        occupation: r.occupation,
+        gender: r.gender,
+        dateOfBirth: r.date_of_birth,
+        photoUrl: r.photo_url,
+        status: 'approved',
+        source: 'local-approved-db',
+        applicationId: r.application_id,
+        updatedAt: r.updated_at || r.created_at
+      }));
+      const writeResult = await writeMirror(recordsToMirror, 'local-approved-db');
+      localImported = writeResult.imported;
+    }
+
+    const mirrorCountRes = await pool.query('SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror');
+    const totalMirrored = mirrorCountRes.rows[0]?.count || 0;
+
+    res.json({
+      success: true,
+      imported: localImported,
+      totalMirrored,
+      approvedApplicationsCount: approvedRes.rows.length,
+      message: `Local PostgreSQL database synchronized! ${totalMirrored} total verified cards available in local mirror.`
+    });
+  } catch (error: any) {
+    console.error('Local sync failed:', error?.message);
+    res.status(500).json({ success: false, error: 'Local database sync failed: ' + error.message });
+  }
+});
+
 // Bulk / Automated Multi-Page Sync
 router.post('/api/admin/cards/sync-all', authenticateToken, requireAdmin, async (req, res) => {
   try {
@@ -321,6 +376,48 @@ router.post('/api/admin/cards/sync-all', authenticateToken, requireAdmin, async 
         console.warn(`Sync stopped at page ${page}:`, pageErr.message);
         break;
       }
+    }
+
+    if (pagesProcessed === 0) {
+      // Automatic fallback to local mirror sync when external api is down
+      await ensureMirror();
+      const approvedRes = await pool.query(`
+        SELECT application_id, user_id, full_name, mobile_number, aadhaar_number,
+               father_or_husband_name, district, state, village_or_city, pincode,
+               occupation, gender, date_of_birth, photo_url, jan_seva_card_no,
+               status, created_at, updated_at
+        FROM card_applications_v2
+        WHERE status = 'approved'
+      `);
+
+      if (approvedRes.rows.length > 0) {
+        const recordsToMirror = approvedRes.rows.map(r => ({
+          cardNo: r.jan_seva_card_no || r.application_id,
+          name: r.full_name,
+          mobileNo: r.mobile_number,
+          district: r.district,
+          state: r.state,
+          status: 'approved',
+          source: 'local-approved-db',
+          applicationId: r.application_id
+        }));
+        const localWrite = await writeMirror(recordsToMirror, 'local-approved-db');
+        totalImported = localWrite.imported;
+      }
+      const mirrorCountRes = await pool.query('SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror');
+      const totalMirrored = mirrorCountRes.rows[0]?.count || 0;
+
+      return res.json({
+        success: true,
+        pagesProcessed: 0,
+        totalImported,
+        totalSkipped: 0,
+        externalTotal: 0,
+        stopReason: 'api-offline-fallback-to-local',
+        isExternalOffline: true,
+        totalMirrored,
+        message: `api.therpfoundation.org is currently offline. Operating on Local Postgres Database Mirror (${totalMirrored} cards verified).`
+      });
     }
 
     res.json({
