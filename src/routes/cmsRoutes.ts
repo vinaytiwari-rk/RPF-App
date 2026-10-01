@@ -250,8 +250,8 @@ router.get("/api/cms", async (req, res) => {
         modified = true;
       }
       if (parsed.quoteOfTheDayEn === undefined) {
-        parsed.quoteOfTheDayEn = "Work is worship, and service is the greatest religion.";
-        parsed.quoteOfTheDayHi = "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।";
+        parsed.quoteOfTheDayEn = "";
+        parsed.quoteOfTheDayHi = "";
         parsed.impactBottomTextEn = "Together, we are making a real difference in people's lives.";
         parsed.impactBottomTextHi = "हम सब मिलकर लोगों के जीवन में वास्तविक बदलाव ला रहे हैं।";
         parsed.statsOffsets = { beneficiaries: 0, volunteers: 0, healthCamps: 0, campaigns: 0 };
@@ -340,8 +340,8 @@ router.get("/api/cms", async (req, res) => {
             image: "/assets/water_pump_camp.png"
           }
         ],
-        quoteOfTheDayEn: "Work is worship, and service is the greatest religion.",
-        quoteOfTheDayHi: "कर्म ही पूजा है, और सेवा ही सबसे बड़ा धर्म है।",
+        quoteOfTheDayEn: "",
+        quoteOfTheDayHi: "",
         impactBottomTextEn: "Together, we are making a real difference in people's lives.",
         impactBottomTextHi: "हम सब मिलकर लोगों के जीवन में वास्तविक बदलाव ला रहे हैं।",
         statsOffsets: {

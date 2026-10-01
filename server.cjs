@@ -336971,8 +336971,8 @@ router22.get("/api/cms", async (req2, res) => {
         modified = true;
       }
       if (parsed.quoteOfTheDayEn === void 0) {
-        parsed.quoteOfTheDayEn = "Work is worship, and service is the greatest religion.";
-        parsed.quoteOfTheDayHi = "\u0915\u0930\u094D\u092E \u0939\u0940 \u092A\u0942\u091C\u093E \u0939\u0948, \u0914\u0930 \u0938\u0947\u0935\u093E \u0939\u0940 \u0938\u092C\u0938\u0947 \u092C\u0921\u093C\u093E \u0927\u0930\u094D\u092E \u0939\u0948\u0964";
+        parsed.quoteOfTheDayEn = "";
+        parsed.quoteOfTheDayHi = "";
         parsed.impactBottomTextEn = "Together, we are making a real difference in people's lives.";
         parsed.impactBottomTextHi = "\u0939\u092E \u0938\u092C \u092E\u093F\u0932\u0915\u0930 \u0932\u094B\u0917\u094B\u0902 \u0915\u0947 \u091C\u0940\u0935\u0928 \u092E\u0947\u0902 \u0935\u093E\u0938\u094D\u0924\u0935\u093F\u0915 \u092C\u0926\u0932\u093E\u0935 \u0932\u093E \u0930\u0939\u0947 \u0939\u0948\u0902\u0964";
         parsed.statsOffsets = { beneficiaries: 0, volunteers: 0, healthCamps: 0, campaigns: 0 };
@@ -337060,8 +337060,8 @@ router22.get("/api/cms", async (req2, res) => {
             image: "/assets/water_pump_camp.png"
           }
         ],
-        quoteOfTheDayEn: "Work is worship, and service is the greatest religion.",
-        quoteOfTheDayHi: "\u0915\u0930\u094D\u092E \u0939\u0940 \u092A\u0942\u091C\u093E \u0939\u0948, \u0914\u0930 \u0938\u0947\u0935\u093E \u0939\u0940 \u0938\u092C\u0938\u0947 \u092C\u0921\u093C\u093E \u0927\u0930\u094D\u092E \u0939\u0948\u0964",
+        quoteOfTheDayEn: "",
+        quoteOfTheDayHi: "",
         impactBottomTextEn: "Together, we are making a real difference in people's lives.",
         impactBottomTextHi: "\u0939\u092E \u0938\u092C \u092E\u093F\u0932\u0915\u0930 \u0932\u094B\u0917\u094B\u0902 \u0915\u0947 \u091C\u0940\u0935\u0928 \u092E\u0947\u0902 \u0935\u093E\u0938\u094D\u0924\u0935\u093F\u0915 \u092C\u0926\u0932\u093E\u0935 \u0932\u093E \u0930\u0939\u0947 \u0939\u0948\u0902\u0964",
         statsOffsets: {
@@ -338143,55 +338143,38 @@ router28.get("/api/public/news", async (_req, res) => {
 });
 router28.get("/api/public/quote-of-day", async (_req, res) => {
   try {
-    let items = cache("quote_feed_items", 36e5);
-    if (!items || !items.length) {
+    let quotesList = cache("quote_feed_list", 18e5);
+    if (!quotesList || !quotesList.length) {
+      quotesList = [];
       const feeds = [
         "https://www.brainyquote.com/link/quotebr.rss",
-        "http://feeds.feedburner.com/azquotes/quoteoftheday"
+        "http://feeds.feedburner.com/azquotes/quoteoftheday",
+        "https://feeds.feedburner.com/quotationspage/qotd"
       ];
-      items = [];
       for (const url3 of feeds) {
         try {
           const feed2 = await fetchRssFeed(url3);
-          if (feed2.items && feed2.items.length) {
-            items.push(...feed2.items);
+          for (const item of feed2.items || []) {
+            const author = cleanText(item.title || item.creator || item.author || "Daily Thought");
+            let quote3 = cleanText(item.contentSnippet || item.content || item.description || "");
+            quote3 = quote3.replace(/^["'“”«»\s]+|["'“”«»\s]+$/g, "");
+            if (quote3 && quote3.length >= 10) {
+              quotesList.push({ quote: quote3, author, link: item.link || "" });
+            }
           }
         } catch {
         }
       }
-      if (items.length) {
-        save("quote_feed_items", items);
+      if (quotesList.length) {
+        save("quote_feed_list", quotesList);
       }
     }
-    if (items && items.length) {
-      const randomIndex = Math.floor(Math.random() * items.length);
-      const item = items[randomIndex];
-      const title = cleanText(item.title || "");
-      const body = cleanText(item.contentSnippet || item.content || item.description || "");
-      const explicitAuthor = cleanText(item.creator || item.author || "");
-      let quote3 = body;
-      let author = explicitAuthor;
-      if (!author && body && title && body !== title) author = title;
-      if (!quote3 && title) {
-        const parts = title.split(/\s[-–—|:]\s/);
-        if (parts.length > 1) {
-          author = author || parts[parts.length - 1].trim();
-          quote3 = parts.slice(0, -1).join(" - ").trim();
-        } else {
-          quote3 = title;
-        }
-      }
-      if (quote3 === title && /\s[-–—|:]\s/.test(title)) {
-        const parts = title.split(/\s[-–—|:]\s/);
-        quote3 = parts.slice(0, -1).join(" - ").trim();
-        author = author || parts[parts.length - 1].trim();
-      }
-      if (quote3) {
-        return res.json({
-          success: true,
-          data: { quote: quote3, author: author || "Daily Thought", link: item.link || "" }
-        });
-      }
+    if (quotesList && quotesList.length) {
+      const selected = quotesList[Math.floor(Math.random() * quotesList.length)];
+      return res.json({
+        success: true,
+        data: selected
+      });
     }
     return res.status(503).json({ success: false, error: "Quote temporarily unavailable" });
   } catch {

@@ -249,55 +249,38 @@ router.get("/api/public/news", async (_req, res) => {
 
 router.get("/api/public/quote-of-day", async (_req, res) => {
   try {
-    let items: any[] = cache("quote_feed_items", 3600000) as any;
-    if (!items || !items.length) {
+    let quotesList: Array<{ quote: string; author: string; link?: string }> = cache("quote_feed_list", 1800000) as any;
+    if (!quotesList || !quotesList.length) {
+      quotesList = [];
       const feeds = [
         "https://www.brainyquote.com/link/quotebr.rss",
-        "http://feeds.feedburner.com/azquotes/quoteoftheday"
+        "http://feeds.feedburner.com/azquotes/quoteoftheday",
+        "https://feeds.feedburner.com/quotationspage/qotd"
       ];
-      items = [];
       for (const url of feeds) {
         try {
           const feed = await fetchRssFeed(url);
-          if (feed.items && feed.items.length) {
-            items.push(...feed.items);
+          for (const item of feed.items || []) {
+            const author = cleanText(item.title || item.creator || item.author || "Daily Thought");
+            let quote = cleanText(item.contentSnippet || item.content || item.description || "");
+            quote = quote.replace(/^["'“”«»\s]+|["'“”«»\s]+$/g, "");
+            if (quote && quote.length >= 10) {
+              quotesList.push({ quote, author, link: item.link || "" });
+            }
           }
         } catch {}
       }
-      if (items.length) {
-        save("quote_feed_items", items);
+      if (quotesList.length) {
+        save("quote_feed_list", quotesList);
       }
     }
 
-    if (items && items.length) {
-      const randomIndex = Math.floor(Math.random() * items.length);
-      const item = items[randomIndex];
-      const title = cleanText(item.title || "");
-      const body = cleanText(item.contentSnippet || item.content || item.description || "");
-      const explicitAuthor = cleanText(item.creator || item.author || "");
-      let quote = body;
-      let author = explicitAuthor;
-      if (!author && body && title && body !== title) author = title;
-      if (!quote && title) {
-        const parts = title.split(/\s[-–—|:]\s/);
-        if (parts.length > 1) {
-          author = author || parts[parts.length - 1].trim();
-          quote = parts.slice(0, -1).join(" - ").trim();
-        } else {
-          quote = title;
-        }
-      }
-      if (quote === title && /\s[-–—|:]\s/.test(title)) {
-        const parts = title.split(/\s[-–—|:]\s/);
-        quote = parts.slice(0, -1).join(" - ").trim();
-        author = author || parts[parts.length - 1].trim();
-      }
-      if (quote) {
-        return res.json({
-          success: true,
-          data: { quote, author: author || "Daily Thought", link: item.link || "" }
-        });
-      }
+    if (quotesList && quotesList.length) {
+      const selected = quotesList[Math.floor(Math.random() * quotesList.length)];
+      return res.json({
+        success: true,
+        data: selected
+      });
     }
     return res.status(503).json({ success: false, error: "Quote temporarily unavailable" });
   } catch {

@@ -1,6 +1,6 @@
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
-import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, Sparkles } from "lucide-react";
+import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -44,11 +44,7 @@ function parseFeedItems(items: unknown): string[] {
   }).filter((item) => item.length >= 15);
 }
 
-
-
 const dailyQuotes = [
-  { quote: "कर्म ही पूजा है, और समाज के अंतिम व्यक्ति की सेवा ही सबसे बड़ा धर्म है।", author: "रोहित पंडित" },
-  { quote: "Work is worship, and selfless service to society is the highest virtue.", author: "Rohit Pandit" },
   { quote: "उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।", author: "स्वामी विवेकानंद" },
   { quote: "The best way to find yourself is to lose yourself in the service of others.", author: "Mahatma Gandhi" },
   { quote: "नर सेवा ही नारायण सेवा है। पीड़ितों की सेवा से बढ़कर कोई साधना नहीं।", author: "स्वामी विवेकानंद" },
@@ -56,7 +52,9 @@ const dailyQuotes = [
   { quote: "Be the change that you wish to see in the world.", author: "Mahatma Gandhi" },
   { quote: "हम दूसरों को उठाकर ही स्वयं ऊपर उठते हैं।", author: "रॉबर्ट इंगरसोल" },
   { quote: "परहित सरिस धर्म नहिं भाई, पर पीड़ा सम नहिं अधमाई।", author: "गोस्वामी तुलसीदास" },
-  { quote: "Where there is unity, there is always victory and welfare.", author: "Sardar Vallabhbhai Patel" }
+  { quote: "Where there is unity, there is always victory and welfare.", author: "Sardar Vallabhbhai Patel" },
+  { quote: "God gives the nuts, but he does not crack them.", author: "Franz Kafka" },
+  { quote: "Well done is better than well said.", author: "Benjamin Franklin" }
 ];
 
 function cleanHeadline(str: unknown): string {
@@ -193,8 +191,13 @@ export default function Home() {
   const [slide, setSlide] = useState(0);
   const [marquee1, setMarquee1] = useState<string[]>([]);
   const [marquee2, setMarquee2] = useState<string[]>([]);
-  const [quoteOfDay, setQuoteOfDay] = useState(() => {
-    return dailyQuotes[Math.floor(Math.random() * dailyQuotes.length)];
+  const [quoteOfDay, setQuoteOfDay] = useState<{ quote: string; author: string }>(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem("@rpf_quote_cache") || "null");
+      if (cached?.quote) return cached;
+    } catch {}
+    const randomIndex = Math.floor(Math.random() * dailyQuotes.length);
+    return dailyQuotes[randomIndex];
   });
 
   // Broadcast Marquee from Admin CMS
@@ -207,17 +210,8 @@ export default function Home() {
     return [];
   }, [cmsConfig?.homeMarquees]);
 
-  // Thought of the Day: CMS Config takes priority over default/API
-  const currentQuote = useMemo(() => {
-    const cmsQuote = cmsConfig?.quoteOfTheDay || cmsConfig?.quoteOfTheDayHi || cmsConfig?.quoteOfTheDayEn || (cmsConfig as any)?.thoughtOfDay?.quote || (cmsConfig as any)?.thought_of_the_day;
-    if (cmsQuote) {
-      return {
-        quote: cmsQuote,
-        author: cmsConfig?.quoteAuthor || (cmsConfig as any)?.thoughtOfDay?.author || "Rohit Pandit"
-      };
-    }
-    return quoteOfDay;
-  }, [cmsConfig, quoteOfDay]);
+  // Thought of the Day: Live from RSS Feed (no hardcoded override)
+  const currentQuote = quoteOfDay;
 
   const name = user?.name?.trim().split(/\s+/)[0] || "Guest";
   const hour = new Date().getHours();
@@ -241,21 +235,28 @@ export default function Home() {
 
   // Load Thought of the Day live from RSS Feed
   useEffect(() => {
+    let alive = true;
     const loadQuote = async () => {
       try {
         const res = await timedFetch("/api/public/quote-of-day");
         if (res.ok) {
           const json = await res.json();
-          if (json?.data?.quote) {
+          if (json?.data?.quote && alive) {
             setQuoteOfDay({ quote: json.data.quote, author: json.data.author || "Daily Thought" });
+            try {
+              localStorage.setItem("@rpf_quote_cache", JSON.stringify(json.data));
+            } catch {}
             return;
           }
         }
       } catch {}
       const randomIndex = Math.floor(Math.random() * dailyQuotes.length);
-      setQuoteOfDay(dailyQuotes[randomIndex]);
+      if (alive) {
+        setQuoteOfDay(dailyQuotes[randomIndex]);
+      }
     };
     void loadQuote();
+    return () => { alive = false; };
   }, []);
 
   // Load Marquees Live from RSS Pipeline
@@ -612,42 +613,6 @@ export default function Home() {
                 </div>
               </motion.button>
             ))}
-          </div>
-
-          {/* Quick 1-Tap Samahit Tools & Calculators Launch Strip */}
-          <div className="mt-3 rounded-2xl border border-orange-200/70 bg-gradient-to-r from-orange-50/60 via-amber-50/40 to-emerald-50/60 p-3 shadow-2xs">
-            <div className="flex items-center justify-between mb-2 px-0.5">
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-[#C2410C]" />
-                <h3 className="text-[11px] font-black text-[#0A192F] uppercase tracking-wider">
-                  Quick Utility & Calculator Launch
-                </h3>
-              </div>
-              <button
-                onClick={() => navigate("/utilities")}
-                className="text-[10px] font-bold text-[#C2410C] hover:underline flex items-center gap-0.5"
-              >
-                <span>All Tools ({">"})</span>
-              </button>
-            </div>
-            <div className="grid grid-cols-5 gap-2">
-              {[
-                { name: "Fasting", route: "/utilities/fasting-tracker", emoji: "🧘" },
-                { name: "GST Calc", route: "/utilities/gst-calculator", emoji: "🧮" },
-                { name: "Split Bill", route: "/utilities/split-bill", emoji: "⚖️" },
-                { name: "BMI Calc", route: "/utilities/bmi-calculator", emoji: "🏃" },
-                { name: "Pomodoro", route: "/utilities/pomodoro", emoji: "⏱️" },
-              ].map((tool) => (
-                <button
-                  key={tool.name}
-                  onClick={() => navigate(tool.route)}
-                  className="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white border border-slate-200/90 hover:border-[#C2410C] active:scale-95 transition shadow-2xs group"
-                >
-                  <span className="text-base group-hover:scale-110 transition-transform">{tool.emoji}</span>
-                  <span className="text-[10px] font-bold text-[#0A192F] mt-1 tracking-tight truncate max-w-full text-center">{tool.name}</span>
-                </button>
-              ))}
-            </div>
           </div>
         </section>
 
