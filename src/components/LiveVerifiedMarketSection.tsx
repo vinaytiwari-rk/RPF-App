@@ -16,7 +16,8 @@ import {
   MapPin,
   ChevronDown,
   Navigation,
-  Loader2
+  Loader2,
+  Fuel
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
@@ -93,10 +94,11 @@ interface MarketSummary {
     sourceUrl: string;
     updates: { title: string; desc: string }[];
   };
+  fuel: { source: string; sourceUrl: string; city: string; petrol: string; diesel: string; lpgDomestic: string; lpgCommercial: string; cng: string; updatedAt: string };
   updatedAt: string;
 }
 
-type ActiveSheet = null | "panchang" | "bullion" | "vegetables" | "mandi";
+type ActiveSheet = null | "panchang" | "bullion" | "vegetables" | "mandi" | "fuel";
 
 export default function LiveVerifiedMarketSection() {
   const [selectedCity, setSelectedCity] = useState<CityItem>(() => {
