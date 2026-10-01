@@ -519,12 +519,14 @@ export default function LiveVerifiedMarketSection() {
                   {activeSheet === "bullion" && <Coins className="h-5 w-5 text-amber-600" />}
                   {activeSheet === "vegetables" && <Carrot className="h-5 w-5 text-emerald-600" />}
                   {activeSheet === "mandi" && <Wheat className="h-5 w-5 text-indigo-600" />}
+                  {activeSheet === "fuel" && <Fuel className="h-5 w-5 text-orange-600" />}
                   <div>
                     <h3 className="text-[16px] font-bold text-[#14213D] leading-tight">
                       {activeSheet === "panchang" && "Drik Panchang Live Details"}
                       {activeSheet === "bullion" && "Live Gold & Silver Bullion Rates"}
                       {activeSheet === "vegetables" && `${selectedCity.name} Vegetable Mandi Prices`}
                       {activeSheet === "mandi" && "Mandi Pulse Agricultural Updates"}
+                      {activeSheet === "fuel" && `${selectedCity.name} Fuel & Gas Prices`}
                     </h3>
                     <p className="text-[11px] text-slate-500 font-medium">
                       Verified live from{" "}
@@ -532,6 +534,7 @@ export default function LiveVerifiedMarketSection() {
                       {activeSheet === "bullion" && "AllIndiaBullion.com"}
                       {activeSheet === "vegetables" && `RozKaBhav.com (${selectedCity.name})`}
                       {activeSheet === "mandi" && "MandiPulse.com"}
+                      {activeSheet === "fuel" && "GoodReturns.in"}
                     </p>
                   </div>
                 </div>
@@ -668,6 +671,34 @@ export default function LiveVerifiedMarketSection() {
                       className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <span>View Full {selectedCity.name} Report on RozKaBhav.com</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {activeSheet === "fuel" && data?.fuel && (
+                  <div className="space-y-3.5">
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {[
+                        ["Petrol", data.fuel.petrol, "/ litre"],
+                        ["Diesel", data.fuel.diesel, "/ litre"],
+                        ["CNG", data.fuel.cng, "/ kg"],
+                        ["Domestic LPG", data.fuel.lpgDomestic, "14.2 kg"],
+                        ["Commercial LPG", data.fuel.lpgCommercial, "19 kg"]
+                      ].map(([label, value, unit], idx) => (
+                        <div key={idx} className="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200 text-center">
+                          <div className="text-[11px] font-bold text-orange-800 uppercase">{label}</div>
+                          <div className="text-[18px] font-black text-[#14213D] mt-1">{value || "—"}</div>
+                          <div className="text-[10px] text-slate-500 font-semibold">{unit}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10.5px] text-slate-500 font-medium">
+                      Reference prices; actual pump/distributor prices can vary by locality. Updated: {data.fuel.updatedAt ? new Date(data.fuel.updatedAt).toLocaleString("en-IN") : "—"}
+                    </p>
+                    <button type="button" onClick={() => openExternalLink(data.fuel.sourceUrl)}
+                      className="w-full py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                      <span>Check latest city fuel prices</span>
                       <ExternalLink className="h-3.5 w-3.5" />
                     </button>
                   </div>
