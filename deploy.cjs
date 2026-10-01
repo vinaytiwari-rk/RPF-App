@@ -1,5 +1,7 @@
 const ftp = require('basic-ftp');
 const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
 const required = ['FTP_HOST', 'FTP_USER', 'FTP_PASSWORD'];
 const missing = required.filter((name) => !process.env[name]);
@@ -12,6 +14,8 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const remoteDir = String(process.env.FTP_REMOTE_DIR || '').trim().replace(/^\/+|\/+$/g, '');
 const ftpPort = Number.parseInt(process.env.FTP_PORT || '21', 10);
 const ftpSecure = process.env.FTP_SECURE !== 'false';
+const incremental = process.env.FTP_INCREMENTAL !== 'false';
+const manifestName = '.rpf-deploy-manifest.json';
 
 if (!Number.isInteger(ftpPort) || ftpPort < 1 || ftpPort > 65535) {
   console.error(`Invalid FTP_PORT: ${process.env.FTP_PORT}`);
@@ -19,28 +23,180 @@ if (!Number.isInteger(ftpPort) || ftpPort < 1 || ftpPort > 65535) {
 }
 
 function connectionOptions() {
-  return { host: process.env.FTP_HOST, port: ftpPort, user: process.env.FTP_USER, password: process.env.FTP_PASSWORD, secure: ftpSecure, secureOptions: { rejectUnauthorized: false } };
+  return {
+    host: process.env.FTP_HOST,
+    port: ftpPort,
+    user: process.env.FTP_USER,
+    password: process.env.FTP_PASSWORD,
+    secure: ftpSecure,
+    secureOptions: { rejectUnauthorized: false },
+  };
 }
 
-async function withFreshConnection(label, operation, attempts = 3) {
-  let lastError;
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    const client = new ftp.Client();
-    client.ftp.verbose = true;
-    client.ftp.timeout = 180000;
-    try {
-      console.log(`${label}: attempt ${attempt}/${attempts}`);
-      await client.access(connectionOptions());
-      if (remoteDir) await client.cd(remoteDir);
-      await operation(client);
-      return;
-    } catch (error) {
-      lastError = error;
-      console.error(`${label} failed on attempt ${attempt}:`, error?.message || error);
-      if (attempt < attempts) await sleep(attempt * 3000);
-    } finally { client.close(); }
+function walkFiles(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const result = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) result.push(...walkFiles(full));
+    else if (entry.isFile()) result.push(full);
   }
-  throw lastError;
+  return result;
+}
+
+function toPosix(value) {
+  return value.split(path.sep).join('/');
+}
+
+function addFile(files, localPath, remotePath) {
+  if (fs.existsSync(localPath) && fs.statSync(localPath).isFile()) {
+    files.push({ local: localPath, remote: toPosix(remotePath) });
+  }
+}
+
+function collectDeploymentFiles() {
+  const files = [];
+
+  addFile(files, 'server.cjs', 'server.cjs');
+  addFile(files, 'app.js', 'app.js');
+  addFile(files, 'index.js', 'index.js');
+
+  for (const local of walkFiles('dist')) {
+    const rel = toPosix(path.relative('dist', local));
+    addFile(files, local, `dist/${rel}`);
+  }
+
+  // Legacy document-root mirrors retained for the existing cPanel layout.
+  addFile(files, 'dist/index.html', 'index.html');
+  for (const local of walkFiles('dist/assets')) {
+    const rel = toPosix(path.relative('dist/assets', local));
+    addFile(files, local, `assets/${rel}`);
+  }
+  addFile(files, 'dist/version.json', 'version.json');
+
+  for (const local of walkFiles('migrations')) {
+    const rel = toPosix(path.relative('migrations', local));
+    addFile(files, local, `migrations/${rel}`);
+  }
+
+  addFile(files, '.htaccess', '.htaccess');
+  addFile(files, 'rss-proxy.php', 'rss-proxy.php');
+
+  const seen = new Set();
+  return files.filter((file) => {
+    if (seen.has(file.remote)) return false;
+    seen.add(file.remote);
+    return true;
+  });
+}
+
+function sha256(filePath) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fs.createReadStream(filePath);
+    stream.on('error', reject);
+    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('end', () => resolve(hash.digest('hex')));
+  });
+}
+
+async function buildManifest(files) {
+  const entries = {};
+  for (const file of files) {
+    entries[file.remote] = await sha256(file.local);
+  }
+  return {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    files: entries,
+  };
+}
+
+async function readRemoteManifest(client) {
+  const temp = path.join(process.cwd(), '.rpf-remote-manifest.json');
+  try {
+    await client.downloadTo(temp, manifestName);
+    const parsed = JSON.parse(fs.readFileSync(temp, 'utf8'));
+    return parsed && parsed.files && typeof parsed.files === 'object' ? parsed.files : {};
+  } catch (error) {
+    console.log('No previous deployment manifest found; this deployment will establish one.');
+    return {};
+  } finally {
+    try { fs.unlinkSync(temp); } catch {}
+  }
+}
+
+async function ensureRemoteDirectories(client, remotePaths) {
+  const dirs = new Set();
+  for (const remotePath of remotePaths) {
+    const dir = path.posix.dirname(remotePath);
+    if (dir !== '.') dirs.add(dir);
+  }
+
+  for (const dir of [...dirs].sort()) {
+    await client.cd(remoteDir || '/');
+    await client.ensureDir(dir);
+  }
+  await client.cd(remoteDir || '/');
+}
+
+async function uploadChangedFiles(client, files, previousManifest, currentManifest) {
+  const changed = files.filter((file) => previousManifest[file.remote] !== currentManifest.files[file.remote]);
+
+  if (!changed.length) {
+    console.log('Incremental deployment: no application files changed.');
+    return changed;
+  }
+
+  const groups = new Map();
+  for (const file of changed) {
+    const dir = path.posix.dirname(file.remote);
+    if (!groups.has(dir)) groups.set(dir, []);
+    groups.get(dir).push(file);
+  }
+
+  await ensureRemoteDirectories(client, changed.map((file) => file.remote));
+
+  for (const [dir, group] of groups) {
+    await client.cd(remoteDir || '/');
+    if (dir !== '.') await client.cd(dir);
+
+    for (const file of group) {
+      const name = path.posix.basename(file.remote);
+      console.log(`UPLOAD ${file.remote}`);
+      await client.uploadFrom(file.local, name);
+    }
+  }
+
+  await client.cd(remoteDir || '/');
+  console.log(`Incremental deployment uploaded ${changed.length} file(s).`);
+  return changed;
+}
+
+async function removeDeletedFiles(client, previousManifest, currentManifest) {
+  const deleted = Object.keys(previousManifest).filter((remote) => !currentManifest.files[remote]);
+  if (!deleted.length) return;
+
+  await client.cd(remoteDir || '/');
+  for (const remote of deleted) {
+    try {
+      console.log(`REMOVE ${remote}`);
+      await client.remove(remote);
+    } catch (error) {
+      console.warn(`Could not remove obsolete managed file ${remote}: ${error?.message || error}`);
+    }
+  }
+}
+
+async function writeRemoteManifest(client, manifest) {
+  const localManifest = path.join(process.cwd(), manifestName);
+  fs.writeFileSync(localManifest, JSON.stringify(manifest, null, 2));
+  try {
+    await client.cd(remoteDir || '/');
+    await client.uploadFrom(localManifest, manifestName);
+  } finally {
+    try { fs.unlinkSync(localManifest); } catch {}
+  }
 }
 
 async function deployOnce() {
@@ -53,7 +209,7 @@ async function deployOnce() {
     await client.access(connectionOptions());
     if (remoteDir) await client.cd(remoteDir);
 
-    if (process.env.FTP_CLEAN_DIST === 'true') {
+    if (!incremental && process.env.FTP_CLEAN_DIST === 'true') {
       const list = await client.list();
       if (list.some((file) => file.name === 'dist' && file.isDirectory)) {
         console.log('Removing old remote dist...');
@@ -61,52 +217,34 @@ async function deployOnce() {
       }
     }
 
-    await client.uploadFrom('server.cjs', 'server.cjs');
-    if (fs.existsSync('app.js')) await client.uploadFrom('app.js', 'app.js');
-    if (fs.existsSync('index.js')) await client.uploadFrom('index.js', 'index.js');
-
-    if (fs.existsSync('dist/index.html')) {
-      await client.uploadFrom('dist/index.html', 'index.html');
-    } else {
+    const files = collectDeploymentFiles();
+    if (!files.some((file) => file.remote === 'dist/index.html')) {
       throw new Error('Missing dist/index.html after build');
     }
 
-    await client.uploadFromDir('dist', 'dist');
+    const currentManifest = await buildManifest(files);
+    const previousManifest = incremental ? await readRemoteManifest(client) : {};
+    const changed = await uploadChangedFiles(client, files, previousManifest, currentManifest);
 
-    if (fs.existsSync('dist/assets')) {
-      await client.uploadFromDir('dist/assets', 'assets');
-      console.log('dist/assets mirrored to document-root assets/');
+    if (incremental) {
+      await removeDeletedFiles(client, previousManifest, currentManifest);
     }
 
-    if (fs.existsSync('dist/version.json')) {
-      await client.uploadFrom('dist/version.json', 'version.json');
+    if (changed.length || !incremental) {
+      try {
+        fs.writeFileSync('restart.txt', new Date().toISOString());
+        await client.ensureDir('tmp');
+        await client.uploadFrom('restart.txt', 'restart.txt');
+        await client.cd(remoteDir || '/');
+        console.log('Passenger restart marker created in tmp/restart.txt');
+      } catch (restartErr) {
+        console.warn('Passenger restart marker skipped (non-fatal):', restartErr?.message || restartErr);
+      }
     }
 
-    if (fs.existsSync('migrations')) {
-      await client.uploadFromDir('migrations', 'migrations');
-      console.log('migrations directory uploaded');
-    }
+    await writeRemoteManifest(client, currentManifest);
 
-    if (fs.existsSync('.htaccess')) {
-      await client.uploadFrom('.htaccess', '.htaccess');
-      console.log('.htaccess uploaded');
-    }
-
-    if (fs.existsSync('rss-proxy.php')) {
-      await client.uploadFrom('rss-proxy.php', 'rss-proxy.php');
-      console.log('rss-proxy.php uploaded');
-    }
-
-    try {
-      fs.writeFileSync('restart.txt', new Date().toISOString());
-      await client.ensureDir('tmp');
-      await client.uploadFrom('restart.txt', 'restart.txt');
-      console.log('Passenger restart marker created in tmp/restart.txt');
-    } catch (restartErr) {
-      console.warn('Passenger restart marker skipped (non-fatal):', restartErr?.message || restartErr);
-    }
-
-    console.log('FTP deployment completed.');
+    console.log(`FTP deployment completed. Managed files: ${files.length}; changed: ${changed.length}; incremental: ${incremental}`);
   } finally {
     client.close();
   }
@@ -132,4 +270,5 @@ async function main() {
   console.error('FTP deployment failed after retries:', lastError);
   process.exitCode = 1;
 }
+
 main();
