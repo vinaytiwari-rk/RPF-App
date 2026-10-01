@@ -158,7 +158,7 @@ async function uploadChangedFiles(client, files, previousManifest, currentManife
   await ensureRemoteDirectories(client, changed.map((file) => file.remote), rootDir);
 
   for (const [dir, group] of groups) {
-    await client.cd(remoteDir || '/');
+    await client.cd(rootDir);
     if (dir !== '.') await client.cd(dir);
 
     for (const file of group) {
@@ -168,7 +168,7 @@ async function uploadChangedFiles(client, files, previousManifest, currentManife
     }
   }
 
-  await client.cd(remoteDir || '/');
+  await client.cd(rootDir);
   console.log(`Incremental deployment uploaded ${changed.length} file(s).`);
   return changed;
 }
@@ -177,7 +177,7 @@ async function removeDeletedFiles(client, previousManifest, currentManifest, roo
   const deleted = Object.keys(previousManifest).filter((remote) => !currentManifest.files[remote]);
   if (!deleted.length) return;
 
-  await client.cd(remoteDir || '/');
+  await client.cd(rootDir);
   for (const remote of deleted) {
     try {
       console.log(`REMOVE ${remote}`);
@@ -192,7 +192,7 @@ async function writeRemoteManifest(client, manifest, rootDir) {
   const localManifest = path.join(process.cwd(), manifestName);
   fs.writeFileSync(localManifest, JSON.stringify(manifest, null, 2));
   try {
-    await client.cd(remoteDir || '/');
+    await client.cd(rootDir);
     await client.uploadFrom(localManifest, manifestName);
   } finally {
     try { fs.unlinkSync(localManifest); } catch {}
@@ -236,7 +236,7 @@ async function deployOnce() {
         fs.writeFileSync('restart.txt', new Date().toISOString());
         await client.ensureDir('tmp');
         await client.uploadFrom('restart.txt', 'restart.txt');
-        await client.cd(remoteDir || '/');
+        await client.cd(rootDir);
         console.log('Passenger restart marker created in tmp/restart.txt');
       } catch (restartErr) {
         console.warn('Passenger restart marker skipped (non-fatal):', restartErr?.message || restartErr);
