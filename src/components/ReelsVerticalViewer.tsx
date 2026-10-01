@@ -41,6 +41,14 @@ function extractYouTubeId(url: string = ""): string | undefined {
   return match ? match[1] : undefined;
 }
 
+function extractInstagramShortcode(url: string = ""): string | undefined {
+  if (!url) return undefined;
+  const permalinkMatch = url.match(/data-instgrm-permalink="([^"]+)"/i);
+  const target = permalinkMatch ? permalinkMatch[1] : url;
+  const match = target.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+  return match ? match[1] : undefined;
+}
+
 export default function ReelsVerticalViewer({
   reels,
   initialIndex = 0,
@@ -131,6 +139,8 @@ export default function ReelsVerticalViewer({
           const isLiked = likedMap[reel.id];
           const isActive = idx === currentIndex;
           const ytId = reel.videoId || extractYouTubeId(reel.videoUrl) || extractYouTubeId(reel.url);
+          const igShortcode = extractInstagramShortcode(reel.url) || extractInstagramShortcode(reel.videoUrl);
+          const activeEmbedUrl = reel.embedUrl || (igShortcode ? `https://www.instagram.com/p/${igShortcode}/embed/captioned/` : undefined);
 
           return (
             <div
@@ -148,7 +158,7 @@ export default function ReelsVerticalViewer({
                     allowFullScreen
                   />
                 </div>
-              ) : isActive && reel.videoUrl ? (
+              ) : isActive && reel.videoUrl && !reel.videoUrl.includes("instagram.com") ? (
                 <video
                   src={reel.videoUrl}
                   poster={reel.thumbnailUrl}
@@ -159,13 +169,15 @@ export default function ReelsVerticalViewer({
                   muted={isMuted}
                   className="absolute inset-0 h-full w-full object-contain bg-black"
                 />
-              ) : isActive && reel.embedUrl ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-black">
+              ) : isActive && activeEmbedUrl ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-2 pt-14 pb-20">
                   <iframe
-                    src={reel.embedUrl}
+                    src={activeEmbedUrl}
                     title={reel.title}
-                    className="w-full h-full max-w-lg aspect-[9/16] border-0"
-                    allowTransparency
+                    className="w-full h-full max-w-sm aspect-[9/16] border-0 rounded-2xl bg-white shadow-2xl overflow-hidden"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    scrolling="no"
                   />
                 </div>
               ) : (

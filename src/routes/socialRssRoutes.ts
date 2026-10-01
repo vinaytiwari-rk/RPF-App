@@ -119,6 +119,18 @@ async function getInstagramItems(): Promise<SocialRssItem[]> {
   // Authentic fallback items for RP Foundation Instagram with real local assets
   return [
     {
+      id: "ig-cm-meet",
+      platform: "instagram",
+      title: "मुख्यमंत्री निवास कार्यालय में माननीय मुख्यमंत्री डॉ. मोहन यादव जी से भेंट",
+      link: "https://www.instagram.com/p/Dd6j8dOMRHi/",
+      description: "आर पी फाउंडेशन के संस्थापक तथा पीपुल्स ग्रुप के उपाध्यक्ष एवं प्रबंध निदेशक श्री रोहित पंडित जी ने मध्यप्रदेश के माननीय मुख्यमंत्री डॉ. मोहन यादव जी से भेंट की।",
+      pubDate: new Date(Date.now()).toUTCString(),
+      author: "@rpfoundationofficial",
+      thumbnailUrl: "https://images.weserv.nl/?url=instagram.com/p/Dd6j8dOMRHi/media/?size=l",
+      category: "Leadership",
+      embedUrl: "https://www.instagram.com/p/Dd6j8dOMRHi/embed/captioned/"
+    },
+    {
       id: "ig-1",
       platform: "instagram",
       title: "निःशुल्क स्वास्थ्य शिविर एवं दवा वितरण अभियान",

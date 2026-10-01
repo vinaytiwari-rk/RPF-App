@@ -21,23 +21,51 @@ export type InstagramPost = {
   order?: number;
 };
 
+export function cleanInstagramInput(raw: string): string {
+  if (!raw) return "";
+  const trimmed = raw.trim();
+  // If user pasted full blockquote embed code
+  const permalinkMatch = trimmed.match(/data-instgrm-permalink="([^"]+)"/i);
+  if (permalinkMatch) {
+    const rawUrl = permalinkMatch[1].replace(/&amp;/g, "&");
+    const cleanMatch = rawUrl.match(/(https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv)\/[A-Za-z0-9_-]+)/i);
+    if (cleanMatch) return cleanMatch[1] + "/";
+    return rawUrl;
+  }
+  // If user pasted normal URL with extra query params
+  const urlMatch = trimmed.match(/(https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv)\/[A-Za-z0-9_-]+)/i);
+  if (urlMatch) {
+    return urlMatch[1] + "/";
+  }
+  return trimmed;
+}
+
 export function extractInstagramEmbedUrl(url: string): { embedUrl: string; shortcode: string; type: "reel" | "post" | "other" } {
   if (!url) return { embedUrl: "", shortcode: "", type: "other" };
-  const trimmed = url.trim();
-  if (trimmed.endsWith(".mp4") || trimmed.includes(".mp4?")) return { embedUrl: trimmed, shortcode: "", type: "reel" };
-  if (trimmed.includes("/embed")) return { embedUrl: trimmed, shortcode: "", type: "post" };
-  const match = trimmed.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+  const cleaned = cleanInstagramInput(url);
+  if (cleaned.endsWith(".mp4") || cleaned.includes(".mp4?")) return { embedUrl: cleaned, shortcode: "", type: "reel" };
+  if (cleaned.includes("/embed")) return { embedUrl: cleaned, shortcode: "", type: "post" };
+  const match = cleaned.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
   if (match) {
     const type = match[1].toLowerCase() === "reel" ? "reel" : "post";
     const shortcode = match[2];
     return { embedUrl: `https://www.instagram.com/p/${shortcode}/embed/captioned/`, shortcode, type };
   }
-  return { embedUrl: trimmed, shortcode: "", type: "other" };
+  return { embedUrl: cleaned, shortcode: "", type: "other" };
 }
 
 const defaultInstagramPosts: InstagramPost[] = [
-  { id: "ig-1", title: "RP Foundation Healthcare & Medical Drive", url: "https://www.instagram.com/p/C3x9sample1/", caption: "Free health camp & doctor consultations for local families in rural areas.", category: "Healthcare", active: true, order: 0 },
-  { id: "ig-2", title: "Jan Seva Card Distribution Camp", url: "https://www.instagram.com/reel/C3x9sample2/", caption: "Empowering citizens with digital service identity and community support.", category: "Jan Seva", active: true, order: 1 }
+  {
+    id: "ig-cm-meet",
+    title: "मुख्यमंत्री निवास कार्यालय, समत्व भवन में माननीय मुख्यमंत्री डॉ. मोहन यादव जी से भेंट",
+    url: "https://www.instagram.com/p/Dd6j8dOMRHi/",
+    caption: "आर पी फाउंडेशन के संस्थापक तथा पीपुल्स ग्रुप के उपाध्यक्ष एवं प्रबंध निदेशक श्री रोहित पंडित जी ने मध्यप्रदेश के माननीय मुख्यमंत्री डॉ. मोहन यादव जी से भेंट की।",
+    category: "Leadership",
+    active: true,
+    order: 0
+  },
+  { id: "ig-1", title: "RP Foundation Healthcare & Medical Drive", url: "https://www.instagram.com/p/C3x9sample1/", caption: "Free health camp & doctor consultations for local families in rural areas.", category: "Healthcare", active: true, order: 1 },
+  { id: "ig-2", title: "Jan Seva Card Distribution Camp", url: "https://www.instagram.com/reel/C3x9sample2/", caption: "Empowering citizens with digital service identity and community support.", category: "Jan Seva", active: true, order: 2 }
 ];
 
 const emptyPost = (): InstagramPost => ({
@@ -353,14 +381,14 @@ export default function AdminInstagram() {
                     )}
                   </div>
 
-                  {/* Optional Instagram Link */}
+                  {/* Optional Instagram Link / Embed Code */}
                   <label className="block text-xs font-bold text-slate-700">
-                    Instagram Post or Reel URL (Optional Backup)
+                    Instagram Post / Reel URL or Embed Code
                     <div className="relative mt-1.5">
                       <input
                         value={p.url}
-                        onChange={(e) => patch(selected, { url: e.target.value })}
-                        placeholder="https://www.instagram.com/reel/Cxxxxxx/ or https://www.instagram.com/p/Cxxxxxx/"
+                        onChange={(e) => patch(selected, { url: cleanInstagramInput(e.target.value) })}
+                        placeholder="Paste URL or embed blockquote (e.g. https://www.instagram.com/p/Dd6j8dOMRHi/)"
                         className="w-full rounded-xl border border-slate-200 px-3 py-2.5 pr-9 text-sm outline-none focus:border-rose-400"
                       />
                       {p.url && (
