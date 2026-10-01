@@ -166,16 +166,33 @@ export default function ReelsVerticalViewer({
                   <img
                     src={reel.thumbnailUrl}
                     alt={reel.title}
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover opacity-85"
                     onError={(e) => {
-                      e.currentTarget.src = "/assets/rpf-samahit-icon.png";
+                      e.currentTarget.src = "/assets/founder.png";
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90" />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 animate-pulse">
-                      <Play className="h-8 w-8 fill-white ml-1" />
-                    </div>
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/90" />
+                  
+                  {/* Interactive Play & Open Trigger */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => openExternalLink(reel.url)}
+                      className="group flex flex-col items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-md p-5 border border-white/20 hover:scale-105 active:scale-95 transition-all shadow-2xl cursor-pointer"
+                    >
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white shadow-lg group-hover:scale-110 transition-transform">
+                        <Play className="h-8 w-8 fill-white ml-1" />
+                      </div>
+                      <div className="space-y-1">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-600/80 text-white text-[11px] font-black uppercase tracking-wider">
+                          <Instagram className="h-3.5 w-3.5" />
+                          Watch Video on Instagram
+                        </span>
+                        <p className="text-[10.5px] text-slate-300 font-medium max-w-xs line-clamp-1">
+                          Tap to stream directly in the Instagram app
+                        </p>
+                      </div>
+                    </button>
                   </div>
                 </>
               )}
