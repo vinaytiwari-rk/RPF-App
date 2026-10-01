@@ -101,6 +101,7 @@ const panchangCache = new Map<string, { data: any; timestamp: number }>();
 const bullionCache = new Map<string, { data: any; timestamp: number }>();
 const vegetableCache = new Map<string, { data: any; timestamp: number }>();
 let mandiPulseCache: { data: any; timestamp: number } | null = null;
+const fuelCache = new Map<string, { data: any; timestamp: number }>();
 
 const CACHE_TTL_MS = 20 * 60 * 1000; // 20 minutes
 
@@ -339,6 +340,70 @@ export async function getLiveVegetablePrices(cityId?: string) {
   }
 }
 
+// 4. FUEL & GAS PRICE SCRAPER (Source: GoodReturns price pages)
+export async function getLiveFuelPrices(cityId?: string) {
+  const cityKey = normalizeCityKey(cityId);
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
+  const cached = fuelCache.get(cityKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
+
+  const citySlug = cityInfo.name.toLowerCase();
+  const urls = {
+    petrol: "https://www.goodreturns.in/petrol-price-in-" + citySlug + ".html",
+    diesel: "https://www.goodreturns.in/diesel-price-in-" + citySlug + ".html",
+    lpg: "https://www.goodreturns.in/lpg-price-in-" + citySlug + ".html",
+    cng: "https://www.goodreturns.in/cng-price-in-" + citySlug + ".html"
+  };
+
+  const extract = (html: string, pattern: RegExp) => {
+    const text = cheerio.load(html).text().replace(/\s+/g, " ");
+    const m = text.match(pattern);
+    return m?.[1] ? "₹" + m[1] : "";
+  };
+
+  try {
+    const [petrolRes, dieselRes, lpgRes, cngRes] = await Promise.all([
+      axios.get(urls.petrol, { headers: customHeaders, httpsAgent, timeout: 7000 }),
+      axios.get(urls.diesel, { headers: customHeaders, httpsAgent, timeout: 7000 }),
+      axios.get(urls.lpg, { headers: customHeaders, httpsAgent, timeout: 7000 }),
+      axios.get(urls.cng, { headers: customHeaders, httpsAgent, timeout: 7000 })
+    ]);
+
+    const petrol = extract(petrolRes.data, new RegExp(cityInfo.name + "[\\s\\S]{0,180}?₹\\s*([0-9,]+(?:\\.[0-9]+)?)\\s*/\\s*Ltr", "i"));
+    const diesel = extract(dieselRes.data, new RegExp(cityInfo.name + "[\\s\\S]{0,180}?₹\\s*([0-9,]+(?:\\.[0-9]+)?)\\s*/\\s*Ltr", "i"));
+    const cng = extract(cngRes.data, new RegExp(cityInfo.name + "[\\s\\S]{0,180}?₹\\s*([0-9,]+(?:\\.[0-9]+)?)\\s*/\\s*Kg", "i"));
+    const lpgText = cheerio.load(lpgRes.data).text().replace(/\s+/g, " ");
+    const lpgMatch = lpgText.match(/Domestic\s*\(14\.2\s*Kg\)\s*₹\s*([0-9,]+(?:\.[0-9]+)?)/i);
+    const lpgCommercialMatch = lpgText.match(/Commercial\s*\(19\s*Kg\)\s*₹\s*([0-9,]+(?:\.[0-9]+)?)/i);
+
+    const parsed = {
+      source: "GoodReturns.in",
+      sourceUrl: urls.petrol,
+      city: cityInfo.name,
+      petrol,
+      diesel,
+      lpgDomestic: lpgMatch?.[1] ? "₹" + lpgMatch[1] : "",
+      lpgCommercial: lpgCommercialMatch?.[1] ? "₹" + lpgCommercialMatch[1] : "",
+      cng,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (!parsed.petrol && !parsed.diesel && !parsed.lpgDomestic && !parsed.cng) throw new Error("Fuel prices could not be parsed");
+    fuelCache.set(cityKey, { data: parsed, timestamp: Date.now() });
+    return parsed;
+  } catch (error) {
+    if (cached?.data) return cached.data;
+    return {
+      source: "GoodReturns.in",
+      sourceUrl: urls.petrol,
+      city: cityInfo.name,
+      petrol: "", diesel: "", lpgDomestic: "", lpgCommercial: "", cng: "",
+      updatedAt: new Date().toISOString(),
+      unavailable: true
+    };
+  }
+}
+
 // 4. MANDI PULSE COMMODITY SCRAPER (Source: mandipulse.com)
 export async function getLiveMandiPulse() {
   if (mandiPulseCache && Date.now() - mandiPulseCache.timestamp < CACHE_TTL_MS) {
@@ -391,11 +456,12 @@ export async function getVerifiedMarketSummary(cityId?: string) {
   const cityKey = normalizeCityKey(cityId);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
 
-  const [panchang, bullion, vegetables, mandiPulse] = await Promise.all([
+  const [panchang, bullion, vegetables, mandiPulse, fuel] = await Promise.all([
     getLiveDrikPanchang(cityKey),
     getLiveBullionRates(cityKey),
     getLiveVegetablePrices(cityKey),
-    getLiveMandiPulse()
+    getLiveMandiPulse(),
+    getLiveFuelPrices(cityKey)
   ]);
 
   return {
@@ -405,6 +471,7 @@ export async function getVerifiedMarketSummary(cityId?: string) {
     bullion,
     vegetables,
     mandiPulse,
+    fuel,
     updatedAt: new Date().toISOString()
   };
 }
