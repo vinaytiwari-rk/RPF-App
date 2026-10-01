@@ -346,6 +346,33 @@ export default function LiveVerifiedMarketSection() {
           </div>
         </motion.div>
 
+        {/* CARD: FUEL & GAS */}
+        <motion.div
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setActiveSheet("fuel")}
+          className="snap-start min-w-[215px] sm:min-w-[235px] flex-1 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50/70 via-white to-amber-50/50 p-3.5 shadow-2xs cursor-pointer hover:border-orange-400 transition-all flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between text-[#C2410C]">
+              <div className="flex items-center gap-1.5">
+                <Fuel className="h-4 w-4 text-[#EA580C]" />
+                <span className="text-[11px] font-extrabold uppercase tracking-wider">Fuel & Gas</span>
+              </div>
+              <span className="text-[9px] font-bold text-orange-800 bg-orange-100/70 px-1.5 py-0.5 rounded-md">{selectedCity.name}</span>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+              <div><span className="font-semibold text-slate-500">Petrol</span><div className="font-extrabold text-[#14213D]">{data?.fuel?.petrol || "—"} <span className="font-medium text-slate-400">/L</span></div></div>
+              <div><span className="font-semibold text-slate-500">Diesel</span><div className="font-extrabold text-[#14213D]">{data?.fuel?.diesel || "—"} <span className="font-medium text-slate-400">/L</span></div></div>
+              <div><span className="font-semibold text-slate-500">LPG</span><div className="font-extrabold text-[#14213D]">{data?.fuel?.lpgDomestic || "—"}</div></div>
+              <div><span className="font-semibold text-slate-500">CNG</span><div className="font-extrabold text-[#14213D]">{data?.fuel?.cng || "—"} <span className="font-medium text-slate-400">/kg</span></div></div>
+            </div>
+          </div>
+          <div className="mt-2.5 pt-2 border-t border-orange-100 flex items-center justify-between text-[10.5px]">
+            <span className="text-orange-800 font-bold">Latest Rates</span>
+            <span className="text-[#C2410C] font-extrabold flex items-center">View <ChevronRight className="h-3 w-3" /></span>
+          </div>
+        </motion.div>
+
         {/* CARD 4: LIVE MANDI PULSE */}
         <motion.div
           whileTap={{ scale: 0.98 }}
