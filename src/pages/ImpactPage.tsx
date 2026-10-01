@@ -348,6 +348,33 @@ export default function ImpactPage() {
               </div>
             </section>
 
+            {/* LIVE REELS & VIDEO FEED (MOVED BEFORE COMMUNITY, CARE & ACTIVE GROUND) */}
+            <section className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-xs">
+                    <Instagram className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                      {isHi ? "लाइव रील्स एवं वीडियो फ़ीड" : "Live Reels & Video Feed"}
+                    </h3>
+                    <p className="text-[10px] text-slate-400 font-bold">@rpfoundationofficial • Official RSS Stream</p>
+                  </div>
+                </div>
+                <a
+                  href="https://www.instagram.com/rpfoundationofficial/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[10px] font-black text-[#D97706] hover:underline flex items-center gap-1"
+                >
+                  Follow <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <InstagramApiFeed />
+            </section>
+
             {/* Category Filter Pills: All, Community, Care, Active */}
             <section className="space-y-2">
               <div className="flex items-center justify-between px-1">
@@ -448,60 +475,6 @@ export default function ImpactPage() {
                 </div>
               </section>
             )}
-
-            {/* Featured Reel Card */}
-            <section className="bg-gradient-to-br from-[#167C5A] via-emerald-700 to-teal-800 border border-emerald-600 rounded-3xl p-5 text-white shadow-md space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] font-black uppercase tracking-[.18em] text-emerald-100 bg-white/20 px-2.5 py-1 rounded-full border border-white/20">
-                  In-App Reels Player
-                </span>
-                <Instagram className="w-4 h-4 text-emerald-100" />
-              </div>
-
-              <div>
-                <h3 className="text-base font-black leading-snug font-serif text-white">
-                  {isHi ? "पिंक ई-रिक्शा एवं ग्राउंड वर्क रील्स" : "Pink E-Rickshaw & Social Work Reels"}
-                </h3>
-                <p className="text-xs text-emerald-100 mt-1 line-clamp-2 font-medium">
-                  {isHi ? "ऐप के अंदर ही रील्स स्वाइप करें और ग्राउंड-लेवल कार्यों के वीडियो देखें।" : "Swipe through field reels, health camps and video updates right inside the app."}
-                </p>
-              </div>
-
-              <button
-                onClick={() => navigate("/instagram")}
-                className="w-full bg-white text-[#167C5A] text-xs font-black py-3 rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 hover:bg-emerald-50"
-              >
-                <Play className="w-4 h-4 fill-[#167C5A]" />
-                <span>{isHi ? "एप में रील्स प्लेयर खोलें 📱" : "Open In-App Reels Player 📱"}</span>
-              </button>
-            </section>
-
-            {/* Live Instagram Feed Grid */}
-            <section className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-xs">
-                    <Instagram className="h-4.5 w-4.5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                      {isHi ? "लाइव रील्स एवं वीडियो फ़ीड" : "Live Reels & Video Feed"}
-                    </h3>
-                    <p className="text-[10px] text-slate-400 font-bold">@rpfoundationofficial • Official RSS Stream</p>
-                  </div>
-                </div>
-                <a
-                  href="https://www.instagram.com/rpfoundationofficial/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[10px] font-black text-[#D97706] hover:underline flex items-center gap-1"
-                >
-                  Follow <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-
-              <InstagramApiFeed />
-            </section>
           </div>
         )}
 

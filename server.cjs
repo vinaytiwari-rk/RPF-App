@@ -340181,8 +340181,10 @@ async function getYouTubeItems() {
 }
 async function getInstagramItems() {
   try {
-    const cmsRes = await pool.query("SELECT data FROM cms_data WHERE key = 'app_cms' LIMIT 1");
-    if (cmsRes.rows.length > 0) {
+    const cmsQuery = pool.query("SELECT data FROM cms_data WHERE key = 'app_cms' LIMIT 1");
+    const timeout2 = new Promise((_3, reject) => setTimeout(() => reject(new Error("DB timeout")), 1500));
+    const cmsRes = await Promise.race([cmsQuery, timeout2]);
+    if (cmsRes?.rows?.length > 0) {
       const cms = typeof cmsRes.rows[0].data === "string" ? JSON.parse(cmsRes.rows[0].data) : cmsRes.rows[0].data;
       if (Array.isArray(cms?.instagramPosts) && cms.instagramPosts.length > 0) {
         return cms.instagramPosts.map((post, idx) => {
@@ -340198,7 +340200,7 @@ async function getInstagramItems() {
             description: post.caption || post.title || "Follow @rpfoundationofficial on Instagram for live updates and reels.",
             pubDate: new Date(Date.now() - idx * 864e5).toUTCString(),
             author: "@rpfoundationofficial",
-            thumbnailUrl: post.thumbnail || post.thumbnailUrl || (shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : void 0),
+            thumbnailUrl: post.thumbnail || post.thumbnailUrl || (shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : "/assets/founder.png"),
             category: post.category || "Reels",
             videoUrl: post.videoUrl || void 0,
             embedUrl
@@ -340207,37 +340209,39 @@ async function getInstagramItems() {
       }
     }
   } catch (err2) {
-    console.warn("Instagram items load fallback:", err2.message);
   }
   return [
     {
       id: "ig-1",
       platform: "instagram",
-      title: "RP Foundation Healthcare & Medical Camp Drive",
+      title: "\u0928\u093F\u0903\u0936\u0941\u0932\u094D\u0915 \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0936\u093F\u0935\u093F\u0930 \u090F\u0935\u0902 \u0926\u0935\u093E \u0935\u093F\u0924\u0930\u0923 \u0905\u092D\u093F\u092F\u093E\u0928",
       link: "https://www.instagram.com/rpfoundationofficial/",
-      description: "\u0928\u093F\u0903\u0936\u0941\u0932\u094D\u0915 \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0936\u093F\u0935\u093F\u0930 \u090F\u0935\u0902 \u0926\u0935\u093E \u0935\u093F\u0924\u0930\u0923 \u0905\u092D\u093F\u092F\u093E\u0928 \u2014 \u0938\u092E\u093E\u091C \u0915\u0947 \u0905\u0902\u0924\u093F\u092E \u092A\u0902\u0915\u094D\u0924\u093F \u0915\u0947 \u0935\u094D\u092F\u0915\u094D\u0924\u093F \u0924\u0915 \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0938\u0947\u0935\u093E \u092A\u0939\u0941\u0901\u091A\u093E\u0928\u0947 \u0915\u093E \u0938\u0902\u0915\u0932\u094D\u092A\u0964",
+      description: "RP Foundation \u0926\u094D\u0935\u093E\u0930\u093E \u0938\u092E\u093E\u091C \u0915\u0947 \u0905\u0902\u0924\u093F\u092E \u092A\u0902\u0915\u094D\u0924\u093F \u0915\u0947 \u0935\u094D\u092F\u0915\u094D\u0924\u093F \u0924\u0915 \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0938\u0947\u0935\u093E \u092A\u0939\u0941\u0901\u091A\u093E\u0928\u0947 \u0915\u093E \u0938\u0902\u0915\u0932\u094D\u092A\u0964",
       pubDate: new Date(Date.now() - 1 * 864e5).toUTCString(),
       author: "@rpfoundationofficial",
+      thumbnailUrl: "/assets/founder.png",
       category: "Healthcare"
     },
     {
       id: "ig-2",
       platform: "instagram",
-      title: "Jan Seva Card Community Registration Camp",
+      title: "\u091C\u0928 \u0938\u0947\u0935\u093E \u0915\u093E\u0930\u094D\u0921 \u0935\u093F\u0924\u0930\u0923 \u090F\u0935\u0902 \u092A\u0902\u091C\u0940\u0915\u0930\u0923 \u0936\u093F\u0935\u093F\u0930",
       link: "https://www.instagram.com/rpfoundationofficial/",
-      description: "\u091C\u0928 \u0938\u0947\u0935\u093E \u0915\u093E\u0930\u094D\u0921 \u0935\u093F\u0924\u0930\u0923 \u0936\u093F\u0935\u093F\u0930: \u0928\u093E\u0917\u0930\u093F\u0915\u094B\u0902 \u0915\u094B \u0921\u093F\u091C\u093F\u091F\u0932 \u092A\u0939\u091A\u093E\u0928, \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u090F\u0935\u0902 \u091C\u0928\u0915\u0932\u094D\u092F\u093E\u0923\u0915\u093E\u0930\u0940 \u092F\u094B\u091C\u0928\u093E\u0913\u0902 \u0938\u0947 \u0938\u0940\u0927\u093E \u091C\u094B\u0921\u093C\u0928\u093E\u0964",
+      description: "\u0928\u093E\u0917\u0930\u093F\u0915\u094B\u0902 \u0915\u094B \u0921\u093F\u091C\u093F\u091F\u0932 \u092A\u0939\u091A\u093E\u0928, \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u090F\u0935\u0902 \u091C\u0928\u0915\u0932\u094D\u092F\u093E\u0923\u0915\u093E\u0930\u0940 \u092F\u094B\u091C\u0928\u093E\u0913\u0902 \u0938\u0947 \u0938\u0940\u0927\u093E \u091C\u094B\u0921\u093C\u0928\u093E\u0964",
       pubDate: new Date(Date.now() - 3 * 864e5).toUTCString(),
       author: "@rpfoundationofficial",
+      thumbnailUrl: "/assets/founder.png",
       category: "Jan Seva"
     },
     {
       id: "ig-3",
       platform: "instagram",
-      title: "Youth Empowerment & Employment Guidance Workshop",
+      title: "\u092F\u0941\u0935\u093E \u0930\u094B\u091C\u0917\u093E\u0930 \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0928 \u090F\u0935\u0902 \u0915\u094C\u0936\u0932 \u0935\u093F\u0915\u093E\u0938 \u0915\u093E\u0930\u094D\u092F\u0936\u093E\u0932\u093E",
       link: "https://www.instagram.com/rpfoundationofficial/",
-      description: "\u092F\u0941\u0935\u093E\u0913\u0902 \u0915\u0947 \u0938\u092A\u0928\u094B\u0902 \u0915\u094B \u0928\u0908 \u0909\u0921\u093C\u093E\u0928: \u0930\u094B\u091C\u0917\u093E\u0930 \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0928, \u092A\u094D\u0930\u0924\u093F\u092F\u094B\u0917\u0940 \u092A\u0930\u0940\u0915\u094D\u0937\u093E \u0938\u0939\u093E\u092F\u0924\u093E \u090F\u0935\u0902 \u0915\u094C\u0936\u0932 \u0935\u093F\u0915\u093E\u0938 \u092A\u0939\u0932\u0964",
+      description: "\u092F\u0941\u0935\u093E\u0913\u0902 \u0915\u0947 \u0938\u092A\u0928\u094B\u0902 \u0915\u094B \u0928\u0908 \u0909\u0921\u093C\u093E\u0928: \u0930\u094B\u091C\u0917\u093E\u0930 \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0928 \u090F\u0935\u0902 \u092A\u094D\u0930\u0924\u093F\u092F\u094B\u0917\u0940 \u092A\u0930\u0940\u0915\u094D\u0937\u093E \u0938\u0939\u093E\u092F\u0924\u093E\u0964",
       pubDate: new Date(Date.now() - 5 * 864e5).toUTCString(),
       author: "@rpfoundationofficial",
+      thumbnailUrl: "/assets/founder.png",
       category: "Youth"
     }
   ];

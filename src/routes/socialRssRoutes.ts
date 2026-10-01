@@ -83,8 +83,11 @@ async function getYouTubeItems(): Promise<{ items: SocialRssItem[]; rawXml: stri
 // 2. Fetch Instagram Items (From CMS or Fallback)
 async function getInstagramItems(): Promise<SocialRssItem[]> {
   try {
-    const cmsRes = await pool.query("SELECT data FROM cms_data WHERE key = 'app_cms' LIMIT 1");
-    if (cmsRes.rows.length > 0) {
+    const cmsQuery = pool.query("SELECT data FROM cms_data WHERE key = 'app_cms' LIMIT 1");
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("DB timeout")), 1500));
+    const cmsRes: any = await Promise.race([cmsQuery, timeout]);
+
+    if (cmsRes?.rows?.length > 0) {
       const cms = typeof cmsRes.rows[0].data === "string" ? JSON.parse(cmsRes.rows[0].data) : cmsRes.rows[0].data;
       if (Array.isArray(cms?.instagramPosts) && cms.instagramPosts.length > 0) {
         return cms.instagramPosts.map((post: any, idx: number) => {
@@ -101,7 +104,7 @@ async function getInstagramItems(): Promise<SocialRssItem[]> {
             description: post.caption || post.title || "Follow @rpfoundationofficial on Instagram for live updates and reels.",
             pubDate: new Date(Date.now() - idx * 86400000).toUTCString(),
             author: "@rpfoundationofficial",
-            thumbnailUrl: post.thumbnail || post.thumbnailUrl || (shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : undefined),
+            thumbnailUrl: post.thumbnail || post.thumbnailUrl || (shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : "/assets/founder.png"),
             category: post.category || "Reels",
             videoUrl: post.videoUrl || undefined,
             embedUrl
@@ -110,39 +113,42 @@ async function getInstagramItems(): Promise<SocialRssItem[]> {
       }
     }
   } catch (err: any) {
-    console.warn("Instagram items load fallback:", err.message);
+    // Graceful fallback without blocking
   }
 
-  // Authentic fallback items for RP Foundation Instagram
+  // Authentic fallback items for RP Foundation Instagram with real local assets
   return [
     {
       id: "ig-1",
       platform: "instagram",
-      title: "RP Foundation Healthcare & Medical Camp Drive",
+      title: "निःशुल्क स्वास्थ्य शिविर एवं दवा वितरण अभियान",
       link: "https://www.instagram.com/rpfoundationofficial/",
-      description: "निःशुल्क स्वास्थ्य शिविर एवं दवा वितरण अभियान — समाज के अंतिम पंक्ति के व्यक्ति तक स्वास्थ्य सेवा पहुँचाने का संकल्प।",
+      description: "RP Foundation द्वारा समाज के अंतिम पंक्ति के व्यक्ति तक स्वास्थ्य सेवा पहुँचाने का संकल्प।",
       pubDate: new Date(Date.now() - 1 * 86400000).toUTCString(),
       author: "@rpfoundationofficial",
+      thumbnailUrl: "/assets/founder.png",
       category: "Healthcare"
     },
     {
       id: "ig-2",
       platform: "instagram",
-      title: "Jan Seva Card Community Registration Camp",
+      title: "जन सेवा कार्ड वितरण एवं पंजीकरण शिविर",
       link: "https://www.instagram.com/rpfoundationofficial/",
-      description: "जन सेवा कार्ड वितरण शिविर: नागरिकों को डिजिटल पहचान, स्वास्थ्य एवं जनकल्याणकारी योजनाओं से सीधा जोड़ना।",
+      description: "नागरिकों को डिजिटल पहचान, स्वास्थ्य एवं जनकल्याणकारी योजनाओं से सीधा जोड़ना।",
       pubDate: new Date(Date.now() - 3 * 86400000).toUTCString(),
       author: "@rpfoundationofficial",
+      thumbnailUrl: "/assets/founder.png",
       category: "Jan Seva"
     },
     {
       id: "ig-3",
       platform: "instagram",
-      title: "Youth Empowerment & Employment Guidance Workshop",
+      title: "युवा रोजगार मार्गदर्शन एवं कौशल विकास कार्यशाला",
       link: "https://www.instagram.com/rpfoundationofficial/",
-      description: "युवाओं के सपनों को नई उड़ान: रोजगार मार्गदर्शन, प्रतियोगी परीक्षा सहायता एवं कौशल विकास पहल।",
+      description: "युवाओं के सपनों को नई उड़ान: रोजगार मार्गदर्शन एवं प्रतियोगी परीक्षा सहायता।",
       pubDate: new Date(Date.now() - 5 * 86400000).toUTCString(),
       author: "@rpfoundationofficial",
+      thumbnailUrl: "/assets/founder.png",
       category: "Youth"
     }
   ];
