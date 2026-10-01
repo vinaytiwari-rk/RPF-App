@@ -126,7 +126,12 @@ async function readRemoteManifest(client) {
   }
 }
 
-async function ensureRemoteDirectories(client, remotePaths, rootDir) {
+async function resetToDeployRoot(client) {
+  await client.cd('/');
+  if (remoteDir) await client.cd(remoteDir);
+}
+
+async function ensureRemoteDirectories(client, remotePaths) {
   const dirs = new Set();
   for (const remotePath of remotePaths) {
     const dir = path.posix.dirname(remotePath);
@@ -134,13 +139,13 @@ async function ensureRemoteDirectories(client, remotePaths, rootDir) {
   }
 
   for (const dir of [...dirs].sort()) {
-    await client.cd(rootDir);
+    await resetToDeployRoot(client);
     await client.ensureDir(dir);
   }
-  await client.cd(rootDir);
+  await resetToDeployRoot(client);
 }
 
-async function uploadChangedFiles(client, files, previousManifest, currentManifest, rootDir) {
+async function uploadChangedFiles(client, files, previousManifest, currentManifest) {
   const changed = files.filter((file) => previousManifest[file.remote] !== currentManifest.files[file.remote]);
 
   if (!changed.length) {
@@ -155,10 +160,10 @@ async function uploadChangedFiles(client, files, previousManifest, currentManife
     groups.get(dir).push(file);
   }
 
-  await ensureRemoteDirectories(client, changed.map((file) => file.remote), rootDir);
+  await ensureRemoteDirectories(client, changed.map((file) => file.remote));
 
   for (const [dir, group] of groups) {
-    await client.cd(rootDir);
+    await resetToDeployRoot(client);
     if (dir !== '.') await client.cd(dir);
 
     for (const file of group) {
@@ -173,7 +178,7 @@ async function uploadChangedFiles(client, files, previousManifest, currentManife
   return changed;
 }
 
-async function removeDeletedFiles(client, previousManifest, currentManifest, rootDir) {
+async function removeDeletedFiles(client, previousManifest, currentManifest) {
   const deleted = Object.keys(previousManifest).filter((remote) => !currentManifest.files[remote]);
   if (!deleted.length) return;
 
@@ -188,7 +193,7 @@ async function removeDeletedFiles(client, previousManifest, currentManifest, roo
   }
 }
 
-async function writeRemoteManifest(client, manifest, rootDir) {
+async function writeRemoteManifest(client, manifest) {
   const localManifest = path.join(process.cwd(), manifestName);
   fs.writeFileSync(localManifest, JSON.stringify(manifest, null, 2));
   try {
@@ -223,12 +228,11 @@ async function deployOnce() {
     }
 
     const currentManifest = await buildManifest(files);
-    const rootDir = await client.pwd();
     const previousManifest = incremental ? await readRemoteManifest(client) : {};
-    const changed = await uploadChangedFiles(client, files, previousManifest, currentManifest, rootDir);
+    const changed = await uploadChangedFiles(client, files, previousManifest, currentManifest);
 
     if (incremental) {
-      await removeDeletedFiles(client, previousManifest, currentManifest, rootDir);
+      await removeDeletedFiles(client, previousManifest, currentManifest);
     }
 
     if (changed.length || !incremental) {
@@ -243,7 +247,7 @@ async function deployOnce() {
       }
     }
 
-    await writeRemoteManifest(client, currentManifest, rootDir);
+    await writeRemoteManifest(client, currentManifest);
 
     console.log(`FTP deployment completed. Managed files: ${files.length}; changed: ${changed.length}; incremental: ${incremental}`);
   } finally {
