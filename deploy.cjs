@@ -43,73 +43,93 @@ async function withFreshConnection(label, operation, attempts = 3) {
   throw lastError;
 }
 
-async function main() {
+async function deployOnce() {
+  const client = new ftp.Client();
+  client.ftp.verbose = true;
+  client.ftp.timeout = 180000;
+
   try {
+    console.log('Connecting to FTP server...');
+    await client.access(connectionOptions());
+    if (remoteDir) await client.cd(remoteDir);
+
     if (process.env.FTP_CLEAN_DIST === 'true') {
-      await withFreshConnection('remote dist cleanup', async (client) => {
-        const list = await client.list();
-        if (list.some((file) => file.name === 'dist' && file.isDirectory)) await client.removeDir('dist');
-      });
+      const list = await client.list();
+      if (list.some((file) => file.name === 'dist' && file.isDirectory)) {
+        console.log('Removing old remote dist...');
+        await client.removeDir('dist');
+      }
     }
 
-    await withFreshConnection('server.cjs upload', (client) => client.uploadFrom('server.cjs', 'server.cjs'));
-    if (fs.existsSync('app.js')) {
-      await withFreshConnection('app.js upload', (client) => client.uploadFrom('app.js', 'app.js'));
-    }
-    if (fs.existsSync('index.js')) {
-      await withFreshConnection('index.js upload', (client) => client.uploadFrom('index.js', 'index.js'));
-    }
-    // The deploy job checks out source files again, so root index.html may still
-    // contain the Vite development entry (/src/main.tsx). Always publish the
-    // generated production HTML from dist instead.
+    await client.uploadFrom('server.cjs', 'server.cjs');
+    if (fs.existsSync('app.js')) await client.uploadFrom('app.js', 'app.js');
+    if (fs.existsSync('index.js')) await client.uploadFrom('index.js', 'index.js');
+
     if (fs.existsSync('dist/index.html')) {
-      await withFreshConnection('production index.html upload', (client) => client.uploadFrom('dist/index.html', 'index.html'));
+      await client.uploadFrom('dist/index.html', 'index.html');
     } else {
-      throw new Error('Missing dist/index.html after build artifact download');
+      throw new Error('Missing dist/index.html after build');
     }
 
-    await withFreshConnection('dist upload', (client) => client.uploadFromDir('dist', 'dist'));
+    await client.uploadFromDir('dist', 'dist');
 
-    // Static assets are mirrored to the document root so Apache/LiteSpeed can
-    // serve them directly, without SPA rewrite/fallback interference.
     if (fs.existsSync('dist/assets')) {
-      await withFreshConnection('root assets mirror upload', (client) => client.uploadFromDir('dist/assets', 'assets'));
+      await client.uploadFromDir('dist/assets', 'assets');
       console.log('dist/assets mirrored to document-root assets/');
     }
 
-    // Publish the generated web version at the root for the native app updater.
     if (fs.existsSync('dist/version.json')) {
-      await withFreshConnection('root version.json upload', (client) => client.uploadFrom('dist/version.json', 'version.json'));
+      await client.uploadFrom('dist/version.json', 'version.json');
     }
 
     if (fs.existsSync('migrations')) {
-      await withFreshConnection('migrations upload', (client) => client.uploadFromDir('migrations', 'migrations'));
+      await client.uploadFromDir('migrations', 'migrations');
       console.log('migrations directory uploaded');
     }
+
     if (fs.existsSync('.htaccess')) {
-      await withFreshConnection('.htaccess upload', (client) => client.uploadFrom('.htaccess', '.htaccess'));
+      await client.uploadFrom('.htaccess', '.htaccess');
       console.log('.htaccess uploaded');
     }
+
     if (fs.existsSync('rss-proxy.php')) {
-      await withFreshConnection('RSS proxy upload', (client) => client.uploadFrom('rss-proxy.php', 'rss-proxy.php'));
+      await client.uploadFrom('rss-proxy.php', 'rss-proxy.php');
       console.log('rss-proxy.php uploaded');
     }
 
     try {
       fs.writeFileSync('restart.txt', new Date().toISOString());
-      await withFreshConnection('restart marker upload', async (client) => {
-        await client.ensureDir('tmp');
-        await client.uploadFrom('restart.txt', 'restart.txt');
-      });
+      await client.ensureDir('tmp');
+      await client.uploadFrom('restart.txt', 'restart.txt');
       console.log('Passenger restart marker created in tmp/restart.txt');
     } catch (restartErr) {
-      console.warn('Passenger restart marker creation skipped or failed (non-fatal):', restartErr?.message || restartErr);
+      console.warn('Passenger restart marker skipped (non-fatal):', restartErr?.message || restartErr);
     }
-    console.log('Server deployment completed.');
-  } catch (err) {
-    console.error('FTP deployment error after retries:', err);
-    process.exitCode = 1;
+
+    console.log('FTP deployment completed.');
+  } finally {
+    client.close();
   }
 }
 
+async function main() {
+  let lastError;
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      console.log(`Deployment connection attempt ${attempt}/2`);
+      await deployOnce();
+      console.log('Server deployment completed.');
+      return;
+    } catch (err) {
+      lastError = err;
+      console.error(`FTP deployment failed on attempt ${attempt}:`, err?.message || err);
+      if (attempt < 2) {
+        console.log('Retrying FTP deployment with a fresh connection...');
+        await sleep(3000);
+      }
+    }
+  }
+  console.error('FTP deployment failed after retries:', lastError);
+  process.exitCode = 1;
+}
 main();
