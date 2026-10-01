@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Sun,
   Coins,
@@ -12,11 +12,49 @@ import {
   Minus,
   Clock,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  MapPin,
+  ChevronDown,
+  Navigation,
+  Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
 import { openExternalLink } from "../utils/browser";
+
+interface CityItem {
+  id: string;
+  name: string;
+  state: string;
+  lat: number;
+  lon: number;
+}
+
+const CITIES: CityItem[] = [
+  { id: "indore", name: "Indore", state: "Madhya Pradesh", lat: 22.7196, lon: 75.8577 },
+  { id: "bhopal", name: "Bhopal", state: "Madhya Pradesh", lat: 23.2599, lon: 77.4126 },
+  { id: "lucknow", name: "Lucknow", state: "Uttar Pradesh", lat: 26.8467, lon: 80.9462 },
+  { id: "delhi", name: "Delhi", state: "Delhi NCR", lat: 28.6139, lon: 77.2090 },
+  { id: "gwalior", name: "Gwalior", state: "Madhya Pradesh", lat: 26.2183, lon: 78.1828 },
+  { id: "ujjain", name: "Ujjain", state: "Madhya Pradesh", lat: 23.1765, lon: 75.7885 },
+  { id: "jabalpur", name: "Jabalpur", state: "Madhya Pradesh", lat: 23.1815, lon: 79.9864 },
+  { id: "kanpur", name: "Kanpur", state: "Uttar Pradesh", lat: 26.4499, lon: 80.3319 },
+  { id: "jaipur", name: "Jaipur", state: "Rajasthan", lat: 26.9124, lon: 75.7873 },
+  { id: "mumbai", name: "Mumbai", state: "Maharashtra", lat: 19.0760, lon: 72.8777 }
+];
+
+function findNearestCity(lat: number, lon: number): CityItem {
+  let closest = CITIES[0];
+  let minDiff = Infinity;
+  for (const c of CITIES) {
+    const d = (c.lat - lat) ** 2 + (c.lon - lon) ** 2;
+    if (d < minDiff) {
+      minDiff = d;
+      closest = c;
+    }
+  }
+  return closest;
+}
 
 interface MarketSummary {
   panchang: {
@@ -61,52 +99,126 @@ interface MarketSummary {
 type ActiveSheet = null | "panchang" | "bullion" | "vegetables" | "mandi";
 
 export default function LiveVerifiedMarketSection() {
+  const [selectedCity, setSelectedCity] = useState<CityItem>(() => {
+    try {
+      const saved = localStorage.getItem("@rpf_selected_market_city");
+      if (saved) {
+        const found = CITIES.find((c) => c.id === saved);
+        if (found) return found;
+      }
+    } catch {}
+    return CITIES[0]; // Default Indore
+  });
+
   const [data, setData] = useState<MarketSummary | null>(() => {
     try {
-      const cached = localStorage.getItem("@rpf_verified_market_cache");
+      const cached = localStorage.getItem(`@rpf_market_cache_${selectedCity?.id || "indore"}`);
       if (cached) return JSON.parse(cached);
     } catch {}
     return null;
   });
 
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
+  const [showCityPicker, setShowCityPicker] = useState<boolean>(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState<boolean>(false);
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
 
-  useEffect(() => {
-    let alive = true;
+  const fetchMarketData = useCallback((cityId: string) => {
+    setIsLoadingData(true);
     axios
-      .get("/api/public/market-summary")
+      .get(`/api/public/market-summary?city=${cityId}`)
       .then((res) => {
-        if (!alive) return;
         if (res.data?.success && res.data?.data) {
           setData(res.data.data);
           try {
-            localStorage.setItem("@rpf_verified_market_cache", JSON.stringify(res.data.data));
+            localStorage.setItem(`@rpf_market_cache_${cityId}`, JSON.stringify(res.data.data));
           } catch {}
         }
       })
       .catch((err) => {
-        console.warn("Could not load verified market summary:", err);
+        console.warn("Could not load verified market summary for city:", cityId, err);
+      })
+      .finally(() => {
+        setIsLoadingData(false);
       });
-
-    return () => {
-      alive = false;
-    };
   }, []);
+
+  useEffect(() => {
+    fetchMarketData(selectedCity.id);
+  }, [selectedCity.id, fetchMarketData]);
+
+  // Optional: Auto-detect GPS on first visit if user hasn't explicitly chosen yet
+  useEffect(() => {
+    const hasChosen = localStorage.getItem("@rpf_selected_market_city");
+    if (!hasChosen && "geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const nearest = findNearestCity(pos.coords.latitude, pos.coords.longitude);
+          if (nearest && nearest.id !== selectedCity.id) {
+            setSelectedCity(nearest);
+            try {
+              localStorage.setItem("@rpf_selected_market_city", nearest.id);
+            } catch {}
+          }
+        },
+        () => {
+          // Geolocation denied or unavailable; graceful fallback to default
+        },
+        { timeout: 5000, maximumAge: 600000 }
+      );
+    }
+  }, []);
+
+  const handleSelectCity = (city: CityItem) => {
+    setSelectedCity(city);
+    setShowCityPicker(false);
+    try {
+      localStorage.setItem("@rpf_selected_market_city", city.id);
+    } catch {}
+  };
+
+  const handleDetectGPS = () => {
+    if (!("geolocation" in navigator)) {
+      alert("GPS Geolocation is not supported by your browser/device.");
+      return;
+    }
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setIsDetectingLocation(false);
+        const nearest = findNearestCity(pos.coords.latitude, pos.coords.longitude);
+        handleSelectCity(nearest);
+      },
+      (err) => {
+        setIsDetectingLocation(false);
+        console.warn("GPS error:", err);
+        alert("Could not detect location automatically. Please select your city manually.");
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  };
 
   return (
     <section className="pt-2">
-      {/* SECTION HEADER */}
+      {/* SECTION HEADER WITH LOCATION SELECTOR */}
       <div className="mb-2 flex items-center justify-between px-0.5">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="h-4 w-4 text-[#167C5A]" />
-          <h2 className="text-[13.5px] sm:text-[14.5px] font-black uppercase tracking-wider text-[#14213D]">
-            Live Verified Market & Panchang
+          <h2 className="text-[13px] sm:text-[14px] font-black uppercase tracking-wider text-[#14213D]">
+            Live Market & Panchang
           </h2>
         </div>
-        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Verified Sources
-        </span>
+
+        {/* LOCATION SELECTOR PILL */}
+        <button
+          type="button"
+          onClick={() => setShowCityPicker(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-[11px] font-bold shadow-2xs transition-colors cursor-pointer"
+        >
+          <MapPin className="h-3.5 w-3.5 text-emerald-600" />
+          <span>{selectedCity.name}</span>
+          <ChevronDown className="h-3 w-3 text-emerald-600" />
+        </button>
       </div>
 
       {/* HORIZONTAL SWIPEABLE CARDS */}
@@ -190,7 +302,7 @@ export default function LiveVerifiedMarketSection() {
           </div>
         </motion.div>
 
-        {/* CARD 3: LIVE VEGETABLE PRICES */}
+        {/* CARD 3: LIVE VEGETABLE PRICES (CITY AWARE) */}
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("vegetables")}
@@ -202,14 +314,15 @@ export default function LiveVerifiedMarketSection() {
                 <Carrot className="h-4 w-4 text-[#16A34A]" />
                 <span className="text-[11px] font-extrabold uppercase tracking-wider">Vegetable Mandi</span>
               </div>
-              <span className="text-[9px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md">
-                Bhopal
+              <span className="text-[9.5px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                <MapPin className="h-2.5 w-2.5 text-emerald-700" />
+                {selectedCity.name}
               </span>
             </div>
 
             <div className="mt-2 space-y-1 text-[12px]">
               {(data?.vegetables?.items?.slice(0, 2) || [
-                { name: "Onion", price: "₹30 per kg" },
+                { name: "Onion", price: "₹28 per kg" },
                 { name: "Tomato", price: "₹26 per kg" }
               ]).map((v, i) => (
                 <div key={i} className="flex items-center justify-between">
@@ -217,14 +330,14 @@ export default function LiveVerifiedMarketSection() {
                   <span className="font-bold text-[#14213D]">{v.price}</span>
                 </div>
               ))}
-              <div className="text-[10.5px] text-slate-500 font-medium">
-                Potato, Cauliflower, Brinjal, Ladies Finger...
+              <div className="text-[10px] text-slate-500 font-medium line-clamp-1">
+                {data?.vegetables?.market || `${selectedCity.name} Mandi`}
               </div>
             </div>
           </div>
 
           <div className="mt-2.5 pt-2 border-t border-emerald-100 flex items-center justify-between text-[10.5px]">
-            <span className="text-emerald-800 font-bold">RozKaBhav Daily</span>
+            <span className="text-emerald-800 font-bold">{selectedCity.name} Rates</span>
             <span className="text-[#166534] font-extrabold flex items-center">
               All Items <ChevronRight className="h-3 w-3" />
             </span>
@@ -267,6 +380,98 @@ export default function LiveVerifiedMarketSection() {
         </motion.div>
       </div>
 
+      {/* LOCATION PICKER MODAL */}
+      <AnimatePresence>
+        {showCityPicker && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs">
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="w-full max-w-md bg-white rounded-t-[28px] sm:rounded-2xl shadow-2xl overflow-hidden border border-slate-200"
+            >
+              {/* HEADER */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50/70">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-emerald-600" />
+                  <div>
+                    <h3 className="text-[16px] font-bold text-[#14213D] leading-tight">
+                      Select Your Location
+                    </h3>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Rates and mandi prices will update for your selected city
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCityPicker(false)}
+                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* BODY */}
+              <div className="p-4 space-y-3">
+                {/* GPS AUTO-DETECT BUTTON */}
+                <button
+                  type="button"
+                  onClick={handleDetectGPS}
+                  disabled={isDetectingLocation}
+                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isDetectingLocation ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+                      <span>Detecting current location...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Navigation className="h-4 w-4 text-emerald-600" />
+                      <span>Use Current Location (GPS)</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1 pt-1">
+                  Available Cities
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 max-h-[40vh] overflow-y-auto pr-0.5">
+                  {CITIES.map((c) => {
+                    const isSelected = c.id === selectedCity.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => handleSelectCity(c)}
+                        className={`p-3 rounded-xl text-left border transition-all cursor-pointer flex items-center justify-between ${
+                          isSelected
+                            ? "bg-emerald-50 border-emerald-500 shadow-xs"
+                            : "bg-slate-50/70 hover:bg-slate-100/70 border-slate-200"
+                        }`}
+                      >
+                        <div>
+                          <div className={`text-xs font-bold ${isSelected ? "text-emerald-900" : "text-slate-800"}`}>
+                            {c.name}
+                          </div>
+                          <div className="text-[10px] text-slate-500 font-medium">
+                            {c.state}
+                          </div>
+                        </div>
+                        {isSelected && <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* BOTTOM SHEET / MODAL WITH FULL DETAILS */}
       <AnimatePresence>
         {activeSheet && (
@@ -289,19 +494,20 @@ export default function LiveVerifiedMarketSection() {
                     <h3 className="text-[16px] font-bold text-[#14213D] leading-tight">
                       {activeSheet === "panchang" && "Drik Panchang Live Details"}
                       {activeSheet === "bullion" && "Live Gold & Silver Bullion Rates"}
-                      {activeSheet === "vegetables" && "Bhopal Mandi Vegetable Prices"}
+                      {activeSheet === "vegetables" && `${selectedCity.name} Vegetable Mandi Prices`}
                       {activeSheet === "mandi" && "Mandi Pulse Agricultural Updates"}
                     </h3>
                     <p className="text-[11px] text-slate-500 font-medium">
                       Verified live from{" "}
                       {activeSheet === "panchang" && "DrikPanchang.com"}
                       {activeSheet === "bullion" && "AllIndiaBullion.com"}
-                      {activeSheet === "vegetables" && "RozKaBhav.com"}
+                      {activeSheet === "vegetables" && `RozKaBhav.com (${selectedCity.name})`}
                       {activeSheet === "mandi" && "MandiPulse.com"}
                     </p>
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setActiveSheet(null)}
                   className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
                 >
@@ -350,6 +556,7 @@ export default function LiveVerifiedMarketSection() {
                     </div>
 
                     <button
+                      type="button"
                       onClick={() => openExternalLink(data.panchang.sourceUrl)}
                       className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     >
@@ -386,6 +593,7 @@ export default function LiveVerifiedMarketSection() {
                     </div>
 
                     <button
+                      type="button"
                       onClick={() => openExternalLink(data.bullion.sourceUrl)}
                       className="w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     >
@@ -398,8 +606,11 @@ export default function LiveVerifiedMarketSection() {
                 {/* 3. VEGETABLES SHEET */}
                 {activeSheet === "vegetables" && data?.vegetables && (
                   <div className="space-y-3">
-                    <div className="text-xs font-bold text-slate-600 px-0.5">
-                      Market: {data.vegetables.market}
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-600 px-0.5">
+                      <span>Market: {data.vegetables.market}</span>
+                      <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                        {selectedCity.name}
+                      </span>
                     </div>
                     <div className="overflow-hidden rounded-xl border border-slate-200">
                       <table className="w-full text-left text-xs">
@@ -423,10 +634,11 @@ export default function LiveVerifiedMarketSection() {
                     </div>
 
                     <button
+                      type="button"
                       onClick={() => openExternalLink(data.vegetables.sourceUrl)}
                       className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     >
-                      <span>View Full Vegetable Report on RozKaBhav.com</span>
+                      <span>View Full {selectedCity.name} Report on RozKaBhav.com</span>
                       <ExternalLink className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -446,6 +658,7 @@ export default function LiveVerifiedMarketSection() {
                     ))}
 
                     <button
+                      type="button"
                       onClick={() => openExternalLink(data.mandiPulse.sourceUrl)}
                       className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     >

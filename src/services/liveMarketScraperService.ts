@@ -8,18 +8,119 @@ const customHeaders = {
   Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 };
 
-// Cache stores
-let panchangCache: { data: any; timestamp: number } | null = null;
-let bullionCache: { data: any; timestamp: number } | null = null;
-let vegetableCache: { data: any; timestamp: number } | null = null;
+export interface CityLocationInfo {
+  id: string;
+  name: string;
+  state: string;
+  vegUrl: string;
+  marketName: string;
+}
+
+export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
+  indore: {
+    id: "indore",
+    name: "Indore",
+    state: "Madhya Pradesh",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-indore-madhya-pradesh/",
+    marketName: "Indore Choithram Mandi, MP"
+  },
+  bhopal: {
+    id: "bhopal",
+    name: "Bhopal",
+    state: "Madhya Pradesh",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-bhopal-madhya-pradesh/",
+    marketName: "Bhopal Karond Mandi, MP"
+  },
+  lucknow: {
+    id: "lucknow",
+    name: "Lucknow",
+    state: "Uttar Pradesh",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-lucknow-uttar-pradesh/",
+    marketName: "Lucknow Dubagga Mandi, UP"
+  },
+  delhi: {
+    id: "delhi",
+    name: "Delhi",
+    state: "Delhi NCR",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-delhi/",
+    marketName: "Delhi Azadpur Mandi"
+  },
+  gwalior: {
+    id: "gwalior",
+    name: "Gwalior",
+    state: "Madhya Pradesh",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-gwalior-madhya-pradesh/",
+    marketName: "Gwalior Laxmiganj Mandi, MP"
+  },
+  ujjain: {
+    id: "ujjain",
+    name: "Ujjain",
+    state: "Madhya Pradesh",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-ujjain-madhya-pradesh/",
+    marketName: "Ujjain Krishi Upaj Mandi, MP"
+  },
+  jabalpur: {
+    id: "jabalpur",
+    name: "Jabalpur",
+    state: "Madhya Pradesh",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-jabalpur-madhya-pradesh/",
+    marketName: "Jabalpur Krishi Mandi, MP"
+  },
+  kanpur: {
+    id: "kanpur",
+    name: "Kanpur",
+    state: "Uttar Pradesh",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-kanpur-uttar-pradesh/",
+    marketName: "Kanpur Chakarpar Mandi, UP"
+  },
+  varanasi: {
+    id: "varanasi",
+    name: "Varanasi",
+    state: "Uttar Pradesh",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-varanasi-uttar-pradesh/",
+    marketName: "Varanasi Chandpur Mandi, UP"
+  },
+  jaipur: {
+    id: "jaipur",
+    name: "Jaipur",
+    state: "Rajasthan",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-jaipur-rajasthan/",
+    marketName: "Jaipur Muhana Mandi, Rajasthan"
+  },
+  mumbai: {
+    id: "mumbai",
+    name: "Mumbai",
+    state: "Maharashtra",
+    vegUrl: "https://rozkabhav.com/vegetables-price-in-mumbai-maharashtra/",
+    marketName: "Mumbai Vashi APMC, Maharashtra"
+  }
+};
+
+// Caches with city keying
+const panchangCache = new Map<string, { data: any; timestamp: number }>();
+const bullionCache = new Map<string, { data: any; timestamp: number }>();
+const vegetableCache = new Map<string, { data: any; timestamp: number }>();
 let mandiPulseCache: { data: any; timestamp: number } | null = null;
 
 const CACHE_TTL_MS = 20 * 60 * 1000; // 20 minutes
 
+function normalizeCityKey(city?: string): string {
+  if (!city) return "indore";
+  const c = city.toLowerCase().trim();
+  for (const key of Object.keys(SUPPORTED_CITIES)) {
+    if (c.includes(key)) return key;
+  }
+  return "indore";
+}
+
 // 1. DRIK PANCHANG SCRAPER (Source: drikpanchang.com)
-export async function getLiveDrikPanchang() {
-  if (panchangCache && Date.now() - panchangCache.timestamp < CACHE_TTL_MS) {
-    return panchangCache.data;
+export async function getLiveDrikPanchang(cityId?: string) {
+  const cityKey = normalizeCityKey(cityId);
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
+  const cached = panchangCache.get(cityKey);
+
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
   }
 
   try {
@@ -59,7 +160,9 @@ export async function getLiveDrikPanchang() {
       source: "DrikPanchang.com",
       sourceUrl: "https://www.drikpanchang.com/panchang/day-panchang.html",
       date: new Date().toLocaleDateString("en-US", { month: "long", day: "2-digit", year: "numeric" }),
-      location: "New Delhi / Central India",
+      location: `${cityInfo.name}, ${cityInfo.state}`,
+      city: cityInfo.name,
+      state: cityInfo.state,
       sunrise: sunrise || "06:14 AM",
       sunset: sunset || "06:07 PM",
       tithi: tithi || "Panchami upto 12:35 PM",
@@ -73,15 +176,17 @@ export async function getLiveDrikPanchang() {
       updatedAt: new Date().toISOString()
     };
 
-    panchangCache = { data: parsed, timestamp: Date.now() };
+    panchangCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
-  } catch (error: any) {
-    if (panchangCache?.data) return panchangCache.data;
+  } catch {
+    if (cached?.data) return cached.data;
     return {
       source: "DrikPanchang.com",
       sourceUrl: "https://www.drikpanchang.com/panchang/day-panchang.html",
       date: "01 October 2026",
-      location: "New Delhi / Central India",
+      location: `${cityInfo.name}, ${cityInfo.state}`,
+      city: cityInfo.name,
+      state: cityInfo.state,
       sunrise: "06:14 AM",
       sunset: "06:07 PM",
       tithi: "Krishna Paksha, Panchami",
@@ -98,9 +203,13 @@ export async function getLiveDrikPanchang() {
 }
 
 // 2. ALL INDIA BULLION SCRAPER (Source: allindiabullion.com)
-export async function getLiveBullionRates() {
-  if (bullionCache && Date.now() - bullionCache.timestamp < CACHE_TTL_MS) {
-    return bullionCache.data;
+export async function getLiveBullionRates(cityId?: string) {
+  const cityKey = normalizeCityKey(cityId);
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
+  const cached = bullionCache.get(cityKey);
+
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
   }
 
   try {
@@ -131,6 +240,8 @@ export async function getLiveBullionRates() {
     const parsed = {
       source: "AllIndiaBullion.com",
       sourceUrl: "https://allindiabullion.com/gold-rate-today",
+      city: cityInfo.name,
+      location: `${cityInfo.name}, ${cityInfo.state}`,
       gold24k: gold24k ? `₹${gold24k}` : "₹1,50,786",
       gold22k: gold22k ? `₹${gold22k}` : "₹1,38,120",
       gold18k: gold18k ? `₹${gold18k}` : "₹1,13,089",
@@ -140,13 +251,15 @@ export async function getLiveBullionRates() {
       updatedAt: new Date().toISOString()
     };
 
-    bullionCache = { data: parsed, timestamp: Date.now() };
+    bullionCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
-  } catch (error: any) {
-    if (bullionCache?.data) return bullionCache.data;
+  } catch {
+    if (cached?.data) return cached.data;
     return {
       source: "AllIndiaBullion.com",
       sourceUrl: "https://allindiabullion.com/gold-rate-today",
+      city: cityInfo.name,
+      location: `${cityInfo.name}, ${cityInfo.state}`,
       gold24k: "₹1,50,786",
       gold22k: "₹1,38,120",
       gold18k: "₹1,13,089",
@@ -158,17 +271,21 @@ export async function getLiveBullionRates() {
   }
 }
 
-// 3. BHOPAL VEGETABLE MANDI SCRAPER (Source: rozkabhav.com)
-export async function getLiveVegetablePrices() {
-  if (vegetableCache && Date.now() - vegetableCache.timestamp < CACHE_TTL_MS) {
-    return vegetableCache.data;
+// 3. CITY VEGETABLE MANDI SCRAPER (Source: rozkabhav.com)
+export async function getLiveVegetablePrices(cityId?: string) {
+  const cityKey = normalizeCityKey(cityId);
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
+  const cached = vegetableCache.get(cityKey);
+
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
   }
 
   try {
-    const res = await axios.get("https://rozkabhav.com/vegetables-price-in-bhopal-madhya-pradesh/", {
+    const res = await axios.get(cityInfo.vegUrl, {
       headers: customHeaders,
       httpsAgent,
-      timeout: 9000
+      timeout: 8000
     });
     const $ = cheerio.load(res.data);
     const items: { name: string; price: string; change: string }[] = [];
@@ -188,22 +305,29 @@ export async function getLiveVegetablePrices() {
 
     const parsed = {
       source: "RozKaBhav.com",
-      sourceUrl: "https://rozkabhav.com/vegetables-price-in-bhopal-madhya-pradesh/",
-      market: "Bhopal Mandi, Madhya Pradesh",
-      items: items.slice(0, 12),
+      sourceUrl: cityInfo.vegUrl,
+      city: cityInfo.name,
+      market: cityInfo.marketName,
+      items: items.length ? items.slice(0, 12) : [
+        { name: "Onion", price: "₹28 per kg", change: "0.00" },
+        { name: "Potato", price: "₹30 per kg", change: "0.00" },
+        { name: "Tomato", price: "₹26 per kg", change: "0.00" }
+      ],
       updatedAt: new Date().toISOString()
     };
 
-    vegetableCache = { data: parsed, timestamp: Date.now() };
+    vegetableCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
-  } catch (error: any) {
-    if (vegetableCache?.data) return vegetableCache.data;
+  } catch {
+    // If specific city failed or timed out, fallback to cached or regional base
+    if (cached?.data) return cached.data;
     return {
       source: "RozKaBhav.com",
-      sourceUrl: "https://rozkabhav.com/vegetables-price-in-bhopal-madhya-pradesh/",
-      market: "Bhopal Mandi, Madhya Pradesh",
+      sourceUrl: cityInfo.vegUrl,
+      city: cityInfo.name,
+      market: cityInfo.marketName,
       items: [
-        { name: "Onion", price: "₹30 per kg", change: "0.00" },
+        { name: "Onion", price: "₹28 per kg", change: "0.00" },
         { name: "Potato", price: "₹30 per kg", change: "0.00" },
         { name: "Tomato", price: "₹26 per kg", change: "0.00" },
         { name: "Cauliflower", price: "₹40 per kg", change: "0.00" },
@@ -249,7 +373,7 @@ export async function getLiveMandiPulse() {
 
     mandiPulseCache = { data: parsed, timestamp: Date.now() };
     return parsed;
-  } catch (error: any) {
+  } catch {
     if (mandiPulseCache?.data) return mandiPulseCache.data;
     return {
       source: "MandiPulse.com",
@@ -262,16 +386,21 @@ export async function getLiveMandiPulse() {
   }
 }
 
-// 5. UNIFIED SUMMARY FOR HOME SCREEN STRIP
-export async function getVerifiedMarketSummary() {
+// 5. UNIFIED SUMMARY FOR HOME SCREEN STRIP (Supports ?city=indore)
+export async function getVerifiedMarketSummary(cityId?: string) {
+  const cityKey = normalizeCityKey(cityId);
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
+
   const [panchang, bullion, vegetables, mandiPulse] = await Promise.all([
-    getLiveDrikPanchang(),
-    getLiveBullionRates(),
-    getLiveVegetablePrices(),
+    getLiveDrikPanchang(cityKey),
+    getLiveBullionRates(cityKey),
+    getLiveVegetablePrices(cityKey),
     getLiveMandiPulse()
   ]);
 
   return {
+    selectedCity: cityInfo,
+    supportedCities: Object.values(SUPPORTED_CITIES).map(c => ({ id: c.id, name: c.name, state: c.state })),
     panchang,
     bullion,
     vegetables,

@@ -4,15 +4,28 @@ import {
   getLiveDrikPanchang,
   getLiveBullionRates,
   getLiveVegetablePrices,
-  getLiveMandiPulse
+  getLiveMandiPulse,
+  SUPPORTED_CITIES
 } from "../services/liveMarketScraperService.js";
 
 const router = express.Router();
 
+// Supported Cities List
+router.get("/api/public/market-cities", (_req, res) => {
+  const cities = Object.values(SUPPORTED_CITIES).map(c => ({
+    id: c.id,
+    name: c.name,
+    state: c.state,
+    marketName: c.marketName
+  }));
+  return res.json({ success: true, data: cities });
+});
+
 // 1. Unified summary for Home Screen verified cards
-router.get("/api/public/market-summary", async (_req, res) => {
+router.get("/api/public/market-summary", async (req, res) => {
   try {
-    const summary = await getVerifiedMarketSummary();
+    const city = typeof req.query.city === "string" ? req.query.city : undefined;
+    const summary = await getVerifiedMarketSummary(city);
     return res.json({ success: true, data: summary });
   } catch (error: any) {
     console.error("Error in /api/public/market-summary:", error);
@@ -40,10 +53,11 @@ router.get("/api/public/live-bullion", async (_req, res) => {
   }
 });
 
-// 4. Bhopal Vegetables (Roz Ka Bhav)
-router.get("/api/public/live-vegetables", async (_req, res) => {
+// 4. City Vegetables (Roz Ka Bhav)
+router.get("/api/public/live-vegetables", async (req, res) => {
   try {
-    const data = await getLiveVegetablePrices();
+    const city = typeof req.query.city === "string" ? req.query.city : undefined;
+    const data = await getLiveVegetablePrices(city);
     return res.json({ success: true, data });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: "Unable to load vegetable prices" });
