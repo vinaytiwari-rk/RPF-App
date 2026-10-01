@@ -5,20 +5,21 @@ import {
   getLiveBullionRates,
   getLiveVegetablePrices,
   getLiveMandiPulse,
-  SUPPORTED_CITIES
+  SUPPORTED_CITIES,
+  getSupportedMarketCities
 } from "../services/liveMarketScraperService.js";
 
 const router = express.Router();
 
 // Supported Cities List
-router.get("/api/public/market-cities", (_req, res) => {
-  const cities = Object.values(SUPPORTED_CITIES).map(c => ({
-    id: c.id,
-    name: c.name,
-    state: c.state,
-    marketName: c.marketName
-  }));
-  return res.json({ success: true, data: cities });
+router.get("/api/public/market-cities", async (_req, res) => {
+  try {
+    const cities = await getSupportedMarketCities();
+    return res.json({ success: true, data: cities });
+  } catch (error) {
+    console.error("Error discovering market cities:", error);
+    return res.status(500).json({ success: false, error: "Unable to load market cities" });
+  }
 });
 
 // 1. Unified summary for Home Screen verified cards
