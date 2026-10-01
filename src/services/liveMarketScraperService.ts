@@ -108,6 +108,86 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
   }
 };
 
+
+type StateMarketSource = { state: string; vegUrl: string; fuelUrl: string; anchorCity: string };
+
+const STATE_MARKET_SOURCES: Record<string, StateMarketSource> = {
+  "Madhya Pradesh": { state: "Madhya Pradesh", anchorCity: "Bhopal", vegUrl: "https://rozkabhav.com/vegetables-price-in-bhopal-madhya-pradesh/", fuelUrl: "https://rozkabhav.com/fuel-price-in-bhopal-madhya-pradesh/" },
+  "Uttar Pradesh": { state: "Uttar Pradesh", anchorCity: "Agra", vegUrl: "https://rozkabhav.com/vegetables-price-in-agra-uttar-pradesh/", fuelUrl: "https://rozkabhav.com/fuel-price-in-agra-uttar-pradesh/" },
+  "Rajasthan": { state: "Rajasthan", anchorCity: "Kota", vegUrl: "https://rozkabhav.com/vegetables-price-in-kota-rajasthan/", fuelUrl: "https://rozkabhav.com/fuel-price-in-kota-rajasthan/" },
+  "Maharashtra": { state: "Maharashtra", anchorCity: "Nagpur", vegUrl: "https://rozkabhav.com/vegetables-price-in-nagpur-maharashtra/", fuelUrl: "https://rozkabhav.com/fuel-price-in-nagpur-maharashtra/" },
+  "Chhattisgarh": { state: "Chhattisgarh", anchorCity: "Raipur", vegUrl: "https://rozkabhav.com/vegetables-price-in-raipur-chhattisgarh/", fuelUrl: "https://rozkabhav.com/fuel-price-in-raipur-chhattisgarh/" },
+  "Delhi NCR": { state: "Delhi NCR", anchorCity: "Delhi", vegUrl: "https://rozkabhav.com/vegetables-price-in-delhi-delhi/", fuelUrl: "https://rozkabhav.com/fuel-price-in-delhi-delhi/" }
+};
+
+const cityCatalogCache = new Map<string, { data: Record<string, CityLocationInfo>; timestamp: number }>();
+
+function slugifyCity(value: string) {
+  return value.toLowerCase().trim().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+function buildCityInfo(name: string, state: string): CityLocationInfo {
+  const source = STATE_MARKET_SOURCES[state] || STATE_MARKET_SOURCES["Madhya Pradesh"];
+  return { id: slugifyCity(name), name, state, vegUrl: source.vegUrl, fuelUrl: source.fuelUrl, marketName: `${name} Mandi, ${state}` };
+}
+
+async function discoverCitiesFromState(source: StateMarketSource): Promise<Record<string, CityLocationInfo>> {
+  const result: Record<string, CityLocationInfo> = {};
+  try {
+    const res = await axios.get(source.vegUrl, { headers: customHeaders, httpsAgent, timeout: 7000 });
+    const $ = cheerio.load(res.data);
+    $("table").each((_, table) => {
+      const headers = $(table).find("tr").first().find("th,td").map((__, el) => $(el).text().replace(/\s+/g, " ").trim().toLowerCase()).get();
+      if (!headers.some(h => h === "city") || !headers.some(h => h.includes("onion"))) return;
+      $(table).find("tr").slice(1).each((__, row) => {
+        const cells = $(row).find("td").map((___, td) => $(td).text().replace(/\s+/g, " ").trim()).get();
+        const city = (cells[0] || "").replace(/[▲▼]/g, "").trim();
+        if (city && !/^\d+(\.\d+)?$/.test(city)) result[slugifyCity(city)] = buildCityInfo(city, source.state);
+      });
+    });
+  } catch {}
+  return result;
+}
+
+async function ensureCityCatalog() {
+  const cached = cityCatalogCache.get("all");
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    Object.assign(SUPPORTED_CITIES, cached.data);
+    return cached.data;
+  }
+  const discovered: Record<string, CityLocationInfo> = { ...SUPPORTED_CITIES };
+  const groups = await Promise.all(Object.values(STATE_MARKET_SOURCES).map(discoverCitiesFromState));
+  groups.forEach(group => Object.assign(discovered, group));
+  Object.assign(SUPPORTED_CITIES, discovered);
+  cityCatalogCache.set("all", { data: discovered, timestamp: Date.now() });
+  return discovered;
+}
+
+export async function getSupportedMarketCities() {
+  await ensureCityCatalog();
+  return Object.values(SUPPORTED_CITIES).map(c => ({ id: c.id, name: c.name, state: c.state, marketName: c.marketName }));
+}
+
+function parseCityMarketRow(html: string, cityName: string, kind: "vegetable" | "fuel") {
+  const $ = cheerio.load(html);
+  let found: { headers: string[]; cells: string[] } | null = null;
+  $("table").each((_, table) => {
+    if (found) return;
+    const headers = $(table).find("tr").first().find("th,td").map((__, el) => $(el).text().replace(/\s+/g, " ").trim()).get();
+    const lower = headers.map(h => h.toLowerCase());
+    const valid = kind === "vegetable"
+      ? lower.some(h => h === "city") && lower.some(h => h.includes("onion"))
+      : lower.some(h => h === "city") && lower.some(h => h.includes("petrol")) && lower.some(h => h.includes("diesel"));
+    if (!valid) return;
+    $(table).find("tr").slice(1).each((__, row) => {
+      if (found) return;
+      const cells = $(row).find("td").map((___, td) => $(td).text().replace(/\s+/g, " ").trim()).get();
+      if ((cells[0] || "").replace(/[▲▼]/g, "").trim().toLowerCase() === cityName.toLowerCase()) found = { headers, cells };
+    });
+  });
+  return found;
+}
+
 // Caches with city keying
 const panchangCache = new Map<string, { data: any; timestamp: number }>();
 const bullionCache = new Map<string, { data: any; timestamp: number }>();
@@ -128,6 +208,7 @@ function normalizeCityKey(city?: string): string {
 
 // 1. DRIK PANCHANG SCRAPER (Source: drikpanchang.com)
 export async function getLiveDrikPanchang(cityId?: string) {
+  await ensureCityCatalog();
   const cityKey = normalizeCityKey(cityId);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = panchangCache.get(cityKey);
@@ -217,6 +298,7 @@ export async function getLiveDrikPanchang(cityId?: string) {
 
 // 2. ALL INDIA BULLION SCRAPER (Source: allindiabullion.com)
 export async function getLiveBullionRates(cityId?: string) {
+  await ensureCityCatalog();
   const cityKey = normalizeCityKey(cityId);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = bullionCache.get(cityKey);
@@ -286,116 +368,55 @@ export async function getLiveBullionRates(cityId?: string) {
 
 // 3. CITY VEGETABLE MANDI SCRAPER (Source: rozkabhav.com)
 export async function getLiveVegetablePrices(cityId?: string) {
+  await ensureCityCatalog();
   const cityKey = normalizeCityKey(cityId);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = vegetableCache.get(cityKey);
-
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return cached.data;
-  }
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
 
   try {
-    const res = await axios.get(cityInfo.vegUrl, {
-      headers: customHeaders,
-      httpsAgent,
-      timeout: 8000
-    });
-    const $ = cheerio.load(res.data);
+    const res = await axios.get(cityInfo.vegUrl, { headers: customHeaders, httpsAgent, timeout: 8000 });
+    const row = parseCityMarketRow(res.data, cityInfo.name, "vegetable");
     const items: { name: string; price: string; change: string }[] = [];
-
-    $("table tr").each((i, el) => {
-      if (i === 0) return;
-      const tds = $(el).find("td");
-      if (tds.length >= 2) {
-        const name = $(tds[0]).text().trim();
-        const price = $(tds[1]).text().trim();
-        const change = $(tds[3] || tds[2]).text().trim();
-        if (name && price) {
-          items.push({ name, price, change });
-        }
-      }
-    });
-
-    const parsed = {
-      source: "RozKaBhav.com",
-      sourceUrl: cityInfo.vegUrl,
-      city: cityInfo.name,
-      market: cityInfo.marketName,
-      items: items.length ? items.slice(0, 12) : [
-        { name: "Onion", price: "₹28 per kg", change: "0.00" },
-        { name: "Potato", price: "₹30 per kg", change: "0.00" },
-        { name: "Tomato", price: "₹26 per kg", change: "0.00" }
-      ],
-      updatedAt: new Date().toISOString()
-    };
-
+    if (row) {
+      row.headers.forEach((header, index) => {
+        if (index === 0) return;
+        const name = header.replace(/today|price|rate/gi, "").trim();
+        const price = row!.cells[index] || "";
+        if (name && price && /₹|[0-9]/.test(price)) items.push({ name, price, change: "" });
+      });
+    }
+    const uniqueItems = Array.from(new Map(items.map(item => [item.name.toLowerCase().replace(/\s+/g, " ").trim(), item])).values());
+    const parsed = { source: "RozKaBhav.com", sourceUrl: cityInfo.vegUrl, city: cityInfo.name, market: cityInfo.marketName, items: uniqueItems.slice(0, 12), updatedAt: new Date().toISOString() };
     vegetableCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
   } catch {
-    // If specific city failed or timed out, fallback to cached or regional base
     if (cached?.data) return cached.data;
-    return {
-      source: "RozKaBhav.com",
-      sourceUrl: cityInfo.vegUrl,
-      city: cityInfo.name,
-      market: cityInfo.marketName,
-      items: [
-        { name: "Onion", price: "₹28 per kg", change: "0.00" },
-        { name: "Potato", price: "₹30 per kg", change: "0.00" },
-        { name: "Tomato", price: "₹26 per kg", change: "0.00" },
-        { name: "Cauliflower", price: "₹40 per kg", change: "0.00" },
-        { name: "Brinjal", price: "₹80 per kg", change: "0.00" },
-        { name: "Ladies Finger", price: "₹75 per kg", change: "0.00" }
-      ],
-      updatedAt: new Date().toISOString()
-    };
+    return { source: "RozKaBhav.com", sourceUrl: cityInfo.vegUrl, city: cityInfo.name, market: cityInfo.marketName, items: [], unavailable: true, updatedAt: new Date().toISOString() };
   }
 }
 
 // 4. FUEL & GAS PRICE SCRAPER (Source: RozKaBhav.com)
 export async function getLiveFuelPrices(cityId?: string) {
+  await ensureCityCatalog();
   const cityKey = normalizeCityKey(cityId);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = fuelCache.get(cityKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
 
   try {
-    const res = await axios.get(cityInfo.fuelUrl, {
-      headers: customHeaders,
-      httpsAgent,
-      timeout: 6000
-    });
-    const $ = cheerio.load(res.data);
-    let petrol = "", diesel = "", cng = "";
-    $("table tr").each((_, el) => {
-      const cells = $(el).find("td").map((__, td) => $(td).text().replace(/\s+/g, " ").trim()).get();
-      if (cells.length < 4) return;
-      const city = cells[0].toLowerCase();
-      if (city === cityInfo.name.toLowerCase()) {
-        petrol = cells[1].replace(/\s*[▲▼]$/, "");
-        diesel = cells[2].replace(/\s*[▲▼]$/, "");
-        cng = cells[3].replace(/\s*[▲▼]$/, "");
-      }
-    });
-    const parsed = {
-      source: "RozKaBhav.com",
-      sourceUrl: cityInfo.fuelUrl,
-      city: cityInfo.name,
-      petrol, diesel, lpgDomestic: "", lpgCommercial: "", cng,
-      updatedAt: new Date().toISOString()
-    };
+    const res = await axios.get(cityInfo.fuelUrl, { headers: customHeaders, httpsAgent, timeout: 6000 });
+    const row = parseCityMarketRow(res.data, cityInfo.name, "fuel");
+    const petrol = row?.cells[1] || "";
+    const diesel = row?.cells[2] || "";
+    const cng = row?.cells[3] || "";
+    const parsed = { source: "RozKaBhav.com", sourceUrl: cityInfo.fuelUrl, city: cityInfo.name, petrol, diesel, lpgDomestic: "", lpgCommercial: "", cng, updatedAt: new Date().toISOString() };
     if (!petrol && !diesel && !cng) throw new Error("Fuel price row not found");
     fuelCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
   } catch {
     if (cached?.data) return cached.data;
-    return {
-      source: "RozKaBhav.com",
-      sourceUrl: cityInfo.fuelUrl,
-      city: cityInfo.name,
-      petrol: "", diesel: "", lpgDomestic: "", lpgCommercial: "", cng: "",
-      updatedAt: new Date().toISOString(), unavailable: true
-    };
+    return { source: "RozKaBhav.com", sourceUrl: cityInfo.fuelUrl, city: cityInfo.name, petrol: "", diesel: "", lpgDomestic: "", lpgCommercial: "", cng: "", updatedAt: new Date().toISOString(), unavailable: true };
   }
 }
 
@@ -448,6 +469,7 @@ export async function getLiveMandiPulse() {
 
 // 5. UNIFIED SUMMARY FOR HOME SCREEN STRIP (Supports ?city=indore)
 export async function getVerifiedMarketSummary(cityId?: string) {
+  await ensureCityCatalog();
   const cityKey = normalizeCityKey(cityId);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
 
