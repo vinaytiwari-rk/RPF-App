@@ -13,6 +13,7 @@ export interface CityLocationInfo {
   name: string;
   state: string;
   vegUrl: string;
+  fuelUrl: string;
   marketName: string;
 }
 
@@ -22,6 +23,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Indore",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-indore-madhya-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-indore-madhya-pradesh/",
     marketName: "Indore Choithram Mandi, MP"
   },
   bhopal: {
@@ -29,6 +31,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Bhopal",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-bhopal-madhya-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-bhopal-madhya-pradesh/",
     marketName: "Bhopal Karond Mandi, MP"
   },
   lucknow: {
@@ -36,6 +39,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Lucknow",
     state: "Uttar Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-lucknow-uttar-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-lucknow-uttar-pradesh/",
     marketName: "Lucknow Dubagga Mandi, UP"
   },
   delhi: {
@@ -43,6 +47,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Delhi",
     state: "Delhi NCR",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-delhi/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-delhi-delhi/",
     marketName: "Delhi Azadpur Mandi"
   },
   gwalior: {
@@ -50,6 +55,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Gwalior",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-gwalior-madhya-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-gwalior-madhya-pradesh/",
     marketName: "Gwalior Laxmiganj Mandi, MP"
   },
   ujjain: {
@@ -57,6 +63,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Ujjain",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-ujjain-madhya-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-ujjain-madhya-pradesh/",
     marketName: "Ujjain Krishi Upaj Mandi, MP"
   },
   jabalpur: {
@@ -64,6 +71,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Jabalpur",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-jabalpur-madhya-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-jabalpur-madhya-pradesh/",
     marketName: "Jabalpur Krishi Mandi, MP"
   },
   kanpur: {
@@ -71,6 +79,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Kanpur",
     state: "Uttar Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-kanpur-uttar-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-kanpur-uttar-pradesh/",
     marketName: "Kanpur Chakarpar Mandi, UP"
   },
   varanasi: {
@@ -78,6 +87,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Varanasi",
     state: "Uttar Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-varanasi-uttar-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-varanasi-uttar-pradesh/",
     marketName: "Varanasi Chandpur Mandi, UP"
   },
   jaipur: {
@@ -85,6 +95,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Jaipur",
     state: "Rajasthan",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-jaipur-rajasthan/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-jaipur-rajasthan/",
     marketName: "Jaipur Muhana Mandi, Rajasthan"
   },
   mumbai: {
@@ -92,6 +103,7 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     name: "Mumbai",
     state: "Maharashtra",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-mumbai-maharashtra/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-mumbai-maharashtra/",
     marketName: "Mumbai Vashi APMC, Maharashtra"
   }
 };
@@ -340,66 +352,49 @@ export async function getLiveVegetablePrices(cityId?: string) {
   }
 }
 
-// 4. FUEL & GAS PRICE SCRAPER (Source: GoodReturns price pages)
+// 4. FUEL & GAS PRICE SCRAPER (Source: RozKaBhav.com)
 export async function getLiveFuelPrices(cityId?: string) {
   const cityKey = normalizeCityKey(cityId);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = fuelCache.get(cityKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
 
-  const citySlug = cityInfo.name.toLowerCase();
-  const urls = {
-    petrol: "https://www.goodreturns.in/petrol-price-in-" + citySlug + ".html",
-    diesel: "https://www.goodreturns.in/diesel-price-in-" + citySlug + ".html",
-    lpg: "https://www.goodreturns.in/lpg-price-in-" + citySlug + ".html",
-    cng: "https://www.goodreturns.in/cng-price-in-" + citySlug + ".html"
-  };
-
-  const extract = (html: string, pattern: RegExp) => {
-    const text = cheerio.load(html).text().replace(/\s+/g, " ");
-    const m = text.match(pattern);
-    return m?.[1] ? "₹" + m[1] : "";
-  };
-
   try {
-    const [petrolRes, dieselRes, lpgRes, cngRes] = await Promise.all([
-      axios.get(urls.petrol, { headers: customHeaders, httpsAgent, timeout: 7000 }),
-      axios.get(urls.diesel, { headers: customHeaders, httpsAgent, timeout: 7000 }),
-      axios.get(urls.lpg, { headers: customHeaders, httpsAgent, timeout: 7000 }),
-      axios.get(urls.cng, { headers: customHeaders, httpsAgent, timeout: 7000 })
-    ]);
-
-    const petrol = extract(petrolRes.data, new RegExp(cityInfo.name + "[\\s\\S]{0,180}?₹\\s*([0-9,]+(?:\\.[0-9]+)?)\\s*/\\s*Ltr", "i"));
-    const diesel = extract(dieselRes.data, new RegExp(cityInfo.name + "[\\s\\S]{0,180}?₹\\s*([0-9,]+(?:\\.[0-9]+)?)\\s*/\\s*Ltr", "i"));
-    const cng = extract(cngRes.data, new RegExp(cityInfo.name + "[\\s\\S]{0,180}?₹\\s*([0-9,]+(?:\\.[0-9]+)?)\\s*/\\s*Kg", "i"));
-    const lpgText = cheerio.load(lpgRes.data).text().replace(/\s+/g, " ");
-    const lpgMatch = lpgText.match(/Domestic\s*\(14\.2\s*Kg\)\s*₹\s*([0-9,]+(?:\.[0-9]+)?)/i);
-    const lpgCommercialMatch = lpgText.match(/Commercial\s*\(19\s*Kg\)\s*₹\s*([0-9,]+(?:\.[0-9]+)?)/i);
-
+    const res = await axios.get(cityInfo.fuelUrl, {
+      headers: customHeaders,
+      httpsAgent,
+      timeout: 6000
+    });
+    const $ = cheerio.load(res.data);
+    let petrol = "", diesel = "", cng = "";
+    $("table tr").each((_, el) => {
+      const cells = $(el).find("td").map((__, td) => $(td).text().replace(/\s+/g, " ").trim()).get();
+      if (cells.length < 4) return;
+      const city = cells[0].toLowerCase();
+      if (city === cityInfo.name.toLowerCase()) {
+        petrol = cells[1].replace(/\s*[▲▼]$/, "");
+        diesel = cells[2].replace(/\s*[▲▼]$/, "");
+        cng = cells[3].replace(/\s*[▲▼]$/, "");
+      }
+    });
     const parsed = {
-      source: "GoodReturns.in",
-      sourceUrl: urls.petrol,
+      source: "RozKaBhav.com",
+      sourceUrl: cityInfo.fuelUrl,
       city: cityInfo.name,
-      petrol,
-      diesel,
-      lpgDomestic: lpgMatch?.[1] ? "₹" + lpgMatch[1] : "",
-      lpgCommercial: lpgCommercialMatch?.[1] ? "₹" + lpgCommercialMatch[1] : "",
-      cng,
+      petrol, diesel, lpgDomestic: "", lpgCommercial: "", cng,
       updatedAt: new Date().toISOString()
     };
-
-    if (!parsed.petrol && !parsed.diesel && !parsed.lpgDomestic && !parsed.cng) throw new Error("Fuel prices could not be parsed");
+    if (!petrol && !diesel && !cng) throw new Error("Fuel price row not found");
     fuelCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
-  } catch (error) {
+  } catch {
     if (cached?.data) return cached.data;
     return {
-      source: "GoodReturns.in",
-      sourceUrl: urls.petrol,
+      source: "RozKaBhav.com",
+      sourceUrl: cityInfo.fuelUrl,
       city: cityInfo.name,
       petrol: "", diesel: "", lpgDomestic: "", lpgCommercial: "", cng: "",
-      updatedAt: new Date().toISOString(),
-      unavailable: true
+      updatedAt: new Date().toISOString(), unavailable: true
     };
   }
 }
@@ -456,13 +451,25 @@ export async function getVerifiedMarketSummary(cityId?: string) {
   const cityKey = normalizeCityKey(cityId);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
 
-  const [panchang, bullion, vegetables, mandiPulse, fuel] = await Promise.all([
+  // Keep Home fast: all required feeds are fetched concurrently.
+  // Mandi data is derived from the same RozKaBhav city page as vegetable prices,
+  // so we do not make a second MandiPulse request.
+  const [panchang, bullion, vegetables, fuel] = await Promise.all([
     getLiveDrikPanchang(cityKey),
     getLiveBullionRates(cityKey),
     getLiveVegetablePrices(cityKey),
-    getLiveMandiPulse(),
     getLiveFuelPrices(cityKey)
   ]);
+
+  const mandiPulse = {
+    source: vegetables.source,
+    sourceUrl: vegetables.sourceUrl,
+    updates: vegetables.items.slice(0, 8).map((item) => ({
+      title: item.name + " — " + item.price,
+      desc: "Today’s city/mandi reference rate" + (item.change ? " • Change: " + item.change : "")
+    })),
+    updatedAt: vegetables.updatedAt
+  };
 
   return {
     selectedCity: cityInfo,
