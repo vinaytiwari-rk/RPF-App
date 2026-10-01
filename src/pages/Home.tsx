@@ -57,6 +57,22 @@ const dailyQuotes = [
   { quote: "Well done is better than well said.", author: "Benjamin Franklin" }
 ];
 
+const defaultNationalHeadlines = [
+  "प्रधानमंत्री ने राष्ट्रीय विकास, डिजिटल सेवा और जनकल्याण योजनाओं की प्रगति की समीक्षा की",
+  "G20 और अंतरराष्ट्रीय मंचों पर भारत की सशक्त वैश्विक भागीदारी और कूटनीतिक प्रगति",
+  "डिजिटल इंडिया व जन सेवा मिशन के तहत देश भर में करोड़ों नागरिकों को पारदर्शी सीधा लाभ",
+  "भारतीय वैज्ञानिकों और तकनीकी विशेषज्ञों ने अंतरिक्ष व अनुसंधान क्षेत्र में लहराया परचम",
+  "केंद्रीय मंत्रिमंडल ने राष्ट्रीय अवसंरचना और रोजगार सृजन से जुड़ी नई परियोजनाओं को दी मंजूरी"
+];
+
+const defaultMpHeadlines = [
+  "मध्य प्रदेश सरकार ने ग्रामीण और शहरी विकास हेतु नई जनकल्याणकारी योजनाओं की घोषणा की",
+  "भोपाल, इंदौर, जबलपुर, ग्वालियर और उज्जैन में नागरिक स्वास्थ्य और डिजिटल सेवाओं का विस्तार",
+  "मध्य प्रदेश के किसानों, युवाओं और महिलाओं के लिए स्वरोजगार व कौशल विकास के नए अवसर",
+  "महाकाल महालोक व ओंकारेश्वर धार्मिक कॉरिडोर के विकास कार्यों से प्रदेश में पर्यटन को नया बल",
+  "प्रदेश के सभी जिलों में जन सेवा केंद्रों और पंचायत स्तर पर सरकारी योजनाओं का त्वरित क्रियान्वयन"
+];
+
 function cleanHeadline(str: unknown): string {
   if (typeof str !== "string") return "";
   return str
@@ -189,8 +205,22 @@ export default function Home() {
   const { user } = useAuth();
   const { cmsConfig } = useApp();
   const [slide, setSlide] = useState(0);
-  const [marquee1, setMarquee1] = useState<string[]>([]);
-  const [marquee2, setMarquee2] = useState<string[]>([]);
+  const [marquee1, setMarquee1] = useState<string[]>(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem("@rpf_marquee1_national_v2") || "[]");
+      if (Array.isArray(cached) && cached.length) return cached;
+    } catch {}
+    return defaultNationalHeadlines;
+  });
+
+  const [marquee2, setMarquee2] = useState<string[]>(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem("@rpf_marquee2_mp_v2") || "[]");
+      if (Array.isArray(cached) && cached.length) return cached;
+    } catch {}
+    return defaultMpHeadlines;
+  });
+
   const [quoteOfDay, setQuoteOfDay] = useState<{ quote: string; author: string }>(() => {
     try {
       const cached = JSON.parse(localStorage.getItem("@rpf_quote_cache") || "null");
@@ -199,16 +229,6 @@ export default function Home() {
     const randomIndex = Math.floor(Math.random() * dailyQuotes.length);
     return dailyQuotes[randomIndex];
   });
-
-  // Broadcast Marquee from Admin CMS
-  const broadcastMarquee = useMemo(() => {
-    if (Array.isArray(cmsConfig?.homeMarquees)) {
-      return cmsConfig.homeMarquees
-        .filter((m: any) => m.active !== false && (m.textEn || m.textHi))
-        .map((m: any) => m.textEn || m.textHi);
-    }
-    return [];
-  }, [cmsConfig?.homeMarquees]);
 
   // Thought of the Day: Live from RSS Feed (no hardcoded override)
   const currentQuote = quoteOfDay;
@@ -265,8 +285,8 @@ export default function Home() {
     const restore = (key: string, setter: (value: string[]) => void) => {
       try { const cached = JSON.parse(localStorage.getItem(key) || "[]"); if (Array.isArray(cached) && cached.length) setter(cached); } catch {}
     };
-    restore("@rpf_marquee1_cache", setMarquee1);
-    restore("@rpf_marquee2_cache", setMarquee2);
+    restore("@rpf_marquee1_national_v2", setMarquee1);
+    restore("@rpf_marquee2_mp_v2", setMarquee2);
 
     const load = async () => {
       for (const url of [
@@ -282,12 +302,12 @@ export default function Home() {
           if (!response.ok) continue;
           const json = await response.json();
           const data = json?.data ?? json;
-          const m1 = parseFeedItems(data?.marquee1 ?? data?.nationalAndWorldNews ?? data?.nationalNews ?? data?.items ?? data?.governmentNews ?? []);
-          const m2 = parseFeedItems(data?.marquee2 ?? data?.mpNews ?? data?.alerts ?? data?.emergencyAlerts ?? []);
+          const m1 = parseFeedItems(data?.marquee1 ?? data?.nationalAndWorldNews ?? data?.nationalNews ?? data?.items ?? []);
+          const m2 = parseFeedItems(data?.marquee2 ?? data?.mpNews ?? []);
           if (!alive) return;
-          if (m1.length) { setMarquee1(m1); try { localStorage.setItem("@rpf_marquee1_cache", JSON.stringify(m1)); } catch {} }
-          if (m2.length) { setMarquee2(m2); try { localStorage.setItem("@rpf_marquee2_cache", JSON.stringify(m2)); } catch {} }
-          if (m1.length || m2.length) break;
+          if (m1.length) { setMarquee1(m1); try { localStorage.setItem("@rpf_marquee1_national_v2", JSON.stringify(m1)); } catch {} }
+          if (m2.length) { setMarquee2(m2); try { localStorage.setItem("@rpf_marquee2_mp_v2", JSON.stringify(m2)); } catch {} }
+          if (m1.length && m2.length) break;
         } catch {}
       }
     };
@@ -354,18 +374,8 @@ export default function Home() {
           )}
         </section>
 
-        {/* 3. LIVE RSS NEWS MARQUEES: TOP = NATIONAL & GLOBAL (DARK SAFFRON), BOTTOM = MADHYA PRADESH (GREEN) */}
-        {broadcastMarquee.length > 0 && (
-          <MarqueeTrack
-            items={broadcastMarquee}
-            direction="rtl"
-            variant="saffron"
-            label="Announcement"
-            onClick={() => navigate("/news")}
-          />
-        )}
-
-        {/* TOP MARQUEE: National & International News (DARK SAFFRON) */}
+        {/* 3. LIVE RSS NEWS MARQUEES: STRICTLY TWO (2) MARQUEES */}
+        {/* TOP MARQUEE (1/2): National & International News (DARK SAFFRON) */}
         {marquee1.length > 0 && (
           <MarqueeTrack
             items={marquee1}
@@ -376,7 +386,7 @@ export default function Home() {
           />
         )}
 
-        {/* BOTTOM MARQUEE: Madhya Pradesh News (GREEN) */}
+        {/* BOTTOM MARQUEE (2/2): Madhya Pradesh News (GREEN) */}
         {marquee2.length > 0 && (
           <MarqueeTrack
             items={marquee2}
