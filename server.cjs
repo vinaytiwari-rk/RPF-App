@@ -34607,17 +34607,17 @@ var require_router = __commonJS({
     var toString7 = Object.prototype.toString;
     var proto2 = module2.exports = function(options2) {
       var opts = options2 || {};
-      function router33(req2, res, next2) {
-        router33.handle(req2, res, next2);
+      function router34(req2, res, next2) {
+        router34.handle(req2, res, next2);
       }
-      setPrototypeOf(router33, proto2);
-      router33.params = {};
-      router33._params = [];
-      router33.caseSensitive = opts.caseSensitive;
-      router33.mergeParams = opts.mergeParams;
-      router33.strict = opts.strict;
-      router33.stack = [];
-      return router33;
+      setPrototypeOf(router34, proto2);
+      router34.params = {};
+      router34._params = [];
+      router34.caseSensitive = opts.caseSensitive;
+      router34.mergeParams = opts.mergeParams;
+      router34.strict = opts.strict;
+      router34.stack = [];
+      return router34;
     };
     proto2.param = function param(name, fn3) {
       if (typeof name === "function") {
@@ -37592,17 +37592,17 @@ var require_application = __commonJS({
       }
     };
     app2.handle = function handle2(req2, res, callback2) {
-      var router33 = this._router;
+      var router34 = this._router;
       var done = callback2 || finalhandler2(req2, res, {
         env: this.get("env"),
         onerror: logerror2.bind(this)
       });
-      if (!router33) {
+      if (!router34) {
         debug2("no routes defined on app");
         done();
         return;
       }
-      router33.handle(req2, res, done);
+      router34.handle(req2, res, done);
     };
     app2.use = function use2(fn3) {
       var offset2 = 0;
@@ -37622,15 +37622,15 @@ var require_application = __commonJS({
         throw new TypeError("app.use() requires a middleware function");
       }
       this.lazyrouter();
-      var router33 = this._router;
+      var router34 = this._router;
       fns.forEach(function(fn4) {
         if (!fn4 || !fn4.handle || !fn4.set) {
-          return router33.use(path12, fn4);
+          return router34.use(path12, fn4);
         }
         debug2(".use app under %s", path12);
         fn4.mountpath = path12;
         fn4.parent = this;
-        router33.use(path12, function mounted_app(req2, res, next2) {
+        router34.use(path12, function mounted_app(req2, res, next2) {
           var orig = req2.app;
           fn4.handle(req2, res, function(err2) {
             setPrototypeOf(req2, orig.request);
@@ -43660,7 +43660,7 @@ var require_parser = __commonJS({
     var HEADER_LENGTH = CODE_LENGTH + LEN_LENGTH;
     var LATEINIT_LENGTH = -1;
     var emptyBuffer = Buffer.allocUnsafe(0);
-    var Parser7 = class {
+    var Parser8 = class {
       constructor(opts) {
         this.buffer = emptyBuffer;
         this.bufferLength = 0;
@@ -43802,7 +43802,7 @@ var require_parser = __commonJS({
         return message;
       }
     };
-    exports2.Parser = Parser7;
+    exports2.Parser = Parser8;
     var parseReadyForQueryMessage = (reader) => {
       const status2 = reader.string(1);
       return new messages_1.ReadyForQueryMessage(LATEINIT_LENGTH, status2);
@@ -96732,7 +96732,7 @@ var require_client_h1 = __commonJS({
     var TIMEOUT_HEADERS = 2 | USE_FAST_TIMER;
     var TIMEOUT_BODY = 4 | USE_FAST_TIMER;
     var TIMEOUT_KEEP_ALIVE = 8 | USE_NATIVE_TIMER;
-    var Parser7 = class {
+    var Parser8 = class {
       /**
          * @param {import('./client.js')} client
          * @param {import('net').Socket} socket
@@ -97212,7 +97212,7 @@ var require_client_h1 = __commonJS({
       socket[kIdleSocketValidation] = 0;
       socket[kIdleSocketValidationTimeout] = null;
       socket[kSocketUsed] = false;
-      socket[kParser] = new Parser7(client, socket, llhttpInstance);
+      socket[kParser] = new Parser8(client, socket, llhttpInstance);
       util6.addListener(socket, "error", onHttpSocketError);
       util6.addListener(socket, "readable", onHttpSocketReadable);
       util6.addListener(socket, "end", onHttpSocketEnd);
@@ -168198,8 +168198,8 @@ var require_parser4 = __commonJS({
         return item;
       };
       exports2.Parser = (function(superClass) {
-        extend2(Parser7, superClass);
-        function Parser7(opts) {
+        extend2(Parser8, superClass);
+        function Parser8(opts) {
           this.parseStringPromise = bind2(this.parseStringPromise, this);
           this.parseString = bind2(this.parseString, this);
           this.reset = bind2(this.reset, this);
@@ -168232,7 +168232,7 @@ var require_parser4 = __commonJS({
           }
           this.reset();
         }
-        Parser7.prototype.processAsync = function() {
+        Parser8.prototype.processAsync = function() {
           var chunk, err2;
           try {
             if (this.remaining.length <= this.options.chunkSize) {
@@ -168254,7 +168254,7 @@ var require_parser4 = __commonJS({
             }
           }
         };
-        Parser7.prototype.assignOrPush = function(obj, key, newValue) {
+        Parser8.prototype.assignOrPush = function(obj, key, newValue) {
           if (!(key in obj)) {
             if (!this.options.explicitArray) {
               return obj[key] = newValue;
@@ -168268,7 +168268,7 @@ var require_parser4 = __commonJS({
             return obj[key].push(newValue);
           }
         };
-        Parser7.prototype.reset = function() {
+        Parser8.prototype.reset = function() {
           var attrkey, charkey, ontext, stack;
           this.removeAllListeners();
           this.saxParser = sax.parser(this.options.strict, {
@@ -168461,7 +168461,7 @@ var require_parser4 = __commonJS({
             };
           })(this);
         };
-        Parser7.prototype.parseString = function(str2, cb) {
+        Parser8.prototype.parseString = function(str2, cb) {
           var err2;
           if (cb != null && typeof cb === "function") {
             this.on("end", function(result) {
@@ -168496,7 +168496,7 @@ var require_parser4 = __commonJS({
             }
           }
         };
-        Parser7.prototype.parseStringPromise = function(str2) {
+        Parser8.prototype.parseStringPromise = function(str2) {
           return new Promise(/* @__PURE__ */ (function(_this) {
             return function(resolve8, reject) {
               return _this.parseString(str2, function(err2, value2) {
@@ -168509,7 +168509,7 @@ var require_parser4 = __commonJS({
             };
           })(this));
         };
-        return Parser7;
+        return Parser8;
       })(events2);
       exports2.parseString = function(str2, a6, b2) {
         var cb, options2, parser2;
@@ -169039,7 +169039,7 @@ var require_parser5 = __commonJS({
     };
     var DEFAULT_MAX_REDIRECTS = 5;
     var DEFAULT_TIMEOUT = 6e4;
-    var Parser7 = class {
+    var Parser8 = class {
       constructor(options2 = {}) {
         options2.headers = options2.headers || {};
         options2.xml2js = options2.xml2js || {};
@@ -169344,7 +169344,7 @@ var require_parser5 = __commonJS({
         }, {});
       }
     };
-    module2.exports = Parser7;
+    module2.exports = Parser8;
   }
 });
 
@@ -188436,7 +188436,7 @@ var init_jiti = __esm({
 var dep_CvfTChi5_exports = {};
 __export(dep_CvfTChi5_exports, {
   ErrorCodes: () => ERR3,
-  Parser: () => Parser5,
+  Parser: () => Parser6,
   Tokenizer: () => Tokenizer3,
   TokenizerMode: () => TokenizerMode2,
   defaultTreeAdapter: () => defaultTreeAdapter2,
@@ -190551,9 +190551,9 @@ function endTagInForeignContent2(p5, token) {
   }
 }
 function parse10(html3, options2) {
-  return Parser5.parse(html3, options2);
+  return Parser6.parse(html3, options2);
 }
-var UNDEFINED_CODE_POINTS2, REPLACEMENT_CHARACTER2, CODE_POINTS2, SEQUENCES2, ERR3, DEFAULT_BUFFER_WATERLINE2, Preprocessor2, TokenType2, htmlDecodeTree3, decodeMap5, CharCodes5, TO_LOWER_BIT4, BinTrieFlags4, EntityDecoderState4, DecodingMode4, EntityDecoder4, NS2, ATTRS2, DOCUMENT_MODE2, TAG_NAMES2, TAG_ID2, TAG_NAME_TO_ID2, $3, SPECIAL_ELEMENTS2, NUMBERED_HEADERS2, State4, TokenizerMode2, Tokenizer3, IMPLICIT_END_TAG_REQUIRED2, IMPLICIT_END_TAG_REQUIRED_THOROUGHLY2, SCOPING_ELEMENTS_HTML2, SCOPING_ELEMENTS_HTML_LIST2, SCOPING_ELEMENTS_HTML_BUTTON2, SCOPING_ELEMENTS_MATHML2, SCOPING_ELEMENTS_SVG2, TABLE_ROW_CONTEXT2, TABLE_BODY_CONTEXT2, TABLE_CONTEXT2, TABLE_CELLS2, OpenElementStack2, NOAH_ARK_CAPACITY2, EntryType2, MARKER2, FormattingElementList2, defaultTreeAdapter2, VALID_DOCTYPE_NAME2, VALID_SYSTEM_ID2, QUIRKS_MODE_SYSTEM_ID2, QUIRKS_MODE_PUBLIC_ID_PREFIXES2, QUIRKS_MODE_NO_SYSTEM_ID_PUBLIC_ID_PREFIXES2, QUIRKS_MODE_PUBLIC_IDS2, LIMITED_QUIRKS_PUBLIC_ID_PREFIXES2, LIMITED_QUIRKS_WITH_SYSTEM_ID_PUBLIC_ID_PREFIXES2, MIME_TYPES2, DEFINITION_URL_ATTR2, ADJUSTED_DEFINITION_URL_ATTR2, SVG_ATTRS_ADJUSTMENT_MAP2, XML_ATTRS_ADJUSTMENT_MAP2, SVG_TAG_NAMES_ADJUSTMENT_MAP2, EXITS_FOREIGN_CONTENT2, HIDDEN_INPUT_TYPE2, AA_OUTER_LOOP_ITER2, AA_INNER_LOOP_ITER2, InsertionMode2, BASE_LOC2, TABLE_STRUCTURE_TAGS2, defaultParserOptions2, Parser5, TABLE_VOID_ELEMENTS2;
+var UNDEFINED_CODE_POINTS2, REPLACEMENT_CHARACTER2, CODE_POINTS2, SEQUENCES2, ERR3, DEFAULT_BUFFER_WATERLINE2, Preprocessor2, TokenType2, htmlDecodeTree3, decodeMap5, CharCodes5, TO_LOWER_BIT4, BinTrieFlags4, EntityDecoderState4, DecodingMode4, EntityDecoder4, NS2, ATTRS2, DOCUMENT_MODE2, TAG_NAMES2, TAG_ID2, TAG_NAME_TO_ID2, $3, SPECIAL_ELEMENTS2, NUMBERED_HEADERS2, State4, TokenizerMode2, Tokenizer3, IMPLICIT_END_TAG_REQUIRED2, IMPLICIT_END_TAG_REQUIRED_THOROUGHLY2, SCOPING_ELEMENTS_HTML2, SCOPING_ELEMENTS_HTML_LIST2, SCOPING_ELEMENTS_HTML_BUTTON2, SCOPING_ELEMENTS_MATHML2, SCOPING_ELEMENTS_SVG2, TABLE_ROW_CONTEXT2, TABLE_BODY_CONTEXT2, TABLE_CONTEXT2, TABLE_CELLS2, OpenElementStack2, NOAH_ARK_CAPACITY2, EntryType2, MARKER2, FormattingElementList2, defaultTreeAdapter2, VALID_DOCTYPE_NAME2, VALID_SYSTEM_ID2, QUIRKS_MODE_SYSTEM_ID2, QUIRKS_MODE_PUBLIC_ID_PREFIXES2, QUIRKS_MODE_NO_SYSTEM_ID_PUBLIC_ID_PREFIXES2, QUIRKS_MODE_PUBLIC_IDS2, LIMITED_QUIRKS_PUBLIC_ID_PREFIXES2, LIMITED_QUIRKS_WITH_SYSTEM_ID_PUBLIC_ID_PREFIXES2, MIME_TYPES2, DEFINITION_URL_ATTR2, ADJUSTED_DEFINITION_URL_ATTR2, SVG_ATTRS_ADJUSTMENT_MAP2, XML_ATTRS_ADJUSTMENT_MAP2, SVG_TAG_NAMES_ADJUSTMENT_MAP2, EXITS_FOREIGN_CONTENT2, HIDDEN_INPUT_TYPE2, AA_OUTER_LOOP_ITER2, AA_INNER_LOOP_ITER2, InsertionMode2, BASE_LOC2, TABLE_STRUCTURE_TAGS2, defaultParserOptions2, Parser6, TABLE_VOID_ELEMENTS2;
 var init_dep_CvfTChi5 = __esm({
   "node_modules/vite/dist/node/chunks/dep-CvfTChi5.js"() {
     UNDEFINED_CODE_POINTS2 = /* @__PURE__ */ new Set([
@@ -195131,7 +195131,7 @@ var init_dep_CvfTChi5 = __esm({
       treeAdapter: defaultTreeAdapter2,
       onParseError: null
     };
-    Parser5 = class {
+    Parser6 = class {
       constructor(options2, document3, fragmentContext = null, scriptHandler = null) {
         this.fragmentContext = fragmentContext;
         this.scriptHandler = scriptHandler;
@@ -230529,7 +230529,7 @@ var require_parser6 = __commonJS({
       for (let i6 = from; i6 < to; i6++) result += tokens[i6][1];
       return result;
     }
-    var Parser7 = class {
+    var Parser8 = class {
       constructor(input) {
         this.input = input;
         this.root = new Root3();
@@ -231039,7 +231039,7 @@ var require_parser6 = __commonJS({
         );
       }
     };
-    module2.exports = Parser7;
+    module2.exports = Parser8;
   }
 });
 
@@ -231049,10 +231049,10 @@ var require_parse7 = __commonJS({
     "use strict";
     var Container2 = require_container();
     var Input2 = require_input();
-    var Parser7 = require_parser6();
+    var Parser8 = require_parser6();
     function parse16(css2, opts) {
       let input = new Input2(css2, opts);
-      let parser2 = new Parser7(input);
+      let parser2 = new Parser8(input);
       try {
         parser2.parse();
       } catch (e6) {
@@ -233197,7 +233197,7 @@ function makePlugin(opts) {
     }
   };
 }
-var import_fs9, import_path12, import_crypto23, import_util5, build2, fs7, fileSystem, pluginFactory, unquote$1, reg, Parser$1, matchValueName, replaceValueSymbols$2, replaceValueSymbols_1, replaceValueSymbols$1, replaceSymbols$1, replaceSymbols_1, importPattern, balancedQuotes, getDeclsObject, extractICSS$2, extractICSS_1, createImports, createExports, createICSSRules$1, createICSSRules_1, replaceValueSymbols, replaceSymbols, extractICSS$1, createICSSRules, src$4, _icssUtils, importRegexp, Parser6, saveJSON$1, _fs$2, localsConvention, symbolTag, reAsciiWord, reLatin, rsAstralRange, rsComboMarksRange, rsComboSymbolsRange, rsDingbatRange, rsLowerRange, rsMathOpRange, rsNonCharRange, rsPunctuationRange, rsSpaceRange, rsUpperRange, rsVarRange, rsBreakRange, rsApos, rsAstral, rsBreak, rsCombo, rsDigits, rsDingbat, rsLower, rsMisc, rsFitz, rsModifier, rsNonAstral, rsRegional, rsSurrPair, rsUpper, rsZWJ, rsLowerMisc, rsUpperMisc, rsOptLowerContr, rsOptUpperContr, reOptMod, rsOptVar, rsOptJoin, rsSeq, rsEmoji, rsSymbol, reApos, reComboMark, reUnicode, reUnicodeWord, reHasUnicode, reHasUnicodeWord, deburredLetters, freeGlobal, freeSelf, root$2, deburrLetter, objectProto, objectToString, Symbol$1, symbolProto, symbolToString, camelCase2, upperFirst, lodash_camelcase, _lodash, FileSystemLoader$1, _postcss$1, _path, _Parser$1, _fs$1, Core, traceKeySorter, FileSystemLoader, scoping, src$3, PERMANENT_MARKER, TEMPORARY_MARKER, topologicalSort_1, topologicalSort, matchImports$1, icssImport, VISITED_MARKER, srcExports$2, wasmHash, hasRequiredWasmHash, xxhash64_1, hasRequiredXxhash64, BatchedHash_1, hasRequiredBatchedHash, md4_1, hasRequiredMd4, BulkUpdateDecorator_1, hasRequiredBulkUpdateDecorator, baseEncodeTables, crypto23, createXXHash64, createMd4, BatchedHash, BulkUpdateDecorator, getHashDigest_1, path$12, getHashDigest, interpolateName_1, interpolateName, path9, genericNames, src$2, dist, processor, parser, root$1, container, node$1, util4, unesc, unescExports, getProp2, getPropExports, ensureObject, ensureObjectExports, stripComments, stripCommentsExports, _unesc, _getProp, _ensureObject, _stripComments, nodeExports, types4, TAG, STRING, SELECTOR, ROOT, PSEUDO, NESTING, ID, COMMENT, COMBINATOR, CLASS, ATTRIBUTE, UNIVERSAL, containerExports, rootExports, selector$1, selectorExports, className$1, object, hasOwnProperty$1, merge3, regexAnySingleEscape, regexSingleEscape, regexExcessiveSpaces, cssesc, cssesc_1, classNameExports, comment$2, commentExports, id$1, idExports, tag$1, namespace, namespaceExports, tagExports, string$1, stringExports, pseudo$1, pseudoExports, attribute$1, node, universal$1, universalExports, combinator$2, combinatorExports, nesting$1, nestingExports, sortAscending, sortAscendingExports, tokenize, tokenTypes, ampersand, asterisk, at3, comma4, colon2, semicolon2, openParenthesis, closeParenthesis, openSquare, closeSquare, dollar, tilde, caret, plus2, equals, pipe, greaterThan, space, singleQuote2, doubleQuote2, slash3, bang, backslash2, cr2, feed, newline, tab, str, comment$1, word, combinator$1, parserExports, processorExports, selectors, constructors, _attribute, _className, _combinator, _comment, _id, _nesting, _pseudo, _root, _selector, _string, _tag, _universal, attribute, className, combinator, comment2, id, nesting, pseudo, root3, selector, string, tag, universal, guards, _types, _IS_TYPE, IS_TYPE, isAttribute, isClassName, isCombinator, isComment2, isIdentifier, isNesting, isPseudo, isRoot2, isSelector, isString2, isTag3, isUniversal, distExports, selectorParser$1, valueParser2, extractICSS, IGNORE_FILE_MARKER, IGNORE_NEXT_LINE_MARKER, isSpacing, isPureCheckDisabled, isPureSelectorSymbol, specialKeywords, validIdent, animationKeywords, isPureSelector, isNodeWithoutDeclarations, srcExports$1, selectorParser, hasOwnProperty2, whitespace2, unescapeRegExp, plugin2, src$1, stringHash, src, ICSSUtils, matchImports, matchValueDefinition, matchImport, srcExports, _postcssModulesExtractImports, _genericNames, _postcssModulesLocalByDefault, _postcssModulesScope, _stringHash, _postcssModulesValues, behaviours, _postcss, _unquote, _Parser, _saveJSON, _localsConvention, _FileSystemLoader, _scoping, PLUGIN_NAME, _fs, _fs2, _pluginFactory, postcss2, buildExports, index3, index$12;
+var import_fs9, import_path12, import_crypto23, import_util5, build2, fs7, fileSystem, pluginFactory, unquote$1, reg, Parser$1, matchValueName, replaceValueSymbols$2, replaceValueSymbols_1, replaceValueSymbols$1, replaceSymbols$1, replaceSymbols_1, importPattern, balancedQuotes, getDeclsObject, extractICSS$2, extractICSS_1, createImports, createExports, createICSSRules$1, createICSSRules_1, replaceValueSymbols, replaceSymbols, extractICSS$1, createICSSRules, src$4, _icssUtils, importRegexp, Parser7, saveJSON$1, _fs$2, localsConvention, symbolTag, reAsciiWord, reLatin, rsAstralRange, rsComboMarksRange, rsComboSymbolsRange, rsDingbatRange, rsLowerRange, rsMathOpRange, rsNonCharRange, rsPunctuationRange, rsSpaceRange, rsUpperRange, rsVarRange, rsBreakRange, rsApos, rsAstral, rsBreak, rsCombo, rsDigits, rsDingbat, rsLower, rsMisc, rsFitz, rsModifier, rsNonAstral, rsRegional, rsSurrPair, rsUpper, rsZWJ, rsLowerMisc, rsUpperMisc, rsOptLowerContr, rsOptUpperContr, reOptMod, rsOptVar, rsOptJoin, rsSeq, rsEmoji, rsSymbol, reApos, reComboMark, reUnicode, reUnicodeWord, reHasUnicode, reHasUnicodeWord, deburredLetters, freeGlobal, freeSelf, root$2, deburrLetter, objectProto, objectToString, Symbol$1, symbolProto, symbolToString, camelCase2, upperFirst, lodash_camelcase, _lodash, FileSystemLoader$1, _postcss$1, _path, _Parser$1, _fs$1, Core, traceKeySorter, FileSystemLoader, scoping, src$3, PERMANENT_MARKER, TEMPORARY_MARKER, topologicalSort_1, topologicalSort, matchImports$1, icssImport, VISITED_MARKER, srcExports$2, wasmHash, hasRequiredWasmHash, xxhash64_1, hasRequiredXxhash64, BatchedHash_1, hasRequiredBatchedHash, md4_1, hasRequiredMd4, BulkUpdateDecorator_1, hasRequiredBulkUpdateDecorator, baseEncodeTables, crypto23, createXXHash64, createMd4, BatchedHash, BulkUpdateDecorator, getHashDigest_1, path$12, getHashDigest, interpolateName_1, interpolateName, path9, genericNames, src$2, dist, processor, parser, root$1, container, node$1, util4, unesc, unescExports, getProp2, getPropExports, ensureObject, ensureObjectExports, stripComments, stripCommentsExports, _unesc, _getProp, _ensureObject, _stripComments, nodeExports, types4, TAG, STRING, SELECTOR, ROOT, PSEUDO, NESTING, ID, COMMENT, COMBINATOR, CLASS, ATTRIBUTE, UNIVERSAL, containerExports, rootExports, selector$1, selectorExports, className$1, object, hasOwnProperty$1, merge3, regexAnySingleEscape, regexSingleEscape, regexExcessiveSpaces, cssesc, cssesc_1, classNameExports, comment$2, commentExports, id$1, idExports, tag$1, namespace, namespaceExports, tagExports, string$1, stringExports, pseudo$1, pseudoExports, attribute$1, node, universal$1, universalExports, combinator$2, combinatorExports, nesting$1, nestingExports, sortAscending, sortAscendingExports, tokenize, tokenTypes, ampersand, asterisk, at3, comma4, colon2, semicolon2, openParenthesis, closeParenthesis, openSquare, closeSquare, dollar, tilde, caret, plus2, equals, pipe, greaterThan, space, singleQuote2, doubleQuote2, slash3, bang, backslash2, cr2, feed, newline, tab, str, comment$1, word, combinator$1, parserExports, processorExports, selectors, constructors, _attribute, _className, _combinator, _comment, _id, _nesting, _pseudo, _root, _selector, _string, _tag, _universal, attribute, className, combinator, comment2, id, nesting, pseudo, root3, selector, string, tag, universal, guards, _types, _IS_TYPE, IS_TYPE, isAttribute, isClassName, isCombinator, isComment2, isIdentifier, isNesting, isPseudo, isRoot2, isSelector, isString2, isTag3, isUniversal, distExports, selectorParser$1, valueParser2, extractICSS, IGNORE_FILE_MARKER, IGNORE_NEXT_LINE_MARKER, isSpacing, isPureCheckDisabled, isPureSelectorSymbol, specialKeywords, validIdent, animationKeywords, isPureSelector, isNodeWithoutDeclarations, srcExports$1, selectorParser, hasOwnProperty2, whitespace2, unescapeRegExp, plugin2, src$1, stringHash, src, ICSSUtils, matchImports, matchValueDefinition, matchImport, srcExports, _postcssModulesExtractImports, _genericNames, _postcssModulesLocalByDefault, _postcssModulesScope, _stringHash, _postcssModulesValues, behaviours, _postcss, _unquote, _Parser, _saveJSON, _localsConvention, _FileSystemLoader, _scoping, PLUGIN_NAME, _fs, _fs2, _pluginFactory, postcss2, buildExports, index3, index$12;
 var init_dep_DDtvSN7 = __esm({
   "node_modules/vite/dist/node/chunks/dep-DDtvSN7_.js"() {
     init_dep_Dm0c1Wj2();
@@ -233382,7 +233382,7 @@ var init_dep_DDtvSN7 = __esm({
     Parser$1.default = void 0;
     _icssUtils = src$4;
     importRegexp = /^:import\((.+)\)$/;
-    Parser6 = class {
+    Parser7 = class {
       constructor(pathFetcher, trace) {
         this.pathFetcher = pathFetcher;
         this.plugin = this.plugin.bind(this);
@@ -233445,7 +233445,7 @@ var init_dep_DDtvSN7 = __esm({
         }
       }
     };
-    Parser$1.default = Parser6;
+    Parser$1.default = Parser7;
     saveJSON$1 = {};
     Object.defineProperty(saveJSON$1, "__esModule", {
       value: true
@@ -236243,8 +236243,8 @@ var init_dep_DDtvSN7 = __esm({
           return i6 === list2.indexOf(item);
         });
       }
-      var Parser7 = /* @__PURE__ */ (function() {
-        function Parser8(rule2, options2) {
+      var Parser8 = /* @__PURE__ */ (function() {
+        function Parser9(rule2, options2) {
           if (options2 === void 0) {
             options2 = {};
           }
@@ -236278,7 +236278,7 @@ var init_dep_DDtvSN7 = __esm({
           this.current = selector3;
           this.loop();
         }
-        var _proto = Parser8.prototype;
+        var _proto = Parser9.prototype;
         _proto._errorGenerator = function _errorGenerator() {
           var _this = this;
           return function(message, errorOptions) {
@@ -237097,7 +237097,7 @@ var init_dep_DDtvSN7 = __esm({
           }
           return -1;
         };
-        _createClass(Parser8, [{
+        _createClass(Parser9, [{
           key: "currToken",
           get: function get3() {
             return this.tokens[this.position];
@@ -237113,9 +237113,9 @@ var init_dep_DDtvSN7 = __esm({
             return this.tokens[this.position - 1];
           }
         }]);
-        return Parser8;
+        return Parser9;
       })();
-      exports2["default"] = Parser7;
+      exports2["default"] = Parser8;
       module2.exports = exports2.default;
     })(parser, parser.exports);
     parserExports = parser.exports;
@@ -286202,7 +286202,7 @@ function resolveConstituency(pincode, district, areas = [], state) {
 }
 
 // server.ts
-var import_express33 = __toESM(require_express2(), 1);
+var import_express34 = __toESM(require_express2(), 1);
 
 // node_modules/express-rate-limit/dist/index.mjs
 var import_node_net = require("node:net");
@@ -340124,6 +340124,357 @@ router32.get("/api/public/live-mandi-pulse", async (_req, res) => {
 });
 var liveMarketRoutes_default = router32;
 
+// src/routes/socialRssRoutes.ts
+var import_express33 = __toESM(require_express2(), 1);
+var import_rss_parser3 = __toESM(require_rss_parser(), 1);
+var router33 = import_express33.default.Router();
+var rssParser3 = new import_rss_parser3.default({
+  customFields: {
+    item: [
+      ["media:group", "mediaGroup"],
+      ["yt:videoId", "videoId"],
+      ["yt:channelId", "channelId"]
+    ]
+  }
+});
+var YOUTUBE_CHANNEL_ID = "UCzzICeVSv2b9qGlYWWxhNIw";
+var YOUTUBE_OFFICIAL_RSS = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
+var youtubeCache = null;
+var CACHE_TTL_MS4 = 15 * 60 * 1e3;
+async function getYouTubeItems() {
+  const now = Date.now();
+  if (youtubeCache && now - youtubeCache.timestamp < CACHE_TTL_MS4) {
+    return youtubeCache;
+  }
+  try {
+    const res = await axios_default.get(YOUTUBE_OFFICIAL_RSS, {
+      timeout: 8e3,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      }
+    });
+    const parsed = await rssParser3.parseString(res.data);
+    const items = (parsed.items || []).map((it3) => {
+      const videoId = it3.videoId || (it3.id ? it3.id.replace("yt:video:", "") : "");
+      const thumb = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "";
+      return {
+        id: it3.id || `yt-${videoId}`,
+        platform: "youtube",
+        title: it3.title || "RP Foundation Video",
+        link: it3.link || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : "https://www.youtube.com/@rpfoundationofficial"),
+        description: it3.contentSnippet || it3.title || "Watch on RP Foundation YouTube channel",
+        pubDate: it3.pubDate ? new Date(it3.pubDate).toUTCString() : (/* @__PURE__ */ new Date()).toUTCString(),
+        author: "RP Foundation",
+        thumbnailUrl: thumb,
+        category: "Video"
+      };
+    });
+    youtubeCache = { items, rawXml: res.data, timestamp: now };
+    return youtubeCache;
+  } catch (err2) {
+    console.warn("Could not fetch YouTube official RSS:", err2.message);
+    if (youtubeCache) return youtubeCache;
+    return { items: [], rawXml: "" };
+  }
+}
+async function getInstagramItems() {
+  try {
+    const cmsRes = await pool.query("SELECT data FROM cms_data WHERE key = 'app_cms' LIMIT 1");
+    if (cmsRes.rows.length > 0) {
+      const cms = typeof cmsRes.rows[0].data === "string" ? JSON.parse(cmsRes.rows[0].data) : cmsRes.rows[0].data;
+      if (Array.isArray(cms?.instagramPosts) && cms.instagramPosts.length > 0) {
+        return cms.instagramPosts.map((post, idx) => ({
+          id: post.id || `ig-${idx}`,
+          platform: "instagram",
+          title: post.title || "RP Foundation Instagram Reel",
+          link: post.url || "https://www.instagram.com/rpfoundationofficial/",
+          description: post.caption || post.title || "Follow @rpfoundationofficial on Instagram for live updates and reels.",
+          pubDate: new Date(Date.now() - idx * 864e5).toUTCString(),
+          author: "@rpfoundationofficial",
+          thumbnailUrl: post.videoUrl ? "" : void 0,
+          category: post.category || "Reels"
+        }));
+      }
+    }
+  } catch (err2) {
+    console.warn("Instagram items load fallback:", err2.message);
+  }
+  return [
+    {
+      id: "ig-1",
+      platform: "instagram",
+      title: "RP Foundation Healthcare & Medical Camp Drive",
+      link: "https://www.instagram.com/rpfoundationofficial/",
+      description: "\u0928\u093F\u0903\u0936\u0941\u0932\u094D\u0915 \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0936\u093F\u0935\u093F\u0930 \u090F\u0935\u0902 \u0926\u0935\u093E \u0935\u093F\u0924\u0930\u0923 \u0905\u092D\u093F\u092F\u093E\u0928 \u2014 \u0938\u092E\u093E\u091C \u0915\u0947 \u0905\u0902\u0924\u093F\u092E \u092A\u0902\u0915\u094D\u0924\u093F \u0915\u0947 \u0935\u094D\u092F\u0915\u094D\u0924\u093F \u0924\u0915 \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0938\u0947\u0935\u093E \u092A\u0939\u0941\u0901\u091A\u093E\u0928\u0947 \u0915\u093E \u0938\u0902\u0915\u0932\u094D\u092A\u0964",
+      pubDate: new Date(Date.now() - 1 * 864e5).toUTCString(),
+      author: "@rpfoundationofficial",
+      category: "Healthcare"
+    },
+    {
+      id: "ig-2",
+      platform: "instagram",
+      title: "Jan Seva Card Community Registration Camp",
+      link: "https://www.instagram.com/rpfoundationofficial/",
+      description: "\u091C\u0928 \u0938\u0947\u0935\u093E \u0915\u093E\u0930\u094D\u0921 \u0935\u093F\u0924\u0930\u0923 \u0936\u093F\u0935\u093F\u0930: \u0928\u093E\u0917\u0930\u093F\u0915\u094B\u0902 \u0915\u094B \u0921\u093F\u091C\u093F\u091F\u0932 \u092A\u0939\u091A\u093E\u0928, \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u090F\u0935\u0902 \u091C\u0928\u0915\u0932\u094D\u092F\u093E\u0923\u0915\u093E\u0930\u0940 \u092F\u094B\u091C\u0928\u093E\u0913\u0902 \u0938\u0947 \u0938\u0940\u0927\u093E \u091C\u094B\u0921\u093C\u0928\u093E\u0964",
+      pubDate: new Date(Date.now() - 3 * 864e5).toUTCString(),
+      author: "@rpfoundationofficial",
+      category: "Jan Seva"
+    },
+    {
+      id: "ig-3",
+      platform: "instagram",
+      title: "Youth Empowerment & Employment Guidance Workshop",
+      link: "https://www.instagram.com/rpfoundationofficial/",
+      description: "\u092F\u0941\u0935\u093E\u0913\u0902 \u0915\u0947 \u0938\u092A\u0928\u094B\u0902 \u0915\u094B \u0928\u0908 \u0909\u0921\u093C\u093E\u0928: \u0930\u094B\u091C\u0917\u093E\u0930 \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0928, \u092A\u094D\u0930\u0924\u093F\u092F\u094B\u0917\u0940 \u092A\u0930\u0940\u0915\u094D\u0937\u093E \u0938\u0939\u093E\u092F\u0924\u093E \u090F\u0935\u0902 \u0915\u094C\u0936\u0932 \u0935\u093F\u0915\u093E\u0938 \u092A\u0939\u0932\u0964",
+      pubDate: new Date(Date.now() - 5 * 864e5).toUTCString(),
+      author: "@rpfoundationofficial",
+      category: "Youth"
+    }
+  ];
+}
+function getFacebookItems() {
+  return [
+    {
+      id: "fb-1",
+      platform: "facebook",
+      title: "RP Foundation Public Welfare & Community Outreach",
+      link: "https://www.facebook.com/rpfofficial",
+      description: "\u0906\u0930.\u092A\u0940. \u092B\u093E\u0909\u0902\u0921\u0947\u0936\u0928 \u0926\u094D\u0935\u093E\u0930\u093E \u0938\u092E\u093E\u091C \u0938\u0947\u0935\u093E, \u0928\u093F\u0903\u0936\u0941\u0932\u094D\u0915 \u0938\u0939\u093E\u092F\u0924\u093E \u090F\u0935\u0902 \u091C\u0928\u0915\u0932\u094D\u092F\u093E\u0923\u0915\u093E\u0930\u0940 \u092F\u094B\u091C\u0928\u093E\u0913\u0902 \u0915\u093E \u0938\u0902\u091A\u093E\u0932\u0928 \u0932\u0917\u093E\u0924\u093E\u0930 \u091C\u093E\u0930\u0940 \u0939\u0948\u0964 \u091C\u0941\u095C\u093F\u090F \u0939\u092E\u093E\u0930\u0947 \u092B\u0947\u0938\u092C\u0941\u0915 \u092A\u0947\u091C \u0938\u0947\u0964",
+      pubDate: new Date(Date.now() - 12 * 36e5).toUTCString(),
+      author: "RP Foundation Official",
+      category: "Community"
+    },
+    {
+      id: "fb-2",
+      platform: "facebook",
+      title: "Religious & Cultural Pilgrimage Support for Devotees",
+      link: "https://www.facebook.com/rpfofficial",
+      description: "\u0936\u094D\u0930\u0926\u094D\u0927\u093E\u0932\u0941\u0913\u0902 \u0915\u094B \u092A\u094D\u0930\u0938\u093F\u0926\u094D\u0927 \u0927\u093E\u0930\u094D\u092E\u093F\u0915 \u0938\u094D\u0925\u0932\u094B\u0902 \u090F\u0935\u0902 \u092E\u0939\u093E\u0926\u0947\u0935 \u092E\u0902\u0926\u093F\u0930\u094B\u0902 \u0915\u0947 \u0928\u093F\u0903\u0936\u0941\u0932\u094D\u0915 \u0926\u0930\u094D\u0936\u0928 \u0935 \u092A\u094D\u0930\u0938\u093E\u0926 \u0935\u093F\u0924\u0930\u0923 \u0938\u0947\u0935\u093E \u0915\u093E \u0906\u092F\u094B\u091C\u0928\u0964",
+      pubDate: new Date(Date.now() - 2 * 864e5).toUTCString(),
+      author: "RP Foundation Official",
+      category: "Culture"
+    },
+    {
+      id: "fb-3",
+      platform: "facebook",
+      title: "Citizen Grievance Redressal & Help Desk Active",
+      link: "https://www.facebook.com/rpfofficial",
+      description: "\u0928\u093E\u0917\u0930\u093F\u0915 \u0938\u092E\u0938\u094D\u092F\u093E\u0913\u0902 \u0915\u0947 \u0938\u092E\u093E\u0927\u093E\u0928 \u0939\u0947\u0924\u0941 \u0906\u0930.\u092A\u0940. \u092B\u093E\u0909\u0902\u0921\u0947\u0936\u0928 \u0939\u0947\u0932\u094D\u092A\u0932\u093E\u0907\u0928 1800-569-0991 24 \u0918\u0902\u091F\u0947 \u0909\u092A\u0932\u092C\u094D\u0927 \u0939\u0948\u0964",
+      pubDate: new Date(Date.now() - 4 * 864e5).toUTCString(),
+      author: "RP Foundation Official",
+      category: "Helpdesk"
+    }
+  ];
+}
+function getXItems() {
+  return [
+    {
+      id: "x-1",
+      platform: "x",
+      title: "RP Foundation Official Announcement (@rpfoundation15)",
+      link: "https://x.com/rpfoundation15",
+      description: "\u0938\u0947\u0935\u093E, \u0938\u092E\u0930\u094D\u092A\u0923 \u0914\u0930 \u0938\u0936\u0915\u094D\u0924\u093F\u0915\u0930\u0923 \u2014 \u0906\u0930.\u092A\u0940. \u092B\u093E\u0909\u0902\u0921\u0947\u0936\u0928 \u0915\u093E \u0938\u0902\u0915\u0932\u094D\u092A \u0939\u0930 \u0928\u093E\u0917\u0930\u093F\u0915 \u0915\u0947 \u0938\u093E\u0925\u0964 Follow @rpfoundation15 on X for real-time announcements.",
+      pubDate: new Date(Date.now() - 6 * 36e5).toUTCString(),
+      author: "@rpfoundation15",
+      category: "Announcements"
+    },
+    {
+      id: "x-2",
+      platform: "x",
+      title: "Youth National Sports Support by RP Foundation",
+      link: "https://x.com/rpfoundation15",
+      description: "Youth National Goalball Championship \u092E\u0947\u0902 \u092D\u093E\u0917 \u0932\u0947\u0928\u0947 \u0935\u093E\u0932\u0947 \u0939\u094B\u0928\u0939\u093E\u0930 \u0916\u093F\u0932\u093E\u0921\u093C\u093F\u092F\u094B\u0902 \u0915\u094B \u0906\u0930.\u092A\u0940. \u092B\u093E\u0909\u0902\u0921\u0947\u0936\u0928 \u0926\u094D\u0935\u093E\u0930\u093E \u0939\u0930 \u0938\u0902\u092D\u0935 \u0938\u0939\u092F\u094B\u0917 \u0935 \u092A\u094D\u0930\u094B\u0924\u094D\u0938\u093E\u0939\u0928\u0964",
+      pubDate: new Date(Date.now() - 2 * 864e5).toUTCString(),
+      author: "@rpfoundation15",
+      category: "Sports"
+    },
+    {
+      id: "x-3",
+      platform: "x",
+      title: "Blood Donation & Emergency Relief Support",
+      link: "https://x.com/rpfoundation15",
+      description: "\u0906\u092A\u093E\u0924\u0915\u093E\u0932\u0940\u0928 \u0930\u0915\u094D\u0924\u0926\u093E\u0928 \u0928\u0947\u091F\u0935\u0930\u094D\u0915 \u090F\u0935\u0902 \u091A\u093F\u0915\u093F\u0924\u094D\u0938\u093E \u0938\u0939\u093E\u092F\u0924\u093E \u0915\u0947\u0902\u0926\u094D\u0930 \u0938\u0915\u094D\u0930\u093F\u092F\u0964 \u0938\u0947\u0935\u093E \u092E\u0947\u0902 \u0938\u0926\u0948\u0935 \u0938\u092E\u0930\u094D\u092A\u093F\u0924 \u0906\u0930.\u092A\u0940. \u092B\u093E\u0909\u0902\u0921\u0947\u0936\u0928\u0964",
+      pubDate: new Date(Date.now() - 5 * 864e5).toUTCString(),
+      author: "@rpfoundation15",
+      category: "Emergency"
+    }
+  ];
+}
+function escapeXml(unsafe = "") {
+  return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+}
+function buildRssXml(channel) {
+  const itemsXml = channel.items.map(
+    (item) => `    <item>
+      <title>${escapeXml(item.title)}</title>
+      <link>${escapeXml(item.link)}</link>
+      <guid isPermaLink="false">${escapeXml(item.id)}</guid>
+      <pubDate>${item.pubDate}</pubDate>
+      <description><![CDATA[${item.description}]]></description>
+      ${item.author ? `<author>${escapeXml(item.author)}</author>` : ""}
+      ${item.category ? `<category>${escapeXml(item.category)}</category>` : ""}
+      ${item.thumbnailUrl ? `<enclosure url="${escapeXml(item.thumbnailUrl)}" type="image/jpeg" length="0" />` : ""}
+    </item>`
+  ).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${escapeXml(channel.title)}</title>
+    <link>${escapeXml(channel.link)}</link>
+    <description>${escapeXml(channel.description)}</description>
+    <language>hi-IN</language>
+    <lastBuildDate>${(/* @__PURE__ */ new Date()).toUTCString()}</lastBuildDate>
+    <atom:link href="${escapeXml(channel.feedUrl)}" rel="self" type="application/rss+xml" />
+    <generator>RP Foundation Social RSS Engine</generator>
+${itemsXml}
+  </channel>
+</rss>`;
+}
+router33.get("/api/public/social-rss-directory", (req2, res) => {
+  const protocol = req2.protocol;
+  const host = req2.get("host") || "localhost:3000";
+  const baseUrl = `${protocol}://${host}`;
+  return res.json({
+    success: true,
+    data: {
+      youtube: {
+        platform: "YouTube",
+        profileUrl: "https://www.youtube.com/@rpfoundationofficial",
+        officialRssUrl: YOUTUBE_OFFICIAL_RSS,
+        appRssUrl: `${baseUrl}/api/rss/social/youtube.xml`,
+        channelId: YOUTUBE_CHANNEL_ID
+      },
+      instagram: {
+        platform: "Instagram",
+        profileUrl: "https://www.instagram.com/rpfoundationofficial/",
+        appRssUrl: `${baseUrl}/api/rss/social/instagram.xml`
+      },
+      facebook: {
+        platform: "Facebook",
+        profileUrl: "https://www.facebook.com/rpfofficial",
+        appRssUrl: `${baseUrl}/api/rss/social/facebook.xml`
+      },
+      x: {
+        platform: "X (Twitter)",
+        profileUrl: "https://x.com/rpfoundation15",
+        appRssUrl: `${baseUrl}/api/rss/social/x.xml`
+      },
+      allInOne: {
+        platform: "All Channels Unified",
+        appRssUrl: `${baseUrl}/api/rss/social/all.xml`,
+        description: "Unified master feed merging YouTube, Instagram, Facebook, and X"
+      }
+    }
+  });
+});
+router33.get("/api/public/social-feed", async (_req, res) => {
+  try {
+    const [yt3, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
+    const fb = getFacebookItems();
+    const x2 = getXItems();
+    const all3 = [...yt3.items, ...ig, ...fb, ...x2].sort(
+      (a6, b2) => new Date(b2.pubDate).getTime() - new Date(a6.pubDate).getTime()
+    );
+    return res.json({ success: true, count: all3.length, data: all3 });
+  } catch (err2) {
+    return res.status(500).json({ success: false, error: "Failed to generate social feed" });
+  }
+});
+router33.get(["/api/rss/social/youtube.xml", "/rss/youtube.xml"], async (req2, res) => {
+  try {
+    const { items, rawXml } = await getYouTubeItems();
+    res.set("Content-Type", "application/rss+xml; charset=utf-8");
+    if (rawXml) {
+      return res.send(rawXml);
+    }
+    const host = req2.get("host") || "localhost:3000";
+    const xml2 = buildRssXml({
+      title: "RP Foundation YouTube Official Feed",
+      link: "https://www.youtube.com/@rpfoundationofficial",
+      description: "Official video updates and shorts from RP Foundation YouTube Channel.",
+      feedUrl: `${req2.protocol}://${host}/api/rss/social/youtube.xml`,
+      items
+    });
+    return res.send(xml2);
+  } catch {
+    return res.status(500).send("Unable to render YouTube RSS feed");
+  }
+});
+router33.get(["/api/rss/social/instagram.xml", "/rss/instagram.xml"], async (req2, res) => {
+  try {
+    const items = await getInstagramItems();
+    const host = req2.get("host") || "localhost:3000";
+    const xml2 = buildRssXml({
+      title: "RP Foundation Instagram Official Feed (@rpfoundationofficial)",
+      link: "https://www.instagram.com/rpfoundationofficial/",
+      description: "Official reels, posts, and visual outreach updates from @rpfoundationofficial.",
+      feedUrl: `${req2.protocol}://${host}/api/rss/social/instagram.xml`,
+      items
+    });
+    res.set("Content-Type", "application/rss+xml; charset=utf-8");
+    return res.send(xml2);
+  } catch {
+    return res.status(500).send("Unable to render Instagram RSS feed");
+  }
+});
+router33.get(["/api/rss/social/facebook.xml", "/rss/facebook.xml"], (req2, res) => {
+  try {
+    const items = getFacebookItems();
+    const host = req2.get("host") || "localhost:3000";
+    const xml2 = buildRssXml({
+      title: "RP Foundation Facebook Official Feed",
+      link: "https://www.facebook.com/rpfofficial",
+      description: "Official public welfare updates and community events from RP Foundation on Facebook.",
+      feedUrl: `${req2.protocol}://${host}/api/rss/social/facebook.xml`,
+      items
+    });
+    res.set("Content-Type", "application/rss+xml; charset=utf-8");
+    return res.send(xml2);
+  } catch {
+    return res.status(500).send("Unable to render Facebook RSS feed");
+  }
+});
+router33.get(["/api/rss/social/x.xml", "/rss/x.xml"], (req2, res) => {
+  try {
+    const items = getXItems();
+    const host = req2.get("host") || "localhost:3000";
+    const xml2 = buildRssXml({
+      title: "RP Foundation X (@rpfoundation15) Official Feed",
+      link: "https://x.com/rpfoundation15",
+      description: "Official announcements, press briefs, and statements from @rpfoundation15 on X.",
+      feedUrl: `${req2.protocol}://${host}/api/rss/social/x.xml`,
+      items
+    });
+    res.set("Content-Type", "application/rss+xml; charset=utf-8");
+    return res.send(xml2);
+  } catch {
+    return res.status(500).send("Unable to render X RSS feed");
+  }
+});
+router33.get(["/api/rss/social/all.xml", "/rss/social.xml", "/rss.xml"], async (req2, res) => {
+  try {
+    const [yt3, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
+    const fb = getFacebookItems();
+    const x2 = getXItems();
+    const merged = [...yt3.items, ...ig, ...fb, ...x2].sort(
+      (a6, b2) => new Date(b2.pubDate).getTime() - new Date(a6.pubDate).getTime()
+    );
+    const host = req2.get("host") || "localhost:3000";
+    const xml2 = buildRssXml({
+      title: "RP Foundation Unified Social Media Feed",
+      link: "https://therpfoundation.org",
+      description: "Combined real-time stream of YouTube, Instagram, Facebook, and X updates from RP Foundation.",
+      feedUrl: `${req2.protocol}://${host}/api/rss/social/all.xml`,
+      items: merged
+    });
+    res.set("Content-Type", "application/rss+xml; charset=utf-8");
+    return res.send(xml2);
+  } catch {
+    return res.status(500).send("Unable to render Unified RSS feed");
+  }
+});
+var socialRssRoutes_default = router33;
+
 // src/db/migrationRunner.ts
 var import_fs5 = __toESM(require("fs"), 1);
 var import_path5 = __toESM(require("path"), 1);
@@ -340199,7 +340550,7 @@ async function runMigrationsOnPool(pool4) {
 
 // server.ts
 var import_jsonwebtoken4 = __toESM(require_jsonwebtoken(), 1);
-var app = (0, import_express33.default)();
+var app = (0, import_express34.default)();
 app.set("trust proxy", 1);
 app.use("/api/iptv", iptvRoutes_default);
 import_dotenv2.default.config();
@@ -340219,8 +340570,8 @@ app.use((req2, res, next2) => {
   }
   next2();
 });
-app.use(import_express33.default.json({ limit: "2mb" }));
-app.use(import_express33.default.urlencoded({ limit: "2mb", extended: true }));
+app.use(import_express34.default.json({ limit: "2mb" }));
+app.use(import_express34.default.urlencoded({ limit: "2mb", extended: true }));
 var limiter2 = rate_limit_default({
   windowMs: 15 * 60 * 1e3,
   max: 500,
@@ -340270,6 +340621,7 @@ app.use(adminHqExtraRoutes_default);
 app.use(adminDynamicRoutes_default);
 app.use("/", rssFeedRoutes_default);
 app.use("/", liveMarketRoutes_default);
+app.use("/", socialRssRoutes_default);
 var rpID2 = process.env.WEBAUTHN_RP_ID || "localhost";
 var originUrl2 = `https://${rpID2}`;
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
@@ -340378,8 +340730,8 @@ app.use("/uploads", (req2, res, next2) => {
   res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
   res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
   next2();
-}, import_express33.default.static(import_path14.default.join(process.cwd(), "uploads")));
-app.use("/app", import_express33.default.static(import_path14.default.join(process.cwd(), "public", "app")));
+}, import_express34.default.static(import_path14.default.join(process.cwd(), "uploads")));
+app.use("/app", import_express34.default.static(import_path14.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req2, res) => {
   res.redirect("/app/");
 });
@@ -340585,7 +340937,7 @@ async function startServer2() {
     app.use(vite.middlewares);
   } else {
     if (import_fs11.default.existsSync(distPath)) {
-      app.use(import_express33.default.static(distPath));
+      app.use(import_express34.default.static(distPath));
     }
     app.get("*", (req2, res, next2) => {
       if (req2.path.startsWith("/api/")) return next2();
