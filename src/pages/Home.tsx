@@ -8,6 +8,7 @@ import { useApp } from "../context/AppContext";
 import { resolveMediaUrl } from "../utils/media";
 import { RP_FOUNDATION_LOGO, ROHIT_PANDIT_PHOTO } from "../assets/foundationBrand";
 import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
+import DailyEssentialsSection from "../components/DailyEssentialsSection";
 
 const fallbackSlides = [
   { image: "/assets/mega_camp_banner.png", titleEn: "Healthcare support for the community", subEn: "Health camps, medical support and community care.", route: "/health-care" },
@@ -397,7 +398,10 @@ export default function Home() {
           />
         )}
 
-        {/* 4. CAROUSEL: RP FOUNDATION AT WORK (TRANSPARENT TEXT BACKGROUND) */}
+        {/* 4. DAILY ESSENTIALS SERVICES (LIVE MANDI, FUEL/GOLD, PANCHANG, SARKARI JOBS) */}
+        <DailyEssentialsSection />
+
+        {/* 5. CAROUSEL: RP FOUNDATION AT WORK (TRANSPARENT TEXT BACKGROUND) */}
         <section className="pt-1">
           <div className="mb-2 flex items-center justify-between">
             <div>
