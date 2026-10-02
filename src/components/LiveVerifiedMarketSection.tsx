@@ -216,19 +216,6 @@ export default function LiveVerifiedMarketSection() {
     } catch {}
   };
 
-  const resolveCurrentLocation = useCallback(() => new Promise<CityItem>((resolve, reject) => {
-    if (!("geolocation" in navigator)) return reject(new Error("Geolocation unavailable"));
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const r = await axios.get("/api/public/reverse-location?lat=" + pos.coords.latitude + "&lon=" + pos.coords.longitude);
-        const d = r.data?.data;
-        if (!d?.city) throw new Error("City not resolved");
-        const id = d.city.toLowerCase().trim().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-        resolve({ id, name:d.city, state:d.state || "Unknown" });
-      } catch (e) { reject(e); }
-    }, reject, { timeout: 10000, enableHighAccuracy: true, maximumAge: 300000 });
-  }), []);
-
   const handleDetectGPS = async () => {
     setIsDetectingLocation(true);
     try {
