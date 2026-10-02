@@ -178,6 +178,19 @@ export default function LiveVerifiedMarketSection() {
     fetchMarketData(selectedCity.id, selectedCity.state);
   }, [selectedCity.id, fetchMarketData]);
 
+  const resolveCurrentLocation = useCallback(() => new Promise<CityItem>((resolve, reject) => {
+    if (!("geolocation" in navigator)) return reject(new Error("Geolocation unavailable"));
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const r = await axios.get("/api/public/reverse-location?lat=" + pos.coords.latitude + "&lon=" + pos.coords.longitude);
+        const d = r.data?.data;
+        if (!d?.city) throw new Error("City not resolved");
+        const id = d.city.toLowerCase().trim().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+        resolve({ id, name:d.city, state:d.state || "Unknown" });
+      } catch (e) { reject(e); }
+    }, reject, { timeout: 10000, enableHighAccuracy: true, maximumAge: 300000 });
+  }), []);
+
   // Auto-detect the user's real current city on first visit.
   useEffect(() => {
     const hasChosen = localStorage.getItem("@rpf_selected_market_manual") === "1";
@@ -273,10 +286,10 @@ export default function LiveVerifiedMarketSection() {
 
             <div className="mt-2 space-y-0.5">
               <div className="text-[13px] font-bold text-[#14213D] line-clamp-1">
-                {data?.panchang?.tithi || "Loading…"}
+                {data?.panchang?.tithi || (data?.panchang?.unavailable ? "Live Panchang unavailable" : "Loading…")}
               </div>
               <div className="text-[11px] font-semibold text-emerald-800 line-clamp-1">
-                {data?.panchang?.samvat || "Fetching today’s Panchang…"}
+                {data?.panchang?.samvat || (data?.panchang?.unavailable ? "Please refresh shortly" : "Fetching today’s Panchang…")}
               </div>
               <div className="text-[10.5px] text-slate-500 font-medium">
                 Sunrise: {data?.panchang?.sunrise || "—"} • Sunset: {data?.panchang?.sunset || "—"}
@@ -690,7 +703,7 @@ export default function LiveVerifiedMarketSection() {
 
                     <button
                       type="button"
-                      onClick={() => openExternalLink(data.vegetables.sourceUrl)}
+                      onClick={() => setActiveSheet("vegetables")}
                       className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <span>View Full {selectedCity.name} Report on RozKaBhav.com</span>
