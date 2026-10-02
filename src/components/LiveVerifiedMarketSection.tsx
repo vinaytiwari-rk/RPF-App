@@ -74,6 +74,7 @@ interface MarketSummary {
     karana: string;
     abhijitMuhurat: string;
     rahukaal: string;
+    unavailable?: boolean;
   };
   bullion: {
     source: string;
@@ -187,13 +188,12 @@ export default function LiveVerifiedMarketSection() {
 
   // Auto-detect the user's real current city on first visit.
   useEffect(() => {
-    const hasChosen = localStorage.getItem("@rpf_selected_market_city");
+    const hasChosen = localStorage.getItem("@rpf_selected_market_manual") === "1";
     if (!hasChosen) {
       resolveCurrentLocation().then((current) => {
         setSelectedCity(current);
         setSelectedState(current.state);
         try {
-          localStorage.setItem("@rpf_selected_market_city", current.id);
           localStorage.setItem("@rpf_selected_market_state", current.state);
         } catch {}
       }).catch(() => {});
@@ -207,6 +207,7 @@ export default function LiveVerifiedMarketSection() {
     setShowCityPicker(false);
     try {
       localStorage.setItem("@rpf_selected_market_city", city.id);
+      localStorage.setItem("@rpf_selected_market_manual", "1");
     } catch {}
   };
 
@@ -280,10 +281,10 @@ export default function LiveVerifiedMarketSection() {
 
             <div className="mt-2 space-y-0.5">
               <div className="text-[13px] font-bold text-[#14213D] line-clamp-1">
-                {data?.panchang?.tithi || (data?.panchang?.unavailable ? "Live Panchang unavailable" : "Loading…")}
+                {data?.panchang?.tithi || "Loading…"}
               </div>
               <div className="text-[11px] font-semibold text-emerald-800 line-clamp-1">
-                {data?.panchang?.samvat || (data?.panchang?.unavailable ? "Please refresh shortly" : "Fetching today’s Panchang…")}
+                {data?.panchang?.samvat || "Fetching today’s Panchang…"}
               </div>
               <div className="text-[10.5px] text-slate-500 font-medium">
                 Sunrise: {data?.panchang?.sunrise || "—"} • Sunset: {data?.panchang?.sunset || "—"}
@@ -319,15 +320,15 @@ export default function LiveVerifiedMarketSection() {
             <div className="mt-2 space-y-1 text-[12px]">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-slate-600">24K Gold (10g)</span>
-                <span className="font-extrabold text-[#14213D]">{data?.bullion?.gold24k || "₹1,50,786"}</span>
+                <span className="font-extrabold text-[#14213D]">{data?.bullion?.gold24k || "—"}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-slate-600">22K Gold (10g)</span>
-                <span className="font-extrabold text-amber-800">{data?.bullion?.gold22k || "₹1,38,120"}</span>
+                <span className="font-extrabold text-amber-800">{data?.bullion?.gold22k || "—"}</span>
               </div>
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-semibold text-slate-500">Silver (1kg)</span>
-                <span className="font-bold text-slate-700">{data?.bullion?.silver || "₹84,500"}</span>
+                <span className="font-bold text-slate-700">{data?.bullion?.silver || "—"}</span>
               </div>
             </div>
           </div>
@@ -359,10 +360,7 @@ export default function LiveVerifiedMarketSection() {
             </div>
 
             <div className="mt-2 space-y-1 text-[12px]">
-              {(data?.vegetables?.items?.slice(0, 2) || [
-                { name: "Onion", price: "₹28 per kg" },
-                { name: "Tomato", price: "₹26 per kg" }
-              ]).map((v, i) => (
+              {(data?.vegetables?.items?.slice(0, 2) || []).map((v, i) => (
                 <div key={i} className="flex items-center justify-between">
                   <span className="font-semibold text-slate-700">{v.name}</span>
                   <span className="font-bold text-[#14213D]">{v.price}</span>
