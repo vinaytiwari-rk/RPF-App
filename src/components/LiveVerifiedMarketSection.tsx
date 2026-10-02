@@ -174,10 +174,6 @@ export default function LiveVerifiedMarketSection() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    fetchMarketData(selectedCity.id, selectedCity.state);
-  }, [selectedCity.id, fetchMarketData]);
-
   const resolveCurrentLocation = useCallback(() => new Promise<CityItem>((resolve, reject) => {
     if (!("geolocation" in navigator)) return reject(new Error("Geolocation unavailable"));
     navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -190,6 +186,10 @@ export default function LiveVerifiedMarketSection() {
       } catch (e) { reject(e); }
     }, reject, { timeout: 10000, enableHighAccuracy: true, maximumAge: 300000 });
   }), []);
+
+  useEffect(() => {
+    fetchMarketData(selectedCity.id, selectedCity.state);
+  }, [selectedCity.id, selectedCity.state, fetchMarketData]);
 
   // Auto-detect the user's real current city on first visit.
   useEffect(() => {
