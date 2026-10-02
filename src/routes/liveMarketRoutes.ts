@@ -42,6 +42,7 @@ router.get("/api/public/reverse-location", async (req, res) => {
 });
 
 router.get("/api/public/market-summary", async (req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
     const city = typeof req.query.city === "string" ? req.query.city : undefined;
     const state = typeof req.query.state === "string" ? req.query.state : undefined;
@@ -55,6 +56,7 @@ router.get("/api/public/market-summary", async (req, res) => {
 
 // 2. Drik Panchang
 router.get("/api/public/live-panchang", async (_req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
     const city = typeof _req.query.city === "string" ? _req.query.city : undefined;
     const state = typeof _req.query.state === "string" ? _req.query.state : undefined;
@@ -67,6 +69,7 @@ router.get("/api/public/live-panchang", async (_req, res) => {
 
 // 3. All India Bullion (Gold & Silver)
 router.get("/api/public/live-bullion", async (_req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
     const data = await getLiveBullionRates();
     return res.json({ success: true, data });
@@ -77,6 +80,7 @@ router.get("/api/public/live-bullion", async (_req, res) => {
 
 // 4. City Vegetables (Roz Ka Bhav)
 router.get("/api/public/live-vegetables", async (req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
     const city = typeof req.query.city === "string" ? req.query.city : undefined;
     const data = await getLiveVegetablePrices(city);
@@ -88,6 +92,7 @@ router.get("/api/public/live-vegetables", async (req, res) => {
 
 // 5. Mandi Pulse
 router.get("/api/public/live-mandi-pulse", async (_req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
     const city = typeof _req.query.city === "string" ? _req.query.city : undefined;
     const state = typeof _req.query.state === "string" ? _req.query.state : undefined;
