@@ -36,7 +36,8 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-bhopal-madhya-pradesh/",
     fuelUrl: "https://rozkabhav.com/fuel-price-in-bhopal-madhya-pradesh/",
-    marketName: "Bhopal Karond Mandi, MP"
+    marketName: "Bhopal Karond Mandi, MP",
+    geonameId: "1275841"
   },
   lucknow: {
     id: "lucknow",
@@ -270,14 +271,14 @@ export async function getLiveDrikPanchang(cityId?: string, state?: string) {
     const sunrise = to12(pick(/Sunrise\\s*(\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)/i));
     const sunset = to12(pick(/Sunset\\s*(\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)/i));
     const moonrise = to12(pick(/Moonrise\\s*(\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)/i));
-    const tithi = pick(/Tithi\\s+(.+?)\\s+Nakshatra/i);
-    const nakshatra = pick(/Nakshatra\\s+(.+?)\\s+Saptami|Nakshatra\\s+(.+?)\\s+Yoga/i);
-    const yoga = pick(/Yoga\\s+(.+?)\\s+Karana/i);
-    const karana = pick(/Karana\\s+(.+?)\\s+Weekday/i);
-    const paksha = pick(/Paksha\\s+(.+?)(?:\\s+Tithi|\\s+Chandra|\\s+Moon)/i);
-    const samvat = pick(/Vikram Samvat\\s+([0-9]{4}\\s+[A-Za-z]+)/i);
-    const rahukaal = pick(/Rahu Kalam\\s+(.+?)(?:\\s+Gulikai|\\s+Yamaganda|\\s+Abhijit)/i);
-    const abhijitMuhurat = pick(/Abhijit\\s+(.+?)(?:\\s+Dur Muhurtam|\\s+Amrit Kalam|\\s+Varjyam)/i);
+    const tithi = pick(/Tithi\\s*([A-Za-z][A-Za-z\\s-]*?)(?:\\s+Nakshatra)/i);
+    const nakshatra = pick(/Nakshatra\\s*([A-Za-z][A-Za-z\\s-]*?)(?:\\s+Yoga|\\s+Karana)/i);
+    const yoga = pick(/Yoga\\s*([A-Za-z][A-Za-z\\s-]*?)(?:\\s+Karana)/i);
+    const karana = pick(/Karana\\s*([A-Za-z][A-Za-z\\s-]*?)(?:\\s+Weekday|\\s+Sunsign|\\s+Moonsign)/i);
+    const paksha = pick(/Paksha\\s*(Krishna Paksha|Shukla Paksha)/i);
+    const samvat = pick(/Vikram Samvat\\s*([0-9]{4}\\s+[A-Za-z]+)/i);
+    const rahukaal = pick(/Rahu Kalam\\s*(.+?)(?:\\s+Gulikai|\\s+Yamaganda|\\s+Abhijit)/i);
+    const abhijitMuhurat = pick(/Abhijit\\s*(.+?)(?:\\s+Dur Muhurtam|\\s+Amrit Kalam|\\s+Varjyam)/i);
 
     if (!sunrise || !sunset || !tithi || !nakshatra || !yoga || !karana || !paksha || !samvat || !rahukaal || !abhijitMuhurat) {
       throw new Error("Drik Panchang page loaded but required fields could not be parsed");
@@ -459,10 +460,26 @@ export async function getLiveMandiPulse(cityId?: string, state?: string) {
     const $ = cheerio.load(res.data);
     const body = $("body").text().replace(/\\s+/g, " ");
     const updates: { title: string; desc: string }[] = [];
-    const re = /(Soyabean|Wheat|Maize|Green Peas|Onion|Potato|Garlic|Kabuli Chana)[^₹]{0,120}Modal Price\\s*₹([0-9,]+)[^₹]{0,80}(?:Min:|Minimum:)[^₹]*₹([0-9,]+)[^₹]{0,80}(?:Max:|Maximum:)[^₹]*₹([0-9,]+)/gi;
+    const seen = new Set<string>();
+    const cardRe = /(Soyabean|Wheat|Maize|Green Peas|Onion|Potato|Garlic|Kabuli Chana|Tomato|Cauliflower|Cabbage|Capsicum|Carrot|Brinjal|Bhindi|Bitter gourd)[\\s\\S]{0,180}?Modal Price\\s*₹([0-9,]+)[\\s\\S]{0,100}?(?:Min:|Minimum:)\\s*₹([0-9,]+)[\\s\\S]{0,100}?(?:Max:|Maximum:)\\s*₹([0-9,]+)/gi;
     let m;
-    while ((m = re.exec(body)) && updates.length < 8) {
+    while ((m = cardRe.exec(body)) && updates.length < 8) {
+      const key = m[1].toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
       updates.push({ title: `${m[1]} — ₹${m[2]}/quintal`, desc: `Min ₹${m[3]} • Max ₹${m[4]}` });
+    }
+    if (!updates.length) {
+      $("table tr").each((_, row) => {
+        if (updates.length >= 8) return;
+        const cells = $(row).find("th,td").map((__, el) => $(el).text().replace(/\\s+/g, " ").trim()).get();
+        const text = cells.join(" | ");
+        const rate = text.match(/(Soyabean|Wheat|Maize|Green Peas|Onion|Potato|Garlic|Kabuli Chana|Tomato|Cauliflower|Cabbage|Capsicum|Carrot|Brinjal|Bhindi|Bitter gourd)[^₹]*₹([0-9,]+)[^₹]*₹([0-9,]+)[^₹]*₹([0-9,]+)/i);
+        if (rate && !seen.has(rate[1].toLowerCase())) {
+          seen.add(rate[1].toLowerCase());
+          updates.push({ title: `${rate[1]} — ₹${rate[3]}/quintal`, desc: `Min ₹${rate[2]} • Max ₹${rate[4]}` });
+        }
+      });
     }
     if (!updates.length) throw new Error("Mandi rates not parsed");
     return { source:"MandiPulse.com", sourceUrl:url, market:cityInfo.marketName, updates, updatedAt:new Date().toISOString() };
