@@ -238,7 +238,7 @@ function normalizeCityKey(city?: string, state?: string): string {
 }
 
 // 1. DRIK PANCHANG SCRAPER (Source: drikpanchang.com)
-export async function getLiveDrikPanchang(cityId?: string) {
+export async function getLiveDrikPanchang(cityId?: string, state?: string) {
   await ensureCityCatalog();
   const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
@@ -315,9 +315,9 @@ export async function getLiveDrikPanchang(cityId?: string) {
 }
 
 // 2. ALL INDIA BULLION SCRAPER (Source: allindiabullion.com)
-export async function getLiveBullionRates(cityId?: string) {
+export async function getLiveBullionRates(cityId?: string, state?: string) {
   await ensureCityCatalog();
-  const cityKey = normalizeCityKey(cityId);
+  const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = bullionCache.get(cityKey);
 
@@ -376,9 +376,9 @@ export async function getLiveBullionRates(cityId?: string) {
 }
 
 // 3. CITY VEGETABLE MANDI SCRAPER (Source: rozkabhav.com)
-export async function getLiveVegetablePrices(cityId?: string) {
+export async function getLiveVegetablePrices(cityId?: string, state?: string) {
   await ensureCityCatalog();
-  const cityKey = normalizeCityKey(cityId);
+  const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = vegetableCache.get(cityKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
@@ -404,9 +404,9 @@ export async function getLiveVegetablePrices(cityId?: string) {
 }
 
 // 4. FUEL & GAS PRICE SCRAPER (Source: RozKaBhav.com)
-export async function getLiveFuelPrices(cityId?: string) {
+export async function getLiveFuelPrices(cityId?: string, state?: string) {
   await ensureCityCatalog();
-  const cityKey = normalizeCityKey(cityId);
+  const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = fuelCache.get(cityKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
@@ -474,7 +474,7 @@ export async function getLiveMandiPulse(cityId?: string, state?: string) {
 // 5. UNIFIED SUMMARY FOR HOME SCREEN STRIP (Supports ?city=indore)
 export async function getVerifiedMarketSummary(cityId?: string, state?: string) {
   await ensureCityCatalog();
-  const cityKey = normalizeCityKey(cityId);
+  const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
 
   // Keep Home fast: all required feeds are fetched concurrently.
