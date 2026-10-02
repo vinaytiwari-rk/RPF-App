@@ -346,9 +346,9 @@ export async function getLiveBullionRates(cityId?: string, state?: string) {
       sourceUrl: cityInfo.bullionUrl || "https://allindiabullion.com/gold-rate",
       city: cityInfo.name,
       location: `${cityInfo.name}, ${cityInfo.state}`,
-      gold24k: gold24k ? `₹${gold24k}` : "₹1,50,786",
-      gold22k: gold22k ? `₹${gold22k}` : "₹1,38,120",
-      gold18k: gold18k ? `₹${gold18k}` : "₹1,13,089",
+      gold24k: gold24k ? `₹${gold24k}` : "",
+      gold22k: gold22k ? `₹${gold22k}` : "",
+      gold18k: gold18k ? `₹${gold18k}` : "",
       silver: silver ? `₹${silver}` : "",
       unit: "Per 10g",
       silverUnit: "Per 1kg",
@@ -364,10 +364,11 @@ export async function getLiveBullionRates(cityId?: string, state?: string) {
       sourceUrl: cityInfo.bullionUrl || "https://allindiabullion.com/gold-rate",
       city: cityInfo.name,
       location: `${cityInfo.name}, ${cityInfo.state}`,
-      gold24k: "₹1,50,786",
-      gold22k: "₹1,38,120",
-      gold18k: "₹1,13,089",
-      silver: "₹84,500",
+      gold24k: "",
+      gold22k: "",
+      gold18k: "",
+      silver: "",
+      unavailable: true,
       unit: "Per 10g",
       silverUnit: "Per 1kg",
       updatedAt: new Date().toISOString()
@@ -481,10 +482,10 @@ export async function getVerifiedMarketSummary(cityId?: string, state?: string) 
   // Mandi data is derived from the same RozKaBhav city page as vegetable prices,
   // so we do not make a second MandiPulse request.
   const [panchang, bullion, vegetables, fuel, mandiPulse] = await Promise.all([
-    getLiveDrikPanchang(cityKey),
-    getLiveBullionRates(cityKey),
-    getLiveVegetablePrices(cityKey),
-    getLiveFuelPrices(cityKey),
+    getLiveDrikPanchang(cityKey, state),
+    getLiveBullionRates(cityKey, state),
+    getLiveVegetablePrices(cityKey, state),
+    getLiveFuelPrices(cityKey, state),
     getLiveMandiPulse(cityKey, state)
   ]);
 
