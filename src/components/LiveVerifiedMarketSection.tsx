@@ -213,6 +213,7 @@ export default function LiveVerifiedMarketSection() {
   const handleSelectCity = (city: CityItem) => {
     setSelectedCity(city);
     setSelectedState(city.state);
+    setLocationResolved(true);
     try { localStorage.setItem("@rpf_selected_market_state", city.state); } catch {}
     setShowCityPicker(false);
     try {
