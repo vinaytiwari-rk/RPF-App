@@ -478,9 +478,7 @@ export async function getVerifiedMarketSummary(cityId?: string, state?: string) 
   const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
 
-  // Keep Home fast: all required feeds are fetched concurrently.
-  // Mandi data is derived from the same RozKaBhav city page as vegetable prices,
-  // so we do not make a second MandiPulse request.
+  // Fetch all live feeds concurrently.
   const [panchang, bullion, vegetables, fuel, mandiPulse] = await Promise.all([
     getLiveDrikPanchang(cityKey, state),
     getLiveBullionRates(cityKey, state),
