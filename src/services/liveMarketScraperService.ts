@@ -16,6 +16,8 @@ export interface CityLocationInfo {
   fuelUrl: string;
   marketName: string;
   geonameId?: string;
+  bullionUrl?: string;
+  mandiUrl?: string;
 }
 
 export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
@@ -130,8 +132,20 @@ function slugifyCity(value: string) {
 }
 
 function buildCityInfo(name: string, state: string): CityLocationInfo {
+  const stateSlug = slugifyCity(state);
+  const citySlug = slugifyCity(name);
   const source = STATE_MARKET_SOURCES[state] || STATE_MARKET_SOURCES["Madhya Pradesh"];
-  return { id: slugifyCity(name), name, state, vegUrl: source.vegUrl, fuelUrl: source.fuelUrl, marketName: `${name} Mandi, ${state}` };
+  return {
+    id: citySlug,
+    name,
+    state,
+    vegUrl: `https://rozkabhav.com/vegetables-price-in-${citySlug}-${stateSlug}/`,
+    fuelUrl: `https://rozkabhav.com/fuel-price-in-${citySlug}-${stateSlug}/`,
+    marketName: `${name} Mandi, ${state}`,
+    bullionUrl: `https://allindiabullion.com/gold-rate/${stateSlug}/${citySlug}`,
+    mandiUrl: `https://mandipulse.com/mandi/${stateSlug}-${citySlug}-${citySlug}-apmc`,
+    geonameId: undefined
+  };
 }
 
 async function discoverCitiesFromState(source: StateMarketSource): Promise<Record<string, CityLocationInfo>> {
@@ -210,13 +224,17 @@ const fuelCache = new Map<string, { data: any; timestamp: number }>();
 
 const CACHE_TTL_MS = 20 * 60 * 1000; // 20 minutes
 
-function normalizeCityKey(city?: string): string {
+function normalizeCityKey(city?: string, state?: string): string {
   if (!city) return "indore";
   const c = city.toLowerCase().trim();
   for (const key of Object.keys(SUPPORTED_CITIES)) {
-    if (c.includes(key)) return key;
+    if (c === key || c.includes(key)) return key;
   }
-  return "indore";
+  const name = city.replace(/-/g, " ").trim().replace(/\\b\\w/g, m => m.toUpperCase());
+  const st = (state || "Madhya Pradesh").trim();
+  const dynamic = buildCityInfo(name, st);
+  SUPPORTED_CITIES[dynamic.id] = dynamic;
+  return dynamic.id;
 }
 
 // 1. DRIK PANCHANG SCRAPER (Source: drikpanchang.com)
@@ -308,39 +326,30 @@ export async function getLiveBullionRates(cityId?: string) {
   }
 
   try {
-    const res = await axios.get("https://allindiabullion.com/gold-rate-today", {
+    const res = await axios.get(cityInfo.bullionUrl || "https://allindiabullion.com/gold-rate", {
       headers: customHeaders,
       httpsAgent,
       timeout: 9000
     });
     const $ = cheerio.load(res.data);
 
-    let gold24k = "", gold22k = "", gold18k = "";
-    $("table tr").each((_, el) => {
-      const text = $(el).text().replace(/\s+/g, " ").trim();
-      if (text.includes("24K") && !gold24k) {
-        const m = text.match(/₹([0-9,]+)/);
-        if (m) gold24k = m[1];
-      }
-      if (text.includes("22K") && !gold22k) {
-        const m = text.match(/₹([0-9,]+)/);
-        if (m) gold22k = m[1];
-      }
-      if (text.includes("18K") && !gold18k) {
-        const m = text.match(/₹([0-9,]+)/);
-        if (m) gold18k = m[1];
-      }
-    });
+    const body = $("body").text().replace(/\\s+/g, " ");
+    const money = (re: RegExp) => body.match(re)?.[1] || "";
+    const gold24k = money(/24K Gold\\s+₹([0-9,]+)/i);
+    const gold22k = money(/22K Gold\\s+₹([0-9,]+)/i);
+    const gold18k = money(/18K Gold\\s+₹([0-9,]+)/i);
+    const silver = money(/Silver\\s+₹([0-9,]+)\\s+per kg/i);
+    if (!gold24k || !gold22k || !silver) throw new Error("AIB city bullion values not parsed");
 
     const parsed = {
       source: "AllIndiaBullion.com",
-      sourceUrl: "https://allindiabullion.com/gold-rate-today",
+      sourceUrl: cityInfo.bullionUrl || "https://allindiabullion.com/gold-rate",
       city: cityInfo.name,
       location: `${cityInfo.name}, ${cityInfo.state}`,
       gold24k: gold24k ? `₹${gold24k}` : "₹1,50,786",
       gold22k: gold22k ? `₹${gold22k}` : "₹1,38,120",
       gold18k: gold18k ? `₹${gold18k}` : "₹1,13,089",
-      silver: "₹84,500",
+      silver: silver ? `₹${silver}` : "",
       unit: "Per 10g",
       silverUnit: "Per 1kg",
       updatedAt: new Date().toISOString()
@@ -352,7 +361,7 @@ export async function getLiveBullionRates(cityId?: string) {
     if (cached?.data) return cached.data;
     return {
       source: "AllIndiaBullion.com",
-      sourceUrl: "https://allindiabullion.com/gold-rate-today",
+      sourceUrl: cityInfo.bullionUrl || "https://allindiabullion.com/gold-rate",
       city: cityInfo.name,
       location: `${cityInfo.name}, ${cityInfo.state}`,
       gold24k: "₹1,50,786",
@@ -376,16 +385,14 @@ export async function getLiveVegetablePrices(cityId?: string) {
 
   try {
     const res = await axios.get(cityInfo.vegUrl, { headers: customHeaders, httpsAgent, timeout: 8000 });
-    const row = parseCityMarketRow(res.data, cityInfo.name, "vegetable");
+    const body = cheerio.load(res.data)("body").text().replace(/\\s+/g, " ");
     const items: { name: string; price: string; change: string }[] = [];
-    if (row) {
-      row.headers.forEach((header, index) => {
-        if (index === 0) return;
-        const name = header.replace(/today|price|rate/gi, "").trim();
-        const price = row!.cells[index] || "";
-        if (name && price && /₹|[0-9]/.test(price)) items.push({ name, price, change: "" });
-      });
+    const names = ["Onion","Potato","Tomato","Cauliflower","Capsicum","Beans","Carrot","Cabbage","Garlic","Ginger","Green Peas","Bitter Gourd"];
+    for (const name of names) {
+      const m = body.match(new RegExp(name + "\\s+Today\\s*[–-]\\s*₹([0-9,.]+)\\s+per kg", "i"));
+      if (m) items.push({ name, price: `₹${m[1]} per kg`, change: "" });
     }
+    if (!items.length) throw new Error("Vegetable prices not parsed");
     const uniqueItems = Array.from(new Map(items.map(item => [item.name.toLowerCase().replace(/\s+/g, " ").trim(), item])).values());
     const parsed = { source: "RozKaBhav.com", sourceUrl: cityInfo.vegUrl, city: cityInfo.name, market: cityInfo.marketName, items: uniqueItems.slice(0, 12), updatedAt: new Date().toISOString() };
     vegetableCache.set(cityKey, { data: parsed, timestamp: Date.now() });
@@ -426,7 +433,7 @@ export async function getLiveFuelPrices(cityId?: string) {
     if (!petrol || !diesel || !cng) throw new Error("Fuel page loaded but petrol/diesel/CNG values were not parsed");
     const parsed = {
       source: "RozKaBhav.com", sourceUrl: cityInfo.fuelUrl, city: cityInfo.name,
-      petrol, diesel, lpgDomestic: "", lpgCommercial: "", cng,
+      petrol: `₹${petrol}`, diesel: `₹${diesel}`, lpgDomestic: "", lpgCommercial: "", cng: `₹${cng}`,
       updatedAt: new Date().toISOString()
     };
     fuelCache.set(cityKey, { data: parsed, timestamp: Date.now() });
@@ -441,49 +448,26 @@ export async function getLiveFuelPrices(cityId?: string) {
 }
 
 // 4. MANDI PULSE COMMODITY SCRAPER (Source: mandipulse.com)
-export async function getLiveMandiPulse() {
-  if (mandiPulseCache && Date.now() - mandiPulseCache.timestamp < CACHE_TTL_MS) {
-    return mandiPulseCache.data;
-  }
-
+export async function getLiveMandiPulse(cityId?: string, state?: string) {
+  await ensureCityCatalog();
+  const cityKey = normalizeCityKey(cityId, state);
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
+  const url = cityInfo.mandiUrl || `https://mandipulse.com/mandi/madhya-pradesh-indore-indore-apmc`;
   try {
-    const res = await axios.get("https://mandipulse.com/", {
-      headers: customHeaders,
-      httpsAgent,
-      timeout: 9000
-    });
+    const res = await axios.get(url, { headers: customHeaders, httpsAgent, timeout: 9000 });
     const $ = cheerio.load(res.data);
+    const body = $("body").text().replace(/\\s+/g, " ");
     const updates: { title: string; desc: string }[] = [];
-
-    $("h2, h3").slice(0, 6).each((_, el) => {
-      const text = $(el).text().replace(/\s+/g, " ").trim();
-      if (text.length > 20 && !text.includes("Mandi Pulse")) {
-        updates.push({
-          title: text,
-          desc: $(el).next("p").text().replace(/\s+/g, " ").trim() || "Live Mandi Arrival & Price Report"
-        });
-      }
-    });
-
-    const parsed = {
-      source: "MandiPulse.com",
-      sourceUrl: "https://mandipulse.com/",
-      updates: updates.slice(0, 5),
-      updatedAt: new Date().toISOString()
-    };
-
-    mandiPulseCache = { data: parsed, timestamp: Date.now() };
-    return parsed;
-  } catch {
-    if (mandiPulseCache?.data) return mandiPulseCache.data;
-    return {
-      source: "MandiPulse.com",
-      sourceUrl: "https://mandipulse.com/",
-      updates: [
-        { title: "Indore & Ujjain APMC Soybean & Wheat Market Arrivals", desc: "Live agricultural commodity movements in Central India." }
-      ],
-      updatedAt: new Date().toISOString()
-    };
+    const re = /(Soyabean|Wheat|Maize|Green Peas|Onion|Potato|Garlic|Kabuli Chana)[^₹]{0,120}Modal Price\\s*₹([0-9,]+)[^₹]{0,80}(?:Min:|Minimum:)[^₹]*₹([0-9,]+)[^₹]{0,80}(?:Max:|Maximum:)[^₹]*₹([0-9,]+)/gi;
+    let m;
+    while ((m = re.exec(body)) && updates.length < 8) {
+      updates.push({ title: `${m[1]} — ₹${m[2]}/quintal`, desc: `Min ₹${m[3]} • Max ₹${m[4]}` });
+    }
+    if (!updates.length) throw new Error("Mandi rates not parsed");
+    return { source:"MandiPulse.com", sourceUrl:url, market:cityInfo.marketName, updates, updatedAt:new Date().toISOString() };
+  } catch (error) {
+    console.error("Mandi fetch/parse failed:", error);
+    return { source:"MandiPulse.com", sourceUrl:url, market:cityInfo.marketName, updates:[], unavailable:true, updatedAt:new Date().toISOString() };
   }
 }
 
@@ -496,22 +480,12 @@ export async function getVerifiedMarketSummary(cityId?: string) {
   // Keep Home fast: all required feeds are fetched concurrently.
   // Mandi data is derived from the same RozKaBhav city page as vegetable prices,
   // so we do not make a second MandiPulse request.
-  const [panchang, bullion, vegetables, fuel] = await Promise.all([
+  const [panchang, bullion, vegetables, fuel, mandiPulse] = await Promise.all([
     getLiveDrikPanchang(cityKey),
     getLiveBullionRates(cityKey),
     getLiveVegetablePrices(cityKey),
     getLiveFuelPrices(cityKey)
   ]);
-
-  const mandiPulse = {
-    source: vegetables.source,
-    sourceUrl: vegetables.sourceUrl,
-    updates: vegetables.items.slice(0, 8).map((item) => ({
-      title: item.name + " — " + item.price,
-      desc: "Today’s city/mandi reference rate" + (item.change ? " • Change: " + item.change : "")
-    })),
-    updatedAt: vegetables.updatedAt
-  };
 
   return {
     selectedCity: cityInfo,
