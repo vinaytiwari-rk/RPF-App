@@ -15,6 +15,7 @@ export interface CityLocationInfo {
   vegUrl: string;
   fuelUrl: string;
   marketName: string;
+  geonameId?: string;
 }
 
 export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
@@ -24,7 +25,8 @@ export const SUPPORTED_CITIES: Record<string, CityLocationInfo> = {
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-indore-madhya-pradesh/",
     fuelUrl: "https://rozkabhav.com/fuel-price-in-indore-madhya-pradesh/",
-    marketName: "Indore Choithram Mandi, MP"
+    marketName: "Indore Choithram Mandi, MP",
+    geonameId: "1269743"
   },
   bhopal: {
     id: "bhopal",
@@ -223,86 +225,73 @@ export async function getLiveDrikPanchang(cityId?: string) {
   const cityKey = normalizeCityKey(cityId);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = panchangCache.get(cityKey);
-
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return cached.data;
-  }
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
 
   try {
-    const res = await axios.get("https://www.drikpanchang.com/panchang/day-panchang.html", {
-      headers: customHeaders,
-      httpsAgent,
-      timeout: 9000
-    });
+    const url = cityInfo.geonameId
+      ? `https://www.drikpanchang.com/panchang/day-panchang.html?geoname-id=${encodeURIComponent(cityInfo.geonameId)}`
+      : "https://www.drikpanchang.com/panchang/day-panchang.html";
+    const res = await axios.get(url, { headers: customHeaders, httpsAgent, timeout: 10000 });
     const $ = cheerio.load(res.data);
+    const body = $("body").text().replace(/\\s+/g, " ").replace(/\\u00a0/g, " ").trim();
 
-    let sunrise = "", sunset = "";
-    let tithi = "", nakshatra = "", paksha = "", samvat = "";
+    const pick = (pattern: RegExp) => {
+      const m = body.match(pattern);
+      return m?.[1]?.replace(/\\s+/g, " ").trim() || "";
+    };
+    const to12 = (v: string) => {
+      if (!v) return "";
+      if (/AM|PM/i.test(v)) return v;
+      const m = v.match(/^(\\d{1,2}):(\\d{2})$/);
+      if (!m) return v;
+      let h = Number(m[1]); const min = m[2]; const suffix = h >= 12 ? "PM" : "AM";
+      h = h % 12 || 12;
+      return `${String(h).padStart(2, "0")}:${min} ${suffix}`;
+    };
 
-    $("div.dpTableRow, div.dpPanchangCard, .dpPanchangDetails").each((_, el) => {
-      const text = $(el).text().replace(/\s+/g, " ").trim();
-      if (text.includes("Sunrise") && text.includes("Sunset") && !sunrise) {
-        const match = text.match(/Sunrise\s*([0-9:]+\s*[AP]M)\s*Sunset\s*([0-9:]+\s*[AP]M)/i);
-        if (match) { sunrise = match[1]; sunset = match[2]; }
-      }
-      if (text.includes("Tithi") && text.includes("Nakshatra") && !tithi) {
-        const tMatch = text.match(/Tithi\s*([^\s]+(?:\s+upto\s+[0-9:]+\s*[AP]M)?)/i);
-        const nMatch = text.match(/Nakshatra\s*([^\s]+(?:\s+upto\s+[0-9:]+\s*[AP]M)?)/i);
-        if (tMatch) tithi = tMatch[1];
-        if (nMatch) nakshatra = nMatch[1];
-      }
-      if (text.includes("Paksha") && !paksha) {
-        const match = text.match(/Paksha\s*([A-Za-z\s]+Paksha)/i);
-        if (match) paksha = match[1].trim();
-      }
-      if (text.includes("Vikram Samvat") && !samvat) {
-        const match = text.match(/Vikram\s*Samvat\s*([0-9]{4}\s*[A-Za-z]+)/i);
-        if (match) samvat = match[1].trim();
-      }
-    });
+    const sunrise = to12(pick(/Sunrise\\s*(\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)/i));
+    const sunset = to12(pick(/Sunset\\s*(\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)/i));
+    const moonrise = to12(pick(/Moonrise\\s*(\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)/i));
+    const tithi = pick(/Tithi\\s+(.+?)\\s+Nakshatra/i);
+    const nakshatra = pick(/Nakshatra\\s+(.+?)\\s+Saptami|Nakshatra\\s+(.+?)\\s+Yoga/i);
+    const yoga = pick(/Yoga\\s+(.+?)\\s+Karana/i);
+    const karana = pick(/Karana\\s+(.+?)\\s+Weekday/i);
+    const paksha = pick(/Paksha\\s+(.+?)(?:\\s+Tithi|\\s+Chandra|\\s+Moon)/i);
+    const samvat = pick(/Vikram Samvat\\s+([0-9]{4}\\s+[A-Za-z]+)/i);
+    const rahukaal = pick(/Rahu Kalam\\s+(.+?)(?:\\s+Gulikai|\\s+Yamaganda|\\s+Abhijit)/i);
+    const abhijitMuhurat = pick(/Abhijit\\s+(.+?)(?:\\s+Dur Muhurtam|\\s+Amrit Kalam|\\s+Varjyam)/i);
+
+    if (!sunrise || !sunset || !tithi || !nakshatra || !yoga || !karana || !paksha || !samvat || !rahukaal || !abhijitMuhurat) {
+      throw new Error("Drik Panchang page loaded but required fields could not be parsed");
+    }
 
     const parsed = {
       source: "DrikPanchang.com",
-      sourceUrl: "https://www.drikpanchang.com/panchang/day-panchang.html",
-      date: new Date().toLocaleDateString("en-US", { month: "long", day: "2-digit", year: "numeric" }),
+      sourceUrl: url,
+      date: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
       location: `${cityInfo.name}, ${cityInfo.state}`,
       city: cityInfo.name,
       state: cityInfo.state,
-      sunrise: sunrise || "06:14 AM",
-      sunset: sunset || "06:07 PM",
-      tithi: tithi || "Panchami upto 12:35 PM",
-      nakshatra: nakshatra || "Rohini upto 04:27 AM",
-      paksha: paksha || "Krishna Paksha",
-      samvat: samvat ? `Vikram Samvat ${samvat}` : "Vikram Samvat 2083 Siddharthi",
-      yoga: "Siddhi upto 09:18 PM",
-      karana: "Taitila / Garaja",
-      abhijitMuhurat: "11:46 AM to 12:34 PM",
-      rahukaal: "01:30 PM to 03:00 PM",
+      sunrise, sunset, moonrise,
+      tithi, nakshatra, paksha,
+      samvat: `Vikram Samvat ${samvat}`,
+      yoga, karana, abhijitMuhurat, rahukaal,
       updatedAt: new Date().toISOString()
     };
-
     panchangCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
-  } catch {
+  } catch (error) {
+    console.error("Drik Panchang fetch/parse failed:", error);
     if (cached?.data) return cached.data;
     return {
       source: "DrikPanchang.com",
       sourceUrl: "https://www.drikpanchang.com/panchang/day-panchang.html",
-      date: "01 October 2026",
+      date: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
       location: `${cityInfo.name}, ${cityInfo.state}`,
-      city: cityInfo.name,
-      state: cityInfo.state,
-      sunrise: "06:14 AM",
-      sunset: "06:07 PM",
-      tithi: "Krishna Paksha, Panchami",
-      nakshatra: "Rohini Nakshatra",
-      paksha: "Krishna Paksha",
-      samvat: "Vikram Samvat 2083 Siddharthi",
-      yoga: "Siddhi Yoga",
-      karana: "Taitila / Garaja",
-      abhijitMuhurat: "11:46 AM to 12:34 PM",
-      rahukaal: "01:30 PM to 03:00 PM",
-      updatedAt: new Date().toISOString()
+      city: cityInfo.name, state: cityInfo.state,
+      sunrise: "", sunset: "", moonrise: "", tithi: "", nakshatra: "",
+      paksha: "", samvat: "", yoga: "", karana: "", abhijitMuhurat: "", rahukaal: "",
+      unavailable: true, updatedAt: new Date().toISOString()
     };
   }
 }
@@ -416,18 +405,38 @@ export async function getLiveFuelPrices(cityId?: string) {
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
 
   try {
-    const res = await axios.get(cityInfo.fuelUrl, { headers: customHeaders, httpsAgent, timeout: 6000 });
-    const row = parseCityMarketRow(res.data, cityInfo.name, "fuel");
-    const petrol = row?.cells[1] || "";
-    const diesel = row?.cells[2] || "";
-    const cng = row?.cells[3] || "";
-    const parsed = { source: "RozKaBhav.com", sourceUrl: cityInfo.fuelUrl, city: cityInfo.name, petrol, diesel, lpgDomestic: "", lpgCommercial: "", cng, updatedAt: new Date().toISOString() };
-    if (!petrol && !diesel && !cng) throw new Error("Fuel price row not found");
+    const res = await axios.get(cityInfo.fuelUrl, { headers: customHeaders, httpsAgent, timeout: 8000 });
+    const $ = cheerio.load(res.data);
+    const rows: Record<string,string>[] = [];
+    $("table tr").each((_, tr) => {
+      const cells = $(tr).find("th,td").map((__, el) => $(el).text().replace(/\\s+/g, " ").trim()).get();
+      if (cells.length >= 4) {
+        const first = cells[0].toLowerCase().replace(/[▲▼]/g, "").trim();
+        if (["petrol","diesel","cng"].includes(first)) rows.push({ item:first, value:cells[1] });
+      }
+    });
+    const body = $("body").text().replace(/\\s+/g, " ");
+    const extract = (label:string) => {
+      const row = rows.find(r => r.item === label.toLowerCase());
+      if (row?.value) return row.value;
+      const m = body.match(new RegExp(label + "\\s+(?:Today\\s+)?[-–]?\\s*(₹[0-9]+(?:\\.[0-9]+)?)", "i"));
+      return m?.[1] || "";
+    };
+    const petrol = extract("Petrol"), diesel = extract("Diesel"), cng = extract("CNG");
+    if (!petrol || !diesel || !cng) throw new Error("Fuel page loaded but petrol/diesel/CNG values were not parsed");
+    const parsed = {
+      source: "RozKaBhav.com", sourceUrl: cityInfo.fuelUrl, city: cityInfo.name,
+      petrol, diesel, lpgDomestic: "", lpgCommercial: "", cng,
+      updatedAt: new Date().toISOString()
+    };
     fuelCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
-  } catch {
+  } catch (error) {
+    console.error("Fuel price fetch/parse failed:", error);
     if (cached?.data) return cached.data;
-    return { source: "RozKaBhav.com", sourceUrl: cityInfo.fuelUrl, city: cityInfo.name, petrol: "", diesel: "", lpgDomestic: "", lpgCommercial: "", cng: "", updatedAt: new Date().toISOString(), unavailable: true };
+    return { source:"RozKaBhav.com", sourceUrl:cityInfo.fuelUrl, city:cityInfo.name,
+      petrol:"", diesel:"", lpgDomestic:"", lpgCommercial:"", cng:"",
+      unavailable:true, updatedAt:new Date().toISOString() };
   }
 }
 
