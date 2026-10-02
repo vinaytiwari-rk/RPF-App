@@ -122,13 +122,7 @@ export default function LiveVerifiedMarketSection() {
     return FALLBACK_CITIES[0]; // Default Indore
   });
 
-  const [data, setData] = useState<MarketSummary | null>(() => {
-    try {
-      const cached = localStorage.getItem(`@rpf_market_cache_${selectedCity?.id || "indore"}`);
-      if (cached) return JSON.parse(cached);
-    } catch {}
-    return null;
-  });
+  const [data, setData] = useState<MarketSummary | null>(null);
 
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
   const [showCityPicker, setShowCityPicker] = useState<boolean>(false);
@@ -139,13 +133,14 @@ export default function LiveVerifiedMarketSection() {
 
   const fetchMarketData = useCallback((cityId: string, state: string) => {
     setIsLoadingData(true);
+    setData(null);
     axios
       .get(`/api/public/market-summary?city=${cityId}`)
       .then((res) => {
         if (res.data?.success && res.data?.data) {
           setData(res.data.data);
           try {
-            localStorage.setItem(`@rpf_market_cache_${cityId}`, JSON.stringify(res.data.data));
+
           } catch {}
         }
       })
@@ -166,15 +161,12 @@ export default function LiveVerifiedMarketSection() {
           })) as CityItem[];
           if (discovered.length) {
             setCities(discovered);
+            const manual = localStorage.getItem("@rpf_selected_market_manual") === "1";
             const saved = localStorage.getItem("@rpf_selected_market_city");
             const savedCity = discovered.find((c) => c.id === saved);
-            if (savedCity) {
+            if (manual && savedCity) {
               setSelectedCity(savedCity);
               setSelectedState(savedCity.state);
-            } else if (!discovered.some((c) => c.id === selectedCity.id)) {
-              const fallback = discovered.find((c) => c.id === "indore") || discovered[0];
-              setSelectedCity(fallback);
-              setSelectedState(fallback.state);
             }
           }
         }
