@@ -214,13 +214,7 @@ export default function Home() {
     return defaultNationalHeadlines;
   });
 
-  const [marquee2, setMarquee2] = useState<string[]>(() => {
-    try {
-      const cached = JSON.parse(localStorage.getItem("@rpf_marquee2_mp_v2") || "[]");
-      if (Array.isArray(cached) && cached.length) return cached;
-    } catch {}
-    return defaultMpHeadlines;
-  });
+  const [marquee2, setMarquee2] = useState<string[]>([]);
 
   const [quoteOfDay, setQuoteOfDay] = useState<{ quote: string; author: string }>(() => {
     try {
@@ -287,7 +281,7 @@ export default function Home() {
       try { const cached = JSON.parse(localStorage.getItem(key) || "[]"); if (Array.isArray(cached) && cached.length) setter(cached); } catch {}
     };
     restore("@rpf_marquee1_national_v2", setMarquee1);
-    restore("@rpf_marquee2_mp_v2", setMarquee2);
+    // MP marquee is feed-only; never restore stale localStorage headlines.
 
     const load = async () => {
       for (const url of [
@@ -307,7 +301,7 @@ export default function Home() {
           const m2 = parseFeedItems(data?.marquee2 ?? data?.mpNews ?? []);
           if (!alive) return;
           if (m1.length) { setMarquee1(m1); try { localStorage.setItem("@rpf_marquee1_national_v2", JSON.stringify(m1)); } catch {} }
-          if (m2.length) { setMarquee2(m2); try { localStorage.setItem("@rpf_marquee2_mp_v2", JSON.stringify(m2)); } catch {} }
+          if (m2.length) { setMarquee2(m2); }
           if (m1.length && m2.length) break;
         } catch {}
       }
