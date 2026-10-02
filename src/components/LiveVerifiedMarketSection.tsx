@@ -119,7 +119,7 @@ export default function LiveVerifiedMarketSection() {
         if (found) return found;
       }
     } catch {}
-    return FALLBACK_CITIES[0]; // Default Indore
+    return FALLBACK_CITIES[0]; // Temporary UI placeholder until GPS/manual location resolves
   });
 
   const [data, setData] = useState<MarketSummary | null>(null);
@@ -128,6 +128,9 @@ export default function LiveVerifiedMarketSection() {
   const [showCityPicker, setShowCityPicker] = useState<boolean>(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState<boolean>(false);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
+  const [locationResolved, setLocationResolved] = useState<boolean>(() => {
+    try { return localStorage.getItem("@rpf_selected_market_manual") === "1"; } catch { return false; }
+  });
   const availableStates = Array.from(new Set(cities.map((c) => c.state))).sort();
   const citiesInState = cities.filter((c) => c.state === selectedState).sort((a, b) => a.name.localeCompare(b.name));
 
@@ -135,7 +138,7 @@ export default function LiveVerifiedMarketSection() {
     setIsLoadingData(true);
     setData(null);
     axios
-      .get(`/api/public/market-summary?city=${cityId}`)
+      .get(`/api/public/market-summary?city=${encodeURIComponent(cityId)}&state=${encodeURIComponent(state)}`, { cache: "no-store", headers: { "Cache-Control": "no-cache" } })
       .then((res) => {
         if (res.data?.success && res.data?.data) {
           setData(res.data.data);
@@ -188,8 +191,9 @@ export default function LiveVerifiedMarketSection() {
   }), []);
 
   useEffect(() => {
+    if (!locationResolved) return;
     fetchMarketData(selectedCity.id, selectedCity.state);
-  }, [selectedCity.id, selectedCity.state, fetchMarketData]);
+  }, [locationResolved, selectedCity.id, selectedCity.state, fetchMarketData]);
 
   // Auto-detect the user's real current city on first visit.
   useEffect(() => {
@@ -198,6 +202,7 @@ export default function LiveVerifiedMarketSection() {
       resolveCurrentLocation().then((current) => {
         setSelectedCity(current);
         setSelectedState(current.state);
+        setLocationResolved(true);
         try {
           localStorage.setItem("@rpf_selected_market_state", current.state);
         } catch {}
