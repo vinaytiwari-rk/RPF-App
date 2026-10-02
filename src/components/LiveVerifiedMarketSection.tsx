@@ -283,13 +283,13 @@ export default function LiveVerifiedMarketSection() {
 
             <div className="mt-2 space-y-0.5">
               <div className="text-[13px] font-bold text-[#14213D] line-clamp-1">
-                {data?.panchang?.tithi || "Panchami (Krishna Paksha)"}
+                {data?.panchang?.tithi || (data?.panchang?.unavailable ? "Live Panchang unavailable" : "Loading…")}
               </div>
               <div className="text-[11px] font-semibold text-emerald-800 line-clamp-1">
-                {data?.panchang?.samvat || "Vikram Samvat 2083 Siddharthi"}
+                {data?.panchang?.samvat || (data?.panchang?.unavailable ? "Please refresh shortly" : "Fetching today’s Panchang…")}
               </div>
               <div className="text-[10.5px] text-slate-500 font-medium">
-                Sunrise: {data?.panchang?.sunrise || "06:14 AM"} • Sunset: {data?.panchang?.sunset || "06:07 PM"}
+                Sunrise: {data?.panchang?.sunrise || "—"} • Sunset: {data?.panchang?.sunset || "—"}
               </div>
             </div>
           </div>
