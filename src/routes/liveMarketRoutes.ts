@@ -56,7 +56,9 @@ router.get("/api/public/market-summary", async (req, res) => {
 // 2. Drik Panchang
 router.get("/api/public/live-panchang", async (_req, res) => {
   try {
-    const data = await getLiveDrikPanchang();
+    const city = typeof _req.query.city === "string" ? _req.query.city : undefined;
+    const state = typeof _req.query.state === "string" ? _req.query.state : undefined;
+    const data = await getLiveDrikPanchang(city, state);
     return res.json({ success: true, data });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: "Unable to load panchang" });
@@ -87,7 +89,9 @@ router.get("/api/public/live-vegetables", async (req, res) => {
 // 5. Mandi Pulse
 router.get("/api/public/live-mandi-pulse", async (_req, res) => {
   try {
-    const data = await getLiveMandiPulse();
+    const city = typeof _req.query.city === "string" ? _req.query.city : undefined;
+    const state = typeof _req.query.state === "string" ? _req.query.state : undefined;
+    const data = await getLiveMandiPulse(city, state);
     return res.json({ success: true, data });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: "Unable to load mandi pulse" });
