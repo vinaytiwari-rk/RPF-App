@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
-import { openExternalLink } from "../utils/browser";
 
 interface CityItem {
   id: string;
@@ -137,7 +136,7 @@ export default function LiveVerifiedMarketSection() {
   const availableStates = Array.from(new Set(cities.map((c) => c.state))).sort();
   const citiesInState = cities.filter((c) => c.state === selectedState).sort((a, b) => a.name.localeCompare(b.name));
 
-  const fetchMarketData = useCallback((cityId: string) => {
+  const fetchMarketData = useCallback((cityId: string, state: string) => {
     setIsLoadingData(true);
     axios
       .get(`/api/public/market-summary?city=${cityId}`)
@@ -183,30 +182,23 @@ export default function LiveVerifiedMarketSection() {
   }, []);
 
   useEffect(() => {
-    fetchMarketData(selectedCity.id);
+    fetchMarketData(selectedCity.id, selectedCity.state);
   }, [selectedCity.id, fetchMarketData]);
 
-  // Optional: Auto-detect GPS on first visit if user hasn't explicitly chosen yet
+  // Auto-detect the user's real current city on first visit.
   useEffect(() => {
     const hasChosen = localStorage.getItem("@rpf_selected_market_city");
-    if (!hasChosen && "geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const nearest = findNearestCity(pos.coords.latitude, pos.coords.longitude);
-          if (nearest && nearest.id !== selectedCity.id) {
-            setSelectedCity(nearest);
-            try {
-              localStorage.setItem("@rpf_selected_market_city", nearest.id);
-            } catch {}
-          }
-        },
-        () => {
-          // Geolocation denied or unavailable; graceful fallback to default
-        },
-        { timeout: 5000, maximumAge: 600000 }
-      );
+    if (!hasChosen) {
+      resolveCurrentLocation().then((current) => {
+        setSelectedCity(current);
+        setSelectedState(current.state);
+        try {
+          localStorage.setItem("@rpf_selected_market_city", current.id);
+          localStorage.setItem("@rpf_selected_market_state", current.state);
+        } catch {}
+      }).catch(() => {});
     }
-  }, []);
+  }, [resolveCurrentLocation]);
 
   const handleSelectCity = (city: CityItem) => {
     setSelectedCity(city);
@@ -218,25 +210,30 @@ export default function LiveVerifiedMarketSection() {
     } catch {}
   };
 
-  const handleDetectGPS = () => {
-    if (!("geolocation" in navigator)) {
-      alert("GPS Geolocation is not supported by your browser/device.");
-      return;
-    }
+  const resolveCurrentLocation = useCallback(() => new Promise<CityItem>((resolve, reject) => {
+    if (!("geolocation" in navigator)) return reject(new Error("Geolocation unavailable"));
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const r = await axios.get("/api/public/reverse-location?lat=" + pos.coords.latitude + "&lon=" + pos.coords.longitude);
+        const d = r.data?.data;
+        if (!d?.city) throw new Error("City not resolved");
+        const id = d.city.toLowerCase().trim().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+        resolve({ id, name:d.city, state:d.state || "Unknown" });
+      } catch (e) { reject(e); }
+    }, reject, { timeout: 10000, enableHighAccuracy: true, maximumAge: 300000 });
+  }), []);
+
+  const handleDetectGPS = async () => {
     setIsDetectingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setIsDetectingLocation(false);
-        const nearest = findNearestCity(pos.coords.latitude, pos.coords.longitude);
-        handleSelectCity(nearest);
-      },
-      (err) => {
-        setIsDetectingLocation(false);
-        console.warn("GPS error:", err);
-        alert("Could not detect location automatically. Please select your city manually.");
-      },
-      { timeout: 8000, enableHighAccuracy: true }
-    );
+    try {
+      const current = await resolveCurrentLocation();
+      handleSelectCity(current);
+    } catch (err) {
+      console.warn("GPS location resolution failed:", err);
+      alert("Current location could not be resolved. Please allow location access or select a city manually.");
+    } finally {
+      setIsDetectingLocation(false);
+    }
   };
 
   return (
@@ -637,14 +634,7 @@ export default function LiveVerifiedMarketSection() {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => openExternalLink(data.panchang.sourceUrl)}
-                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <span>View Full Panchang on DrikPanchang.com</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </button>
+                    
                   </div>
                 )}
 
@@ -674,14 +664,7 @@ export default function LiveVerifiedMarketSection() {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => openExternalLink(data.bullion.sourceUrl)}
-                      className="w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <span>Check Live City Rates on AllIndiaBullion.com</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </button>
+                    
                   </div>
                 )}
 
@@ -746,11 +729,7 @@ export default function LiveVerifiedMarketSection() {
                     <p className="text-[10.5px] text-slate-500 font-medium">
                       Reference prices; actual pump/distributor prices can vary by locality. Updated: {data.fuel.updatedAt ? new Date(data.fuel.updatedAt).toLocaleString("en-IN") : "—"}
                     </p>
-                    <button type="button" onClick={() => openExternalLink(data.fuel.sourceUrl)}
-                      className="w-full py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
-                      <span>Check latest city fuel prices</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </button>
+                    
                   </div>
                 )}
 
@@ -767,14 +746,7 @@ export default function LiveVerifiedMarketSection() {
                       </div>
                     ))}
 
-                    <button
-                      type="button"
-                      onClick={() => openExternalLink(data.mandiPulse.sourceUrl)}
-                      className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <span>Explore Mandi Arrivals on MandiPulse.com</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </button>
+                    
                   </div>
                 )}
               </div>
