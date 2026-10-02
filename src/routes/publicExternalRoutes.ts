@@ -144,48 +144,32 @@ const fetchNationalAndWorldNews = async () => {
   return { national: nationalItems, world: worldItems, combined };
 };
 
-// BOTTOM MARQUEE: Madhya Pradesh News (Google News MP + MP Major Cities + MP Info)
+// BOTTOM MARQUEE: Madhya Pradesh official + regional RSS.
+// Primary: MPInfo Hindi RSS. Secondary: Google News MP RSS.
 const fetchMadhyaPradeshNews = async () => {
   const mpItems: string[] = [];
 
-  // 1. Google News MP State (Hindi)
-  try {
-    const feed = await fetchRssFeed("https://news.google.com/rss/search?q=%E0%A4%AE%E0%A4%A7%E0%A4%8F+%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%A6%E0%A5%87%E0%A4%B6&hl=hi&gl=IN&ceid=IN:hi");
-    for (const item of feed.items || []) {
-      const t = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
-      if (t.length > 15 && !mpItems.includes(t)) {
-        mpItems.push(t);
-      }
-    }
-  } catch {}
-
-  // 2. Google News MP Major Cities (Bhopal, Indore, Jabalpur, Gwalior, Ujjain)
-  try {
-    const feed = await fetchRssFeed("https://news.google.com/rss/search?q=Bhopal+Indore+Jabalpur+Gwalior+Ujjain&hl=hi&gl=IN&ceid=IN:hi");
-    for (const item of feed.items || []) {
-      const t = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
-      if (t.length > 15 && !mpItems.includes(t)) {
-        mpItems.push(t);
-      }
-    }
-  } catch {}
-
-  // 3. MP Info RSS
   try {
     const feed = await fetchRssFeed("https://mpinfo.org/RSSFeed/RSSFeed_News.xml");
     for (const item of feed.items || []) {
       const t = cleanText(item.title || "");
-      if (t.length > 12 && !mpItems.includes(t)) {
-        mpItems.push(t);
-      }
+      if (t.length > 12 && !mpItems.includes(t)) mpItems.push(t);
     }
   } catch {}
 
-  return mpItems;
+  try {
+    const feed = await fetchRssFeed("https://news.google.com/rss/search?q=Madhya+Pradesh&hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed.items || []) {
+      const t = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t.length > 15 && !mpItems.includes(t)) mpItems.push(t);
+    }
+  } catch {}
+
+  return mpItems.slice(0, 40);
 };
 
 const getUnifiedLiveFeed = async () => {
-  const cached = cache("unified_live_feed", 120000);
+  const cached = cache("unified_live_feed", 60000);
   if (cached) return cached;
 
   const [nationalAndWorldRes, mpRes] = await Promise.all([
@@ -203,7 +187,7 @@ const getUnifiedLiveFeed = async () => {
     marquee3: nationalAndWorldRes.world,
     // backward compatibility
     governmentNews: { pib: nationalAndWorldRes.national, mpInfo: mpRes },
-    emergencyAlerts: { sachet: mpRes },
+    emergencyAlerts: { sachet: [] },
     pib: nationalAndWorldRes.combined,
     sachet: mpRes,
     news: nationalAndWorldRes.world
