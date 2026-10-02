@@ -230,7 +230,7 @@ function normalizeCityKey(city?: string, state?: string): string {
   for (const key of Object.keys(SUPPORTED_CITIES)) {
     if (c === key || c.includes(key)) return key;
   }
-  const name = city.replace(/-/g, " ").trim().replace(/\\b\\w/g, m => m.toUpperCase());
+  const name = city.replace(/-/g, " ").trim().replace(/\b\w/g, m => m.toUpperCase());
   const st = (state || "Madhya Pradesh").trim();
   const dynamic = buildCityInfo(name, st);
   SUPPORTED_CITIES[dynamic.id] = dynamic;
