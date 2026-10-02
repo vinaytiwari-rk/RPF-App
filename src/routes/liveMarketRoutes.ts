@@ -1,4 +1,5 @@
 import express from "express";
+import axios from "axios";
 import {
   getVerifiedMarketSummary,
   getLiveDrikPanchang,
@@ -22,10 +23,29 @@ router.get("/api/public/market-cities", async (_req, res) => {
 });
 
 // 1. Unified summary for Home Screen verified cards
+router.get("/api/public/reverse-location", async (req, res) => {
+  try {
+    const lat = Number(req.query.lat), lon = Number(req.query.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return res.status(400).json({ success:false, error:"Invalid coordinates" });
+    const r = await axios.get("https://nominatim.openstreetmap.org/reverse", {
+      params: { format:"jsonv2", lat, lon, zoom:10, addressdetails:1 },
+      headers: { "User-Agent":"Samahit-RPFoundation/2.5 (location lookup)" }, timeout:8000
+    });
+    const a = r.data?.address || {};
+    const city = a.city || a.town || a.municipality || a.village || a.county || "";
+    const state = a.state || "";
+    return res.json({ success:true, data:{ city, state, displayName:r.data?.display_name || "", lat, lon } });
+  } catch (error) {
+    console.error("Reverse location lookup failed:", error);
+    return res.status(502).json({ success:false, error:"Unable to resolve current location" });
+  }
+});
+
 router.get("/api/public/market-summary", async (req, res) => {
   try {
     const city = typeof req.query.city === "string" ? req.query.city : undefined;
-    const summary = await getVerifiedMarketSummary(city);
+    const state = typeof req.query.state === "string" ? req.query.state : undefined;
+    const summary = await getVerifiedMarketSummary(city, state);
     return res.json({ success: true, data: summary });
   } catch (error: any) {
     console.error("Error in /api/public/market-summary:", error);
