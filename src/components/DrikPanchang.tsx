@@ -16,7 +16,12 @@ export default function DrikPanchang({ lang }: { lang: "en" | "hi" }) {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetch("/api/public/live-panchang?_=" + Date.now(), { cache: "no-store", headers: { "Cache-Control": "no-cache" } })
+    const city = (() => { try { return localStorage.getItem("@rpf_selected_market_city") || ""; } catch { return ""; } })();
+    const state = (() => { try { return localStorage.getItem("@rpf_selected_market_state") || ""; } catch { return ""; } })();
+    const query = new URLSearchParams({ _: String(Date.now()) });
+    if (city) query.set("city", city);
+    if (state) query.set("state", state);
+    fetch("/api/public/live-panchang?" + query.toString(), { cache: "no-store", headers: { "Cache-Control": "no-cache" } })
       .then(r => r.json())
       .then(r => { if (active && r?.success) setData(r.data); })
       .catch(() => {})
