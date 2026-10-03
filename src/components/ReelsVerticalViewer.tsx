@@ -164,17 +164,6 @@ export default function ReelsVerticalViewer({
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                     scrolling="no"
-                  />
-                </div>
-              ) : activeEmbedUrl ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-2 pt-14 pb-20">
-                  <iframe
-                    src={activeEmbedUrl}
-                    title={reel.title}
-                    className="w-full h-full max-w-sm aspect-[9/16] border-0 rounded-2xl bg-white shadow-2xl overflow-hidden"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    scrolling="no"
                     sandbox="allow-scripts allow-same-origin allow-forms"
                   />
                 </div>
@@ -187,7 +176,7 @@ export default function ReelsVerticalViewer({
                     e.currentTarget.src = "/assets/founder.png";
                   }}
                 />
-              )})}
+              )}
 
               {/* Bottom Caption & Handle Bar */}
               <div className="absolute bottom-6 left-4 right-20 z-20 space-y-2 text-left">
