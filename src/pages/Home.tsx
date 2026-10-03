@@ -1,6 +1,6 @@
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
-import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench } from "lucide-react";
+import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, CloudSun, Droplets, Wind, MapPin } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -8,7 +8,6 @@ import { useApp } from "../context/AppContext";
 import { resolveMediaUrl } from "../utils/media";
 import { RP_FOUNDATION_LOGO, ROHIT_PANDIT_PHOTO } from "../assets/foundationBrand";
 import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
-import LiveVerifiedMarketSection from "../components/LiveVerifiedMarketSection";
 
 const fallbackSlides = [
   { image: "/assets/mega_camp_banner.png", titleEn: "Healthcare support for the community", subEn: "Health camps, medical support and community care.", route: "/health-care" },
@@ -215,6 +214,8 @@ export default function Home() {
   });
 
   const [marquee2, setMarquee2] = useState<string[]>([]);
+  const [weather, setWeather] = useState<{ temperature: number; apparent: number; humidity: number; wind: number; code: number; timezone: string } | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(true);
 
   const [quoteOfDay, setQuoteOfDay] = useState<{ quote: string; author: string }>(() => {
     try {
@@ -274,38 +275,79 @@ export default function Home() {
     return () => { alive = false; };
   }, []);
 
+  // Location-based free live weather (Open-Meteo; no API key required)
+  useEffect(() => {
+    let alive = true;
+    const loadWeather = async () => {
+      try {
+        const getWeather = async (latitude: number, longitude: number) => {
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`;
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) throw new Error("Weather request failed");
+          const json = await res.json();
+          const current = json?.current;
+          if (!current) throw new Error("Weather data unavailable");
+          return {
+            temperature: Number(current.temperature_2m),
+            apparent: Number(current.apparent_temperature),
+            humidity: Number(current.relative_humidity_2m),
+            wind: Number(current.wind_speed_10m),
+            code: Number(current.weather_code),
+            timezone: String(json.timezone || "auto")
+          };
+        };
+
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          if (!navigator.geolocation) return reject(new Error("Geolocation unavailable"));
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 7000, maximumAge: 900000 });
+        });
+        const data = await getWeather(position.coords.latitude, position.coords.longitude);
+        if (alive) setWeather(data);
+      } catch {
+        // Location permission may be denied; keep the weather card unobtrusive.
+      } finally {
+        if (alive) setWeatherLoading(false);
+      }
+    };
+    void loadWeather();
+    return () => { alive = false; };
+  }, []);
+
+  const weatherLabel = (code: number) => {
+    if (code === 0) return "Clear sky";
+    if ([1, 2, 3].includes(code)) return "Partly cloudy";
+    if ([45, 48].includes(code)) return "Foggy";
+    if ([51, 53, 55, 56, 57].includes(code)) return "Drizzle";
+    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "Rain";
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return "Snow";
+    if ([95, 96, 99].includes(code)) return "Thunderstorm";
+    return "Weather update";
+  };
+
   // Load Marquees Live from RSS Pipeline
   useEffect(() => {
     let alive = true;
-    const restore = (key: string, setter: (value: string[]) => void) => {
-      try { const cached = JSON.parse(localStorage.getItem(key) || "[]"); if (Array.isArray(cached) && cached.length) setter(cached); } catch {}
-    };
-    restore("@rpf_marquee1_national_v2", setMarquee1);
-    // MP marquee is feed-only; never restore stale localStorage headlines.
 
     const load = async () => {
-      for (const url of [
-        "/api/public/live-feed",
-        "/api/public/news",
-        "/api/public/rss-feed?feedId=pib-national",
-        "/api/public/rss-feed?feedId=sarkari-jobs",
-        "/rss-proxy.php",
-        "https://samahit.rpfoundation.org/rss-proxy.php"
-      ]) {
-        try {
-          const response = await timedFetch(url);
-          if (!response.ok) continue;
-          const json = await response.json();
-          const data = json?.data ?? json;
-          const m1 = parseFeedItems(data?.marquee1 ?? data?.nationalAndWorldNews ?? data?.nationalNews ?? data?.items ?? []);
-          const m2 = parseFeedItems(data?.marquee2 ?? data?.mpNews ?? []);
-          if (!alive) return;
-          if (m1.length) { setMarquee1(m1); try { localStorage.setItem("@rpf_marquee1_national_v2", JSON.stringify(m1)); } catch {} }
-          if (m2.length) { setMarquee2(m2); }
-          if (m1.length && m2.length) break;
-        } catch {}
+      try {
+        const [pibResponse, mpResponse] = await Promise.all([
+          timedFetch("/api/public/rss-feed?url=" + encodeURIComponent("https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48")),
+          timedFetch("/api/public/rss-feed?url=" + encodeURIComponent("https://mpinfo.org/RSSFeed/RSSFeed_News.xml"))
+        ]);
+
+        const pibJson = pibResponse.ok ? await pibResponse.json() : null;
+        const mpJson = mpResponse.ok ? await mpResponse.json() : null;
+        const pibItems = parseFeedItems(pibJson?.data || []);
+        const mpItems = parseFeedItems(mpJson?.data || []);
+
+        if (!alive) return;
+        setMarquee1(pibItems);
+        setMarquee2(mpItems);
+      } catch {
+        if (!alive) return;
       }
     };
+
     void load();
     const timer = window.setInterval(() => void load(), 60000);
     return () => { alive = false; window.clearInterval(timer); };
@@ -353,8 +395,29 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* 2. LIVE VERIFIED MARKET & PANCHANG SECTION (Directly below Greeting & Explore community services) */}
-        <LiveVerifiedMarketSection />
+        {/* Location-based live weather */}
+        {!weatherLoading && weather && (
+          <section className="rounded-2xl border border-sky-200/70 bg-gradient-to-r from-sky-50/80 via-white/80 to-emerald-50/70 p-4 shadow-2xs">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-1.5 text-[#167C5A]">
+                  <MapPin className="h-4 w-4" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">Your Local Weather</p>
+                </div>
+                <div className="mt-1 flex items-end gap-2">
+                  <span className="text-3xl font-black text-[#14213D]">{Math.round(weather.temperature)}°C</span>
+                  <span className="pb-1 text-[11px] font-semibold text-slate-500">{weatherLabel(weather.code)}</span>
+                </div>
+              </div>
+              <CloudSun className="h-12 w-12 text-sky-500" />
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-[11px] font-semibold text-slate-600">
+              <div className="rounded-xl bg-white/70 p-2"><span className="block text-[9px] uppercase text-slate-400">Feels like</span>{Math.round(weather.apparent)}°C</div>
+              <div className="rounded-xl bg-white/70 p-2"><span className="flex items-center gap-1 text-[9px] uppercase text-slate-400"><Droplets className="h-3 w-3" />Humidity</span>{Math.round(weather.humidity)}%</div>
+              <div className="rounded-xl bg-white/70 p-2"><span className="flex items-center gap-1 text-[9px] uppercase text-slate-400"><Wind className="h-3 w-3" />Wind</span>{Math.round(weather.wind)} km/h</div>
+            </div>
+          </section>
+        )}
 
         {/* 3. THOUGHT OF THE DAY */}
         <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3 shadow-2xs">
@@ -373,24 +436,24 @@ export default function Home() {
         </section>
 
         {/* 4. LIVE RSS NEWS MARQUEES: STRICTLY TWO (2) MARQUEES */}
-        {/* TOP MARQUEE (1/2): National & International News (DARK SAFFRON) */}
+        {/* TOP MARQUEE: PIB RSS only */}
         {marquee1.length > 0 && (
           <MarqueeTrack
             items={marquee1}
             direction="rtl"
             variant="saffron"
-            label="National & Global"
+            label="PIB News"
             onClick={() => navigate("/news")}
           />
         )}
 
-        {/* BOTTOM MARQUEE (2/2): Madhya Pradesh News (GREEN) */}
+        {/* BOTTOM MARQUEE: MPInfo RSS only */}
         {marquee2.length > 0 && (
           <MarqueeTrack
             items={marquee2}
             direction="ltr"
             variant="green"
-            label="Madhya Pradesh"
+            label="MPInfo"
             onClick={() => navigate("/news")}
           />
         )}
@@ -463,7 +526,7 @@ export default function Home() {
             {/* Vision Narrative */}
             <div className="flex items-start gap-3.5">
               <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-white border border-emerald-500/20 p-1.5 shadow-sm">
-                <img src="/assets/rp-foundation-logo.webp" alt="RP Foundation" className="h-full w-full object-contain" />
+                <img src={RP_FOUNDATION_LOGO} alt="RP Foundation" className="h-full w-full object-contain" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-[16px] font-bold text-[#14213D]">Empowering Communities Through Direct Ground Action</h3>
@@ -484,7 +547,7 @@ export default function Home() {
             {/* Founder's Message Narrative */}
             <div className="flex items-start gap-3.5">
               <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-amber-500/30 bg-white shadow-sm">
-                <img src="/assets/rohit-pandit.webp" alt="Rohit Pandit, Founder of RP Foundation" className="h-full w-full object-cover object-top" />
+                <img src={ROHIT_PANDIT_PHOTO} alt="Rohit Pandit, Founder of RP Foundation" className="h-full w-full object-cover object-top" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-[16px] font-bold text-[#14213D]">Message from Founder Rohit Pandit</h3>
@@ -498,51 +561,6 @@ export default function Home() {
                   Read Founder’s Message & Values <ChevronRight className="h-3.5 w-3.5" />
                 </button>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. VERIFIED IMPACT HIGHLIGHTS (Directly synced with Admin Impact Studio) */}
-        <section className="pt-2">
-          <div className="rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-2xs space-y-3">
-            <div className="flex items-center justify-between px-0.5">
-              <div className="flex items-center gap-1.5 text-[#166534]">
-                <UsersRound className="h-4 w-4 text-[#C2410C]" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#0A192F]">Ground Impact & Reach</h3>
-              </div>
-              <button
-                onClick={() => navigate("/impact")}
-                className="text-[11px] font-bold text-[#C2410C] hover:underline flex items-center gap-0.5 cursor-pointer"
-              >
-                <span>Full Impact Report</span>
-                <ChevronRight className="h-3 w-3" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {(Array.isArray(cmsConfig?.impactStats) && cmsConfig.impactStats.length > 0
-                ? cmsConfig.impactStats.filter((s: any) => s.enabled !== false).slice(0, 4)
-                : [
-                    { id: "beneficiaries", labelEn: "Beneficiaries", labelHi: "कुल लाभार्थी", value: 250000, suffix: "+" },
-                    { id: "health_camps", labelEn: "Health Camps", labelHi: "स्वास्थ्य शिविर", value: 450, suffix: "+" },
-                    { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित पौधे", value: 50000, suffix: "+" },
-                    { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड", value: 120000, suffix: "+" }
-                  ]
-              ).map((st: any, idx: number) => {
-                const tones: ("saffron" | "green" | "gold" | "navy")[] = ["saffron", "green", "gold", "navy"];
-                const tone = tones[idx % tones.length];
-                return (
-                  <AnimatedMetricCard
-                    key={st.id || idx}
-                    label={st.labelEn || st.labelHi}
-                    value={Number(st.value) || 0}
-                    suffix={st.suffix || "+"}
-                    tone={tone}
-                    delay={idx * 0.08}
-                    onClick={() => navigate("/impact")}
-                  />
-                );
-              })}
             </div>
           </div>
         </section>
