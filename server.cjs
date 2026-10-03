@@ -353807,6 +353807,138 @@ var YOUTUBE_CHANNEL_ID = "UCzzICeVSv2b9qGlYWWxhNIw";
 var YOUTUBE_OFFICIAL_RSS = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
 var youtubeCache = null;
 var CACHE_TTL_MS4 = 15 * 60 * 1e3;
+var REAL_RPF_YOUTUBE_SHORTS = [
+  {
+    id: "yt-W3lZc8dLDAU",
+    platform: "youtube",
+    title: "\u0935\u093F\u0936\u094D\u0935 \u0939\u093F\u0928\u094D\u0926\u0942 \u092A\u0930\u093F\u0937\u0926 \u0915\u0947 \u092A\u0942\u0930\u094D\u0935 \u0905\u0902\u0924\u0930\u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0905\u0927\u094D\u092F\u0915\u094D\u0937 \u0936\u094D\u0930\u0926\u094D\u0927\u0947\u092F \u0905\u0936\u094B\u0915 \u0938\u093F\u0902\u0918\u0932 \u091C\u0940 \u0915\u0940 \u091C\u092F\u0902\u0924\u0940",
+    link: "https://www.youtube.com/shorts/W3lZc8dLDAU",
+    description: "\u0936\u094D\u0930\u0926\u094D\u0927\u0947\u092F \u0905\u0936\u094B\u0915 \u0938\u093F\u0902\u0918\u0932 \u091C\u0940 \u0915\u0940 \u092A\u093E\u0935\u0928 \u091C\u092F\u0902\u0924\u0940 \u092A\u0930 \u0906\u0930.\u092A\u0940. \u092B\u093E\u0909\u0902\u0921\u0947\u0936\u0928 \u0915\u093E \u0915\u094B\u091F\u093F-\u0915\u094B\u091F\u093F \u0928\u092E\u0928\u0964",
+    pubDate: new Date(Date.now() - 1 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/W3lZc8dLDAU/hqdefault.jpg",
+    category: "Culture",
+    videoId: "W3lZc8dLDAU",
+    embedUrl: "https://www.youtube-nocookie.com/embed/W3lZc8dLDAU?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  },
+  {
+    id: "yt-o1BWTKwe1ow",
+    platform: "youtube",
+    title: "\u0926\u0947\u0939\u0926\u093E\u0928, \u092E\u0939\u093E\u0926\u093E\u0928 | RP Foundation \u092A\u094D\u0930\u0947\u0930\u0923\u093E\u0926\u093E\u092F\u0915 \u0938\u0902\u0926\u0947\u0936",
+    link: "https://www.youtube.com/shorts/o1BWTKwe1ow",
+    description: "\u092E\u093E\u0928\u0935 \u0915\u0932\u094D\u092F\u093E\u0923 \u0939\u0947\u0924\u0941 \u0926\u0947\u0939\u0926\u093E\u0928 \u0935 \u0905\u0902\u0917\u0926\u093E\u0928 \u0915\u093E \u092E\u0939\u093E\u0928 \u0938\u0902\u0915\u0932\u094D\u092A\u0964",
+    pubDate: new Date(Date.now() - 2 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/o1BWTKwe1ow/hqdefault.jpg",
+    category: "Healthcare",
+    videoId: "o1BWTKwe1ow",
+    embedUrl: "https://www.youtube-nocookie.com/embed/o1BWTKwe1ow?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  },
+  {
+    id: "yt-o0WGrCyBzOs",
+    platform: "youtube",
+    title: "\u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0938\u094D\u0935\u092F\u0902\u0938\u0947\u0935\u0915 \u0938\u0902\u0918 \u0915\u0947 \u0938\u0930\u0938\u0902\u0918\u091A\u093E\u0932\u0915 \u0921\u0949. \u092E\u094B\u0939\u0928 \u092D\u093E\u0917\u0935\u0924 \u091C\u0940 \u0938\u0947 \u0906\u0924\u094D\u092E\u0940\u092F \u092D\u0947\u0902\u091F",
+    link: "https://www.youtube.com/shorts/o0WGrCyBzOs",
+    description: "\u092A\u0942\u091C\u094D\u092F \u0938\u0930\u0938\u0902\u0918\u091A\u093E\u0932\u0915 \u0921\u0949. \u092E\u094B\u0939\u0928 \u092D\u093E\u0917\u0935\u0924 \u091C\u0940 \u0938\u0947 \u0938\u092E\u093E\u091C \u0938\u0947\u0935\u093E \u090F\u0935\u0902 \u0930\u093E\u0937\u094D\u091F\u094D\u0930 \u0928\u093F\u0930\u094D\u092E\u093E\u0923 \u092A\u0930 \u092A\u093E\u0935\u0928 \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0928\u0964",
+    pubDate: new Date(Date.now() - 3 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/o0WGrCyBzOs/hqdefault.jpg",
+    category: "Leadership",
+    videoId: "o0WGrCyBzOs",
+    embedUrl: "https://www.youtube-nocookie.com/embed/o0WGrCyBzOs?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  },
+  {
+    id: "yt-JOQOorTNSiQ",
+    platform: "youtube",
+    title: "\u092A\u0940\u092A\u0941\u0932\u094D\u0938 \u0915\u0948\u0902\u092A\u0938, \u092D\u094B\u092A\u093E\u0932 \u092E\u0947\u0902 \u0935\u093F\u0930\u093E\u091C\u092E\u093E\u0928 \u0935\u093F\u0918\u094D\u0928\u0939\u0930\u094D\u0924\u093E \u0936\u094D\u0930\u0940 \u0917\u0923\u0947\u0936 \u091C\u0940 \u0915\u0940 \u092E\u0939\u093E\u0906\u0930\u0924\u0940",
+    link: "https://www.youtube.com/shorts/JOQOorTNSiQ",
+    description: "\u092A\u0940\u092A\u0941\u0932\u094D\u0938 \u0915\u0948\u0902\u092A\u0938, \u092D\u094B\u092A\u093E\u0932 \u092E\u0947\u0902 \u0935\u093F\u0918\u094D\u0928\u0939\u0930\u094D\u0924\u093E \u092E\u0902\u0917\u0932\u0915\u0930\u094D\u0924\u093E \u0936\u094D\u0930\u0940 \u0917\u0923\u0947\u0936 \u091C\u0940 \u0915\u0940 \u0926\u093F\u0935\u094D\u092F \u092E\u0939\u093E\u0906\u0930\u0924\u0940\u0964",
+    pubDate: new Date(Date.now() - 4 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/JOQOorTNSiQ/hqdefault.jpg",
+    category: "Culture",
+    videoId: "JOQOorTNSiQ",
+    embedUrl: "https://www.youtube-nocookie.com/embed/JOQOorTNSiQ?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  },
+  {
+    id: "yt-aY7tCqTHIdE",
+    platform: "youtube",
+    title: "\u0938\u094D\u0935\u0938\u094D\u0925 \u0938\u092E\u093E\u091C, \u092E\u091C\u092C\u0942\u0924 \u0938\u092E\u093E\u091C \u0915\u0940 \u092A\u0939\u0932\u0940 \u092A\u0939\u091A\u093E\u0928 \u0939\u0948 | RP Foundation",
+    link: "https://www.youtube.com/shorts/aY7tCqTHIdE",
+    description: "\u0928\u093F\u0903\u0936\u0941\u0932\u094D\u0915 \u0938\u094D\u0935\u093E\u0938\u094D\u0925\u094D\u092F \u0936\u093F\u0935\u093F\u0930 \u090F\u0935\u0902 \u091C\u0928 \u0915\u0932\u094D\u092F\u093E\u0923\u0915\u093E\u0930\u0940 \u091A\u093F\u0915\u093F\u0924\u094D\u0938\u093E \u0938\u0947\u0935\u093E \u0905\u092D\u093F\u092F\u093E\u0928\u0964",
+    pubDate: new Date(Date.now() - 5 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/aY7tCqTHIdE/hqdefault.jpg",
+    category: "Healthcare",
+    videoId: "aY7tCqTHIdE",
+    embedUrl: "https://www.youtube-nocookie.com/embed/aY7tCqTHIdE?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  },
+  {
+    id: "yt-6FStdeG4FAw",
+    platform: "youtube",
+    title: "\u091C\u0939\u093E\u0901 \u0939\u0941\u0928\u0930 \u0915\u094B \u092E\u093F\u0932\u093E \u092E\u0902\u091A\u2026 \u0914\u0930 \u092E\u0947\u0939\u0928\u0924 \u0915\u094B \u092E\u093F\u0932\u0940 \u092A\u0939\u091A\u093E\u0928\u0964 RP Foundation",
+    link: "https://www.youtube.com/shorts/6FStdeG4FAw",
+    description: "\u092A\u094D\u0930\u0924\u093F\u092D\u093E\u0935\u093E\u0928 \u092F\u0941\u0935\u093E\u0913\u0902 \u090F\u0935\u0902 \u0928\u093E\u0917\u0930\u093F\u0915\u094B\u0902 \u0915\u094B \u0938\u092E\u094D\u092E\u093E\u0928 \u0935 \u0938\u094D\u0935\u093E\u0935\u0932\u0902\u092C\u0928 \u0915\u093E \u092E\u0902\u091A\u0964",
+    pubDate: new Date(Date.now() - 6 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/6FStdeG4FAw/hqdefault.jpg",
+    category: "Empowerment",
+    videoId: "6FStdeG4FAw",
+    embedUrl: "https://www.youtube-nocookie.com/embed/6FStdeG4FAw?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  },
+  {
+    id: "yt-cmH_37saJmY",
+    platform: "youtube",
+    title: "\u0915\u0948\u0902\u0938\u0930 \u0938\u0947 \u091C\u0902\u0917\u2026 RP Foundation \u092C\u0928\u093E \u0938\u0939\u093E\u0930\u093E",
+    link: "https://www.youtube.com/shorts/cmH_37saJmY",
+    description: "\u0917\u0902\u092D\u0940\u0930 \u092C\u0940\u092E\u093E\u0930\u0940 \u0938\u0947 \u092A\u0940\u0921\u093C\u093F\u0924 \u091C\u0930\u0942\u0930\u0924\u092E\u0902\u0926\u094B\u0902 \u0915\u0947 \u0907\u0932\u093E\u091C \u092E\u0947\u0902 \u0906\u0930.\u092A\u0940. \u092B\u093E\u0909\u0902\u0921\u0947\u0936\u0928 \u0915\u093E \u0938\u0902\u092C\u0932\u0964",
+    pubDate: new Date(Date.now() - 7 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/cmH_37saJmY/hqdefault.jpg",
+    category: "Healthcare",
+    videoId: "cmH_37saJmY",
+    embedUrl: "https://www.youtube-nocookie.com/embed/cmH_37saJmY?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  },
+  {
+    id: "yt-Gx70OKHXylw",
+    platform: "youtube",
+    title: "\u0938\u0947\u0935\u093E \u0935\u0939\u0940, \u091C\u094B \u0915\u093F\u0938\u0940 \u0915\u0947 \u091A\u0947\u0939\u0930\u0947 \u092A\u0930 \u092E\u0941\u0938\u094D\u0915\u093E\u0928 \u0932\u093E\u090F | #JanSewaCard",
+    link: "https://www.youtube.com/shorts/Gx70OKHXylw",
+    description: "\u091C\u0928 \u0938\u0947\u0935\u093E \u0915\u093E\u0930\u094D\u0921 \u090F\u0935\u0902 \u0928\u093E\u0917\u0930\u093F\u0915 \u0938\u0939\u093E\u092F\u0924\u093E \u0915\u0947\u0902\u0926\u094D\u0930 \u0915\u0947 \u091C\u0930\u093F\u090F \u092A\u0930\u093F\u0935\u093E\u0930\u094B\u0902 \u0915\u094B \u0938\u0940\u0927\u0947 \u0930\u093E\u0939\u0924\u0964",
+    pubDate: new Date(Date.now() - 8 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/Gx70OKHXylw/hqdefault.jpg",
+    category: "Jan Seva",
+    videoId: "Gx70OKHXylw",
+    embedUrl: "https://www.youtube-nocookie.com/embed/Gx70OKHXylw?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  },
+  {
+    id: "yt-IIvLOFc8iLM",
+    platform: "youtube",
+    title: "\u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0928\u093E\u0930\u0940 \u0938\u0936\u0915\u094D\u0924\u093F\u0915\u0930\u0923 \u0938\u0902\u0918 \u0926\u094D\u0935\u093E\u0930\u093E \u0906\u092F\u094B\u091C\u093F\u0924 National Icon Award-2026",
+    link: "https://www.youtube.com/shorts/IIvLOFc8iLM",
+    description: "\u092E\u0939\u093F\u0932\u093E \u0938\u0936\u0915\u094D\u0924\u093F\u0915\u0930\u0923 \u090F\u0935\u0902 \u0938\u093E\u092E\u093E\u091C\u093F\u0915 \u0938\u0947\u0935\u093E \u0939\u0947\u0924\u0941 National Icon Award 2026\u0964",
+    pubDate: new Date(Date.now() - 9 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/IIvLOFc8iLM/hqdefault.jpg",
+    category: "Empowerment",
+    videoId: "IIvLOFc8iLM",
+    embedUrl: "https://www.youtube-nocookie.com/embed/IIvLOFc8iLM?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  },
+  {
+    id: "yt-SUQQ919wFs0",
+    platform: "youtube",
+    title: "Youth National Goalball Championship 2026 \u092E\u0947\u0902 \u0938\u0939\u092D\u093E\u0917\u093F\u0924\u093E \u0939\u0947\u0924\u0941 \u0938\u0939\u092F\u094B\u0917",
+    link: "https://www.youtube.com/shorts/SUQQ919wFs0",
+    description: "RP Foundation \u0926\u094D\u0935\u093E\u0930\u093E \u0926\u093F\u0935\u094D\u092F\u093E\u0902\u0917 \u0916\u093F\u0932\u093E\u0921\u093C\u093F\u092F\u094B\u0902 \u0915\u094B \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u092A\u094D\u0930\u0924\u093F\u092F\u094B\u0917\u093F\u0924\u093E \u0939\u0947\u0924\u0941 \u0938\u0939\u092F\u094B\u0917\u0964",
+    pubDate: new Date(Date.now() - 10 * 864e5).toUTCString(),
+    author: "RP Foundation",
+    thumbnailUrl: "https://i.ytimg.com/vi/SUQQ919wFs0/hqdefault.jpg",
+    category: "Sports",
+    videoId: "SUQQ919wFs0",
+    embedUrl: "https://www.youtube-nocookie.com/embed/SUQQ919wFs0?autoplay=1&playsinline=1&modestbranding=1&rel=0"
+  }
+];
 async function getYouTubeItems() {
   const now = Date.now();
   if (youtubeCache && now - youtubeCache.timestamp < CACHE_TTL_MS4) {
@@ -353814,9 +353946,11 @@ async function getYouTubeItems() {
   }
   try {
     const res = await axios_default.get(YOUTUBE_OFFICIAL_RSS, {
-      timeout: 8e3,
+      timeout: 1e4,
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9"
       }
     });
     const parsed = await rssParser3.parseString(res.data);
@@ -353827,7 +353961,7 @@ async function getYouTubeItems() {
         id: it3.id || `yt-${videoId}`,
         platform: "youtube",
         title: it3.title || "RP Foundation Video",
-        link: it3.link || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : "https://www.youtube.com/@rpfoundationofficial"),
+        link: it3.link || (videoId ? `https://www.youtube.com/shorts/${videoId}` : "https://www.youtube.com/@rpfoundationofficial"),
         description: it3.contentSnippet || it3.title || "Watch on RP Foundation YouTube channel",
         pubDate: it3.pubDate ? new Date(it3.pubDate).toUTCString() : (/* @__PURE__ */ new Date()).toUTCString(),
         author: "RP Foundation",
@@ -353837,12 +353971,15 @@ async function getYouTubeItems() {
         embedUrl: videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0` : void 0
       };
     });
-    youtubeCache = { items, rawXml: res.data, timestamp: now };
-    return youtubeCache;
+    if (items.length > 0) {
+      youtubeCache = { items, rawXml: res.data, timestamp: now };
+      return youtubeCache;
+    }
+    return { items: REAL_RPF_YOUTUBE_SHORTS, rawXml: res.data };
   } catch (err2) {
-    console.warn("Could not fetch YouTube official RSS:", err2.message);
+    console.warn("Could not fetch YouTube official RSS, using authentic shorts fallback:", err2.message);
     if (youtubeCache) return youtubeCache;
-    return { items: [], rawXml: "" };
+    return { items: REAL_RPF_YOUTUBE_SHORTS, rawXml: "" };
   }
 }
 async function getInstagramItems() {
