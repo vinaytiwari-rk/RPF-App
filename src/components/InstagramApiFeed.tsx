@@ -174,8 +174,12 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
             };
           });
 
-          // Respect the server's exact list
-          setReels(items);
+          // Keep the UX deterministic: all YouTube Shorts first, then Instagram Reels.
+          const ordered = [...items].sort((a, b) => {
+            const rank = (item: ReelItem) => item.platform === "youtube" ? 0 : item.platform === "instagram" ? 1 : 2;
+            return rank(a) - rank(b);
+          });
+          setReels(ordered);
         }
       })
       .catch((err) => {
