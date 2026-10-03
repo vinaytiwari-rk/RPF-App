@@ -153,16 +153,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     embedUrl: "https://www.instagram.com/p/Dd6j8dOMRHi/embed/captioned/"
   },
   {
-    id: "fb-1",
-    url: "https://www.facebook.com/rpfofficial",
-    thumbnailUrl: "/assets/founder.png",
-    title: "RP Foundation Community & Citizen Outreach",
-    caption: "आर.पी. फाउंडेशन द्वारा समाज सेवा, निःशुल्क सहायता एवं जनकल्याणकारी योजनाओं का संचालन लगातार जारी है।",
-    likes: "Facebook",
-    author: "RP Foundation Official",
-    platform: "facebook" as const
-  },
-  {
     id: "x-1",
     url: "https://x.com/rpfoundation15",
     thumbnailUrl: "/assets/founder.png",
@@ -177,7 +167,7 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
 export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed" }: InstagramApiFeedProps) {
   const [reels, setReels] = useState<ReelItem[]>(AUTHENTIC_FEED_ITEMS);
   const [loading, setLoading] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<"all" | "youtube" | "instagram" | "facebook" | "x">("all");
+  const [activeFilter, setActiveFilter] = useState<"all" | "youtube" | "instagram" | "x">("all");
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -271,24 +261,14 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
           </button>
           <button
             type="button"
-            onClick={() => setActiveFilter("facebook")}
-            className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeFilter === "facebook"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-            }`}
-          >
-            Facebook
-          </button>
-          <button
-            type="button"
             onClick={() => setActiveFilter("x")}
-            className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
               activeFilter === "x"
                 ? "bg-slate-900 text-white shadow-xs"
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
             }`}
           >
+            <span className="font-black text-xs leading-none">𝕏</span>
             X (Twitter)
           </button>
         </div>
@@ -342,8 +322,6 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
                         ? "bg-rose-600/90 text-white border-rose-400/50"
                         : item.platform === "instagram"
                         ? "bg-pink-600/90 text-white border-pink-400/50"
-                        : item.platform === "facebook"
-                        ? "bg-blue-600/90 text-white border-blue-400/50"
                         : "bg-slate-900/90 text-white border-slate-700/50"
                     }`}
                   >
@@ -355,13 +333,9 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
                       <>
                         <Instagram className="h-2.5 w-2.5" /> Instagram
                       </>
-                    ) : item.platform === "facebook" ? (
-                      <>
-                        Facebook
-                      </>
                     ) : (
                       <>
-                        X (Twitter)
+                        <span className="font-black text-[9px] leading-none">𝕏</span> X (Twitter)
                       </>
                     )}
                   </span>
@@ -416,21 +390,13 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
           </a>
           <span className="text-slate-300">•</span>
           <a
-            href="https://www.facebook.com/rpfofficial"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-black text-blue-700 hover:underline"
-          >
-            Facebook
-          </a>
-          <span className="text-slate-300">•</span>
-          <a
             href="https://x.com/rpfoundation15"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-black text-slate-800 hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-black text-slate-800 hover:underline"
           >
-            X
+            <span className="font-black text-xs leading-none">𝕏</span>
+            X (Twitter)
           </a>
         </div>
 

@@ -354111,7 +354111,7 @@ async function getMetaGraphItems() {
     return metaGraphCache;
   }
   const token = process.env.META_USER_TOKEN;
-  if (!token) return { instagram: [], facebook: [] };
+  if (!token) return { instagram: [] };
   try {
     const accRes = await axios_default.get("https://graph.facebook.com/v22.0/me/accounts", {
       params: {
@@ -354122,34 +354122,8 @@ async function getMetaGraphItems() {
     });
     const pages = accRes.data?.data || [];
     let igItems = [];
-    let fbItems = [];
     for (const page of pages) {
       const pageToken = page.access_token || token;
-      try {
-        const fbRes = await axios_default.get(`https://graph.facebook.com/v22.0/${page.id}/posts`, {
-          params: {
-            fields: "id,message,created_time,permalink_url,full_picture",
-            limit: 10,
-            access_token: pageToken
-          },
-          timeout: 4e3
-        });
-        const rawPosts = fbRes.data?.data || [];
-        for (const p5 of rawPosts) {
-          fbItems.push({
-            id: `fb-${p5.id}`,
-            platform: "facebook",
-            title: p5.message ? p5.message.slice(0, 80) + "..." : `${page.name} Update`,
-            link: p5.permalink_url || `https://www.facebook.com/${page.id}`,
-            description: p5.message || `${page.name} on Facebook`,
-            pubDate: p5.created_time ? new Date(p5.created_time).toUTCString() : (/* @__PURE__ */ new Date()).toUTCString(),
-            author: page.name,
-            thumbnailUrl: p5.full_picture || "/assets/founder.png",
-            category: "Community"
-          });
-        }
-      } catch {
-      }
       const igId = page.instagram_business_account?.id;
       if (igId) {
         try {
@@ -354181,13 +354155,13 @@ async function getMetaGraphItems() {
         }
       }
     }
-    if (igItems.length > 0 || fbItems.length > 0) {
-      metaGraphCache = { instagram: igItems, facebook: fbItems, timestamp: now };
+    if (igItems.length > 0) {
+      metaGraphCache = { instagram: igItems, timestamp: now };
       return metaGraphCache;
     }
-    return { instagram: [], facebook: [] };
+    return { instagram: [] };
   } catch {
-    return { instagram: [], facebook: [] };
+    return { instagram: [] };
   }
 }
 async function getInstagramItems() {
@@ -354276,47 +354250,6 @@ async function getInstagramItems() {
     }
   ];
 }
-async function getFacebookItems() {
-  try {
-    const meta = await getMetaGraphItems();
-    if (meta.facebook.length > 0) {
-      return meta.facebook;
-    }
-  } catch {
-  }
-  return [
-    {
-      id: "fb-1",
-      platform: "facebook",
-      title: "RP Foundation Public Welfare & Community Outreach",
-      link: "https://www.facebook.com/rpfofficial",
-      description: "\u0906\u0930.\u092A\u0940. \u092B\u093E\u0909\u0902\u0921\u0947\u0936\u0928 \u0926\u094D\u0935\u093E\u0930\u093E \u0938\u092E\u093E\u091C \u0938\u0947\u0935\u093E, \u0928\u093F\u0903\u0936\u0941\u0932\u094D\u0915 \u0938\u0939\u093E\u092F\u0924\u093E \u090F\u0935\u0902 \u091C\u0928\u0915\u0932\u094D\u092F\u093E\u0923\u0915\u093E\u0930\u0940 \u092F\u094B\u091C\u0928\u093E\u0913\u0902 \u0915\u093E \u0938\u0902\u091A\u093E\u0932\u0928 \u0932\u0917\u093E\u0924\u093E\u0930 \u091C\u093E\u0930\u0940 \u0939\u0948\u0964 \u091C\u0941\u095C\u093F\u090F \u0939\u092E\u093E\u0930\u0947 \u092B\u0947\u0938\u092C\u0941\u0915 \u092A\u0947\u091C \u0938\u0947\u0964",
-      pubDate: new Date(Date.now() - 12 * 36e5).toUTCString(),
-      author: "RP Foundation Official",
-      category: "Community"
-    },
-    {
-      id: "fb-2",
-      platform: "facebook",
-      title: "Religious & Cultural Pilgrimage Support for Devotees",
-      link: "https://www.facebook.com/rpfofficial",
-      description: "\u0936\u094D\u0930\u0926\u094D\u0927\u093E\u0932\u0941\u0913\u0902 \u0915\u094B \u092A\u094D\u0930\u0938\u093F\u0926\u094D\u0927 \u0927\u093E\u0930\u094D\u092E\u093F\u0915 \u0938\u094D\u0925\u0932\u094B\u0902 \u090F\u0935\u0902 \u092E\u0939\u093E\u0926\u0947\u0935 \u092E\u0902\u0926\u093F\u0930\u094B\u0902 \u0915\u0947 \u0928\u093F\u0903\u0936\u0941\u0932\u094D\u0915 \u0926\u0930\u094D\u0936\u0928 \u0935 \u092A\u094D\u0930\u0938\u093E\u0926 \u0935\u093F\u0924\u0930\u0923 \u0938\u0947\u0935\u093E \u0915\u093E \u0906\u092F\u094B\u091C\u0928\u0964",
-      pubDate: new Date(Date.now() - 2 * 864e5).toUTCString(),
-      author: "RP Foundation Official",
-      category: "Culture"
-    },
-    {
-      id: "fb-3",
-      platform: "facebook",
-      title: "Citizen Grievance Redressal & Help Desk Active",
-      link: "https://www.facebook.com/rpfofficial",
-      description: "\u0928\u093E\u0917\u0930\u093F\u0915 \u0938\u092E\u0938\u094D\u092F\u093E\u0913\u0902 \u0915\u0947 \u0938\u092E\u093E\u0927\u093E\u0928 \u0939\u0947\u0924\u0941 \u0906\u0930.\u092A\u0940. \u092B\u093E\u0909\u0902\u0921\u0947\u0936\u0928 \u0939\u0947\u0932\u094D\u092A\u0932\u093E\u0907\u0928 1800-569-0991 24 \u0918\u0902\u091F\u0947 \u0909\u092A\u0932\u092C\u094D\u0927 \u0939\u0948\u0964",
-      pubDate: new Date(Date.now() - 4 * 864e5).toUTCString(),
-      author: "RP Foundation Official",
-      category: "Helpdesk"
-    }
-  ];
-}
 function getXItems() {
   return [
     {
@@ -354400,11 +354333,6 @@ router33.get("/api/public/social-rss-directory", (req2, res) => {
         profileUrl: "https://www.instagram.com/rpfoundationofficial/",
         appRssUrl: `${baseUrl}/api/rss/social/instagram.xml`
       },
-      facebook: {
-        platform: "Facebook",
-        profileUrl: "https://www.facebook.com/rpfofficial",
-        appRssUrl: `${baseUrl}/api/rss/social/facebook.xml`
-      },
       x: {
         platform: "X (Twitter)",
         profileUrl: "https://x.com/rpfoundation15",
@@ -354413,16 +354341,16 @@ router33.get("/api/public/social-rss-directory", (req2, res) => {
       allInOne: {
         platform: "All Channels Unified",
         appRssUrl: `${baseUrl}/api/rss/social/all.xml`,
-        description: "Unified master feed merging YouTube, Instagram, Facebook, and X"
+        description: "Unified master feed merging YouTube, Instagram, and X"
       }
     }
   });
 });
 router33.get("/api/public/social-feed", async (_req, res) => {
   try {
-    const [yt3, ig, fb] = await Promise.all([getYouTubeItems(), getInstagramItems(), getFacebookItems()]);
+    const [yt3, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
     const x2 = getXItems();
-    const all3 = [...yt3.items, ...ig, ...fb, ...x2].sort(
+    const all3 = [...yt3.items, ...ig, ...x2].sort(
       (a6, b2) => new Date(b2.pubDate).getTime() - new Date(a6.pubDate).getTime()
     );
     return res.json({ success: true, count: all3.length, data: all3 });
@@ -354467,23 +354395,6 @@ router33.get(["/api/rss/social/instagram.xml", "/rss/instagram.xml"], async (req
     return res.status(500).send("Unable to render Instagram RSS feed");
   }
 });
-router33.get(["/api/rss/social/facebook.xml", "/rss/facebook.xml"], async (req2, res) => {
-  try {
-    const items = await getFacebookItems();
-    const host = req2.get("host") || "localhost:3000";
-    const xml2 = buildRssXml({
-      title: "RP Foundation Facebook Official Feed",
-      link: "https://www.facebook.com/rpfofficial",
-      description: "Official public welfare updates and community events from RP Foundation on Facebook.",
-      feedUrl: `${req2.protocol}://${host}/api/rss/social/facebook.xml`,
-      items
-    });
-    res.set("Content-Type", "application/rss+xml; charset=utf-8");
-    return res.send(xml2);
-  } catch {
-    return res.status(500).send("Unable to render Facebook RSS feed");
-  }
-});
 router33.get(["/api/rss/social/x.xml", "/rss/x.xml"], (req2, res) => {
   try {
     const items = getXItems();
@@ -354503,16 +354414,16 @@ router33.get(["/api/rss/social/x.xml", "/rss/x.xml"], (req2, res) => {
 });
 router33.get(["/api/rss/social/all.xml", "/rss/social.xml", "/rss.xml"], async (req2, res) => {
   try {
-    const [yt3, ig, fb] = await Promise.all([getYouTubeItems(), getInstagramItems(), getFacebookItems()]);
+    const [yt3, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
     const x2 = getXItems();
-    const merged = [...yt3.items, ...ig, ...fb, ...x2].sort(
+    const merged = [...yt3.items, ...ig, ...x2].sort(
       (a6, b2) => new Date(b2.pubDate).getTime() - new Date(a6.pubDate).getTime()
     );
     const host = req2.get("host") || "localhost:3000";
     const xml2 = buildRssXml({
       title: "RP Foundation Unified Social Media Feed",
       link: "https://therpfoundation.org",
-      description: "Combined real-time stream of YouTube, Instagram, Facebook, and X updates from RP Foundation.",
+      description: "Combined real-time stream of YouTube, Instagram, and X updates from RP Foundation.",
       feedUrl: `${req2.protocol}://${host}/api/rss/social/all.xml`,
       items: merged
     });

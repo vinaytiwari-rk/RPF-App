@@ -17,7 +17,7 @@ const rssParser = new Parser({
 
 interface SocialRssItem {
   id: string;
-  platform: "youtube" | "instagram" | "facebook" | "x";
+  platform: "youtube" | "instagram" | "x";
   title: string;
   link: string;
   description: string;
@@ -219,18 +219,18 @@ async function getYouTubeItems(): Promise<{ items: SocialRssItem[]; rawXml: stri
   }
 }
 
-// In-memory cache for Meta Graph items
-let metaGraphCache: { instagram: SocialRssItem[]; facebook: SocialRssItem[]; timestamp: number } | null = null;
+// In-memory cache for Meta Graph items (Instagram)
+let metaGraphCache: { instagram: SocialRssItem[]; timestamp: number } | null = null;
 const META_CACHE_TTL_MS = 15 * 60 * 1000; // 15 mins
 
-async function getMetaGraphItems(): Promise<{ instagram: SocialRssItem[]; facebook: SocialRssItem[] }> {
+async function getMetaGraphItems(): Promise<{ instagram: SocialRssItem[] }> {
   const now = Date.now();
   if (metaGraphCache && now - metaGraphCache.timestamp < META_CACHE_TTL_MS) {
     return metaGraphCache;
   }
 
   const token = process.env.META_USER_TOKEN;
-  if (!token) return { instagram: [], facebook: [] };
+  if (!token) return { instagram: [] };
 
   try {
     const accRes = await axios.get("https://graph.facebook.com/v22.0/me/accounts", {
@@ -243,38 +243,9 @@ async function getMetaGraphItems(): Promise<{ instagram: SocialRssItem[]; facebo
 
     const pages = accRes.data?.data || [];
     let igItems: SocialRssItem[] = [];
-    let fbItems: SocialRssItem[] = [];
 
     for (const page of pages) {
       const pageToken = page.access_token || token;
-
-      // Facebook page posts
-      try {
-        const fbRes = await axios.get(`https://graph.facebook.com/v22.0/${page.id}/posts`, {
-          params: {
-            fields: "id,message,created_time,permalink_url,full_picture",
-            limit: 10,
-            access_token: pageToken
-          },
-          timeout: 4000
-        });
-
-        const rawPosts = fbRes.data?.data || [];
-        for (const p of rawPosts) {
-          fbItems.push({
-            id: `fb-${p.id}`,
-            platform: "facebook",
-            title: p.message ? p.message.slice(0, 80) + "..." : `${page.name} Update`,
-            link: p.permalink_url || `https://www.facebook.com/${page.id}`,
-            description: p.message || `${page.name} on Facebook`,
-            pubDate: p.created_time ? new Date(p.created_time).toUTCString() : new Date().toUTCString(),
-            author: page.name,
-            thumbnailUrl: p.full_picture || "/assets/founder.png",
-            category: "Community"
-          });
-        }
-      } catch {}
-
       // Instagram business media
       const igId = page.instagram_business_account?.id;
       if (igId) {
@@ -308,13 +279,13 @@ async function getMetaGraphItems(): Promise<{ instagram: SocialRssItem[]; facebo
       }
     }
 
-    if (igItems.length > 0 || fbItems.length > 0) {
-      metaGraphCache = { instagram: igItems, facebook: fbItems, timestamp: now };
+    if (igItems.length > 0) {
+      metaGraphCache = { instagram: igItems, timestamp: now };
       return metaGraphCache;
     }
-    return { instagram: [], facebook: [] };
+    return { instagram: [] };
   } catch {
-    return { instagram: [], facebook: [] };
+    return { instagram: [] };
   }
 }
 
@@ -407,49 +378,6 @@ async function getInstagramItems(): Promise<SocialRssItem[]> {
       author: "@rpfoundationofficial",
       thumbnailUrl: "/assets/founder.png",
       category: "Youth"
-    }
-  ];
-}
-
-// 3. Fetch Facebook Items (From Meta Graph or Fallback)
-async function getFacebookItems(): Promise<SocialRssItem[]> {
-  try {
-    const meta = await getMetaGraphItems();
-    if (meta.facebook.length > 0) {
-      return meta.facebook;
-    }
-  } catch {}
-
-  return [
-    {
-      id: "fb-1",
-      platform: "facebook",
-      title: "RP Foundation Public Welfare & Community Outreach",
-      link: "https://www.facebook.com/rpfofficial",
-      description: "आर.पी. फाउंडेशन द्वारा समाज सेवा, निःशुल्क सहायता एवं जनकल्याणकारी योजनाओं का संचालन लगातार जारी है। जुड़िए हमारे फेसबुक पेज से।",
-      pubDate: new Date(Date.now() - 12 * 3600000).toUTCString(),
-      author: "RP Foundation Official",
-      category: "Community"
-    },
-    {
-      id: "fb-2",
-      platform: "facebook",
-      title: "Religious & Cultural Pilgrimage Support for Devotees",
-      link: "https://www.facebook.com/rpfofficial",
-      description: "श्रद्धालुओं को प्रसिद्ध धार्मिक स्थलों एवं महादेव मंदिरों के निःशुल्क दर्शन व प्रसाद वितरण सेवा का आयोजन।",
-      pubDate: new Date(Date.now() - 2 * 86400000).toUTCString(),
-      author: "RP Foundation Official",
-      category: "Culture"
-    },
-    {
-      id: "fb-3",
-      platform: "facebook",
-      title: "Citizen Grievance Redressal & Help Desk Active",
-      link: "https://www.facebook.com/rpfofficial",
-      description: "नागरिक समस्याओं के समाधान हेतु आर.पी. फाउंडेशन हेल्पलाइन 1800-569-0991 24 घंटे उपलब्ध है।",
-      pubDate: new Date(Date.now() - 4 * 86400000).toUTCString(),
-      author: "RP Foundation Official",
-      category: "Helpdesk"
     }
   ];
 }
@@ -561,11 +489,6 @@ router.get("/api/public/social-rss-directory", (req, res) => {
         profileUrl: "https://www.instagram.com/rpfoundationofficial/",
         appRssUrl: `${baseUrl}/api/rss/social/instagram.xml`
       },
-      facebook: {
-        platform: "Facebook",
-        profileUrl: "https://www.facebook.com/rpfofficial",
-        appRssUrl: `${baseUrl}/api/rss/social/facebook.xml`
-      },
       x: {
         platform: "X (Twitter)",
         profileUrl: "https://x.com/rpfoundation15",
@@ -574,7 +497,7 @@ router.get("/api/public/social-rss-directory", (req, res) => {
       allInOne: {
         platform: "All Channels Unified",
         appRssUrl: `${baseUrl}/api/rss/social/all.xml`,
-        description: "Unified master feed merging YouTube, Instagram, Facebook, and X"
+        description: "Unified master feed merging YouTube, Instagram, and X"
       }
     }
   });
@@ -583,10 +506,10 @@ router.get("/api/public/social-rss-directory", (req, res) => {
 // JSON REST Feed for in-app widgets
 router.get("/api/public/social-feed", async (_req, res) => {
   try {
-    const [yt, ig, fb] = await Promise.all([getYouTubeItems(), getInstagramItems(), getFacebookItems()]);
+    const [yt, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
     const x = getXItems();
 
-    const all = [...yt.items, ...ig, ...fb, ...x].sort(
+    const all = [...yt.items, ...ig, ...x].sort(
       (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
     );
 
@@ -637,26 +560,7 @@ router.get(["/api/rss/social/instagram.xml", "/rss/instagram.xml"], async (req, 
   }
 });
 
-// 3. Facebook RSS Feed (XML)
-router.get(["/api/rss/social/facebook.xml", "/rss/facebook.xml"], async (req, res) => {
-  try {
-    const items = await getFacebookItems();
-    const host = req.get("host") || "localhost:3000";
-    const xml = buildRssXml({
-      title: "RP Foundation Facebook Official Feed",
-      link: "https://www.facebook.com/rpfofficial",
-      description: "Official public welfare updates and community events from RP Foundation on Facebook.",
-      feedUrl: `${req.protocol}://${host}/api/rss/social/facebook.xml`,
-      items
-    });
-    res.set("Content-Type", "application/rss+xml; charset=utf-8");
-    return res.send(xml);
-  } catch {
-    return res.status(500).send("Unable to render Facebook RSS feed");
-  }
-});
-
-// 4. X (Twitter) RSS Feed (XML)
+// 3. X (Twitter) RSS Feed (XML)
 router.get(["/api/rss/social/x.xml", "/rss/x.xml"], (req, res) => {
   try {
     const items = getXItems();
@@ -675,13 +579,13 @@ router.get(["/api/rss/social/x.xml", "/rss/x.xml"], (req, res) => {
   }
 });
 
-// 5. Unified All-in-One Social RSS Feed (XML)
+// 4. Unified All-in-One Social RSS Feed (XML)
 router.get(["/api/rss/social/all.xml", "/rss/social.xml", "/rss.xml"], async (req, res) => {
   try {
-    const [yt, ig, fb] = await Promise.all([getYouTubeItems(), getInstagramItems(), getFacebookItems()]);
+    const [yt, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
     const x = getXItems();
 
-    const merged = [...yt.items, ...ig, ...fb, ...x].sort(
+    const merged = [...yt.items, ...ig, ...x].sort(
       (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
     );
 
@@ -689,7 +593,7 @@ router.get(["/api/rss/social/all.xml", "/rss/social.xml", "/rss.xml"], async (re
     const xml = buildRssXml({
       title: "RP Foundation Unified Social Media Feed",
       link: "https://therpfoundation.org",
-      description: "Combined real-time stream of YouTube, Instagram, Facebook, and X updates from RP Foundation.",
+      description: "Combined real-time stream of YouTube, Instagram, and X updates from RP Foundation.",
       feedUrl: `${req.protocol}://${host}/api/rss/social/all.xml`,
       items: merged
     });

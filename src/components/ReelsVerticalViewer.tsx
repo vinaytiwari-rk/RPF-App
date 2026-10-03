@@ -26,7 +26,7 @@ export interface ReelItem {
   shares?: string;
   author: string;
   authorAvatar?: string;
-  platform?: "youtube" | "instagram" | "facebook" | "x";
+  platform?: "youtube" | "instagram" | "x";
 }
 
 interface ReelsVerticalViewerProps {
@@ -255,10 +255,16 @@ export default function ReelsVerticalViewer({
                   className="flex flex-col items-center gap-1 active:scale-95 transition cursor-pointer"
                 >
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF9933] to-[#138808] text-white shadow-lg">
-                    {reel.platform === "youtube" ? <Play className="h-5 w-5 fill-white" /> : <Instagram className="h-5 w-5" />}
+                    {reel.platform === "youtube" ? (
+                      <Play className="h-5 w-5 fill-white" />
+                    ) : reel.platform === "x" ? (
+                      <span className="font-black text-sm">𝕏</span>
+                    ) : (
+                      <Instagram className="h-5 w-5" />
+                    )}
                   </div>
                   <span className="text-[9px] font-black tracking-wider text-orange-300">
-                    {reel.platform === "youtube" ? "YouTube" : "Instagram"}
+                    {reel.platform === "youtube" ? "YouTube" : reel.platform === "x" ? "X / Twitter" : "Instagram"}
                   </span>
                 </button>
               </div>
