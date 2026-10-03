@@ -351723,39 +351723,25 @@ var fetchNationalAndWorldNews = async () => {
 var fetchMadhyaPradeshNews = async () => {
   const mpItems = [];
   try {
-    const feed2 = await fetchRssFeed("https://news.google.com/rss/search?q=%E0%A4%AE%E0%A4%A7%E0%A4%8F+%E0%A4%AA%E0%A5%8D%E0%A4%B0%E0%A4%A6%E0%A5%87%E0%A4%B6&hl=hi&gl=IN&ceid=IN:hi");
-    for (const item of feed2.items || []) {
-      const t7 = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
-      if (t7.length > 15 && !mpItems.includes(t7)) {
-        mpItems.push(t7);
-      }
-    }
-  } catch {
-  }
-  try {
-    const feed2 = await fetchRssFeed("https://news.google.com/rss/search?q=Bhopal+Indore+Jabalpur+Gwalior+Ujjain&hl=hi&gl=IN&ceid=IN:hi");
-    for (const item of feed2.items || []) {
-      const t7 = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
-      if (t7.length > 15 && !mpItems.includes(t7)) {
-        mpItems.push(t7);
-      }
-    }
-  } catch {
-  }
-  try {
     const feed2 = await fetchRssFeed("https://mpinfo.org/RSSFeed/RSSFeed_News.xml");
     for (const item of feed2.items || []) {
       const t7 = cleanText(item.title || "");
-      if (t7.length > 12 && !mpItems.includes(t7)) {
-        mpItems.push(t7);
-      }
+      if (t7.length > 12 && !mpItems.includes(t7)) mpItems.push(t7);
     }
   } catch {
   }
-  return mpItems;
+  try {
+    const feed2 = await fetchRssFeed("https://news.google.com/rss/search?q=Madhya+Pradesh&hl=hi&gl=IN&ceid=IN:hi");
+    for (const item of feed2.items || []) {
+      const t7 = cleanText(item.title || "").replace(/\s*-\s*[^-]+$/i, "");
+      if (t7.length > 15 && !mpItems.includes(t7)) mpItems.push(t7);
+    }
+  } catch {
+  }
+  return mpItems.slice(0, 40);
 };
 var getUnifiedLiveFeed = async () => {
-  const cached = cache("unified_live_feed", 12e4);
+  const cached = cache("unified_live_feed", 6e4);
   if (cached) return cached;
   const [nationalAndWorldRes, mpRes] = await Promise.all([
     fetchNationalAndWorldNews(),
@@ -351773,7 +351759,7 @@ var getUnifiedLiveFeed = async () => {
     marquee3: nationalAndWorldRes.world,
     // backward compatibility
     governmentNews: { pib: nationalAndWorldRes.national, mpInfo: mpRes },
-    emergencyAlerts: { sachet: mpRes },
+    emergencyAlerts: { sachet: [] },
     pib: nationalAndWorldRes.combined,
     sachet: mpRes,
     news: nationalAndWorldRes.world
@@ -353381,20 +353367,25 @@ var SUPPORTED_CITIES = {
     name: "Indore",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-indore-madhya-pradesh/",
-    marketName: "Indore Choithram Mandi, MP"
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-indore-madhya-pradesh/",
+    marketName: "Indore Choithram Mandi, MP",
+    geonameId: "1269743"
   },
   bhopal: {
     id: "bhopal",
     name: "Bhopal",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-bhopal-madhya-pradesh/",
-    marketName: "Bhopal Karond Mandi, MP"
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-bhopal-madhya-pradesh/",
+    marketName: "Bhopal Karond Mandi, MP",
+    geonameId: "1275841"
   },
   lucknow: {
     id: "lucknow",
     name: "Lucknow",
     state: "Uttar Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-lucknow-uttar-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-lucknow-uttar-pradesh/",
     marketName: "Lucknow Dubagga Mandi, UP"
   },
   delhi: {
@@ -353402,6 +353393,7 @@ var SUPPORTED_CITIES = {
     name: "Delhi",
     state: "Delhi NCR",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-delhi/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-delhi-delhi/",
     marketName: "Delhi Azadpur Mandi"
   },
   gwalior: {
@@ -353409,6 +353401,7 @@ var SUPPORTED_CITIES = {
     name: "Gwalior",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-gwalior-madhya-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-gwalior-madhya-pradesh/",
     marketName: "Gwalior Laxmiganj Mandi, MP"
   },
   ujjain: {
@@ -353416,6 +353409,7 @@ var SUPPORTED_CITIES = {
     name: "Ujjain",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-ujjain-madhya-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-ujjain-madhya-pradesh/",
     marketName: "Ujjain Krishi Upaj Mandi, MP"
   },
   jabalpur: {
@@ -353423,6 +353417,7 @@ var SUPPORTED_CITIES = {
     name: "Jabalpur",
     state: "Madhya Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-jabalpur-madhya-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-jabalpur-madhya-pradesh/",
     marketName: "Jabalpur Krishi Mandi, MP"
   },
   kanpur: {
@@ -353430,6 +353425,7 @@ var SUPPORTED_CITIES = {
     name: "Kanpur",
     state: "Uttar Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-kanpur-uttar-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-kanpur-uttar-pradesh/",
     marketName: "Kanpur Chakarpar Mandi, UP"
   },
   varanasi: {
@@ -353437,6 +353433,7 @@ var SUPPORTED_CITIES = {
     name: "Varanasi",
     state: "Uttar Pradesh",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-varanasi-uttar-pradesh/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-varanasi-uttar-pradesh/",
     marketName: "Varanasi Chandpur Mandi, UP"
   },
   jaipur: {
@@ -353444,6 +353441,7 @@ var SUPPORTED_CITIES = {
     name: "Jaipur",
     state: "Rajasthan",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-jaipur-rajasthan/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-jaipur-rajasthan/",
     marketName: "Jaipur Muhana Mandi, Rajasthan"
   },
   mumbai: {
@@ -353451,145 +353449,218 @@ var SUPPORTED_CITIES = {
     name: "Mumbai",
     state: "Maharashtra",
     vegUrl: "https://rozkabhav.com/vegetables-price-in-mumbai-maharashtra/",
+    fuelUrl: "https://rozkabhav.com/fuel-price-in-mumbai-maharashtra/",
     marketName: "Mumbai Vashi APMC, Maharashtra"
   }
 };
+var STATE_MARKET_SOURCES = {
+  "Madhya Pradesh": { state: "Madhya Pradesh", anchorCity: "Bhopal", vegUrl: "https://rozkabhav.com/vegetables-price-in-bhopal-madhya-pradesh/", fuelUrl: "https://rozkabhav.com/fuel-price-in-bhopal-madhya-pradesh/" },
+  "Uttar Pradesh": { state: "Uttar Pradesh", anchorCity: "Agra", vegUrl: "https://rozkabhav.com/vegetables-price-in-agra-uttar-pradesh/", fuelUrl: "https://rozkabhav.com/fuel-price-in-agra-uttar-pradesh/" },
+  "Rajasthan": { state: "Rajasthan", anchorCity: "Kota", vegUrl: "https://rozkabhav.com/vegetables-price-in-kota-rajasthan/", fuelUrl: "https://rozkabhav.com/fuel-price-in-kota-rajasthan/" },
+  "Maharashtra": { state: "Maharashtra", anchorCity: "Nagpur", vegUrl: "https://rozkabhav.com/vegetables-price-in-nagpur-maharashtra/", fuelUrl: "https://rozkabhav.com/fuel-price-in-nagpur-maharashtra/" },
+  "Chhattisgarh": { state: "Chhattisgarh", anchorCity: "Raipur", vegUrl: "https://rozkabhav.com/vegetables-price-in-raipur-chhattisgarh/", fuelUrl: "https://rozkabhav.com/fuel-price-in-raipur-chhattisgarh/" },
+  "Delhi NCR": { state: "Delhi NCR", anchorCity: "Delhi", vegUrl: "https://rozkabhav.com/vegetables-price-in-delhi-delhi/", fuelUrl: "https://rozkabhav.com/fuel-price-in-delhi-delhi/" }
+};
+var cityCatalogCache = /* @__PURE__ */ new Map();
+var cityCatalogPromise = null;
+function slugifyCity(value2) {
+  return value2.toLowerCase().trim().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+function buildCityInfo(name, state) {
+  const stateSlug = slugifyCity(state);
+  const citySlug = slugifyCity(name);
+  const source = STATE_MARKET_SOURCES[state] || STATE_MARKET_SOURCES["Madhya Pradesh"];
+  return {
+    id: citySlug,
+    name,
+    state,
+    vegUrl: `https://rozkabhav.com/vegetables-price-in-${citySlug}-${stateSlug}/`,
+    fuelUrl: `https://rozkabhav.com/fuel-price-in-${citySlug}-${stateSlug}/`,
+    marketName: `${name} Mandi, ${state}`,
+    bullionUrl: `https://allindiabullion.com/gold-rate/${stateSlug}/${citySlug}`,
+    mandiUrl: `https://mandipulse.com/mandi/${stateSlug}-${citySlug}-${citySlug}-apmc`,
+    geonameId: void 0
+  };
+}
+async function discoverCitiesFromState(source) {
+  const result = {};
+  try {
+    const res = await axios_default.get(source.vegUrl, { headers: customHeaders3, httpsAgent: httpsAgent4, timeout: 7e3 });
+    const $4 = load(res.data);
+    $4("table").each((_3, table) => {
+      const headers = $4(table).find("tr").first().find("th,td").map((__, el) => $4(el).text().replace(/\s+/g, " ").trim().toLowerCase()).get();
+      if (!headers.some((h4) => h4 === "city") || !headers.some((h4) => h4.includes("onion"))) return;
+      $4(table).find("tr").slice(1).each((__, row) => {
+        const cells = $4(row).find("td").map((___, td3) => $4(td3).text().replace(/\s+/g, " ").trim()).get();
+        const city = (cells[0] || "").replace(/[▲▼]/g, "").trim();
+        if (city && !/^\d+(\.\d+)?$/.test(city)) result[slugifyCity(city)] = buildCityInfo(city, source.state);
+      });
+    });
+  } catch {
+  }
+  return result;
+}
+async function ensureCityCatalog() {
+  const cached = cityCatalogCache.get("all");
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) {
+    Object.assign(SUPPORTED_CITIES, cached.data);
+    return cached.data;
+  }
+  if (cityCatalogPromise) return cityCatalogPromise;
+  cityCatalogPromise = (async () => {
+    const discovered = { ...SUPPORTED_CITIES };
+    const groups2 = await Promise.all(Object.values(STATE_MARKET_SOURCES).map(discoverCitiesFromState));
+    groups2.forEach((group) => Object.assign(discovered, group));
+    Object.assign(SUPPORTED_CITIES, discovered);
+    cityCatalogCache.set("all", { data: discovered, timestamp: Date.now() });
+    return discovered;
+  })();
+  try {
+    return await cityCatalogPromise;
+  } finally {
+    cityCatalogPromise = null;
+  }
+}
+async function getSupportedMarketCities() {
+  await ensureCityCatalog();
+  return Object.values(SUPPORTED_CITIES).map((c4) => ({ id: c4.id, name: c4.name, state: c4.state, marketName: c4.marketName }));
+}
 var panchangCache = /* @__PURE__ */ new Map();
 var bullionCache = /* @__PURE__ */ new Map();
 var vegetableCache = /* @__PURE__ */ new Map();
-var mandiPulseCache = null;
+var fuelCache = /* @__PURE__ */ new Map();
 var CACHE_TTL_MS3 = 20 * 60 * 1e3;
-function normalizeCityKey(city) {
+function normalizeCityKey(city, state) {
   if (!city) return "indore";
   const c4 = city.toLowerCase().trim();
   for (const key of Object.keys(SUPPORTED_CITIES)) {
-    if (c4.includes(key)) return key;
+    if (c4 === key || c4.includes(key)) return key;
   }
-  return "indore";
+  const name = city.replace(/-/g, " ").trim().replace(/\b\w/g, (m6) => m6.toUpperCase());
+  const st3 = (state || "Madhya Pradesh").trim();
+  const dynamic = buildCityInfo(name, st3);
+  SUPPORTED_CITIES[dynamic.id] = dynamic;
+  return dynamic.id;
 }
-async function getLiveDrikPanchang(cityId) {
-  const cityKey = normalizeCityKey(cityId);
+async function getLiveDrikPanchang(cityId, state) {
+  await ensureCityCatalog();
+  const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = panchangCache.get(cityKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) {
-    return cached.data;
-  }
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) return cached.data;
   try {
-    const res = await axios_default.get("https://www.drikpanchang.com/panchang/day-panchang.html", {
-      headers: customHeaders3,
-      httpsAgent: httpsAgent4,
-      timeout: 9e3
-    });
+    const url3 = cityInfo.geonameId ? `https://www.drikpanchang.com/panchang/day-panchang.html?geoname-id=${encodeURIComponent(cityInfo.geonameId)}` : "https://www.drikpanchang.com/panchang/day-panchang.html";
+    const res = await axios_default.get(url3, { headers: customHeaders3, httpsAgent: httpsAgent4, timeout: 1e4 });
     const $4 = load(res.data);
-    let sunrise = "", sunset = "";
-    let tithi = "", nakshatra = "", paksha = "", samvat = "";
-    $4("div.dpTableRow, div.dpPanchangCard, .dpPanchangDetails").each((_3, el) => {
-      const text3 = $4(el).text().replace(/\s+/g, " ").trim();
-      if (text3.includes("Sunrise") && text3.includes("Sunset") && !sunrise) {
-        const match2 = text3.match(/Sunrise\s*([0-9:]+\s*[AP]M)\s*Sunset\s*([0-9:]+\s*[AP]M)/i);
-        if (match2) {
-          sunrise = match2[1];
-          sunset = match2[2];
-        }
-      }
-      if (text3.includes("Tithi") && text3.includes("Nakshatra") && !tithi) {
-        const tMatch = text3.match(/Tithi\s*([^\s]+(?:\s+upto\s+[0-9:]+\s*[AP]M)?)/i);
-        const nMatch = text3.match(/Nakshatra\s*([^\s]+(?:\s+upto\s+[0-9:]+\s*[AP]M)?)/i);
-        if (tMatch) tithi = tMatch[1];
-        if (nMatch) nakshatra = nMatch[1];
-      }
-      if (text3.includes("Paksha") && !paksha) {
-        const match2 = text3.match(/Paksha\s*([A-Za-z\s]+Paksha)/i);
-        if (match2) paksha = match2[1].trim();
-      }
-      if (text3.includes("Vikram Samvat") && !samvat) {
-        const match2 = text3.match(/Vikram\s*Samvat\s*([0-9]{4}\s*[A-Za-z]+)/i);
-        if (match2) samvat = match2[1].trim();
-      }
-    });
+    const body = $4("body").text().replace(/\\s+/g, " ").replace(/\\u00a0/g, " ").trim();
+    const pick = (pattern) => {
+      const m6 = body.match(pattern);
+      return m6?.[1]?.replace(/\\s+/g, " ").trim() || "";
+    };
+    const to12 = (v) => {
+      if (!v) return "";
+      if (/AM|PM/i.test(v)) return v;
+      const m6 = v.match(/^(\\d{1,2}):(\\d{2})$/);
+      if (!m6) return v;
+      let h4 = Number(m6[1]);
+      const min2 = m6[2];
+      const suffix = h4 >= 12 ? "PM" : "AM";
+      h4 = h4 % 12 || 12;
+      return `${String(h4).padStart(2, "0")}:${min2} ${suffix}`;
+    };
+    const sunrise = to12(pick(/Sunrise\\s*(\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)/i));
+    const sunset = to12(pick(/Sunset\\s*(\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)/i));
+    const moonrise = to12(pick(/Moonrise\\s*(\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)/i));
+    const tithi = pick(/Tithi\\s*([A-Za-z][A-Za-z\\s-]*?)(?:\\s+Nakshatra)/i);
+    const nakshatra = pick(/Nakshatra\\s*([A-Za-z][A-Za-z\\s-]*?)(?:\\s+Yoga|\\s+Karana)/i);
+    const yoga = pick(/Yoga\\s*([A-Za-z][A-Za-z\\s-]*?)(?:\\s+Karana)/i);
+    const karana = pick(/Karana\\s*([A-Za-z][A-Za-z\\s-]*?)(?:\\s+Weekday|\\s+Sunsign|\\s+Moonsign)/i);
+    const paksha = pick(/Paksha\\s*(Krishna Paksha|Shukla Paksha)/i);
+    const samvat = pick(/Vikram Samvat\\s*([0-9]{4}\\s+[A-Za-z]+)/i);
+    const rahukaal = pick(/Rahu Kalam\\s*(.+?)(?:\\s+Gulikai|\\s+Yamaganda|\\s+Abhijit)/i);
+    const abhijitMuhurat = pick(/Abhijit\\s*(.+?)(?:\\s+Dur Muhurtam|\\s+Amrit Kalam|\\s+Varjyam)/i);
+    if (!sunrise || !sunset || !tithi || !nakshatra || !yoga || !karana || !paksha || !samvat || !rahukaal || !abhijitMuhurat) {
+      throw new Error("Drik Panchang page loaded but required fields could not be parsed");
+    }
     const parsed = {
       source: "DrikPanchang.com",
-      sourceUrl: "https://www.drikpanchang.com/panchang/day-panchang.html",
-      date: (/* @__PURE__ */ new Date()).toLocaleDateString("en-US", { month: "long", day: "2-digit", year: "numeric" }),
+      sourceUrl: url3,
+      date: (/* @__PURE__ */ new Date()).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
       location: `${cityInfo.name}, ${cityInfo.state}`,
       city: cityInfo.name,
       state: cityInfo.state,
-      sunrise: sunrise || "06:14 AM",
-      sunset: sunset || "06:07 PM",
-      tithi: tithi || "Panchami upto 12:35 PM",
-      nakshatra: nakshatra || "Rohini upto 04:27 AM",
-      paksha: paksha || "Krishna Paksha",
-      samvat: samvat ? `Vikram Samvat ${samvat}` : "Vikram Samvat 2083 Siddharthi",
-      yoga: "Siddhi upto 09:18 PM",
-      karana: "Taitila / Garaja",
-      abhijitMuhurat: "11:46 AM to 12:34 PM",
-      rahukaal: "01:30 PM to 03:00 PM",
+      sunrise,
+      sunset,
+      moonrise,
+      tithi,
+      nakshatra,
+      paksha,
+      samvat: `Vikram Samvat ${samvat}`,
+      yoga,
+      karana,
+      abhijitMuhurat,
+      rahukaal,
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
     panchangCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
-  } catch {
+  } catch (error3) {
+    console.error("Drik Panchang fetch/parse failed:", error3);
     if (cached?.data) return cached.data;
     return {
       source: "DrikPanchang.com",
       sourceUrl: "https://www.drikpanchang.com/panchang/day-panchang.html",
-      date: "01 October 2026",
+      date: (/* @__PURE__ */ new Date()).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
       location: `${cityInfo.name}, ${cityInfo.state}`,
       city: cityInfo.name,
       state: cityInfo.state,
-      sunrise: "06:14 AM",
-      sunset: "06:07 PM",
-      tithi: "Krishna Paksha, Panchami",
-      nakshatra: "Rohini Nakshatra",
-      paksha: "Krishna Paksha",
-      samvat: "Vikram Samvat 2083 Siddharthi",
-      yoga: "Siddhi Yoga",
-      karana: "Taitila / Garaja",
-      abhijitMuhurat: "11:46 AM to 12:34 PM",
-      rahukaal: "01:30 PM to 03:00 PM",
+      sunrise: "",
+      sunset: "",
+      moonrise: "",
+      tithi: "",
+      nakshatra: "",
+      paksha: "",
+      samvat: "",
+      yoga: "",
+      karana: "",
+      abhijitMuhurat: "",
+      rahukaal: "",
+      unavailable: true,
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
   }
 }
-async function getLiveBullionRates(cityId) {
-  const cityKey = normalizeCityKey(cityId);
+async function getLiveBullionRates(cityId, state) {
+  await ensureCityCatalog();
+  const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = bullionCache.get(cityKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) {
     return cached.data;
   }
   try {
-    const res = await axios_default.get("https://allindiabullion.com/gold-rate-today", {
+    const res = await axios_default.get(cityInfo.bullionUrl || "https://allindiabullion.com/gold-rate", {
       headers: customHeaders3,
       httpsAgent: httpsAgent4,
       timeout: 9e3
     });
     const $4 = load(res.data);
-    let gold24k = "", gold22k = "", gold18k = "";
-    $4("table tr").each((_3, el) => {
-      const text3 = $4(el).text().replace(/\s+/g, " ").trim();
-      if (text3.includes("24K") && !gold24k) {
-        const m6 = text3.match(/₹([0-9,]+)/);
-        if (m6) gold24k = m6[1];
-      }
-      if (text3.includes("22K") && !gold22k) {
-        const m6 = text3.match(/₹([0-9,]+)/);
-        if (m6) gold22k = m6[1];
-      }
-      if (text3.includes("18K") && !gold18k) {
-        const m6 = text3.match(/₹([0-9,]+)/);
-        if (m6) gold18k = m6[1];
-      }
-    });
+    const body = $4("body").text().replace(/\\s+/g, " ");
+    const money = (re2) => body.match(re2)?.[1] || "";
+    const gold24k = money(/24K Gold\\s+₹([0-9,]+)/i);
+    const gold22k = money(/22K Gold\\s+₹([0-9,]+)/i);
+    const gold18k = money(/18K Gold\\s+₹([0-9,]+)/i);
+    const silver = money(/Silver\\s+₹([0-9,]+)\\s+per kg/i);
+    if (!gold24k || !gold22k || !silver) throw new Error("AIB city bullion values not parsed");
     const parsed = {
       source: "AllIndiaBullion.com",
-      sourceUrl: "https://allindiabullion.com/gold-rate-today",
+      sourceUrl: cityInfo.bullionUrl || "https://allindiabullion.com/gold-rate",
       city: cityInfo.name,
       location: `${cityInfo.name}, ${cityInfo.state}`,
-      gold24k: gold24k ? `\u20B9${gold24k}` : "\u20B91,50,786",
-      gold22k: gold22k ? `\u20B9${gold22k}` : "\u20B91,38,120",
-      gold18k: gold18k ? `\u20B9${gold18k}` : "\u20B91,13,089",
-      silver: "\u20B984,500",
+      gold24k: gold24k ? `\u20B9${gold24k}` : "",
+      gold22k: gold22k ? `\u20B9${gold22k}` : "",
+      gold18k: gold18k ? `\u20B9${gold18k}` : "",
+      silver: silver ? `\u20B9${silver}` : "",
       unit: "Per 10g",
       silverUnit: "Per 1kg",
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
@@ -353600,128 +353671,149 @@ async function getLiveBullionRates(cityId) {
     if (cached?.data) return cached.data;
     return {
       source: "AllIndiaBullion.com",
-      sourceUrl: "https://allindiabullion.com/gold-rate-today",
+      sourceUrl: cityInfo.bullionUrl || "https://allindiabullion.com/gold-rate",
       city: cityInfo.name,
       location: `${cityInfo.name}, ${cityInfo.state}`,
-      gold24k: "\u20B91,50,786",
-      gold22k: "\u20B91,38,120",
-      gold18k: "\u20B91,13,089",
-      silver: "\u20B984,500",
+      gold24k: "",
+      gold22k: "",
+      gold18k: "",
+      silver: "",
+      unavailable: true,
       unit: "Per 10g",
       silverUnit: "Per 1kg",
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
   }
 }
-async function getLiveVegetablePrices(cityId) {
-  const cityKey = normalizeCityKey(cityId);
+async function getLiveVegetablePrices(cityId, state) {
+  await ensureCityCatalog();
+  const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = vegetableCache.get(cityKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) {
-    return cached.data;
-  }
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) return cached.data;
   try {
-    const res = await axios_default.get(cityInfo.vegUrl, {
-      headers: customHeaders3,
-      httpsAgent: httpsAgent4,
-      timeout: 8e3
-    });
-    const $4 = load(res.data);
+    const res = await axios_default.get(cityInfo.vegUrl, { headers: customHeaders3, httpsAgent: httpsAgent4, timeout: 8e3 });
+    const body = load(res.data)("body").text().replace(/\\s+/g, " ");
     const items = [];
-    $4("table tr").each((i6, el) => {
-      if (i6 === 0) return;
-      const tds = $4(el).find("td");
-      if (tds.length >= 2) {
-        const name = $4(tds[0]).text().trim();
-        const price = $4(tds[1]).text().trim();
-        const change = $4(tds[3] || tds[2]).text().trim();
-        if (name && price) {
-          items.push({ name, price, change });
-        }
-      }
-    });
-    const parsed = {
-      source: "RozKaBhav.com",
-      sourceUrl: cityInfo.vegUrl,
-      city: cityInfo.name,
-      market: cityInfo.marketName,
-      items: items.length ? items.slice(0, 12) : [
-        { name: "Onion", price: "\u20B928 per kg", change: "0.00" },
-        { name: "Potato", price: "\u20B930 per kg", change: "0.00" },
-        { name: "Tomato", price: "\u20B926 per kg", change: "0.00" }
-      ],
-      updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-    };
+    const names = ["Onion", "Potato", "Tomato", "Cauliflower", "Capsicum", "Beans", "Carrot", "Cabbage", "Garlic", "Ginger", "Green Peas", "Bitter Gourd"];
+    for (const name of names) {
+      const m6 = body.match(new RegExp(name + "\\s+Today\\s*[\u2013-]\\s*\u20B9([0-9,.]+)\\s+per kg", "i"));
+      if (m6) items.push({ name, price: `\u20B9${m6[1]} per kg`, change: "" });
+    }
+    if (!items.length) throw new Error("Vegetable prices not parsed");
+    const uniqueItems = Array.from(new Map(items.map((item) => [item.name.toLowerCase().replace(/\s+/g, " ").trim(), item])).values());
+    const parsed = { source: "RozKaBhav.com", sourceUrl: cityInfo.vegUrl, city: cityInfo.name, market: cityInfo.marketName, items: uniqueItems.slice(0, 12), updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
     vegetableCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
   } catch {
     if (cached?.data) return cached.data;
-    return {
-      source: "RozKaBhav.com",
-      sourceUrl: cityInfo.vegUrl,
-      city: cityInfo.name,
-      market: cityInfo.marketName,
-      items: [
-        { name: "Onion", price: "\u20B928 per kg", change: "0.00" },
-        { name: "Potato", price: "\u20B930 per kg", change: "0.00" },
-        { name: "Tomato", price: "\u20B926 per kg", change: "0.00" },
-        { name: "Cauliflower", price: "\u20B940 per kg", change: "0.00" },
-        { name: "Brinjal", price: "\u20B980 per kg", change: "0.00" },
-        { name: "Ladies Finger", price: "\u20B975 per kg", change: "0.00" }
-      ],
-      updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-    };
+    return { source: "RozKaBhav.com", sourceUrl: cityInfo.vegUrl, city: cityInfo.name, market: cityInfo.marketName, items: [], unavailable: true, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
   }
 }
-async function getLiveMandiPulse() {
-  if (mandiPulseCache && Date.now() - mandiPulseCache.timestamp < CACHE_TTL_MS3) {
-    return mandiPulseCache.data;
-  }
+async function getLiveFuelPrices(cityId, state) {
+  await ensureCityCatalog();
+  const cityKey = normalizeCityKey(cityId, state);
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
+  const cached = fuelCache.get(cityKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) return cached.data;
   try {
-    const res = await axios_default.get("https://mandipulse.com/", {
-      headers: customHeaders3,
-      httpsAgent: httpsAgent4,
-      timeout: 9e3
-    });
+    const res = await axios_default.get(cityInfo.fuelUrl, { headers: customHeaders3, httpsAgent: httpsAgent4, timeout: 8e3 });
     const $4 = load(res.data);
-    const updates = [];
-    $4("h2, h3").slice(0, 6).each((_3, el) => {
-      const text3 = $4(el).text().replace(/\s+/g, " ").trim();
-      if (text3.length > 20 && !text3.includes("Mandi Pulse")) {
-        updates.push({
-          title: text3,
-          desc: $4(el).next("p").text().replace(/\s+/g, " ").trim() || "Live Mandi Arrival & Price Report"
-        });
+    const rows = [];
+    $4("table tr").each((_3, tr3) => {
+      const cells = $4(tr3).find("th,td").map((__, el) => $4(el).text().replace(/\\s+/g, " ").trim()).get();
+      if (cells.length >= 4) {
+        const first3 = cells[0].toLowerCase().replace(/[▲▼]/g, "").trim();
+        if (["petrol", "diesel", "cng"].includes(first3)) rows.push({ item: first3, value: cells[1] });
       }
     });
+    const body = $4("body").text().replace(/\\s+/g, " ");
+    const extract3 = (label) => {
+      const row = rows.find((r5) => r5.item === label.toLowerCase());
+      if (row?.value) return row.value;
+      const m6 = body.match(new RegExp(label + "\\s+(?:Today\\s+)?[-\u2013]?\\s*(\u20B9[0-9]+(?:\\.[0-9]+)?)", "i"));
+      return m6?.[1] || "";
+    };
+    const petrol = extract3("Petrol"), diesel = extract3("Diesel"), cng = extract3("CNG");
+    if (!petrol || !diesel || !cng) throw new Error("Fuel page loaded but petrol/diesel/CNG values were not parsed");
     const parsed = {
-      source: "MandiPulse.com",
-      sourceUrl: "https://mandipulse.com/",
-      updates: updates.slice(0, 5),
+      source: "RozKaBhav.com",
+      sourceUrl: cityInfo.fuelUrl,
+      city: cityInfo.name,
+      petrol: `\u20B9${petrol}`,
+      diesel: `\u20B9${diesel}`,
+      lpgDomestic: "",
+      lpgCommercial: "",
+      cng: `\u20B9${cng}`,
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
-    mandiPulseCache = { data: parsed, timestamp: Date.now() };
+    fuelCache.set(cityKey, { data: parsed, timestamp: Date.now() });
     return parsed;
-  } catch {
-    if (mandiPulseCache?.data) return mandiPulseCache.data;
+  } catch (error3) {
+    console.error("Fuel price fetch/parse failed:", error3);
+    if (cached?.data) return cached.data;
     return {
-      source: "MandiPulse.com",
-      sourceUrl: "https://mandipulse.com/",
-      updates: [
-        { title: "Indore & Ujjain APMC Soybean & Wheat Market Arrivals", desc: "Live agricultural commodity movements in Central India." }
-      ],
+      source: "RozKaBhav.com",
+      sourceUrl: cityInfo.fuelUrl,
+      city: cityInfo.name,
+      petrol: "",
+      diesel: "",
+      lpgDomestic: "",
+      lpgCommercial: "",
+      cng: "",
+      unavailable: true,
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
   }
 }
-async function getVerifiedMarketSummary(cityId) {
-  const cityKey = normalizeCityKey(cityId);
+async function getLiveMandiPulse(cityId, state) {
+  await ensureCityCatalog();
+  const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
-  const [panchang, bullion, vegetables, mandiPulse] = await Promise.all([
-    getLiveDrikPanchang(cityKey),
-    getLiveBullionRates(cityKey),
-    getLiveVegetablePrices(cityKey),
-    getLiveMandiPulse()
+  const url3 = cityInfo.mandiUrl || `https://mandipulse.com/mandi/madhya-pradesh-indore-indore-apmc`;
+  try {
+    const res = await axios_default.get(url3, { headers: customHeaders3, httpsAgent: httpsAgent4, timeout: 9e3 });
+    const $4 = load(res.data);
+    const body = $4("body").text().replace(/\\s+/g, " ");
+    const updates = [];
+    const seen2 = /* @__PURE__ */ new Set();
+    const cardRe = /(Soyabean|Wheat|Maize|Green Peas|Onion|Potato|Garlic|Kabuli Chana|Tomato|Cauliflower|Cabbage|Capsicum|Carrot|Brinjal|Bhindi|Bitter gourd)[\\s\\S]{0,180}?Modal Price\\s*₹([0-9,]+)[\\s\\S]{0,100}?(?:Min:|Minimum:)\\s*₹([0-9,]+)[\\s\\S]{0,100}?(?:Max:|Maximum:)\\s*₹([0-9,]+)/gi;
+    let m6;
+    while ((m6 = cardRe.exec(body)) && updates.length < 8) {
+      const key = m6[1].toLowerCase();
+      if (seen2.has(key)) continue;
+      seen2.add(key);
+      updates.push({ title: `${m6[1]} \u2014 \u20B9${m6[2]}/quintal`, desc: `Min \u20B9${m6[3]} \u2022 Max \u20B9${m6[4]}` });
+    }
+    if (!updates.length) {
+      $4("table tr").each((_3, row) => {
+        if (updates.length >= 8) return;
+        const cells = $4(row).find("th,td").map((__, el) => $4(el).text().replace(/\\s+/g, " ").trim()).get();
+        const text3 = cells.join(" | ");
+        const rate = text3.match(/(Soyabean|Wheat|Maize|Green Peas|Onion|Potato|Garlic|Kabuli Chana|Tomato|Cauliflower|Cabbage|Capsicum|Carrot|Brinjal|Bhindi|Bitter gourd)[^₹]*₹([0-9,]+)[^₹]*₹([0-9,]+)[^₹]*₹([0-9,]+)/i);
+        if (rate && !seen2.has(rate[1].toLowerCase())) {
+          seen2.add(rate[1].toLowerCase());
+          updates.push({ title: `${rate[1]} \u2014 \u20B9${rate[3]}/quintal`, desc: `Min \u20B9${rate[2]} \u2022 Max \u20B9${rate[4]}` });
+        }
+      });
+    }
+    if (!updates.length) throw new Error("Mandi rates not parsed");
+    return { source: "MandiPulse.com", sourceUrl: url3, market: cityInfo.marketName, updates, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+  } catch (error3) {
+    console.error("Mandi fetch/parse failed:", error3);
+    return { source: "MandiPulse.com", sourceUrl: url3, market: cityInfo.marketName, updates: [], unavailable: true, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+  }
+}
+async function getVerifiedMarketSummary(cityId, state) {
+  await ensureCityCatalog();
+  const cityKey = normalizeCityKey(cityId, state);
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
+  const [panchang, bullion, vegetables, fuel, mandiPulse] = await Promise.all([
+    getLiveDrikPanchang(cityKey, state),
+    getLiveBullionRates(cityKey, state),
+    getLiveVegetablePrices(cityKey, state),
+    getLiveFuelPrices(cityKey, state),
+    getLiveMandiPulse(cityKey, state)
   ]);
   return {
     selectedCity: cityInfo,
@@ -353730,25 +353822,46 @@ async function getVerifiedMarketSummary(cityId) {
     bullion,
     vegetables,
     mandiPulse,
+    fuel,
     updatedAt: (/* @__PURE__ */ new Date()).toISOString()
   };
 }
 
 // src/routes/liveMarketRoutes.ts
 var router32 = import_express32.default.Router();
-router32.get("/api/public/market-cities", (_req, res) => {
-  const cities = Object.values(SUPPORTED_CITIES).map((c4) => ({
-    id: c4.id,
-    name: c4.name,
-    state: c4.state,
-    marketName: c4.marketName
-  }));
-  return res.json({ success: true, data: cities });
+router32.get("/api/public/market-cities", async (_req, res) => {
+  try {
+    const cities = await getSupportedMarketCities();
+    return res.json({ success: true, data: cities });
+  } catch (error3) {
+    console.error("Error discovering market cities:", error3);
+    return res.status(500).json({ success: false, error: "Unable to load market cities" });
+  }
+});
+router32.get("/api/public/reverse-location", async (req2, res) => {
+  try {
+    const lat = Number(req2.query.lat), lon = Number(req2.query.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return res.status(400).json({ success: false, error: "Invalid coordinates" });
+    const r5 = await axios_default.get("https://nominatim.openstreetmap.org/reverse", {
+      params: { format: "jsonv2", lat, lon, zoom: 10, addressdetails: 1 },
+      headers: { "User-Agent": "Samahit-RPFoundation/2.5 (location lookup)" },
+      timeout: 8e3
+    });
+    const a6 = r5.data?.address || {};
+    const city = a6.city || a6.town || a6.municipality || a6.village || a6.county || "";
+    const state = a6.state || "";
+    return res.json({ success: true, data: { city, state, displayName: r5.data?.display_name || "", lat, lon } });
+  } catch (error3) {
+    console.error("Reverse location lookup failed:", error3);
+    return res.status(502).json({ success: false, error: "Unable to resolve current location" });
+  }
 });
 router32.get("/api/public/market-summary", async (req2, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
     const city = typeof req2.query.city === "string" ? req2.query.city : void 0;
-    const summary = await getVerifiedMarketSummary(city);
+    const state = typeof req2.query.state === "string" ? req2.query.state : void 0;
+    const summary = await getVerifiedMarketSummary(city, state);
     return res.json({ success: true, data: summary });
   } catch (error3) {
     console.error("Error in /api/public/market-summary:", error3);
@@ -353756,14 +353869,18 @@ router32.get("/api/public/market-summary", async (req2, res) => {
   }
 });
 router32.get("/api/public/live-panchang", async (_req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
-    const data2 = await getLiveDrikPanchang();
+    const city = typeof _req.query.city === "string" ? _req.query.city : void 0;
+    const state = typeof _req.query.state === "string" ? _req.query.state : void 0;
+    const data2 = await getLiveDrikPanchang(city, state);
     return res.json({ success: true, data: data2 });
   } catch (error3) {
     return res.status(500).json({ success: false, error: "Unable to load panchang" });
   }
 });
 router32.get("/api/public/live-bullion", async (_req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
     const data2 = await getLiveBullionRates();
     return res.json({ success: true, data: data2 });
@@ -353772,6 +353889,7 @@ router32.get("/api/public/live-bullion", async (_req, res) => {
   }
 });
 router32.get("/api/public/live-vegetables", async (req2, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
     const city = typeof req2.query.city === "string" ? req2.query.city : void 0;
     const data2 = await getLiveVegetablePrices(city);
@@ -353781,8 +353899,11 @@ router32.get("/api/public/live-vegetables", async (req2, res) => {
   }
 });
 router32.get("/api/public/live-mandi-pulse", async (_req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   try {
-    const data2 = await getLiveMandiPulse();
+    const city = typeof _req.query.city === "string" ? _req.query.city : void 0;
+    const state = typeof _req.query.state === "string" ? _req.query.state : void 0;
+    const data2 = await getLiveMandiPulse(city, state);
     return res.json({ success: true, data: data2 });
   } catch (error3) {
     return res.status(500).json({ success: false, error: "Unable to load mandi pulse" });
@@ -353982,7 +354103,101 @@ async function getYouTubeItems() {
     return { items: REAL_RPF_YOUTUBE_SHORTS, rawXml: "" };
   }
 }
+var metaGraphCache = null;
+var META_CACHE_TTL_MS = 15 * 60 * 1e3;
+async function getMetaGraphItems() {
+  const now = Date.now();
+  if (metaGraphCache && now - metaGraphCache.timestamp < META_CACHE_TTL_MS) {
+    return metaGraphCache;
+  }
+  const token = process.env.META_USER_TOKEN;
+  if (!token) return { instagram: [], facebook: [] };
+  try {
+    const accRes = await axios_default.get("https://graph.facebook.com/v22.0/me/accounts", {
+      params: {
+        fields: "id,name,access_token,instagram_business_account{id,username,name}",
+        access_token: token
+      },
+      timeout: 5e3
+    });
+    const pages = accRes.data?.data || [];
+    let igItems = [];
+    let fbItems = [];
+    for (const page of pages) {
+      const pageToken = page.access_token || token;
+      try {
+        const fbRes = await axios_default.get(`https://graph.facebook.com/v22.0/${page.id}/posts`, {
+          params: {
+            fields: "id,message,created_time,permalink_url,full_picture",
+            limit: 10,
+            access_token: pageToken
+          },
+          timeout: 4e3
+        });
+        const rawPosts = fbRes.data?.data || [];
+        for (const p5 of rawPosts) {
+          fbItems.push({
+            id: `fb-${p5.id}`,
+            platform: "facebook",
+            title: p5.message ? p5.message.slice(0, 80) + "..." : `${page.name} Update`,
+            link: p5.permalink_url || `https://www.facebook.com/${page.id}`,
+            description: p5.message || `${page.name} on Facebook`,
+            pubDate: p5.created_time ? new Date(p5.created_time).toUTCString() : (/* @__PURE__ */ new Date()).toUTCString(),
+            author: page.name,
+            thumbnailUrl: p5.full_picture || "/assets/founder.png",
+            category: "Community"
+          });
+        }
+      } catch {
+      }
+      const igId = page.instagram_business_account?.id;
+      if (igId) {
+        try {
+          const igRes = await axios_default.get(`https://graph.facebook.com/v22.0/${igId}/media`, {
+            params: {
+              fields: "id,caption,media_type,media_url,permalink,thumbnail_url,timestamp",
+              limit: 15,
+              access_token: pageToken
+            },
+            timeout: 4e3
+          });
+          const rawMedia = igRes.data?.data || [];
+          for (const m6 of rawMedia) {
+            const isVideo2 = m6.media_type === "VIDEO";
+            igItems.push({
+              id: `ig-${m6.id}`,
+              platform: "instagram",
+              title: m6.caption ? m6.caption.slice(0, 80) + "..." : "RP Foundation Reel",
+              link: m6.permalink || "https://www.instagram.com/rpfoundationofficial/",
+              description: m6.caption || "Follow @rpfoundationofficial on Instagram.",
+              pubDate: m6.timestamp ? new Date(m6.timestamp).toUTCString() : (/* @__PURE__ */ new Date()).toUTCString(),
+              author: "@rpfoundationofficial",
+              thumbnailUrl: m6.thumbnail_url || m6.media_url || "/assets/founder.png",
+              videoUrl: isVideo2 ? m6.media_url : void 0,
+              category: isVideo2 ? "Reels" : "Post"
+            });
+          }
+        } catch {
+        }
+      }
+    }
+    if (igItems.length > 0 || fbItems.length > 0) {
+      metaGraphCache = { instagram: igItems, facebook: fbItems, timestamp: now };
+      return metaGraphCache;
+    }
+    return { instagram: [], facebook: [] };
+  } catch {
+    return { instagram: [], facebook: [] };
+  }
+}
 async function getInstagramItems() {
+  try {
+    const meta = await getMetaGraphItems();
+    if (meta.instagram.length > 0) {
+      return meta.instagram;
+    }
+  } catch {
+  }
   try {
     const cmsQuery = pool.query("SELECT data FROM cms_data WHERE key = 'app_cms' LIMIT 1");
     const timeout2 = new Promise((_3, reject) => setTimeout(() => reject(new Error("DB timeout")), 1500));
@@ -354061,7 +354276,14 @@ async function getInstagramItems() {
     }
   ];
 }
-function getFacebookItems() {
+async function getFacebookItems() {
+  try {
+    const meta = await getMetaGraphItems();
+    if (meta.facebook.length > 0) {
+      return meta.facebook;
+    }
+  } catch {
+  }
   return [
     {
       id: "fb-1",
@@ -354198,8 +354420,7 @@ router33.get("/api/public/social-rss-directory", (req2, res) => {
 });
 router33.get("/api/public/social-feed", async (_req, res) => {
   try {
-    const [yt3, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
-    const fb = getFacebookItems();
+    const [yt3, ig, fb] = await Promise.all([getYouTubeItems(), getInstagramItems(), getFacebookItems()]);
     const x2 = getXItems();
     const all3 = [...yt3.items, ...ig, ...fb, ...x2].sort(
       (a6, b2) => new Date(b2.pubDate).getTime() - new Date(a6.pubDate).getTime()
@@ -354246,9 +354467,9 @@ router33.get(["/api/rss/social/instagram.xml", "/rss/instagram.xml"], async (req
     return res.status(500).send("Unable to render Instagram RSS feed");
   }
 });
-router33.get(["/api/rss/social/facebook.xml", "/rss/facebook.xml"], (req2, res) => {
+router33.get(["/api/rss/social/facebook.xml", "/rss/facebook.xml"], async (req2, res) => {
   try {
-    const items = getFacebookItems();
+    const items = await getFacebookItems();
     const host = req2.get("host") || "localhost:3000";
     const xml2 = buildRssXml({
       title: "RP Foundation Facebook Official Feed",
@@ -354282,8 +354503,7 @@ router33.get(["/api/rss/social/x.xml", "/rss/x.xml"], (req2, res) => {
 });
 router33.get(["/api/rss/social/all.xml", "/rss/social.xml", "/rss.xml"], async (req2, res) => {
   try {
-    const [yt3, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
-    const fb = getFacebookItems();
+    const [yt3, ig, fb] = await Promise.all([getYouTubeItems(), getInstagramItems(), getFacebookItems()]);
     const x2 = getXItems();
     const merged = [...yt3.items, ...ig, ...fb, ...x2].sort(
       (a6, b2) => new Date(b2.pubDate).getTime() - new Date(a6.pubDate).getTime()
