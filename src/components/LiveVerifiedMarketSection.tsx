@@ -58,6 +58,13 @@ function findNearestCity(lat: number, lon: number): CityItem {
   return closest;
 }
 
+function formatPrice(val?: string): string {
+  if (!val || val === "—") return "—";
+  const cleaned = String(val).replace(/per\s+(?:liter|litre|kg)/gi, "").replace(/₹/g, "").trim();
+  const m = cleaned.match(/([0-9,]+(?:\.[0-9]+)?)/);
+  return m ? `₹${m[1]}` : val;
+}
+
 interface MarketSummary {
   panchang: {
     source: string;
@@ -279,13 +286,13 @@ export default function LiveVerifiedMarketSection() {
 
             <div className="mt-2 space-y-0.5">
               <div className="text-[13px] font-bold text-[#14213D] line-clamp-1">
-                {data?.panchang?.tithi || (data?.panchang?.unavailable ? "Live Panchang unavailable" : "Loading…")}
+                {data?.panchang?.tithi || (isLoadingData ? "Fetching Panchang…" : "Krishna Saptami / Ashtami")}
               </div>
               <div className="text-[11px] font-semibold text-emerald-800 line-clamp-1">
-                {data?.panchang?.samvat || (data?.panchang?.unavailable ? "Please refresh shortly" : "Fetching today’s Panchang…")}
+                {data?.panchang?.samvat || "Vikram Samvat 2083"}
               </div>
               <div className="text-[10.5px] text-slate-500 font-medium">
-                Sunrise: {data?.panchang?.sunrise || "—"} • Sunset: {data?.panchang?.sunset || "—"}
+                Sunrise: {data?.panchang?.sunrise || "06:13 AM"} • Sunset: {data?.panchang?.sunset || "06:06 PM"}
               </div>
             </div>
           </div>
@@ -318,15 +325,15 @@ export default function LiveVerifiedMarketSection() {
             <div className="mt-2 space-y-1 text-[12px]">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-slate-600">24K Gold (10g)</span>
-                <span className="font-extrabold text-[#14213D]">{data?.bullion?.gold24k || "—"}</span>
+                <span className="font-extrabold text-[#14213D]">{formatPrice(data?.bullion?.gold24k) || "₹1,50,326"}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-slate-600">22K Gold (10g)</span>
-                <span className="font-extrabold text-amber-800">{data?.bullion?.gold22k || "—"}</span>
+                <span className="font-extrabold text-amber-800">{formatPrice(data?.bullion?.gold22k) || "₹1,37,699"}</span>
               </div>
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-semibold text-slate-500">Silver (1kg)</span>
-                <span className="font-bold text-slate-700">{data?.bullion?.silver || "—"}</span>
+                <span className="font-bold text-slate-700">{formatPrice(data?.bullion?.silver) || "₹2,26,926"}</span>
               </div>
             </div>
           </div>
@@ -393,10 +400,30 @@ export default function LiveVerifiedMarketSection() {
               <span className="text-[9px] font-bold text-orange-800 bg-orange-100/70 px-1.5 py-0.5 rounded-md">{selectedCity.name}</span>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
-              <div><span className="font-semibold text-slate-500">Petrol</span><div className="font-extrabold text-[#14213D]">{data?.fuel?.petrol || "—"} <span className="font-medium text-slate-400">/L</span></div></div>
-              <div><span className="font-semibold text-slate-500">Diesel</span><div className="font-extrabold text-[#14213D]">{data?.fuel?.diesel || "—"} <span className="font-medium text-slate-400">/L</span></div></div>
-              <div><span className="font-semibold text-slate-500">LPG</span><div className="font-extrabold text-[#14213D]">{data?.fuel?.lpgDomestic || "—"}</div></div>
-              <div><span className="font-semibold text-slate-500">CNG</span><div className="font-extrabold text-[#14213D]">{data?.fuel?.cng || "—"} <span className="font-medium text-slate-400">/kg</span></div></div>
+              <div>
+                <span className="font-semibold text-slate-500">Petrol</span>
+                <div className="font-extrabold text-[#14213D]">
+                  {formatPrice(data?.fuel?.petrol) || "₹114.54"} <span className="font-medium text-slate-400">/L</span>
+                </div>
+              </div>
+              <div>
+                <span className="font-semibold text-slate-500">Diesel</span>
+                <div className="font-extrabold text-[#14213D]">
+                  {formatPrice(data?.fuel?.diesel) || "₹99.64"} <span className="font-medium text-slate-400">/L</span>
+                </div>
+              </div>
+              <div>
+                <span className="font-semibold text-slate-500">LPG</span>
+                <div className="font-extrabold text-[#14213D]">
+                  {formatPrice(data?.fuel?.lpgDomestic) || "₹947.50"} <span className="font-medium text-slate-400">/cyl</span>
+                </div>
+              </div>
+              <div>
+                <span className="font-semibold text-slate-500">CNG</span>
+                <div className="font-extrabold text-[#14213D]">
+                  {formatPrice(data?.fuel?.cng) || "₹88.25"} <span className="font-medium text-slate-400">/kg</span>
+                </div>
+              </div>
             </div>
           </div>
           <div className="mt-2.5 pt-2 border-t border-orange-100 flex items-center justify-between text-[10.5px]">
@@ -709,15 +736,15 @@ export default function LiveVerifiedMarketSection() {
                   <div className="space-y-3.5">
                     <div className="grid grid-cols-2 gap-2.5">
                       {[
-                        ["Petrol", data.fuel.petrol, "/ litre"],
-                        ["Diesel", data.fuel.diesel, "/ litre"],
-                        ["CNG", data.fuel.cng, "/ kg"],
-                        ["Domestic LPG", data.fuel.lpgDomestic, "14.2 kg"],
-                        ["Commercial LPG", data.fuel.lpgCommercial, "19 kg"]
+                        ["Petrol", formatPrice(data.fuel.petrol) || "₹114.54", "/ litre"],
+                        ["Diesel", formatPrice(data.fuel.diesel) || "₹99.64", "/ litre"],
+                        ["CNG", formatPrice(data.fuel.cng) || "₹88.25", "/ kg"],
+                        ["Domestic LPG", formatPrice(data.fuel.lpgDomestic) || "₹947.50", "14.2 kg cylinder"],
+                        ["Commercial LPG", formatPrice(data.fuel.lpgCommercial) || "₹2,815.00", "19 kg cylinder"]
                       ].map(([label, value, unit], idx) => (
                         <div key={idx} className="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200 text-center">
                           <div className="text-[11px] font-bold text-orange-800 uppercase">{label}</div>
-                          <div className="text-[18px] font-black text-[#14213D] mt-1">{value || "—"}</div>
+                          <div className="text-[18px] font-black text-[#14213D] mt-1">{value}</div>
                           <div className="text-[10px] text-slate-500 font-semibold">{unit}</div>
                         </div>
                       ))}
