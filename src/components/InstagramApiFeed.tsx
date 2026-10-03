@@ -157,7 +157,7 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
 export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed" }: InstagramApiFeedProps) {
   const [reels, setReels] = useState<ReelItem[]>(AUTHENTIC_FEED_ITEMS);
   const [loading, setLoading] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<"all" | "youtube" | "instagram" | "x">("all");
+  const [activeFilter, setActiveFilter] = useState<"all" | "youtube" | "instagram">("all");
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -235,11 +235,13 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
     };
   }, [sourceUrl]);
 
-  const displayList = reels;
+  // Filter out any X / Twitter items completely
+  const displayList = reels.filter(
+    (i) => i.platform !== "x" && !String(i.url || "").includes("twitter.com") && !String(i.url || "").includes("x.com")
+  );
 
   const ytCount = displayList.filter((i) => i.platform === "youtube").length;
-  const igCount = displayList.filter((i) => i.platform === "instagram").length;
-  const xCount = displayList.filter((i) => i.platform === "x").length;
+  const igCount = displayList.filter((i) => i.platform === "instagram" || (!i.platform && !i.videoId)).length;
 
   const filtered = activeFilter === "all"
     ? displayList
@@ -284,18 +286,6 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
           >
             <Instagram className="h-3.5 w-3.5" />
             Instagram ({igCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveFilter("x")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeFilter === "x"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
-            <span className="font-black text-xs leading-none">𝕏</span>
-            X (Twitter) ({xCount})
           </button>
         </div>
 
@@ -351,22 +341,16 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider backdrop-blur-md border ${
                       item.platform === "youtube"
                         ? "bg-rose-600/90 text-white border-rose-400/50"
-                        : item.platform === "instagram"
-                        ? "bg-pink-600/90 text-white border-pink-400/50"
-                        : "bg-slate-900/90 text-white border-slate-700/50"
+                        : "bg-pink-600/90 text-white border-pink-400/50"
                     }`}
                   >
                     {item.platform === "youtube" ? (
                       <>
                         <Youtube className="h-2.5 w-2.5 fill-white" /> YouTube
                       </>
-                    ) : item.platform === "instagram" ? (
-                      <>
-                        <Instagram className="h-2.5 w-2.5" /> Instagram
-                      </>
                     ) : (
                       <>
-                        <span className="font-black text-[9px] leading-none">𝕏</span> X (Twitter)
+                        <Instagram className="h-2.5 w-2.5" /> Instagram
                       </>
                     )}
                   </span>
@@ -418,16 +402,6 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
           >
             <Instagram className="h-3.5 w-3.5 text-pink-600" />
             Instagram
-          </a>
-          <span className="text-slate-300">•</span>
-          <a
-            href="https://x.com/rpfoundation15"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-black text-slate-800 hover:underline"
-          >
-            <span className="font-black text-xs leading-none">𝕏</span>
-            X (Twitter)
           </a>
         </div>
 

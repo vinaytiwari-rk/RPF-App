@@ -354308,11 +354308,16 @@ router33.get("/api/public/social-feed", async (_req, res) => {
   try {
     const [yt3, cmsSocial] = await Promise.all([getYouTubeItems(), getCmsSocialItems()]);
     if (cmsSocial.configured) {
-      const all4 = [...cmsSocial.items, ...yt3.items];
+      const validCms = cmsSocial.items.filter(
+        (item) => item.platform !== "x" && !String(item.link || "").includes("twitter.com") && !String(item.link || "").includes("x.com")
+      );
+      const all4 = [...validCms, ...yt3.items];
       return res.json({ success: true, count: all4.length, data: all4 });
     }
-    const [ig, x2] = await Promise.all([getInstagramItems(), getXItems()]);
-    const all3 = [...ig, ...x2, ...yt3.items];
+    const ig = await getInstagramItems();
+    const all3 = [...ig, ...yt3.items].filter(
+      (item) => item.platform !== "x" && !String(item.link || "").includes("twitter.com") && !String(item.link || "").includes("x.com")
+    );
     return res.json({ success: true, count: all3.length, data: all3 });
   } catch (err2) {
     return res.status(500).json({ success: false, error: "Failed to generate social feed" });

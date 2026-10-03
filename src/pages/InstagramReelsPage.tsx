@@ -52,22 +52,18 @@ export default function InstagramReelsPage() {
         const list = res.data?.cms?.instagramPosts;
         if (Array.isArray(list)) {
           const activeOnly = list
-            .filter((item: any) => item && item.active !== false)
+            .filter((item: any) => item && item.active !== false && item.platform !== "x" && !String(item.url || "").includes("twitter.com") && !String(item.url || "").includes("x.com"))
             .map((item: any, idx: number) => {
               const postUrl = item.url || item.videoUrl || "https://www.instagram.com/rpfoundationofficial/";
               const ytMatch = String(postUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
               const videoId = item.videoId || (ytMatch ? ytMatch[1] : undefined);
-              const xMatch = String(postUrl).match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
-              const tweetId = item.tweetId || (xMatch ? xMatch[1] : undefined);
               const igMatch = String(postUrl).match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
               const shortcode = igMatch ? igMatch[1] : undefined;
 
-              const platform = item.platform || (videoId ? "youtube" : tweetId ? "x" : "instagram");
+              const platform = item.platform || (videoId ? "youtube" : "instagram");
               const embedUrl = item.embedUrl || (
                 videoId
                   ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`
-                  : tweetId
-                  ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
                   : shortcode
                   ? `https://www.instagram.com/p/${shortcode}/embed/captioned/`
                   : undefined
@@ -80,10 +76,9 @@ export default function InstagramReelsPage() {
                 videoUrl: item.videoUrl,
                 embedUrl,
                 videoId,
-                tweetId,
                 platform,
                 caption: item.caption || item.title || "RP Foundation Social Initiative",
-                category: item.category || (platform === "youtube" ? "Healthcare" : platform === "x" ? "Leadership" : "Empowerment"),
+                category: item.category || (platform === "youtube" ? "Healthcare" : "Leadership"),
                 thumbnail: item.thumbnail || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "/assets/founder.png")
               };
             });
@@ -94,18 +89,20 @@ export default function InstagramReelsPage() {
         return axios.get("/api/public/social-feed").then((feedRes) => {
           if (!alive) return;
           if (feedRes.data?.success && Array.isArray(feedRes.data.data) && feedRes.data.data.length > 0) {
-            const feedItems = feedRes.data.data.map((item: any, idx: number) => ({
-              id: item.id || `feed-${idx}`,
-              title: item.title || "RP Foundation Update",
-              url: item.link || "https://www.youtube.com/@rpfoundationofficial",
-              videoUrl: item.videoUrl,
-              embedUrl: item.embedUrl,
-              videoId: item.videoId,
-              platform: item.platform,
-              caption: item.description || "Official update from RP Foundation.",
-              category: item.category || "General",
-              thumbnail: item.thumbnailUrl || "/assets/founder.png"
-            }));
+            const feedItems = feedRes.data.data
+              .filter((item: any) => item.platform !== "x" && !String(item.link || "").includes("twitter.com") && !String(item.link || "").includes("x.com"))
+              .map((item: any, idx: number) => ({
+                id: item.id || `feed-${idx}`,
+                title: item.title || "RP Foundation Update",
+                url: item.link || "https://www.youtube.com/@rpfoundationofficial",
+                videoUrl: item.videoUrl,
+                embedUrl: item.embedUrl,
+                videoId: item.videoId,
+                platform: item.platform,
+                caption: item.description || "Official update from RP Foundation.",
+                category: item.category || "General",
+                thumbnail: item.thumbnailUrl || "/assets/founder.png"
+              }));
             setReels(feedItems);
           }
         });
@@ -349,8 +346,6 @@ export default function InstagramReelsPage() {
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-pink-600 text-white shadow-md">
                   {currentReel?.platform === "youtube" ? (
                     <Youtube className="h-5 w-5 fill-white" />
-                  ) : currentReel?.platform === "x" ? (
-                    <span className="font-black text-sm">𝕏</span>
                   ) : (
                     <Instagram className="h-5 w-5" />
                   )}

@@ -276,14 +276,12 @@ export default function ReelsVerticalViewer({
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF9933] to-[#138808] text-white shadow-lg">
                     {reel.platform === "youtube" ? (
                       <Play className="h-5 w-5 fill-white" />
-                    ) : reel.platform === "x" ? (
-                      <span className="font-black text-sm">𝕏</span>
                     ) : (
                       <Instagram className="h-5 w-5" />
                     )}
                   </div>
                   <span className="text-[9px] font-black tracking-wider text-orange-300">
-                    {reel.platform === "youtube" ? "YouTube" : reel.platform === "x" ? "X / Twitter" : "Instagram"}
+                    {reel.platform === "youtube" ? "YouTube" : "Instagram"}
                   </span>
                 </button>
               </div>

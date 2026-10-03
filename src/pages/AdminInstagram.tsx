@@ -186,7 +186,7 @@ export default function AdminInstagram() {
   const [cms, setCms] = useState<any>(null);
   const [posts, setPosts] = useState<InstagramPost[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
-  const [filterPlatform, setFilterPlatform] = useState<"all" | "youtube" | "instagram" | "x">("all");
+  const [filterPlatform, setFilterPlatform] = useState<"all" | "youtube" | "instagram">("all");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
@@ -197,7 +197,9 @@ export default function AdminInstagram() {
         const next = res.data?.cms || {};
         const list = Array.isArray(next.instagramPosts) ? next.instagramPosts : defaultInstagramPosts;
         setCms(next);
-        setPosts(list.map((item: any, index: number) => ({
+        // Exclude any X/Twitter items
+        const cleanList = list.filter((item: any) => item.platform !== "x" && !String(item.url || "").includes("twitter.com") && !String(item.url || "").includes("x.com"));
+        setPosts(cleanList.map((item: any, index: number) => ({
           ...item,
           id: item.id || `ig-${index}-${Date.now()}`,
           active: item.active !== false,
@@ -229,17 +231,19 @@ export default function AdminInstagram() {
   };
 
   const removeAllDemoItems = () => {
-    if (!window.confirm("क्या आप सभी डेमो / डमी रील्स और ट्वीट्स हटाना चाहते हैं? केवल आपके द्वारा जोड़े गए असली पोस्ट ही रहेंगे।")) return;
+    if (!window.confirm("क्या आप सभी डेमो / डमी रील्स व ट्वीट्स हटाना चाहते हैं? केवल आपके द्वारा जोड़े गए असली पोस्ट ही रहेंगे।")) return;
     const cleaned = posts.filter((p) => {
       const id = String(p.id || "").toLowerCase();
       const title = String(p.title || "").toLowerCase();
-      if (id.startsWith("x-") || id === "ig-1" || id === "ig-2" || id === "ig-3" || id.includes("sample")) return false;
+      const url = String(p.url || "").toLowerCase();
+      if (p.platform === "x" || url.includes("twitter.com") || url.includes("x.com") || id.startsWith("x-")) return false;
+      if (id === "ig-1" || id === "ig-2" || id === "ig-3" || id.includes("sample")) return false;
       if (title.includes("healthcare & medical drive") || title.includes("card distribution camp") || title.includes("sports support") || title.includes("blood donation") || title.includes("announcement (@rpfoundation15)")) return false;
       return true;
     });
     setPosts(cleaned.map((p, i) => ({ ...p, order: i })));
     setSelected(cleaned.length > 0 ? 0 : null);
-    toast.success("सभी डमी पोस्ट्स हटाई गईं! बदलाव लागू करने के लिए 'Save & Publish' पर क्लिक करें।");
+    toast.success("सभी डमी व X (Twitter) पोस्ट्स हटाई गईं! बदलाव लागू करने के लिए 'Save & Publish' पर क्लिक करें।");
   };
 
   const removeAllPosts = () => {
@@ -348,7 +352,7 @@ export default function AdminInstagram() {
               <p className="text-[10px] font-black uppercase tracking-[.18em] text-rose-600">Media Content & Embeds</p>
               <h1 className="text-xl font-black">Social Media & Video Embed CMS</h1>
               <p className="mt-1 text-xs text-slate-500">
-                YouTube Shorts, Instagram Reels, X Tweets या Device Video जोड़ें। सभी मीडिया बिना बाहर खुले 100% ऐप के अंदर ही स्ट्रीम होंगे।
+                YouTube Shorts, Instagram Reels या Device Video जोड़ें। सभी मीडिया बिना बाहर खुले 100% ऐप के अंदर ही स्ट्रीम होंगे।
               </p>
             </div>
           </div>
@@ -400,22 +404,13 @@ export default function AdminInstagram() {
               >
                 <Instagram className="h-3 w-3" /> Instagram ({posts.filter(p => p.platform === "instagram" || (!p.platform && !p.videoUrl)).length})
               </button>
-              <button
-                type="button"
-                onClick={() => setFilterPlatform("x")}
-                className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  filterPlatform === "x" ? "bg-slate-900 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200"
-                }`}
-              >
-                <span className="font-black text-xs leading-none">𝕏</span> X/Twitter ({posts.filter(p => p.platform === "x").length})
-              </button>
             </div>
 
             {posts.length === 0 && (
               <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
                 <Instagram className="mx-auto h-8 w-8 text-rose-400" />
                 <p className="mt-3 text-sm font-black">No social reels or posts in feed</p>
-                <p className="mt-1 text-xs text-slate-500">Click &apos;Add Embed / Reel&apos; above to add your own YouTube shorts, Instagram reels, or X tweets.</p>
+                <p className="mt-1 text-xs text-slate-500">Click &apos;Add Embed / Reel&apos; above to add your own YouTube shorts or Instagram reels.</p>
               </div>
             )}
 
@@ -443,8 +438,6 @@ export default function AdminInstagram() {
                     >
                       {post.platform === "youtube" ? (
                         <Youtube className="h-6 w-6 fill-white" />
-                      ) : post.platform === "x" ? (
-                        <span className="font-black text-lg">𝕏</span>
                       ) : post.videoUrl ? (
                         <Film className="h-6 w-6" />
                       ) : (
@@ -458,7 +451,7 @@ export default function AdminInstagram() {
                     >
                       <p className="truncate text-sm font-black text-slate-900">{post.title || "Untitled Video Reel"}</p>
                       <p className="mt-0.5 truncate text-[10px] font-bold text-slate-400">
-                        {post.platform === "youtube" ? "🔴 YouTube" : post.platform === "x" ? "⚫ X (Twitter)" : "🟣 Instagram"} · {post.category || "Social"} · {post.active !== false ? "🟢 Active" : "⚪ Hidden"}
+                        {post.platform === "youtube" ? "🔴 YouTube" : "🟣 Instagram"} · {post.category || "Social"} · {post.active !== false ? "🟢 Active" : "⚪ Hidden"}
                         {post.videoUrl && " · 📹 Video Ready"}
                       </p>
                     </div>
@@ -612,21 +605,19 @@ export default function AdminInstagram() {
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-black text-slate-800 flex items-center gap-1.5">
                         <Code className="h-4 w-4 text-rose-600" />
-                        <span>Embed Code or Link (YouTube / Instagram / X / &lt;iframe&gt;)</span>
+                        <span>Embed Code or Link (YouTube / Instagram / &lt;iframe&gt;)</span>
                       </label>
                       <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
                         p.platform === "youtube" 
                           ? "bg-rose-100 text-rose-800 border-rose-300"
-                          : p.platform === "x"
-                          ? "bg-slate-900 text-white border-slate-700"
                           : "bg-pink-100 text-pink-800 border-pink-300"
                       }`}>
-                        {p.platform === "youtube" ? "🔴 YouTube Short" : p.platform === "x" ? "⚫ X (Twitter) Tweet" : "🟣 Instagram Reel"}
+                        {p.platform === "youtube" ? "🔴 YouTube Short" : "🟣 Instagram Reel"}
                       </span>
                     </div>
 
                     <p className="text-[11px] text-slate-500">
-                      Paste YouTube Shorts URL, Instagram Reel/Post link, X Tweet URL, or complete embed code (&lt;blockquote&gt; / &lt;iframe&gt;).
+                      Paste YouTube Shorts URL, Instagram Reel/Post link, or complete embed code (&lt;blockquote&gt; / &lt;iframe&gt;).
                     </p>
 
                     <div className="relative">
@@ -638,14 +629,13 @@ export default function AdminInstagram() {
                           patch(selected, {
                             url: val,
                             embedUrl: parsed.embedUrl,
-                            platform: parsed.platform,
+                            platform: parsed.platform === "x" ? "instagram" : parsed.platform,
                             videoId: parsed.videoId,
-                            tweetId: parsed.tweetId,
                             thumbnailUrl: parsed.thumbnailUrl || p.thumbnailUrl,
                             videoUrl: parsed.videoUrl || p.videoUrl
                           });
                         }}
-                        placeholder="Paste YouTube Shorts, Instagram Reel, X Tweet link or <iframe> code here..."
+                        placeholder="Paste YouTube Shorts, Instagram Reel link or <iframe> code here..."
                         rows={2}
                         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-rose-400 font-mono"
                       />

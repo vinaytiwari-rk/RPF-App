@@ -481,22 +481,25 @@ router.get("/api/public/social-rss-directory", (req, res) => {
   });
 });
 
-// JSON REST Feed for in-app widgets
+// JSON REST Feed for in-app widgets (YouTube and Instagram ONLY)
 router.get("/api/public/social-feed", async (_req, res) => {
   try {
     const [yt, cmsSocial] = await Promise.all([getYouTubeItems(), getCmsSocialItems()]);
 
     if (cmsSocial.configured) {
-      // Admin has explicitly configured/saved social posts:
-      // Show ONLY admin's saved posts (Instagram, YouTube, X, Video), followed by official YouTube channel items.
-      // ZERO mock/dummy items will ever be shown!
-      const all = [...cmsSocial.items, ...yt.items];
+      // Show ONLY admin's saved posts (excluding X / Twitter), followed by official YouTube channel items.
+      const validCms = cmsSocial.items.filter(
+        (item) => item.platform !== "x" && !String(item.link || "").includes("twitter.com") && !String(item.link || "").includes("x.com")
+      );
+      const all = [...validCms, ...yt.items];
       return res.json({ success: true, count: all.length, data: all });
     }
 
     // Default when CMS has never been touched by admin
-    const [ig, x] = await Promise.all([getInstagramItems(), getXItems()]);
-    const all = [...ig, ...x, ...yt.items];
+    const ig = await getInstagramItems();
+    const all = [...ig, ...yt.items].filter(
+      (item) => item.platform !== "x" && !String(item.link || "").includes("twitter.com") && !String(item.link || "").includes("x.com")
+    );
     return res.json({ success: true, count: all.length, data: all });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: "Failed to generate social feed" });
