@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import {
-  Play,
   Instagram,
   Heart,
   Briefcase,
@@ -30,7 +29,6 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
-import InstagramApiFeed from "../components/InstagramApiFeed";
 import { AnimatedMetricCard, AnimatedNumber } from "../components/AnimatedMetricCard";
 
 type MainTab = "impact" | "volunteers" | "chat";
@@ -346,32 +344,6 @@ export default function ImpactPage() {
                   );
                 })}
               </div>
-            </section>
-
-            {/* LIVE REELS & VIDEO FEED (MOVED BEFORE COMMUNITY, CARE & ACTIVE GROUND) */}
-            <section className="bg-white rounded-3xl border border-slate-200/80 p-4 sm:p-5 shadow-xs space-y-3.5">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500 text-white shadow-xs">
-                    <Play className="h-4.5 w-4.5 fill-white ml-0.5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                      {isHi ? "लाइव रील्स व वीडियो" : "Live Reels & Video Feed"}
-                    </h3>
-                    <p className="text-[10px] text-slate-400 font-bold">
-                      {isHi ? "आधिकारिक सोशल व वीडियो अपडेट्स" : "@rpfoundationofficial • Official Media"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] font-bold text-emerald-700 shadow-2xs">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{isHi ? "लाइव फ़ीड" : "Live Feed"}</span>
-                </div>
-              </div>
-
-              <InstagramApiFeed />
             </section>
 
             {/* Category Filter Pills: All, Community, Care, Active */}
