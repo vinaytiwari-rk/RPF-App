@@ -53,9 +53,9 @@ export default function ReelsVerticalViewer({
   onClose,
 }: ReelsVerticalViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  // Autoplay is reliably permitted by mobile browsers when media starts muted.
-  // The user can unmute with the single volume control in the header.
-  const [isMuted, setIsMuted] = useState(true);
+  // Default audio state: ON at full volume.
+  // Browsers may still block audible autoplay until the user interacts with the page.
+  const [isMuted, setIsMuted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = () => {
@@ -134,11 +134,22 @@ export default function ReelsVerticalViewer({
               {isActive && ytId ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black">
                   <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&playsinline=1&modestbranding=1&rel=0`}
+                    src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=0&playsinline=1&modestbranding=1&rel=0&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
                     title={reel.title}
                     className="w-full h-full max-w-lg aspect-[9/16] border-0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
+                    onLoad={(event) => {
+                      const iframe = event.currentTarget;
+                      iframe.contentWindow?.postMessage(
+                        JSON.stringify({ event: "command", func: "unMute", args: [] }),
+                        "https://www.youtube-nocookie.com"
+                      );
+                      iframe.contentWindow?.postMessage(
+                        JSON.stringify({ event: "command", func: "setVolume", args: [100] }),
+                        "https://www.youtube-nocookie.com"
+                      );
+                    }}
                   />
                 </div>
               ) : isActive && reel.videoUrl && !reel.videoUrl.includes("instagram.com") ? (
@@ -149,6 +160,7 @@ export default function ReelsVerticalViewer({
                   loop
                   playsInline
                   muted={isMuted}
+                  volume={1}
                   className="absolute inset-0 h-full w-full object-contain bg-black"
                 />
               ) : isActive && activeEmbedUrl ? (
