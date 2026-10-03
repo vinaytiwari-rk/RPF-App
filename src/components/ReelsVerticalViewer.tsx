@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { openExternalLink } from "../utils/browser";
 import { useNavigate } from "react-router-dom";
+import InAppWebView from "./InAppWebView";
 
 export interface ReelItem {
   id: string;
@@ -49,6 +50,12 @@ function extractInstagramShortcode(url: string = ""): string | undefined {
   return match ? match[1] : undefined;
 }
 
+function extractTwitterId(url: string = ""): string | undefined {
+  if (!url) return undefined;
+  const match = url.match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
+  return match ? match[1] : undefined;
+}
+
 export default function ReelsVerticalViewer({
   reels,
   initialIndex = 0,
@@ -58,6 +65,7 @@ export default function ReelsVerticalViewer({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isMuted, setIsMuted] = useState(false);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
+  const [inAppViewUrl, setInAppViewUrl] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = () => {
@@ -140,7 +148,17 @@ export default function ReelsVerticalViewer({
           const isActive = idx === currentIndex;
           const ytId = reel.videoId || extractYouTubeId(reel.videoUrl) || extractYouTubeId(reel.url);
           const igShortcode = extractInstagramShortcode(reel.url) || extractInstagramShortcode(reel.videoUrl);
-          const activeEmbedUrl = reel.embedUrl || (igShortcode ? `https://www.instagram.com/p/${igShortcode}/embed/captioned/` : undefined);
+          const tweetId = extractTwitterId(reel.url) || extractTwitterId(reel.videoUrl);
+
+          const activeEmbedUrl = reel.embedUrl || (
+            ytId
+              ? `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`
+              : tweetId
+              ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
+              : igShortcode
+              ? `https://www.instagram.com/p/${igShortcode}/embed/captioned/`
+              : undefined
+          );
 
           return (
             <div
@@ -192,11 +210,11 @@ export default function ReelsVerticalViewer({
                   />
                   <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/90" />
                   
-                  {/* Interactive Play & Open Trigger */}
+                  {/* Interactive Play & In-App View Trigger */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 gap-3">
                     <button
                       type="button"
-                      onClick={() => openExternalLink(reel.url)}
+                      onClick={() => setInAppViewUrl(reel.url)}
                       className="group flex flex-col items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-md p-5 border border-white/20 hover:scale-105 active:scale-95 transition-all shadow-2xl cursor-pointer"
                     >
                       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white shadow-lg group-hover:scale-110 transition-transform">
@@ -204,11 +222,11 @@ export default function ReelsVerticalViewer({
                       </div>
                       <div className="space-y-1">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-600/80 text-white text-[11px] font-black uppercase tracking-wider">
-                          <Instagram className="h-3.5 w-3.5" />
-                          Watch Video on Instagram
+                          <Play className="h-3.5 w-3.5" />
+                          View Inside App
                         </span>
                         <p className="text-[10.5px] text-slate-300 font-medium max-w-xs line-clamp-1">
-                          Tap to stream directly in the Instagram app
+                          Plays directly in RP Foundation in-app browser
                         </p>
                       </div>
                     </button>
@@ -248,11 +266,12 @@ export default function ReelsVerticalViewer({
                   <span className="text-[10px] font-black tracking-wider text-white">Share</span>
                 </button>
 
-                {/* Open in External/Official App */}
+                {/* In-App Browser Action */}
                 <button
                   type="button"
-                  onClick={() => openExternalLink(reel.url)}
+                  onClick={() => setInAppViewUrl(reel.url)}
                   className="flex flex-col items-center gap-1 active:scale-95 transition cursor-pointer"
+                  title="View details inside app"
                 >
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF9933] to-[#138808] text-white shadow-lg">
                     {reel.platform === "youtube" ? (
@@ -296,6 +315,16 @@ export default function ReelsVerticalViewer({
           );
         })}
       </div>
+
+      {/* 100% In-App Web View Modal (Never Leaves The App) */}
+      {inAppViewUrl && (
+        <InAppWebView
+          url={inAppViewUrl}
+          title={reels[currentIndex]?.title || "RP Foundation Media"}
+          platform={reels[currentIndex]?.platform}
+          onClose={() => setInAppViewUrl(null)}
+        />
+      )}
     </div>
   );
 }

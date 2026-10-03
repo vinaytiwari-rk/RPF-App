@@ -307,22 +307,43 @@ async function getInstagramItems(): Promise<SocialRssItem[]> {
       const cms = typeof cmsRes.rows[0].data === "string" ? JSON.parse(cmsRes.rows[0].data) : cmsRes.rows[0].data;
       if (Array.isArray(cms?.instagramPosts) && cms.instagramPosts.length > 0) {
         return cms.instagramPosts.map((post: any, idx: number) => {
-          const postUrl = post.url || "https://www.instagram.com/rpfoundationofficial/";
-          const igMatch = String(postUrl).match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
-          const shortcode = igMatch ? igMatch[2] : "";
-          const embedUrl = shortcode ? `https://www.instagram.com/p/${shortcode}/embed/captioned/` : undefined;
+          const postUrl = post.url || post.videoUrl || "https://www.instagram.com/rpfoundationofficial/";
+          const igMatch = String(postUrl).match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+          const shortcode = igMatch ? igMatch[1] : "";
+          const ytMatch = String(postUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+          const videoId = post.videoId || (ytMatch ? ytMatch[1] : undefined);
+          const xMatch = String(postUrl).match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
+          const tweetId = xMatch ? xMatch[1] : undefined;
+
+          const platform = post.platform || (videoId ? "youtube" : tweetId ? "x" : "instagram");
+          const embedUrl = post.embedUrl || (
+            videoId
+              ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`
+              : tweetId
+              ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
+              : shortcode
+              ? `https://www.instagram.com/p/${shortcode}/embed/captioned/`
+              : undefined
+          );
+
+          const defaultThumb = videoId
+            ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+            : shortcode
+            ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l`
+            : "/assets/founder.png";
 
           return {
-            id: post.id || `ig-${idx}`,
-            platform: "instagram",
-            title: post.title || "RP Foundation Instagram Reel",
+            id: post.id || `cms-media-${idx}`,
+            platform,
+            title: post.title || "RP Foundation Media Update",
             link: postUrl,
-            description: post.caption || post.title || "Follow @rpfoundationofficial on Instagram for live updates and reels.",
+            description: post.caption || post.title || "Official update from RP Foundation.",
             pubDate: new Date(Date.now() - idx * 86400000).toUTCString(),
-            author: "@rpfoundationofficial",
-            thumbnailUrl: post.thumbnail || post.thumbnailUrl || (shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : "/assets/founder.png"),
-            category: post.category || "Reels",
+            author: platform === "youtube" ? "RP Foundation" : platform === "x" ? "@rpfoundation15" : "@rpfoundationofficial",
+            thumbnailUrl: post.thumbnail || post.thumbnailUrl || defaultThumb,
+            category: post.category || (platform === "youtube" ? "Video" : platform === "x" ? "Press" : "Reels"),
             videoUrl: post.videoUrl || undefined,
+            videoId,
             embedUrl
           };
         });

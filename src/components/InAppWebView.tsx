@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { X, Instagram, Facebook, Youtube, Twitter, Globe } from "lucide-react";
+import { X, Instagram, Youtube, Twitter, Globe } from "lucide-react";
 import BrandLoader from "./BrandLoader";
 
 interface InAppWebViewProps { url:string; title?:string; platform?:string; onClose:()=>void; }
-const PLATFORM_ICON: Record<string, React.ElementType>={instagram:Instagram,facebook:Facebook,youtube:Youtube,x:Twitter,twitter:Twitter};
+const PLATFORM_ICON: Record<string, React.ElementType>={instagram:Instagram,youtube:Youtube,x:Twitter,twitter:Twitter};
 
 /** RPF's own in-app browser surface. Keep all supported services inside the app. */
 export default function InAppWebView({url,title,platform,onClose}:InAppWebViewProps){

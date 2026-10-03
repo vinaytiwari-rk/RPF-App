@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { 
   ArrowLeft, ChevronDown, ChevronUp, Eye, EyeOff, Instagram, 
-  Plus, Save, Trash2, ExternalLink, Play, Upload, Loader2, Film, CheckCircle2 
+  Plus, Save, Trash2, ExternalLink, Play, Upload, Loader2, Film, CheckCircle2,
+  Youtube, Code, ShieldCheck, Sparkles
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -15,43 +16,144 @@ export type InstagramPost = {
   url: string;
   videoUrl?: string;
   thumbnailUrl?: string;
+  embedUrl?: string;
+  videoId?: string;
+  tweetId?: string;
   caption?: string;
   category?: string;
+  platform?: "youtube" | "instagram" | "x";
   active?: boolean;
   order?: number;
 };
 
-export function cleanInstagramInput(raw: string): string {
-  if (!raw) return "";
+export function parseSocialEmbed(raw: string): {
+  platform: "youtube" | "instagram" | "x";
+  cleanUrl: string;
+  embedUrl: string;
+  videoId?: string;
+  tweetId?: string;
+  thumbnailUrl?: string;
+  videoUrl?: string;
+} {
+  if (!raw) {
+    return { platform: "instagram", cleanUrl: "", embedUrl: "" };
+  }
+
   const trimmed = raw.trim();
-  // If user pasted full blockquote embed code
-  const permalinkMatch = trimmed.match(/data-instgrm-permalink="([^"]+)"/i);
-  if (permalinkMatch) {
-    const rawUrl = permalinkMatch[1].replace(/&amp;/g, "&");
-    const cleanMatch = rawUrl.match(/(https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv)\/[A-Za-z0-9_-]+)/i);
-    if (cleanMatch) return cleanMatch[1] + "/";
-    return rawUrl;
+
+  // 1. Raw <iframe> check: <iframe ... src="..." ...>
+  const iframeMatch = trimmed.match(/<iframe[^>]+src=["']([^"']+)["']/i);
+  if (iframeMatch) {
+    const src = iframeMatch[1];
+    if (src.includes("youtube.com") || src.includes("youtu.be")) {
+      const ytIdMatch = src.match(/(?:embed\/|shorts\/|v=)([A-Za-z0-9_-]{11})/i);
+      const videoId = ytIdMatch ? ytIdMatch[1] : undefined;
+      return {
+        platform: "youtube",
+        cleanUrl: videoId ? `https://www.youtube.com/shorts/${videoId}` : src,
+        embedUrl: videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0` : src,
+        videoId,
+        thumbnailUrl: videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "/assets/founder.png"
+      };
+    }
+    if (src.includes("instagram.com")) {
+      const igMatch = src.match(/instagram\.com\/p\/([A-Za-z0-9_-]+)/i);
+      const shortcode = igMatch ? igMatch[1] : "";
+      return {
+        platform: "instagram",
+        cleanUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/` : src,
+        embedUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/embed/captioned/` : src,
+        thumbnailUrl: shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : "/assets/founder.png"
+      };
+    }
+    if (src.includes("twitter.com") || src.includes("x.com")) {
+      const xMatch = src.match(/id=([0-9]+)/i);
+      const tweetId = xMatch ? xMatch[1] : undefined;
+      return {
+        platform: "x",
+        cleanUrl: tweetId ? `https://x.com/i/status/${tweetId}` : src,
+        embedUrl: tweetId ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark` : src,
+        tweetId,
+        thumbnailUrl: "/assets/founder.png"
+      };
+    }
+    return {
+      platform: "instagram",
+      cleanUrl: src,
+      embedUrl: src
+    };
   }
-  // If user pasted normal URL with extra query params
-  const urlMatch = trimmed.match(/(https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv)\/[A-Za-z0-9_-]+)/i);
-  if (urlMatch) {
-    return urlMatch[1] + "/";
+
+  // 2. Direct MP4 / WebM / Cloudinary video URL
+  if (trimmed.match(/\.(mp4|webm|mov)($|\?)/i) || (trimmed.includes("res.cloudinary.com") && trimmed.includes("/video/"))) {
+    return {
+      platform: "instagram",
+      cleanUrl: trimmed,
+      embedUrl: trimmed,
+      videoUrl: trimmed,
+      thumbnailUrl: "/assets/founder.png"
+    };
   }
-  return trimmed;
+
+  // 3. YouTube (Shorts, Watch, youtu.be, embed)
+  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+  if (ytMatch) {
+    const videoId = ytMatch[1];
+    return {
+      platform: "youtube",
+      cleanUrl: `https://www.youtube.com/shorts/${videoId}`,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`,
+      videoId,
+      thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+    };
+  }
+
+  // 4. X (Twitter) Tweet URL or Blockquote
+  const xMatch = trimmed.match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
+  if (xMatch) {
+    const tweetId = xMatch[1];
+    return {
+      platform: "x",
+      cleanUrl: `https://x.com/i/status/${tweetId}`,
+      embedUrl: `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`,
+      tweetId,
+      thumbnailUrl: "/assets/founder.png"
+    };
+  }
+
+  // 5. Instagram (Reels, Posts, blockquote permalink)
+  const igPermalinkMatch = trimmed.match(/data-instgrm-permalink=["']([^"']+)["']/i);
+  const targetIg = igPermalinkMatch ? igPermalinkMatch[1].replace(/&amp;/g, "&") : trimmed;
+  const igMatch = targetIg.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+  if (igMatch) {
+    const shortcode = igMatch[1];
+    return {
+      platform: "instagram",
+      cleanUrl: `https://www.instagram.com/p/${shortcode}/`,
+      embedUrl: `https://www.instagram.com/p/${shortcode}/embed/captioned/`,
+      thumbnailUrl: `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l`
+    };
+  }
+
+  return {
+    platform: "instagram",
+    cleanUrl: trimmed,
+    embedUrl: trimmed
+  };
+}
+
+export function cleanInstagramInput(raw: string): string {
+  return parseSocialEmbed(raw).cleanUrl;
 }
 
 export function extractInstagramEmbedUrl(url: string): { embedUrl: string; shortcode: string; type: "reel" | "post" | "other" } {
-  if (!url) return { embedUrl: "", shortcode: "", type: "other" };
-  const cleaned = cleanInstagramInput(url);
-  if (cleaned.endsWith(".mp4") || cleaned.includes(".mp4?")) return { embedUrl: cleaned, shortcode: "", type: "reel" };
-  if (cleaned.includes("/embed")) return { embedUrl: cleaned, shortcode: "", type: "post" };
-  const match = cleaned.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
-  if (match) {
-    const type = match[1].toLowerCase() === "reel" ? "reel" : "post";
-    const shortcode = match[2];
-    return { embedUrl: `https://www.instagram.com/p/${shortcode}/embed/captioned/`, shortcode, type };
-  }
-  return { embedUrl: cleaned, shortcode: "", type: "other" };
+  const parsed = parseSocialEmbed(url);
+  const shortcode = parsed.cleanUrl.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/i)?.[1] || "";
+  return {
+    embedUrl: parsed.embedUrl,
+    shortcode,
+    type: parsed.platform === "youtube" ? "reel" : shortcode ? "post" : "other"
+  };
 }
 
 const defaultInstagramPosts: InstagramPost[] = [
@@ -221,10 +323,10 @@ export default function AdminInstagram() {
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[.18em] text-rose-600">Media Content</p>
-              <h1 className="text-xl font-black">Social Reels & Video CMS</h1>
+              <p className="text-[10px] font-black uppercase tracking-[.18em] text-rose-600">Media Content & Embeds</p>
+              <h1 className="text-xl font-black">Social Media & Video Embed CMS</h1>
               <p className="mt-1 text-xs text-slate-500">
-                Upload device videos (MP4/WebM) or paste Instagram Reel URLs for in-app vertical video playback.
+                YouTube Shorts, Instagram Reels, X Tweets या Device Video जोड़ें। सभी मीडिया बिना बाहर खुले 100% ऐप के अंदर ही स्ट्रीम होंगे।
               </p>
             </div>
           </div>
@@ -233,7 +335,7 @@ export default function AdminInstagram() {
               <Play className="h-4 w-4" /> View Reels Player
             </button>
             <button onClick={addPost} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-black text-slate-700 hover:bg-slate-50">
-              <Plus className="h-4 w-4" /> Add Reel
+              <Plus className="h-4 w-4" /> Add Embed / Reel
             </button>
             <button onClick={save} disabled={saving} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#0F3157] px-4 py-2.5 text-xs font-black text-white disabled:opacity-50 hover:bg-[#1D5B93]">
               <Save className="h-4 w-4" /> {saving ? "Publishing…" : "Save & Publish"}
@@ -254,14 +356,30 @@ export default function AdminInstagram() {
             {posts.map((post, index) => (
               <article key={post.id} className={`overflow-hidden rounded-2xl border bg-white ${selected === index ? "border-rose-400 ring-2 ring-rose-100" : "border-slate-200"}`}>
                 <button onClick={() => setSelected(index)} className="flex w-full items-center gap-3 p-3 text-left">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-xs">
-                    {post.videoUrl ? <Film className="h-6 w-6" /> : <Instagram className="h-6 w-6" />}
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-xs ${
+                    post.platform === "youtube"
+                      ? "bg-rose-600"
+                      : post.platform === "x"
+                      ? "bg-slate-900"
+                      : post.videoUrl
+                      ? "bg-purple-600"
+                      : "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600"
+                  }`}>
+                    {post.platform === "youtube" ? (
+                      <Youtube className="h-6 w-6 fill-white" />
+                    ) : post.platform === "x" ? (
+                      <span className="font-black text-lg">𝕏</span>
+                    ) : post.videoUrl ? (
+                      <Film className="h-6 w-6" />
+                    ) : (
+                      <Instagram className="h-6 w-6" />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-black">{post.title || "Untitled Video Reel"}</p>
                     <p className="mt-1 truncate text-[10px] font-bold text-slate-400">
-                      {post.category || "Social Work"} · {post.active !== false ? "Active" : "Hidden"} · Position {index + 1}
-                      {post.videoUrl && " · 📹 Video Attached"}
+                      {post.platform === "youtube" ? "🔴 YouTube" : post.platform === "x" ? "⚫ X (Twitter)" : "🟣 Instagram"} · {post.category || "Social Work"} · {post.active !== false ? "Active" : "Hidden"}
+                      {post.videoUrl && " · 📹 Video Ready"}
                     </p>
                   </div>
                   {post.active !== false ? <Eye className="h-4 w-4 text-emerald-600" /> : <EyeOff className="h-4 w-4 text-slate-400" />}
@@ -381,23 +499,56 @@ export default function AdminInstagram() {
                     )}
                   </div>
 
-                  {/* Optional Instagram Link / Embed Code */}
-                  <label className="block text-xs font-bold text-slate-700">
-                    Instagram Post / Reel URL or Embed Code
-                    <div className="relative mt-1.5">
-                      <input
-                        value={p.url}
-                        onChange={(e) => patch(selected, { url: cleanInstagramInput(e.target.value) })}
-                        placeholder="Paste URL or embed blockquote (e.g. https://www.instagram.com/p/Dd6j8dOMRHi/)"
-                        className="w-full rounded-xl border border-slate-200 px-3 py-2.5 pr-9 text-sm outline-none focus:border-rose-400"
-                      />
-                      {p.url && (
-                        <a href={p.url} target="_blank" rel="noopener noreferrer" className="absolute right-2.5 top-2.5 text-slate-400 hover:text-rose-600">
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      )}
+                  {/* Universal Social Embed Code or URL Input */}
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                        <Code className="h-4 w-4 text-rose-600" />
+                        <span>Embed Code or Link (YouTube / Instagram / X / &lt;iframe&gt;)</span>
+                      </label>
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
+                        p.platform === "youtube" 
+                          ? "bg-rose-100 text-rose-800 border-rose-300"
+                          : p.platform === "x"
+                          ? "bg-slate-900 text-white border-slate-700"
+                          : "bg-pink-100 text-pink-800 border-pink-300"
+                      }`}>
+                        {p.platform === "youtube" ? "🔴 YouTube Short" : p.platform === "x" ? "⚫ X (Twitter) Tweet" : "🟣 Instagram Reel"}
+                      </span>
                     </div>
-                  </label>
+
+                    <p className="text-[11px] text-slate-500">
+                      Paste YouTube Shorts URL, Instagram Reel/Post link, X Tweet URL, or complete embed code (&lt;blockquote&gt; / &lt;iframe&gt;).
+                    </p>
+
+                    <div className="relative">
+                      <textarea
+                        value={p.url || ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const parsed = parseSocialEmbed(val);
+                          patch(selected, {
+                            url: val,
+                            embedUrl: parsed.embedUrl,
+                            platform: parsed.platform,
+                            videoId: parsed.videoId,
+                            tweetId: parsed.tweetId,
+                            thumbnailUrl: parsed.thumbnailUrl || p.thumbnailUrl,
+                            videoUrl: parsed.videoUrl || p.videoUrl
+                          });
+                        }}
+                        placeholder="Paste YouTube Shorts, Instagram Reel, X Tweet link or <iframe> code here..."
+                        rows={2}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-rose-400 font-mono"
+                      />
+                    </div>
+
+                    {/* 100% In-App Playback Guarantee */}
+                    <div className="flex items-start gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-[11px] text-emerald-800 font-semibold">
+                      <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>100% In-App Playback: Video/Post will stream directly inside the app without opening external browsers or apps.</span>
+                    </div>
+                  </div>
 
                   {/* Caption */}
                   <label className="block text-xs font-bold text-slate-700">
@@ -405,24 +556,38 @@ export default function AdminInstagram() {
                     <textarea
                       value={p.caption || ""}
                       onChange={(e) => patch(selected, { caption: e.target.value })}
-                      placeholder="Write a short description or caption for this Reel..."
+                      placeholder="Write a short description or caption for this media item..."
                       rows={3}
                       className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-rose-400"
                     />
                   </label>
 
-                  {/* Live Player Preview */}
-                  {(p.videoUrl || embedUrl) && (
-                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-2">
-                      <p className="mb-2 text-[10px] font-black uppercase tracking-[.14em] text-slate-500">Live Player Preview</p>
-                      {p.videoUrl ? (
-                        <video src={resolveMediaUrl(p.videoUrl)} controls className="h-[360px] w-full rounded-xl object-cover bg-black" />
+                  {/* Live In-App Player Preview */}
+                  {(p.videoUrl || p.embedUrl || embedUrl) && (
+                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 p-3 text-center">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-black uppercase tracking-[.14em] text-white/70">
+                          In-App Live Stream Preview ({p.platform === "youtube" ? "YouTube 9:16" : p.platform === "x" ? "X Tweet" : "Instagram"})
+                        </p>
+                        <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950 border border-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" /> Streams Inside App
+                        </span>
+                      </div>
+
+                      {p.videoUrl && !p.videoUrl.includes("instagram.com") ? (
+                        <video
+                          src={resolveMediaUrl(p.videoUrl)}
+                          controls
+                          playsInline
+                          className="h-[380px] w-full rounded-xl object-contain bg-black mx-auto"
+                        />
                       ) : (
                         <iframe
-                          src={embedUrl}
-                          title="Instagram Preview"
-                          className="h-[360px] w-full rounded-xl border-0 bg-white"
-                          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                          src={p.embedUrl || embedUrl}
+                          title="In-App Embed Preview"
+                          className="h-[380px] w-full max-w-sm rounded-xl border-0 bg-white mx-auto shadow-2xl"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
                         />
                       )}
                     </div>
