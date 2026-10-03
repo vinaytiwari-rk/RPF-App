@@ -260,7 +260,7 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
               : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
           }`}
         >
-          <span>सभी (All)</span>
+          <span>All Media</span>
           <span
             className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
               activeFilter === "all" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
@@ -407,14 +407,14 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
       <div className="flex items-center justify-between pt-0.5 px-1 text-slate-500">
         <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
           <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-          <span>टैप करके फ़ुलस्क्रीन में देखें</span>
+          <span>Tap to watch in fullscreen</span>
         </div>
         <button
           type="button"
           onClick={() => setActiveReelIndex(0)}
           className="inline-flex items-center gap-1 text-xs font-bold text-[#D97706] hover:text-[#B45309] hover:underline cursor-pointer transition-colors"
         >
-          <span>फ़ुलस्क्रीन प्लेयर</span>
+          <span>Fullscreen Player</span>
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
       </div>
