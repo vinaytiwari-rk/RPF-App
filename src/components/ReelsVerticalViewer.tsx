@@ -147,8 +147,7 @@ export default function ReelsVerticalViewer({
               ) : isActive && reel.videoUrl && !reel.videoUrl.includes("instagram.com") ? (
                 <video
                   src={reel.videoUrl}
-                  poster={reel.thumbnailUrl}
-                  controls
+                  poster={reel.thumbnailUrl} 
                   autoPlay
                   loop
                   playsInline
