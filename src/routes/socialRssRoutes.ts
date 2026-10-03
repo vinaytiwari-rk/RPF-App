@@ -487,17 +487,19 @@ router.get("/api/public/social-feed", async (_req, res) => {
     const [yt, cmsSocial] = await Promise.all([getYouTubeItems(), getCmsSocialItems()]);
 
     if (cmsSocial.configured) {
-      // Show ONLY admin's saved posts (excluding X / Twitter), followed by official YouTube channel items.
+      // Always present YouTube Shorts first, then Instagram/Reels. X/Twitter stays excluded.
       const validCms = cmsSocial.items.filter(
         (item) => item.platform !== "x" && !String(item.link || "").includes("twitter.com") && !String(item.link || "").includes("x.com")
       );
-      const all = [...validCms, ...yt.items];
+      const cmsYouTube = validCms.filter((item) => item.platform === "youtube");
+      const cmsInstagram = validCms.filter((item) => item.platform === "instagram");
+      const all = [...yt.items, ...cmsYouTube, ...cmsInstagram, ...validCms.filter((item) => item.platform !== "youtube" && item.platform !== "instagram")];
       return res.json({ success: true, count: all.length, data: all });
     }
 
     // Default when CMS has never been touched by admin
     const ig = await getInstagramItems();
-    const all = [...ig, ...yt.items].filter(
+    const all = [...yt.items, ...ig].filter(
       (item) => item.platform !== "x" && !String(item.link || "").includes("twitter.com") && !String(item.link || "").includes("x.com")
     );
     return res.json({ success: true, count: all.length, data: all });
