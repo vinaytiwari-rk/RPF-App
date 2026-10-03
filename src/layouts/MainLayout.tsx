@@ -47,10 +47,10 @@ export default function MainLayout() {
   const root = roots.includes(location.pathname);
   const items = [
     { path: "/", label: "Home", icon: Home },
+    { path: "/impact", label: "Impact", icon: HeartHandshake },
+    { path: "/reels", label: "Reels", icon: Clapperboard },
     { path: "/services", label: "Explore", icon: Compass },
     { path: "/activity", label: "Activity", icon: Activity },
-    { path: "/reels", label: "Reels", icon: Clapperboard },
-    { path: "/impact", label: "Impact", icon: HeartHandshake },
     { path: "/profile", label: "Profile", icon: User }
   ];
 
