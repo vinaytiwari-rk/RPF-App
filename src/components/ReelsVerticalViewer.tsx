@@ -3,11 +3,9 @@ import {
   X,
   Volume2,
   VolumeX,
-  Play,
   ChevronDown,
   Sparkles,
 } from "lucide-react";
-import InAppWebView from "./InAppWebView";
 
 export interface ReelItem {
   id: string;
