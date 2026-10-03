@@ -21,6 +21,8 @@ import { openExternalLink } from "../utils/browser";
 import SortableList from "../components/SortableList";
 import BrandLoader from "../components/BrandLoader";
 
+const REMOVED_SERVICE_IDS = new Set<string>(["countries","earthquakes","fuel-tracker","gps-toolkit","vitals","medications","medical-dict","period-tracker","child-tracker","resume-builder","doc-scanner","ai-chat","story-library","decision-maker","morse-code","habit-tracker","fasting-tracker","typing-speed","quick-calculator"]);
+
 const EXPLORE_LINKS = [
   { id: "epaper", category: "community", iconName: "Newspaper", titleEn: "Epaper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Read today's leading daily e-papers", descHi: "आज के प्रमुख दैनिक ई-पेपर पढ़ें", route: "/epaper" },
   { id: "directory", category: "government", iconName: "BookOpen", titleEn: "National Directory", titleHi: "राष्ट्रीय निर्देशिका", descEn: "Government contacts & helplines", descHi: "सरकारी संपर्क और उपयोगिता निर्देशिका", route: "/directory" },
@@ -28,13 +30,6 @@ const EXPLORE_LINKS = [
   { id: "fact-check", category: "community", iconName: "ShieldCheck", titleEn: "Fact Check Hub", titleHi: "फैक्ट चेक हब", descEn: "Check claims and viral news", descHi: "वायरल दावों और खबरों की जांच करें", route: "/fact-check" },
   { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "आधिकारिक लाइव टीवी चैनल", route: "/live-tv" }
 ];
-
-const HIDDEN_UTILITY_IDS = new Set<string>([
-  "utility-center", "bmi-calculator", "pomodoro", "breathing-meditator", "decision-maker", "morse-code",
-  "habit-tracker", "fasting-tracker", "typing-speed", "quick-calculator", "countries", "earthquakes",
-  "fuel-tracker", "gps-toolkit", "vitals", "medications", "medical-dict", "period-tracker", "child-tracker",
-  "resume-builder", "doc-scanner", "ai-chat", "story-library"
-]);
 
 const FEATURED_SERVICES = [
   { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवा पहचान और कल्याण पहुंच", icon: BadgePlus, route: "/jan-seva-card", accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20" },
@@ -54,8 +49,8 @@ export default function Services() {
   const [webResults, setWebResults] = useState<any[]>([]);
   const [webLoading, setWebLoading] = useState(false);
 
-  const HEALTH_SERVICES = ["health-care", "women-safety", "seniors", "medicine", "blood", "food", "bmi-calculator", "vitals", "breathing-meditator", "fasting-tracker"];
-  const EDUCATION_SERVICES = ["education", "scholarships", "skills", "peoples-university", "pomodoro", "morse-code", "typing-speed"];
+  const HEALTH_SERVICES = ["health-care", "women-safety", "seniors", "medicine", "blood", "food", "bmi-calculator", "breathing-meditator"];
+  const EDUCATION_SERVICES = ["education", "scholarships", "skills", "peoples-university", "pomodoro"];
   const GOV_SERVICES = ["card", "schemes", "farmer", "grievance", "disaster", "directory"];
   const COMMUNITY_SERVICES = ["donations", "volunteers", "animals", "environment", "crowdfunding", "culture", "sos", "youth", "nation", "internet-radio", "epaper", "fact-check", "live-tv", "hindu-calendar"];
 
@@ -69,13 +64,13 @@ export default function Services() {
 
   const hiddenIds = useMemo(() => {
     const configured = Array.isArray((cmsConfig as any)?.hiddenServiceIds) ? (cmsConfig as any).hiddenServiceIds : [];
-    return new Set<string>([...configured, ...HIDDEN_UTILITY_IDS]);
+    return new Set<string>([...configured, ...REMOVED_SERVICE_IDS]);
   }, [cmsConfig]);
 
   const allServices = useMemo(() => {
     const base = Array.isArray(servicesList) ? servicesList : [];
     const cmsUtils = Array.isArray((cmsConfig as any)?.exploreUtilities) ? (cmsConfig as any).exploreUtilities : [];
-    const combined = [...base, ...EXPLORE_LINKS, ...cmsUtils];
+    const combined = [...base, ...EXPLORE_LINKS, ...cmsUtils].filter((item: any) => item?.id && !REMOVED_SERVICE_IDS.has(item.id));
     const seen = new Set<string>();
     const list: any[] = [];
     for (const item of combined) {
