@@ -29,6 +29,13 @@ const EXPLORE_LINKS = [
   { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "आधिकारिक लाइव टीवी चैनल", route: "/live-tv" }
 ];
 
+const HIDDEN_UTILITY_IDS = new Set<string>([
+  "utility-center", "bmi-calculator", "pomodoro", "breathing-meditator", "decision-maker", "morse-code",
+  "habit-tracker", "fasting-tracker", "typing-speed", "quick-calculator", "countries", "earthquakes",
+  "fuel-tracker", "gps-toolkit", "vitals", "medications", "medical-dict", "period-tracker", "child-tracker",
+  "resume-builder", "doc-scanner", "ai-chat", "story-library"
+]);
+
 const FEATURED_SERVICES = [
   { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवा पहचान और कल्याण पहुंच", icon: BadgePlus, route: "/jan-seva-card", accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20" },
   { id: "health-care", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", descEn: "Health camps, medicines & hospital locator", descHi: "स्वास्थ्य शिविर, दवाएं और अस्पताल खोजक", icon: HeartPulse, route: "/health-care", accent: "text-[#DC2626] bg-red-500/10 border border-red-500/20" },
@@ -61,9 +68,8 @@ export default function Services() {
   ];
 
   const hiddenIds = useMemo(() => {
-    return new Set<string>(
-      Array.isArray((cmsConfig as any)?.hiddenServiceIds) ? (cmsConfig as any).hiddenServiceIds : []
-    );
+    const configured = Array.isArray((cmsConfig as any)?.hiddenServiceIds) ? (cmsConfig as any).hiddenServiceIds : [];
+    return new Set<string>([...configured, ...HIDDEN_UTILITY_IDS]);
   }, [cmsConfig]);
 
   const allServices = useMemo(() => {
