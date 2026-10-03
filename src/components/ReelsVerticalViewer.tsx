@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   X,
   ChevronDown,
@@ -52,6 +52,11 @@ export default function ReelsVerticalViewer({
 }: ReelsVerticalViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [loaded, setLoaded] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setLoaded({});
+  }, [currentIndex]);
 
   const handleScroll = () => {
     if (!containerRef.current) return;
@@ -120,6 +125,11 @@ export default function ReelsVerticalViewer({
               className="relative w-full h-full snap-start snap-always flex items-center justify-center bg-black overflow-hidden"
             >
               {/* VIDEO PLAYBACK / MEDIA LAYER */}
+              {!loaded[reel.id] && isActive && (
+                <div className="absolute z-20 rounded-full bg-black/60 px-4 py-2 text-xs font-bold text-white backdrop-blur-md">
+                  Loading…
+                </div>
+              )}
               {isActive && ytId ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black">
                   <iframe
@@ -149,6 +159,12 @@ export default function ReelsVerticalViewer({
                   loop
                   playsInline
                   muted={false}
+                  preload="auto"
+                  onCanPlay={(event) => {
+                    setLoaded((prev) => ({ ...prev, [reel.id]: true }));
+                    event.currentTarget.volume = 1;
+                    void event.currentTarget.play().catch(() => undefined);
+                  }}
                   className="absolute inset-0 h-full w-full object-contain bg-black"
                 />
               ) : isActive && activeEmbedUrl ? (
@@ -161,6 +177,7 @@ export default function ReelsVerticalViewer({
                     allowFullScreen
                     scrolling="no"
                     sandbox="allow-scripts allow-same-origin allow-forms"
+                    onLoad={() => setLoaded((prev) => ({ ...prev, [reel.id]: true }))}
                   />
                 </div>
               ) : (
@@ -175,7 +192,8 @@ export default function ReelsVerticalViewer({
               )}
 
               {/* Bottom Caption & Handle Bar */}
-              <div className="absolute bottom-6 left-4 right-20 z-20 space-y-2 text-left">
+              <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 via-black/45 to-transparent px-4 pb-10 pt-24">
+                <div className="max-w-[calc(100%-1rem)] space-y-2 text-left">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-orange-300 bg-orange-950/80 border border-orange-500/40 px-2.5 py-0.5 rounded-full backdrop-blur-md">
                     <Sparkles className="h-3 w-3 text-amber-300" />
@@ -188,10 +206,16 @@ export default function ReelsVerticalViewer({
                 <p className="text-xs font-medium text-slate-200 line-clamp-3 leading-relaxed drop-shadow-sm">
                   {reel.caption}
                 </p>
+                <div className="flex items-center gap-2 pt-1 text-[10px] font-bold text-white/70">
+                  <span>{reel.author}</span>
+                  <span>•</span>
+                  <span>{idx + 1} / {reels.length}</span>
+                </div>
+                </div>
               </div>
 
               {/* Swipe Guidance Indicator */}
-              {idx === 0 && (
+              {idx === 0 && reels.length > 1 && (
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 text-[10px] font-black uppercase text-amber-300 tracking-widest animate-bounce">
                   <ChevronDown className="h-4 w-4" />
                   Swipe up for next reel
