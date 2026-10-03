@@ -49,7 +49,7 @@ export default function MainLayout() {
     { path: "/", label: "Home", icon: Home },
     { path: "/services", label: "Explore", icon: Compass },
     { path: "/activity", label: "Activity", icon: Activity },
-    { path: "/reels", label: "Shorts & Reels", icon: Clapperboard },
+    { path: "/reels", label: "Reels", icon: Clapperboard },
     { path: "/profile", label: "Profile", icon: User }
   ];
 
