@@ -295,7 +295,7 @@ export default function ImpactPage() {
   }, [cmsConfig?.testimonials]);
 
   return (
-    <div className="min-h-screen bg-transparent pb-28 font-sans selection:bg-orange-100 animate-fadeIn text-slate-800">
+    <div className="min-h-screen bg-transparent pb-36 font-sans selection:bg-orange-100 animate-fadeIn text-slate-800">
       {/* Header Banner (Vibrant Saffron-Emerald Brand Tricolor) */}
       <div className="bg-gradient-to-br from-[#B9E5CC] via-[#FFF7E8] to-[#FFD49A] p-6 text-[#245D45] relative overflow-hidden shadow-md">
         <div className="absolute top-0 right-0 w-44 h-44 bg-white/10 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />
@@ -349,27 +349,26 @@ export default function ImpactPage() {
             </section>
 
             {/* LIVE REELS & VIDEO FEED (MOVED BEFORE COMMUNITY, CARE & ACTIVE GROUND) */}
-            <section className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+            <section className="bg-white rounded-3xl border border-slate-200/80 p-4 sm:p-5 shadow-xs space-y-3.5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-xs">
-                    <Instagram className="h-4.5 w-4.5" />
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500 text-white shadow-xs">
+                    <Play className="h-4.5 w-4.5 fill-white ml-0.5" />
                   </div>
                   <div>
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                      {isHi ? "लाइव रील्स एवं वीडियो फ़ीड" : "Live Reels & Video Feed"}
+                      {isHi ? "लाइव रील्स व वीडियो" : "Live Reels & Video Feed"}
                     </h3>
-                    <p className="text-[10px] text-slate-400 font-bold">@rpfoundationofficial • Official RSS Stream</p>
+                    <p className="text-[10px] text-slate-400 font-bold">
+                      {isHi ? "आधिकारिक सोशल व वीडियो अपडेट्स" : "@rpfoundationofficial • Official Media"}
+                    </p>
                   </div>
                 </div>
-                <a
-                  href="https://www.instagram.com/rpfoundationofficial/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[10px] font-black text-[#D97706] hover:underline flex items-center gap-1"
-                >
-                  Follow <ExternalLink className="w-3 h-3" />
-                </a>
+
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] font-bold text-emerald-700 shadow-2xs">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>{isHi ? "लाइव फ़ीड" : "Live Feed"}</span>
+                </div>
               </div>
 
               <InstagramApiFeed />

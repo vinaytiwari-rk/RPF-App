@@ -248,51 +248,67 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
     : displayList.filter((item) => item.platform === activeFilter);
 
   return (
-    <div className="space-y-3 font-sans">
-      {/* FILTER TABS & LIVE BADGE */}
-      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-none">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            type="button"
-            onClick={() => setActiveFilter("all")}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeFilter === "all"
-                ? "bg-[#14213D] text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+    <div className="space-y-3.5 font-sans">
+      {/* FILTER TABS */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <button
+          type="button"
+          onClick={() => setActiveFilter("all")}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeFilter === "all"
+              ? "bg-slate-900 text-white shadow-xs"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
+          }`}
+        >
+          <span>सभी (All)</span>
+          <span
+            className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+              activeFilter === "all" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
             }`}
           >
-            All Live Media ({displayList.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveFilter("youtube")}
-            className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeFilter === "youtube"
-                ? "bg-rose-600 text-white shadow-xs"
-                : "bg-rose-50 text-rose-700 hover:bg-rose-100"
-            }`}
-          >
-            <Youtube className="h-3.5 w-3.5 fill-current" />
-            YouTube ({ytCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveFilter("instagram")}
-            className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeFilter === "instagram"
-                ? "bg-pink-600 text-white shadow-xs"
-                : "bg-pink-50 text-pink-700 hover:bg-pink-100"
-            }`}
-          >
-            <Instagram className="h-3.5 w-3.5" />
-            Instagram ({igCount})
-          </button>
-        </div>
+            {displayList.length}
+          </span>
+        </button>
 
-        <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Live RSS Feed
-        </span>
+        <button
+          type="button"
+          onClick={() => setActiveFilter("youtube")}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeFilter === "youtube"
+              ? "bg-rose-600 text-white shadow-xs"
+              : "bg-rose-50 text-rose-700 hover:bg-rose-100/80 border border-rose-100"
+          }`}
+        >
+          <Youtube className="h-3.5 w-3.5 fill-current" />
+          <span>YouTube</span>
+          <span
+            className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+              activeFilter === "youtube" ? "bg-white/20 text-white" : "bg-rose-200/70 text-rose-800"
+            }`}
+          >
+            {ytCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveFilter("instagram")}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeFilter === "instagram"
+              ? "bg-gradient-to-r from-amber-500 via-rose-500 to-fuchsia-600 text-white shadow-xs"
+              : "bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100/80 border border-fuchsia-100"
+          }`}
+        >
+          <Instagram className="h-3.5 w-3.5" />
+          <span>Instagram</span>
+          <span
+            className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+              activeFilter === "instagram" ? "bg-white/20 text-white" : "bg-fuchsia-200/70 text-fuchsia-800"
+            }`}
+          >
+            {igCount}
+          </span>
+        </button>
       </div>
 
       {/* HORIZONTAL SWIPEABLE REELS & VIDEO SHOWCASE */}
@@ -301,78 +317,84 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
           {[1, 2, 3].map((n) => (
             <div
               key={n}
-              className="h-64 w-44 shrink-0 rounded-3xl bg-slate-100 animate-pulse border border-slate-200 flex items-center justify-center text-slate-400 text-xs font-bold"
+              className="w-[148px] sm:w-[165px] aspect-[9/16] shrink-0 rounded-2xl bg-slate-100 animate-pulse border border-slate-200 flex items-center justify-center text-slate-400 text-xs font-bold"
             >
               <Loader2 className="h-5 w-5 animate-spin" />
             </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center">
           <p className="text-xs font-bold text-slate-700">No {activeFilter === "all" ? "" : activeFilter.toUpperCase()} posts currently available</p>
           <p className="mt-1 text-[11px] text-slate-400">Admin can add or publish reels from Admin Control Center.</p>
         </div>
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory">
+        <div className="flex gap-3 overflow-x-auto pb-2 pt-0.5 px-0.5 scrollbar-none snap-x snap-mandatory">
           {filtered.map((item, idx) => {
             const isYt = item.platform === "youtube";
+            const rawCaption = (item.caption || "").trim();
+            const rawTitle = (item.title || "").trim();
+            const isDuplicate = !rawCaption || rawCaption === rawTitle || (rawTitle.length > 10 && rawCaption.startsWith(rawTitle.slice(0, 15)));
+            const displayCaption = isDuplicate
+              ? (isYt ? "YouTube • RP Foundation" : "Instagram • @rpfoundationofficial")
+              : rawCaption;
+
             return (
               <div
                 key={item.id || idx}
                 onClick={() => setActiveReelIndex(idx)}
-                className="group relative h-64 w-44 shrink-0 cursor-pointer overflow-hidden rounded-3xl bg-slate-900 border border-slate-200 shadow-sm snap-start active:scale-95 transition-all hover:shadow-xl hover:border-orange-400"
+                className="group relative w-[148px] sm:w-[165px] aspect-[9/16] shrink-0 cursor-pointer overflow-hidden rounded-2xl bg-slate-950 border border-slate-200/90 shadow-sm snap-start active:scale-95 transition-all duration-300 hover:shadow-xl hover:border-amber-400"
               >
                 {/* Real Media Background */}
                 <img
                   src={item.thumbnailUrl}
                   alt={item.title}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => {
                     e.currentTarget.src = "/assets/founder.png";
                   }}
                 />
 
-                {/* Dark Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" />
+                {/* Top Subtle Vignette */}
+                <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
 
-                {/* Top Badge */}
-                <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider backdrop-blur-md border ${
-                      item.platform === "youtube"
-                        ? "bg-rose-600/90 text-white border-rose-400/50"
-                        : "bg-pink-600/90 text-white border-pink-400/50"
-                    }`}
-                  >
-                    {item.platform === "youtube" ? (
+                {/* Bottom Cinematic Gradient */}
+                <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none" />
+
+                {/* Top Glass Badge */}
+                <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between z-10">
+                  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8.5px] font-bold text-white bg-black/50 backdrop-blur-md border border-white/20 shadow-xs">
+                    {isYt ? (
                       <>
-                        <Youtube className="h-2.5 w-2.5 fill-white" /> YouTube
+                        <Youtube className="h-2.5 w-2.5 fill-rose-500 text-rose-500" />
+                        <span>Shorts</span>
                       </>
                     ) : (
                       <>
-                        <Instagram className="h-2.5 w-2.5" /> Instagram
+                        <Instagram className="h-2.5 w-2.5 text-pink-400" />
+                        <span>Reel</span>
                       </>
                     )}
                   </span>
-                  <span className="flex items-center gap-1 text-[9px] font-bold text-white bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/20">
-                    <Play className="h-2 w-2 fill-white" /> Play
+                  <span className="h-5 w-5 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 text-white/90 shadow-xs">
+                    <Play className="h-2.5 w-2.5 fill-white ml-0.2" />
                   </span>
                 </div>
 
-                {/* Play Circle Icon */}
+                {/* Elegant Centered Play Button */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/25 backdrop-blur-md text-white border border-white/40 group-hover:scale-110 transition-transform shadow-lg">
-                    <Play className="h-6 w-6 fill-white ml-0.5" />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/25 backdrop-blur-md text-white border border-white/40 shadow-lg group-hover:scale-110 group-active:scale-95 transition-all">
+                    <Play className="h-5 w-5 fill-white ml-0.5 drop-shadow-sm" />
                   </div>
                 </div>
 
-                {/* Bottom Caption Overlay */}
-                <div className="absolute bottom-3 inset-x-3 z-10 space-y-1 text-left">
-                  <p className="text-[11px] font-black text-white font-serif leading-snug line-clamp-2">
+                {/* Bottom Title & Details */}
+                <div className="absolute bottom-2.5 inset-x-2.5 z-10 space-y-0.5 text-left">
+                  <p className="text-[11px] font-bold text-white leading-snug line-clamp-2 drop-shadow-sm">
                     {item.title}
                   </p>
-                  <p className="text-[9px] font-medium text-slate-300 line-clamp-1 leading-tight">
-                    {item.caption}
+                  <p className="text-[9px] font-medium text-slate-300 line-clamp-1 leading-tight drop-shadow-xs">
+                    {displayCaption}
                   </p>
                 </div>
               </div>
@@ -381,36 +403,18 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
         </div>
       )}
 
-      {/* QUICK LAUNCH BAR */}
-      <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-orange-50 via-rose-50 to-pink-50 border border-orange-200/80 px-4 py-2.5 shadow-2xs">
-        <div className="flex flex-wrap items-center gap-2">
-          <a
-            href="https://www.youtube.com/@rpfoundationofficial"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-black text-rose-700 hover:underline"
-          >
-            <Youtube className="h-3.5 w-3.5 fill-rose-600" />
-            YouTube
-          </a>
-          <span className="text-slate-300">•</span>
-          <a
-            href="https://www.instagram.com/rpfoundationofficial/"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-black text-pink-700 hover:underline"
-          >
-            <Instagram className="h-3.5 w-3.5 text-pink-600" />
-            Instagram
-          </a>
+      {/* FOOTER HINT & FULLSCREEN ACTION */}
+      <div className="flex items-center justify-between pt-0.5 px-1 text-slate-500">
+        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+          <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+          <span>टैप करके फ़ुलस्क्रीन में देखें</span>
         </div>
-
         <button
           type="button"
           onClick={() => setActiveReelIndex(0)}
-          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#14213D] hover:underline cursor-pointer"
+          className="inline-flex items-center gap-1 text-xs font-bold text-[#D97706] hover:text-[#B45309] hover:underline cursor-pointer transition-colors"
         >
-          <span>Watch Fullscreen</span>
+          <span>फ़ुलस्क्रीन प्लेयर</span>
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
       </div>
