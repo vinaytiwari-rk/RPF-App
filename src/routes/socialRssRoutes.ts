@@ -345,6 +345,25 @@ async function getCmsSocialItems(): Promise<{ configured: boolean; items: Social
             isCms: true
           };
         });
+
+        // When Meta access is configured, replace Instagram embed-only entries with their
+        // direct media URL where the permalink matches. This keeps Reels inside the app
+        // and avoids exposing Instagram's Like/Share/Profile chrome.
+        try {
+          const meta = await getMetaGraphItems();
+          if (meta.instagram.length > 0) {
+            const byLink = new Map(meta.instagram.map((item) => [String(item.link || "").replace(/\/$/, ""), item]));
+            for (const item of mapped) {
+              if (item.platform !== "instagram") continue;
+              const match = byLink.get(String(item.link || "").replace(/\/$/, ""));
+              if (match?.videoUrl) {
+                item.videoUrl = match.videoUrl;
+                item.thumbnailUrl = match.thumbnailUrl || item.thumbnailUrl;
+              }
+            }
+          }
+        } catch {}
+
         return { configured: true, items: mapped };
       }
     }
