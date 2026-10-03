@@ -353,7 +353,10 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* 2. THOUGHT OF THE DAY (IMMEDIATELY AFTER GREETING) */}
+        {/* 2. LIVE VERIFIED MARKET & PANCHANG SECTION (Directly below Greeting & Explore community services) */}
+        <LiveVerifiedMarketSection />
+
+        {/* 3. THOUGHT OF THE DAY */}
         <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3 shadow-2xs">
           <div className="flex items-center gap-1.5 text-[#D97706]">
             <Quote className="h-3.5 w-3.5" />
@@ -369,7 +372,7 @@ export default function Home() {
           )}
         </section>
 
-        {/* 3. LIVE RSS NEWS MARQUEES: STRICTLY TWO (2) MARQUEES */}
+        {/* 4. LIVE RSS NEWS MARQUEES: STRICTLY TWO (2) MARQUEES */}
         {/* TOP MARQUEE (1/2): National & International News (DARK SAFFRON) */}
         {marquee1.length > 0 && (
           <MarqueeTrack
@@ -391,9 +394,6 @@ export default function Home() {
             onClick={() => navigate("/news")}
           />
         )}
-
-        {/* 4. LIVE VERIFIED MARKET & PANCHANG SECTION */}
-        <LiveVerifiedMarketSection />
 
         {/* 5. CAROUSEL: RP FOUNDATION AT WORK (TRANSPARENT TEXT BACKGROUND) */}
         <section className="pt-1">

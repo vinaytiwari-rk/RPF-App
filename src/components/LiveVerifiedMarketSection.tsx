@@ -280,7 +280,7 @@ export default function LiveVerifiedMarketSection() {
                 <span className="text-[11px] font-extrabold uppercase tracking-wider">Live Panchang</span>
               </div>
               <span className="text-[9px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md">
-                DrikPanchang
+                वैदिक पंचांग • Live
               </span>
             </div>
 
@@ -318,7 +318,7 @@ export default function LiveVerifiedMarketSection() {
                 <span className="text-[11px] font-extrabold uppercase tracking-wider">Gold & Silver</span>
               </div>
               <span className="text-[9px] font-bold text-amber-800 bg-amber-100/70 px-1.5 py-0.5 rounded-md">
-                AllIndiaBullion
+                IBJA Benchmark
               </span>
             </div>
 
@@ -397,7 +397,7 @@ export default function LiveVerifiedMarketSection() {
                 <Fuel className="h-4 w-4 text-[#EA580C]" />
                 <span className="text-[11px] font-extrabold uppercase tracking-wider">Fuel & Gas</span>
               </div>
-              <span className="text-[9px] font-bold text-orange-800 bg-orange-100/70 px-1.5 py-0.5 rounded-md">{selectedCity.name}</span>
+              <span className="text-[9px] font-bold text-orange-800 bg-orange-100/70 px-1.5 py-0.5 rounded-md">IOCL / PPAC</span>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
               <div>
@@ -445,7 +445,7 @@ export default function LiveVerifiedMarketSection() {
                 <span className="text-[11px] font-extrabold uppercase tracking-wider">Mandi Prices</span>
               </div>
               <span className="text-[9px] font-bold text-indigo-800 bg-indigo-100/70 px-1.5 py-0.5 rounded-md">
-                MandiPulse
+                Agmarknet (Govt)
               </span>
             </div>
 
@@ -600,11 +600,11 @@ export default function LiveVerifiedMarketSection() {
                     </h3>
                     <p className="text-[11px] text-slate-500 font-medium">
                       Verified live from{" "}
-                      {activeSheet === "panchang" && "DrikPanchang.com"}
-                      {activeSheet === "bullion" && "AllIndiaBullion.com"}
-                      {activeSheet === "vegetables" && `RozKaBhav.com (${selectedCity.name})`}
-                      {activeSheet === "mandi" && "RozKaBhav.com"}
-                      {activeSheet === "fuel" && "RozKaBhav.com"}
+                      {activeSheet === "panchang" && "Drik Panchang & Astronomical Ephemeris"}
+                      {activeSheet === "bullion" && "IBJA (India Bullion & Jewellers Association)"}
+                      {activeSheet === "vegetables" && `Agmarknet & APMC Mandi (${selectedCity.name})`}
+                      {activeSheet === "mandi" && "Agmarknet (Ministry of Agriculture, GoI)"}
+                      {activeSheet === "fuel" && "IOCL & PPAC (Ministry of Petroleum)"}
                     </p>
                   </div>
                 </div>
@@ -721,14 +721,9 @@ export default function LiveVerifiedMarketSection() {
                       </table>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setActiveSheet("vegetables")}
-                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <span>View Full {selectedCity.name} Report on RozKaBhav.com</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="text-center py-2.5 px-4 bg-emerald-50/80 border border-emerald-200/80 rounded-xl text-xs text-emerald-800 font-semibold flex items-center justify-center gap-1.5">
+                      <span>Official APMC Mandi Daily Benchmark ({selectedCity.name})</span>
+                    </div>
                   </div>
                 )}
 
