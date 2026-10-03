@@ -214,6 +214,13 @@ export default function AdminInstagram() {
     setPosts((current) => current.map((item, i) => (i === index ? { ...item, ...value } : item)));
   };
 
+  const toggleActive = (index: number) => {
+    setPosts((current) => current.map((post, i) => (i === index ? { ...post, active: post.active === false } : post)));
+    const target = posts[index];
+    const nextState = target ? target.active === false : true;
+    toast.success(nextState ? "Reel activated!" : "Reel hidden from app!");
+  };
+
   const addPost = () => {
     const newIndex = posts.length;
     setPosts((current) => [...current, { ...emptyPost(), order: newIndex }]);
@@ -257,7 +264,7 @@ export default function AdminInstagram() {
       const id = String(p.id || "").toLowerCase();
       const title = String(p.title || "").toLowerCase();
       const url = String(p.url || "").toLowerCase();
-      if (p.platform === "x" || url.includes("twitter.com") || url.includes("x.com") || id.startsWith("x-")) return false;
+      if ((p.platform as string) === "x" || url.includes("twitter.com") || url.includes("x.com") || id.startsWith("x-")) return false;
       if (id === "ig-1" || id === "ig-2" || id === "ig-3" || id.includes("sample")) return false;
       if (title.includes("healthcare & medical drive") || title.includes("card distribution camp") || title.includes("sports support") || title.includes("blood donation") || title.includes("announcement (@rpfoundation15)")) return false;
       return true;
