@@ -61,15 +61,7 @@ export default function InstagramReelsPage() {
             platform
           };
         })
-        .sort((a, b) => {
-          const rank = (item: ReelItem) =>
-            item.platform === "youtube"
-              ? 0
-              : item.platform === "instagram"
-              ? 1
-              : 2;
-          return rank(a) - rank(b);
-        });
+        .sort(() => Math.random() - 0.5);
 
     axios
       .get("/api/public/social-feed")
