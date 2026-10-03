@@ -112,7 +112,6 @@ export default function ReelsVerticalViewer({
         style={{ scrollBehavior: "smooth" }}
       >
         {reels.map((reel, idx) => {
-          const isLiked = likedMap[reel.id];
           const isActive = idx === currentIndex;
           const ytId = reel.videoId || extractYouTubeId(reel.videoUrl) || extractYouTubeId(reel.url);
           const igShortcode = extractInstagramShortcode(reel.url) || extractInstagramShortcode(reel.videoUrl);
