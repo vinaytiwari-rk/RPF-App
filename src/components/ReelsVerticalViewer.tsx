@@ -1,8 +1,6 @@
 import React, { useState, useRef } from "react";
 import {
   X,
-  Volume2,
-  VolumeX,
   ChevronDown,
   Sparkles,
 } from "lucide-react";
@@ -53,9 +51,6 @@ export default function ReelsVerticalViewer({
   onClose,
 }: ReelsVerticalViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  // Default audio state: ON at full volume.
-  // Browsers may still block audible autoplay until the user interacts with the page.
-  const [isMuted, setIsMuted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = () => {
@@ -89,12 +84,6 @@ export default function ReelsVerticalViewer({
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsMuted((m) => !m)}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/20 active:scale-95 cursor-pointer"
-          >
-            {isMuted ? <VolumeX className="h-4.5 w-4.5" /> : <Volume2 className="h-4.5 w-4.5" />}
-          </button>
           <button
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/20 active:scale-95 cursor-pointer"
@@ -134,7 +123,7 @@ export default function ReelsVerticalViewer({
               {isActive && ytId ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black">
                   <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=0&playsinline=1&modestbranding=1&rel=0&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
+                    src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=0&playsinline=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
                     title={reel.title}
                     className="w-full h-full max-w-lg aspect-[9/16] border-0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -159,7 +148,7 @@ export default function ReelsVerticalViewer({
                   autoPlay
                   loop
                   playsInline
-                  muted={isMuted}
+                  muted={false}
                   volume={1}
                   className="absolute inset-0 h-full w-full object-contain bg-black"
                 />
