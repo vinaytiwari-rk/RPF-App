@@ -28,6 +28,7 @@ interface SocialRssItem {
   videoId?: string;
   videoUrl?: string;
   embedUrl?: string;
+  isCms?: boolean;
 }
 
 const YOUTUBE_CHANNEL_ID = "UCzzICeVSv2b9qGlYWWxhNIw";
@@ -289,69 +290,76 @@ async function getMetaGraphItems(): Promise<{ instagram: SocialRssItem[] }> {
   }
 }
 
-// 2. Fetch Instagram Items (From Meta Graph, CMS, or Fallback)
+// 2. Fetch Instagram Items (From Admin CMS, Meta Graph, or Authentic Fallback)
 async function getInstagramItems(): Promise<SocialRssItem[]> {
+  // 1. Check Admin CMS first (direct source of truth saved via Admin Control Center)
+  try {
+    const cmsQuery = pool.query('SELECT "founderMessageEn" FROM settings WHERE id = $1 LIMIT 1', ["cms_data"]);
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("DB timeout")), 3000));
+    const cmsRes: any = await Promise.race([cmsQuery, timeout]);
+
+    if (cmsRes?.rows?.length > 0 && cmsRes.rows[0].founderMessageEn) {
+      const raw = cmsRes.rows[0].founderMessageEn;
+      const cms = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (Array.isArray(cms?.instagramPosts) && cms.instagramPosts.length > 0) {
+        const activePosts = cms.instagramPosts.filter((post: any) => post && post.active !== false);
+        if (activePosts.length > 0) {
+          return activePosts.map((post: any, idx: number) => {
+            const postUrl = post.url || post.videoUrl || "https://www.instagram.com/rpfoundationofficial/";
+            const igMatch = String(postUrl).match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+            const shortcode = igMatch ? igMatch[1] : "";
+            const ytMatch = String(postUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+            const videoId = post.videoId || (ytMatch ? ytMatch[1] : undefined);
+            const xMatch = String(postUrl).match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
+            const tweetId = post.tweetId || (xMatch ? xMatch[1] : undefined);
+
+            const platform = post.platform || (videoId ? "youtube" : tweetId ? "x" : "instagram");
+            const embedUrl = post.embedUrl || (
+              videoId
+                ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`
+                : tweetId
+                ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
+                : shortcode
+                ? `https://www.instagram.com/p/${shortcode}/embed/captioned/`
+                : undefined
+            );
+
+            const defaultThumb = videoId
+              ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+              : shortcode
+              ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l`
+              : "/assets/founder.png";
+
+            return {
+              id: post.id || `cms-media-${idx}`,
+              platform,
+              title: post.title || "RP Foundation Media Update",
+              link: postUrl,
+              description: post.caption || post.title || "Official update from RP Foundation.",
+              pubDate: post.pubDate || new Date(Date.now() - idx * 60000).toUTCString(),
+              author: platform === "youtube" ? "RP Foundation" : platform === "x" ? "@rpfoundation15" : "@rpfoundationofficial",
+              thumbnailUrl: post.thumbnail || post.thumbnailUrl || defaultThumb,
+              category: post.category || (platform === "youtube" ? "Video" : platform === "x" ? "Press" : "Reels"),
+              videoUrl: post.videoUrl || undefined,
+              videoId,
+              embedUrl,
+              isCms: true
+            };
+          });
+        }
+      }
+    }
+  } catch (err: any) {
+    // Graceful fallback without blocking
+  }
+
+  // 2. Try Meta Graph API if available
   try {
     const meta = await getMetaGraphItems();
     if (meta.instagram.length > 0) {
       return meta.instagram;
     }
   } catch {}
-
-  try {
-    const cmsQuery = pool.query("SELECT data FROM cms_data WHERE key = 'app_cms' LIMIT 1");
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("DB timeout")), 1500));
-    const cmsRes: any = await Promise.race([cmsQuery, timeout]);
-
-    if (cmsRes?.rows?.length > 0) {
-      const cms = typeof cmsRes.rows[0].data === "string" ? JSON.parse(cmsRes.rows[0].data) : cmsRes.rows[0].data;
-      if (Array.isArray(cms?.instagramPosts) && cms.instagramPosts.length > 0) {
-        return cms.instagramPosts.map((post: any, idx: number) => {
-          const postUrl = post.url || post.videoUrl || "https://www.instagram.com/rpfoundationofficial/";
-          const igMatch = String(postUrl).match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
-          const shortcode = igMatch ? igMatch[1] : "";
-          const ytMatch = String(postUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
-          const videoId = post.videoId || (ytMatch ? ytMatch[1] : undefined);
-          const xMatch = String(postUrl).match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
-          const tweetId = xMatch ? xMatch[1] : undefined;
-
-          const platform = post.platform || (videoId ? "youtube" : tweetId ? "x" : "instagram");
-          const embedUrl = post.embedUrl || (
-            videoId
-              ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`
-              : tweetId
-              ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
-              : shortcode
-              ? `https://www.instagram.com/p/${shortcode}/embed/captioned/`
-              : undefined
-          );
-
-          const defaultThumb = videoId
-            ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
-            : shortcode
-            ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l`
-            : "/assets/founder.png";
-
-          return {
-            id: post.id || `cms-media-${idx}`,
-            platform,
-            title: post.title || "RP Foundation Media Update",
-            link: postUrl,
-            description: post.caption || post.title || "Official update from RP Foundation.",
-            pubDate: new Date(Date.now() - idx * 86400000).toUTCString(),
-            author: platform === "youtube" ? "RP Foundation" : platform === "x" ? "@rpfoundation15" : "@rpfoundationofficial",
-            thumbnailUrl: post.thumbnail || post.thumbnailUrl || defaultThumb,
-            category: post.category || (platform === "youtube" ? "Video" : platform === "x" ? "Press" : "Reels"),
-            videoUrl: post.videoUrl || undefined,
-            videoId,
-            embedUrl
-          };
-        });
-      }
-    }
-  } catch (err: any) {
-    // Graceful fallback without blocking
-  }
 
   // Authentic fallback items for RP Foundation Instagram with real local assets
   return [
@@ -529,10 +537,15 @@ router.get("/api/public/social-feed", async (_req, res) => {
   try {
     const [yt, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
     const x = getXItems();
+    const cmsItems = ig.filter((item: any) => item.isCms);
+    const nonCmsIg = ig.filter((item: any) => !item.isCms);
 
-    const all = [...yt.items, ...ig, ...x].sort(
+    const rssItems = [...yt.items, ...nonCmsIg, ...x].sort(
       (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
     );
+
+    // Prioritize admin-curated CMS items at the top in their exact saved order, followed by other channel feeds
+    const all = cmsItems.length > 0 ? [...cmsItems, ...rssItems] : rssItems;
 
     return res.json({ success: true, count: all.length, data: all });
   } catch (err: any) {

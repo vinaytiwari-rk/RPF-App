@@ -178,21 +178,23 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
         if (!alive) return;
         if (res.data?.success && Array.isArray(res.data?.data) && res.data.data.length > 0) {
           const items: ReelItem[] = res.data.data.map((item: any, idx: number) => {
-            const videoId = item.videoId || (item.link?.includes("watch?v=") ? item.link.split("watch?v=")[1]?.split("&")[0] : undefined);
+            const rawUrl = item.link || item.url || "";
+            const ytMatch = String(rawUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+            const videoId = item.videoId || (ytMatch ? ytMatch[1] : undefined);
             const thumb = item.thumbnailUrl || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "/assets/founder.png");
 
             return {
               id: item.id || `social-${idx}`,
-              url: item.link || "https://www.youtube.com/@rpfoundationofficial",
+              url: rawUrl || "https://www.youtube.com/@rpfoundationofficial",
               videoId,
               videoUrl: item.videoUrl,
               embedUrl: item.embedUrl,
               thumbnailUrl: thumb,
               title: item.title || "RP Foundation Update",
-              caption: item.description || "Official update from RP Foundation.",
+              caption: item.description || item.caption || "Official update from RP Foundation.",
               likes: item.platform === "youtube" ? "Live Video" : item.platform === "instagram" ? "Official Post" : "Verified",
-              author: item.author || "RP Foundation",
-              platform: item.platform
+              author: item.author || (item.platform === "youtube" ? "RP Foundation" : item.platform === "x" ? "@rpfoundation15" : "@rpfoundationofficial"),
+              platform: item.platform || (videoId ? "youtube" : "instagram")
             };
           });
 
@@ -202,7 +204,40 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
         }
       })
       .catch((err) => {
-        console.warn("Could not load live social feed:", err);
+        console.warn("Could not load live social feed, trying CMS directly:", err);
+        axios
+          .get("/api/cms")
+          .then((cmsRes) => {
+            if (!alive) return;
+            const list = cmsRes.data?.cms?.instagramPosts;
+            if (Array.isArray(list) && list.length > 0) {
+              const activePosts = list.filter((p: any) => p && p.active !== false);
+              if (activePosts.length > 0) {
+                const cmsItems: ReelItem[] = activePosts.map((post: any, idx: number) => {
+                  const pUrl = post.url || post.videoUrl || "";
+                  const ytMatch = String(pUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+                  const vId = post.videoId || (ytMatch ? ytMatch[1] : undefined);
+                  const pThumb = post.thumbnail || post.thumbnailUrl || (vId ? `https://i.ytimg.com/vi/${vId}/hqdefault.jpg` : "/assets/founder.png");
+                  const platform = post.platform || (vId ? "youtube" : "instagram");
+                  return {
+                    id: post.id || `cms-fallback-${idx}`,
+                    url: pUrl,
+                    videoId: vId,
+                    videoUrl: post.videoUrl,
+                    embedUrl: post.embedUrl,
+                    thumbnailUrl: pThumb,
+                    title: post.title || "RP Foundation Update",
+                    caption: post.caption || post.title || "Official update from RP Foundation.",
+                    likes: platform === "youtube" ? "Live Video" : "Official Post",
+                    author: platform === "youtube" ? "RP Foundation" : "@rpfoundationofficial",
+                    platform
+                  };
+                });
+                setReels(cmsItems);
+              }
+            }
+          })
+          .catch(() => {});
       })
       .finally(() => {
         if (alive) setLoading(false);

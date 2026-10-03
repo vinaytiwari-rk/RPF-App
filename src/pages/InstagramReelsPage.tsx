@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { ArrowLeft, ChevronDown, ChevronUp, Heart, Instagram, Share2, ExternalLink, Play, Film, Sparkles } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Heart, Instagram, Share2, Play, Film, Sparkles, Youtube, Volume2, VolumeX } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import InAppWebView from "../components/InAppWebView";
 
 export interface ReelItem {
   id: string;
@@ -10,6 +11,9 @@ export interface ReelItem {
   url: string;
   videoUrl?: string;
   embedUrl?: string;
+  videoId?: string;
+  tweetId?: string;
+  platform?: "instagram" | "youtube" | "x";
   caption: string;
   category: string;
   thumbnail?: string;
@@ -59,31 +63,84 @@ export default function InstagramReelsPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
+  const [inAppUrl, setInAppUrl] = useState<string | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
   const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
+    let alive = true;
     axios
       .get("/api/cms")
       .then((res) => {
+        if (!alive) return;
         const list = res.data?.cms?.instagramPosts;
         if (Array.isArray(list) && list.length > 0) {
           const activeOnly = list
-            .filter((item: any) => item.active !== false)
-            .map((item: any, idx: number) => ({
-              id: item.id || `cms-${idx}`,
-              title: item.title || "RP Foundation Reel",
-              url: item.url || "https://www.instagram.com/therpfoundation/",
-              videoUrl: item.videoUrl,
-              caption: item.caption || item.title || "RP Foundation Social Initiative",
-              category: item.category || "General",
-              thumbnail: item.thumbnail || defaultReels[idx % defaultReels.length].thumbnail
-            }));
+            .filter((item: any) => item && item.active !== false)
+            .map((item: any, idx: number) => {
+              const postUrl = item.url || item.videoUrl || "https://www.instagram.com/rpfoundationofficial/";
+              const ytMatch = String(postUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+              const videoId = item.videoId || (ytMatch ? ytMatch[1] : undefined);
+              const xMatch = String(postUrl).match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
+              const tweetId = item.tweetId || (xMatch ? xMatch[1] : undefined);
+              const igMatch = String(postUrl).match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+              const shortcode = igMatch ? igMatch[1] : undefined;
+
+              const platform = item.platform || (videoId ? "youtube" : tweetId ? "x" : "instagram");
+              const embedUrl = item.embedUrl || (
+                videoId
+                  ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`
+                  : tweetId
+                  ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
+                  : shortcode
+                  ? `https://www.instagram.com/p/${shortcode}/embed/captioned/`
+                  : undefined
+              );
+
+              return {
+                id: item.id || `cms-${idx}`,
+                title: item.title || "RP Foundation Reel",
+                url: postUrl,
+                videoUrl: item.videoUrl,
+                embedUrl,
+                videoId,
+                tweetId,
+                platform,
+                caption: item.caption || item.title || "RP Foundation Social Initiative",
+                category: item.category || (platform === "youtube" ? "Healthcare" : platform === "x" ? "Leadership" : "Empowerment"),
+                thumbnail: item.thumbnail || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : defaultReels[idx % defaultReels.length].thumbnail)
+              };
+            });
           if (activeOnly.length > 0) {
             setReels(activeOnly);
+            return;
           }
         }
+        // Fallback to /api/public/social-feed if no CMS posts
+        return axios.get("/api/public/social-feed").then((feedRes) => {
+          if (!alive) return;
+          if (feedRes.data?.success && Array.isArray(feedRes.data.data) && feedRes.data.data.length > 0) {
+            const feedItems = feedRes.data.data.map((item: any, idx: number) => ({
+              id: item.id || `feed-${idx}`,
+              title: item.title || "RP Foundation Update",
+              url: item.link || "https://www.youtube.com/@rpfoundationofficial",
+              videoUrl: item.videoUrl,
+              embedUrl: item.embedUrl,
+              videoId: item.videoId,
+              platform: item.platform,
+              caption: item.description || "Official update from RP Foundation.",
+              category: item.category || "General",
+              thumbnail: item.thumbnailUrl || "/assets/founder.png"
+            }));
+            setReels(feedItems);
+          }
+        });
       })
       .catch(() => {});
+
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const categories = ["all", "Healthcare", "Empowerment", "Leadership", "Ground Action"];
@@ -93,6 +150,9 @@ export default function InstagramReelsPage() {
     : reels.filter((r) => r.category.toLowerCase() === selectedCategory.toLowerCase());
 
   const currentReel = filteredReels[currentIndex] || filteredReels[0] || reels[0];
+  const ytMatch = String(currentReel?.url || "").match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+  const ytId = currentReel?.videoId || (ytMatch ? ytMatch[1] : undefined);
+  const isDirectVideo = Boolean(currentReel?.videoUrl && !currentReel.videoUrl.includes("instagram.com"));
 
   const goNext = () => {
     if (currentIndex < filteredReels.length - 1) {
@@ -154,12 +214,24 @@ export default function InstagramReelsPage() {
           </span>
         </div>
 
-        <button
-          onClick={() => shareReel(currentReel)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md text-white hover:bg-white/20 active:scale-95 transition-all"
-        >
-          <Share2 className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          {isDirectVideo && (
+            <button
+              type="button"
+              onClick={() => setIsMuted((m) => !m)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+            >
+              {isMuted ? <VolumeX className="h-4.5 w-4.5" /> : <Volume2 className="h-4.5 w-4.5" />}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => shareReel(currentReel)}
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+          >
+            <Share2 className="h-5 w-5" />
+          </button>
+        </div>
       </header>
 
       {/* Category Pills */}
@@ -184,7 +256,18 @@ export default function InstagramReelsPage() {
 
       {/* Reel Card Viewport */}
       <div className="relative flex-1 w-full h-full flex items-center justify-center bg-slate-900 overflow-hidden">
-        {currentReel?.videoUrl ? (
+        {ytId ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-black">
+            <iframe
+              key={ytId}
+              src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`}
+              title={currentReel?.title}
+              className="w-full h-full max-w-md aspect-[9/16] border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        ) : isDirectVideo ? (
           <video
             key={currentReel.id + currentReel.videoUrl}
             src={currentReel.videoUrl}
@@ -193,23 +276,38 @@ export default function InstagramReelsPage() {
             autoPlay
             loop
             playsInline
+            muted={isMuted}
             className="absolute inset-0 h-full w-full object-contain bg-black"
           />
+        ) : currentReel?.embedUrl ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-2 pt-16 pb-24">
+            <iframe
+              key={currentReel.id}
+              src={currentReel.embedUrl}
+              title={currentReel?.title}
+              className="w-full h-full max-w-sm aspect-[9/16] border-0 rounded-2xl bg-white shadow-2xl overflow-hidden"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              scrolling="no"
+            />
+          </div>
         ) : (
           <>
             <img
               src={currentReel?.thumbnail || "/assets/founder.png"}
               alt={currentReel?.title}
               className="absolute inset-0 h-full w-full object-cover opacity-80"
+              onError={(e) => {
+                e.currentTarget.src = "/assets/founder.png";
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-            {/* Play Icon / Open Trigger */}
-            <a
-              href={currentReel?.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="z-20 flex flex-col items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-md p-6 border border-white/10 hover:scale-105 transition-all shadow-xl text-center max-w-xs"
+            {/* Play Trigger / In-App Modal Open */}
+            <button
+              type="button"
+              onClick={() => setInAppUrl(currentReel?.url)}
+              className="z-20 flex flex-col items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-md p-6 border border-white/10 hover:scale-105 active:scale-95 transition-all shadow-xl text-center max-w-xs cursor-pointer"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white shadow-lg">
                 <Play className="h-7 w-7 fill-current ml-1" />
@@ -219,10 +317,10 @@ export default function InstagramReelsPage() {
                   {currentReel?.title}
                 </p>
                 <p className="mt-1 text-[11px] text-pink-300 font-semibold inline-flex items-center gap-1">
-                  Watch on Instagram <ExternalLink className="h-3.5 w-3.5" />
+                  Tap to Watch In-App
                 </p>
               </div>
-            </a>
+            </button>
           </>
         )}
       </div>
@@ -258,17 +356,22 @@ export default function InstagramReelsPage() {
               </span>
             </button>
 
-            <a
-              href={currentReel?.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-1 text-white"
+            <button
+              type="button"
+              onClick={() => setInAppUrl(currentReel?.url)}
+              className="flex flex-col items-center gap-1 text-white hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-pink-600 text-white shadow-md">
-                <Instagram className="h-6 w-6" />
+                {currentReel?.platform === "youtube" ? (
+                  <Youtube className="h-5 w-5 fill-white" />
+                ) : currentReel?.platform === "x" ? (
+                  <span className="font-black text-sm">𝕏</span>
+                ) : (
+                  <Instagram className="h-5 w-5" />
+                )}
               </div>
-              <span className="text-[10px] font-bold">Open</span>
-            </a>
+              <span className="text-[10px] font-bold">Watch</span>
+            </button>
           </div>
         </div>
 
@@ -295,6 +398,15 @@ export default function InstagramReelsPage() {
           </div>
         </div>
       </div>
+
+      {/* In-App WebView Modal for 100% Contained Playback */}
+      {inAppUrl && (
+        <InAppWebView
+          url={inAppUrl}
+          title={currentReel?.title || "RP Foundation Media"}
+          onClose={() => setInAppUrl(null)}
+        />
+      )}
     </main>
   );
 }
