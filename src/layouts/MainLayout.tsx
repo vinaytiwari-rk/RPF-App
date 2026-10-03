@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Bell, Search, RotateCw, Home, Activity, HeartHandshake } from "lucide-react";
+import { ArrowLeft, User, Compass, Bell, Search, RotateCw, Home, Activity, Clapperboard } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
@@ -49,7 +49,7 @@ export default function MainLayout() {
     { path: "/", label: "Home", icon: Home },
     { path: "/services", label: "Explore", icon: Compass },
     { path: "/activity", label: "Activity", icon: Activity },
-    { path: "/impact", label: "Impact", icon: HeartHandshake },
+    { path: "/reels", label: "Shorts & Reels", icon: Clapperboard },
     { path: "/profile", label: "Profile", icon: User }
   ];
 
