@@ -16,7 +16,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/W3lZc8dLDAU/hqdefault.jpg",
     title: "विश्व हिन्दू परिषद के पूर्व अंतरराष्ट्रीय अध्यक्ष श्रद्धेय अशोक सिंघल जी की जयंती",
     caption: "श्रद्धेय अशोक सिंघल जी की पावन जयंती पर आर.पी. फाउंडेशन का कोटि-कोटि नमन।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -27,7 +26,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/o1BWTKwe1ow/hqdefault.jpg",
     title: "देहदान, महादान | RP Foundation प्रेरणादायक संदेश",
     caption: "मानव कल्याण हेतु देहदान व अंगदान का महान संकल्प।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -38,7 +36,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/o0WGrCyBzOs/hqdefault.jpg",
     title: "राष्ट्रीय स्वयंसेवक संघ के सरसंघचालक डॉ. मोहन भागवत जी से आत्मीय भेंट",
     caption: "पूज्य सरसंघचालक डॉ. मोहन भागवत जी से समाज सेवा एवं राष्ट्र निर्माण पर पावन मार्गदर्शन।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -49,7 +46,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/JOQOorTNSiQ/hqdefault.jpg",
     title: "पीपुल्स कैंपस, भोपाल में विराजमान विघ्नहर्ता श्री गणेश जी की महाआरती",
     caption: "पीपुल्स कैंपस, भोपाल में विघ्नहर्ता मंगलकर्ता श्री गणेश जी की दिव्य महाआरती।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -60,7 +56,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/aY7tCqTHIdE/hqdefault.jpg",
     title: "स्वस्थ समाज, मजबूत समाज की पहली पहचान है | RP Foundation",
     caption: "निःशुल्क स्वास्थ्य शिविर एवं जन कल्याणकारी चिकित्सा सेवा अभियान।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -71,7 +66,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/6FStdeG4FAw/hqdefault.jpg",
     title: "जहाँ हुनर को मिला मंच… और मेहनत को मिली पहचान",
     caption: "प्रतिभावान युवाओं एवं नागरिकों को सम्मान व स्वावलंबन का मंच।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -82,7 +76,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/cmH_37saJmY/hqdefault.jpg",
     title: "कैंसर से जंग… RP Foundation बना सहारा",
     caption: "गंभीर बीमारी से पीड़ित जरूरतमंदों के इलाज में आर.पी. फाउंडेशन का संबल।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -93,7 +86,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/Gx70OKHXylw/hqdefault.jpg",
     title: "सेवा वही, जो किसी के चेहरे पर मुस्कान लाए | #JanSewaCard",
     caption: "जन सेवा कार्ड एवं नागरिक सहायता केंद्र के जरिए परिवारों को सीधे राहत।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -104,7 +96,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/IIvLOFc8iLM/hqdefault.jpg",
     title: "राष्ट्रीय नारी सशक्तिकरण संघ द्वारा आयोजित National Icon Award-2026",
     caption: "महिला सशक्तिकरण एवं सामाजिक सेवा हेतु National Icon Award 2026।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -115,7 +106,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/SUQQ919wFs0/hqdefault.jpg",
     title: "Youth National Goalball Championship 2026 में सहभागिता हेतु सहयोग",
     caption: "RP Foundation द्वारा दिव्यांग खिलाड़ियों को राष्ट्रीय प्रतियोगिता हेतु सहयोग प्रदान किया गया।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -126,7 +116,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/k4Id3sdnK08/hqdefault.jpg",
     title: "मानसरोवर धाम स्थित प्रसिद्ध महादेव मंदिर दर्शन",
     caption: "आर.पी. फाउंडेशन द्वारा श्रद्धालुओं को महादेव मंदिर के दर्शन कराए गए।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -137,7 +126,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://i.ytimg.com/vi/zyfJ_wpX9hY/hqdefault.jpg",
     title: "भोपाल स्थित गुफा मंदिर में प्रसाद वितरण सेवा",
     caption: "आर.पी. फाउंडेशन द्वारा गुफा मंदिर में प्रसाद वितरण सेवा का भव्य आयोजन।",
-    likes: "Live Video",
     author: "RP Foundation",
     platform: "youtube" as const
   },
@@ -147,7 +135,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     thumbnailUrl: "https://images.weserv.nl/?url=instagram.com/p/Dd6j8dOMRHi/media/?size=l",
     title: "मुख्यमंत्री निवास कार्यालय में माननीय मुख्यमंत्री डॉ. मोहन यादव जी से भेंट",
     caption: "आर पी फाउंडेशन के संस्थापक तथा पीपुल्स ग्रुप के उपाध्यक्ष एवं प्रबंध निदेशक श्री रोहित पंडित जी ने मध्यप्रदेश के माननीय मुख्यमंत्री डॉ. मोहन यादव जी से भेंट की।",
-    likes: "Official Post",
     author: "@rpfoundationofficial",
     platform: "instagram" as const,
     embedUrl: "https://www.instagram.com/p/Dd6j8dOMRHi/embed/captioned/"
@@ -182,7 +169,6 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
               thumbnailUrl: thumb,
               title: item.title || "RP Foundation Update",
               caption: item.description || item.caption || "Official update from RP Foundation.",
-              likes: item.platform === "youtube" ? "Live Video" : item.platform === "instagram" ? "Official Post" : "Verified",
               author: item.author || (item.platform === "youtube" ? "RP Foundation" : item.platform === "x" ? "@rpfoundation15" : "@rpfoundationofficial"),
               platform: item.platform || (videoId ? "youtube" : "instagram")
             };
@@ -216,7 +202,6 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
                   thumbnailUrl: pThumb,
                   title: post.title || "RP Foundation Update",
                   caption: post.caption || post.title || "Official update from RP Foundation.",
-                  likes: platform === "youtube" ? "Live Video" : "Official Post",
                   author: platform === "youtube" ? "RP Foundation" : "@rpfoundationofficial",
                   platform
                 };
