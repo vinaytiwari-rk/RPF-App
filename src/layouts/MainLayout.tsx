@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Bell, Search, RotateCw, Home, Activity, Clapperboard, HeartHandshake } from "lucide-react";
+import { ArrowLeft, User, Bell, Search, RotateCw, Home, Activity, Clapperboard, HeartHandshake } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
@@ -43,13 +43,12 @@ export default function MainLayout() {
     navigate(p);
   };
 
-  const roots = ["/", "/services", "/impact", "/activity", "/profile"];
+  const roots = ["/", "/impact", "/activity", "/profile"];
   const root = roots.includes(location.pathname);
   const items = [
     { path: "/", label: "Home", icon: Home },
     { path: "/impact", label: "Impact", icon: HeartHandshake },
     { path: "/reels", label: "Reels", icon: Clapperboard },
-    { path: "/services", label: "Explore", icon: Compass },
     { path: "/activity", label: "Activity", icon: Activity },
     { path: "/profile", label: "Profile", icon: User }
   ];
@@ -118,7 +117,7 @@ export default function MainLayout() {
 
       {/* Android Native Standard Bottom Navigation */}
       <nav className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-3xl border-t border-orange-200/50 bg-[#FFF7E8]/95 px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_20px_rgba(15,49,87,.08)] backdrop-blur-xl">
-        <div className="grid grid-cols-6 items-stretch">
+        <div className="grid grid-cols-5 items-stretch">
           {items.map(({ path, label, icon: Icon }) => {
             const active = location.pathname === path;
             return (
