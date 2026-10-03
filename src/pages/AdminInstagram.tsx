@@ -163,20 +163,20 @@ const defaultInstagramPosts: InstagramPost[] = [
     url: "https://www.instagram.com/p/Dd6j8dOMRHi/",
     caption: "आर पी फाउंडेशन के संस्थापक तथा पीपुल्स ग्रुप के उपाध्यक्ष एवं प्रबंध निदेशक श्री रोहित पंडित जी ने मध्यप्रदेश के माननीय मुख्यमंत्री डॉ. मोहन यादव जी से भेंट की।",
     category: "Leadership",
+    platform: "instagram",
     active: true,
     order: 0
-  },
-  { id: "ig-1", title: "RP Foundation Healthcare & Medical Drive", url: "https://www.instagram.com/p/C3x9sample1/", caption: "Free health camp & doctor consultations for local families in rural areas.", category: "Healthcare", active: true, order: 1 },
-  { id: "ig-2", title: "Jan Seva Card Distribution Camp", url: "https://www.instagram.com/reel/C3x9sample2/", caption: "Empowering citizens with digital service identity and community support.", category: "Jan Seva", active: true, order: 2 }
+  }
 ];
 
 const emptyPost = (): InstagramPost => ({
-  id: `ig-${Date.now()}`,
+  id: `social-${Date.now()}`,
   title: "",
   url: "https://www.instagram.com/rpfoundationofficial/",
   videoUrl: "",
   caption: "",
   category: "Social Work",
+  platform: "instagram",
   active: true
 });
 
@@ -186,6 +186,7 @@ export default function AdminInstagram() {
   const [cms, setCms] = useState<any>(null);
   const [posts, setPosts] = useState<InstagramPost[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
+  const [filterPlatform, setFilterPlatform] = useState<"all" | "youtube" | "instagram" | "x">("all");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
@@ -210,8 +211,6 @@ export default function AdminInstagram() {
       .finally(() => setLoading(false));
   }, []);
 
-  const ordered = useMemo(() => [...posts].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)), [posts]);
-
   const patch = (index: number, value: Partial<InstagramPost>) => {
     setPosts((current) => current.map((item, i) => (i === index ? { ...item, ...value } : item)));
   };
@@ -222,9 +221,32 @@ export default function AdminInstagram() {
   };
 
   const removePost = (index: number) => {
-    if (!window.confirm("Delete this Instagram Reel/Post?")) return;
+    if (!window.confirm("क्या आप इस रील / पोस्ट को हटाना चाहते हैं? (Delete this post?)")) return;
     setPosts((current) => current.filter((_, i) => i !== index).map((item, i) => ({ ...item, order: i })));
     if (selected === index) setSelected(null);
+    else if (selected !== null && selected > index) setSelected(selected - 1);
+    toast.success("पोस्ट हटाई गई! लाइव ऐप में लागू करने के लिए 'Save & Publish' पर क्लिक करें।");
+  };
+
+  const removeAllDemoItems = () => {
+    if (!window.confirm("क्या आप सभी डेमो / डमी रील्स और ट्वीट्स हटाना चाहते हैं? केवल आपके द्वारा जोड़े गए असली पोस्ट ही रहेंगे।")) return;
+    const cleaned = posts.filter((p) => {
+      const id = String(p.id || "").toLowerCase();
+      const title = String(p.title || "").toLowerCase();
+      if (id.startsWith("x-") || id === "ig-1" || id === "ig-2" || id === "ig-3" || id.includes("sample")) return false;
+      if (title.includes("healthcare & medical drive") || title.includes("card distribution camp") || title.includes("sports support") || title.includes("blood donation") || title.includes("announcement (@rpfoundation15)")) return false;
+      return true;
+    });
+    setPosts(cleaned.map((p, i) => ({ ...p, order: i })));
+    setSelected(cleaned.length > 0 ? 0 : null);
+    toast.success("सभी डमी पोस्ट्स हटाई गईं! बदलाव लागू करने के लिए 'Save & Publish' पर क्लिक करें।");
+  };
+
+  const removeAllPosts = () => {
+    if (!window.confirm("क्या आप वाकई सभी रील्स और पोस्ट्स हटाना चाहते हैं? (Delete all posts?)")) return;
+    setPosts([]);
+    setSelected(null);
+    toast.success("सभी पोस्ट्स हटाई गईं! लाइव ऐप में लागू करने के लिए 'Save & Publish' दबाएं।");
   };
 
   const move = (index: number, direction: -1 | 1) => {
@@ -330,14 +352,17 @@ export default function AdminInstagram() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => navigate("/instagram")} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-black text-rose-700 hover:bg-rose-100">
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => navigate("/instagram")} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-black text-rose-700 hover:bg-rose-100 cursor-pointer">
               <Play className="h-4 w-4" /> View Reels Player
             </button>
-            <button onClick={addPost} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-black text-slate-700 hover:bg-slate-50">
+            <button type="button" onClick={removeAllDemoItems} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-black text-amber-800 hover:bg-amber-100 cursor-pointer">
+              <Trash2 className="h-4 w-4 text-amber-600" /> Remove Demo Posts
+            </button>
+            <button type="button" onClick={addPost} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-black text-slate-700 hover:bg-slate-50 cursor-pointer">
               <Plus className="h-4 w-4" /> Add Embed / Reel
             </button>
-            <button onClick={save} disabled={saving} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#0F3157] px-4 py-2.5 text-xs font-black text-white disabled:opacity-50 hover:bg-[#1D5B93]">
+            <button type="button" onClick={save} disabled={saving} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#0F3157] px-4 py-2 text-xs font-black text-white disabled:opacity-50 hover:bg-[#1D5B93] cursor-pointer shadow-sm">
               <Save className="h-4 w-4" /> {saving ? "Publishing…" : "Save & Publish"}
             </button>
           </div>
@@ -346,46 +371,129 @@ export default function AdminInstagram() {
         <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
           {/* List of Reels */}
           <section className="space-y-3">
-            {ordered.length === 0 && (
+            {/* Filter by Platform */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+              <button
+                type="button"
+                onClick={() => setFilterPlatform("all")}
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  filterPlatform === "all" ? "bg-slate-900 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200"
+                }`}
+              >
+                All ({posts.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterPlatform("youtube")}
+                className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  filterPlatform === "youtube" ? "bg-rose-600 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200"
+                }`}
+              >
+                <Youtube className="h-3 w-3" /> YouTube ({posts.filter(p => p.platform === "youtube").length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterPlatform("instagram")}
+                className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  filterPlatform === "instagram" ? "bg-pink-600 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200"
+                }`}
+              >
+                <Instagram className="h-3 w-3" /> Instagram ({posts.filter(p => p.platform === "instagram" || (!p.platform && !p.videoUrl)).length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterPlatform("x")}
+                className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  filterPlatform === "x" ? "bg-slate-900 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200"
+                }`}
+              >
+                <span className="font-black text-xs leading-none">𝕏</span> X/Twitter ({posts.filter(p => p.platform === "x").length})
+              </button>
+            </div>
+
+            {posts.length === 0 && (
               <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
                 <Instagram className="mx-auto h-8 w-8 text-rose-400" />
-                <p className="mt-3 text-sm font-black">No social reels added yet</p>
-                <p className="mt-1 text-xs text-slate-500">Upload RP Foundation videos or add Instagram Reel URLs.</p>
+                <p className="mt-3 text-sm font-black">No social reels or posts in feed</p>
+                <p className="mt-1 text-xs text-slate-500">Click &apos;Add Embed / Reel&apos; above to add your own YouTube shorts, Instagram reels, or X tweets.</p>
               </div>
             )}
-            {posts.map((post, index) => (
-              <article key={post.id} className={`overflow-hidden rounded-2xl border bg-white ${selected === index ? "border-rose-400 ring-2 ring-rose-100" : "border-slate-200"}`}>
-                <button onClick={() => setSelected(index)} className="flex w-full items-center gap-3 p-3 text-left">
-                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-xs ${
-                    post.platform === "youtube"
-                      ? "bg-rose-600"
-                      : post.platform === "x"
-                      ? "bg-slate-900"
-                      : post.videoUrl
-                      ? "bg-purple-600"
-                      : "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600"
-                  }`}>
-                    {post.platform === "youtube" ? (
-                      <Youtube className="h-6 w-6 fill-white" />
-                    ) : post.platform === "x" ? (
-                      <span className="font-black text-lg">𝕏</span>
-                    ) : post.videoUrl ? (
-                      <Film className="h-6 w-6" />
-                    ) : (
-                      <Instagram className="h-6 w-6" />
-                    )}
+
+            {posts.map((post, index) => {
+              if (filterPlatform !== "all" && post.platform !== filterPlatform) return null;
+              return (
+                <article
+                  key={post.id}
+                  className={`overflow-hidden rounded-2xl border bg-white transition-all ${
+                    selected === index ? "border-rose-400 ring-2 ring-rose-100 shadow-sm" : "border-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  <div className="flex w-full items-center gap-3 p-3">
+                    <div
+                      onClick={() => setSelected(index)}
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-xs cursor-pointer hover:scale-105 transition-transform ${
+                        post.platform === "youtube"
+                          ? "bg-rose-600"
+                          : post.platform === "x"
+                          ? "bg-slate-900"
+                          : post.videoUrl
+                          ? "bg-purple-600"
+                          : "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600"
+                      }`}
+                    >
+                      {post.platform === "youtube" ? (
+                        <Youtube className="h-6 w-6 fill-white" />
+                      ) : post.platform === "x" ? (
+                        <span className="font-black text-lg">𝕏</span>
+                      ) : post.videoUrl ? (
+                        <Film className="h-6 w-6" />
+                      ) : (
+                        <Instagram className="h-6 w-6" />
+                      )}
+                    </div>
+
+                    <div
+                      onClick={() => setSelected(index)}
+                      className="min-w-0 flex-1 cursor-pointer"
+                    >
+                      <p className="truncate text-sm font-black text-slate-900">{post.title || "Untitled Video Reel"}</p>
+                      <p className="mt-0.5 truncate text-[10px] font-bold text-slate-400">
+                        {post.platform === "youtube" ? "🔴 YouTube" : post.platform === "x" ? "⚫ X (Twitter)" : "🟣 Instagram"} · {post.category || "Social"} · {post.active !== false ? "🟢 Active" : "⚪ Hidden"}
+                        {post.videoUrl && " · 📹 Video Ready"}
+                      </p>
+                    </div>
+
+                    {/* Quick Action Buttons on Each Card: Eye (toggle visibility) and Trash (Delete) */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        title={post.active !== false ? "Hide from user app" : "Show in user app"}
+                        onClick={() => {
+                          patch(index, { active: post.active === false });
+                          toast.success(post.active === false ? "Reel activated!" : "Reel hidden from app!");
+                        }}
+                        className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                          post.active !== false
+                            ? "text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                            : "text-slate-400 bg-slate-100 border-slate-200 hover:bg-slate-200"
+                        }`}
+                      >
+                        {post.active !== false ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      </button>
+
+                      <button
+                        type="button"
+                        title="Delete this reel/post"
+                        onClick={() => removePost(index)}
+                        className="p-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition-all cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-black">{post.title || "Untitled Video Reel"}</p>
-                    <p className="mt-1 truncate text-[10px] font-bold text-slate-400">
-                      {post.platform === "youtube" ? "🔴 YouTube" : post.platform === "x" ? "⚫ X (Twitter)" : "🟣 Instagram"} · {post.category || "Social Work"} · {post.active !== false ? "Active" : "Hidden"}
-                      {post.videoUrl && " · 📹 Video Ready"}
-                    </p>
-                  </div>
-                  {post.active !== false ? <Eye className="h-4 w-4 text-emerald-600" /> : <EyeOff className="h-4 w-4 text-slate-400" />}
-                </button>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </section>
 
           {/* Edit Reel Form */}

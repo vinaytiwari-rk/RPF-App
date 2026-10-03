@@ -21,36 +21,12 @@ export interface ReelItem {
 
 const defaultReels: ReelItem[] = [
   {
-    id: "reel-1",
-    title: "Mega Free Health Camp & Medicines Distribution",
-    url: "https://www.instagram.com/therpfoundation/",
-    caption: "Over 1,200 citizens benefitted from specialized health checkups, free medicines & diagnostic support organized by RP Foundation.",
-    category: "Healthcare",
-    thumbnail: "/assets/mega_camp_banner.png"
-  },
-  {
-    id: "reel-2",
-    title: "Pink E-Rickshaw Women Empowerment Launch",
-    url: "https://www.instagram.com/therpfoundation/",
-    caption: "Empowering women with economic independence and eco-friendly urban mobility ownership across Bhopal & Mumbai.",
-    category: "Empowerment",
-    thumbnail: "/assets/water_pump_camp.png"
-  },
-  {
-    id: "reel-3",
-    title: "Founder Rohit Pandit's Vision & Youth Address",
-    url: "https://www.instagram.com/therpfoundation/",
-    caption: "“True service begins when we reach out to those in need with humility and unyielding resolve.”",
+    id: "ig-cm-meet",
+    title: "Hon'ble CM Mohan Yadav ji Meeting with Founder Rohit Pandit",
+    url: "https://www.instagram.com/p/DFaL81yvM_w/",
+    caption: "फाउंडर रोहित पंडित जी ने माननीय मुख्यमंत्री डॉ. मोहन यादव जी से सौजन्य भेंट कर आरपी फाउंडेशन के सामाजिक सेवा प्रकल्पों की जानकारी दी।",
     category: "Leadership",
     thumbnail: "/assets/founder.png"
-  },
-  {
-    id: "reel-4",
-    title: "Jan Seva Card Distribution & Volunteer Support",
-    url: "https://www.instagram.com/therpfoundation/",
-    caption: "Connecting ground-level citizens directly with welfare benefits and digital identity cards.",
-    category: "Ground Action",
-    thumbnail: "/assets/donate.jpg"
   }
 ];
 
@@ -74,7 +50,7 @@ export default function InstagramReelsPage() {
       .then((res) => {
         if (!alive) return;
         const list = res.data?.cms?.instagramPosts;
-        if (Array.isArray(list) && list.length > 0) {
+        if (Array.isArray(list)) {
           const activeOnly = list
             .filter((item: any) => item && item.active !== false)
             .map((item: any, idx: number) => {
@@ -108,15 +84,13 @@ export default function InstagramReelsPage() {
                 platform,
                 caption: item.caption || item.title || "RP Foundation Social Initiative",
                 category: item.category || (platform === "youtube" ? "Healthcare" : platform === "x" ? "Leadership" : "Empowerment"),
-                thumbnail: item.thumbnail || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : defaultReels[idx % defaultReels.length].thumbnail)
+                thumbnail: item.thumbnail || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "/assets/founder.png")
               };
             });
-          if (activeOnly.length > 0) {
-            setReels(activeOnly);
-            return;
-          }
+          setReels(activeOnly);
+          return;
         }
-        // Fallback to /api/public/social-feed if no CMS posts
+        // Fallback to /api/public/social-feed only if CMS posts not initialized
         return axios.get("/api/public/social-feed").then((feedRes) => {
           if (!alive) return;
           if (feedRes.data?.success && Array.isArray(feedRes.data.data) && feedRes.data.data.length > 0) {
@@ -256,7 +230,17 @@ export default function InstagramReelsPage() {
 
       {/* Reel Card Viewport */}
       <div className="relative flex-1 w-full h-full flex items-center justify-center bg-slate-900 overflow-hidden">
-        {ytId ? (
+        {filteredReels.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-8 text-center max-w-sm">
+            <Film className="h-16 w-16 text-slate-600 mb-4 animate-pulse" />
+            <p className="text-base font-bold text-slate-300">
+              {hi ? "कोई रील उपलब्ध नहीं है" : "No Reels Available"}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              {hi ? "एडमिन द्वारा कोई रील पोस्ट नहीं की गई है।" : "No active reels have been added by admin yet."}
+            </p>
+          </div>
+        ) : ytId ? (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <iframe
               key={ytId}
@@ -326,78 +310,80 @@ export default function InstagramReelsPage() {
       </div>
 
       {/* Bottom Info Overlay & Floating Controls */}
-      <div className="absolute bottom-4 inset-x-0 z-30 p-4 space-y-3">
-        <div className="flex items-end justify-between gap-4">
-          <div className="space-y-1.5 flex-1">
-            <span className="inline-flex items-center gap-1 rounded-md bg-pink-600/30 border border-pink-500/40 px-2.5 py-0.5 text-[10px] font-bold text-pink-300">
-              <Film className="h-3 w-3" /> {currentReel?.category}
-            </span>
-            <h2 className="text-base sm:text-lg font-bold text-white leading-tight">
-              {currentReel?.title}
-            </h2>
-            <p className="text-xs text-slate-300 font-medium line-clamp-2 leading-relaxed">
-              {currentReel?.caption}
-            </p>
-          </div>
-
-          {/* Action Buttons Side Column */}
-          <div className="flex flex-col items-center gap-4">
-            <button
-              onClick={() => toggleLike(currentReel?.id)}
-              className="flex flex-col items-center gap-1 text-white"
-            >
-              <div className={`flex h-11 w-11 items-center justify-center rounded-full backdrop-blur-md transition-all ${
-                liked[currentReel?.id] ? "bg-pink-600 text-white" : "bg-white/10 text-white hover:bg-white/20"
-              }`}>
-                <Heart className={`h-6 w-6 ${liked[currentReel?.id] ? "fill-current" : ""}`} />
-              </div>
-              <span className="text-[10px] font-bold">
-                {liked[currentReel?.id] ? "Liked" : "Like"}
+      {currentReel && (
+        <div className="absolute bottom-4 inset-x-0 z-30 p-4 space-y-3">
+          <div className="flex items-end justify-between gap-4">
+            <div className="space-y-1.5 flex-1">
+              <span className="inline-flex items-center gap-1 rounded-md bg-pink-600/30 border border-pink-500/40 px-2.5 py-0.5 text-[10px] font-bold text-pink-300">
+                <Film className="h-3 w-3" /> {currentReel?.category}
               </span>
-            </button>
+              <h2 className="text-base sm:text-lg font-bold text-white leading-tight">
+                {currentReel?.title}
+              </h2>
+              <p className="text-xs text-slate-300 font-medium line-clamp-2 leading-relaxed">
+                {currentReel?.caption}
+              </p>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => setInAppUrl(currentReel?.url)}
-              className="flex flex-col items-center gap-1 text-white hover:scale-105 active:scale-95 transition-all cursor-pointer"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-pink-600 text-white shadow-md">
-                {currentReel?.platform === "youtube" ? (
-                  <Youtube className="h-5 w-5 fill-white" />
-                ) : currentReel?.platform === "x" ? (
-                  <span className="font-black text-sm">𝕏</span>
-                ) : (
-                  <Instagram className="h-5 w-5" />
-                )}
-              </div>
-              <span className="text-[10px] font-bold">Watch</span>
-            </button>
+            {/* Action Buttons Side Column */}
+            <div className="flex flex-col items-center gap-4">
+              <button
+                onClick={() => toggleLike(currentReel?.id)}
+                className="flex flex-col items-center gap-1 text-white"
+              >
+                <div className={`flex h-11 w-11 items-center justify-center rounded-full backdrop-blur-md transition-all ${
+                  liked[currentReel?.id] ? "bg-pink-600 text-white" : "bg-white/10 text-white hover:bg-white/20"
+                }`}>
+                  <Heart className={`h-6 w-6 ${liked[currentReel?.id] ? "fill-current" : ""}`} />
+                </div>
+                <span className="text-[10px] font-bold">
+                  {liked[currentReel?.id] ? "Liked" : "Like"}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setInAppUrl(currentReel?.url)}
+                className="flex flex-col items-center gap-1 text-white hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-pink-600 text-white shadow-md">
+                  {currentReel?.platform === "youtube" ? (
+                    <Youtube className="h-5 w-5 fill-white" />
+                  ) : currentReel?.platform === "x" ? (
+                    <span className="font-black text-sm">𝕏</span>
+                  ) : (
+                    <Instagram className="h-5 w-5" />
+                  )}
+                </div>
+                <span className="text-[10px] font-bold">Watch</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Up/Down Navigation Controls */}
+          <div className="flex items-center justify-between pt-2 border-t border-white/10 text-xs font-semibold text-slate-400">
+            <span>
+              {currentIndex + 1} of {filteredReels.length} Reels
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={goPrev}
+                disabled={currentIndex === 0}
+                className="p-1.5 rounded-lg bg-white/10 disabled:opacity-30 hover:bg-white/20 transition-all"
+              >
+                <ChevronUp className="h-4 w-4 text-white" />
+              </button>
+              <button
+                onClick={goNext}
+                disabled={currentIndex === filteredReels.length - 1}
+                className="p-1.5 rounded-lg bg-white/10 disabled:opacity-30 hover:bg-white/20 transition-all"
+              >
+                <ChevronDown className="h-4 w-4 text-white" />
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Up/Down Navigation Controls */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/10 text-xs font-semibold text-slate-400">
-          <span>
-            {currentIndex + 1} of {filteredReels.length} Reels
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={goPrev}
-              disabled={currentIndex === 0}
-              className="p-1.5 rounded-lg bg-white/10 disabled:opacity-30 hover:bg-white/20 transition-all"
-            >
-              <ChevronUp className="h-4 w-4 text-white" />
-            </button>
-            <button
-              onClick={goNext}
-              disabled={currentIndex === filteredReels.length - 1}
-              className="p-1.5 rounded-lg bg-white/10 disabled:opacity-30 hover:bg-white/20 transition-all"
-            >
-              <ChevronDown className="h-4 w-4 text-white" />
-            </button>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* In-App WebView Modal for 100% Contained Playback */}
       {inAppUrl && (

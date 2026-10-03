@@ -291,8 +291,8 @@ async function getMetaGraphItems(): Promise<{ instagram: SocialRssItem[] }> {
 }
 
 // 2. Fetch Instagram Items (From Admin CMS, Meta Graph, or Authentic Fallback)
-async function getInstagramItems(): Promise<SocialRssItem[]> {
-  // 1. Check Admin CMS first (direct source of truth saved via Admin Control Center)
+// 2. Fetch CMS Social Items (Configured by Admin in Control Center)
+async function getCmsSocialItems(): Promise<{ configured: boolean; items: SocialRssItem[] }> {
   try {
     const cmsQuery = pool.query('SELECT "founderMessageEn" FROM settings WHERE id = $1 LIMIT 1', ["cms_data"]);
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("DB timeout")), 3000));
@@ -301,59 +301,68 @@ async function getInstagramItems(): Promise<SocialRssItem[]> {
     if (cmsRes?.rows?.length > 0 && cmsRes.rows[0].founderMessageEn) {
       const raw = cmsRes.rows[0].founderMessageEn;
       const cms = typeof raw === "string" ? JSON.parse(raw) : raw;
-      if (Array.isArray(cms?.instagramPosts) && cms.instagramPosts.length > 0) {
+      if (Array.isArray(cms?.instagramPosts)) {
         const activePosts = cms.instagramPosts.filter((post: any) => post && post.active !== false);
-        if (activePosts.length > 0) {
-          return activePosts.map((post: any, idx: number) => {
-            const postUrl = post.url || post.videoUrl || "https://www.instagram.com/rpfoundationofficial/";
-            const igMatch = String(postUrl).match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
-            const shortcode = igMatch ? igMatch[1] : "";
-            const ytMatch = String(postUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
-            const videoId = post.videoId || (ytMatch ? ytMatch[1] : undefined);
-            const xMatch = String(postUrl).match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
-            const tweetId = post.tweetId || (xMatch ? xMatch[1] : undefined);
+        const mapped: SocialRssItem[] = activePosts.map((post: any, idx: number) => {
+          const postUrl = post.url || post.videoUrl || "https://www.instagram.com/rpfoundationofficial/";
+          const igMatch = String(postUrl).match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+          const shortcode = igMatch ? igMatch[1] : "";
+          const ytMatch = String(postUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+          const videoId = post.videoId || (ytMatch ? ytMatch[1] : undefined);
+          const xMatch = String(postUrl).match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
+          const tweetId = post.tweetId || (xMatch ? xMatch[1] : undefined);
 
-            const platform = post.platform || (videoId ? "youtube" : tweetId ? "x" : "instagram");
-            const embedUrl = post.embedUrl || (
-              videoId
-                ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`
-                : tweetId
-                ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
-                : shortcode
-                ? `https://www.instagram.com/p/${shortcode}/embed/captioned/`
-                : undefined
-            );
-
-            const defaultThumb = videoId
-              ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+          const platform = post.platform || (videoId ? "youtube" : tweetId ? "x" : "instagram");
+          const embedUrl = post.embedUrl || (
+            videoId
+              ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`
+              : tweetId
+              ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
               : shortcode
-              ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l`
-              : "/assets/founder.png";
+              ? `https://www.instagram.com/p/${shortcode}/embed/captioned/`
+              : undefined
+          );
 
-            return {
-              id: post.id || `cms-media-${idx}`,
-              platform,
-              title: post.title || "RP Foundation Media Update",
-              link: postUrl,
-              description: post.caption || post.title || "Official update from RP Foundation.",
-              pubDate: post.pubDate || new Date(Date.now() - idx * 60000).toUTCString(),
-              author: platform === "youtube" ? "RP Foundation" : platform === "x" ? "@rpfoundation15" : "@rpfoundationofficial",
-              thumbnailUrl: post.thumbnail || post.thumbnailUrl || defaultThumb,
-              category: post.category || (platform === "youtube" ? "Video" : platform === "x" ? "Press" : "Reels"),
-              videoUrl: post.videoUrl || undefined,
-              videoId,
-              embedUrl,
-              isCms: true
-            };
-          });
-        }
+          const defaultThumb = videoId
+            ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+            : shortcode
+            ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l`
+            : "/assets/founder.png";
+
+          return {
+            id: post.id || `cms-media-${idx}`,
+            platform,
+            title: post.title || "RP Foundation Media Update",
+            link: postUrl,
+            description: post.caption || post.title || "Official update from RP Foundation.",
+            pubDate: post.pubDate || new Date(Date.now() - idx * 60000).toUTCString(),
+            author: platform === "youtube" ? "RP Foundation" : platform === "x" ? "@rpfoundation15" : "@rpfoundationofficial",
+            thumbnailUrl: post.thumbnail || post.thumbnailUrl || defaultThumb,
+            category: post.category || (platform === "youtube" ? "Video" : platform === "x" ? "Press" : "Reels"),
+            videoUrl: post.videoUrl || undefined,
+            videoId,
+            embedUrl,
+            isCms: true
+          };
+        });
+        return { configured: true, items: mapped };
       }
     }
   } catch (err: any) {
     // Graceful fallback without blocking
   }
+  return { configured: false, items: [] };
+}
 
-  // 2. Try Meta Graph API if available
+// 3. Fetch Instagram Items (From CMS, Meta Graph, or Authentic Fallback)
+async function getInstagramItems(): Promise<SocialRssItem[]> {
+  const cms = await getCmsSocialItems();
+  if (cms.configured) {
+    // Admin has customized CMS: only return what the admin has kept with platform instagram
+    return cms.items.filter((item) => item.platform === "instagram");
+  }
+
+  // Next, try Meta Graph API if available
   try {
     const meta = await getMetaGraphItems();
     if (meta.instagram.length > 0) {
@@ -361,7 +370,7 @@ async function getInstagramItems(): Promise<SocialRssItem[]> {
     }
   } catch {}
 
-  // Authentic fallback items for RP Foundation Instagram with real local assets
+  // Authentic fallback item for RP Foundation Instagram with real local assets
   return [
     {
       id: "ig-cm-meet",
@@ -374,77 +383,17 @@ async function getInstagramItems(): Promise<SocialRssItem[]> {
       thumbnailUrl: "https://images.weserv.nl/?url=instagram.com/p/Dd6j8dOMRHi/media/?size=l",
       category: "Leadership",
       embedUrl: "https://www.instagram.com/p/Dd6j8dOMRHi/embed/captioned/"
-    },
-    {
-      id: "ig-1",
-      platform: "instagram",
-      title: "निःशुल्क स्वास्थ्य शिविर एवं दवा वितरण अभियान",
-      link: "https://www.instagram.com/rpfoundationofficial/",
-      description: "RP Foundation द्वारा समाज के अंतिम पंक्ति के व्यक्ति तक स्वास्थ्य सेवा पहुँचाने का संकल्प।",
-      pubDate: new Date(Date.now() - 1 * 86400000).toUTCString(),
-      author: "@rpfoundationofficial",
-      thumbnailUrl: "/assets/founder.png",
-      category: "Healthcare"
-    },
-    {
-      id: "ig-2",
-      platform: "instagram",
-      title: "जन सेवा कार्ड वितरण एवं पंजीकरण शिविर",
-      link: "https://www.instagram.com/rpfoundationofficial/",
-      description: "नागरिकों को डिजिटल पहचान, स्वास्थ्य एवं जनकल्याणकारी योजनाओं से सीधा जोड़ना।",
-      pubDate: new Date(Date.now() - 3 * 86400000).toUTCString(),
-      author: "@rpfoundationofficial",
-      thumbnailUrl: "/assets/founder.png",
-      category: "Jan Seva"
-    },
-    {
-      id: "ig-3",
-      platform: "instagram",
-      title: "युवा रोजगार मार्गदर्शन एवं कौशल विकास कार्यशाला",
-      link: "https://www.instagram.com/rpfoundationofficial/",
-      description: "युवाओं के सपनों को नई उड़ान: रोजगार मार्गदर्शन एवं प्रतियोगी परीक्षा सहायता।",
-      pubDate: new Date(Date.now() - 5 * 86400000).toUTCString(),
-      author: "@rpfoundationofficial",
-      thumbnailUrl: "/assets/founder.png",
-      category: "Youth"
     }
   ];
 }
 
-// 4. Fetch X (Twitter) Items
-function getXItems(): SocialRssItem[] {
-  return [
-    {
-      id: "x-1",
-      platform: "x",
-      title: "RP Foundation Official Announcement (@rpfoundation15)",
-      link: "https://x.com/rpfoundation15",
-      description: "सेवा, समर्पण और सशक्तिकरण — आर.पी. फाउंडेशन का संकल्प हर नागरिक के साथ। Follow @rpfoundation15 on X for real-time announcements.",
-      pubDate: new Date(Date.now() - 6 * 3600000).toUTCString(),
-      author: "@rpfoundation15",
-      category: "Announcements"
-    },
-    {
-      id: "x-2",
-      platform: "x",
-      title: "Youth National Sports Support by RP Foundation",
-      link: "https://x.com/rpfoundation15",
-      description: "Youth National Goalball Championship में भाग लेने वाले होनहार खिलाड़ियों को आर.पी. फाउंडेशन द्वारा हर संभव सहयोग व प्रोत्साहन।",
-      pubDate: new Date(Date.now() - 2 * 86400000).toUTCString(),
-      author: "@rpfoundation15",
-      category: "Sports"
-    },
-    {
-      id: "x-3",
-      platform: "x",
-      title: "Blood Donation & Emergency Relief Support",
-      link: "https://x.com/rpfoundation15",
-      description: "आपातकालीन रक्तदान नेटवर्क एवं चिकित्सा सहायता केंद्र सक्रिय। सेवा में सदैव समर्पित आर.पी. फाउंडेशन।",
-      pubDate: new Date(Date.now() - 5 * 86400000).toUTCString(),
-      author: "@rpfoundation15",
-      category: "Emergency"
-    }
-  ];
+// 4. Fetch X (Twitter) Items (From CMS only, never inject dummy items)
+async function getXItems(): Promise<SocialRssItem[]> {
+  const cms = await getCmsSocialItems();
+  if (cms.configured) {
+    return cms.items.filter((item) => item.platform === "x");
+  }
+  return [];
 }
 
 // Helper: Escape XML special characters
@@ -535,18 +484,19 @@ router.get("/api/public/social-rss-directory", (req, res) => {
 // JSON REST Feed for in-app widgets
 router.get("/api/public/social-feed", async (_req, res) => {
   try {
-    const [yt, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
-    const x = getXItems();
-    const cmsItems = ig.filter((item: any) => item.isCms);
-    const nonCmsIg = ig.filter((item: any) => !item.isCms);
+    const [yt, cmsSocial] = await Promise.all([getYouTubeItems(), getCmsSocialItems()]);
 
-    const rssItems = [...yt.items, ...nonCmsIg, ...x].sort(
-      (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
-    );
+    if (cmsSocial.configured) {
+      // Admin has explicitly configured/saved social posts:
+      // Show ONLY admin's saved posts (Instagram, YouTube, X, Video), followed by official YouTube channel items.
+      // ZERO mock/dummy items will ever be shown!
+      const all = [...cmsSocial.items, ...yt.items];
+      return res.json({ success: true, count: all.length, data: all });
+    }
 
-    // Prioritize admin-curated CMS items at the top in their exact saved order, followed by other channel feeds
-    const all = cmsItems.length > 0 ? [...cmsItems, ...rssItems] : rssItems;
-
+    // Default when CMS has never been touched by admin
+    const [ig, x] = await Promise.all([getInstagramItems(), getXItems()]);
+    const all = [...ig, ...x, ...yt.items];
     return res.json({ success: true, count: all.length, data: all });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: "Failed to generate social feed" });
@@ -595,9 +545,9 @@ router.get(["/api/rss/social/instagram.xml", "/rss/instagram.xml"], async (req, 
 });
 
 // 3. X (Twitter) RSS Feed (XML)
-router.get(["/api/rss/social/x.xml", "/rss/x.xml"], (req, res) => {
+router.get(["/api/rss/social/x.xml", "/rss/x.xml"], async (req, res) => {
   try {
-    const items = getXItems();
+    const items = await getXItems();
     const host = req.get("host") || "localhost:3000";
     const xml = buildRssXml({
       title: "RP Foundation X (@rpfoundation15) Official Feed",
@@ -616,10 +566,9 @@ router.get(["/api/rss/social/x.xml", "/rss/x.xml"], (req, res) => {
 // 4. Unified All-in-One Social RSS Feed (XML)
 router.get(["/api/rss/social/all.xml", "/rss/social.xml", "/rss.xml"], async (req, res) => {
   try {
-    const [yt, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
-    const x = getXItems();
+    const [yt, ig, x] = await Promise.all([getYouTubeItems(), getInstagramItems(), getXItems()]);
 
-    const merged = [...yt.items, ...ig, ...x].sort(
+    const merged = [...ig, ...x, ...yt.items].sort(
       (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
     );
 

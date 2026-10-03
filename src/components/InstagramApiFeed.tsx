@@ -151,16 +151,6 @@ const AUTHENTIC_FEED_ITEMS: ReelItem[] = [
     author: "@rpfoundationofficial",
     platform: "instagram" as const,
     embedUrl: "https://www.instagram.com/p/Dd6j8dOMRHi/embed/captioned/"
-  },
-  {
-    id: "x-1",
-    url: "https://x.com/rpfoundation15",
-    thumbnailUrl: "/assets/founder.png",
-    title: "RP Foundation Official Announcements on X",
-    caption: "सेवा, समर्पण और सशक्तिकरण — आर.पी. फाउंडेशन का संकल्प हर नागरिक के साथ। Follow @rpfoundation15 on X.",
-    likes: "X (Twitter)",
-    author: "@rpfoundation15",
-    platform: "x" as const
   }
 ];
 
@@ -176,7 +166,7 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
       .get(sourceUrl)
       .then((res) => {
         if (!alive) return;
-        if (res.data?.success && Array.isArray(res.data?.data) && res.data.data.length > 0) {
+        if (res.data?.success && Array.isArray(res.data?.data)) {
           const items: ReelItem[] = res.data.data.map((item: any, idx: number) => {
             const rawUrl = item.link || item.url || "";
             const ytMatch = String(rawUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
@@ -198,9 +188,8 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
             };
           });
 
-          if (items.length > 0) {
-            setReels(items);
-          }
+          // Respect the server's exact list
+          setReels(items);
         }
       })
       .catch((err) => {
@@ -210,31 +199,29 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
           .then((cmsRes) => {
             if (!alive) return;
             const list = cmsRes.data?.cms?.instagramPosts;
-            if (Array.isArray(list) && list.length > 0) {
+            if (Array.isArray(list)) {
               const activePosts = list.filter((p: any) => p && p.active !== false);
-              if (activePosts.length > 0) {
-                const cmsItems: ReelItem[] = activePosts.map((post: any, idx: number) => {
-                  const pUrl = post.url || post.videoUrl || "";
-                  const ytMatch = String(pUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
-                  const vId = post.videoId || (ytMatch ? ytMatch[1] : undefined);
-                  const pThumb = post.thumbnail || post.thumbnailUrl || (vId ? `https://i.ytimg.com/vi/${vId}/hqdefault.jpg` : "/assets/founder.png");
-                  const platform = post.platform || (vId ? "youtube" : "instagram");
-                  return {
-                    id: post.id || `cms-fallback-${idx}`,
-                    url: pUrl,
-                    videoId: vId,
-                    videoUrl: post.videoUrl,
-                    embedUrl: post.embedUrl,
-                    thumbnailUrl: pThumb,
-                    title: post.title || "RP Foundation Update",
-                    caption: post.caption || post.title || "Official update from RP Foundation.",
-                    likes: platform === "youtube" ? "Live Video" : "Official Post",
-                    author: platform === "youtube" ? "RP Foundation" : "@rpfoundationofficial",
-                    platform
-                  };
-                });
-                setReels(cmsItems);
-              }
+              const cmsItems: ReelItem[] = activePosts.map((post: any, idx: number) => {
+                const pUrl = post.url || post.videoUrl || "";
+                const ytMatch = String(pUrl).match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+                const vId = post.videoId || (ytMatch ? ytMatch[1] : undefined);
+                const pThumb = post.thumbnail || post.thumbnailUrl || (vId ? `https://i.ytimg.com/vi/${vId}/hqdefault.jpg` : "/assets/founder.png");
+                const platform = post.platform || (vId ? "youtube" : "instagram");
+                return {
+                  id: post.id || `cms-fallback-${idx}`,
+                  url: pUrl,
+                  videoId: vId,
+                  videoUrl: post.videoUrl,
+                  embedUrl: post.embedUrl,
+                  thumbnailUrl: pThumb,
+                  title: post.title || "RP Foundation Update",
+                  caption: post.caption || post.title || "Official update from RP Foundation.",
+                  likes: platform === "youtube" ? "Live Video" : "Official Post",
+                  author: platform === "youtube" ? "RP Foundation" : "@rpfoundationofficial",
+                  platform
+                };
+              });
+              setReels(cmsItems);
             }
           })
           .catch(() => {});
@@ -248,7 +235,11 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
     };
   }, [sourceUrl]);
 
-  const displayList = reels.length > 0 ? reels : AUTHENTIC_FEED_ITEMS;
+  const displayList = reels;
+
+  const ytCount = displayList.filter((i) => i.platform === "youtube").length;
+  const igCount = displayList.filter((i) => i.platform === "instagram").length;
+  const xCount = displayList.filter((i) => i.platform === "x").length;
 
   const filtered = activeFilter === "all"
     ? displayList
@@ -280,7 +271,7 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
             }`}
           >
             <Youtube className="h-3.5 w-3.5 fill-current" />
-            YouTube
+            YouTube ({ytCount})
           </button>
           <button
             type="button"
@@ -292,7 +283,7 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
             }`}
           >
             <Instagram className="h-3.5 w-3.5" />
-            Instagram
+            Instagram ({igCount})
           </button>
           <button
             type="button"
@@ -304,7 +295,7 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
             }`}
           >
             <span className="font-black text-xs leading-none">𝕏</span>
-            X (Twitter)
+            X (Twitter) ({xCount})
           </button>
         </div>
 
@@ -325,6 +316,11 @@ export default function InstagramApiFeed({ sourceUrl = "/api/public/social-feed"
               <Loader2 className="h-5 w-5 animate-spin" />
             </div>
           ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center">
+          <p className="text-xs font-bold text-slate-700">No {activeFilter === "all" ? "" : activeFilter.toUpperCase()} posts currently available</p>
+          <p className="mt-1 text-[11px] text-slate-400">Admin can add or publish reels from Admin Control Center.</p>
         </div>
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory">
