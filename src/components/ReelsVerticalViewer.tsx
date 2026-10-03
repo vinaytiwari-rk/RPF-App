@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   X,
-  ChevronDown,
-  Sparkles,
 } from "lucide-react";
 
 export interface ReelItem {
@@ -70,35 +68,18 @@ export default function ReelsVerticalViewer({
 
   return (
     <div className="fixed inset-0 z-[100] bg-black text-white flex flex-col font-sans selection:bg-orange-500 animate-fadeIn">
-      {/* Top Header Bar */}
-      <div className="absolute top-0 inset-x-0 z-30 flex items-center justify-between p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#FF9933] to-[#138808] p-0.5 shadow-md">
-            <img
-              src="/assets/founder.png"
-              alt="RP Foundation"
-              className="h-full w-full rounded-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = "/assets/rpf-samahit-icon.png";
-              }}
-            />
-          </div>
-          <div>
-            <p className="text-xs font-black text-white tracking-wide">RP Foundation Live Feed</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/20 active:scale-95 cursor-pointer"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+      {/* Minimal top bar */}
+      <div className="absolute top-0 right-0 z-30 p-4">
+        <button
+          onClick={onClose}
+          aria-label="Close Reels"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/20 active:scale-95 cursor-pointer"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
-      {/* Vertical Snap Scroll Container — YouTube Shorts first, then Instagram Reels */}
+      {/* Vertical Snap Scroll Container */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
@@ -139,6 +120,7 @@ export default function ReelsVerticalViewer({
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                     onLoad={(event) => {
+                      setLoaded((prev) => ({ ...prev, [reel.id]: true }));
                       const iframe = event.currentTarget;
                       iframe.contentWindow?.postMessage(
                         JSON.stringify({ event: "command", func: "unMute", args: [] }),
@@ -191,15 +173,18 @@ export default function ReelsVerticalViewer({
                 />
               )}
 
-              {/* Bottom Caption & Handle Bar */}
-              <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 via-black/45 to-transparent px-4 pb-10 pt-24">
-                <div className="max-w-[calc(100%-1rem)] space-y-2 text-left">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-orange-300 bg-orange-950/80 border border-orange-500/40 px-2.5 py-0.5 rounded-full backdrop-blur-md">
-                    <Sparkles className="h-3 w-3 text-amber-300" />
-                    RP Foundation Initiative
-                  </span>
+              {/* Single clean caption/title */}
+              {(reel.title || reel.caption) && (
+                <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-4 pb-8 pt-20 pointer-events-none">
+                  <p className="mx-auto max-w-lg text-center text-sm font-bold leading-snug text-white drop-shadow-lg line-clamp-3">
+                    {reel.title || reel.caption}
+                  </p>
                 </div>
+              )}
+
+              {/* No extra platform labels, author text, counters, or initiative badges */}
+
+            </div>
                 <h3 className="text-sm font-black text-white font-serif leading-snug line-clamp-2">
                   {reel.title}
                 </h3>
@@ -214,12 +199,7 @@ export default function ReelsVerticalViewer({
                 </div>
               </div>
 
-              {/* Swipe Guidance Indicator */}
-              {idx === 0 && reels.length > 1 && (
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 text-[10px] font-black uppercase text-amber-300 tracking-widest animate-bounce">
-                  <ChevronDown className="h-4 w-4" />
-                  Swipe up for next reel
-                </div>
+
               )}
             </div>
           );
@@ -229,3 +209,4 @@ export default function ReelsVerticalViewer({
     </div>
   );
 }
+
