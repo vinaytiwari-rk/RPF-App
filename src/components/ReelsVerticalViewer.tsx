@@ -185,23 +185,7 @@ export default function ReelsVerticalViewer({
               {/* No extra platform labels, author text, counters, or initiative badges */}
 
             </div>
-                <h3 className="text-sm font-black text-white font-serif leading-snug line-clamp-2">
-                  {reel.title}
-                </h3>
-                <p className="text-xs font-medium text-slate-200 line-clamp-3 leading-relaxed drop-shadow-sm">
-                  {reel.caption}
-                </p>
-                <div className="flex items-center gap-2 pt-1 text-[10px] font-bold text-white/70">
-                  <span>{reel.author}</span>
-                  <span>•</span>
-                  <span>{idx + 1} / {reels.length}</span>
-                </div>
-                </div>
-              </div>
-
-
-              )}
-            </div>
+          );
           );
         })}
       </div>
