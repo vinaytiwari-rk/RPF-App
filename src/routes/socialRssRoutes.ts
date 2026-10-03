@@ -219,8 +219,114 @@ async function getYouTubeItems(): Promise<{ items: SocialRssItem[]; rawXml: stri
   }
 }
 
-// 2. Fetch Instagram Items (From CMS or Fallback)
+// In-memory cache for Meta Graph items
+let metaGraphCache: { instagram: SocialRssItem[]; facebook: SocialRssItem[]; timestamp: number } | null = null;
+const META_CACHE_TTL_MS = 15 * 60 * 1000; // 15 mins
+
+async function getMetaGraphItems(): Promise<{ instagram: SocialRssItem[]; facebook: SocialRssItem[] }> {
+  const now = Date.now();
+  if (metaGraphCache && now - metaGraphCache.timestamp < META_CACHE_TTL_MS) {
+    return metaGraphCache;
+  }
+
+  const token = process.env.META_USER_TOKEN;
+  if (!token) return { instagram: [], facebook: [] };
+
+  try {
+    const accRes = await axios.get("https://graph.facebook.com/v22.0/me/accounts", {
+      params: {
+        fields: "id,name,access_token,instagram_business_account{id,username,name}",
+        access_token: token
+      },
+      timeout: 5000
+    });
+
+    const pages = accRes.data?.data || [];
+    let igItems: SocialRssItem[] = [];
+    let fbItems: SocialRssItem[] = [];
+
+    for (const page of pages) {
+      const pageToken = page.access_token || token;
+
+      // Facebook page posts
+      try {
+        const fbRes = await axios.get(`https://graph.facebook.com/v22.0/${page.id}/posts`, {
+          params: {
+            fields: "id,message,created_time,permalink_url,full_picture",
+            limit: 10,
+            access_token: pageToken
+          },
+          timeout: 4000
+        });
+
+        const rawPosts = fbRes.data?.data || [];
+        for (const p of rawPosts) {
+          fbItems.push({
+            id: `fb-${p.id}`,
+            platform: "facebook",
+            title: p.message ? p.message.slice(0, 80) + "..." : `${page.name} Update`,
+            link: p.permalink_url || `https://www.facebook.com/${page.id}`,
+            description: p.message || `${page.name} on Facebook`,
+            pubDate: p.created_time ? new Date(p.created_time).toUTCString() : new Date().toUTCString(),
+            author: page.name,
+            thumbnailUrl: p.full_picture || "/assets/founder.png",
+            category: "Community"
+          });
+        }
+      } catch {}
+
+      // Instagram business media
+      const igId = page.instagram_business_account?.id;
+      if (igId) {
+        try {
+          const igRes = await axios.get(`https://graph.facebook.com/v22.0/${igId}/media`, {
+            params: {
+              fields: "id,caption,media_type,media_url,permalink,thumbnail_url,timestamp",
+              limit: 15,
+              access_token: pageToken
+            },
+            timeout: 4000
+          });
+
+          const rawMedia = igRes.data?.data || [];
+          for (const m of rawMedia) {
+            const isVideo = m.media_type === "VIDEO";
+            igItems.push({
+              id: `ig-${m.id}`,
+              platform: "instagram",
+              title: m.caption ? m.caption.slice(0, 80) + "..." : "RP Foundation Reel",
+              link: m.permalink || "https://www.instagram.com/rpfoundationofficial/",
+              description: m.caption || "Follow @rpfoundationofficial on Instagram.",
+              pubDate: m.timestamp ? new Date(m.timestamp).toUTCString() : new Date().toUTCString(),
+              author: "@rpfoundationofficial",
+              thumbnailUrl: m.thumbnail_url || m.media_url || "/assets/founder.png",
+              videoUrl: isVideo ? m.media_url : undefined,
+              category: isVideo ? "Reels" : "Post"
+            });
+          }
+        } catch {}
+      }
+    }
+
+    if (igItems.length > 0 || fbItems.length > 0) {
+      metaGraphCache = { instagram: igItems, facebook: fbItems, timestamp: now };
+      return metaGraphCache;
+    }
+    return { instagram: [], facebook: [] };
+  } catch {
+    return { instagram: [], facebook: [] };
+  }
+}
+
+// 2. Fetch Instagram Items (From Meta Graph, CMS, or Fallback)
 async function getInstagramItems(): Promise<SocialRssItem[]> {
+  try {
+    const meta = await getMetaGraphItems();
+    if (meta.instagram.length > 0) {
+      return meta.instagram;
+    }
+  } catch {}
+
   try {
     const cmsQuery = pool.query("SELECT data FROM cms_data WHERE key = 'app_cms' LIMIT 1");
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("DB timeout")), 1500));
@@ -305,8 +411,15 @@ async function getInstagramItems(): Promise<SocialRssItem[]> {
   ];
 }
 
-// 3. Fetch Facebook Items
-function getFacebookItems(): SocialRssItem[] {
+// 3. Fetch Facebook Items (From Meta Graph or Fallback)
+async function getFacebookItems(): Promise<SocialRssItem[]> {
+  try {
+    const meta = await getMetaGraphItems();
+    if (meta.facebook.length > 0) {
+      return meta.facebook;
+    }
+  } catch {}
+
   return [
     {
       id: "fb-1",
@@ -470,8 +583,7 @@ router.get("/api/public/social-rss-directory", (req, res) => {
 // JSON REST Feed for in-app widgets
 router.get("/api/public/social-feed", async (_req, res) => {
   try {
-    const [yt, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
-    const fb = getFacebookItems();
+    const [yt, ig, fb] = await Promise.all([getYouTubeItems(), getInstagramItems(), getFacebookItems()]);
     const x = getXItems();
 
     const all = [...yt.items, ...ig, ...fb, ...x].sort(
@@ -526,9 +638,9 @@ router.get(["/api/rss/social/instagram.xml", "/rss/instagram.xml"], async (req, 
 });
 
 // 3. Facebook RSS Feed (XML)
-router.get(["/api/rss/social/facebook.xml", "/rss/facebook.xml"], (req, res) => {
+router.get(["/api/rss/social/facebook.xml", "/rss/facebook.xml"], async (req, res) => {
   try {
-    const items = getFacebookItems();
+    const items = await getFacebookItems();
     const host = req.get("host") || "localhost:3000";
     const xml = buildRssXml({
       title: "RP Foundation Facebook Official Feed",
@@ -566,8 +678,7 @@ router.get(["/api/rss/social/x.xml", "/rss/x.xml"], (req, res) => {
 // 5. Unified All-in-One Social RSS Feed (XML)
 router.get(["/api/rss/social/all.xml", "/rss/social.xml", "/rss.xml"], async (req, res) => {
   try {
-    const [yt, ig] = await Promise.all([getYouTubeItems(), getInstagramItems()]);
-    const fb = getFacebookItems();
+    const [yt, ig, fb] = await Promise.all([getYouTubeItems(), getInstagramItems(), getFacebookItems()]);
     const x = getXItems();
 
     const merged = [...yt.items, ...ig, ...fb, ...x].sort(
