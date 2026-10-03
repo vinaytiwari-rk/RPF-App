@@ -3,7 +3,7 @@ import axios from "axios";
 import { 
   ArrowLeft, ChevronDown, ChevronUp, Eye, EyeOff, Instagram, 
   Plus, Save, Trash2, ExternalLink, Play, Upload, Loader2, Film, CheckCircle2,
-  Youtube, Code, ShieldCheck, Sparkles
+  Youtube, Code, ShieldCheck, Sparkles, Pencil, Copy, RefreshCw
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -18,22 +18,21 @@ export type InstagramPost = {
   thumbnailUrl?: string;
   embedUrl?: string;
   videoId?: string;
-  tweetId?: string;
   caption?: string;
   category?: string;
-  platform?: "youtube" | "instagram" | "x";
+  platform?: "youtube" | "instagram";
   active?: boolean;
   order?: number;
 };
 
 export function parseSocialEmbed(raw: string): {
-  platform: "youtube" | "instagram" | "x";
+  platform: "youtube" | "instagram";
   cleanUrl: string;
   embedUrl: string;
   videoId?: string;
-  tweetId?: string;
   thumbnailUrl?: string;
   videoUrl?: string;
+  suggestedTitle?: string;
 } {
   if (!raw) {
     return { platform: "instagram", cleanUrl: "", embedUrl: "" };
@@ -46,7 +45,7 @@ export function parseSocialEmbed(raw: string): {
   if (iframeMatch) {
     const src = iframeMatch[1];
     if (src.includes("youtube.com") || src.includes("youtu.be")) {
-      const ytIdMatch = src.match(/(?:embed\/|shorts\/|v=)([A-Za-z0-9_-]{11})/i);
+      const ytIdMatch = src.match(/(?:embed\/|shorts\/|watch\?v=|live\/|v=)([A-Za-z0-9_-]{11})/i);
       const videoId = ytIdMatch ? ytIdMatch[1] : undefined;
       return {
         platform: "youtube",
@@ -57,24 +56,13 @@ export function parseSocialEmbed(raw: string): {
       };
     }
     if (src.includes("instagram.com")) {
-      const igMatch = src.match(/instagram\.com\/p\/([A-Za-z0-9_-]+)/i);
+      const igMatch = src.match(/instagram\.com\/(?:reel|reels|p|tv|share)\/([A-Za-z0-9_-]+)/i);
       const shortcode = igMatch ? igMatch[1] : "";
       return {
         platform: "instagram",
         cleanUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/` : src,
         embedUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/embed/captioned/` : src,
         thumbnailUrl: shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : "/assets/founder.png"
-      };
-    }
-    if (src.includes("twitter.com") || src.includes("x.com")) {
-      const xMatch = src.match(/id=([0-9]+)/i);
-      const tweetId = xMatch ? xMatch[1] : undefined;
-      return {
-        platform: "x",
-        cleanUrl: tweetId ? `https://x.com/i/status/${tweetId}` : src,
-        embedUrl: tweetId ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark` : src,
-        tweetId,
-        thumbnailUrl: "/assets/founder.png"
       };
     }
     return {
@@ -84,8 +72,31 @@ export function parseSocialEmbed(raw: string): {
     };
   }
 
-  // 2. Direct MP4 / WebM / Cloudinary video URL
-  if (trimmed.match(/\.(mp4|webm|mov)($|\?)/i) || (trimmed.includes("res.cloudinary.com") && trimmed.includes("/video/"))) {
+  // 2. Instagram Blockquote Embed Code (<blockquote class="instagram-media" ...>)
+  if (trimmed.includes("instagram-media") || trimmed.includes("data-instgrm-permalink")) {
+    const permalinkMatch = trimmed.match(/data-instgrm-permalink=["']([^"']+)["']/i);
+    const permalink = permalinkMatch ? permalinkMatch[1].replace(/&amp;/g, "&") : "";
+    const shortcodeMatch = (permalink || trimmed).match(/instagram\.com\/(?:reel|reels|p|tv|share)\/([A-Za-z0-9_-]+)/i);
+    const shortcode = shortcodeMatch ? shortcodeMatch[1] : "";
+
+    // Extract caption / title text inside blockquote if available
+    let extractedText = "";
+    const textMatch = trimmed.match(/<a[^>]*>(.*?)<\/a>/i);
+    if (textMatch) {
+      extractedText = textMatch[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    return {
+      platform: "instagram",
+      cleanUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/` : (permalink || trimmed),
+      embedUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/embed/captioned/` : (permalink || trimmed),
+      thumbnailUrl: shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : "/assets/founder.png",
+      suggestedTitle: extractedText.length > 5 ? extractedText.slice(0, 140) : undefined
+    };
+  }
+
+  // 3. Direct MP4 / WebM / Cloudinary video URL
+  if (trimmed.match(/\.(mp4|webm|mov|m4v)($|\?)/i) || (trimmed.includes("res.cloudinary.com") && trimmed.includes("/video/"))) {
     return {
       platform: "instagram",
       cleanUrl: trimmed,
@@ -95,8 +106,8 @@ export function parseSocialEmbed(raw: string): {
     };
   }
 
-  // 3. YouTube (Shorts, Watch, youtu.be, embed)
-  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+  // 4. YouTube (Shorts, Watch, youtu.be, live, embed)
+  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
   if (ytMatch) {
     const videoId = ytMatch[1];
     return {
@@ -108,23 +119,8 @@ export function parseSocialEmbed(raw: string): {
     };
   }
 
-  // 4. X (Twitter) Tweet URL or Blockquote
-  const xMatch = trimmed.match(/(?:twitter\.com|x\.com)\/(?:#!\/)?[a-zA-Z0-9_]+\/status\/([0-9]+)/i);
-  if (xMatch) {
-    const tweetId = xMatch[1];
-    return {
-      platform: "x",
-      cleanUrl: `https://x.com/i/status/${tweetId}`,
-      embedUrl: `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`,
-      tweetId,
-      thumbnailUrl: "/assets/founder.png"
-    };
-  }
-
-  // 5. Instagram (Reels, Posts, blockquote permalink)
-  const igPermalinkMatch = trimmed.match(/data-instgrm-permalink=["']([^"']+)["']/i);
-  const targetIg = igPermalinkMatch ? igPermalinkMatch[1].replace(/&amp;/g, "&") : trimmed;
-  const igMatch = targetIg.match(/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+  // 5. Instagram (Reels, Posts, IGTV, share links with query params)
+  const igMatch = trimmed.match(/instagram\.com\/(?:reel|reels|p|tv|share)\/([A-Za-z0-9_-]+)/i);
   if (igMatch) {
     const shortcode = igMatch[1];
     return {
@@ -135,6 +131,7 @@ export function parseSocialEmbed(raw: string): {
     };
   }
 
+  // 6. Generic Link / Embed (never truncate, never cut)
   return {
     platform: "instagram",
     cleanUrl: trimmed,
@@ -218,8 +215,32 @@ export default function AdminInstagram() {
   };
 
   const addPost = () => {
-    setPosts((current) => [...current, { ...emptyPost(), order: current.length }]);
-    setSelected(posts.length);
+    const newIndex = posts.length;
+    setPosts((current) => [...current, { ...emptyPost(), order: newIndex }]);
+    setSelected(newIndex);
+    setTimeout(() => {
+      const el = document.getElementById("edit-reel-form-panel");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  };
+
+  const duplicatePost = (index: number) => {
+    const target = posts[index];
+    if (!target) return;
+    const newIndex = posts.length;
+    const duplicated: InstagramPost = {
+      ...target,
+      id: `social-${Date.now()}`,
+      title: `${target.title} (Copy)`,
+      order: newIndex
+    };
+    setPosts((current) => [...current, duplicated]);
+    setSelected(newIndex);
+    toast.success("Reel duplicated!");
+    setTimeout(() => {
+      const el = document.getElementById("edit-reel-form-panel");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const removePost = (index: number) => {
@@ -416,71 +437,121 @@ export default function AdminInstagram() {
 
             {posts.map((post, index) => {
               if (filterPlatform !== "all" && post.platform !== filterPlatform) return null;
+              const isSelected = selected === index;
               return (
                 <article
                   key={post.id}
-                  className={`overflow-hidden rounded-2xl border bg-white transition-all ${
-                    selected === index ? "border-rose-400 ring-2 ring-rose-100 shadow-sm" : "border-slate-200 hover:border-slate-300"
+                  className={`overflow-hidden rounded-2xl border transition-all ${
+                    isSelected
+                      ? "border-blue-600 ring-2 ring-blue-500/20 bg-blue-50/20 shadow-md"
+                      : "border-slate-200 bg-white hover:border-slate-300 shadow-2xs"
                   }`}
                 >
-                  <div className="flex w-full items-center gap-3 p-3">
-                    <div
-                      onClick={() => setSelected(index)}
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-xs cursor-pointer hover:scale-105 transition-transform ${
-                        post.platform === "youtube"
-                          ? "bg-rose-600"
-                          : post.platform === "x"
-                          ? "bg-slate-900"
-                          : post.videoUrl
-                          ? "bg-purple-600"
-                          : "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600"
-                      }`}
-                    >
-                      {post.platform === "youtube" ? (
-                        <Youtube className="h-6 w-6 fill-white" />
-                      ) : post.videoUrl ? (
-                        <Film className="h-6 w-6" />
-                      ) : (
-                        <Instagram className="h-6 w-6" />
-                      )}
-                    </div>
-
-                    <div
-                      onClick={() => setSelected(index)}
-                      className="min-w-0 flex-1 cursor-pointer"
-                    >
-                      <p className="truncate text-sm font-black text-slate-900">{post.title || "Untitled Video Reel"}</p>
-                      <p className="mt-0.5 truncate text-[10px] font-bold text-slate-400">
-                        {post.platform === "youtube" ? "🔴 YouTube" : "🟣 Instagram"} · {post.category || "Social"} · {post.active !== false ? "🟢 Active" : "⚪ Hidden"}
-                        {post.videoUrl && " · 📹 Video Ready"}
-                      </p>
-                    </div>
-
-                    {/* Quick Action Buttons on Each Card: Eye (toggle visibility) and Trash (Delete) */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        title={post.active !== false ? "Hide from user app" : "Show in user app"}
+                  <div className="p-3.5 space-y-3">
+                    {/* Header info row */}
+                    <div className="flex items-start gap-3">
+                      <div
                         onClick={() => {
-                          patch(index, { active: post.active === false });
-                          toast.success(post.active === false ? "Reel activated!" : "Reel hidden from app!");
+                          setSelected(index);
+                          const el = document.getElementById("edit-reel-form-panel");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                         }}
-                        className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                          post.active !== false
-                            ? "text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
-                            : "text-slate-400 bg-slate-100 border-slate-200 hover:bg-slate-200"
+                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-xs cursor-pointer hover:scale-105 transition-transform ${
+                          post.platform === "youtube"
+                            ? "bg-rose-600"
+                            : post.videoUrl
+                            ? "bg-purple-600"
+                            : "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600"
                         }`}
                       >
-                        {post.active !== false ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                      </button>
+                        {post.platform === "youtube" ? (
+                          <Youtube className="h-6 w-6 fill-white" />
+                        ) : post.videoUrl ? (
+                          <Film className="h-6 w-6" />
+                        ) : (
+                          <Instagram className="h-6 w-6" />
+                        )}
+                      </div>
 
+                      <div
+                        onClick={() => {
+                          setSelected(index);
+                          const el = document.getElementById("edit-reel-form-panel");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }}
+                        className="min-w-0 flex-1 cursor-pointer"
+                      >
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                            post.platform === "youtube"
+                              ? "bg-rose-100 text-rose-800"
+                              : "bg-pink-100 text-pink-800"
+                          }`}>
+                            {post.platform === "youtube" ? "YouTube" : "Instagram"}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                            {post.category || "Social Work"}
+                          </span>
+                          {isSelected && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-blue-700 bg-blue-100 border border-blue-300 px-2 py-0.5 rounded-full animate-pulse">
+                              <Pencil className="h-2.5 w-2.5" /> Editing Now
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Title - Never truncate abruptly, show readable 2 lines */}
+                        <p className="mt-1 text-sm font-black text-slate-900 leading-snug line-clamp-2">
+                          {post.title || "Untitled Video Reel"}
+                        </p>
+
+                        {post.caption && (
+                          <p className="mt-0.5 text-xs text-slate-500 line-clamp-1">
+                            {post.caption}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons Row on EVERY Card (Edit, Delete, Active/Hide) */}
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                      <div className="flex items-center gap-2">
+                        {/* ✏️ EDIT BUTTON */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelected(index);
+                            const el = document.getElementById("edit-reel-form-panel");
+                            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-black transition-all cursor-pointer shadow-2xs"
+                        >
+                          <Pencil className="h-3.5 w-3.5 text-indigo-600" />
+                          <span>Edit (बदलें)</span>
+                        </button>
+
+                        {/* 🗑️ DELETE BUTTON */}
+                        <button
+                          type="button"
+                          onClick={() => removePost(index)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-black transition-all cursor-pointer shadow-2xs"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-rose-600" />
+                          <span>Delete (हटाएं)</span>
+                        </button>
+                      </div>
+
+                      {/* 👁️ ACTIVE / HIDE TOGGLE */}
                       <button
                         type="button"
-                        title="Delete this reel/post"
-                        onClick={() => removePost(index)}
-                        className="p-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition-all cursor-pointer"
+                        onClick={() => toggleActive(index)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer ${
+                          post.active !== false
+                            ? "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
+                            : "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200"
+                        }`}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {post.active !== false ? <Eye className="h-3.5 w-3.5 text-emerald-600" /> : <EyeOff className="h-3.5 w-3.5 text-slate-400" />}
+                        <span>{post.active !== false ? "Active" : "Hidden"}</span>
                       </button>
                     </div>
                   </div>
@@ -490,13 +561,13 @@ export default function AdminInstagram() {
           </section>
 
           {/* Edit Reel Form */}
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section id="edit-reel-form-panel" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-4 self-start">
             {selected === null || !posts[selected] ? (
               <div className="grid min-h-[430px] place-items-center text-center">
                 <div>
                   <Instagram className="mx-auto h-9 w-9 text-rose-400" />
-                  <p className="mt-3 text-sm font-black">Select a Reel to edit</p>
-                  <p className="mt-1 text-xs text-slate-500">Upload device videos or edit details for the vertical player.</p>
+                  <p className="mt-3 text-sm font-black">Select a Reel from left or click &apos;Add Embed / Reel&apos;</p>
+                  <p className="mt-1 text-xs text-slate-500">Edit any details or paste embed code. Nothing will be cut off.</p>
                 </div>
               </div>
             ) : (() => {
@@ -504,35 +575,68 @@ export default function AdminInstagram() {
               const { embedUrl } = extractInstagramEmbedUrl(p.url);
               return (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[.16em] text-rose-600">Reel #{selected + 1}</p>
-                      <h2 className="text-lg font-black">Edit Social Video Reel</h2>
+                      <h2 className="text-lg font-black text-slate-900">Edit Reel / Video Embed</h2>
                     </div>
-                    <button onClick={() => removePost(selected)} className="inline-flex items-center gap-1 rounded-xl bg-rose-50 px-3 py-2 text-xs font-black text-rose-700">
-                      <Trash2 className="h-4 w-4" /> Delete
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => duplicatePost(selected)}
+                        className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
+                      >
+                        <Copy className="h-3.5 w-3.5" /> Duplicate
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removePost(selected)}
+                        className="inline-flex items-center gap-1 rounded-xl bg-rose-50 border border-rose-200 px-2.5 py-1.5 text-xs font-black text-rose-700 hover:bg-rose-100 cursor-pointer"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-rose-600" /> Delete
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="text-xs font-bold text-slate-700">
-                      Title / Heading
-                      <input
-                        value={p.title}
-                        onChange={(e) => patch(selected, { title: e.target.value })}
-                        placeholder="e.g. Mega Health Camp Video"
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-rose-400"
-                      />
+                  {/* Title - Spacious Textarea so text never gets cut off */}
+                  <label className="block text-xs font-bold text-slate-700">
+                    Title / Heading (शीर्षक)
+                    <textarea
+                      value={p.title}
+                      onChange={(e) => patch(selected, { title: e.target.value })}
+                      placeholder="e.g. मुख्यमंत्री निवास कार्यालय में माननीय मुख्यमंत्री जी से भेंट"
+                      rows={2}
+                      className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-rose-400 resize-y font-medium"
+                    />
+                  </label>
+
+                  {/* Category with Quick Chips */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Category (श्रेणी)
                     </label>
-                    <label className="text-xs font-bold text-slate-700">
-                      Category
-                      <input
-                        value={p.category || ""}
-                        onChange={(e) => patch(selected, { category: e.target.value })}
-                        placeholder="e.g. Healthcare / Volunteers"
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-rose-400"
-                      />
-                    </label>
+                    <div className="flex flex-wrap gap-1.5 pb-1">
+                      {["Social Work", "Healthcare", "Leadership", "Empowerment", "Culture", "Ground Action"].map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => patch(selected, { category: cat })}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                            p.category === cat
+                              ? "bg-[#0F3157] text-white"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      value={p.category || ""}
+                      onChange={(e) => patch(selected, { category: e.target.value })}
+                      placeholder="Custom category name..."
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-rose-400"
+                    />
                   </div>
 
                   {/* Device Video Upload Section */}
@@ -588,9 +692,6 @@ export default function AdminInstagram() {
                           className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-rose-400"
                         />
                       </label>
-                      <p className="mt-1 text-[10px] text-emerald-700 font-semibold">
-                        💡 Tip: Uses 0 MB cPanel disk space! Streams 24/7 directly from Google's high-speed CDN.
-                      </p>
                     </div>
 
                     {p.videoUrl && (
@@ -600,7 +701,7 @@ export default function AdminInstagram() {
                     )}
                   </div>
 
-                  {/* Universal Social Embed Code or URL Input */}
+                  {/* Universal Social Embed Code or URL Input - NOTHING CUT OFF */}
                   <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-black text-slate-800 flex items-center gap-1.5">
@@ -617,7 +718,7 @@ export default function AdminInstagram() {
                     </div>
 
                     <p className="text-[11px] text-slate-500">
-                      Paste YouTube Shorts URL, Instagram Reel/Post link, or complete embed code (&lt;blockquote&gt; / &lt;iframe&gt;).
+                      Paste ANY link or embed code (Instagram Reel, Post URL, complete &lt;blockquote...&gt;, YouTube Shorts, or &lt;iframe...&gt;). <strong>कुछ भी पेस्ट करें, यह अपने आप सही फ़ॉर्मैट निकाल लेगा और कोई ऑप्शन कट नहीं होगा।</strong>
                     </p>
 
                     <div className="relative">
@@ -627,19 +728,26 @@ export default function AdminInstagram() {
                           const val = e.target.value;
                           const parsed = parseSocialEmbed(val);
                           patch(selected, {
-                            url: val,
-                            embedUrl: parsed.embedUrl,
-                            platform: parsed.platform === "x" ? "instagram" : parsed.platform,
+                            url: parsed.cleanUrl || val,
+                            embedUrl: parsed.embedUrl || val,
+                            platform: parsed.platform,
                             videoId: parsed.videoId,
                             thumbnailUrl: parsed.thumbnailUrl || p.thumbnailUrl,
-                            videoUrl: parsed.videoUrl || p.videoUrl
+                            videoUrl: parsed.videoUrl || p.videoUrl,
+                            title: (!p.title.trim() && parsed.suggestedTitle) ? parsed.suggestedTitle : p.title
                           });
                         }}
-                        placeholder="Paste YouTube Shorts, Instagram Reel link or <iframe> code here..."
-                        rows={2}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-rose-400 font-mono"
+                        placeholder="Paste Instagram Reel / Post link, <blockquote...> embed code, or YouTube Shorts link here..."
+                        rows={3}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-rose-400 font-mono resize-y"
                       />
                     </div>
+
+                    {p.embedUrl && (
+                      <p className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 p-2 rounded-xl break-all">
+                        <strong>Active Stream:</strong> {p.embedUrl}
+                      </p>
+                    )}
 
                     {/* 100% In-App Playback Guarantee */}
                     <div className="flex items-start gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-[11px] text-emerald-800 font-semibold">
@@ -648,15 +756,15 @@ export default function AdminInstagram() {
                     </div>
                   </div>
 
-                  {/* Caption */}
+                  {/* Caption / Description - Spacious Textarea */}
                   <label className="block text-xs font-bold text-slate-700">
-                    Caption / Description
+                    Caption / Description (संदेश / विवरण)
                     <textarea
                       value={p.caption || ""}
                       onChange={(e) => patch(selected, { caption: e.target.value })}
                       placeholder="Write a short description or caption for this media item..."
                       rows={3}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-rose-400"
+                      className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none focus:border-rose-400 resize-y"
                     />
                   </label>
 
@@ -665,7 +773,7 @@ export default function AdminInstagram() {
                     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 p-3 text-center">
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-[10px] font-black uppercase tracking-[.14em] text-white/70">
-                          In-App Live Stream Preview ({p.platform === "youtube" ? "YouTube 9:16" : p.platform === "x" ? "X Tweet" : "Instagram"})
+                          In-App Live Stream Preview ({p.platform === "youtube" ? "YouTube 9:16" : "Instagram"})
                         </p>
                         <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950 border border-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" /> Streams Inside App
@@ -691,18 +799,25 @@ export default function AdminInstagram() {
                     </div>
                   )}
 
-                  {/* Ordering & Active Toggle */}
-                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-                    <button onClick={() => move(selected, -1)} disabled={selected === 0} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-2 text-xs font-black disabled:opacity-40">
-                      <ChevronUp className="h-4 w-4" /> Move Up
+                  {/* Ordering & Active Toggle & Direct Save */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => move(selected, -1)} disabled={selected === 0} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-black disabled:opacity-40 hover:bg-slate-50 cursor-pointer">
+                        <ChevronUp className="h-4 w-4" /> Move Up
+                      </button>
+                      <button type="button" onClick={() => move(selected, 1)} disabled={selected === posts.length - 1} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-black disabled:opacity-40 hover:bg-slate-50 cursor-pointer">
+                        <ChevronDown className="h-4 w-4" /> Move Down
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={save}
+                      disabled={saving}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#0F3157] px-4 py-2 text-xs font-black text-white disabled:opacity-50 hover:bg-[#1D5B93] cursor-pointer shadow-sm ml-auto"
+                    >
+                      <Save className="h-4 w-4" /> {saving ? "Publishing…" : "Save & Publish"}
                     </button>
-                    <button onClick={() => move(selected, 1)} disabled={selected === posts.length - 1} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-2 text-xs font-black disabled:opacity-40">
-                      <ChevronDown className="h-4 w-4" /> Move Down
-                    </button>
-                    <label className="ml-auto flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 text-xs font-black cursor-pointer">
-                      <span>Active in Reels Player</span>
-                      <input type="checkbox" checked={p.active !== false} onChange={(e) => patch(selected, { active: e.target.checked })} />
-                    </label>
                   </div>
                 </div>
               );
