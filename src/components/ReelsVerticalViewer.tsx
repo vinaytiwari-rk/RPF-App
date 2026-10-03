@@ -149,7 +149,6 @@ export default function ReelsVerticalViewer({
                   loop
                   playsInline
                   muted={false}
-                  volume={1}
                   className="absolute inset-0 h-full w-full object-contain bg-black"
                 />
               ) : isActive && activeEmbedUrl ? (
