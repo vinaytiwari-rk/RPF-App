@@ -1,17 +1,12 @@
 import React, { useState, useRef } from "react";
 import {
   X,
-  Heart,
-  Share2,
   Volume2,
   VolumeX,
   Play,
-  Instagram,
   ChevronDown,
   Sparkles,
 } from "lucide-react";
-import { openExternalLink } from "../utils/browser";
-import { useNavigate } from "react-router-dom";
 import InAppWebView from "./InAppWebView";
 
 export interface ReelItem {
@@ -23,8 +18,6 @@ export interface ReelItem {
   thumbnailUrl: string;
   title: string;
   caption: string;
-  likes: string;
-  shares?: string;
   author: string;
   authorAvatar?: string;
   platform?: "youtube" | "instagram" | "x";
@@ -61,11 +54,10 @@ export default function ReelsVerticalViewer({
   initialIndex = 0,
   onClose,
 }: ReelsVerticalViewerProps) {
-  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [isMuted, setIsMuted] = useState(false);
-  const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
-  const [inAppViewUrl, setInAppViewUrl] = useState<string | null>(null);
+  // Autoplay is reliably permitted by mobile browsers when media starts muted.
+  // The user can unmute with the single volume control in the header.
+  const [isMuted, setIsMuted] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = () => {
@@ -76,25 +68,6 @@ export default function ReelsVerticalViewer({
     if (index !== currentIndex && index >= 0 && index < reels.length) {
       setCurrentIndex(index);
     }
-  };
-
-  const toggleLike = (id: string) => {
-    setLikedMap((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleShare = async (reel: ReelItem) => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: reel.title,
-          text: reel.caption,
-          url: reel.url,
-        });
-      } else {
-        await navigator.clipboard.writeText(reel.url);
-        alert("Reel link copied to clipboard!");
-      }
-    } catch {}
   };
 
   return (
@@ -114,9 +87,6 @@ export default function ReelsVerticalViewer({
           </div>
           <div>
             <p className="text-xs font-black text-white tracking-wide">RP Foundation Live Feed</p>
-            <p className="text-[10px] text-orange-300 font-semibold">
-              {reels[currentIndex]?.platform === "youtube" ? "@rpfoundationofficial (YouTube)" : "@rpfoundationofficial (Instagram)"}
-            </p>
           </div>
         </div>
 
@@ -136,7 +106,7 @@ export default function ReelsVerticalViewer({
         </div>
       </div>
 
-      {/* Vertical Snap Scroll Container */}
+      {/* Vertical Snap Scroll Container — YouTube Shorts first, then Instagram Reels */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
@@ -151,9 +121,7 @@ export default function ReelsVerticalViewer({
           const tweetId = extractTwitterId(reel.url) || extractTwitterId(reel.videoUrl);
 
           const activeEmbedUrl = reel.embedUrl || (
-            ytId
-              ? `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`
-              : tweetId
+            tweetId
               ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
               : igShortcode
               ? `https://www.instagram.com/p/${igShortcode}/embed/captioned/`
@@ -169,10 +137,10 @@ export default function ReelsVerticalViewer({
               {isActive && ytId ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black">
                   <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`}
+                    src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&playsinline=1&modestbranding=1&rel=0`}
                     title={reel.title}
                     className="w-full h-full max-w-lg aspect-[9/16] border-0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                   />
                 </div>
@@ -198,93 +166,28 @@ export default function ReelsVerticalViewer({
                     scrolling="no"
                   />
                 </div>
-              ) : (
-                <>
-                  <img
-                    src={reel.thumbnailUrl}
-                    alt={reel.title}
-                    className="absolute inset-0 h-full w-full object-cover opacity-85"
-                    onError={(e) => {
-                      e.currentTarget.src = "/assets/founder.png";
-                    }}
+              ) : activeEmbedUrl ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-2 pt-14 pb-20">
+                  <iframe
+                    src={activeEmbedUrl}
+                    title={reel.title}
+                    className="w-full h-full max-w-sm aspect-[9/16] border-0 rounded-2xl bg-white shadow-2xl overflow-hidden"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    scrolling="no"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/90" />
-                  
-                  {/* Interactive Play & In-App View Trigger */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setInAppViewUrl(reel.url)}
-                      className="group flex flex-col items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-md p-5 border border-white/20 hover:scale-105 active:scale-95 transition-all shadow-2xl cursor-pointer"
-                    >
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white shadow-lg group-hover:scale-110 transition-transform">
-                        <Play className="h-8 w-8 fill-white ml-1" />
-                      </div>
-                      <div className="space-y-1">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-600/80 text-white text-[11px] font-black uppercase tracking-wider">
-                          <Play className="h-3.5 w-3.5" />
-                          View Inside App
-                        </span>
-                        <p className="text-[10.5px] text-slate-300 font-medium max-w-xs line-clamp-1">
-                          Plays directly in RP Foundation in-app browser
-                        </p>
-                      </div>
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {/* Right Action Bar (Instagram Reels Style) */}
-              <div className="absolute right-4 bottom-24 z-20 flex flex-col items-center gap-5">
-                {/* Like Button */}
-                <button
-                  onClick={() => toggleLike(reel.id)}
-                  className="flex flex-col items-center gap-1 group active:scale-125 transition-transform"
-                >
-                  <div
-                    className={`flex h-11 w-11 items-center justify-center rounded-full backdrop-blur-md border ${
-                      isLiked
-                        ? "bg-rose-600 border-rose-500 text-white shadow-lg shadow-rose-600/50"
-                        : "bg-black/40 border-white/20 text-white"
-                    }`}
-                  >
-                    <Heart className={`h-6 w-6 ${isLiked ? "fill-white" : ""}`} />
-                  </div>
-                  <span className="text-[10px] font-black tracking-wider text-white shadow-xs">
-                    {reel.likes}
-                  </span>
-                </button>
-
-                {/* Share Button */}
-                <button
-                  onClick={() => handleShare(reel)}
-                  className="flex flex-col items-center gap-1 active:scale-95 transition"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white">
-                    <Share2 className="h-5 w-5" />
-                  </div>
-                  <span className="text-[10px] font-black tracking-wider text-white">Share</span>
-                </button>
-
-                {/* In-App Browser Action */}
-                <button
-                  type="button"
-                  onClick={() => setInAppViewUrl(reel.url)}
-                  className="flex flex-col items-center gap-1 active:scale-95 transition cursor-pointer"
-                  title="View details inside app"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF9933] to-[#138808] text-white shadow-lg">
-                    {reel.platform === "youtube" ? (
-                      <Play className="h-5 w-5 fill-white" />
-                    ) : (
-                      <Instagram className="h-5 w-5" />
-                    )}
-                  </div>
-                  <span className="text-[9px] font-black tracking-wider text-orange-300">
-                    {reel.platform === "youtube" ? "YouTube" : "Instagram"}
-                  </span>
-                </button>
-              </div>
+                </div>
+              ) : (
+                <img
+                  src={reel.thumbnailUrl}
+                  alt={reel.title}
+                  className="absolute inset-0 h-full w-full object-cover opacity-85"
+                  onError={(e) => {
+                    e.currentTarget.src = "/assets/founder.png";
+                  }}
+                />
+              )})}
 
               {/* Bottom Caption & Handle Bar */}
               <div className="absolute bottom-6 left-4 right-20 z-20 space-y-2 text-left">
@@ -314,15 +217,6 @@ export default function ReelsVerticalViewer({
         })}
       </div>
 
-      {/* 100% In-App Web View Modal (Never Leaves The App) */}
-      {inAppViewUrl && (
-        <InAppWebView
-          url={inAppViewUrl}
-          title={reels[currentIndex]?.title || "RP Foundation Media"}
-          platform={reels[currentIndex]?.platform}
-          onClose={() => setInAppViewUrl(null)}
-        />
-      )}
     </div>
   );
 }
