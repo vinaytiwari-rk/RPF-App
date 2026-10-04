@@ -349,8 +349,6 @@ public class NativeBrowserActivity extends AppCompatActivity {
                           if(needsMic&&!micOk)p.add(Manifest.permission.RECORD_AUDIO);
                           permissionLauncher.launch(p.toArray(new String[0]));
                       }
-                  }).setNegativeButton("Block",(d,w)->request.deny())
-                  .setOnCancelListener(d->request.deny()).show();
             }
             @Override public boolean onCreateWindow(WebView view,boolean dialog,boolean userGesture,Message resultMsg){openPopup(resultMsg);return true;}
             @Override public void onCloseWindow(WebView window){if(window==popupWebView)closePopup();}
