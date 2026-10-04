@@ -258,7 +258,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
             webContainer.addView(w,new FrameLayout.LayoutParams(-1,-1));
             w.setVisibility(i==currentTab?View.VISIBLE:View.GONE);
             if(isHttpUrl(url)) w.loadUrl(url);
-            if(i<tabScrollY.size()) w.postDelayed(()->w.scrollTo(0,tabScrollY.get(i)),500);
+            if(i<tabScrollY.size()){ final int restoreIndex=i; w.postDelayed(()->w.scrollTo(0,tabScrollY.get(restoreIndex)),500); }
         }
         if(currentTab>=0 && currentTab<tabViews.size()){
             webView=tabViews.get(currentTab);
