@@ -9,6 +9,14 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 @CapacitorPlugin(name = "NativeRPFBrowser")
 public class NativeBrowserPlugin extends Plugin {
     @PluginMethod
+    public void openSettings(PluginCall call) {
+        Intent intent = new Intent(getContext(), NativeBrowserActivity.class);
+        intent.putExtra("settingsOnly", true);
+        getActivity().startActivity(intent);
+        call.resolve();
+    }
+
+    @PluginMethod
     public void open(PluginCall call) {
         String url = call.getString("url");
         if (url == null || !(url.startsWith("https://") || url.startsWith("http://"))) {
