@@ -245,7 +245,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
                     String description=error != null && error.getDescription()!=null ? error.getDescription().toString() : "The page could not be loaded.";
                     if(error!=null && error.getErrorCode()==WebViewClient.ERROR_HOST_LOOKUP)description="Website address could not be found (DNS). Check the URL and internet connection. If other sites open, this domain may be unavailable.\n\n"+description;
                     showError(description);
-                    if(isHttpUrl(failedUrl)) handler.postDelayed(() -> openCompatibilityBrowser(failedUrl), 250);
+                    // Keep failures inside Samahit Views. External browser is user-invoked only.
                 }
             }
             @Override public void onReceivedSslError(WebView view,SslErrorHandler handler,android.net.http.SslError error){
