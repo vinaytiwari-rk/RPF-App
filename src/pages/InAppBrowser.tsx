@@ -218,7 +218,7 @@ export default function InAppBrowser() {
               title="Samahit Views"
               key={`${frameSrc}:${frameVersion}`}
               src={frameSrc}
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-modals allow-presentation"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-presentation allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
               onLoad={() => {
                 setLoading(false);
               }}
