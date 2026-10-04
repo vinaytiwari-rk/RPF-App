@@ -62,11 +62,14 @@ export async function openExternalLink(url: string, navigate?: NavigateFunction,
     }
   }
 
-  // A normal browser cannot reliably embed arbitrary third-party sites because
-  // of CSP/X-Frame-Options. Do not route to an iframe fallback: navigate the
-  // current browser context directly so every HTTP(S) site gets its own real
-  // document, cookies, redirects, scripts and storage.
-  window.location.assign(value);
+  const fallback = `/browser?url=${encodeURIComponent(value)}&title=${encodeURIComponent(title || DEFAULT_WEB_TITLE)}`;
+  if (navigate) {
+    navigate(fallback);
+    return;
+  }
+
+  // Browser-build fallback stays in the current application context.
+  window.location.assign(fallback);
 }
 
 export const openSamahitView = openExternalLink;
