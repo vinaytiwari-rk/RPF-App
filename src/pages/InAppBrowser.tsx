@@ -23,6 +23,7 @@ export default function InAppBrowser() {
   const [controls, setControls] = useState(false);
   const [copied, setCopied] = useState(false);
   const [frameVersion, setFrameVersion] = useState(0);
+  const [browserMode, setBrowserMode] = useState<'direct' | 'proxy'>('direct');
 
   useEffect(() => {
     const valid = normalizeExternalWebUrl(params.get('url') || '') || '';
@@ -30,16 +31,20 @@ export default function InAppBrowser() {
       setCurrentUrl(valid);
       setAddressInput(valid);
       setError('');
+      setBrowserMode('direct');
     } else {
       setError(!initialUrl ? 'Invalid or unsupported website.' : '');
     }
     setLoading(true);
   }, [params]);
 
-  // Browser build: always try the real URL first. The server proxy is intentionally
-  // not used automatically because rewriting arbitrary third-party SPAs can break
-  // cookies, authentication, WebSockets, routing and JavaScript APIs.
-  const frameSrc = currentUrl;
+  // Browser build: try the real URL first, then transparently fall back to the
+  // server compatibility proxy for sites that block iframe embedding. Native
+  // Android uses the real WebView and never goes through this iframe path.
+  const proxySrc = currentUrl
+    ? `/api/gov/web-proxy?url=${encodeURIComponent(currentUrl)}&clean=1`
+    : '';
+  const frameSrc = browserMode === 'proxy' ? proxySrc : currentUrl;
 
   const showControlsTemporarily = () => {
     setControls(true);
@@ -53,6 +58,7 @@ export default function InAppBrowser() {
     setError('');
     setLoading(true);
     showControlsTemporarily();
+    setBrowserMode('direct');
     setFrameVersion(version => version + 1);
   };
 
@@ -65,18 +71,29 @@ export default function InAppBrowser() {
   useEffect(() => {
     if (!currentUrl || !loading || Capacitor.isNativePlatform()) return;
     const timer = window.setTimeout(() => {
-      // An iframe can never bypass X-Frame-Options/CSP or browser isolation.
-      // Do not show a fake error or send the site through the proxy. Let the
-      // normal browser engine open the exact URL in this same tab instead.
+      if (browserMode === 'direct') {
+        // First compatibility step: retry the same URL through our server
+        // proxy. This removes frame restrictions for sites that can safely
+        // be rendered through the compatibility layer.
+        setError('');
+        setControls(false);
+        setLoading(true);
+        setBrowserMode('proxy');
+        setFrameVersion(version => version + 1);
+        return;
+      }
+
+      // Final fallback: open the exact URL in the normal browser only after
+      // both embedded attempts have had a chance to load.
       setLoading(false);
       setControls(true);
-      setError('This website does not allow embedded viewing. Opening it directly in your browser…');
+      setError('This website cannot be embedded here. Opening the original website…');
       window.setTimeout(() => {
         window.location.assign(currentUrl);
       }, 450);
-    }, 10000);
+    }, browserMode === 'direct' ? 7000 : 12000);
     return () => window.clearTimeout(timer);
-  }, [currentUrl, loading, frameVersion]);
+  }, [currentUrl, loading, browserMode, frameVersion]);
 
   const handleNavigateAddress = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -94,6 +111,7 @@ export default function InAppBrowser() {
       setCurrentUrl(normalized);
       setAddressInput(normalized);
       setIsEditingAddress(false);
+      setBrowserMode('direct');
       setParams({ url: normalized, title: normalized });
       setLoading(true);
     }
@@ -221,6 +239,7 @@ export default function InAppBrowser() {
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-presentation allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
               onLoad={() => {
                 setLoading(false);
+                setError('');
               }}
               onError={() => {
                 setLoading(false);
