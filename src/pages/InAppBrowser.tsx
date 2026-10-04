@@ -23,7 +23,7 @@ export default function InAppBrowser() {
   const [controls, setControls] = useState(false);
   const [copied, setCopied] = useState(false);
   const [frameVersion, setFrameVersion] = useState(0);
-  const [browserMode, setBrowserMode] = useState<'direct' | 'proxy'>('direct');
+  const [browserMode, setBrowserMode] = useState<'direct' | 'proxy'>('proxy');
 
   useEffect(() => {
     const valid = normalizeExternalWebUrl(params.get('url') || '') || '';
@@ -31,7 +31,7 @@ export default function InAppBrowser() {
       setCurrentUrl(valid);
       setAddressInput(valid);
       setError('');
-      setBrowserMode('direct');
+      setBrowserMode('proxy');
     } else {
       setError(!initialUrl ? 'Invalid or unsupported website.' : '');
     }
@@ -58,7 +58,7 @@ export default function InAppBrowser() {
     setError('');
     setLoading(true);
     showControlsTemporarily();
-    setBrowserMode('direct');
+    setBrowserMode('proxy');
     setFrameVersion(version => version + 1);
   };
 
@@ -71,14 +71,13 @@ export default function InAppBrowser() {
   useEffect(() => {
     if (!currentUrl || !loading || Capacitor.isNativePlatform()) return;
     const timer = window.setTimeout(() => {
-      if (browserMode === 'direct') {
-        // First compatibility step: retry the same URL through our server
-        // proxy. This removes frame restrictions for sites that can safely
-        // be rendered through the compatibility layer.
+      if (browserMode === 'proxy') {
+        // The proxy is the primary web-browser mode because it can render
+        // portals that explicitly reject iframe embedding.
         setError('');
         setControls(false);
         setLoading(true);
-        setBrowserMode('proxy');
+        setBrowserMode('direct');
         setFrameVersion(version => version + 1);
         return;
       }
@@ -91,7 +90,7 @@ export default function InAppBrowser() {
       window.setTimeout(() => {
         window.location.assign(currentUrl);
       }, 450);
-    }, browserMode === 'direct' ? 7000 : 12000);
+    }, browserMode === 'proxy' ? 15000 : 8000);
     return () => window.clearTimeout(timer);
   }, [currentUrl, loading, browserMode, frameVersion]);
 
@@ -111,7 +110,7 @@ export default function InAppBrowser() {
       setCurrentUrl(normalized);
       setAddressInput(normalized);
       setIsEditingAddress(false);
-      setBrowserMode('direct');
+      setBrowserMode('proxy');
       setParams({ url: normalized, title: normalized });
       setLoading(true);
     }
