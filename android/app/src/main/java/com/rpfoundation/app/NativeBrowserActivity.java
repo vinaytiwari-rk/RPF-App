@@ -312,6 +312,44 @@ public class NativeBrowserActivity extends AppCompatActivity {
         };
     }
 
+    private void enterFullscreen(View view, WebChromeClient.CustomViewCallback callback){
+        if(view==null){ if(callback!=null) callback.onCustomViewHidden(); return; }
+        if(customFullscreenView!=null){ if(callback!=null) callback.onCustomViewHidden(); return; }
+        customFullscreenView=view;
+        customFullscreenCallback=callback;
+        if(topBar!=null) topBar.setVisibility(View.GONE);
+        if(bottomBar!=null) bottomBar.setVisibility(View.GONE);
+        if(progressBar!=null) progressBar.setVisibility(View.GONE);
+        if(errorView!=null) errorView.setVisibility(View.GONE);
+        try{
+            getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            root.addView(view,new FrameLayout.LayoutParams(-1,-1,Gravity.CENTER));
+        }catch(Exception e){
+            customFullscreenView=null;
+            customFullscreenCallback=null;
+            if(callback!=null) callback.onCustomViewHidden();
+        }
+    }
+
+    private void exitFullscreen(){
+        if(customFullscreenView==null){
+            try{ getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN); }catch(Exception ignored){}
+            return;
+        }
+        View view=customFullscreenView;
+        WebChromeClient.CustomViewCallback callback=customFullscreenCallback;
+        customFullscreenView=null;
+        customFullscreenCallback=null;
+        try{ root.removeView(view); }catch(Exception ignored){}
+        try{ getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN); }catch(Exception ignored){}
+        if(topBar!=null) topBar.setVisibility(View.VISIBLE);
+        if(bottomBar!=null) bottomBar.setVisibility(View.VISIBLE);
+        if(progressBar!=null && loading) progressBar.setVisibility(View.VISIBLE);
+        if(callback!=null){ try{ callback.onCustomViewHidden(); }catch(Exception ignored){} }
+        updateAddress(activeWebView()!=null?activeWebView().getUrl():null);
+        updateNavigation();
+    }
+
     private void deliverPickedFiles(ActivityResult result){
         if(fileCallback==null)return; Uri[] values=null;
         if(result.getResultCode()==RESULT_OK && result.getData()!=null){Intent d=result.getData();if(d.getClipData()!=null){int n=d.getClipData().getItemCount();values=new Uri[n];for(int i=0;i<n;i++)values[i]=d.getClipData().getItemAt(i).getUri();}else if(d.getData()!=null)values=new Uri[]{d.getData()};}
