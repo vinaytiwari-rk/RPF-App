@@ -84,11 +84,12 @@ export default function InAppBrowser() {
         return;
       }
 
-      // Do not silently throw the user out to Chrome. A slow/blocked portal
-      // should remain in Samahit with an explicit direct-open option.
+      // The proxy is the last embedded fallback. Do not label a slow proxy
+      // response as a site outage: the upstream may simply reject iframe
+      // embedding or require browser-only capabilities.
       setLoading(false);
       setControls(true);
-      setError('This website is taking too long to load here. You can retry or open the original website directly.');
+      setError('This website cannot be embedded in Samahit Views. You can open the original website directly or retry.');
     }, browserMode === 'direct' ? 6000 : 12000);
     return () => window.clearTimeout(timer);
   }, [currentUrl, loading, browserMode, frameVersion]);
