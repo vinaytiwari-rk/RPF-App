@@ -109,7 +109,7 @@ export default function InAppBrowser() {
       setCurrentUrl(normalized);
       setAddressInput(normalized);
       setIsEditingAddress(false);
-      setBrowserMode('proxy');
+      setBrowserMode('direct');
       setParams({ url: normalized, title: normalized });
       setLoading(true);
     }
