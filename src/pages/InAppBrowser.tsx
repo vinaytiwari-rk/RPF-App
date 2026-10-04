@@ -28,6 +28,13 @@ export default function InAppBrowser() {
       setCurrentUrl(valid);
       setAddressInput(valid);
       setError('');
+      // On the web build, do not iframe/proxy arbitrary third-party sites.
+      // Navigate the current tab directly so the site's own browser context
+      // handles JavaScript, cookies, redirects, SPA routing, downloads and media.
+      if (!Capacitor.isNativePlatform()) {
+        window.location.replace(valid);
+        return;
+      }
     } else {
       setError(!initialUrl ? 'Invalid or unsupported website.' : '');
     }
