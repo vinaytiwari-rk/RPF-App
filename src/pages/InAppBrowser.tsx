@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCw, Share2, ExternalLink, ChevronLeft, ChevronRight, Globe, Lock, Search, Home } from 'lucide-react';
 import { normalizeExternalWebUrl } from '../utils/browser';
-import { Capacitor } from '@capacitor/core';
 import BrandLoader from '../components/BrandLoader';
 
 const DEFAULT_TITLE = 'Samahit Views';
@@ -21,24 +20,26 @@ export default function InAppBrowser() {
   const [loading, setLoading] = useState(true);
   const [controls, setControls] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [frameTimedOut, setFrameTimedOut] = useState(false);
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
     const valid = normalizeExternalWebUrl(params.get('url') || '') || '';
-    if (valid) {
-      setCurrentUrl(valid);
-      setAddressInput(valid);
-      setError('');
-      // On the web build, do not iframe/proxy arbitrary third-party sites.
-      // Navigate the current tab directly so the site's own browser context
-      // handles JavaScript, cookies, redirects, SPA routing, downloads and media.
-      if (!Capacitor.isNativePlatform()) {
-        window.location.replace(valid);
-        return;
-      }
-    } else {
+    if (!valid) {
       setError(!initialUrl ? 'Invalid or unsupported website.' : '');
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+    setCurrentUrl(valid);
+    setAddressInput(valid);
+    setError('');
+    setFrameTimedOut(false);
+    setLoading(true);
+    const timer = window.setTimeout(() => {
+      setLoading(false);
+      setFrameTimedOut(true);
+    }, 9000);
+    return () => window.clearTimeout(timer);
   }, [params]);
 
 
@@ -194,13 +195,41 @@ export default function InAppBrowser() {
           </div>
         ) : (
           <>
-            <div className="flex h-full w-full flex-col items-center justify-center bg-white p-6 text-center">
-              <Globe className="h-10 w-10 text-[#C2410C]" />
-              <h2 className="mt-4 text-base font-bold text-[#0A192F]">Samahit Views</h2>
-              <p className="mt-2 max-w-sm text-xs text-slate-500">This website is opened directly for maximum compatibility with JavaScript, login, cookies, redirects, downloads and media.</p>
-              <button onClick={() => currentUrl && window.location.assign(currentUrl)} className="mt-5 rounded-xl bg-[#C2410C] px-5 py-2.5 text-xs font-bold text-white">Open Website</button>
-              {error && <p className="mt-3 text-xs text-slate-500">{error}</p>}
-            </div>
+            <iframe
+              ref={frameRef}
+              key={currentUrl}
+              src={currentUrl}
+              title={pageTitle}
+              className="h-full w-full border-0 bg-white"
+              allow="accelerometer; autoplay; camera; clipboard-read; clipboard-write; display-capture; fullscreen; geolocation; microphone; payment; picture-in-picture; usb"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+              onLoad={() => { setLoading(false); setFrameTimedOut(false); setError(''); }}
+            />
+            {(loading || frameTimedOut) && (
+              <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-center">
+                <div className="mt-16 max-w-sm rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 text-center shadow-lg backdrop-blur">
+                  {loading && !frameTimedOut ? (
+                    <>
+                      <BrandLoader compact />
+                      <p className="mt-2 text-xs font-semibold text-slate-600">Loading website…</p>
+                    </>
+                  ) : (
+                    <>
+                      <Globe className="mx-auto h-8 w-8 text-[#C2410C]" />
+                      <p className="mt-2 text-xs font-semibold text-slate-700">This website does not allow embedded viewing or is taking too long.</p>
+                      <button
+                        type="button"
+                        className="pointer-events-auto mt-3 rounded-xl bg-[#C2410C] px-4 py-2 text-xs font-bold text-white"
+                        onClick={() => window.location.assign(currentUrl)}
+                      >
+                        Open Website Directly
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>
