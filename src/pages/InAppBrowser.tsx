@@ -261,7 +261,7 @@ export default function InAppBrowser() {
       </main>
 
       {/* CONTROLS: hidden by default; double-tap the page to reveal temporarily */}
-      {/* FLOATING BOTTOM CONTROLS */
+      {/* FLOATING BOTTOM CONTROLS */}
       <footer className={`fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ${controls || error ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0 pointer-events-none'}`}>
         <div className="mx-auto flex h-14 max-w-md items-center justify-around border-t border-slate-200/90 bg-white/95 px-5 shadow-lg backdrop-blur-xl sm:rounded-t-2xl">
           <button
