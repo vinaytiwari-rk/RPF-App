@@ -255,7 +255,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 handler.cancel(); if(!popup){failedUrl=error!=null?error.getUrl():view.getUrl();showError("Secure connection could not be verified.");}
             }
             @Override public boolean onRenderProcessGone(WebView view,RenderProcessGoneDetail detail){
-                String url=view.getUrl(); if(view==popupWebView) closePopup(); else rebuildMainWebView(isHttpUrl(url)?url:lastStableUrl); return true;
+                String url=view.getUrl(); if(view==popupWebView) closePopup(); else { int idx=tabViews.indexOf(view); String restore=isHttpUrl(url)?url:lastStableUrl; if(idx>=0){webContainer.removeView(view);view.destroy();WebView replacement=createTabWebView(restore);tabViews.set(idx,replacement);webView=replacement;webContainer.addView(replacement,0,new FrameLayout.LayoutParams(-1,-1));} else rebuildMainWebView(restore); } return true;
             }
         };
     }
