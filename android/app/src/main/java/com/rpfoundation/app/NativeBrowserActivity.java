@@ -607,7 +607,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
             else if(w==15)newTab("https://www.google.com");
             else if(w==16)showTabs();
             else if(w==17){if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) enterPictureInPictureMode(new PictureInPictureParams.Builder().setAspectRatio(new Rational(16,9)).build());else Toast.makeText(this,"Picture-in-Picture requires Android 8 or newer",Toast.LENGTH_SHORT).show();}
-            else showSettings();
+            else showBrowserSettings();
         }).show();
     }
 
