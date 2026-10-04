@@ -211,7 +211,7 @@ export default function InAppBrowser() {
                 <div className="mt-16 max-w-sm rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 text-center shadow-lg backdrop-blur">
                   {loading && !frameTimedOut ? (
                     <>
-                      <BrandLoader compact />
+                      <BrandLoader size="sm" label="Loading website" />
                       <p className="mt-2 text-xs font-semibold text-slate-600">Loading website…</p>
                     </>
                   ) : (
