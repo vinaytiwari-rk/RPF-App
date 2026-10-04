@@ -8,7 +8,7 @@ const HTTP_URL = /^https?:\/\//i;
 const UNSAFE_URL_SCHEME = /^(?:javascript|data|file|blob|intent):/i;
 const DEFAULT_WEB_TITLE = 'Samahit Views';
 
-const NativeSamahitViews = registerPlugin<{ open(options: { url: string; title?: string }): Promise<void> }>('NativeRPFBrowser');
+const NativeSamahitViews = registerPlugin<{ open(options: { url: string; title?: string }): Promise<void>; openSettings(): Promise<void> }>('NativeRPFBrowser');
 
 export function normalizeExternalWebUrl(url: string): string | null {
   const value = String(url || '').trim();
@@ -101,4 +101,9 @@ export function installExternalLinkInterceptor(getNavigate: () => NavigateFuncti
   };
   document.addEventListener('click', handleClick, true);
   return () => document.removeEventListener('click', handleClick, true);
+}
+
+export async function openBrowserSettings(navigate?: NavigateFunction): Promise<void> {
+  if (Capacitor.isNativePlatform()) { try { await NativeSamahitViews.openSettings(); return; } catch (err) { console.error('[Samahit Views] Native browser settings unavailable:', err); } }
+  if (navigate) navigate('/settings?browser=1');
 }
