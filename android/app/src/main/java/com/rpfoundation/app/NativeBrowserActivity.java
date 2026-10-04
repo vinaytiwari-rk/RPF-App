@@ -648,7 +648,25 @@ public class NativeBrowserActivity extends AppCompatActivity {
         setContentView(root);String first=getIntent().getStringExtra("url");
         if(settingsOnly){ setContentView(root); handler.post(this::showBrowserSettings); return; }
         if(state==null) restoreSavedTabs();
-        String initial=isHttpUrl(first)?first:(tabs.isEmpty()?"https://www.google.com":tabs.get(currentTab));
+
+        // A URL supplied by the app is an explicit navigation request. Do not let
+        // the restored tab registry overwrite it with the previously active tab
+        // (for example, every new link becoming the old eRaktKosh page).
+        boolean explicitFirst=isHttpUrl(first);
+        if(explicitFirst){
+            if(tabs.isEmpty()){
+                tabs.add(first);
+                tabScrollY.add(0);
+                currentTab=0;
+            }else{
+                if(currentTab<0 || currentTab>=tabs.size()) currentTab=0;
+                tabs.set(currentTab,first);
+                while(tabScrollY.size()<tabs.size()) tabScrollY.add(0);
+                tabScrollY.set(currentTab,0);
+            }
+        }
+
+        String initial=explicitFirst?first:(tabs.isEmpty()?"https://www.google.com":tabs.get(currentTab));
         if(tabs.isEmpty()) tabs.add(initial);
         if(state!=null) webView.restoreState(state); else loadInApp(initial);
         restoreTabWebViews();
