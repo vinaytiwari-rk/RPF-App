@@ -10,6 +10,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
+import { openBrowserSettings } from "../utils/browser";
 
 type Lang = "en" | "hi";
 type VolunteerMeta = {
@@ -116,6 +117,7 @@ export default function Profile() {
     { icon: User, title: hi ? "प्रोफाइल संपादित करें" : "Edit Profile", sub: hi ? "अपनी व्यक्तिगत जानकारी अपडेट करें" : "Update your personal information", route: "/profile?edit=1", color: "bg-[#245D45]" },
     { icon: Award, title: hi ? "मेरे प्रमाणपत्र" : "My Certificates", sub: hi ? "सेवा एवं भागीदारी प्रमाणपत्र" : "Certificates of service & impact", route: "/my-certificates", color: "bg-[#7C5C9E]" },
     { icon: Settings, title: hi ? "ऐप सेटिंग्स" : "App Settings", sub: hi ? "भाषा, सूचनाएं और ऐप प्राथमिकताएं" : "Language, notifications & preferences", route: "/settings", color: "bg-[#245D45]" },
+    { icon: ShieldCheck, title: hi ? "ब्राउज़र सेटिंग्स" : "Browser Settings", sub: hi ? "साइट, डाउनलोड, डेटा, अनुमति और टैब नियंत्रण" : "Site, downloads, data, permissions & tabs", route: "/settings?browser=1", color: "bg-[#167C5A]", browserSettings: true },
     { icon: HelpCircle, title: hi ? "सूचनाएं" : "Notifications", sub: hi ? "महत्वपूर्ण अपडेट और घोषणाएं" : "Important updates and announcements", route: "/notifications", color: "bg-[#167C5A]" },
   ], [hi]);
 
@@ -291,10 +293,10 @@ export default function Profile() {
           </h2>
 
           <div className="grid grid-cols-2 gap-3">
-            {accountItems.map(({ icon: Icon, title, sub, route, color }) => (
+            {accountItems.map(({ icon: Icon, title, sub, route, color, browserSettings }) => (
               <button
                 key={title}
-                onClick={() => navigate(route)}
+                onClick={() => browserSettings ? void openBrowserSettings(navigate) : navigate(route)}
                 className="group flex flex-col justify-between rounded-[20px] border border-[#D8E8DB] bg-white p-4 text-left shadow-sm hover:border-slate-300 transition-all active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between">
