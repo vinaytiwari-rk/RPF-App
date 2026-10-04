@@ -294,14 +294,24 @@ public class NativeBrowserActivity extends AppCompatActivity {
         try{
             DownloadManager dm=(DownloadManager)getSystemService(DOWNLOAD_SERVICE);
             android.app.DownloadManager.Query q=new android.app.DownloadManager.Query();
-            android.database.Cursor cur=dm.query(q); ArrayList<String> rows=new ArrayList<>();
-            if(cur!=null){int title=cur.getColumnIndex(DownloadManager.COLUMN_TITLE),status=cur.getColumnIndex(DownloadManager.COLUMN_STATUS),uri=cur.getColumnIndex(DownloadManager.COLUMN_URI);while(cur.moveToNext()){
-                String t=title>=0?cur.getString(title):"Download"; int s=status>=0?cur.getInt(status):0; String u=uri>=0?cur.getString(uri):"";
-                String st=s==DownloadManager.STATUS_SUCCESSFUL?"Completed":s==DownloadManager.STATUS_FAILED?"Failed":s==DownloadManager.STATUS_PAUSED?"Paused":"In progress"; rows.add(t+"\n"+st+(u.isEmpty()?"":"\n"+u));}cur.close();}
+            android.database.Cursor cur=dm.query(q); ArrayList<String> rows=new ArrayList<>(); ArrayList<Long> ids=new ArrayList<>(); ArrayList<Integer> states=new ArrayList<>(); ArrayList<String> localUris=new ArrayList<>();
+            if(cur!=null){int idCol=cur.getColumnIndex(DownloadManager.COLUMN_ID),title=cur.getColumnIndex(DownloadManager.COLUMN_TITLE),status=cur.getColumnIndex(DownloadManager.COLUMN_STATUS),local=cur.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI),reason=cur.getColumnIndex(DownloadManager.COLUMN_REASON);while(cur.moveToNext()){
+                long id=idCol>=0?cur.getLong(idCol):0L; String t=title>=0?cur.getString(title):"Download"; int s=status>=0?cur.getInt(status):0; String u=local>=0?cur.getString(local):"";
+                String st=s==DownloadManager.STATUS_SUCCESSFUL?"Completed":s==DownloadManager.STATUS_FAILED?"Failed":s==DownloadManager.STATUS_PAUSED?"Paused":"In progress";
+                if(s==DownloadManager.STATUS_FAILED && reason>=0){int rr=cur.getInt(reason); if(rr!=0) st += " (code "+rr+")";}
+                ids.add(id); states.add(s); localUris.add(u); rows.add(t+"\n"+st);}cur.close();}
             if(rows.isEmpty()){Toast.makeText(this,"No downloads yet",Toast.LENGTH_SHORT).show();return;}
-            new AlertDialog.Builder(this).setTitle("Downloads").setItems(rows.toArray(new String[0]),null).setNegativeButton("Close",null).show();
+            new AlertDialog.Builder(this).setTitle("Downloads").setItems(rows.toArray(new String[0]),(d,which)->{
+                long id=ids.get(which); int state=states.get(which); String local=localUris.get(which);
+                if(state==DownloadManager.STATUS_SUCCESSFUL && local!=null && !local.isEmpty()){
+                    try{Uri file=Uri.parse(local); Intent view=new Intent(Intent.ACTION_VIEW); view.setDataAndType(file,getContentResolver().getType(file)); view.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); startActivity(view);}catch(Exception e){Toast.makeText(this,"No app can open this file",Toast.LENGTH_SHORT).show();}
+                }else if(state==DownloadManager.STATUS_RUNNING || state==DownloadManager.STATUS_PENDING || state==DownloadManager.STATUS_PAUSED){
+                    new AlertDialog.Builder(this).setMessage("Cancel this download?").setPositiveButton("Cancel",(a,b)->{dm.remove(id);showDownloads();}).setNegativeButton("Keep",null).show();
+                }else Toast.makeText(this,"Download failed. Start it again from the website.",Toast.LENGTH_SHORT).show();
+            }).setNegativeButton("Close",null).show();
         }catch(Exception e){Toast.makeText(this,"Download manager unavailable",Toast.LENGTH_SHORT).show();}
     }
+
     private void installDownloadListener(WebView target){
         target.setDownloadListener(new DownloadListener(){
             @Override public void onDownloadStart(String url,String ua,String disposition,String mime,long length){
@@ -651,6 +661,13 @@ public class NativeBrowserActivity extends AppCompatActivity {
     @Override protected void onPause(){if(webView!=null){webView.onPause();webView.pauseTimers();}if(popupWebView!=null)popupWebView.onPause();super.onPause();}
     @Override public void onUserLeaveHint(){
         super.onUserLeaveHint();
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O && customFullscreenView!=null && !isInPictureInPictureMode()){
+            try{enterPictureInPictureMode(new PictureInPictureParams.Builder().setAspectRatio(new Rational(16,9)).build());}catch(Exception ignored){}
+        }
+    }
+    @Override public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode){
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode);
+        if(isInPictureInPictureMode) showControls();
     }
     @Override protected void onResume(){super.onResume();if(webView!=null){webView.onResume();webView.resumeTimers();}if(popupWebView!=null)popupWebView.onResume();}
     @Override protected void onDestroy(){if(hideRunnable!=null)handler.removeCallbacks(hideRunnable);exitFullscreen();closePopup();for(WebView w:tabViews){try{w.stopLoading();w.destroy();}catch(Exception ignored){}}tabViews.clear();webView=null;super.onDestroy();}
