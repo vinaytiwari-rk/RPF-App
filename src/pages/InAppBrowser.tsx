@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCw, Share2, ExternalLink, ChevronLeft, ChevronRight, Globe, Lock, Search, Home } from 'lucide-react';
 import { normalizeExternalWebUrl } from '../utils/browser';
-import { RPF_WEB_ORIGIN } from '../config/browserPolicy';
 import { Capacitor } from '@capacitor/core';
 import BrandLoader from '../components/BrandLoader';
 
@@ -24,7 +23,6 @@ export default function InAppBrowser() {
   const [controls, setControls] = useState(false);
   const [copied, setCopied] = useState(false);
   const [frameVersion, setFrameVersion] = useState(0);
-  const [proxyFallback, setProxyFallback] = useState(false);
 
   useEffect(() => {
     const valid = normalizeExternalWebUrl(params.get('url') || '') || '';
@@ -32,19 +30,16 @@ export default function InAppBrowser() {
       setCurrentUrl(valid);
       setAddressInput(valid);
       setError('');
-      setProxyFallback(false);
     } else {
       setError(!initialUrl ? 'Invalid or unsupported website.' : '');
     }
     setLoading(true);
-    setProxyFallback(false);
   }, [params]);
 
-  const proxyPath = currentUrl ? `/api/gov/web-proxy?url=${encodeURIComponent(currentUrl)}` : '';
-  const proxyUrl = proxyPath ? (Capacitor.isNativePlatform() ? `${RPF_WEB_ORIGIN}${proxyPath}` : proxyPath) : '';
-  // Browser-build default: load the real site directly for maximum speed and web compatibility.
-  // The server proxy remains available as the explicit compatibility fallback.
-  const frameSrc = currentUrl || proxyUrl;
+  // Browser build: always try the real URL first. The server proxy is intentionally
+  // not used automatically because rewriting arbitrary third-party SPAs can break
+  // cookies, authentication, WebSockets, routing and JavaScript APIs.
+  const frameSrc = currentUrl;
 
   const showControlsTemporarily = () => {
     setControls(true);
@@ -57,7 +52,6 @@ export default function InAppBrowser() {
   const reload = () => {
     setError('');
     setLoading(true);
-    setProxyFallback(false);
     showControlsTemporarily();
     setFrameVersion(version => version + 1);
   };
@@ -69,19 +63,18 @@ export default function InAppBrowser() {
   }, []);
 
   useEffect(() => {
-    if (!currentUrl || !loading) return;
+    if (!currentUrl || !loading || Capacitor.isNativePlatform()) return;
     const timer = window.setTimeout(() => {
+      // An iframe can never bypass X-Frame-Options/CSP or browser isolation.
+      // Do not show a fake error or send the site through the proxy. Let the
+      // normal browser engine open the exact URL in this same tab instead.
       setLoading(false);
-      if (!proxyFallback && !Capacitor.isNativePlatform()) {
-        setProxyFallback(true);
-        setLoading(true);
-        setControls(false);
-        setFrameVersion(version => version + 1);
-        return;
-      }
       setControls(true);
-      setError('This website is taking too long to load. The site may require a full browser window or block embedded views.');
-    }, 18000);
+      setError('This website does not allow embedded viewing. Opening it directly in your browser…');
+      window.setTimeout(() => {
+        window.location.assign(currentUrl);
+      }, 450);
+    }, 10000);
     return () => window.clearTimeout(timer);
   }, [currentUrl, loading, frameVersion]);
 
@@ -223,8 +216,8 @@ export default function InAppBrowser() {
             <iframe
               ref={frameRef}
               title="Samahit Views"
-              key={`${proxyFallback ? proxyUrl : frameSrc}:${frameVersion}`}
-              src={proxyFallback ? proxyUrl : frameSrc}
+              key={`${frameSrc}:${frameVersion}`}
+              src={frameSrc}
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-modals allow-presentation"
               onLoad={() => {
                 setLoading(false);
@@ -245,7 +238,7 @@ export default function InAppBrowser() {
             {loading && (
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-xs">
                 <BrandLoader size="lg" label="Loading portal…" />
-                <p className="mt-3 text-xs font-bold text-[#0A192F]">{proxyFallback ? "Opening compatibility view…" : "Opening website…"}</p>
+                <p className="mt-3 text-xs font-bold text-[#0A192F]">"Opening website…"</p>
                 <p className="text-[11px] text-slate-400 mt-0.5 max-w-xs text-center truncate">{currentUrl}</p>
               </div>
             )}
