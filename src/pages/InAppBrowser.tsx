@@ -228,7 +228,6 @@ export default function InAppBrowser() {
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-modals allow-presentation"
               onLoad={() => {
                 setLoading(false);
-                if (!error) showControlsTemporarily();
               }}
               onError={() => {
                 setLoading(false);
