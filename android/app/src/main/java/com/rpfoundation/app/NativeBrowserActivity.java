@@ -341,7 +341,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private void toggleDataSaver(){dataSaver=!dataSaver;prefs.edit().putBoolean("dataSaver",dataSaver).apply();activeWebView().getSettings().setLoadsImagesAutomatically(!dataSaver);activeWebView().getSettings().setBlockNetworkImage(dataSaver);activeWebView().reload();}
     private void zoomIn(){WebView w=activeWebView();if(w.canZoomIn())w.zoomIn();}
     private void zoomOut(){WebView w=activeWebView();if(w.canZoomOut())w.zoomOut();}
-    private void resetZoom(){activeWebView().zoomBy(1f);}
+    private void resetZoom(){ WebView w=activeWebView(); try{ float scale=w.getScale(); if(scale>1.01f){ for(int i=0;i<8&&w.getScale()>1.01f;i++)w.zoomOut(); } else if(scale<0.99f){ for(int i=0;i<8&&w.getScale()<0.99f;i++)w.zoomIn(); } }catch(Exception ignored){} }
     private void findInPage(){EditText e=new EditText(this);e.setSingleLine(true);e.setHint("Find text");new AlertDialog.Builder(this).setTitle("Find in page").setView(e).setPositiveButton("Find",(d,w)->activeWebView().findAllAsync(e.getText().toString())).setNegativeButton("Cancel",null).show();}
     private void copyUrl(){String u=activeWebView().getUrl();if(u!=null){((ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("URL",u));Toast.makeText(this,"Link copied",Toast.LENGTH_SHORT).show();}}
     private void openInExternalBrowser(){
