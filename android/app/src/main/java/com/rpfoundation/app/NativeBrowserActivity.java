@@ -539,7 +539,34 @@ public class NativeBrowserActivity extends AppCompatActivity {
     }
     private TextView tabsButton;
     private void updateTabLabel(){if(tabsButton!=null)tabsButton.setText("▣ "+tabs.size());}
-    private void showSettings(){String[] o={"Auto-hide toolbar: "+(autoHide?"On":"Off"),"Data Saver: "+(dataSaver?"On":"Off"),"Clear browsing data"};new AlertDialog.Builder(this).setTitle("Samahit Views Settings").setItems(o,(d,w)->{if(w==0){autoHide=!autoHide;prefs.edit().putBoolean("autoHide",autoHide).apply();if(autoHide)scheduleHide();}else if(w==1)toggleDataSaver();else new AlertDialog.Builder(this).setMessage("Clear cookies, cache and saved history? This may sign you out of websites.").setPositiveButton("Clear",(a,b)->{clearData();clearSitePermissions();prefs.edit().remove(HISTORY).apply();}).setNegativeButton("Cancel",null).show();}).show();}
+    private void showBrowserSettings(){
+        String[] items={
+            "Site mode: "+(desktopMode?"Desktop":"Mobile"),
+            "Data Saver: "+(dataSaver?"On":"Off"),
+            "Auto-hide browser controls: "+(autoHide?"On":"Off"),
+            "Restore open tabs on startup: On",
+            "Media autoplay: On",
+            "Reset site permissions",
+            "Clear browsing data",
+            "Downloads",
+            "Bookmarks",
+            "History"
+        };
+        new AlertDialog.Builder(this).setTitle("Browser Settings")
+          .setItems(items,(d,w)->{
+            if(w==0) toggleDesktopMode();
+            else if(w==1) toggleDataSaver();
+            else if(w==2){autoHide=!autoHide;prefs.edit().putBoolean("autoHide",autoHide).apply();if(autoHide)scheduleHide();else if(hideRunnable!=null)handler.removeCallbacks(hideRunnable);showControls();}
+            else if(w==3) Toast.makeText(this,"Open tabs are restored automatically",Toast.LENGTH_SHORT).show();
+            else if(w==4) Toast.makeText(this,"Media autoplay is enabled for supported websites",Toast.LENGTH_SHORT).show();
+            else if(w==5){clearSitePermissions();Toast.makeText(this,"Site permissions reset",Toast.LENGTH_SHORT).show();}
+            else if(w==6) new AlertDialog.Builder(this).setMessage("Clear cookies, cache, WebStorage, form data and site permissions?").setPositiveButton("Clear",(a,b)->clearData()).setNegativeButton("Cancel",null).show();
+            else if(w==7) showDownloads();
+            else if(w==8) showSaved(BOOKMARKS);
+            else if(w==9) showSaved(HISTORY);
+          }).setNegativeButton("Close",null).show();
+    }
+
     private void showMenu(){
         String[] a={"Refresh","Zoom in","Zoom out","Reset zoom","Find in page",desktopMode?"Mobile site":"Desktop site",dataSaver?"Disable Data Saver":"Enable Data Saver","Share","Copy link","Close popup","Open in another browser","Add bookmark","Bookmarks","History","Downloads","New tab","Tabs","Settings"};
         new AlertDialog.Builder(this).setItems(a,(d,w)->{
@@ -586,6 +613,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         errorView=new LinearLayout(this);errorView.setOrientation(LinearLayout.VERTICAL);errorView.setGravity(Gravity.CENTER);errorView.setPadding(dp(28),dp(28),dp(28),dp(28));errorView.setBackgroundColor(IVORY);TextView title=new TextView(this);title.setText("This page could not be loaded");title.setTextColor(NAVY);title.setTextSize(19);title.setGravity(Gravity.CENTER);errorView.addView(title);TextView detail=new TextView(this);detail.setTag("detail");detail.setTextColor(Color.DKGRAY);detail.setTextSize(13);detail.setGravity(Gravity.CENTER);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(12);errorView.addView(detail,p);TextView retry=button("Try again");retry.setTextColor(Color.WHITE);retry.setBackgroundColor(NAVY);retry.setOnClickListener(v->activeWebView().reload());LinearLayout.LayoutParams rp=new LinearLayout.LayoutParams(-2,-2);rp.topMargin=dp(20);errorView.addView(retry,rp);
         TextView external=button("Open in another browser (optional)");external.setOnClickListener(v->openInExternalBrowser());LinearLayout.LayoutParams ep=new LinearLayout.LayoutParams(-2,-2);ep.topMargin=dp(12);errorView.addView(external,ep);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
         buildChrome();
+        if(getIntent().getBooleanExtra("settingsOnly",false)){ handler.post(this::showBrowserSettings); }
         root.setOnApplyWindowInsetsListener((view,insets)->{int bottom=insets.getSystemWindowInsetBottom();root.setPadding(0,0,0,bottom);return insets;});
         setContentView(root);String first=getIntent().getStringExtra("url");
         if(state==null) restoreSavedTabs();
