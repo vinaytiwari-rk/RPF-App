@@ -229,7 +229,16 @@ public class NativeBrowserActivity extends AppCompatActivity {
     }
 
     private void restoreTabWebViews(){
-        if(tabViews.size()>=tabs.size()) return;
+        if(tabs.isEmpty()) return;
+        if(tabViews.isEmpty() && webView != null){
+            tabViews.add(webView);
+            webView.setVisibility(currentTab==0 ? View.VISIBLE : View.GONE);
+            if(isHttpUrl(tabs.get(0)) && !tabs.get(0).equals(webView.getUrl())) webView.loadUrl(tabs.get(0));
+        }
+        if(tabViews.size()>=tabs.size()){
+            if(currentTab>=0 && currentTab<tabViews.size()){webView=tabViews.get(currentTab);webView.setVisibility(View.VISIBLE);}
+            return;
+        }
         for(int i=tabViews.size();i<tabs.size();i++){
             String url=tabs.get(i);
             WebView w=createTabWebView(null);
@@ -244,7 +253,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         }
     }
     private String permissionKey(String origin,String resource){
-        try{return PERMISSION_PREFIX+Uri.parse(origin).getHost()+":"+resource;}catch(Exception e){return PERMISSION_PREFIX+origin+":"+resource;}
+        try{Uri u=Uri.parse(origin);return PERMISSION_PREFIX+u.getScheme()+"://"+u.getAuthority()+":"+resource;}catch(Exception e){return PERMISSION_PREFIX+origin+":"+resource;}
     }
     private int sitePermission(String origin,String resource){ return prefs.getInt(permissionKey(origin,resource),0); }
     private void setSitePermission(String origin,String resource,int value){ prefs.edit().putInt(permissionKey(origin,resource),value).apply(); }
@@ -325,6 +334,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
                     // Keep failures inside Samahit Views. External browser is user-invoked only.
                 }
             }
+            @Override public void onReceivedHttpError(WebView view,WebResourceRequest request,android.webkit.WebResourceResponse response){if(!popup&&request!=null&&request.isForMainFrame()&&response!=null&&response.getStatusCode()>=400){mainFrameError=true;failedUrl=request.getUrl()!=null?request.getUrl().toString():view.getUrl();String reason=response.getReasonPhrase()!=null?response.getReasonPhrase():"HTTP error";showError("Website returned HTTP "+response.getStatusCode()+" ("+reason+"). The server may be unavailable or blocking this request.");}}
             @Override public void onReceivedSslError(WebView view,SslErrorHandler handler,android.net.http.SslError error){
                 handler.cancel(); if(!popup){failedUrl=error!=null?error.getUrl():view.getUrl();showError("Secure connection could not be verified.");}
             }
@@ -482,7 +492,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         catch(Exception e){Toast.makeText(this,"No external browser available",Toast.LENGTH_SHORT).show();}
     }
     private void share(){String u=activeWebView().getUrl();if(u!=null)startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,u),"Share link"));}
-    private void clearData(){CookieManager.getInstance().removeAllCookies(null);CookieManager.getInstance().flush();for(WebView w:tabViews){w.clearCache(true);w.clearHistory();}if(popupWebView!=null){popupWebView.clearCache(true);popupWebView.clearHistory();}Toast.makeText(this,"Browsing data cleared",Toast.LENGTH_SHORT).show();}
+    private void clearData(){CookieManager.getInstance().removeAllCookies(null);CookieManager.getInstance().flush();android.webkit.WebStorage.getInstance().deleteAllData();for(WebView w:tabViews){w.clearCache(true);w.clearHistory();w.clearFormData();}if(popupWebView!=null){popupWebView.clearCache(true);popupWebView.clearHistory();popupWebView.clearFormData();}clearSitePermissions();Toast.makeText(this,"Browsing data cleared",Toast.LENGTH_SHORT).show();}
     private ArrayList<String> saved(String key){
         ArrayList<String> list=new ArrayList<>();
         try{JSONArray a=new JSONArray(prefs.getString(key,"[]"));for(int i=0;i<a.length();i++)list.add(a.getString(i));}catch(Exception ignored){}
