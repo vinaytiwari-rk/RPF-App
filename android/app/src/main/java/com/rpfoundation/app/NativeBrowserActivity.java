@@ -49,7 +49,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.browser.customtabs.CustomTabsIntent;
 
 import java.util.ArrayList;
 import org.json.JSONArray;
@@ -154,14 +153,10 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private void openCompatibilityBrowser(String value){
         if(!isHttpUrl(value)) return;
         try {
-            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-            builder.setShowTitle(true);
-            builder.setShareState(CustomTabsIntent.SHARE_STATE_ON);
-            builder.build().launchUrl(this, Uri.parse(value));
-        } catch(Exception ignored) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(value));
+            intent.addCategory(Intent.CATEGORY_BROWSABLE);
             startActivity(intent);
-        }
+        } catch(Exception ignored) {}
     }
 
     private void loadInApp(String value){
