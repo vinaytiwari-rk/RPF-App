@@ -67,6 +67,8 @@ const rewriteClientRequests = (html: string, target: URL) => {
       return PREFIX+encodeURIComponent(u.toString())+'&clean=1';
     }catch(e){return value;}
   };
+  const NativeEventSource=window.EventSource;
+  if(NativeEventSource){ window.EventSource=function(url,opts){ return new NativeEventSource('/api/gov/web-proxy-stream?url='+encodeURIComponent(new URL(url,BASE).toString()),opts); }; window.EventSource.prototype=NativeEventSource.prototype; }
   const nativeFetch=window.fetch;
   window.fetch=function(input,init){
     try{
@@ -107,6 +109,27 @@ const proxyResponseCookies = (res: express.Response, upstream: any) => {
     res.setHeader('Set-Cookie', setCookie.map((v:string)=>v.replace(/;\\s*Domain=[^;]*/ig,'').replace(/;\\s*SameSite=None/ig,'; SameSite=Lax')));
   }
 };
+
+router.get('/api/gov/web-proxy-stream', async (req, res) => {
+  const raw=String(req.query.url||'');
+  if(!isAllowedPortal(raw)) return res.status(400).json({success:false,error:'Invalid or restricted stream address'});
+  try{
+    const target=new URL(raw);
+    const upstream=await axios.get(target.toString(),{responseType:'stream',timeout:30000,maxRedirects:10,httpsAgent,headers:proxyHeaders(req,target),validateStatus:()=>true});
+    const finalUrl=upstream.request?.res?.responseUrl||target.toString();
+    if(!isAllowedPortal(finalUrl)){upstream.data.destroy();return res.status(403).end();}
+    const ct=String(upstream.headers['content-type']||'text/event-stream');
+    res.status(upstream.status).set({
+      'Content-Type':ct,
+      'Cache-Control':'no-cache, no-transform',
+      'Connection':'keep-alive',
+      'Access-Control-Allow-Origin':'*'
+    });
+    upstream.data.on('error',()=>res.end());
+    req.on('close',()=>{try{upstream.data.destroy();}catch{}});
+    upstream.data.pipe(res);
+  }catch(err:any){console.error('Web proxy stream failed:',err?.message||err);if(!res.headersSent)res.status(502).json({success:false,error:'Upstream stream unavailable'});}
+});
 
 const proxyHandler = async (req: express.Request, res: express.Response) => {
   const raw = String(req.query.url || '');
