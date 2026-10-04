@@ -225,6 +225,26 @@ public class NativeBrowserActivity extends AppCompatActivity {
     }
     private int sitePermission(String origin,String resource){ return prefs.getInt(permissionKey(origin,resource),0); }
     private void setSitePermission(String origin,String resource,int value){ prefs.edit().putInt(permissionKey(origin,resource),value).apply(); }
+
+    private boolean androidPermissionGranted(String resource){
+        if(PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource))
+            return ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED;
+        if(PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource))
+            return ContextCompat.checkSelfPermission(this,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED;
+        return false;
+    }
+
+    private boolean locationPermissionGranted(){
+        return ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void clearSitePermissions(){
+        java.util.Map<String,?> all=prefs.getAll();
+        SharedPreferences.Editor editor=prefs.edit();
+        for(String key:all.keySet()) if(key.startsWith(PERMISSION_PREFIX)) editor.remove(key);
+        editor.apply();
+    }
     private void showDownloads(){
         try{
             DownloadManager dm=(DownloadManager)getSystemService(DOWNLOAD_SERVICE);
@@ -304,7 +324,8 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 if(origin==null||!origin.startsWith("https://")){callback.invoke(origin,false,false);return;}
                 int decision=sitePermission(origin,"location");
                 if(decision==2){callback.invoke(origin,false,false);return;}
-                if(decision==1){callback.invoke(origin,true,false);return;}
+                if(decision==1 && locationPermissionGranted()){callback.invoke(origin,true,false);return;}
+                if(decision==1 && !locationPermissionGranted()) setSitePermission(origin,"location",0);
                 new AlertDialog.Builder(NativeBrowserActivity.this).setTitle("Location permission")
                   .setMessage("Allow "+origin+" to access your location?")
                   .setPositiveButton("Always allow",(d,w)->{ setSitePermission(origin,"location",1); requestLocation(callback,origin); })
@@ -331,7 +352,11 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 String origin=request.getOrigin().toString();
                 int camDecision=needsCam?sitePermission(origin,"camera"):1, micDecision=needsMic?sitePermission(origin,"microphone"):1;
                 if((needsCam&&camDecision==2)||(needsMic&&micDecision==2)){request.deny();return;}
-                if((!needsCam||camDecision==1)&&(!needsMic||micDecision==1)){request.grant(request.getResources());return;}
+                if((!needsCam||camDecision==1)&&(!needsMic||micDecision==1)
+                        && (!needsCam || androidPermissionGranted(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+                        && (!needsMic || androidPermissionGranted(PermissionRequest.RESOURCE_AUDIO_CAPTURE))){request.grant(request.getResources());return;}
+                if(needsCam && camDecision==1 && !androidPermissionGranted(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) camDecision=0;
+                if(needsMic && micDecision==1 && !androidPermissionGranted(PermissionRequest.RESOURCE_AUDIO_CAPTURE)) micDecision=0;
                 new AlertDialog.Builder(NativeBrowserActivity.this).setTitle("Website permission")
                   .setMessage("Allow "+request.getOrigin().getHost()+" to use "+(cam&&mic?"camera and microphone":cam?"camera":"microphone")+"?")
                   .setPositiveButton("Always allow",(d,w)->{ if(needsCam)setSitePermission(origin,"camera",1); if(needsMic)setSitePermission(origin,"microphone",1); grantWebPermission(request,needsCam,needsMic); })
@@ -481,7 +506,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     }
     private TextView tabsButton;
     private void updateTabLabel(){if(tabsButton!=null)tabsButton.setText("▣ "+tabs.size());}
-    private void showSettings(){String[] o={"Auto-hide toolbar: "+(autoHide?"On":"Off"),"Data Saver: "+(dataSaver?"On":"Off"),"Clear browsing data"};new AlertDialog.Builder(this).setTitle("Samahit Views Settings").setItems(o,(d,w)->{if(w==0){autoHide=!autoHide;prefs.edit().putBoolean("autoHide",autoHide).apply();if(autoHide)scheduleHide();}else if(w==1)toggleDataSaver();else new AlertDialog.Builder(this).setMessage("Clear cookies, cache and saved history? This may sign you out of websites.").setPositiveButton("Clear",(a,b)->{clearData();prefs.edit().remove(HISTORY).apply();}).setNegativeButton("Cancel",null).show();}).show();}
+    private void showSettings(){String[] o={"Auto-hide toolbar: "+(autoHide?"On":"Off"),"Data Saver: "+(dataSaver?"On":"Off"),"Clear browsing data"};new AlertDialog.Builder(this).setTitle("Samahit Views Settings").setItems(o,(d,w)->{if(w==0){autoHide=!autoHide;prefs.edit().putBoolean("autoHide",autoHide).apply();if(autoHide)scheduleHide();}else if(w==1)toggleDataSaver();else new AlertDialog.Builder(this).setMessage("Clear cookies, cache and saved history? This may sign you out of websites.").setPositiveButton("Clear",(a,b)->{clearData();clearSitePermissions();prefs.edit().remove(HISTORY).apply();}).setNegativeButton("Cancel",null).show();}).show();}
     private void showMenu(){
         String[] a={"Refresh","Zoom in","Zoom out","Reset zoom","Find in page",desktopMode?"Mobile site":"Desktop site",dataSaver?"Disable Data Saver":"Enable Data Saver","Share","Copy link","Close popup","Open in another browser","Add bookmark","Bookmarks","History","Downloads","New tab","Tabs","Settings"};
         new AlertDialog.Builder(this).setItems(a,(d,w)->{
