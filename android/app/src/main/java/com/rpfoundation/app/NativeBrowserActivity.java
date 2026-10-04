@@ -213,12 +213,35 @@ public class NativeBrowserActivity extends AppCompatActivity {
         try{ prefs.edit().putString("openTabs",new JSONArray(tabs).toString()).putInt("currentTab",currentTab).apply(); }catch(Exception ignored){}
     }
     private void restoreSavedTabs(){
-        tabs.clear(); tabViews.clear();
+        tabs.clear();
         try{
             JSONArray a=new JSONArray(prefs.getString("openTabs","[]"));
             for(int i=0;i<a.length() && i<12;i++){String u=a.optString(i,"");if(isHttpUrl(u))tabs.add(u);}
+            if(tabs.isEmpty()){
+                currentTab=0;
+                return;
+            }
             currentTab=Math.max(0,Math.min(prefs.getInt("currentTab",0),tabs.size()-1));
-        }catch(Exception ignored){}
+        }catch(Exception ignored){
+            tabs.clear();
+            currentTab=0;
+        }
+    }
+
+    private void restoreTabWebViews(){
+        if(tabViews.size()>=tabs.size()) return;
+        for(int i=tabViews.size();i<tabs.size();i++){
+            String url=tabs.get(i);
+            WebView w=createTabWebView(null);
+            tabViews.add(w);
+            webContainer.addView(w,new FrameLayout.LayoutParams(-1,-1));
+            w.setVisibility(i==currentTab?View.VISIBLE:View.GONE);
+            if(isHttpUrl(url)) w.loadUrl(url);
+        }
+        if(currentTab>=0 && currentTab<tabViews.size()){
+            webView=tabViews.get(currentTab);
+            webView.setVisibility(View.VISIBLE);
+        }
     }
     private String permissionKey(String origin,String resource){
         try{return PERMISSION_PREFIX+Uri.parse(origin).getHost()+":"+resource;}catch(Exception e){return PERMISSION_PREFIX+origin+":"+resource;}
@@ -558,8 +581,8 @@ public class NativeBrowserActivity extends AppCompatActivity {
         if(state==null) restoreSavedTabs();
         String initial=isHttpUrl(first)?first:(tabs.isEmpty()?"https://www.google.com":tabs.get(currentTab));
         if(tabs.isEmpty()) tabs.add(initial);
-        if(tabViews.isEmpty()) tabViews.add(webView);
         if(state!=null) webView.restoreState(state); else loadInApp(initial);
+        restoreTabWebViews();
         rememberTabs();
     }
     @Override public void onBackPressed(){if(customFullscreenView!=null){exitFullscreen();return;}if(popupWebView!=null){if(popupWebView.canGoBack())popupWebView.goBack();else closePopup();}else if(webView!=null&&webView.canGoBack())webView.goBack();else super.onBackPressed();}
