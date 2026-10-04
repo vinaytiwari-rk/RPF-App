@@ -197,7 +197,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         if(desktopMode) s.setUserAgentString(desktopUserAgent);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+            s.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
             CookieManager.getInstance().setAcceptThirdPartyCookies(target,true);
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
