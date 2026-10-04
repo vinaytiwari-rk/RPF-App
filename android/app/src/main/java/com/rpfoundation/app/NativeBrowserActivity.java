@@ -50,6 +50,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import java.util.ArrayList;
 import org.json.JSONArray;
@@ -157,6 +158,19 @@ public class NativeBrowserActivity extends AppCompatActivity {
         return true;
     }
 
+    private void openCompatibilityBrowser(String value){
+        if(!isHttpUrl(value)) return;
+        try {
+            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+            builder.setShowTitle(true);
+            builder.setShareState(CustomTabsIntent.SHARE_STATE_ON);
+            builder.build().launchUrl(this, Uri.parse(value));
+        } catch(Exception ignored) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(value));
+            startActivity(intent);
+        }
+    }
+
     private void loadInApp(String value){
         String target = normalizeAddress(value);
         if(target == null) return;
@@ -171,6 +185,9 @@ public class NativeBrowserActivity extends AppCompatActivity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
+        s.setSaveFormData(true);
+        s.setDefaultTextEncodingName("UTF-8");
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) s.setOffscreenPreRaster(true);
         s.setJavaScriptCanOpenWindowsAutomatically(true);
         s.setSupportMultipleWindows(true);
         s.setMediaPlaybackRequiresUserGesture(false);
@@ -197,6 +214,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         }
         target.setLayerType(View.LAYER_TYPE_HARDWARE,null);
         CookieManager.getInstance().setAcceptCookie(true);
+        CookieManager.getInstance().flush();
     }
 
     private void installDownloadListener(WebView target){
@@ -239,6 +257,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
                     String description=error != null && error.getDescription()!=null ? error.getDescription().toString() : "The page could not be loaded.";
                     if(error!=null && error.getErrorCode()==WebViewClient.ERROR_HOST_LOOKUP)description="Website address could not be found (DNS). Check the URL and internet connection. If other sites open, this domain may be unavailable.\n\n"+description;
                     showError(description);
+                    if(isHttpUrl(failedUrl)) handler.postDelayed(() -> openCompatibilityBrowser(failedUrl), 250);
                 }
             }
             // HTTP 401/403/404 pages may contain valid login/challenge/content. Never replace them with our own error screen.
