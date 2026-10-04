@@ -634,7 +634,6 @@ public class NativeBrowserActivity extends AppCompatActivity {
         TextView external=button("Open in another browser (optional)");external.setOnClickListener(v->openInExternalBrowser());LinearLayout.LayoutParams ep=new LinearLayout.LayoutParams(-2,-2);ep.topMargin=dp(12);errorView.addView(external,ep);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
         buildChrome();
         boolean settingsOnly=getIntent().getBooleanExtra("settingsOnly",false);
-        if(settingsOnly){ handler.post(this::showBrowserSettings); }
         root.setOnApplyWindowInsetsListener((view,insets)->{int bottom=insets.getSystemWindowInsetBottom();root.setPadding(0,0,0,bottom);return insets;});
         setContentView(root);String first=getIntent().getStringExtra("url");
         if(settingsOnly){ setContentView(root); handler.post(this::showBrowserSettings); return; }
