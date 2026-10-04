@@ -21,9 +21,10 @@ export default function InAppBrowser() {
   const hideTimerRef = useRef<number | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [controls, setControls] = useState(true);
+  const [controls, setControls] = useState(false);
   const [copied, setCopied] = useState(false);
   const [frameVersion, setFrameVersion] = useState(0);
+  const [proxyFallback, setProxyFallback] = useState(false);
 
   useEffect(() => {
     const valid = normalizeExternalWebUrl(params.get('url') || '') || '';
@@ -31,14 +32,19 @@ export default function InAppBrowser() {
       setCurrentUrl(valid);
       setAddressInput(valid);
       setError('');
+      setProxyFallback(false);
     } else {
       setError(!initialUrl ? 'Invalid or unsupported website.' : '');
     }
     setLoading(true);
+    setProxyFallback(false);
   }, [params]);
 
   const proxyPath = currentUrl ? `/api/gov/web-proxy?url=${encodeURIComponent(currentUrl)}` : '';
   const proxyUrl = proxyPath ? (Capacitor.isNativePlatform() ? `${RPF_WEB_ORIGIN}${proxyPath}` : proxyPath) : '';
+  // Browser-build default: load the real site directly for maximum speed and web compatibility.
+  // The server proxy remains available as the explicit compatibility fallback.
+  const frameSrc = currentUrl || proxyUrl;
 
   const showControlsTemporarily = () => {
     setControls(true);
@@ -51,6 +57,7 @@ export default function InAppBrowser() {
   const reload = () => {
     setError('');
     setLoading(true);
+    setProxyFallback(false);
     showControlsTemporarily();
     setFrameVersion(version => version + 1);
   };
@@ -65,8 +72,15 @@ export default function InAppBrowser() {
     if (!currentUrl || !loading) return;
     const timer = window.setTimeout(() => {
       setLoading(false);
+      if (!proxyFallback && !Capacitor.isNativePlatform()) {
+        setProxyFallback(true);
+        setLoading(true);
+        setControls(false);
+        setFrameVersion(version => version + 1);
+        return;
+      }
       setControls(true);
-      setError('This website is taking too long to load. Try opening it directly.');
+      setError('This website is taking too long to load. The site may require a full browser window or block embedded views.');
     }, 18000);
     return () => window.clearTimeout(timer);
   }, [currentUrl, loading, frameVersion]);
@@ -209,9 +223,9 @@ export default function InAppBrowser() {
             <iframe
               ref={frameRef}
               title="Samahit Views"
-              key={`${proxyUrl}:${frameVersion}`}
-              src={proxyUrl}
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-modals"
+              key={`${proxyFallback ? proxyUrl : frameSrc}:${frameVersion}`}
+              src={proxyFallback ? proxyUrl : frameSrc}
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-modals allow-presentation"
               onLoad={() => {
                 setLoading(false);
                 if (!error) showControlsTemporarily();
@@ -232,7 +246,7 @@ export default function InAppBrowser() {
             {loading && (
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-xs">
                 <BrandLoader size="lg" label="Loading portal…" />
-                <p className="mt-3 text-xs font-bold text-[#0A192F]">Opening secure view…</p>
+                <p className="mt-3 text-xs font-bold text-[#0A192F]">{proxyFallback ? "Opening compatibility view…" : "Opening website…"}</p>
                 <p className="text-[11px] text-slate-400 mt-0.5 max-w-xs text-center truncate">{currentUrl}</p>
               </div>
             )}
@@ -247,7 +261,8 @@ export default function InAppBrowser() {
         )}
       </main>
 
-      {/* FLOATING BOTTOM CONTROLS */}
+      {/* CONTROLS: hidden by default; double-tap the page to reveal temporarily */}
+      {/* FLOATING BOTTOM CONTROLS */
       <footer className={`fixed bottom-0 inset-x-0 z-40 transition-all duration-300 ${controls || error ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0 pointer-events-none'}`}>
         <div className="mx-auto flex h-14 max-w-md items-center justify-around border-t border-slate-200/90 bg-white/95 px-5 shadow-lg backdrop-blur-xl sm:rounded-t-2xl">
           <button
