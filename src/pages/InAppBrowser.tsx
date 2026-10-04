@@ -23,7 +23,7 @@ export default function InAppBrowser() {
   const [controls, setControls] = useState(false);
   const [copied, setCopied] = useState(false);
   const [frameVersion, setFrameVersion] = useState(0);
-  const [browserMode, setBrowserMode] = useState<'direct' | 'proxy'>('proxy');
+  const [browserMode, setBrowserMode] = useState<'direct' | 'proxy'>('direct');
 
   useEffect(() => {
     const valid = normalizeExternalWebUrl(params.get('url') || '') || '';
@@ -31,16 +31,17 @@ export default function InAppBrowser() {
       setCurrentUrl(valid);
       setAddressInput(valid);
       setError('');
-      setBrowserMode('proxy');
+      setBrowserMode('direct');
     } else {
       setError(!initialUrl ? 'Invalid or unsupported website.' : '');
     }
     setLoading(true);
   }, [params]);
 
-  // Browser build: try the real URL first, then transparently fall back to the
-  // server compatibility proxy for sites that block iframe embedding. Native
-  // Android uses the real WebView and never goes through this iframe path.
+  // Browser build: load the real URL first for normal Chrome-like speed.
+  // Only fall back to the compatibility proxy when the site does not render
+  // inside an iframe. Native Android uses the real WebView and never goes
+  // through this iframe path.
   const proxySrc = currentUrl
     ? `/api/gov/web-proxy?url=${encodeURIComponent(currentUrl)}&clean=1`
     : '';
@@ -58,7 +59,7 @@ export default function InAppBrowser() {
     setError('');
     setLoading(true);
     showControlsTemporarily();
-    setBrowserMode('proxy');
+    setBrowserMode('direct');
     setFrameVersion(version => version + 1);
   };
 
@@ -71,26 +72,24 @@ export default function InAppBrowser() {
   useEffect(() => {
     if (!currentUrl || !loading || Capacitor.isNativePlatform()) return;
     const timer = window.setTimeout(() => {
-      if (browserMode === 'proxy') {
-        // The proxy is the primary web-browser mode because it can render
-        // portals that explicitly reject iframe embedding.
+      if (browserMode === 'direct') {
+        // Normal sites should never wait for the proxy. If direct iframe
+        // rendering has not produced a usable page quickly, give the
+        // compatibility proxy a chance.
         setError('');
         setControls(false);
         setLoading(true);
-        setBrowserMode('direct');
+        setBrowserMode('proxy');
         setFrameVersion(version => version + 1);
         return;
       }
 
-      // Final fallback: open the exact URL in the normal browser only after
-      // both embedded attempts have had a chance to load.
+      // Do not silently throw the user out to Chrome. A slow/blocked portal
+      // should remain in Samahit with an explicit direct-open option.
       setLoading(false);
       setControls(true);
-      setError('This website cannot be embedded here. Opening the original website…');
-      window.setTimeout(() => {
-        window.location.assign(currentUrl);
-      }, 450);
-    }, browserMode === 'proxy' ? 15000 : 8000);
+      setError('This website is taking too long to load here. You can retry or open the original website directly.');
+    }, browserMode === 'direct' ? 6000 : 12000);
     return () => window.clearTimeout(timer);
   }, [currentUrl, loading, browserMode, frameVersion]);
 
