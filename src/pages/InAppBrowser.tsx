@@ -16,14 +16,11 @@ export default function InAppBrowser() {
   const [currentUrl, setCurrentUrl] = useState(initialUrl);
   const [addressInput, setAddressInput] = useState(initialUrl);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
-  const frameRef = useRef<HTMLIFrameElement>(null);
   const hideTimerRef = useRef<number | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [controls, setControls] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [frameVersion, setFrameVersion] = useState(0);
-  const [browserMode, setBrowserMode] = useState<'direct' | 'proxy'>('direct');
 
   useEffect(() => {
     const valid = normalizeExternalWebUrl(params.get('url') || '') || '';
@@ -31,21 +28,12 @@ export default function InAppBrowser() {
       setCurrentUrl(valid);
       setAddressInput(valid);
       setError('');
-      setBrowserMode('direct');
     } else {
       setError(!initialUrl ? 'Invalid or unsupported website.' : '');
     }
-    setLoading(true);
+    setLoading(false);
   }, [params]);
 
-  // Browser build: load the real URL first for normal Chrome-like speed.
-  // Only fall back to the compatibility proxy when the site does not render
-  // inside an iframe. Native Android uses the real WebView and never goes
-  // through this iframe path.
-  const proxySrc = currentUrl
-    ? `/api/gov/web-proxy?url=${encodeURIComponent(currentUrl)}&clean=1`
-    : '';
-  const frameSrc = browserMode === 'proxy' ? proxySrc : currentUrl;
 
   const showControlsTemporarily = () => {
     setControls(true);
@@ -56,43 +44,18 @@ export default function InAppBrowser() {
   useEffect(() => () => { if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current); }, []);
 
   const reload = () => {
+    if (!currentUrl) return;
     setError('');
     setLoading(true);
     showControlsTemporarily();
-    setBrowserMode('direct');
-    setFrameVersion(version => version + 1);
+    window.location.assign(currentUrl);
   };
 
   useEffect(() => {
     const onRefresh = () => reload();
     window.addEventListener('rpf-browser-refresh', onRefresh);
     return () => window.removeEventListener('rpf-browser-refresh', onRefresh);
-  }, []);
-
-  useEffect(() => {
-    if (!currentUrl || !loading || Capacitor.isNativePlatform()) return;
-    const timer = window.setTimeout(() => {
-      if (browserMode === 'direct') {
-        // Normal sites should never wait for the proxy. If direct iframe
-        // rendering has not produced a usable page quickly, give the
-        // compatibility proxy a chance.
-        setError('');
-        setControls(false);
-        setLoading(true);
-        setBrowserMode('proxy');
-        setFrameVersion(version => version + 1);
-        return;
-      }
-
-      // The proxy is the last embedded fallback. Do not label a slow proxy
-      // response as a site outage: the upstream may simply reject iframe
-      // embedding or require browser-only capabilities.
-      setLoading(false);
-      setControls(true);
-      setError('This website cannot be embedded in Samahit Views. You can open the original website directly or retry.');
-    }, browserMode === 'direct' ? 6000 : 12000);
-    return () => window.clearTimeout(timer);
-  }, [currentUrl, loading, browserMode, frameVersion]);
+  }, [currentUrl]);
 
   const handleNavigateAddress = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -110,9 +73,8 @@ export default function InAppBrowser() {
       setCurrentUrl(normalized);
       setAddressInput(normalized);
       setIsEditingAddress(false);
-      setBrowserMode('direct');
       setParams({ url: normalized, title: normalized });
-      setLoading(true);
+      window.location.assign(normalized);
     }
   };
 
@@ -130,12 +92,8 @@ export default function InAppBrowser() {
   };
 
   const frameHistory = (action: 'back' | 'forward') => {
-    try {
-      if (action === 'back') frameRef.current?.contentWindow?.history.back();
-      else frameRef.current?.contentWindow?.history.forward();
-    } catch {
-      reload();
-    }
+    if (action === 'back') window.history.back();
+    else window.history.forward();
   };
 
   const openDirectExternal = () => {
@@ -229,44 +187,13 @@ export default function InAppBrowser() {
           </div>
         ) : (
           <>
-            {/* IFRAME WITH HARDENED SANDBOX (Omit allow-top-navigation to prevent any parent window hijacking) */}
-            <iframe
-              ref={frameRef}
-              title="Samahit Views"
-              key={`${frameSrc}:${frameVersion}`}
-              src={frameSrc}
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-presentation allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-              onLoad={() => {
-                setLoading(false);
-                setError('');
-              }}
-              onError={() => {
-                setLoading(false);
-                setControls(true);
-                setError("Unable to load this website inside Samahit. Open it directly.");
-              }}
-              className="h-full w-full border-0 bg-white"
-              allow="autoplay; clipboard-read; clipboard-write; encrypted-media; fullscreen; geolocation; microphone; camera; picture-in-picture"
-              allowFullScreen
-            />
-
-            {error && <div role="alert" className="absolute inset-x-4 top-20 z-30 rounded-xl border border-amber-200 bg-[#FFF7E8] p-4 text-sm text-slate-800 shadow-md"><p>{error}</p><button onClick={openDirectExternal} className="mt-2 rounded-lg bg-[#B9E5CC] px-3 py-2 font-bold">Open website directly</button><button onClick={reload} className="ml-2 rounded-lg border px-3 py-2">Retry</button></div>}
-
-            {/* SMOOTH LOADING OVERLAY */}
-            {loading && (
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-xs">
-                <BrandLoader size="lg" label="Loading portal…" />
-                <p className="mt-3 text-xs font-bold text-[#0A192F]">"Opening website…"</p>
-                <p className="text-[11px] text-slate-400 mt-0.5 max-w-xs text-center truncate">{currentUrl}</p>
-              </div>
-            )}
-
-            {/* COPIED TOAST */}
-            {copied && (
-              <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#0A192F] px-4 py-2 text-xs font-bold text-white shadow-lg">
-                Link copied to clipboard
-              </div>
-            )}
+            <div className="flex h-full w-full flex-col items-center justify-center bg-white p-6 text-center">
+              <Globe className="h-10 w-10 text-[#C2410C]" />
+              <h2 className="mt-4 text-base font-bold text-[#0A192F]">Samahit Views</h2>
+              <p className="mt-2 max-w-sm text-xs text-slate-500">This website is opened directly for maximum compatibility with JavaScript, login, cookies, redirects, downloads and media.</p>
+              <button onClick={() => currentUrl && window.location.assign(currentUrl)} className="mt-5 rounded-xl bg-[#C2410C] px-5 py-2.5 text-xs font-bold text-white">Open Website</button>
+              {error && <p className="mt-3 text-xs text-slate-500">{error}</p>}
+            </div>
           </>
         )}
       </main>
