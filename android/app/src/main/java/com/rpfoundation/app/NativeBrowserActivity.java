@@ -496,15 +496,20 @@ public class NativeBrowserActivity extends AppCompatActivity {
         fileCallback.onReceiveValue(values);fileCallback=null;
     }
 
+    private void installDoubleTapToggle(WebView target){
+        if(target==null || gestureDetector==null) return;
+        target.setOnTouchListener((v,e)->{ gestureDetector.onTouchEvent(e); return false; });
+    }
+
     private WebView createTabWebView(String url){
-        WebView w=new WebView(this); configureWebView(w); w.setWebViewClient(createClient(false)); w.setWebChromeClient(createChromeClient()); installDownloadListener(w);
+        WebView w=new WebView(this); configureWebView(w); w.setWebViewClient(createClient(false)); w.setWebChromeClient(createChromeClient()); installDownloadListener(w); installDoubleTapToggle(w);
         if(isHttpUrl(url)) w.loadUrl(url); return w;
     }
     private void rebuildMainWebView(String url){
         if(webView!=null){webView.stopLoading();webContainer.removeView(webView);}
         webView=createTabWebView(url); webContainer.addView(webView,0,new FrameLayout.LayoutParams(-1,-1));
     }
-    private void openPopup(Message msg){closePopup();popupWebView=new WebView(this);configureWebView(popupWebView);popupWebView.setWebViewClient(createClient(true));popupWebView.setWebChromeClient(createChromeClient());installDownloadListener(popupWebView);webContainer.addView(popupWebView,new FrameLayout.LayoutParams(-1,-1));WebView.WebViewTransport t=(WebView.WebViewTransport)msg.obj;t.setWebView(popupWebView);msg.sendToTarget();showControls();}
+    private void openPopup(Message msg){closePopup();popupWebView=new WebView(this);configureWebView(popupWebView);popupWebView.setWebViewClient(createClient(true));popupWebView.setWebChromeClient(createChromeClient());installDownloadListener(popupWebView);installDoubleTapToggle(popupWebView);webContainer.addView(popupWebView,new FrameLayout.LayoutParams(-1,-1));WebView.WebViewTransport t=(WebView.WebViewTransport)msg.obj;t.setWebView(popupWebView);msg.sendToTarget();showControls();}
     private void closePopup(){if(popupWebView!=null){webContainer.removeView(popupWebView);popupWebView.stopLoading();popupWebView.destroy();popupWebView=null;updateAddress(webView!=null?webView.getUrl():null);updateNavigation();}}
 
     private void showControls(){if(hideRunnable!=null)handler.removeCallbacks(hideRunnable);if(topBar!=null){topBar.setVisibility(View.VISIBLE);topBar.animate().translationY(0).alpha(1f).setDuration(140).start();}if(bottomBar!=null){bottomBar.setVisibility(View.VISIBLE);bottomBar.animate().translationY(0).alpha(1f).setDuration(140).start();}}
@@ -652,7 +657,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     @Override public void onCreate(Bundle state){
         super.onCreate(state);prefs=getSharedPreferences(PREFS,MODE_PRIVATE);desktopMode=prefs.getBoolean("desktop",false);autoHide=prefs.getBoolean("autoHide",true);dataSaver=prefs.getBoolean("dataSaver",false);restoreTabs=prefs.getBoolean("restoreTabs",true);mediaAutoplay=prefs.getBoolean("mediaAutoplay",true);initializeUserAgents();
         getWindow().setStatusBarColor(IVORY);getWindow().setNavigationBarColor(IVORY);root=new FrameLayout(this);root.setBackgroundColor(Color.WHITE);webContainer=new FrameLayout(this);root.addView(webContainer,new FrameLayout.LayoutParams(-1,-1));rebuildMainWebView(null);
-        gestureDetector=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){@Override public boolean onDoubleTap(MotionEvent e){if(topBar.getVisibility()==View.VISIBLE)hideControls();else{showControls();scheduleHide();}return false;}});webContainer.setOnTouchListener((v,e)->{gestureDetector.onTouchEvent(e);return false;});
+        gestureDetector=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){@Override public boolean onDoubleTap(MotionEvent e){if(topBar.getVisibility()==View.VISIBLE)hideControls();else{showControls();scheduleHide();}return true;}});installDoubleTapToggle(webView);webContainer.setOnTouchListener((v,e)->{gestureDetector.onTouchEvent(e);return false;});
         progressBar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);progressBar.setMax(100);root.addView(progressBar,new FrameLayout.LayoutParams(-1,dp(3),Gravity.TOP));
         errorView=new LinearLayout(this);errorView.setOrientation(LinearLayout.VERTICAL);errorView.setGravity(Gravity.CENTER);errorView.setPadding(dp(28),dp(28),dp(28),dp(28));errorView.setBackgroundColor(IVORY);TextView title=new TextView(this);title.setText("This page could not be loaded");title.setTextColor(NAVY);title.setTextSize(19);title.setGravity(Gravity.CENTER);errorView.addView(title);TextView detail=new TextView(this);detail.setTag("detail");detail.setTextColor(Color.DKGRAY);detail.setTextSize(13);detail.setGravity(Gravity.CENTER);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(12);errorView.addView(detail,p);TextView retry=button("Try again");retry.setTextColor(Color.WHITE);retry.setBackgroundColor(NAVY);retry.setOnClickListener(v->activeWebView().reload());LinearLayout.LayoutParams rp=new LinearLayout.LayoutParams(-2,-2);rp.topMargin=dp(20);errorView.addView(retry,rp);
         TextView external=button("Open in another browser (optional)");external.setOnClickListener(v->openInExternalBrowser());LinearLayout.LayoutParams ep=new LinearLayout.LayoutParams(-2,-2);ep.topMargin=dp(12);errorView.addView(external,ep);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
