@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
 import { PDFDocument } from "pdf-lib";
 import { jsPDF } from "jspdf";
+import { FileImage, UploadCloud, X } from "lucide-react";
 import Shell from "./UtilityPageShell";
 
 const save = (blob: Blob, name: string) => { const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); window.setTimeout(()=>URL.revokeObjectURL(url),60000); };
@@ -40,7 +41,44 @@ export default function EverydayToolPage() {
  {tool==="qr"&&<><input className={input} placeholder="Enter text or website URL" value={value} maxLength={2048} onChange={e=>setValue(e.target.value)}/>{value.trim()&&<div className="inline-block rounded-xl border bg-white p-4"><QRCode value={value} size={200}/></div>}<p className="text-xs">QR is generated offline. Use a screenshot to save it.</p></>}
  {tool==="date"&&<><label className="block text-sm">Start date<input type="date" className={input} value={date} onChange={e=>setDate(e.target.value)}/></label><label className="block text-sm">End date<input type="date" className={input} value={days} onChange={e=>setDays(e.target.value)}/></label>{date&&days&&<p className="rounded-xl bg-emerald-50 p-4 font-bold">{Math.round((Date.parse(days+"T12:00:00Z")-Date.parse(date+"T12:00:00Z"))/86400000)} days</p>}</>}
  {tool==="image"&&<><input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setFile(e.target.files?.[0]||null)}/><label className="block">Maximum width (px)<input className={input} type="number" min="100" max="4000" value={width} onChange={e=>setWidth(Math.min(4000,Math.max(100,Number(e.target.value)||100)))}/></label><label className="block">JPEG quality: {Math.round(quality*100)}%<input className="w-full" type="range" min=".3" max="1" step=".05" value={quality} onChange={e=>setQuality(Number(e.target.value))}/></label><button className={button} disabled={!file||busy} onClick={()=>void run(processImage)}>Resize & Download JPG</button></>}
- {tool==="image-pdf"&&<><input type="file" multiple accept="image/png,image/jpeg,image/webp" onChange={e=>setImages(Array.from(e.target.files||[]).slice(0,30))}/><p>{images.length} image(s) selected; maximum 30</p><button className={button} disabled={!images.length||busy} onClick={()=>void run(makePdf)}>Create PDF</button></>}
+ {tool==="image-pdf"&&<>
+  <div className="space-y-3">
+    <div className="rounded-2xl border-2 border-dashed border-[#8FB6A8] bg-[#F3FAF6] p-5 text-center">
+      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-[#D8E9E1] text-[#245D45]">
+        <FileImage className="h-6 w-6" />
+      </div>
+      <h2 className="text-base font-bold text-[#243B32]">Upload images to create a PDF</h2>
+      <p className="mt-1 text-xs text-slate-500">Select up to 30 JPG, PNG or WebP images from your device.</p>
+      <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#245D45] px-5 py-3 text-sm font-bold text-white shadow-sm">
+        <UploadCloud className="h-4 w-4" />
+        {images.length ? "Add / Change Images" : "Select Images"}
+        <input
+          type="file"
+          multiple
+          accept="image/png,image/jpeg,image/webp"
+          className="sr-only"
+          onChange={e=>setImages(Array.from(e.target.files||[]).slice(0,30))}
+        />
+      </label>
+      <p className="mt-3 text-xs font-semibold text-[#245D45]">{images.length} / 30 images selected</p>
+    </div>
+    {images.length>0&&<div className="rounded-2xl border border-slate-200 bg-white p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-xs font-bold text-[#243B32]">Selected images</span>
+        <button type="button" className="text-xs font-semibold text-slate-500" onClick={()=>setImages([])}>Clear all</button>
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {images.slice(0,8).map((img,i)=><div key={i} className="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-50 aspect-square">
+          <img src={URL.createObjectURL(img)} alt="" className="h-full w-full object-cover" />
+          {i===7&&images.length>8&&<div className="absolute inset-0 flex items-center justify-center bg-black/45 text-sm font-bold text-white">+{images.length-8}</div>}
+        </div>)}
+      </div>
+    </div>}
+    <button className={button+" w-full"} disabled={!images.length||busy} onClick={()=>void run(makePdf)}>
+      {busy ? "Creating PDF…" : "Create PDF"}
+    </button>
+  </div>
+</>}
  {tool==="pdf-merge"&&<><input type="file" multiple accept="application/pdf,.pdf" onChange={e=>setPdfs(Array.from(e.target.files||[]).slice(0,15))}/><p>{pdfs.length} PDF(s) selected in merge order; maximum 15</p><button className={button} disabled={pdfs.length<2||busy} onClick={()=>void run(merge)}>Merge & Download</button></>}
  {tool==="pdf-split"&&<><input type="file" accept="application/pdf,.pdf" onChange={e=>setFile(e.target.files?.[0]||null)}/><p className="text-xs">Downloads individual pages. Up to 100 pages; allow multiple downloads if prompted.</p><button className={button} disabled={!file||busy} onClick={()=>void run(split)}>Split into pages</button></>}
  {tool==="pdf-compress"&&<><p className="text-sm">Lossless PDF structure optimization. Image-heavy scanned PDFs may not shrink.</p><input type="file" accept="application/pdf,.pdf" onChange={e=>setFile(e.target.files?.[0]||null)}/><button className={button} disabled={!file||busy} onClick={()=>void run(compress)}>Optimize & Download PDF</button></>}
