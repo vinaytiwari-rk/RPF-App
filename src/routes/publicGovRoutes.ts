@@ -36,167 +36,127 @@ const proxiedLink = (value: string, base: string) => {
   } catch { return value; }
 };
 
-router.get('/api/gov/web-proxy', async (req, res) => {
-  const raw = String(req.query.url || '');
-  if (!isAllowedPortal(raw)) {
-    return res.status(400).send(`<html><body style="font-family:sans-serif;padding:30px;text-align:center"><h3 style="color:#C2410C">Invalid Web Address</h3><p style="color:#64748B">The requested address is invalid or restricted.</p></body></html>`);
-  }
+const proxyMethods = new Set(['GET','POST','PUT','PATCH','DELETE','OPTIONS']);
 
-  try {
-    const target = new URL(raw);
-    const upstream = await axios.get(target.toString(), {
-      responseType: 'text',
-      timeout: 20000,
-      maxRedirects: 10,
-      httpsAgent,
-      headers: { 
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-IN,en-US,en;q=0.9,hi;q=0.8',
-        'Referer': target.origin + '/'
-      },
-      validateStatus: () => true, // Accept 2xx, 3xx, 4xx without throwing immediately
-    });
-
-    const finalUrl = upstream.request?.res?.responseUrl || upstream.config?.url || target.toString();
-    if (!isAllowedPortal(finalUrl)) {
-      return res.status(403).send(`<html><body style="font-family:sans-serif;padding:30px;text-align:center"><h3 style="color:#C2410C">Restricted Redirect</h3><p style="color:#64748B">The website redirected to a restricted internal address.</p></body></html>`);
-    }
-
-    const contentType = String(upstream.headers['content-type'] || 'text/html');
-    
-    // Strip upstream security headers that would block iframe embedding
-    res.removeHeader('X-Frame-Options');
-    res.removeHeader('Content-Security-Policy');
-    res.removeHeader('x-frame-options');
-    res.removeHeader('content-security-policy');
-
-    if (!contentType.includes('text/html')) {
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      return res.send(upstream.data);
-    }
-
-    const $ = cheerio.load(String(upstream.data));
-    $('meta[http-equiv="Content-Security-Policy"], meta[http-equiv="X-Frame-Options"], meta[http-equiv="content-security-policy"], meta[http-equiv="x-frame-options"]').remove();
-
-    // Preserve the upstream application path for SPAs. Using target.origin here
-    // breaks portals mounted below a sub-path (for example /eraktkoshPortal/),
-    // because Angular/React then requests its JS chunks from the domain root.
-    const upstreamBase = new URL('.', target.toString()).toString();
-    if ($('base').length === 0) {
-      $('head').prepend(`<base href="${upstreamBase}" />`);
-    } else {
-      $('base').attr('href', upstreamBase);
-    }
-
-    // Comprehensive Anti-Framebusting and In-App Navigation Lock script
-    const IN_APP_SHIELD = `<script>
-(function(){
-  // 1. Defeat frame-busting scripts that check window.top or window.parent
-  try {
-    Object.defineProperty(window, 'top', { get: function(){ return window; }, configurable: true });
-    Object.defineProperty(window, 'parent', { get: function(){ return window; }, configurable: true });
-    Object.defineProperty(window, 'frameElement', { get: function(){ return null; }, configurable: true });
-  } catch(e) {
-    try {
-      window.__defineGetter__('top', function(){ return window; });
-      window.__defineGetter__('parent', function(){ return window; });
-    } catch(e2) {}
-  }
-
-  // 2. Prevent window.open from escaping to external tabs
-  var _origOpen = window.open;
-  window.open = function(url, target, features) {
-    if (!url) return null;
-    var targetStr = String(target || '').toLowerCase();
-    if (targetStr === '_top' || targetStr === '_parent' || targetStr === '_blank') {
-      target = '_self';
-    }
-    var fullUrl = url.startsWith('http') ? url : (url.startsWith('/') ? "${target.origin}" + url : url);
-    window.location.href = '/api/gov/web-proxy?url=' + encodeURIComponent(fullUrl) + '&clean=1';
-    return window;
+const proxyHeaders = (req: express.Request, target: URL) => {
+  const headers: Record<string,string> = {
+    'User-Agent': String(req.headers['user-agent'] || 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/128 Mobile Safari/537.36'),
+    'Accept': String(req.headers.accept || 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'),
+    'Accept-Language': String(req.headers['accept-language'] || 'en-IN,en-US,en;q=0.9,hi;q=0.8'),
+    'Referer': target.origin + '/',
   };
+  if(req.headers.cookie) headers.Cookie=String(req.headers.cookie);
+  if(req.headers.authorization) headers.Authorization=String(req.headers.authorization);
+  if(req.headers['content-type']) headers['Content-Type']=String(req.headers['content-type']);
+  return headers;
+};
 
-  // 3. Ensure clicked links stay inside the in-app browser proxy
-  document.addEventListener('click', function(e) {
-    var a = e.target && e.target.closest ? e.target.closest('a') : null;
-    if (a && a.href && !a.href.startsWith('javascript:') && !a.href.startsWith('#')) {
-      if (a.target === '_top' || a.target === '_parent' || a.target === '_blank') {
-        a.target = '_self';
-      }
-    }
-  }, true);
+const proxyUrl = (absolute: string) => `/api/gov/web-proxy?url=${encodeURIComponent(absolute)}&clean=1`;
+
+const rewriteClientRequests = (html: string, target: URL) => {
+  const $ = cheerio.load(html);
+  const targetBase = new URL('.', target.toString()).toString();
+  const shield = `<script>
+(function(){
+  const BASE=${JSON.stringify(targetBase)}, PREFIX='/api/gov/web-proxy?url=';
+  const proxify=(value)=>{
+    try{
+      if(!value || /^(data:|blob:|javascript:|mailto:|tel:|#)/i.test(String(value))) return value;
+      const u=new URL(String(value),BASE);
+      if(!/^https?:$/i.test(u.protocol)) return value;
+      return PREFIX+encodeURIComponent(u.toString())+'&clean=1';
+    }catch(e){return value;}
+  };
+  const nativeFetch=window.fetch;
+  window.fetch=function(input,init){
+    try{
+      const raw=input instanceof Request?input.url:input;
+      const p=proxify(raw);
+      if(p && p!==raw) return nativeFetch.call(this,p,init);
+    }catch(e){}
+    return nativeFetch.call(this,input,init);
+  };
+  const open=XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open=function(method,url,async,user,password){
+    let next=url; try{next=proxify(url);}catch(e){}
+    return open.call(this,method,next,async===undefined?true:async,user,password);
+  };
 })();
 </script>`;
-    $('head').prepend(IN_APP_SHIELD);
+  $('head').prepend(shield);
+  $('a[href]').each((_i,el)=>{const v=$(el).attr('href');if(v&&!/^#|javascript:/i.test(v)){$(el).attr('href',proxifyLink(v,target));$(el).removeAttr('target');}});
+  $('form[action]').each((_i,el)=>{const v=$(el).attr('action');if(v)$(el).attr('action',proxifyLink(v,target));$(el).removeAttr('target');});
+  $('iframe[src],frame[src]').each((_i,el)=>{const v=$(el).attr('src');if(v)$(el).attr('src',proxifyLink(v,target));});
+  $('link[href]').each((_i,el)=>{const v=$(el).attr('href');if(v)$(el).attr('href',new URL(v,targetBase).toString());});
+  $('img[src],script[src],source[src],object[data],embed[src]').each((_i,el)=>{
+    const attr=$(el).attr('src')!==undefined?'src':'data',v=$(el).attr(attr);if(v&&!/^data:/i.test(v))$(el).attr(attr,new URL(v,targetBase).toString());
+  });
+  return $.html();
+};
 
-    // Convert link hrefs and form actions to stay inside our proxy
-    $('a[href]').each((_i, el) => {
-      const value = $(el).attr('href');
-      if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) {
-        $(el).attr('href', proxiedLink(value, target.toString()));
-        $(el).removeAttr('target');
-      }
-    });
+const proxifyLink = (value: string, base: URL) => {
+  try {
+    const absolute = new URL(value, base.toString()).toString();
+    return isAllowedPortal(absolute) ? proxyUrl(absolute) : absolute;
+  } catch { return value; }
+};
 
-    $('form[action]').each((_i, el) => {
-      const value = $(el).attr('action');
-      if (value) {
-        $(el).attr('action', proxiedLink(value, target.toString()));
-        $(el).removeAttr('target');
-      }
-    });
-
-    // Proxy nested iframes and frames so they bypass X-Frame-Options
-    $('iframe[src], frame[src]').each((_i, el) => {
-      const value = $(el).attr('src');
-      if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) {
-        $(el).attr('src', proxiedLink(value, target.toString()));
-      }
-    });
-
-    // Assets (CSS, JS, Images) load directly from the original server
-    $('link[href]').each((_i, el) => {
-      const value = $(el).attr('href');
-      if (value && !value.startsWith('#') && !/^javascript:/i.test(value)) {
-        $(el).attr('href', proxiedAsset(value, target.toString()));
-      }
-    });
-
-    $('img[src], script[src], source[src]').each((_i, el) => {
-      const value = $(el).attr('src');
-      if (value && !/^data:/i.test(value)) {
-        $(el).attr('src', proxiedAsset(value, target.toString()));
-      }
-    });
-
-    $('object[data]').each((_i, el) => {
-      const value = $(el).attr('data');
-      if (value && !/^data:/i.test(value)) {
-        $(el).attr('data', proxiedAsset(value, target.toString()));
-      }
-    });
-
-    $('embed[src]').each((_i, el) => {
-      const value = $(el).attr('src');
-      if (value && !/^data:/i.test(value)) {
-        $(el).attr('src', proxiedAsset(value, target.toString()));
-      }
-    });
-
-    // Explicitly remove any X-Frame-Options and set permissive frame-ancestors
-    res.removeHeader('X-Frame-Options');
-    res.removeHeader('x-frame-options');
-    res.setHeader('Content-Security-Policy', "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors *; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:; font-src * data: blob:;");
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.type('html').send($.html());
-  } catch (err: any) {
-    const msg = err?.message || 'Network request failed';
-    return res.status(502).send(`<html><body style="font-family:system-ui,-apple-system,sans-serif;padding:32px;max-width:480px;margin:40px auto;text-align:center"><div style="display:inline-block;padding:12px;background:#FFF7ED;border-radius:16px;margin-bottom:16px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div><h2 style="color:#0A192F;margin:0 0 8px 0;font-size:18px">Website Temporarily Unavailable</h2><p style="color:#64748B;font-size:13px;line-height:1.5;margin:0 0 20px 0">The requested site did not respond in time or rejected the embedded connection.</p><button onclick="history.back()" style="padding:10px 24px;background:#0A192F;color:#fff;border:none;border-radius:12px;font-weight:bold;font-size:13px;cursor:pointer">← Go Back</button></body></html>`);
+const proxyResponseCookies = (res: express.Response, upstream: any) => {
+  const setCookie = upstream.headers['set-cookie'];
+  if(Array.isArray(setCookie) && setCookie.length){
+    res.setHeader('Set-Cookie', setCookie.map((v:string)=>v.replace(/;\\s*Domain=[^;]*/ig,'').replace(/;\\s*SameSite=None/ig,'; SameSite=Lax')));
   }
-});
+};
+
+const proxyHandler = async (req: express.Request, res: express.Response) => {
+  const raw = String(req.query.url || '');
+  if(!isAllowedPortal(raw)) return res.status(400).json({success:false,error:'Invalid or restricted web address'});
+  const target = new URL(raw);
+  if(!proxyMethods.has(req.method)) return res.status(405).set('Allow',Array.from(proxyMethods).join(', ')).end();
+
+  try{
+    const upstream = await axios({
+      method:req.method as any,
+      url:target.toString(),
+      data:['GET','HEAD'].includes(req.method)?undefined:req.body,
+      responseType:'arraybuffer',
+      timeout:30000,
+      maxRedirects:10,
+      httpsAgent,
+      headers:proxyHeaders(req,target),
+      validateStatus:()=>true,
+      maxContentLength:25*1024*1024,
+      maxBodyLength:10*1024*1024,
+    });
+    const finalUrl = upstream.request?.res?.responseUrl || target.toString();
+    if(!isAllowedPortal(finalUrl)) return res.status(403).json({success:false,error:'Restricted redirect'});
+    proxyResponseCookies(res,upstream);
+    const contentType=String(upstream.headers['content-type']||'application/octet-stream');
+    res.status(upstream.status);
+    res.setHeader('Content-Type',contentType);
+    if(upstream.headers['content-length']) res.setHeader('Content-Length',String(upstream.headers['content-length']));
+    ['cache-control','etag','last-modified','content-range','accept-ranges'].forEach(h=>{if(upstream.headers[h])res.setHeader(h,String(upstream.headers[h]));});
+    res.setHeader('Access-Control-Allow-Origin','*');
+    res.setHeader('Access-Control-Allow-Headers','*');
+    res.setHeader('Access-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.removeHeader('X-Frame-Options'); res.removeHeader('Content-Security-Policy');
+    if(req.method==='OPTIONS') return res.status(204).end();
+    if(contentType.toLowerCase().includes('text/html')){
+      const html=Buffer.from(upstream.data).toString('utf8');
+      const clean=cheerio.load(html);
+      clean('meta[http-equiv="Content-Security-Policy"],meta[http-equiv="X-Frame-Options"],meta[http-equiv="content-security-policy"],meta[http-equiv="x-frame-options"]').remove();
+      const rewritten=rewriteClientRequests(clean.html(),target);
+      res.setHeader('Content-Security-Policy',"default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors *; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:; font-src * data: blob:;");
+      return res.type('html').send(rewritten);
+    }
+    return res.send(Buffer.from(upstream.data));
+  }catch(err:any){
+    console.error('Web proxy failed:',err?.message||err);
+    return res.status(502).json({success:false,error:'Upstream website unavailable'});
+  }
+};
+
+router.all('/api/gov/web-proxy', proxyHandler);
 
 router.get("/api/gov/mandi-prices", async (req, res) => {
   const { state, commodity } = req.query;
