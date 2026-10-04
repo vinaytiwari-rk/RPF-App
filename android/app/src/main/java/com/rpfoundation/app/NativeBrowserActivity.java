@@ -64,6 +64,9 @@ public class NativeBrowserActivity extends AppCompatActivity {
 
     private FrameLayout root, webContainer;
     private WebView webView, popupWebView;
+    private final ArrayList<WebView> tabViews = new ArrayList<>();
+    private View customFullscreenView;
+    private WebChromeClient.CustomViewCallback customFullscreenCallback;
     private LinearLayout topBar, bottomBar, errorView;
     private ProgressBar progressBar;
     private EditText addressBar;
@@ -304,6 +307,8 @@ public class NativeBrowserActivity extends AppCompatActivity {
             }
             @Override public boolean onCreateWindow(WebView view,boolean dialog,boolean userGesture,Message resultMsg){openPopup(resultMsg);return true;}
             @Override public void onCloseWindow(WebView window){if(window==popupWebView)closePopup();}
+            @Override public void onShowCustomView(View view,CustomViewCallback callback){enterFullscreen(view,callback);}
+            @Override public void onHideCustomView(){exitFullscreen();}
         };
     }
 
@@ -313,10 +318,13 @@ public class NativeBrowserActivity extends AppCompatActivity {
         fileCallback.onReceiveValue(values);fileCallback=null;
     }
 
+    private WebView createTabWebView(String url){
+        WebView w=new WebView(this); configureWebView(w); w.setWebViewClient(createClient(false)); w.setWebChromeClient(createChromeClient()); installDownloadListener(w);
+        if(isHttpUrl(url)) w.loadUrl(url); return w;
+    }
     private void rebuildMainWebView(String url){
-        if(webView!=null){webView.stopLoading();webContainer.removeView(webView);webView.destroy();}
-        webView=new WebView(this);configureWebView(webView);webView.setWebViewClient(createClient(false));webView.setWebChromeClient(createChromeClient());installDownloadListener(webView);
-        webContainer.addView(webView,0,new FrameLayout.LayoutParams(-1,-1)); if(isHttpUrl(url))webView.loadUrl(url);
+        if(webView!=null){webView.stopLoading();webContainer.removeView(webView);}
+        webView=createTabWebView(url); webContainer.addView(webView,0,new FrameLayout.LayoutParams(-1,-1));
     }
     private void openPopup(Message msg){closePopup();popupWebView=new WebView(this);configureWebView(popupWebView);popupWebView.setWebViewClient(createClient(true));popupWebView.setWebChromeClient(createChromeClient());installDownloadListener(popupWebView);webContainer.addView(popupWebView,new FrameLayout.LayoutParams(-1,-1));WebView.WebViewTransport t=(WebView.WebViewTransport)msg.obj;t.setWebView(popupWebView);msg.sendToTarget();showControls();}
     private void closePopup(){if(popupWebView!=null){webContainer.removeView(popupWebView);popupWebView.stopLoading();popupWebView.destroy();popupWebView=null;updateAddress(webView!=null?webView.getUrl():null);updateNavigation();}}
@@ -343,7 +351,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         catch(Exception e){Toast.makeText(this,"No external browser available",Toast.LENGTH_SHORT).show();}
     }
     private void share(){String u=activeWebView().getUrl();if(u!=null)startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,u),"Share link"));}
-    private void clearData(){CookieManager.getInstance().removeAllCookies(null);CookieManager.getInstance().flush();if(webView!=null){webView.clearCache(true);webView.clearHistory();}if(popupWebView!=null){popupWebView.clearCache(true);popupWebView.clearHistory();}Toast.makeText(this,"Browsing data cleared",Toast.LENGTH_SHORT).show();}
+    private void clearData(){CookieManager.getInstance().removeAllCookies(null);CookieManager.getInstance().flush();for(WebView w:tabViews){w.clearCache(true);w.clearHistory();}if(popupWebView!=null){popupWebView.clearCache(true);popupWebView.clearHistory();}Toast.makeText(this,"Browsing data cleared",Toast.LENGTH_SHORT).show();}
     private ArrayList<String> saved(String key){
         ArrayList<String> list=new ArrayList<>();
         try{JSONArray a=new JSONArray(prefs.getString(key,"[]"));for(int i=0;i<a.length();i++)list.add(a.getString(i));}catch(Exception ignored){}
@@ -366,14 +374,15 @@ public class NativeBrowserActivity extends AppCompatActivity {
     }
     private void newTab(String url){
         if(tabs.size()>=12){Toast.makeText(this,"Maximum 12 tabs",Toast.LENGTH_SHORT).show();return;}
-        if(currentTab<tabs.size())tabs.set(currentTab,webView.getUrl()==null?"https://www.google.com":webView.getUrl());
-        tabs.add(isHttpUrl(url)?url:"https://www.google.com");currentTab=tabs.size()-1;
-        rebuildMainWebView(tabs.get(currentTab));updateTabLabel();
+        if(currentTab<tabs.size()&&webView!=null&&webView.getUrl()!=null)tabs.set(currentTab,webView.getUrl());
+        String target=isHttpUrl(url)?url:"https://www.google.com"; tabs.add(target); currentTab=tabs.size()-1;
+        WebView w=createTabWebView(target); tabViews.add(w);
+        if(webView!=null)webView.setVisibility(View.GONE); webView=w; webView.setVisibility(View.VISIBLE); webContainer.addView(webView,0,new FrameLayout.LayoutParams(-1,-1)); updateTabLabel();
     }
     private void switchTab(int index){
-        if(index<0||index>=tabs.size())return;
-        if(currentTab<tabs.size()&&webView.getUrl()!=null)tabs.set(currentTab,webView.getUrl());
-        currentTab=index;rebuildMainWebView(tabs.get(index));updateTabLabel();
+        if(index<0||index>=tabs.size()||index>=tabViews.size())return;
+        if(webView!=null&&webView.getUrl()!=null)tabs.set(currentTab,webView.getUrl());
+        if(webView!=null)webView.setVisibility(View.GONE); currentTab=index; webView=tabViews.get(index); webView.setVisibility(View.VISIBLE); updateAddress(webView.getUrl()); updateNavigation(); updateTabLabel();
     }
     private void showTabs(){
         ArrayList<String> options=new ArrayList<>(tabs);
@@ -383,7 +392,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
              if(index==tabs.size())newTab("https://www.google.com");
              else if(index==tabs.size()+1){
                  if(tabs.size()==1){tabs.set(0,"https://www.google.com");switchTab(0);}
-                 else{tabs.remove(currentTab);currentTab=Math.min(currentTab,tabs.size()-1);rebuildMainWebView(tabs.get(currentTab));updateTabLabel();}
+                 else{ if(currentTab<tabViews.size()){WebView old=tabViews.remove(currentTab);webContainer.removeView(old);old.destroy();} tabs.remove(currentTab);currentTab=Math.min(currentTab,tabs.size()-1);switchTab(currentTab);updateTabLabel();}
              }else switchTab(index);
           }).show();
     }
@@ -436,11 +445,11 @@ public class NativeBrowserActivity extends AppCompatActivity {
         TextView external=button("Open in another browser (optional)");external.setOnClickListener(v->openInExternalBrowser());LinearLayout.LayoutParams ep=new LinearLayout.LayoutParams(-2,-2);ep.topMargin=dp(12);errorView.addView(external,ep);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
         buildChrome();
         root.setOnApplyWindowInsetsListener((view,insets)->{int bottom=insets.getSystemWindowInsetBottom();root.setPadding(0,0,0,bottom);return insets;});
-        setContentView(root);String first=getIntent().getStringExtra("url");tabs.add(isHttpUrl(first)?first:"https://www.google.com");if(state!=null)webView.restoreState(state);else loadInApp(tabs.get(0));
+        setContentView(root);String first=getIntent().getStringExtra("url");String initial=isHttpUrl(first)?first:"https://www.google.com";tabs.add(initial);tabViews.add(webView);if(state!=null)webView.restoreState(state);else loadInApp(initial);
     }
-    @Override public void onBackPressed(){if(popupWebView!=null){if(popupWebView.canGoBack())popupWebView.goBack();else closePopup();}else if(webView!=null&&webView.canGoBack())webView.goBack();else super.onBackPressed();}
+    @Override public void onBackPressed(){if(customFullscreenView!=null){exitFullscreen();return;}if(popupWebView!=null){if(popupWebView.canGoBack())popupWebView.goBack();else closePopup();}else if(webView!=null&&webView.canGoBack())webView.goBack();else super.onBackPressed();}
     @Override protected void onSaveInstanceState(Bundle out){if(webView!=null)webView.saveState(out);super.onSaveInstanceState(out);}
     @Override protected void onPause(){if(webView!=null){webView.onPause();webView.pauseTimers();}if(popupWebView!=null)popupWebView.onPause();super.onPause();}
     @Override protected void onResume(){super.onResume();if(webView!=null){webView.onResume();webView.resumeTimers();}if(popupWebView!=null)popupWebView.onResume();}
-    @Override protected void onDestroy(){if(hideRunnable!=null)handler.removeCallbacks(hideRunnable);closePopup();if(webView!=null){webView.stopLoading();webView.destroy();}super.onDestroy();}
+    @Override protected void onDestroy(){if(hideRunnable!=null)handler.removeCallbacks(hideRunnable);exitFullscreen();closePopup();for(WebView w:tabViews){try{w.stopLoading();w.destroy();}catch(Exception ignored){}}tabViews.clear();webView=null;super.onDestroy();}
 }
