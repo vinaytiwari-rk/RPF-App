@@ -339,9 +339,23 @@ public class NativeBrowserActivity extends AppCompatActivity {
         return new WebViewClient(){
             @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest request){
                 String next = request != null && request.getUrl()!=null ? request.getUrl().toString() : null;
-                return next != null && !isHttpUrl(next) && routeNonHttp(next);
+                if(next == null) return false;
+                if(isHttpUrl(next)){
+                    // Explicitly load the exact clicked HTTP(S) target. This prevents a
+                    // restored/stale WebView URL from winning over a fresh link tap.
+                    if(!next.equals(view.getUrl())) view.loadUrl(next);
+                    return true;
+                }
+                return routeNonHttp(next);
             }
-            @Override public boolean shouldOverrideUrlLoading(WebView view,String url){ return url != null && !isHttpUrl(url) && routeNonHttp(url); }
+            @Override public boolean shouldOverrideUrlLoading(WebView view,String url){
+                if(url == null) return false;
+                if(isHttpUrl(url)){
+                    if(!url.equals(view.getUrl())) view.loadUrl(url);
+                    return true;
+                }
+                return routeNonHttp(url);
+            }
             @Override public void onPageStarted(WebView view,String url,Bitmap icon){
                 if(!popup){ mainFrameError=false; loading=true; hideError(); showControls(); updateAddress(url); }
             }
@@ -654,21 +668,18 @@ public class NativeBrowserActivity extends AppCompatActivity {
         // (for example, every new link becoming the old eRaktKosh page).
         boolean explicitFirst=isHttpUrl(first);
         if(explicitFirst){
-            if(tabs.isEmpty()){
-                tabs.add(first);
-                tabScrollY.add(0);
-                currentTab=0;
-            }else{
-                if(currentTab<0 || currentTab>=tabs.size()) currentTab=0;
-                tabs.set(currentTab,first);
-                while(tabScrollY.size()<tabs.size()) tabScrollY.add(0);
-                tabScrollY.set(currentTab,0);
-            }
+            // A URL explicitly supplied by the app is a brand-new navigation request.
+            // Never reuse/restore the previous browser tab or WebView state for it.
+            tabs.clear();
+            tabScrollY.clear();
+            currentTab=0;
+            tabs.add(first);
+            tabScrollY.add(0);
         }
 
         String initial=explicitFirst?first:(tabs.isEmpty()?"https://www.google.com":tabs.get(currentTab));
         if(tabs.isEmpty()) tabs.add(initial);
-        if(state!=null) webView.restoreState(state); else loadInApp(initial);
+        if(state!=null && !explicitFirst) webView.restoreState(state); else loadInApp(initial);
         restoreTabWebViews();
         rememberTabs();
     }
