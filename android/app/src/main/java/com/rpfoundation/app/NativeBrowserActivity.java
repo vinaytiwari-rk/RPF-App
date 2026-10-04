@@ -59,6 +59,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private static final int IVORY = Color.rgb(255,249,240);
     private static final long AUTO_HIDE_MS = 3500L;
     private static final String PREFS = "samahit_views";
+    private static final String PERMISSION_PREFIX = "permission_";
     private String mobileUserAgent;
     private String desktopUserAgent;
 
@@ -196,7 +197,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         if(desktopMode) s.setUserAgentString(desktopUserAgent);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            s.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+            s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
             CookieManager.getInstance().setAcceptThirdPartyCookies(target,true);
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
@@ -208,6 +209,34 @@ public class NativeBrowserActivity extends AppCompatActivity {
         CookieManager.getInstance().flush();
     }
 
+    private void rememberTabs(){
+        try{ prefs.edit().putString("openTabs",new JSONArray(tabs).toString()).putInt("currentTab",currentTab).apply(); }catch(Exception ignored){}
+    }
+    private void restoreSavedTabs(){
+        tabs.clear(); tabViews.clear();
+        try{
+            JSONArray a=new JSONArray(prefs.getString("openTabs","[]"));
+            for(int i=0;i<a.length() && i<12;i++){String u=a.optString(i,"");if(isHttpUrl(u))tabs.add(u);}
+            currentTab=Math.max(0,Math.min(prefs.getInt("currentTab",0),tabs.size()-1));
+        }catch(Exception ignored){}
+    }
+    private String permissionKey(String origin,String resource){
+        try{return PERMISSION_PREFIX+Uri.parse(origin).getHost()+":"+resource;}catch(Exception e){return PERMISSION_PREFIX+origin+":"+resource;}
+    }
+    private int sitePermission(String origin,String resource){ return prefs.getInt(permissionKey(origin,resource),0); }
+    private void setSitePermission(String origin,String resource,int value){ prefs.edit().putInt(permissionKey(origin,resource),value).apply(); }
+    private void showDownloads(){
+        try{
+            DownloadManager dm=(DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+            android.app.DownloadManager.Query q=new android.app.DownloadManager.Query();
+            android.database.Cursor cur=dm.query(q); ArrayList<String> rows=new ArrayList<>();
+            if(cur!=null){int title=cur.getColumnIndex(DownloadManager.COLUMN_TITLE),status=cur.getColumnIndex(DownloadManager.COLUMN_STATUS),uri=cur.getColumnIndex(DownloadManager.COLUMN_URI);while(cur.moveToNext()){
+                String t=title>=0?cur.getString(title):"Download"; int s=status>=0?cur.getInt(status):0; String u=uri>=0?cur.getString(uri):"";
+                String st=s==DownloadManager.STATUS_SUCCESSFUL?"Completed":s==DownloadManager.STATUS_FAILED?"Failed":s==DownloadManager.STATUS_PAUSED?"Paused":"In progress"; rows.add(t+"\n"+st+(u.isEmpty()?"":"\n"+u));}cur.close();}
+            if(rows.isEmpty()){Toast.makeText(this,"No downloads yet",Toast.LENGTH_SHORT).show();return;}
+            new AlertDialog.Builder(this).setTitle("Downloads").setItems(rows.toArray(new String[0]),null).setNegativeButton("Close",null).show();
+        }catch(Exception e){Toast.makeText(this,"Download manager unavailable",Toast.LENGTH_SHORT).show();}
+    }
     private void installDownloadListener(WebView target){
         target.setDownloadListener(new DownloadListener(){
             @Override public void onDownloadStart(String url,String ua,String disposition,String mime,long length){
@@ -216,6 +245,8 @@ public class NativeBrowserActivity extends AppCompatActivity {
                     DownloadManager.Request r = new DownloadManager.Request(Uri.parse(url));
                     String cookies = CookieManager.getInstance().getCookie(url);
                     if(cookies != null) r.addRequestHeader("Cookie",cookies);
+                    r.setAllowedOverMetered(true);
+                    r.setAllowedOverRoaming(false);
                     if(ua != null) r.addRequestHeader("User-Agent",ua);
                     r.setMimeType(mime);
                     String name = URLUtil.guessFileName(url,disposition,mime);
@@ -240,7 +271,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 if(!popup){ mainFrameError=false; loading=true; hideError(); showControls(); updateAddress(url); }
             }
             @Override public void onPageFinished(WebView view,String url){
-                if(!popup){ loading=false; if(isHttpUrl(url)){ lastStableUrl=url; if(currentTab<tabs.size())tabs.set(currentTab,url); remember(HISTORY,url); } updateAddress(url); updateNavigation(); if(!mainFrameError) scheduleHide(); }
+                if(!popup){ loading=false; if(isHttpUrl(url)){ lastStableUrl=url; if(currentTab<tabs.size())tabs.set(currentTab,url); remember(HISTORY,url); rememberTabs(); } updateAddress(url); updateNavigation(); if(!mainFrameError) scheduleHide(); }
             }
             @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){
                 if(!popup && request != null && request.isForMainFrame()){
@@ -271,15 +302,22 @@ public class NativeBrowserActivity extends AppCompatActivity {
             }
             @Override public void onGeolocationPermissionsShowPrompt(String origin,GeolocationPermissions.Callback callback){
                 if(origin==null||!origin.startsWith("https://")){callback.invoke(origin,false,false);return;}
+                int decision=sitePermission(origin,"location");
+                if(decision==2){callback.invoke(origin,false,false);return;}
+                if(decision==1){callback.invoke(origin,true,false);return;}
                 new AlertDialog.Builder(NativeBrowserActivity.this).setTitle("Location permission")
-                  .setMessage("Allow "+origin+" to access your location this time?")
-                  .setPositiveButton("Allow",(d,w)->{
+                  .setMessage("Allow "+origin+" to access your location?")
+                  .setPositiveButton("Always allow",(d,w)->{ setSitePermission(origin,"location",1); requestLocation(callback,origin); })
+                  .setNeutralButton("Allow once",(d,w)->requestLocation(callback,origin))
+                  .setNegativeButton("Block",(d,w)->{setSitePermission(origin,"location",2);callback.invoke(origin,false,false);})
+                  .setOnCancelListener(d->callback.invoke(origin,false,false)).show();
+            }
+            private void requestLocation(GeolocationPermissions.Callback callback,String origin){
+                      
                       boolean granted=ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
                         || ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED;
                       if(granted)callback.invoke(origin,true,false);
                       else{pendingGeoCallback=callback;pendingGeoOrigin=origin;permissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION});}
-                  }).setNegativeButton("Block",(d,w)->callback.invoke(origin,false,false))
-                  .setOnCancelListener(d->callback.invoke(origin,false,false)).show();
             }
             @Override public void onPermissionRequest(PermissionRequest request){
                 if(request.getOrigin()==null||!"https".equalsIgnoreCase(request.getOrigin().getScheme())){request.deny();return;}
@@ -290,9 +328,18 @@ public class NativeBrowserActivity extends AppCompatActivity {
                     else{request.deny();return;}
                 }
                 final boolean needsCam=cam,needsMic=mic;
+                String origin=request.getOrigin().toString();
+                int camDecision=needsCam?sitePermission(origin,"camera"):1, micDecision=needsMic?sitePermission(origin,"microphone"):1;
+                if((needsCam&&camDecision==2)||(needsMic&&micDecision==2)){request.deny();return;}
+                if((!needsCam||camDecision==1)&&(!needsMic||micDecision==1)){request.grant(request.getResources());return;}
                 new AlertDialog.Builder(NativeBrowserActivity.this).setTitle("Website permission")
-                  .setMessage("Allow "+request.getOrigin().getHost()+" to use "+(cam&&mic?"camera and microphone":cam?"camera":"microphone")+" this time?")
-                  .setPositiveButton("Allow",(d,w)->{
+                  .setMessage("Allow "+request.getOrigin().getHost()+" to use "+(cam&&mic?"camera and microphone":cam?"camera":"microphone")+"?")
+                  .setPositiveButton("Always allow",(d,w)->{ if(needsCam)setSitePermission(origin,"camera",1); if(needsMic)setSitePermission(origin,"microphone",1); grantWebPermission(request,needsCam,needsMic); })
+                  .setNeutralButton("Allow once",(d,w)->grantWebPermission(request,needsCam,needsMic))
+                  .setNegativeButton("Block",(d,w)->{if(needsCam)setSitePermission(origin,"camera",2);if(needsMic)setSitePermission(origin,"microphone",2);request.deny();})
+                  .setOnCancelListener(d->request.deny()).show();
+            }
+            private void grantWebPermission(PermissionRequest request,boolean needsCam,boolean needsMic){
                       boolean camOk=!needsCam||ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED;
                       boolean micOk=!needsMic||ContextCompat.checkSelfPermission(NativeBrowserActivity.this,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED;
                       if(camOk&&micOk)request.grant(request.getResources());
@@ -413,14 +460,14 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private void newTab(String url){
         if(tabs.size()>=12){Toast.makeText(this,"Maximum 12 tabs",Toast.LENGTH_SHORT).show();return;}
         if(currentTab<tabs.size()&&webView!=null&&webView.getUrl()!=null)tabs.set(currentTab,webView.getUrl());
-        String target=isHttpUrl(url)?url:"https://www.google.com"; tabs.add(target); currentTab=tabs.size()-1;
+        String target=isHttpUrl(url)?url:"https://www.google.com"; tabs.add(target); currentTab=tabs.size()-1; rememberTabs();
         WebView w=createTabWebView(target); tabViews.add(w);
         if(webView!=null)webView.setVisibility(View.GONE); webView=w; webView.setVisibility(View.VISIBLE); webContainer.addView(webView,0,new FrameLayout.LayoutParams(-1,-1)); updateTabLabel();
     }
     private void switchTab(int index){
         if(index<0||index>=tabs.size()||index>=tabViews.size())return;
         if(webView!=null&&webView.getUrl()!=null)tabs.set(currentTab,webView.getUrl());
-        if(webView!=null)webView.setVisibility(View.GONE); currentTab=index; webView=tabViews.get(index); webView.setVisibility(View.VISIBLE); updateAddress(webView.getUrl()); updateNavigation(); updateTabLabel();
+        if(webView!=null)webView.setVisibility(View.GONE); currentTab=index; rememberTabs(); webView=tabViews.get(index); webView.setVisibility(View.VISIBLE); updateAddress(webView.getUrl()); updateNavigation(); updateTabLabel();
     }
     private void showTabs(){
         ArrayList<String> options=new ArrayList<>(tabs);
@@ -430,7 +477,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
              if(index==tabs.size())newTab("https://www.google.com");
              else if(index==tabs.size()+1){
                  if(tabs.size()==1){tabs.set(0,"https://www.google.com");switchTab(0);}
-                 else{ if(currentTab<tabViews.size()){WebView old=tabViews.remove(currentTab);webContainer.removeView(old);old.destroy();} tabs.remove(currentTab);currentTab=Math.min(currentTab,tabs.size()-1);switchTab(currentTab);updateTabLabel();}
+                 else{ if(currentTab<tabViews.size()){WebView old=tabViews.remove(currentTab);webContainer.removeView(old);old.destroy();} tabs.remove(currentTab);currentTab=Math.min(currentTab,tabs.size()-1);rememberTabs();switchTab(currentTab);updateTabLabel();}
              }else switchTab(index);
           }).show();
     }
@@ -438,7 +485,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
     private void updateTabLabel(){if(tabsButton!=null)tabsButton.setText("▣ "+tabs.size());}
     private void showSettings(){String[] o={"Auto-hide toolbar: "+(autoHide?"On":"Off"),"Data Saver: "+(dataSaver?"On":"Off"),"Clear browsing data"};new AlertDialog.Builder(this).setTitle("Samahit Views Settings").setItems(o,(d,w)->{if(w==0){autoHide=!autoHide;prefs.edit().putBoolean("autoHide",autoHide).apply();if(autoHide)scheduleHide();}else if(w==1)toggleDataSaver();else new AlertDialog.Builder(this).setMessage("Clear cookies, cache and saved history? This may sign you out of websites.").setPositiveButton("Clear",(a,b)->{clearData();prefs.edit().remove(HISTORY).apply();}).setNegativeButton("Cancel",null).show();}).show();}
     private void showMenu(){
-        String[] a={"Refresh","Zoom in","Zoom out","Reset zoom","Find in page",desktopMode?"Mobile site":"Desktop site",dataSaver?"Disable Data Saver":"Enable Data Saver","Share","Copy link","Close popup","Open in another browser","Add bookmark","Bookmarks","History","New tab","Tabs","Settings"};
+        String[] a={"Refresh","Zoom in","Zoom out","Reset zoom","Find in page",desktopMode?"Mobile site":"Desktop site",dataSaver?"Disable Data Saver":"Enable Data Saver","Share","Copy link","Close popup","Open in another browser","Add bookmark","Bookmarks","History","Downloads","New tab","Tabs","Settings"};
         new AlertDialog.Builder(this).setItems(a,(d,w)->{
             if(w==0)activeWebView().reload();
             else if(w==1)zoomIn();
@@ -454,8 +501,9 @@ public class NativeBrowserActivity extends AppCompatActivity {
             else if(w==11){String u=activeWebView().getUrl();if(isHttpUrl(u)){remember(BOOKMARKS,u);Toast.makeText(this,"Bookmarked",Toast.LENGTH_SHORT).show();}}
             else if(w==12)showSaved(BOOKMARKS);
             else if(w==13)showSaved(HISTORY);
-            else if(w==14)newTab("https://www.google.com");
-            else if(w==15)showTabs();
+            else if(w==14)showDownloads();
+            else if(w==15)newTab("https://www.google.com");
+            else if(w==16)showTabs();
             else showSettings();
         }).show();
     }
@@ -483,10 +531,18 @@ public class NativeBrowserActivity extends AppCompatActivity {
         TextView external=button("Open in another browser (optional)");external.setOnClickListener(v->openInExternalBrowser());LinearLayout.LayoutParams ep=new LinearLayout.LayoutParams(-2,-2);ep.topMargin=dp(12);errorView.addView(external,ep);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
         buildChrome();
         root.setOnApplyWindowInsetsListener((view,insets)->{int bottom=insets.getSystemWindowInsetBottom();root.setPadding(0,0,0,bottom);return insets;});
-        setContentView(root);String first=getIntent().getStringExtra("url");String initial=isHttpUrl(first)?first:"https://www.google.com";tabs.add(initial);tabViews.add(webView);if(state!=null)webView.restoreState(state);else loadInApp(initial);
+        setContentView(root);String first=getIntent().getStringExtra("url");
+        if(state==null) restoreSavedTabs();
+        String initial=isHttpUrl(first)?first:(tabs.isEmpty()?"https://www.google.com":tabs.get(currentTab));
+        if(tabs.isEmpty()) tabs.add(initial);
+        if(tabViews.isEmpty()) tabViews.add(webView);
+        if(state!=null) webView.restoreState(state); else loadInApp(initial);
+        rememberTabs();
     }
     @Override public void onBackPressed(){if(customFullscreenView!=null){exitFullscreen();return;}if(popupWebView!=null){if(popupWebView.canGoBack())popupWebView.goBack();else closePopup();}else if(webView!=null&&webView.canGoBack())webView.goBack();else super.onBackPressed();}
-    @Override protected void onSaveInstanceState(Bundle out){if(webView!=null)webView.saveState(out);super.onSaveInstanceState(out);}
+    @Override protected void onSaveInstanceState(Bundle out){if(webView!=null)webView.saveState(out);rememberTabs();
+        if(webView!=null) out.putString("activeUrl",webView.getUrl());
+        super.onSaveInstanceState(out);}
     @Override protected void onPause(){if(webView!=null){webView.onPause();webView.pauseTimers();}if(popupWebView!=null)popupWebView.onPause();super.onPause();}
     @Override protected void onResume(){super.onResume();if(webView!=null){webView.onResume();webView.resumeTimers();}if(popupWebView!=null)popupWebView.onResume();}
     @Override protected void onDestroy(){if(hideRunnable!=null)handler.removeCallbacks(hideRunnable);exitFullscreen();closePopup();for(WebView w:tabViews){try{w.stopLoading();w.destroy();}catch(Exception ignored){}}tabViews.clear();webView=null;super.onDestroy();}
