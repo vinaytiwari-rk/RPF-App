@@ -80,11 +80,14 @@ router.get('/api/gov/web-proxy', async (req, res) => {
     const $ = cheerio.load(String(upstream.data));
     $('meta[http-equiv="Content-Security-Policy"], meta[http-equiv="X-Frame-Options"], meta[http-equiv="content-security-policy"], meta[http-equiv="x-frame-options"]').remove();
 
-    // Set correct base URL so all relative assets, css, images, fonts, scripts resolve to upstream host
+    // Preserve the upstream application path for SPAs. Using target.origin here
+    // breaks portals mounted below a sub-path (for example /eraktkoshPortal/),
+    // because Angular/React then requests its JS chunks from the domain root.
+    const upstreamBase = new URL('.', target.toString()).toString();
     if ($('base').length === 0) {
-      $('head').prepend(`<base href="${target.origin}/" />`);
+      $('head').prepend(`<base href="${upstreamBase}" />`);
     } else {
-      $('base').attr('href', `${target.origin}/`);
+      $('base').attr('href', upstreamBase);
     }
 
     // Comprehensive Anti-Framebusting and In-App Navigation Lock script
