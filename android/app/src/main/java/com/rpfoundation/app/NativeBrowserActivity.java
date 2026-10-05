@@ -508,8 +508,41 @@ public class NativeBrowserActivity extends AppCompatActivity {
         if(webView!=null){webView.stopLoading();webContainer.removeView(webView);}
         webView=createTabWebView(url); webContainer.addView(webView,0,new FrameLayout.LayoutParams(-1,-1));
     }
-    private void openPopup(Message msg){closePopup();popupWebView=new WebView(this);configureWebView(popupWebView);popupWebView.setWebViewClient(createClient(true));popupWebView.setWebChromeClient(createChromeClient());installDownloadListener(popupWebView);installDoubleTapToggle(popupWebView);webContainer.addView(popupWebView,new FrameLayout.LayoutParams(-1,-1));WebView.WebViewTransport t=(WebView.WebViewTransport)msg.obj;t.setWebView(popupWebView);msg.sendToTarget();showControls();}
-    private void closePopup(){if(popupWebView!=null){webContainer.removeView(popupWebView);popupWebView.stopLoading();popupWebView.destroy();popupWebView=null;updateAddress(webView!=null?webView.getUrl():null);updateNavigation();}}
+    private void openPopup(Message msg){
+        // Treat target=_blank/window.open as a real browser tab. This keeps the
+        // new page usable with normal tab switching, history and back navigation.
+        if(popupWebView!=null) closePopup();
+        if(tabs.size()>=12){
+            Toast.makeText(this,"Maximum 12 tabs",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(webView!=null&&webView.getUrl()!=null&&currentTab<tabs.size()) tabs.set(currentTab,webView.getUrl());
+        String placeholder="https://www.google.com";
+        tabs.add(placeholder); tabScrollY.add(0); currentTab=tabs.size()-1;
+        if(webView!=null) webView.setVisibility(View.GONE);
+        popupWebView=new WebView(this); configureWebView(popupWebView);
+        popupWebView.setWebViewClient(createClient(false)); popupWebView.setWebChromeClient(createChromeClient());
+        installDownloadListener(popupWebView); installDoubleTapToggle(popupWebView);
+        tabViews.add(popupWebView); webView=popupWebView;
+        webContainer.addView(popupWebView,0,new FrameLayout.LayoutParams(-1,-1));
+        WebView.WebViewTransport t=(WebView.WebViewTransport)msg.obj; t.setWebView(popupWebView); msg.sendToTarget();
+        rememberTabs(); updateTabLabel(); showControls();
+    }
+    private void closePopup(){
+        if(popupWebView!=null){
+            int idx=tabViews.indexOf(popupWebView);
+            webContainer.removeView(popupWebView); popupWebView.stopLoading(); popupWebView.destroy();
+            if(idx>=0) tabViews.remove(idx);
+            if(idx>=0&&idx<tabs.size()) tabs.remove(idx);
+            if(idx>=0&&idx<tabScrollY.size()) tabScrollY.remove(idx);
+            popupWebView=null;
+            if(tabs.isEmpty()){tabs.add("https://www.google.com");tabScrollY.add(0);currentTab=0;}
+            else currentTab=Math.max(0,Math.min(currentTab,tabs.size()-1));
+            webView=tabViews.size()>currentTab?tabViews.get(currentTab):webView;
+            if(webView!=null) webView.setVisibility(View.VISIBLE);
+            rememberTabs(); updateTabLabel(); updateAddress(webView!=null?webView.getUrl():null); updateNavigation();
+        }
+    }
 
     private void showControls(){if(hideRunnable!=null)handler.removeCallbacks(hideRunnable);if(topBar!=null){topBar.setVisibility(View.VISIBLE);topBar.animate().translationY(0).alpha(1f).setDuration(140).start();}if(bottomBar!=null){bottomBar.setVisibility(View.VISIBLE);bottomBar.animate().translationY(0).alpha(1f).setDuration(140).start();}}
     private void hideControls(){if(loading||mainFrameError||!autoHide)return;if(topBar!=null&&topBar.getVisibility()==View.VISIBLE)topBar.animate().translationY(-dp(80)).alpha(0f).setDuration(180).withEndAction(()->topBar.setVisibility(View.INVISIBLE)).start();if(bottomBar!=null&&bottomBar.getVisibility()==View.VISIBLE)bottomBar.animate().translationY(dp(80)).alpha(0f).setDuration(180).withEndAction(()->bottomBar.setVisibility(View.INVISIBLE)).start();}
