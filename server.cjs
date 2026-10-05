@@ -100335,7 +100335,7 @@ var require_socks5_proxy_agent = __commonJS({
     var kRequestTls = Symbol("request tls settings");
     var experimentalWarningEmitted = false;
     var Socks5ProxyAgent = class extends DispatcherBase {
-      constructor(proxyUrl, options2 = {}) {
+      constructor(proxyUrl2, options2 = {}) {
         super();
         if (!experimentalWarningEmitted) {
           process.emitWarning(
@@ -100344,10 +100344,10 @@ var require_socks5_proxy_agent = __commonJS({
           );
           experimentalWarningEmitted = true;
         }
-        if (!proxyUrl) {
+        if (!proxyUrl2) {
           throw new InvalidArgumentError("Proxy URL is mandatory");
         }
-        const url3 = typeof proxyUrl === "string" ? new URL3(proxyUrl) : proxyUrl;
+        const url3 = typeof proxyUrl2 === "string" ? new URL3(proxyUrl2) : proxyUrl2;
         if (url3.protocol !== "socks5:" && url3.protocol !== "socks:") {
           throw new InvalidArgumentError("Proxy URL must use socks5:// or socks:// protocol");
         }
@@ -100551,16 +100551,16 @@ var require_proxy_agent = __commonJS({
     }
     var Http1ProxyWrapper = class extends DispatcherBase {
       #client;
-      constructor(proxyUrl, { headers = {}, connect: connect2, factory: factory2 }) {
-        if (!proxyUrl) {
+      constructor(proxyUrl2, { headers = {}, connect: connect2, factory: factory2 }) {
+        if (!proxyUrl2) {
           throw new InvalidArgumentError("Proxy URL is mandatory");
         }
         super();
         this[kProxyHeaders] = headers;
         if (factory2) {
-          this.#client = factory2(proxyUrl, { connect: connect2 });
+          this.#client = factory2(proxyUrl2, { connect: connect2 });
         } else {
-          this.#client = new Client3(proxyUrl, { connect: connect2 });
+          this.#client = new Client3(proxyUrl2, { connect: connect2 });
         }
       }
       [kDispatch](opts, handler) {
@@ -162527,20 +162527,7 @@ var init_coreServices = __esm({
       { id: "farmer", category: "welfare", iconName: "Sprout", titleEn: "Farmer Support", titleHi: "\u0915\u093F\u0938\u093E\u0928 \u0938\u0939\u092F\u094B\u0917", descEn: "Crop diagnostic & market pricing", descHi: "\u0915\u0943\u0937\u093F \u0938\u0939\u093E\u092F\u0924\u093E \u0914\u0930 \u092A\u094D\u0930\u0936\u093F\u0915\u094D\u0937\u0923" },
       { id: "schemes", category: "empowerment", iconName: "FileText", titleEn: "Government Schemes", titleHi: "\u0938\u0930\u0915\u093E\u0930\u0940 \u092F\u094B\u091C\u0928\u093E\u090F\u0902", descEn: "Eligibility calculator & guides", descHi: "\u0906\u0927\u093E\u0930, \u0930\u093E\u0936\u0928 \u090F\u0935\u0902 PM \u0906\u0935\u093E\u0938 \u0938\u0939\u093E\u092F\u0924\u093E" },
       { id: "skills", category: "empowerment", iconName: "GraduationCap", titleEn: "Skills Training", titleHi: "\u0915\u094C\u0936\u0932 \u092A\u094D\u0930\u0936\u093F\u0915\u094D\u0937\u0923", descEn: "Tailoring, coding & courses", descHi: "\u0928\u093F\u0936\u0941\u0932\u094D\u0915 \u092A\u094D\u0930\u0936\u093F\u0915\u094D\u0937\u0923 \u0915\u094B\u0930\u094D\u0938" },
-      { id: "countries", category: "civic", iconName: "Globe", titleEn: "Global Guide", titleHi: "\u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0928\u093F\u0930\u094D\u0926\u0947\u0936\u093F\u0915\u093E", descEn: "Look up nation currencies, timezones & details", descHi: "\u0935\u093F\u0936\u094D\u0935 \u092E\u0941\u0926\u094D\u0930\u093E, \u0938\u092E\u092F \u0914\u0930 \u0926\u0947\u0936\u094B\u0902 \u0915\u0940 \u091C\u093E\u0928\u0915\u093E\u0930\u0940" },
-      { id: "earthquakes", category: "civic", iconName: "AlertTriangle", titleEn: "Earthquakes", titleHi: "\u092D\u0942\u0915\u0902\u092A", descEn: "Live USGS Alerts", descHi: "\u0932\u093E\u0907\u0935 \u092D\u0942\u0915\u0902\u092A \u0905\u0932\u0930\u094D\u091F" },
-      { id: "fuel-tracker", category: "welfare", iconName: "Fuel", titleEn: "Fuel Tracker", titleHi: "\u0908\u0902\u0927\u0928 \u091F\u094D\u0930\u0948\u0915\u0930", descEn: "Track mileage & cost", descHi: "\u092E\u093E\u0907\u0932\u0947\u091C \u0914\u0930 \u0932\u093E\u0917\u0924" },
-      { id: "gps-toolkit", category: "civic", iconName: "Compass", titleEn: "GPS Toolkit", titleHi: "\u091C\u0940\u092A\u0940\u090F\u0938 \u091F\u0942\u0932\u0915\u093F\u091F", descEn: "Speedometer & Parking", descHi: "\u0938\u094D\u092A\u0940\u0921\u094B\u092E\u0940\u091F\u0930 \u0914\u0930 \u092A\u093E\u0930\u094D\u0915\u093F\u0902\u0917" },
-      { id: "vitals", category: "welfare", iconName: "Activity", titleEn: "Vitals Dashboard", titleHi: "\u0935\u093F\u091F\u0932\u094D\u0938 \u0921\u0948\u0936\u092C\u094B\u0930\u094D\u0921", descEn: "Track BP, steps & BMI", descHi: "\u092C\u0940\u092A\u0940, \u0915\u0926\u092E \u0914\u0930 \u092C\u0940\u090F\u092E\u0906\u0908" },
-      { id: "medications", category: "welfare", iconName: "Pill", titleEn: "Med Reminder", titleHi: "\u0926\u0935\u093E \u0905\u0928\u0941\u0938\u094D\u092E\u093E\u0930\u0915", descEn: "Pill schedule alerts", descHi: "\u0926\u0935\u093E \u0915\u093E\u0930\u094D\u092F\u0915\u094D\u0930\u092E \u0905\u0932\u0930\u094D\u091F" },
-      { id: "medical-dict", category: "welfare", iconName: "BookOpen", titleEn: "Medical Dict", titleHi: "\u091A\u093F\u0915\u093F\u0924\u094D\u0938\u093E \u0936\u092C\u094D\u0926\u0915\u094B\u0936", descEn: "Glossary & first aid", descHi: "\u0936\u092C\u094D\u0926\u093E\u0935\u0932\u0940 \u0914\u0930 \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915 \u0909\u092A\u091A\u093E\u0930" },
       { id: "sos", category: "urgent", iconName: "ShieldAlert", titleEn: "SOS System", titleHi: "\u090F\u0938\u0913\u090F\u0938 \u0938\u093F\u0938\u094D\u091F\u092E", descEn: "Emergency panic & location", descHi: "\u0906\u092A\u093E\u0924\u0915\u093E\u0932\u0940\u0928 \u092A\u0948\u0928\u093F\u0915 \u0914\u0930 \u0938\u094D\u0925\u093E\u0928" },
-      { id: "period-tracker", category: "welfare", iconName: "Heart", titleEn: "Period Tracker", titleHi: "\u092E\u093E\u0939\u0935\u093E\u0930\u0940 \u091F\u094D\u0930\u0948\u0915\u0930", descEn: "Cycle calendar & symptoms", descHi: "\u092E\u093E\u0938\u093F\u0915 \u0927\u0930\u094D\u092E \u0915\u0948\u0932\u0947\u0902\u0921\u0930" },
-      { id: "child-tracker", category: "welfare", iconName: "Baby", titleEn: "Child Tracker", titleHi: "\u0936\u093F\u0936\u0941 \u091F\u094D\u0930\u0948\u0915\u0930", descEn: "Developmental milestones", descHi: "\u0935\u093F\u0915\u093E\u0938 \u0915\u0947 \u092E\u0940\u0932 \u0915\u0947 \u092A\u0924\u094D\u0925\u0930" },
-      { id: "resume-builder", category: "empowerment", iconName: "FileText", titleEn: "Resume Builder", titleHi: "\u092C\u093E\u092F\u094B\u0921\u093E\u091F\u093E \u0928\u093F\u0930\u094D\u092E\u093E\u0924\u093E", descEn: "AI resume generation", descHi: "\u090F\u0906\u0908 \u092C\u093E\u092F\u094B\u0921\u093E\u091F\u093E \u0928\u093F\u0930\u094D\u092E\u093E\u0923" },
-      { id: "doc-scanner", category: "empowerment", iconName: "Camera", titleEn: "Doc Scanner", titleHi: "\u0926\u0938\u094D\u0924\u093E\u0935\u0947\u091C\u093C \u0938\u094D\u0915\u0948\u0928\u0930", descEn: "Scan and save PDFs", descHi: "\u092A\u0940\u0921\u0940\u090F\u092B \u0938\u094D\u0915\u0948\u0928 \u0915\u0930\u0947\u0902" },
-      { id: "ai-chat", category: "empowerment", iconName: "Bot", titleEn: "AI Assistant", titleHi: "\u090F\u0906\u0908 \u0938\u0939\u093E\u092F\u0915", descEn: "Ask Gemini anything", descHi: "\u091C\u0947\u092E\u093F\u0928\u0940 \u0938\u0947 \u0915\u0941\u091B \u092D\u0940 \u092A\u0942\u091B\u0947\u0902" },
-      { id: "story-library", category: "empowerment", iconName: "BookOpen", titleEn: "Audiobooks", titleHi: "\u0911\u0921\u093F\u092F\u094B \u092A\u0941\u0938\u094D\u0924\u0915\u0947\u0902", descEn: "Read and listen to stories", descHi: "\u0915\u0939\u093E\u0928\u093F\u092F\u093E\u0902 \u092A\u0922\u093C\u0947\u0902 \u0914\u0930 \u0938\u0941\u0928\u0947\u0902" },
       { id: "hindu-calendar", category: "culture", iconName: "Calendar", titleEn: "Hindu Calendar", titleHi: "\u0939\u093F\u0902\u0926\u0942 \u092A\u0902\u091A\u093E\u0902\u0917", descEn: "Tithis & Festivals", descHi: "\u0924\u093F\u0925\u093F\u092F\u093E\u0902 \u0914\u0930 \u0924\u094D\u092F\u094B\u0939\u093E\u0930" },
       { id: "news-feed", category: "culture", iconName: "Newspaper", titleEn: "News Feed", titleHi: "\u0938\u092E\u093E\u091A\u093E\u0930", descEn: "Top headlines & stories", descHi: "\u092A\u094D\u0930\u092E\u0941\u0916 \u0916\u092C\u0930\u0947\u0902" },
       { id: "internet-radio", category: "culture", iconName: "Radio", titleEn: "Internet Radio", titleHi: "\u0907\u0902\u091F\u0930\u0928\u0947\u091F \u0930\u0947\u0921\u093F\u092F\u094B", descEn: "Live radio stations", descHi: "\u0932\u093E\u0907\u0935 \u0930\u0947\u0921\u093F\u092F\u094B \u0938\u094D\u091F\u0947\u0936\u0928" },
@@ -296968,10 +296955,10 @@ function setProxy(options2, configProxy, location2, isRedirect2, configHttpsAgen
   let proxy = configProxy;
   const proxyEnvAgent = getProxyEnvAgent(options2, configHttpAgent, configHttpsAgent);
   if (!proxy && proxy !== false && !isNodeEnvProxyEnabled(proxyEnvAgent)) {
-    const proxyUrl = getProxyForUrl(location2);
-    if (proxyUrl) {
+    const proxyUrl2 = getProxyForUrl(location2);
+    if (proxyUrl2) {
       if (!shouldBypassProxy(location2)) {
-        proxy = new URL(proxyUrl);
+        proxy = new URL(proxyUrl2);
       }
     }
   }
@@ -351319,157 +351306,174 @@ var isAllowedPortal = (raw) => {
     return false;
   }
 };
-var proxiedAsset = (value2, base2) => {
-  try {
-    return new URL(value2, base2).toString();
-  } catch {
-    return value2;
-  }
-};
-var proxiedLink = (value2, base2) => {
-  try {
-    const absolute = new URL(value2, base2).toString();
-    return isAllowedPortal(absolute) ? `/api/gov/web-proxy?url=${encodeURIComponent(absolute)}&clean=1` : absolute;
-  } catch {
-    return value2;
-  }
-};
-router27.get("/api/gov/web-proxy", async (req2, res) => {
-  const raw = String(req2.query.url || "");
-  if (!isAllowedPortal(raw)) {
-    return res.status(400).send(`<html><body style="font-family:sans-serif;padding:30px;text-align:center"><h3 style="color:#C2410C">Invalid Web Address</h3><p style="color:#64748B">The requested address is invalid or restricted.</p></body></html>`);
-  }
-  try {
-    const target = new URL(raw);
-    const upstream = await axios_default.get(target.toString(), {
-      responseType: "text",
-      timeout: 2e4,
-      maxRedirects: 10,
-      httpsAgent,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-IN,en-US,en;q=0.9,hi;q=0.8",
-        "Referer": target.origin + "/"
-      },
-      validateStatus: () => true
-      // Accept 2xx, 3xx, 4xx without throwing immediately
-    });
-    const finalUrl = upstream.request?.res?.responseUrl || upstream.config?.url || target.toString();
-    if (!isAllowedPortal(finalUrl)) {
-      return res.status(403).send(`<html><body style="font-family:sans-serif;padding:30px;text-align:center"><h3 style="color:#C2410C">Restricted Redirect</h3><p style="color:#64748B">The website redirected to a restricted internal address.</p></body></html>`);
-    }
-    const contentType = String(upstream.headers["content-type"] || "text/html");
-    res.removeHeader("X-Frame-Options");
-    res.removeHeader("Content-Security-Policy");
-    res.removeHeader("x-frame-options");
-    res.removeHeader("content-security-policy");
-    if (!contentType.includes("text/html")) {
-      res.setHeader("Content-Type", contentType);
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      return res.send(upstream.data);
-    }
-    const $4 = load(String(upstream.data));
-    $4('meta[http-equiv="Content-Security-Policy"], meta[http-equiv="X-Frame-Options"], meta[http-equiv="content-security-policy"], meta[http-equiv="x-frame-options"]').remove();
-    if ($4("base").length === 0) {
-      $4("head").prepend(`<base href="${target.origin}/" />`);
-    } else {
-      $4("base").attr("href", `${target.origin}/`);
-    }
-    const IN_APP_SHIELD = `<script>
-(function(){
-  // 1. Defeat frame-busting scripts that check window.top or window.parent
-  try {
-    Object.defineProperty(window, 'top', { get: function(){ return window; }, configurable: true });
-    Object.defineProperty(window, 'parent', { get: function(){ return window; }, configurable: true });
-    Object.defineProperty(window, 'frameElement', { get: function(){ return null; }, configurable: true });
-  } catch(e) {
-    try {
-      window.__defineGetter__('top', function(){ return window; });
-      window.__defineGetter__('parent', function(){ return window; });
-    } catch(e2) {}
-  }
-
-  // 2. Prevent window.open from escaping to external tabs
-  var _origOpen = window.open;
-  window.open = function(url, target, features) {
-    if (!url) return null;
-    var targetStr = String(target || '').toLowerCase();
-    if (targetStr === '_top' || targetStr === '_parent' || targetStr === '_blank') {
-      target = '_self';
-    }
-    var fullUrl = url.startsWith('http') ? url : (url.startsWith('/') ? "${target.origin}" + url : url);
-    window.location.href = '/api/gov/web-proxy?url=' + encodeURIComponent(fullUrl) + '&clean=1';
-    return window;
+var proxyMethods = /* @__PURE__ */ new Set(["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
+var proxyHeaders = (req2, target) => {
+  const headers = {
+    "User-Agent": String(req2.headers["user-agent"] || "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/128 Mobile Safari/537.36"),
+    "Accept": String(req2.headers.accept || "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
+    "Accept-Language": String(req2.headers["accept-language"] || "en-IN,en-US,en;q=0.9,hi;q=0.8"),
+    "Referer": target.origin + "/"
   };
-
-  // 3. Ensure clicked links stay inside the in-app browser proxy
-  document.addEventListener('click', function(e) {
-    var a = e.target && e.target.closest ? e.target.closest('a') : null;
-    if (a && a.href && !a.href.startsWith('javascript:') && !a.href.startsWith('#')) {
-      if (a.target === '_top' || a.target === '_parent' || a.target === '_blank') {
-        a.target = '_self';
-      }
-    }
-  }, true);
+  if (req2.headers.cookie) headers.Cookie = String(req2.headers.cookie);
+  if (req2.headers.authorization) headers.Authorization = String(req2.headers.authorization);
+  if (req2.headers["content-type"]) headers["Content-Type"] = String(req2.headers["content-type"]);
+  return headers;
+};
+var proxyUrl = (absolute) => `/api/gov/web-proxy?url=${encodeURIComponent(absolute)}&clean=1`;
+var rewriteClientRequests = (html3, target) => {
+  const $4 = load(html3);
+  const targetBase = new URL(".", target.toString()).toString();
+  const shield = `<script>
+(function(){
+  const BASE=${JSON.stringify(targetBase)}, PREFIX='/api/gov/web-proxy?url=';
+  const proxify=(value)=>{
+    try{
+      if(!value || /^(data:|blob:|javascript:|mailto:|tel:|#)/i.test(String(value))) return value;
+      const u=new URL(String(value),BASE);
+      if(!/^https?:$/i.test(u.protocol)) return value;
+      return PREFIX+encodeURIComponent(u.toString())+'&clean=1';
+    }catch(e){return value;}
+  };
+  const NativeEventSource=window.EventSource;
+  if(NativeEventSource){ window.EventSource=function(url,opts){ return new NativeEventSource('/api/gov/web-proxy-stream?url='+encodeURIComponent(new URL(url,BASE).toString()),opts); }; window.EventSource.prototype=NativeEventSource.prototype; }
+  const nativeFetch=window.fetch;
+  window.fetch=function(input,init){
+    try{
+      const raw=input instanceof Request?input.url:input;
+      const p=proxify(raw);
+      if(p && p!==raw) return nativeFetch.call(this,p,init);
+    }catch(e){}
+    return nativeFetch.call(this,input,init);
+  };
+  const open=XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open=function(method,url,async,user,password){
+    let next=url; try{next=proxify(url);}catch(e){}
+    return open.call(this,method,next,async===undefined?true:async,user,password);
+  };
 })();
 </script>`;
-    $4("head").prepend(IN_APP_SHIELD);
-    $4("a[href]").each((_i, el) => {
-      const value2 = $4(el).attr("href");
-      if (value2 && !value2.startsWith("#") && !/^javascript:/i.test(value2)) {
-        $4(el).attr("href", proxiedLink(value2, target.toString()));
-        $4(el).removeAttr("target");
+  $4("head").prepend(shield);
+  $4("a[href]").each((_i, el) => {
+    const v = $4(el).attr("href");
+    if (v && !/^#|javascript:/i.test(v)) {
+      $4(el).attr("href", proxifyLink(v, target));
+      $4(el).removeAttr("target");
+    }
+  });
+  $4("form[action]").each((_i, el) => {
+    const v = $4(el).attr("action");
+    if (v) $4(el).attr("action", proxifyLink(v, target));
+    $4(el).removeAttr("target");
+  });
+  $4("iframe[src],frame[src]").each((_i, el) => {
+    const v = $4(el).attr("src");
+    if (v) $4(el).attr("src", proxifyLink(v, target));
+  });
+  $4("link[href]").each((_i, el) => {
+    const v = $4(el).attr("href");
+    if (v) $4(el).attr("href", new URL(v, targetBase).toString());
+  });
+  $4("img[src],script[src],source[src],object[data],embed[src]").each((_i, el) => {
+    const attr2 = $4(el).attr("src") !== void 0 ? "src" : "data", v = $4(el).attr(attr2);
+    if (v && !/^data:/i.test(v)) $4(el).attr(attr2, new URL(v, targetBase).toString());
+  });
+  return $4.html();
+};
+var proxifyLink = (value2, base2) => {
+  try {
+    const absolute = new URL(value2, base2.toString()).toString();
+    return isAllowedPortal(absolute) ? proxyUrl(absolute) : absolute;
+  } catch {
+    return value2;
+  }
+};
+var proxyResponseCookies = (res, upstream) => {
+  const setCookie = upstream.headers["set-cookie"];
+  if (Array.isArray(setCookie) && setCookie.length) {
+    res.setHeader("Set-Cookie", setCookie.map((v) => v.replace(/;\\s*Domain=[^;]*/ig, "").replace(/;\\s*SameSite=None/ig, "; SameSite=Lax")));
+  }
+};
+router27.get("/api/gov/web-proxy-stream", async (req2, res) => {
+  const raw = String(req2.query.url || "");
+  if (!isAllowedPortal(raw)) return res.status(400).json({ success: false, error: "Invalid or restricted stream address" });
+  try {
+    const target = new URL(raw);
+    const upstream = await axios_default.get(target.toString(), { responseType: "stream", timeout: 3e4, maxRedirects: 10, httpsAgent, headers: proxyHeaders(req2, target), validateStatus: () => true });
+    const finalUrl = upstream.request?.res?.responseUrl || target.toString();
+    if (!isAllowedPortal(finalUrl)) {
+      upstream.data.destroy();
+      return res.status(403).end();
+    }
+    const ct3 = String(upstream.headers["content-type"] || "text/event-stream");
+    res.status(upstream.status).set({
+      "Content-Type": ct3,
+      "Cache-Control": "no-cache, no-transform",
+      "Connection": "keep-alive",
+      "Access-Control-Allow-Origin": "*"
+    });
+    upstream.data.on("error", () => res.end());
+    req2.on("close", () => {
+      try {
+        upstream.data.destroy();
+      } catch {
       }
     });
-    $4("form[action]").each((_i, el) => {
-      const value2 = $4(el).attr("action");
-      if (value2) {
-        $4(el).attr("action", proxiedLink(value2, target.toString()));
-        $4(el).removeAttr("target");
-      }
-    });
-    $4("iframe[src], frame[src]").each((_i, el) => {
-      const value2 = $4(el).attr("src");
-      if (value2 && !value2.startsWith("#") && !/^javascript:/i.test(value2)) {
-        $4(el).attr("src", proxiedLink(value2, target.toString()));
-      }
-    });
-    $4("link[href]").each((_i, el) => {
-      const value2 = $4(el).attr("href");
-      if (value2 && !value2.startsWith("#") && !/^javascript:/i.test(value2)) {
-        $4(el).attr("href", proxiedAsset(value2, target.toString()));
-      }
-    });
-    $4("img[src], script[src], source[src]").each((_i, el) => {
-      const value2 = $4(el).attr("src");
-      if (value2 && !/^data:/i.test(value2)) {
-        $4(el).attr("src", proxiedAsset(value2, target.toString()));
-      }
-    });
-    $4("object[data]").each((_i, el) => {
-      const value2 = $4(el).attr("data");
-      if (value2 && !/^data:/i.test(value2)) {
-        $4(el).attr("data", proxiedAsset(value2, target.toString()));
-      }
-    });
-    $4("embed[src]").each((_i, el) => {
-      const value2 = $4(el).attr("src");
-      if (value2 && !/^data:/i.test(value2)) {
-        $4(el).attr("src", proxiedAsset(value2, target.toString()));
-      }
-    });
-    res.removeHeader("X-Frame-Options");
-    res.removeHeader("x-frame-options");
-    res.setHeader("Content-Security-Policy", "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors *; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:; font-src * data: blob:;");
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    return res.type("html").send($4.html());
+    upstream.data.pipe(res);
   } catch (err2) {
-    const msg = err2?.message || "Network request failed";
-    return res.status(502).send(`<html><body style="font-family:system-ui,-apple-system,sans-serif;padding:32px;max-width:480px;margin:40px auto;text-align:center"><div style="display:inline-block;padding:12px;background:#FFF7ED;border-radius:16px;margin-bottom:16px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div><h2 style="color:#0A192F;margin:0 0 8px 0;font-size:18px">Website Temporarily Unavailable</h2><p style="color:#64748B;font-size:13px;line-height:1.5;margin:0 0 20px 0">The requested site did not respond in time or rejected the embedded connection.</p><button onclick="history.back()" style="padding:10px 24px;background:#0A192F;color:#fff;border:none;border-radius:12px;font-weight:bold;font-size:13px;cursor:pointer">\u2190 Go Back</button></body></html>`);
+    console.error("Web proxy stream failed:", err2?.message || err2);
+    if (!res.headersSent) res.status(502).json({ success: false, error: "Upstream stream unavailable" });
   }
 });
+var proxyHandler = async (req2, res) => {
+  const raw = String(req2.query.url || "");
+  if (!isAllowedPortal(raw)) return res.status(400).json({ success: false, error: "Invalid or restricted web address" });
+  const target = new URL(raw);
+  if (!proxyMethods.has(req2.method)) return res.status(405).set("Allow", Array.from(proxyMethods).join(", ")).end();
+  try {
+    const upstream = await axios_default({
+      method: req2.method,
+      url: target.toString(),
+      data: ["GET", "HEAD"].includes(req2.method) ? void 0 : req2.body,
+      responseType: "arraybuffer",
+      timeout: 3e4,
+      maxRedirects: 10,
+      httpsAgent,
+      headers: proxyHeaders(req2, target),
+      validateStatus: () => true,
+      maxContentLength: 25 * 1024 * 1024,
+      maxBodyLength: 10 * 1024 * 1024
+    });
+    const finalUrl = upstream.request?.res?.responseUrl || target.toString();
+    if (!isAllowedPortal(finalUrl)) return res.status(403).json({ success: false, error: "Restricted redirect" });
+    proxyResponseCookies(res, upstream);
+    const contentType = String(upstream.headers["content-type"] || "application/octet-stream");
+    res.status(upstream.status);
+    res.setHeader("Content-Type", contentType);
+    if (upstream.headers["content-length"]) res.setHeader("Content-Length", String(upstream.headers["content-length"]));
+    ["cache-control", "etag", "last-modified", "content-range", "accept-ranges"].forEach((h4) => {
+      if (upstream.headers[h4]) res.setHeader(h4, String(upstream.headers[h4]));
+    });
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+    res.removeHeader("X-Frame-Options");
+    res.removeHeader("Content-Security-Policy");
+    if (req2.method === "OPTIONS") return res.status(204).end();
+    if (contentType.toLowerCase().includes("text/html")) {
+      const html3 = Buffer.from(upstream.data).toString("utf8");
+      const clean = load(html3);
+      clean('meta[http-equiv="Content-Security-Policy"],meta[http-equiv="X-Frame-Options"],meta[http-equiv="content-security-policy"],meta[http-equiv="x-frame-options"]').remove();
+      const rewritten = rewriteClientRequests(clean.html(), target);
+      res.setHeader("Content-Security-Policy", "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors *; connect-src * data: blob:; img-src * data: blob:; media-src * data: blob:; font-src * data: blob:;");
+      return res.type("html").send(rewritten);
+    }
+    return res.send(Buffer.from(upstream.data));
+  } catch (err2) {
+    console.error("Web proxy failed:", err2?.message || err2);
+    return res.status(502).json({ success: false, error: "Upstream website unavailable" });
+  }
+};
+router27.all("/api/gov/web-proxy", proxyHandler);
 router27.get("/api/gov/mandi-prices", async (req2, res) => {
   const { state, commodity } = req2.query;
   const apiKey = process.env.DATAGOV_API_KEY;
@@ -354269,6 +354273,21 @@ async function getCmsSocialItems() {
             isCms: true
           };
         });
+        try {
+          const meta = await getMetaGraphItems();
+          if (meta.instagram.length > 0) {
+            const byLink = new Map(meta.instagram.map((item) => [String(item.link || "").replace(/\/$/, ""), item]));
+            for (const item of mapped) {
+              if (item.platform !== "instagram") continue;
+              const match2 = byLink.get(String(item.link || "").replace(/\/$/, ""));
+              if (match2?.videoUrl) {
+                item.videoUrl = match2.videoUrl;
+                item.thumbnailUrl = match2.thumbnailUrl || item.thumbnailUrl;
+              }
+            }
+          }
+        } catch {
+        }
         return { configured: true, items: mapped };
       }
     }
@@ -354379,11 +354398,13 @@ router33.get("/api/public/social-feed", async (_req, res) => {
       const validCms = cmsSocial.items.filter(
         (item) => item.platform !== "x" && !String(item.link || "").includes("twitter.com") && !String(item.link || "").includes("x.com")
       );
-      const all4 = [...validCms, ...yt3.items];
+      const cmsYouTube = validCms.filter((item) => item.platform === "youtube");
+      const cmsInstagram = validCms.filter((item) => item.platform === "instagram");
+      const all4 = [...yt3.items, ...cmsYouTube, ...cmsInstagram, ...validCms.filter((item) => item.platform !== "youtube" && item.platform !== "instagram")];
       return res.json({ success: true, count: all4.length, data: all4 });
     }
     const ig = await getInstagramItems();
-    const all3 = [...ig, ...yt3.items].filter(
+    const all3 = [...yt3.items, ...ig].filter(
       (item) => item.platform !== "x" && !String(item.link || "").includes("twitter.com") && !String(item.link || "").includes("x.com")
     );
     return res.json({ success: true, count: all3.length, data: all3 });

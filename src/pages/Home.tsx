@@ -1,6 +1,6 @@
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
-import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, CloudSun, Droplets, Wind, MapPin } from "lucide-react";
+import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, CloudSun } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -8,6 +8,7 @@ import { useApp } from "../context/AppContext";
 import { resolveMediaUrl } from "../utils/media";
 import { RP_FOUNDATION_LOGO, ROHIT_PANDIT_PHOTO } from "../assets/foundationBrand";
 import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
+import LiveVerifiedMarketSection from "../components/LiveVerifiedMarketSection";
 
 const fallbackSlides = [
   { image: "/assets/mega_camp_banner.png", titleEn: "Healthcare support for the community", subEn: "Health camps, medical support and community care.", route: "/health-care" },
@@ -214,7 +215,14 @@ export default function Home() {
   });
 
   const [marquee2, setMarquee2] = useState<string[]>([]);
-  const [weather, setWeather] = useState<{ temperature: number; apparent: number; humidity: number; wind: number; code: number; timezone: string } | null>(null);
+  const [weather, setWeather] = useState<{ temperature: number; apparent: number; humidity: number; wind: number; code: number; timezone: string } | null>(() => {
+    try {
+      const cached = localStorage.getItem("@rpf_live_weather_temp");
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
   const [weatherLoading, setWeatherLoading] = useState(true);
 
   const [quoteOfDay, setQuoteOfDay] = useState<{ quote: string; author: string }>(() => {
@@ -275,36 +283,64 @@ export default function Home() {
     return () => { alive = false; };
   }, []);
 
-  // Location-based free live weather (Open-Meteo; no API key required)
+  // Location-based free live weather (Open-Meteo & WeatherAPI benchmark; real-time meteorological data)
   useEffect(() => {
     let alive = true;
     const loadWeather = async () => {
-      try {
-        const getWeather = async (latitude: number, longitude: number) => {
-          const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`;
-          const res = await fetch(url, { cache: "no-store" });
-          if (!res.ok) throw new Error("Weather request failed");
-          const json = await res.json();
-          const current = json?.current;
-          if (!current) throw new Error("Weather data unavailable");
-          return {
-            temperature: Number(current.temperature_2m),
-            apparent: Number(current.apparent_temperature),
-            humidity: Number(current.relative_humidity_2m),
-            wind: Number(current.wind_speed_10m),
-            code: Number(current.weather_code),
-            timezone: String(json.timezone || "auto")
-          };
+      const getWeather = async (latitude: number, longitude: number) => {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`;
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error("Weather request failed");
+        const json = await res.json();
+        const current = json?.current;
+        if (!current) throw new Error("Weather data unavailable");
+        return {
+          temperature: Number(current.temperature_2m),
+          apparent: Number(current.apparent_temperature),
+          humidity: Number(current.relative_humidity_2m),
+          wind: Number(current.wind_speed_10m),
+          code: Number(current.weather_code),
+          timezone: String(json.timezone || "auto")
         };
+      };
 
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          if (!navigator.geolocation) return reject(new Error("Geolocation unavailable"));
-          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 7000, maximumAge: 900000 });
-        });
-        const data = await getWeather(position.coords.latitude, position.coords.longitude);
-        if (alive) setWeather(data);
+      try {
+        let lat = 23.2599;
+        let lon = 77.4126;
+        if (typeof navigator !== "undefined" && navigator.geolocation) {
+          try {
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 6000, maximumAge: 900000 });
+            });
+            lat = position.coords.latitude;
+            lon = position.coords.longitude;
+          } catch {}
+        }
+        const data = await getWeather(lat, lon);
+        if (alive) {
+          setWeather(data);
+          try { localStorage.setItem("@rpf_live_weather_temp", JSON.stringify(data)); } catch {}
+        }
       } catch {
-        // Location permission may be denied; keep the weather card unobtrusive.
+        // Fallback to WeatherAPI if Open-Meteo is unreachable
+        try {
+          const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=f54f6cb62e264dabb1990414262508&q=23.2599,77.4126&aqi=no`);
+          if (res.ok) {
+            const json = await res.json();
+            if (alive && json?.current) {
+              const data = {
+                temperature: Number(json.current.temp_c),
+                apparent: Number(json.current.feelslike_c),
+                humidity: Number(json.current.humidity),
+                wind: Number(json.current.wind_kph),
+                code: 1,
+                timezone: "Asia/Kolkata"
+              };
+              setWeather(data);
+              try { localStorage.setItem("@rpf_live_weather_temp", JSON.stringify(data)); } catch {}
+            }
+          }
+        } catch {}
       } finally {
         if (alive) setWeatherLoading(false);
       }
@@ -377,15 +413,28 @@ export default function Home() {
           <motion.div aria-hidden="true" className="pointer-events-none absolute -bottom-16 left-12 -z-10 h-32 w-32 rounded-full bg-amber-200/55 blur-2xl"
             animate={reduceMotion ? undefined : { x: [0, 18, 0], y: [0, -10, 0] }}
             transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }} />
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#243B32] tracking-tight leading-snug">
-            {greeting}, {name} Ji,
-          </h1>
-          <p className="text-base sm:text-lg font-semibold text-slate-700 tracking-normal">
-            Welcome to Samahit
-          </p>
-          <p className="text-xs sm:text-[13px] italic font-medium text-slate-500 tracking-normal pt-0.5">
-            An initiative by the RP Foundation's Volunteers.
-          </p>
+          <div className="flex items-start justify-between gap-2.5">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#243B32] tracking-tight leading-snug">
+                {greeting}, {name} Ji,
+              </h1>
+              <p className="text-base sm:text-lg font-semibold text-slate-700 tracking-normal">
+                Welcome to Samahit
+              </p>
+              <p className="text-xs sm:text-[13px] italic font-medium text-slate-500 tracking-normal pt-0.5">
+                An initiative by the RP Foundation's Volunteers.
+              </p>
+            </div>
+            {weather && (
+              <div
+                className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 backdrop-blur-xs border border-emerald-200/80 shadow-2xs text-[#243B32] mt-0.5"
+                title={`Live Weather: ${weatherLabel(weather.code)} (${Math.round(weather.temperature)}°C)`}
+              >
+                <CloudSun className="h-4 w-4 text-[#D97706]" />
+                <span className="text-[13.5px] sm:text-[14.5px] font-black">{Math.round(weather.temperature)}°C</span>
+              </div>
+            )}
+          </div>
           <div className="mt-3 flex items-center gap-2 text-[11px] font-semibold text-[#245D45]">
             <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
               {!reduceMotion && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />}
@@ -395,29 +444,8 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* Location-based live weather */}
-        {!weatherLoading && weather && (
-          <section className="rounded-2xl border border-sky-200/70 bg-gradient-to-r from-sky-50/80 via-white/80 to-emerald-50/70 p-4 shadow-2xs">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-1.5 text-[#167C5A]">
-                  <MapPin className="h-4 w-4" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">Your Local Weather</p>
-                </div>
-                <div className="mt-1 flex items-end gap-2">
-                  <span className="text-3xl font-black text-[#14213D]">{Math.round(weather.temperature)}°C</span>
-                  <span className="pb-1 text-[11px] font-semibold text-slate-500">{weatherLabel(weather.code)}</span>
-                </div>
-              </div>
-              <CloudSun className="h-12 w-12 text-sky-500" />
-            </div>
-            <div className="mt-3 grid grid-cols-3 gap-2 text-[11px] font-semibold text-slate-600">
-              <div className="rounded-xl bg-white/70 p-2"><span className="block text-[9px] uppercase text-slate-400">Feels like</span>{Math.round(weather.apparent)}°C</div>
-              <div className="rounded-xl bg-white/70 p-2"><span className="flex items-center gap-1 text-[9px] uppercase text-slate-400"><Droplets className="h-3 w-3" />Humidity</span>{Math.round(weather.humidity)}%</div>
-              <div className="rounded-xl bg-white/70 p-2"><span className="flex items-center gap-1 text-[9px] uppercase text-slate-400"><Wind className="h-3 w-3" />Wind</span>{Math.round(weather.wind)} km/h</div>
-            </div>
-          </section>
-        )}
+        {/* 2. LIVE VERIFIED MARKET & PANCHANG SECTION (Directly below Greeting & Explore community services) */}
+        <LiveVerifiedMarketSection />
 
         {/* 3. THOUGHT OF THE DAY */}
         <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3 shadow-2xs">
