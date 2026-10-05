@@ -243,6 +243,33 @@ const extraDefs:Record<string,{fields:Field[];calc:(v:V)=>string}>={
 "calcium-corrected-calculator":{fields:[{k:"ca",l:"Total calcium",u:"mg/dL",d:"9.2"},{k:"alb",l:"Albumin",u:"g/dL",d:"4"}],calc:v=>"Corrected calcium: "+F(N(v.ca)+0.8*(4-N(v.alb)))+" mg/dL — typical ~8.5–10.5; use lab range"},
 "iron-saturation-calculator":{fields:[{k:"iron",l:"Serum iron",u:"µg/dL",d:"100"},{k:"tibc",l:"TIBC",u:"µg/dL",d:"300"}],calc:v=>"Transferrin saturation: "+F(N(v.iron)/N(v.tibc)*100)+"% — typical ~20–50%; lab-specific"}},
 
+
+"tsh-checker":E([{k:"t",l:"TSH",u:"mIU/L",d:"2"}],v=>{const x=N(v.t);return"TSH: "+F(x)+" mIU/L — "+(x<0.4?"LOW":x>4.0?"HIGH":"TYPICAL")+"; adult reference commonly ~0.4–4.0; lab range applies"}),
+"free-t4-checker":E([{k:"t",l:"Free T4",u:"ng/dL",d:"1.2"}],v=>{const x=N(v.t);return"Free T4: "+F(x)+" ng/dL — "+(x<0.8?"LOW":x>1.8?"HIGH":"TYPICAL")+"; lab-specific range applies"}),
+"free-t3-checker":E([{k:"t",l:"Free T3",u:"pg/mL",d:"3"}],v=>{const x=N(v.t);return"Free T3: "+F(x)+" pg/mL — "+(x<2.3?"LOW":x>4.2?"HIGH":"TYPICAL")+"; lab-specific range applies"}),
+"ferritin-checker":E([{k:"f",l:"Ferritin",u:"ng/mL",d:"80"},{k:"s",l:"Sex (1=male, 0=female)",d:"1"}],v=>{const x=N(v.f);return"Ferritin: "+F(x)+" ng/mL — "+(x<24?"LOW":x>336?"HIGH":"TYPICAL")+"; sex/lab-specific range applies"}),
+"vitamin-b12-checker":E([{k:"b",l:"Vitamin B12",u:"pg/mL",d:"500"}],v=>{const x=N(v.b);return"Vitamin B12: "+F(x)+" pg/mL — "+(x<200?"LOW":x<300?"BORDERLINE":"TYPICAL")+"; laboratory range applies"}),
+"vitamin-d-checker":E([{k:"d",l:"25-OH Vitamin D",u:"ng/mL",d:"30"}],v=>{const x=N(v.d);return"25-OH Vitamin D: "+F(x)+" ng/mL — "+(x<20?"LOW / DEFICIENT":x<30?"INSUFFICIENT":x<=100?"TYPICAL":"HIGH")+"; clinical context required"}),
+"crp-checker":E([{k:"c",l:"CRP",u:"mg/L",d:"1"}],v=>{const x=N(v.c);return"CRP: "+F(x)+" mg/L — "+(x>10?"HIGH / acute inflammation possible":x>3?"ELEVATED":"LOWER RANGE")+"; CRP is nonspecific"}),
+"esr-checker":E([{k:"e",l:"ESR",u:"mm/hr",d:"10"},{k:"s",l:"Sex (1=male, 0=female)",d:"1"}],v=>{const x=N(v.e);return"ESR: "+F(x)+" mm/hr — interpret by age/sex/lab; elevated ESR is nonspecific"}),
+"pt-inr-calculator":E([{k:"pt",l:"PT",u:"seconds",d:"12"},{k:"control",l:"Control PT",u:"seconds",d:"12"},{k:"isi",l:"ISI",d:"1"}],v=>{const inr=(N(v.pt)/N(v.control))**N(v.isi);return"Estimated INR: "+F(inr)+" — typical non-anticoagulated INR ~0.8–1.1; therapeutic targets depend on indication"}),
+"aptt-checker":E([{k:"a",l:"aPTT",u:"seconds",d:"30"}],v=>{const x=N(v.a);return"aPTT: "+F(x)+" sec — typical ~25–35 sec; lab-specific range applies"}),
+"fibrinogen-checker":E([{k:"f",l:"Fibrinogen",u:"mg/dL",d:"300"}],v=>{const x=N(v.f);return"Fibrinogen: "+F(x)+" mg/dL — "+(x<200?"LOW":x>400?"HIGH":"TYPICAL")+"; lab-specific range applies"}),
+"amylase-checker":E([{k:"a",l:"Amylase",u:"U/L",d:"70"}],v=>{const x=N(v.a);return"Amylase: "+F(x)+" U/L — lab-specific reference required; elevated values can have multiple causes"}),
+"lipase-checker":E([{k:"l",l:"Lipase",u:"U/L",d:"40"}],v=>{const x=N(v.l);return"Lipase: "+F(x)+" U/L — lab-specific reference required; interpret clinically"}),
+"ldh-checker":E([{k:"l",l:"LDH",u:"U/L",d:"180"}],v=>{const x=N(v.l);return"LDH: "+F(x)+" U/L — lab-specific reference required; nonspecific marker"}),
+"magnesium-checker":E([{k:"m",l:"Magnesium",u:"mg/dL",d:"2"}],v=>{const x=N(v.m);return"Magnesium: "+F(x)+" mg/dL — "+(x<1.7?"LOW":x>2.2?"HIGH":"TYPICAL")+"; lab range applies"}),
+"phosphate-checker":E([{k:"p",l:"Phosphate",u:"mg/dL",d:"3.5"}],v=>{const x=N(v.p);return"Phosphate: "+F(x)+" mg/dL — "+(x<2.5?"LOW":x>4.5?"HIGH":"TYPICAL")+"; adult range; lab-specific"}),
+"potassium-checker":E([{k:"p",l:"Potassium",u:"mEq/L",d:"4.2"}],v=>{const x=N(v.p);return"Potassium: "+F(x)+" mEq/L — "+(x<3.5?"LOW":x>5.0?"HIGH":"TYPICAL")+"; abnormal potassium can be urgent"}),
+"sodium-checker":E([{k:"s",l:"Sodium",u:"mEq/L",d:"140"}],v=>{const x=N(v.s);return"Sodium: "+F(x)+" mEq/L — "+(x<135?"LOW":x>145?"HIGH":"TYPICAL")}),
+"chloride-checker":E([{k:"c",l:"Chloride",u:"mEq/L",d:"102"}],v=>{const x=N(v.c);return"Chloride: "+F(x)+" mEq/L — "+(x<98?"LOW":x>106?"HIGH":"TYPICAL")}),
+"glucose-fasting-checker":E([{k:"g",l:"Fasting glucose",u:"mg/dL",d:"90"}],v=>{const x=N(v.g);return"Fasting glucose: "+F(x)+" mg/dL — "+(x<70?"LOW":x<100?"NORMAL":x<126?"PREDIABETES RANGE":"DIABETES RANGE")+"; diagnosis requires appropriate testing"}),
+"glucose-random-checker":E([{k:"g",l:"Random glucose",u:"mg/dL",d:"110"}],v=>{const x=N(v.g);return"Random glucose: "+F(x)+" mg/dL — interpret with symptoms/timing; ≥200 can be in diabetes range when diagnostic criteria are met"}),
+"urine-protein-checker":E([{k:"p",l:"Urine protein",u:"mg/dL",d:"10"}],v=>"Urine protein: "+F(N(v.p))+" mg/dL — interpretation depends on urine concentration and lab method"),
+"psa-checker":E([{k:"p",l:"PSA",u:"ng/mL",d:"1"}],v=>{const x=N(v.p);return"PSA: "+F(x)+" ng/mL — commonly <4 is considered lower range, but age and clinical context matter"}),
+"cea-checker":E([{k:"c",l:"CEA",u:"ng/mL",d:"2"}],v=>"CEA: "+F(N(v.c))+" ng/mL — lab/smoking status affect interpretation; not a standalone cancer diagnosis"),
+"afp-checker":E([{k:"a",l:"AFP",u:"ng/mL",d:"3"}],v=>"AFP: "+F(N(v.a))+" ng/mL — lab-specific reference and clinical context required"),
+
 };
 Object.assign(defs,extraDefs);
 const aliases:Record<string,string>={"gfr-calculator":"gfr-e-gfr-calculator","gfr-egfr-calculator":"gfr-e-gfr-calculator","hba1c-converter":"hba1c-converter","sleep-health-calculator":"age-calculator","sleep-calculator":"age-calculator"};
