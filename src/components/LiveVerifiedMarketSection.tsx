@@ -167,7 +167,7 @@ export default function LiveVerifiedMarketSection() {
     setIsLoadingData(true);
     setData(null);
     axios
-      .get(`/api/public/market-summary?city=${encodeURIComponent(cityId)}&state=${encodeURIComponent(state)}` , { headers: { "Cache-Control": "no-cache" } })
+      .get(`/api/public/market-summary?city=${encodeURIComponent(cityId)}&state=${encodeURIComponent(state)}&_t=${Date.now()}`, { headers: { "Cache-Control": "no-cache" } })
       .then((res) => {
         if (res.data?.success && res.data?.data) {
           setData(res.data.data);
