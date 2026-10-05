@@ -209,7 +209,6 @@ public class NativeBrowserActivity extends AppCompatActivity {
         }
         target.setLayerType(View.LAYER_TYPE_HARDWARE,null);
         CookieManager.getInstance().setAcceptCookie(true);
-        CookieManager.getInstance().flush();
     }
 
     private void rememberTabs(){
@@ -357,10 +356,10 @@ public class NativeBrowserActivity extends AppCompatActivity {
                 return routeNonHttp(url);
             }
             @Override public void onPageStarted(WebView view,String url,Bitmap icon){
-                if(!popup){ mainFrameError=false; loading=true; hideError(); showControls(); updateAddress(url); }
+                if(!popup){ mainFrameError=false; loading=true; hideError(); showControls(); if(progressBar!=null){ progressBar.setIndeterminate(true); progressBar.setVisibility(View.VISIBLE); } updateAddress(url); }
             }
             @Override public void onPageFinished(WebView view,String url){
-                if(!popup){ loading=false; if(isHttpUrl(url)){ lastStableUrl=url; if(currentTab<tabs.size())tabs.set(currentTab,url); remember(HISTORY,url); rememberTabs(); } updateAddress(url); updateNavigation(); if(!mainFrameError) scheduleHide(); }
+                if(!popup){ loading=false; if(progressBar!=null) progressBar.setVisibility(View.GONE); if(isHttpUrl(url)){ lastStableUrl=url; if(currentTab<tabs.size())tabs.set(currentTab,url); remember(HISTORY,url); rememberTabs(); } updateAddress(url); updateNavigation(); if(!mainFrameError) scheduleHide(); }
             }
             @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){
                 if(!popup && request != null && request.isForMainFrame()){
@@ -383,7 +382,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
 
     private WebChromeClient createChromeClient(){
         return new WebChromeClient(){
-            @Override public void onProgressChanged(WebView view,int progress){ if(view==activeWebView() && progressBar!=null){ progressBar.setProgress(progress); progressBar.setVisibility(progress>=100?View.GONE:View.VISIBLE); } }
+            @Override public void onProgressChanged(WebView view,int progress){ if(view==activeWebView() && progressBar!=null){ progressBar.setIndeterminate(progress<100); progressBar.setVisibility(progress>=100?View.GONE:View.VISIBLE); } }
             @Override public boolean onShowFileChooser(WebView view,ValueCallback<Uri[]> callback,FileChooserParams params){
                 if(fileCallback!=null) fileCallback.onReceiveValue(null); fileCallback=callback;
                 Intent i; try{i=params.createIntent();}catch(Exception e){i=new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*");}
@@ -658,7 +657,7 @@ public class NativeBrowserActivity extends AppCompatActivity {
         super.onCreate(state);prefs=getSharedPreferences(PREFS,MODE_PRIVATE);desktopMode=prefs.getBoolean("desktop",false);autoHide=prefs.getBoolean("autoHide",true);dataSaver=prefs.getBoolean("dataSaver",false);restoreTabs=prefs.getBoolean("restoreTabs",true);mediaAutoplay=prefs.getBoolean("mediaAutoplay",true);initializeUserAgents();
         getWindow().setStatusBarColor(IVORY);getWindow().setNavigationBarColor(IVORY);root=new FrameLayout(this);root.setBackgroundColor(Color.WHITE);webContainer=new FrameLayout(this);root.addView(webContainer,new FrameLayout.LayoutParams(-1,-1));rebuildMainWebView(null);
         gestureDetector=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){@Override public boolean onDoubleTap(MotionEvent e){if(topBar.getVisibility()==View.VISIBLE)hideControls();else{showControls();scheduleHide();}return true;}});installDoubleTapToggle(webView);webContainer.setOnTouchListener((v,e)->{gestureDetector.onTouchEvent(e);return false;});
-        progressBar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);progressBar.setMax(100);root.addView(progressBar,new FrameLayout.LayoutParams(-1,dp(3),Gravity.TOP));
+        progressBar=new ProgressBar(this); progressBar.setIndeterminate(true); progressBar.setVisibility(View.GONE); FrameLayout.LayoutParams spinnerLp=new FrameLayout.LayoutParams(dp(48),dp(48),Gravity.CENTER); root.addView(progressBar,spinnerLp);
         errorView=new LinearLayout(this);errorView.setOrientation(LinearLayout.VERTICAL);errorView.setGravity(Gravity.CENTER);errorView.setPadding(dp(28),dp(28),dp(28),dp(28));errorView.setBackgroundColor(IVORY);TextView title=new TextView(this);title.setText("This page could not be loaded");title.setTextColor(NAVY);title.setTextSize(19);title.setGravity(Gravity.CENTER);errorView.addView(title);TextView detail=new TextView(this);detail.setTag("detail");detail.setTextColor(Color.DKGRAY);detail.setTextSize(13);detail.setGravity(Gravity.CENTER);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(12);errorView.addView(detail,p);TextView retry=button("Try again");retry.setTextColor(Color.WHITE);retry.setBackgroundColor(NAVY);retry.setOnClickListener(v->activeWebView().reload());LinearLayout.LayoutParams rp=new LinearLayout.LayoutParams(-2,-2);rp.topMargin=dp(20);errorView.addView(retry,rp);
         TextView external=button("Open in another browser (optional)");external.setOnClickListener(v->openInExternalBrowser());LinearLayout.LayoutParams ep=new LinearLayout.LayoutParams(-2,-2);ep.topMargin=dp(12);errorView.addView(external,ep);errorView.setVisibility(View.GONE);root.addView(errorView,new FrameLayout.LayoutParams(-1,-1));
         buildChrome();
