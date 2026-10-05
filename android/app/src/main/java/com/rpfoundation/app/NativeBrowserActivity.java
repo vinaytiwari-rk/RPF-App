@@ -444,7 +444,11 @@ public class NativeBrowserActivity extends AppCompatActivity {
                           permissionLauncher.launch(p.toArray(new String[0]));
                       }
             }
-            @Override public boolean onCreateWindow(WebView view,boolean dialog,boolean userGesture,Message resultMsg){openPopup(resultMsg);return true;}
+            @Override public boolean onCreateWindow(WebView view,boolean dialog,boolean userGesture,Message resultMsg){
+                if(!userGesture) return false;
+                openPopup(resultMsg);
+                return true;
+            }
             @Override public void onCloseWindow(WebView window){if(window==popupWebView)closePopup();}
             @Override public void onShowCustomView(View view,CustomViewCallback callback){enterFullscreen(view,callback);}
             @Override public void onHideCustomView(){exitFullscreen();}
