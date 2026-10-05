@@ -18,6 +18,11 @@ const groups:Group[]=[
 {id:"weather",title:"Weather",icon:CloudSun,items:make(["Wind Chill Calculator","Heat Index Calculator","Dew Point Calculator","Relative Humidity Calculator","Temperature Conversion","Wind Speed Conversion"],"Weather calculations")},
 {id:"transport",title:"Transportation",icon:Car,items:make(["Fuel Cost Calculator","Gas Mileage Calculator","Horsepower Calculator","Engine Horsepower Calculator","Mileage Calculator","Tire Size Calculator","Trip Cost Calculator","Travel Time Calculator","Fuel Consumption Converter","EV Charging Cost Calculator"],"Vehicle and travel calculations")},
 {id:"everyday",title:"Everyday Utility",icon:Smile,items:make(["GPA Calculator","Grade Calculator","Shoe Size Conversion","Tip Calculator","Golf Handicap Calculator","Sleep Calculator","GST Calculator","Split Bill","Age in Days Calculator","Cooking Unit Converter","Discount Calculator","Percentage Calculator"],"Quick everyday calculations")}
+{id:"education",title:"Education",icon:Brain,items:make(["Percentage of Number Calculator","Average Calculator","Grade Percentage Calculator","Attendance Calculator","CGPA to Percentage Calculator"],"Marks, grades and study calculations")},
+{id:"agriculture",title:"Agriculture",icon:House,items:make(["Crop Seed Rate Calculator","Fertilizer Requirement Calculator","Irrigation Water Calculator"],"Simple farm planning estimates")},
+{id:"electrical",title:"Electrical & Engineering",icon:Wifi,items:make(["Electricity Bill Calculator","Power Consumption Calculator","Ohm's Law Calculator","Resistor Calculator"],"Practical electrical calculations")},
+{id:"itnetwork",title:"IT & Networking",icon:Wifi,items:make(["Data Usage Calculator","Download Time Calculator","IP Subnet Calculator","CIDR Calculator"],"Data, network and internet calculations")},
+{id:"construction",title:"Construction",icon:House,items:make(["Concrete Volume Calculator","Brick Quantity Calculator","Paint Quantity Calculator"],"Basic construction material estimates")}
 ];
 const popular=["BMI Calculator","EMI Calculator","GST Calculator","Income Tax Calculator","SIP Calculator","Age Calculator"].map(title=>({title,id:title.toLowerCase().replace(/[^a-z0-9]+/g,"-")}));
 export default function CalculatorCenterPage(){
