@@ -101,7 +101,6 @@ const defs:Record<string,{fields:Field[];calc:(v:V)=>string}>= {
 "rd-calculator":{fields:[{k:"p",l:"Monthly deposit",u:"₹",d:"5000"},{k:"r",l:"Annual interest",u:"%",d:"6.5"},{k:"y",l:"Years",d:"5"}],calc:v=>{const p=N(v.p),r=N(v.r)/400,n=N(v.y)*4;const fv=p*((1+r)**n-1)/r;return"Total deposit: "+M(p*N(v.y)*12)+"; Estimated maturity: "+M(fv)+"; Interest: "+M(fv-p*N(v.y)*12)}},
 "nps-calculator":{fields:[{k:"p",l:"Monthly contribution",u:"₹",d:"5000"},{k:"r",l:"Expected annual return",u:"%",d:"10"},{k:"y",l:"Years",d:"25"}],calc:v=>{const p=N(v.p),r=N(v.r)/1200,m=N(v.y)*12,f=r?p*((1+r)**m-1)/r*(1+r):p*m;return"Invested: "+M(p*m)+"; Estimated corpus: "+M(f)+"; Estimated gain: "+M(f-p*m)}},
 "epf-calculator":{fields:[{k:"basic",l:"Monthly basic + DA",u:"₹",d:"30000"},{k:"emp",l:"Employee PF rate",u:"%",d:"12"},{k:"r",l:"Annual interest",u:"%",d:"8.25"},{k:"y",l:"Years",d:"20"}],calc:v=>{const p=N(v.basic)*N(v.emp)/100,r=N(v.r)/1200,m=N(v.y)*12,f=p*((1+r)**m-1)/r;return"Monthly employee contribution: "+M(p)+"; Estimated employee-side corpus: "+M(f)+"; Total contributions: "+M(p*m)}},
-"cagr-calculator":{fields:[{k:"s",l:"Starting value",u:"₹",d:"100000"},{k:"e",l:"Ending value",u:"₹",d:"200000"},{k:"y",l:"Years",d:"5"}],calc:v=>"CAGR: "+P(((N(v.e)/N(v.s))**(1/N(v.y))-1)*100)},
 };
 const E=(fields:Field[],calc:(v:V)=>string)=>({fields,calc});
 const nums=(s:string)=>s.split(",").map(Number).filter(Number.isFinite);
