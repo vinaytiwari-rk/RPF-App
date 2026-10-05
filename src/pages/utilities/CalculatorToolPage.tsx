@@ -241,7 +241,7 @@ const extraDefs:Record<string,{fields:Field[];calc:(v:V)=>string}>={
 "corrected-sodium-calculator":{fields:[{k:"na",l:"Measured sodium",u:"mEq/L",d:"132"},{k:"glu",l:"Glucose",u:"mg/dL",d:"250"}],calc:v=>"Corrected sodium (1.6 factor): "+F(N(v.na)+1.6*(N(v.glu)-100)/100)+" mEq/L — estimate; formulas vary"},
 "serum-osmolality-calculator":{fields:[{k:"na",l:"Sodium",u:"mEq/L",d:"140"},{k:"glu",l:"Glucose",u:"mg/dL",d:"100"},{k:"bun",l:"BUN",u:"mg/dL",d:"15"}],calc:v=>"Calculated serum osmolality: "+F(2*N(v.na)+N(v.glu)/18+N(v.bun)/2.8)+" mOsm/kg — typical ~275–295"}},
 "calcium-corrected-calculator":{fields:[{k:"ca",l:"Total calcium",u:"mg/dL",d:"9.2"},{k:"alb",l:"Albumin",u:"g/dL",d:"4"}],calc:v=>"Corrected calcium: "+F(N(v.ca)+0.8*(4-N(v.alb)))+" mg/dL — typical ~8.5–10.5; use lab range"},
-"iron-saturation-calculator":{fields:[{k:"iron",l:"Serum iron",u:"µg/dL",d:"100"},{k:"tibc",l:"TIBC",u:"µg/dL",d:"300"}],calc:v=>"Transferrin saturation: "+F(N(v.iron)/N(v.tibc)*100)+"% — typical ~20–50%; lab-specific"}},
+"iron-saturation-calculator":{fields:[{k:"iron",l:"Serum iron",u:"µg/dL",d:"100"},{k:"tibc",l:"TIBC",u:"µg/dL",d:"300"}],calc:v=>"Transferrin saturation: "+F(N(v.iron)/N(v.tibc)*100)+"% — typical ~20–50%; lab-specific"},
 
 
 "tsh-checker":E([{k:"t",l:"TSH",u:"mIU/L",d:"2"}],v=>{const x=N(v.t);return"TSH: "+F(x)+" mIU/L — "+(x<0.4?"LOW":x>4.0?"HIGH":"TYPICAL")+"; adult reference commonly ~0.4–4.0; lab range applies"}),
