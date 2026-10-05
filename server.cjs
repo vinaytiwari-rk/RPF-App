@@ -353661,15 +353661,21 @@ async function getLiveBullionRates(cityId, state) {
     let gold24k = "", gold22k = "", gold18k = "", silver = "";
     $4("table tr").each((_3, tr3) => {
       const cells = $4(tr3).find("th, td").map((__, el) => $4(el).text().replace(/\s+/g, " ").trim()).get();
+      if (cells.length < 2) return;
       const rowHeader = (cells[0] || "").toLowerCase();
-      if (rowHeader.includes("24k") && !gold24k) {
-        gold24k = cleanPrice(cells[3] || cells[1]);
-      } else if (rowHeader.includes("22k") && !gold22k) {
-        gold22k = cleanPrice(cells[3] || cells[1]);
-      } else if (rowHeader.includes("18k") && !gold18k) {
-        gold18k = cleanPrice(cells[3] || cells[1]);
+      const priceCells = cells.filter((c4) => /₹\s*[0-9]/.test(c4));
+      const c32 = cells[3] || "";
+      const c1 = cells[1] || "";
+      const pick = /₹/.test(c32) ? c32 : /₹/.test(c1) ? c1 : priceCells[0] || "";
+      if (rowHeader.includes("24k") && !gold24k && pick) {
+        gold24k = cleanPrice(pick);
+      } else if (rowHeader.includes("22k") && !gold22k && pick) {
+        gold22k = cleanPrice(pick);
+      } else if (rowHeader.includes("18k") && !gold18k && pick) {
+        gold18k = cleanPrice(pick);
       } else if (rowHeader.includes("silver") && !silver) {
-        silver = cleanPrice(cells[6] || cells[3] || cells[1]);
+        const silvPick = /₹/.test(cells[6] || "") ? cells[6] : pick;
+        if (silvPick) silver = cleanPrice(silvPick);
       }
     });
     const parsed = {

@@ -369,16 +369,22 @@ export async function getLiveBullionRates(cityId?: string, state?: string) {
 
     $("table tr").each((_, tr) => {
       const cells = $(tr).find("th, td").map((__, el) => $(el).text().replace(/\s+/g, " ").trim()).get();
+      if (cells.length < 2) return;
       const rowHeader = (cells[0] || "").toLowerCase();
-      // Table: ["Purity", "1 gram", "8 gram", "10 gram", "1 tola", "100 gram", "1 kg"]
-      if (rowHeader.includes("24k") && !gold24k) {
-        gold24k = cleanPrice(cells[3] || cells[1]);
-      } else if (rowHeader.includes("22k") && !gold22k) {
-        gold22k = cleanPrice(cells[3] || cells[1]);
-      } else if (rowHeader.includes("18k") && !gold18k) {
-        gold18k = cleanPrice(cells[3] || cells[1]);
+      const priceCells = cells.filter(c => /₹\s*[0-9]/.test(c));
+      const c3 = cells[3] || "";
+      const c1 = cells[1] || "";
+      const pick = /₹/.test(c3) ? c3 : /₹/.test(c1) ? c1 : priceCells[0] || "";
+
+      if (rowHeader.includes("24k") && !gold24k && pick) {
+        gold24k = cleanPrice(pick);
+      } else if (rowHeader.includes("22k") && !gold22k && pick) {
+        gold22k = cleanPrice(pick);
+      } else if (rowHeader.includes("18k") && !gold18k && pick) {
+        gold18k = cleanPrice(pick);
       } else if (rowHeader.includes("silver") && !silver) {
-        silver = cleanPrice(cells[6] || cells[3] || cells[1]);
+        const silvPick = /₹/.test(cells[6] || "") ? cells[6] : pick;
+        if (silvPick) silver = cleanPrice(silvPick);
       }
     });
 
