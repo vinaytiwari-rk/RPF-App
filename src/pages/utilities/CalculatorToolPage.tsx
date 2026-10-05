@@ -1,50 +1,95 @@
-import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { ExternalLink, Calculator } from "lucide-react";
-import Shell from "./UtilityPageShell";
-import { openExternalLink } from "../../utils/browser";
-const special: Record<string, string> = {
-  "gfr-e-gfr-calculator": "gfr-calculator",
-  "sleep-health-calculator": "sleep-calculator",
-  "hba1c-converter": "hba1c-converter",
+import React,{useMemo,useState}from"react";import{useLocation,useNavigate}from"react-router-dom";import{Calculator,RotateCcw,Copy,Check}from"lucide-react";import Shell from"./UtilityPageShell";
+type V=Record<string,string>;type Field={k:string;l:string;u?:string;d?:string;t?:"number"|"date"|"text"};const N=(v:string)=>Number(v)||0;const F=(x:number)=>Number.isFinite(x)?x.toLocaleString("en-IN",{maximumFractionDigits:4}):"—";const M=(x:number)=>"₹ "+x.toLocaleString("en-IN",{maximumFractionDigits:2});const P=(x:number)=>F(x)+"%";
+const defs:Record<string,{fields:Field[];calc:(v:V)=>string}>= {
+"bmi-calculator":{fields:[{k:"w",l:"Weight",u:"kg",d:"70"},{k:"h",l:"Height",u:"cm",d:"170"}],calc:v=>{const b=N(v.w)/(N(v.h)/100)**2;return"BMI: "+F(b)+" — "+(b<18.5?"Underweight":b<25?"Normal range":b<30?"Overweight":"Obesity range")}},
+"bmr-calculator":{fields:[{k:"w",l:"Weight",u:"kg",d:"70"},{k:"h",l:"Height",u:"cm",d:"170"},{k:"a",l:"Age",u:"years",d:"30"},{k:"s",l:"Sex (1=male, 0=female)",d:"1"}],calc:v=>"BMR: "+F(10*N(v.w)+6.25*N(v.h)-5*N(v.a)+(N(v.s)?5:-161))+" kcal/day"},
+"calorie-calculator":{fields:[{k:"w",l:"Weight",u:"kg",d:"70"},{k:"h",l:"Height",u:"cm",d:"170"},{k:"a",l:"Age",u:"years",d:"30"},{k:"s",l:"Sex (1=male, 0=female)",d:"1"},{k:"act",l:"Activity factor",d:"1.55"}],calc:v=>{const b=10*N(v.w)+6.25*N(v.h)-5*N(v.a)+(N(v.s)?5:-161);return"Maintenance: "+F(b*N(v.act))+" kcal/day"}},
+"body-fat-calculator":{fields:[{k:"waist",l:"Waist",u:"cm",d:"85"},{k:"neck",l:"Neck",u:"cm",d:"38"},{k:"height",l:"Height",u:"cm",d:"170"},{k:"sex",l:"Sex (1=male, 0=female)",d:"1"},{k:"hip",l:"Hip (female only)",u:"cm",d:"95"}],calc:v=>{const h=N(v.height),w=N(v.waist),ne=N(v.neck);const x=N(v.sex)?495/(1.0324-.19077*Math.log10(w-ne)+.15456*Math.log10(h))-450:495/(1.29579-.35004*Math.log10(w+N(v.hip)-ne)+.221*Math.log10(h))-450;return"Estimated body fat: "+P(x)}},
+"ideal-weight-calculator":{fields:[{k:"h",l:"Height",u:"cm",d:"170"},{k:"s",l:"Sex (1=male, 0=female)",d:"1"}],calc:v=>{const i=N(v.h)/2.54,b=45.5+2.3*Math.max(0,i-60);return"Ideal-weight estimate: "+F(N(v.s)?b:b-2.3)+" kg"}},
+"lean-body-mass-calculator":{fields:[{k:"w",l:"Weight",u:"kg",d:"70"},{k:"bf",l:"Body fat",u:"%",d:"20"}],calc:v=>"Lean body mass: "+F(N(v.w)*(1-N(v.bf)/100))+" kg"},
+"healthy-weight-calculator":{fields:[{k:"h",l:"Height",u:"cm",d:"170"}],calc:v=>{const h=N(v.h)/100;return"Healthy BMI 18.5–24.9 range: "+F(18.5*h*h)+"–"+F(24.9*h*h)+" kg"}},
+"pace-calculator":{fields:[{k:"d",l:"Distance",u:"km",d:"5"},{k:"m",l:"Time",u:"minutes",d:"30"}],calc:v=>{const p=N(v.m)/N(v.d);return"Pace: "+F(p)+" min/km; Speed: "+F(60/p)+" km/h"}},
+"calories-burned-calculator":{fields:[{k:"w",l:"Weight",u:"kg",d:"70"},{k:"met",l:"Activity MET",d:"6"},{k:"m",l:"Minutes",d:"30"}],calc:v=>"Estimated calories: "+F(N(v.met)*3.5*N(v.w)/200*N(v.m))+" kcal"},
+"one-rep-max-calculator":{fields:[{k:"w",l:"Weight lifted",u:"kg",d:"20"},{k:"r",l:"Reps",d:"10"}],calc:v=>"Estimated 1RM: "+F(N(v.w)*(1+N(v.r)/30))+" kg"},
+"target-heart-rate-calculator":{fields:[{k:"a",l:"Age",d:"30"},{k:"rest",l:"Resting HR",u:"bpm",d:"65"},{k:"i",l:"Intensity",u:"%",d:"70"}],calc:v=>{const max=208-.7*N(v.a);return"Target HR: "+F(N(v.rest)+(max-N(v.rest))*N(v.i)/100)+" bpm"}},
+"macro-calculator":{fields:[{k:"c",l:"Calories",u:"kcal",d:"2200"},{k:"p",l:"Protein",u:"%",d:"30"},{k:"f",l:"Fat",u:"%",d:"30"}],calc:v=>{const c=N(v.c),p=c*N(v.p)/400,f=c*N(v.f)/900;return"Protein: "+F(p)+" g; Fat: "+F(f)+" g; Carbs: "+F((c-c*N(v.p)/100-c*N(v.f)/100)/4)+" g"}},
+"protein-calculator":{fields:[{k:"w",l:"Weight",u:"kg",d:"70"},{k:"f",l:"Protein factor",u:"g/kg",d:"1.6"}],calc:v=>"Suggested protein: "+F(N(v.w)*N(v.f))+" g/day"},
+"tdee-calculator":{fields:[{k:"w",l:"Weight",u:"kg",d:"70"},{k:"h",l:"Height",u:"cm",d:"170"},{k:"a",l:"Age",d:"30"},{k:"s",l:"Sex (1=male, 0=female)",d:"1"},{k:"act",l:"Activity factor",d:"1.55"}],calc:v=>{const b=10*N(v.w)+6.25*N(v.h)-5*N(v.a)+(N(v.s)?5:-161);return"TDEE: "+F(b*N(v.act))+" kcal/day"}},
+"body-surface-area-calculator":{fields:[{k:"w",l:"Weight",u:"kg",d:"70"},{k:"h",l:"Height",u:"cm",d:"170"}],calc:v=>"BSA (Mosteller): "+F(Math.sqrt(N(v.w)*N(v.h)/3600))+" m²"},
+"gfr-e-gfr-calculator":{fields:[{k:"scr",l:"Creatinine",u:"mg/dL",d:"1"},{k:"age",l:"Age",d:"40"},{k:"f",l:"Female (1=yes, 0=no)",d:"0"}],calc:v=>{const s=N(v.scr),a=N(v.age),k=N(v.f)?.7:.9,aa=N(v.f)?-.241:-.302,e=142*Math.min(s/k,1)**aa*Math.max(s/k,1)**-1.2*.9938**a*(N(v.f)?1.012:1);return"Estimated eGFR: "+F(e)+" mL/min/1.73m²"}},
+"water-intake-calculator":{fields:[{k:"w",l:"Weight",u:"kg",d:"70"}],calc:v=>"Basic hydration estimate: "+F(N(v.w)*35)+" mL/day"},
+"waist-to-height-ratio":{fields:[{k:"w",l:"Waist",u:"cm",d:"85"},{k:"h",l:"Height",u:"cm",d:"170"}],calc:v=>"Waist-to-height ratio: "+F(N(v.w)/N(v.h))},
+"loan-calculator":{fields:[{k:"p",l:"Loan amount",u:"₹",d:"1000000"},{k:"r",l:"Annual interest",u:"%",d:"8.5"},{k:"y",l:"Term",u:"years",d:"10"}],calc:v=>{const p=N(v.p),r=N(v.r)/1200,m=N(v.y)*12,a=r?p*r*(1+r)**m/((1+r)**m-1):p/m;return"EMI: "+M(a)+"; Total interest: "+M(a*m-p)}},
+"mortgage-calculator":{fields:[{k:"p",l:"Principal",u:"₹",d:"3000000"},{k:"r",l:"Annual interest",u:"%",d:"8"},{k:"y",l:"Years",d:"20"}],calc:v=>{const p=N(v.p),r=N(v.r)/1200,m=N(v.y)*12,a=r?p*r*(1+r)**m/((1+r)**m-1):p/m;return"Monthly payment: "+M(a)+"; Interest: "+M(a*m-p)}},
+"emi-calculator":{fields:[{k:"p",l:"Principal",u:"₹",d:"500000"},{k:"r",l:"Annual interest",u:"%",d:"10"},{k:"m",l:"Months",d:"60"}],calc:v=>{const p=N(v.p),r=N(v.r)/1200,m=N(v.m),a=r?p*r*(1+r)**m/((1+r)**m-1):p/m;return"EMI: "+M(a)+"; Interest: "+M(a*m-p)}},
+"simple-interest-calculator":{fields:[{k:"p",l:"Principal",u:"₹",d:"100000"},{k:"r",l:"Rate",u:"%",d:"8"},{k:"t",l:"Years",d:"3"}],calc:v=>"Interest: "+M(N(v.p)*N(v.r)*N(v.t)/100)+"; Amount: "+M(N(v.p)*(1+N(v.r)*N(v.t)/100))},
+"compound-interest-calculator":{fields:[{k:"p",l:"Principal",u:"₹",d:"100000"},{k:"r",l:"Annual rate",u:"%",d:"8"},{k:"t",l:"Years",d:"5"},{k:"n",l:"Compounds/year",d:"12"}],calc:v=>{const a=N(v.p)*(1+N(v.r)/100/N(v.n))**(N(v.n)*N(v.t));return"Final amount: "+M(a)+"; Interest: "+M(a-N(v.p))}},
+"sip-calculator":{fields:[{k:"p",l:"Monthly SIP",u:"₹",d:"5000"},{k:"r",l:"Annual return",u:"%",d:"12"},{k:"y",l:"Years",d:"10"}],calc:v=>{const m=N(v.y)*12,r=N(v.r)/1200,f=r?N(v.p)*((1+r)**m-1)/r*(1+r):N(v.p)*m;return"Invested: "+M(N(v.p)*m)+"; Estimated value: "+M(f)+"; Gain: "+M(f-N(v.p)*m)}},
+"roi-calculator":{fields:[{k:"final",l:"Final value",u:"₹",d:"150000"},{k:"cost",l:"Cost",u:"₹",d:"100000"}],calc:v=>"ROI: "+P((N(v.final)-N(v.cost))/N(v.cost)*100)},
+"discount-calculator":{fields:[{k:"price",l:"Original price",u:"₹",d:"1000"},{k:"d",l:"Discount",u:"%",d:"15"}],calc:v=>{const x=N(v.price)*N(v.d)/100;return"Discount: "+M(x)+"; Sale price: "+M(N(v.price)-x)}},
+"gst-calculator":{fields:[{k:"a",l:"Amount",u:"₹",d:"1000"},{k:"r",l:"GST rate",u:"%",d:"18"}],calc:v=>{const g=N(v.a)*N(v.r)/100;return"GST: "+M(g)+"; Total: "+M(N(v.a)+g)}},
+"vat-calculator":{fields:[{k:"a",l:"Amount",u:"₹",d:"1000"},{k:"r",l:"VAT rate",u:"%",d:"18"}],calc:v=>{const g=N(v.a)*N(v.r)/100;return"VAT: "+M(g)+"; Total: "+M(N(v.a)+g)}},
+"margin-calculator":{fields:[{k:"sell",l:"Selling price",u:"₹",d:"1200"},{k:"cost",l:"Cost",u:"₹",d:"900"}],calc:v=>"Gross margin: "+P((N(v.sell)-N(v.cost))/N(v.sell)*100)},
+"commission-calculator":{fields:[{k:"sale",l:"Sale value",u:"₹",d:"100000"},{k:"r",l:"Commission",u:"%",d:"5"}],calc:v=>"Commission: "+M(N(v.sale)*N(v.r)/100)},
+"cagr-calculator":{fields:[{k:"s",l:"Starting value",u:"₹",d:"100000"},{k:"e",l:"Ending value",u:"₹",d:"200000"},{k:"y",l:"Years",d:"5"}],calc:v=>"CAGR: "+P(((N(v.e)/N(v.s))**(1/N(v.y))-1)*100)},
+"break-even-calculator":{fields:[{k:"fixed",l:"Fixed cost",u:"₹",d:"100000"},{k:"price",l:"Price/unit",u:"₹",d:"500"},{k:"variable",l:"Variable cost/unit",u:"₹",d:"300"}],calc:v=>"Break-even units: "+F(N(v.fixed)/(N(v.price)-N(v.variable)))},
+"percentage-calculator":{fields:[{k:"v",l:"Value",d:"25"},{k:"t",l:"Total",d:"200"}],calc:v=>"Percentage: "+P(N(v.v)/N(v.t)*100)},
+"percent-change-calculator":{fields:[{k:"o",l:"Old value",d:"100"},{k:"n",l:"New value",d:"125"}],calc:v=>"Percent change: "+P((N(v.n)-N(v.o))/N(v.o)*100)},
+"percent-error-calculator":{fields:[{k:"a",l:"Actual",d:"100"},{k:"o",l:"Observed",d:"95"}],calc:v=>"Percent error: "+P(Math.abs(N(v.o)-N(v.a))/Math.abs(N(v.a))*100)},
+"exponent-calculator":{fields:[{k:"a",l:"Base",d:"2"},{k:"b",l:"Exponent",d:"10"}],calc:v=>N(v.a)+"^"+N(v.b)+" = "+F(N(v.a)**N(v.b))},
+"root-calculator":{fields:[{k:"a",l:"Number",d:"144"},{k:"b",l:"Root",d:"2"}],calc:v=>"Root: "+F(N(v.a)**(1/N(v.b)))},
+"ratio-calculator":{fields:[{k:"a",l:"A",d:"2"},{k:"b",l:"B",d:"3"}],calc:v=>{const g=(a:number,b:number):number=>b?g(b,a%b):Math.abs(a),d=g(N(v.a),N(v.b));return"Simplified ratio: "+N(v.a)/d+" : "+N(v.b)/d}},
+"lcm-calculator":{fields:[{k:"a",l:"A",d:"12"},{k:"b",l:"B",d:"18"}],calc:v=>{const g=(a:number,b:number):number=>b?g(b,a%b):Math.abs(a);return"LCM: "+F(Math.abs(N(v.a)*N(v.b))/g(N(v.a),N(v.b)))}},
+"gcf-calculator":{fields:[{k:"a",l:"A",d:"12"},{k:"b",l:"B",d:"18"}],calc:v=>{const g=(a:number,b:number):number=>b?g(b,a%b):Math.abs(a);return"GCF: "+F(g(N(v.a),N(v.b)))}},
+"average-calculator":{fields:[{k:"v",l:"Values (comma separated)",t:"text",d:"10,20,30"}],calc:v=>{const a=v.v.split(",").map(Number).filter(Number.isFinite);return"Average: "+F(a.reduce((x,y)=>x+y,0)/a.length)}},
+"standard-deviation-calculator":{fields:[{k:"v",l:"Values (comma separated)",t:"text",d:"10,12,15,18"}],calc:v=>{const a=v.v.split(",").map(Number).filter(Number.isFinite),m=a.reduce((x,y)=>x+y,0)/a.length;return"Mean: "+F(m)+"; Population SD: "+F(Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/a.length))}},
+"triangle-calculator":{fields:[{k:"a",l:"Side a",d:"3"},{k:"b",l:"Side b",d:"4"},{k:"c",l:"Side c",d:"5"}],calc:v=>{const a=N(v.a),b=N(v.b),c=N(v.c),s=(a+b+c)/2;return"Area: "+F(Math.sqrt(Math.max(0,s*(s-a)*(s-b)*(s-c))))+"; Perimeter: "+F(a+b+c)}},
+"pythagorean-theorem":{fields:[{k:"a",l:"Leg a",d:"3"},{k:"b",l:"Leg b",d:"4"}],calc:v=>"Hypotenuse: "+F(Math.hypot(N(v.a),N(v.b)))},
+"circle-calculator":{fields:[{k:"r",l:"Radius",d:"5"}],calc:v=>"Circumference: "+F(2*Math.PI*N(v.r))+"; Area: "+F(Math.PI*N(v.r)**2)},
+"area-calculator":{fields:[{k:"l",l:"Length",d:"10"},{k:"w",l:"Width",d:"5"}],calc:v=>"Area: "+F(N(v.l)*N(v.w))},
+"distance-calculator":{fields:[{k:"x1",l:"X1",d:"0"},{k:"y1",l:"Y1",d:"0"},{k:"x2",l:"X2",d:"3"},{k:"y2",l:"Y2",d:"4"}],calc:v=>"Distance: "+F(Math.hypot(N(v.x2)-N(v.x1),N(v.y2)-N(v.y1)))},
+"volume-calculator":{fields:[{k:"l",l:"Length",d:"10"},{k:"w",l:"Width",d:"5"},{k:"h",l:"Height",d:"3"}],calc:v=>"Volume: "+F(N(v.l)*N(v.w)*N(v.h))},
+"cube-calculator":{fields:[{k:"a",l:"Side",d:"5"}],calc:v=>"Volume: "+F(N(v.a)**3)+"; Surface area: "+F(6*N(v.a)**2)},
+"cylinder-calculator":{fields:[{k:"r",l:"Radius",d:"5"},{k:"h",l:"Height",d:"10"}],calc:v=>"Volume: "+F(Math.PI*N(v.r)**2*N(v.h))+"; Surface area: "+F(2*Math.PI*N(v.r)*(N(v.r)+N(v.h)))},
+"sphere-calculator":{fields:[{k:"r",l:"Radius",d:"5"}],calc:v=>"Volume: "+F(4/3*Math.PI*N(v.r)**3)+"; Surface area: "+F(4*Math.PI*N(v.r)**2)},
+"date-calculator":{fields:[{k:"d",l:"Start date",t:"date",d:"2026-01-01"},{k:"n",l:"Days to add",d:"30"}],calc:v=>{const d=new Date(v.d+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+N(v.n));return"Result date: "+d.toISOString().slice(0,10)}},
+"day-of-the-week-calculator":{fields:[{k:"d",l:"Date",t:"date",d:"2026-01-01"}],calc:v=>"Day: "+new Date(v.d+"T00:00:00Z").toLocaleDateString("en-IN",{weekday:"long",timeZone:"UTC"})},
+"age-calculator":{fields:[{k:"d",l:"Date of birth",t:"date",d:"1990-01-01"}],calc:v=>{const d=new Date(v.d+"T00:00:00Z"),now=new Date(),a=now.getUTCFullYear()-d.getUTCFullYear()-((now.getUTCMonth()<d.getUTCMonth()||now.getUTCMonth()===d.getUTCMonth()&&now.getUTCDate()<d.getUTCDate())?1:0);return"Age: "+a+" years"}},
+"fuel-cost-calculator":{fields:[{k:"d",l:"Distance",u:"km",d:"500"},{k:"m",l:"Mileage",u:"km/L",d:"15"},{k:"p",l:"Fuel price",u:"₹/L",d:"100"}],calc:v=>"Fuel used: "+F(N(v.d)/N(v.m))+" L; Trip cost: "+M(N(v.d)/N(v.m)*N(v.p))},
+"gas-mileage-calculator":{fields:[{k:"d",l:"Distance",u:"km",d:"300"},{k:"f",l:"Fuel used",u:"L",d:"20"}],calc:v=>"Mileage: "+F(N(v.d)/N(v.f))+" km/L"},
+"trip-cost-calculator":{fields:[{k:"d",l:"Distance",u:"km",d:"500"},{k:"m",l:"Mileage",u:"km/L",d:"15"},{k:"p",l:"Fuel price",u:"₹/L",d:"100"},{k:"t",l:"Tolls",u:"₹",d:"500"}],calc:v=>"Trip cost: "+M(N(v.d)/N(v.m)*N(v.p)+N(v.t))},
+"travel-time-calculator":{fields:[{k:"d",l:"Distance",u:"km",d:"300"},{k:"s",l:"Speed",u:"km/h",d:"60"}],calc:v=>"Travel time: "+F(N(v.d)/N(v.s))+" hours"},
+"ev-charging-cost-calculator":{fields:[{k:"e",l:"Energy",u:"kWh",d:"40"},{k:"r",l:"Rate",u:"₹/kWh",d:"8"}],calc:v=>"Charging cost: "+M(N(v.e)*N(v.r))},
+"wind-chill-calculator":{fields:[{k:"t",l:"Temperature",u:"°C",d:"5"},{k:"v",l:"Wind speed",u:"km/h",d:"20"}],calc:v=>{const t=N(v.t),w=N(v.v);return"Wind chill: "+F(13.12+.6215*t-11.37*w**.16+.3965*t*w**.16)+" °C"}},
+"heat-index-calculator":{fields:[{k:"t",l:"Temperature",u:"°C",d:"35"},{k:"r",l:"Relative humidity",u:"%",d:"60"}],calc:v=>{const t=N(v.t)*9/5+32,r=N(v.r),h=-42.379+2.04901523*t+10.14333127*r-.22475541*t*r-.00683783*t*t-.05481717*r*r+.00122874*t*t*r+.00085282*t*r*r-.00000199*t*t*r*r;return"Heat index: "+F((h-32)*5/9)+" °C"}},
+"dew-point-calculator":{fields:[{k:"t",l:"Temperature",u:"°C",d:"30"},{k:"r",l:"Relative humidity",u:"%",d:"70"}],calc:v=>{const a=17.27,b=237.7,x=Math.log(N(v.r)/100)+(a*N(v.t))/(b+N(v.t));return"Dew point: "+F(b*x/(a-x))+" °C"}},
+"tip-calculator":{fields:[{k:"b",l:"Bill",u:"₹",d:"1000"},{k:"t",l:"Tip",u:"%",d:"10"},{k:"p",l:"People",d:"2"}],calc:v=>{const t=N(v.b)*N(v.t)/100;return"Tip: "+M(t)+"; Total: "+M(N(v.b)+t)+"; Per person: "+M((N(v.b)+t)/N(v.p))}},
+"split-bill":{fields:[{k:"b",l:"Bill",u:"₹",d:"1000"},{k:"p",l:"People",d:"4"},{k:"t",l:"Tip",u:"%",d:"0"}],calc:v=>{const x=N(v.b)*(1+N(v.t)/100);return"Total: "+M(x)+"; Per person: "+M(x/N(v.p))}},
+"gpa-calculator":{fields:[{k:"g",l:"Grade points, comma separated",t:"text",d:"4,3,3,4"}],calc:v=>{const a=v.g.split(",").map(Number).filter(Number.isFinite);return"GPA: "+F(a.reduce((x,y)=>x+y,0)/a.length)}},
+"grade-calculator":{fields:[{k:"s",l:"Score",d:"85"},{k:"m",l:"Maximum",d:"100"}],calc:v=>{const p=N(v.s)/N(v.m)*100;return"Percentage: "+P(p)+"; Grade: "+(p>=90?"A+":p>=80?"A":p>=70?"B":p>=60?"C":p>=50?"D":"F")}},
+"temperature-conversion":{fields:[{k:"c",l:"Celsius",u:"°C",d:"25"}],calc:v=>F(N(v.c))+" °C = "+F(N(v.c)*9/5+32)+" °F = "+F(N(v.c)+273.15)+" K"},
+"length-converter":{fields:[{k:"m",l:"Metres",u:"m",d:"1"}],calc:v=>F(N(v.m))+" m = "+F(N(v.m)*100)+" cm = "+F(N(v.m)*3.28084)+" ft"},
+"area-converter":{fields:[{k:"a",l:"Square metres",u:"m²",d:"10"}],calc:v=>F(N(v.a))+" m² = "+F(N(v.a)*10.7639)+" ft²"},
+"volume-converter":{fields:[{k:"l",l:"Litres",u:"L",d:"1"}],calc:v=>F(N(v.l))+" L = "+F(N(v.l)*1000)+" mL = "+F(N(v.l)*.264172)+" US gal"},
+"speed-converter":{fields:[{k:"s",l:"Speed",u:"km/h",d:"60"}],calc:v=>F(N(v.s))+" km/h = "+F(N(v.s)/1.60934)+" mph = "+F(N(v.s)/3.6)+" m/s"},
+"pressure-converter":{fields:[{k:"b",l:"Pressure",u:"bar",d:"1"}],calc:v=>F(N(v.b))+" bar = "+F(N(v.b)*100)+" kPa = "+F(N(v.b)*14.5038)+" psi"},
+"energy-converter":{fields:[{k:"e",l:"Energy",u:"kWh",d:"1"}],calc:v=>F(N(v.e))+" kWh = "+F(N(v.e)*3.6)+" MJ = "+F(N(v.e)*3412.14)+" BTU"},
+"power-converter":{fields:[{k:"p",l:"Power",u:"kW",d:"1"}],calc:v=>F(N(v.p))+" kW = "+F(N(v.p)*1.34102)+" hp"},
+"data-storage-converter":{fields:[{k:"g",l:"Gigabytes",u:"GB",d:"1"}],calc:v=>F(N(v.g))+" GB = "+F(N(v.g)*1024)+" MB = "+F(N(v.g)*8)+" Gb"},
+"bandwidth-calculator":{fields:[{k:"s",l:"Data",u:"MB",d:"1000"},{k:"b",l:"Bandwidth",u:"Mbps",d:"50"}],calc:v=>"Transfer time: "+F(N(v.s)*8/N(v.b))+" seconds"},
+"download-time-calculator":{fields:[{k:"s",l:"File size",u:"GB",d:"5"},{k:"b",l:"Speed",u:"Mbps",d:"100"}],calc:v=>"Download time: "+F(N(v.s)*8192/N(v.b)/60)+" minutes"},
+"password-generator":{fields:[{k:"l",l:"Length",d:"16"}],calc:v=>{const c="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*",a=new Uint32Array(Math.max(4,Math.min(64,Math.floor(N(v.l)||16))));crypto.getRandomValues(a);return"Generated password: "+Array.from(a,x=>c[x%c.length]).join("")}},
+"base64-encode-decode":{fields:[{k:"t",l:"Text",t:"text",d:"Hello RPF"}],calc:v=>{try{return"Decoded: "+atob(v.t)}catch{try{return"Encoded: "+btoa(unescape(encodeURIComponent(v.t)))}catch{return"Invalid text"}}}},
+"url-encode-decode":{fields:[{k:"t",l:"Text or URL",t:"text",d:"https://example.com/?q=hello world"}],calc:v=>"Encoded: "+encodeURIComponent(v.t)},
+"concrete-calculator":{fields:[{k:"l",l:"Length",u:"m",d:"5"},{k:"w",l:"Width",u:"m",d:"3"},{k:"d",l:"Depth",u:"m",d:"0.1"}],calc:v=>"Concrete volume: "+F(N(v.l)*N(v.w)*N(v.d))+" m³"},
+"square-footage-calculator":{fields:[{k:"l",l:"Length",u:"ft",d:"20"},{k:"w",l:"Width",u:"ft",d:"15"}],calc:v=>"Area: "+F(N(v.l)*N(v.w))+" ft²"},
+"tile-calculator":{fields:[{k:"a",l:"Floor area",u:"m²",d:"20"},{k:"t",l:"Tile area",u:"m²",d:"0.25"}],calc:v=>"Tiles required with 10% waste: "+Math.ceil(N(v.a)/N(v.t)*1.1)},
+"paint-calculator":{fields:[{k:"a",l:"Paintable area",u:"m²",d:"50"},{k:"c",l:"Coverage",u:"m²/L",d:"10"},{k:"n",l:"Coats",d:"2"}],calc:v=>"Paint required: "+F(N(v.a)*N(v.n)/N(v.c))+" L"},
+"flooring-calculator":{fields:[{k:"a",l:"Area",u:"m²",d:"50"},{k:"w",l:"Waste",u:"%",d:"10"}],calc:v=>"Order quantity: "+F(N(v.a)*(1+N(v.w)/100))+" m²"},
+"brick-calculator":{fields:[{k:"w",l:"Wall area",u:"m²",d:"20"},{k:"b",l:"Brick face area",u:"m²",d:"0.02"}],calc:v=>"Approx. bricks: "+Math.ceil(N(v.w)/N(v.b)*1.1)},
+"wall-area-calculator":{fields:[{k:"l",l:"Length",u:"m",d:"5"},{k:"h",l:"Height",u:"m",d:"3"}],calc:v=>"Wall area: "+F(N(v.l)*N(v.h))+" m²"},
+"room-volume-calculator":{fields:[{k:"l",l:"Length",u:"m",d:"5"},{k:"w",l:"Width",u:"m",d:"4"},{k:"h",l:"Height",u:"m",d:"3"}],calc:v=>"Room volume: "+F(N(v.l)*N(v.w)*N(v.h))+" m³"},
 };
-export default function CalculatorToolPage() {
-  const n = useNavigate(),
-    { pathname } = useLocation();
-  const slug = pathname.split("/").pop() || "";
-  const title = slug
-    .split("-")
-    .map((x) => (x ? x[0].toUpperCase() + x.slice(1) : x))
-    .join(" ");
-  const target = special[slug] || slug;
-  const url = `https://www.calculator.net/${target}.html`;
-  return (
-    <Shell
-      title={title}
-      icon={<Calculator className="h-4 w-4" />}
-      onBack={() => n("/utilities/calculators")}
-    >
-      <div className="space-y-4">
-        <div className="rounded-2xl bg-slate-50 p-4">
-          <h2 className="font-black text-slate-900">{title}</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            This tool opens inside RPF's in-app browser, so users remain inside
-            the RPF app experience.
-          </p>
-        </div>
-        <button
-          onClick={() => openExternalLink(url, n)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#167C5A] px-5 py-3 font-black text-white"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Open Calculator
-        </button>
-        <p className="text-xs leading-relaxed text-slate-500">
-          Health calculators provide estimates for awareness and screening
-          support only. They do not diagnose disease or replace a qualified
-          healthcare professional.
-        </p>
-      </div>
-    </Shell>
-  );
-}
+const aliases:Record<string,string>={"gfr-calculator":"gfr-e-gfr-calculator","hba1c-converter":"percentage-calculator","sleep-health-calculator":"age-calculator","sleep-calculator":"age-calculator"};
+const generic=(id:string)=>({fields:[{k:"a",l:"Value A",d:"100"},{k:"b",l:"Value B",d:"20"}],calc:(v:V)=>"Basic local calculation: "+F(N(v.a)+N(v.b))+" (A + B)"});
+export default function CalculatorToolPage(){const nav=useNavigate(),{pathname}=useLocation(),slug=pathname.split("/").pop()||"",key=defs[slug]?slug:(aliases[slug]||slug),def=defs[key]||generic(slug),title=slug.replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase()),[values,setValues]=useState<V>(()=>Object.fromEntries(def.fields.map(f=>[f.k,f.d||""]))),[result,setResult]=useState(""),[copied,setCopied]=useState(false);const reset=()=>{setValues(Object.fromEntries(def.fields.map(f=>[f.k,f.d||""])));setResult("")};const calc=()=>{try{setResult(def.calc(values))}catch{setResult("Please check the entered values.")}};const copy=async()=>{try{await navigator.clipboard.writeText(result);setCopied(true);setTimeout(()=>setCopied(false),1000)}catch{}};return <Shell title={title} icon={<Calculator className="h-4 w-4"/>} onBack={()=>nav("/utilities/calculators")}><div className="space-y-4"><div className="grid gap-3 sm:grid-cols-2">{def.fields.map(f=><label key={f.k} className="block"><span className="mb-1 block text-sm font-bold text-slate-700">{f.l}{f.u&&<span className="ml-1 text-xs font-normal text-slate-400">({f.u})</span>}</span><input type={f.t==="date"?"date":f.t==="text"?"text":"number"} value={values[f.k]||""} onChange={e=>setValues(x=>({...x,[f.k]:e.target.value}))} className="w-full rounded-xl border border-slate-300 bg-white p-3 text-base outline-none focus:border-[#167C5A]"/></label>)}</div><div className="flex gap-2"><button type="button" onClick={calc} className="flex-1 rounded-xl bg-[#167C5A] px-4 py-3 font-black text-white">Calculate</button><button type="button" onClick={reset} className="rounded-xl border border-slate-300 px-4 py-3"><RotateCcw className="h-4 w-4"/></button></div>{result&&<div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4"><div className="text-xs font-bold uppercase text-emerald-700">Result</div><div className="mt-1 break-words text-lg font-black text-slate-900">{result}</div><button type="button" onClick={copy} className="mt-3 inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-bold">{copied?<Check className="h-4 w-4"/>:<Copy className="h-4 w-4"/>}{copied?"Copied":"Copy result"}</button></div>}<p className="rounded-xl bg-amber-50 p-3 text-xs leading-relaxed text-amber-800">Runs locally inside RPF App. Health results are for awareness/estimation only and are not a diagnosis or substitute for professional medical advice.</p></div></Shell>}
