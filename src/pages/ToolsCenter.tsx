@@ -33,7 +33,7 @@ export default function ToolsCenter() {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-extrabold text-slate-900">{hi ? "कैलकुलेटर सेंटर" : "Calculator Center"}</h3>
-            <p className="mt-1 text-xs font-medium text-slate-500">{hi ? "100+ कैलकुलेटर और गणना टूल" : "100+ calculators and calculation tools"}</p>
+            <p className="mt-1 text-xs font-medium text-slate-500">{hi ? "सभी कैलकुलेटर और गणना टूल" : "All calculators and calculation tools"}</p>
           </div>
           <ChevronRight className="h-5 w-5 text-slate-300" />
         </button>
