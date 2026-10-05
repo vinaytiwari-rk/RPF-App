@@ -17,7 +17,10 @@ import {
   ChevronDown,
   Navigation,
   Loader2,
-  Fuel
+  Fuel,
+  LayoutGrid,
+  SlidersHorizontal,
+  Search
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
@@ -101,6 +104,7 @@ interface MarketSummary {
   mandiPulse: {
     source: string;
     sourceUrl: string;
+    market?: string;
     updates: { title: string; desc: string }[];
   };
   fuel: { source: string; sourceUrl: string; city: string; petrol: string; diesel: string; lpgDomestic: string; lpgCommercial: string; cng: string; updatedAt: string };
@@ -130,6 +134,24 @@ export default function LiveVerifiedMarketSection() {
   });
 
   const [data, setData] = useState<MarketSummary | null>(null);
+
+  const [viewMode, setViewMode] = useState<"grid" | "scroll">(() => {
+    try {
+      return (localStorage.getItem("@rpf_market_view_mode") as any) || "grid";
+    } catch {
+      return "grid";
+    }
+  });
+  const [vegSearch, setVegSearch] = useState<string>("");
+  const [mandiSearch, setMandiSearch] = useState<string>("");
+
+  const toggleViewMode = () => {
+    const next = viewMode === "grid" ? "scroll" : "grid";
+    setViewMode(next);
+    try {
+      localStorage.setItem("@rpf_market_view_mode", next);
+    } catch {}
+  };
 
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null);
   const [showCityPicker, setShowCityPicker] = useState<boolean>(false);
@@ -244,60 +266,90 @@ export default function LiveVerifiedMarketSection() {
 
   return (
     <section className="pt-2">
-      {/* SECTION HEADER WITH LOCATION SELECTOR */}
-      <div className="mb-2 flex items-center justify-between px-0.5">
-        <div className="flex items-center gap-1.5">
-          <ShieldCheck className="h-4 w-4 text-[#167C5A]" />
-          <h2 className="text-[13px] sm:text-[14px] font-black uppercase tracking-wider text-[#14213D]">
+      {/* SECTION HEADER WITH LOCATION SELECTOR & VIEW MODE TOGGLE */}
+      <div className="mb-2.5 flex items-center justify-between px-0.5 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <ShieldCheck className="h-4 w-4 text-[#167C5A] shrink-0" />
+          <h2 className="text-[13px] sm:text-[14px] font-black uppercase tracking-wider text-[#14213D] truncate">
             Live Market & Panchang
           </h2>
         </div>
 
-        {/* LOCATION SELECTOR PILL */}
-        <button
-          type="button"
-          onClick={() => setShowCityPicker(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-[11px] font-bold shadow-2xs transition-colors cursor-pointer"
-        >
-          <MapPin className="h-3.5 w-3.5 text-emerald-600" />
-          <span>{selectedCity.name}</span>
-          <ChevronDown className="h-3 w-3 text-emerald-600" />
-        </button>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* VIEW MODE TOGGLE: GRID (ALL 5 CARDS) / SWIPE */}
+          <button
+            type="button"
+            onClick={toggleViewMode}
+            title={viewMode === "grid" ? "Switch to Swipe View" : "Show all 5 cards in Grid View"}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-[10.5px] font-bold transition-colors cursor-pointer"
+          >
+            {viewMode === "grid" ? (
+              <>
+                <LayoutGrid className="h-3 w-3 text-emerald-700" />
+                <span className="hidden xs:inline">Grid (5 Cards)</span>
+              </>
+            ) : (
+              <>
+                <SlidersHorizontal className="h-3 w-3 text-indigo-700" />
+                <span className="hidden xs:inline">Swipe</span>
+              </>
+            )}
+          </button>
+
+          {/* LOCATION SELECTOR PILL */}
+          <button
+            type="button"
+            onClick={() => setShowCityPicker(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-[11px] font-bold shadow-2xs transition-colors cursor-pointer"
+          >
+            <MapPin className="h-3.5 w-3.5 text-emerald-600" />
+            <span className="max-w-[80px] sm:max-w-[120px] truncate">{selectedCity.name}</span>
+            <ChevronDown className="h-3 w-3 text-emerald-600" />
+          </button>
+        </div>
       </div>
 
-      {/* HORIZONTAL SWIPEABLE CARDS */}
-      <div className="flex gap-2.5 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none snap-x snap-mandatory">
+      {/* 5 CARDS CONTAINER: GRID VIEW (ALL 5 FULLY VISIBLE) OR HORIZONTAL SWIPE */}
+      <div
+        className={
+          viewMode === "grid"
+            ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-0.5 pb-1"
+            : "flex gap-2.5 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none snap-x snap-mandatory"
+        }
+      >
         {/* CARD 1: LIVE DRIK PANCHANG */}
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("panchang")}
-          className="snap-start min-w-[215px] sm:min-w-[235px] flex-1 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 p-3.5 shadow-2xs cursor-pointer hover:border-emerald-400 transition-all flex flex-col justify-between"
+          className={`${
+            viewMode === "scroll" ? "snap-start min-w-[215px] sm:min-w-[235px] flex-1" : ""
+          } rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 p-3 shadow-2xs cursor-pointer hover:border-emerald-400 transition-all flex flex-col justify-between`}
         >
           <div>
             <div className="flex items-center justify-between text-[#15803D]">
               <div className="flex items-center gap-1.5">
-                <Sun className="h-4 w-4 text-[#16A34A]" />
-                <span className="text-[11px] font-extrabold uppercase tracking-wider">Live Panchang</span>
+                <Sun className="h-4 w-4 text-[#16A34A] shrink-0" />
+                <span className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider">Panchang</span>
               </div>
-              <span className="text-[9px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md">
-                वैदिक पंचांग • Live
+              <span className="text-[8.5px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md">
+                वैदिक • Live
               </span>
             </div>
 
             <div className="mt-2 space-y-0.5">
-              <div className="text-[13px] font-bold text-[#14213D] line-clamp-1">
+              <div className="text-[12.5px] sm:text-[13px] font-bold text-[#14213D] line-clamp-1">
                 {data?.panchang?.tithi || (isLoadingData ? "Fetching Panchang…" : "Krishna Saptami / Ashtami")}
               </div>
-              <div className="text-[11px] font-semibold text-emerald-800 line-clamp-1">
+              <div className="text-[10.5px] sm:text-[11px] font-semibold text-emerald-800 line-clamp-1">
                 {data?.panchang?.samvat || "Vikram Samvat 2083"}
               </div>
-              <div className="text-[10.5px] text-slate-500 font-medium">
-                Sunrise: {data?.panchang?.sunrise || "06:13 AM"} • Sunset: {data?.panchang?.sunset || "06:06 PM"}
+              <div className="text-[10px] text-slate-500 font-medium line-clamp-1">
+                ☀️ {data?.panchang?.sunrise || "05:38 AM"} • 🌙 {data?.panchang?.sunset || "05:31 PM"}
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-emerald-100 flex items-center justify-between text-[10.5px]">
+          <div className="mt-2.5 pt-1.5 border-t border-emerald-100 flex items-center justify-between text-[10px]">
             <span className="text-emerald-800 font-bold">Muhurat & Timings</span>
             <span className="text-[#15803D] font-extrabold flex items-center">
               View <ChevronRight className="h-3 w-3" />
@@ -309,36 +361,38 @@ export default function LiveVerifiedMarketSection() {
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("bullion")}
-          className="snap-start min-w-[215px] sm:min-w-[235px] flex-1 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/70 via-white to-yellow-50/50 p-3.5 shadow-2xs cursor-pointer hover:border-amber-400 transition-all flex flex-col justify-between"
+          className={`${
+            viewMode === "scroll" ? "snap-start min-w-[215px] sm:min-w-[235px] flex-1" : ""
+          } rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/70 via-white to-yellow-50/50 p-3 shadow-2xs cursor-pointer hover:border-amber-400 transition-all flex flex-col justify-between`}
         >
           <div>
             <div className="flex items-center justify-between text-[#B45309]">
               <div className="flex items-center gap-1.5">
-                <Coins className="h-4 w-4 text-[#D97706]" />
-                <span className="text-[11px] font-extrabold uppercase tracking-wider">Gold & Silver</span>
+                <Coins className="h-4 w-4 text-[#D97706] shrink-0" />
+                <span className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider">Bullion</span>
               </div>
-              <span className="text-[9px] font-bold text-amber-800 bg-amber-100/70 px-1.5 py-0.5 rounded-md">
+              <span className="text-[8.5px] font-bold text-amber-800 bg-amber-100/70 px-1.5 py-0.5 rounded-md">
                 IBJA Benchmark
               </span>
             </div>
 
-            <div className="mt-2 space-y-1 text-[12px]">
+            <div className="mt-2 space-y-0.5 text-[11.5px]">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-600">24K Gold (10g)</span>
+                <span className="font-semibold text-slate-600">24K Gold</span>
                 <span className="font-extrabold text-[#14213D]">{formatPrice(data?.bullion?.gold24k) || "₹1,50,326"}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-600">22K Gold (10g)</span>
+                <span className="font-semibold text-slate-600">22K Gold</span>
                 <span className="font-extrabold text-amber-800">{formatPrice(data?.bullion?.gold22k) || "₹1,37,699"}</span>
               </div>
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="font-semibold text-slate-500">Silver (1kg)</span>
-                <span className="font-bold text-slate-700">{formatPrice(data?.bullion?.silver) || "₹2,26,926"}</span>
+              <div className="flex items-center justify-between text-[10.5px]">
+                <span className="font-semibold text-slate-500">Silver 1kg</span>
+                <span className="font-bold text-slate-700">{formatPrice(data?.bullion?.silver) || "₹2,29,634"}</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-amber-100 flex items-center justify-between text-[10.5px]">
+          <div className="mt-2.5 pt-1.5 border-t border-amber-100 flex items-center justify-between text-[10px]">
             <span className="text-amber-800 font-bold">18K / Sovereign</span>
             <span className="text-[#C2410C] font-extrabold flex items-center">
               Rates <ChevronRight className="h-3 w-3" />
@@ -346,120 +400,146 @@ export default function LiveVerifiedMarketSection() {
           </div>
         </motion.div>
 
-        {/* CARD 3: LIVE VEGETABLE PRICES (CITY AWARE) */}
+        {/* CARD 3: LIVE VEGETABLE PRICES (RICH 10+ LIST AWARE) */}
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("vegetables")}
-          className="snap-start min-w-[215px] sm:min-w-[235px] flex-1 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 via-white to-green-50/50 p-3.5 shadow-2xs cursor-pointer hover:border-emerald-400 transition-all flex flex-col justify-between"
+          className={`${
+            viewMode === "scroll" ? "snap-start min-w-[215px] sm:min-w-[235px] flex-1" : ""
+          } rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 via-white to-green-50/50 p-3 shadow-2xs cursor-pointer hover:border-emerald-400 transition-all flex flex-col justify-between`}
         >
           <div>
             <div className="flex items-center justify-between text-[#166534]">
               <div className="flex items-center gap-1.5">
-                <Carrot className="h-4 w-4 text-[#16A34A]" />
-                <span className="text-[11px] font-extrabold uppercase tracking-wider">Vegetable Mandi</span>
+                <Carrot className="h-4 w-4 text-[#16A34A] shrink-0" />
+                <span className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider">Vegetables</span>
               </div>
-              <span className="text-[9.5px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
-                <MapPin className="h-2.5 w-2.5 text-emerald-700" />
+              <span className="text-[8.5px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 truncate max-w-[85px]">
+                <MapPin className="h-2.5 w-2.5 text-emerald-700 shrink-0" />
                 {selectedCity.name}
               </span>
             </div>
 
-            <div className="mt-2 space-y-1 text-[12px]">
-              {(data?.vegetables?.items?.slice(0, 2) || []).map((v, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <span className="font-semibold text-slate-700">{v.name}</span>
-                  <span className="font-bold text-[#14213D]">{v.price}</span>
+            <div className="mt-2 space-y-0.5 text-[11px]">
+              {(data?.vegetables?.items?.slice(0, 3) || [
+                { name: "प्याज (Onion)", price: "₹30 per kg" },
+                { name: "आलू (Potato)", price: "₹30 per kg" },
+                { name: "टमाटर (Tomato)", price: "₹26 per kg" }
+              ]).map((v, i) => (
+                <div key={i} className="flex items-center justify-between gap-1">
+                  <span className="font-semibold text-slate-700 truncate">{v.name}</span>
+                  <span className="font-black text-[#14213D] shrink-0">{v.price.replace(" per kg", "/kg")}</span>
                 </div>
               ))}
-              <div className="text-[10px] text-slate-500 font-medium line-clamp-1">
-                {data?.vegetables?.market || `${selectedCity.name} Mandi`}
+              <div className="text-[9.5px] text-emerald-800 font-bold flex items-center justify-between pt-0.5">
+                <span>{data?.vegetables?.items?.length || 10}+ Vegetables</span>
+                <span className="font-medium text-slate-500">APMC Mandi</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-emerald-100 flex items-center justify-between text-[10.5px]">
-            <span className="text-emerald-800 font-bold">{selectedCity.name} Rates</span>
+          <div className="mt-2.5 pt-1.5 border-t border-emerald-100 flex items-center justify-between text-[10px]">
+            <span className="text-emerald-800 font-bold">{selectedCity.name} Mandi</span>
             <span className="text-[#166534] font-extrabold flex items-center">
               All Items <ChevronRight className="h-3 w-3" />
             </span>
           </div>
         </motion.div>
 
-        {/* CARD: FUEL & GAS */}
+        {/* CARD 4: FUEL & GAS */}
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("fuel")}
-          className="snap-start min-w-[215px] sm:min-w-[235px] flex-1 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50/70 via-white to-amber-50/50 p-3.5 shadow-2xs cursor-pointer hover:border-orange-400 transition-all flex flex-col justify-between"
+          className={`${
+            viewMode === "scroll" ? "snap-start min-w-[215px] sm:min-w-[235px] flex-1" : ""
+          } rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50/70 via-white to-amber-50/50 p-3 shadow-2xs cursor-pointer hover:border-orange-400 transition-all flex flex-col justify-between`}
         >
           <div>
             <div className="flex items-center justify-between text-[#C2410C]">
               <div className="flex items-center gap-1.5">
-                <Fuel className="h-4 w-4 text-[#EA580C]" />
-                <span className="text-[11px] font-extrabold uppercase tracking-wider">Fuel & Gas</span>
+                <Fuel className="h-4 w-4 text-[#EA580C] shrink-0" />
+                <span className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider">Fuel & Gas</span>
               </div>
-              <span className="text-[9px] font-bold text-orange-800 bg-orange-100/70 px-1.5 py-0.5 rounded-md">IOCL / PPAC</span>
+              <span className="text-[8.5px] font-bold text-orange-800 bg-orange-100/70 px-1.5 py-0.5 rounded-md">IOCL / PPAC</span>
             </div>
-            <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+            <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10.5px]">
               <div>
                 <span className="font-semibold text-slate-500">Petrol</span>
-                <div className="font-extrabold text-[#14213D]">
-                  {formatPrice(data?.fuel?.petrol) || "₹114.54"} <span className="font-medium text-slate-400">/L</span>
+                <div className="font-extrabold text-[#14213D] leading-tight">
+                  {formatPrice(data?.fuel?.petrol) || "₹114.54"}<span className="font-normal text-[9px] text-slate-400">/L</span>
                 </div>
               </div>
               <div>
                 <span className="font-semibold text-slate-500">Diesel</span>
-                <div className="font-extrabold text-[#14213D]">
-                  {formatPrice(data?.fuel?.diesel) || "₹99.64"} <span className="font-medium text-slate-400">/L</span>
+                <div className="font-extrabold text-[#14213D] leading-tight">
+                  {formatPrice(data?.fuel?.diesel) || "₹99.64"}<span className="font-normal text-[9px] text-slate-400">/L</span>
                 </div>
               </div>
               <div>
                 <span className="font-semibold text-slate-500">LPG</span>
-                <div className="font-extrabold text-[#14213D]">
-                  {formatPrice(data?.fuel?.lpgDomestic) || "₹947.50"} <span className="font-medium text-slate-400">/cyl</span>
+                <div className="font-extrabold text-[#14213D] leading-tight">
+                  {formatPrice(data?.fuel?.lpgDomestic) || "₹947.50"}<span className="font-normal text-[9px] text-slate-400">/cyl</span>
                 </div>
               </div>
               <div>
                 <span className="font-semibold text-slate-500">CNG</span>
-                <div className="font-extrabold text-[#14213D]">
-                  {formatPrice(data?.fuel?.cng) || "₹88.25"} <span className="font-medium text-slate-400">/kg</span>
+                <div className="font-extrabold text-[#14213D] leading-tight">
+                  {formatPrice(data?.fuel?.cng) || "₹88.25"}<span className="font-normal text-[9px] text-slate-400">/kg</span>
                 </div>
               </div>
             </div>
           </div>
-          <div className="mt-2.5 pt-2 border-t border-orange-100 flex items-center justify-between text-[10.5px]">
+          <div className="mt-2.5 pt-1.5 border-t border-orange-100 flex items-center justify-between text-[10px]">
             <span className="text-orange-800 font-bold">Latest Rates</span>
             <span className="text-[#C2410C] font-extrabold flex items-center">View <ChevronRight className="h-3 w-3" /></span>
           </div>
         </motion.div>
 
-        {/* CARD 4: LIVE MANDI PULSE */}
+        {/* CARD 5: LIVE MANDI PRICES (SPANS FULL WIDTH ON 2-COL MOBILE TO COMPLETE 5-CARD GRID) */}
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("mandi")}
-          className="snap-start min-w-[215px] sm:min-w-[235px] flex-1 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/70 via-white to-blue-50/50 p-3.5 shadow-2xs cursor-pointer hover:border-indigo-400 transition-all flex flex-col justify-between"
+          className={`${
+            viewMode === "grid" ? "col-span-2 md:col-span-1" : "snap-start min-w-[215px] sm:min-w-[235px] flex-1"
+          } rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/70 via-white to-blue-50/50 p-3 shadow-2xs cursor-pointer hover:border-indigo-400 transition-all flex flex-col justify-between`}
         >
           <div>
             <div className="flex items-center justify-between text-[#4338CA]">
               <div className="flex items-center gap-1.5">
-                <Wheat className="h-4 w-4 text-[#4F46E5]" />
-                <span className="text-[11px] font-extrabold uppercase tracking-wider">Mandi Prices</span>
+                <Wheat className="h-4 w-4 text-[#4F46E5] shrink-0" />
+                <span className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider">Mandi Prices</span>
               </div>
-              <span className="text-[9px] font-bold text-indigo-800 bg-indigo-100/70 px-1.5 py-0.5 rounded-md">
+              <span className="text-[8.5px] font-bold text-indigo-800 bg-indigo-100/70 px-1.5 py-0.5 rounded-md">
                 Agmarknet (Govt)
               </span>
             </div>
 
-            <div className="mt-2 space-y-1">
-              <div className="text-[12.5px] font-bold text-[#14213D] line-clamp-2 leading-snug">
-                {data?.mandiPulse?.updates?.[0]?.title || "Latest Mandi Rates & Live Commodity Arrivals"}
-              </div>
-              <div className="text-[10.5px] text-slate-500 font-medium line-clamp-1">
-                Soybean, Wheat, Pulses & Oilseeds Mandi Movements
+            <div className="mt-2 space-y-0.5 text-[11px]">
+              {(data?.mandiPulse?.updates?.slice(0, 3) || [
+                { title: "Wheat (गेहूँ) — ₹3,220/quintal", desc: "Min ₹2,550 • Max ₹3,220" },
+                { title: "Soybean (सोयाबीन) — ₹4,450/quintal", desc: "Min ₹3,500 • Max ₹5,510" },
+                { title: "Gram (चना) — ₹6,000/quintal", desc: "Min ₹5,800 • Max ₹6,460" }
+              ]).map((u, i) => {
+                const parts = u.title.split("—");
+                const name = parts[0]?.trim() || u.title;
+                const rate = parts[1]?.trim() || "";
+                return (
+                  <div key={i} className="flex items-center justify-between gap-1">
+                    <span className="font-bold text-[#14213D] truncate">{name}</span>
+                    <span className="font-extrabold text-indigo-900 shrink-0 text-[10.5px]">
+                      {rate.replace("/quintal", "/qtl")}
+                    </span>
+                  </div>
+                );
+              })}
+              <div className="text-[9.5px] text-indigo-800 font-bold flex items-center justify-between pt-0.5">
+                <span>{data?.mandiPulse?.updates?.length || 8}+ Commodities</span>
+                <span className="font-medium text-slate-500">APMC Arrivals</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-indigo-100 flex items-center justify-between text-[10.5px]">
+          <div className="mt-2.5 pt-1.5 border-t border-indigo-100 flex items-center justify-between text-[10px]">
             <span className="text-indigo-800 font-bold">APMC Arrivals</span>
             <span className="text-[#4338CA] font-extrabold flex items-center">
               Updates <ChevronRight className="h-3 w-3" />
@@ -467,6 +547,15 @@ export default function LiveVerifiedMarketSection() {
           </div>
         </motion.div>
       </div>
+
+      {/* SWIPE DOTS WHEN IN HORIZONTAL SCROLL MODE */}
+      {viewMode === "scroll" && (
+        <div className="flex items-center justify-center gap-1.5 pt-1.5 pb-0.5">
+          {[0, 1, 2, 3, 4].map((idx) => (
+            <span key={idx} className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+          ))}
+        </div>
+      )}
 
       {/* LOCATION PICKER MODAL */}
       <AnimatePresence>
@@ -696,32 +785,47 @@ export default function LiveVerifiedMarketSection() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs font-bold text-slate-600 px-0.5">
                       <span>Market: {data.vegetables.market}</span>
-                      <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                        {selectedCity.name}
+                      <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold">
+                        {data.vegetables.items.length} Vegetables Live
                       </span>
                     </div>
-                    <div className="overflow-hidden rounded-xl border border-slate-200">
+
+                    {/* SEARCH INPUT */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                      <input
+                        type="text"
+                        value={vegSearch}
+                        onChange={(e) => setVegSearch(e.target.value)}
+                        placeholder="सब्जी खोजें (टमाटर, आलू, प्याज, लहसुन, गोभी...)"
+                        className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-emerald-500 font-medium"
+                      />
+                    </div>
+
+                    <div className="overflow-hidden rounded-xl border border-slate-200 max-h-[50vh] overflow-y-auto">
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                        <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 sticky top-0 z-10">
                           <tr>
-                            <th className="p-2.5">Vegetable</th>
-                            <th className="p-2.5">Today Price</th>
-                            <th className="p-2.5">Change</th>
+                            <th className="p-2.5">Vegetable (सब्जी)</th>
+                            <th className="p-2.5">Today Rate</th>
+                            <th className="p-2.5 text-right">Daily Trend</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                          {data.vegetables.items.map((v, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50">
-                              <td className="p-2.5 font-bold text-slate-800">{v.name}</td>
-                              <td className="p-2.5 font-black text-emerald-700">{v.price}</td>
-                              <td className="p-2.5 text-slate-500">{v.change}</td>
-                            </tr>
-                          ))}
+                          {data.vegetables.items
+                            .filter((v) => !vegSearch || v.name.toLowerCase().includes(vegSearch.toLowerCase()))
+                            .map((v, idx) => (
+                              <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                <td className="p-2.5 font-bold text-slate-800">{v.name}</td>
+                                <td className="p-2.5 font-black text-emerald-700">{v.price}</td>
+                                <td className="p-2.5 text-right text-slate-500 font-semibold">{v.change}</td>
+                              </tr>
+                            ))}
                         </tbody>
                       </table>
                     </div>
 
-                    <div className="text-center py-2.5 px-4 bg-emerald-50/80 border border-emerald-200/80 rounded-xl text-xs text-emerald-800 font-semibold flex items-center justify-center gap-1.5">
+                    <div className="text-center py-2 px-4 bg-emerald-50/80 border border-emerald-200/80 rounded-xl text-[11px] text-emerald-800 font-semibold flex items-center justify-center gap-1.5">
                       <span>Official APMC Mandi Daily Benchmark ({selectedCity.name})</span>
                     </div>
                   </div>
@@ -747,24 +851,53 @@ export default function LiveVerifiedMarketSection() {
                     <p className="text-[10.5px] text-slate-500 font-medium">
                       Reference prices; actual pump/distributor prices can vary by locality. Updated: {data.fuel.updatedAt ? new Date(data.fuel.updatedAt).toLocaleString("en-IN") : "—"}
                     </p>
-                    
                   </div>
                 )}
 
                 {/* 4. MANDI PULSE SHEET */}
                 {activeSheet === "mandi" && data?.mandiPulse && (
                   <div className="space-y-3">
-                    {data.mandiPulse.updates.map((u, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 transition-colors shadow-2xs space-y-1"
-                      >
-                        <h4 className="text-[13px] font-bold text-[#14213D] leading-snug">{u.title}</h4>
-                        <p className="text-[11.5px] text-slate-600 leading-relaxed font-medium">{u.desc}</p>
-                      </div>
-                    ))}
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-600 px-0.5">
+                      <span>Market: {data.mandiPulse.market || `${selectedCity.name} APMC`}</span>
+                      <span className="text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200 font-bold">
+                        {data.mandiPulse.updates.length} Commodities Live
+                      </span>
+                    </div>
 
-                    
+                    {/* SEARCH INPUT */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                      <input
+                        type="text"
+                        value={mandiSearch}
+                        onChange={(e) => setMandiSearch(e.target.value)}
+                        placeholder="फसल / जिंस खोजें (गेहूँ, चना, सोयाबीन, लहसुन, सरसों...)"
+                        className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-indigo-500 font-medium"
+                      />
+                    </div>
+
+                    <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-0.5">
+                      {data.mandiPulse.updates
+                        .filter(
+                          (u) =>
+                            !mandiSearch ||
+                            u.title.toLowerCase().includes(mandiSearch.toLowerCase()) ||
+                            u.desc.toLowerCase().includes(mandiSearch.toLowerCase())
+                        )
+                        .map((u, idx) => (
+                          <div
+                            key={idx}
+                            className="p-3 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 transition-colors shadow-2xs space-y-1"
+                          >
+                            <h4 className="text-[13px] font-black text-[#14213D] leading-snug">{u.title}</h4>
+                            <p className="text-[11.5px] text-slate-600 leading-relaxed font-semibold">{u.desc}</p>
+                          </div>
+                        ))}
+                    </div>
+
+                    <div className="text-center py-2 px-4 bg-indigo-50/80 border border-indigo-200/80 rounded-xl text-[11px] text-indigo-800 font-semibold flex items-center justify-center gap-1.5">
+                      <span>Agmarknet (Ministry of Agriculture & Farmers Welfare, GoI)</span>
+                    </div>
                   </div>
                 )}
               </div>
