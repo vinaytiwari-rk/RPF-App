@@ -146,7 +146,7 @@ export default function AdminHub() {
     if (!token || !hasAdminAccess) return;
     setLoading(true);
 
-    const endpoints: Array<[keyof AdminState, string]> = [
+    const endpoints: Array<[Exclude<keyof AdminState, "cardTotal">, string]> = [
       ["users", "/api/admin/users"],
       ["volunteers", "/api/admin/volunteers"],
       ["cards", "/api/cards"],
