@@ -37,6 +37,43 @@ function firstText(row: Row, keys: string[]): string {
   return "—";
 }
 
+function formatDob(value: unknown): string {
+  if (value === undefined || value === null || !String(value).trim()) return "—";
+  const raw = String(value).trim();
+  const match = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (match) return `${match[3].padStart(2, "0")}-${match[2].padStart(2, "0")}-${match[1]}`;
+  return raw;
+}
+
+function cardAddress(row: Row): string {
+  const direct = firstText(row, [
+    "address", "fullAddress", "full_address", "registeredAddress",
+    "registered_address", "addressLine", "address_line"
+  ]);
+  if (direct !== "—" && !direct.includes("[object Object]")) return direct;
+
+  const parts = [
+    row.addressLine1, row.address_line1, row.addressLine2, row.address_line2,
+    row.village, row.locality, row.ward, row.city, row.district,
+    row.state, row.pincode, row.pinCode
+  ]
+    .filter((value) => value !== undefined && value !== null && String(value).trim())
+    .map((value) => String(value).trim());
+
+  return parts.length ? [...new Set(parts)].join(", ") : "—";
+}
+
+const JAN_SEVA_BENEFITS_HI = [
+  ["सामाजिक कल्याण", "समाज के हर वर्ग को बेहतर जीवन की ओर ले जाना।"],
+  ["स्वास्थ्य सेवाएँ", "निःशुल्क स्वास्थ्य शिविर और दवा वितरण।"],
+  ["शिक्षा", "स्कूल, पुस्तकालय और शिक्षा सामग्री उपलब्ध कराना।"],
+  ["महिला सशक्तिकरण", "महिलाओं को शिक्षा, स्वास्थ्य और रोजगार से जोड़ना।"],
+  ["कौशल विकास", "युवाओं को कौशल प्रशिक्षण देकर रोजगार व विकास बढ़ाना।"],
+  ["पर्यावरण संरक्षण", "जल संरक्षण और वृक्षारोपण अभियान।"],
+  ["सांस्कृतिक संरक्षण", "कला, संस्कृति और राष्ट्रीय एकता को बढ़ावा देना।"],
+  ["मानव अधिकार", "अन्याय और भ्रष्टाचार के खिलाफ जागरूकता फैलाना।"]
+] as const;
+
 export default function JanSevaSyncStudio({ cards, totalCards = cards.length, token, onRefresh, exportCsv }: JanSevaSyncStudioProps) {
   const [syncBusy, setSyncBusy] = useState(false);
   const [syncStatus, setSyncStatus] = useState("");
@@ -51,6 +88,7 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
   // Card Preview Modal
   const [previewCard, setPreviewCard] = useState<Row | null>(null);
   const [copiedId, setCopiedId] = useState(false);
+  const [previewFlipped, setPreviewFlipped] = useState(false);
   const [masterCards, setMasterCards] = useState<Row[]>([]);
   const [masterTotal, setMasterTotal] = useState(totalCards);
   const [masterLoading, setMasterLoading] = useState(false);
@@ -486,106 +524,167 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
       </section>
 
       {/* 5. OFFICIAL JAN SEVA CARD PREVIEW MODAL */}
-      {previewCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4 my-8">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#C2410C] border border-orange-200">
-                  <CreditCard className="h-5 w-5" />
+      {previewCard && (() => {
+        const cardNo = firstText(previewCard, ["cardNo", "card_no", "janSevaCardNo", "janSevaCardNumber", "cardNumber"]);
+        const name = firstText(previewCard, ["nameOfMember", "name", "memberName", "fullName", "userName"]);
+        const gender = firstText(previewCard, ["gender", "sex"]);
+        const dob = formatDob(
+          previewCard.dob ?? previewCard.dateOfBirth ?? previewCard.date_of_birth ?? previewCard.birthDate
+        );
+        const address = cardAddress(previewCard);
+        const verifyUrl = `https://jansevacard.therpfoundation.org/verify?id=${encodeURIComponent(cardNo)}`;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-3 sm:p-6 backdrop-blur-md overflow-y-auto">
+            <div className="w-full max-w-2xl rounded-[28px] border border-white/30 bg-white p-4 sm:p-6 shadow-2xl my-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-[#C2410C] border border-orange-200">
+                    <CreditCard className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-[#0A192F]">Jan Seva Card Preview</h3>
+                    <p className="text-[10px] text-slate-400">Official front & back design · Master Registry data</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-base font-black text-[#0A192F]">Jan Seva Digital Card Preview</h3>
-                  <p className="text-[11px] text-slate-400">Verified RP Foundation Identity Card</p>
-                </div>
+                <button
+                  onClick={() => { setPreviewCard(null); setPreviewFlipped(false); }}
+                  className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                  aria-label="Close preview"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setPreviewCard(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+
+              <div
+                className="perspective-1000 w-full max-w-[560px] mx-auto cursor-pointer"
+                onClick={() => setPreviewFlipped((value) => !value)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setPreviewFlipped((value) => !value); }}
               >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+                <div className={`relative w-full aspect-[1.586] transition-transform duration-700 transform-style-3d ${previewFlipped ? "rotate-y-180" : ""}`}>
 
-            {/* CARD MOCKUP WITH TRICOLOR PALETTE */}
-            <div className="overflow-hidden rounded-2xl border-2 border-[#0A192F] bg-gradient-to-b from-[#FFFDF9] via-white to-[#F0FDF4] shadow-md p-4 space-y-3 relative">
-              {/* Top Accent Strip */}
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#C2410C] via-white to-[#166534]" />
+                  {/* FRONT */}
+                  <div className="absolute inset-0 backface-hidden overflow-hidden rounded-[22px] border border-slate-300 bg-white shadow-[0_22px_45px_rgba(15,23,42,0.28)] flex flex-col">
+                    <div className="h-[24%] min-h-[72px] bg-gradient-to-r from-[#F97316] via-[#F15A24] to-[#D94801] px-4 sm:px-6 flex items-center gap-3 text-white relative overflow-hidden">
+                      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,.16),transparent_45%,rgba(255,255,255,.08))]" />
+                      <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full bg-white p-1 shadow-lg ring-1 ring-white/70">
+                        <img src="/assets/logo.png" alt="RP Foundation" className="h-full w-full object-contain rounded-full" />
+                      </div>
+                      <div className="relative min-w-0">
+                        <h4 className="text-[18px] sm:text-[25px] font-black tracking-[0.08em] leading-none">RP FOUNDATION</h4>
+                        <p className="mt-1 text-[8px] sm:text-[11px] font-semibold leading-tight">(Rohit Pandit Foundation) <span className="opacity-80">|</span> Reg. No. 14675/05</p>
+                      </div>
+                    </div>
 
-              <div className="flex items-start justify-between gap-3 border-b border-slate-200/80 pb-2.5 pt-1">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-wider text-[#C2410C]">Jan Seva Foundation</p>
-                  <h4 className="text-sm font-black text-[#0A192F]">Jan Seva Identity Smart Card</h4>
-                </div>
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase text-[#166534] border border-emerald-200 flex items-center gap-1">
-                  <ShieldCheck className="h-3 w-3" /> Active / Verified
-                </span>
-              </div>
+                    <div className="relative flex-1 bg-gradient-to-br from-white via-white to-slate-50 px-4 sm:px-7 py-3 sm:py-5 overflow-hidden">
+                      <div className="absolute -right-16 -bottom-20 h-48 w-48 rounded-full border-[20px] border-[#000080]/[0.025]" />
+                      <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border-[14px] border-[#000080]/[0.025]" />
 
-              <div className="flex gap-4 items-center">
-                {/* QR Code */}
-                <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-2 shrink-0 shadow-2xs">
-                  <QRCode
-                    value={`https://jansevacard.therpfoundation.org/verify?id=${encodeURIComponent(firstText(previewCard, ["cardNo", "card_no", "janSevaCardNo"]))}`}
-                    size={84}
-                  />
-                  <span className="mt-1 text-[8px] font-bold text-slate-400">Scan to Verify</span>
-                </div>
+                      <div className="relative flex items-center justify-between gap-3 border-b border-slate-100 pb-2">
+                        <h4 className="text-[19px] sm:text-[27px] font-black text-[#000080] leading-none">जनसेवा कार्ड</h4>
+                        <span className="font-mono text-[12px] sm:text-[17px] font-black tracking-[0.08em] text-[#000080] text-right">{cardNo}</span>
+                      </div>
 
-                {/* Details */}
-                <div className="space-y-1 text-xs">
-                  <p className="font-mono text-sm font-black text-[#0A192F]">
-                    {firstText(previewCard, ["cardNo", "card_no", "janSevaCardNo"])}
-                  </p>
-                  <p className="text-xs font-bold text-slate-800">
-                    {firstText(previewCard, ["name", "nameOfMember", "userId"])}
-                  </p>
-                  <div className="grid grid-cols-2 gap-x-2 text-[10px] text-slate-500 font-medium">
-                    <span>Gender: {firstText(previewCard, ["gender"])}</span>
-                    <span>DOB: {firstText(previewCard, ["dob"])}</span>
-                    <span>Vidhan Sabha: {firstText(previewCard, ["vidhanSabhaNo"])}</span>
-                    <span>District: {firstText(previewCard, ["district"])}</span>
+                      <div className="relative mt-3 space-y-2 text-[10px] sm:text-[13px] text-[#182B49]">
+                        <div className="flex gap-2">
+                          <span className="w-[76px] sm:w-[100px] shrink-0 font-semibold">नाम / Name :</span>
+                          <span className="font-bold truncate">{name}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="w-[76px] sm:w-[100px] shrink-0 font-semibold">लिंग / Gender :</span>
+                          <span className="font-bold">{gender}</span>
+                          <span className="mx-1 text-slate-300">|</span>
+                          <span className="font-semibold">DOB :</span>
+                          <span className="font-bold">{dob}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="w-[76px] sm:w-[100px] shrink-0 font-semibold">पता / Address :</span>
+                          <span className="font-bold leading-snug line-clamp-2">{address}</span>
+                        </div>
+                      </div>
+
+                      <div className="absolute bottom-3 sm:bottom-4 left-4 right-4 sm:left-7 sm:right-7 border-t border-slate-200 pt-2 text-center">
+                        <p className="text-[12px] sm:text-[17px] font-black tracking-[0.04em] text-[#172554]">Toll Free Number : 1800 - 569 - 0991</p>
+                        <p className="mt-1 text-[7px] sm:text-[10px] font-semibold text-slate-500">www.therpfoundation.org &nbsp;|&nbsp; info@therpfoundation.org</p>
+                        <p className="mt-0.5 text-[6.5px] sm:text-[9px] font-medium text-slate-400">Facebook: rpfoundationofficial &nbsp; Instagram: rpfoundationofficial &nbsp; X: rpfoundation15</p>
+                      </div>
+                    </div>
+
+                    <div className="h-2 sm:h-3 bg-gradient-to-r from-[#138808] via-[#159447] to-[#0B6B06]" />
+                  </div>
+
+                  {/* BACK */}
+                  <div className="absolute inset-0 backface-hidden rotate-y-180 overflow-hidden rounded-[22px] border border-slate-300 bg-white shadow-[0_22px_45px_rgba(15,23,42,0.28)] flex flex-col">
+                    <div className="h-2 sm:h-3 bg-gradient-to-r from-[#F97316] via-[#FF9933] to-[#F97316]" />
+                    <div className="relative flex-1 bg-gradient-to-br from-white via-white to-slate-50 px-4 sm:px-7 py-3 sm:py-5 overflow-hidden">
+                      <div className="absolute -right-16 -bottom-20 h-48 w-48 rounded-full border-[20px] border-[#000080]/[0.025]" />
+                      <div className="relative text-center">
+                        <h4 className="text-[16px] sm:text-[23px] font-black text-[#000080]">जनसेवा कार्ड के फायदे :</h4>
+                      </div>
+
+                      <div className="relative mt-2 rounded-xl border border-orange-200/70 bg-white/80 px-3 sm:px-5 py-2 sm:py-3 shadow-sm">
+                        <div className="grid grid-cols-1 gap-1 sm:gap-1.5">
+                          {JAN_SEVA_BENEFITS_HI.map(([label, desc]) => (
+                            <div key={label} className="flex gap-1.5 text-[7.5px] sm:text-[10px] leading-snug text-slate-700">
+                              <span className="font-black text-[#000080] shrink-0">{label}</span>
+                              <span>– {desc}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <p className="absolute bottom-3 sm:bottom-4 left-4 right-4 sm:left-7 sm:right-7 border-t border-slate-200 pt-2 text-center text-[7.5px] sm:text-[10px] font-semibold text-slate-600">
+                        नोट: यह सभी सुविधाएं जन सेवा कार्ड धारकों के लिए निःशुल्क है।
+                      </p>
+                    </div>
+                    <div className="h-2 sm:h-3 bg-gradient-to-r from-[#138808] via-[#159447] to-[#0B6B06]" />
                   </div>
                 </div>
               </div>
 
-              {/* Bottom security strip */}
-              <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-[9px] text-slate-400">
-                <span>Secure Digital Seal: ISO/IEC 27001</span>
-                <span>RP Foundation Welfare Portal</span>
+              <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-semibold text-slate-400">
+                <span className="rounded-full bg-slate-100 px-3 py-1">{previewFlipped ? "Back Side" : "Front Side"}</span>
+                <span>• Tap card to flip</span>
               </div>
-            </div>
 
-            {/* Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
-              <button
-                onClick={() => copyToClipboard(`https://jansevacard.therpfoundation.org/verify?id=${encodeURIComponent(firstText(previewCard, ["cardNo", "card_no", "janSevaCardNo"]))}`)}
-                className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-white transition"
-              >
-                {copiedId ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                <span>{copiedId ? "Copied Link" : "Copy Verify URL"}</span>
-              </button>
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  <div><span className="text-slate-400">Name</span><p className="font-bold text-slate-700 truncate">{name}</p></div>
+                  <div><span className="text-slate-400">DOB</span><p className="font-bold text-slate-700">{dob}</p></div>
+                  <div className="col-span-2"><span className="text-slate-400">Address</span><p className="font-bold text-slate-700 leading-snug">{address}</p></div>
+                </div>
+              </div>
 
-              <div className="flex gap-2">
-                <a
-                  href={`https://jansevacard.therpfoundation.org/verify?id=${encodeURIComponent(firstText(previewCard, ["cardNo", "card_no", "janSevaCardNo"]))}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 rounded-xl bg-[#166534] px-4 py-2 text-xs font-black text-white hover:bg-emerald-700 transition shadow-sm"
-                >
-                  Verify on Portal <ExternalLink className="h-3.5 w-3.5" />
-                </a>
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
                 <button
-                  onClick={() => setPreviewCard(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                  onClick={() => copyToClipboard(verifyUrl)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
                 >
-                  Close
+                  {copiedId ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copiedId ? "Copied" : "Copy Verify URL"}
                 </button>
+
+                <div className="flex gap-2">
+                  <a
+                    href={verifyUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#166534] px-4 py-2 text-xs font-black text-white hover:bg-emerald-700 transition shadow-sm"
+                  >
+                    Verify on Portal <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                  <button
+                    onClick={() => { setPreviewCard(null); setPreviewFlipped(false); }}
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        );
+      })()}
+
