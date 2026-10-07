@@ -23,6 +23,7 @@ type Row = Record<string, unknown>;
 
 interface JanSevaSyncStudioProps {
   cards: Row[];
+  totalCards?: number;
   token: string;
   onRefresh: () => void | Promise<void>;
   exportCsv: (resource: string, filename: string) => void;
@@ -36,7 +37,7 @@ function firstText(row: Row, keys: string[]): string {
   return "—";
 }
 
-export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }: JanSevaSyncStudioProps) {
+export default function JanSevaSyncStudio({ cards, totalCards = cards.length, token, onRefresh, exportCsv }: JanSevaSyncStudioProps) {
   const [syncBusy, setSyncBusy] = useState(false);
   const [syncStatus, setSyncStatus] = useState("");
   const [cardFilter, setCardFilter] = useState<"all" | "pending" | "mirrored" | "approved">("all");
@@ -273,7 +274,7 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
         <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-sm font-black text-[#0A192F]">Jan Seva Smart Identity Registry</h3>
-            <p className="text-xs text-slate-500">Showing {filteredCards.length} of {cards.length} registered cards</p>
+            <p className="text-xs text-slate-500">Showing {filteredCards.length} loaded records · {totalCards.toLocaleString()} total registered cards</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
