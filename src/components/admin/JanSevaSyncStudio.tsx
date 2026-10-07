@@ -688,4 +688,6 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
           </div>
         );
       })()}
-
+    </div>
+  );
+}
