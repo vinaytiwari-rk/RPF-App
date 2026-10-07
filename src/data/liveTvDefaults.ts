@@ -820,4 +820,13 @@ export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
   ['tv-extract-858','Sony BBC Earth HD (1080p)','http://103.185.24.134:3001/SONY-BBC/index.m3u8','','Documentary'],
   ['tv-extract-859','InWonder (1080p)','https://amg00861-terninternation-inwonder-samsungau-1k63k.amagi.tv/playlist/amg00861-terninternation-inwonder-samsungau/playlist.m3u8','','Science'],
   ['tv-custom-ddkisan', 'DD Kisan', 'https://www.youtube.com/live/izXvukZFBtg', 'izXvukZFBtg', 'News'],
+  ['swayam-1', 'Swayam Prabha: CH-1: SANSKAR', 'https://www.youtube.com/live/J77z6Gc9X9c', 'J77z6Gc9X9c', 'Education'],
+  ['swayam-2', 'Swayam Prabha: CH-2: SANVAHAK', 'https://www.youtube.com/live/YI7CMkNDimY', 'YI7CMkNDimY', 'Education'],
+  ['swayam-3', 'Swayam Prabha: CH-3: KAUTILYA', 'https://www.youtube.com/live/nMDtN1mSNZs', 'nMDtN1mSNZs', 'Education'],
+  ['swayam-4', 'Swayam Prabha: CH-4: ARYABHATT', 'https://www.youtube.com/live/FlWOhwRkZHw', 'FlWOhwRkZHw', 'Education'],
+  ['swayam-5', 'Swayam Prabha: CH-5:  SPANDAN', 'https://www.youtube.com/live/JPlbtkNdh5s', 'JPlbtkNdh5s', 'Education'],
+  ['swayam-6', 'Swayam Prabha: CH-7: Vyas', 'https://www.youtube.com/live/R2fdpixKA9Q', 'R2fdpixKA9Q', 'Education'],
+  ['swayam-7', 'Swayam Prabha: CH-8: Aatmagyan', 'https://www.youtube.com/live/k1HJ5vtdI4Q', 'k1HJ5vtdI4Q', 'Education'],
+  ['swayam-8', 'Swayam Prabha: CH-9: AICTE/MIC 01', 'https://www.youtube.com/live/rYtFG0edlhk', 'rYtFG0edlhk', 'Education'],
+  ['swayam-9', 'Swayam Prabha: CH-10: IGNOU', 'https://www.youtube.com/live/Xq-rdCDGY_U', 'Xq-rdCDGY_U', 'Education'],
 ].map(([id,name,url,videoId,category], order) => ({ id, name, url, videoId: videoId || undefined, category, enabled: true, order }));
