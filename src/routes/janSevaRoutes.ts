@@ -82,8 +82,54 @@ export const ensureMirror = async () => {
   )`);
 };
 
+const ensureAuditLogs = async () => {
+  await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255),
+    action VARCHAR(100) NOT NULL,
+    resource VARCHAR(100),
+    resource_id VARCHAR(255),
+    ip_address INET,
+    user_agent TEXT,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)');
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs(resource, resource_id)');
+};
+
+const writeAuditLog = async (req: any, action: string, resource: string, resourceId: string | null, metadata: Record<string, unknown> = {}) => {
+  try {
+    await ensureAuditLogs();
+    const userId = String(req.user?.id || req.user?.userId || '') || null;
+    const forwarded = String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
+    const ip = forwarded || req.ip || null;
+    await pool.query(
+      `INSERT INTO audit_logs (user_id, action, resource, resource_id, ip_address, user_agent, metadata)
+       VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb)`,
+      [userId, action, resource, resourceId, ip, String(req.headers?.['user-agent'] || ''), JSON.stringify(metadata)]
+    );
+  } catch (auditError: any) {
+    console.warn('Audit log write failed:', auditError?.message);
+  }
+};
+
 const extractCardNumber = (record: any): string | null => {
-  const value = record?.cardNo ?? record?.card_no ?? record?.janSevaCardNo ?? record?._id;
+  const value =
+    record?.cardNo ??
+    record?.cardNumber ??
+    record?.card_number ??
+    record?.cardNoNumber ??
+    record?.janSevaCardNo ??
+    record?.janSevaCardNumber ??
+    record?.jan_seva_card_no ??
+    record?.card_id ??
+    record?.cardId ??
+    record?.patient?.cardNo ??
+    record?.patient?.cardNumber ??
+    record?.data?.cardNo ??
+    record?.data?.cardNumber ??
+    record?._id;
   return typeof value === 'string' || typeof value === 'number'
     ? String(value).trim() || null
     : null;
@@ -141,11 +187,42 @@ router.post('/api/admin/cards/import', authenticateToken, requireAdmin, async (r
     const records = req.body?.records;
     if (!Array.isArray(records) || records.length < 1 || records.length > 500)
       return res.status(400).json({ success: false, error: 'Provide 1–500 card records per batch' });
+
     const result = await writeMirror(records, 'admin-import');
-    res.json({ success: true, ...result });
+    await writeAuditLog(req, 'JAN_SEVA_MASTER_IMPORT', 'jan_seva_card_mirror', null, {
+      received: records.length,
+      imported: result.imported,
+      skipped: result.skipped,
+      source: 'admin-master-json'
+    });
+
+    res.json({ success: true, ...result, received: records.length });
   } catch (error: any) {
     console.error('Jan Seva card import failed:', error?.message);
-    res.status(500).json({ success: false, error: 'Card import failed' });
+    await writeAuditLog(req, 'JAN_SEVA_MASTER_IMPORT_FAILED', 'jan_seva_card_mirror', null, {
+      error: error?.message || 'Unknown import error'
+    });
+    res.status(500).json({ success: false, error: error?.message || 'Card import failed' });
+  }
+});
+
+
+// Admin Audit Trail
+router.get('/api/admin/audit-logs', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await ensureAuditLogs();
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 25));
+    const result = await pool.query(
+      `SELECT id, user_id, action, resource, resource_id, ip_address, user_agent, metadata, created_at
+       FROM audit_logs
+       ORDER BY created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+    res.json({ success: true, logs: result.rows });
+  } catch (error: any) {
+    console.error('Audit log retrieval failed:', error?.message);
+    res.status(500).json({ success: false, error: 'Unable to load audit logs' });
   }
 });
 
@@ -645,6 +722,7 @@ router.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, r
     }
 
     cardCache.clear();
+    await writeAuditLog(req, 'JAN_SEVA_CARD_APPROVED', 'card_application', userId, { cardNo });
     res.json({
       success: true,
       cardNo,
@@ -668,6 +746,7 @@ router.post("/api/cards/reject", authenticateToken, requireAdmin, async (req, re
       ["rejected", userId]
     );
     cardCache.clear();
+    await writeAuditLog(req, 'JAN_SEVA_CARD_REJECTED', 'card_application', String(userId || ''), {});
     res.json({ success: true });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
