@@ -617,6 +617,75 @@ export default function AdminHub() {
               {/* 3-WAY UPSTREAM SYNC STUDIO */}
               <JanSevaSyncStudio cards={data.cards} token={token || ""} onRefresh={load} exportCsv={exportCsv} />
 
+              {/* AUDIT TRAIL / ADMIN ACTIVITY */}
+              <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-[#C2410C]" />
+                    <div>
+                      <h3 className="text-sm font-black text-[#0A192F]">Audit Trail & Admin Logs</h3>
+                      <p className="text-[10px] font-medium text-slate-400">
+                        Important administrator actions, imports and approval events
+                      </p>
+                    </div>
+                  </div>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black text-slate-600">
+                    {data.auditLogs.length} recent logs
+                  </span>
+                </div>
+
+                {data.auditLogs.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center text-xs text-slate-400">
+                    No audit events recorded yet.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[680px] text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-200 text-[10px] font-bold uppercase text-slate-400">
+                          <th className="px-3 py-2.5">Time</th>
+                          <th className="px-3 py-2.5">Action</th>
+                          <th className="px-3 py-2.5">Resource</th>
+                          <th className="px-3 py-2.5">Details</th>
+                          <th className="px-3 py-2.5">Admin</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {data.auditLogs.map((log, index) => {
+                          const metadata = log.metadata && typeof log.metadata === "object" ? log.metadata as Row : {};
+                          const detail = Object.entries(metadata)
+                            .filter(([key]) => key !== "source")
+                            .slice(0, 3)
+                            .map(([key, value]) => `${key}: ${String(value)}`)
+                            .join(" · ");
+                          return (
+                            <tr key={String(log.id || index)} className="hover:bg-slate-50/70">
+                              <td className="whitespace-nowrap px-3 py-3 text-slate-500">
+                                {log.created_at ? new Date(String(log.created_at)).toLocaleString() : "—"}
+                              </td>
+                              <td className="px-3 py-3">
+                                <span className="rounded-full bg-orange-50 px-2 py-1 text-[10px] font-black text-[#C2410C] border border-orange-100">
+                                  {String(log.action || "UNKNOWN").replace(/_/g, " ")}
+                                </span>
+                              </td>
+                              <td className="px-3 py-3 font-medium text-slate-600">
+                                {String(log.resource || "—")}
+                              </td>
+                              <td className="max-w-[360px] px-3 py-3 text-[10px] text-slate-500">
+                                {detail || "—"}
+                              </td>
+                              <td className="px-3 py-3 font-mono text-[10px] text-slate-400">
+                                {String(log.user_id || "system")}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+
               {/* PEOPLE & ACCOUNTS MANAGEMENT STUDIO */}
               <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
