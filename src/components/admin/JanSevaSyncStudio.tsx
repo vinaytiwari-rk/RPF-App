@@ -38,12 +38,36 @@ function firstText(row: Row, keys: string[]): string {
   return "—";
 }
 
+function scalarText(value: unknown): string {
+  if (value === undefined || value === null) return "—";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    const text = String(value).trim();
+    return text || "—";
+  }
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    for (const key of ["value", "date", "dob", "dateOfBirth", "date_of_birth", "$date", "formatted", "label"]) {
+      const nested = scalarText(obj[key]);
+      if (nested !== "—" && !nested.includes("[object Object]")) return nested;
+    }
+  }
+  return "—";
+}
+
 function formatDob(value: unknown): string {
-  if (value === undefined || value === null || !String(value).trim()) return "—";
-  const raw = String(value).trim();
+  const raw = scalarText(value);
+  if (raw === "—") return "—";
   const match = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
   if (match) return `${match[3].padStart(2, "0")}-${match[2].padStart(2, "0")}-${match[1]}`;
   return raw;
+}
+
+function firstScalar(row: Row, keys: string[]): string {
+  for (const key of keys) {
+    const value = scalarText(row[key]);
+    if (value !== "—") return value;
+  }
+  return "—";
 }
 
 function cardAddress(row: Row): string {
@@ -526,12 +550,15 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
 
       {/* 5. OFFICIAL JAN SEVA CARD PREVIEW MODAL */}
       {previewCard && (() => {
-        const cardNo = firstText(previewCard, ["cardNo", "card_no", "janSevaCardNo", "janSevaCardNumber", "cardNumber"]);
-        const name = firstText(previewCard, ["nameOfMember", "name", "memberName", "fullName", "userName"]);
-        const gender = firstText(previewCard, ["gender", "sex"]);
-        const dob = formatDob(
-          previewCard.dob ?? previewCard.dateOfBirth ?? previewCard.date_of_birth ?? previewCard.birthDate
-        );
+        const cardNo = firstScalar(previewCard, ["cardNo", "card_no", "janSevaCardNo", "janSevaCardNumber", "cardNumber"]);
+        const name = firstScalar(previewCard, ["nameOfMember", "name", "memberName", "fullName", "userName"]);
+        const gender = firstScalar(previewCard, ["gender", "sex"]);
+        const dob = formatDob(previewCard.dob ?? previewCard.dateOfBirth ?? previewCard.date_of_birth ?? previewCard.birthDate);
+        const vidhanSabha = firstScalar(previewCard, [
+          "vidhanSabhaNo", "vidhan_sabha_no", "vidhanSabhaNumber", "vidhan_sabha_number",
+          "assemblyConstituencyNo", "assembly_constituency_no", "assemblyNumber",
+          "vidhanSabha", "vidhan_sabha"
+        ]);
         const address = cardAddress(previewCard);
         const verifyUrl = `https://jansevacard.therpfoundation.org/verify?id=${encodeURIComponent(cardNo)}`;
 
@@ -588,7 +615,7 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
                         <span className="font-mono text-[12px] sm:text-[17px] font-black tracking-[0.08em] text-[#000080] text-right">{cardNo}</span>
                       </div>
 
-                      <div className="relative mt-3 space-y-2 text-[10px] sm:text-[13px] text-[#182B49]">
+                      <div className="relative mt-3 pr-[76px] sm:pr-[94px] space-y-2 text-[10px] sm:text-[13px] text-[#182B49]">
                         <div className="flex gap-2">
                           <span className="w-[76px] sm:w-[100px] shrink-0 font-semibold">नाम / Name :</span>
                           <span className="font-bold truncate">{name}</span>
@@ -600,10 +627,18 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
                           <span className="font-semibold">DOB :</span>
                           <span className="font-bold">{dob}</span>
                         </div>
+                        <div className="flex gap-2">
+                          <span className="w-[76px] sm:w-[100px] shrink-0 font-semibold">विधान सभा :</span>
+                          <span className="font-bold truncate">{vidhanSabha}</span>
+                        </div>
                         <div className="flex items-start gap-2">
                           <span className="w-[76px] sm:w-[100px] shrink-0 font-semibold">पता / Address :</span>
                           <span className="font-bold leading-snug line-clamp-2">{address}</span>
                         </div>
+                      </div>
+
+                      <div className="absolute right-4 sm:right-7 top-[39%] rounded-lg bg-white p-1 shadow-md ring-1 ring-slate-200">
+                        <QRCode value={verifyUrl} size={64} bgColor="#FFFFFF" fgColor="#000000" level="M" />
                       </div>
 
                       <div className="absolute bottom-3 sm:bottom-4 left-4 right-4 sm:left-7 sm:right-7 border-t border-slate-200 pt-2 text-center">
@@ -654,6 +689,7 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
                 <div className="grid grid-cols-2 gap-2 text-[10px]">
                   <div><span className="text-slate-400">Name</span><p className="font-bold text-slate-700 truncate">{name}</p></div>
                   <div><span className="text-slate-400">DOB</span><p className="font-bold text-slate-700">{dob}</p></div>
+                  <div><span className="text-slate-400">Vidhan Sabha</span><p className="font-bold text-slate-700 truncate">{vidhanSabha}</p></div>
                   <div className="col-span-2"><span className="text-slate-400">Address</span><p className="font-bold text-slate-700 leading-snug">{address}</p></div>
                 </div>
               </div>
