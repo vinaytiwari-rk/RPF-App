@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import QRCode from "react-qr-code";
+import { RP_FOUNDATION_LOGO } from "../../assets/foundationBrand";
 import {
   CreditCard,
   ExternalLink,
@@ -570,7 +571,7 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
                     <div className="h-[24%] min-h-[72px] bg-gradient-to-r from-[#F97316] via-[#F15A24] to-[#D94801] px-4 sm:px-6 flex items-center gap-3 text-white relative overflow-hidden">
                       <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,.16),transparent_45%,rgba(255,255,255,.08))]" />
                       <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full bg-white p-1 shadow-lg ring-1 ring-white/70">
-                        <img src="/assets/logo.png" alt="RP Foundation" className="h-full w-full object-contain rounded-full" />
+                        <img src={RP_FOUNDATION_LOGO} alt="RP Foundation" className="h-full w-full object-contain rounded-full" />
                       </div>
                       <div className="relative min-w-0">
                         <h4 className="text-[18px] sm:text-[25px] font-black tracking-[0.08em] leading-none">RP FOUNDATION</h4>
