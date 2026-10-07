@@ -65,6 +65,7 @@ export default function LiveTV() {
   const hi = lang === "hi";
 
   const [search, setSearch] = useState("");
+  const [visibleCount, setVisibleCount] = useState(40);
   const [channels, setChannels] = useState<LiveTvChannel[]>(() => canonical(LIVE_TV_DEFAULTS));
   const [active, setActive] = useState<LiveTvChannel | null>(null);
   const [serverControlled, setServerControlled] = useState(false);
@@ -94,6 +95,7 @@ export default function LiveTV() {
   }, []);
 
   const visible = useMemo(() => channels.filter((c) => c.enabled !== false), [channels]);
+  useEffect(() => { setVisibleCount(40); }, [search]);
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q ? visible.filter((c) => `${c.name} ${c.category}`.toLowerCase().includes(q)) : visible;
@@ -120,7 +122,7 @@ export default function LiveTV() {
   // Initialize video.js player for non‑YouTube streams
   useEffect(() => {
     if (active && videoRef.current && !embed) {
-      const srcUrl = `/api/iptv/proxy?url=${encodeURIComponent(active.url)}`;
+      const srcUrl = active.url;
       const player = videojs(videoRef.current, {
         fluid: true,
         autoplay: true,
@@ -228,7 +230,7 @@ export default function LiveTV() {
 
           {/* Channels Grid */}
           <div className="grid gap-3.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((c) => {
+            {filtered.slice(0, visibleCount).map((c) => {
               const v = getId(c);
               const thumb = v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null;
               return (
