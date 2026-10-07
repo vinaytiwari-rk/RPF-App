@@ -47,6 +47,7 @@ type AdminState = {
   users: Row[];
   volunteers: Row[];
   cards: Row[];
+  cardTotal: number;
   announcements: Row[];
   grievances: Row[];
   blood: Row[];
@@ -67,6 +68,7 @@ const emptyState: AdminState = {
   users: [],
   volunteers: [],
   cards: [],
+  cardTotal: 0,
   announcements: [],
   grievances: [],
   blood: [],
@@ -174,6 +176,13 @@ export default function AdminHub() {
       console.warn("CMS fetch warning:", e);
     }
 
+    try {
+      const statsRes = await axios.get("/api/cards/stats", { headers: authHeaders(token), timeout: 10000 });
+      next.cardTotal = Number(statsRes.data?.stats?.totalMirrored || 0) + Number(statsRes.data?.stats?.totalLocal || 0);
+    } catch (e) {
+      next.cardTotal = next.cards.length;
+    }
+
     setData(next);
     setLoading(false);
   }, [token, hasAdminAccess]);
@@ -187,7 +196,7 @@ export default function AdminHub() {
     () => ({
       users: data.users.length,
       volunteers: data.volunteers.length,
-      cards: data.cards.length,
+      cards: data.cardTotal || data.cards.length,
       announcements: data.announcements.length,
       grievances: data.grievances.length,
       blood: data.blood.length,
