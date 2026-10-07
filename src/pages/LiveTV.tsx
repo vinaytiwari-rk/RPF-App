@@ -241,7 +241,7 @@ export default function LiveTV() {
           <div className="grid gap-3.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.slice(0, visibleCount).map((c) => {
               const v = getId(c);
-              const thumb = v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null;
+              const thumb = c.logo || (v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null);
               return (
                 <button
                   key={c.id}
