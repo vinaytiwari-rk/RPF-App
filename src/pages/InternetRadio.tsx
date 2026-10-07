@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { Radio, Play, Pause, Volume2, VolumeX, Search, Signal, WifiOff, X } from 'lucide-react';
 import BrandLoader from '../components/BrandLoader';
 import rawChannels from '../data/akashvaniChannels.json';
+import privateFm from '../data/privateFmChannels.json';
 import { useMedia } from '../context/MediaContext';
 
 interface RadioStation {
@@ -23,10 +24,12 @@ const REGIONS = [
   { id: 'Mumbai', name: 'Mumbai', nameHi: 'मुंबई' },
   { id: 'Kolkata', name: 'Kolkata', nameHi: 'कोलकाता' },
   { id: 'Vividh', name: 'Vividh Bharati', nameHi: 'विविध भारती' },
+  { id: 'Private', name: 'Private FM (Global)', nameHi: 'निजी ऍफ़एम' },
   { id: 'Other', name: 'Other Regions', nameHi: 'अन्य क्षेत्र' },
 ];
 
-const fallbackStations = rawChannels as RadioStation[];
+const allStationsRaw = [...rawChannels, ...privateFm];
+const fallbackStations = allStationsRaw as RadioStation[];
 const validStations = (v: unknown): v is RadioStation[] =>
   Array.isArray(v) && v.every((s: any) => s && typeof s.name === 'string' && typeof s.url === 'string');
 
@@ -39,6 +42,7 @@ function getRegionId(name: string) {
   if (n.includes('vividh') || n.includes('vbs')) return 'Vividh';
   if (['indore', 'gwalior', 'jabalpur', 'chhindwara', 'sagar', 'rewa', 'ratlam', 'shahdol', 'balaghat'].some((c) => n.includes(c))) return 'MP';
   if (['lucknow', 'kanpur', 'varanasi', 'mathura', 'najibabad', 'obra', 'rampur', 'allahabad', 'prayagraj', 'gorakhpur', 'agra'].some((c) => n.includes(c))) return 'UP';
+  if (name.toLowerCase().includes('radio') || name.toLowerCase().includes('fm') || name.toLowerCase().includes('hit')) return 'Private';
   return 'Other';
 }
 
