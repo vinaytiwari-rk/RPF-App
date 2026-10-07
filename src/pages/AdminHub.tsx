@@ -521,9 +521,14 @@ export default function AdminHub() {
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-2">
                     <Activity className="h-5 w-5 text-[#C2410C]" />
-                    <h2 className="text-sm font-black text-[#0A192F]">
-                      System & Infrastructure Health Monitor
-                    </h2>
+                    <div>
+                      <h2 className="text-sm font-black text-[#0A192F]">
+                        System & Infrastructure Health Monitor
+                      </h2>
+                      <p className="mt-0.5 text-[10px] font-medium text-slate-400">
+                        Simple operational overview for administrators
+                      </p>
+                    </div>
                   </div>
                   <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase text-[#166534] border border-emerald-200 flex items-center gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-[#166534] animate-pulse"></span>
@@ -534,38 +539,38 @@ export default function AdminHub() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-1">
                     <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
-                      <span>API Gateway</span>
-                      <Server className="h-4 w-4 text-[#166534]" />
+                      <span>System Status</span>
+                      <CheckCircle2 className="h-4 w-4 text-[#166534]" />
                     </div>
-                    <p className="text-base font-black text-[#0A192F]">HTTP 200 OK</p>
-                    <p className="text-[10px] text-slate-500 font-medium">Latency &lt; 40ms</p>
+                    <p className="text-base font-black text-[#0A192F]">Operational</p>
+                    <p className="text-[10px] text-slate-500 font-medium">Application services available</p>
                   </div>
 
                   <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-1">
                     <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
-                      <span>PostgreSQL DB</span>
+                      <span>API Service</span>
+                      <Server className="h-4 w-4 text-[#166534]" />
+                    </div>
+                    <p className="text-base font-black text-[#0A192F]">Online</p>
+                    <p className="text-[10px] text-slate-500 font-medium">Admin services available</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-1">
+                    <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
+                      <span>Database</span>
                       <Database className="h-4 w-4 text-[#1E3A8A]" />
                     </div>
                     <p className="text-base font-black text-[#0A192F]">Connected</p>
-                    <p className="text-[10px] text-slate-500 font-medium">20 Active Pool Connections</p>
+                    <p className="text-[10px] text-slate-500 font-medium">Application data service</p>
                   </div>
 
                   <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-1">
                     <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
-                      <span>Authentication</span>
+                      <span>Security</span>
                       <ShieldCheck className="h-4 w-4 text-[#C2410C]" />
                     </div>
-                    <p className="text-base font-black text-[#0A192F]">JWT Active</p>
-                    <p className="text-[10px] text-slate-500 font-medium">Role-Based Guard Enabled</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-1">
-                    <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
-                      <span>Sync Engine</span>
-                      <CheckCircle2 className="h-4 w-4 text-[#166534]" />
-                    </div>
-                    <p className="text-base font-black text-[#0A192F]">3-Way Synced</p>
-                    <p className="text-[10px] text-slate-500 font-medium">Live Mirror Ingest Ready</p>
+                    <p className="text-base font-black text-[#0A192F]">Protected</p>
+                    <p className="text-[10px] text-slate-500 font-medium">Administrator access controls enabled</p>
                   </div>
                 </div>
               </section>
