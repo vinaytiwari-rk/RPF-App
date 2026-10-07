@@ -57,22 +57,23 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
     setSyncBusy(true);
     setSyncStatus("Reading and validating JSON file...");
     try {
-      if (file.size > 25 * 1024 * 1024) throw new Error("Maximum file size is 25 MB.");
+      const MAX_MASTER_FILE_SIZE = 200 * 1024 * 1024;
+      if (file.size > MAX_MASTER_FILE_SIZE) throw new Error("Maximum master file size is 200 MB.");
       const text = await file.text();
       const parsed: unknown = JSON.parse(text);
       const records: unknown = Array.isArray(parsed) ? parsed : (parsed as any)?.patients;
       if (!Array.isArray(records)) throw new Error("File must be a JSON array of card records.");
 
       let imported = 0, skipped = 0;
-      for (let i = 0; i < records.length; i += 200) {
-        const batch = records.slice(i, i + 200);
+      for (let i = 0; i < records.length; i += 100) {
+        const batch = records.slice(i, i + 100);
         const res = await axios.post("/api/admin/cards/import", { records: batch }, {
           headers: { Authorization: `Bearer ${token}` },
           timeout: 30000
         });
         imported += res.data?.imported || 0;
         skipped += res.data?.skipped || 0;
-        setSyncStatus(`Importing: ${Math.min(i + 200, records.length)} / ${records.length} records processed (${imported} imported, ${skipped} skipped).`);
+        setSyncStatus(`Importing: ${Math.min(i + 100, records.length)} / ${records.length} records processed (${imported} imported, ${skipped} skipped).`);
       }
 
       toast.success(`Import complete: ${imported} records imported, ${skipped} skipped.`);
@@ -200,7 +201,7 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
           </button>
         </div>
         {syncStatus && <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 text-xs font-semibold text-emerald-800">{syncStatus}</div>}
-        <p className="text-[11px] leading-5 text-slate-400">JSON may be a direct array of records or an object containing a <code>patients</code> array. Records are imported into the local verified registry in batches.</p>
+        <p className="text-[11px] leading-5 text-slate-400">JSON may be a direct array of records or an object containing a <code>patients</code> array. Records are imported into the local verified registry in small cPanel-safe batches.</p>
       </section>
 
       {/* 3. QUICK REGISTRY LOOKUP & VERIFY BOX */}
@@ -296,7 +297,7 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
                 onClick={() => setCardFilter("mirrored")}
                 className={`rounded-lg px-3 py-1 transition ${cardFilter === "mirrored" ? "bg-[#0A192F] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"}`}
               >
-                Mirrored API
+                Master Registry
               </button>
             </div>
 
@@ -338,7 +339,7 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
                       {status}
                     </span>
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600 border border-slate-200">
-                      {source.includes("external") ? "api.therpfoundation.org" : source}
+                      {source.includes("external") ? "External" : source}
                     </span>
                   </div>
 
