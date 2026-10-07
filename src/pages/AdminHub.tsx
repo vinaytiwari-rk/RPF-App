@@ -354,7 +354,8 @@ export default function AdminHub() {
 
   // Export CSV Handler
   const exportCsv = (resource: string, filename: string) => {
-    const targetData = data[resource as keyof AdminState] || [];
+    const key = resource as Exclude<keyof AdminState, "cardTotal">;
+    const targetData: Row[] = Array.isArray(data[key]) ? data[key] : [];
     if (!targetData.length) {
       toast.error("No data available to export.");
       return;
