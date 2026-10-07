@@ -29,7 +29,7 @@ type LegalModalType = "terms" | "privacy" | "disclaimer" | "support" | "about" |
 export default function Profile() {
   const navigate = useNavigate();
   const { lang } = useOutletContext<{ lang: Lang }>();
-  const { user, language, logout } = useAuth();
+    const { user, isAuthenticated, language, logout } = useAuth();
   const { settings } = useApp();
   const hi = lang === "hi" || language === "hi";
   const name = user?.name?.trim() || (hi ? "नागरिक" : "Citizen");
@@ -132,6 +132,37 @@ export default function Profile() {
     <main className="min-h-full bg-[#FFF7E8] pb-28 text-[#243B32] font-sans">
       <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 space-y-5">
         
+        {/* Unauthenticated Login Card */}
+        {!isAuthenticated && (
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-[24px] border border-[#D8E8DB] bg-white p-6 shadow-sm text-center"
+          >
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#167C5A] via-[#FFF7E8] to-[#D97706]" />
+            <div className="flex justify-center mb-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 text-[#D97706]">
+                <User className="h-8 w-8" />
+              </div>
+            </div>
+            <h2 className="text-xl font-bold text-[#243B32]">
+              {hi ? "खाता साइन इन करें" : "Sign In to Your Account"}
+            </h2>
+            <p className="mt-2 text-sm text-slate-500 mb-6">
+              {hi ? "जन सेवा कार्ड, व्यक्तिगत गतिविधियों और अन्य सुविधाओं तक पहुंचने के लिए साइन इन करें।" : "Sign in to access your Jan Seva Card, personal activity, and other features."}
+            </p>
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#167C5A] py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#12664A] transition active:scale-[0.98]"
+            >
+              <LogIn className="h-5 w-5" />
+              {hi ? "साइन इन / रजिस्टर" : "Sign In / Register"}
+            </button>
+          </motion.section>
+        )}
+        
+        {isAuthenticated && (
+          <>
         {/* User Identity Header Card */}
         <motion.section 
           initial={{ opacity: 0, y: 12 }} 
@@ -313,6 +344,9 @@ export default function Profile() {
           </div>
         </section>
 
+          </>
+        )}
+
         {/* Legal, Governance & Policy Options */}
         <section className="space-y-2.5">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-[#243B32] px-1 flex items-center justify-between">
@@ -340,6 +374,8 @@ export default function Profile() {
           </div>
         </section>
 
+        {isAuthenticated && (
+        <>
         {/* Logout Section */}
         <section className="pt-2">
           <button
@@ -350,6 +386,8 @@ export default function Profile() {
             {hi ? "खाते से लॉग आउट करें" : "Log Out of Account"}
           </button>
         </section>
+        </>
+        )}
 
         <p className="text-center text-[10px] font-medium text-slate-400 pt-2">
           RP Foundation Seva App • Samahit Portal • Built with Pride
