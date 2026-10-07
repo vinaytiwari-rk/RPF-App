@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { 
+  LogIn,
   Award, ChevronRight, HeartHandshake, IdCard, Mail, Phone, Settings, 
   ShieldCheck, User, LogOut, FileText, Camera, BadgeCheck,
   Lock, AlertTriangle, HelpCircle, Info, X, ExternalLink,
