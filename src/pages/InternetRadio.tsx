@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { Radio, Play, Pause, Volume2, VolumeX, Search, Signal, WifiOff, X } from 'lucide-react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import { Tv, Radio, Play, Pause, Volume2, VolumeX, Search, Signal, WifiOff, X } from 'lucide-react';
 import BrandLoader from '../components/BrandLoader';
 import rawChannels from '../data/akashvaniChannels.json';
 import privateFm from '../data/privateFmChannels.json';
@@ -61,6 +61,7 @@ function SoundBars() {
 }
 
 export default function InternetRadio() {
+  const navigate = useNavigate();
   const { lang } = useOutletContext<{ lang: 'en' | 'hi' }>();
   const hi = lang === 'hi';
 
@@ -129,7 +130,26 @@ export default function InternetRadio() {
     <div className="min-h-full bg-[#f8f7f4] pb-10">
       <style>{`@keyframes soundBar{from{transform:scaleY(.3)}to{transform:scaleY(1)}}`}</style>
       <div className="mx-auto max-w-3xl px-3.5 py-5 sm:px-6 space-y-4">
-        <div className="flex items-center gap-3">
+                  {/* Media Type Toggle */}
+          <div className="flex justify-center mb-2">
+            <div className="inline-flex items-center rounded-full bg-slate-200/60 p-1 shadow-inner backdrop-blur-md border border-slate-300/30">
+              <button
+                onClick={() => navigate('/live-tv')}
+                className="flex items-center gap-1.5 rounded-full px-5 py-2 text-[11px] font-black uppercase tracking-wider text-slate-500 hover:text-slate-700 transition"
+              >
+                <Tv className="h-4 w-4" />
+                Live TV
+              </button>
+              <button
+                className="flex items-center gap-1.5 rounded-full px-5 py-2 text-[11px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-orange-500 to-amber-500 shadow-sm transition"
+              >
+                <Radio className="h-4 w-4" />
+                Radio
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FF9933]/10">
             <Radio className="h-6 w-6 text-[#FF9933]" />
           </div>

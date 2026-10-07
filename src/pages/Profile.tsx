@@ -113,13 +113,12 @@ export default function Profile() {
     return (volunteerDutyHours * 10) + (volunteerReportsCount * 15);
   }, [volunteerDutyHours, volunteerReportsCount]);
 
-  const accountItems = useMemo(() => [
-    { icon: User, title: hi ? "प्रोफाइल संपादित करें" : "Edit Profile", sub: hi ? "अपनी व्यक्तिगत जानकारी अपडेट करें" : "Update your personal information", route: "/profile?edit=1", color: "bg-[#245D45]" },
-    { icon: Award, title: hi ? "मेरे प्रमाणपत्र" : "My Certificates", sub: hi ? "सेवा एवं भागीदारी प्रमाणपत्र" : "Certificates of service & impact", route: "/my-certificates", color: "bg-[#7C5C9E]" },
-    { icon: Settings, title: hi ? "ऐप सेटिंग्स" : "App Settings", sub: hi ? "भाषा, सूचनाएं और ऐप प्राथमिकताएं" : "Language, notifications & preferences", route: "/settings", color: "bg-[#245D45]" },
-    { icon: ShieldCheck, title: hi ? "ब्राउज़र सेटिंग्स" : "Browser Settings", sub: hi ? "साइट, डाउनलोड, डेटा, अनुमति और टैब नियंत्रण" : "Site, downloads, data, permissions & tabs", route: "/settings?browser=1", color: "bg-[#167C5A]", browserSettings: true },
-    { icon: HelpCircle, title: hi ? "सूचनाएं" : "Notifications", sub: hi ? "महत्वपूर्ण अपडेट और घोषणाएं" : "Important updates and announcements", route: "/notifications", color: "bg-[#167C5A]" },
-  ], [hi]);
+      const accountItems = useMemo(() => [
+      { icon: Sparkles, title: hi ? "मेरी गतिविधियाँ" : "My Activity", sub: hi ? "आपके कार्य और प्रभाव" : "Your actions and impact", route: "/activity", color: "bg-[#D97706]" },
+      { icon: User, title: hi ? "प्रोफ़ाइल संपादित करें" : "Edit Profile", sub: hi ? "अपनी व्यक्तिगत जानकारी अपडेट करें" : "Update your personal information", route: "/profile?edit=1", color: "bg-[#245D45]" },
+      { icon: Award, title: hi ? "मेरे प्रमाणपत्र" : "My Certificates", sub: hi ? "सेवा एवं भागीदारी प्रमाणपत्र" : "Certificates of service & impact", route: "/my-certificates", color: "bg-[#7C5C9E]" },
+      { icon: Settings, title: hi ? "ऐप सेटिंग्स" : "App Settings", sub: hi ? "भाषा, सूचनाएं और ऐप प्राथमिकताएं" : "Language, notifications & preferences", route: "/settings", color: "bg-[#245D45]" },
+    ], [hi]);
 
   const legalItems = [
     { id: "terms" as const, icon: FileText, title: hi ? "नियम एवं शर्तें" : "Terms & Conditions", sub: hi ? "समाहित उपयोग के नियम व शर्तें" : "Terms governing Samahit usage" },
@@ -293,7 +292,7 @@ export default function Profile() {
           </h2>
 
           <div className="grid grid-cols-2 gap-3">
-            {accountItems.map(({ icon: Icon, title, sub, route, color, browserSettings }) => (
+            {accountItems.map(({ icon: Icon, title, sub, route, color, browserSettings }: any) => (
               <button
                 key={title}
                 onClick={() => browserSettings ? void openBrowserSettings(navigate) : navigate(route)}

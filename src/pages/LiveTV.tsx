@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { ArrowLeft, Play, Search, Tv, Sparkles, ShieldCheck, Maximize2, ExternalLink } from "lucide-react";
+import { RadioReceiver,  ArrowLeft, Play, Search, Tv, Sparkles, ShieldCheck, Maximize2, ExternalLink  } from "lucide-react";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
 import { openExternalLink } from "../utils/browser";
 
@@ -204,6 +204,25 @@ export default function LiveTV() {
       ) : (
         /* Main Channels Directory View */
         <div className="mx-auto max-w-4xl px-4 py-5 space-y-4 text-[#14213D]">
+                    {/* Media Type Toggle */}
+          <div className="flex justify-center mb-2">
+            <div className="inline-flex items-center rounded-full bg-slate-200/60 p-1 shadow-inner backdrop-blur-md border border-slate-300/30">
+              <button
+                className="flex items-center gap-1.5 rounded-full px-5 py-2 text-[11px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-orange-500 to-amber-500 shadow-sm transition"
+              >
+                <Tv className="h-4 w-4" />
+                Live TV
+              </button>
+              <button
+                onClick={() => navigate('/internet-radio')}
+                className="flex items-center gap-1.5 rounded-full px-5 py-2 text-[11px] font-black uppercase tracking-wider text-slate-500 hover:text-slate-700 transition"
+              >
+                <RadioReceiver className="h-4 w-4" />
+                Radio
+              </button>
+            </div>
+          </div>
+
           {/* Header Card */}
           <div className="border border-amber-200 bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] rounded-[24px] p-5 sm:p-6 text-[#243B32] shadow-sm relative overflow-hidden space-y-2">
             <div className="flex items-center justify-between">
