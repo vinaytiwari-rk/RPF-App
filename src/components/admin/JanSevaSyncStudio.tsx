@@ -73,7 +73,15 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
         timeout: 15000
       });
 
-      setMasterCards(Array.isArray(res.data?.records) ? res.data.records : []);
+      const rawRecords = Array.isArray(res.data?.records) ? res.data.records : [];
+      const normalized = rawRecords.map((item: any) => ({
+        ...((item?.record && typeof item.record === "object") ? item.record : {}),
+        card_no: item?.card_no,
+        cardNo: item?.card_no,
+        source: item?.source || "admin-import",
+        synced_at: item?.synced_at
+      }));
+      setMasterCards(normalized);
       setMasterTotal(Number(res.data?.total || 0));
       setMasterPage(Number(res.data?.page || page));
     } catch (err: any) {
