@@ -51,6 +51,46 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
   // Card Preview Modal
   const [previewCard, setPreviewCard] = useState<Row | null>(null);
   const [copiedId, setCopiedId] = useState(false);
+  const [masterCards, setMasterCards] = useState<Row[]>([]);
+  const [masterTotal, setMasterTotal] = useState(totalCards);
+  const [masterLoading, setMasterLoading] = useState(false);
+  const [masterPage, setMasterPage] = useState(1);
+  const MASTER_PAGE_SIZE = 100;
+
+  // Master Registry is loaded server-side in small pages to protect cPanel/mobile memory.
+  const loadMasterRegistry = useCallback(async (page = 1, search = "") => {
+    if (!token) return;
+    setMasterLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(MASTER_PAGE_SIZE)
+      });
+      if (search.trim()) params.set("search", search.trim());
+
+      const res = await axios.get(`/api/admin/cards/mirror?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 15000
+      });
+
+      setMasterCards(Array.isArray(res.data?.records) ? res.data.records : []);
+      setMasterTotal(Number(res.data?.total || 0));
+      setMasterPage(Number(res.data?.page || page));
+    } catch (err: any) {
+      setMasterCards([]);
+      toast.error(err?.response?.data?.error || "Unable to load Master Registry.");
+    } finally {
+      setMasterLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (cardFilter !== "all" && cardFilter !== "mirrored") return;
+    const timer = window.setTimeout(() => {
+      void loadMasterRegistry(1, searchQuery);
+    }, searchQuery.trim() ? 350 : 0);
+    return () => window.clearTimeout(timer);
+  }, [cardFilter, searchQuery, loadMasterRegistry]);
 
   // Import JSON Backup File
   const handleImportJson = async (file?: File) => {
@@ -154,15 +194,13 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
     }
   };
 
-  // Filter rows
+  // Master Registry uses server-side filtering; applications remain local.
   const filteredCards = useMemo(() => {
+    if (cardFilter === "all" || cardFilter === "mirrored") return masterCards;
     return cards.filter(row => {
       const status = String(row.status || "").toLowerCase();
-      const source = String(row.source || "").toLowerCase();
-
       if (cardFilter === "pending" && status !== "pending") return false;
       if (cardFilter === "approved" && status !== "approved") return false;
-      if (cardFilter === "mirrored" && !source.includes("external") && !source.includes("import") && !source.includes("mirror")) return false;
 
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase().trim();
@@ -172,7 +210,7 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
       const district = String(row.district || row.address || "").toLowerCase();
       return cardNo.includes(q) || name.includes(q) || phone.includes(q) || district.includes(q);
     });
-  }, [cards, cardFilter, searchQuery]);
+  }, [cards, masterCards, cardFilter, searchQuery]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -274,7 +312,7 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
         <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-sm font-black text-[#0A192F]">Jan Seva Smart Identity Registry</h3>
-            <p className="text-xs text-slate-500">Showing {filteredCards.length} loaded records · {totalCards.toLocaleString()} total registered cards</p>
+            <p className="text-xs text-slate-500">Showing {filteredCards.length} loaded records · {(cardFilter === "all" || cardFilter === "mirrored" ? masterTotal : filteredCards.length).toLocaleString()} total records</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -284,7 +322,7 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
                 onClick={() => setCardFilter("all")}
                 className={`rounded-lg px-3 py-1 transition ${cardFilter === "all" ? "bg-white text-[#0A192F] shadow-xs" : "text-slate-600 hover:text-slate-900"}`}
               >
-                All ({cards.length})
+                All ({masterTotal.toLocaleString()})
               </button>
               <button
                 onClick={() => setCardFilter("pending")}
@@ -405,12 +443,38 @@ export default function JanSevaSyncStudio({ cards, totalCards = cards.length, to
             );
           })}
 
-          {!filteredCards.length && (
+          {masterLoading && (cardFilter === "all" || cardFilter === "mirrored") && (
+            <div className="p-10 text-center text-slate-400 text-xs">Loading Master Registry records...</div>
+          )}
+
+          {!masterLoading && !filteredCards.length && (
             <div className="p-12 text-center text-slate-400 text-xs">
               No Jan Seva cards matching your search or filter.
             </div>
           )}
         </div>
+
+        {(cardFilter === "all" || cardFilter === "mirrored") && masterTotal > MASTER_PAGE_SIZE && (
+          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3">
+            <button
+              disabled={masterLoading || masterPage <= 1}
+              onClick={() => void loadMasterRegistry(masterPage - 1, searchQuery)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="text-[10px] font-bold text-slate-400">
+              Page {masterPage} · {Math.min(masterPage * MASTER_PAGE_SIZE, masterTotal).toLocaleString()} / {masterTotal.toLocaleString()}
+            </span>
+            <button
+              disabled={masterLoading || masterPage * MASTER_PAGE_SIZE >= masterTotal}
+              onClick={() => void loadMasterRegistry(masterPage + 1, searchQuery)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </section>
 
       {/* 5. OFFICIAL JAN SEVA CARD PREVIEW MODAL */}
