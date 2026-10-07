@@ -284,7 +284,15 @@ export default function LiveTV() {
                 </button>
               );
             })}
-          </div>
+                    </div>
+
+          {visibleCount < filtered.length && (
+            <div className="flex justify-center mt-6 mb-4">
+              <button onClick={() => setVisibleCount(v => v + 40)} className="px-6 py-2.5 bg-[#FF9933]/10 text-[#FF9933] font-bold text-sm rounded-full border border-[#FF9933]/30 hover:bg-[#FF9933]/20 transition-colors shadow-sm">
+                Load More Channels ({filtered.length - visibleCount} left)
+              </button>
+            </div>
+          )}
 
           {!filtered.length && (
             <div className="py-12 text-center text-xs font-medium text-slate-500 bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-6 shadow-2xs">
