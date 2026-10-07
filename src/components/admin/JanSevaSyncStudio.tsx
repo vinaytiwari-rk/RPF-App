@@ -29,28 +29,6 @@ import {
 
 type Row = Record<string, unknown>;
 
-interface IntegrationHealth {
-  apiServer?: {
-    url: string;
-    status: string;
-    latencyMs: number;
-    httpStatus: number;
-    message: string;
-  };
-  portal?: {
-    url: string;
-    status: string;
-    latencyMs: number;
-    httpStatus: number;
-  };
-  mirror?: {
-    totalMirrored: number;
-    lastSyncedAt: string | null;
-    localApproved: number;
-    localPending: number;
-  };
-}
-
 interface JanSevaSyncStudioProps {
   cards: Row[];
   token: string;
@@ -67,10 +45,8 @@ function firstText(row: Row, keys: string[]): string {
 }
 
 export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }: JanSevaSyncStudioProps) {
-  const [health, setHealth] = useState<IntegrationHealth | null>(null);
-  const [healthLoading, setHealthLoading] = useState(false);
   const [syncBusy, setSyncBusy] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<string>("");
+  const [syncStatus, setSyncStatus] = useState("");
   const [cardFilter, setCardFilter] = useState<"all" | "pending" | "mirrored" | "approved">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -82,97 +58,6 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
   // Card Preview Modal
   const [previewCard, setPreviewCard] = useState<Row | null>(null);
   const [copiedId, setCopiedId] = useState(false);
-
-  // Fetch Health & Connectivity
-  const fetchHealth = useCallback(async () => {
-    if (!token) return;
-    setHealthLoading(true);
-    try {
-      const res = await axios.get("/api/admin/cards/health", {
-        headers: { Authorization: `Bearer ${token}` },
-        timeout: 8000
-      });
-      if (res.data?.success) {
-        setHealth(res.data);
-      }
-    } catch {
-      // Graceful fallback
-    } finally {
-      setHealthLoading(false);
-    }
-  }, [token]);
-
-  useEffect(() => {
-    void fetchHealth();
-  }, [fetchHealth]);
-
-  // Run Local Database & Mirror Sync (Offline-Ready)
-  const handleRunLocalSync = async () => {
-    if (!token) return;
-    setSyncBusy(true);
-    setSyncStatus("Syncing approved cards with local database mirror...");
-    try {
-      const res = await axios.post("/api/admin/cards/sync-local", {}, {
-        headers: { Authorization: `Bearer ${token}` },
-        timeout: 15000
-      });
-
-      if (res.data?.success) {
-        toast.success(res.data.message || "Local mirror synced successfully!");
-        setSyncStatus(`Local sync complete: ${res.data.totalMirrored} approved cards mirrored locally.`);
-        await onRefresh();
-        await fetchHealth();
-      } else {
-        toast.error(res.data?.error || "Local sync failed");
-        setSyncStatus(`Sync error: ${res.data?.error}`);
-      }
-    } catch (err: any) {
-      const msg = err?.response?.data?.error || err.message || "Local sync failed";
-      toast.error(msg);
-      setSyncStatus(`Local sync error: ${msg}`);
-    } finally {
-      setSyncBusy(false);
-    }
-  };
-
-  // Run Automated Multi-Page Sync from api.therpfoundation.org (with automatic local fallback)
-  const handleRunSyncAll = async () => {
-    if (!token) return;
-    setSyncBusy(true);
-    setSyncStatus("Connecting to api.therpfoundation.org (RP Card Backend)...");
-    try {
-      const res = await axios.post("/api/admin/cards/sync-all", { maxPages: 5, limit: 100 }, {
-        headers: { Authorization: `Bearer ${token}` },
-        timeout: 35000
-      });
-
-      if (res.data?.success) {
-        if (res.data?.isExternalOffline) {
-          toast("api.therpfoundation.org is offline — Resilient Local Mirror Sync completed!", {
-            icon: "⚡",
-            duration: 5000
-          });
-          setSyncStatus(`Notice: api.therpfoundation.org is offline. Synchronized ${res.data.totalImported} cards via local mirror.`);
-        } else {
-          toast.success(res.data.message || "Sync finished successfully!");
-          setSyncStatus(`Sync result: ${res.data.totalImported} imported across ${res.data.pagesProcessed} pages.`);
-        }
-        await onRefresh();
-        await fetchHealth();
-      } else {
-        toast.error(res.data?.error || "Sync encountered an issue.");
-        setSyncStatus(`Sync notice: ${res.data?.error || "Incomplete"}`);
-      }
-    } catch (err: any) {
-      const msg = err?.response?.data?.error || err.message || "Sync failed";
-      // If network failure to external API, offer automatic local sync
-      toast.error(`External sync unavailable (${msg}). Switching to local mirror sync...`);
-      setSyncStatus(`External API offline. Running local database sync...`);
-      await handleRunLocalSync();
-    } finally {
-      setSyncBusy(false);
-    }
-  };
 
   // Import JSON Backup File
   const handleImportJson = async (file?: File) => {
@@ -201,7 +86,6 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
       toast.success(`Import complete: ${imported} records imported, ${skipped} skipped.`);
       setSyncStatus(`Import finished: ${imported} records imported.`);
       await onRefresh();
-      await fetchHealth();
     } catch (err: any) {
       const msg = err?.response?.data?.error || err.message || "Import failed";
       toast.error(msg);
@@ -238,13 +122,10 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
   // Approve Card Application
   const handleApprove = async (userId: string, existingCardNo?: string) => {
     if (!token) return;
-    let cardNo = existingCardNo ? String(existingCardNo).trim() : "";
+    const cardNo = existingCardNo ? String(existingCardNo).trim() : "";
     if (!cardNo) {
-      const randomSuffix = Math.floor(10000000 + Math.random() * 90000000);
-      const generated = `RPF-${new Date().getFullYear()}-${randomSuffix}`;
-      const prompted = window.prompt("Assign 16-digit or formatted Jan Seva Card Number:", generated);
-      if (!prompted) return;
-      cardNo = prompted.trim();
+      toast.error("Verified Jan Seva Card number is required. Import the master data file first.");
+      return;
     }
 
     try {
@@ -254,8 +135,7 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
       if (res.data?.success) {
         toast.success(`Card ${res.data.cardNo} successfully approved!`);
         await onRefresh();
-        await fetchHealth();
-      }
+        }
     } catch (err: any) {
       toast.error(err?.response?.data?.error || "Approval failed");
     }
@@ -271,7 +151,6 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
       });
       toast.success("Application marked as rejected.");
       await onRefresh();
-      await fetchHealth();
     } catch (err: any) {
       toast.error(err?.response?.data?.error || "Rejection failed");
     }
@@ -306,160 +185,30 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
 
   return (
     <div className="space-y-6">
-      {/* 1. THREE-WAY INTEGRATION HEALTH MONITOR */}
+      {/* 1. MASTER DATA IMPORT */}
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#C2410C] border border-orange-200">
-              <Globe className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-sm font-black text-[#0A192F]">Live Integration & Portal Synchronizer</h2>
-              <p className="text-[11px] text-slate-500">
-                Bidirectional sync between <code className="font-bold text-[#C2410C]">api.therpfoundation.org</code>, <code className="font-bold text-[#166534]">jansevacard.therpfoundation.org</code>, and <code className="font-bold text-[#0A192F]">appapi.therpfoundation.org</code>
-              </p>
-            </div>
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h2 className="text-sm font-black text-[#0A192F]">Jan Seva Card Master Data</h2>
+            <p className="mt-1 text-[11px] leading-5 text-slate-500">
+              Admin-managed master file is the single source of truth. External API synchronization has been removed.
+            </p>
           </div>
-          <button
-            onClick={() => void fetchHealth()}
-            disabled={healthLoading}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-white hover:border-[#C2410C] transition shadow-2xs"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 text-[#C2410C] ${healthLoading ? "animate-spin" : ""}`} /> Refresh Status
+          <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-black text-emerald-700">FILE SOURCE</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#245D45] px-4 py-2 text-xs font-black text-white shadow-sm hover:brightness-105">
+            <Upload className="h-3.5 w-3.5" /><span>Import Master JSON</span>
+            <input type="file" accept=".json,application/json" disabled={syncBusy}
+              onChange={(e) => { void handleImportJson(e.target.files?.[0]); e.target.value = ""; }} className="sr-only" />
+          </label>
+          <button onClick={() => exportCsv("cards", "rpf_jan_seva_cards_master")}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+            <Download className="h-3.5 w-3.5" /> Export CSV
           </button>
         </div>
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          {/* Card 1: api.therpfoundation.org */}
-          <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-600">RP Card Backend API</span>
-              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
-                health?.apiServer?.status === "online"
-                  ? "bg-emerald-50 text-[#166534] border border-emerald-200"
-                  : health?.apiServer?.status === "degraded"
-                  ? "bg-amber-50 text-amber-700 border border-amber-200"
-                  : "bg-rose-50 text-rose-700 border border-rose-200"
-              }`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${health?.apiServer?.status === "online" ? "bg-[#166534] animate-pulse" : "bg-rose-600"}`} />
-                {health?.apiServer?.status || "Checking..."}
-              </span>
-            </div>
-            <p className="text-xs font-mono font-bold text-[#0A192F] truncate" title="https://api.therpfoundation.org">
-              api.therpfoundation.org
-            </p>
-            <div className="flex items-center justify-between text-[11px] text-slate-500">
-              <span>Latency: {health?.apiServer?.latencyMs ? `${health.apiServer.latencyMs}ms` : "—"}</span>
-              <span>HTTP {health?.apiServer?.httpStatus || 200}</span>
-            </div>
-          </div>
-
-          {/* Card 2: jansevacard.therpfoundation.org */}
-          <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-600">Jan Seva Web Portal</span>
-              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
-                health?.portal?.status === "online"
-                  ? "bg-emerald-50 text-[#166534] border border-emerald-200"
-                  : "bg-rose-50 text-rose-700 border border-rose-200"
-              }`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${health?.portal?.status === "online" ? "bg-[#166534] animate-pulse" : "bg-rose-600"}`} />
-                {health?.portal?.status || "Checking..."}
-              </span>
-            </div>
-            <p className="text-xs font-mono font-bold text-[#0A192F] truncate" title="https://jansevacard.therpfoundation.org">
-              jansevacard.therpfoundation.org
-            </p>
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-500">Status: Verified</span>
-              <a
-                href="https://jansevacard.therpfoundation.org"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 font-bold text-[#C2410C] hover:underline"
-              >
-                Launch Portal <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-          </div>
-
-          {/* Card 3: appapi.therpfoundation.org (Postgres Mirror) */}
-          <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-600">Central PG Mirror Database</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase text-[#166534] border border-emerald-200">
-                <Database className="h-3 w-3 text-[#166534]" /> Connected
-              </span>
-            </div>
-            <p className="text-xs font-mono font-bold text-[#0A192F] truncate">
-              rp_db · jan_seva_card_mirror
-            </p>
-            <div className="flex items-center justify-between text-[11px] text-slate-500">
-              <span>Mirrored: <strong className="text-[#0A192F] font-black">{health?.mirror?.totalMirrored ?? cards.length}</strong></span>
-              <span>Pending: <strong className="text-[#C2410C] font-black">{health?.mirror?.localPending ?? 0}</strong></span>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. SYNC & CONTROL TOOLBAR */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              onClick={handleRunSyncAll}
-              disabled={syncBusy}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#C2410C] to-[#EA580C] px-4 py-2 text-xs font-black text-white hover:brightness-105 transition shadow-sm disabled:opacity-50"
-              title="Sync with external API (falls back automatically to local mirror if offline)"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${syncBusy ? "animate-spin" : ""}`} />
-              {syncBusy ? "Syncing in progress..." : "⚡ Sync with api.therpfoundation.org"}
-            </button>
-
-            <button
-              onClick={handleRunLocalSync}
-              disabled={syncBusy}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-[#166534] hover:bg-emerald-100 transition shadow-2xs disabled:opacity-50"
-              title="Sync all approved applications directly into local mirror cache (works 100% offline)"
-            >
-              <Database className="h-3.5 w-3.5 text-[#166534]" />
-              <span>⚡ Local Mirror Sync (Offline Ready)</span>
-            </button>
-
-            <label className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer transition shadow-2xs">
-              <Upload className="h-3.5 w-3.5 text-[#166534]" />
-              <span>Import JSON Backup</span>
-              <input
-                type="file"
-                accept=".json,application/json"
-                disabled={syncBusy}
-                onChange={(e) => {
-                  void handleImportJson(e.target.files?.[0]);
-                  e.target.value = "";
-                }}
-                className="sr-only"
-              />
-            </label>
-
-            <button
-              onClick={() => exportCsv("cards", "rpf_jan_seva_cards_master")}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
-            >
-              <Download className="h-3.5 w-3.5 text-[#0A192F]" /> Export CSV
-            </button>
-          </div>
-
-          {health?.mirror?.lastSyncedAt && (
-            <p className="text-[11px] text-slate-400 font-medium">
-              Last mirror sync: {new Date(health.mirror.lastSyncedAt).toLocaleString()}
-            </p>
-          )}
-        </div>
-
-        {syncStatus && (
-          <div className="rounded-xl bg-orange-50/80 border border-orange-200/80 p-3 text-xs font-semibold text-[#C2410C] flex items-center gap-2">
-            <Activity className="h-4 w-4 shrink-0" />
-            <span>{syncStatus}</span>
-          </div>
-        )}
+        {syncStatus && <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 text-xs font-semibold text-emerald-800">{syncStatus}</div>}
+        <p className="text-[11px] leading-5 text-slate-400">JSON may be a direct array of records or an object containing a <code>patients</code> array. Records are imported into the local verified registry in batches.</p>
       </section>
 
       {/* 3. QUICK REGISTRY LOOKUP & VERIFY BOX */}
