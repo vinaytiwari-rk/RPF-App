@@ -123,11 +123,20 @@ export default function LiveTV() {
   useEffect(() => {
     if (active && videoRef.current && !embed) {
       const srcUrl = active.url;
-      const player = videojs(videoRef.current, {
-        fluid: true,
-        autoplay: true,
-        controls: true,
-      });
+              const player = videojs(videoRef.current, {
+          fluid: true,
+          autoplay: true,
+          controls: true,
+          preload: 'auto',
+          html5: {
+            vhs: {
+              enableLowInitialPlaylist: true,
+              smoothQualityChange: true,
+              fastReady: true,
+              useDeviceAmpSupported: true
+            }
+          }
+        });
       player.src({ src: srcUrl, type: 'application/x-mpegURL' });
       return () => {
         player.dispose();
