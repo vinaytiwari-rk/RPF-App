@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, User, Compass, Bell, Search, RotateCw, Home, Activity, Clapperboard, HeartHandshake } from "lucide-react";
+import { ArrowLeft, User, Compass, Bell, Search, RotateCw, Home, Activity, Clapperboard, HeartHandshake, Tv } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
@@ -49,6 +49,7 @@ export default function MainLayout() {
     { path: "/", label: "Home", icon: Home },
     { path: "/impact", label: "Impact", icon: HeartHandshake },
     { path: "/reels", label: "Reels", icon: Clapperboard },
+      { path: "/live-tv", label: "Live TV", icon: Tv },
     { path: "/services", label: "Explore", icon: Compass },
     { path: "/activity", label: "Activity", icon: Activity },
     { path: "/profile", label: "Profile", icon: User }
@@ -118,7 +119,7 @@ export default function MainLayout() {
 
       {/* Android Native Standard Bottom Navigation */}
       <nav className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-3xl border-t border-orange-200/50 bg-[#FFF7E8]/95 px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_20px_rgba(15,49,87,.08)] backdrop-blur-xl">
-        <div className="grid grid-cols-6 items-stretch">
+        <div className="flex items-stretch justify-between w-full">
           {items.map(({ path, label, icon: Icon }) => {
             const active = location.pathname === path;
             return (
@@ -126,7 +127,7 @@ export default function MainLayout() {
                 key={path}
                 whileTap={{ scale: 0.92 }}
                 onClick={() => nav(path)}
-                className={`relative flex min-w-0 flex-col items-center justify-center gap-0.5 py-1 text-[9px] font-black tracking-tight transition-all ${
+                className={`relative flex-1 flex min-w-0 flex-col items-center justify-center gap-0.5 py-1 text-[9px] font-black tracking-tight transition-all ${
                   active ? "text-[#E67817]" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
