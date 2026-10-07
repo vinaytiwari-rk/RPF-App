@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import React,{useState,useEffect} from 'react';
 import {ArrowLeft,AlertTriangle,KeyRound,Loader2,UserPlus} from 'lucide-react';
 import axios from 'axios';
@@ -39,6 +40,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     }
   }, []);
 
+  const navigate = useNavigate();
   const [mode, setMode] = useState<'welcome' | 'login' | 'register'>('welcome');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
