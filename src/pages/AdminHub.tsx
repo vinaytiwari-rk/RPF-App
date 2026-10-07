@@ -624,7 +624,7 @@ export default function AdminHub() {
               </div>
 
               {/* 3-WAY UPSTREAM SYNC STUDIO */}
-              <JanSevaSyncStudio cards={data.cards} token={token || ""} onRefresh={load} exportCsv={exportCsv} />
+              <JanSevaSyncStudio cards={data.cards} totalCards={data.cardTotal} token={token || ""} onRefresh={load} exportCsv={exportCsv} />
 
               {/* AUDIT TRAIL / ADMIN ACTIVITY */}
               <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
