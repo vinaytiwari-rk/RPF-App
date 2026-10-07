@@ -819,4 +819,5 @@ export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
   ['tv-extract-857','Safari TV (576p)','https://mumt04.tangotv.in/m18aqlK4SAFARITV/index.m3u8','','Documentary'],
   ['tv-extract-858','Sony BBC Earth HD (1080p)','http://103.185.24.134:3001/SONY-BBC/index.m3u8','','Documentary'],
   ['tv-extract-859','InWonder (1080p)','https://amg00861-terninternation-inwonder-samsungau-1k63k.amagi.tv/playlist/amg00861-terninternation-inwonder-samsungau/playlist.m3u8','','Science'],
+  ['tv-custom-ddkisan', 'DD Kisan', 'https://www.youtube.com/live/izXvukZFBtg', 'izXvukZFBtg', 'News'],
 ].map(([id,name,url,videoId,category], order) => ({ id, name, url, videoId: videoId || undefined, category, enabled: true, order }));
