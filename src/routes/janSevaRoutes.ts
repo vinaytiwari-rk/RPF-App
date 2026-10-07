@@ -29,6 +29,108 @@ const setCached = (key: string, data: any, ttlMs = CACHE_TTL_MS) => {
   cardCache.set(key, { data, expiresAt: Date.now() + ttlMs });
 };
 
+/**
+ * Robust upstream Jan Seva API client.
+ * Kept only for existing user-facing compatibility/application routes;
+ * Admin bulk/external sync routes have been removed.
+ */
+async function callJanSevaApi(subPath = '', options: any = {}) {
+  const timeout = options.timeout || 7000;
+  const headers = {
+    'User-Agent': 'Samahit-AppAPI/2.5 (+https://appapi.therpfoundation.org)',
+    ...(process.env.JAN_SEVA_API_TOKEN ? { Authorization: `Bearer ${process.env.JAN_SEVA_API_TOKEN}` } : {}),
+    ...(options.headers || {})
+  };
+
+  const cleanSubPath = subPath ? (subPath.startsWith('/') ? subPath : `/${subPath}`) : '';
+  const endpoints = [
+    `${PRIMARY_JAN_SEVA_API}${cleanSubPath}`,
+    `${FALLBACK_JAN_SEVA_API}${cleanSubPath}`
+  ];
+
+  let lastError: any = null;
+  for (const endpoint of endpoints) {
+    try {
+      return await axios({
+        method: options.method || 'GET',
+        url: endpoint,
+        params: options.params,
+        data: options.data,
+        headers,
+        timeout
+      });
+    } catch (err: any) {
+      lastError = err;
+      if (err.response && (err.response.status === 400 || err.response.status === 404)) {
+        throw err;
+      }
+    }
+  }
+  throw lastError;
+}
+
+/**
+ * Idempotent local PostgreSQL mirror table.
+ * The master JSON import and local verification depend on this table.
+ */
+export const ensureMirror = async () => {
+  await pool.query(`CREATE TABLE IF NOT EXISTS jan_seva_card_mirror (
+    card_no TEXT PRIMARY KEY,
+    record JSONB NOT NULL,
+    source TEXT NOT NULL,
+    synced_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+};
+
+const extractCardNumber = (record: any): string | null => {
+  const value = record?.cardNo ?? record?.card_no ?? record?.janSevaCardNo ?? record?._id;
+  return typeof value === 'string' || typeof value === 'number'
+    ? String(value).trim() || null
+    : null;
+};
+
+export const writeMirror = async (records: any[], source: string) => {
+  await ensureMirror();
+  const client = await pool.connect();
+  let imported = 0;
+  let skipped = 0;
+
+  try {
+    await client.query('BEGIN');
+
+    for (const record of records) {
+      const number = record && typeof record === 'object' && !Array.isArray(record)
+        ? extractCardNumber(record)
+        : null;
+
+      if (!number) {
+        skipped++;
+        continue;
+      }
+
+      await client.query(
+        `INSERT INTO jan_seva_card_mirror (card_no, record, source, synced_at)
+         VALUES ($1, $2::jsonb, $3, NOW())
+         ON CONFLICT (card_no) DO UPDATE
+         SET record = EXCLUDED.record, source = EXCLUDED.source, synced_at = NOW()`,
+        [number, JSON.stringify(record), source]
+      );
+
+      imported++;
+    }
+
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  cardCache.clear();
+  return { imported, skipped };
+};
+
 // =============================================================================
 // SYNCHRONIZATION & IMPORT ROUTES
 // =============================================================================
