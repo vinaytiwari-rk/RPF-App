@@ -61,8 +61,12 @@ export default function JanSevaSyncStudio({ cards, token, onRefresh, exportCsv }
       if (file.size > MAX_MASTER_FILE_SIZE) throw new Error("Maximum master file size is 200 MB.");
       const text = await file.text();
       const parsed: unknown = JSON.parse(text);
-      const records: unknown = Array.isArray(parsed) ? parsed : (parsed as any)?.patients;
-      if (!Array.isArray(records)) throw new Error("File must be a JSON array of card records.");
+      const records: unknown = Array.isArray(parsed)
+        ? parsed
+        : (parsed as any)?.patients ?? (parsed as any)?.records ?? (parsed as any)?.data;
+      if (!Array.isArray(records)) {
+        throw new Error("File must contain a JSON array of card records (direct array, patients, records, or data).");
+      }
 
       let imported = 0, skipped = 0;
       for (let i = 0; i < records.length; i += 100) {
