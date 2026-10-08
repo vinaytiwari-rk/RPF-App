@@ -206,6 +206,11 @@ export default function Home() {
   const { user } = useAuth();
   const { cmsConfig } = useApp();
   const [slide, setSlide] = useState(0);
+  const [supremeConfig, setSupremeConfig] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/supreme/configs").then(r => r.json()).then(d => { if(d.success) setSupremeConfig(d.configs); }).catch(() => {});
+  }, []);
   const [marquee1, setMarquee1] = useState<string[]>(() => {
     try {
       const cached = JSON.parse(localStorage.getItem("@rpf_marquee1_national_v2") || "[]");
@@ -366,9 +371,11 @@ export default function Home() {
 
     const load = async () => {
       try {
-        const [pibResponse, mpResponse] = await Promise.all([
-          timedFetch("/api/public/rss-feed?url=" + encodeURIComponent("https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48")),
-          timedFetch("/api/public/rss-feed?url=" + encodeURIComponent("https://mpinfo.org/RSSFeed/RSSFeed_News.xml"))
+        const marqueeUrl = supremeConfig.marquee_rss_url || "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48";
+          const thoughtUrl = supremeConfig.thought_rss_url || "https://mpinfo.org/RSSFeed/RSSFeed_News.xml";
+          const [pibResponse, mpResponse] = await Promise.all([
+          timedFetch("/api/public/rss-feed?url=" + encodeURIComponent(marqueeUrl)),
+          timedFetch("/api/public/rss-feed?url=" + encodeURIComponent(thoughtUrl))
         ]);
 
         const pibJson = pibResponse.ok ? await pibResponse.json() : null;
