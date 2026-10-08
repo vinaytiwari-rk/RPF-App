@@ -1,215 +1,128 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { User, Save, RefreshCw, Upload, Shield } from "lucide-react";
+import { User, Save, RefreshCw, FileText } from "lucide-react";
 import toast from "react-hot-toast";
-
-const TABS = [
-  { id: "roles", label: "User Roles & Access" },
-  { id: "certificates", label: "Certificate Designer" },
-  { id: "policies", label: "App Policies (T&C)" },
-];
+import { useAuth } from "../../../context/AuthContext";
 
 export default function ProfileStudio() {
-  const [activeTab, setActiveTab] = useState("certificates");
+  const { token } = useAuth();
+  const [activeTab, setActiveTab] = useState("about");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [configs, setConfigs] = useState<Record<string, string>>({});
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [dirty, setDirty] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetchConfigs();
+    fetchCms();
   }, []);
 
-  const fetchConfigs = async () => {
+  const fetchCms = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/supreme/configs");
-      if (res.data.success) {
-        setConfigs(res.data.configs);
-      }
+      const res = await axios.get("/api/cms");
+      const data = res.data?.cms || res.data?.data || {};
+      const newDrafts: Record<string, string> = {};
+      Object.keys(data).forEach((key) => {
+        newDrafts[key] = typeof data[key] === "string" ? data[key] : JSON.stringify(data[key], null, 2);
+      });
+      setDrafts(newDrafts);
+      setDirty(new Set());
     } catch (e) {
-      toast.error("Failed to load configurations.");
+      toast.error("Failed to load CMS data");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleUpdateDraft = (key: string, value: string) => {
+    setDrafts(prev => ({ ...prev, [key]: value }));
+    setDirty(prev => new Set(prev).add(key));
+  };
+
   const handleSave = async () => {
+    if (!token) return;
+    const patch: Record<string, any> = {};
+    for (const key of dirty) {
+      patch[key] = drafts[key];
+    }
+    if (Object.keys(patch).length === 0) return;
+
     setSaving(true);
+    const toastId = toast.loading("Saving Profile content...");
     try {
-      const token = localStorage.getItem("token") || "";
       const res = await axios.post(
-        "/api/supreme/configs",
-        { configs },
+        "/api/admin/control/cms/publish",
+        { patch, label: "ProfileStudio updates" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      if (res.data.success) {
-        toast.success("Profile Studio settings saved!");
-      }
-    } catch (e) {
-      toast.error("Failed to save Profile settings.");
+      if (res.data?.success === false) throw new Error("Publish failed");
+      toast.success("Profile content updated!", { id: toastId });
+      setDirty(new Set());
+    } catch (e: any) {
+      toast.error("Failed to save", { id: toastId });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleChange = (key: string, value: string) => {
-    setConfigs(prev => ({ ...prev, [key]: value }));
-  };
-
-  
-  const handleImageUpload = async (key: string, file: File | null) => {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("image", file);
-    
-    const toastId = toast.loading("Uploading image...");
-    try {
-      const token = localStorage.getItem("token") || "";
-      const res = await axios.post("/api/admin/upload", formData, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data" 
-        }
-      });
-      if (res.data.success) {
-        handleChange(key, res.data.url);
-        toast.success("Image uploaded successfully!", { id: toastId });
-      } else {
-        toast.error(res.data.message || "Upload failed", { id: toastId });
-      }
-    } catch (e) {
-      toast.error("Upload failed", { id: toastId });
-    }
-  };
-
   return (
-    <div className="space-y-6 pb-12">
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+    <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-purple-50 text-purple-500">
             <User className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-[#0A192F]">Profile & Security Studio</h2>
-            <p className="text-xs font-medium text-slate-500 mt-1">
-              Manage user policies, access control, and dynamic certificate templates.
-            </p>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-purple-500">Profile & About CMS</p>
+            <h1 className="text-xl md:text-2xl font-black text-slate-800">Organization Info</h1>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={fetchConfigs}
-            className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
-          >
-            <RefreshCw className={`h-4 w-4 $\{loading ? 'animate-spin' : ''}`} /> Reload
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={fetchCms} disabled={loading} className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
-          <button
-            onClick={handleSave}
-            disabled={saving || loading}
-            className="flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-800 transition"
-          >
-            {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Configs
+          <button onClick={handleSave} disabled={saving || dirty.size === 0} className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50">
+            <Save className="h-4 w-4" /> {saving ? "Saving..." : `Publish (${dirty.size})`}
           </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 px-2">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2.5 text-xs font-bold rounded-full transition-colors $\{
-              activeTab === tab.id
-                ? "bg-[#0A192F] text-white shadow-md"
-                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 shadow-sm"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm min-h-[400px]">
-        {loading ? (
-          <div className="flex justify-center h-48 items-center">
-            <RefreshCw className="h-6 w-6 animate-spin text-slate-400" />
+      <div className="flex flex-col lg:flex-row gap-6 h-[75vh]">
+        <div className="w-full lg:w-3/12 flex flex-col space-y-4">
+          <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+            <button className="w-full flex items-center gap-3 p-3 rounded-xl border bg-white border-purple-500 shadow-sm ring-1 ring-purple-500 text-left">
+              <div className="p-2 rounded-lg bg-purple-50 text-purple-600">
+                <FileText className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800">About App</p>
+                <p className="text-[10px] text-slate-500">Long-form descriptions</p>
+              </div>
+            </button>
           </div>
-        ) : (
-          <div className="space-y-6 max-w-3xl">
-            {activeTab === "certificates" && (
+        </div>
+
+        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col p-6">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <RefreshCw className="h-8 w-8 animate-spin text-slate-300" />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 mb-4">About the Organization</h3>
               <div className="space-y-4">
-                <h3 className="text-sm font-black text-slate-900 border-b border-slate-100 pb-2">Dynamic Certificate Templates</h3>
-                <p className="text-xs text-slate-500">Provide image URLs for the base certificate backgrounds. The system will auto-print the user's name on them.</p>
-                
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Volunteer Certificate Template URL</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload("cert_volunteer_bg", e.target.files?.[0] || null)}
-                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
-                    />
-                  </div>
-                  {configs.cert_volunteer_bg && (
-                    <img src={configs.cert_volunteer_bg} alt="Preview" className="mt-2 w-48 border border-slate-200 rounded-lg shadow-sm" />
-                  )}
-                </div>
-
-                <div className="pt-4">
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Donor Certificate Template URL</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload("cert_donor_bg", e.target.files?.[0] || null)}
-                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
-                    />
-                  </div>
-                  {configs.cert_donor_bg && (
-                    <img src={configs.cert_donor_bg} alt="Preview" className="mt-2 w-48 border border-slate-200 rounded-lg shadow-sm" />
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === "policies" && (
-              <div className="space-y-4">
-                <h3 className="text-sm font-black text-slate-900 border-b border-slate-100 pb-2">App Terms & Policies</h3>
-                
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Privacy Policy URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://therpfoundation.org/privacy"
-                    value={configs.policy_privacy_url || ""}
-                    onChange={(e) => handleChange("policy_privacy_url", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 outline-none"
-                  />
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">About Text (English)</label>
+                  <textarea rows={6} value={drafts["aboutTextEn"] || ""} onChange={(e) => handleUpdateDraft("aboutTextEn", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Terms & Conditions URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://therpfoundation.org/terms"
-                    value={configs.policy_terms_url || ""}
-                    onChange={(e) => handleChange("policy_terms_url", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 outline-none"
-                  />
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">About Text (Hindi)</label>
+                  <textarea rows={6} value={drafts["aboutTextHi"] || ""} onChange={(e) => handleUpdateDraft("aboutTextHi", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500" />
                 </div>
               </div>
-            )}
-
-            {activeTab === "roles" && (
-              <div className="space-y-4 text-center py-10">
-                <Shield className="h-12 w-12 mx-auto text-slate-300 mb-4" />
-                <h3 className="text-sm font-black text-slate-900">User Access Management</h3>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">Role management interface is being linked to the core auth database. This allows assigning Admin/Super Admin privileges.</p>
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

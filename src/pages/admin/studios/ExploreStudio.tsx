@@ -17,12 +17,8 @@ type ServiceItem = {
 export default function ExploreStudio() {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "welfare" | "urgent" | "involved" | "civic">("all");
   const [selectedItem, setSelectedItem] = useState<ServiceItem | null>(null);
-
-  // Supreme configs for global toggles (like SOS)
-  const [configs, setConfigs] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchData();
@@ -31,16 +27,9 @@ export default function ExploreStudio() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [servicesRes, configsRes] = await Promise.all([
-        axios.get("/api/admin/services"),
-        axios.get("/api/supreme/configs")
-      ]);
-      
-      if (servicesRes.data?.data) {
-        setServices(servicesRes.data.data);
-      }
-      if (configsRes.data?.configs) {
-        setConfigs(configsRes.data.configs);
+      const res = await axios.get("/api/admin/services");
+      if (res.data?.data) {
+        setServices(res.data.data);
       }
     } catch (e) {
       toast.error("Failed to load CMS data");
@@ -71,24 +60,6 @@ export default function ExploreStudio() {
     }
   };
 
-  const handleSaveConfigs = async () => {
-    setSaving(true);
-    const toastId = toast.loading("Saving emergency configs...");
-    try {
-      const token = localStorage.getItem("token") || "";
-      const res = await axios.post("/api/supreme/configs", { configs }, { headers: { Authorization: `Bearer ${token}` } });
-      if (res.data.success) {
-        toast.success("Configs saved successfully!", { id: toastId });
-      } else {
-        toast.error("Failed to save", { id: toastId });
-      }
-    } catch (e) {
-      toast.error("Error saving configs", { id: toastId });
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const filteredServices = services.filter((s) => {
     if (activeTab === "all") return true;
     return s.category === activeTab;
@@ -111,34 +82,9 @@ export default function ExploreStudio() {
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button 
-            onClick={handleSaveConfigs}
-            disabled={saving}
-            className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-70"
-          >
-            <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save Emergency Configs"}
-          </button>
-        </div>
       </div>
 
-      {/* Emergency Configs Banner */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Police / SOS No.</label>
-          <input type="text" value={configs.sos_police || ""} onChange={(e) => setConfigs({ ...configs, sos_police: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500" />
-        </div>
-        <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ambulance No.</label>
-          <input type="text" value={configs.sos_ambulance || ""} onChange={(e) => setConfigs({ ...configs, sos_ambulance: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500" />
-        </div>
-        <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Women Helpline</label>
-          <input type="text" value={configs.sos_women || ""} onChange={(e) => setConfigs({ ...configs, sos_women: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500" />
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6 h-[65vh]">
+      <div className="flex flex-col lg:flex-row gap-6 h-[75vh]">
         {/* Left List */}
         <div className="w-full lg:w-5/12 xl:w-1/3 flex flex-col space-y-4">
           <div className="flex flex-wrap gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
@@ -276,7 +222,7 @@ export default function ExploreStudio() {
               </div>
               <h2 className="text-lg font-black text-slate-800">Select a Service from the left list</h2>
               <p className="text-sm text-slate-500 mt-1 max-w-sm">
-                Manage public visibility, category mapping, and emergency configurations.
+                Manage public visibility and category mapping for services.
               </p>
             </div>
           )}
