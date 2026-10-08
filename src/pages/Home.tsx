@@ -240,8 +240,16 @@ export default function Home() {
     return dailyQuotes[randomIndex];
   });
 
-  // Thought of the Day: Live from RSS Feed (no hardcoded override)
-  const currentQuote = quoteOfDay;
+  // Thought of the Day: Live from CMS thoughtConfig or RSS Feed
+  const currentQuote = useMemo(() => {
+    if (cmsConfig?.thoughtConfig?.currentQuote?.quote) {
+      return {
+        quote: cmsConfig.thoughtConfig.currentQuote.quote,
+        author: cmsConfig.thoughtConfig.currentQuote.author || "Daily Thought"
+      };
+    }
+    return quoteOfDay;
+  }, [cmsConfig?.thoughtConfig, quoteOfDay]);
 
   const name = user?.name?.trim().split(/\s+/)[0] || "Guest";
   const hour = new Date().getHours();
@@ -515,7 +523,7 @@ export default function Home() {
                 An initiative by the RP Foundation's Volunteers.
               </p>
             </div>
-            {weather && (
+            {weather && cmsConfig?.weatherConfig?.enabled !== false && (
               <div
                 className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 backdrop-blur-xs border border-emerald-200/80 shadow-2xs text-[#243B32] mt-0.5"
                 title={`Live Weather: ${weatherLabel(weather.code)} (${Math.round(weather.temperature)}°C)`}
@@ -538,24 +546,26 @@ export default function Home() {
         <LiveVerifiedMarketSection />
 
         {/* 3. THOUGHT OF THE DAY */}
-        <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3 shadow-2xs">
-          <div className="flex items-center gap-1.5 text-[#D97706]">
-            <Quote className="h-3.5 w-3.5" />
-            <p className="text-[10px] font-bold uppercase tracking-widest">Thought of the Day</p>
-          </div>
-          <p className="mt-1 text-[13px] sm:text-[14px] font-semibold leading-relaxed text-[#14213D]">
-            “{currentQuote.quote}”
-          </p>
-          {currentQuote.author && (
-            <p className="mt-0.5 text-right text-[11px] font-bold text-[#D97706] italic">
-              — {currentQuote.author}
+        {cmsConfig?.thoughtConfig?.enabled !== false && (
+          <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3 shadow-2xs">
+            <div className="flex items-center gap-1.5 text-[#D97706]">
+              <Quote className="h-3.5 w-3.5" />
+              <p className="text-[10px] font-bold uppercase tracking-widest">Thought of the Day</p>
+            </div>
+            <p className="mt-1 text-[13px] sm:text-[14px] font-semibold leading-relaxed text-[#14213D]">
+              “{currentQuote.quote}”
             </p>
-          )}
-        </section>
+            {currentQuote.author && (
+              <p className="mt-0.5 text-right text-[11px] font-bold text-[#D97706] italic">
+                — {currentQuote.author}
+              </p>
+            )}
+          </section>
+        )}
 
         {/* 4. LIVE RSS NEWS MARQUEES: STRICTLY TWO (2) MARQUEES */}
         {/* TOP MARQUEE: PIB RSS only */}
-        {marquee1.length > 0 && (
+        {cmsConfig?.marqueeConfig?.enabled !== false && marquee1.length > 0 && (
           <MarqueeTrack
             items={marquee1}
             direction="rtl"
@@ -566,7 +576,7 @@ export default function Home() {
         )}
 
         {/* BOTTOM MARQUEE: MPInfo RSS only */}
-        {marquee2.length > 0 && (
+        {cmsConfig?.marqueeConfig?.enabled !== false && marquee2.length > 0 && (
           <MarqueeTrack
             items={marquee2}
             direction="ltr"

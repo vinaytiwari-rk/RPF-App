@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
+import { useApp } from "../context/AppContext";
 
 interface CityItem {
   id: string;
@@ -113,7 +114,14 @@ interface MarketSummary {
 
 type ActiveSheet = null | "panchang" | "bullion" | "vegetables" | "mandi" | "fuel";
 
-export default function LiveVerifiedMarketSection() {
+export interface LiveVerifiedMarketSectionProps {
+  marketConfig?: any;
+}
+
+export default function LiveVerifiedMarketSection({ marketConfig }: LiveVerifiedMarketSectionProps = {}) {
+  const { cmsConfig } = useApp();
+  const activeMarketConfig = marketConfig || cmsConfig?.marketConfig;
+
   const [cities, setCities] = useState<CityItem[]>(FALLBACK_CITIES);
   const [selectedState, setSelectedState] = useState<string>(() => {
     try {
@@ -264,6 +272,23 @@ export default function LiveVerifiedMarketSection() {
     }
   };
 
+  if (activeMarketConfig && activeMarketConfig.enabled === false) {
+    return null;
+  }
+
+  const panchangEnabled = activeMarketConfig?.panchangEnabled !== false;
+  const goldSilverEnabled = activeMarketConfig?.goldSilverEnabled !== false;
+  const vegetableEnabled = activeMarketConfig?.vegetableEnabled !== false;
+  const fuelEnabled = activeMarketConfig?.fuelEnabled !== false;
+  const mandiEnabled = activeMarketConfig?.mandiEnabled !== false;
+
+  const customItems = Array.isArray(activeMarketConfig?.marketItems)
+    ? activeMarketConfig.marketItems.filter((m: any) => m.category === "custom" && m.active !== false)
+    : [];
+
+  const anyCardVisible = panchangEnabled || goldSilverEnabled || vegetableEnabled || fuelEnabled || mandiEnabled || customItems.length > 0;
+  if (!anyCardVisible) return null;
+
   return (
     <section className="pt-2">
       {/* SECTION HEADER WITH LOCATION SELECTOR & VIEW MODE TOGGLE */}
@@ -318,6 +343,7 @@ export default function LiveVerifiedMarketSection() {
         }
       >
         {/* CARD 1: LIVE DRIK PANCHANG */}
+        {panchangEnabled && (
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("panchang")}
@@ -356,8 +382,10 @@ export default function LiveVerifiedMarketSection() {
             </span>
           </div>
         </motion.div>
+        )}
 
         {/* CARD 2: LIVE BULLION GOLD & SILVER */}
+        {goldSilverEnabled && (
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("bullion")}
@@ -399,8 +427,10 @@ export default function LiveVerifiedMarketSection() {
             </span>
           </div>
         </motion.div>
+        )}
 
         {/* CARD 3: LIVE VEGETABLE PRICES (RICH 10+ LIST AWARE) */}
+        {vegetableEnabled && (
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("vegetables")}
@@ -445,8 +475,10 @@ export default function LiveVerifiedMarketSection() {
             </span>
           </div>
         </motion.div>
+        )}
 
         {/* CARD 4: FUEL & GAS */}
+        {fuelEnabled && (
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("fuel")}
@@ -494,8 +526,10 @@ export default function LiveVerifiedMarketSection() {
             <span className="text-[#C2410C] font-extrabold flex items-center">View <ChevronRight className="h-3 w-3" /></span>
           </div>
         </motion.div>
+        )}
 
-        {/* CARD 5: LIVE MANDI PRICES (SPANS FULL WIDTH ON 2-COL MOBILE TO COMPLETE 5-CARD GRID) */}
+        {/* CARD 5: LIVE MANDI PRICES */}
+        {mandiEnabled && (
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("mandi")}
@@ -546,6 +580,42 @@ export default function LiveVerifiedMarketSection() {
             </span>
           </div>
         </motion.div>
+        )}
+
+        {/* CUSTOM COMMODITY CARDS ADDED BY ADMIN */}
+        {customItems.map((item: any) => (
+          <motion.div
+            key={item.id}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => item.feedUrl && window.open(item.feedUrl, "_blank", "noopener,noreferrer")}
+            className={`${
+              viewMode === "scroll" ? "snap-start min-w-[215px] sm:min-w-[235px] flex-1" : ""
+            } rounded-2xl border border-slate-200/80 bg-gradient-to-br from-amber-50/50 via-white to-slate-50/50 p-3 shadow-2xs cursor-pointer hover:border-amber-400 transition-all flex flex-col justify-between`}
+          >
+            <div>
+              <div className="flex items-center justify-between text-amber-800">
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="h-4 w-4 text-amber-600 shrink-0" />
+                  <span className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider truncate max-w-[110px]">
+                    {item.name}
+                  </span>
+                </div>
+                <span className="text-[8.5px] font-bold text-amber-800 bg-amber-100/70 px-1.5 py-0.5 rounded-md">
+                  {item.badge || "Live Rate"}
+                </span>
+              </div>
+              <div className="mt-2 space-y-0.5 text-[11px]">
+                <p className="text-slate-700 font-semibold line-clamp-2">{item.description}</p>
+              </div>
+            </div>
+            <div className="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px]">
+              <span className="text-slate-500 font-medium">{item.providerType?.toUpperCase() || "LIVE"}</span>
+              <span className="text-amber-800 font-extrabold flex items-center">
+                Feed <ChevronRight className="h-3 w-3" />
+              </span>
+            </div>
+          </motion.div>
+        ))}
       </div>
 
       {/* SWIPE DOTS WHEN IN HORIZONTAL SCROLL MODE */}

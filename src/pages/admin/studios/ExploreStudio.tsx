@@ -753,6 +753,41 @@ export default function ExploreStudio() {
                                 External
                               </label>
 
+                              <div className="flex items-center border border-slate-200 rounded overflow-hidden bg-slate-50">
+                                <button
+                                  type="button"
+                                  disabled={lIdx === 0}
+                                  onClick={() => {
+                                    if (lIdx === 0) return;
+                                    const links = [...(selectedCard.subLinks || [])];
+                                    const tmp = links[lIdx];
+                                    links[lIdx] = links[lIdx - 1];
+                                    links[lIdx - 1] = tmp;
+                                    setSelectedCard({ ...selectedCard, subLinks: links });
+                                  }}
+                                  className="p-1 hover:bg-slate-200 text-slate-500 disabled:opacity-20 transition"
+                                  title="Move Up"
+                                >
+                                  <ArrowUp className="h-3 w-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={lIdx === (selectedCard.subLinks?.length || 0) - 1}
+                                  onClick={() => {
+                                    if (lIdx >= (selectedCard.subLinks?.length || 0) - 1) return;
+                                    const links = [...(selectedCard.subLinks || [])];
+                                    const tmp = links[lIdx];
+                                    links[lIdx] = links[lIdx + 1];
+                                    links[lIdx + 1] = tmp;
+                                    setSelectedCard({ ...selectedCard, subLinks: links });
+                                  }}
+                                  className="p-1 hover:bg-slate-200 text-slate-500 disabled:opacity-20 transition"
+                                  title="Move Down"
+                                >
+                                  <ArrowDown className="h-3 w-3" />
+                                </button>
+                              </div>
+
                               <button
                                 type="button"
                                 onClick={() => {

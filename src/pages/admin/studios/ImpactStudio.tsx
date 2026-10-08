@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
   HeartHandshake,
@@ -9,25 +9,16 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
-  CheckCircle2,
   Award,
-  Users,
-  Stethoscope,
-  Trees,
-  Briefcase,
-  Heart,
-  Droplets,
-  Wrench,
-  GraduationCap,
-  Sparkles,
   Layers,
   Quote,
   MessageSquareQuote,
-  ExternalLink,
-  ChevronRight,
-  Sliders,
   Type,
-  Activity
+  Activity,
+  Sparkles,
+  Upload,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
@@ -35,8 +26,7 @@ import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/Icon
 
 export interface ImpactStatItem {
   id: string;
-  labelEn: string;
-  labelHi: string;
+  label: string;
   value: number;
   suffix: string;
   iconName: string;
@@ -46,25 +36,20 @@ export interface ImpactStatItem {
 export interface ImpactDomainItem {
   id: string;
   tab: "all" | "community" | "care" | "active";
-  titleEn: string;
-  titleHi: string;
-  descEn: string;
-  descHi: string;
+  title: string;
+  description: string;
+  badge: string;
   iconName: string;
-  badgeEn: string;
-  badgeHi: string;
   color?: string;
   enabled: boolean;
+  subLinks?: Array<{ id: string; title: string; url: string; active?: boolean }>;
 }
 
 export interface ImpactStoryItem {
   id: string;
-  nameEn: string;
-  nameHi: string;
-  villageEn: string;
-  villageHi: string;
-  quoteEn: string;
-  quoteHi: string;
+  name: string;
+  village: string;
+  quote: string;
   photoUrl?: string;
   enabled: boolean;
 }
@@ -73,104 +58,80 @@ const DEFAULT_DOMAINS: ImpactDomainItem[] = [
   {
     id: "sanitation",
     tab: "active",
-    titleEn: "Sanitation & Clean Environment Drive",
-    titleHi: "स्वच्छता अभियान व प्रसाधन केंद्र",
-    descEn: "Organizing mass cleanliness drives, plastic-free campaigns, and building public sanitation facilities across rural and urban slums.",
-    descHi: "ग्रामीण व शहरी बस्तियों में वृहद स्वच्छता अभियान, प्लास्टिक-मुक्त ड्राइव एवं सार्वजनिक प्रसाधन केंद्रों का निर्माण।",
+    title: "Sanitation & Clean Environment Drive",
+    description: "Organizing mass cleanliness drives, plastic-free campaigns, and building public sanitation facilities across rural and urban slums.",
     iconName: "Trash2",
-    badgeEn: "Clean Environment",
-    badgeHi: "पर्यावरण व स्वच्छता",
+    badge: "Clean Environment",
     color: "bg-emerald-50 text-[#167C5A] border-emerald-200",
     enabled: true
   },
   {
     id: "water",
     tab: "care",
-    titleEn: "Clean Drinking Water Supply",
-    titleHi: "शुद्ध पेयजल व जल संरक्षण",
-    descEn: "Installing handpumps, clean RO water systems, and deploying water tankers in drought-prone & water-scarce communities.",
-    descHi: "जल संकटग्रस्त क्षेत्रों में हैंडपंप स्थापना, शुद्ध आरओ प्लांट व टैंकरों से निःशुल्क पेयजल आपूर्ति।",
+    title: "Clean Drinking Water Supply",
+    description: "Installing handpumps, clean RO water systems, and deploying water tankers in drought-prone & water-scarce communities.",
     iconName: "Droplets",
-    badgeEn: "Water Relief",
-    badgeHi: "पेयजल आपूर्ति",
+    badge: "Water Relief",
     color: "bg-sky-50 text-sky-600 border-sky-200",
     enabled: true
   },
   {
     id: "jobs",
     tab: "active",
-    titleEn: "Jobs for Unemployed Youth & Women",
-    titleHi: "रोजगार मेला व महिला आजीविका",
-    descEn: "Organizing Mega Rojgar Melas, direct company hiring drives, and micro-entrepreneurship support for unemployed youth.",
-    descHi: "बेरोजगार युवाओं के लिए रोजगार मेले, सीधी भर्ती ड्राइव व स्वरोजगार हेतु आर्थिक मार्गदर्शन।",
+    title: "Jobs for Unemployed Youth & Women",
+    description: "Organizing Mega Rojgar Melas, direct company hiring drives, and micro-entrepreneurship support for unemployed youth.",
     iconName: "Briefcase",
-    badgeEn: "Livelihood",
-    badgeHi: "रोजगार अवसर",
+    badge: "Livelihood",
     color: "bg-amber-50 text-[#D97706] border-amber-200",
     enabled: true
   },
   {
     id: "pink-erickshaw",
     tab: "active",
-    titleEn: "Pink E-Rickshaw Empowerment",
-    titleHi: "पिंक ई-रिक्शा योजना (महिला स्वावलंबन)",
-    descEn: "Providing subsidized eco-friendly e-rickshaws to women, empowering them with financial independence and safe urban transit.",
-    descHi: "महिलाओं को ई-रिक्शा स्वामित्व प्रदान कर आर्थिक स्वतंत्रता व सुरक्षित हरित परिवहन योजना।",
+    title: "Pink E-Rickshaw Empowerment",
+    description: "Providing subsidized eco-friendly e-rickshaws to women, empowering them with financial independence and safe urban transit.",
     iconName: "Heart",
-    badgeEn: "Women Power",
-    badgeHi: "महिला स्वावलंबन",
+    badge: "Women Power",
     color: "bg-rose-50 text-rose-600 border-rose-200",
     enabled: true
   },
   {
     id: "skills",
     tab: "active",
-    titleEn: "Skills Training & Vocational Courses",
-    titleHi: "कौशल विकास व वोकेशनल ट्रेनिंग",
-    descEn: "Free tailoring units, computer literacy centers, electrician certification, and vocational skill workshops.",
-    descHi: "निःशुल्क सिलाई-कढ़ाई केंद्र, कंप्यूटर साक्षरता, मोबाइल रिपेयरिंग व स्किल सर्टिफिकेशन कोर्स।",
+    title: "Skills Training & Vocational Courses",
+    description: "Free tailoring units, computer literacy centers, electrician certification, and vocational skill workshops.",
     iconName: "Wrench",
-    badgeEn: "Skill Development",
-    badgeHi: "कौशल विकास",
+    badge: "Skill Development",
     color: "bg-purple-50 text-purple-600 border-purple-200",
     enabled: true
   },
   {
     id: "health",
     tab: "care",
-    titleEn: "Free Health Services & Emergency Care",
-    titleHi: "निःशुल्क स्वास्थ्य सेवा व चिकित्सा शिविर",
-    descEn: "Conducting Mega Health Camps, free medicine distribution, blood donor network dispatch, and diagnostic aid.",
-    descHi: "निःशुल्क स्वास्थ्य जांच शिविर, दवा वितरण, इमरजेंसी ब्लड डोनेशन नेटवर्क व एम्बुलेंस सहायता।",
+    title: "Free Health Services & Emergency Care",
+    description: "Conducting Mega Health Camps, free medicine distribution, blood donor network dispatch, and diagnostic aid.",
     iconName: "Stethoscope",
-    badgeEn: "Healthcare",
-    badgeHi: "निःशुल्क चिकित्सा",
+    badge: "Healthcare",
     color: "bg-red-50 text-red-600 border-red-200",
     enabled: true
   },
   {
     id: "welfare",
     tab: "care",
-    titleEn: "Helping Poor & Downtrodden People",
-    titleHi: "निराश्रित व वंचित वर्ग कल्याण",
-    descEn: "Distributing ration kits, winter blankets, disaster emergency relief, and shelter assistance to vulnerable families.",
-    descHi: "जरूरतमंद परिवारों को राशन किट, शीतकालीन कंबल, आपदा राहत सामग्रियां व आश्रय सहायता।",
+    title: "Helping Poor & Downtrodden People",
+    description: "Distributing ration kits, winter blankets, disaster emergency relief, and shelter assistance to vulnerable families.",
     iconName: "HandCoins",
-    badgeEn: "Welfare Relief",
-    badgeHi: "जन सेवा सहायता",
+    badge: "Welfare Relief",
     color: "bg-[#B9E5CC]/10 text-[#245D45] border-[#B9E5CC]/20",
     enabled: true
   },
   {
     id: "education",
     tab: "community",
-    titleEn: "Education Services & Youth Mentorship",
-    titleHi: "निःशुल्क शिक्षा व बाल कल्याण",
-    descEn: "Providing free books, stationery, evening tuition classes for underprivileged children, and youth sports aid.",
-    descHi: "वंचित बच्चों हेतु निःशुल्क पाठ्य सामग्री, शाम की कोचिंग कक्षाएं एवं युवा खेलकूद प्रोत्साहन।",
+    title: "Education Services & Youth Mentorship",
+    description: "Providing free books, stationery, evening tuition classes for underprivileged children, and youth sports aid.",
     iconName: "GraduationCap",
-    badgeEn: "Youth Education",
-    badgeHi: "बाल शिक्षा सपोर्ट",
+    badge: "Youth Education",
     color: "bg-indigo-50 text-indigo-600 border-indigo-200",
     enabled: true
   }
@@ -190,16 +151,16 @@ export default function ImpactStudio() {
     currentIcon: string;
   } | null>(null);
 
-  // Editing Modals
+  // Editing Modals (Unified Fields - No En/Hi division!)
   const [editingDomain, setEditingDomain] = useState<ImpactDomainItem | null>(null);
   const [editingStory, setEditingStory] = useState<ImpactStoryItem | null>(null);
 
-  // Impact State
-  const [headlineEn, setHeadlineEn] = useState("Our Social Impact");
-  const [headlineHi, setHeadlineHi] = useState("हमारा सामाजिक प्रभाव");
-  const [descEn, setDescEn] = useState("Field activities across sanitation, clean water, jobs, skills, free health, poor relief, environment & heritage.");
-  const [descHi, setDescHi] = useState("पेयजल, स्वच्छता, रोजगार, स्वास्थ्य, महिला स्वावलंबन, पर्यावरण व भारतीय संस्कृति हेतु समर्पित कार्य।");
-  
+  // Impact State - Single Unified Text (No En/Hi division!)
+  const [headline, setHeadline] = useState("Our Social Impact");
+  const [description, setDescription] = useState(
+    "Field activities across sanitation, clean water, jobs, skills, free health, poor relief, environment & heritage."
+  );
+
   const [impactStats, setImpactStats] = useState<ImpactStatItem[]>([]);
   const [impactDomains, setImpactDomains] = useState<ImpactDomainItem[]>([]);
   const [stories, setStories] = useState<ImpactStoryItem[]>([]);
@@ -210,51 +171,75 @@ export default function ImpactStudio() {
       const res = await axios.get("/api/cms");
       const cms = res.data?.cms || {};
 
-      if (cms.impactHeadlineEn) setHeadlineEn(cms.impactHeadlineEn);
-      if (cms.impactHeadlineHi) setHeadlineHi(cms.impactHeadlineHi);
-      if (cms.impactDescEn) setDescEn(cms.impactDescEn);
-      if (cms.impactDescHi) setDescHi(cms.impactDescHi);
+      if (cms.impactHeadline || cms.impactHeadlineEn || cms.impactHeadlineHi) {
+        setHeadline(cms.impactHeadline || cms.impactHeadlineEn || cms.impactHeadlineHi);
+      }
+      if (cms.impactDesc || cms.impactDescEn || cms.impactDescHi) {
+        setDescription(cms.impactDesc || cms.impactDescEn || cms.impactDescHi);
+      }
 
       if (Array.isArray(cms.impactStats) && cms.impactStats.length > 0) {
-        setImpactStats(cms.impactStats);
+        setImpactStats(
+          cms.impactStats.map((s: any) => ({
+            id: s.id,
+            label: s.label || s.labelEn || s.labelHi || "Impact Metric",
+            value: Number(s.value) || 0,
+            suffix: s.suffix || "+",
+            iconName: s.iconName || "Award",
+            enabled: s.enabled !== false
+          }))
+        );
       } else {
-        // Load default structure without inventing fake production counts
         setImpactStats([
-          { id: "beneficiaries", labelEn: "Total Beneficiaries", labelHi: "कुल लाभार्थी नागरिक", value: 250000, suffix: "+", iconName: "Users", enabled: true },
-          { id: "health_camps", labelEn: "Health & Eye Camps", labelHi: "स्वास्थ्य एवं नेत्र शिविर", value: 450, suffix: "+", iconName: "Stethoscope", enabled: true },
-          { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित वृक्ष व पौधे", value: 50000, suffix: "+", iconName: "Trees", enabled: true },
-          { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: 0, suffix: "+", iconName: "Award", enabled: true }
+          { id: "beneficiaries", label: "Total Beneficiaries", value: 250000, suffix: "+", iconName: "Users", enabled: true },
+          { id: "health_camps", label: "Health & Eye Camps", value: 450, suffix: "+", iconName: "Stethoscope", enabled: true },
+          { id: "tree_plantations", label: "Trees Planted", value: 50000, suffix: "+", iconName: "Trees", enabled: true },
+          { id: "cards_issued", label: "Jan Seva Cards", value: 66505, suffix: "+", iconName: "Award", enabled: true }
         ]);
       }
 
       if (Array.isArray(cms.impactDomains) && cms.impactDomains.length > 0) {
-        setImpactDomains(cms.impactDomains);
+        setImpactDomains(
+          cms.impactDomains.map((d: any) => ({
+            id: d.id,
+            tab: d.tab || "active",
+            title: d.title || d.titleEn || d.titleHi || "Initiative Title",
+            description: d.description || d.descEn || d.descHi || "",
+            badge: d.badge || d.badgeEn || d.badgeHi || "Ground Action",
+            iconName: d.iconName || "Sparkles",
+            color: d.color || "bg-emerald-50 text-[#167C5A] border-emerald-200",
+            enabled: d.enabled !== false
+          }))
+        );
       } else {
         setImpactDomains(DEFAULT_DOMAINS);
       }
 
       if (Array.isArray(cms.testimonials) && cms.testimonials.length > 0) {
-        setStories(cms.testimonials);
+        setStories(
+          cms.testimonials.map((t: any) => ({
+            id: t.id,
+            name: t.name || t.nameEn || t.nameHi || "Citizen Beneficiary",
+            village: t.village || t.villageEn || t.villageHi || "Bhopal, MP",
+            quote: t.quote || t.quoteEn || t.quoteHi || "",
+            photoUrl: t.photoUrl,
+            enabled: t.enabled !== false
+          }))
+        );
       } else {
         setStories([
           {
             id: "t1",
-            nameEn: "Satyendra Thakur",
-            nameHi: "सत्येंद्र ठाकुर",
-            villageEn: "Karond Ward 5, Bhopal",
-            villageHi: "करौंद वार्ड 5, भोपाल",
-            quoteEn: "My daughter received the Saraswati Scholarship directly in her bank account within 2 weeks of applying. This support is helping her pursue college education. Gratitude to Rohit Sir!",
-            quoteHi: "मेरी बेटी को आवेदन करने के २ सप्ताह के भीतर सीधे उसके बैंक खाते में सरस्वती छात्रवृत्ति प्राप्त हुई। यह सहायता उसे कॉलेज की शिक्षा जारी रखने में मदद कर रही है। रोहित सर को धन्यवाद!",
+            name: "Satyendra Thakur",
+            village: "Karond Ward 5, Bhopal",
+            quote: "My daughter received the Saraswati Scholarship directly in her bank account within 2 weeks of applying. This support is helping her pursue college education.",
             enabled: true
           },
           {
             id: "t2",
-            nameEn: "Shanti Devi",
-            nameHi: "शान्ति देवी",
-            villageEn: "Bhopal Block, MP",
-            villageHi: "सीहोर ब्लॉक, म.प्र.",
-            quoteEn: "During my husband's eye surgery, RP Foundation volunteers did everything from hospital registration to arranging blood donors. They treated us like family members.",
-            quoteHi: "मेरे पति के नेत्र ऑपरेशन के दौरान, आरपी फाउंडेशन के स्वयंसेवकों ने अस्पताल पंजीकरण से लेकर रक्तदाताओं की व्यवस्था करने तक सब कुछ किया। उन्होंने हमारे साथ परिवार के सदस्यों जैसा व्यवहार किया।",
+            name: "Shanti Devi",
+            village: "Sehore Block, MP",
+            quote: "During my husband's eye surgery, RP Foundation volunteers did everything from hospital registration to arranging blood donors.",
             enabled: true
           }
         ]);
@@ -270,17 +255,47 @@ export default function ImpactStudio() {
     void loadData();
   }, [loadData]);
 
+  // Save All Changes to Live Application - Automatically synchronizes single inputs to En and Hi fields
   const handleSaveAll = async () => {
     try {
       setSaving(true);
       const payload = {
-        impactHeadlineEn: headlineEn,
-        impactHeadlineHi: headlineHi,
-        impactDescEn: descEn,
-        impactDescHi: descHi,
-        impactStats,
-        impactDomains,
-        testimonials: stories
+        impactHeadline: headline,
+        impactHeadlineEn: headline,
+        impactHeadlineHi: headline,
+        impactDesc: description,
+        impactDescEn: description,
+        impactDescHi: description,
+        impactStats: impactStats.map(s => ({
+          ...s,
+          label: s.label,
+          labelEn: s.label,
+          labelHi: s.label
+        })),
+        impactDomains: impactDomains.map(d => ({
+          ...d,
+          title: d.title,
+          titleEn: d.title,
+          titleHi: d.title,
+          description: d.description,
+          descEn: d.description,
+          descHi: d.description,
+          badge: d.badge,
+          badgeEn: d.badge,
+          badgeHi: d.badge
+        })),
+        testimonials: stories.map(s => ({
+          ...s,
+          name: s.name,
+          nameEn: s.name,
+          nameHi: s.name,
+          village: s.village,
+          villageEn: s.village,
+          villageHi: s.village,
+          quote: s.quote,
+          quoteEn: s.quote,
+          quoteHi: s.quote
+        }))
       };
 
       const res = await axios.post(
@@ -315,14 +330,44 @@ export default function ImpactStudio() {
   const handleSelectIcon = (iconName: string) => {
     if (!iconTarget) return;
     if (iconTarget.type === "counter") {
-      setImpactStats(prev => prev.map(s => s.id === iconTarget.id ? { ...s, iconName } : s));
+      setImpactStats(prev => prev.map(s => (s.id === iconTarget.id ? { ...s, iconName } : s)));
     } else if (iconTarget.type === "domain") {
-      setImpactDomains(prev => prev.map(d => d.id === iconTarget.id ? { ...d, iconName } : d));
+      setImpactDomains(prev => prev.map(d => (d.id === iconTarget.id ? { ...d, iconName } : d)));
       if (editingDomain && editingDomain.id === iconTarget.id) {
-        setEditingDomain(prev => prev ? { ...prev, iconName } : null);
+        setEditingDomain(prev => (prev ? { ...prev, iconName } : null));
       }
     }
     toast.success(`Icon updated to ${iconName}`);
+  };
+
+  const handleMoveCounter = (index: number, direction: "up" | "down") => {
+    const list = [...impactStats];
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (target < 0 || target >= list.length) return;
+    const tmp = list[index];
+    list[index] = list[target];
+    list[target] = tmp;
+    setImpactStats(list);
+  };
+
+  const handleMoveDomain = (index: number, direction: "up" | "down") => {
+    const list = [...impactDomains];
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (target < 0 || target >= list.length) return;
+    const tmp = list[index];
+    list[index] = list[target];
+    list[target] = tmp;
+    setImpactDomains(list);
+  };
+
+  const handleMoveStory = (index: number, direction: "up" | "down") => {
+    const list = [...stories];
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (target < 0 || target >= list.length) return;
+    const tmp = list[index];
+    list[index] = list[target];
+    list[target] = tmp;
+    setStories(list);
   };
 
   if (loading) {
@@ -349,11 +394,9 @@ export default function ImpactStudio() {
               </span>
               <span className="text-[11px] font-bold text-slate-400">Public Route: /impact</span>
             </div>
-            <h2 className="text-xl font-black text-[#0A192F] mt-0.5">
-              Impact Studio
-            </h2>
+            <h2 className="text-xl font-black text-[#0A192F] mt-0.5">Impact Studio</h2>
             <p className="text-xs text-slate-500">
-              Manage live impact headline, KPI metrics, 8 Seva domains, and citizen impact stories.
+              Universal Add, Edit, Delete, Active/Deactivate control for KPI metrics, Seva domains, and stories (No bilingual coding division).
             </p>
           </div>
         </div>
@@ -383,7 +426,7 @@ export default function ImpactStudio() {
           { id: "counters", label: "KPI Counters", icon: Activity, count: impactStats.length },
           { id: "domains", label: "8 Seva Domains", icon: Layers, count: impactDomains.length },
           { id: "stories", label: "Impact Stories & Testimonials", icon: MessageSquareQuote, count: stories.length },
-          { id: "header", label: "Headline & Text", icon: Type }
+          { id: "header", label: "Headline & Banner Text", icon: Type }
         ].map(tab => (
           <button
             key={tab.id}
@@ -397,7 +440,11 @@ export default function ImpactStudio() {
             <tab.icon className="h-3.5 w-3.5" />
             <span>{tab.label}</span>
             {tab.count !== undefined && (
-              <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${activeSubTab === tab.id ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"}`}>
+              <span
+                className={`rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${
+                  activeSubTab === tab.id ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
+                }`}
+              >
                 {tab.count}
               </span>
             )}
@@ -412,7 +459,7 @@ export default function ImpactStudio() {
             <div>
               <h3 className="text-sm font-black text-[#0A192F]">Master Impact Counters</h3>
               <p className="text-xs text-slate-500">
-                These KPI cards appear at the top of the public /impact page and reflect ground realities.
+                KPI metric cards displayed at top of public /impact page. Add, edit numbers, change icons, toggle active/deactive, or delete.
               </p>
             </div>
             <button
@@ -420,7 +467,7 @@ export default function ImpactStudio() {
                 const newId = `stat-${Date.now()}`;
                 setImpactStats(prev => [
                   ...prev,
-                  { id: newId, labelEn: "New Impact Metric", labelHi: "नया प्रभाव आंकड़ा", value: 1000, suffix: "+", iconName: "Award", enabled: true }
+                  { id: newId, label: "New Impact Metric", value: 1000, suffix: "+", iconName: "Award", enabled: true }
                 ]);
                 toast.success("Added new impact counter card");
               }}
@@ -444,26 +491,45 @@ export default function ImpactStudio() {
                     <button
                       onClick={() => openIconPicker("counter", stat.id, stat.iconName)}
                       className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 hover:bg-orange-100 text-slate-700 hover:text-[#C2410C] transition border border-slate-200"
-                      title="Click to change icon visually"
+                      title="Click to change icon visually (No code)"
                     >
-                      <IconComp className="h-4.5 w-4.5" />
+                      <IconComp className="h-4.5 w-4.5 text-[#C2410C]" />
                     </button>
+
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => {
-                          setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, enabled: !s.enabled } : s));
+                          setImpactStats(prev => prev.map((s, i) => (i === idx ? { ...s, enabled: !s.enabled } : s)));
                           toast.success(stat.enabled ? "Counter disabled" : "Counter enabled");
                         }}
                         className={`rounded-lg p-1.5 text-xs transition ${
-                          stat.enabled ? "text-emerald-700 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-200"
+                          stat.enabled ? "text-emerald-700 bg-emerald-50 border border-emerald-200" : "text-slate-400 bg-slate-100"
                         }`}
                         title={stat.enabled ? "Active on public page" : "Disabled"}
                       >
                         {stat.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                       </button>
+                      <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                        <button
+                          onClick={() => handleMoveCounter(idx, "up")}
+                          disabled={idx === 0}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move up"
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </button>
+                        <button
+                          onClick={() => handleMoveCounter(idx, "down")}
+                          disabled={idx === impactStats.length - 1}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move down"
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </button>
+                      </div>
                       <button
                         onClick={() => {
-                          if (confirm(`Delete counter "${stat.labelEn}"?`)) {
+                          if (confirm(`Delete counter "${stat.label}"?`)) {
                             setImpactStats(prev => prev.filter((_, i) => i !== idx));
                             toast.success("Counter deleted");
                           }
@@ -478,25 +544,13 @@ export default function ImpactStudio() {
 
                   <div className="space-y-2">
                     <div>
-                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">English Label</label>
+                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Metric Label</label>
                       <input
                         type="text"
-                        value={stat.labelEn}
+                        value={stat.label}
                         onChange={e => {
                           const val = e.target.value;
-                          setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, labelEn: val } : s));
-                        }}
-                        className="w-full text-xs font-bold text-slate-800 rounded-lg border border-slate-200 p-2 outline-none focus:border-[#C2410C]"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Hindi Label</label>
-                      <input
-                        type="text"
-                        value={stat.labelHi}
-                        onChange={e => {
-                          const val = e.target.value;
-                          setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, labelHi: val } : s));
+                          setImpactStats(prev => prev.map((s, i) => (i === idx ? { ...s, label: val } : s)));
                         }}
                         className="w-full text-xs font-bold text-slate-800 rounded-lg border border-slate-200 p-2 outline-none focus:border-[#C2410C]"
                       />
@@ -509,7 +563,7 @@ export default function ImpactStudio() {
                           value={stat.value}
                           onChange={e => {
                             const val = Number(e.target.value) || 0;
-                            setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, value: val } : s));
+                            setImpactStats(prev => prev.map((s, i) => (i === idx ? { ...s, value: val } : s)));
                           }}
                           className="w-full text-xs font-black text-[#0A192F] rounded-lg border border-slate-200 p-2 outline-none focus:border-[#C2410C]"
                         />
@@ -521,7 +575,7 @@ export default function ImpactStudio() {
                           value={stat.suffix}
                           onChange={e => {
                             const val = e.target.value;
-                            setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, suffix: val } : s));
+                            setImpactStats(prev => prev.map((s, i) => (i === idx ? { ...s, suffix: val } : s)));
                           }}
                           className="w-full text-xs font-black text-[#0A192F] rounded-lg border border-slate-200 p-2 outline-none focus:border-[#C2410C]"
                         />
@@ -540,7 +594,7 @@ export default function ImpactStudio() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-black text-[#0A192F]">8 Ground Seva Domains</h3>
+              <h3 className="text-sm font-black text-[#0A192F]">Ground Seva Domains</h3>
               <p className="text-xs text-slate-500">
                 Detailed field areas on the Impact page (Cleanliness, RO Water, Jobs, Pink E-Rickshaw, Health, Relief, Skills, Education).
               </p>
@@ -550,13 +604,10 @@ export default function ImpactStudio() {
                 const newDomain: ImpactDomainItem = {
                   id: `domain-${Date.now()}`,
                   tab: "active",
-                  titleEn: "New Field Initiative",
-                  titleHi: "नया जनसेवा अभियान",
-                  descEn: "Describe the ground-level work and impact.",
-                  descHi: "अभियान का विवरण और प्रभाव।",
+                  title: "New Field Initiative",
+                  description: "Describe the ground-level work, beneficiaries and achievements.",
                   iconName: "Sparkles",
-                  badgeEn: "Initiative",
-                  badgeHi: "जन सेवा",
+                  badge: "Ground Initiative",
                   enabled: true
                 };
                 setImpactDomains(prev => [...prev, newDomain]);
@@ -584,21 +635,18 @@ export default function ImpactStudio() {
                       <button
                         onClick={() => openIconPicker("domain", domain.id, domain.iconName)}
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-700 transition border border-slate-200"
-                        title="Click to change icon visually"
+                        title="Click to change icon visually (No code)"
                       >
-                        <IconComp className="h-5 w-5" />
+                        <IconComp className="h-5 w-5 text-emerald-700" />
                       </button>
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase text-slate-700">
                             {domain.tab}
                           </span>
-                          <span className="text-[10px] font-bold text-[#166534]">
-                            {domain.badgeEn || domain.badgeHi}
-                          </span>
+                          <span className="text-[10px] font-bold text-[#166534]">{domain.badge}</span>
                         </div>
-                        <h4 className="text-sm font-bold text-[#0A192F] mt-0.5">{domain.titleEn}</h4>
-                        <p className="text-[11px] font-medium text-slate-500">{domain.titleHi}</p>
+                        <h4 className="text-sm font-bold text-[#0A192F] mt-0.5">{domain.title}</h4>
                       </div>
                     </div>
 
@@ -612,19 +660,37 @@ export default function ImpactStudio() {
                       </button>
                       <button
                         onClick={() => {
-                          setImpactDomains(prev => prev.map((d, i) => i === idx ? { ...d, enabled: !d.enabled } : d));
+                          setImpactDomains(prev => prev.map((d, i) => (i === idx ? { ...d, enabled: !d.enabled } : d)));
                           toast.success(domain.enabled ? "Domain disabled" : "Domain enabled");
                         }}
                         className={`rounded-lg p-1.5 text-xs transition ${
-                          domain.enabled ? "text-emerald-700 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-200"
+                          domain.enabled ? "text-emerald-700 bg-emerald-50 border border-emerald-200" : "text-slate-400 bg-slate-100"
                         }`}
                         title={domain.enabled ? "Visible on /impact" : "Hidden"}
                       >
                         {domain.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                       </button>
+                      <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                        <button
+                          onClick={() => handleMoveDomain(idx, "up")}
+                          disabled={idx === 0}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move up"
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </button>
+                        <button
+                          onClick={() => handleMoveDomain(idx, "down")}
+                          disabled={idx === impactDomains.length - 1}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move down"
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </button>
+                      </div>
                       <button
                         onClick={() => {
-                          if (confirm(`Delete domain "${domain.titleEn}"?`)) {
+                          if (confirm(`Delete domain "${domain.title}"?`)) {
                             setImpactDomains(prev => prev.filter((_, i) => i !== idx));
                             toast.success("Domain deleted");
                           }
@@ -637,9 +703,7 @@ export default function ImpactStudio() {
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                    {domain.descEn}
-                  </p>
+                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{domain.description}</p>
                 </div>
               );
             })}
@@ -654,19 +718,16 @@ export default function ImpactStudio() {
             <div>
               <h3 className="text-sm font-black text-[#0A192F]">Citizen Impact Stories & Testimonials</h3>
               <p className="text-xs text-slate-500">
-                Ground-level experiences, scholarship recipients, patient care, and volunteer testimonies.
+                Ground experiences, scholarship recipients, patient care, and volunteer testimonies. Full Add, Edit, Delete and Active toggles.
               </p>
             </div>
             <button
               onClick={() => {
                 const newStory: ImpactStoryItem = {
                   id: `story-${Date.now()}`,
-                  nameEn: "Citizen Beneficiary",
-                  nameHi: "नागरिक लाभार्थी",
-                  villageEn: "Bhopal, MP",
-                  villageHi: "भोपाल, म.प्र.",
-                  quoteEn: "Sharing personal testimony of service received from RP Foundation.",
-                  quoteHi: "आरपी फाउंडेशन द्वारा प्राप्त सहायता का व्यक्तिगत अनुभव।",
+                  name: "Citizen Beneficiary",
+                  village: "Bhopal, MP",
+                  quote: "Sharing personal testimony of service received from RP Foundation.",
                   enabled: true
                 };
                 setStories(prev => [...prev, newStory]);
@@ -693,8 +754,8 @@ export default function ImpactStudio() {
                       <Quote className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-[#0A192F]">{story.nameEn} ({story.nameHi})</h4>
-                      <p className="text-[11px] font-medium text-slate-500">{story.villageEn} • {story.villageHi}</p>
+                      <h4 className="text-sm font-bold text-[#0A192F]">{story.name}</h4>
+                      <p className="text-[11px] font-medium text-slate-500">{story.village}</p>
                     </div>
                   </div>
 
@@ -708,32 +769,50 @@ export default function ImpactStudio() {
                     </button>
                     <button
                       onClick={() => {
-                        setStories(prev => prev.map((s, i) => i === idx ? { ...s, enabled: !s.enabled } : s));
+                        setStories(prev => prev.map((s, i) => (i === idx ? { ...s, enabled: !s.enabled } : s)));
                         toast.success(story.enabled ? "Story disabled" : "Story enabled");
                       }}
                       className={`rounded-lg p-1.5 text-xs transition ${
-                        story.enabled ? "text-emerald-700 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-200"
+                        story.enabled ? "text-emerald-700 bg-emerald-50 border border-emerald-200" : "text-slate-400 bg-slate-100"
                       }`}
                     >
                       {story.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </button>
+                    <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                      <button
+                        onClick={() => handleMoveStory(idx, "up")}
+                        disabled={idx === 0}
+                        className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                        title="Move up"
+                      >
+                        <ArrowUp className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveStory(idx, "down")}
+                        disabled={idx === stories.length - 1}
+                        className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                        title="Move down"
+                      >
+                        <ArrowDown className="h-3 w-3" />
+                      </button>
+                    </div>
                     <button
                       onClick={() => {
-                        if (confirm(`Delete story for "${story.nameEn}"?`)) {
+                        if (confirm(`Delete story for "${story.name}"?`)) {
                           setStories(prev => prev.filter((_, i) => i !== idx));
                           toast.success("Story deleted");
                         }
                       }}
                       className="rounded-lg p-1.5 text-rose-600 hover:bg-rose-50 transition"
+                      title="Delete story"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
 
-                <div className="space-y-1 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-700 italic">
-                  <p>"{story.quoteEn}"</p>
-                  <p className="text-[11px] text-slate-500 font-sans not-italic">"{story.quoteHi}"</p>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-700 italic">
+                  <p>"{story.quote}"</p>
                 </div>
               </div>
             ))}
@@ -744,41 +823,26 @@ export default function ImpactStudio() {
       {/* TAB 4: HEADER & HEADLINE */}
       {activeSubTab === "header" && (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-xs max-w-2xl">
-          <h3 className="text-sm font-black text-[#0A192F]">Public Impact Page Banner Headline</h3>
+          <h3 className="text-sm font-black text-[#0A192F]">Public Impact Page Banner Headline & Narrative</h3>
+          <p className="text-xs text-slate-500">
+            Unified single headline and description that seamlessly updates across all views without bilingual divisions.
+          </p>
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-bold text-slate-700">English Headline</label>
+              <label className="text-xs font-bold text-slate-700">Headline</label>
               <input
                 type="text"
-                value={headlineEn}
-                onChange={e => setHeadlineEn(e.target.value)}
+                value={headline}
+                onChange={e => setHeadline(e.target.value)}
                 className="mt-1 w-full text-xs font-medium rounded-xl border border-slate-200 p-2.5 outline-none focus:border-[#C2410C]"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-700">Hindi Headline</label>
-              <input
-                type="text"
-                value={headlineHi}
-                onChange={e => setHeadlineHi(e.target.value)}
-                className="mt-1 w-full text-xs font-medium rounded-xl border border-slate-200 p-2.5 outline-none focus:border-[#C2410C]"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-700">English Description</label>
+              <label className="text-xs font-bold text-slate-700">Description</label>
               <textarea
-                rows={3}
-                value={descEn}
-                onChange={e => setDescEn(e.target.value)}
-                className="mt-1 w-full text-xs font-medium rounded-xl border border-slate-200 p-2.5 outline-none focus:border-[#C2410C]"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-700">Hindi Description</label>
-              <textarea
-                rows={3}
-                value={descHi}
-                onChange={e => setDescHi(e.target.value)}
+                rows={4}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
                 className="mt-1 w-full text-xs font-medium rounded-xl border border-slate-200 p-2.5 outline-none focus:border-[#C2410C]"
               />
             </div>
@@ -786,13 +850,15 @@ export default function ImpactStudio() {
         </div>
       )}
 
-      {/* Domain Editor Modal */}
+      {/* Domain Editor Modal (Single Unified Fields - No English/Hindi Split!) */}
       {editingDomain && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="text-sm font-black text-[#0A192F]">Edit Field Domain</h3>
-              <button onClick={() => setEditingDomain(null)} className="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+              <h3 className="text-sm font-black text-[#0A192F]">Edit Field Seva Domain</h3>
+              <button onClick={() => setEditingDomain(null)} className="text-slate-400 hover:text-slate-700 font-bold">
+                ✕
+              </button>
             </div>
 
             <div className="space-y-3 text-xs">
@@ -803,73 +869,106 @@ export default function ImpactStudio() {
                   onChange={e => setEditingDomain({ ...editingDomain, tab: e.target.value as any })}
                   className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
                 >
-                  <option value="community">Community (सामुदायिक)</option>
-                  <option value="care">Care & Relief (देखभाल व राहत)</option>
                   <option value="active">Active Ground (सक्रिय अभियान)</option>
+                  <option value="care">Care & Relief (देखभाल व राहत)</option>
+                  <option value="community">Community (सामुदायिक कल्याण)</option>
                   <option value="all">All (समस्त)</option>
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="font-bold text-slate-700">Title (English)</label>
-                  <input
-                    type="text"
-                    value={editingDomain.titleEn}
-                    onChange={e => setEditingDomain({ ...editingDomain, titleEn: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700">Title (Hindi)</label>
-                  <input
-                    type="text"
-                    value={editingDomain.titleHi}
-                    onChange={e => setEditingDomain({ ...editingDomain, titleHi: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="font-bold text-slate-700">Badge (English)</label>
-                  <input
-                    type="text"
-                    value={editingDomain.badgeEn}
-                    onChange={e => setEditingDomain({ ...editingDomain, badgeEn: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700">Badge (Hindi)</label>
-                  <input
-                    type="text"
-                    value={editingDomain.badgeHi}
-                    onChange={e => setEditingDomain({ ...editingDomain, badgeHi: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
-                  />
-                </div>
-              </div>
-
               <div>
-                <label className="font-bold text-slate-700">Description (English)</label>
-                <textarea
-                  rows={2}
-                  value={editingDomain.descEn}
-                  onChange={e => setEditingDomain({ ...editingDomain, descEn: e.target.value })}
+                <label className="font-bold text-slate-700">Initiative Title</label>
+                <input
+                  type="text"
+                  value={editingDomain.title}
+                  onChange={e => setEditingDomain({ ...editingDomain, title: e.target.value })}
+                  placeholder="e.g. Clean Drinking Water Supply"
                   className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-slate-700">Description (Hindi)</label>
-                <textarea
-                  rows={2}
-                  value={editingDomain.descHi}
-                  onChange={e => setEditingDomain({ ...editingDomain, descHi: e.target.value })}
+                <label className="font-bold text-slate-700">Badge Label</label>
+                <input
+                  type="text"
+                  value={editingDomain.badge}
+                  onChange={e => setEditingDomain({ ...editingDomain, badge: e.target.value })}
+                  placeholder="e.g. Water Relief"
                   className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700">Description of Field Work</label>
+                <textarea
+                  rows={3}
+                  value={editingDomain.description}
+                  onChange={e => setEditingDomain({ ...editingDomain, description: e.target.value })}
+                  placeholder="Describe ground operations, locations, and beneficiaries..."
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                />
+              </div>
+
+              {/* Sub-features & Child Action Links */}
+              <div className="pt-2 border-t border-slate-100 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="font-bold text-slate-700">Child Links & Action Portals (सब-फीचर्स)</label>
+                    <p className="text-[10px] text-slate-400">Add inner buttons or portal links inside this Seva domain</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newSub = { id: `link-${Date.now()}`, title: "New Initiative Action", url: "#", active: true };
+                      const current = editingDomain.subLinks || [];
+                      setEditingDomain({ ...editingDomain, subLinks: [...current, newSub] });
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 rounded-lg hover:bg-emerald-100 border border-emerald-200"
+                  >
+                    <Plus className="h-3 w-3" /> Add Link
+                  </button>
+                </div>
+                {(editingDomain.subLinks || []).length === 0 ? (
+                  <p className="text-[11px] text-slate-400 italic">No child links added to this domain.</p>
+                ) : (
+                  (editingDomain.subLinks || []).map((sub, sIdx) => (
+                    <div key={sub.id} className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                      <input
+                        type="text"
+                        placeholder="Link Label (e.g. Volunteer Form)"
+                        value={sub.title}
+                        onChange={e => {
+                          const val = e.target.value;
+                          const updated = (editingDomain.subLinks || []).map((l, i) => i === sIdx ? { ...l, title: val } : l);
+                          setEditingDomain({ ...editingDomain, subLinks: updated });
+                        }}
+                        className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold"
+                      />
+                      <input
+                        type="text"
+                        placeholder="URL (/volunteer-duty or https://...)"
+                        value={sub.url}
+                        onChange={e => {
+                          const val = e.target.value;
+                          const updated = (editingDomain.subLinks || []).map((l, i) => i === sIdx ? { ...l, url: val } : l);
+                          setEditingDomain({ ...editingDomain, subLinks: updated });
+                        }}
+                        className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = (editingDomain.subLinks || []).filter((_, i) => i !== sIdx);
+                          setEditingDomain({ ...editingDomain, subLinks: updated });
+                        }}
+                        className="text-rose-500 hover:bg-rose-50 p-1 rounded-lg"
+                        title="Delete Link"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -882,7 +981,7 @@ export default function ImpactStudio() {
               </button>
               <button
                 onClick={() => {
-                  setImpactDomains(prev => prev.map(d => d.id === editingDomain.id ? editingDomain : d));
+                  setImpactDomains(prev => prev.map(d => (d.id === editingDomain.id ? editingDomain : d)));
                   setEditingDomain(null);
                   toast.success("Domain updated");
                 }}
@@ -895,74 +994,47 @@ export default function ImpactStudio() {
         </div>
       )}
 
-      {/* Story Editor Modal */}
+      {/* Story Editor Modal (Single Unified Fields - No English/Hindi Split!) */}
       {editingStory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="text-sm font-black text-[#0A192F]">Edit Impact Story</h3>
-              <button onClick={() => setEditingStory(null)} className="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+              <button onClick={() => setEditingStory(null)} className="text-slate-400 hover:text-slate-700 font-bold">
+                ✕
+              </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="font-bold text-slate-700">Name (English)</label>
-                  <input
-                    type="text"
-                    value={editingStory.nameEn}
-                    onChange={e => setEditingStory({ ...editingStory, nameEn: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700">Name (Hindi)</label>
-                  <input
-                    type="text"
-                    value={editingStory.nameHi}
-                    onChange={e => setEditingStory({ ...editingStory, nameHi: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="font-bold text-slate-700">Location/Village (English)</label>
-                  <input
-                    type="text"
-                    value={editingStory.villageEn}
-                    onChange={e => setEditingStory({ ...editingStory, villageEn: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700">Location/Village (Hindi)</label>
-                  <input
-                    type="text"
-                    value={editingStory.villageHi}
-                    onChange={e => setEditingStory({ ...editingStory, villageHi: e.target.value })}
-                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
-                  />
-                </div>
-              </div>
-
               <div>
-                <label className="font-bold text-slate-700">Story / Quote (English)</label>
-                <textarea
-                  rows={3}
-                  value={editingStory.quoteEn}
-                  onChange={e => setEditingStory({ ...editingStory, quoteEn: e.target.value })}
+                <label className="font-bold text-slate-700">Citizen Beneficiary Name</label>
+                <input
+                  type="text"
+                  value={editingStory.name}
+                  onChange={e => setEditingStory({ ...editingStory, name: e.target.value })}
+                  placeholder="e.g. Ramesh Sharma"
                   className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-slate-700">Story / Quote (Hindi)</label>
+                <label className="font-bold text-slate-700">Location / Village / Ward</label>
+                <input
+                  type="text"
+                  value={editingStory.village}
+                  onChange={e => setEditingStory({ ...editingStory, village: e.target.value })}
+                  placeholder="e.g. Karond Ward 5, Bhopal"
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700">Personal Experience / Testimony Quote</label>
                 <textarea
-                  rows={3}
-                  value={editingStory.quoteHi}
-                  onChange={e => setEditingStory({ ...editingStory, quoteHi: e.target.value })}
+                  rows={4}
+                  value={editingStory.quote}
+                  onChange={e => setEditingStory({ ...editingStory, quote: e.target.value })}
+                  placeholder="Describe the assistance received and its impact..."
                   className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
                 />
               </div>
@@ -977,7 +1049,7 @@ export default function ImpactStudio() {
               </button>
               <button
                 onClick={() => {
-                  setStories(prev => prev.map(s => s.id === editingStory.id ? editingStory : s));
+                  setStories(prev => prev.map(s => (s.id === editingStory.id ? editingStory : s)));
                   setEditingStory(null);
                   toast.success("Story updated");
                 }}

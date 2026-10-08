@@ -349465,6 +349465,28 @@ router17.put("/api/admin/certificate-rules/:id", authenticateToken, requireAdmin
     res.status(500).json({ error: err2.message });
   }
 });
+router17.post("/api/admin/certificate-rules", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    const { title, title_hi, min_hours, min_reports, min_tasks, active } = req2.body;
+    const id3 = `rule-${Date.now()}`;
+    const result = await pool.query(
+      `INSERT INTO certificate_rules (id, title, title_hi, min_hours, min_reports, min_tasks, active, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) RETURNING *`,
+      [id3, title, title_hi || title, Number(min_hours || 0), Number(min_reports || 0), Number(min_tasks || 0), active !== false]
+    );
+    res.json({ success: true, rule: result.rows[0] });
+  } catch (err2) {
+    res.status(500).json({ error: err2.message });
+  }
+});
+router17.delete("/api/admin/certificate-rules/:id", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    await pool.query(`DELETE FROM certificate_rules WHERE id = $1`, [req2.params.id]);
+    res.json({ success: true, message: "Rule deleted" });
+  } catch (err2) {
+    res.status(500).json({ error: err2.message });
+  }
+});
 router17.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi } = req2.body;

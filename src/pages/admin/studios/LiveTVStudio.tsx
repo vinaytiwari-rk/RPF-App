@@ -20,7 +20,8 @@ import {
   ArrowUp,
   ArrowDown,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Pencil
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../../../data/liveTvDefaults";
@@ -102,8 +103,8 @@ export default function LiveTVStudio() {
       const res = await axios.get("/api/cms");
       const cms = res.data?.cms || res.data?.data || {};
 
-      // Live TV Channels (fallback to all 60+ authentic running defaults if empty)
-      if (Array.isArray(cms.liveTvChannels) && cms.liveTvChannels.length > 0) {
+      // Live TV Channels (respect saved array even if empty)
+      if (Array.isArray(cms.liveTvChannels)) {
         setTvChannels(cms.liveTvChannels);
       } else {
         setTvChannels(LIVE_TV_DEFAULTS);
@@ -114,8 +115,8 @@ export default function LiveTVStudio() {
         setTvLayout(cms.liveTvLayout);
       }
 
-      // Internet Radio Stations (fallback to authentic Akashvani & FM defaults if empty)
-      if (Array.isArray(cms.internetRadioStations) && cms.internetRadioStations.length > 0) {
+      // Internet Radio Stations (respect saved array even if empty)
+      if (Array.isArray(cms.internetRadioStations)) {
         setRadioStations(cms.internetRadioStations);
       } else {
         setRadioStations(DEFAULT_RADIO_STATIONS);
@@ -126,8 +127,8 @@ export default function LiveTVStudio() {
         setRadioLayout(cms.radioLayout);
       }
 
-      // E-Papers
-      if (Array.isArray(cms.epapers) && cms.epapers.length > 0) {
+      // E-Papers (respect saved array even if empty)
+      if (Array.isArray(cms.epapers)) {
         setEpapers(cms.epapers);
       } else {
         setEpapers([
@@ -264,6 +265,14 @@ export default function LiveTVStudio() {
       nextList[index] = nextList[targetIndex];
       nextList[targetIndex] = temp;
       setRadioStations(nextList);
+    } else {
+      const nextList = [...epapers];
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= nextList.length) return;
+      const temp = nextList[index];
+      nextList[index] = nextList[targetIndex];
+      nextList[targetIndex] = temp;
+      setEpapers(nextList);
     }
   };
 
@@ -483,17 +492,27 @@ export default function LiveTVStudio() {
                           <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                             {item.category || item.region || item.language || "General"}
                           </span>
-                          <div className="flex items-center gap-1.5">
-                            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                              isLive ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500 border border-slate-200"
-                            }`}>
+                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => setSelectedItem({ type: activeTab, data: item })}
+                              className="p-1 text-amber-600 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded transition"
+                              title="Edit stream details"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={() => handleToggleEnable(item.id)}
+                              className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition ${
+                                isLive ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500 border border-slate-200"
+                              }`}
+                            >
                               {isLive ? "Active" : "Disabled"}
-                            </span>
-                            <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                            </button>
+                            <div className="flex items-center border border-slate-200 rounded overflow-hidden bg-slate-50">
                               <button
                                 onClick={() => handleMoveItem(idx, "up")}
                                 disabled={idx === 0}
-                                className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-20"
+                                className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
                                 title="Move up"
                               >
                                 <ArrowUp className="h-3 w-3" />
@@ -501,12 +520,19 @@ export default function LiveTVStudio() {
                               <button
                                 onClick={() => handleMoveItem(idx, "down")}
                                 disabled={idx === currentItems.length - 1}
-                                className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-20"
+                                className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
                                 title="Move down"
                               >
                                 <ArrowDown className="h-3 w-3" />
                               </button>
                             </div>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              className="p-1 text-rose-500 hover:bg-rose-50 rounded transition"
+                              title="Delete stream"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
                           </div>
                         </div>
                         <h4 className="text-xs font-bold text-slate-800 truncate">{item.name}</h4>

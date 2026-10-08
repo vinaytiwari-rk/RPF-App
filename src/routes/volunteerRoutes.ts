@@ -50,6 +50,26 @@ router.put("/api/admin/certificate-rules/:id", authenticateToken, requireAdmin, 
     res.json({ success: true, rule: result.rows[0] });
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
+
+router.post("/api/admin/certificate-rules", authenticateToken, requireAdmin, async (req: any, res) => {
+  try {
+    const { title, title_hi, min_hours, min_reports, min_tasks, active } = req.body;
+    const id = `rule-${Date.now()}`;
+    const result = await pool.query(
+      `INSERT INTO certificate_rules (id, title, title_hi, min_hours, min_reports, min_tasks, active, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) RETURNING *`,
+      [id, title, title_hi || title, Number(min_hours || 0), Number(min_reports || 0), Number(min_tasks || 0), active !== false]
+    );
+    res.json({ success: true, rule: result.rows[0] });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+router.delete("/api/admin/certificate-rules/:id", authenticateToken, requireAdmin, async (req: any, res) => {
+  try {
+    await pool.query(`DELETE FROM certificate_rules WHERE id = $1`, [req.params.id]);
+    res.json({ success: true, message: "Rule deleted" });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
 router.post("/api/volunteer_tasks", authenticateToken, requireAdmin, async (req, res) => { try { const { volunteerId, titleEn, titleHi, descriptionEn, descriptionHi } = req.body; await pool.query('INSERT INTO volunteer_tasks ("volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", status) VALUES ($1, $2, $3, $4, $5, $6)', [volunteerId, titleEn, titleHi, descriptionEn, descriptionHi || 10, 'assigned']); res.json({ success: true, message: "Task assigned successfully" }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
 router.get("/api/volunteer_tasks", authenticateToken, async (req: any, res) => { try { const result = await pool.query('SELECT id, "volunteerId", "titleEn", "titleHi", "descriptionEn", "descriptionHi", status, "createdAt" FROM volunteer_tasks WHERE "volunteerId" = $1', [req.user.id]); res.json({ success: true, tasks: result.rows }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
 router.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin, async (req, res) => { try { const { id } = req.params; const { status } = req.body; const taskRes = await pool.query('UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId"', [status, id]); if (taskRes.rows.length > 0 && status === "completed") { await pool.query('UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2', [10, taskRes.rows[0].volunteerId]); await ensureEligibleCertificates(taskRes.rows[0].volunteerId); } res.json({ success: true, message: "Task status updated" }); } catch (error: any) { res.status(500).json({ error: error.message }); } });

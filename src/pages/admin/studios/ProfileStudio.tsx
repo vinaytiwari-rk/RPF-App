@@ -45,7 +45,62 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
 
-type SubTab = "profile_cms" | "roles" | "control_room" | "about_cms";
+type SubTab = "profile_cms" | "certificates" | "volunteer_rules" | "browser_settings" | "roles" | "control_room" | "about_cms";
+
+export interface CertificateRuleItem {
+  id: string;
+  title: string;
+  title_hi?: string;
+  min_hours: number;
+  min_reports: number;
+  min_tasks: number;
+  active: boolean;
+}
+
+export interface VolunteerRulesConfig {
+  minimumDutyMinutes: number;
+  maximumDutyHoursPerDay: number;
+  karmaPointsPerHour: number;
+  autoApproveReports: boolean;
+  geoFencingEnabled: boolean;
+  allowOfflineSync: boolean;
+}
+
+export interface BrowserSettingsConfig {
+  historyEnabled: boolean;
+  historyRetentionDays: number;
+  bookmarksEnabled: boolean;
+  dataSaverDefault: boolean;
+  desktopModeDefault: boolean;
+  allowExternalRedirect: boolean;
+  adBlockLite: boolean;
+}
+
+export const DEFAULT_CERTIFICATE_RULES: CertificateRuleItem[] = [
+  { id: "rule-1", title: "Jan Seva Mitra (Bronze)", title_hi: "जन सेवा मित्र", min_hours: 10, min_reports: 3, min_tasks: 2, active: true },
+  { id: "rule-2", title: "Seva Ratna (Silver)", title_hi: "सेवा रत्न", min_hours: 25, min_reports: 10, min_tasks: 5, active: true },
+  { id: "rule-3", title: "Samahit Pride (Gold)", title_hi: "समाहित गौरव", min_hours: 50, min_reports: 25, min_tasks: 10, active: true },
+  { id: "rule-4", title: "Corona Warrior Award", title_hi: "कोरोना योद्धा सम्मान", min_hours: 100, min_reports: 50, min_tasks: 20, active: true },
+];
+
+export const DEFAULT_VOLUNTEER_RULES: VolunteerRulesConfig = {
+  minimumDutyMinutes: 30,
+  maximumDutyHoursPerDay: 8,
+  karmaPointsPerHour: 15,
+  autoApproveReports: false,
+  geoFencingEnabled: true,
+  allowOfflineSync: true,
+};
+
+export const DEFAULT_BROWSER_SETTINGS: BrowserSettingsConfig = {
+  historyEnabled: true,
+  historyRetentionDays: 30,
+  bookmarksEnabled: true,
+  dataSaverDefault: false,
+  desktopModeDefault: false,
+  allowExternalRedirect: true,
+  adBlockLite: true,
+};
 
 export interface ProfileMetricItem {
   id: string;
@@ -218,6 +273,16 @@ export default function ProfileStudio() {
     };
   } | null>(null);
 
+  // 7. Certificates System State
+  const [certRules, setCertRules] = useState<CertificateRuleItem[]>(DEFAULT_CERTIFICATE_RULES);
+  const [editingCertRule, setEditingCertRule] = useState<CertificateRuleItem | null>(null);
+
+  // 8. Volunteer Rules State
+  const [volunteerRules, setVolunteerRules] = useState<VolunteerRulesConfig>(DEFAULT_VOLUNTEER_RULES);
+
+  // 9. Browser Settings State
+  const [browserSettings, setBrowserSettings] = useState<BrowserSettingsConfig>(DEFAULT_BROWSER_SETTINGS);
+
   const authHeader = useCallback(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
   // Load all data
@@ -225,7 +290,7 @@ export default function ProfileStudio() {
     if (!token) return;
     setLoading(true);
     try {
-      // 1. Fetch CMS config including profileConfig
+      // 1. Fetch CMS config including profileConfig, certificateRules, volunteerRules, browserSettings
       const cmsRes = await axios.get("/api/cms");
       const cms = cmsRes.data?.cms || cmsRes.data?.data || {};
       if (cms.profileConfig) {
@@ -241,6 +306,22 @@ export default function ProfileStudio() {
       }
       if (typeof cms.foundationAbout === "string") {
         setAboutDraft(cms.foundationAbout);
+      }
+      if (Array.isArray(cms.certificateRules) && cms.certificateRules.length > 0) {
+        setCertRules(cms.certificateRules);
+      } else {
+        try {
+          const certsRes = await axios.get("/api/certificate-rules", { headers: authHeader() });
+          if (Array.isArray(certsRes.data?.rules) && certsRes.data.rules.length > 0) {
+            setCertRules(certsRes.data.rules);
+          }
+        } catch { /* use defaults */ }
+      }
+      if (cms.volunteerRules) {
+        setVolunteerRules({ ...DEFAULT_VOLUNTEER_RULES, ...cms.volunteerRules });
+      }
+      if (cms.browserSettings) {
+        setBrowserSettings({ ...DEFAULT_BROWSER_SETTINGS, ...cms.browserSettings });
       }
 
       // 2. Fetch Users
@@ -277,27 +358,48 @@ export default function ProfileStudio() {
     void loadData();
   }, [loadData]);
 
-  // Save and publish profileConfig
+  // Save and publish profileConfig, certRules, volunteerRules, and browserSettings
   const handleSaveProfileConfig = async () => {
     if (!token) {
       toast.error("Admin session expired");
       return;
     }
     setActionBusy(true);
-    const toastId = toast.loading("Publishing Profile & Seva Impact layout...");
+    const toastId = toast.loading("Publishing Profile, Governance & Settings...");
     try {
+      const patch = {
+        profileConfig,
+        certificateRules: certRules,
+        volunteerRules,
+        browserSettings,
+      };
+
       const res = await axios.post(
         "/api/admin/control/cms/publish",
         {
-          patch: { profileConfig },
-          label: "Profile Studio: Updated Citizen Profile & Seva Impact Layout"
+          patch,
+          label: "Profile Studio: Updated Profile, Certificates, Volunteer Rules & Browser Settings"
         },
         { headers: authHeader() }
       );
       if (res.data?.success === false) throw new Error(res.data?.error || "Publish failed");
-      toast.success("Profile layout live across citizen apps!", { id: toastId });
+
+      // Background sync certificate rules to PostgreSQL
+      for (const rule of certRules) {
+        await axios.put(`/api/admin/certificate-rules/${rule.id}`, {
+          title: rule.title,
+          title_hi: rule.title_hi || rule.title,
+          min_hours: rule.min_hours,
+          min_reports: rule.min_reports,
+          min_tasks: rule.min_tasks,
+          active: rule.active
+        }, { headers: authHeader() }).catch(() => {});
+      }
+
+      window.dispatchEvent(new CustomEvent("samahit-admin-updated"));
+      toast.success("Profile, Certificates & Governance live on apps!", { id: toastId });
     } catch (e: any) {
-      toast.error(e?.response?.data?.error || "Failed to save profile layout", { id: toastId });
+      toast.error(e?.response?.data?.error || "Failed to save configuration", { id: toastId });
     } finally {
       setActionBusy(false);
     }
@@ -419,6 +521,66 @@ export default function ProfileStudio() {
     toast.success("Transparency notice added");
   };
 
+  const handleMoveLegalItem = (index: number, direction: "up" | "down") => {
+    const list = [...profileConfig.legalItems];
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= list.length) return;
+    const temp = list[index];
+    list[index] = list[targetIdx];
+    list[targetIdx] = temp;
+    setProfileConfig({ ...profileConfig, legalItems: list });
+  };
+
+  // Certificate Rule Handlers
+  const handleAddCertRule = () => {
+    const newRule: CertificateRuleItem = {
+      id: `rule-${Date.now()}`,
+      title: "New Recognition Award",
+      title_hi: "नया सम्मान प्रमाणपत्र",
+      min_hours: 10,
+      min_reports: 5,
+      min_tasks: 2,
+      active: true,
+    };
+    setCertRules([...certRules, newRule]);
+    setEditingCertRule(newRule);
+    toast.success("New certificate award added to draft");
+  };
+
+  const handleUpdateCertRule = (id: string, patch: Partial<CertificateRuleItem>) => {
+    setCertRules(certRules.map(r => r.id === id ? { ...r, ...patch } : r));
+    if (editingCertRule?.id === id) {
+      setEditingCertRule(prev => prev ? { ...prev, ...patch } : null);
+    }
+  };
+
+  const handleDeleteCertRule = async (id: string) => {
+    setCertRules(certRules.filter(r => r.id !== id));
+    if (editingCertRule?.id === id) setEditingCertRule(null);
+    try {
+      await axios.delete(`/api/admin/certificate-rules/${id}`, { headers: authHeader() });
+    } catch { /* fallback to cms patch */ }
+    toast.success("Certificate rule removed");
+  };
+
+  const handleToggleCertRuleActive = async (rule: CertificateRuleItem) => {
+    const updated = !rule.active;
+    setCertRules(certRules.map(r => r.id === rule.id ? { ...r, active: updated } : r));
+    try {
+      await axios.put(`/api/admin/certificate-rules/${rule.id}`, { active: updated }, { headers: authHeader() });
+    } catch { /* fallback to cms patch */ }
+  };
+
+  const handleMoveCertRule = (index: number, direction: "up" | "down") => {
+    const list = [...certRules];
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= list.length) return;
+    const temp = list[index];
+    list[index] = list[targetIdx];
+    list[targetIdx] = temp;
+    setCertRules(list);
+  };
+
   // User list filter for roles
   const filteredUsers = users.filter(u => {
     const q = userSearch.toLowerCase();
@@ -463,7 +625,7 @@ export default function ProfileStudio() {
               <RefreshCw className="h-3.5 w-3.5" /> Defaults
             </button>
           )}
-          {activeTab === "profile_cms" && (
+          {["profile_cms", "certificates", "volunteer_rules", "browser_settings"].includes(activeTab) && (
             <button
               onClick={handleSaveProfileConfig}
               disabled={actionBusy}
@@ -475,39 +637,63 @@ export default function ProfileStudio() {
         </div>
       </div>
 
-      {/* FOUR MAIN COMMAND TABS */}
-      <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
+      {/* COMMAND TABS */}
+      <div className="flex flex-wrap gap-2 bg-slate-100 p-1 rounded-xl">
         <button
           onClick={() => setActiveTab("profile_cms")}
-          className={`flex-1 text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2 ${
+          className={`px-3 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
             activeTab === "profile_cms" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <User className="h-4 w-4" /> Profile & Seva Impact CMS
+          <User className="h-3.5 w-3.5" /> Profile & Impact
+        </button>
+        <button
+          onClick={() => setActiveTab("certificates")}
+          className={`px-3 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
+            activeTab === "certificates" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Award className="h-3.5 w-3.5 text-amber-500" /> Certificates ({certRules.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("volunteer_rules")}
+          className={`px-3 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
+            activeTab === "volunteer_rules" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Activity className="h-3.5 w-3.5 text-emerald-600" /> Volunteer Duty Rules
+        </button>
+        <button
+          onClick={() => setActiveTab("browser_settings")}
+          className={`px-3 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
+            activeTab === "browser_settings" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Settings className="h-3.5 w-3.5 text-blue-600" /> Browser Settings
         </button>
         <button
           onClick={() => setActiveTab("roles")}
-          className={`flex-1 text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2 ${
+          className={`px-3 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
             activeTab === "roles" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <Key className="h-4 w-4" /> Role & Privilege Control ({users.length})
+          <Key className="h-3.5 w-3.5" /> Roles ({users.length})
         </button>
         <button
           onClick={() => setActiveTab("control_room")}
-          className={`flex-1 text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2 ${
+          className={`px-3 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
             activeTab === "control_room" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <Server className="h-4 w-4" /> System & Rollbacks ({versions.length})
+          <Server className="h-3.5 w-3.5" /> System ({versions.length})
         </button>
         <button
           onClick={() => setActiveTab("about_cms")}
-          className={`flex-1 text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2 ${
+          className={`px-3 py-2 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 ${
             activeTab === "about_cms" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <FileText className="h-4 w-4" /> Foundation About CMS
+          <FileText className="h-3.5 w-3.5" /> About CMS
         </button>
       </div>
 
@@ -928,9 +1114,28 @@ export default function ProfileStudio() {
                       >
                         {item.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                       </button>
+                      <div className="flex items-center border border-slate-200 rounded overflow-hidden bg-slate-50">
+                        <button
+                          onClick={() => handleMoveLegalItem(profileConfig.legalItems.findIndex(l => l.id === item.id), "up")}
+                          disabled={profileConfig.legalItems.findIndex(l => l.id === item.id) === 0}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move up"
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </button>
+                        <button
+                          onClick={() => handleMoveLegalItem(profileConfig.legalItems.findIndex(l => l.id === item.id), "down")}
+                          disabled={profileConfig.legalItems.findIndex(l => l.id === item.id) === profileConfig.legalItems.length - 1}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move down"
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </button>
+                      </div>
                       <button
                         onClick={() => handleDeleteLegalItem(item.id)}
                         className="p-1 text-rose-500 hover:bg-rose-50 rounded"
+                        title="Delete item"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -1042,6 +1247,405 @@ export default function ProfileStudio() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CERTIFICATES SYSTEM TAB */}
+      {activeTab === "certificates" && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-amber-500" />
+                <h2 className="text-base font-black text-slate-800">Certificates & Recognition Rules Command</h2>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Configure recognition titles, eligibility thresholds (duty hours, reports, tasks), active/deactivate status, and reordering.
+              </p>
+            </div>
+            <button
+              onClick={handleAddCertRule}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition shadow-xs"
+            >
+              <Plus className="h-4 w-4" /> Add Certificate Award
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {certRules.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs">No certificate rules configured. Click &apos;Add Certificate Award&apos; to create one.</div>
+            ) : (
+              certRules.map((rule, idx) => (
+                <div
+                  key={rule.id}
+                  className={`p-4 rounded-xl border transition flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                    rule.active ? "bg-white border-slate-200 hover:border-amber-300 shadow-2xs" : "bg-slate-50 border-slate-200 opacity-60"
+                  }`}
+                >
+                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                    <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 font-bold">
+                      <Award className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <input
+                          type="text"
+                          value={rule.title}
+                          onChange={e => handleUpdateCertRule(rule.id, { title: e.target.value })}
+                          className="text-xs font-bold text-slate-800 bg-transparent border-b border-dashed border-slate-300 hover:border-amber-500 focus:border-amber-500 px-1 py-0.5 focus:outline-hidden"
+                          placeholder="Certificate Title (e.g. Jan Seva Mitra)"
+                        />
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                          rule.active ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-200 text-slate-600"
+                        }`}>
+                          {rule.active ? "Active Award" : "Deactivated"}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-2">
+                        <label className="flex items-center gap-1.5 font-semibold">
+                          <Clock className="h-3.5 w-3.5 text-blue-500" />
+                          <span>Min Hours:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={rule.min_hours}
+                            onChange={e => handleUpdateCertRule(rule.id, { min_hours: Number(e.target.value) })}
+                            className="w-16 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-xs font-bold text-slate-700"
+                          />
+                        </label>
+                        <label className="flex items-center gap-1.5 font-semibold">
+                          <FileText className="h-3.5 w-3.5 text-emerald-500" />
+                          <span>Min Reports:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={rule.min_reports}
+                            onChange={e => handleUpdateCertRule(rule.id, { min_reports: Number(e.target.value) })}
+                            className="w-16 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-xs font-bold text-slate-700"
+                          />
+                        </label>
+                        <label className="flex items-center gap-1.5 font-semibold">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-purple-500" />
+                          <span>Min Tasks:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={rule.min_tasks}
+                            onChange={e => handleUpdateCertRule(rule.id, { min_tasks: Number(e.target.value) })}
+                            className="w-16 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-xs font-bold text-slate-700"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0 self-end md:self-center">
+                    <button
+                      onClick={() => handleToggleCertRuleActive(rule)}
+                      className={`p-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 ${
+                        rule.active
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                          : "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200"
+                      }`}
+                      title={rule.active ? "Deactivate" : "Activate"}
+                    >
+                      {rule.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                      <span className="hidden sm:inline">{rule.active ? "Active" : "Disabled"}</span>
+                    </button>
+
+                    <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                      <button
+                        onClick={() => handleMoveCertRule(idx, "up")}
+                        disabled={idx === 0}
+                        className="p-1.5 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                        title="Move Up"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveCertRule(idx, "down")}
+                        disabled={idx === certRules.length - 1}
+                        className="p-1.5 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                        title="Move Down"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => handleDeleteCertRule(rule.id)}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-lg transition"
+                      title="Delete Certificate Rule"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* VOLUNTEER RULES & DUTY SETTINGS TAB */}
+      {activeTab === "volunteer_rules" && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
+          <div className="border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-emerald-600" />
+              <h2 className="text-base font-black text-slate-800">Volunteer Duty & Activity Governance</h2>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
+              Configure session duration rules, daily limits, karma points multiplier formula, and report approval workflows.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+              <h3 className="text-xs font-black uppercase text-slate-700 tracking-wider">Duty Hours & Limits</h3>
+              
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">
+                  Minimum Duty Session Duration (Minutes)
+                </label>
+                <input
+                  type="number"
+                  min="5"
+                  max="120"
+                  value={volunteerRules.minimumDutyMinutes}
+                  onChange={e => setVolunteerRules({ ...volunteerRules, minimumDutyMinutes: Number(e.target.value) })}
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Sessions shorter than this are not counted toward certificate progress.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">
+                  Maximum Duty Hours Allowed per Day
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="24"
+                  value={volunteerRules.maximumDutyHoursPerDay}
+                  onChange={e => setVolunteerRules({ ...volunteerRules, maximumDutyHoursPerDay: Number(e.target.value) })}
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Cap to prevent fatigue and unrealistic logs.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">
+                  Seva Karma Points Formula (Points per completed hour)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={volunteerRules.karmaPointsPerHour}
+                  onChange={e => setVolunteerRules({ ...volunteerRules, karmaPointsPerHour: Number(e.target.value) })}
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Score multiplier credited upon verified completion.</p>
+              </div>
+            </div>
+
+            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+              <h3 className="text-xs font-black uppercase text-slate-700 tracking-wider">Verification & Policies</h3>
+
+              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800">Auto-Approve Duty Reports</h4>
+                  <p className="text-[11px] text-slate-500">Automatically accept volunteer field reports without manual HQ sign-off</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setVolunteerRules({ ...volunteerRules, autoApproveReports: !volunteerRules.autoApproveReports })}
+                  className={`p-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 ${
+                    volunteerRules.autoApproveReports
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}
+                >
+                  {volunteerRules.autoApproveReports ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  <span>{volunteerRules.autoApproveReports ? "Enabled" : "Disabled"}</span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800">Require Live Geo-Fencing</h4>
+                  <p className="text-[11px] text-slate-500">Capture and verify volunteer GPS coordinates during check-in / check-out</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setVolunteerRules({ ...volunteerRules, geoFencingEnabled: !volunteerRules.geoFencingEnabled })}
+                  className={`p-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 ${
+                    volunteerRules.geoFencingEnabled
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}
+                >
+                  {volunteerRules.geoFencingEnabled ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  <span>{volunteerRules.geoFencingEnabled ? "Enabled" : "Disabled"}</span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800">Offline Duty Sync</h4>
+                  <p className="text-[11px] text-slate-500">Allow volunteers in remote areas without signal to queue duty logs offline</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setVolunteerRules({ ...volunteerRules, allowOfflineSync: !volunteerRules.allowOfflineSync })}
+                  className={`p-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 ${
+                    volunteerRules.allowOfflineSync
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}
+                >
+                  {volunteerRules.allowOfflineSync ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  <span>{volunteerRules.allowOfflineSync ? "Enabled" : "Disabled"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BROWSER & CITIZEN APP SETTINGS TAB */}
+      {activeTab === "browser_settings" && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
+          <div className="border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-blue-600" />
+              <h2 className="text-base font-black text-slate-800">In-App Browser & Citizen App Governance</h2>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
+              Global privacy toggles, browsing history retention, bookmarks feature flag, data-saver defaults, and external redirect policy.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+              <h3 className="text-xs font-black uppercase text-slate-700 tracking-wider">Browser Privacy & History</h3>
+
+              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800">Browsing History Storage</h4>
+                  <p className="text-[11px] text-slate-500">Save visited portal links locally on citizen devices</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBrowserSettings({ ...browserSettings, historyEnabled: !browserSettings.historyEnabled })}
+                  className={`p-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 ${
+                    browserSettings.historyEnabled
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}
+                >
+                  {browserSettings.historyEnabled ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  <span>{browserSettings.historyEnabled ? "Enabled" : "Disabled"}</span>
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">
+                  History Retention Window (Days)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={browserSettings.historyRetentionDays}
+                  onChange={e => setBrowserSettings({ ...browserSettings, historyRetentionDays: Number(e.target.value) })}
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Auto-purge browser history older than this window.</p>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800">Bookmarks & Quick Favorites</h4>
+                  <p className="text-[11px] text-slate-500">Allow citizens to star and bookmark frequently used portal services</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBrowserSettings({ ...browserSettings, bookmarksEnabled: !browserSettings.bookmarksEnabled })}
+                  className={`p-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 ${
+                    browserSettings.bookmarksEnabled
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}
+                >
+                  {browserSettings.bookmarksEnabled ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  <span>{browserSettings.bookmarksEnabled ? "Enabled" : "Disabled"}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+              <h3 className="text-xs font-black uppercase text-slate-700 tracking-wider">Experience & Network Optimization</h3>
+
+              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800">Data Saver Mode Default</h4>
+                  <p className="text-[11px] text-slate-500">Compress imagery and disable auto-play media in poor signal regions</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBrowserSettings({ ...browserSettings, dataSaverDefault: !browserSettings.dataSaverDefault })}
+                  className={`p-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 ${
+                    browserSettings.dataSaverDefault
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}
+                >
+                  {browserSettings.dataSaverDefault ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  <span>{browserSettings.dataSaverDefault ? "Enabled" : "Disabled"}</span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800">External Browser Fallback</h4>
+                  <p className="text-[11px] text-slate-500">Prompt users to open device browser (Chrome) for heavy third-party portals</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBrowserSettings({ ...browserSettings, allowExternalRedirect: !browserSettings.allowExternalRedirect })}
+                  className={`p-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 ${
+                    browserSettings.allowExternalRedirect
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}
+                >
+                  {browserSettings.allowExternalRedirect ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  <span>{browserSettings.allowExternalRedirect ? "Enabled" : "Disabled"}</span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800">Safe Ad-Block Lite</h4>
+                  <p className="text-[11px] text-slate-500">Suppress popups and tracker scripts inside citizen in-app browser</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBrowserSettings({ ...browserSettings, adBlockLite: !browserSettings.adBlockLite })}
+                  className={`p-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 ${
+                    browserSettings.adBlockLite
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}
+                >
+                  {browserSettings.adBlockLite ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  <span>{browserSettings.adBlockLite ? "Enabled" : "Disabled"}</span>
+                </button>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
   CloudSun,
@@ -16,8 +16,6 @@ import {
   Plus,
   Trash2,
   Upload,
-  ExternalLink,
-  ChevronRight,
   TrendingUp,
   Fuel,
   Carrot,
@@ -25,13 +23,15 @@ import {
   Sun,
   Layers,
   Sparkles,
-  Link2,
-  CheckCircle2,
-  Radio,
   Sliders,
-  Type,
   Pencil,
-  Award
+  Award,
+  CheckCircle2,
+  Star,
+  MapPin,
+  ExternalLink,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
@@ -48,18 +48,60 @@ type ControlTab =
   | "impact"
   | "theme_layout";
 
-interface CarouselSlideItem {
+// 1. Weather Station Item
+export interface WeatherStationItem {
+  id: string;
+  cityName: string;
+  state: string;
+  provider: "open-meteo" | "weatherapi" | "custom_rss";
+  customUrl?: string;
+  isDefault: boolean;
+  active: boolean;
+}
+
+// 2. Live Market & Panchang Feed Item
+export interface MarketFeedItem {
+  id: string;
+  name: string;
+  category: "panchang" | "gold_silver" | "vegetable" | "fuel" | "mandi" | "custom";
+  providerType: "api" | "rss" | "scraper";
+  feedUrl: string;
+  description: string;
+  badge: string;
+  active: boolean;
+}
+
+// 3. Daily Thought Item
+export interface ThoughtItem {
+  id: string;
+  quote: string;
+  author: string;
+  active: boolean;
+  isCurrent: boolean;
+}
+
+// 4. Marquee News Item
+export interface MarqueeFeedItem {
+  id: string;
+  label: string;
+  type: "rss" | "custom_text";
+  feedUrl?: string;
+  customText?: string;
+  active: boolean;
+}
+
+// 5. Carousel Slide (Unified - No En/Hi division!)
+export interface CarouselSlideItem {
   id?: string;
-  titleEn: string;
-  titleHi?: string;
-  subEn: string;
-  subHi?: string;
+  title: string;
+  subtitle: string;
   image: string;
   order?: number;
   active?: boolean;
 }
 
-interface QuickAccessItem {
+// 7. Quick Access Item
+export interface QuickAccessItem {
   id: string;
   title: string;
   subtitle: string;
@@ -69,7 +111,8 @@ interface QuickAccessItem {
   accentColor?: string;
 }
 
-interface ImpactMetricItem {
+// 8. Field Impact Items (Unified - No En/Hi division!)
+export interface ImpactMetricItem {
   id: string;
   title: string;
   subtitle: string;
@@ -80,8 +123,7 @@ interface ImpactMetricItem {
 
 export interface ImpactStatItem {
   id: string;
-  labelEn: string;
-  labelHi: string;
+  label: string;
   value: number;
   suffix: string;
   iconName: string;
@@ -91,13 +133,10 @@ export interface ImpactStatItem {
 export interface ImpactDomainItem {
   id: string;
   tab: "all" | "community" | "care" | "active";
-  titleEn: string;
-  titleHi: string;
-  descEn: string;
-  descHi: string;
+  title: string;
+  description: string;
+  badge: string;
   iconName: string;
-  badgeEn: string;
-  badgeHi: string;
   color?: string;
   enabled: boolean;
 }
@@ -117,56 +156,138 @@ export default function HomeStudio() {
     currentIcon: string;
   } | null>(null);
 
-  // Editing state for Impact Domain Modal
+  // Editing Modals / Dialogs for Complex Entities
+  const [editingWeatherStation, setEditingWeatherStation] = useState<WeatherStationItem | null>(null);
+  const [editingMarketFeed, setEditingMarketFeed] = useState<MarketFeedItem | null>(null);
+  const [editingThought, setEditingThought] = useState<ThoughtItem | null>(null);
+  const [editingMarquee, setEditingMarquee] = useState<MarqueeFeedItem | null>(null);
   const [editingDomain, setEditingDomain] = useState<ImpactDomainItem | null>(null);
 
-  // Complete CMS State
-  const [cms, setCms] = useState<Record<string, any>>({});
-
-  // 1. Weather Controls
+  // 1. Weather Controls & Dynamic Stations List
+  const [weatherMasterEnabled, setWeatherMasterEnabled] = useState(true);
+  const [weatherStations, setWeatherStations] = useState<WeatherStationItem[]>([
+    { id: "ws-bhopal", cityName: "Bhopal", state: "Madhya Pradesh", provider: "open-meteo", isDefault: true, active: true },
+    { id: "ws-indore", cityName: "Indore", state: "Madhya Pradesh", provider: "open-meteo", isDefault: false, active: true },
+    { id: "ws-gwalior", cityName: "Gwalior", state: "Madhya Pradesh", provider: "open-meteo", isDefault: false, active: true },
+    { id: "ws-jabalpur", cityName: "Jabalpur", state: "Madhya Pradesh", provider: "open-meteo", isDefault: false, active: true },
+    { id: "ws-delhi", cityName: "Delhi", state: "Delhi NCR", provider: "open-meteo", isDefault: false, active: true }
+  ]);
   const [weatherConfig, setWeatherConfig] = useState({
-    enabled: true,
     defaultCity: "Bhopal",
-    apiProvider: "open-meteo", // open-meteo or weatherapi
+    apiProvider: "open-meteo",
     customApiKey: "",
     refreshIntervalMinutes: 15
   });
 
-  // 2. Market & Panchang Controls
-  const [marketConfig, setMarketConfig] = useState({
-    enabled: true,
-    panchangEnabled: true,
-    goldSilverEnabled: true,
-    fuelEnabled: true,
-    mandiEnabled: true,
-    vegetableEnabled: true,
-    mandiRssFeedUrl: "https://agmarknet.gov.in/mandi-rss",
-    fuelApiUrl: "https://api.rpfoundation.org/fuel-rates",
-    autoDetectCity: true
-  });
+  // 2. Live Market & Panchang Controls & Dynamic Feeds List
+  const [marketMasterEnabled, setMarketMasterEnabled] = useState(true);
+  const [marketFeeds, setMarketFeeds] = useState<MarketFeedItem[]>([
+    {
+      id: "feed-panchang",
+      name: "Drik Panchang & Vedic Tithi",
+      category: "panchang",
+      providerType: "api",
+      feedUrl: "https://api.drikpanchang.com/v1/tithi",
+      description: "Tithi, Samvat, Sunrise/Sunset, Rahukaal & Abhijit Muhurat",
+      badge: "वैदिक • Live",
+      active: true
+    },
+    {
+      id: "feed-gold-silver",
+      name: "Gold & Silver Bullion Rates",
+      category: "gold_silver",
+      providerType: "api",
+      feedUrl: "https://api.ibja.co/rates",
+      description: "24K Gold, 22K Gold & Silver 1kg IBJA Benchmarks",
+      badge: "IBJA Benchmark",
+      active: true
+    },
+    {
+      id: "feed-vegetables",
+      name: "Vegetable Mandi Prices",
+      category: "vegetable",
+      providerType: "rss",
+      feedUrl: "https://mpmandiboard.gov.in/prices-rss",
+      description: "Potato, Onion, Tomato & Seasonal Vegetables per KG",
+      badge: "APMC Mandi",
+      active: true
+    },
+    {
+      id: "feed-fuel",
+      name: "Petrol, Diesel & LPG Fuel Rates",
+      category: "fuel",
+      providerType: "api",
+      feedUrl: "https://api.rpfoundation.org/fuel-rates",
+      description: "Petrol, Diesel, Domestic LPG & CNG city rates",
+      badge: "IOCL / PPAC",
+      active: true
+    },
+    {
+      id: "feed-mandi",
+      name: "Crops & Pulses Mandi Rates",
+      category: "mandi",
+      providerType: "rss",
+      feedUrl: "https://agmarknet.gov.in/mandi-rss",
+      description: "Wheat, Soybean, Mustard, Chana & Grain MSP Rates",
+      badge: "Agmarknet (Govt)",
+      active: true
+    }
+  ]);
 
-  // 3. Thought of the Day Controls
-  const [thoughtConfig, setThoughtConfig] = useState({
-    enabled: true,
-    feedMode: "manual", // manual | api | rss
-    apiUrl: "https://zenquotes.io/api/today",
-    activeQuote: "उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।",
-    author: "स्वामी विवेकानंद"
-  });
+  // 3. Thought of the Day Controls & Dynamic Quotes List
+  const [thoughtMasterEnabled, setThoughtMasterEnabled] = useState(true);
+  const [thoughtList, setThoughtList] = useState<ThoughtItem[]>([
+    {
+      id: "th-1",
+      quote: "उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।",
+      author: "स्वामी विवेकानंद",
+      active: true,
+      isCurrent: true
+    },
+    {
+      id: "th-2",
+      quote: "सत्य और अहिंसा ही मानव जीवन के सर्वोच्च आदर्श हैं।",
+      author: "महात्मा गांधी",
+      active: true,
+      isCurrent: false
+    },
+    {
+      id: "th-3",
+      quote: "सेवा ही परमो धर्म: — जन कल्याण से बड़ा कोई पुण्य नहीं।",
+      author: "रोहित पंडित",
+      active: true,
+      isCurrent: false
+    }
+  ]);
+  const [thoughtRssUrl, setThoughtRssUrl] = useState("https://zenquotes.io/api/today");
 
-  // 4. Marquee Controls
-  const [marqueeConfig, setMarqueeConfig] = useState({
-    enabled: true,
-    ticker1Enabled: true,
-    ticker1Label: "PIB News",
-    ticker1FeedUrl: "https://pib.gov.in/RssMain.aspx?ModId=6&Lang=2",
-    ticker2Enabled: true,
-    ticker2Label: "MPInfo",
-    ticker2FeedUrl: "https://mpinfo.org/Home/NewsFeedRSS",
-    customAlertText: "Latest verified foundation initiatives and emergency advisories."
-  });
+  // 4. Marquee News Controls & Dynamic Items List
+  const [marqueeMasterEnabled, setMarqueeMasterEnabled] = useState(true);
+  const [marqueeList, setMarqueeList] = useState<MarqueeFeedItem[]>([
+    {
+      id: "mq-pib",
+      label: "PIB Verified National News",
+      type: "rss",
+      feedUrl: "https://pib.gov.in/RssMain.aspx?ModId=6&Lang=2",
+      active: true
+    },
+    {
+      id: "mq-mpinfo",
+      label: "MPInfo State Governance & Seva News",
+      type: "rss",
+      feedUrl: "https://mpinfo.org/Home/NewsFeedRSS",
+      active: true
+    },
+    {
+      id: "mq-alert",
+      label: "Emergency Citizen Advisory",
+      type: "custom_text",
+      customText: "Latest verified foundation initiatives and emergency advisories.",
+      active: true
+    }
+  ]);
 
-  // 5. Carousel Slides
+  // 5. Carousel Slides (Unified single fields)
   const [slides, setSlides] = useState<CarouselSlideItem[]>([]);
   const [selectedSlideIndex, setSelectedSlideIndex] = useState<number>(0);
 
@@ -174,26 +295,28 @@ export default function HomeStudio() {
   const [visionConfig, setVisionConfig] = useState({
     heading: "Our Vision & Leadership",
     subHeading: "Empowering Communities Through Direct Ground Action",
-    narrative: "RP Foundation is built on an interconnected model of social development—uniting accessible healthcare, sustainable employment, women’s self-reliance, and direct grievance resolution.",
+    narrative:
+      "RP Foundation is built on an interconnected model of social development—uniting accessible healthcare, sustainable employment, women’s self-reliance, and direct grievance resolution.",
     iconName: "RP_LOGO",
     targetRoute: "/vision-goals",
     active: true,
     founderName: "Rohit Pandit",
     founderDesignation: "Founder & Social Worker",
-    founderMessage: "True service begins when we reach out to those in need with humility, resolve, and unyielding commitment."
+    founderMessage:
+      "True service begins when we reach out to those in need with humility, resolve, and unyielding commitment."
   });
 
   // 7. Quick Access Grid
   const [quickAccessItems, setQuickAccessItems] = useState<QuickAccessItem[]>([]);
 
-  // 8. Field Impact (Counters & Domains)
+  // 8. Field Impact (Counters, Domains & Bottom Strip)
   const [impactMetrics, setImpactMetrics] = useState<ImpactMetricItem[]>([]);
   const [impactStats, setImpactStats] = useState<ImpactStatItem[]>([]);
   const [impactDomains, setImpactDomains] = useState<ImpactDomainItem[]>([]);
 
-  // 9. Theme & Layout Template Samples
+  // 9. Theme & Layout Config
   const [themeConfig, setThemeConfig] = useState({
-    templatePreset: "classic_saffron", // classic_saffron | royal_navy | forest_emerald | minimal_white
+    templatePreset: "classic_saffron",
     primaryColor: "#D97706",
     secondaryColor: "#167C5A",
     backgroundColor: "#FFF9EF",
@@ -210,56 +333,96 @@ export default function HomeStudio() {
     try {
       const res = await axios.get("/api/cms");
       const d = res.data?.cms || res.data?.data || {};
-      setCms(d);
 
-      // Weather
-      if (d.weatherConfig) setWeatherConfig(prev => ({ ...prev, ...d.weatherConfig }));
+      // 1. Weather
+      if (d.weatherConfig) {
+        setWeatherMasterEnabled(d.weatherConfig.enabled !== false);
+        setWeatherConfig(prev => ({ ...prev, ...d.weatherConfig }));
+        if (Array.isArray(d.weatherConfig.stations) && d.weatherConfig.stations.length > 0) {
+          setWeatherStations(d.weatherConfig.stations);
+        }
+      }
 
-      // Market & Panchang
-      if (d.marketConfig) setMarketConfig(prev => ({ ...prev, ...d.marketConfig }));
+      // 2. Market & Panchang
+      if (d.marketConfig) {
+        setMarketMasterEnabled(d.marketConfig.enabled !== false);
+        if (Array.isArray(d.marketConfig.marketItems) && d.marketConfig.marketItems.length > 0) {
+          setMarketFeeds(d.marketConfig.marketItems);
+        }
+      }
 
-      // Thought of the Day
+      // 3. Thought of the Day
       if (d.thoughtConfig) {
-        setThoughtConfig(prev => ({ ...prev, ...d.thoughtConfig }));
+        setThoughtMasterEnabled(d.thoughtConfig.enabled !== false);
+        if (Array.isArray(d.thoughtConfig.thoughts) && d.thoughtConfig.thoughts.length > 0) {
+          setThoughtList(d.thoughtConfig.thoughts);
+        } else if (d.thoughtConfig.activeQuote) {
+          setThoughtList(prev => [
+            {
+              id: "th-active",
+              quote: d.thoughtConfig.activeQuote,
+              author: d.thoughtConfig.author || "Daily Thought",
+              active: true,
+              isCurrent: true
+            },
+            ...prev.filter(t => t.id !== "th-active")
+          ]);
+        }
+        if (d.thoughtConfig.apiUrl) setThoughtRssUrl(d.thoughtConfig.apiUrl);
       } else if (d.quoteOfTheDay || d.quoteOfTheDayHi || d.quoteOfTheDayEn) {
-        setThoughtConfig(prev => ({
-          ...prev,
-          activeQuote: d.quoteOfTheDay || d.quoteOfTheDayHi || d.quoteOfTheDayEn,
-          author: d.quoteAuthor || "Daily Thought"
-        }));
+        const quoteText = d.quoteOfTheDay || d.quoteOfTheDayHi || d.quoteOfTheDayEn;
+        setThoughtList(prev => [
+          {
+            id: "th-active",
+            quote: quoteText,
+            author: d.quoteAuthor || "Daily Thought",
+            active: true,
+            isCurrent: true
+          },
+          ...prev.filter(t => t.id !== "th-active")
+        ]);
       }
 
-      // Marquees
+      // 4. Marquees
       if (d.marqueeConfig) {
-        setMarqueeConfig(prev => ({ ...prev, ...d.marqueeConfig }));
-      } else if (d.helplinesMarquee || d.alertBanner || d.alertBannerHi) {
-        setMarqueeConfig(prev => ({
-          ...prev,
-          customAlertText: d.alertBanner || d.alertBannerHi || d.alertBannerEn || prev.customAlertText
-        }));
+        setMarqueeMasterEnabled(d.marqueeConfig.enabled !== false);
+        if (Array.isArray(d.marqueeConfig.marqueeItems) && d.marqueeConfig.marqueeItems.length > 0) {
+          setMarqueeList(d.marqueeConfig.marqueeItems);
+        }
       }
 
-      // Carousel Slides
-      if (Array.isArray(d.carouselSlides) && d.carouselSlides.length) {
-        setSlides(d.carouselSlides);
+      // 5. Carousel Slides (Unified single fields)
+      if (Array.isArray(d.carouselSlides) && d.carouselSlides.length > 0) {
+        setSlides(
+          d.carouselSlides.map((s: any, idx: number) => ({
+            id: s.id || `slide-${idx}`,
+            title: s.title || s.titleEn || s.titleHi || "Initiative",
+            subtitle: s.subtitle || s.subEn || s.subHi || "",
+            image: s.image || "/assets/mega_camp_banner.png",
+            order: s.order ?? idx,
+            active: s.active !== false
+          }))
+        );
       } else {
         setSlides([
           {
-            titleEn: "Together, We Build a Better Tomorrow",
-            subEn: "Empowering lives. Strengthening communities.",
+            id: "s1",
+            title: "Together, We Build a Better Tomorrow",
+            subtitle: "Empowering lives. Strengthening communities.",
             image: "/assets/mega_camp_banner.png",
             active: true
           },
           {
-            titleEn: "Building a Better Tomorrow for Every Citizen",
-            subEn: "We create healthier, stronger, and empowered communities.",
+            id: "s2",
+            title: "Building a Better Tomorrow for Every Citizen",
+            subtitle: "We create healthier, stronger, and empowered communities.",
             image: "/assets/water_pump_camp.png",
             active: true
           }
         ]);
       }
 
-      // Vision & Leadership
+      // 6. Vision & Leadership
       if (d.visionConfig) {
         setVisionConfig(prev => ({ ...prev, ...d.visionConfig }));
       } else {
@@ -271,9 +434,19 @@ export default function HomeStudio() {
         }));
       }
 
-      // Quick Access
-      if (Array.isArray(d.quickAccessItems) && d.quickAccessItems.length) {
-        setQuickAccessItems(d.quickAccessItems);
+      // 7. Quick Access Grid
+      if (Array.isArray(d.quickAccessItems) && d.quickAccessItems.length > 0) {
+        setQuickAccessItems(
+          d.quickAccessItems.map((q: any) => ({
+            id: q.id,
+            title: q.title || "Service",
+            subtitle: q.subtitle || "",
+            icon: q.icon || "Compass",
+            route: q.route || "/explore",
+            active: q.active !== false,
+            accentColor: q.accentColor || "#167C5A"
+          }))
+        );
       } else {
         setQuickAccessItems([
           { id: "qa-1", title: "Jan Seva Card", subtitle: "Your digital service identity & welfare benefit card", icon: "BadgePlus", route: "/jan-seva-card", active: true, accentColor: "#D97706" },
@@ -285,8 +458,56 @@ export default function HomeStudio() {
         ]);
       }
 
-      // Field Impact
-      if (Array.isArray(d.impactMetrics) && d.impactMetrics.length) {
+      // 8. Field Impact: Master KPI Counters (Unified)
+      if (Array.isArray(d.impactStats) && d.impactStats.length > 0) {
+        setImpactStats(
+          d.impactStats.map((st: any) => ({
+            id: st.id,
+            label: st.label || st.labelEn || st.labelHi || "Impact Metric",
+            value: Number(st.value) || 0,
+            suffix: st.suffix || "+",
+            iconName: st.iconName || "Award",
+            enabled: st.enabled !== false
+          }))
+        );
+      } else {
+        setImpactStats([
+          { id: "cards_issued", label: "Jan Seva Cards", value: 66505, suffix: "+", iconName: "Award", enabled: true },
+          { id: "health_camps", label: "Health & Eye Camps", value: 150, suffix: "+", iconName: "Stethoscope", enabled: true },
+          { id: "volunteers", label: "Volunteers Network", value: 2400, suffix: "+", iconName: "Users", enabled: true },
+          { id: "jobs_empowered", label: "Jobs & Livelihood", value: 1800, suffix: "+", iconName: "Briefcase", enabled: true }
+        ]);
+      }
+
+      // 8. Field Impact: Seva Domains (Unified)
+      if (Array.isArray(d.impactDomains) && d.impactDomains.length > 0) {
+        setImpactDomains(
+          d.impactDomains.map((dm: any) => ({
+            id: dm.id,
+            tab: dm.tab || "active",
+            title: dm.title || dm.titleEn || dm.titleHi || "Field Initiative",
+            description: dm.description || dm.descEn || dm.descHi || "",
+            badge: dm.badge || dm.badgeEn || dm.badgeHi || "Ground Seva",
+            iconName: dm.iconName || "Sparkles",
+            color: dm.color || "emerald",
+            enabled: dm.enabled !== false
+          }))
+        );
+      } else {
+        setImpactDomains([
+          { id: "sanitation", tab: "active", title: "Sanitation & Clean Environment Drive", description: "Mass cleanliness drives, plastic-free campaigns, and public sanitation facilities.", iconName: "Trash2", badge: "Clean Environment", color: "emerald", enabled: true },
+          { id: "water", tab: "care", title: "Clean Drinking Water Supply", description: "Installing handpumps, clean RO water systems, and deploying water tankers.", iconName: "Droplets", badge: "Water Relief", color: "sky", enabled: true },
+          { id: "jobs", tab: "active", title: "Jobs for Unemployed Youth & Women", description: "Mega Rojgar Melas, direct company hiring drives, and micro-entrepreneurship.", iconName: "Briefcase", badge: "Livelihood", color: "amber", enabled: true },
+          { id: "pink-erickshaw", tab: "active", title: "Pink E-Rickshaw Empowerment", description: "Subsidized eco-friendly e-rickshaws to women for financial independence.", iconName: "Heart", badge: "Women Power", color: "rose", enabled: true },
+          { id: "skills", tab: "active", title: "Skills Training & Vocational Courses", description: "Free tailoring units, computer literacy centers, and vocational workshops.", iconName: "Wrench", badge: "Skill Development", color: "purple", enabled: true },
+          { id: "health", tab: "care", title: "Free Health Services & Emergency Care", description: "Mega Health Camps, free medicine distribution, and ambulance aid.", iconName: "Stethoscope", badge: "Healthcare", color: "red", enabled: true },
+          { id: "welfare", tab: "care", title: "Helping Poor & Downtrodden People", description: "Ration kits, winter blankets, and disaster emergency relief.", iconName: "HandHeart", badge: "Welfare Relief", color: "emerald", enabled: true },
+          { id: "education", tab: "community", title: "Education Services & Youth Mentorship", description: "Free books, stationery, evening tuition classes for children.", iconName: "GraduationCap", badge: "Youth Education", color: "indigo", enabled: true }
+        ]);
+      }
+
+      // 8. Field Impact: Bottom Strip
+      if (Array.isArray(d.impactMetrics) && d.impactMetrics.length > 0) {
         setImpactMetrics(d.impactMetrics);
       } else {
         setImpactMetrics([
@@ -296,130 +517,7 @@ export default function HomeStudio() {
         ]);
       }
 
-      // 4 Master Counters & 8 Seva Domains
-      if (Array.isArray(d.impactStats) && d.impactStats.length) {
-        setImpactStats(d.impactStats);
-      } else {
-        setImpactStats([
-          { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: 66505, suffix: "+", iconName: "Award", enabled: true },
-          { id: "health_camps", labelEn: "Health & Eye Camps", labelHi: "स्वास्थ्य एवं नेत्र शिविर", value: 150, suffix: "+", iconName: "Stethoscope", enabled: true },
-          { id: "volunteers", labelEn: "Volunteers Network", labelHi: "सक्रिय स्वयंसेवक", value: 2400, suffix: "+", iconName: "Users", enabled: true },
-          { id: "jobs_empowered", labelEn: "Jobs & Livelihood", labelHi: "रोजगार व आजीविका", value: 1800, suffix: "+", iconName: "Briefcase", enabled: true }
-        ]);
-      }
-
-      if (Array.isArray(d.impactDomains) && d.impactDomains.length) {
-        setImpactDomains(d.impactDomains);
-      } else {
-        setImpactDomains([
-          {
-            id: "sanitation",
-            tab: "active",
-            titleEn: "Sanitation & Clean Environment Drive",
-            titleHi: "स्वच्छता अभियान व प्रसाधन केंद्र",
-            descEn: "Mass cleanliness drives, plastic-free campaigns, and public sanitation facilities.",
-            descHi: "ग्रामीण व शहरी बस्तियों में वृहद स्वच्छता अभियान एवं प्रसाधन केंद्र।",
-            iconName: "Trash2",
-            badgeEn: "Clean Environment",
-            badgeHi: "पर्यावरण व स्वच्छता",
-            color: "emerald",
-            enabled: true
-          },
-          {
-            id: "water",
-            tab: "care",
-            titleEn: "Clean Drinking Water Supply",
-            titleHi: "शुद्ध पेयजल व जल संरक्षण",
-            descEn: "Installing handpumps, clean RO water systems, and deploying water tankers.",
-            descHi: "जल संकटग्रस्त क्षेत्रों में हैंडपंप स्थापना, शुद्ध आरओ प्लांट व टैंकर आपूर्ति।",
-            iconName: "Droplets",
-            badgeEn: "Water Relief",
-            badgeHi: "पेयजल आपूर्ति",
-            color: "sky",
-            enabled: true
-          },
-          {
-            id: "jobs",
-            tab: "active",
-            titleEn: "Jobs for Unemployed Youth & Women",
-            titleHi: "रोजगार मेला व महिला आजीविका",
-            descEn: "Mega Rojgar Melas, direct company hiring drives, and micro-entrepreneurship.",
-            descHi: "बेरोजगार युवाओं के लिए रोजगार मेले, सीधी भर्ती ड्राइव व स्वरोजगार।",
-            iconName: "Briefcase",
-            badgeEn: "Livelihood",
-            badgeHi: "रोजगार अवसर",
-            color: "amber",
-            enabled: true
-          },
-          {
-            id: "pink-erickshaw",
-            tab: "active",
-            titleEn: "Pink E-Rickshaw Empowerment",
-            titleHi: "पिंक ई-रिक्शा योजना (महिला स्वावलंबन)",
-            descEn: "Providing subsidized eco-friendly e-rickshaws to women for financial independence.",
-            descHi: "महिलाओं को ई-रिक्शा स्वामित्व प्रदान कर आर्थिक स्वतंत्रता व सुरक्षित परिवहन।",
-            iconName: "Heart",
-            badgeEn: "Women Power",
-            badgeHi: "महिला स्वावलंबन",
-            color: "rose",
-            enabled: true
-          },
-          {
-            id: "skills",
-            tab: "active",
-            titleEn: "Skills Training & Vocational Courses",
-            titleHi: "कौशल विकास व वोकेशनल ट्रेनिंग",
-            descEn: "Free tailoring units, computer literacy centers, and electrician workshops.",
-            descHi: "निःशुल्क सिलाई-कढ़ाई केंद्र, कंप्यूटर साक्षरता, मोबाइल रिपेयरिंग कोर्स।",
-            iconName: "Wrench",
-            badgeEn: "Skill Development",
-            badgeHi: "कौशल विकास",
-            color: "purple",
-            enabled: true
-          },
-          {
-            id: "health",
-            tab: "care",
-            titleEn: "Free Health Services & Emergency Care",
-            titleHi: "निःशुल्क स्वास्थ्य सेवा व चिकित्सा शिविर",
-            descEn: "Conducting Mega Health Camps, free medicine distribution, and ambulance aid.",
-            descHi: "निःशुल्क स्वास्थ्य जांच शिविर, दवा वितरण, इमरजेंसी ब्लड डोनेशन नेटवर्क।",
-            iconName: "Stethoscope",
-            badgeEn: "Healthcare",
-            badgeHi: "निःशुल्क चिकित्सा",
-            color: "red",
-            enabled: true
-          },
-          {
-            id: "welfare",
-            tab: "care",
-            titleEn: "Helping Poor & Downtrodden People",
-            titleHi: "निराश्रित व वंचित वर्ग कल्याण",
-            descEn: "Distributing ration kits, winter blankets, and disaster emergency relief.",
-            descHi: "जरूरतमंद परिवारों को राशन किट, शीतकालीन कंबल, आपदा राहत सामग्रियां।",
-            iconName: "HandHeart",
-            badgeEn: "Welfare Relief",
-            badgeHi: "जन सेवा सहायता",
-            color: "emerald",
-            enabled: true
-          },
-          {
-            id: "education",
-            tab: "community",
-            titleEn: "Education Services & Youth Mentorship",
-            titleHi: "निःशुल्क शिक्षा व बाल कल्याण",
-            descEn: "Providing free books, stationery, evening tuition classes for children.",
-            descHi: "वंचित बच्चों हेतु निःशुल्क पाठ्य सामग्री, शाम की कोचिंग कक्षाएं।",
-            iconName: "GraduationCap",
-            badgeEn: "Youth Education",
-            badgeHi: "बाल शिक्षा सपोर्ट",
-            color: "indigo",
-            enabled: true
-          }
-        ]);
-      }
-
-      // Theme
+      // 9. Theme & Layout
       if (d.themeConfig) setThemeConfig(prev => ({ ...prev, ...d.themeConfig }));
     } catch {
       toast.error("Failed to load Home configuration");
@@ -432,7 +530,7 @@ export default function HomeStudio() {
     void loadCmsData();
   }, [loadCmsData]);
 
-  // Direct Image Upload Handler
+  // Image Upload Handler
   const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -464,7 +562,7 @@ export default function HomeStudio() {
     }
   };
 
-  // Save All Changes to Live Application via /api/admin/control/cms/publish
+  // Save All Changes to Live Application - Safe bidirectional mapping for complete backwards compatibility
   const handleSaveAll = async () => {
     if (!token) {
       toast.error("Admin session expired. Please sign in.");
@@ -474,30 +572,115 @@ export default function HomeStudio() {
     setSaving(true);
     const toastId = toast.loading("Publishing all Home Supreme updates live...");
     try {
+      const activeCurrentThought = thoughtList.find(t => t.isCurrent && t.active) || thoughtList.find(t => t.active) || thoughtList[0];
+
+      // Calculate backwards compatible boolean flags from market items
+      const panchangItem = marketFeeds.find(f => f.category === "panchang");
+      const goldSilverItem = marketFeeds.find(f => f.category === "gold_silver");
+      const vegItem = marketFeeds.find(f => f.category === "vegetable");
+      const fuelItem = marketFeeds.find(f => f.category === "fuel");
+      const mandiItem = marketFeeds.find(f => f.category === "mandi");
+
+      const defaultWeatherStation = weatherStations.find(s => s.isDefault) || weatherStations[0];
+
       const patch = {
-        weatherConfig,
-        marketConfig,
-        thoughtConfig,
-        quoteOfTheDay: thoughtConfig.activeQuote,
-        quoteOfTheDayHi: thoughtConfig.activeQuote,
-        quoteOfTheDayEn: thoughtConfig.activeQuote,
-        quoteAuthor: thoughtConfig.author,
-        marqueeConfig,
-        alertBanner: marqueeConfig.customAlertText,
-        alertBannerHi: marqueeConfig.customAlertText,
-        alertBannerEn: marqueeConfig.customAlertText,
-        carouselSlides: slides,
+        // 1. Weather
+        weatherConfig: {
+          ...weatherConfig,
+          enabled: weatherMasterEnabled,
+          defaultCity: defaultWeatherStation?.cityName || weatherConfig.defaultCity,
+          stations: weatherStations
+        },
+
+        // 2. Market & Panchang
+        marketConfig: {
+          enabled: marketMasterEnabled,
+          panchangEnabled: panchangItem ? panchangItem.active : true,
+          goldSilverEnabled: goldSilverItem ? goldSilverItem.active : true,
+          vegetableEnabled: vegItem ? vegItem.active : true,
+          fuelEnabled: fuelItem ? fuelItem.active : true,
+          mandiEnabled: mandiItem ? mandiItem.active : true,
+          mandiRssFeedUrl: mandiItem?.feedUrl || "https://agmarknet.gov.in/mandi-rss",
+          fuelApiUrl: fuelItem?.feedUrl || "https://api.rpfoundation.org/fuel-rates",
+          marketItems: marketFeeds
+        },
+
+        // 3. Thought of the Day
+        thoughtConfig: {
+          enabled: thoughtMasterEnabled,
+          apiUrl: thoughtRssUrl,
+          activeQuote: activeCurrentThought?.quote || "",
+          author: activeCurrentThought?.author || "Daily Thought",
+          thoughts: thoughtList
+        },
+        quoteOfTheDay: activeCurrentThought?.quote || "",
+        quoteOfTheDayHi: activeCurrentThought?.quote || "",
+        quoteOfTheDayEn: activeCurrentThought?.quote || "",
+        quoteAuthor: activeCurrentThought?.author || "Daily Thought",
+
+        // 4. Marquee News
+        marqueeConfig: {
+          enabled: marqueeMasterEnabled,
+          marqueeItems: marqueeList,
+          ticker1Enabled: marqueeList[0]?.active ?? true,
+          ticker1FeedUrl: marqueeList[0]?.feedUrl ?? "",
+          ticker2Enabled: marqueeList[1]?.active ?? true,
+          ticker2FeedUrl: marqueeList[1]?.feedUrl ?? "",
+          customAlertText: marqueeList.find(m => m.type === "custom_text")?.customText || ""
+        },
+        alertBanner: marqueeList.find(m => m.type === "custom_text")?.customText || "",
+        alertBannerHi: marqueeList.find(m => m.type === "custom_text")?.customText || "",
+        alertBannerEn: marqueeList.find(m => m.type === "custom_text")?.customText || "",
+
+        // 5. Carousel Slides (Syncs unified fields to En & Hi)
+        carouselSlides: slides.map((s, idx) => ({
+          id: s.id || `slide-${idx}`,
+          title: s.title,
+          titleEn: s.title,
+          titleHi: s.title,
+          subtitle: s.subtitle,
+          subEn: s.subtitle,
+          subHi: s.subtitle,
+          image: s.image,
+          order: s.order ?? idx,
+          active: s.active !== false
+        })),
+
+        // 6. Vision & Leadership
         visionConfig,
         founderName: visionConfig.founderName,
         founderDesignation: visionConfig.founderDesignation,
         founderMessage: visionConfig.founderMessage,
         founderMessageHi: visionConfig.founderMessage,
         founderMessageEn: visionConfig.founderMessage,
+
+        // 7. Quick Access Grid
         quickAccessItems,
+
+        // 8. Field Impact (Counters, Domains & Bottom Strip synced to En & Hi)
         impactMetrics,
-        impactStats,
-        impactDomains,
-        themeConfig      };
+        impactStats: impactStats.map(st => ({
+          ...st,
+          label: st.label,
+          labelEn: st.label,
+          labelHi: st.label
+        })),
+        impactDomains: impactDomains.map(dm => ({
+          ...dm,
+          title: dm.title,
+          titleEn: dm.title,
+          titleHi: dm.title,
+          description: dm.description,
+          descEn: dm.description,
+          descHi: dm.description,
+          badge: dm.badge,
+          badgeEn: dm.badge,
+          badgeHi: dm.badge
+        })),
+
+        // 9. Theme & Layout
+        themeConfig
+      };
 
       const res = await axios.post(
         "/api/admin/control/cms/publish",
@@ -506,6 +689,7 @@ export default function HomeStudio() {
       );
 
       if (res.data?.success === false) throw new Error(res.data?.error || "Publish failed");
+      window.dispatchEvent(new CustomEvent("samahit-admin-updated"));
       toast.success("Home controls published safely to live apps!", { id: toastId });
     } catch (e: any) {
       toast.error(e?.response?.data?.error || "Failed to publish", { id: toastId });
@@ -516,7 +700,7 @@ export default function HomeStudio() {
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
-      {/* HEADER MATCHING LEGACY CMS */}
+      {/* HEADER */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
           <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-amber-50 text-amber-600">
@@ -527,11 +711,11 @@ export default function HomeStudio() {
               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-amber-800">
                 Supreme Command
               </span>
-              <span className="text-xs text-slate-400">Home Screen Control Engine</span>
+              <span className="text-xs text-slate-400">Home Screen Control Plane</span>
             </div>
             <h1 className="text-xl md:text-2xl font-black text-slate-800 mt-1">Home Studio & Master Layout</h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Full control access for Weather, Market, Panchang, Marquees, Carousel, Vision, Quick Access, Impact & Style.
+              Universal Add, Edit, Delete, Active/Deactivate control across Weather, Live Market, Panchang, Marquee, Slides & Impact.
             </p>
           </div>
         </div>
@@ -585,270 +769,542 @@ export default function HomeStudio() {
 
       {/* ACTIVE TAB CONTROL SURFACES */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 min-h-[500px]">
-        {/* 1. WEATHER CONTROLS */}
+        {/* ========================================================================= */}
+        {/* 1. WEATHER CONTROLS: DYNAMIC STATIONS (ADD, EDIT, DELETE, TOGGLE)         */}
+        {/* ========================================================================= */}
         {activeTab === "weather" && (
-          <div className="space-y-6 animate-fade-in max-w-4xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="space-y-6 animate-fade-in max-w-5xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-black text-slate-800">Weather Module Configuration</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Toggle live temperature badge, configure providers, or link custom RSS/API feeds.</p>
+                <h3 className="text-base font-black text-slate-800">Weather Module & City Weather Stations</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Configure real-time weather stations. Add new cities, set primary default city, edit providers, or toggle active/inactive.
+                </p>
               </div>
-              <button
-                onClick={() => setWeatherConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  weatherConfig.enabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
-                }`}
-              >
-                {weatherConfig.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                {weatherConfig.enabled ? "Weather Badge Active" : "Disabled / Hidden"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newStation: WeatherStationItem = {
+                      id: `ws-${Date.now()}`,
+                      cityName: "New City",
+                      state: "Madhya Pradesh",
+                      provider: "open-meteo",
+                      isDefault: false,
+                      active: true
+                    };
+                    setWeatherStations([...weatherStations, newStation]);
+                    setEditingWeatherStation(newStation);
+                    toast.success("Added new weather city station");
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800 hover:bg-amber-100 flex items-center gap-1.5 transition"
+                >
+                  <Plus className="h-4 w-4" /> Add Weather City
+                </button>
+                <button
+                  onClick={() => setWeatherMasterEnabled(!weatherMasterEnabled)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                    weatherMasterEnabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {weatherMasterEnabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  {weatherMasterEnabled ? "Weather Active" : "Module Hidden"}
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Default City</label>
-                <input
-                  type="text"
-                  value={weatherConfig.defaultCity}
-                  onChange={e => setWeatherConfig({ ...weatherConfig, defaultCity: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Weather Provider / API Engine</label>
-                <select
-                  value={weatherConfig.apiProvider}
-                  onChange={e => setWeatherConfig({ ...weatherConfig, apiProvider: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800"
+            {/* Weather Stations Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {weatherStations.map((station, sIdx) => (
+                <div
+                  key={station.id}
+                  className={`p-4 rounded-xl border transition flex flex-col justify-between space-y-3 ${
+                    station.active ? "bg-white border-slate-200 shadow-2xs" : "bg-slate-50 border-slate-200 opacity-60"
+                  }`}
                 >
-                  <option value="open-meteo">Open-Meteo (Real-Time Meteorological Benchmark - Free)</option>
-                  <option value="weatherapi">WeatherAPI (Backup Key Protocol)</option>
-                </select>
-              </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                        <CloudSun className="h-4.5 w-4.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                          {station.cityName}
+                          {station.isDefault && (
+                            <span className="rounded bg-amber-100 px-1.5 py-0.2 text-[9px] font-black uppercase text-amber-800">
+                              Default Primary
+                            </span>
+                          )}
+                        </h4>
+                        <p className="text-[10px] text-slate-400 font-medium">{station.state} • {station.provider}</p>
+                      </div>
+                    </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custom API Key (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="Paste WeatherAPI / OpenWeather Token here..."
-                  value={weatherConfig.customApiKey}
-                  onChange={e => setWeatherConfig({ ...weatherConfig, customApiKey: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800"
-                />
-              </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setEditingWeatherStation(station)}
+                        className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                        title="Edit Station"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setWeatherStations(
+                            weatherStations.map((ws, i) =>
+                              i === sIdx ? { ...ws, active: !ws.active } : ws
+                            )
+                          )
+                        }
+                        className={`p-1.5 rounded-lg transition ${
+                          station.active ? "text-emerald-700 bg-emerald-50" : "text-slate-400 bg-slate-200"
+                        }`}
+                        title={station.active ? "Active" : "Disabled"}
+                      >
+                        {station.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (weatherStations.length <= 1) {
+                            toast.error("At least one weather city station must remain.");
+                            return;
+                          }
+                          setWeatherStations(weatherStations.filter((_, i) => i !== sIdx));
+                          toast.success("Weather station removed");
+                        }}
+                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                        title="Delete Station"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                    <span className="text-slate-500 font-medium truncate max-w-[160px]">
+                      {station.customUrl ? "Custom Endpoint" : "Live API Stream"}
+                    </span>
+                    {!station.isDefault && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setWeatherStations(
+                            weatherStations.map((ws, i) => ({
+                              ...ws,
+                              isDefault: i === sIdx
+                            }))
+                          )
+                        }
+                        className="text-[10px] font-bold text-amber-700 hover:underline"
+                      >
+                        Set as Default
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Global API Settings */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+              <h4 className="text-xs font-black uppercase text-slate-500">Global Weather API Token (Optional)</h4>
+              <input
+                type="text"
+                placeholder="Paste WeatherAPI / OpenWeather API key (Optional backup)..."
+                value={weatherConfig.customApiKey}
+                onChange={e => setWeatherConfig({ ...weatherConfig, customApiKey: e.target.value })}
+                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800"
+              />
             </div>
           </div>
         )}
 
-        {/* 2. LIVE MARKET & PANCHANG CONTROLS */}
+        {/* ========================================================================= */}
+        {/* 2. LIVE MARKET & PANCHANG: DYNAMIC ITEMS (ADD, EDIT, DELETE, TOGGLE)       */}
+        {/* ========================================================================= */}
         {activeTab === "market_panchang" && (
-          <div className="space-y-6 animate-fade-in max-w-4xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="space-y-6 animate-fade-in max-w-5xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-base font-black text-slate-800">Live Verified Market & Panchang Engine</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Control Panchang, Gold/Silver, Vegetable, Fuel, and Mandi rates.</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Dynamic commodities, Drik Panchang, Gold/Silver, Fuel, and Mandi feeds. Add custom commodities, edit URLs, toggle, or delete.
+                </p>
               </div>
-              <button
-                onClick={() => setMarketConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  marketConfig.enabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
-                }`}
-              >
-                {marketConfig.enabled ? "Master Section Active" : "Master Section Hidden"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newFeed: MarketFeedItem = {
+                      id: `feed-${Date.now()}`,
+                      name: "New Commodity / Rate Feed",
+                      category: "custom",
+                      providerType: "api",
+                      feedUrl: "https://api.example.com/commodity-rates",
+                      description: "Daily verified wholesale rates and market trends.",
+                      badge: "Live Rate",
+                      active: true
+                    };
+                    setMarketFeeds([...marketFeeds, newFeed]);
+                    setEditingMarketFeed(newFeed);
+                    toast.success("Added new market commodity feed");
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800 hover:bg-amber-100 flex items-center gap-1.5 transition"
+                >
+                  <Plus className="h-4 w-4" /> Add Market Item
+                </button>
+                <button
+                  onClick={() => setMarketMasterEnabled(!marketMasterEnabled)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                    marketMasterEnabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {marketMasterEnabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  {marketMasterEnabled ? "Master Section Active" : "Master Section Hidden"}
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {[
-                { key: "panchangEnabled", label: "Drik Panchang & Tithi", icon: Sun },
-                { key: "goldSilverEnabled", label: "Gold & Silver Rates", icon: Coins },
-                { key: "vegetableEnabled", label: "Vegetable Mandi Prices", icon: Carrot },
-                { key: "fuelEnabled", label: "Petrol & Diesel Fuel Rates", icon: Fuel },
-                { key: "mandiEnabled", label: "Crops & Pulse Mandi Rates", icon: Wheat }
-              ].map(sub => {
-                const isSubActive = (marketConfig as any)[sub.key];
-                const Icon = sub.icon;
-                return (
-                  <button
-                    key={sub.key}
-                    onClick={() => setMarketConfig(prev => ({ ...prev, [sub.key]: !isSubActive }))}
-                    className={`p-4 rounded-xl border text-left transition flex flex-col justify-between ${
-                      isSubActive ? "border-amber-500 bg-amber-50/30 text-amber-900 shadow-2xs" : "border-slate-200 bg-slate-50 text-slate-400"
-                    }`}
-                  >
-                    <Icon className="h-5 w-5 mb-2" />
+            {/* Dynamic Market Cards List */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {marketFeeds.map((feed, fIdx) => (
+                <div
+                  key={feed.id}
+                  className={`p-4 rounded-xl border transition flex flex-col justify-between space-y-3 ${
+                    feed.active ? "bg-white border-slate-200 shadow-2xs" : "bg-slate-50 border-slate-200 opacity-60"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-xs font-bold">{sub.label}</p>
-                      <p className="text-[10px] mt-0.5 font-bold uppercase">{isSubActive ? "Active" : "Disabled"}</p>
+                      <div className="flex items-center gap-1.5">
+                        <span className="rounded bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase text-slate-700">
+                          {feed.category}
+                        </span>
+                        <span className="rounded bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-700">
+                          {feed.badge}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-black text-slate-800 mt-1">{feed.name}</h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2">{feed.description}</p>
                     </div>
-                  </button>
-                );
-              })}
-            </div>
 
-            <div className="space-y-4 pt-4 border-t border-slate-100">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mandi Price Agmarknet RSS Feed / Scraper URL</label>
-                <input
-                  type="text"
-                  value={marketConfig.mandiRssFeedUrl}
-                  onChange={e => setMarketConfig({ ...marketConfig, mandiRssFeedUrl: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Fuel Price API Feed URL</label>
-                <input
-                  type="text"
-                  value={marketConfig.fuelApiUrl}
-                  onChange={e => setMarketConfig({ ...marketConfig, fuelApiUrl: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800"
-                />
-              </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setEditingMarketFeed(feed)}
+                        className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                        title="Edit Feed Details"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setMarketFeeds(
+                            marketFeeds.map((f, i) =>
+                              i === fIdx ? { ...f, active: !f.active } : f
+                            )
+                          )
+                        }
+                        className={`p-1.5 rounded-lg transition ${
+                          feed.active ? "text-emerald-700 bg-emerald-50" : "text-slate-400 bg-slate-200"
+                        }`}
+                        title={feed.active ? "Active" : "Deactive"}
+                      >
+                        {feed.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMarketFeeds(marketFeeds.filter((_, i) => i !== fIdx));
+                          toast.success("Market item deleted");
+                        }}
+                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                        title="Delete Feed"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                    <span className="truncate max-w-[200px]" title={feed.feedUrl}>{feed.feedUrl}</span>
+                    <span className="uppercase font-bold text-[9px] text-slate-400">{feed.providerType}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* 3. THOUGHT OF THE DAY CONTROLS */}
+        {/* ========================================================================= */}
+        {/* 3. THOUGHT OF THE DAY: DYNAMIC QUOTES (ADD, EDIT, DELETE, TOGGLE)          */}
+        {/* ========================================================================= */}
         {activeTab === "thought" && (
           <div className="space-y-6 animate-fade-in max-w-4xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-black text-slate-800">Thought of the Day</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Toggle section on/off or configure automated RSS quote feeds.</p>
+                <h3 className="text-base font-black text-slate-800">Thought of the Day (Universal Quotes List)</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Add inspirational quotes, set which thought is active today, edit author names, or link an automated quotes RSS feed.
+                </p>
               </div>
-              <button
-                onClick={() => setThoughtConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  thoughtConfig.enabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
-                }`}
-              >
-                {thoughtConfig.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                {thoughtConfig.enabled ? "Section Active" : "Section Hidden"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newThought: ThoughtItem = {
+                      id: `th-${Date.now()}`,
+                      quote: "नया प्रेरक विचार यहाँ लिखें...",
+                      author: "प्रेरक विचार",
+                      active: true,
+                      isCurrent: false
+                    };
+                    setThoughtList([...thoughtList, newThought]);
+                    setEditingThought(newThought);
+                    toast.success("Added new thought");
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800 hover:bg-amber-100 flex items-center gap-1.5 transition"
+                >
+                  <Plus className="h-4 w-4" /> Add Thought
+                </button>
+                <button
+                  onClick={() => setThoughtMasterEnabled(!thoughtMasterEnabled)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                    thoughtMasterEnabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {thoughtMasterEnabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  {thoughtMasterEnabled ? "Thought Active" : "Section Hidden"}
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Quote Text (Single Unified)</label>
-                <textarea
-                  rows={4}
-                  value={thoughtConfig.activeQuote}
-                  onChange={e => setThoughtConfig({ ...thoughtConfig, activeQuote: e.target.value })}
-                  className="w-full bg-amber-50/50 border border-amber-200 rounded-xl p-3 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Author / Thinker Name</label>
-                <input
-                  type="text"
-                  value={thoughtConfig.author}
-                  onChange={e => setThoughtConfig({ ...thoughtConfig, author: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Automated RSS / Quotes API Feed URL</label>
-                <input
-                  type="text"
-                  value={thoughtConfig.apiUrl}
-                  onChange={e => setThoughtConfig({ ...thoughtConfig, apiUrl: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800"
-                />
-              </div>
+            <div className="space-y-3">
+              {thoughtList.map((th, tIdx) => (
+                <div
+                  key={th.id}
+                  className={`p-4 rounded-xl border transition flex items-start justify-between gap-4 ${
+                    th.isCurrent ? "border-amber-400 bg-amber-50/40 ring-1 ring-amber-400" : "border-slate-200 bg-white"
+                  }`}
+                >
+                  <div className="space-y-1 flex-1">
+                    <div className="flex items-center gap-2">
+                      {th.isCurrent && (
+                        <span className="rounded bg-amber-600 px-2 py-0.5 text-[9px] font-black uppercase text-white">
+                          Active Today
+                        </span>
+                      )}
+                      <span className="text-xs font-bold text-amber-800">— {th.author}</span>
+                    </div>
+                    <p className="text-xs font-semibold text-slate-800 leading-relaxed italic">“{th.quote}”</p>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    {!th.isCurrent && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setThoughtList(
+                            thoughtList.map((item, i) => ({
+                              ...item,
+                              isCurrent: i === tIdx
+                            }))
+                          )
+                        }
+                        className="px-2.5 py-1 text-[10px] font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-md transition"
+                      >
+                        Set Active
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setEditingThought(th)}
+                      className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                      title="Edit Thought"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setThoughtList(
+                          thoughtList.map((item, i) =>
+                            i === tIdx ? { ...item, active: !item.active } : item
+                          )
+                        )
+                      }
+                      className={`p-1.5 rounded-lg transition ${
+                        th.active ? "text-emerald-700 bg-emerald-50" : "text-slate-400 bg-slate-200"
+                      }`}
+                      title={th.active ? "Active" : "Disabled"}
+                    >
+                      {th.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setThoughtList(thoughtList.filter((_, i) => i !== tIdx));
+                        toast.success("Thought deleted");
+                      }}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                      title="Delete Thought"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+              <label className="block text-xs font-bold text-slate-500 uppercase">Automated Quotes RSS / API URL</label>
+              <input
+                type="text"
+                value={thoughtRssUrl}
+                onChange={e => setThoughtRssUrl(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800"
+              />
             </div>
           </div>
         )}
 
-        {/* 4. MARQUEE CONTROLS */}
+        {/* ========================================================================= */}
+        {/* 4. MARQUEE NEWS: DYNAMIC FEEDS (ADD, EDIT, DELETE, TOGGLE)                 */}
+        {/* ========================================================================= */}
         {activeTab === "marquee" && (
           <div className="space-y-6 animate-fade-in max-w-4xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-black text-slate-800">Live RSS News Marquees</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Manage the running news feeds, PIB and MPInfo RSS URLs.</p>
+                <h3 className="text-base font-black text-slate-800">Live RSS News Marquees & Announcements</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Manage running ticker feeds, government bulletins, or emergency citizen advisories.
+                </p>
               </div>
-              <button
-                onClick={() => setMarqueeConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  marqueeConfig.enabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
-                }`}
-              >
-                {marqueeConfig.enabled ? "Marquees Active" : "Marquees Hidden"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newMarquee: MarqueeFeedItem = {
+                      id: `mq-${Date.now()}`,
+                      label: "Custom Bulletin / Alert",
+                      type: "custom_text",
+                      customText: "Emergency notification or public broadcast message.",
+                      active: true
+                    };
+                    setMarqueeList([...marqueeList, newMarquee]);
+                    setEditingMarquee(newMarquee);
+                    toast.success("Added new marquee feed");
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800 hover:bg-amber-100 flex items-center gap-1.5 transition"
+                >
+                  <Plus className="h-4 w-4" /> Add Marquee
+                </button>
+                <button
+                  onClick={() => setMarqueeMasterEnabled(!marqueeMasterEnabled)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                    marqueeMasterEnabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {marqueeMasterEnabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  {marqueeMasterEnabled ? "Marquees Active" : "Marquees Hidden"}
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black uppercase text-amber-700">Top Marquee: PIB RSS Feed</h4>
-                  <input
-                    type="checkbox"
-                    checked={marqueeConfig.ticker1Enabled}
-                    onChange={e => setMarqueeConfig({ ...marqueeConfig, ticker1Enabled: e.target.checked })}
-                    className="h-4 w-4 rounded text-amber-600"
-                  />
-                </div>
-                <input
-                  type="text"
-                  value={marqueeConfig.ticker1FeedUrl}
-                  onChange={e => setMarqueeConfig({ ...marqueeConfig, ticker1FeedUrl: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800"
-                />
-              </div>
+            <div className="space-y-3">
+              {marqueeList.map((mq, mIdx) => (
+                <div
+                  key={mq.id}
+                  className={`p-4 rounded-xl border transition flex items-center justify-between gap-4 ${
+                    mq.active ? "bg-white border-slate-200 shadow-2xs" : "bg-slate-50 border-slate-200 opacity-60"
+                  }`}
+                >
+                  <div className="space-y-1 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase text-slate-700">
+                        {mq.type === "rss" ? "RSS Feed" : "Custom Text"}
+                      </span>
+                      <h4 className="text-xs font-black text-slate-800">{mq.label}</h4>
+                    </div>
+                    <p className="text-xs text-slate-600 font-mono truncate max-w-lg">
+                      {mq.type === "rss" ? mq.feedUrl : mq.customText}
+                    </p>
+                  </div>
 
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black uppercase text-emerald-700">Bottom Marquee: MPInfo RSS Feed</h4>
-                  <input
-                    type="checkbox"
-                    checked={marqueeConfig.ticker2Enabled}
-                    onChange={e => setMarqueeConfig({ ...marqueeConfig, ticker2Enabled: e.target.checked })}
-                    className="h-4 w-4 rounded text-emerald-600"
-                  />
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setEditingMarquee(mq)}
+                      className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                      title="Edit Marquee"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMarqueeList(
+                          marqueeList.map((item, i) =>
+                            i === mIdx ? { ...item, active: !item.active } : item
+                          )
+                        )
+                      }
+                      className={`p-1.5 rounded-lg transition ${
+                        mq.active ? "text-emerald-700 bg-emerald-50" : "text-slate-400 bg-slate-200"
+                      }`}
+                      title={mq.active ? "Active" : "Disabled"}
+                    >
+                      {mq.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMarqueeList(marqueeList.filter((_, i) => i !== mIdx));
+                        toast.success("Marquee deleted");
+                      }}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                      title="Delete Marquee"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <input
-                  type="text"
-                  value={marqueeConfig.ticker2FeedUrl}
-                  onChange={e => setMarqueeConfig({ ...marqueeConfig, ticker2FeedUrl: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custom Emergency Headline</label>
-                <input
-                  type="text"
-                  value={marqueeConfig.customAlertText}
-                  onChange={e => setMarqueeConfig({ ...marqueeConfig, customAlertText: e.target.value })}
-                  className="w-full bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm font-semibold text-amber-900"
-                />
-              </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* 5. CAROUSEL CONTROLS */}
+        {/* ========================================================================= */}
+        {/* 5. CAROUSEL SLIDES: DEVICE UPLOAD & UNIFIED TEXT (ADD, EDIT, DELETE, EYE)   */}
+        {/* ========================================================================= */}
         {activeTab === "carousel" && (
           <div className="space-y-6 animate-fade-in">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-base font-black text-slate-800">Carousel Slides & Direct Device Upload</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Upload photos directly from your device without needing links.</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Upload photos directly from your device. Add, edit caption, toggle active, or delete slides.
+                </p>
               </div>
               <button
+                type="button"
                 onClick={() => {
                   const newSlide: CarouselSlideItem = {
-                    titleEn: "New Initiative",
-                    subEn: "Empowering rural communities through collective service.",
+                    id: `slide-${Date.now()}`,
+                    title: "New Initiative Headline",
+                    subtitle: "Empowering rural communities through collective service.",
                     image: "/assets/mega_camp_banner.png",
                     active: true
                   };
                   setSlides([...slides, newSlide]);
                   setSelectedSlideIndex(slides.length);
+                  toast.success("Added new carousel slide");
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition"
               >
                 <Plus className="h-4 w-4" /> Add Slide
               </button>
@@ -856,103 +1312,103 @@ export default function HomeStudio() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Slides List */}
-              <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1 custom-scrollbar">
+              <div className="space-y-2 max-h-[440px] overflow-y-auto pr-1">
                 {slides.map((s, idx) => (
                   <div
-                    key={idx}
+                    key={s.id || idx}
                     onClick={() => setSelectedSlideIndex(idx)}
                     className={`p-3 rounded-xl border cursor-pointer transition flex items-center gap-3 ${
                       selectedSlideIndex === idx ? "border-amber-500 bg-amber-50/20 ring-1 ring-amber-500" : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
-                    <img src={s.image} alt={s.titleEn} className="h-12 w-16 object-cover rounded-lg bg-slate-100 flex-shrink-0" />
+                    <img src={s.image} alt={s.title} className="h-12 w-16 object-cover rounded-lg bg-slate-100 shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-slate-800 truncate">{s.titleEn}</p>
-                      <p className="text-[10px] text-slate-500 truncate">{s.subEn}</p>
+                      <p className="text-xs font-bold text-slate-800 truncate">{s.title}</p>
+                      <p className="text-[10px] text-slate-500 truncate">{s.subtitle}</p>
                     </div>
-                    <div className="flex items-center gap-0.5">
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
-                        disabled={idx === 0}
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
-                          if (idx === 0) return;
-                          const next = [...slides];
-                          [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-                          setSlides(next.map((slide, i) => ({ ...slide, order: i })));
-                          setSelectedSlideIndex(idx - 1);
+                          setSlides(slides.map((sl, i) => (i === idx ? { ...sl, active: !sl.active } : sl)));
                         }}
-                        className="p-1 text-slate-500 hover:bg-white rounded disabled:opacity-30"
-                        title="Move Up"
+                        className={`p-1 rounded ${s.active !== false ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"}`}
+                        title={s.active !== false ? "Active" : "Hidden"}
                       >
-                        <ArrowUp className="h-3.5 w-3.5" />
+                        {s.active !== false ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                       </button>
+                      <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={e => {
+                            e.stopPropagation();
+                            if (idx === 0) return;
+                            const next = [...slides];
+                            const tmp = next[idx];
+                            next[idx] = next[idx - 1];
+                            next[idx - 1] = tmp;
+                            setSlides(next);
+                            setSelectedSlideIndex(idx - 1);
+                          }}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move up"
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === slides.length - 1}
+                          onClick={e => {
+                            e.stopPropagation();
+                            if (idx >= slides.length - 1) return;
+                            const next = [...slides];
+                            const tmp = next[idx];
+                            next[idx] = next[idx + 1];
+                            next[idx + 1] = tmp;
+                            setSlides(next);
+                            setSelectedSlideIndex(idx + 1);
+                          }}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move down"
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </button>
+                      </div>
                       <button
                         type="button"
-                        disabled={idx === slides.length - 1}
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
-                          if (idx === slides.length - 1) return;
-                          const next = [...slides];
-                          [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
-                          setSlides(next.map((slide, i) => ({ ...slide, order: i })));
-                          setSelectedSlideIndex(idx + 1);
+                          setSlides(slides.filter((_, i) => i !== idx));
+                          if (selectedSlideIndex >= idx) setSelectedSlideIndex(Math.max(0, idx - 1));
                         }}
-                        className="p-1 text-slate-500 hover:bg-white rounded disabled:opacity-30"
-                        title="Move Down"
+                        className="p-1 text-rose-500 hover:bg-rose-50 rounded"
+                        title="Delete Slide"
                       >
-                        <ArrowDown className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedSlideIndex(idx);
-                        }}
-                        className="p-1 text-amber-600 hover:bg-amber-50 rounded"
-                        title="Edit Slide"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSlides(slides.map((slide, i) => i === idx ? { ...slide, active: slide.active === false } : slide));
-                        }}
-                        className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
-                        title={s.active === false ? "Activate Slide" : "Deactivate Slide"}
-                      >
-                        {s.active === false ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                      <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSlides(slides.filter((_, i) => i !== idx));
-                        if (selectedSlideIndex >= idx) setSelectedSlideIndex(Math.max(0, idx - 1));
-                      }}
-                      className="p-1 text-rose-500 hover:bg-rose-50 rounded"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Slide Detail Editor */}
+              {/* Slide Detail Editor (Unified single inputs) */}
               {slides[selectedSlideIndex] && (
                 <div className="lg:col-span-2 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                  <div className="flex items-center justify-between gap-3"><h4 className="text-xs font-black uppercase text-slate-400">Edit Carousel Slide #{selectedSlideIndex + 1}</h4><span className="text-[10px] font-bold text-emerald-600">Single language field</span></div>
-                  
+                  <div className="flex items-center justify-between gap-3">
+                    <h4 className="text-xs font-black uppercase text-slate-400">Editing Slide #{selectedSlideIndex + 1}</h4>
+                    <span className="text-[10px] font-bold text-emerald-600">Unified Single Input</span>
+                  </div>
+
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Slide Heading / Caption</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Slide Headline</label>
                     <input
                       type="text"
-                      value={slides[selectedSlideIndex].titleEn}
+                      value={slides[selectedSlideIndex].title}
                       onChange={e => {
                         const val = e.target.value;
-                        setSlides(slides.map((sl, i) => i === selectedSlideIndex ? { ...sl, titleEn: val, titleHi: val } : sl));
+                        setSlides(slides.map((sl, i) => (i === selectedSlideIndex ? { ...sl, title: val } : sl)));
                       }}
                       className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold"
                     />
@@ -962,10 +1418,10 @@ export default function HomeStudio() {
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Subtitle / Summary</label>
                     <textarea
                       rows={2}
-                      value={slides[selectedSlideIndex].subEn}
+                      value={slides[selectedSlideIndex].subtitle}
                       onChange={e => {
                         const val = e.target.value;
-                        setSlides(slides.map((sl, i) => i === selectedSlideIndex ? { ...sl, subEn: val, subHi: val } : sl));
+                        setSlides(slides.map((sl, i) => (i === selectedSlideIndex ? { ...sl, subtitle: val } : sl)));
                       }}
                       className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs"
                     />
@@ -986,9 +1442,11 @@ export default function HomeStudio() {
                           type="file"
                           accept="image/*"
                           disabled={uploadingImage}
-                          onChange={e => handleUploadImage(e, url => {
-                            setSlides(slides.map((sl, i) => i === selectedSlideIndex ? { ...sl, image: url } : sl));
-                          })}
+                          onChange={e =>
+                            handleUploadImage(e, url => {
+                              setSlides(slides.map((sl, i) => (i === selectedSlideIndex ? { ...sl, image: url } : sl)));
+                            })
+                          }
                           className="sr-only"
                         />
                       </label>
@@ -1000,12 +1458,26 @@ export default function HomeStudio() {
           </div>
         )}
 
-        {/* 6. OUR VISION & LEADERSHIP */}
+        {/* ========================================================================= */}
+        {/* 6. VISION & LEADERSHIP (UNIFIED TEXT FIELDS)                               */}
+        {/* ========================================================================= */}
         {activeTab === "vision" && (
           <div className="space-y-6 animate-fade-in max-w-4xl">
-            <div className="border-b border-slate-100 pb-4">
-              <h3 className="text-base font-black text-slate-800">Our Vision & Leadership Section</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Control headings, icons, subpage redirection, and founder narrative.</p>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-base font-black text-slate-800">Our Vision & Leadership Section</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Control section title, roadmap route, narrative, and founder message.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVisionConfig(prev => ({ ...prev, active: !prev.active }))}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  visionConfig.active ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
+                }`}
+              >
+                {visionConfig.active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                {visionConfig.active ? "Vision Active" : "Vision Hidden"}
+              </button>
             </div>
 
             <div className="space-y-4">
@@ -1052,7 +1524,9 @@ export default function HomeStudio() {
             </div>
           </div>
         )}
-        {/* 7. QUICK ACCESS CONTROLS */}
+        {/* ========================================================================= */}
+        {/* 7. QUICK ACCESS CONTROLS (ADD, EDIT, DELETE, ICON PICKER, TOGGLE)         */}
+        {/* ========================================================================= */}
         {activeTab === "quick_access" && (
           <div className="space-y-6 animate-fade-in">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -1061,6 +1535,7 @@ export default function HomeStudio() {
                 <p className="text-xs text-slate-500 mt-0.5">Add, edit, remove, re-route and change color accents for quick action buttons.</p>
               </div>
               <button
+                type="button"
                 onClick={() => {
                   const newItem: QuickAccessItem = {
                     id: `qa-${Date.now()}`,
@@ -1072,6 +1547,7 @@ export default function HomeStudio() {
                     accentColor: "#167C5A"
                   };
                   setQuickAccessItems([...quickAccessItems, newItem]);
+                  toast.success("Added new quick card");
                 }}
                 className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-lg"
               >
@@ -1088,20 +1564,62 @@ export default function HomeStudio() {
                       value={item.title}
                       onChange={e => {
                         const val = e.target.value;
-                        setQuickAccessItems(quickAccessItems.map((q, i) => i === idx ? { ...q, title: val } : q));
+                        setQuickAccessItems(quickAccessItems.map((q, i) => (i === idx ? { ...q, title: val } : q)));
                       }}
                       className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-bold w-40"
                     />
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setQuickAccessItems(quickAccessItems.map((q, i) => i === idx ? { ...q, active: !q.active } : q))}
+                        type="button"
+                        onClick={() =>
+                          setQuickAccessItems(
+                            quickAccessItems.map((q, i) => (i === idx ? { ...q, active: !q.active } : q))
+                          )
+                        }
                         className={`p-1 rounded ${item.active ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"}`}
+                        title={item.active ? "Active" : "Disabled"}
                       >
                         {item.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                       </button>
+                      <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => {
+                            if (idx === 0) return;
+                            const next = [...quickAccessItems];
+                            const tmp = next[idx];
+                            next[idx] = next[idx - 1];
+                            next[idx - 1] = tmp;
+                            setQuickAccessItems(next);
+                          }}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move up"
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === quickAccessItems.length - 1}
+                          onClick={() => {
+                            if (idx >= quickAccessItems.length - 1) return;
+                            const next = [...quickAccessItems];
+                            const tmp = next[idx];
+                            next[idx] = next[idx + 1];
+                            next[idx + 1] = tmp;
+                            setQuickAccessItems(next);
+                          }}
+                          className="p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-20 transition"
+                          title="Move down"
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </button>
+                      </div>
                       <button
+                        type="button"
                         onClick={() => setQuickAccessItems(quickAccessItems.filter((_, i) => i !== idx))}
                         className="p-1 text-rose-500 hover:bg-rose-50 rounded"
+                        title="Delete Card"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -1113,7 +1631,7 @@ export default function HomeStudio() {
                     value={item.subtitle}
                     onChange={e => {
                       const val = e.target.value;
-                      setQuickAccessItems(quickAccessItems.map((q, i) => i === idx ? { ...q, subtitle: val } : q));
+                      setQuickAccessItems(quickAccessItems.map((q, i) => (i === idx ? { ...q, subtitle: val } : q)));
                     }}
                     placeholder="Subtitle"
                     className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] text-slate-600"
@@ -1131,7 +1649,7 @@ export default function HomeStudio() {
                         setIconPickerOpen(true);
                       }}
                       className="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-700 hover:border-amber-400 hover:text-amber-700 flex items-center gap-1 shadow-2xs shrink-0"
-                      title="Click to visually pick icon (कोई कोडिंग नहीं)"
+                      title="Click to visually pick icon (No coding)"
                     >
                       {React.createElement(AVAILABLE_ICONS[item.icon] || Compass, { className: "h-3.5 w-3.5 text-amber-600" })}
                       <span className="text-[10px] font-medium">{item.icon || "Icon"}</span>
@@ -1142,7 +1660,7 @@ export default function HomeStudio() {
                       value={item.route}
                       onChange={e => {
                         const val = e.target.value;
-                        setQuickAccessItems(quickAccessItems.map((q, i) => i === idx ? { ...q, route: val } : q));
+                        setQuickAccessItems(quickAccessItems.map((q, i) => (i === idx ? { ...q, route: val } : q)));
                       }}
                       placeholder="Route (/jan-seva-card)"
                       className="flex-1 bg-white border border-slate-200 rounded px-2 py-1 text-[10px] font-mono"
@@ -1152,7 +1670,7 @@ export default function HomeStudio() {
                       value={item.accentColor || "#D97706"}
                       onChange={e => {
                         const val = e.target.value;
-                        setQuickAccessItems(quickAccessItems.map((q, i) => i === idx ? { ...q, accentColor: val } : q));
+                        setQuickAccessItems(quickAccessItems.map((q, i) => (i === idx ? { ...q, accentColor: val } : q)));
                       }}
                       className="h-7 w-8 rounded cursor-pointer border border-slate-200"
                     />
@@ -1163,10 +1681,12 @@ export default function HomeStudio() {
           </div>
         )}
 
-        {/* 8. FIELD IMPACT CONTROLS (FULL PENCIL EDIT, 4 MASTER COUNTERS & 8 SEVA DOMAINS) */}
+        {/* ========================================================================= */}
+        {/* 8. FIELD IMPACT: COUNTERS, DOMAINS & STRIP (UNIFIED - NO EN/HI DIVIDE)    */}
+        {/* ========================================================================= */}
         {activeTab === "impact" && (
           <div className="space-y-8 animate-fade-in max-w-5xl">
-            {/* SUB-SECTION 1: 4 MASTER IMPACT COUNTERS (E.G. 66,505+ JAN SEVA CARDS) */}
+            {/* SUB-SECTION 1: MASTER IMPACT KPI COUNTERS */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                 <div>
@@ -1175,11 +1695,11 @@ export default function HomeStudio() {
                       <TrendingUp className="h-4 w-4" />
                     </span>
                     <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-                      1. Master Impact KPI Counters (शीर्ष प्रभाव आंकड़े)
+                      1. Master Impact KPI Counters
                     </h3>
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Jan Seva Cards (66,505+), Health Camps (150+), Volunteers Network, and Livelihoods.
+                    Jan Seva Cards, Health Camps, Volunteers Network, and Livelihoods. Full Add, Edit, Delete and Active toggles.
                   </p>
                 </div>
                 <button
@@ -1187,14 +1707,14 @@ export default function HomeStudio() {
                   onClick={() => {
                     const newStat: ImpactStatItem = {
                       id: `stat-${Date.now()}`,
-                      labelEn: "New Impact Metric",
-                      labelHi: "नया प्रभाव आंकड़ा",
+                      label: "New Impact Metric",
                       value: 1000,
                       suffix: "+",
                       iconName: "Sparkles",
                       enabled: true
                     };
                     setImpactStats([...impactStats, newStat]);
+                    toast.success("Added new KPI counter");
                   }}
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 shadow-2xs"
                 >
@@ -1211,7 +1731,6 @@ export default function HomeStudio() {
                       className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between space-y-3"
                     >
                       <div className="flex items-center justify-between">
-                        {/* Visual Icon Button */}
                         <button
                           type="button"
                           onClick={() => {
@@ -1223,7 +1742,7 @@ export default function HomeStudio() {
                             setIconPickerOpen(true);
                           }}
                           className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:border-amber-400 hover:text-amber-700 shadow-2xs transition"
-                          title="Click to visually pick icon (कोई कोडिंग नहीं)"
+                          title="Click to visually pick icon (No coding)"
                         >
                           <IconComp className="h-4 w-4 text-amber-600" />
                           <span className="text-[10px]">{stat.iconName || "Icon"}</span>
@@ -1269,7 +1788,7 @@ export default function HomeStudio() {
                           <input
                             type="number"
                             value={stat.value}
-                            onChange={(e) => {
+                            onChange={e => {
                               const val = Number(e.target.value) || 0;
                               setImpactStats(
                                 impactStats.map((st, i) =>
@@ -1285,7 +1804,7 @@ export default function HomeStudio() {
                           <input
                             type="text"
                             value={stat.suffix}
-                            onChange={(e) => {
+                            onChange={e => {
                               const val = e.target.value;
                               setImpactStats(
                                 impactStats.map((st, i) =>
@@ -1298,17 +1817,17 @@ export default function HomeStudio() {
                         </div>
                       </div>
 
-                      {/* Labels */}
+                      {/* Unified Label */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase">Label (English)</label>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase">Metric Title</label>
                         <input
                           type="text"
-                          value={stat.labelEn}
-                          onChange={(e) => {
+                          value={stat.label}
+                          onChange={e => {
                             const val = e.target.value;
                             setImpactStats(
                               impactStats.map((st, i) =>
-                                i === sIdx ? { ...st, labelEn: val } : st
+                                i === sIdx ? { ...st, label: val } : st
                               )
                             );
                           }}
@@ -1321,7 +1840,7 @@ export default function HomeStudio() {
               </div>
             </div>
 
-            {/* SUB-SECTION 2: 8 SEVA DOMAINS (SANITATION, DRINKING WATER, PINK E-RICKSHAW, ETC.) */}
+            {/* SUB-SECTION 2: 8 SEVA DOMAINS (UNIFIED) */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                 <div>
@@ -1330,11 +1849,11 @@ export default function HomeStudio() {
                       <Sparkles className="h-4 w-4" />
                     </span>
                     <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-                      2. Seva Domains & Field Work (8 मुख्य कार्य क्षेत्र)
+                      2. Seva Domains & Field Work
                     </h3>
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Edit Title, Badges, Icons, and Descriptions with direct pencil editing (✏️) and active toggles.
+                    Edit Title, Badges, Icons, and Descriptions with direct pencil editing (✏️) and active toggles. No bilingual split.
                   </p>
                 </div>
                 <button
@@ -1343,17 +1862,16 @@ export default function HomeStudio() {
                     const newDom: ImpactDomainItem = {
                       id: `domain-${Date.now()}`,
                       tab: "active",
-                      titleEn: "New Field Initiative",
-                      titleHi: "नई जन सेवा पहल",
-                      descEn: "Describe the grassroots initiative, beneficiaries and achievements.",
-                      descHi: "पहल का विवरण और उपलब्धियां।",
+                      title: "New Field Initiative",
+                      description: "Describe the grassroots initiative, beneficiaries and achievements.",
+                      badge: "Ground Seva",
                       iconName: "Sparkles",
-                      badgeEn: "Field Mission",
-                      badgeHi: "जन सेवा मिशन",
                       color: "emerald",
                       enabled: true
                     };
                     setImpactDomains([...impactDomains, newDom]);
+                    setEditingDomain(newDom);
+                    toast.success("Added new seva domain");
                   }}
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 shadow-2xs"
                 >
@@ -1369,7 +1887,6 @@ export default function HomeStudio() {
                       key={dom.id}
                       className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3 relative group"
                     >
-                      {/* Top Header: Badge, Icon & Controls */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <button
@@ -1383,19 +1900,19 @@ export default function HomeStudio() {
                               setIconPickerOpen(true);
                             }}
                             className="p-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-amber-400 hover:text-amber-700 shadow-2xs transition flex items-center gap-1"
-                            title="Click to visually pick icon (कोई कोडिंग नहीं)"
+                            title="Click to visually pick icon (No coding)"
                           >
                             <IconComp className="h-4 w-4 text-emerald-600" />
                             <Pencil className="h-3 w-3 text-slate-400" />
                           </button>
                           <input
                             type="text"
-                            value={dom.badgeEn}
-                            onChange={(e) => {
+                            value={dom.badge}
+                            onChange={e => {
                               const val = e.target.value;
                               setImpactDomains(
                                 impactDomains.map((dm, i) =>
-                                  i === dIdx ? { ...dm, badgeEn: val } : dm
+                                  i === dIdx ? { ...dm, badge: val } : dm
                                 )
                               );
                             }}
@@ -1407,7 +1924,7 @@ export default function HomeStudio() {
                         <div className="flex items-center gap-1">
                           <select
                             value={dom.tab}
-                            onChange={(e) => {
+                            onChange={e => {
                               const val = e.target.value as any;
                               setImpactDomains(
                                 impactDomains.map((dm, i) =>
@@ -1452,16 +1969,16 @@ export default function HomeStudio() {
                         </div>
                       </div>
 
-                      {/* Title */}
+                      {/* Unified Title */}
                       <div>
                         <input
                           type="text"
-                          value={dom.titleEn}
-                          onChange={(e) => {
+                          value={dom.title}
+                          onChange={e => {
                             const val = e.target.value;
                             setImpactDomains(
                               impactDomains.map((dm, i) =>
-                                i === dIdx ? { ...dm, titleEn: val } : dm
+                                i === dIdx ? { ...dm, title: val } : dm
                               )
                             );
                           }}
@@ -1470,16 +1987,16 @@ export default function HomeStudio() {
                         />
                       </div>
 
-                      {/* Description */}
+                      {/* Unified Description */}
                       <div>
                         <textarea
                           rows={2}
-                          value={dom.descEn}
-                          onChange={(e) => {
+                          value={dom.description}
+                          onChange={e => {
                             const val = e.target.value;
                             setImpactDomains(
                               impactDomains.map((dm, i) =>
-                                i === dIdx ? { ...dm, descEn: val } : dm
+                                i === dIdx ? { ...dm, description: val } : dm
                               )
                             );
                           }}
@@ -1493,9 +2010,9 @@ export default function HomeStudio() {
               </div>
             </div>
 
-            {/* SUB-SECTION 3: THREE QUICK FIELD METRICS BAR ON HOMESCREEN (COMMUNITY, CARE, ACTIVE) */}
+            {/* SUB-SECTION 3: THREE QUICK FIELD METRICS BAR ON HOMESCREEN */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                 <div>
                   <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
                     3. Bottom Homescreen Strip (Community, Care, Active Bar)
@@ -1504,6 +2021,24 @@ export default function HomeStudio() {
                     The 3-column impact strip shown just above the footer on the home page.
                   </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newStrip: ImpactMetricItem = {
+                      id: `imp-${Date.now()}`,
+                      title: "Initiative",
+                      subtitle: "Action & Relief",
+                      icon: "CalendarDays",
+                      active: true,
+                      route: "/community-care-active"
+                    };
+                    setImpactMetrics([...impactMetrics, newStrip]);
+                    toast.success("Added strip card");
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 rounded-xl hover:bg-slate-200 transition"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Strip Card
+                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1513,7 +2048,7 @@ export default function HomeStudio() {
                       <input
                         type="text"
                         value={m.title}
-                        onChange={(e) => {
+                        onChange={e => {
                           const val = e.target.value;
                           setImpactMetrics(
                             impactMetrics.map((im, i) => (i === idx ? { ...im, title: val } : im))
@@ -1534,8 +2069,17 @@ export default function HomeStudio() {
                           className={`p-1 rounded ${
                             m.active ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"
                           }`}
+                          title={m.active ? "Active" : "Disabled"}
                         >
                           {m.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setImpactMetrics(impactMetrics.filter((_, i) => i !== idx))}
+                          className="p-1 text-rose-500 hover:bg-rose-50 rounded"
+                          title="Delete Card"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
@@ -1543,7 +2087,7 @@ export default function HomeStudio() {
                     <input
                       type="text"
                       value={m.subtitle}
-                      onChange={(e) => {
+                      onChange={e => {
                         const val = e.target.value;
                         setImpactMetrics(
                           impactMetrics.map((im, i) => (i === idx ? { ...im, subtitle: val } : im))
@@ -1553,7 +2097,7 @@ export default function HomeStudio() {
                     />
                     <input                      type="text"
                       value={m.route || "/community-care-active"}
-                      onChange={(e) => {
+                      onChange={e => {
                         const val = e.target.value;
                         setImpactMetrics(
                           impactMetrics.map((im, i) => (i === idx ? { ...im, route: val } : im))
@@ -1568,7 +2112,9 @@ export default function HomeStudio() {
           </div>
         )}
 
-        {/* 9. THEME & LAYOUT TEMPLATES */}
+        {/* ========================================================================= */}
+        {/* 9. THEME & LAYOUT TEMPLATES                                               */}
+        {/* ========================================================================= */}
         {activeTab === "theme_layout" && (
           <div className="space-y-6 animate-fade-in max-w-4xl">
             <div className="border-b border-slate-100 pb-4">
@@ -1585,14 +2131,18 @@ export default function HomeStudio() {
               ].map(preset => (
                 <button
                   key={preset.id}
-                  onClick={() => setThemeConfig({
-                    ...themeConfig,
-                    templatePreset: preset.id,
-                    primaryColor: preset.primary,
-                    secondaryColor: preset.secondary
-                  })}
+                  onClick={() =>
+                    setThemeConfig({
+                      ...themeConfig,
+                      templatePreset: preset.id,
+                      primaryColor: preset.primary,
+                      secondaryColor: preset.secondary
+                    })
+                  }
                   className={`p-3 rounded-xl border text-left transition ${
-                    themeConfig.templatePreset === preset.id ? "border-amber-500 ring-1 ring-amber-500 bg-amber-50/20" : "border-slate-200"
+                    themeConfig.templatePreset === preset.id
+                      ? "border-amber-500 ring-1 ring-amber-500 bg-amber-50/20"
+                      : "border-slate-200"
                   }`}
                 >
                   <div className="flex gap-1.5 mb-2">
@@ -1645,6 +2195,333 @@ export default function HomeStudio() {
         )}
       </div>
 
+      {/* ========================================================================= */}
+      {/* MODAL 1: EDIT WEATHER STATION                                             */}
+      {/* ========================================================================= */}
+      {editingWeatherStation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-sm font-black text-slate-800">Edit Weather Station</h3>
+              <button onClick={() => setEditingWeatherStation(null)} className="text-slate-400 hover:text-slate-700 font-bold">
+                ✕
+              </button>
+            </div>
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="font-bold text-slate-700">City Name</label>
+                <input
+                  type="text"
+                  value={editingWeatherStation.cityName}
+                  onChange={e => setEditingWeatherStation({ ...editingWeatherStation, cityName: e.target.value })}
+                  placeholder="e.g. Bhopal"
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2.5 font-bold outline-none"
+                />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700">State / Region</label>
+                <input
+                  type="text"
+                  value={editingWeatherStation.state}
+                  onChange={e => setEditingWeatherStation({ ...editingWeatherStation, state: e.target.value })}
+                  placeholder="e.g. Madhya Pradesh"
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2.5 font-medium outline-none"
+                />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700">Provider Engine</label>
+                <select
+                  value={editingWeatherStation.provider}
+                  onChange={e => setEditingWeatherStation({ ...editingWeatherStation, provider: e.target.value as any })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                >
+                  <option value="open-meteo">Open-Meteo (Real-Time Meteorological Benchmark - Free)</option>
+                  <option value="weatherapi">WeatherAPI (Backup Key Protocol)</option>
+                  <option value="custom_rss">Custom Meteorological Feed / RSS</option>
+                </select>
+              </div>
+              <div>
+                <label className="font-bold text-slate-700">Custom API Endpoint / Key (Optional)</label>
+                <input
+                  type="text"
+                  value={editingWeatherStation.customUrl || ""}
+                  onChange={e => setEditingWeatherStation({ ...editingWeatherStation, customUrl: e.target.value })}
+                  placeholder="Optional custom feed URL or token"
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-mono text-[11px] outline-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <button
+                type="button"
+                onClick={() => setEditingWeatherStation(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setWeatherStations(weatherStations.map(s => (s.id === editingWeatherStation.id ? editingWeatherStation : s)));
+                  setEditingWeatherStation(null);
+                  toast.success("Weather station updated");
+                }}
+                className="px-5 py-2 rounded-xl bg-amber-600 text-xs font-black text-white hover:bg-amber-700"
+              >
+                Save Station
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: EDIT MARKET & PANCHANG FEED                                      */}
+      {/* ========================================================================= */}
+      {editingMarketFeed && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-sm font-black text-slate-800">Edit Market / Panchang Feed</h3>
+              <button onClick={() => setEditingMarketFeed(null)} className="text-slate-400 hover:text-slate-700 font-bold">
+                ✕
+              </button>
+            </div>
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="font-bold text-slate-700">Commodity / Feed Name</label>
+                <input
+                  type="text"
+                  value={editingMarketFeed.name}
+                  onChange={e => setEditingMarketFeed({ ...editingMarketFeed, name: e.target.value })}
+                  placeholder="e.g. Gold & Silver Bullion Rates"
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2.5 font-bold outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold text-slate-700">Category</label>
+                  <select
+                    value={editingMarketFeed.category}
+                    onChange={e => setEditingMarketFeed({ ...editingMarketFeed, category: e.target.value as any })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  >
+                    <option value="panchang">Drik Panchang</option>
+                    <option value="gold_silver">Gold & Silver Bullion</option>
+                    <option value="vegetable">Vegetables</option>
+                    <option value="fuel">Fuel & Gas</option>
+                    <option value="mandi">Crops & Mandi</option>
+                    <option value="custom">Custom Commodity / Rate</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700">Provider Protocol</label>
+                  <select
+                    value={editingMarketFeed.providerType}
+                    onChange={e => setEditingMarketFeed({ ...editingMarketFeed, providerType: e.target.value as any })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  >
+                    <option value="api">Live JSON API</option>
+                    <option value="rss">Govt / Mandi RSS Feed</option>
+                    <option value="scraper">Live Scraper Protocol</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="font-bold text-slate-700">Source Badge Label</label>
+                <input
+                  type="text"
+                  value={editingMarketFeed.badge}
+                  onChange={e => setEditingMarketFeed({ ...editingMarketFeed, badge: e.target.value })}
+                  placeholder="e.g. Agmarknet (Govt) or IBJA Benchmark"
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700">Feed URL / Endpoint</label>
+                <input
+                  type="text"
+                  value={editingMarketFeed.feedUrl}
+                  onChange={e => setEditingMarketFeed({ ...editingMarketFeed, feedUrl: e.target.value })}
+                  placeholder="https://..."
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-mono text-[11px] outline-none"
+                />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700">Summary Description</label>
+                <textarea
+                  rows={2}
+                  value={editingMarketFeed.description}
+                  onChange={e => setEditingMarketFeed({ ...editingMarketFeed, description: e.target.value })}
+                  placeholder="Items or rates tracked by this card..."
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <button
+                type="button"
+                onClick={() => setEditingMarketFeed(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMarketFeeds(marketFeeds.map(f => (f.id === editingMarketFeed.id ? editingMarketFeed : f)));
+                  setEditingMarketFeed(null);
+                  toast.success("Market feed updated");
+                }}
+                className="px-5 py-2 rounded-xl bg-amber-600 text-xs font-black text-white hover:bg-amber-700"
+              >
+                Save Market Feed
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: EDIT THOUGHT OF THE DAY                                          */}
+      {/* ========================================================================= */}
+      {editingThought && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-sm font-black text-slate-800">Edit Inspirational Thought</h3>
+              <button onClick={() => setEditingThought(null)} className="text-slate-400 hover:text-slate-700 font-bold">
+                ✕
+              </button>
+            </div>
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="font-bold text-slate-700">Author / Thinker Name</label>
+                <input
+                  type="text"
+                  value={editingThought.author}
+                  onChange={e => setEditingThought({ ...editingThought, author: e.target.value })}
+                  placeholder="e.g. स्वामी विवेकानंद"
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2.5 font-bold outline-none"
+                />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700">Quote Text</label>
+                <textarea
+                  rows={4}
+                  value={editingThought.quote}
+                  onChange={e => setEditingThought({ ...editingThought, quote: e.target.value })}
+                  placeholder="प्रेरक विचार यहाँ लिखें..."
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2.5 font-semibold text-slate-800 outline-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <button
+                type="button"
+                onClick={() => setEditingThought(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setThoughtList(thoughtList.map(t => (t.id === editingThought.id ? editingThought : t)));
+                  setEditingThought(null);
+                  toast.success("Thought updated");
+                }}
+                className="px-5 py-2 rounded-xl bg-amber-600 text-xs font-black text-white hover:bg-amber-700"
+              >
+                Save Thought
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 4: EDIT MARQUEE NEWS                                                */}
+      {/* ========================================================================= */}
+      {editingMarquee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-sm font-black text-slate-800">Edit Marquee News Feed</h3>
+              <button onClick={() => setEditingMarquee(null)} className="text-slate-400 hover:text-slate-700 font-bold">
+                ✕
+              </button>
+            </div>
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="font-bold text-slate-700">Ticker Label</label>
+                <input
+                  type="text"
+                  value={editingMarquee.label}
+                  onChange={e => setEditingMarquee({ ...editingMarquee, label: e.target.value })}
+                  placeholder="e.g. PIB National News"
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2.5 font-bold outline-none"
+                />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700">Ticker Type</label>
+                <select
+                  value={editingMarquee.type}
+                  onChange={e => setEditingMarquee({ ...editingMarquee, type: e.target.value as any })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                >
+                  <option value="rss">Live RSS Feed URL</option>
+                  <option value="custom_text">Custom Announcement / Alert Text</option>
+                </select>
+              </div>
+              {editingMarquee.type === "rss" ? (
+                <div>
+                  <label className="font-bold text-slate-700">RSS Feed URL</label>
+                  <input
+                    type="text"
+                    value={editingMarquee.feedUrl || ""}
+                    onChange={e => setEditingMarquee({ ...editingMarquee, feedUrl: e.target.value })}
+                    placeholder="https://..."
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-mono text-[11px] outline-none"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="font-bold text-slate-700">Announcement Headline Text</label>
+                  <textarea
+                    rows={3}
+                    value={editingMarquee.customText || ""}
+                    onChange={e => setEditingMarquee({ ...editingMarquee, customText: e.target.value })}
+                    placeholder="Type urgent announcement or headline..."
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-semibold outline-none"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <button
+                type="button"
+                onClick={() => setEditingMarquee(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMarqueeList(marqueeList.map(m => (m.id === editingMarquee.id ? editingMarquee : m)));
+                  setEditingMarquee(null);
+                  toast.success("Marquee feed updated");
+                }}
+                className="px-5 py-2 rounded-xl bg-amber-600 text-xs font-black text-white hover:bg-amber-700"
+              >
+                Save Marquee
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* REUSABLE VISUAL ICON PICKER MODAL */}
       <IconPickerModal
         isOpen={iconPickerOpen}
@@ -1653,25 +2530,19 @@ export default function HomeStudio() {
           setCurrentIconTarget(null);
         }}
         selectedIcon={currentIconTarget?.currentIcon || ""}
-        onSelectIcon={(newIconName) => {
+        onSelectIcon={newIconName => {
           if (!currentIconTarget) return;
           if (currentIconTarget.type === "quick_access") {
             setQuickAccessItems(
-              quickAccessItems.map((q) =>
-                q.id === currentIconTarget.id ? { ...q, icon: newIconName } : q
-              )
+              quickAccessItems.map(q => (q.id === currentIconTarget.id ? { ...q, icon: newIconName } : q))
             );
           } else if (currentIconTarget.type === "impact_stat") {
             setImpactStats(
-              impactStats.map((st) =>
-                st.id === currentIconTarget.id ? { ...st, iconName: newIconName } : st
-              )
+              impactStats.map(st => (st.id === currentIconTarget.id ? { ...st, iconName: newIconName } : st))
             );
           } else if (currentIconTarget.type === "impact_domain") {
             setImpactDomains(
-              impactDomains.map((dm) =>
-                dm.id === currentIconTarget.id ? { ...dm, iconName: newIconName } : dm
-              )
+              impactDomains.map(dm => (dm.id === currentIconTarget.id ? { ...dm, iconName: newIconName } : dm))
             );
           }
           toast.success(`Icon changed to ${newIconName}`);
