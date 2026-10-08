@@ -37518,7 +37518,7 @@ var require_application = __commonJS({
   "node_modules/express/lib/application.js"(exports2, module2) {
     "use strict";
     var finalhandler2 = require_finalhandler();
-    var Router4 = require_router();
+    var Router5 = require_router();
     var methods = require_methods();
     var middleware = require_init();
     var query = require_query();
@@ -37583,7 +37583,7 @@ var require_application = __commonJS({
     };
     app2.lazyrouter = function lazyrouter() {
       if (!this._router) {
-        this._router = new Router4({
+        this._router = new Router5({
           caseSensitive: this.enabled("case sensitive routing"),
           strict: this.enabled("strict routing")
         });
@@ -38630,7 +38630,7 @@ var require_express = __commonJS({
     var mixin = require_merge_descriptors();
     var proto2 = require_application();
     var Route = require_route();
-    var Router4 = require_router();
+    var Router5 = require_router();
     var req2 = require_request();
     var res = require_response();
     exports2 = module2.exports = createApplication;
@@ -38653,7 +38653,7 @@ var require_express = __commonJS({
     exports2.request = req2;
     exports2.response = res;
     exports2.Route = Route;
-    exports2.Router = Router4;
+    exports2.Router = Router5;
     exports2.json = bodyParser.json;
     exports2.query = require_query();
     exports2.raw = bodyParser.raw;
@@ -299773,7 +299773,7 @@ function resolveConstituency(pincode, district, areas = [], state) {
 }
 
 // server.ts
-var import_express34 = __toESM(require_express2(), 1);
+var import_express35 = __toESM(require_express2(), 1);
 
 // node_modules/express-rate-limit/dist/index.mjs
 var import_node_net = require("node:net");
@@ -311082,10 +311082,96 @@ router4.post("/api/auth/verify", async (req2, res) => {
 });
 var authRoutes_default = router4;
 
-// src/routes/passwordResetSecure.ts
+// src/routes/supremeCommandRoutes.ts
 var import_express5 = __toESM(require_express2(), 1);
+var supremeCommandRouter = (0, import_express5.Router)();
+supremeCommandRouter.get("/api/supreme/seed", async (req2, res) => {
+  const defaults3 = {
+    founder_name: "Rohit Pandit",
+    founder_image_url: "/assets/founder.png",
+    foundation_logo: "/assets/logo.png",
+    splash_bg_color: "#ffffff",
+    splash_text: "Service. Commitment. Resolve.",
+    splash_logo: "/assets/logo.png",
+    marquee_type: "rss",
+    marquee_rss_url: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
+    thought_type: "rss",
+    thought_rss_url: "https://mpinfo.org/RSSFeed/RSSFeed_News.xml",
+    drik_panchang_active: "true",
+    weather_active: "true",
+    cert_volunteer_bg: "/assets/certificate_volunteer.png",
+    cert_donor_bg: "/assets/certificate_donor.png",
+    module_healthcare: "true",
+    module_employment: "true",
+    module_utilities: "true",
+    module_epaper: "true",
+    sos_police: "112",
+    sos_ambulance: "102",
+    sos_women: "1091",
+    policy_privacy_url: "https://therpfoundation.org/privacy",
+    policy_terms_url: "https://therpfoundation.org/terms"
+  };
+  try {
+    const fs10 = require("fs");
+    if (fs10.existsSync("migrations/20261008_01_system_configs.sql")) {
+      await pool.query(fs10.readFileSync("migrations/20261008_01_system_configs.sql", "utf8"));
+    }
+    for (const [k2, v] of Object.entries(defaults3)) {
+      await pool.query("INSERT INTO system_configs (config_key, config_value) VALUES ($1, $2) ON CONFLICT DO NOTHING", [k2, String(v)]);
+    }
+    res.json({ success: true, message: "Seeded!" });
+  } catch (e6) {
+    res.status(500).json({ error: String(e6) });
+  }
+});
+supremeCommandRouter.get("/api/supreme/configs", async (req2, res) => {
+  try {
+    const result = await pool.query("SELECT config_key, config_value FROM system_configs");
+    const configs = {};
+    result.rows.forEach((row) => {
+      configs[row.config_key] = row.config_value;
+    });
+    res.json({ success: true, configs });
+  } catch (err2) {
+    console.error("Failed to fetch configs", err2);
+    res.status(500).json({ success: false, error: "Database error" });
+  }
+});
+supremeCommandRouter.post("/api/supreme/configs", authenticateToken, requireAdmin, async (req2, res) => {
+  try {
+    const { configs } = req2.body;
+    if (!configs || typeof configs !== "object") {
+      return res.status(400).json({ success: false, error: "Invalid payload" });
+    }
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      for (const [key, value2] of Object.entries(configs)) {
+        await client.query(
+          `INSERT INTO system_configs (config_key, config_value) 
+           VALUES ($1, $2) 
+           ON CONFLICT (config_key) DO UPDATE SET config_value = $2, updated_at = NOW()`,
+          [key, String(value2)]
+        );
+      }
+      await client.query("COMMIT");
+      res.json({ success: true });
+    } catch (e6) {
+      await client.query("ROLLBACK");
+      throw e6;
+    } finally {
+      client.release();
+    }
+  } catch (err2) {
+    console.error("Failed to save configs", err2);
+    res.status(500).json({ success: false, error: "Database error" });
+  }
+});
+
+// src/routes/passwordResetSecure.ts
+var import_express6 = __toESM(require_express2(), 1);
 var import_crypto4 = __toESM(require("crypto"), 1);
-var router5 = import_express5.default.Router();
+var router5 = import_express6.default.Router();
 var RESET_TTL_MINUTES = 15;
 var RESET_TTL_SQL = `${RESET_TTL_MINUTES} minutes`;
 function hashResetToken(token) {
@@ -311220,9 +311306,9 @@ router5.post("/api/auth/set-password", async (req2, res) => {
 var passwordResetSecure_default = router5;
 
 // src/routes/livenessRoutes.ts
-var import_express6 = __toESM(require_express2(), 1);
+var import_express7 = __toESM(require_express2(), 1);
 var import_crypto5 = __toESM(require("crypto"), 1);
-var router6 = import_express6.default.Router();
+var router6 = import_express7.default.Router();
 router6.get("/api/liveness", (_req, res) => {
   res.status(200).json({
     success: true,
@@ -311314,9 +311400,9 @@ router6.post("/api/blood_donors", authenticateToken, async (req2, res) => {
 var livenessRoutes_default = router6;
 
 // src/routes/healthRoutes.ts
-var import_express7 = __toESM(require_express2(), 1);
+var import_express8 = __toESM(require_express2(), 1);
 var import_crypto6 = __toESM(require("crypto"), 1);
-var router7 = import_express7.default.Router();
+var router7 = import_express8.default.Router();
 router7.use(["/api/auth/fix-db", "/api/auth/debug-db"], (_req, res) => {
   return res.status(410).json({
     success: false,
@@ -311731,9 +311817,9 @@ router7.get("/api/health/dictionary", async (req2, res) => {
 var healthRoutes_default = router7;
 
 // src/routes/grievanceRoutes.ts
-var import_express8 = __toESM(require_express2(), 1);
+var import_express9 = __toESM(require_express2(), 1);
 var import_crypto7 = __toESM(require("crypto"), 1);
-var router8 = import_express8.default.Router();
+var router8 = import_express9.default.Router();
 router8.post("/api/support_requests", async (req2, res) => {
   try {
     const { citizenName, citizenPhone, requestType, location: location2, description, status: status2, createdAt } = req2.body;
@@ -311824,7 +311910,7 @@ router8.delete("/api/grievances/:id", authenticateToken, requireAdmin, async (re
 var grievanceRoutes_default = router8;
 
 // src/routes/aiRoutes.ts
-var import_express9 = __toESM(require_express2(), 1);
+var import_express10 = __toESM(require_express2(), 1);
 
 // node_modules/cheerio/dist/esm/options.js
 var defaultOpts = {
@@ -347481,7 +347567,7 @@ ${r5.snippet}
 }
 
 // src/routes/aiRoutes.ts
-var router9 = import_express9.default.Router();
+var router9 = import_express10.default.Router();
 router9.post("/api/ai/chat", async (req2, res) => {
   const { message, history = [], language = "hi" } = req2.body;
   if (!message) {
@@ -347655,7 +347741,7 @@ Format the response strictly as a JSON object with:
 var aiRoutes_default = router9;
 
 // src/routes/cultureRoutes.ts
-var import_express10 = __toESM(require_express2(), 1);
+var import_express11 = __toESM(require_express2(), 1);
 
 // src/lib/socialCache.ts
 var socialPreviewsCache = {};
@@ -347663,7 +347749,7 @@ var SOCIAL_CACHE_TTL = 60 * 60 * 1e3;
 
 // src/routes/cultureRoutes.ts
 var import_crypto8 = __toESM(require("crypto"), 1);
-var router10 = import_express10.default.Router();
+var router10 = import_express11.default.Router();
 router10.get("/api/success-stories", async (req2, res) => {
   try {
     const result = await pool.query('SELECT * FROM success_stories ORDER BY "createdAt" DESC');
@@ -347809,9 +347895,9 @@ router10.delete("/api/culture/rsvps/:eventTitle", authenticateToken, async (req2
 var cultureRoutes_default = router10;
 
 // src/routes/janSevaRoutes.ts
-var import_express11 = __toESM(require_express2(), 1);
+var import_express12 = __toESM(require_express2(), 1);
 var import_crypto9 = __toESM(require("crypto"), 1);
-var router11 = import_express11.default.Router();
+var router11 = import_express12.default.Router();
 var PRIMARY_JAN_SEVA_API = process.env.JAN_SEVA_API_URL || "https://api.therpfoundation.org/api/patient";
 var FALLBACK_JAN_SEVA_API = "https://www.api.therpfoundation.org/api/patient";
 var JAN_SEVA_PORTAL_URL = "https://jansevacard.therpfoundation.org";
@@ -348470,8 +348556,8 @@ router11.get("/api/cards/my", authenticateToken, async (req2, res) => {
 var janSevaRoutes_default = router11;
 
 // src/routes/locationRoutes.ts
-var import_express12 = __toESM(require_express2(), 1);
-var router12 = import_express12.default.Router();
+var import_express13 = __toESM(require_express2(), 1);
+var router12 = import_express13.default.Router();
 router12.get("/api/locations/pincode", async (req2, res) => {
   const pincode = String(req2.query.p || "").trim();
   if (!pincode || pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
@@ -348746,9 +348832,9 @@ router12.get("/api/countries", async (_req, res) => {
 var locationRoutes_default = router12;
 
 // src/routes/womenRoutes.ts
-var import_express13 = __toESM(require_express2(), 1);
+var import_express14 = __toESM(require_express2(), 1);
 var import_crypto10 = __toESM(require("crypto"), 1);
-var router13 = import_express13.default.Router();
+var router13 = import_express14.default.Router();
 router13.get("/api/women/complaints", async (req2, res) => {
   try {
     const { userId } = req2.query;
@@ -348943,9 +349029,9 @@ router13.get("/api/family/locations/:groupId", async (req2, res) => {
 var womenRoutes_default = router13;
 
 // src/routes/environmentRoutes.ts
-var import_express14 = __toESM(require_express2(), 1);
+var import_express15 = __toESM(require_express2(), 1);
 var import_crypto11 = __toESM(require("crypto"), 1);
-var router14 = import_express14.default.Router();
+var router14 = import_express15.default.Router();
 router14.get("/api/env/fuel", authenticateToken, async (req2, res) => {
   try {
     const userId = req2.user.id;
@@ -348999,9 +349085,9 @@ router14.get("/api/env/earthquakes", async (req2, res) => {
 var environmentRoutes_default = router14;
 
 // src/routes/educationRoutes.ts
-var import_express15 = __toESM(require_express2(), 1);
+var import_express16 = __toESM(require_express2(), 1);
 var import_crypto12 = __toESM(require("crypto"), 1);
-var router15 = import_express15.default.Router();
+var router15 = import_express16.default.Router();
 var MOCK_COURSES = [
   { id: "c1", title: "Introduction to Digital Literacy", category: "Technology", instructor: "Govt. IT Initiative", youtube_id: "7_eM0_tF6xM", duration: "1.5 Hours", views: 1205 },
   { id: "c2", title: "Financial Independence for Women", category: "Finance", instructor: "State Bank Literacy Program", youtube_id: "L1_N3R6a1fU", duration: "2 Hours", views: 3400 },
@@ -349069,14 +349155,14 @@ router15.get("/api/edu/library", async (req2, res) => {
 var educationRoutes_default = router15;
 
 // src/routes/miscRoutes.ts
-var import_express16 = __toESM(require_express2(), 1);
+var import_express17 = __toESM(require_express2(), 1);
 
 // src/lib/apiCache.ts
 var apiCache = /* @__PURE__ */ new Map();
 var CACHE_TTL = 6e4;
 
 // src/routes/miscRoutes.ts
-var router16 = import_express16.default.Router();
+var router16 = import_express17.default.Router();
 router16.get("/api/search/external", async (req2, res) => {
   try {
     const q2 = req2.query.q || req2.query.query;
@@ -349252,7 +349338,7 @@ router16.get("/api/ai/chat/history", async (req2, res) => {
 var miscRoutes_default = router16;
 
 // src/routes/volunteerRoutes.ts
-var import_express17 = __toESM(require_express2(), 1);
+var import_express18 = __toESM(require_express2(), 1);
 var import_crypto14 = __toESM(require("crypto"), 1);
 
 // src/lib/certificateAutomation.ts
@@ -349281,7 +349367,7 @@ async function ensureEligibleCertificates(userId) {
 }
 
 // src/routes/volunteerRoutes.ts
-var router17 = import_express17.default.Router();
+var router17 = import_express18.default.Router();
 router17.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { id: id3 } = req2.params;
@@ -349457,11 +349543,11 @@ router17.get("/api/public/volunteers", async (req2, res) => {
 var volunteerRoutes_default = router17;
 
 // src/routes/certificateRoutes.ts
-var import_express18 = __toESM(require_express2(), 1);
+var import_express19 = __toESM(require_express2(), 1);
 var import_pdf_lib = __toESM(require_cjs15(), 1);
 var import_path3 = __toESM(require("path"), 1);
 var import_fs3 = __toESM(require("fs"), 1);
-var router18 = import_express18.default.Router();
+var router18 = import_express19.default.Router();
 router18.get("/api/certificates/verify/:certificate_id", async (req2, res) => {
   try {
     const certId = req2.params.certificate_id;
@@ -349558,9 +349644,9 @@ router18.get("/api/certificates/download/:id", authenticateToken, async (req2, r
 var certificateRoutes_default = router18;
 
 // src/routes/communityRoutes.ts
-var import_express19 = __toESM(require_express2(), 1);
+var import_express20 = __toESM(require_express2(), 1);
 var import_crypto15 = __toESM(require("crypto"), 1);
-var router19 = import_express19.default.Router();
+var router19 = import_express20.default.Router();
 router19.get("/api/community_posts", async (req2, res) => {
   try {
     const result = await pool.query('SELECT * FROM community_posts ORDER BY "createdAt" DESC');
@@ -349722,9 +349808,9 @@ router19.post("/api/social/:id/edit", authenticateToken, requireAdmin, async (re
 var communityRoutes_default = router19;
 
 // src/routes/jobRoutes.ts
-var import_express20 = __toESM(require_express2(), 1);
+var import_express21 = __toESM(require_express2(), 1);
 var import_crypto16 = __toESM(require("crypto"), 1);
-var router20 = import_express20.default.Router();
+var router20 = import_express21.default.Router();
 var jobsQuery = 'SELECT id, "titleEn", "titleHi", "company", "locEn", "locHi", "salary", "typeEn", "typeHi", "postedAt" FROM jobs ORDER BY "postedAt" DESC';
 router20.get("/api/jobs", async (req2, res) => {
   try {
@@ -349827,9 +349913,9 @@ var sendPushNotification = async (fcmToken, title, body) => {
 };
 
 // src/routes/donationRoutes.ts
-var import_express21 = __toESM(require_express2(), 1);
+var import_express22 = __toESM(require_express2(), 1);
 var import_crypto17 = __toESM(require("crypto"), 1);
-var router21 = import_express21.default.Router();
+var router21 = import_express22.default.Router();
 var BLOOD_GROUPS = /* @__PURE__ */ new Set(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]);
 var VALID_URGENCY = /* @__PURE__ */ new Set(["Normal", "Urgent", "Emergency"]);
 var EMAIL_DOMAINS = /* @__PURE__ */ new Set(["gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.in", "rediffmail.com", "rediff.com", "zoho.com", "peoplesuniversity.edu.in"]);
@@ -350106,8 +350192,8 @@ router21.post("/api/save-fcm-token", async (req2, res) => {
 var donationRoutes_default = router21;
 
 // src/routes/cmsRoutes.ts
-var import_express22 = __toESM(require_express2(), 1);
-var router22 = import_express22.default.Router();
+var import_express23 = __toESM(require_express2(), 1);
+var router22 = import_express23.default.Router();
 router22.get("/api/settings", async (req2, res) => {
   try {
     const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["general"]);
@@ -350589,9 +350675,9 @@ router22.post("/api/cms", authenticateToken, requireAdmin, async (req2, res) => 
 var cmsRoutes_default = router22;
 
 // src/routes/campaignRoutes.ts
-var import_express23 = __toESM(require_express2(), 1);
+var import_express24 = __toESM(require_express2(), 1);
 var import_crypto18 = __toESM(require("crypto"), 1);
-var router23 = import_express23.default.Router();
+var router23 = import_express24.default.Router();
 router23.get("/api/campaigns", async (req2, res) => {
   const cached = apiCache.get("/api/campaigns");
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
@@ -350671,9 +350757,9 @@ router23.delete("/api/campaigns/:id", authenticateToken, requireAdmin, async (re
 var campaignRoutes_default = router23;
 
 // src/routes/submissionRoutes.ts
-var import_express24 = __toESM(require_express2(), 1);
+var import_express25 = __toESM(require_express2(), 1);
 var import_crypto19 = __toESM(require("crypto"), 1);
-var router24 = import_express24.default.Router();
+var router24 = import_express25.default.Router();
 router24.get("/api/submissions", async (req2, res) => {
   try {
     const result = await pool.query(
@@ -350781,13 +350867,13 @@ router24.delete("/api/submissions/:id", authenticateToken, requireAdmin, async (
 var submissionRoutes_default = router24;
 
 // src/routes/userRoutes.ts
-var import_express25 = __toESM(require_express2(), 1);
+var import_express26 = __toESM(require_express2(), 1);
 
 // src/lib/userFields.ts
 var USER_PRIVILEGED_FIELDS = /* @__PURE__ */ new Set(["role", "points", "janSevaCardStatus", "janSevaCardNo", "isVolunteer", "isDonor"]);
 
 // src/routes/userRoutes.ts
-var router25 = import_express25.default.Router();
+var router25 = import_express26.default.Router();
 router25.get("/api/users/:id", async (req2, res) => {
   try {
     const result = await pool.query(
@@ -350831,7 +350917,7 @@ router25.post("/api/users/:id/update", authenticateToken, async (req2, res) => {
 var userRoutes_default = router25;
 
 // src/routes/uploadRoutes.ts
-var import_express26 = __toESM(require_express2(), 1);
+var import_express27 = __toESM(require_express2(), 1);
 var import_crypto20 = __toESM(require("crypto"), 1);
 var import_multer = __toESM(require_multer(), 1);
 var import_path4 = __toESM(require("path"), 1);
@@ -350982,7 +351068,7 @@ var saveFile = async (file, req2, resourceType = "auto", folder = "rpf_media") =
     return await saveFileLocally(file, req2);
   }
 };
-var router26 = import_express26.default.Router();
+var router26 = import_express27.default.Router();
 router26.post("/api/upload/founder", authenticateToken, requireAdmin, uploadLimiter, upload.single("file"), handleUploadErrors, async (req2, res) => {
   try {
     if (!req2.file) {
@@ -351088,10 +351174,10 @@ router26.post("/api/profile/remove-cover", authenticateToken, async (req2, res) 
 var uploadRoutes_default = router26;
 
 // src/routes/publicGovRoutes.ts
-var import_express27 = __toESM(require_express2(), 1);
+var import_express28 = __toESM(require_express2(), 1);
 var import_https2 = __toESM(require("https"), 1);
 init_coreServices();
-var router27 = import_express27.default.Router();
+var router27 = import_express28.default.Router();
 var httpsAgent = new import_https2.default.Agent({ rejectUnauthorized: true });
 var isAllowedPortal = (raw) => {
   try {
@@ -351376,10 +351462,10 @@ router27.get("/api/public/services/:id/content", async (req2, res) => {
 var publicGovRoutes_default = router27;
 
 // src/routes/publicExternalRoutes.ts
-var import_express28 = __toESM(require_express2(), 1);
+var import_express29 = __toESM(require_express2(), 1);
 var import_rss_parser = __toESM(require_rss_parser(), 1);
 var import_https3 = __toESM(require("https"), 1);
-var router28 = import_express28.default.Router();
+var router28 = import_express29.default.Router();
 var rssParser = new import_rss_parser.default();
 var httpsAgent2 = new import_https3.default.Agent({ rejectUnauthorized: false });
 var customHeaders = {
@@ -351856,9 +351942,9 @@ router28.get("/api/public/live-feeds", async (_req, res) => {
 var publicExternalRoutes_default = router28;
 
 // src/routes/adminHqExtraRoutes.ts
-var import_express29 = __toESM(require_express2(), 1);
+var import_express30 = __toESM(require_express2(), 1);
 var import_crypto21 = __toESM(require("crypto"), 1);
-var router29 = import_express29.default.Router();
+var router29 = import_express30.default.Router();
 router29.all("/api/admin-setup", (_req, res) => {
   return res.status(410).json({
     success: false,
@@ -351994,9 +352080,9 @@ router29.post("/api/admin/settings", async (req2, res) => {
 var adminHqExtraRoutes_default = router29;
 
 // src/routes/adminDynamicRoutes.ts
-var import_express30 = __toESM(require_express2(), 1);
+var import_express31 = __toESM(require_express2(), 1);
 var import_crypto22 = __toESM(require("crypto"), 1);
-var router30 = import_express30.default.Router();
+var router30 = import_express31.default.Router();
 router30.get("/api/admin-setup", async (req2, res) => {
   return res.status(410).json({ success: false, error: "This setup endpoint has been permanently retired for security." });
 });
@@ -352884,10 +352970,10 @@ router30.delete("/api/admin/global_guide/:id", authenticateToken, requireAdmin, 
 var adminDynamicRoutes_default = router30;
 
 // src/routes/rssFeedRoutes.ts
-var import_express31 = __toESM(require_express2(), 1);
+var import_express32 = __toESM(require_express2(), 1);
 var import_rss_parser2 = __toESM(require_rss_parser(), 1);
 var import_https4 = __toESM(require("https"), 1);
-var router31 = import_express31.default.Router();
+var router31 = import_express32.default.Router();
 var rssParser2 = new import_rss_parser2.default({
   customFields: {
     item: [
@@ -353158,7 +353244,7 @@ router31.post("/api/admin/rss/test", authenticateToken, requireAdmin, async (req
 var rssFeedRoutes_default = router31;
 
 // src/routes/liveMarketRoutes.ts
-var import_express32 = __toESM(require_express2(), 1);
+var import_express33 = __toESM(require_express2(), 1);
 
 // src/services/liveMarketScraperService.ts
 var import_https5 = __toESM(require("https"), 1);
@@ -353894,7 +353980,7 @@ async function getVerifiedMarketSummary(cityId, state) {
 }
 
 // src/routes/liveMarketRoutes.ts
-var router32 = import_express32.default.Router();
+var router32 = import_express33.default.Router();
 router32.get("/api/public/market-cities", async (_req, res) => {
   try {
     const cities = await getSupportedMarketCities();
@@ -353978,9 +354064,9 @@ router32.get("/api/public/live-mandi-pulse", async (_req, res) => {
 var liveMarketRoutes_default = router32;
 
 // src/routes/socialRssRoutes.ts
-var import_express33 = __toESM(require_express2(), 1);
+var import_express34 = __toESM(require_express2(), 1);
 var import_rss_parser3 = __toESM(require_rss_parser(), 1);
-var router33 = import_express33.default.Router();
+var router33 = import_express34.default.Router();
 var rssParser3 = new import_rss_parser3.default({
   customFields: {
     item: [
@@ -354487,6 +354573,47 @@ var import_fs5 = __toESM(require("fs"), 1);
 var import_path5 = __toESM(require("path"), 1);
 var import_url3 = require("url");
 var import_meta = {};
+async function seedSystemConfigs(client) {
+  const defaults3 = {
+    founder_name: "Rohit Pandit",
+    founder_image_url: "",
+    foundation_logo: "",
+    splash_bg_color: "#ffffff",
+    splash_text: "Service. Commitment. Resolve.",
+    splash_logo: "",
+    marquee_type: "rss",
+    marquee_rss_url: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
+    thought_type: "rss",
+    thought_rss_url: "https://mpinfo.org/RSSFeed/RSSFeed_News.xml",
+    drik_panchang_active: "true",
+    weather_active: "true",
+    cert_volunteer_bg: "",
+    cert_donor_bg: "",
+    module_healthcare: "true",
+    module_employment: "true",
+    module_utilities: "true",
+    module_epaper: "true",
+    sos_police: "112",
+    sos_ambulance: "102",
+    sos_women: "1091",
+    policy_privacy_url: "https://therpfoundation.org/privacy",
+    policy_terms_url: "https://therpfoundation.org/terms"
+  };
+  try {
+    const checkRes = await client.query("SELECT 1 FROM information_schema.tables WHERE table_name = 'system_configs'");
+    if (checkRes.rows.length === 0) return;
+    for (const [key, value2] of Object.entries(defaults3)) {
+      await client.query(
+        "INSERT INTO system_configs (config_key, config_value) VALUES ($1, $2) ON CONFLICT (config_key) DO NOTHING",
+        [key, String(value2)]
+      );
+    }
+    await client.query("UPDATE system_configs SET config_value = '' WHERE config_value LIKE '/assets/%'");
+    console.log("Seeded default system_configs successfully.");
+  } catch (e6) {
+    console.error("Seed failed:", e6);
+  }
+}
 function getDirname() {
   if (typeof __dirname !== "undefined") return __dirname;
   try {
@@ -354539,6 +354666,7 @@ async function runMigrationsOnPool(pool4) {
       console.log(`Successfully applied server boot migration: ${file}`);
       appliedCount++;
     }
+    await seedSystemConfigs(client);
     if (appliedCount > 0) {
       console.log(`Server boot migration complete: ${appliedCount} file(s) applied successfully.`);
     }
@@ -354557,7 +354685,7 @@ async function runMigrationsOnPool(pool4) {
 
 // server.ts
 var import_jsonwebtoken4 = __toESM(require_jsonwebtoken(), 1);
-var app = (0, import_express34.default)();
+var app = (0, import_express35.default)();
 app.set("trust proxy", 1);
 app.use("/api/iptv", iptvRoutes_default);
 import_dotenv2.default.config();
@@ -354577,8 +354705,8 @@ app.use((req2, res, next2) => {
   }
   next2();
 });
-app.use(import_express34.default.json({ limit: "5mb" }));
-app.use(import_express34.default.urlencoded({ limit: "5mb", extended: true }));
+app.use(import_express35.default.json({ limit: "5mb" }));
+app.use(import_express35.default.urlencoded({ limit: "5mb", extended: true }));
 var limiter2 = rate_limit_default({
   windowMs: 15 * 60 * 1e3,
   max: 500,
@@ -354599,6 +354727,7 @@ var SMTP2GO_API_KEY2 = process.env.SMTP2GO_API_KEY;
 var DEFAULT_SENDER2 = process.env.SMTP_USER || "no-reply@appapi.therpfoundation.org";
 app.use("/api/admin/hq", authenticateToken, requireAdmin);
 app.use("/", authRoutes_default);
+app.use("/", supremeCommandRouter);
 app.use("/", passwordResetSecure_default);
 app.use("/", livenessRoutes_default);
 app.use("/", healthRoutes_default);
@@ -354743,8 +354872,8 @@ app.use("/uploads", (req2, res, next2) => {
   res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
   res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
   next2();
-}, import_express34.default.static(import_path14.default.join(process.cwd(), "uploads")));
-app.use("/app", import_express34.default.static(import_path14.default.join(process.cwd(), "public", "app")));
+}, import_express35.default.static(import_path14.default.join(process.cwd(), "uploads")));
+app.use("/app", import_express35.default.static(import_path14.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req2, res) => {
   res.redirect("/app/");
 });
@@ -354950,7 +355079,7 @@ async function startServer2() {
     app.use(vite.middlewares);
   } else {
     if (import_fs11.default.existsSync(distPath)) {
-      app.use(import_express34.default.static(distPath));
+      app.use(import_express35.default.static(distPath));
     }
     app.get("*", (req2, res, next2) => {
       if (req2.path.startsWith("/api/")) return next2();
