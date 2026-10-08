@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { 
   ShieldCheck, Search, RefreshCw, LogOut, 
   LayoutGrid, Images, HeartHandshake, Tv, Compass, User,
-  Download, Activity
+  Download, Activity, TrendingUp
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -12,6 +12,7 @@ const STUDIOS = [
   { id: "home", path: "/admin/home", label: "Home", icon: Images },
   { id: "activity", path: "/admin/activity", label: "Activity", icon: Activity, badge: "Action" },
   { id: "impact", path: "/admin/impact", label: "Impact", icon: HeartHandshake },
+  { id: "campaigns", path: "/admin/campaigns", label: "Campaigns & Funds", icon: TrendingUp, badge: "Donations" },
   { id: "live-tv", path: "/admin/live-tv", label: "Live TV", icon: Tv },
   { id: "explore", path: "/admin/explore", label: "Explore", icon: Compass },
   { id: "profile", path: "/admin/profile", label: "Profile", icon: User },
@@ -98,7 +99,7 @@ export default function SupremeCommandCenter() {
             {/* Core Studios */}
             <div className="rounded-3xl border border-slate-200/90 bg-white p-3.5 shadow-sm">
               <p className="px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-slate-400 mb-2">
-                7 Core Command Studios
+                8 Core Command Studios
               </p>
               <div className="space-y-1">
                 {STUDIOS.map(({ id, path, label, icon: Icon, badge }) => {

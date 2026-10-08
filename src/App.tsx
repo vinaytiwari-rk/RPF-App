@@ -42,6 +42,7 @@ const DashboardStudio = lazyWithRetry(() => import("./pages/admin/studios/Dashbo
 const HomeStudio = lazyWithRetry(() => import("./pages/admin/studios/HomeStudio"), "admin-home");
 const ActivityStudio = lazyWithRetry(() => import("./pages/admin/studios/ActivityStudio"), "admin-activity");
 const ImpactStudio = lazyWithRetry(() => import("./pages/admin/studios/ImpactStudio"), "admin-impact");
+const CampaignStudio = lazyWithRetry(() => import("./pages/admin/studios/CampaignStudio"), "admin-campaigns");
 const LiveTVStudio = lazyWithRetry(() => import("./pages/admin/studios/LiveTVStudio"), "admin-livetv");
 const ExploreStudio = lazyWithRetry(() => import("./pages/admin/studios/ExploreStudio"), "admin-explore");
 const ProfileStudio = lazyWithRetry(() => import("./pages/admin/studios/ProfileStudio"), "admin-profile");
@@ -96,6 +97,7 @@ function AppContent() {
                 <Route path="home" element={<HomeStudio />} />
                 <Route path="activity" element={<ActivityStudio />} />
                 <Route path="impact" element={<ImpactStudio />} />
+                <Route path="campaigns" element={<CampaignStudio />} />
                 <Route path="live-tv" element={<LiveTVStudio />} />
                 <Route path="explore" element={<ExploreStudio />} />
                 <Route path="profile" element={<ProfileStudio />} />
