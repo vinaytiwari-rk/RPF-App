@@ -75,21 +75,21 @@ export default function DashboardStudio() {
     grievances: data.grievances?.length || 0,
   };
 
-  const exportCsv = (rows: Row[], filename: string) => {
-    if (!rows.length) return;
-    const keys = Object.keys(rows[0]);
-    const csv = [
-      keys.join(","),
-      ...rows.map((r) =>
-        keys
-          .map((k) => `"${String(r[k] || "").replace(/"/g, '""')}"`)
-          .join(",")
-      ),
-    ].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const exportCsv = (resource: string, filename: string) => {
+    const targetData: Row[] = Array.isArray((data as any)[resource]) ? (data as any)[resource] : [];
+    if (!targetData.length) return;
+    const headers = Object.keys(targetData[0]).join(",");
+    const rows = targetData.map((row) =>
+      Object.values(row)
+        .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
+        .join(",")
+    );
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
+    const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${filename}_${Date.now()}.csv`);
+    document.body.appendChild(link);
     link.click();
   };
 

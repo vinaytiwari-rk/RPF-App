@@ -32,6 +32,7 @@ app.set('trust proxy', 1);
 app.use('/api/iptv', iptvRoutes);
 
 import authRoutes from './src/routes/authRoutes.js';
+import { supremeCommandRouter } from './src/routes/supremeCommandRoutes.js';
 import passwordResetSecure from './src/routes/passwordResetSecure.js';
 import livenessRoutes from './src/routes/livenessRoutes.js';
 import healthRoutes from './src/routes/healthRoutes.js';
@@ -147,6 +148,7 @@ const DEFAULT_SENDER = process.env.SMTP_USER || "no-reply@appapi.therpfoundation
 app.use("/api/admin/hq", authenticateToken, requireAdmin);
 
 app.use('/', authRoutes);
+app.use('/', supremeCommandRouter);
 app.use('/', passwordResetSecure);
 app.use('/', livenessRoutes);
 app.use('/', healthRoutes);
