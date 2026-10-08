@@ -25,12 +25,104 @@ import {
   Lock,
   Trash2,
   Edit3,
-  Server
+  Server,
+  Plus,
+  Save,
+  ArrowUp,
+  ArrowDown,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Award,
+  Settings,
+  HelpCircle,
+  AlertTriangle,
+  Info,
+  LogOut,
+  BadgeCheck
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 
-type SubTab = "roles" | "control_room" | "about_cms";
+type SubTab = "profile_cms" | "roles" | "control_room" | "about_cms";
+
+export interface ProfileMetricItem {
+  id: string;
+  value: string;
+  label: string;
+  subLabel: string;
+  iconName: string;
+  route?: string;
+  active: boolean;
+}
+
+export interface ProfileMenuItem {
+  id: string;
+  title: string;
+  sub: string;
+  iconName: string;
+  route?: string;
+  active: boolean;
+}
+
+export interface ProfileConfig {
+  portalName: string;
+  verifiedBadgeText: string;
+  showVerifiedBadge: boolean;
+  demoUser: {
+    avatarInitial: string;
+    name: string;
+    phone: string;
+    email: string;
+  };
+  impactSection: {
+    title: string;
+    subtitle: string;
+    noticeText: string;
+    active: boolean;
+  };
+  metrics: ProfileMetricItem[];
+  accountItems: ProfileMenuItem[];
+  legalItems: ProfileMenuItem[];
+}
+
+export const DEFAULT_PROFILE_CONFIG: ProfileConfig = {
+  portalName: "RPF SAMAHIT PORTAL",
+  verifiedBadgeText: "Verified Volunteer",
+  showVerifiedBadge: true,
+  demoUser: {
+    avatarInitial: "V",
+    name: "Vinu",
+    phone: "7880121167",
+    email: "vinu27989@gmail.com"
+  },
+  impactSection: {
+    title: "My Volunteer Seva Impact",
+    subtitle: "Live Real-Time",
+    noticeText: "This area contains only your personal profile and account options. Volunteer Duty belongs in Activity and Jan Seva Card is available in Explore.",
+    active: true
+  },
+  metrics: [
+    { id: "metric-1", value: "38 hrs", label: "Duty Hours Logged", subLabel: "Active field service", iconName: "Clock", route: "/volunteer-duty", active: true },
+    { id: "metric-2", value: "14+", label: "Field Missions", subLabel: "Verified reports", iconName: "CheckCircle2", route: "/activity", active: true },
+    { id: "metric-3", value: "590 pts", label: "Seva Karma Points", subLabel: "Verified impact score", iconName: "Sparkles", route: "/my-certificates", active: true },
+    { id: "metric-4", value: "1,240+", label: "Citizens Reached", subLabel: "Directly supported", iconName: "Users", route: "/activity", active: true }
+  ],
+  accountItems: [
+    { id: "item-activity", title: "My Activity", sub: "Your actions and impact", iconName: "Sparkles", route: "/activity", active: true },
+    { id: "item-edit-profile", title: "Edit Profile", sub: "Update your personal information", iconName: "User", route: "/profile?edit=1", active: true },
+    { id: "item-certificates", title: "My Certificates", sub: "Certificates of service & impact", iconName: "Award", route: "/my-certificates", active: true },
+    { id: "item-settings", title: "App Settings", sub: "Language, notifications & preferences", iconName: "Settings", route: "/settings", active: true }
+  ],
+  legalItems: [
+    { id: "terms", title: "Terms & Conditions", sub: "Terms governing Samahit usage", iconName: "FileText", active: true },
+    { id: "privacy", title: "Privacy Policy", sub: "How we handle information and privacy", iconName: "Lock", active: true },
+    { id: "disclaimer", title: "Disclaimer & Notice", sub: "Important transparency and responsibility notices", iconName: "AlertTriangle", active: true },
+    { id: "support", title: "Help Desk & Support", sub: "Get help, report issues & share feedback", iconName: "HelpCircle", active: true },
+    { id: "about", title: "About App & Version", sub: "About Samahit, volunteers & app version", iconName: "Info", active: true },
+    { id: "logout", title: "Log Out of Account", sub: "Sign out safely", iconName: "LogOut", active: true }
+  ]
+};
 
 interface UserRow {
   id: string | number;
@@ -74,22 +166,25 @@ interface SystemOverview {
 
 export default function ProfileStudio() {
   const { token, user } = useAuth();
-  const [activeTab, setActiveTab] = useState<SubTab>("roles");
+  const [activeTab, setActiveTab] = useState<SubTab>("profile_cms");
   const [loading, setLoading] = useState(true);
   const [actionBusy, setActionBusy] = useState(false);
 
-  // 1. Roles & Access State
+  // 1. Profile Layout CMS State
+  const [profileConfig, setProfileConfig] = useState<ProfileConfig>(DEFAULT_PROFILE_CONFIG);
+
+  // 2. Roles & Access State
   const [users, setUsers] = useState<UserRow[]>([]);
   const [userSearch, setUserSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
 
-  // 2. Control Room State (Legacy Supreme Admin)
+  // 3. Control Room State
   const [overview, setOverview] = useState<SystemOverview | null>(null);
   const [versions, setVersions] = useState<CmsVersion[]>([]);
   const [flags, setFlags] = useState<FeatureFlag[]>([]);
   const [rollbackId, setRollbackId] = useState<number | null>(null);
 
-  // 3. Foundation About CMS State
+  // 4. Foundation About CMS State
   const [aboutDraft, setAboutDraft] = useState("");
   const [aboutDirty, setAboutDirty] = useState(false);
 
@@ -100,36 +195,49 @@ export default function ProfileStudio() {
     if (!token) return;
     setLoading(true);
     try {
-      const headers = authHeader();
+      // 1. Fetch CMS config including profileConfig
+      const cmsRes = await axios.get("/api/cms");
+      const cms = cmsRes.data?.cms || cmsRes.data?.data || {};
+      if (cms.profileConfig) {
+        setProfileConfig({
+          ...DEFAULT_PROFILE_CONFIG,
+          ...cms.profileConfig,
+          demoUser: { ...DEFAULT_PROFILE_CONFIG.demoUser, ...(cms.profileConfig.demoUser || {}) },
+          impactSection: { ...DEFAULT_PROFILE_CONFIG.impactSection, ...(cms.profileConfig.impactSection || {}) },
+          metrics: Array.isArray(cms.profileConfig.metrics) ? cms.profileConfig.metrics : DEFAULT_PROFILE_CONFIG.metrics,
+          accountItems: Array.isArray(cms.profileConfig.accountItems) ? cms.profileConfig.accountItems : DEFAULT_PROFILE_CONFIG.accountItems,
+          legalItems: Array.isArray(cms.profileConfig.legalItems) ? cms.profileConfig.legalItems : DEFAULT_PROFILE_CONFIG.legalItems,
+        });
+      }
+      if (typeof cms.foundationAbout === "string") {
+        setAboutDraft(cms.foundationAbout);
+      }
 
-      const [usersRes, overviewRes, versionsRes, flagsRes, cmsRes] = await Promise.allSettled([
-        axios.get("/api/admin/users", { headers, timeout: 8000 }),
-        axios.get("/api/admin/control/overview", { headers, timeout: 8000 }),
-        axios.get("/api/admin/control/cms/versions", { headers, timeout: 8000 }),
-        axios.get("/api/admin/control/feature-flags", { headers, timeout: 8000 }),
-        axios.get("/api/cms", { timeout: 8000 }),
-      ]);
+      // 2. Fetch Users
+      try {
+        const usersRes = await axios.get("/api/admin/hq/users", { headers: authHeader() });
+        if (usersRes.data?.data) {
+          setUsers(usersRes.data.data);
+        }
+      } catch {
+        // Users endpoint may require superadmin
+      }
 
-      if (usersRes.status === "fulfilled" && usersRes.value.data?.data) {
-        setUsers(usersRes.value.data.data);
-      }
-      if (overviewRes.status === "fulfilled" && overviewRes.value.data?.data) {
-        setOverview(overviewRes.value.data.data);
-      }
-      if (versionsRes.status === "fulfilled" && versionsRes.value.data?.data) {
-        setVersions(versionsRes.value.data.data);
-      }
-      if (flagsRes.status === "fulfilled" && flagsRes.value.data?.data) {
-        setFlags(flagsRes.value.data.data);
-      }
-      if (cmsRes.status === "fulfilled") {
-        const cms = cmsRes.value.data?.cms || cmsRes.value.data?.data || {};
-        const txt = cms.aboutText || cms.aboutTextHi || cms.aboutTextEn || "";
-        setAboutDraft(txt);
-        setAboutDirty(false);
+      // 3. Fetch Control Room Snapshots
+      try {
+        const sysRes = await axios.get("/api/admin/control/overview", { headers: authHeader() });
+        if (sysRes.data?.data) setOverview(sysRes.data.data);
+
+        const verRes = await axios.get("/api/admin/control/cms/versions", { headers: authHeader() });
+        if (verRes.data?.data) setVersions(verRes.data.data);
+
+        const flagRes = await axios.get("/api/admin/control/flags", { headers: authHeader() });
+        if (flagRes.data?.data) setFlags(flagRes.data.data);
+      } catch {
+        // Control room optional endpoints
       }
     } catch {
-      toast.error("Failed to refresh administration controls");
+      toast.error("Failed to load profile state");
     } finally {
       setLoading(false);
     }
@@ -139,124 +247,149 @@ export default function ProfileStudio() {
     void loadData();
   }, [loadData]);
 
-  // Role upgrade/downgrade handler
-  const handleUpdateRole = async (targetUserId: string | number, newRole: string) => {
-    setActionBusy(true);
-    const toastId = toast.loading(`Updating security role to ${newRole.toUpperCase()}...`);
-    try {
-      const res = await axios.put(
-        `/api/admin/users/${targetUserId}`,
-        { role: newRole },
-        { headers: authHeader() }
-      );
-      if (res.data?.success === false) throw new Error(res.data?.error || "Failed");
-
-      toast.success(`User role updated to ${newRole.toUpperCase()}!`, { id: toastId });
-      setUsers(prev => prev.map(u => (u.id === targetUserId ? { ...u, role: newRole } : u)));
-      if (selectedUser?.id === targetUserId) {
-        setSelectedUser(prev => prev ? { ...prev, role: newRole } : null);
-      }
-    } catch (e: any) {
-      toast.error(e?.response?.data?.error || "Failed to update role", { id: toastId });
-    } finally {
-      setActionBusy(false);
-    }
-  };
-
-  // Feature Flag toggle handler
-  const handleToggleFlag = async (flag: FeatureFlag) => {
-    const nextEnabled = !flag.enabled;
-    const toastId = toast.loading(`Toggling ${flag.key}...`);
-    try {
-      const res = await axios.put(
-        `/api/admin/control/feature-flags/${encodeURIComponent(flag.key)}`,
-        { enabled: nextEnabled, description: flag.description },
-        { headers: authHeader() }
-      );
-      if (res.data?.success === false) throw new Error(res.data?.error || "Flag toggle failed");
-      toast.success(`Flag ${flag.key} is now ${nextEnabled ? "ENABLED" : "DISABLED"}`, { id: toastId });
-      setFlags(prev => prev.map(f => (f.key === flag.key ? { ...f, enabled: nextEnabled } : f)));
-    } catch (e: any) {
-      toast.error(e?.response?.data?.error || "Failed to toggle flag", { id: toastId });
-    }
-  };
-
-  // CMS Rollback handler
-  const handleRollback = async (version: CmsVersion) => {
-    if (!window.confirm(`Rollback entire live CMS state to Version #${version.id} (${version.label})?\n\nA backup of the current state will be created automatically first.`)) {
+  // Save and publish profileConfig
+  const handleSaveProfileConfig = async () => {
+    if (!token) {
+      toast.error("Admin session expired");
       return;
     }
-    setRollbackId(version.id);
-    const toastId = toast.loading(`Rolling back to version #${version.id}...`);
-    try {
-      const res = await axios.post(
-        `/api/admin/control/cms/rollback/${version.id}`,
-        {},
-        { headers: authHeader() }
-      );
-      if (res.data?.success === false) throw new Error(res.data?.error || "Rollback failed");
-      toast.success(`CMS state restored to #${version.id}!`, { id: toastId });
-      await loadData();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.error || "Unable to rollback CMS", { id: toastId });
-    } finally {
-      setRollbackId(null);
-    }
-  };
-
-  // Database Backup Download handler
-  const handleExportDatabase = async () => {
     setActionBusy(true);
-    const toastId = toast.loading("Executing full pg_dump PostgreSQL backup stream...");
+    const toastId = toast.loading("Publishing Profile & Seva Impact layout...");
     try {
-      const response = await axios.get("/api/admin/control/database/export", {
-        headers: authHeader(),
-        responseType: "blob",
-        timeout: 60000,
-      });
-      const blob = new Blob([response.data], { type: "application/sql;charset=utf-8;" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `rpf_full_backup_${Date.now()}.sql`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success("Database backup SQL downloaded successfully!", { id: toastId });
-    } catch (e: any) {
-      toast.error(e?.response?.data?.error || "Database export failed (pg_dump unavailable or restricted).", { id: toastId });
-    } finally {
-      setActionBusy(false);
-    }
-  };
-
-  // Save Foundation About CMS
-  const handleSaveAbout = async () => {
-    if (!aboutDirty) return;
-    setActionBusy(true);
-    const toastId = toast.loading("Publishing Foundation About Vision statement...");
-    try {
-      const patch = {
-        aboutText: aboutDraft,
-        aboutTextEn: aboutDraft,
-        aboutTextHi: aboutDraft,
-      };
       const res = await axios.post(
         "/api/admin/control/cms/publish",
-        { patch, label: "ProfileStudio: updated unified about text" },
+        {
+          patch: { profileConfig },
+          label: "Profile Studio: Updated Citizen Profile & Seva Impact Layout"
+        },
         { headers: authHeader() }
       );
-      if (res.data?.success === false) throw new Error("Save failed");
-      toast.success("About & Mission updated across live platforms!", { id: toastId });
-      setAboutDirty(false);
+      if (res.data?.success === false) throw new Error(res.data?.error || "Publish failed");
+      toast.success("Profile layout live across citizen apps!", { id: toastId });
     } catch (e: any) {
-      toast.error(e?.response?.data?.error || "Save failed", { id: toastId });
+      toast.error(e?.response?.data?.error || "Failed to save profile layout", { id: toastId });
     } finally {
       setActionBusy(false);
     }
   };
 
-  // User list filter
+  // Profile CMS Metric Handlers
+  const handleAddMetric = () => {
+    const newMetric: ProfileMetricItem = {
+      id: `metric-${Date.now()}`,
+      value: "100+",
+      label: "New Impact Metric",
+      subLabel: "Verified records",
+      iconName: "Sparkles",
+      route: "/activity",
+      active: true
+    };
+    setProfileConfig({
+      ...profileConfig,
+      metrics: [...profileConfig.metrics, newMetric]
+    });
+    toast.success("Metric card added");
+  };
+
+  const handleUpdateMetric = (id: string, patch: Partial<ProfileMetricItem>) => {
+    setProfileConfig({
+      ...profileConfig,
+      metrics: profileConfig.metrics.map(m => m.id === id ? { ...m, ...patch } : m)
+    });
+  };
+
+  const handleDeleteMetric = (id: string) => {
+    setProfileConfig({
+      ...profileConfig,
+      metrics: profileConfig.metrics.filter(m => m.id !== id)
+    });
+    toast.success("Metric card removed");
+  };
+
+  const handleMoveMetric = (index: number, direction: "up" | "down") => {
+    const nextList = [...profileConfig.metrics];
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= nextList.length) return;
+    const temp = nextList[index];
+    nextList[index] = nextList[targetIdx];
+    nextList[targetIdx] = temp;
+    setProfileConfig({ ...profileConfig, metrics: nextList });
+  };
+
+  // Account Menu Handlers
+  const handleAddAccountItem = () => {
+    const newItem: ProfileMenuItem = {
+      id: `item-${Date.now()}`,
+      title: "New Account Item",
+      sub: "Short description of account action",
+      iconName: "User",
+      route: "/profile",
+      active: true
+    };
+    setProfileConfig({
+      ...profileConfig,
+      accountItems: [...profileConfig.accountItems, newItem]
+    });
+    toast.success("Account item added");
+  };
+
+  const handleUpdateAccountItem = (id: string, patch: Partial<ProfileMenuItem>) => {
+    setProfileConfig({
+      ...profileConfig,
+      accountItems: profileConfig.accountItems.map(item => item.id === id ? { ...item, ...patch } : item)
+    });
+  };
+
+  const handleDeleteAccountItem = (id: string) => {
+    setProfileConfig({
+      ...profileConfig,
+      accountItems: profileConfig.accountItems.filter(item => item.id !== id)
+    });
+    toast.success("Account item removed");
+  };
+
+  const handleMoveAccountItem = (index: number, direction: "up" | "down") => {
+    const nextList = [...profileConfig.accountItems];
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= nextList.length) return;
+    const temp = nextList[index];
+    nextList[index] = nextList[targetIdx];
+    nextList[targetIdx] = temp;
+    setProfileConfig({ ...profileConfig, accountItems: nextList });
+  };
+
+  // Legal Items Handlers
+  const handleUpdateLegalItem = (id: string, patch: Partial<ProfileMenuItem>) => {
+    setProfileConfig({
+      ...profileConfig,
+      legalItems: profileConfig.legalItems.map(item => item.id === id ? { ...item, ...patch } : item)
+    });
+  };
+
+  const handleDeleteLegalItem = (id: string) => {
+    setProfileConfig({
+      ...profileConfig,
+      legalItems: profileConfig.legalItems.filter(item => item.id !== id)
+    });
+    toast.success("Item removed");
+  };
+
+  const handleAddLegalItem = () => {
+    const newItem: ProfileMenuItem = {
+      id: `legal-${Date.now()}`,
+      title: "New Transparency Notice",
+      sub: "Description of policy or guidance",
+      iconName: "FileText",
+      active: true
+    };
+    setProfileConfig({
+      ...profileConfig,
+      legalItems: [...profileConfig.legalItems, newItem]
+    });
+    toast.success("Transparency notice added");
+  };
+
+  // User list filter for roles
   const filteredUsers = users.filter(u => {
     const q = userSearch.toLowerCase();
     return (
@@ -267,11 +400,9 @@ export default function ProfileStudio() {
     );
   });
 
-  const isSuperAdmin = user?.role === "super_admin" || user?.role === "superadmin";
-
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
-      {/* HEADER MATCHING SUPREME CONTROL ROOM DESIGN */}
+      {/* HEADER WITH SAVE AND REFRESH */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
           <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-purple-50 text-purple-600">
@@ -282,27 +413,48 @@ export default function ProfileStudio() {
               <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-purple-700">
                 Phase 5 Command
               </span>
-              <span className="text-xs text-slate-400">Security & Infrastructure Governance</span>
+              <span className="text-xs text-slate-400">Profile, Identity & System Governance</span>
             </div>
-            <h1 className="text-xl md:text-2xl font-black text-slate-800 mt-1">Profile, Roles & System Control Room</h1>
+            <h1 className="text-xl md:text-2xl font-black text-slate-800 mt-1">Profile & Citizen Portal Command</h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Manage administrator privileges, immutable snapshot rollbacks, feature flags and server backups.
+              Customize Citizen Profile, Seva Impact metrics, account menus, legal policies and administrator roles.
             </p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => void loadData()}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh State
-          </button>
+          {activeTab === "profile_cms" && (
+            <button
+              onClick={() => {
+                setProfileConfig(DEFAULT_PROFILE_CONFIG);
+                toast.success("Defaults restored. Click 'Save & Publish' to make permanent.");
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition border border-slate-200"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Defaults
+            </button>
+          )}
+          {activeTab === "profile_cms" && (
+            <button
+              onClick={handleSaveProfileConfig}
+              disabled={actionBusy}
+              className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition shadow-xs disabled:opacity-60"
+            >
+              <Save className="h-4 w-4" /> {actionBusy ? "Publishing..." : "Save & Publish"}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* THREE MAIN COMMAND TABS */}
+      {/* FOUR MAIN COMMAND TABS */}
       <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
+        <button
+          onClick={() => setActiveTab("profile_cms")}
+          className={`flex-1 text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2 ${
+            activeTab === "profile_cms" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <User className="h-4 w-4" /> Profile & Seva Impact CMS
+        </button>
         <button
           onClick={() => setActiveTab("roles")}
           className={`flex-1 text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2 ${
@@ -317,7 +469,7 @@ export default function ProfileStudio() {
             activeTab === "control_room" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <Server className="h-4 w-4" /> Infrastructure & Rollbacks ({versions.length} Snapshots)
+          <Server className="h-4 w-4" /> System & Rollbacks ({versions.length})
         </button>
         <button
           onClick={() => setActiveTab("about_cms")}
@@ -325,344 +477,669 @@ export default function ProfileStudio() {
             activeTab === "about_cms" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <FileText className="h-4 w-4" /> Foundation Vision & About CMS
+          <FileText className="h-4 w-4" /> Foundation About CMS
         </button>
       </div>
 
-      {/* 1. ROLES & PERMISSIONS TAB */}
-      {activeTab === "roles" && (
-        <div className="flex flex-col lg:flex-row gap-6 h-[72vh] animate-fade-in">
-          {/* Left User List */}
-          <div className="w-full lg:w-5/12 xl:w-5/12 flex flex-col space-y-3">
-            <div className="relative">
-              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search accounts by name, email or phone..."
-                value={userSearch}
-                onChange={e => setUserSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-purple-500"
-              />
+      {/* TAB 1: PROFILE CMS CONTROL ROOM */}
+      {activeTab === "profile_cms" && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* LEFT 7 COLS: FORM CONTROLS */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* 1. Header & Identity Card */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-purple-600" />
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                    Profile Identity & Portal Badge
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setProfileConfig({ ...profileConfig, showVerifiedBadge: !profileConfig.showVerifiedBadge })}
+                  className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    profileConfig.showVerifiedBadge ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {profileConfig.showVerifiedBadge ? "Badge Active" : "Badge Hidden"}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Portal Name</label>
+                  <input
+                    type="text"
+                    value={profileConfig.portalName}
+                    onChange={e => setProfileConfig({ ...profileConfig, portalName: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Badge Text</label>
+                  <input
+                    type="text"
+                    value={profileConfig.verifiedBadgeText}
+                    onChange={e => setProfileConfig({ ...profileConfig, verifiedBadgeText: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <p className="text-[11px] font-bold text-slate-400 uppercase mb-2">Default Preview User Details</p>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Name</label>
+                    <input
+                      type="text"
+                      value={profileConfig.demoUser.name}
+                      onChange={e => setProfileConfig({
+                        ...profileConfig,
+                        demoUser: { ...profileConfig.demoUser, name: e.target.value }
+                      })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Phone</label>
+                    <input
+                      type="text"
+                      value={profileConfig.demoUser.phone}
+                      onChange={e => setProfileConfig({
+                        ...profileConfig,
+                        demoUser: { ...profileConfig.demoUser, phone: e.target.value }
+                      })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Email</label>
+                    <input
+                      type="text"
+                      value={profileConfig.demoUser.email}
+                      onChange={e => setProfileConfig({
+                        ...profileConfig,
+                        demoUser: { ...profileConfig.demoUser, email: e.target.value }
+                      })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
-              {filteredUsers.map(u => {
-                const isSelected = selectedUser?.id === u.id;
-                const isAdmin = u.role === "admin" || u.role === "super_admin" || u.role === "superadmin";
-                return (
-                  <div
-                    key={u.id}
-                    onClick={() => setSelectedUser(u)}
-                    className={`bg-white p-3 rounded-xl border transition-all cursor-pointer hover:border-slate-300 ${
-                      isSelected ? "border-purple-500 ring-1 ring-purple-500 shadow-xs" : "border-slate-200"
+            {/* 2. Volunteer Seva Impact Section & 4 Metric Cards */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-amber-500" />
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                    My Volunteer Seva Impact Controls
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setProfileConfig({
+                      ...profileConfig,
+                      impactSection: { ...profileConfig.impactSection, active: !profileConfig.impactSection.active }
+                    })}
+                    className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      profileConfig.impactSection.active ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg flex-shrink-0 ${isAdmin ? "bg-purple-100 text-purple-700" : "bg-slate-100 text-slate-600"}`}>
-                        <User className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-1 mb-1">
-                          <h4 className="text-xs font-bold text-slate-800 truncate">{u.name || u.username || "Unnamed User"}</h4>
-                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                            isAdmin ? "bg-purple-50 text-purple-700 border border-purple-200" : "bg-slate-100 text-slate-600"
-                          }`}>
-                            {u.role || "User"}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500 truncate">{u.email || u.phone || "No contact info"}</p>
-                      </div>
+                    {profileConfig.impactSection.active ? "Section Active" : "Section Hidden"}
+                  </button>
+                  <button
+                    onClick={handleAddMetric}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-lg border border-purple-200 hover:bg-purple-100"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add Metric
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={profileConfig.impactSection.title}
+                    onChange={e => setProfileConfig({
+                      ...profileConfig,
+                      impactSection: { ...profileConfig.impactSection, title: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Live Subtitle Tag</label>
+                  <input
+                    type="text"
+                    value={profileConfig.impactSection.subtitle}
+                    onChange={e => setProfileConfig({
+                      ...profileConfig,
+                      impactSection: { ...profileConfig.impactSection, subtitle: e.target.value }
+                    })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Explanatory Notice Text</label>
+                <textarea
+                  rows={2}
+                  value={profileConfig.impactSection.noticeText}
+                  onChange={e => setProfileConfig({
+                    ...profileConfig,
+                    impactSection: { ...profileConfig.impactSection, noticeText: e.target.value }
+                  })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium"
+                />
+              </div>
+
+              {/* Metric Cards List */}
+              <div className="space-y-2 pt-2">
+                <p className="text-[11px] font-bold text-slate-400 uppercase">Impact Metric Cards ({profileConfig.metrics.length})</p>
+                {profileConfig.metrics.map((metric, idx) => (
+                  <div key={metric.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                    <div className="grid grid-cols-3 gap-2 flex-1">
+                      <input
+                        type="text"
+                        placeholder="Value (e.g. 38 hrs)"
+                        value={metric.value}
+                        onChange={e => handleUpdateMetric(metric.id, { value: e.target.value })}
+                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-bold text-purple-700"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Label"
+                        value={metric.label}
+                        onChange={e => handleUpdateMetric(metric.id, { label: e.target.value })}
+                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-semibold"
+                      />
+                      <input
+                        type="text"
+                        placeholder="SubLabel"
+                        value={metric.subLabel}
+                        onChange={e => handleUpdateMetric(metric.id, { subLabel: e.target.value })}
+                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-500"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => handleUpdateMetric(metric.id, { active: !metric.active })}
+                        className={`p-1 rounded ${metric.active ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"}`}
+                        title={metric.active ? "Active" : "Deactivated"}
+                      >
+                        {metric.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => handleMoveMetric(idx, "up")}
+                        disabled={idx === 0}
+                        className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-20"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveMetric(idx, "down")}
+                        disabled={idx === profileConfig.metrics.length - 1}
+                        className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-20"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMetric(metric.id)}
+                        className="p-1 text-rose-500 hover:bg-rose-50 rounded"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </div>
-                );
-              })}
+                ))}
+              </div>
+            </div>
+
+            {/* 3. My Profile & Account Menu */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Settings className="h-4 w-4 text-emerald-600" />
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                    My Profile & Account Menu Items
+                  </h3>
+                </div>
+                <button
+                  onClick={handleAddAccountItem}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200 hover:bg-emerald-100"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Menu Item
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {profileConfig.accountItems.map((item, idx) => (
+                  <div key={item.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                    <div className="grid grid-cols-3 gap-2 flex-1">
+                      <input
+                        type="text"
+                        placeholder="Title (e.g. My Activity)"
+                        value={item.title}
+                        onChange={e => handleUpdateAccountItem(item.id, { title: e.target.value })}
+                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-bold"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Subtitle (e.g. Your actions and impact)"
+                        value={item.sub}
+                        onChange={e => handleUpdateAccountItem(item.id, { sub: e.target.value })}
+                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Route (e.g. /activity)"
+                        value={item.route || ""}
+                        onChange={e => handleUpdateAccountItem(item.id, { route: e.target.value })}
+                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono text-emerald-700"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => handleUpdateAccountItem(item.id, { active: !item.active })}
+                        className={`p-1 rounded ${item.active ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"}`}
+                        title={item.active ? "Active" : "Deactivated"}
+                      >
+                        {item.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => handleMoveAccountItem(idx, "up")}
+                        disabled={idx === 0}
+                        className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-20"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveAccountItem(idx, "down")}
+                        disabled={idx === profileConfig.accountItems.length - 1}
+                        className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-20"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAccountItem(item.id)}
+                        className="p-1 text-rose-500 hover:bg-rose-50 rounded"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 4. Policy, Legal & Transparency */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-blue-600" />
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                    Policy, Legal & Transparency Menu
+                  </h3>
+                </div>
+                <button
+                  onClick={handleAddLegalItem}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200 hover:bg-blue-100"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Policy Notice
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {profileConfig.legalItems.map((item) => (
+                  <div key={item.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                    <div className="grid grid-cols-2 gap-2 flex-1">
+                      <input
+                        type="text"
+                        placeholder="Title (e.g. Terms & Conditions)"
+                        value={item.title}
+                        onChange={e => handleUpdateLegalItem(item.id, { title: e.target.value })}
+                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-bold"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Subtitle (e.g. Terms governing Samahit usage)"
+                        value={item.sub}
+                        onChange={e => handleUpdateLegalItem(item.id, { sub: e.target.value })}
+                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => handleUpdateLegalItem(item.id, { active: !item.active })}
+                        className={`p-1 rounded ${item.active ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"}`}
+                        title={item.active ? "Active" : "Deactivated"}
+                      >
+                        {item.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteLegalItem(item.id)}
+                        className="p-1 text-rose-500 hover:bg-rose-50 rounded"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Right Role Management Inspector */}
-          <div className="hidden lg:flex flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-col">
-            {selectedUser ? (
-              <div className="p-6 h-full flex flex-col justify-between overflow-y-auto custom-scrollbar">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 rounded-xl bg-purple-50 text-purple-700">
-                        <Key className="h-6 w-6" />
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-purple-700">Account Privilege Authority</span>
-                        <h2 className="text-lg font-black text-slate-800">{selectedUser.name || selectedUser.username}</h2>
-                      </div>
-                    </div>
-                    <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700">
-                      ID: #{selectedUser.id}
-                    </span>
-                  </div>
+          {/* RIGHT 5 COLS: LIVE MOBILE SCREEN PREVIEW */}
+          <div className="lg:col-span-5">
+            <div className="sticky top-6 bg-[#FFF7E8] rounded-3xl p-5 border-2 border-[#D8E8DB] shadow-lg text-[#243B32] space-y-4 max-h-[85vh] overflow-y-auto custom-scrollbar">
+              <div className="flex items-center justify-between border-b border-amber-200 pb-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
+                  Live Public Profile Preview
+                </span>
+                <span className="text-[10px] font-bold bg-white px-2 py-0.5 rounded-full border border-amber-200 text-slate-700">
+                  Mobile View
+                </span>
+              </div>
 
-                  {/* Account Information Details */}
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-slate-400">Email Address</p>
-                      <p className="text-xs font-semibold text-slate-800">{selectedUser.email || "N/A"}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-slate-400">Phone Number</p>
-                      <p className="text-xs font-semibold text-slate-800">{selectedUser.phone || "N/A"}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-slate-400">Account Type</p>
-                      <p className="text-xs font-semibold text-slate-800">
-                        {selectedUser.isVolunteer ? "Volunteer + Member" : "Standard User"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-slate-400">Registration Date</p>
-                      <p className="text-xs font-semibold text-slate-800">
-                        {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : "N/A"}
-                      </p>
+              {/* User Identity Card Preview */}
+              <div className="bg-white p-4 rounded-2xl border border-[#D8E8DB] shadow-2xs space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-14 w-14 rounded-full bg-gradient-to-br from-[#243B32] via-[#D97706] to-[#167C5A] p-0.5 shrink-0">
+                    <div className="h-full w-full rounded-full bg-white flex items-center justify-center font-black text-lg text-[#243B32]">
+                      {profileConfig.demoUser.avatarInitial || "V"}
                     </div>
                   </div>
-
-                  {/* Role Assignment Buttons */}
-                  <div className="space-y-3">
-                    <p className="text-xs font-bold text-slate-500 uppercase">Change Privilege Level</p>
-                    <div className="grid grid-cols-3 gap-3">
-                      <button
-                        onClick={() => handleUpdateRole(selectedUser.id, "user")}
-                        disabled={actionBusy || selectedUser.role === "user"}
-                        className={`p-3 rounded-xl border text-left transition ${
-                          selectedUser.role === "user"
-                            ? "border-slate-800 bg-slate-900 text-white shadow-xs font-bold"
-                            : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                        }`}
-                      >
-                        <User className="h-4 w-4 mb-2" />
-                        <p className="text-xs font-bold">Standard User</p>
-                        <p className="text-[10px] opacity-70">App view & services</p>
-                      </button>
-
-                      <button
-                        onClick={() => handleUpdateRole(selectedUser.id, "admin")}
-                        disabled={actionBusy || selectedUser.role === "admin"}
-                        className={`p-3 rounded-xl border text-left transition ${
-                          selectedUser.role === "admin"
-                            ? "border-purple-600 bg-purple-600 text-white shadow-xs font-bold"
-                            : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                        }`}
-                      >
-                        <Shield className="h-4 w-4 mb-2" />
-                        <p className="text-xs font-bold">Administrator</p>
-                        <p className="text-[10px] opacity-70">Studio command center</p>
-                      </button>
-
-                      <button
-                        onClick={() => handleUpdateRole(selectedUser.id, "super_admin")}
-                        disabled={actionBusy || !isSuperAdmin || selectedUser.role === "super_admin"}
-                        className={`p-3 rounded-xl border text-left transition ${
-                          selectedUser.role === "super_admin" || selectedUser.role === "superadmin"
-                            ? "border-amber-600 bg-amber-600 text-white shadow-xs font-bold"
-                            : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40"
-                        }`}
-                      >
-                        <ShieldCheck className="h-4 w-4 mb-2" />
-                        <p className="text-xs font-bold">Super Admin</p>
-                        <p className="text-[10px] opacity-70">Database & system flags</p>
-                      </button>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[9px] font-bold text-[#D97706] uppercase tracking-wider">
+                        {profileConfig.portalName}
+                      </span>
+                      {profileConfig.showVerifiedBadge && (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[8.5px] font-bold text-[#167C5A] border border-emerald-200">
+                          <BadgeCheck className="h-2.5 w-2.5" /> {profileConfig.verifiedBadgeText}
+                        </span>
+                      )}
                     </div>
+                    <h2 className="text-sm font-bold text-[#243B32]">{profileConfig.demoUser.name}</h2>
+                    <p className="text-[10px] text-slate-500 font-medium">
+                      {profileConfig.demoUser.phone} • {profileConfig.demoUser.email}
+                    </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="border-t border-slate-100 pt-4 text-xs text-slate-400">
-                  Role assignments immediately reconfigure live route guard permissions on next user action.
+              {/* Seva Impact Section Preview */}
+              {profileConfig.impactSection.active && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#243B32] flex items-center gap-1">
+                      <Sparkles className="h-3 w-3 text-[#D97706]" />
+                      {profileConfig.impactSection.title}
+                    </h4>
+                    <span className="text-[9px] font-bold text-slate-400">
+                      {profileConfig.impactSection.subtitle}
+                    </span>
+                  </div>
+                  <p className="text-[9px] text-slate-500 leading-snug px-1">
+                    {profileConfig.impactSection.noticeText}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {profileConfig.metrics.filter(m => m.active).map(m => (
+                      <div key={m.id} className="bg-white p-3 rounded-xl border border-amber-100 shadow-2xs">
+                        <p className="text-sm font-black text-amber-700">{m.value}</p>
+                        <p className="text-[10px] font-bold text-[#243B32] truncate">{m.label}</p>
+                        <p className="text-[8.5px] text-slate-400 truncate">{m.subLabel}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Account Items Preview */}
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#243B32] px-1">
+                  My Profile & Account
+                </p>
+                <div className="bg-white rounded-2xl border border-[#D8E8DB] divide-y divide-slate-100 shadow-2xs overflow-hidden">
+                  {profileConfig.accountItems.filter(i => i.active).map(item => (
+                    <div key={item.id} className="p-3 flex items-center justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-[#243B32] truncate">{item.title}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{item.sub}</p>
+                      </div>
+                      <span className="text-[10px] text-slate-400">→</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Legal Items Preview */}
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#243B32] px-1">
+                  Policy, Legal & Transparency
+                </p>
+                <div className="bg-white rounded-2xl border border-[#D8E8DB] divide-y divide-slate-100 shadow-2xs overflow-hidden">
+                  {profileConfig.legalItems.filter(i => i.active).map(item => (
+                    <div key={item.id} className="p-3 flex items-center justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-[#243B32] truncate">{item.title}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{item.sub}</p>
+                      </div>
+                      <span className="text-[10px] text-slate-400">→</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: ROLES & PRIVILEGES */}
+      {activeTab === "roles" && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-4">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search user name, email, phone or role..."
+                  value={userSearch}
+                  onChange={e => setUserSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden shadow-xs">
+              {filteredUsers.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">No user accounts found.</div>
+              ) : (
+                filteredUsers.map(u => (
+                  <div
+                    key={u.id}
+                    onClick={() => setSelectedUser(u)}
+                    className={`p-4 flex items-center justify-between cursor-pointer transition hover:bg-slate-50 ${
+                      selectedUser?.id === u.id ? "bg-purple-50/50" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-sm">
+                        {(u.name || u.username || "U")[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-800">{u.name || u.username || "Unknown"}</h4>
+                        <p className="text-[11px] text-slate-500">{u.email || u.phone || "No contact info"}</p>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700">
+                      {u.role}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+            {selectedUser ? (
+              <div className="space-y-4">
+                <h3 className="text-sm font-black text-slate-800 border-b pb-2">Privilege Management</h3>
+                <div>
+                  <p className="text-xs font-bold text-slate-600">Selected: {selectedUser.name || selectedUser.username}</p>
+                  <p className="text-[11px] text-slate-400 font-mono">ID: {selectedUser.id}</p>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Assign Role</label>
+                  <select
+                    value={selectedUser.role}
+                    onChange={async (e) => {
+                      const newRole = e.target.value;
+                      try {
+                        await axios.post(
+                          `/api/admin/hq/users/${selectedUser.id}/role`,
+                          { role: newRole },
+                          { headers: authHeader() }
+                        );
+                        setSelectedUser({ ...selectedUser, role: newRole });
+                        setUsers(users.map(u => u.id === selectedUser.id ? { ...u, role: newRole } : u));
+                        toast.success("Role updated successfully");
+                      } catch {
+                        toast.error("Role update failed");
+                      }
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold"
+                  >
+                    <option value="citizen">citizen</option>
+                    <option value="volunteer">volunteer</option>
+                    <option value="coordinator">coordinator</option>
+                    <option value="admin">admin</option>
+                    <option value="super_admin">super_admin</option>
+                  </select>
                 </div>
               </div>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50/50">
-                <div className="h-16 w-16 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 mb-4 shadow-xs border border-purple-100">
-                  <Key className="h-8 w-8" />
-                </div>
-                <h2 className="text-lg font-black text-slate-800">Select an Account to Manage Permissions</h2>
-                <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                  Upgrade trusted coordinators to Administrators or revoke elevated command access.
-                </p>
+              <div className="p-8 text-center text-slate-400 text-xs">
+                Select a user to review privileges and assign admin permissions.
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* 2. INFRASTRUCTURE, ROLLBACKS & BACKUPS TAB (RESTORED FROM LEGACY SUPREME CONTROL) */}
+      {/* TAB 3: SYSTEM CONTROL ROOM & ROLLBACKS */}
       {activeTab === "control_room" && (
-        <div className="space-y-6 animate-fade-in">
-          {/* Diagnostic Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between text-slate-400 mb-3">
-                <Activity className="h-4 w-4" />
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Healthy</span>
-              </div>
-              <p className="text-[10px] font-bold uppercase text-slate-400">System Telemetry</p>
-              <p className="text-lg font-black text-slate-800">{overview ? `${overview.apiLatencyMs} ms Latency` : "Online"}</p>
+              <p className="text-[10px] font-bold uppercase text-slate-400">System Status</p>
+              <p className="text-lg font-black text-emerald-600 mt-1">HEALTHY</p>
             </div>
-
             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between text-slate-400 mb-3">
-                <Database className="h-4 w-4" />
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Connected</span>
-              </div>
-              <p className="text-[10px] font-bold uppercase text-slate-400">PostgreSQL Schema</p>
-              <p className="text-lg font-black text-slate-800">{overview?.schemaTables ?? 42} Relational Tables</p>
+              <p className="text-[10px] font-bold uppercase text-slate-400">Database Tables</p>
+              <p className="text-lg font-black text-slate-800 mt-1">{overview?.schemaTables || "32"}</p>
             </div>
-
             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between text-slate-400 mb-3">
-                <History className="h-4 w-4" />
-                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Immutable</span>
-              </div>
-              <p className="text-[10px] font-bold uppercase text-slate-400">CMS Snapshots</p>
-              <p className="text-lg font-black text-slate-800">{versions.length} Snapshots Saved</p>
+              <p className="text-[10px] font-bold uppercase text-slate-400">Saved CMS Snapshots</p>
+              <p className="text-lg font-black text-purple-600 mt-1">{versions.length}</p>
             </div>
-
             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between text-slate-400 mb-3">
-                <ToggleRight className="h-4 w-4" />
-                <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Controlled</span>
-              </div>
-              <p className="text-[10px] font-bold uppercase text-slate-400">Feature Switches</p>
-              <p className="text-lg font-black text-slate-800">{flags.filter(f => f.enabled).length}/{flags.length} Active</p>
+              <p className="text-[10px] font-bold uppercase text-slate-400">Active Feature Flags</p>
+              <p className="text-lg font-black text-blue-600 mt-1">{flags.filter(f => f.enabled).length}</p>
             </div>
           </div>
 
-          {/* Split Pane: Version History & Feature Switches */}
-          <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            {/* Version History & One-Click Rollback */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div>
-                  <h3 className="text-sm font-black text-slate-800">Configuration Version History</h3>
-                  <p className="text-xs text-slate-500">
-                    Snapshots are SHA-256 checksum-protected. Rollback restores full live CMS state safely.
-                  </p>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+              Immutable Snapshot Rollbacks
+            </h3>
+            <p className="text-xs text-slate-500">
+              Every save action creates an immutable SHA-256 snapshot. Rollback instantly if needed.
+            </p>
+            <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+              {versions.map(v => (
+                <div key={v.id} className="py-3 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-800">{v.label}</span>
+                    <p className="text-[10px] font-mono text-slate-400">
+                      {new Date(v.created_at).toLocaleString()} • Hash: {v.checksum.slice(0, 10)}...
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm(`Roll back configuration to snapshot #${v.id}?`)) return;
+                      try {
+                        await axios.post(
+                          `/api/admin/control/cms/rollback/${v.id}`,
+                          {},
+                          { headers: authHeader() }
+                        );
+                        toast.success(`Successfully rolled back to version #${v.id}`);
+                        void loadData();
+                      } catch {
+                        toast.error("Rollback failed");
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1 bg-amber-50 text-amber-700 rounded-lg border border-amber-200 hover:bg-amber-100"
+                  >
+                    <RotateCcw className="h-3 w-3" /> Rollback
+                  </button>
                 </div>
-                <ArchiveRestore className="h-5 w-5 text-indigo-600" />
-              </div>
-
-              <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
-                {versions.length === 0 ? (
-                  <p className="text-xs text-slate-400 py-8 text-center">No snapshot versions found.</p>
-                ) : (
-                  versions.map(v => (
-                    <div key={v.id} className="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-slate-200 transition">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-slate-800">#{v.id} • {v.label}</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">
-                          {new Date(v.created_at).toLocaleString()} • {v.field_count ?? 0} fields
-                        </p>
-                        <p className="text-[9px] font-mono text-slate-400 truncate max-w-[280px]">{v.checksum}</p>
-                      </div>
-                      <button
-                        onClick={() => void handleRollback(v)}
-                        disabled={rollbackId !== null}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition disabled:opacity-40"
-                      >
-                        <RotateCcw className="h-3 w-3" /> {rollbackId === v.id ? "Restoring..." : "Rollback"}
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
+              ))}
             </div>
-
-            {/* Feature Flags */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div>
-                  <h3 className="text-sm font-black text-slate-800">Feature Switches</h3>
-                  <p className="text-xs text-slate-500">Toggle runtime modules across the mobile & web app.</p>
-                </div>
-                <ToggleLeft className="h-5 w-5 text-purple-600" />
-              </div>
-
-              <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
-                {flags.length === 0 ? (
-                  <p className="text-xs text-slate-400 py-8 text-center">No runtime feature flags registered.</p>
-                ) : (
-                  flags.map(f => (
-                    <button
-                      key={f.key}
-                      onClick={() => void handleToggleFlag(f)}
-                      className="flex w-full items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-slate-200 transition text-left"
-                    >
-                      <div>
-                        <p className="text-xs font-bold text-slate-800">{f.key}</p>
-                        <p className="text-[10px] text-slate-500">{f.description || "Runtime toggle flag"}</p>
-                      </div>
-                      {f.enabled ? (
-                        <ToggleRight className="h-6 w-6 text-emerald-600 shrink-0" />
-                      ) : (
-                        <ToggleLeft className="h-6 w-6 text-slate-400 shrink-0" />
-                      )}
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Database Backup Section */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Database className="h-4 w-4 text-rose-600" />
-                <h3 className="text-sm font-black text-slate-800">Database Protection & Full Export</h3>
-              </div>
-              <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                Execute a pg_dump transaction to export the entire production relational database as an SQL dump. Requires Super Admin authority.
-              </p>
-            </div>
-            <button
-              onClick={handleExportDatabase}
-              disabled={actionBusy}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs disabled:opacity-50"
-            >
-              <Download className="h-4 w-4" /> {actionBusy ? "Exporting Backup..." : "Download SQL Backup"}
-            </button>
           </div>
         </div>
       )}
 
-      {/* 3. FOUNDATION VISION & ABOUT CMS TAB */}
+      {/* TAB 4: FOUNDATION ABOUT CMS */}
       {activeTab === "about_cms" && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4 animate-fade-in">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b pb-3">
             <div>
-              <h3 className="text-base font-black text-slate-800">Foundation Vision & About Statement</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Official mission and foundation background displayed across public information portals.
-              </p>
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                Foundation About & Mission CMS
+              </h3>
+              <p className="text-xs text-slate-500">Markdown and plain text for the public About screen.</p>
             </div>
             <button
-              onClick={handleSaveAbout}
-              disabled={actionBusy || !aboutDirty}
-              className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition disabled:opacity-50 shadow-xs"
+              onClick={async () => {
+                setActionBusy(true);
+                try {
+                  await axios.post(
+                    "/api/admin/control/cms/publish",
+                    { patch: { foundationAbout: aboutDraft }, label: "Updated Foundation About statement" },
+                    { headers: authHeader() }
+                  );
+                  toast.success("About updated successfully");
+                  setAboutDirty(false);
+                } catch {
+                  toast.error("Save failed");
+                } finally {
+                  setActionBusy(false);
+                }
+              }}
+              disabled={actionBusy}
+              className="px-5 py-2 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800"
             >
-              {actionBusy ? "Publishing..." : "Save & Publish"}
+              Save Statement
             </button>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">About & Vision Statement</label>
-            <textarea
-              rows={12}
-              value={aboutDraft}
-              onChange={e => {
-                setAboutDraft(e.target.value);
-                setAboutDirty(true);
-              }}
-              placeholder="Enter official foundation summary, community welfare goals, and registered charity details..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-800 focus:ring-2 focus:ring-purple-500 leading-relaxed custom-scrollbar font-medium"
-            />
-          </div>
+          <textarea
+            rows={10}
+            value={aboutDraft}
+            onChange={e => { setAboutDraft(e.target.value); setAboutDirty(true); }}
+            placeholder="Enter public about statement..."
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-purple-500"
+          />
         </div>
       )}
     </div>

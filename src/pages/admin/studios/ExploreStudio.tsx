@@ -1,230 +1,629 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { CheckCircle, Compass, AlertCircle, Edit, Globe } from "lucide-react";
+import {
+  Compass,
+  Plus,
+  Trash2,
+  Save,
+  ArrowUp,
+  ArrowDown,
+  Search,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Flame,
+  LayoutGrid,
+  ExternalLink,
+  Edit3,
+  BadgePlus,
+  HeartPulse,
+  Briefcase,
+  ClipboardList,
+  Heart,
+  Users,
+  TreePine,
+  Landmark,
+  AlertCircle,
+  Sprout,
+  FileText,
+  GraduationCap,
+  AlertTriangle,
+  HandCoins,
+  ShieldAlert,
+  Calendar,
+  Newspaper,
+  Radio,
+  Bus,
+  Sparkles,
+  Flag,
+  Wrench,
+  Calculator,
+  Clock,
+  Wind,
+  Tv,
+  ShieldCheck,
+  BookOpen
+} from "lucide-react";
 import toast from "react-hot-toast";
 
-type ServiceItem = {
+export interface ServiceCard {
   id: string;
-  category: string;
+  title: string;
+  desc: string;
   iconName: string;
-  titleEn: string;
-  titleHi: string;
-  descEn: string;
-  descHi: string;
-  hidden: boolean;
-};
+  route: string;
+  category?: string;
+  active: boolean;
+  order?: number;
+}
+
+export const DEFAULT_FEATURED_SERVICES: ServiceCard[] = [
+  {
+    id: "card",
+    title: "Jan Seva Card",
+    desc: "Your digital service identity & welfare access",
+    iconName: "BadgePlus",
+    route: "/jan-seva-card",
+    category: "Welfare",
+    active: true
+  },
+  {
+    id: "health-care",
+    title: "Healthcare",
+    desc: "Health camps, medicines & hospital locator",
+    iconName: "HeartPulse",
+    route: "/health-care",
+    category: "Health",
+    active: true
+  },
+  {
+    id: "employment",
+    title: "Employment",
+    desc: "Jobs, skill development & career guidance",
+    iconName: "Briefcase",
+    route: "/employment",
+    category: "Employment",
+    active: true
+  },
+  {
+    id: "grievance",
+    title: "Grievance",
+    desc: "Submit issues & track resolution progress",
+    iconName: "ClipboardList",
+    route: "/grievance",
+    category: "Civic",
+    active: true
+  }
+];
+
+export const DEFAULT_ALL_SERVICES: ServiceCard[] = [
+  { id: "jan-seva-card", title: "Jan Seva Card", desc: "Apply for Foundational ID", iconName: "BadgePlus", route: "/jan-seva-card", category: "Welfare", active: true },
+  { id: "blood-network", title: "Blood Network", desc: "Emergency Blood Donor Requests", iconName: "Heart", route: "/blood-network", category: "Urgent", active: true },
+  { id: "grievances", title: "Grievances", desc: "Report Civic Issues", iconName: "AlertTriangle", route: "/grievance", category: "Civic", active: true },
+  { id: "volunteering", title: "Volunteering", desc: "Join the RP Force", iconName: "Users", route: "/volunteers", category: "Involved", active: true },
+  { id: "health-care", title: "Health Care", desc: "Track health metrics & seek care", iconName: "HeartPulse", route: "/health-care", category: "Welfare", active: true },
+  { id: "jobs-portal", title: "Jobs Portal", desc: "Find local employment opportunities", iconName: "Briefcase", route: "/employment", category: "Welfare", active: true },
+  { id: "scholarships", title: "Scholarships", desc: "Apply for educational grants", iconName: "GraduationCap", route: "/services/scholarships", category: "Empowerment", active: true },
+  { id: "food-support", title: "Food Support", desc: "Apply for dry rations or find kitchens", iconName: "HandCoins", route: "/services/food", category: "Welfare", active: true },
+  { id: "medicine-support", title: "Medicine Support", desc: "Request critical medical supplies", iconName: "HeartPulse", route: "/services/medicine", category: "Welfare", active: true },
+  { id: "education-aid", title: "Education Aid", desc: "Scholarships and Books", iconName: "BookOpen", route: "/services/education", category: "Empowerment", active: true },
+  { id: "women-safety", title: "Women Safety", desc: "24/7 Helpline and support", iconName: "ShieldAlert", route: "/services/women-safety", category: "Urgent", active: true },
+  { id: "senior-citizens", title: "Senior Citizens", desc: "Doorstep checkups & elder care", iconName: "Users", route: "/services/seniors", category: "Welfare", active: true },
+  { id: "animal-welfare", title: "Animal Welfare", desc: "Stray rescue & adoption registry", iconName: "Heart", route: "/services/animals", category: "Involved", active: true },
+  { id: "environment", title: "Environment", desc: "Tree plantation drives", iconName: "TreePine", route: "/services/environment", category: "Involved", active: true },
+  { id: "crowdfunding", title: "Crowdfunding", desc: "Crowdfunded community projects", iconName: "HandCoins", route: "/services/crowdfunding", category: "Involved", active: true },
+  { id: "religious-culture", title: "Religious & Culture", desc: "Festivals, sacred texts & live feeds", iconName: "Landmark", route: "/culture", category: "Civic", active: true },
+  { id: "disaster-management", title: "Disaster Management", desc: "Emergency relief & rescue mapping", iconName: "AlertCircle", route: "/services/disaster", category: "Urgent", active: true },
+  { id: "farmer-support", title: "Farmer Support", desc: "Crop diagnostic & market pricing", iconName: "Sprout", route: "/services/farmer", category: "Welfare", active: true },
+  { id: "government-schemes", title: "Government Schemes", desc: "Eligibility calculator & guides", iconName: "FileText", route: "/services/schemes", category: "Empowerment", active: true },
+  { id: "skills-training", title: "Skills Training", desc: "Tailoring, coding & courses", iconName: "GraduationCap", route: "/services/skills", category: "Empowerment", active: true },
+  { id: "sos-system", title: "SOS System", desc: "Emergency panic & location", iconName: "ShieldAlert", route: "/sos", category: "Urgent", active: true },
+  { id: "hindu-calendar", title: "Hindu Calendar", desc: "Tithis & Festivals", iconName: "Calendar", route: "/hindu-calendar", category: "Civic", active: true },
+  { id: "news-feed", title: "News Feed", desc: "Top headlines & stories", iconName: "Newspaper", route: "/news", category: "Information", active: true },
+  { id: "internet-radio", title: "Internet Radio", desc: "Live radio stations", iconName: "Radio", route: "/internet-radio", category: "Broadcast", active: true },
+  { id: "transit-planner", title: "Transit Planner", desc: "Bus & Metro Routes", iconName: "Bus", route: "/services/transit", category: "Daily Utility", active: true },
+  { id: "youth-empowerment", title: "Youth Empowerment", desc: "Leadership, sports & career guidance for youth", iconName: "Sparkles", route: "/services/youth", category: "Empowerment", active: true },
+  { id: "nation-building", title: "Nation Building", desc: "National programs, civic duty & patriotic initiatives", iconName: "Flag", route: "/services/nation", category: "Civic", active: true },
+  { id: "daily-utility", title: "Daily Utility Center", desc: "BMI, bill split, Pomodoro, breathing, Morse, habits & more", iconName: "Wrench", route: "/daily-utility", category: "Daily Utility", active: true },
+  { id: "bmi-calculator", title: "BMI Calculator", desc: "Calculate BMI offline", iconName: "Calculator", route: "/bmi-calculator", category: "Daily Utility", active: true },
+  { id: "pomodoro-timer", title: "Pomodoro Timer", desc: "Focus and break timer", iconName: "Clock", route: "/pomodoro", category: "Daily Utility", active: true },
+  { id: "breathing-meditator", title: "Breathing Meditator", desc: "Guided breathing cycles", iconName: "Wind", route: "/breathing-meditator", category: "Daily Utility", active: true },
+  { id: "epaper-kiosk", title: "Epaper Kiosk", desc: "Read today's leading daily e-papers", iconName: "FileText", route: "/epaper", category: "Information", active: true },
+  { id: "national-directory", title: "National Directory", desc: "Government contacts & helplines", iconName: "BookOpen", route: "/directory", category: "Information", active: true },
+  { id: "peoples-university", title: "People's University Portal", desc: "Official University Information", iconName: "GraduationCap", route: "https://www.peoplesuniversity.edu.in/", category: "Education", active: true },
+  { id: "fact-check", title: "Fact Check Hub", desc: "Check claims and viral news", iconName: "ShieldCheck", route: "/fact-check", category: "Information", active: true },
+  { id: "live-tv", title: "Live Broadcast TV", desc: "Official news & culture channels", iconName: "Tv", route: "/live-tv", category: "Broadcast", active: true }
+];
 
 export default function ExploreStudio() {
-  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [activeTab, setActiveTab] = useState<"featured" | "all">("all");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"all" | "welfare" | "urgent" | "involved" | "civic">("all");
-  const [selectedItem, setSelectedItem] = useState<ServiceItem | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+
+  const [featuredServices, setFeaturedServices] = useState<ServiceCard[]>(DEFAULT_FEATURED_SERVICES);
+  const [allServices, setAllServices] = useState<ServiceCard[]>(DEFAULT_ALL_SERVICES);
+
+  const [selectedCard, setSelectedCard] = useState<ServiceCard | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const token = localStorage.getItem("token") || "";
 
   useEffect(() => {
-    fetchData();
+    fetchCmsData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchCmsData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/admin/services");
-      if (res.data?.data) {
-        setServices(res.data.data);
+      const res = await axios.get("/api/cms");
+      const cms = res.data?.cms || res.data?.data || {};
+
+      if (Array.isArray(cms.featuredServices) && cms.featuredServices.length > 0) {
+        setFeaturedServices(cms.featuredServices);
+      } else {
+        setFeaturedServices(DEFAULT_FEATURED_SERVICES);
+      }
+
+      if (Array.isArray(cms.allServices) && cms.allServices.length > 0) {
+        setAllServices(cms.allServices);
+      } else {
+        setAllServices(DEFAULT_ALL_SERVICES);
       }
     } catch {
-      toast.error("Failed to load CMS data");
+      toast.error("Failed to load CMS data, loading default catalog");
+      setFeaturedServices(DEFAULT_FEATURED_SERVICES);
+      setAllServices(DEFAULT_ALL_SERVICES);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleToggleVisibility = async (service: ServiceItem) => {
-    const nextHidden = !service.hidden;
-    const toastId = toast.loading(nextHidden ? "Hiding service..." : "Publishing service...");
+  const handlePublish = async () => {
+    if (!token) {
+      toast.error("Admin session expired");
+      return;
+    }
+    setSaving(true);
+    const toastId = toast.loading("Saving and publishing Explore services...");
     try {
-      const token = localStorage.getItem("token") || "";
+      const patch = {
+        featuredServices,
+        allServices
+      };
+
       const res = await axios.post(
-        `/api/admin/services/${service.id}/visibility`,
-        { hidden: nextHidden },
+        "/api/admin/control/cms/publish",
+        { patch, label: "Explore Studio: Updated Featured and All Services" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      if (res.data.success) {
-        setServices(services.map(s => s.id === service.id ? { ...s, hidden: nextHidden } : s));
-        if (selectedItem?.id === service.id) setSelectedItem({ ...selectedItem, hidden: nextHidden });
-        toast.success(nextHidden ? "Service Hidden" : "Service Active", { id: toastId });
-      } else {
-        toast.error("Failed to update visibility", { id: toastId });
-      }
-    } catch {
-      toast.error("Error saving changes", { id: toastId });
+
+      if (res.data?.success === false) throw new Error(res.data?.error || "Publish failed");
+      toast.success("Explore catalog updated across app!", { id: toastId });
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || "Save failed", { id: toastId });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const filteredServices = services.filter((s) => {
-    if (activeTab === "all") return true;
-    return s.category === activeTab;
-  });
+  // Toggle active status
+  const handleToggleActive = (id: string, isFeatured: boolean) => {
+    if (isFeatured) {
+      setFeaturedServices(prev =>
+        prev.map(s => (s.id === id ? { ...s, active: !s.active } : s))
+      );
+    } else {
+      setAllServices(prev =>
+        prev.map(s => (s.id === id ? { ...s, active: !s.active } : s))
+      );
+    }
+    if (selectedCard?.id === id) {
+      setSelectedCard(prev => (prev ? { ...prev, active: !prev.active } : null));
+    }
+  };
+
+  // Delete card
+  const handleDeleteCard = (id: string, isFeatured: boolean) => {
+    if (isFeatured) {
+      setFeaturedServices(prev => prev.filter(s => s.id !== id));
+    } else {
+      setAllServices(prev => prev.filter(s => s.id !== id));
+    }
+    if (selectedCard?.id === id) {
+      setSelectedCard(null);
+      setIsEditing(false);
+    }
+    toast.success("Service card removed");
+  };
+
+  // Add new card
+  const handleAddNew = () => {
+    const isFeatured = activeTab === "featured";
+    const newId = `service-${Date.now()}`;
+    const newCard: ServiceCard = {
+      id: newId,
+      title: isFeatured ? "New Featured Service" : "New Service Card",
+      desc: "Short descriptive summary",
+      iconName: "Compass",
+      route: "/services/new",
+      category: "General",
+      active: true
+    };
+
+    if (isFeatured) {
+      setFeaturedServices([newCard, ...featuredServices]);
+    } else {
+      setAllServices([newCard, ...allServices]);
+    }
+    setSelectedCard(newCard);
+    setIsEditing(true);
+    toast.success("New service card added");
+  };
+
+  // Move Up / Move Down ("Arrange")
+  const handleMove = (index: number, direction: "up" | "down", isFeatured: boolean) => {
+    const list = isFeatured ? [...featuredServices] : [...allServices];
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= list.length) return;
+
+    const temp = list[index];
+    list[index] = list[targetIdx];
+    list[targetIdx] = temp;
+
+    if (isFeatured) {
+      setFeaturedServices(list);
+    } else {
+      setAllServices(list);
+    }
+  };
+
+  // Save changes to current card in inspector
+  const handleSaveCard = (card: ServiceCard) => {
+    const isFeatured = activeTab === "featured";
+    if (isFeatured) {
+      setFeaturedServices(prev => prev.map(s => (s.id === card.id ? card : s)));
+    } else {
+      setAllServices(prev => prev.map(s => (s.id === card.id ? card : s)));
+    }
+    setSelectedCard(card);
+    toast.success("Card updated in draft");
+  };
+
+  // Restore defaults
+  const handleResetDefaults = () => {
+    if (window.confirm("Reset all services back to default authentic state?")) {
+      setFeaturedServices(DEFAULT_FEATURED_SERVICES);
+      setAllServices(DEFAULT_ALL_SERVICES);
+      toast.success("Defaults restored. Click 'Save & Publish' to make permanent.");
+    }
+  };
+
+  // Filtered items
+  const currentList = activeTab === "featured" ? featuredServices : allServices;
+  const filteredList = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return currentList.filter(s => {
+      const matchesSearch = !q || s.title.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q) || s.route.toLowerCase().includes(q);
+      const matchesCategory = categoryFilter === "all" || s.category?.toLowerCase() === categoryFilter.toLowerCase();
+      return matchesSearch && matchesCategory;
+    });
+  }, [currentList, search, categoryFilter]);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    currentList.forEach(s => { if (s.category) set.add(s.category); });
+    return ["all", ...Array.from(set)];
+  }, [currentList]);
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
-      
-      {/* Header matching the screenshot design */}
+      {/* HEADER WITH SAVE AND NEW */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-indigo-50 text-indigo-500">
+          <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600">
             <Compass className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[10px] font-bold tracking-widest uppercase text-indigo-500">Services & Integrations CMS</p>
-            <h1 className="text-xl md:text-2xl font-black text-slate-800">Explore & Services Management</h1>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-indigo-600">Explore & Services CMS</p>
+            <h1 className="text-xl md:text-2xl font-black text-slate-800">Explore & Citizen Portals Command</h1>
             <p className="text-xs text-slate-500 mt-1">
-              Toggle all public services, welfare schemes, and emergency tools from here.
+              Configure Featured Services, All Services, links, icons, arrangement order, and active/deactivate controls.
             </p>
           </div>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleAddNew}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition shadow-xs"
+          >
+            <Plus className="h-4 w-4" /> Add Card
+          </button>
+          <button
+            onClick={handleResetDefaults}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition border border-slate-200"
+          >
+            <RefreshCw className="h-3.5 w-3.5" /> Defaults
+          </button>
+          <button
+            onClick={handlePublish}
+            disabled={saving}
+            className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition shadow-xs disabled:opacity-60"
+          >
+            <Save className="h-4 w-4" /> {saving ? "Publishing..." : "Save & Publish"}
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 h-[75vh]">
-        {/* Left List */}
-        <div className="w-full lg:w-5/12 xl:w-1/3 flex flex-col space-y-4">
-          <div className="flex flex-wrap gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-            <button 
-              onClick={() => setActiveTab("all")}
-              className={`flex-1 min-w-[70px] text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "all" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
-            >
-              All
-            </button>
-            <button 
-              onClick={() => setActiveTab("welfare")}
-              className={`flex-1 min-w-[70px] text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "welfare" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
-            >
-              Welfare
-            </button>
-            <button 
-              onClick={() => setActiveTab("urgent")}
-              className={`flex-1 min-w-[70px] text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "urgent" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
-            >
-              Urgent
-            </button>
-            <button 
-              onClick={() => setActiveTab("involved")}
-              className={`flex-1 min-w-[70px] text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "involved" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
-            >
-              Involved
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-            {loading ? (
-              <p className="text-center text-sm text-slate-400 py-10">Loading services...</p>
-            ) : (
-              filteredServices.map((service) => (
-                <div 
-                  key={service.id} 
-                  onClick={() => setSelectedItem(service)}
-                  className={`bg-white p-3 rounded-xl border transition-all cursor-pointer hover:border-slate-300 hover:shadow-md ${selectedItem?.id === service.id ? "border-indigo-500 shadow-sm ring-1 ring-indigo-500" : "border-slate-200 shadow-sm"}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center text-indigo-600 bg-indigo-50 border border-indigo-100">
-                      <Globe className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded text-white bg-indigo-500">
-                          {service.category}
-                        </span>
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
-                          ID: {service.id}
-                        </span>
-                      </div>
-                      <h3 className="text-xs font-bold text-slate-800 truncate mb-1">
-                        {service.titleEn || service.titleHi}
-                      </h3>
-                      <p className="text-[10px] text-slate-500 truncate mb-2">
-                        {service.descEn || service.descHi}
-                      </p>
-                      
-                      <div className="flex items-center justify-between border-t border-slate-100 pt-2">
-                        <button className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800">
-                          <Edit className="h-3 w-3" /> View Details
-                        </button>
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${!service.hidden ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-slate-50 text-slate-500 border border-slate-200"}`}>
-                          <CheckCircle className="h-3 w-3" /> {!service.hidden ? "Active" : "Hidden"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+      {/* TABS: FEATURED SERVICES vs ALL SERVICES */}
+      <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-2">
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setActiveTab("featured"); setSelectedCard(null); }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+              activeTab === "featured"
+                ? "bg-amber-500 text-white shadow-sm"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+            }`}
+          >
+            <Flame className="h-4 w-4" /> Featured Services ({featuredServices.length})
+          </button>
+          <button
+            onClick={() => { setActiveTab("all"); setSelectedCard(null); }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+              activeTab === "all"
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+            }`}
+          >
+            <LayoutGrid className="h-4 w-4" /> All Services & Portals ({allServices.length})
+          </button>
         </div>
 
-        {/* Right Panel */}
-        <div className="hidden lg:flex flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-col">
-          {selectedItem ? (
-            <div className="p-6 h-full flex flex-col">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-lg font-black text-slate-800">
-                    {selectedItem.titleEn || selectedItem.titleHi}
-                  </h2>
-                  <span className="inline-block mt-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded text-indigo-700 bg-indigo-50 border border-indigo-100">
-                    Category: {selectedItem.category}
-                  </span>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 border border-indigo-100">
-                  <Globe className="h-6 w-6" />
-                </div>
-              </div>
-              
-              <div className="space-y-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Service Overview</h4>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Description</p>
-                      <p className="text-xs font-semibold text-slate-700 leading-relaxed">
-                        {selectedItem.descEn || selectedItem.descHi}
-                      </p>
+        <span className="text-xs font-bold text-slate-400 hidden sm:inline">
+          Use Arrange (↑ / ↓) to reorder public position
+        </span>
+      </div>
+
+      {/* SEARCH AND CATEGORY FILTER */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search service title, description, route..."
+            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 shadow-2xs"
+          />
+        </div>
+        {activeTab === "all" && (
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+            {categories.map(c => (
+              <button
+                key={c}
+                onClick={() => setCategoryFilter(c)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition whitespace-nowrap ${
+                  categoryFilter === c
+                    ? "bg-slate-800 text-white"
+                    : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* SPLIT PANE: SERVICES LIST & INSPECTOR */}
+      <div className="flex flex-col lg:flex-row gap-6 h-[70vh]">
+        {/* LEFT COLUMN: CARDS LIST */}
+        <div className="w-full lg:w-7/12 flex flex-col space-y-2.5 overflow-y-auto pr-1 custom-scrollbar">
+          {loading ? (
+            <div className="flex items-center justify-center py-12 text-slate-400 text-xs font-bold">
+              <RefreshCw className="h-4 w-4 animate-spin mr-2" /> Loading services...
+            </div>
+          ) : filteredList.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 text-xs bg-white rounded-2xl border border-slate-200">
+              No matching service cards found.
+            </div>
+          ) : (
+            filteredList.map((card, idx) => {
+              const isSelected = selectedCard?.id === card.id;
+              const isFeatured = activeTab === "featured";
+              return (
+                <div
+                  key={card.id}
+                  onClick={() => { setSelectedCard(card); setIsEditing(true); }}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer bg-white flex items-center justify-between gap-3 hover:border-slate-300 hover:shadow-xs ${
+                    isSelected ? "border-indigo-500 ring-2 ring-indigo-500/20 shadow-xs" : "border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="h-11 w-11 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 shrink-0 font-bold">
+                      <Compass className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="text-xs font-bold text-slate-800 truncate">{card.title}</h3>
+                        {card.category && (
+                          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                            {card.category}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500 truncate">{card.desc}</p>
+                      <p className="text-[10px] text-indigo-600 font-mono truncate mt-0.5">{card.route}</p>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between p-5 bg-indigo-50/50 border border-indigo-100 rounded-xl">
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-800">Public Visibility</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">Show this service in the public 'Explore' page.</p>
+                  <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                    {/* Status Badge */}
+                    <button
+                      onClick={() => handleToggleActive(card.id, isFeatured)}
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition ${
+                        card.active
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                          : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200"
+                      }`}
+                    >
+                      {card.active ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                      {card.active ? "Active" : "Deactive"}
+                    </button>
+
+                    {/* Arrange buttons */}
+                    <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                      <button
+                        onClick={() => handleMove(idx, "up", isFeatured)}
+                        disabled={idx === 0}
+                        className="p-1 hover:bg-slate-200 text-slate-500 disabled:opacity-20 transition"
+                        title="Move Up"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleMove(idx, "down", isFeatured)}
+                        disabled={idx === filteredList.length - 1}
+                        className="p-1 hover:bg-slate-200 text-slate-500 disabled:opacity-20 transition"
+                        title="Move Down"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Delete */}
+                    <button
+                      onClick={() => handleDeleteCard(card.id, isFeatured)}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                      title="Delete card"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => handleToggleVisibility(selectedItem)}
-                    className={`inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm ${!selectedItem.hidden ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-slate-200 text-slate-600 hover:bg-slate-300"}`}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: INSPECTOR & LIVE EDITOR */}
+        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+          {selectedCard ? (
+            <div className="p-6 h-full flex flex-col justify-between overflow-y-auto custom-scrollbar">
+              <div className="space-y-5">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">
+                      Card Inspector
+                    </span>
+                    <h2 className="text-base font-black text-slate-800">{selectedCard.title}</h2>
+                  </div>
+                  <button
+                    onClick={() => handleToggleActive(selectedCard.id, activeTab === "featured")}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                      selectedCard.active
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-slate-100 text-slate-600 border border-slate-200"
+                    }`}
                   >
-                    {!selectedItem.hidden ? <><CheckCircle className="h-4 w-4" /> Service is Live</> : <><AlertCircle className="h-4 w-4" /> Service Hidden</>}
+                    {selectedCard.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                    {selectedCard.active ? "Card Active" : "Card Deactivated"}
                   </button>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100">
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-amber-800">
-                    <AlertCircle className="h-5 w-5 shrink-0" />
-                    <div className="text-xs">
-                      <strong className="block mb-1">Notice regarding internal content</strong>
-                      To update internal rich text or external links for this specific module, navigate to the service page inside the public app as an administrator and click the "Edit Content" floating button.
+                {/* Form fields */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Service Title</label>
+                    <input
+                      type="text"
+                      value={selectedCard.title}
+                      onChange={e => setSelectedCard({ ...selectedCard, title: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Description / Subtitle</label>
+                    <textarea
+                      rows={2}
+                      value={selectedCard.desc}
+                      onChange={e => setSelectedCard({ ...selectedCard, desc: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">In-App Route / External URL</label>
+                      <input
+                        type="text"
+                        value={selectedCard.route}
+                        onChange={e => setSelectedCard({ ...selectedCard, route: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Category Badge</label>
+                      <input
+                        type="text"
+                        value={selectedCard.category || ""}
+                        onChange={e => setSelectedCard({ ...selectedCard, category: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Icon Name (Lucide)</label>
+                    <input
+                      type="text"
+                      value={selectedCard.iconName || "Compass"}
+                      onChange={e => setSelectedCard({ ...selectedCard, iconName: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  {/* Quick Preview Card */}
+                  <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/50">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 mb-2">Live Public App Preview</p>
+                    <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                          <Compass className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-800">{selectedCard.title}</h4>
+                          <p className="text-[11px] text-slate-500">{selectedCard.desc}</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-indigo-600 font-mono">{selectedCard.route}</span>
                     </div>
                   </div>
                 </div>
-                
+              </div>
+
+              {/* Bottom save button */}
+              <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
+                <span className="text-xs text-slate-400">Remember to Save & Publish when finished.</span>
+                <button
+                  onClick={() => handleSaveCard(selectedCard)}
+                  className="px-5 py-2 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 text-xs transition"
+                >
+                  Apply Card Updates
+                </button>
               </div>
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50/50">
-              <div className="h-16 w-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-400 mb-4 shadow-sm border border-indigo-100">
+              <div className="h-16 w-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 mb-4 shadow-xs border border-indigo-100">
                 <Compass className="h-8 w-8" />
               </div>
-              <h2 className="text-lg font-black text-slate-800">Select a Service from the left list</h2>
-              <p className="text-sm text-slate-500 mt-1 max-w-sm">
-                Manage public visibility and category mapping for services.
+              <h2 className="text-lg font-black text-slate-800">Select a Service Card to Edit</h2>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                Add, modify routes, reorder positions (Arrange), and toggle active/deactivate for citizen services.
               </p>
             </div>
           )}

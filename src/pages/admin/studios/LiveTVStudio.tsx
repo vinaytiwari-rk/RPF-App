@@ -6,44 +6,40 @@ import {
   FileText,
   Plus,
   Trash2,
-  Edit3,
-  Play,
   Save,
-  CheckCircle,
   ExternalLink,
   Search,
-  Filter,
   RefreshCw,
-  Globe,
   RadioTower,
   Eye,
   EyeOff,
-  Video
+  LayoutGrid,
+  List,
+  Columns,
+  Play,
+  ArrowUp,
+  ArrowDown,
+  CheckCircle2,
+  Sparkles
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../../../data/liveTvDefaults";
+import rawChannels from "../../../data/akashvaniChannels.json";
+import privateFm from "../../../data/privateFmChannels.json";
 
 type MediaType = "tv" | "radio" | "epaper";
 
-interface TVChannel {
-  id: string;
-  name: string;
-  url: string;
-  videoId?: string;
-  category: string;
-  logo?: string;
-  enabled?: boolean;
-}
-
-interface RadioStation {
+export interface RadioStation {
   id: string;
   name: string;
   url: string;
   category?: string;
   region?: string;
+  image?: string;
   enabled?: boolean;
 }
 
-interface EpaperItem {
+export interface EpaperItem {
   id: string;
   name: string;
   nameHi?: string;
@@ -52,6 +48,27 @@ interface EpaperItem {
   enabled?: boolean;
 }
 
+const DEFAULT_RADIO_STATIONS: RadioStation[] = [
+  ...rawChannels.slice(0, 30).map((s: any, idx: number) => ({
+    id: `akashvani-${idx + 1}`,
+    name: s.name,
+    url: s.url,
+    category: "Akashvani (AIR)",
+    region: s.region || "National",
+    image: s.image,
+    enabled: true
+  })),
+  ...privateFm.slice(0, 20).map((s: any, idx: number) => ({
+    id: `fm-${idx + 1}`,
+    name: s.name,
+    url: s.url,
+    category: "Private FM",
+    region: "Commercial",
+    image: s.image,
+    enabled: true
+  }))
+];
+
 export default function LiveTVStudio() {
   const [activeTab, setActiveTab] = useState<MediaType>("tv");
   const [loading, setLoading] = useState(true);
@@ -59,11 +76,15 @@ export default function LiveTVStudio() {
   const [search, setSearch] = useState("");
 
   // Media Collections
-  const [tvChannels, setTvChannels] = useState<TVChannel[]>([]);
+  const [tvChannels, setTvChannels] = useState<LiveTvChannel[]>([]);
   const [radioStations, setRadioStations] = useState<RadioStation[]>([]);
   const [epapers, setEpapers] = useState<EpaperItem[]>([]);
 
-  // Selected item for right inspector pane
+  // Layout Configurations
+  const [tvLayout, setTvLayout] = useState<"grid" | "list" | "compact" | "theater">("grid");
+  const [radioLayout, setRadioLayout] = useState<"cards" | "list" | "compact">("cards");
+
+  // Selected item for inspector pane
   const [selectedItem, setSelectedItem] = useState<{
     type: MediaType;
     data: any;
@@ -81,25 +102,34 @@ export default function LiveTVStudio() {
       const res = await axios.get("/api/cms");
       const cms = res.data?.cms || res.data?.data || {};
 
-      // Live TV
-      if (Array.isArray(cms.liveTvChannels)) {
+      // Live TV Channels (fallback to all 60+ authentic running defaults if empty)
+      if (Array.isArray(cms.liveTvChannels) && cms.liveTvChannels.length > 0) {
         setTvChannels(cms.liveTvChannels);
       } else {
-        setTvChannels([]);
+        setTvChannels(LIVE_TV_DEFAULTS);
       }
 
-      // Internet Radio
-      if (Array.isArray(cms.internetRadioStations)) {
+      // TV Layout
+      if (cms.liveTvLayout) {
+        setTvLayout(cms.liveTvLayout);
+      }
+
+      // Internet Radio Stations (fallback to authentic Akashvani & FM defaults if empty)
+      if (Array.isArray(cms.internetRadioStations) && cms.internetRadioStations.length > 0) {
         setRadioStations(cms.internetRadioStations);
       } else {
-        setRadioStations([]);
+        setRadioStations(DEFAULT_RADIO_STATIONS);
+      }
+
+      // Radio Layout
+      if (cms.radioLayout) {
+        setRadioLayout(cms.radioLayout);
       }
 
       // E-Papers
-      if (Array.isArray(cms.epapers)) {
+      if (Array.isArray(cms.epapers) && cms.epapers.length > 0) {
         setEpapers(cms.epapers);
       } else {
-        // Fallback defaults if not in CMS
         setEpapers([
           { id: "epaper-1", name: "Free Press Journal", nameHi: "फ्री प्रेस जर्नल", url: "https://epaper.freepressjournal.in/", language: "English", enabled: true },
           { id: "epaper-2", name: "Peoples Samachar", nameHi: "पीपुल्स समाचार", url: "https://epapers.peoplessamachar.in/", language: "Hindi", enabled: true },
@@ -110,6 +140,8 @@ export default function LiveTVStudio() {
       }
     } catch {
       toast.error("Failed to load broadcast media catalog");
+      setTvChannels(LIVE_TV_DEFAULTS);
+      setRadioStations(DEFAULT_RADIO_STATIONS);
     } finally {
       setLoading(false);
     }
@@ -127,11 +159,13 @@ export default function LiveTVStudio() {
         liveTvChannels: tvChannels,
         internetRadioStations: radioStations,
         epapers: epapers,
+        liveTvLayout: tvLayout,
+        radioLayout: radioLayout
       };
 
       const res = await axios.post(
         "/api/admin/control/cms/publish",
-        { patch, label: `Broadcast Hub: update ${activeTab} content` },
+        { patch, label: `Broadcast Hub: update ${activeTab} content and layouts` },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -144,25 +178,46 @@ export default function LiveTVStudio() {
     }
   };
 
-  // Add new item helper
+  // Add new item
   const handleAddNew = () => {
     const id = `${activeTab}-${Date.now()}`;
     if (activeTab === "tv") {
-      const newItem: TVChannel = { id, name: "New TV Channel", url: "https://www.youtube.com/live/...", category: "News", enabled: true };
+      const newItem: LiveTvChannel = {
+        id,
+        name: "New Live TV Channel",
+        url: "https://www.youtube.com/live/...",
+        category: "News",
+        enabled: true,
+        order: tvChannels.length
+      };
       setTvChannels([newItem, ...tvChannels]);
       setSelectedItem({ type: "tv", data: newItem });
     } else if (activeTab === "radio") {
-      const newItem: RadioStation = { id, name: "New FM Station", url: "https://stream...", category: "Regional", enabled: true };
+      const newItem: RadioStation = {
+        id,
+        name: "New FM Station",
+        url: "https://stream...",
+        category: "Regional",
+        region: "Madhya Pradesh",
+        enabled: true
+      };
       setRadioStations([newItem, ...radioStations]);
       setSelectedItem({ type: "radio", data: newItem });
     } else {
-      const newItem: EpaperItem = { id, name: "New Newspaper", url: "https://epaper...", language: "Hindi", enabled: true };
+      const newItem: EpaperItem = {
+        id,
+        name: "New Newspaper",
+        url: "https://epaper...",
+        language: "Hindi",
+        enabled: true
+      };
       setEpapers([newItem, ...epapers]);
       setSelectedItem({ type: "epaper", data: newItem });
     }
+    toast.success(`New ${activeTab.toUpperCase()} stream added to editor`);
   };
 
-  // Delete item helper
+  // Delete item
   const handleDelete = (id: string) => {
     if (activeTab === "tv") {
       setTvChannels(tvChannels.filter(c => c.id !== id));
@@ -174,19 +229,41 @@ export default function LiveTVStudio() {
     if (selectedItem?.data?.id === id) {
       setSelectedItem(null);
     }
+    toast.success("Channel removed");
   };
 
   // Toggle enable status
   const handleToggleEnable = (id: string) => {
     if (activeTab === "tv") {
-      setTvChannels(tvChannels.map(c => c.id === id ? { ...c, enabled: c.enabled === false ? true : false } : c));
+      setTvChannels(tvChannels.map(c => c.id === id ? { ...c, enabled: c.enabled === false } : c));
     } else if (activeTab === "radio") {
-      setRadioStations(radioStations.map(s => s.id === id ? { ...s, enabled: s.enabled === false ? true : false } : s));
+      setRadioStations(radioStations.map(s => s.id === id ? { ...s, enabled: s.enabled === false } : s));
     } else {
-      setEpapers(epapers.map(p => p.id === id ? { ...p, enabled: p.enabled === false ? true : false } : p));
+      setEpapers(epapers.map(p => p.id === id ? { ...p, enabled: p.enabled === false } : p));
     }
     if (selectedItem?.data?.id === id) {
-      setSelectedItem(prev => prev ? { ...prev, data: { ...prev.data, enabled: prev.data.enabled === false ? true : false } } : null);
+      setSelectedItem(prev => prev ? { ...prev, data: { ...prev.data, enabled: prev.data.enabled === false } } : null);
+    }
+  };
+
+  // Move item up / down for ordering
+  const handleMoveItem = (index: number, direction: "up" | "down") => {
+    if (activeTab === "tv") {
+      const nextList = [...tvChannels];
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= nextList.length) return;
+      const temp = nextList[index];
+      nextList[index] = nextList[targetIndex];
+      nextList[targetIndex] = temp;
+      setTvChannels(nextList);
+    } else if (activeTab === "radio") {
+      const nextList = [...radioStations];
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= nextList.length) return;
+      const temp = nextList[index];
+      nextList[index] = nextList[targetIndex];
+      nextList[targetIndex] = temp;
+      setRadioStations(nextList);
     }
   };
 
@@ -194,9 +271,9 @@ export default function LiveTVStudio() {
   const currentItems = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (activeTab === "tv") {
-      return tvChannels.filter(c => (c.name || "").toLowerCase().includes(q) || (c.category || "").toLowerCase().includes(q));
+      return tvChannels.filter(c => (c.name || "").toLowerCase().includes(q) || (c.category || "").toLowerCase().includes(q) || (c.url || "").toLowerCase().includes(q));
     } else if (activeTab === "radio") {
-      return radioStations.filter(s => (s.name || "").toLowerCase().includes(q) || (s.category || "").toLowerCase().includes(q));
+      return radioStations.filter(s => (s.name || "").toLowerCase().includes(q) || (s.category || "").toLowerCase().includes(q) || (s.region || "").toLowerCase().includes(q));
     } else {
       return epapers.filter(p => (p.name || "").toLowerCase().includes(q) || (p.language || "").toLowerCase().includes(q));
     }
@@ -204,7 +281,7 @@ export default function LiveTVStudio() {
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
-      {/* HEADER MATCHING LEGACY CMS DESIGN */}
+      {/* HEADER WITH PUBLISH & ADD STREAM */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
           <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-amber-50 text-amber-600">
@@ -212,9 +289,9 @@ export default function LiveTVStudio() {
           </div>
           <div>
             <p className="text-[10px] font-bold tracking-widest uppercase text-amber-600">Broadcast & Infotainment CMS</p>
-            <h1 className="text-xl md:text-2xl font-black text-slate-800">Live TV, Radio & E-Paper Command</h1>
+            <h1 className="text-xl md:text-2xl font-black text-slate-800">Live TV, Radio & Media Command</h1>
             <p className="text-xs text-slate-500 mt-1">
-              Live stream URLs, government channels, regional radio frequencies and daily digital newspapers.
+              Live TV links, FM Radio frequencies, layout selector, and real-time Active/Deactivate controls.
             </p>
           </div>
         </div>
@@ -235,45 +312,99 @@ export default function LiveTVStudio() {
         </div>
       </div>
 
-      {/* METRIC BADGES */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-blue-50 text-blue-600"><Tv className="h-5 w-5" /></div>
-            <div>
-              <p className="text-[10px] font-bold uppercase text-slate-400">Live TV Channels</p>
-              <p className="text-lg font-black text-slate-800">{tvChannels.length}</p>
+      {/* METRIC BADGES & LAYOUT CONTROLS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* TV Badge + Layout */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600"><Tv className="h-5 w-5" /></div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400">Live TV Channels</p>
+                <p className="text-lg font-black text-slate-800">{tvChannels.length}</p>
+              </div>
+            </div>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+              {tvChannels.filter(c => c.enabled !== false).length} Active
+            </span>
+          </div>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-[11px] font-bold text-slate-500">TV Layout:</span>
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+              {(["grid", "list", "compact", "theater"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setTvLayout(mode)}
+                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition ${
+                    tvLayout === mode ? "bg-white text-slate-900 shadow-xs" : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
             </div>
           </div>
-          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-            {tvChannels.filter(c => c.enabled !== false).length} Active
-          </span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-purple-50 text-purple-600"><Radio className="h-5 w-5" /></div>
-            <div>
-              <p className="text-[10px] font-bold uppercase text-slate-400">Radio Stations</p>
-              <p className="text-lg font-black text-slate-800">{radioStations.length}</p>
+        {/* Radio Badge + Layout */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-purple-50 text-purple-600"><Radio className="h-5 w-5" /></div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400">Radio Stations</p>
+                <p className="text-lg font-black text-slate-800">{radioStations.length}</p>
+              </div>
+            </div>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+              {radioStations.filter(s => s.enabled !== false).length} Active
+            </span>
+          </div>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-[11px] font-bold text-slate-500">Radio Layout:</span>
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+              {(["cards", "list", "compact"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setRadioLayout(mode)}
+                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition ${
+                    radioLayout === mode ? "bg-white text-slate-900 shadow-xs" : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
             </div>
           </div>
-          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-            {radioStations.filter(s => s.enabled !== false).length} Active
-          </span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-amber-50 text-amber-600"><FileText className="h-5 w-5" /></div>
-            <div>
-              <p className="text-[10px] font-bold uppercase text-slate-400">Daily E-Papers</p>
-              <p className="text-lg font-black text-slate-800">{epapers.length}</p>
+        {/* Epaper Badge */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600"><FileText className="h-5 w-5" /></div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400">Daily E-Papers</p>
+                <p className="text-lg font-black text-slate-800">{epapers.length}</p>
+              </div>
             </div>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+              {epapers.filter(p => p.enabled !== false).length} Active
+            </span>
           </div>
-          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-            {epapers.filter(p => p.enabled !== false).length} Active
-          </span>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-[11px] font-bold text-slate-500">Fast Action:</span>
+            <button
+              onClick={() => {
+                setTvChannels(LIVE_TV_DEFAULTS);
+                setRadioStations(DEFAULT_RADIO_STATIONS);
+                toast.success("Restored all 60+ running authentic TV & Radio channels");
+              }}
+              className="text-[10px] font-bold text-amber-700 hover:underline"
+            >
+              Reset to Authentic Defaults
+            </button>
+          </div>
         </div>
       </div>
 
@@ -317,7 +448,7 @@ export default function LiveTVStudio() {
               placeholder={`Search ${activeTab === 'tv' ? 'channels' : activeTab === 'radio' ? 'stations' : 'newspapers'}...`}
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-amber-500"
+              className="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:ring-1 focus:ring-amber-500 shadow-2xs"
             />
           </div>
 
@@ -330,7 +461,7 @@ export default function LiveTVStudio() {
             ) : currentItems.length === 0 ? (
               <div className="text-center py-12 text-slate-400 text-xs">No media items found.</div>
             ) : (
-              currentItems.map((item: any) => {
+              currentItems.map((item: any, idx: number) => {
                 const isSelected = selectedItem?.data?.id === item.id && selectedItem?.type === activeTab;
                 const isLive = item.enabled !== false;
                 return (
@@ -350,13 +481,33 @@ export default function LiveTVStudio() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1">
                           <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
-                            {item.category || item.language || "General"}
+                            {item.category || item.region || item.language || "General"}
                           </span>
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            isLive ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500 border border-slate-200"
-                          }`}>
-                            {isLive ? "Active" : "Disabled"}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              isLive ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500 border border-slate-200"
+                            }`}>
+                              {isLive ? "Active" : "Disabled"}
+                            </span>
+                            <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => handleMoveItem(idx, "up")}
+                                disabled={idx === 0}
+                                className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-20"
+                                title="Move up"
+                              >
+                                <ArrowUp className="h-3 w-3" />
+                              </button>
+                              <button
+                                onClick={() => handleMoveItem(idx, "down")}
+                                disabled={idx === currentItems.length - 1}
+                                className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-20"
+                                title="Move down"
+                              >
+                                <ArrowDown className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
                         <h4 className="text-xs font-bold text-slate-800 truncate">{item.name}</h4>
                         <p className="text-[11px] text-slate-400 truncate mt-0.5 font-mono">{item.url}</p>
@@ -370,7 +521,7 @@ export default function LiveTVStudio() {
         </div>
 
         {/* RIGHT COLUMN: ACTION & CONFIGURATION INSPECTOR */}
-        <div className="hidden lg:flex flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-col">
+        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           {selectedItem ? (
             <div className="p-6 h-full flex flex-col justify-between overflow-y-auto custom-scrollbar">
               <div className="space-y-6">
@@ -384,7 +535,7 @@ export default function LiveTVStudio() {
                     </div>
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-widest text-amber-600">
-                        Stream Editor
+                        {activeTab.toUpperCase()} Stream Editor
                       </span>
                       <h2 className="text-lg font-black text-slate-800">
                         {selectedItem.data.name || "Channel Settings"}
@@ -401,7 +552,7 @@ export default function LiveTVStudio() {
                       }`}
                     >
                       {selectedItem.data.enabled !== false ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                      {selectedItem.data.enabled !== false ? "Visible Live" : "Hidden"}
+                      {selectedItem.data.enabled !== false ? "Active" : "Deactivated"}
                     </button>
                     <button
                       onClick={() => handleDelete(selectedItem.data.id)}
@@ -416,7 +567,9 @@ export default function LiveTVStudio() {
                 {/* Form Fields */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Channel / Station Name</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                      {activeTab === "tv" ? "Channel Name" : activeTab === "radio" ? "Station Name" : "Newspaper Title"}
+                    </label>
                     <input
                       type="text"
                       value={selectedItem.data.name || ""}
@@ -463,7 +616,7 @@ export default function LiveTVStudio() {
                           rel="noreferrer"
                           className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200 flex items-center gap-1 text-xs font-bold"
                         >
-                          <ExternalLink className="h-3.5 w-3.5" /> Test
+                          <ExternalLink className="h-3.5 w-3.5" /> Test Link
                         </a>
                       )}
                     </div>
@@ -471,34 +624,71 @@ export default function LiveTVStudio() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Category / Genre</label>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                        {activeTab === "radio" ? "Region / State" : "Category / Genre"}
+                      </label>
                       <input
                         type="text"
-                        value={selectedItem.data.category || selectedItem.data.language || ""}
+                        value={selectedItem.data.category || selectedItem.data.region || selectedItem.data.language || ""}
                         onChange={e => {
                           const val = e.target.value;
                           if (activeTab === "tv") {
                             setTvChannels(tvChannels.map(c => c.id === selectedItem.data.id ? { ...c, category: val } : c));
                           } else if (activeTab === "radio") {
-                            setRadioStations(radioStations.map(s => s.id === selectedItem.data.id ? { ...s, category: val } : s));
+                            setRadioStations(radioStations.map(s => s.id === selectedItem.data.id ? { ...s, category: val, region: val } : s));
                           } else {
                             setEpapers(epapers.map(p => p.id === selectedItem.data.id ? { ...p, language: val } : p));
                           }
-                          setSelectedItem({ ...selectedItem, data: { ...selectedItem.data, category: val, language: val } });
+                          setSelectedItem({ ...selectedItem, data: { ...selectedItem.data, category: val, region: val, language: val } });
                         }}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Stream Identifier</label>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Channel Logo / Icon URL</label>
                       <input
                         type="text"
-                        disabled
-                        value={selectedItem.data.id}
-                        className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-500 cursor-not-allowed"
+                        value={selectedItem.data.logo || selectedItem.data.image || ""}
+                        placeholder="https://... (Optional)"
+                        onChange={e => {
+                          const val = e.target.value;
+                          if (activeTab === "tv") {
+                            setTvChannels(tvChannels.map(c => c.id === selectedItem.data.id ? { ...c, logo: val } : c));
+                          } else if (activeTab === "radio") {
+                            setRadioStations(radioStations.map(s => s.id === selectedItem.data.id ? { ...s, image: val } : s));
+                          }
+                          setSelectedItem({ ...selectedItem, data: { ...selectedItem.data, logo: val, image: val } });
+                        }}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-amber-500"
                       />
                     </div>
                   </div>
+
+                  {/* Quick Preview Area for Stream */}
+                  {activeTab === "tv" && selectedItem.data.url && (
+                    <div className="bg-slate-900 rounded-xl p-3 text-white">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400 mb-2">Live Embed Tester</p>
+                      <div className="aspect-video w-full rounded-lg overflow-hidden bg-black flex items-center justify-center">
+                        {selectedItem.data.url.includes("youtube.com") || selectedItem.data.url.includes("youtu.be") ? (
+                          <iframe
+                            src={
+                              selectedItem.data.url.includes("embed")
+                                ? selectedItem.data.url
+                                : `https://www.youtube.com/embed/${selectedItem.data.url.split("/").pop()}?autoplay=0`
+                            }
+                            title="Preview"
+                            className="w-full h-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        ) : (
+                          <div className="text-center p-4 text-xs text-slate-400">
+                            Direct HLS Stream: <span className="font-mono text-white">{selectedItem.data.url}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -508,9 +698,9 @@ export default function LiveTVStudio() {
                 <button
                   onClick={handlePublish}
                   disabled={saving}
-                  className="px-5 py-2 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 transition"
+                  className="px-5 py-2 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 transition shadow-xs"
                 >
-                  {saving ? "Saving..." : "Save Stream"}
+                  {saving ? "Saving..." : "Save All Streams"}
                 </button>
               </div>
             </div>
@@ -521,7 +711,7 @@ export default function LiveTVStudio() {
               </div>
               <h2 className="text-lg font-black text-slate-800">Select a Broadcast Stream to Inspect</h2>
               <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                Add, toggle visibility, and update streaming servers for Live TV, FM Radio, and E-Papers.
+                Add, toggle active/deactive, edit stream URLs, change layouts, and manage TV & Radio networks.
               </p>
             </div>
           )}

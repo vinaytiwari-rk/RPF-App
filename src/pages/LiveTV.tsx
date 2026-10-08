@@ -2,11 +2,9 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { RadioReceiver,  ArrowLeft, Play, Search, Tv, Sparkles, ShieldCheck, Maximize2, ExternalLink  } from "lucide-react";
+import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns } from "lucide-react";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
 import { openExternalLink } from "../utils/browser";
-
-type CmsResponse = { cms?: { liveTvChannels?: unknown } };
 
 const U: Record<string, string> = {
   aajtak: "Nq2wYlWFucg",
@@ -68,18 +66,22 @@ export default function LiveTV() {
   const [visibleCount, setVisibleCount] = useState(40);
   const [channels, setChannels] = useState<LiveTvChannel[]>(() => canonical(LIVE_TV_DEFAULTS));
   const [active, setActive] = useState<LiveTvChannel | null>(null);
-  const [serverControlled, setServerControlled] = useState(false);
+  const [, setServerControlled] = useState(false);
+  const [layout, setLayout] = useState<"grid" | "list" | "compact" | "theater">("grid");
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     let cancelled = false;
     fetch("/api/cms", { cache: "no-store" })
-      .then((r) => (r.ok ? (r.json() as Promise<CmsResponse>) : null))
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const configured = data?.cms?.liveTvChannels;
-        if (!cancelled && Array.isArray(configured)) {
+        if (!cancelled && Array.isArray(configured) && configured.length > 0) {
           setChannels(canonical(normalize(configured)));
           setServerControlled(true);
+        }
+        if (!cancelled && data?.cms?.liveTvLayout) {
+          setLayout(data.cms.liveTvLayout);
         }
       })
       .catch(() => undefined);
@@ -114,29 +116,24 @@ export default function LiveTV() {
     else setActive(null);
   };
 
-  // Debug logs
-  useEffect(() => {
-    console.log('Active channel:', active);
-    console.log('Embed (YouTube) URL:', embed);
-  }, [active, embed]);
   // Initialize video.js player for non‑YouTube streams
   useEffect(() => {
     if (active && videoRef.current && !embed) {
       const srcUrl = active.url;
-              const player = videojs(videoRef.current, {
-          fluid: true,
-          autoplay: true,
-          controls: true,
-          preload: 'auto',
-          html5: {
-            vhs: {
-              enableLowInitialPlaylist: true,
-              smoothQualityChange: true,
-              fastReady: true,
-              useDeviceAmpSupported: true
-            }
+      const player = videojs(videoRef.current, {
+        fluid: true,
+        autoplay: true,
+        controls: true,
+        preload: 'auto',
+        html5: {
+          vhs: {
+            enableLowInitialPlaylist: true,
+            smoothQualityChange: true,
+            fastReady: true,
+            useDeviceAmpSupported: true
           }
-        });
+        }
+      });
       player.src({ src: srcUrl, type: 'application/x-mpegURL' });
       return () => {
         player.dispose();
@@ -182,15 +179,6 @@ export default function LiveTV() {
                 />
               ) : (
                 <div className="relative h-full w-full">
-                  <select
-                    onChange={(e) => console.log('Quality selected:', e.target.value)}
-                    className="absolute top-2 right-2 z-10 bg-black text-white rounded px-2 py-1 text-xs"
-                  >
-                    <option value="auto">Auto</option>
-                    <option value="1080p">1080p</option>
-                    <option value="720p">720p</option>
-                    <option value="480p">480p</option>
-                  </select>
                   <video
                     ref={videoRef}
                     className="video-js vjs-default-skin h-full w-full"
@@ -204,7 +192,7 @@ export default function LiveTV() {
       ) : (
         /* Main Channels Directory View */
         <div className="mx-auto max-w-4xl px-4 py-5 space-y-4 text-[#14213D]">
-                    {/* Media Type Toggle */}
+          {/* Media Type Toggle */}
           <div className="flex justify-center mb-2">
             <div className="inline-flex items-center rounded-full bg-slate-200/60 p-1 shadow-inner backdrop-blur-md border border-slate-300/30">
               <button
@@ -230,9 +218,35 @@ export default function LiveTV() {
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 {hi ? "लाइव न्यूज़ एवं ब्रॉडकास्ट" : "Live News & Broadcast"}
               </div>
-              <span className="text-[10px] font-bold bg-white px-2.5 py-0.5 rounded-md border border-amber-200 text-slate-700">
-                {visible.length} {hi ? "चैनल" : "Channels"}
-              </span>
+              <div className="flex items-center gap-2">
+                {/* Layout Switcher */}
+                <div className="hidden sm:flex items-center gap-1 bg-white/80 p-0.5 rounded-lg border border-amber-200/80">
+                  <button
+                    onClick={() => setLayout("grid")}
+                    className={`p-1 rounded ${layout === "grid" ? "bg-amber-500 text-white" : "text-slate-500 hover:text-slate-900"}`}
+                    title="Grid layout"
+                  >
+                    <LayoutGrid className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => setLayout("compact")}
+                    className={`p-1 rounded ${layout === "compact" ? "bg-amber-500 text-white" : "text-slate-500 hover:text-slate-900"}`}
+                    title="Compact grid"
+                  >
+                    <Columns className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => setLayout("list")}
+                    className={`p-1 rounded ${layout === "list" ? "bg-amber-500 text-white" : "text-slate-500 hover:text-slate-900"}`}
+                    title="List layout"
+                  >
+                    <List className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <span className="text-[10px] font-bold bg-white px-2.5 py-0.5 rounded-md border border-amber-200 text-slate-700">
+                  {visible.length} {hi ? "चैनल" : "Channels"}
+                </span>
+              </div>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#243B32]">
@@ -256,54 +270,124 @@ export default function LiveTV() {
             />
           </div>
 
-          {/* Channels Grid */}
-          <div className="grid gap-3.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.slice(0, visibleCount).map((c) => {
-              const v = getId(c);
-              const thumb = c.logo || (v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null);
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => openPlayer(c)}
-                  className="group overflow-hidden rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md text-left shadow-2xs hover:shadow-xs hover:border-amber-300/80 transition-all duration-200 active:scale-[0.99]"
-                >
-                  <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
-                    {thumb ? (
-                      <img
-                        src={thumb}
-                        alt={c.name}
-                        loading="lazy"
-                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center bg-slate-800 text-slate-400">
-                        <Tv className="h-10 w-10" />
+          {/* Channels Layout Display */}
+          {layout === "list" ? (
+            /* LIST LAYOUT */
+            <div className="space-y-2">
+              {filtered.slice(0, visibleCount).map((c) => {
+                const v = getId(c);
+                const thumb = c.logo || (v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null);
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => openPlayer(c)}
+                    className="w-full flex items-center justify-between p-3 rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md shadow-2xs hover:border-amber-300 hover:shadow-xs transition text-left"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="h-12 w-20 rounded-xl overflow-hidden bg-slate-900 shrink-0 relative">
+                        {thumb ? (
+                          <img src={thumb} alt={c.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-slate-500"><Tv className="h-5 w-5" /></div>
+                        )}
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <Play className="h-4 w-4 text-white fill-current" />
+                        </span>
                       </div>
-                    )}
-                    <span className="absolute bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-[#D97706] shadow-md group-hover:scale-110 transition-transform">
-                      <Play className="h-4 h-4 fill-current ml-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-[#14213D] truncate">{c.name}</p>
+                        <span className="inline-block text-[9.5px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded mt-0.5">
+                          {c.category}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="flex items-center gap-1 text-[9px] font-bold uppercase text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full shrink-0">
+                      <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-ping" /> LIVE
                     </span>
-                    <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-[#DC2626] px-2.5 py-0.5 text-[9px] font-bold uppercase text-white shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                      LIVE
-                    </span>
-                  </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : layout === "compact" ? (
+            /* COMPACT GRID LAYOUT */
+            <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {filtered.slice(0, visibleCount).map((c) => {
+                const v = getId(c);
+                const thumb = c.logo || (v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null);
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => openPlayer(c)}
+                    className="group overflow-hidden rounded-xl border border-amber-100/80 bg-white/80 backdrop-blur-md text-left shadow-2xs hover:shadow-xs hover:border-amber-300 transition active:scale-[0.98]"
+                  >
+                    <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+                      {thumb ? (
+                        <img src={thumb} alt={c.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-slate-500"><Tv className="h-6 w-6" /></div>
+                      )}
+                      <span className="absolute bottom-2 left-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#D97706] shadow-sm">
+                        <Play className="h-3 w-3 fill-current ml-0.5" />
+                      </span>
+                    </div>
+                    <div className="p-2">
+                      <p className="truncate text-[11px] font-bold text-[#14213D]">{c.name}</p>
+                      <p className="text-[9px] font-semibold text-slate-500 uppercase">{c.category}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            /* STANDARD 3-COLUMN GRID LAYOUT */
+            <div className="grid gap-3.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.slice(0, visibleCount).map((c) => {
+                const v = getId(c);
+                const thumb = c.logo || (v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null);
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => openPlayer(c)}
+                    className="group overflow-hidden rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md text-left shadow-2xs hover:shadow-xs hover:border-amber-300/80 transition-all duration-200 active:scale-[0.99]"
+                  >
+                    <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+                      {thumb ? (
+                        <img
+                          src={thumb}
+                          alt={c.name}
+                          loading="lazy"
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center bg-slate-800 text-slate-400">
+                          <Tv className="h-10 w-10" />
+                        </div>
+                      )}
+                      <span className="absolute bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-[#D97706] shadow-md group-hover:scale-110 transition-transform">
+                        <Play className="h-4 h-4 fill-current ml-0.5" />
+                      </span>
+                      <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-[#DC2626] px-2.5 py-0.5 text-[9px] font-bold uppercase text-white shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                        LIVE
+                      </span>
+                    </div>
 
-                  <div className="p-3.5 flex items-center justify-between">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-bold text-[#14213D] leading-tight group-hover:text-[#D97706] transition-colors">
-                        {c.name}
-                      </p>
-                      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                        {c.category}
-                      </p>
+                    <div className="p-3.5 flex items-center justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-bold text-[#14213D] leading-tight group-hover:text-[#D97706] transition-colors">
+                          {c.name}
+                        </p>
+                        <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                          {c.category}
+                        </p>
+                      </div>
+                      <Maximize2 className="w-4 h-4 text-slate-400 group-hover:text-[#14213D] transition-colors shrink-0 ml-2" />
                     </div>
-                    <Maximize2 className="w-4 h-4 text-slate-400 group-hover:text-[#14213D] transition-colors shrink-0 ml-2" />
-                  </div>
-                </button>
-              );
-            })}
-                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {visibleCount < filtered.length && (
             <div className="flex justify-center mt-6 mb-4">

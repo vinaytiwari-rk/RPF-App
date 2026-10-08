@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import * as LucideIcons from "lucide-react";
 import { 
   LogIn,
   Award, ChevronRight, HeartHandshake, IdCard, Mail, Phone, Settings, 
@@ -30,8 +31,8 @@ type LegalModalType = "terms" | "privacy" | "disclaimer" | "support" | "about" |
 export default function Profile() {
   const navigate = useNavigate();
   const { lang } = useOutletContext<{ lang: Lang }>();
-    const { user, isAuthenticated, language, logout } = useAuth();
-  const { settings } = useApp();
+  const { user, isAuthenticated, language, logout } = useAuth();
+  const { settings, cmsConfig } = useApp();
   const hi = lang === "hi" || language === "hi";
   const name = user?.name?.trim() || (hi ? "नागरिक" : "Citizen");
   const [avatar, setAvatar] = useState("");
@@ -39,6 +40,7 @@ export default function Profile() {
   const [, setVolunteerLoading] = useState(false);
   const [activeModal, setActiveModal] = useState<LegalModalType>(null);
 
+  const profileConfig = (cmsConfig as any)?.profileConfig;
   const localAvatarKey = `@rpf_profile_avatar:${user?.id || "guest"}`;
 
   useEffect(() => {
@@ -84,9 +86,6 @@ export default function Profile() {
   };
 
   const isVolunteer = user?.role === "volunteer" || !!user?.isVolunteer || !!volunteer;
-  const registrationNo = volunteer?.registration_number || user?.registration_number || user?.volunteerData?.registration_number || user?.volunteerData?.registrationNumber || (hi ? "उपलब्ध नहीं" : "Not available");
-  const sinceRaw = volunteer?.registeredAt || volunteer?.registered_at || volunteer?.created_at || volunteer?.createdAt || user?.volunteerData?.registeredAt || user?.volunteerData?.registered_at || user?.volunteerData?.created_at || user?.volunteerData?.createdAt;
-  const volunteerSince = sinceRaw ? new Date(sinceRaw).toLocaleDateString(hi ? "hi-IN" : "en-IN", { month: "long", year: "numeric" }) : (hi ? "उपलब्ध नहीं" : "Not available");
   const initials = name.split(/\s+/).map(p => p[0]).slice(0, 2).join("").toUpperCase();
 
   // Dynamic Metrics for Volunteer, Citizen and User
@@ -114,20 +113,45 @@ export default function Profile() {
     return (volunteerDutyHours * 10) + (volunteerReportsCount * 15);
   }, [volunteerDutyHours, volunteerReportsCount]);
 
-      const accountItems = useMemo(() => [
+  const accountItems = useMemo(() => {
+    if (Array.isArray(profileConfig?.accountItems) && profileConfig.accountItems.length > 0) {
+      return profileConfig.accountItems
+        .filter((i: any) => i.active !== false)
+        .map((i: any) => ({
+          icon: (LucideIcons as any)[i.iconName] || User,
+          title: i.title,
+          sub: i.sub,
+          route: i.route || "/profile",
+          color: "bg-[#245D45]"
+        }));
+    }
+    return [
       { icon: Sparkles, title: hi ? "मेरी गतिविधियाँ" : "My Activity", sub: hi ? "आपके कार्य और प्रभाव" : "Your actions and impact", route: "/activity", color: "bg-[#D97706]" },
       { icon: User, title: hi ? "प्रोफ़ाइल संपादित करें" : "Edit Profile", sub: hi ? "अपनी व्यक्तिगत जानकारी अपडेट करें" : "Update your personal information", route: "/profile?edit=1", color: "bg-[#245D45]" },
       { icon: Award, title: hi ? "मेरे प्रमाणपत्र" : "My Certificates", sub: hi ? "सेवा एवं भागीदारी प्रमाणपत्र" : "Certificates of service & impact", route: "/my-certificates", color: "bg-[#7C5C9E]" },
       { icon: Settings, title: hi ? "ऐप सेटिंग्स" : "App Settings", sub: hi ? "भाषा, सूचनाएं और ऐप प्राथमिकताएं" : "Language, notifications & preferences", route: "/settings", color: "bg-[#245D45]" },
-    ], [hi]);
+    ];
+  }, [profileConfig, hi]);
 
-  const legalItems = [
-    { id: "terms" as const, icon: FileText, title: hi ? "नियम एवं शर्तें" : "Terms & Conditions", sub: hi ? "समाहित उपयोग के नियम व शर्तें" : "Terms governing Samahit usage" },
-    { id: "privacy" as const, icon: Lock, title: hi ? "गोपनीयता नीति" : "Privacy Policy", sub: hi ? "डेटा सुरक्षा व गोपनीयता नीति" : "How we handle information and privacy" },
-    { id: "disclaimer" as const, icon: AlertTriangle, title: hi ? "अस्वीकरण व सूचना" : "Disclaimer & Notice", sub: hi ? "महत्वपूर्ण पारदर्शिता व उत्तरदायित्व सूचनाएं" : "Important transparency and responsibility notices" },
-    { id: "support" as const, icon: HelpCircle, title: hi ? "सहायता एवं संपर्क" : "Help Desk & Support", sub: hi ? "सहायता, समस्या रिपोर्ट व सुझाव" : "Get help, report issues & share feedback" },
-    { id: "about" as const, icon: Info, title: hi ? "ऐप संस्करण एवं जानकारी" : "About App & Version", sub: hi ? "समाहित ऐप, वालंटियर्स व संस्करण" : "About Samahit, volunteers & app version" },
-  ];
+  const legalItems = useMemo(() => {
+    if (Array.isArray(profileConfig?.legalItems) && profileConfig.legalItems.length > 0) {
+      return profileConfig.legalItems
+        .filter((i: any) => i.active !== false && i.id !== "logout")
+        .map((i: any) => ({
+          id: i.id as LegalModalType,
+          icon: (LucideIcons as any)[i.iconName] || FileText,
+          title: i.title,
+          sub: i.sub
+        }));
+    }
+    return [
+      { id: "terms" as const, icon: FileText, title: hi ? "नियम एवं शर्तें" : "Terms & Conditions", sub: hi ? "समाहित उपयोग के नियम व शर्तें" : "Terms governing Samahit usage" },
+      { id: "privacy" as const, icon: Lock, title: hi ? "गोपनीयता नीति" : "Privacy Policy", sub: hi ? "डेटा सुरक्षा व गोपनीयता नीति" : "How we handle information and privacy" },
+      { id: "disclaimer" as const, icon: AlertTriangle, title: hi ? "अस्वीकरण व सूचना" : "Disclaimer & Notice", sub: hi ? "महत्वपूर्ण पारदर्शिता व उत्तरदायित्व सूचनाएं" : "Important transparency and responsibility notices" },
+      { id: "support" as const, icon: HelpCircle, title: hi ? "सहायता एवं संपर्क" : "Help Desk & Support", sub: hi ? "सहायता, समस्या रिपोर्ट व सुझाव" : "Get help, report issues & share feedback" },
+      { id: "about" as const, icon: Info, title: hi ? "ऐप संस्करण एवं जानकारी" : "About App & Version", sub: hi ? "समाहित ऐप, वालंटियर्स व संस्करण" : "About Samahit, volunteers & app version" },
+    ];
+  }, [profileConfig, hi]);
 
   return (
     <main className="min-h-full bg-[#FFF7E8] pb-28 text-[#243B32] font-sans">
@@ -191,11 +215,11 @@ export default function Profile() {
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 <span className="text-[10px] font-medium uppercase tracking-wider text-[#D97706]">
-                  {hi ? "RPF समाहित पोर्टल" : "RPF SAMAHIT PORTAL"}
+                  {profileConfig?.portalName || (hi ? "RPF समाहित पोर्टल" : "RPF SAMAHIT PORTAL")}
                 </span>
-                {isVolunteer && (
+                {(profileConfig?.showVerifiedBadge !== false) && isVolunteer && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[9px] font-extrabold text-[#167C5A] border border-emerald-200">
-                    <BadgeCheck className="h-3 w-3" /> {hi ? "सत्यापित स्वयंसेवक" : "Verified Volunteer"}
+                    <BadgeCheck className="h-3 w-3" /> {profileConfig?.verifiedBadgeText || (hi ? "सत्यापित स्वयंसेवक" : "Verified Volunteer")}
                   </span>
                 )}
               </div>
@@ -203,119 +227,151 @@ export default function Profile() {
               <h1 className="text-xl sm:text-2xl font-bold text-[#243B32] truncate">{name}</h1>
               
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-slate-500 font-medium pt-0.5">
-                {user?.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3 text-slate-400" /> {user.phone}</span>}
-                {user?.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3 text-slate-400" /> {user.email}</span>}
+                {(user?.phone || profileConfig?.demoUser?.phone) && (
+                  <span className="flex items-center gap-1">
+                    <Phone className="h-3 w-3 text-slate-400" /> {user?.phone || profileConfig?.demoUser?.phone}
+                  </span>
+                )}
+                {(user?.email || profileConfig?.demoUser?.email) && (
+                  <span className="flex items-center gap-1">
+                    <Mail className="h-3 w-3 text-slate-400" /> {user?.email || profileConfig?.demoUser?.email}
+                  </span>
+                )}
               </div>
             </div>
           </div>
-
-          </motion.section>
+        </motion.section>
 
         {/* Animated Seva Metrics Dashboard (User/Volunteer/Citizen) */}
-        <section className="space-y-2.5">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-[#243B32] flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-[#D97706]" />
-              {isVolunteer 
-                ? (hi ? "मेरी सेवा उपलब्धियां एवं प्रभाव" : "My Volunteer Seva Impact")
-                : (hi ? "नागरिक सेवा प्रोफाइल मेट्रिक्स" : "Citizen Seva Profile Metrics")}
-            </h2>
-            <span className="text-[10px] font-medium text-slate-400">
-              {hi ? "लाइव ट्रैकिंग" : "Live Real-Time"}
-            </span>
-          </div>
+        {profileConfig?.impactSection?.active !== false && (
+          <section className="space-y-2.5">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-[#243B32] flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-[#D97706]" />
+                {profileConfig?.impactSection?.title || (isVolunteer 
+                  ? (hi ? "मेरी सेवा उपलब्धियां एवं प्रभाव" : "My Volunteer Seva Impact")
+                  : (hi ? "नागरिक सेवा प्रोफाइल मेट्रिक्स" : "Citizen Seva Profile Metrics"))}
+              </h2>
+              <span className="text-[10px] font-medium text-slate-400">
+                {profileConfig?.impactSection?.subtitle || (hi ? "लाइव ट्रैकिंग" : "Live Real-Time")}
+              </span>
+            </div>
 
-          <p className="px-1 text-[10px] font-medium text-slate-500">{hi ? "यहाँ केवल आपकी व्यक्तिगत प्रोफाइल और खाता विकल्प हैं। स्वयंसेवक ड्यूटी Activity में और Jan Seva Card Explore में मिलेगा।" : "This area contains only your personal profile and account options. Volunteer Duty belongs in Activity and Jan Seva Card is available in Explore."}</p>\n\n          <div className="grid grid-cols-2 gap-3">
-            {isVolunteer ? (
-              <>
-                <AnimatedMetricCard
-                  label={hi ? "कुल सेवा घंटे" : "Duty Hours Logged"}
-                  subLabel={hi ? "फील्ड एवं शिविर समय" : "Active field service"}
-                  value={volunteerDutyHours}
-                  suffix=" hrs"
-                  icon={Clock}
-                  tone="saffron"
-                  delay={0.05}
-                  onClick={() => navigate("/volunteer-duty")}
-                />
-                <AnimatedMetricCard
-                  label={hi ? "सत्यापित रिपोर्ट्स" : "Field Missions"}
-                  subLabel={hi ? "स्वीकृत सेवा कार्य" : "Verified reports"}
-                  value={volunteerReportsCount}
-                  suffix="+"
-                  icon={CheckCircle2}
-                  tone="green"
-                  delay={0.1}
-                  onClick={() => navigate("/volunteer-duty")}
-                />
-                <AnimatedMetricCard
-                  label={hi ? "सेवा कर्म अंक" : "Seva Karma Points"}
-                  subLabel={hi ? "सम्मान व प्रमाणन" : "Verified impact score"}
-                  value={volunteerPoints}
-                  suffix=" pts"
-                  icon={Award}
-                  tone="gold"
-                  delay={0.15}
-                  onClick={() => navigate("/my-certificates")}
-                />
-                <AnimatedMetricCard
-                  label={hi ? "नागरिक लाभार्थी" : "Citizens Reached"}
-                  subLabel={hi ? "प्रत्यक्ष राहत व सहायता" : "Directly supported"}
-                  value={1240}
-                  suffix="+"
-                  icon={Users}
-                  tone="navy"
-                  delay={0.2}
-                  onClick={() => navigate("/impact")}
-                />
-              </>
-            ) : (
-              <>
-                <AnimatedMetricCard
-                  label={hi ? "जन सेवा कार्ड" : "Jan Seva Card"}
-                  subLabel={hi ? "डिजिटल पहचान स्थिति" : "Active & Verified"}
-                  value={1}
-                  prefix=""
-                  suffix={hi ? " सक्रिय" : " Active"}
-                  icon={IdCard}
-                  tone="saffron"
-                  delay={0.05}
-                  onClick={() => navigate("/jan-seva-card")}
-                />
-                <AnimatedMetricCard
-                  label={hi ? "नागरिक सेवा अंक" : "Citizen Karma"}
-                  subLabel={hi ? "सहभागिता स्कोर" : "Participation points"}
-                  value={185}
-                  suffix=" pts"
-                  icon={Sparkles}
-                  tone="green"
-                  delay={0.1}
-                  onClick={() => navigate("/jan-seva-card")}
-                />
-                <AnimatedMetricCard
-                  label={hi ? "कल्याणकारी योजनाएं" : "Welfare Services"}
-                  subLabel={hi ? "उपलब्ध डिजिटल सेवाएं" : "Accessible benefits"}
-                  value={8}
-                  suffix="+"
-                  icon={HeartHandshake}
-                  tone="gold"
-                  delay={0.15}
-                  onClick={() => navigate("/services")}
-                />
-                <AnimatedMetricCard
-                  label={hi ? "समाधान दर" : "Resolution Rate"}
-                  subLabel={hi ? "पारदर्शी जन शिकायत" : "Verified tracking"}
-                  value={100}
-                  suffix="%"
-                  icon={ShieldCheck}
-                  tone="navy"
-                  delay={0.2}
-                  onClick={() => navigate("/grievance")}
-                />
-              </>
-            )}
-          </div>
-        </section>
+            <p className="px-1 text-[10px] font-medium text-slate-500">
+              {profileConfig?.impactSection?.noticeText || (hi ? "यहाँ केवल आपकी व्यक्तिगत प्रोफाइल और खाता विकल्प हैं। स्वयंसेवक ड्यूटी Activity में और Jan Seva Card Explore में मिलेगा।" : "This area contains only your personal profile and account options. Volunteer Duty belongs in Activity and Jan Seva Card is available in Explore.")}
+            </p>
+
+            <div className="grid grid-cols-2 gap-3">
+              {Array.isArray(profileConfig?.metrics) && profileConfig.metrics.length > 0 ? (
+                profileConfig.metrics.filter((m: any) => m.active !== false).map((m: any, idx: number) => {
+                  const IconComp = (LucideIcons as any)[m.iconName] || Sparkles;
+                  const numVal = parseInt(m.value.replace(/[^0-9]/g, ""), 10);
+                  const suffixStr = m.value.replace(/[0-9]/g, "") || "";
+                  return (
+                    <AnimatedMetricCard
+                      key={m.id || idx}
+                      label={m.label}
+                      subLabel={m.subLabel}
+                      value={isNaN(numVal) ? 0 : numVal}
+                      suffix={suffixStr}
+                      icon={IconComp}
+                      tone={idx % 4 === 0 ? "saffron" : idx % 4 === 1 ? "green" : idx % 4 === 2 ? "gold" : "navy"}
+                      delay={0.05 * (idx + 1)}
+                      onClick={() => m.route ? navigate(m.route) : undefined}
+                    />
+                  );
+                })
+              ) : isVolunteer ? (
+                <>
+                  <AnimatedMetricCard
+                    label={hi ? "कुल सेवा घंटे" : "Duty Hours Logged"}
+                    subLabel={hi ? "फील्ड एवं शिविर समय" : "Active field service"}
+                    value={volunteerDutyHours}
+                    suffix=" hrs"
+                    icon={Clock}
+                    tone="saffron"
+                    delay={0.05}
+                    onClick={() => navigate("/volunteer-duty")}
+                  />
+                  <AnimatedMetricCard
+                    label={hi ? "सत्यापित रिपोर्ट्स" : "Field Missions"}
+                    subLabel={hi ? "स्वीकृत सेवा कार्य" : "Verified reports"}
+                    value={volunteerReportsCount}
+                    suffix="+"
+                    icon={CheckCircle2}
+                    tone="green"
+                    delay={0.1}
+                    onClick={() => navigate("/volunteer-duty")}
+                  />
+                  <AnimatedMetricCard
+                    label={hi ? "सेवा कर्म अंक" : "Seva Karma Points"}
+                    subLabel={hi ? "सम्मान व प्रमाणन" : "Verified impact score"}
+                    value={volunteerPoints}
+                    suffix=" pts"
+                    icon={Award}
+                    tone="gold"
+                    delay={0.15}
+                    onClick={() => navigate("/my-certificates")}
+                  />
+                  <AnimatedMetricCard
+                    label={hi ? "नागरिक लाभार्थी" : "Citizens Reached"}
+                    subLabel={hi ? "प्रत्यक्ष राहत व सहायता" : "Directly supported"}
+                    value={1240}
+                    suffix="+"
+                    icon={Users}
+                    tone="navy"
+                    delay={0.2}
+                    onClick={() => navigate("/impact")}
+                  />
+                </>
+              ) : (
+                <>
+                  <AnimatedMetricCard
+                    label={hi ? "जन सेवा कार्ड" : "Jan Seva Card"}
+                    subLabel={hi ? "डिजिटल पहचान स्थिति" : "Active & Verified"}
+                    value={1}
+                    prefix=""
+                    suffix={hi ? " सक्रिय" : " Active"}
+                    icon={IdCard}
+                    tone="saffron"
+                    delay={0.05}
+                    onClick={() => navigate("/jan-seva-card")}
+                  />
+                  <AnimatedMetricCard
+                    label={hi ? "नागरिक सेवा अंक" : "Citizen Karma"}
+                    subLabel={hi ? "सहभागिता स्कोर" : "Participation points"}
+                    value={185}
+                    suffix=" pts"
+                    icon={Sparkles}
+                    tone="green"
+                    delay={0.1}
+                    onClick={() => navigate("/jan-seva-card")}
+                  />
+                  <AnimatedMetricCard
+                    label={hi ? "कल्याणकारी योजनाएं" : "Welfare Services"}
+                    subLabel={hi ? "उपलब्ध डिजिटल सेवाएं" : "Accessible benefits"}
+                    value={8}
+                    suffix="+"
+                    icon={HeartHandshake}
+                    tone="gold"
+                    delay={0.15}
+                    onClick={() => navigate("/services")}
+                  />
+                  <AnimatedMetricCard
+                    label={hi ? "समाधान दर" : "Resolution Rate"}
+                    subLabel={hi ? "पारदर्शी जन शिकायत" : "Verified tracking"}
+                    value={100}
+                    suffix="%"
+                    icon={ShieldCheck}
+                    tone="navy"
+                    delay={0.2}
+                    onClick={() => navigate("/grievance")}
+                  />
+                </>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Quick Access Menu Grid */}
         <section className="space-y-2.5">
@@ -633,5 +689,3 @@ export default function Profile() {
     </main>
   );
 }
-
-

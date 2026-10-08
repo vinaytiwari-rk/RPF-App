@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { openExternalLink } from "../utils/browser";
-import SortableList from "../components/SortableList";
 import BrandLoader from "../components/BrandLoader";
 
 const REMOVED_SERVICE_IDS = new Set<string>(["countries","earthquakes","fuel-tracker","gps-toolkit","vitals","medications","medical-dict","period-tracker","child-tracker","resume-builder","doc-scanner","ai-chat","story-library","decision-maker","morse-code","habit-tracker","fasting-tracker","typing-speed","quick-calculator"]);
@@ -31,7 +30,7 @@ const EXPLORE_LINKS = [
   { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "आधिकारिक लाइव टीवी चैनल", route: "/live-tv" }
 ];
 
-const FEATURED_SERVICES = [
+const DEFAULT_FEATURED_SERVICES = [
   { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवा पहचान और कल्याण पहुंच", icon: BadgePlus, route: "/jan-seva-card", accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20" },
   { id: "health-care", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", descEn: "Health camps, medicines & hospital locator", descHi: "स्वास्थ्य शिविर, दवाएं और अस्पताल खोजक", icon: HeartPulse, route: "/health-care", accent: "text-[#DC2626] bg-red-500/10 border border-red-500/20" },
   { id: "employment", titleEn: "Employment", titleHi: "रोजगार पोर्टल", descEn: "Jobs, skill development & career guidance", descHi: "नौकरियां, कौशल विकास और करियर मार्गदर्शन", icon: BriefcaseBusiness, route: "/employment", accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20" },
@@ -46,8 +45,8 @@ export default function Services() {
 
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
-  const [webResults, setWebResults] = useState<any[]>([]);
-  const [webLoading, setWebLoading] = useState(false);
+  const [, setWebResults] = useState<any[]>([]);
+  const [, setWebLoading] = useState(false);
 
   const HEALTH_SERVICES = ["health-care", "women-safety", "seniors", "medicine", "blood", "food", "bmi-calculator", "breathing-meditator"];
   const EDUCATION_SERVICES = ["education", "scholarships", "skills", "peoples-university", "pomodoro"];
@@ -67,7 +66,44 @@ export default function Services() {
     return new Set<string>([...configured, ...REMOVED_SERVICE_IDS]);
   }, [cmsConfig]);
 
+  // Featured services loaded dynamically from CMS if provided
+  const featuredServicesList = useMemo(() => {
+    const customFeatured = (cmsConfig as any)?.featuredServices;
+    if (Array.isArray(customFeatured) && customFeatured.length > 0) {
+      return customFeatured
+        .filter((s: any) => s.active !== false && s.enabled !== false)
+        .map((s: any) => ({
+          id: s.id,
+          titleEn: s.title || s.titleEn,
+          titleHi: s.titleHi || s.title || s.titleEn,
+          descEn: s.desc || s.descEn,
+          descHi: s.descHi || s.desc || s.descEn,
+          icon: (LucideIcons as any)[s.iconName] || BadgePlus,
+          route: s.route || "/services",
+          accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
+        }));
+    }
+    return DEFAULT_FEATURED_SERVICES;
+  }, [cmsConfig]);
+
+  // All services loaded dynamically from CMS if provided, or merged from default catalog
   const allServices = useMemo(() => {
+    const customAll = (cmsConfig as any)?.allServices;
+    if (Array.isArray(customAll) && customAll.length > 0) {
+      return customAll
+        .filter((s: any) => s.active !== false && s.enabled !== false && !hiddenIds.has(s.id))
+        .map((s: any) => ({
+          id: s.id,
+          titleEn: s.title || s.titleEn,
+          titleHi: s.titleHi || s.title || s.titleEn,
+          descEn: s.desc || s.descEn,
+          descHi: s.descHi || s.desc || s.descEn,
+          iconName: s.iconName || "Compass",
+          route: s.route,
+          category: s.category?.toLowerCase() || "community"
+        }));
+    }
+
     const base = Array.isArray(servicesList) ? servicesList : [];
     const cmsUtils = Array.isArray((cmsConfig as any)?.exploreUtilities) ? (cmsConfig as any).exploreUtilities : [];
     const combined = [...base, ...EXPLORE_LINKS, ...cmsUtils].filter((item: any) => item?.id && !REMOVED_SERVICE_IDS.has(item.id));
@@ -80,7 +116,7 @@ export default function Services() {
       }
     }
     return list;
-  }, [servicesList, cmsConfig]);
+  }, [servicesList, cmsConfig, hiddenIds]);
 
   const filtered = useMemo(
     () =>
@@ -170,14 +206,21 @@ export default function Services() {
         className="group relative w-full rounded-2xl p-4 flex items-center justify-between border border-amber-100/80 bg-white/80 backdrop-blur-md shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all text-left cursor-pointer"
       >
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="h-14 w-14 shrink-0" aria-hidden="true">{serviceArtFor(svc.id) ? <ServiceIllustration kind={serviceArtFor(svc.id)!} className="h-full w-full transition-transform group-hover:scale-105" /> : <div className={`flex h-full w-full items-center justify-center rounded-xl ${getSemanticIconStyle(svc.id)}`}><IconComponent className="h-6 w-6" /></div>}</div>
+          <div className="h-14 w-14 shrink-0" aria-hidden="true">
+            {serviceArtFor(svc.id) ? (
+              <ServiceIllustration kind={serviceArtFor(svc.id)!} className="h-full w-full transition-transform group-hover:scale-105" />
+            ) : (
+              <div className={`flex h-full w-full items-center justify-center rounded-xl ${getSemanticIconStyle(svc.id)}`}>
+                <IconComponent className="h-6 w-6" />
+              </div>
+            )}
+          </div>
 
           <div className="min-w-0 pr-2">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-[14px] font-bold text-[#14213D] group-hover:text-[#D97706] transition-colors truncate">
                 {isHi ? svc.titleHi || svc.titleEn : svc.titleEn}
               </h3>
-
             </div>
             <p className="text-[11.5px] text-slate-500 font-medium line-clamp-1 mt-0.5">
               {isHi ? svc.descHi || svc.descEn : svc.descEn}
@@ -198,7 +241,7 @@ export default function Services() {
         {/* Header Title */}
         <div>
           <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-amber-50/70 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#D97706] uppercase shadow-2xs backdrop-blur-xs mb-1">
-            <Sparkles className="h-3 w-3 text-[#D97706]" />
+            <Sparkles className="h-3.5 w-3.5 text-[#D97706]" />
             Samahit Ecosystem
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#14213D]">
@@ -250,15 +293,23 @@ export default function Services() {
               </h2>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {FEATURED_SERVICES.map((feat) => {
-                const FeatIcon = feat.icon;
+              {featuredServicesList.map((feat: any) => {
+                const FeatIcon = feat.icon || BadgePlus;
                 return (
                   <button
                     key={feat.id}
                     onClick={() => navigate(feat.route)}
                     className="rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-3.5 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all flex flex-col justify-between min-h-[120px]"
                   >
-                    <div className="h-14 w-14" aria-hidden="true">{serviceArtFor(feat.id) ? <ServiceIllustration kind={serviceArtFor(feat.id)!} className="h-full w-full" /> : <div className={`flex h-full w-full items-center justify-center rounded-xl ${feat.accent}`}><FeatIcon className="h-6 w-6" /></div>}</div>
+                    <div className="h-14 w-14" aria-hidden="true">
+                      {serviceArtFor(feat.id) ? (
+                        <ServiceIllustration kind={serviceArtFor(feat.id)!} className="h-full w-full" />
+                      ) : (
+                        <div className={`flex h-full w-full items-center justify-center rounded-xl ${feat.accent}`}>
+                          <FeatIcon className="h-6 w-6" />
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <p className="mt-2 text-[14px] font-bold text-[#14213D]">{isHi ? feat.titleHi : feat.titleEn}</p>
                       <p className="mt-0.5 text-[11px] text-slate-500 font-medium leading-snug line-clamp-1">{isHi ? feat.descHi : feat.descEn}</p>
@@ -283,56 +334,18 @@ export default function Services() {
             <BrandLoader size="sm" label="Loading services" />
           </div>
         ) : (
-          <SortableList
-            items={filtered}
-            storageKey={`services:${category}`}
-            renderItem={(svc) => renderService(svc)}
-            className="flex flex-col gap-3 pt-2"
-          />
-        )}
-
-        {!isLoadingServices && filtered.length === 0 && (
-          <div className="py-12 text-center bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-6 mt-2 shadow-2xs">
-            <Search className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-            <p className="text-xs font-bold text-[#14213D]">{isHi ? "कोई सेवा नहीं मिली" : "No matching services found"}</p>
-            <p className="text-[11px] text-slate-500 mt-1">Try selecting another category or clear your search.</p>
+          <div className="space-y-3">
+            {filtered.map((svc: any) => (
+              <React.Fragment key={svc.id}>
+                {renderService(svc)}
+              </React.Fragment>
+            ))}
           </div>
         )}
 
-        {/* Official & External Results Section */}
-        {search.trim() && (
-          <div className="pt-4">
-            <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706] flex items-center gap-1.5 mb-2.5">
-              <Globe2 className="w-3.5 h-3.5 text-[#D97706]" />
-              {isHi ? "आधिकारिक एवं बाह्य परिणाम" : "OFFICIAL & EXTERNAL RESULTS"}
-            </p>
-
-            {webLoading ? (
-              <div className="flex justify-center py-6">
-                <BrandLoader size="sm" label="Searching external sources" />
-              </div>
-            ) : (
-              webResults.length > 0 && (
-                <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-3.5 shadow-2xs space-y-2">
-                  {webResults.map((r, i) => (
-                    <button
-                      key={i}
-                      onClick={() => openExternalLink(r.link, navigate, r.title)}
-                      className="w-full text-left flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white p-3 hover:border-amber-300 transition-all shadow-2xs"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/80 uppercase">External Website</span>
-                          <p className="text-xs font-bold text-[#14213D] leading-snug line-clamp-1">{r.title}</p>
-                        </div>
-                        <p className="text-[11px] font-medium text-slate-500 mt-1 line-clamp-1">{r.snippet}</p>
-                      </div>
-                      <ExternalLink className="h-4 w-4 shrink-0 text-[#14213D]" />
-                    </button>
-                  ))}
-                </div>
-              )
-            )}
+        {!filtered.length && !isLoadingServices && (
+          <div className="py-12 text-center text-xs font-semibold text-slate-500 bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-6 shadow-2xs">
+            {isHi ? "कोई सेवा नहीं मिली" : "No services found matching your query."}
           </div>
         )}
       </div>
