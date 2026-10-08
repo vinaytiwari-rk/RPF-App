@@ -338,7 +338,7 @@ export default function HomeStudio() {
       if (d.weatherConfig) {
         setWeatherMasterEnabled(d.weatherConfig.enabled !== false);
         setWeatherConfig(prev => ({ ...prev, ...d.weatherConfig }));
-        if (Array.isArray(d.weatherConfig.stations) && d.weatherConfig.stations.length > 0) {
+        if (Array.isArray(d.weatherConfig.stations)) {
           setWeatherStations(d.weatherConfig.stations);
         }
       }
@@ -346,7 +346,7 @@ export default function HomeStudio() {
       // 2. Market & Panchang
       if (d.marketConfig) {
         setMarketMasterEnabled(d.marketConfig.enabled !== false);
-        if (Array.isArray(d.marketConfig.marketItems) && d.marketConfig.marketItems.length > 0) {
+        if (Array.isArray(d.marketConfig.marketItems)) {
           setMarketFeeds(d.marketConfig.marketItems);
         }
       }
@@ -354,7 +354,7 @@ export default function HomeStudio() {
       // 3. Thought of the Day
       if (d.thoughtConfig) {
         setThoughtMasterEnabled(d.thoughtConfig.enabled !== false);
-        if (Array.isArray(d.thoughtConfig.thoughts) && d.thoughtConfig.thoughts.length > 0) {
+        if (Array.isArray(d.thoughtConfig.thoughts)) {
           setThoughtList(d.thoughtConfig.thoughts);
         } else if (d.thoughtConfig.activeQuote) {
           setThoughtList(prev => [
@@ -386,13 +386,13 @@ export default function HomeStudio() {
       // 4. Marquees
       if (d.marqueeConfig) {
         setMarqueeMasterEnabled(d.marqueeConfig.enabled !== false);
-        if (Array.isArray(d.marqueeConfig.marqueeItems) && d.marqueeConfig.marqueeItems.length > 0) {
+        if (Array.isArray(d.marqueeConfig.marqueeItems)) {
           setMarqueeList(d.marqueeConfig.marqueeItems);
         }
       }
 
       // 5. Carousel Slides (Unified single fields)
-      if (Array.isArray(d.carouselSlides) && d.carouselSlides.length > 0) {
+      if (Array.isArray(d.carouselSlides)) {
         setSlides(
           d.carouselSlides.map((s: any, idx: number) => ({
             id: s.id || `slide-${idx}`,
@@ -435,7 +435,7 @@ export default function HomeStudio() {
       }
 
       // 7. Quick Access Grid
-      if (Array.isArray(d.quickAccessItems) && d.quickAccessItems.length > 0) {
+      if (Array.isArray(d.quickAccessItems)) {
         setQuickAccessItems(
           d.quickAccessItems.map((q: any) => ({
             id: q.id,
@@ -459,7 +459,7 @@ export default function HomeStudio() {
       }
 
       // 8. Field Impact: Master KPI Counters (Unified)
-      if (Array.isArray(d.impactStats) && d.impactStats.length > 0) {
+      if (Array.isArray(d.impactStats)) {
         setImpactStats(
           d.impactStats.map((st: any) => ({
             id: st.id,
@@ -480,7 +480,7 @@ export default function HomeStudio() {
       }
 
       // 8. Field Impact: Seva Domains (Unified)
-      if (Array.isArray(d.impactDomains) && d.impactDomains.length > 0) {
+      if (Array.isArray(d.impactDomains)) {
         setImpactDomains(
           d.impactDomains.map((dm: any) => ({
             id: dm.id,
