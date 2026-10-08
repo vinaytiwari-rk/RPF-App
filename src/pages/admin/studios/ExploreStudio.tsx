@@ -1,172 +1,286 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Compass, Save, RefreshCw } from "lucide-react";
+import { Save, CheckCircle, Compass, ShieldCheck, Heart, Users, Landmark, AlertCircle, Edit, ExternalLink, Globe } from "lucide-react";
 import toast from "react-hot-toast";
 
-const TABS = [
-  { id: "services", label: "Public Services" },
-  { id: "sos", label: "Emergency & SOS" },
-];
+type ServiceItem = {
+  id: string;
+  category: string;
+  iconName: string;
+  titleEn: string;
+  titleHi: string;
+  descEn: string;
+  descHi: string;
+  hidden: boolean;
+};
 
 export default function ExploreStudio() {
-  const [activeTab, setActiveTab] = useState("services");
+  const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<"all" | "welfare" | "urgent" | "involved" | "civic">("all");
+  const [selectedItem, setSelectedItem] = useState<ServiceItem | null>(null);
+
+  // Supreme configs for global toggles (like SOS)
   const [configs, setConfigs] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    fetchConfigs();
+    fetchData();
   }, []);
 
-  const fetchConfigs = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/supreme/configs");
-      if (res.data.success) {
-        setConfigs(res.data.configs);
+      const [servicesRes, configsRes] = await Promise.all([
+        axios.get("/api/admin/services"),
+        axios.get("/api/supreme/configs")
+      ]);
+      
+      if (servicesRes.data?.data) {
+        setServices(servicesRes.data.data);
+      }
+      if (configsRes.data?.configs) {
+        setConfigs(configsRes.data.configs);
       }
     } catch (e) {
-      toast.error("Failed to load configurations.");
+      toast.error("Failed to load CMS data");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
-    setSaving(true);
+  const handleToggleVisibility = async (service: ServiceItem) => {
+    const nextHidden = !service.hidden;
+    const toastId = toast.loading(nextHidden ? "Hiding service..." : "Publishing service...");
     try {
       const token = localStorage.getItem("token") || "";
       const res = await axios.post(
-        "/api/supreme/configs",
-        { configs },
+        `/api/admin/services/${service.id}/visibility`,
+        { hidden: nextHidden },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data.success) {
-        toast.success("Explore settings saved!");
+        setServices(services.map(s => s.id === service.id ? { ...s, hidden: nextHidden } : s));
+        if (selectedItem?.id === service.id) setSelectedItem({ ...selectedItem, hidden: nextHidden });
+        toast.success(nextHidden ? "Service Hidden" : "Service Active", { id: toastId });
+      } else {
+        toast.error("Failed to update visibility", { id: toastId });
       }
     } catch (e) {
-      toast.error("Failed to save Explore settings.");
+      toast.error("Error saving changes", { id: toastId });
+    }
+  };
+
+  const handleSaveConfigs = async () => {
+    setSaving(true);
+    const toastId = toast.loading("Saving emergency configs...");
+    try {
+      const token = localStorage.getItem("token") || "";
+      const res = await axios.post("/api/supreme/configs", { configs }, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.data.success) {
+        toast.success("Configs saved successfully!", { id: toastId });
+      } else {
+        toast.error("Failed to save", { id: toastId });
+      }
+    } catch (e) {
+      toast.error("Error saving configs", { id: toastId });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleChange = (key: string, value: string) => {
-    setConfigs(prev => ({ ...prev, [key]: value }));
-  };
+  const filteredServices = services.filter((s) => {
+    if (activeTab === "all") return true;
+    return s.category === activeTab;
+  });
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+    <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
+      
+      {/* Header matching the screenshot design */}
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-indigo-50 text-indigo-500">
             <Compass className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-[#0A192F]">Explore & Services Studio</h2>
-            <p className="text-xs font-medium text-slate-500 mt-1">
-              Manage public services links, healthcare, SOS numbers, and utilities.
+            <p className="text-[10px] font-bold tracking-widest uppercase text-indigo-500">Services & Integrations CMS</p>
+            <h1 className="text-xl md:text-2xl font-black text-slate-800">Explore & Services Management</h1>
+            <p className="text-xs text-slate-500 mt-1">
+              Toggle all public services, welfare schemes, and emergency tools from here.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={fetchConfigs}
-            className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
+        <div className="flex flex-wrap items-center gap-2">
+          <button 
+            onClick={handleSaveConfigs}
+            disabled={saving}
+            className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-70"
           >
-            <RefreshCw className={`h-4 w-4 $\{loading ? 'animate-spin' : ''}`} /> Reload
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving || loading}
-            className="flex items-center gap-2 rounded-xl bg-purple-700 px-4 py-2.5 text-xs font-bold text-white hover:bg-purple-800 transition"
-          >
-            {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Configs
+            <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save Emergency Configs"}
           </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 px-2">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2.5 text-xs font-bold rounded-full transition-colors $\{
-              activeTab === tab.id
-                ? "bg-[#0A192F] text-white shadow-md"
-                : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 shadow-sm"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Emergency Configs Banner */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Police / SOS No.</label>
+          <input type="text" value={configs.sos_police || ""} onChange={(e) => setConfigs({ ...configs, sos_police: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ambulance No.</label>
+          <input type="text" value={configs.sos_ambulance || ""} onChange={(e) => setConfigs({ ...configs, sos_ambulance: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div>
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Women Helpline</label>
+          <input type="text" value={configs.sos_women || ""} onChange={(e) => setConfigs({ ...configs, sos_women: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500" />
+        </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm min-h-[400px]">
-        {loading ? (
-          <div className="flex justify-center h-48 items-center">
-            <RefreshCw className="h-6 w-6 animate-spin text-slate-400" />
+      <div className="flex flex-col lg:flex-row gap-6 h-[65vh]">
+        {/* Left List */}
+        <div className="w-full lg:w-5/12 xl:w-1/3 flex flex-col space-y-4">
+          <div className="flex flex-wrap gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+            <button 
+              onClick={() => setActiveTab("all")}
+              className={`flex-1 min-w-[70px] text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "all" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
+            >
+              All
+            </button>
+            <button 
+              onClick={() => setActiveTab("welfare")}
+              className={`flex-1 min-w-[70px] text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "welfare" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
+            >
+              Welfare
+            </button>
+            <button 
+              onClick={() => setActiveTab("urgent")}
+              className={`flex-1 min-w-[70px] text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "urgent" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
+            >
+              Urgent
+            </button>
+            <button 
+              onClick={() => setActiveTab("involved")}
+              className={`flex-1 min-w-[70px] text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "involved" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
+            >
+              Involved
+            </button>
           </div>
-        ) : (
-          <div className="space-y-6 max-w-3xl">
-            {activeTab === "sos" && (
-              <div className="space-y-4">
-                <h3 className="text-sm font-black text-slate-900 border-b border-slate-100 pb-2">Emergency Contacts Config</h3>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Police / National Emergency</label>
-                  <input
-                    type="text"
-                    value={configs.sos_police || "112"}
-                    onChange={(e) => handleChange("sos_police", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-purple-500 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Ambulance</label>
-                  <input
-                    type="text"
-                    value={configs.sos_ambulance || "102"}
-                    onChange={(e) => handleChange("sos_ambulance", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-purple-500 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Women Helpline</label>
-                  <input
-                    type="text"
-                    value={configs.sos_women || "1091"}
-                    onChange={(e) => handleChange("sos_women", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-purple-500 outline-none"
-                  />
-                </div>
-              </div>
-            )}
 
-            {activeTab === "services" && (
-              <div className="space-y-4">
-                <h3 className="text-sm font-black text-slate-900 border-b border-slate-100 pb-2">Service Modules Toggle</h3>
-                <p className="text-xs text-slate-500">Configure which public services are active in the Explore tab.</p>
-                <div className="space-y-3">
-                  {['healthcare', 'employment', 'utilities', 'epaper'].map(mod => (
-                    <div key={mod} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                      <span className="text-sm font-bold text-slate-700 capitalize">{mod} Module</span>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={configs[`module_$\{mod}`] !== 'false'}
-                          onChange={(e) => handleChange(`module_$\{mod}`, e.target.checked ? 'true' : 'false')}
-                        />
-                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
-                      </label>
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+            {loading ? (
+              <p className="text-center text-sm text-slate-400 py-10">Loading services...</p>
+            ) : (
+              filteredServices.map((service) => (
+                <div 
+                  key={service.id} 
+                  onClick={() => setSelectedItem(service)}
+                  className={`bg-white p-3 rounded-xl border transition-all cursor-pointer hover:border-slate-300 hover:shadow-md ${selectedItem?.id === service.id ? "border-indigo-500 shadow-sm ring-1 ring-indigo-500" : "border-slate-200 shadow-sm"}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center text-indigo-600 bg-indigo-50 border border-indigo-100">
+                      <Globe className="h-5 w-5" />
                     </div>
-                  ))}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded text-white bg-indigo-500">
+                          {service.category}
+                        </span>
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                          ID: {service.id}
+                        </span>
+                      </div>
+                      <h3 className="text-xs font-bold text-slate-800 truncate mb-1">{service.titleEn}</h3>
+                      <p className="text-[10px] text-slate-500 truncate mb-2">{service.descEn}</p>
+                      
+                      <div className="flex items-center justify-between border-t border-slate-100 pt-2">
+                        <button className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800">
+                          <Edit className="h-3 w-3" /> View Details
+                        </button>
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${!service.hidden ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-slate-50 text-slate-500 border border-slate-200"}`}>
+                          <CheckCircle className="h-3 w-3" /> {!service.hidden ? "Active" : "Hidden"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))
             )}
           </div>
-        )}
+        </div>
+
+        {/* Right Panel */}
+        <div className="hidden lg:flex flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-col">
+          {selectedItem ? (
+            <div className="p-6 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-black text-slate-800">{selectedItem.titleEn}</h2>
+                  <p className="text-sm font-semibold text-slate-500">{selectedItem.titleHi}</p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 border border-indigo-100">
+                  <Globe className="h-6 w-6" />
+                </div>
+              </div>
+              
+              <div className="space-y-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                
+                <div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Service Identity (Hardcoded in Core)</h4>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">English Desc</p>
+                      <p className="text-xs font-semibold text-slate-700">{selectedItem.descEn}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Hindi Desc</p>
+                      <p className="text-xs font-semibold text-slate-700">{selectedItem.descHi}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Category</p>
+                      <p className="text-xs font-semibold text-slate-700">{selectedItem.category}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-5 bg-indigo-50/50 border border-indigo-100 rounded-xl">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800">Public Visibility</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">Show this service in the public 'Explore' page.</p>
+                  </div>
+                  <button 
+                    onClick={() => handleToggleVisibility(selectedItem)}
+                    className={`inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm ${!selectedItem.hidden ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-slate-200 text-slate-600 hover:bg-slate-300"}`}
+                  >
+                    {!selectedItem.hidden ? <><CheckCircle className="h-4 w-4" /> Service is Live</> : <><AlertCircle className="h-4 w-4" /> Service Hidden</>}
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100">
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-amber-800">
+                    <AlertCircle className="h-5 w-5 shrink-0" />
+                    <div className="text-xs">
+                      <strong className="block mb-1">Notice regarding internal content</strong>
+                      To update internal rich text or external links for this specific module, navigate to the service page inside the public app as an administrator and click the "Edit Content" floating button.
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50/50">
+              <div className="h-16 w-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-400 mb-4 shadow-sm border border-indigo-100">
+                <Compass className="h-8 w-8" />
+              </div>
+              <h2 className="text-lg font-black text-slate-800">Select a Service from the left list</h2>
+              <p className="text-sm text-slate-500 mt-1 max-w-sm">
+                Manage public visibility, category mapping, and emergency configurations.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
