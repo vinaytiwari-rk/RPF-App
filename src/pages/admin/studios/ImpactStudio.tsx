@@ -31,6 +31,7 @@ export interface ImpactStatItem {
   suffix: string;
   iconName: string;
   enabled: boolean;
+  order?: number;
 }
 
 export interface ImpactDomainItem {
@@ -42,7 +43,8 @@ export interface ImpactDomainItem {
   iconName: string;
   color?: string;
   enabled: boolean;
-  subLinks?: Array<{ id: string; title: string; url: string; active?: boolean }>;
+  order?: number;
+  subLinks?: Array<{ id: string; title: string; url: string; active?: boolean; order?: number }>;
 }
 
 export interface ImpactStoryItem {
@@ -52,6 +54,7 @@ export interface ImpactStoryItem {
   quote: string;
   photoUrl?: string;
   enabled: boolean;
+  order?: number;
 }
 
 const DEFAULT_DOMAINS: ImpactDomainItem[] = [
@@ -178,7 +181,7 @@ export default function ImpactStudio() {
         setDescription(cms.impactDesc || cms.impactDescEn || cms.impactDescHi);
       }
 
-      if (Array.isArray(cms.impactStats) && cms.impactStats.length > 0) {
+      if (Array.isArray(cms.impactStats)) {
         setImpactStats(
           cms.impactStats.map((s: any) => ({
             id: s.id,
@@ -186,8 +189,9 @@ export default function ImpactStudio() {
             value: Number(s.value) || 0,
             suffix: s.suffix || "+",
             iconName: s.iconName || "Award",
-            enabled: s.enabled !== false
-          }))
+            enabled: s.enabled !== false,
+            order: typeof s.order === "number" ? s.order : undefined
+          })).sort((a: ImpactStatItem, b: ImpactStatItem) => (a.order ?? 0) - (b.order ?? 0))
         );
       } else {
         setImpactStats([
@@ -198,7 +202,7 @@ export default function ImpactStudio() {
         ]);
       }
 
-      if (Array.isArray(cms.impactDomains) && cms.impactDomains.length > 0) {
+      if (Array.isArray(cms.impactDomains)) {
         setImpactDomains(
           cms.impactDomains.map((d: any) => ({
             id: d.id,
@@ -208,14 +212,16 @@ export default function ImpactStudio() {
             badge: d.badge || d.badgeEn || d.badgeHi || "Ground Action",
             iconName: d.iconName || "Sparkles",
             color: d.color || "bg-emerald-50 text-[#167C5A] border-emerald-200",
-            enabled: d.enabled !== false
-          }))
+            enabled: d.enabled !== false,
+            order: typeof d.order === "number" ? d.order : undefined,
+            subLinks: Array.isArray(d.subLinks) ? d.subLinks.map((l: any, i: number) => ({ ...l, order: typeof l.order === "number" ? l.order : i })) : []
+          })).sort((a: ImpactDomainItem, b: ImpactDomainItem) => (a.order ?? 0) - (b.order ?? 0))
         );
       } else {
         setImpactDomains(DEFAULT_DOMAINS);
       }
 
-      if (Array.isArray(cms.testimonials) && cms.testimonials.length > 0) {
+      if (Array.isArray(cms.testimonials)) {
         setStories(
           cms.testimonials.map((t: any) => ({
             id: t.id,
@@ -223,8 +229,9 @@ export default function ImpactStudio() {
             village: t.village || t.villageEn || t.villageHi || "Bhopal, MP",
             quote: t.quote || t.quoteEn || t.quoteHi || "",
             photoUrl: t.photoUrl,
-            enabled: t.enabled !== false
-          }))
+            enabled: t.enabled !== false,
+            order: typeof t.order === "number" ? t.order : undefined
+          })).sort((a: ImpactStoryItem, b: ImpactStoryItem) => (a.order ?? 0) - (b.order ?? 0))
         );
       } else {
         setStories([
@@ -266,36 +273,9 @@ export default function ImpactStudio() {
         impactDesc: description,
         impactDescEn: description,
         impactDescHi: description,
-        impactStats: impactStats.map(s => ({
-          ...s,
-          label: s.label,
-          labelEn: s.label,
-          labelHi: s.label
-        })),
-        impactDomains: impactDomains.map(d => ({
-          ...d,
-          title: d.title,
-          titleEn: d.title,
-          titleHi: d.title,
-          description: d.description,
-          descEn: d.description,
-          descHi: d.description,
-          badge: d.badge,
-          badgeEn: d.badge,
-          badgeHi: d.badge
-        })),
-        testimonials: stories.map(s => ({
-          ...s,
-          name: s.name,
-          nameEn: s.name,
-          nameHi: s.name,
-          village: s.village,
-          villageEn: s.village,
-          villageHi: s.village,
-          quote: s.quote,
-          quoteEn: s.quote,
-          quoteHi: s.quote
-        }))
+        impactStats: impactStats.map((s, index) => ({ ...s, order: index })),
+        impactDomains: impactDomains.map((d, index) => ({ ...d, order: index, subLinks: Array.isArray(d.subLinks) ? d.subLinks.map((l: any, i: number) => ({ ...l, order: i })) : [] })),
+        testimonials: stories.map((s, index) => ({ ...s, order: index }))
       };
 
       const res = await axios.post(
@@ -347,7 +327,7 @@ export default function ImpactStudio() {
     const tmp = list[index];
     list[index] = list[target];
     list[target] = tmp;
-    setImpactStats(list);
+    setImpactStats(list.map((item, i) => ({ ...item, order: i })));
   };
 
   const handleMoveDomain = (index: number, direction: "up" | "down") => {
@@ -357,7 +337,7 @@ export default function ImpactStudio() {
     const tmp = list[index];
     list[index] = list[target];
     list[target] = tmp;
-    setImpactDomains(list);
+    setImpactDomains(list.map((item, i) => ({ ...item, order: i })));
   };
 
   const handleMoveStory = (index: number, direction: "up" | "down") => {
@@ -367,7 +347,7 @@ export default function ImpactStudio() {
     const tmp = list[index];
     list[index] = list[target];
     list[target] = tmp;
-    setStories(list);
+    setStories(list.map((item, i) => ({ ...item, order: i })));
   };
 
   if (loading) {
