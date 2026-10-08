@@ -497,8 +497,7 @@ export default function HomeStudio() {
         impactMetrics,
         impactStats,
         impactDomains,
-        themeConfig
-      };
+        themeConfig      };
 
       const res = await axios.post(
         "/api/admin/control/cms/publish",
@@ -871,7 +870,62 @@ export default function HomeStudio() {
                       <p className="text-xs font-bold text-slate-800 truncate">{s.titleEn}</p>
                       <p className="text-[10px] text-slate-500 truncate">{s.subEn}</p>
                     </div>
-                    <button
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        disabled={idx === 0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (idx === 0) return;
+                          const next = [...slides];
+                          [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+                          setSlides(next.map((slide, i) => ({ ...slide, order: i })));
+                          setSelectedSlideIndex(idx - 1);
+                        }}
+                        className="p-1 text-slate-500 hover:bg-white rounded disabled:opacity-30"
+                        title="Move Up"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={idx === slides.length - 1}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (idx === slides.length - 1) return;
+                          const next = [...slides];
+                          [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+                          setSlides(next.map((slide, i) => ({ ...slide, order: i })));
+                          setSelectedSlideIndex(idx + 1);
+                        }}
+                        className="p-1 text-slate-500 hover:bg-white rounded disabled:opacity-30"
+                        title="Move Down"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSlideIndex(idx);
+                        }}
+                        className="p-1 text-amber-600 hover:bg-amber-50 rounded"
+                        title="Edit Slide"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSlides(slides.map((slide, i) => i === idx ? { ...slide, active: slide.active === false } : slide));
+                        }}
+                        className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
+                        title={s.active === false ? "Activate Slide" : "Deactivate Slide"}
+                      >
+                        {s.active === false ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                      <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setSlides(slides.filter((_, i) => i !== idx));
@@ -881,6 +935,7 @@ export default function HomeStudio() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -888,7 +943,7 @@ export default function HomeStudio() {
               {/* Slide Detail Editor */}
               {slides[selectedSlideIndex] && (
                 <div className="lg:col-span-2 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                  <h4 className="text-xs font-black uppercase text-slate-400">Editing Slide #{selectedSlideIndex + 1}</h4>
+                  <div className="flex items-center justify-between gap-3"><h4 className="text-xs font-black uppercase text-slate-400">Edit Carousel Slide #{selectedSlideIndex + 1}</h4><span className="text-[10px] font-bold text-emerald-600">Single language field</span></div>
                   
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Slide Heading / Caption</label>
@@ -897,7 +952,7 @@ export default function HomeStudio() {
                       value={slides[selectedSlideIndex].titleEn}
                       onChange={e => {
                         const val = e.target.value;
-                        setSlides(slides.map((sl, i) => i === selectedSlideIndex ? { ...sl, titleEn: val } : sl));
+                        setSlides(slides.map((sl, i) => i === selectedSlideIndex ? { ...sl, titleEn: val, titleHi: val } : sl));
                       }}
                       className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold"
                     />
@@ -910,7 +965,7 @@ export default function HomeStudio() {
                       value={slides[selectedSlideIndex].subEn}
                       onChange={e => {
                         const val = e.target.value;
-                        setSlides(slides.map((sl, i) => i === selectedSlideIndex ? { ...sl, subEn: val } : sl));
+                        setSlides(slides.map((sl, i) => i === selectedSlideIndex ? { ...sl, subEn: val, subHi: val } : sl));
                       }}
                       className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs"
                     />
@@ -997,7 +1052,6 @@ export default function HomeStudio() {
             </div>
           </div>
         )}
-
         {/* 7. QUICK ACCESS CONTROLS */}
         {activeTab === "quick_access" && (
           <div className="space-y-6 animate-fade-in">
@@ -1497,8 +1551,7 @@ export default function HomeStudio() {
                       }}
                       className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600"
                     />
-                    <input
-                      type="text"
+                    <input                      type="text"
                       value={m.route || "/community-care-active"}
                       onChange={(e) => {
                         const val = e.target.value;
