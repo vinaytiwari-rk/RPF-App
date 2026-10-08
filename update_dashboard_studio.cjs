@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+const fs = require('fs');
+
+const fileContent = `import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Users, CreditCard, Activity } from "lucide-react";
-import JanSevaSyncStudio from "../../../components/admin/JanSevaSyncStudio";
+import JanSevaSyncStudio from "../../components/admin/JanSevaSyncStudio";
 
 type Row = Record<string, unknown>;
 
@@ -18,7 +20,7 @@ export default function DashboardStudio() {
 
   const token = localStorage.getItem("token") || "";
 
-  const authHeaders = (t: string) => ({ Authorization: `Bearer ${t}` });
+  const authHeaders = (t: string) => ({ Authorization: \`Bearer \${t}\` });
 
   async function getAdminData(url: string, t: string): Promise<Row[]> {
     try {
@@ -82,10 +84,10 @@ export default function DashboardStudio() {
       keys.join(","),
       ...rows.map((r) =>
         keys
-          .map((k) => `"${String(r[k] || "").replace(/"/g, '""')}"`)
+          .map((k) => \`"\${String(r[k] || "").replace(/"/g, '""')}"\`)
           .join(",")
       ),
-    ].join("\n");
+    ].join("\\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -166,3 +168,6 @@ export default function DashboardStudio() {
     </div>
   );
 }
+`;
+fs.writeFileSync('src/pages/admin/studios/DashboardStudio.tsx', fileContent, 'utf8');
+console.log('DashboardStudio updated with correct stats and SyncStudio component');

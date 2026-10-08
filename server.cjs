@@ -347814,7 +347814,6 @@ var import_crypto9 = __toESM(require("crypto"), 1);
 var router11 = import_express11.default.Router();
 var PRIMARY_JAN_SEVA_API = process.env.JAN_SEVA_API_URL || "https://api.therpfoundation.org/api/patient";
 var FALLBACK_JAN_SEVA_API = "https://www.api.therpfoundation.org/api/patient";
-var JAN_SEVA_ROOT_URL = "https://api.therpfoundation.org";
 var JAN_SEVA_PORTAL_URL = "https://jansevacard.therpfoundation.org";
 var cardCache = /* @__PURE__ */ new Map();
 var CACHE_TTL_MS = 60 * 1e3;
@@ -347845,7 +347844,7 @@ async function callJanSevaApi(subPath = "", options2 = {}) {
   let lastError = null;
   for (const endpoint of endpoints) {
     try {
-      const response = await axios_default({
+      return await axios_default({
         method: options2.method || "GET",
         url: endpoint,
         params: options2.params,
@@ -347853,7 +347852,6 @@ async function callJanSevaApi(subPath = "", options2 = {}) {
         headers,
         timeout: timeout2
       });
-      return response;
     } catch (err2) {
       lastError = err2;
       if (err2.response && (err2.response.status === 400 || err2.response.status === 404)) {
@@ -347871,14 +347869,45 @@ var ensureMirror = async () => {
     synced_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`);
 };
+var ensureAuditLogs = async () => {
+  await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255),
+    action VARCHAR(100) NOT NULL,
+    resource VARCHAR(100),
+    resource_id VARCHAR(255),
+    ip_address INET,
+    user_agent TEXT,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+  await pool.query("CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)");
+  await pool.query("CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs(resource, resource_id)");
+};
+var writeAuditLog = async (req2, action, resource, resourceId, metadata = {}) => {
+  try {
+    await ensureAuditLogs();
+    const userId = String(req2.user?.id || req2.user?.userId || "") || null;
+    const forwarded = String(req2.headers?.["x-forwarded-for"] || "").split(",")[0].trim();
+    const ip = forwarded || req2.ip || null;
+    await pool.query(
+      `INSERT INTO audit_logs (user_id, action, resource, resource_id, ip_address, user_agent, metadata)
+       VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb)`,
+      [userId, action, resource, resourceId, ip, String(req2.headers?.["user-agent"] || ""), JSON.stringify(metadata)]
+    );
+  } catch (auditError) {
+    console.warn("Audit log write failed:", auditError?.message);
+  }
+};
 var extractCardNumber = (record) => {
-  const value2 = record?.cardNo ?? record?.card_no ?? record?.janSevaCardNo ?? record?._id;
+  const value2 = record?.cardNo ?? record?.cardNumber ?? record?.card_number ?? record?.cardNoNumber ?? record?.janSevaCardNo ?? record?.janSevaCardNumber ?? record?.jan_seva_card_no ?? record?.card_id ?? record?.cardId ?? record?.patient?.cardNo ?? record?.patient?.cardNumber ?? record?.data?.cardNo ?? record?.data?.cardNumber ?? record?._id;
   return typeof value2 === "string" || typeof value2 === "number" ? String(value2).trim() || null : null;
 };
 var writeMirror = async (records, source) => {
   await ensureMirror();
   const client = await pool.connect();
-  let imported = 0, skipped = 0;
+  let imported = 0;
+  let skipped = 0;
   try {
     await client.query("BEGIN");
     for (const record of records) {
@@ -347890,7 +347919,8 @@ var writeMirror = async (records, source) => {
       await client.query(
         `INSERT INTO jan_seva_card_mirror (card_no, record, source, synced_at)
          VALUES ($1, $2::jsonb, $3, NOW())
-         ON CONFLICT (card_no) DO UPDATE SET record = EXCLUDED.record, source = EXCLUDED.source, synced_at = NOW()`,
+         ON CONFLICT (card_no) DO UPDATE
+         SET record = EXCLUDED.record, source = EXCLUDED.source, synced_at = NOW()`,
         [number, JSON.stringify(record), source]
       );
       imported++;
@@ -347905,272 +347935,42 @@ var writeMirror = async (records, source) => {
   cardCache.clear();
   return { imported, skipped };
 };
-var getIntegrationHealth = async (_req, res) => {
-  const t0 = Date.now();
-  let apiHealth = {
-    url: JAN_SEVA_ROOT_URL,
-    status: "offline",
-    latencyMs: 0,
-    httpStatus: 0,
-    message: ""
-  };
-  let portalHealth = {
-    url: JAN_SEVA_PORTAL_URL,
-    status: "offline",
-    latencyMs: 0,
-    httpStatus: 0
-  };
-  try {
-    const start = Date.now();
-    const r5 = await axios_default.get(JAN_SEVA_ROOT_URL, { timeout: 4e3 });
-    apiHealth = {
-      url: JAN_SEVA_ROOT_URL,
-      status: r5.status >= 200 && r5.status < 400 ? "online" : "degraded",
-      latencyMs: Date.now() - start,
-      httpStatus: r5.status,
-      message: r5.data?.message || "RP_Card_Backend responding"
-    };
-  } catch (err2) {
-    apiHealth = {
-      url: JAN_SEVA_ROOT_URL,
-      status: "offline",
-      latencyMs: Date.now() - t0,
-      httpStatus: err2.response?.status || 504,
-      message: err2.message || "Connection timed out"
-    };
-  }
-  try {
-    const start = Date.now();
-    const r5 = await axios_default.get(JAN_SEVA_PORTAL_URL, { timeout: 4e3 });
-    portalHealth = {
-      url: JAN_SEVA_PORTAL_URL,
-      status: r5.status >= 200 && r5.status < 400 ? "online" : "degraded",
-      latencyMs: Date.now() - start,
-      httpStatus: r5.status
-    };
-  } catch (err2) {
-    portalHealth = {
-      url: JAN_SEVA_PORTAL_URL,
-      status: "offline",
-      latencyMs: 0,
-      httpStatus: err2.response?.status || 504
-    };
-  }
-  let mirrorStats = {
-    totalMirrored: 0,
-    lastSyncedAt: null,
-    sources: {},
-    localApproved: 0,
-    localPending: 0
-  };
-  try {
-    await ensureMirror();
-    const [mirrorCount, mirrorLatest, localCounts] = await Promise.all([
-      pool.query("SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror"),
-      pool.query("SELECT MAX(synced_at) AS last_sync FROM jan_seva_card_mirror"),
-      pool.query(`SELECT 
-        COUNT(*) FILTER (WHERE status = 'approved')::int as approved,
-        COUNT(*) FILTER (WHERE status = 'pending')::int as pending
-        FROM card_applications_v2`)
-    ]);
-    mirrorStats.totalMirrored = mirrorCount.rows[0]?.count || 0;
-    mirrorStats.lastSyncedAt = mirrorLatest.rows[0]?.last_sync ? new Date(mirrorLatest.rows[0].last_sync).toISOString() : null;
-    mirrorStats.localApproved = localCounts.rows[0]?.approved || 0;
-    mirrorStats.localPending = localCounts.rows[0]?.pending || 0;
-  } catch (dbErr) {
-    console.warn("Mirror stats lookup warning:", dbErr.message);
-  }
-  res.json({
-    success: true,
-    timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-    apiServer: apiHealth,
-    portal: portalHealth,
-    mirror: mirrorStats
-  });
-};
-router11.get("/api/admin/cards/health", authenticateToken, requireAdmin, getIntegrationHealth);
-router11.get("/api/admin/external/health", authenticateToken, requireAdmin, getIntegrationHealth);
 router11.post("/api/admin/cards/import", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const records = req2.body?.records;
     if (!Array.isArray(records) || records.length < 1 || records.length > 500)
       return res.status(400).json({ success: false, error: "Provide 1\u2013500 card records per batch" });
     const result = await writeMirror(records, "admin-import");
-    res.json({ success: true, ...result });
+    await writeAuditLog(req2, "JAN_SEVA_MASTER_IMPORT", "jan_seva_card_mirror", null, {
+      received: records.length,
+      imported: result.imported,
+      skipped: result.skipped,
+      source: "admin-master-json"
+    });
+    res.json({ success: true, ...result, received: records.length });
   } catch (error3) {
     console.error("Jan Seva card import failed:", error3?.message);
-    res.status(500).json({ success: false, error: "Card import failed" });
+    await writeAuditLog(req2, "JAN_SEVA_MASTER_IMPORT_FAILED", "jan_seva_card_mirror", null, {
+      error: error3?.message || "Unknown import error"
+    });
+    res.status(500).json({ success: false, error: error3?.message || "Card import failed" });
   }
 });
-router11.post("/api/admin/cards/sync", authenticateToken, requireAdmin, async (req2, res) => {
+router11.get("/api/admin/audit-logs", authenticateToken, requireAdmin, async (req2, res) => {
   try {
-    const page = Number(req2.body?.page || 1);
-    const limit = Number(req2.body?.limit ?? 100);
-    if (!Number.isInteger(page) || page < 1 || !Number.isInteger(limit) || limit < 1 || limit > 500)
-      return res.status(400).json({ success: false, error: "Valid page (>=1) and limit (1\u2013500) required" });
-    const response = await callJanSevaApi("", {
-      params: { page, limit },
-      timeout: 1e4
-    });
-    if (!Array.isArray(response.data?.patients)) {
-      return res.status(502).json({
-        success: false,
-        error: "External API schema mismatch: patients array expected"
-      });
-    }
-    const records = response.data.patients;
-    const result = records.length ? await writeMirror(records, "external-api") : { imported: 0, skipped: 0 };
-    res.json({
-      success: true,
-      page,
-      limit,
-      ...result,
-      received: records.length,
-      totalPatients: Number.isFinite(Number(response.data.totalPatients)) ? Number(response.data.totalPatients) : null,
-      totalPages: Number.isFinite(Number(response.data.totalPages)) ? Number(response.data.totalPages) : null
-    });
+    await ensureAuditLogs();
+    const limit = Math.min(100, Math.max(1, Number(req2.query.limit) || 25));
+    const result = await pool.query(
+      `SELECT id, user_id, action, resource, resource_id, ip_address, user_agent, metadata, created_at
+       FROM audit_logs
+       ORDER BY created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+    res.json({ success: true, logs: result.rows });
   } catch (error3) {
-    console.error("Jan Seva sync failed:", error3?.message);
-    res.status(502).json({
-      success: false,
-      error: "External Jan Seva API unavailable or currently buffering: " + (error3?.response?.data?.message || error3?.message || "Connection error")
-    });
-  }
-});
-router11.post("/api/admin/cards/sync-local", authenticateToken, requireAdmin, async (req2, res) => {
-  try {
-    await ensureMirror();
-    const approvedRes = await pool.query(`
-      SELECT application_id, user_id, full_name, mobile_number, aadhaar_number,
-             father_or_husband_name, district, state, village_or_city, pincode,
-             occupation, gender, date_of_birth, photo_url, jan_seva_card_no,
-             status, created_at, updated_at
-      FROM card_applications_v2
-      WHERE status = 'approved'
-    `);
-    let localImported = 0;
-    if (approvedRes.rows.length > 0) {
-      const recordsToMirror = approvedRes.rows.map((r5) => ({
-        cardNo: r5.jan_seva_card_no || r5.application_id,
-        name: r5.full_name,
-        nameOfMember: r5.full_name,
-        mobileNo: r5.mobile_number,
-        phone: r5.mobile_number,
-        fatherOrHusbandName: r5.father_or_husband_name,
-        district: r5.district,
-        state: r5.state,
-        villageOrCity: r5.village_or_city,
-        pincode: r5.pincode,
-        occupation: r5.occupation,
-        gender: r5.gender,
-        dateOfBirth: r5.date_of_birth,
-        photoUrl: r5.photo_url,
-        status: "approved",
-        source: "local-approved-db",
-        applicationId: r5.application_id,
-        updatedAt: r5.updated_at || r5.created_at
-      }));
-      const writeResult = await writeMirror(recordsToMirror, "local-approved-db");
-      localImported = writeResult.imported;
-    }
-    const mirrorCountRes = await pool.query("SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror");
-    const totalMirrored = mirrorCountRes.rows[0]?.count || 0;
-    res.json({
-      success: true,
-      imported: localImported,
-      totalMirrored,
-      approvedApplicationsCount: approvedRes.rows.length,
-      message: `Local PostgreSQL database synchronized! ${totalMirrored} total verified cards available in local mirror.`
-    });
-  } catch (error3) {
-    console.error("Local sync failed:", error3?.message);
-    res.status(500).json({ success: false, error: "Local database sync failed: " + error3.message });
-  }
-});
-router11.post("/api/admin/cards/sync-all", authenticateToken, requireAdmin, async (req2, res) => {
-  try {
-    const maxPages = Math.min(20, Math.max(1, Number(req2.body?.maxPages) || 5));
-    const limit = Math.min(200, Math.max(20, Number(req2.body?.limit) || 100));
-    let totalImported = 0;
-    let totalSkipped = 0;
-    let pagesProcessed = 0;
-    let externalTotal = 0;
-    let stopReason = "completed";
-    for (let page = 1; page <= maxPages; page++) {
-      try {
-        const response = await callJanSevaApi("", {
-          params: { page, limit },
-          timeout: 8e3
-        });
-        const patients = response.data?.patients;
-        if (!Array.isArray(patients) || patients.length === 0) {
-          stopReason = "end-of-records";
-          break;
-        }
-        externalTotal = Number(response.data?.totalPatients) || externalTotal;
-        const result = await writeMirror(patients, "external-api");
-        totalImported += result.imported;
-        totalSkipped += result.skipped;
-        pagesProcessed++;
-        if (patients.length < limit) {
-          stopReason = "last-page";
-          break;
-        }
-      } catch (pageErr) {
-        stopReason = "external-timeout-or-error";
-        console.warn(`Sync stopped at page ${page}:`, pageErr.message);
-        break;
-      }
-    }
-    if (pagesProcessed === 0) {
-      await ensureMirror();
-      const approvedRes = await pool.query(`
-        SELECT application_id, user_id, full_name, mobile_number, aadhaar_number,
-               father_or_husband_name, district, state, village_or_city, pincode,
-               occupation, gender, date_of_birth, photo_url, jan_seva_card_no,
-               status, created_at, updated_at
-        FROM card_applications_v2
-        WHERE status = 'approved'
-      `);
-      if (approvedRes.rows.length > 0) {
-        const recordsToMirror = approvedRes.rows.map((r5) => ({
-          cardNo: r5.jan_seva_card_no || r5.application_id,
-          name: r5.full_name,
-          mobileNo: r5.mobile_number,
-          district: r5.district,
-          state: r5.state,
-          status: "approved",
-          source: "local-approved-db",
-          applicationId: r5.application_id
-        }));
-        const localWrite = await writeMirror(recordsToMirror, "local-approved-db");
-        totalImported = localWrite.imported;
-      }
-      const mirrorCountRes = await pool.query("SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror");
-      const totalMirrored = mirrorCountRes.rows[0]?.count || 0;
-      return res.json({
-        success: true,
-        pagesProcessed: 0,
-        totalImported,
-        totalSkipped: 0,
-        externalTotal: 0,
-        stopReason: "api-offline-fallback-to-local",
-        isExternalOffline: true,
-        totalMirrored,
-        message: `api.therpfoundation.org is currently offline. Operating on Local Postgres Database Mirror (${totalMirrored} cards verified).`
-      });
-    }
-    res.json({
-      success: true,
-      pagesProcessed,
-      totalImported,
-      totalSkipped,
-      externalTotal,
-      stopReason,
-      message: pagesProcessed > 0 ? `Successfully synchronized ${totalImported} records across ${pagesProcessed} pages.` : `External API is currently buffering or unreachable. Local records preserved.`
-    });
-  } catch (error3) {
-    res.status(500).json({ success: false, error: error3?.message || "Sync runner failed" });
+    console.error("Audit log retrieval failed:", error3?.message);
+    res.status(500).json({ success: false, error: "Unable to load audit logs" });
   }
 });
 router11.get("/api/admin/cards/mirror", authenticateToken, requireAdmin, async (req2, res) => {
@@ -348600,6 +348400,7 @@ router11.post("/api/cards/approve", authenticateToken, requireAdmin, async (req2
       client.release();
     }
     cardCache.clear();
+    await writeAuditLog(req2, "JAN_SEVA_CARD_APPROVED", "card_application", userId, { cardNo });
     res.json({
       success: true,
       cardNo,
@@ -348622,6 +348423,7 @@ router11.post("/api/cards/reject", authenticateToken, requireAdmin, async (req2,
       ["rejected", userId]
     );
     cardCache.clear();
+    await writeAuditLog(req2, "JAN_SEVA_CARD_REJECTED", "card_application", String(userId || ""), {});
     res.json({ success: true });
   } catch (error3) {
     res.status(500).json({ error: error3.message });
@@ -354775,8 +354577,8 @@ app.use((req2, res, next2) => {
   }
   next2();
 });
-app.use(import_express34.default.json({ limit: "2mb" }));
-app.use(import_express34.default.urlencoded({ limit: "2mb", extended: true }));
+app.use(import_express34.default.json({ limit: "5mb" }));
+app.use(import_express34.default.urlencoded({ limit: "5mb", extended: true }));
 var limiter2 = rate_limit_default({
   windowMs: 15 * 60 * 1e3,
   max: 500,
