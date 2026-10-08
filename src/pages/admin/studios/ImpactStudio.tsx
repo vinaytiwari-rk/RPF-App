@@ -133,19 +133,19 @@ export default function ImpactStudio() {
           <div className="flex gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
             <button 
               onClick={() => setActiveTab("all")}
-              className={\`flex-1 text-xs font-bold py-2 rounded-lg transition-colors \${activeTab === "all" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}\`}
+              className={`flex-1 text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "all" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
             >
               All ({reels.length})
             </button>
             <button 
               onClick={() => setActiveTab("youtube")}
-              className={\`flex-1 text-xs font-bold py-2 rounded-lg transition-colors \${activeTab === "youtube" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}\`}
+              className={`flex-1 text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "youtube" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
             >
               YouTube ({reels.filter(r=>r.type==="youtube").length})
             </button>
             <button 
               onClick={() => setActiveTab("instagram")}
-              className={\`flex-1 text-xs font-bold py-2 rounded-lg transition-colors \${activeTab === "instagram" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}\`}
+              className={`flex-1 text-xs font-bold py-2 rounded-lg transition-colors ${activeTab === "instagram" ? "bg-slate-800 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"}`}
             >
               Instagram ({reels.filter(r=>r.type==="instagram").length})
             </button>
@@ -156,15 +156,15 @@ export default function ImpactStudio() {
               <div 
                 key={reel.id} 
                 onClick={() => setSelectedItem(reel)}
-                className={\`bg-white p-3 rounded-xl border transition-all cursor-pointer hover:border-slate-300 hover:shadow-md \${selectedItem?.id === reel.id ? "border-blue-500 shadow-sm ring-1 ring-blue-500" : "border-slate-200 shadow-sm"}\`}
+                className={`bg-white p-3 rounded-xl border transition-all cursor-pointer hover:border-slate-300 hover:shadow-md ${selectedItem?.id === reel.id ? "border-blue-500 shadow-sm ring-1 ring-blue-500" : "border-slate-200 shadow-sm"}`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={\`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center text-white bg-gradient-to-tr \${reel.type === "instagram" ? "from-amber-500 via-rose-500 to-fuchsia-600" : "from-red-600 to-red-500"}\`}>
+                  <div className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center text-white bg-gradient-to-tr ${reel.type === "instagram" ? "from-amber-500 via-rose-500 to-fuchsia-600" : "from-red-600 to-red-500"}`}>
                     {reel.type === "instagram" ? <Instagram className="h-5 w-5" /> : <Youtube className="h-5 w-5" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={\`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded text-white \${reel.type === "instagram" ? "bg-rose-500" : "bg-red-600"}\`}>
+                      <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded text-white ${reel.type === "instagram" ? "bg-rose-500" : "bg-red-600"}`}>
                         {reel.type}
                       </span>
                       <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
@@ -184,7 +184,7 @@ export default function ImpactStudio() {
                           <Trash2 className="h-3 w-3" /> Delete
                         </button>
                       </div>
-                      <span className={\`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full \${reel.active ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-slate-50 text-slate-500 border border-slate-200"}\`}>
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${reel.active ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-slate-50 text-slate-500 border border-slate-200"}`}>
                         <CheckCircle className="h-3 w-3" /> {reel.active ? "Active" : "Hidden"}
                       </span>
                     </div>

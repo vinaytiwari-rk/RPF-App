@@ -2,19 +2,19 @@
 async function seedSystemConfigs(client: any) {
   const defaults = {
     founder_name: "Rohit Pandit",
-    founder_image_url: "/assets/founder.png",
-    foundation_logo: "/assets/logo.png",
+    founder_image_url: "",
+    foundation_logo: "",
     splash_bg_color: "#ffffff",
     splash_text: "Service. Commitment. Resolve.",
-    splash_logo: "/assets/logo.png",
+    splash_logo: "",
     marquee_type: "rss",
     marquee_rss_url: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
     thought_type: "rss",
     thought_rss_url: "https://mpinfo.org/RSSFeed/RSSFeed_News.xml",
     drik_panchang_active: "true",
     weather_active: "true",
-    cert_volunteer_bg: "/assets/certificate_volunteer.png",
-    cert_donor_bg: "/assets/certificate_donor.png",
+    cert_volunteer_bg: "",
+    cert_donor_bg: "",
     module_healthcare: "true",
     module_employment: "true",
     module_utilities: "true",
@@ -37,6 +37,10 @@ async function seedSystemConfigs(client: any) {
         [key, String(value)]
       );
     }
+    
+    // FIX FOR FAKE URLs:
+    await client.query("UPDATE system_configs SET config_value = '' WHERE config_value LIKE '/assets/%'");
+
     console.log("Seeded default system_configs successfully.");
   } catch(e) {
     console.error("Seed failed:", e);
