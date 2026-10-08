@@ -1,0 +1,52 @@
+import { pool } from "./src/db/dbPool";
+
+async function seed() {
+  const defaults = {
+    founder_name: "Rohit Pandit",
+    founder_image_url: "/assets/founder.png",
+    foundation_logo: "/assets/logo.png",
+    splash_bg_color: "#ffffff",
+    splash_text: "Service. Commitment. Resolve.",
+    splash_logo: "/assets/logo.png",
+    marquee_type: "rss",
+    marquee_rss_url: "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3&reg=48",
+    thought_type: "rss",
+    thought_rss_url: "https://mpinfo.org/RSSFeed/RSSFeed_News.xml",
+    drik_panchang_active: "true",
+    weather_active: "true",
+    cert_volunteer_bg: "/assets/certificate_volunteer.png", // Just a placeholder for default UI
+    cert_donor_bg: "/assets/certificate_donor.png",
+    module_healthcare: "true",
+    module_employment: "true",
+    module_utilities: "true",
+    module_epaper: "true",
+    sos_police: "112",
+    sos_ambulance: "102",
+    sos_women: "1091",
+    policy_privacy_url: "https://therpfoundation.org/privacy",
+    policy_terms_url: "https://therpfoundation.org/terms"
+  };
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const [key, value] of Object.entries(defaults)) {
+      await client.query(
+        `INSERT INTO system_configs (config_key, config_value) 
+         VALUES ($1, $2) 
+         ON CONFLICT (config_key) DO NOTHING`, // only insert if not exists (so it doesn't overwrite if user started saving)
+        [key, value]
+      );
+    }
+    await client.query('COMMIT');
+    console.log("Seeded system_configs with default values!");
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("Failed to seed configs", err);
+  } finally {
+    client.release();
+    process.exit(0);
+  }
+}
+
+seed();

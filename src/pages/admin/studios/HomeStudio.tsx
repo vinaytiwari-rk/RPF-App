@@ -58,6 +58,32 @@ export default function HomeStudio() {
     setConfigs(prev => ({ ...prev, [key]: value }));
   };
 
+  
+  const handleImageUpload = async (key: string, file: File | null) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    const toastId = toast.loading("Uploading image...");
+    try {
+      const token = localStorage.getItem("token") || "";
+      const res = await axios.post("/api/admin/upload", formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data" 
+        }
+      });
+      if (res.data.success) {
+        handleChange(key, res.data.url);
+        toast.success("Image uploaded successfully!", { id: toastId });
+      } else {
+        toast.error(res.data.message || "Upload failed", { id: toastId });
+      }
+    } catch (e) {
+      toast.error("Upload failed", { id: toastId });
+    }
+  };
+
   return (
     <div className="space-y-6 pb-12">
       {/* Studio Header */}
@@ -130,26 +156,31 @@ export default function HomeStudio() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Founder Photo URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://..."
-                    value={configs.founder_image_url || ""}
-                    onChange={(e) => handleChange("founder_image_url", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-[#E67817] focus:ring-1 focus:ring-[#E67817] outline-none"
-                  />
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload("founder_image_url", e.target.files?.[0] || null)}
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
+                    />
+                  </div>
                   {configs.founder_image_url && (
                     <img src={configs.founder_image_url} alt="Preview" className="mt-2 h-20 w-20 object-cover rounded-full border border-slate-200" />
                   )}
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Foundation Logo URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://..."
-                    value={configs.foundation_logo || ""}
-                    onChange={(e) => handleChange("foundation_logo", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-[#E67817] focus:ring-1 focus:ring-[#E67817] outline-none"
-                  />
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload("foundation_logo", e.target.files?.[0] || null)}
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
+                    />
+                  </div>
+                  {configs.foundation_logo && (
+                    <img src={configs.foundation_logo} alt="Preview" className="mt-2 h-16 object-contain border border-slate-200 rounded-lg p-2" />
+                  )}
                 </div>
               </div>
             )}
@@ -177,13 +208,17 @@ export default function HomeStudio() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Splash Logo URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://..."
-                    value={configs.splash_logo || ""}
-                    onChange={(e) => handleChange("splash_logo", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-[#E67817] focus:ring-1 focus:ring-[#E67817] outline-none"
-                  />
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload("splash_logo", e.target.files?.[0] || null)}
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
+                    />
+                  </div>
+                  {configs.splash_logo && (
+                    <img src={configs.splash_logo} alt="Preview" className="mt-2 h-16 object-contain border border-slate-200 rounded-lg p-2" />
+                  )}
                 </div>
               </div>
             )}

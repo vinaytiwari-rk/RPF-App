@@ -56,6 +56,32 @@ export default function ProfileStudio() {
     setConfigs(prev => ({ ...prev, [key]: value }));
   };
 
+  
+  const handleImageUpload = async (key: string, file: File | null) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    const toastId = toast.loading("Uploading image...");
+    try {
+      const token = localStorage.getItem("token") || "";
+      const res = await axios.post("/api/admin/upload", formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data" 
+        }
+      });
+      if (res.data.success) {
+        handleChange(key, res.data.url);
+        toast.success("Image uploaded successfully!", { id: toastId });
+      } else {
+        toast.error(res.data.message || "Upload failed", { id: toastId });
+      }
+    } catch (e) {
+      toast.error("Upload failed", { id: toastId });
+    }
+  };
+
   return (
     <div className="space-y-6 pb-12">
       <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -120,11 +146,10 @@ export default function ProfileStudio() {
                   <label className="block text-xs font-bold text-slate-700 mb-1">Volunteer Certificate Template URL</label>
                   <div className="flex gap-2">
                     <input
-                      type="text"
-                      placeholder="https://..."
-                      value={configs.cert_volunteer_bg || ""}
-                      onChange={(e) => handleChange("cert_volunteer_bg", e.target.value)}
-                      className="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 outline-none"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload("cert_volunteer_bg", e.target.files?.[0] || null)}
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
                     />
                   </div>
                   {configs.cert_volunteer_bg && (
@@ -136,11 +161,10 @@ export default function ProfileStudio() {
                   <label className="block text-xs font-bold text-slate-700 mb-1">Donor Certificate Template URL</label>
                   <div className="flex gap-2">
                     <input
-                      type="text"
-                      placeholder="https://..."
-                      value={configs.cert_donor_bg || ""}
-                      onChange={(e) => handleChange("cert_donor_bg", e.target.value)}
-                      className="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-emerald-500 outline-none"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload("cert_donor_bg", e.target.files?.[0] || null)}
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
                     />
                   </div>
                   {configs.cert_donor_bg && (
