@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
+import { SERVICE_GOV_LINKS } from "../../../data/serviceGovLinks";
 
 export interface SubFeatureLink {
   id: string;
@@ -173,16 +174,41 @@ export default function ExploreStudio() {
       const res = await axios.get("/api/cms");
       const cms = res.data?.cms || res.data?.data || {};
 
+      const websiteMap = cms.serviceWebsiteLinks || {};
+
+      const hydrateCardsWithLinks = (cards: ServiceCard[]) => {
+        return cards.map(card => {
+          if (Array.isArray(card.subLinks) && card.subLinks.length > 0) return card;
+          // Hydrate from serviceWebsiteLinks or default catalog
+          const existingLinks = (Array.isArray(websiteMap[card.id]) && websiteMap[card.id].length > 0)
+            ? websiteMap[card.id]
+            : (SERVICE_GOV_LINKS[card.id] || []);
+          if (Array.isArray(existingLinks) && existingLinks.length > 0) {
+            return {
+              ...card,
+              subLinks: existingLinks.map((l: any, idx: number) => ({
+                id: `link-${card.id}-${idx}`,
+                title: l.title || l.titleHi || "Link",
+                url: l.url || "#",
+                isExternal: l.isGov !== false,
+                active: true
+              }))
+            };
+          }
+          return card;
+        });
+      };
+
       if (Array.isArray(cms.featuredServices) && cms.featuredServices.length > 0) {
-        setFeaturedServices(cms.featuredServices);
+        setFeaturedServices(hydrateCardsWithLinks(cms.featuredServices));
       } else {
-        setFeaturedServices(DEFAULT_FEATURED_SERVICES);
+        setFeaturedServices(hydrateCardsWithLinks(DEFAULT_FEATURED_SERVICES));
       }
 
       if (Array.isArray(cms.allServices) && cms.allServices.length > 0) {
-        setAllServices(cms.allServices);
+        setAllServices(hydrateCardsWithLinks(cms.allServices));
       } else {
-        setAllServices(DEFAULT_ALL_SERVICES);
+        setAllServices(hydrateCardsWithLinks(DEFAULT_ALL_SERVICES));
       }
     } catch {
       toast.error("Failed to load CMS data, loading default catalog");
@@ -201,19 +227,38 @@ export default function ExploreStudio() {
     setSaving(true);
     const toastId = toast.loading("Saving and publishing Explore services...");
     try {
+      // Construct serviceWebsiteLinks map so both legacy and modern readers receive identical child links
+      const serviceWebsiteLinks: Record<string, any[]> = {};
+      [...featuredServices, ...allServices].forEach(s => {
+        if (s && s.id && Array.isArray(s.subLinks) && s.subLinks.length > 0) {
+          serviceWebsiteLinks[s.id] = s.subLinks
+            .filter((l: any) => l && l.active !== false)
+            .map((l: any) => ({
+              title: l.title,
+              titleHi: l.title,
+              url: l.url,
+              desc: l.url,
+              descHi: l.url,
+              isGov: l.isExternal !== false
+            }));
+        }
+      });
+
       const patch = {
         featuredServices,
-        allServices
+        allServices,
+        serviceWebsiteLinks
       };
 
       const res = await axios.post(
         "/api/admin/control/cms/publish",
-        { patch, label: "Explore Studio: Updated Featured and All Services" },
+        { patch, label: "Explore Studio: Updated Featured and All Services with Child Links" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data?.success === false) throw new Error(res.data?.error || "Publish failed");
-      toast.success("Explore catalog updated across app!", { id: toastId });
+      window.dispatchEvent(new CustomEvent("samahit-admin-updated"));
+      toast.success("Explore catalog and child links published live!", { id: toastId });
     } catch (e: any) {
       toast.error(e?.response?.data?.error || "Save failed", { id: toastId });
     } finally {

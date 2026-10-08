@@ -135,11 +135,36 @@ export default function ServiceDetails() {
   const actionUrl = contentData?.action_url || "";
   const resources = Array.isArray(contentData?.resources) ? contentData.resources : [];
 
-  // Fetch all related official government links for this service page
+  // Fetch all related official government links and Admin Explore Studio child links for this service page
   const govLinks: GovLink[] = useMemo(() => {
     if (!id) return [];
+
+    // 1. Check if Admin has configured sub-links in ExploreStudio for this service card
+    const allServices = (cmsConfig as any)?.allServices;
+    const featuredServices = (cmsConfig as any)?.featuredServices;
+    const matchedService =
+      (Array.isArray(allServices) ? allServices.find((s: any) => s.id === id || s.route === `/services/${id}` || s.route === `/${id}`) : null) ||
+      (Array.isArray(featuredServices) ? featuredServices.find((s: any) => s.id === id || s.route === `/services/${id}` || s.route === `/${id}`) : null);
+
+    if (matchedService && Array.isArray(matchedService.subLinks) && matchedService.subLinks.length > 0) {
+      const activeAdminLinks = matchedService.subLinks
+        .filter((l: any) => l && l.active !== false)
+        .map((l: any) => ({
+          title: l.title || "Portal Link",
+          titleHi: l.title || "पोर्टल लिंक",
+          desc: l.url || "Action Link",
+          descHi: l.url || "एक्शन लिंक",
+          url: l.url,
+          isGov: l.isExternal !== false
+        }));
+      if (activeAdminLinks.length > 0) return activeAdminLinks;
+    }
+
+    // 2. Check serviceWebsiteLinks override
     const overrides = (cmsConfig as any)?.serviceWebsiteLinks;
     if (overrides && Object.prototype.hasOwnProperty.call(overrides, id) && Array.isArray(overrides[id])) return overrides[id];
+    
+    // 3. Fallback to standard verified government database links
     return getGovLinksForService(id);
   }, [id, cmsConfig]);
 
