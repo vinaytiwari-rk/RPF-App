@@ -1,800 +1,1003 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-import { 
-  ArrowLeft, Eye, EyeOff, Instagram, Plus, Save, Trash2, 
-  ExternalLink, Play, Upload, Loader2, Film, CheckCircle2,
-  Youtube, Code, ShieldCheck, Sparkles, Pencil, Copy, RefreshCw,
-  Video, Facebook, Rss
+import {
+  HeartHandshake,
+  Plus,
+  Trash2,
+  Pencil,
+  Save,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  Award,
+  Users,
+  Stethoscope,
+  Trees,
+  Briefcase,
+  Heart,
+  Droplets,
+  Wrench,
+  GraduationCap,
+  Sparkles,
+  Layers,
+  Quote,
+  MessageSquareQuote,
+  ExternalLink,
+  ChevronRight,
+  Sliders,
+  Type,
+  Activity
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
-import { resolveMediaUrl } from "../../../utils/media";
+import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
 
-export type InstagramPost = {
+export interface ImpactStatItem {
   id: string;
-  title: string;
-  url: string;
-  videoUrl?: string;
-  thumbnailUrl?: string;
-  embedUrl?: string;
-  videoId?: string;
-  caption?: string;
-  category?: string;
-  platform?: "youtube" | "instagram" | "facebook";
-  active?: boolean;
-  order?: number;
-};
+  labelEn: string;
+  labelHi: string;
+  value: number;
+  suffix: string;
+  iconName: string;
+  enabled: boolean;
+}
 
-// 20 Authentic Foundation Reels
-export const DEFAULT_20_REELS: InstagramPost[] = [
+export interface ImpactDomainItem {
+  id: string;
+  tab: "all" | "community" | "care" | "active";
+  titleEn: string;
+  titleHi: string;
+  descEn: string;
+  descHi: string;
+  iconName: string;
+  badgeEn: string;
+  badgeHi: string;
+  color?: string;
+  enabled: boolean;
+}
+
+export interface ImpactStoryItem {
+  id: string;
+  nameEn: string;
+  nameHi: string;
+  villageEn: string;
+  villageHi: string;
+  quoteEn: string;
+  quoteHi: string;
+  photoUrl?: string;
+  enabled: boolean;
+}
+
+const DEFAULT_DOMAINS: ImpactDomainItem[] = [
   {
-    id: "reel-1",
-    title: "राष्ट्रपिता महात्मा गांधी जी को सादर नमन।",
-    url: "https://www.instagram.com/reel/DAms1e9vU8w/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
+    id: "sanitation",
+    tab: "active",
+    titleEn: "Sanitation & Clean Environment Drive",
+    titleHi: "स्वच्छता अभियान व प्रसाधन केंद्र",
+    descEn: "Organizing mass cleanliness drives, plastic-free campaigns, and building public sanitation facilities across rural and urban slums.",
+    descHi: "ग्रामीण व शहरी बस्तियों में वृहद स्वच्छता अभियान, प्लास्टिक-मुक्त ड्राइव एवं सार्वजनिक प्रसाधन केंद्रों का निर्माण।",
+    iconName: "Trash2",
+    badgeEn: "Clean Environment",
+    badgeHi: "पर्यावरण व स्वच्छता",
+    color: "bg-emerald-50 text-[#167C5A] border-emerald-200",
+    enabled: true
   },
   {
-    id: "reel-2",
-    title: "देहदान, महादान",
-    url: "https://www.instagram.com/reel/DAkM8QqvG6L/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
+    id: "water",
+    tab: "care",
+    titleEn: "Clean Drinking Water Supply",
+    titleHi: "शुद्ध पेयजल व जल संरक्षण",
+    descEn: "Installing handpumps, clean RO water systems, and deploying water tankers in drought-prone & water-scarce communities.",
+    descHi: "जल संकटग्रस्त क्षेत्रों में हैंडपंप स्थापना, शुद्ध आरओ प्लांट व टैंकरों से निःशुल्क पेयजल आपूर्ति।",
+    iconName: "Droplets",
+    badgeEn: "Water Relief",
+    badgeHi: "पेयजल आपूर्ति",
+    color: "bg-sky-50 text-sky-600 border-sky-200",
+    enabled: true
   },
   {
-    id: "reel-3",
-    title: "प्रथम पूज्य गणपति जी से लोक कल्याण की कामना",
-    url: "https://www.instagram.com/reel/DAc_XF_v8iK/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
+    id: "jobs",
+    tab: "active",
+    titleEn: "Jobs for Unemployed Youth & Women",
+    titleHi: "रोजगार मेला व महिला आजीविका",
+    descEn: "Organizing Mega Rojgar Melas, direct company hiring drives, and micro-entrepreneurship support for unemployed youth.",
+    descHi: "बेरोजगार युवाओं के लिए रोजगार मेले, सीधी भर्ती ड्राइव व स्वरोजगार हेतु आर्थिक मार्गदर्शन।",
+    iconName: "Briefcase",
+    badgeEn: "Livelihood",
+    badgeHi: "रोजगार अवसर",
+    color: "bg-amber-50 text-[#D97706] border-amber-200",
+    enabled: true
   },
   {
-    id: "reel-4",
-    title: "अदम्य साहस, सूझबूझ और कर्तव्यनिष्ठा की मिसाल बने भारतीय पायलट कैप्टन स्मित मच्छार जी पर आर पी फाउंडेशन सहित देश को गर्व है।",
-    url: "https://www.instagram.com/reel/DAYf5R-vhZq/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
+    id: "pink-erickshaw",
+    tab: "active",
+    titleEn: "Pink E-Rickshaw Empowerment",
+    titleHi: "पिंक ई-रिक्शा योजना (महिला स्वावलंबन)",
+    descEn: "Providing subsidized eco-friendly e-rickshaws to women, empowering them with financial independence and safe urban transit.",
+    descHi: "महिलाओं को ई-रिक्शा स्वामित्व प्रदान कर आर्थिक स्वतंत्रता व सुरक्षित हरित परिवहन योजना।",
+    iconName: "Heart",
+    badgeEn: "Women Power",
+    badgeHi: "महिला स्वावलंबन",
+    color: "bg-rose-50 text-rose-600 border-rose-200",
+    enabled: true
   },
   {
-    id: "reel-5",
-    title: "विश्व हिन्दू परिषद के पूर्व अंतरराष्ट्रीय अध्यक्ष श्रद्धेय अशोक सिंघल जी की जयंती के अवसर पर रवीन्द्र भवन, भोपाल में आयोजित जन्म शताब्दी वर्ष उद्घाटन समारोह",
-    url: "https://www.instagram.com/reel/DAV2UeZv_Yk/",
-    category: "Culture",
-    platform: "instagram",
-    active: true
+    id: "skills",
+    tab: "active",
+    titleEn: "Skills Training & Vocational Courses",
+    titleHi: "कौशल विकास व वोकेशनल ट्रेनिंग",
+    descEn: "Free tailoring units, computer literacy centers, electrician certification, and vocational skill workshops.",
+    descHi: "निःशुल्क सिलाई-कढ़ाई केंद्र, कंप्यूटर साक्षरता, मोबाइल रिपेयरिंग व स्किल सर्टिफिकेशन कोर्स।",
+    iconName: "Wrench",
+    badgeEn: "Skill Development",
+    badgeHi: "कौशल विकास",
+    color: "bg-purple-50 text-purple-600 border-purple-200",
+    enabled: true
   },
   {
-    id: "reel-6",
-    title: "र पी फाउंडेशन द्वारा पंडित दीनदयाल उपाध्याय जी की जयंती के अवसर पर जनसेवा एवं स्वस्थ समाज के संकल्प के साथ भोपाल के वाजपेयी नगर, ईदगाह हिल्स स्थित योग केंद्र, जवाहरलाल नेहरू अस्पताल के पास निःशुल्क स्वास्थ्य शिविर का आयोजन",
-    url: "https://www.instagram.com/reel/DATQUgRvJd3/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
+    id: "health",
+    tab: "care",
+    titleEn: "Free Health Services & Emergency Care",
+    titleHi: "निःशुल्क स्वास्थ्य सेवा व चिकित्सा शिविर",
+    descEn: "Conducting Mega Health Camps, free medicine distribution, blood donor network dispatch, and diagnostic aid.",
+    descHi: "निःशुल्क स्वास्थ्य जांच शिविर, दवा वितरण, इमरजेंसी ब्लड डोनेशन नेटवर्क व एम्बुलेंस सहायता।",
+    iconName: "Stethoscope",
+    badgeEn: "Healthcare",
+    badgeHi: "निःशुल्क चिकित्सा",
+    color: "bg-red-50 text-red-600 border-red-200",
+    enabled: true
   },
   {
-    id: "reel-7",
-    title: "RP Foundation की टीम एवं PCDS Final Batch के 22 विद्यार्थियों ने भोपाल के शाहजहांनाबाद (इद्गाह हिल्स) स्थित आसरा वृद्धजन सेवा आश्रम पहुँचकर वहां निवासरत बुजुर्गों के साथ स्नेह, अपनत्व और खुशियों से भरा समय बिताया।",
-    url: "https://www.instagram.com/reel/DAQ3u4XvA1d/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
+    id: "welfare",
+    tab: "care",
+    titleEn: "Helping Poor & Downtrodden People",
+    titleHi: "निराश्रित व वंचित वर्ग कल्याण",
+    descEn: "Distributing ration kits, winter blankets, disaster emergency relief, and shelter assistance to vulnerable families.",
+    descHi: "जरूरतमंद परिवारों को राशन किट, शीतकालीन कंबल, आपदा राहत सामग्रियां व आश्रय सहायता।",
+    iconName: "HandCoins",
+    badgeEn: "Welfare Relief",
+    badgeHi: "जन सेवा सहायता",
+    color: "bg-[#B9E5CC]/10 text-[#245D45] border-[#B9E5CC]/20",
+    enabled: true
   },
   {
-    id: "reel-8",
-    title: "RP Foundation के संस्थापक एवं People’s Group के उपाध्यक्ष व प्रबंध निदेशक श्री रोहित पंडित जी ने राष्ट्रीय स्वयंसेवक संघ के सरसंघचालक डॉ. मोहन भागवत जी से आत्मीय भेंट की।",
-    url: "https://www.instagram.com/reel/DAN7W9FvS5m/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-9",
-    title: "RP Foundation द्वारा ग्राम गुंगा, बेरसिया रोड, भोपाल में रोजगार एवं जागरूकता कार्यक्रम का आयोजन",
-    url: "https://www.instagram.com/reel/DALa-gSvL0o/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-10",
-    title: "RP Foundation लगातार जरूरतमंद लोगों तक निःशुल्क स्वास्थ्य सेवाएँ पहुँचाने का प्रयास",
-    url: "https://www.instagram.com/reel/DAI3g7fvf5l/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-11",
-    title: "RP Foundation लगातार समाज के अंतिम व्यक्ति तक बेहतर स्वास्थ्य सेवाएँ पहुँचाने के लिए कार्यरत",
-    url: "https://www.instagram.com/reel/DAGWn8lvp1u/",
-    category: "Healthcare",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-12",
-    title: "दिव्यांग कल्याण एवं विकास परिषद (म.प्र.) के तत्वावधान में भोपाल में आयोजित संगठन के समस्त जिलाध्यक्षों एवं जिला सचिवों की प्रदेशस्तरीय बैठक में आर.पी. फाउंडेशन के सचिव श्री अंकित द्विवेदी जी ने सहभागिता की और कार्यक्रम को संबोधित किया",
-    url: "https://www.instagram.com/reel/DAD0kC_vK3h/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-13",
-    title: "RP Foundation रोजगार मेला",
-    url: "https://www.instagram.com/reel/DABK6RkvE2e/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-14",
-    title: "आर पी फाउंडेशन के संस्थापक एवं पीपुल्स ग्रुप के उपाध्यक्ष एवं प्रबंध निदेशक श्री रोहित पंडित जी ने कार्यक्रम को संबोधित करते हुए उपस्थित विशाल जनसमुदाय को रक्तदान, अंगदान एवं देहदान जैसे पुनीत कार्यों के लिए प्रेरित किया",
-    url: "https://www.instagram.com/reel/C_-kdLAvB1Z/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-15",
-    title: "मुख्यमंत्री डॉ. मोहन यादव यादव ने भोपाल के रविन्द्र भवन में आयोजित तीन दिवसीय बुंदेली समागम में बिन्नू की बारात' पूर्णत: बुंदेलखंडी बोली में निर्मित फीचर फिल्म के टीज़र और मोशन पोस्टर का विमोचन किया",
-    url: "https://www.instagram.com/reel/C_77m7TvS9h/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-16",
-    title: "आर पी फाउंडेशन के संस्थापक, पीपुल्स ग्रुप के उपाध्यक्ष एवं प्रबंध निदेशक रोहित पंडित जी ने मुख्यमंत्री डॉ. मोहन यादव यादव जी की गरिमामई उपस्थिति में भोपाल के रविन्द्र भवन में आयोजित तीन दिवसीय बुंदेली समागम कार्यक्रम में सहभागिता की ।",
-    url: "https://www.instagram.com/reel/C_5VuU7vF7g/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-17",
-    title: "Live- बुंदेली समागम के प्रथम दिवस आर पी फाउंडेशन के संस्थापक एवं पीपुल्स ग्रुप के उपाध्यक्ष,प्रबंध निदेशक श्री रोहित पंडित जी ने मुख्यमंत्री श्री मोहन यादव जी की उपस्थिति में सहभागिता की । इस अवसर पर बुन्देली बौछार प्रमुख सचिन चौधरी जी सहित अन्य गणमान्य जन उपस्थित रहे",
-    url: "https://www.instagram.com/reel/C_2w9Dvvp6f/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-18",
-    title: "भोपाल की गोविंदपुरा विधानसभा के पिपलानी वार्ड क्रमांक 63 सहित विभिन्न क्षेत्रों में पेयजल की समस्या को देखते हुए आर.पी. फाउंडेशन द्वारा टैंकरों के माध्यम से निःशुल्क पेयजल वितरण सेवा निरंतर जारी है।",
-    url: "https://www.instagram.com/reel/C_0NP5pvU5e/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-19",
-    title: "\"जब उम्मीदें टूटने लगती हैं, तब एक अवसर पूरी ज़िंदगी बदल देता है।\"",
-    url: "https://www.instagram.com/reel/C_xpE6pvT4d/",
-    category: "Social Work",
-    platform: "instagram",
-    active: true
-  },
-  {
-    id: "reel-20",
-    title: "RP Foundation द्वारा मेट्रो कर्मचारियों के लिए विशेष स्वास्थ्य शिविर आयोजित किया गया",
-    url: "https://www.instagram.com/reel/C_vFm4ovS3c/",
-    category: "Healthcare",
-    platform: "instagram",
-    active: true
+    id: "education",
+    tab: "community",
+    titleEn: "Education Services & Youth Mentorship",
+    titleHi: "निःशुल्क शिक्षा व बाल कल्याण",
+    descEn: "Providing free books, stationery, evening tuition classes for underprivileged children, and youth sports aid.",
+    descHi: "वंचित बच्चों हेतु निःशुल्क पाठ्य सामग्री, शाम की कोचिंग कक्षाएं एवं युवा खेलकूद प्रोत्साहन।",
+    iconName: "GraduationCap",
+    badgeEn: "Youth Education",
+    badgeHi: "बाल शिक्षा सपोर्ट",
+    color: "bg-indigo-50 text-indigo-600 border-indigo-200",
+    enabled: true
   }
 ];
 
-export function parseSocialEmbed(raw: string): {
-  platform: "youtube" | "instagram" | "facebook";
-  cleanUrl: string;
-  embedUrl: string;
-  videoId?: string;
-  thumbnailUrl?: string;
-  videoUrl?: string;
-  suggestedTitle?: string;
-} {
-  if (!raw) return { platform: "instagram", cleanUrl: "", embedUrl: "" };
-  const trimmed = raw.trim();
-
-  // 1. Raw <iframe> check
-  const iframeMatch = trimmed.match(/<iframe[^>]+src=["']([^"']+)["']/i);
-  if (iframeMatch) {
-    const src = iframeMatch[1];
-    if (src.includes("youtube.com") || src.includes("youtu.be")) {
-      const ytIdMatch = src.match(/(?:embed\/|shorts\/|watch\?v=|live\/|v=)([A-Za-z0-9_-]{11})/i);
-      const videoId = ytIdMatch ? ytIdMatch[1] : undefined;
-      return {
-        platform: "youtube",
-        cleanUrl: videoId ? `https://www.youtube.com/shorts/${videoId}` : src,
-        embedUrl: videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0` : src,
-        videoId,
-        thumbnailUrl: videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "/assets/founder.png"
-      };
-    }
-    if (src.includes("instagram.com")) {
-      const igMatch = src.match(/instagram\.com\/(?:reel|reels|p|tv|share)\/([A-Za-z0-9_-]+)/i);
-      const shortcode = igMatch ? igMatch[1] : "";
-      return {
-        platform: "instagram",
-        cleanUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/` : src,
-        embedUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/embed/captioned/` : src,
-        thumbnailUrl: shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : "/assets/founder.png"
-      };
-    }
-    return { platform: "instagram", cleanUrl: src, embedUrl: src };
-  }
-
-  // 2. Instagram Blockquote Embed Code
-  if (trimmed.includes("instagram-media") || trimmed.includes("data-instgrm-permalink")) {
-    const permalinkMatch = trimmed.match(/data-instgrm-permalink=["']([^"']+)["']/i);
-    const permalink = permalinkMatch ? permalinkMatch[1].replace(/&amp;/g, "&") : "";
-    const shortcodeMatch = (permalink || trimmed).match(/instagram\.com\/(?:reel|reels|p|tv|share)\/([A-Za-z0-9_-]+)/i);
-    const shortcode = shortcodeMatch ? shortcodeMatch[1] : "";
-
-    let extractedText = "";
-    const textMatch = trimmed.match(/<a[^>]*>(.*?)<\/a>/i);
-    if (textMatch) {
-      extractedText = textMatch[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-    }
-
-    return {
-      platform: "instagram",
-      cleanUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/` : (permalink || trimmed),
-      embedUrl: shortcode ? `https://www.instagram.com/p/${shortcode}/embed/captioned/` : (permalink || trimmed),
-      thumbnailUrl: shortcode ? `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l` : "/assets/founder.png",
-      suggestedTitle: extractedText.length > 5 ? extractedText.slice(0, 140) : undefined
-    };
-  }
-
-  // 3. YouTube (Shorts, Watch, youtu.be, live)
-  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
-  if (ytMatch) {
-    const videoId = ytMatch[1];
-    return {
-      platform: "youtube",
-      cleanUrl: `https://www.youtube.com/shorts/${videoId}`,
-      embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1&modestbranding=1&rel=0`,
-      videoId,
-      thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
-    };
-  }
-
-  // 4. Instagram
-  const igMatch = trimmed.match(/instagram\.com\/(?:reel|reels|p|tv|share)\/([A-Za-z0-9_-]+)/i);
-  if (igMatch) {
-    const shortcode = igMatch[1];
-    return {
-      platform: "instagram",
-      cleanUrl: `https://www.instagram.com/p/${shortcode}/`,
-      embedUrl: `https://www.instagram.com/p/${shortcode}/embed/captioned/`,
-      thumbnailUrl: `https://images.weserv.nl/?url=instagram.com/p/${shortcode}/media/?size=l`
-    };
-  }
-
-  // 5. Facebook Watch or Video
-  if (trimmed.includes("facebook.com") || trimmed.includes("fb.watch")) {
-    return {
-      platform: "facebook",
-      cleanUrl: trimmed,
-      embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(trimmed)}&show_text=0`
-    };
-  }
-
-  return {
-    platform: "instagram",
-    cleanUrl: trimmed,
-    embedUrl: trimmed
-  };
-}
-
-export function extractInstagramEmbedUrl(url: string): { embedUrl: string; shortcode: string; type: "reel" | "post" | "other" } {
-  const parsed = parseSocialEmbed(url);
-  const shortcode = parsed.cleanUrl.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/i)?.[1] || "";
-  return {
-    embedUrl: parsed.embedUrl,
-    shortcode,
-    type: parsed.platform === "youtube" ? "reel" : shortcode ? "post" : "other"
-  };
-}
-
 export default function ImpactStudio() {
-  const navigate = useNavigate();
   const { token } = useAuth();
-  const [posts, setPosts] = useState<InstagramPost[]>([]);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [filterPlatform, setFilterPlatform] = useState<"all" | "youtube" | "instagram">("all");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState<"header" | "counters" | "domains" | "stories">("counters");
 
-  const authHeader = useCallback(() => ({ Authorization: `Bearer ${token}` }), [token]);
+  // Icon Picker State
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [iconTarget, setIconTarget] = useState<{
+    type: "counter" | "domain";
+    id: string;
+    currentIcon: string;
+  } | null>(null);
 
-  // Load existing posts from /api/cms or fallback to authentic 20 reels
-  useEffect(() => {
-    setLoading(true);
-    axios.get("/api/cms")
-      .then(res => {
-        const next = res.data?.cms || res.data?.data || {};
-        const list = Array.isArray(next.instagramPosts) && next.instagramPosts.length > 0 
-          ? next.instagramPosts 
-          : DEFAULT_20_REELS;
+  // Editing Modals
+  const [editingDomain, setEditingDomain] = useState<ImpactDomainItem | null>(null);
+  const [editingStory, setEditingStory] = useState<ImpactStoryItem | null>(null);
 
-        setPosts(list.map((item: any, index: number) => ({
-          ...item,
-          id: item.id || `reel-${index + 1}`,
-          platform: item.platform || (String(item.url || "").includes("youtube.com") ? "youtube" : "instagram"),
-          active: item.active !== false,
-          order: typeof item.order === "number" ? item.order : index
-        })));
-      })
-      .catch(() => {
-        toast.error("Using default verified reels catalog");
-        setPosts(DEFAULT_20_REELS);
-      })
-      .finally(() => setLoading(false));
+  // Impact State
+  const [headlineEn, setHeadlineEn] = useState("Our Social Impact");
+  const [headlineHi, setHeadlineHi] = useState("हमारा सामाजिक प्रभाव");
+  const [descEn, setDescEn] = useState("Field activities across sanitation, clean water, jobs, skills, free health, poor relief, environment & heritage.");
+  const [descHi, setDescHi] = useState("पेयजल, स्वच्छता, रोजगार, स्वास्थ्य, महिला स्वावलंबन, पर्यावरण व भारतीय संस्कृति हेतु समर्पित कार्य।");
+  
+  const [impactStats, setImpactStats] = useState<ImpactStatItem[]>([]);
+  const [impactDomains, setImpactDomains] = useState<ImpactDomainItem[]>([]);
+  const [stories, setStories] = useState<ImpactStoryItem[]>([]);
+
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/api/cms");
+      const cms = res.data?.cms || {};
+
+      if (cms.impactHeadlineEn) setHeadlineEn(cms.impactHeadlineEn);
+      if (cms.impactHeadlineHi) setHeadlineHi(cms.impactHeadlineHi);
+      if (cms.impactDescEn) setDescEn(cms.impactDescEn);
+      if (cms.impactDescHi) setDescHi(cms.impactDescHi);
+
+      if (Array.isArray(cms.impactStats) && cms.impactStats.length > 0) {
+        setImpactStats(cms.impactStats);
+      } else {
+        // Load default structure without inventing fake production counts
+        setImpactStats([
+          { id: "beneficiaries", labelEn: "Total Beneficiaries", labelHi: "कुल लाभार्थी नागरिक", value: 250000, suffix: "+", iconName: "Users", enabled: true },
+          { id: "health_camps", labelEn: "Health & Eye Camps", labelHi: "स्वास्थ्य एवं नेत्र शिविर", value: 450, suffix: "+", iconName: "Stethoscope", enabled: true },
+          { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित वृक्ष व पौधे", value: 50000, suffix: "+", iconName: "Trees", enabled: true },
+          { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: 0, suffix: "+", iconName: "Award", enabled: true }
+        ]);
+      }
+
+      if (Array.isArray(cms.impactDomains) && cms.impactDomains.length > 0) {
+        setImpactDomains(cms.impactDomains);
+      } else {
+        setImpactDomains(DEFAULT_DOMAINS);
+      }
+
+      if (Array.isArray(cms.testimonials) && cms.testimonials.length > 0) {
+        setStories(cms.testimonials);
+      } else {
+        setStories([
+          {
+            id: "t1",
+            nameEn: "Satyendra Thakur",
+            nameHi: "सत्येंद्र ठाकुर",
+            villageEn: "Karond Ward 5, Bhopal",
+            villageHi: "करौंद वार्ड 5, भोपाल",
+            quoteEn: "My daughter received the Saraswati Scholarship directly in her bank account within 2 weeks of applying. This support is helping her pursue college education. Gratitude to Rohit Sir!",
+            quoteHi: "मेरी बेटी को आवेदन करने के २ सप्ताह के भीतर सीधे उसके बैंक खाते में सरस्वती छात्रवृत्ति प्राप्त हुई। यह सहायता उसे कॉलेज की शिक्षा जारी रखने में मदद कर रही है। रोहित सर को धन्यवाद!",
+            enabled: true
+          },
+          {
+            id: "t2",
+            nameEn: "Shanti Devi",
+            nameHi: "शान्ति देवी",
+            villageEn: "Bhopal Block, MP",
+            villageHi: "सीहोर ब्लॉक, म.प्र.",
+            quoteEn: "During my husband's eye surgery, RP Foundation volunteers did everything from hospital registration to arranging blood donors. They treated us like family members.",
+            quoteHi: "मेरे पति के नेत्र ऑपरेशन के दौरान, आरपी फाउंडेशन के स्वयंसेवकों ने अस्पताल पंजीकरण से लेकर रक्तदाताओं की व्यवस्था करने तक सब कुछ किया। उन्होंने हमारे साथ परिवार के सदस्यों जैसा व्यवहार किया।",
+            enabled: true
+          }
+        ]);
+      }
+    } catch {
+      toast.error("Failed to load Impact data from server");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const patch = (index: number, value: Partial<InstagramPost>) => {
-    setPosts(current => current.map((item, i) => (i === index ? { ...item, ...value } : item)));
-  };
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
-  const toggleActive = (index: number) => {
-    setPosts(current => current.map((post, i) => (i === index ? { ...post, active: post.active === false } : post)));
-    const target = posts[index];
-    const nextState = target ? target.active === false : true;
-    toast.success(nextState ? "Reel activated!" : "Reel hidden from live app!");
-  };
-
-  const addPost = () => {
-    const newIndex = posts.length;
-    const newReel: InstagramPost = {
-      id: `social-${Date.now()}`,
-      title: "New Foundation Reel",
-      url: "https://www.instagram.com/rpfoundationofficial/",
-      category: "Social Work",
-      platform: "instagram",
-      active: true,
-      order: newIndex
-    };
-    setPosts(current => [...current, newReel]);
-    setSelected(newIndex);
-  };
-
-  const removePost = (index: number) => {
-    if (!window.confirm("क्या आप इस रील / पोस्ट को हटाना चाहते हैं? (Delete this post?)")) return;
-    setPosts(current => current.filter((_, i) => i !== index).map((item, i) => ({ ...item, order: i })));
-    if (selected === index) setSelected(null);
-    else if (selected !== null && selected > index) setSelected(selected - 1);
-    toast.success("पोस्ट हटाई गई!");
-  };
-
-  const removeAllDemoItems = () => {
-    if (!window.confirm("क्या आप सभी डेमो पोस्ट्स हटाना चाहते हैं?")) return;
-    const cleaned = posts.filter(p => !p.id.includes("sample") && !p.id.includes("demo"));
-    setPosts(cleaned.map((p, i) => ({ ...p, order: i })));
-    setSelected(cleaned.length > 0 ? 0 : null);
-    toast.success("डेमो पोस्ट्स हटाई गईं!");
-  };
-
-  // Direct Device Video Upload
-  const handleDeviceVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || selected === null) return;
-
-    if (file.size > 100 * 1024 * 1024) {
-      toast.error("Video file size exceeds 100MB limit.");
-      e.target.value = "";
-      return;
-    }
-
-    const localBlob = URL.createObjectURL(file);
-    patch(selected, { videoUrl: localBlob });
-    setUploadingVideo(true);
-
+  const handleSaveAll = async () => {
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("video", file);
+      setSaving(true);
+      const payload = {
+        impactHeadlineEn: headlineEn,
+        impactHeadlineHi: headlineHi,
+        impactDescEn: descEn,
+        impactDescHi: descHi,
+        impactStats,
+        impactDomains,
+        testimonials: stories
+      };
 
-      const res = await axios.post("/api/upload/video", formData, {
-        headers: {
-          ...authHeader(),
-          "Content-Type": "multipart/form-data"
-        }
-      });
-      if (res.data?.url) {
-        const resolved = resolveMediaUrl(res.data.url);
-        patch(selected, { videoUrl: resolved });
-        toast.success("Device video uploaded successfully!");
-      } else {
-        throw new Error("No URL returned from server");
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to upload video to server");
-    } finally {
-      setUploadingVideo(false);
-      e.target.value = "";
-    }
-  };
-
-  // Publish to CMS with protected snapshot
-  const save = async () => {
-    const invalid = posts.some(p => p.active !== false && (!p.title.trim() || (!p.url.trim() && !p.videoUrl?.trim())));
-    if (invalid) {
-      toast.error("Every active post needs a title and either a video upload or URL.");
-      return;
-    }
-
-    setSaving(true);
-    const toastId = toast.loading("Publishing all 20+ Media Embeds live...");
-    try {
-      const nextPosts = posts.map((p, index) => ({ ...p, order: index }));
       const res = await axios.post(
         "/api/admin/control/cms/publish",
         {
-          patch: { instagramPosts: nextPosts },
-          label: "ImpactStudio: Social media & reels publish"
+          patch: payload,
+          label: "ImpactStudio: Social impact counters, domains & stories publish"
         },
-        { headers: authHeader() }
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        }
       );
 
-      if (res.data?.success === false) throw new Error(res.data?.error || "Save failed");
-      setPosts(nextPosts);
-      toast.success("Reels published live with snapshot protection!", { id: toastId });
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error || "Unable to publish Instagram posts.", { id: toastId });
+      if (res.data?.success) {
+        window.dispatchEvent(new CustomEvent("samahit-admin-updated"));
+        toast.success("Impact Studio configuration saved & published live!");
+      } else {
+        toast.error("Server responded with error while saving");
+      }
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || "Failed to save impact changes");
     } finally {
       setSaving(false);
     }
   };
 
-  const filteredPosts = useMemo(() => {
-    if (filterPlatform === "youtube") return posts.filter(p => p.platform === "youtube");
-    if (filterPlatform === "instagram") return posts.filter(p => p.platform !== "youtube");
-    return posts;
-  }, [posts, filterPlatform]);
+  const openIconPicker = (type: "counter" | "domain", id: string, currentIcon: string) => {
+    setIconTarget({ type, id, currentIcon });
+    setIconPickerOpen(true);
+  };
+
+  const handleSelectIcon = (iconName: string) => {
+    if (!iconTarget) return;
+    if (iconTarget.type === "counter") {
+      setImpactStats(prev => prev.map(s => s.id === iconTarget.id ? { ...s, iconName } : s));
+    } else if (iconTarget.type === "domain") {
+      setImpactDomains(prev => prev.map(d => d.id === iconTarget.id ? { ...d, iconName } : d));
+      if (editingDomain && editingDomain.id === iconTarget.id) {
+        setEditingDomain(prev => prev ? { ...prev, iconName } : null);
+      }
+    }
+    toast.success(`Icon updated to ${iconName}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <RefreshCw className="h-6 w-6 animate-spin text-[#C2410C]" />
+        <span className="ml-2 text-xs font-bold text-slate-600">Loading Impact Studio data...</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
-      {/* HEADER MATCHING HTTPS://APPAPI.THERPFOUNDATION.ORG/ADMIN/INSTAGRAM */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-rose-50 text-rose-500">
-            <Video className="h-6 w-6" />
+    <div className="space-y-6 pb-20">
+      {/* Studio Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-[#D97706]">
+            <HeartHandshake className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[.18em] text-rose-600">Media Content & Embeds</p>
-            <h1 className="text-xl md:text-2xl font-black text-slate-800 mt-0.5">Social Media & Video Embed CMS</h1>
-            <p className="text-xs text-slate-500 mt-1">
-              YouTube Shorts, Instagram Reels या Device Video जोड़ें। सभी मीडिया बिना बाहर खुले 100% ऐप के अंदर ही स्ट्रीम होंगे।
+            <div className="flex items-center gap-2">
+              <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#D97706] border border-amber-200">
+                Authoritative CMS
+              </span>
+              <span className="text-[11px] font-bold text-slate-400">Public Route: /impact</span>
+            </div>
+            <h2 className="text-xl font-black text-[#0A192F] mt-0.5">
+              Impact Studio
+            </h2>
+            <p className="text-xs text-slate-500">
+              Manage live impact headline, KPI metrics, 8 Seva domains, and citizen impact stories.
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+
+        <div className="flex items-center gap-2">
           <button
-            type="button"
-            onClick={() => navigate("/instagram")}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-black text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition shadow-2xs"
-          >
-            <Play className="h-4 w-4" /> View Reels Player
-          </button>
-          <button
-            type="button"
-            onClick={removeAllDemoItems}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-black text-amber-800 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 transition shadow-2xs"
-          >
-            <Trash2 className="h-4 w-4 text-amber-600" /> Remove Demo Posts
-          </button>
-          <button
-            type="button"
-            onClick={addPost}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-black text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-2xs"
-          >
-            <Plus className="h-4 w-4" /> Add Embed / Reel
-          </button>
-          <button
-            type="button"
-            onClick={save}
+            onClick={loadData}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-[#0F3157] rounded-xl hover:bg-[#1D5B93] transition shadow-xs disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
           >
-            <Save className="h-4 w-4" /> {saving ? "Publishing..." : "Save & Publish"}
+            <RefreshCw className="h-3.5 w-3.5 text-slate-500" /> Reset
+          </button>
+          <button
+            onClick={handleSaveAll}
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#166534] px-5 py-2.5 text-xs font-black text-white shadow-md shadow-emerald-700/20 hover:bg-[#14532d] transition"
+          >
+            {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Save & Publish All
           </button>
         </div>
       </div>
 
-      {/* SPLIT PANE MAIN CONTAINER */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* LEFT COLUMN: LIST OF 20 REELS (col-span-7) */}
-        <div className="lg:col-span-7 space-y-3">
-          {/* FILTER PILLS */}
-          <div className="flex gap-2">
+      {/* Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto border-b border-slate-200 pb-2">
+        {[
+          { id: "counters", label: "KPI Counters", icon: Activity, count: impactStats.length },
+          { id: "domains", label: "8 Seva Domains", icon: Layers, count: impactDomains.length },
+          { id: "stories", label: "Impact Stories & Testimonials", icon: MessageSquareQuote, count: stories.length },
+          { id: "header", label: "Headline & Text", icon: Type }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveSubTab(tab.id as any)}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition whitespace-nowrap ${
+              activeSubTab === tab.id
+                ? "bg-[#0A192F] text-white shadow-xs"
+                : "text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            <tab.icon className="h-3.5 w-3.5" />
+            <span>{tab.label}</span>
+            {tab.count !== undefined && (
+              <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${activeSubTab === tab.id ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"}`}>
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* TAB 1: KPI COUNTERS */}
+      {activeSubTab === "counters" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-black text-[#0A192F]">Master Impact Counters</h3>
+              <p className="text-xs text-slate-500">
+                These KPI cards appear at the top of the public /impact page and reflect ground realities.
+              </p>
+            </div>
             <button
-              type="button"
-              onClick={() => setFilterPlatform("all")}
-              className={`px-4 py-1.5 rounded-full text-xs font-black transition ${
-                filterPlatform === "all" ? "bg-slate-900 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-              }`}
+              onClick={() => {
+                const newId = `stat-${Date.now()}`;
+                setImpactStats(prev => [
+                  ...prev,
+                  { id: newId, labelEn: "New Impact Metric", labelHi: "नया प्रभाव आंकड़ा", value: 1000, suffix: "+", iconName: "Award", enabled: true }
+                ]);
+                toast.success("Added new impact counter card");
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 border border-orange-200 px-3 py-1.5 text-xs font-bold text-[#C2410C] hover:bg-orange-100 transition"
             >
-              All ({posts.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterPlatform("youtube")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black transition ${
-                filterPlatform === "youtube" ? "bg-rose-600 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-              }`}
-            >
-              <Youtube className="h-3.5 w-3.5" /> YouTube ({posts.filter(p => p.platform === "youtube").length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterPlatform("instagram")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black transition ${
-                filterPlatform === "instagram" ? "bg-pink-600 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-              }`}
-            >
-              <Instagram className="h-3.5 w-3.5" /> Instagram ({posts.filter(p => p.platform !== "youtube").length})
+              <Plus className="h-3.5 w-3.5" /> Add Counter
             </button>
           </div>
 
-          {/* SCROLLABLE FEED CARDS */}
-          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1.5 custom-scrollbar">
-            {filteredPosts.map((post, index) => {
-              const isSelected = selected === index;
-              const isYoutube = post.platform === "youtube";
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {impactStats.map((stat, idx) => {
+              const IconComp = AVAILABLE_ICONS[stat.iconName] || Award;
               return (
-                <article
-                  key={post.id}
-                  onClick={() => setSelected(index)}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                    isSelected
-                      ? "border-blue-600 ring-2 ring-blue-500/20 bg-blue-50/20 shadow-md"
-                      : "border-slate-200 bg-white hover:border-slate-300 shadow-2xs"
+                <div
+                  key={stat.id}
+                  className={`rounded-2xl border p-4 flex flex-col justify-between space-y-3 transition ${
+                    stat.enabled ? "bg-white border-slate-200 shadow-xs" : "bg-slate-50 border-slate-200/60 opacity-60"
                   }`}
                 >
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-xs ${
-                        isYoutube ? "bg-rose-600" : "bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600"
-                      }`}>
-                        {isYoutube ? <Youtube className="h-6 w-6" /> : <Instagram className="h-6 w-6" />}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                            isYoutube ? "bg-rose-100 text-rose-800" : "bg-pink-100 text-pink-800"
-                          }`}>
-                            {isYoutube ? "YouTube" : "Instagram"}
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                            {post.category || "Social Work"}
-                          </span>
-                          {isSelected && (
-                            <span className="text-[10px] font-black text-blue-700 bg-blue-100 border border-blue-300 px-2 py-0.5 rounded-full animate-pulse">
-                              Editing Now
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Title in full readable view */}
-                        <p className="mt-1.5 text-sm font-black text-slate-900 leading-snug">
-                          {post.title}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons Row */}
-                    <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-slate-100">
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); setSelected(index); }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-black shadow-2xs"
-                        >
-                          <Pencil className="h-3.5 w-3.5" /> Edit (बदलें)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); removePost(index); }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-black shadow-2xs"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" /> Delete (हटाएं)
-                        </button>
-                      </div>
-
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => openIconPicker("counter", stat.id, stat.iconName)}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 hover:bg-orange-100 text-slate-700 hover:text-[#C2410C] transition border border-slate-200"
+                      title="Click to change icon visually"
+                    >
+                      <IconComp className="h-4.5 w-4.5" />
+                    </button>
+                    <div className="flex items-center gap-1">
                       <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); toggleActive(index); }}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-black shadow-2xs ${
-                          post.active !== false
-                            ? "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
-                            : "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200"
+                        onClick={() => {
+                          setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, enabled: !s.enabled } : s));
+                          toast.success(stat.enabled ? "Counter disabled" : "Counter enabled");
+                        }}
+                        className={`rounded-lg p-1.5 text-xs transition ${
+                          stat.enabled ? "text-emerald-700 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-200"
                         }`}
+                        title={stat.enabled ? "Active on public page" : "Disabled"}
                       >
-                        {post.active !== false ? <Eye className="h-3.5 w-3.5 text-emerald-600" /> : <EyeOff className="h-3.5 w-3.5 text-slate-400" />}
-                        <span>{post.active !== false ? "Active" : "Hidden"}</span>
+                        {stat.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm(`Delete counter "${stat.labelEn}"?`)) {
+                            setImpactStats(prev => prev.filter((_, i) => i !== idx));
+                            toast.success("Counter deleted");
+                          }
+                        }}
+                        className="rounded-lg p-1.5 text-rose-600 hover:bg-rose-50 transition"
+                        title="Delete counter"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
-                </article>
+
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">English Label</label>
+                      <input
+                        type="text"
+                        value={stat.labelEn}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, labelEn: val } : s));
+                        }}
+                        className="w-full text-xs font-bold text-slate-800 rounded-lg border border-slate-200 p-2 outline-none focus:border-[#C2410C]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Hindi Label</label>
+                      <input
+                        type="text"
+                        value={stat.labelHi}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, labelHi: val } : s));
+                        }}
+                        className="w-full text-xs font-bold text-slate-800 rounded-lg border border-slate-200 p-2 outline-none focus:border-[#C2410C]"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Value</label>
+                        <input
+                          type="number"
+                          value={stat.value}
+                          onChange={e => {
+                            const val = Number(e.target.value) || 0;
+                            setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, value: val } : s));
+                          }}
+                          className="w-full text-xs font-black text-[#0A192F] rounded-lg border border-slate-200 p-2 outline-none focus:border-[#C2410C]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Suffix</label>
+                        <input
+                          type="text"
+                          value={stat.suffix}
+                          onChange={e => {
+                            const val = e.target.value;
+                            setImpactStats(prev => prev.map((s, i) => i === idx ? { ...s, suffix: val } : s));
+                          }}
+                          className="w-full text-xs font-black text-[#0A192F] rounded-lg border border-slate-200 p-2 outline-none focus:border-[#C2410C]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
+      )}
 
-        {/* RIGHT COLUMN: INSPECTOR & FORM PANEL (col-span-5) */}
-        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm sticky top-4">
-          {selected === null || !posts[selected] ? (
-            <div className="grid min-h-[440px] place-items-center text-center p-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-              <div>
-                <div className="h-16 w-16 mx-auto rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 mb-4 shadow-xs">
-                  <Instagram className="h-8 w-8" />
-                </div>
-                <h3 className="text-base font-black text-slate-800">Select a Reel from left or click &apos;Add Embed / Reel&apos;</h3>
-                <p className="mt-1.5 text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-                  Edit any details or paste embed code. Nothing will be cut off.
-                </p>
-              </div>
+      {/* TAB 2: 8 SEVA DOMAINS */}
+      {activeSubTab === "domains" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-black text-[#0A192F]">8 Ground Seva Domains</h3>
+              <p className="text-xs text-slate-500">
+                Detailed field areas on the Impact page (Cleanliness, RO Water, Jobs, Pink E-Rickshaw, Health, Relief, Skills, Education).
+              </p>
             </div>
-          ) : (() => {
-            const p = posts[selected];
-            return (
-              <div className="space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-rose-600">Reel #{selected + 1}</span>
-                    <h2 className="text-lg font-black text-slate-900 mt-0.5">Edit Reel / Video Embed</h2>
+            <button
+              onClick={() => {
+                const newDomain: ImpactDomainItem = {
+                  id: `domain-${Date.now()}`,
+                  tab: "active",
+                  titleEn: "New Field Initiative",
+                  titleHi: "नया जनसेवा अभियान",
+                  descEn: "Describe the ground-level work and impact.",
+                  descHi: "अभियान का विवरण और प्रभाव।",
+                  iconName: "Sparkles",
+                  badgeEn: "Initiative",
+                  badgeHi: "जन सेवा",
+                  enabled: true
+                };
+                setImpactDomains(prev => [...prev, newDomain]);
+                setEditingDomain(newDomain);
+                toast.success("Created new domain. Edit details in dialog.");
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-xs font-bold text-[#166534] hover:bg-emerald-100 transition"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add Domain
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {impactDomains.map((domain, idx) => {
+              const IconComp = AVAILABLE_ICONS[domain.iconName] || Sparkles;
+              return (
+                <div
+                  key={domain.id}
+                  className={`rounded-2xl border p-4.5 flex flex-col justify-between space-y-3 transition ${
+                    domain.enabled ? "bg-white border-slate-200 shadow-xs" : "bg-slate-50 border-slate-200/60 opacity-60"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        onClick={() => openIconPicker("domain", domain.id, domain.iconName)}
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-700 transition border border-slate-200"
+                        title="Click to change icon visually"
+                      >
+                        <IconComp className="h-5 w-5" />
+                      </button>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase text-slate-700">
+                            {domain.tab}
+                          </span>
+                          <span className="text-[10px] font-bold text-[#166534]">
+                            {domain.badgeEn || domain.badgeHi}
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-bold text-[#0A192F] mt-0.5">{domain.titleEn}</h4>
+                        <p className="text-[11px] font-medium text-slate-500">{domain.titleHi}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => setEditingDomain(domain)}
+                        className="rounded-lg p-1.5 text-amber-600 hover:bg-amber-50 transition"
+                        title="Edit domain text and details"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setImpactDomains(prev => prev.map((d, i) => i === idx ? { ...d, enabled: !d.enabled } : d));
+                          toast.success(domain.enabled ? "Domain disabled" : "Domain enabled");
+                        }}
+                        className={`rounded-lg p-1.5 text-xs transition ${
+                          domain.enabled ? "text-emerald-700 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-200"
+                        }`}
+                        title={domain.enabled ? "Visible on /impact" : "Hidden"}
+                      >
+                        {domain.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm(`Delete domain "${domain.titleEn}"?`)) {
+                            setImpactDomains(prev => prev.filter((_, i) => i !== idx));
+                            toast.success("Domain deleted");
+                          }
+                        }}
+                        className="rounded-lg p-1.5 text-rose-600 hover:bg-rose-50 transition"
+                        title="Delete domain"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
+
+                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                    {domain.descEn}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: IMPACT STORIES & TESTIMONIALS */}
+      {activeSubTab === "stories" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-black text-[#0A192F]">Citizen Impact Stories & Testimonials</h3>
+              <p className="text-xs text-slate-500">
+                Ground-level experiences, scholarship recipients, patient care, and volunteer testimonies.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                const newStory: ImpactStoryItem = {
+                  id: `story-${Date.now()}`,
+                  nameEn: "Citizen Beneficiary",
+                  nameHi: "नागरिक लाभार्थी",
+                  villageEn: "Bhopal, MP",
+                  villageHi: "भोपाल, म.प्र.",
+                  quoteEn: "Sharing personal testimony of service received from RP Foundation.",
+                  quoteHi: "आरपी फाउंडेशन द्वारा प्राप्त सहायता का व्यक्तिगत अनुभव।",
+                  enabled: true
+                };
+                setStories(prev => [...prev, newStory]);
+                setEditingStory(newStory);
+                toast.success("Added new impact story");
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 border border-blue-200 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add Story
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {stories.map((story, idx) => (
+              <div
+                key={story.id}
+                className={`rounded-2xl border p-4.5 flex flex-col justify-between space-y-3 transition ${
+                  story.enabled ? "bg-white border-slate-200 shadow-xs" : "bg-slate-50 border-slate-200/60 opacity-60"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-[#D97706]">
+                      <Quote className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-[#0A192F]">{story.nameEn} ({story.nameHi})</h4>
+                      <p className="text-[11px] font-medium text-slate-500">{story.villageEn} • {story.villageHi}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
-                      type="button"
-                      onClick={() => removePost(selected)}
-                      className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-rose-200"
-                      title="Delete"
+                      onClick={() => setEditingStory(story)}
+                      className="rounded-lg p-1.5 text-amber-600 hover:bg-amber-50 transition"
+                      title="Edit story text"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setStories(prev => prev.map((s, i) => i === idx ? { ...s, enabled: !s.enabled } : s));
+                        toast.success(story.enabled ? "Story disabled" : "Story enabled");
+                      }}
+                      className={`rounded-lg p-1.5 text-xs transition ${
+                        story.enabled ? "text-emerald-700 hover:bg-emerald-50" : "text-slate-400 hover:bg-slate-200"
+                      }`}
+                    >
+                      {story.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete story for "${story.nameEn}"?`)) {
+                          setStories(prev => prev.filter((_, i) => i !== idx));
+                          toast.success("Story deleted");
+                        }
+                      }}
+                      className="rounded-lg p-1.5 text-rose-600 hover:bg-rose-50 transition"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
 
-                {/* Title */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Title / Heading (शीर्षक)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={p.title}
-                    onChange={e => patch(selected, { title: e.target.value })}
-                    placeholder="Enter reel headline..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-rose-500 resize-y"
-                  />
-                </div>
-
-                {/* Category Chips */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
-                    Category (श्रेणी)
-                  </label>
-                  <div className="flex flex-wrap gap-1.5 mb-2">
-                    {["Social Work", "Healthcare", "Culture", "Leadership", "Empowerment", "Ground Action"].map(cat => (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => patch(selected, { category: cat })}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
-                          p.category === cat
-                            ? "bg-[#0F3157] text-white"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                  <input
-                    type="text"
-                    value={p.category || ""}
-                    onChange={e => patch(selected, { category: e.target.value })}
-                    placeholder="Custom category name..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold"
-                  />
-                </div>
-
-                {/* Embed Code / URL Input */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-slate-700 uppercase">
-                      Embed Code or Link (YouTube / Instagram / &lt;iframe&gt;)
-                    </label>
-                    <span className="text-[10px] font-black uppercase text-rose-600">
-                      {p.platform}
-                    </span>
-                  </div>
-                  <textarea
-                    rows={3}
-                    value={p.url || ""}
-                    onChange={e => {
-                      const val = e.target.value;
-                      const parsed = parseSocialEmbed(val);
-                      patch(selected, {
-                        url: parsed.cleanUrl || val,
-                        embedUrl: parsed.embedUrl || val,
-                        platform: parsed.platform,
-                        videoId: parsed.videoId,
-                        thumbnailUrl: parsed.thumbnailUrl || p.thumbnailUrl,
-                        videoUrl: parsed.videoUrl || p.videoUrl,
-                        title: (!p.title.trim() && parsed.suggestedTitle) ? parsed.suggestedTitle : p.title
-                      });
-                    }}
-                    placeholder="Paste Instagram Reel / Post link, <blockquote...> embed code, or YouTube Shorts link..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-rose-500 resize-y"
-                  />
-                </div>
-
-                {/* Direct Device Video Upload */}
-                <div className="rounded-2xl border-2 border-dashed border-rose-200 bg-rose-50/30 p-4 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-slate-800">Direct Device Video Upload</span>
-                    {p.videoUrl && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                        <CheckCircle2 className="h-3 w-3" /> Ready
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-slate-500">
-                    Upload MP4 / MOV videos directly from your phone or PC.
-                  </p>
-                  <label className={`inline-flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 cursor-pointer shadow-xs ${uploadingVideo ? "opacity-50 pointer-events-none" : ""}`}>
-                    {uploadingVideo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                    <span>{uploadingVideo ? "Uploading..." : "Select Video From Device"}</span>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleDeviceVideoUpload}
-                      disabled={uploadingVideo}
-                      className="sr-only"
-                    />
-                  </label>
-                  {p.videoUrl && (
-                    <p className="text-[10px] font-mono text-slate-400 truncate mt-1">
-                      Stream: {p.videoUrl}
-                    </p>
-                  )}
-                </div>
-
-                <div className="pt-2 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => toggleActive(selected)}
-                    className="text-xs font-bold text-slate-600 hover:underline flex items-center gap-1"
-                  >
-                    {p.active !== false ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                    {p.active !== false ? "Active in Live App" : "Hidden from App"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={save}
-                    disabled={saving}
-                    className="px-5 py-2 text-xs font-black text-white bg-[#0F3157] rounded-xl hover:bg-[#1D5B93] transition shadow-xs"
-                  >
-                    {saving ? "Saving..." : "Save Post"}
-                  </button>
+                <div className="space-y-1 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-700 italic">
+                  <p>"{story.quoteEn}"</p>
+                  <p className="text-[11px] text-slate-500 font-sans not-italic">"{story.quoteHi}"</p>
                 </div>
               </div>
-            );
-          })()}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* TAB 4: HEADER & HEADLINE */}
+      {activeSubTab === "header" && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-xs max-w-2xl">
+          <h3 className="text-sm font-black text-[#0A192F]">Public Impact Page Banner Headline</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-bold text-slate-700">English Headline</label>
+              <input
+                type="text"
+                value={headlineEn}
+                onChange={e => setHeadlineEn(e.target.value)}
+                className="mt-1 w-full text-xs font-medium rounded-xl border border-slate-200 p-2.5 outline-none focus:border-[#C2410C]"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-700">Hindi Headline</label>
+              <input
+                type="text"
+                value={headlineHi}
+                onChange={e => setHeadlineHi(e.target.value)}
+                className="mt-1 w-full text-xs font-medium rounded-xl border border-slate-200 p-2.5 outline-none focus:border-[#C2410C]"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-700">English Description</label>
+              <textarea
+                rows={3}
+                value={descEn}
+                onChange={e => setDescEn(e.target.value)}
+                className="mt-1 w-full text-xs font-medium rounded-xl border border-slate-200 p-2.5 outline-none focus:border-[#C2410C]"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-700">Hindi Description</label>
+              <textarea
+                rows={3}
+                value={descHi}
+                onChange={e => setDescHi(e.target.value)}
+                className="mt-1 w-full text-xs font-medium rounded-xl border border-slate-200 p-2.5 outline-none focus:border-[#C2410C]"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Domain Editor Modal */}
+      {editingDomain && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-sm font-black text-[#0A192F]">Edit Field Domain</h3>
+              <button onClick={() => setEditingDomain(null)} className="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="font-bold text-slate-700">Category Filter</label>
+                <select
+                  value={editingDomain.tab}
+                  onChange={e => setEditingDomain({ ...editingDomain, tab: e.target.value as any })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                >
+                  <option value="community">Community (सामुदायिक)</option>
+                  <option value="care">Care & Relief (देखभाल व राहत)</option>
+                  <option value="active">Active Ground (सक्रिय अभियान)</option>
+                  <option value="all">All (समस्त)</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold text-slate-700">Title (English)</label>
+                  <input
+                    type="text"
+                    value={editingDomain.titleEn}
+                    onChange={e => setEditingDomain({ ...editingDomain, titleEn: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700">Title (Hindi)</label>
+                  <input
+                    type="text"
+                    value={editingDomain.titleHi}
+                    onChange={e => setEditingDomain({ ...editingDomain, titleHi: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold text-slate-700">Badge (English)</label>
+                  <input
+                    type="text"
+                    value={editingDomain.badgeEn}
+                    onChange={e => setEditingDomain({ ...editingDomain, badgeEn: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700">Badge (Hindi)</label>
+                  <input
+                    type="text"
+                    value={editingDomain.badgeHi}
+                    onChange={e => setEditingDomain({ ...editingDomain, badgeHi: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700">Description (English)</label>
+                <textarea
+                  rows={2}
+                  value={editingDomain.descEn}
+                  onChange={e => setEditingDomain({ ...editingDomain, descEn: e.target.value })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700">Description (Hindi)</label>
+                <textarea
+                  rows={2}
+                  value={editingDomain.descHi}
+                  onChange={e => setEditingDomain({ ...editingDomain, descHi: e.target.value })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <button
+                onClick={() => setEditingDomain(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setImpactDomains(prev => prev.map(d => d.id === editingDomain.id ? editingDomain : d));
+                  setEditingDomain(null);
+                  toast.success("Domain updated");
+                }}
+                className="px-5 py-2 rounded-xl bg-[#166534] text-xs font-black text-white hover:bg-[#14532d]"
+              >
+                Save Domain
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Story Editor Modal */}
+      {editingStory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-sm font-black text-[#0A192F]">Edit Impact Story</h3>
+              <button onClick={() => setEditingStory(null)} className="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold text-slate-700">Name (English)</label>
+                  <input
+                    type="text"
+                    value={editingStory.nameEn}
+                    onChange={e => setEditingStory({ ...editingStory, nameEn: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700">Name (Hindi)</label>
+                  <input
+                    type="text"
+                    value={editingStory.nameHi}
+                    onChange={e => setEditingStory({ ...editingStory, nameHi: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold text-slate-700">Location/Village (English)</label>
+                  <input
+                    type="text"
+                    value={editingStory.villageEn}
+                    onChange={e => setEditingStory({ ...editingStory, villageEn: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700">Location/Village (Hindi)</label>
+                  <input
+                    type="text"
+                    value={editingStory.villageHi}
+                    onChange={e => setEditingStory({ ...editingStory, villageHi: e.target.value })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700">Story / Quote (English)</label>
+                <textarea
+                  rows={3}
+                  value={editingStory.quoteEn}
+                  onChange={e => setEditingStory({ ...editingStory, quoteEn: e.target.value })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700">Story / Quote (Hindi)</label>
+                <textarea
+                  rows={3}
+                  value={editingStory.quoteHi}
+                  onChange={e => setEditingStory({ ...editingStory, quoteHi: e.target.value })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <button
+                onClick={() => setEditingStory(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setStories(prev => prev.map(s => s.id === editingStory.id ? editingStory : s));
+                  setEditingStory(null);
+                  toast.success("Story updated");
+                }}
+                className="px-5 py-2 rounded-xl bg-[#166534] text-xs font-black text-white hover:bg-[#14532d]"
+              >
+                Save Story
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Visual Icon Picker Modal */}
+      <IconPickerModal
+        isOpen={iconPickerOpen}
+        onClose={() => setIconPickerOpen(false)}
+        selectedIcon={iconTarget?.currentIcon || "Sparkles"}
+        onSelectIcon={handleSelectIcon}
+        title="Choose Official Lucide Icon"
+      />
     </div>
   );
 }

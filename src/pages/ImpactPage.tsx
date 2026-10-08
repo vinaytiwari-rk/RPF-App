@@ -265,13 +265,18 @@ export default function ImpactPage() {
 
   const liveStats = useMemo(() => {
     if (Array.isArray(cmsConfig?.impactStats) && cmsConfig.impactStats.length > 0) {
-      return cmsConfig.impactStats.filter((s: any) => s.enabled !== false);
+      return cmsConfig.impactStats.filter((s: any) => s.enabled !== false).map((s: any) => {
+        if (s.id === "cards_issued" && cardImpact?.totalCards) {
+          return { ...s, value: cardImpact.totalCards };
+        }
+        return s;
+      });
     }
     return [
       { id: "beneficiaries", labelEn: "Total Beneficiaries", labelHi: "कुल लाभार्थी नागरिक", value: 250000, suffix: "+", iconName: "Users" },
       { id: "health_camps", labelEn: "Health & Eye Camps", labelHi: "स्वास्थ्य एवं नेत्र शिविर", value: 450, suffix: "+", iconName: "Stethoscope" },
       { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित वृक्ष व पौधे", value: 50000, suffix: "+", iconName: "Trees" },
-      { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: cardImpact?.totalCards || 120000, suffix: "+", iconName: "Award" }
+      { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: cardImpact?.totalCards ?? 0, suffix: "+", iconName: "Award" }
     ];
   }, [cmsConfig?.impactStats, cardImpact]);
 
@@ -292,6 +297,14 @@ export default function ImpactPage() {
     return [];
   }, [cmsConfig?.testimonials]);
 
+  const pageHeadline = isHi 
+    ? (cmsConfig?.impactHeadlineHi || "हमारा सामाजिक प्रभाव")
+    : (cmsConfig?.impactHeadlineEn || "Our Social Impact");
+    
+  const pageDescription = isHi
+    ? (cmsConfig?.impactDescHi || "पेयजल, स्वच्छता, रोजगार, स्वास्थ्य, महिला स्वावलंबन, पर्यावरण व भारतीय संस्कृति हेतु समर्पित कार्य।")
+    : (cmsConfig?.impactDescEn || "Field activities across sanitation, clean water, jobs, skills, free health, poor relief, environment & heritage.");
+
   return (
     <div className="min-h-screen bg-transparent pb-36 font-sans selection:bg-orange-100 animate-fadeIn text-slate-800">
       {/* Header Banner (Vibrant Saffron-Emerald Brand Tricolor) */}
@@ -303,12 +316,10 @@ export default function ImpactPage() {
             {isHi ? "सामाजिक प्रभाव" : "Impact"}
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight text-[#245D45]">
-            {isHi ? "हमारा सामाजिक प्रभाव" : "Our Social Impact"}
+            {pageHeadline}
           </h1>
           <p className="text-xs text-[#426B55] font-medium leading-relaxed max-w-xl">
-            {isHi 
-              ? "पेयजल, स्वच्छता, रोजगार, स्वास्थ्य, महिला स्वावलंबन, पर्यावरण व भारतीय संस्कृति हेतु समर्पित कार्य।"
-              : "Field activities across sanitation, clean water, jobs, skills, free health, poor relief, environment & heritage."}
+            {pageDescription}
           </p>
         </div>
       </div>

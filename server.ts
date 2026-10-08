@@ -94,18 +94,19 @@ const isAllowedOrigin = (origin?: string): boolean => {
     const host = new URL(origin).hostname;
     if (host === "therpfoundation.org" || host.endsWith(".therpfoundation.org")) return true;
     if (host === "rpfoundation.org" || host.endsWith(".rpfoundation.org")) return true;
-    if (host.endsWith(".vercel.app")) return true;
+    if (host === "localhost" || host === "127.0.0.1") return true;
   } catch {}
-  return true;
+  return false;
 };
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin) {
+  if (origin && isAllowedOrigin(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
-  } else {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+  } else if (!origin) {
+    // Non-browser / same-origin server requests
+    res.setHeader("Access-Control-Allow-Origin", allowedOrigins[0]);
   }
   res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma");

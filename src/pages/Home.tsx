@@ -9,6 +9,7 @@ import { resolveMediaUrl } from "../utils/media";
 import { RP_FOUNDATION_LOGO, ROHIT_PANDIT_PHOTO } from "../assets/foundationBrand";
 import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
 import LiveVerifiedMarketSection from "../components/LiveVerifiedMarketSection";
+import { AVAILABLE_ICONS } from "../components/admin/IconPickerModal";
 
 const fallbackSlides = [
   { image: "/assets/mega_camp_banner.png", titleEn: "Healthcare support for the community", subEn: "Health camps, medical support and community care.", route: "/health-care" },
@@ -403,6 +404,88 @@ export default function Home() {
     return resolveMediaUrl(t);
   };
 
+  const quickAccessList = useMemo(() => {
+    if (Array.isArray(cmsConfig?.quickAccessItems) && cmsConfig.quickAccessItems.length > 0) {
+      return cmsConfig.quickAccessItems
+        .filter((item: any) => item.active !== false)
+        .map((item: any) => {
+          const IconComponent = (AVAILABLE_ICONS as any)[item.icon] || BadgePlus;
+          return {
+            title: item.title,
+            subtitle: item.subtitle,
+            icon: IconComponent,
+            route: item.route || "/explore",
+            accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
+          };
+        });
+    }
+    return [
+      {
+        title: "Jan Seva Card",
+        subtitle: "Your digital service identity & welfare benefit card",
+        icon: BadgePlus,
+        route: "/jan-seva-card",
+        accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
+      },
+      {
+        title: "Healthcare",
+        subtitle: "Free health camps, medical support & emergency assistance",
+        icon: HeartPulse,
+        route: "/health-care",
+        accent: "text-[#DC2626] bg-red-500/10 border border-red-500/20"
+      },
+      {
+        title: "Employment",
+        subtitle: "Job opportunities, skill training & career support",
+        icon: BriefcaseBusiness,
+        route: "/employment",
+        accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20"
+      },
+      {
+        title: "Grievance",
+        subtitle: "Submit public issues, track resolution & support status",
+        icon: ClipboardList,
+        route: "/grievance",
+        accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20"
+      },
+      {
+        title: "Samahit Utilities",
+        subtitle: "Everyday tools, fasting tracker, breathing & digital utilities",
+        icon: Wrench,
+        route: "/utilities",
+        accent: "text-[#0A192F] bg-blue-500/10 border border-blue-500/20"
+      },
+      {
+        title: "Smart Calculators",
+        subtitle: "GST, split bill, BMI, loan EMI & all-in-one calculators",
+        icon: Calculator,
+        route: "/utilities/calculators",
+        accent: "text-[#C2410C] bg-orange-500/10 border border-orange-500/20"
+      }
+    ];
+  }, [cmsConfig?.quickAccessItems]);
+
+  const fieldImpactMetrics = useMemo(() => {
+    if (Array.isArray(cmsConfig?.impactMetrics) && cmsConfig.impactMetrics.length > 0) {
+      return cmsConfig.impactMetrics
+        .filter((item: any) => item.active !== false)
+        .map((item: any) => {
+          const IconComponent = (AVAILABLE_ICONS as any)[item.icon] || UsersRound;
+          return {
+            icon: IconComponent,
+            value: item.title,
+            label: item.subtitle,
+            route: item.route || "/community-care-active"
+          };
+        });
+    }
+    return [
+      { icon: UsersRound, value: "Community", label: "Welfare & Culture", route: "/community-care-active" },
+      { icon: Stethoscope, value: "Care", label: "Health & Relief", route: "/community-care-active" },
+      { icon: CalendarDays, value: "Active", label: "Field Initiatives", route: "/community-care-active" }
+    ];
+  }, [cmsConfig?.impactMetrics]);
+
   return (
     <main className="min-h-full bg-transparent text-[#14213D]">
       <div className="mx-auto w-full max-w-3xl px-4 pb-6 pt-3 sm:px-6 space-y-4">
@@ -607,50 +690,7 @@ export default function Home() {
             <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">What can we help with?</h2>
           </div>
           <div className="grid grid-cols-2 gap-3.5">
-            {[
-              {
-                title: "Jan Seva Card",
-                subtitle: "Your digital service identity & welfare benefit card",
-                icon: BadgePlus,
-                route: "/jan-seva-card",
-                accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
-              },
-              {
-                title: "Healthcare",
-                subtitle: "Free health camps, medical support & emergency assistance",
-                icon: HeartPulse,
-                route: "/health-care",
-                accent: "text-[#DC2626] bg-red-500/10 border border-red-500/20"
-              },
-              {
-                title: "Employment",
-                subtitle: "Job opportunities, skill training & career support",
-                icon: BriefcaseBusiness,
-                route: "/employment",
-                accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20"
-              },
-              {
-                title: "Grievance",
-                subtitle: "Submit public issues, track resolution & support status",
-                icon: ClipboardList,
-                route: "/grievance",
-                accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20"
-              },
-              {
-                title: "Samahit Utilities",
-                subtitle: "Everyday tools, fasting tracker, breathing & digital utilities",
-                icon: Wrench,
-                route: "/utilities",
-                accent: "text-[#0A192F] bg-blue-500/10 border border-blue-500/20"
-              },
-              {
-                title: "Smart Calculators",
-                subtitle: "GST, split bill, BMI, loan EMI & all-in-one calculators",
-                icon: Calculator,
-                route: "/utilities/calculators",
-                accent: "text-[#C2410C] bg-orange-500/10 border border-orange-500/20"
-              }
-            ].map(({ title, subtitle, icon: Icon, route, accent }) => (
+            {quickAccessList.map(({ title, subtitle, icon: Icon, route, accent }) => (
               <motion.button
                 key={title}
                 whileTap={{ scale: 0.98 }}
@@ -686,12 +726,17 @@ export default function Home() {
             onClick={() => navigate("/community-care-active")}
             className="grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-transparent backdrop-blur-xs shadow-2xs cursor-pointer hover:border-emerald-300/80 transition-all"
           >
-            {[
-              { icon: UsersRound, value: "Community", label: "Welfare & Culture" },
-              { icon: Stethoscope, value: "Care", label: "Health & Relief" },
-              { icon: CalendarDays, value: "Active", label: "Field Initiatives" }
-            ].map(({ icon: Icon, value, label }) => (
-              <div key={label} className="border-r border-slate-200/60 px-2 py-4 text-center last:border-r-0 hover:bg-emerald-50/20 transition-colors">
+            {fieldImpactMetrics.map(({ icon: Icon, value, label, route }) => (
+              <div 
+                key={label} 
+                onClick={(e) => {
+                  if (route && route !== "/community-care-active") {
+                    e.stopPropagation();
+                    navigate(route);
+                  }
+                }}
+                className="border-r border-slate-200/60 px-2 py-4 text-center last:border-r-0 hover:bg-emerald-50/20 transition-colors"
+              >
                 <Icon className="mx-auto h-4.5 w-4.5 text-[#167C5A]" />
                 <p className="mt-2 text-[13px] sm:text-[14px] font-bold text-[#14213D]">{value}</p>
                 <p className="mt-0.5 text-[9px] text-slate-500 font-semibold tracking-tight">{label}</p>

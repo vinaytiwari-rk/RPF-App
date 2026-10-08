@@ -38,11 +38,12 @@ import {
   HelpCircle,
   AlertTriangle,
   Info,
-  LogOut,
-  BadgeCheck
+  BadgeCheck,
+  Pencil
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
+import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
 
 type SubTab = "profile_cms" | "roles" | "control_room" | "about_cms";
 
@@ -63,6 +64,13 @@ export interface ProfileMenuItem {
   iconName: string;
   route?: string;
   active: boolean;
+  contentMarkdown?: string;
+  settingsConfig?: {
+    defaultLanguage?: "en" | "hi";
+    notificationsEnabled?: boolean;
+    highContrastMode?: boolean;
+    soundEffects?: boolean;
+  };
 }
 
 export interface ProfileConfig {
@@ -187,6 +195,28 @@ export default function ProfileStudio() {
   // 4. Foundation About CMS State
   const [aboutDraft, setAboutDraft] = useState("");
   const [aboutDirty, setAboutDirty] = useState(false);
+
+  // 5. Visual Icon Picker State
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [currentIconTarget, setCurrentIconTarget] = useState<{
+    type: "metric" | "account" | "legal";
+    id: string;
+    currentIcon: string;
+  } | null>(null);
+
+  // 6. Deep Content Editor Modal State (Terms, Privacy, Disclaimer, Support, Settings)
+  const [editingContentItem, setEditingContentItem] = useState<{
+    id: string;
+    title: string;
+    type: "legal" | "account";
+    contentMarkdown: string;
+    settingsConfig?: {
+      defaultLanguage?: "en" | "hi";
+      notificationsEnabled?: boolean;
+      highContrastMode?: boolean;
+      soundEffects?: boolean;
+    };
+  } | null>(null);
 
   const authHeader = useCallback(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
@@ -721,6 +751,24 @@ export default function ProfileStudio() {
               <div className="space-y-2">
                 {profileConfig.accountItems.map((item, idx) => (
                   <div key={item.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                    {/* Visual Icon button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentIconTarget({
+                          type: "account",
+                          id: item.id,
+                          currentIcon: item.iconName
+                        });
+                        setIconPickerOpen(true);
+                      }}
+                      className="p-1.5 bg-white border border-slate-200 rounded-lg hover:border-emerald-400 hover:text-emerald-700 shadow-2xs transition flex items-center gap-1 shrink-0"
+                      title="Click to visually pick icon (कोई कोडिंग नहीं)"
+                    >
+                      {React.createElement(AVAILABLE_ICONS[item.iconName] || Settings, { className: "h-4 w-4 text-emerald-600" })}
+                      <Pencil className="h-2.5 w-2.5 text-slate-400" />
+                    </button>
+
                     <div className="grid grid-cols-3 gap-2 flex-1">
                       <input
                         type="text"
@@ -745,6 +793,29 @@ export default function ProfileStudio() {
                       />
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
+                      {/* Deep settings configuration edit button */}
+                      {item.id === "item-settings" && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingContentItem({
+                            id: item.id,
+                            title: item.title,
+                            type: "account",
+                            contentMarkdown: "",
+                            settingsConfig: item.settingsConfig || {
+                              defaultLanguage: "hi",
+                              notificationsEnabled: true,
+                              highContrastMode: false,
+                              soundEffects: true
+                            }
+                          })}
+                          className="px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-lg text-[10px] font-bold flex items-center gap-1"
+                          title="Configure App Settings toggles (भाषा, सूचनाएं आदि)"
+                        >
+                          <Pencil className="h-3 w-3" /> Options
+                        </button>
+                      )}
+
                       <button
                         onClick={() => handleUpdateAccountItem(item.id, { active: !item.active })}
                         className={`p-1 rounded ${item.active ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"}`}
@@ -784,7 +855,7 @@ export default function ProfileStudio() {
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-blue-600" />
                   <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-                    Policy, Legal & Transparency Menu
+                    Policy, Legal & Transparency Menu (विस्तृत सामग्री संपादक)
                   </h3>
                 </div>
                 <button
@@ -798,6 +869,24 @@ export default function ProfileStudio() {
               <div className="space-y-2">
                 {profileConfig.legalItems.map((item) => (
                   <div key={item.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                    {/* Visual Icon button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentIconTarget({
+                          type: "legal",
+                          id: item.id,
+                          currentIcon: item.iconName
+                        });
+                        setIconPickerOpen(true);
+                      }}
+                      className="p-1.5 bg-white border border-slate-200 rounded-lg hover:border-blue-400 hover:text-blue-700 shadow-2xs transition flex items-center gap-1 shrink-0"
+                      title="Click to visually pick icon (कोई कोडिंग नहीं)"
+                    >
+                      {React.createElement(AVAILABLE_ICONS[item.iconName] || FileText, { className: "h-4 w-4 text-blue-600" })}
+                      <Pencil className="h-2.5 w-2.5 text-slate-400" />
+                    </button>
+
                     <div className="grid grid-cols-2 gap-2 flex-1">
                       <input
                         type="text"
@@ -814,7 +903,24 @@ export default function ProfileStudio() {
                         className="bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600"
                       />
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {/* Deep full text content edit pencil */}
+                      {item.id !== "logout" && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingContentItem({
+                            id: item.id,
+                            title: item.title,
+                            type: "legal",
+                            contentMarkdown: item.contentMarkdown || ""
+                          })}
+                          className="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-lg text-xs font-bold flex items-center gap-1 shadow-2xs"
+                          title="Edit full policy content text / rules (अंदर का टेक्स्ट बदलें)"
+                        >
+                          <Pencil className="h-3 w-3" /> Edit Text
+                        </button>
+                      )}
+
                       <button
                         onClick={() => handleUpdateLegalItem(item.id, { active: !item.active })}
                         className={`p-1 rounded ${item.active ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"}`}
@@ -1140,6 +1246,177 @@ export default function ProfileStudio() {
             placeholder="Enter public about statement..."
             className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-purple-500"
           />
+        </div>
+      )}
+
+      {/* REUSABLE VISUAL ICON PICKER MODAL */}
+      <IconPickerModal
+        isOpen={iconPickerOpen}
+        onClose={() => {
+          setIconPickerOpen(false);
+          setCurrentIconTarget(null);
+        }}
+        selectedIcon={currentIconTarget?.currentIcon || ""}
+        onSelectIcon={(newIconName) => {
+          if (!currentIconTarget) return;
+          if (currentIconTarget.type === "account") {
+            handleUpdateAccountItem(currentIconTarget.id, { iconName: newIconName });
+          } else if (currentIconTarget.type === "legal") {
+            handleUpdateLegalItem(currentIconTarget.id, { iconName: newIconName });
+          } else if (currentIconTarget.type === "metric") {
+            handleUpdateMetric(currentIconTarget.id, { iconName: newIconName });
+          }
+          toast.success(`Icon updated to ${newIconName}`);
+        }}
+      />
+
+      {/* DEEP CONTENT / SETTINGS EDITOR MODAL */}
+      {editingContentItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div>
+                <h3 className="text-sm font-bold text-slate-800">
+                  {editingContentItem.type === "account" ? "App Settings Controls" : `Edit Content: ${editingContentItem.title}`}
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  {editingContentItem.type === "account"
+                    ? "Configure system defaults and user toggles."
+                    : "Enter custom text, clauses, or guidance shown when user taps this modal."}
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingContentItem(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto flex-1 space-y-4">
+              {editingContentItem.type === "account" && editingContentItem.settingsConfig ? (
+                <div className="space-y-4">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <label className="block text-xs font-bold text-slate-700 uppercase">Default App Language</label>
+                    <div className="flex gap-3">
+                      <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                        <input
+                          type="radio"
+                          name="defaultLang"
+                          checked={editingContentItem.settingsConfig.defaultLanguage === "hi"}
+                          onChange={() => setEditingContentItem({
+                            ...editingContentItem,
+                            settingsConfig: { ...editingContentItem.settingsConfig!, defaultLanguage: "hi" }
+                          })}
+                        />
+                        हिंदी (Hindi Default)
+                      </label>
+                      <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                        <input
+                          type="radio"
+                          name="defaultLang"
+                          checked={editingContentItem.settingsConfig.defaultLanguage === "en"}
+                          onChange={() => setEditingContentItem({
+                            ...editingContentItem,
+                            settingsConfig: { ...editingContentItem.settingsConfig!, defaultLanguage: "en" }
+                          })}
+                        />
+                        English (English Default)
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <label className="block text-xs font-bold text-slate-700 uppercase">Feature Toggles</label>
+                    <div className="space-y-2">
+                      <label className="flex items-center justify-between text-xs font-semibold cursor-pointer p-2 bg-white rounded-lg border border-slate-200">
+                        <span>Push Notifications & Broadcast Alerts</span>
+                        <input
+                          type="checkbox"
+                          checked={editingContentItem.settingsConfig.notificationsEnabled !== false}
+                          onChange={(e) => setEditingContentItem({
+                            ...editingContentItem,
+                            settingsConfig: { ...editingContentItem.settingsConfig!, notificationsEnabled: e.target.checked }
+                          })}
+                          className="h-4 w-4 rounded text-emerald-600"
+                        />
+                      </label>
+                      <label className="flex items-center justify-between text-xs font-semibold cursor-pointer p-2 bg-white rounded-lg border border-slate-200">
+                        <span>High Contrast / Senior Accessibility Mode</span>
+                        <input
+                          type="checkbox"
+                          checked={!!editingContentItem.settingsConfig.highContrastMode}
+                          onChange={(e) => setEditingContentItem({
+                            ...editingContentItem,
+                            settingsConfig: { ...editingContentItem.settingsConfig!, highContrastMode: e.target.checked }
+                          })}
+                          className="h-4 w-4 rounded text-emerald-600"
+                        />
+                      </label>
+                      <label className="flex items-center justify-between text-xs font-semibold cursor-pointer p-2 bg-white rounded-lg border border-slate-200">
+                        <span>Sound & Haptic Feedback</span>
+                        <input
+                          type="checkbox"
+                          checked={editingContentItem.settingsConfig.soundEffects !== false}
+                          onChange={(e) => setEditingContentItem({
+                            ...editingContentItem,
+                            settingsConfig: { ...editingContentItem.settingsConfig!, soundEffects: e.target.checked }
+                          })}
+                          className="h-4 w-4 rounded text-emerald-600"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase">Full Policy Body (Markdown / Plain Text)</label>
+                  <textarea
+                    rows={12}
+                    value={editingContentItem.contentMarkdown}
+                    onChange={(e) => setEditingContentItem({
+                      ...editingContentItem,
+                      contentMarkdown: e.target.value
+                    })}
+                    placeholder="Enter custom policy terms, clauses, support lines, or disclaimers here..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs leading-relaxed font-sans text-slate-800 focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    Leaving this empty will keep the default verified institutional text.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-3 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingContentItem(null)}
+                className="px-4 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (editingContentItem.type === "account") {
+                    handleUpdateAccountItem(editingContentItem.id, {
+                      settingsConfig: editingContentItem.settingsConfig
+                    });
+                  } else {
+                    handleUpdateLegalItem(editingContentItem.id, {
+                      contentMarkdown: editingContentItem.contentMarkdown
+                    });
+                  }
+                  toast.success("Content saved. Remember to click 'Save & Publish Live'!");
+                  setEditingContentItem(null);
+                }}
+                className="px-5 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition shadow-xs"
+              >
+                Apply Content
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

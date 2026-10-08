@@ -29,10 +29,13 @@ import {
   CheckCircle2,
   Radio,
   Sliders,
-  Type
+  Type,
+  Pencil,
+  Award
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
+import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
 
 type ControlTab =
   | "weather"
@@ -75,12 +78,47 @@ interface ImpactMetricItem {
   route?: string;
 }
 
+export interface ImpactStatItem {
+  id: string;
+  labelEn: string;
+  labelHi: string;
+  value: number;
+  suffix: string;
+  iconName: string;
+  enabled: boolean;
+}
+
+export interface ImpactDomainItem {
+  id: string;
+  tab: "all" | "community" | "care" | "active";
+  titleEn: string;
+  titleHi: string;
+  descEn: string;
+  descHi: string;
+  iconName: string;
+  badgeEn: string;
+  badgeHi: string;
+  color?: string;
+  enabled: boolean;
+}
+
 export default function HomeStudio() {
   const { token } = useAuth();
   const [activeTab, setActiveTab] = useState<ControlTab>("weather");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Icon Picker State
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [currentIconTarget, setCurrentIconTarget] = useState<{
+    type: "quick_access" | "impact_metric" | "impact_stat" | "impact_domain";
+    id: string;
+    currentIcon: string;
+  } | null>(null);
+
+  // Editing state for Impact Domain Modal
+  const [editingDomain, setEditingDomain] = useState<ImpactDomainItem | null>(null);
 
   // Complete CMS State
   const [cms, setCms] = useState<Record<string, any>>({});
@@ -148,8 +186,10 @@ export default function HomeStudio() {
   // 7. Quick Access Grid
   const [quickAccessItems, setQuickAccessItems] = useState<QuickAccessItem[]>([]);
 
-  // 8. Field Impact Metrics
+  // 8. Field Impact (Counters & Domains)
   const [impactMetrics, setImpactMetrics] = useState<ImpactMetricItem[]>([]);
+  const [impactStats, setImpactStats] = useState<ImpactStatItem[]>([]);
+  const [impactDomains, setImpactDomains] = useState<ImpactDomainItem[]>([]);
 
   // 9. Theme & Layout Template Samples
   const [themeConfig, setThemeConfig] = useState({
@@ -256,6 +296,129 @@ export default function HomeStudio() {
         ]);
       }
 
+      // 4 Master Counters & 8 Seva Domains
+      if (Array.isArray(d.impactStats) && d.impactStats.length) {
+        setImpactStats(d.impactStats);
+      } else {
+        setImpactStats([
+          { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: 66505, suffix: "+", iconName: "Award", enabled: true },
+          { id: "health_camps", labelEn: "Health & Eye Camps", labelHi: "स्वास्थ्य एवं नेत्र शिविर", value: 150, suffix: "+", iconName: "Stethoscope", enabled: true },
+          { id: "volunteers", labelEn: "Volunteers Network", labelHi: "सक्रिय स्वयंसेवक", value: 2400, suffix: "+", iconName: "Users", enabled: true },
+          { id: "jobs_empowered", labelEn: "Jobs & Livelihood", labelHi: "रोजगार व आजीविका", value: 1800, suffix: "+", iconName: "Briefcase", enabled: true }
+        ]);
+      }
+
+      if (Array.isArray(d.impactDomains) && d.impactDomains.length) {
+        setImpactDomains(d.impactDomains);
+      } else {
+        setImpactDomains([
+          {
+            id: "sanitation",
+            tab: "active",
+            titleEn: "Sanitation & Clean Environment Drive",
+            titleHi: "स्वच्छता अभियान व प्रसाधन केंद्र",
+            descEn: "Mass cleanliness drives, plastic-free campaigns, and public sanitation facilities.",
+            descHi: "ग्रामीण व शहरी बस्तियों में वृहद स्वच्छता अभियान एवं प्रसाधन केंद्र।",
+            iconName: "Trash2",
+            badgeEn: "Clean Environment",
+            badgeHi: "पर्यावरण व स्वच्छता",
+            color: "emerald",
+            enabled: true
+          },
+          {
+            id: "water",
+            tab: "care",
+            titleEn: "Clean Drinking Water Supply",
+            titleHi: "शुद्ध पेयजल व जल संरक्षण",
+            descEn: "Installing handpumps, clean RO water systems, and deploying water tankers.",
+            descHi: "जल संकटग्रस्त क्षेत्रों में हैंडपंप स्थापना, शुद्ध आरओ प्लांट व टैंकर आपूर्ति।",
+            iconName: "Droplets",
+            badgeEn: "Water Relief",
+            badgeHi: "पेयजल आपूर्ति",
+            color: "sky",
+            enabled: true
+          },
+          {
+            id: "jobs",
+            tab: "active",
+            titleEn: "Jobs for Unemployed Youth & Women",
+            titleHi: "रोजगार मेला व महिला आजीविका",
+            descEn: "Mega Rojgar Melas, direct company hiring drives, and micro-entrepreneurship.",
+            descHi: "बेरोजगार युवाओं के लिए रोजगार मेले, सीधी भर्ती ड्राइव व स्वरोजगार।",
+            iconName: "Briefcase",
+            badgeEn: "Livelihood",
+            badgeHi: "रोजगार अवसर",
+            color: "amber",
+            enabled: true
+          },
+          {
+            id: "pink-erickshaw",
+            tab: "active",
+            titleEn: "Pink E-Rickshaw Empowerment",
+            titleHi: "पिंक ई-रिक्शा योजना (महिला स्वावलंबन)",
+            descEn: "Providing subsidized eco-friendly e-rickshaws to women for financial independence.",
+            descHi: "महिलाओं को ई-रिक्शा स्वामित्व प्रदान कर आर्थिक स्वतंत्रता व सुरक्षित परिवहन।",
+            iconName: "Heart",
+            badgeEn: "Women Power",
+            badgeHi: "महिला स्वावलंबन",
+            color: "rose",
+            enabled: true
+          },
+          {
+            id: "skills",
+            tab: "active",
+            titleEn: "Skills Training & Vocational Courses",
+            titleHi: "कौशल विकास व वोकेशनल ट्रेनिंग",
+            descEn: "Free tailoring units, computer literacy centers, and electrician workshops.",
+            descHi: "निःशुल्क सिलाई-कढ़ाई केंद्र, कंप्यूटर साक्षरता, मोबाइल रिपेयरिंग कोर्स।",
+            iconName: "Wrench",
+            badgeEn: "Skill Development",
+            badgeHi: "कौशल विकास",
+            color: "purple",
+            enabled: true
+          },
+          {
+            id: "health",
+            tab: "care",
+            titleEn: "Free Health Services & Emergency Care",
+            titleHi: "निःशुल्क स्वास्थ्य सेवा व चिकित्सा शिविर",
+            descEn: "Conducting Mega Health Camps, free medicine distribution, and ambulance aid.",
+            descHi: "निःशुल्क स्वास्थ्य जांच शिविर, दवा वितरण, इमरजेंसी ब्लड डोनेशन नेटवर्क।",
+            iconName: "Stethoscope",
+            badgeEn: "Healthcare",
+            badgeHi: "निःशुल्क चिकित्सा",
+            color: "red",
+            enabled: true
+          },
+          {
+            id: "welfare",
+            tab: "care",
+            titleEn: "Helping Poor & Downtrodden People",
+            titleHi: "निराश्रित व वंचित वर्ग कल्याण",
+            descEn: "Distributing ration kits, winter blankets, and disaster emergency relief.",
+            descHi: "जरूरतमंद परिवारों को राशन किट, शीतकालीन कंबल, आपदा राहत सामग्रियां।",
+            iconName: "HandHeart",
+            badgeEn: "Welfare Relief",
+            badgeHi: "जन सेवा सहायता",
+            color: "emerald",
+            enabled: true
+          },
+          {
+            id: "education",
+            tab: "community",
+            titleEn: "Education Services & Youth Mentorship",
+            titleHi: "निःशुल्क शिक्षा व बाल कल्याण",
+            descEn: "Providing free books, stationery, evening tuition classes for children.",
+            descHi: "वंचित बच्चों हेतु निःशुल्क पाठ्य सामग्री, शाम की कोचिंग कक्षाएं।",
+            iconName: "GraduationCap",
+            badgeEn: "Youth Education",
+            badgeHi: "बाल शिक्षा सपोर्ट",
+            color: "indigo",
+            enabled: true
+          }
+        ]);
+      }
+
       // Theme
       if (d.themeConfig) setThemeConfig(prev => ({ ...prev, ...d.themeConfig }));
     } catch {
@@ -332,6 +495,8 @@ export default function HomeStudio() {
         founderMessageEn: visionConfig.founderMessage,
         quickAccessItems,
         impactMetrics,
+        impactStats,
+        impactDomains,
         themeConfig
       };
 
@@ -900,7 +1065,24 @@ export default function HomeStudio() {
                     className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] text-slate-600"
                   />
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentIconTarget({
+                          type: "quick_access",
+                          id: item.id,
+                          currentIcon: item.icon
+                        });
+                        setIconPickerOpen(true);
+                      }}
+                      className="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-700 hover:border-amber-400 hover:text-amber-700 flex items-center gap-1 shadow-2xs shrink-0"
+                      title="Click to visually pick icon (कोई कोडिंग नहीं)"
+                    >
+                      {React.createElement(AVAILABLE_ICONS[item.icon] || Compass, { className: "h-3.5 w-3.5 text-amber-600" })}
+                      <span className="text-[10px] font-medium">{item.icon || "Icon"}</span>
+                      <Pencil className="h-2.5 w-2.5 text-slate-400" />
+                    </button>
                     <input
                       type="text"
                       value={item.route}
@@ -927,81 +1109,408 @@ export default function HomeStudio() {
           </div>
         )}
 
-        {/* 8. FIELD IMPACT CONTROLS */}
+        {/* 8. FIELD IMPACT CONTROLS (FULL PENCIL EDIT, 4 MASTER COUNTERS & 8 SEVA DOMAINS) */}
         {activeTab === "impact" && (
-          <div className="space-y-6 animate-fade-in max-w-4xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-base font-black text-slate-800">Our Field Impact Cards</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Active/deactivate cards, update metrics, icons and linked pages.</p>
+          <div className="space-y-8 animate-fade-in max-w-5xl">
+            {/* SUB-SECTION 1: 4 MASTER IMPACT COUNTERS (E.G. 66,505+ JAN SEVA CARDS) */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded-lg bg-amber-50 text-amber-600 font-bold">
+                      <TrendingUp className="h-4 w-4" />
+                    </span>
+                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                      1. Master Impact KPI Counters (शीर्ष प्रभाव आंकड़े)
+                    </h3>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Jan Seva Cards (66,505+), Health Camps (150+), Volunteers Network, and Livelihoods.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newStat: ImpactStatItem = {
+                      id: `stat-${Date.now()}`,
+                      labelEn: "New Impact Metric",
+                      labelHi: "नया प्रभाव आंकड़ा",
+                      value: 1000,
+                      suffix: "+",
+                      iconName: "Sparkles",
+                      enabled: true
+                    };
+                    setImpactStats([...impactStats, newStat]);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 shadow-2xs"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Counter
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  const newImp: ImpactMetricItem = {
-                    id: `imp-${Date.now()}`,
-                    title: "Relief",
-                    subtitle: "Disaster and medical camps",
-                    icon: "Sparkles",
-                    active: true,
-                    route: "/community-care-active"
-                  };
-                  setImpactMetrics([...impactMetrics, newImp]);
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-lg"
-              >
-                <Plus className="h-4 w-4" /> Add Metric
-              </button>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                {impactStats.map((stat, sIdx) => {
+                  const IconComp = AVAILABLE_ICONS[stat.iconName] || Award;
+                  return (
+                    <div
+                      key={stat.id}
+                      className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        {/* Visual Icon Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCurrentIconTarget({
+                              type: "impact_stat",
+                              id: stat.id,
+                              currentIcon: stat.iconName
+                            });
+                            setIconPickerOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:border-amber-400 hover:text-amber-700 shadow-2xs transition"
+                          title="Click to visually pick icon (कोई कोडिंग नहीं)"
+                        >
+                          <IconComp className="h-4 w-4 text-amber-600" />
+                          <span className="text-[10px]">{stat.iconName || "Icon"}</span>
+                          <Pencil className="h-2.5 w-2.5 text-slate-400 ml-0.5" />
+                        </button>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setImpactStats(
+                                impactStats.map((st, i) =>
+                                  i === sIdx ? { ...st, enabled: !st.enabled } : st
+                                )
+                              )
+                            }
+                            className={`p-1 rounded-md ${
+                              stat.enabled
+                                ? "text-emerald-700 bg-emerald-50 border border-emerald-200"
+                                : "text-slate-400 bg-slate-200"
+                            }`}
+                            title={stat.enabled ? "Active" : "Deactive"}
+                          >
+                            {stat.enabled ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setImpactStats(impactStats.filter((_, i) => i !== sIdx))
+                            }
+                            className="p-1 text-rose-500 hover:bg-rose-50 rounded-md"
+                            title="Delete counter"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Number & Suffix */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase">Number</label>
+                          <input
+                            type="number"
+                            value={stat.value}
+                            onChange={(e) => {
+                              const val = Number(e.target.value) || 0;
+                              setImpactStats(
+                                impactStats.map((st, i) =>
+                                  i === sIdx ? { ...st, value: val } : st
+                                )
+                              );
+                            }}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-sm font-black text-slate-800"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase">Suffix</label>
+                          <input
+                            type="text"
+                            value={stat.suffix}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setImpactStats(
+                                impactStats.map((st, i) =>
+                                  i === sIdx ? { ...st, suffix: val } : st
+                                )
+                              );
+                            }}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-800"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Labels */}
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase">Label (English)</label>
+                        <input
+                          type="text"
+                          value={stat.labelEn}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setImpactStats(
+                              impactStats.map((st, i) =>
+                                i === sIdx ? { ...st, labelEn: val } : st
+                              )
+                            );
+                          }}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-700"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {impactMetrics.map((m, idx) => (
-                <div key={m.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
-                  <div className="flex items-center justify-between">
+            {/* SUB-SECTION 2: 8 SEVA DOMAINS (SANITATION, DRINKING WATER, PINK E-RICKSHAW, ETC.) */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 font-bold">
+                      <Sparkles className="h-4 w-4" />
+                    </span>
+                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                      2. Seva Domains & Field Work (8 मुख्य कार्य क्षेत्र)
+                    </h3>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Edit Title, Badges, Icons, and Descriptions with direct pencil editing (✏️) and active toggles.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newDom: ImpactDomainItem = {
+                      id: `domain-${Date.now()}`,
+                      tab: "active",
+                      titleEn: "New Field Initiative",
+                      titleHi: "नई जन सेवा पहल",
+                      descEn: "Describe the grassroots initiative, beneficiaries and achievements.",
+                      descHi: "पहल का विवरण और उपलब्धियां।",
+                      iconName: "Sparkles",
+                      badgeEn: "Field Mission",
+                      badgeHi: "जन सेवा मिशन",
+                      color: "emerald",
+                      enabled: true
+                    };
+                    setImpactDomains([...impactDomains, newDom]);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 shadow-2xs"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Seva Domain
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {impactDomains.map((dom, dIdx) => {
+                  const IconComp = AVAILABLE_ICONS[dom.iconName] || Sparkles;
+                  return (
+                    <div
+                      key={dom.id}
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3 relative group"
+                    >
+                      {/* Top Header: Badge, Icon & Controls */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCurrentIconTarget({
+                                type: "impact_domain",
+                                id: dom.id,
+                                currentIcon: dom.iconName
+                              });
+                              setIconPickerOpen(true);
+                            }}
+                            className="p-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-amber-400 hover:text-amber-700 shadow-2xs transition flex items-center gap-1"
+                            title="Click to visually pick icon (कोई कोडिंग नहीं)"
+                          >
+                            <IconComp className="h-4 w-4 text-emerald-600" />
+                            <Pencil className="h-3 w-3 text-slate-400" />
+                          </button>
+                          <input
+                            type="text"
+                            value={dom.badgeEn}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setImpactDomains(
+                                impactDomains.map((dm, i) =>
+                                  i === dIdx ? { ...dm, badgeEn: val } : dm
+                                )
+                              );
+                            }}
+                            placeholder="Badge (e.g. Water Relief)"
+                            className="bg-white border border-slate-200 rounded-md px-2 py-1 text-[11px] font-bold text-slate-700 w-32"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <select
+                            value={dom.tab}
+                            onChange={(e) => {
+                              const val = e.target.value as any;
+                              setImpactDomains(
+                                impactDomains.map((dm, i) =>
+                                  i === dIdx ? { ...dm, tab: val } : dm
+                                )
+                              );
+                            }}
+                            className="bg-white border border-slate-200 rounded-md px-2 py-1 text-[11px] font-bold text-slate-600"
+                          >
+                            <option value="active">Active</option>
+                            <option value="care">Care</option>
+                            <option value="community">Community</option>
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setImpactDomains(
+                                impactDomains.map((dm, i) =>
+                                  i === dIdx ? { ...dm, enabled: !dm.enabled } : dm
+                                )
+                              )
+                            }
+                            className={`p-1 rounded-md ${
+                              dom.enabled
+                                ? "text-emerald-700 bg-emerald-50 border border-emerald-200"
+                                : "text-slate-400 bg-slate-200"
+                            }`}
+                            title={dom.enabled ? "Active" : "Deactive"}
+                          >
+                            {dom.enabled ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setImpactDomains(impactDomains.filter((_, i) => i !== dIdx))
+                            }
+                            className="p-1 text-rose-500 hover:bg-rose-50 rounded-md"
+                            title="Delete Domain"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Title */}
+                      <div>
+                        <input
+                          type="text"
+                          value={dom.titleEn}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setImpactDomains(
+                              impactDomains.map((dm, i) =>
+                                i === dIdx ? { ...dm, titleEn: val } : dm
+                              )
+                            );
+                          }}
+                          placeholder="Initiative Title (e.g. Clean Drinking Water Supply)"
+                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800"
+                        />
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <textarea
+                          rows={2}
+                          value={dom.descEn}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setImpactDomains(
+                              impactDomains.map((dm, i) =>
+                                i === dIdx ? { ...dm, descEn: val } : dm
+                              )
+                            );
+                          }}
+                          placeholder="Brief description of field work..."
+                          className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-600"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* SUB-SECTION 3: THREE QUICK FIELD METRICS BAR ON HOMESCREEN (COMMUNITY, CARE, ACTIVE) */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                    3. Bottom Homescreen Strip (Community, Care, Active Bar)
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    The 3-column impact strip shown just above the footer on the home page.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {impactMetrics.map((m, idx) => (
+                  <div key={m.id} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <input
+                        type="text"
+                        value={m.title}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setImpactMetrics(
+                            impactMetrics.map((im, i) => (i === idx ? { ...im, title: val } : im))
+                          );
+                        }}
+                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-bold w-28"
+                      />
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setImpactMetrics(
+                              impactMetrics.map((im, i) =>
+                                i === idx ? { ...im, active: !im.active } : im
+                              )
+                            )
+                          }
+                          className={`p-1 rounded ${
+                            m.active ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"
+                          }`}
+                        >
+                          {m.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
                     <input
                       type="text"
-                      value={m.title}
-                      onChange={e => {
+                      value={m.subtitle}
+                      onChange={(e) => {
                         const val = e.target.value;
-                        setImpactMetrics(impactMetrics.map((im, i) => i === idx ? { ...im, title: val } : im));
+                        setImpactMetrics(
+                          impactMetrics.map((im, i) => (i === idx ? { ...im, subtitle: val } : im))
+                        );
                       }}
-                      className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-bold w-28"
+                      className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600"
                     />
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setImpactMetrics(impactMetrics.map((im, i) => i === idx ? { ...im, active: !im.active } : im))}
-                        className={`p-1 rounded ${m.active ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-200"}`}
-                      >
-                        {m.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                      </button>
-                      <button
-                        onClick={() => setImpactMetrics(impactMetrics.filter((_, i) => i !== idx))}
-                        className="p-1 text-rose-500 hover:bg-rose-50 rounded"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+                    <input
+                      type="text"
+                      value={m.route || "/community-care-active"}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setImpactMetrics(
+                          impactMetrics.map((im, i) => (i === idx ? { ...im, route: val } : im))
+                        );
+                      }}
+                      className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[10px] font-mono text-slate-500"
+                    />
                   </div>
-
-                  <input
-                    type="text"
-                    value={m.subtitle}
-                    onChange={e => {
-                      const val = e.target.value;
-                      setImpactMetrics(impactMetrics.map((im, i) => i === idx ? { ...im, subtitle: val } : im));
-                    }}
-                    className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600"
-                  />
-                  <input
-                    type="text"
-                    value={m.route || "/community-care-active"}
-                    onChange={e => {
-                      const val = e.target.value;
-                      setImpactMetrics(impactMetrics.map((im, i) => i === idx ? { ...im, route: val } : im));
-                    }}
-                    className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[10px] font-mono"
-                  />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -1082,6 +1591,39 @@ export default function HomeStudio() {
           </div>
         )}
       </div>
+
+      {/* REUSABLE VISUAL ICON PICKER MODAL */}
+      <IconPickerModal
+        isOpen={iconPickerOpen}
+        onClose={() => {
+          setIconPickerOpen(false);
+          setCurrentIconTarget(null);
+        }}
+        selectedIcon={currentIconTarget?.currentIcon || ""}
+        onSelectIcon={(newIconName) => {
+          if (!currentIconTarget) return;
+          if (currentIconTarget.type === "quick_access") {
+            setQuickAccessItems(
+              quickAccessItems.map((q) =>
+                q.id === currentIconTarget.id ? { ...q, icon: newIconName } : q
+              )
+            );
+          } else if (currentIconTarget.type === "impact_stat") {
+            setImpactStats(
+              impactStats.map((st) =>
+                st.id === currentIconTarget.id ? { ...st, iconName: newIconName } : st
+              )
+            );
+          } else if (currentIconTarget.type === "impact_domain") {
+            setImpactDomains(
+              impactDomains.map((dm) =>
+                dm.id === currentIconTarget.id ? { ...dm, iconName: newIconName } : dm
+              )
+            );
+          }
+          toast.success(`Icon changed to ${newIconName}`);
+        }}
+      />
     </div>
   );
 }

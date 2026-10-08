@@ -495,9 +495,30 @@ export default function Profile() {
               </div>
 
               {/* Modal Body Content */}
-              <div className="p-5 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-700">
+              <div className="overflow-y-auto p-4 flex-1 space-y-4 text-xs text-slate-700 leading-relaxed font-normal">
+                {/* Dynamic Admin Custom Content Check */}
+                {(() => {
+                  const customItem = Array.isArray(profileConfig?.legalItems)
+                    ? profileConfig.legalItems.find((li: any) => li.id === activeModal && li.contentMarkdown?.trim())
+                    : null;
+                  if (customItem) {
+                    return (
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-extrabold text-[#243B32] text-sm mb-1">{customItem.title}</h4>
+                          <p className="text-slate-600">{customItem.sub}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl whitespace-pre-wrap font-sans text-xs text-slate-800 leading-relaxed">
+                          {customItem.contentMarkdown}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
 
-                {activeModal === "terms" && (
+                {/* Default institutional content when no custom admin override is set */}
+                {activeModal === "terms" && !profileConfig?.legalItems?.find((li: any) => li.id === "terms" && li.contentMarkdown?.trim()) && (
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-extrabold text-[#243B32] text-sm mb-1">Terms & Conditions</h4>
