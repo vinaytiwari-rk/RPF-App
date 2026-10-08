@@ -277,7 +277,7 @@ export default function DashboardStudio() {
       if (Array.isArray(cms.instagramPosts)) reelsCount = cms.instagramPosts.filter((p: any) => p.active !== false).length;
 
       // Load persistent widget registry if configured
-      if (Array.isArray(cms.dashboardWidgets) && cms.dashboardWidgets.length > 0) {
+      if (Array.isArray(cms.dashboardWidgets)) {
         setWidgets(cms.dashboardWidgets);
       }
     } catch {}
