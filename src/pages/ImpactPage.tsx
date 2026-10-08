@@ -163,29 +163,27 @@
         }))
     : DEFAULT_IMPACT_DOMAINS;
 
-  const cmsStats = Array.isArray((cmsConfig as any)?.impactStats) ? (cmsConfig as any).impactStats : null;
 
   const liveStats = useMemo(() => {
-    if (Array.isArray(cmsConfig?.impactStats) && cmsConfig.impactStats.length > 0) {
-      return cmsConfig.impactStats.filter((s: any) => s.enabled !== false).map((s: any) => {
-        if (s.id === "cards_issued" && cardImpact?.totalCards) {
-          return { ...s, value: cardImpact.totalCards };
-        }
-        return s;
-      });
+    if (Array.isArray(cmsConfig?.impactStats)) {
+      return [...cmsConfig.impactStats]
+        .filter((s: any) => s && s.enabled !== false)
+        .sort((a: any, b: any) => (Number(a.order) || 0) - (Number(b.order) || 0))
+        .map((s: any) => s.id === "cards_issued" && cardImpact?.totalCards ? { ...s, value: cardImpact.totalCards } : s);
     }
     return [
-      { id: "beneficiaries", labelEn: "Total Beneficiaries", labelHi: "कुल लाभार्थी नागरिक", value: 250000, suffix: "+", iconName: "Users" },
-      { id: "health_camps", labelEn: "Health & Eye Camps", labelHi: "स्वास्थ्य एवं नेत्र शिविर", value: 450, suffix: "+", iconName: "Stethoscope" },
-      { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित वृक्ष व पौधे", value: 50000, suffix: "+", iconName: "Trees" },
+      { id: "beneficiaries", labelEn: "Total Beneficiaries", labelHi: "कुल लाभार्थी नागरिक", value: 0, suffix: "+", iconName: "Users" },
+      { id: "health_camps", labelEn: "Health & Eye Camps", labelHi: "स्वास्थ्य एवं नेत्र शिविर", value: 0, suffix: "+", iconName: "Stethoscope" },
+      { id: "tree_plantations", labelEn: "Trees Planted", labelHi: "रोपित वृक्ष व पौधे", value: 0, suffix: "+", iconName: "Trees" },
       { id: "cards_issued", labelEn: "Jan Seva Cards", labelHi: "जन सेवा कार्ड जारी", value: cardImpact?.totalCards ?? 0, suffix: "+", iconName: "Award" }
     ];
   }, [cmsConfig?.impactStats, cardImpact]);
 
   const liveDomains = useMemo(() => {
-    if (Array.isArray(cmsConfig?.impactDomains) && cmsConfig.impactDomains.length > 0) {
-      const enabledOnly = cmsConfig.impactDomains.filter((d: any) => d.enabled !== false);
-      if (enabledOnly.length > 0) return enabledOnly;
+    if (Array.isArray(cmsConfig?.impactDomains)) {
+      return [...cmsConfig.impactDomains]
+        .filter((d: any) => d && d.enabled !== false)
+        .sort((a: any, b: any) => (Number(a.order) || 0) - (Number(b.order) || 0));
     }
     return IMPACT_DOMAINS;
   }, [cmsConfig?.impactDomains]);
