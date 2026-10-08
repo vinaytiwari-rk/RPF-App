@@ -6,7 +6,6 @@ import { useAuth } from "../../../context/AuthContext";
 
 export default function ProfileStudio() {
   const { token } = useAuth();
-  const [activeTab, setActiveTab] = useState("about");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -25,9 +24,15 @@ export default function ProfileStudio() {
       Object.keys(data).forEach((key) => {
         newDrafts[key] = typeof data[key] === "string" ? data[key] : JSON.stringify(data[key], null, 2);
       });
+
+      // Unified single aboutText key
+      if (!newDrafts["aboutText"] && (newDrafts["aboutTextHi"] || newDrafts["aboutTextEn"])) {
+        newDrafts["aboutText"] = newDrafts["aboutTextHi"] || newDrafts["aboutTextEn"] || "";
+      }
+
       setDrafts(newDrafts);
       setDirty(new Set());
-    } catch (e) {
+    } catch {
       toast.error("Failed to load CMS data");
     } finally {
       setLoading(false);
@@ -35,8 +40,23 @@ export default function ProfileStudio() {
   };
 
   const handleUpdateDraft = (key: string, value: string) => {
-    setDrafts(prev => ({ ...prev, [key]: value }));
-    setDirty(prev => new Set(prev).add(key));
+    setDrafts((prev) => {
+      const updated = { ...prev, [key]: value };
+      if (key === "aboutText") {
+        updated["aboutTextEn"] = value;
+        updated["aboutTextHi"] = value;
+      }
+      return updated;
+    });
+
+    setDirty((prev) => {
+      const next = new Set(prev).add(key);
+      if (key === "aboutText") {
+        next.add("aboutTextEn");
+        next.add("aboutTextHi");
+      }
+      return next;
+    });
   };
 
   const handleSave = async () => {
@@ -59,7 +79,7 @@ export default function ProfileStudio() {
       toast.success("Profile content updated!", { id: toastId });
       setDirty(new Set());
     } catch (e: any) {
-      toast.error("Failed to save", { id: toastId });
+      toast.error(e?.response?.data?.error || "Failed to save", { id: toastId });
     } finally {
       setSaving(false);
     }
@@ -75,6 +95,7 @@ export default function ProfileStudio() {
           <div>
             <p className="text-[10px] font-bold tracking-widest uppercase text-purple-500">Profile & About CMS</p>
             <h1 className="text-xl md:text-2xl font-black text-slate-800">Organization Info</h1>
+            <p className="text-xs text-slate-500 mt-1">Unified description and foundation mission overview</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -95,8 +116,8 @@ export default function ProfileStudio() {
                 <FileText className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-800">About App</p>
-                <p className="text-[10px] text-slate-500">Long-form descriptions</p>
+                <p className="text-sm font-bold text-slate-800">About Foundation</p>
+                <p className="text-[10px] text-slate-500">Main overview & vision</p>
               </div>
             </button>
           </div>
@@ -112,12 +133,14 @@ export default function ProfileStudio() {
               <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 mb-4">About the Organization</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">About Text (English)</label>
-                  <textarea rows={6} value={drafts["aboutTextEn"] || ""} onChange={(e) => handleUpdateDraft("aboutTextEn", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">About Text (Hindi)</label>
-                  <textarea rows={6} value={drafts["aboutTextHi"] || ""} onChange={(e) => handleUpdateDraft("aboutTextHi", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500" />
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">About Text / Vision Statement</label>
+                  <textarea
+                    rows={8}
+                    value={drafts["aboutText"] || drafts["aboutTextHi"] || drafts["aboutTextEn"] || ""}
+                    onChange={(e) => handleUpdateDraft("aboutText", e.target.value)}
+                    placeholder="Enter Foundation story, aims and vision..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 leading-relaxed"
+                  />
                 </div>
               </div>
             </div>

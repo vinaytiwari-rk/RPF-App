@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Save, CheckCircle, Compass, ShieldCheck, Heart, Users, Landmark, AlertCircle, Edit, ExternalLink, Globe } from "lucide-react";
+import { CheckCircle, Compass, AlertCircle, Edit, Globe } from "lucide-react";
 import toast from "react-hot-toast";
 
 type ServiceItem = {
@@ -31,7 +31,7 @@ export default function ExploreStudio() {
       if (res.data?.data) {
         setServices(res.data.data);
       }
-    } catch (e) {
+    } catch {
       toast.error("Failed to load CMS data");
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ export default function ExploreStudio() {
       } else {
         toast.error("Failed to update visibility", { id: toastId });
       }
-    } catch (e) {
+    } catch {
       toast.error("Error saving changes", { id: toastId });
     }
   };
@@ -137,8 +137,12 @@ export default function ExploreStudio() {
                           ID: {service.id}
                         </span>
                       </div>
-                      <h3 className="text-xs font-bold text-slate-800 truncate mb-1">{service.titleEn}</h3>
-                      <p className="text-[10px] text-slate-500 truncate mb-2">{service.descEn}</p>
+                      <h3 className="text-xs font-bold text-slate-800 truncate mb-1">
+                        {service.titleEn || service.titleHi}
+                      </h3>
+                      <p className="text-[10px] text-slate-500 truncate mb-2">
+                        {service.descEn || service.descHi}
+                      </p>
                       
                       <div className="flex items-center justify-between border-t border-slate-100 pt-2">
                         <button className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800">
@@ -162,8 +166,12 @@ export default function ExploreStudio() {
             <div className="p-6 h-full flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-lg font-black text-slate-800">{selectedItem.titleEn}</h2>
-                  <p className="text-sm font-semibold text-slate-500">{selectedItem.titleHi}</p>
+                  <h2 className="text-lg font-black text-slate-800">
+                    {selectedItem.titleEn || selectedItem.titleHi}
+                  </h2>
+                  <span className="inline-block mt-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded text-indigo-700 bg-indigo-50 border border-indigo-100">
+                    Category: {selectedItem.category}
+                  </span>
                 </div>
                 <div className="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 border border-indigo-100">
                   <Globe className="h-6 w-6" />
@@ -173,19 +181,13 @@ export default function ExploreStudio() {
               <div className="space-y-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                 
                 <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Service Identity (Hardcoded in Core)</h4>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-2 gap-4">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Service Overview</h4>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">English Desc</p>
-                      <p className="text-xs font-semibold text-slate-700">{selectedItem.descEn}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Hindi Desc</p>
-                      <p className="text-xs font-semibold text-slate-700">{selectedItem.descHi}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Category</p>
-                      <p className="text-xs font-semibold text-slate-700">{selectedItem.category}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Description</p>
+                      <p className="text-xs font-semibold text-slate-700 leading-relaxed">
+                        {selectedItem.descEn || selectedItem.descHi}
+                      </p>
                     </div>
                   </div>
                 </div>

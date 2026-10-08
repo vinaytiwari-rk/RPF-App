@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Images, Save, Check, RefreshCw, FileText, Megaphone, Link2 } from "lucide-react";
+import { Images, Save, RefreshCw, FileText, Megaphone, Link2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function HomeStudio() {
   const { token } = useAuth();
-  const [cms, setCms] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("identity");
@@ -24,15 +23,23 @@ export default function HomeStudio() {
     try {
       const res = await axios.get("/api/cms");
       const data = res.data?.cms || res.data?.data || {};
-      setCms(data);
-      
+
       const newDrafts: Record<string, string> = {};
       Object.keys(data).forEach((key) => {
         newDrafts[key] = typeof data[key] === "string" ? data[key] : JSON.stringify(data[key], null, 2);
       });
+
+      // Synchronize single unified keys from legacy En/Hi if they don't exist
+      if (!newDrafts["founderMessage"] && (newDrafts["founderMessageHi"] || newDrafts["founderMessageEn"])) {
+        newDrafts["founderMessage"] = newDrafts["founderMessageHi"] || newDrafts["founderMessageEn"] || "";
+      }
+      if (!newDrafts["alertBanner"] && (newDrafts["alertBannerHi"] || newDrafts["alertBannerEn"])) {
+        newDrafts["alertBanner"] = newDrafts["alertBannerHi"] || newDrafts["alertBannerEn"] || "";
+      }
+
       setDrafts(newDrafts);
       setDirty(new Set());
-    } catch (e) {
+    } catch {
       toast.error("Failed to load CMS data");
     } finally {
       setLoading(false);
@@ -40,8 +47,32 @@ export default function HomeStudio() {
   };
 
   const handleUpdateDraft = (key: string, value: string) => {
-    setDrafts(prev => ({ ...prev, [key]: value }));
-    setDirty(prev => new Set(prev).add(key));
+    setDrafts((prev) => {
+      const updated = { ...prev, [key]: value };
+      // Also mirror single unified key to legacy En/Hi keys automatically to keep full app backwards compatible
+      if (key === "founderMessage") {
+        updated["founderMessageEn"] = value;
+        updated["founderMessageHi"] = value;
+      }
+      if (key === "alertBanner") {
+        updated["alertBannerEn"] = value;
+        updated["alertBannerHi"] = value;
+      }
+      return updated;
+    });
+
+    setDirty((prev) => {
+      const next = new Set(prev).add(key);
+      if (key === "founderMessage") {
+        next.add("founderMessageEn");
+        next.add("founderMessageHi");
+      }
+      if (key === "alertBanner") {
+        next.add("alertBannerEn");
+        next.add("alertBannerHi");
+      }
+      return next;
+    });
   };
 
   const handleSave = async () => {
@@ -52,15 +83,17 @@ export default function HomeStudio() {
 
     const patch: Record<string, any> = {};
     let hasChanges = false;
-    
+
     for (const key of dirty) {
-      // Basic JSON parsing if it looks like an array or object
       let parsedValue: any = drafts[key];
-      if ((parsedValue.startsWith("{") && parsedValue.endsWith("}")) || (parsedValue.startsWith("[") && parsedValue.endsWith("]"))) {
+      if (
+        (parsedValue?.startsWith("{") && parsedValue?.endsWith("}")) ||
+        (parsedValue?.startsWith("[") && parsedValue?.endsWith("]"))
+      ) {
         try {
           parsedValue = JSON.parse(parsedValue);
         } catch {
-          // Leave as string if it doesn't parse
+          // fallback string
         }
       }
       patch[key] = parsedValue;
@@ -81,11 +114,8 @@ export default function HomeStudio() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data?.success === false) throw new Error(res.data?.error || "Publish failed");
-      
+
       toast.success("CMS updated successfully!", { id: toastId });
-      
-      // Update local state
-      setCms(prev => ({ ...prev, ...patch }));
       setDirty(new Set());
     } catch (e: any) {
       toast.error(e?.response?.data?.error || e.message || "Failed to save CMS", { id: toastId });
@@ -104,7 +134,7 @@ export default function HomeStudio() {
           <div>
             <p className="text-[10px] font-bold tracking-widest uppercase text-blue-500">Content Studio</p>
             <h1 className="text-xl md:text-2xl font-black text-slate-800">Home & Core Settings CMS</h1>
-            <p className="text-xs text-slate-500 mt-1">Manage Founder details, Alert banners, and Social Links</p>
+            <p className="text-xs text-slate-500 mt-1">Unified content controls for Founder speech, announcements and contacts</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -130,7 +160,7 @@ export default function HomeStudio() {
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-800">Core Identity</p>
-                <p className="text-[10px] text-slate-500">Founder Details & Bio</p>
+                <p className="text-[10px] text-slate-500">Founder Details & Message</p>
               </div>
             </button>
             <button
@@ -142,7 +172,7 @@ export default function HomeStudio() {
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-800">Alerts & Marquees</p>
-                <p className="text-[10px] text-slate-500">Global Announcements</p>
+                <p className="text-[10px] text-slate-500">Unified Live Announcements</p>
               </div>
             </button>
             <button
@@ -173,22 +203,20 @@ export default function HomeStudio() {
                 <div className="space-y-6 animate-fade-in">
                   <div>
                     <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 mb-4">Foundation Identity</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Founder Name</label>
-                        <input type="text" value={drafts["founderName"] || ""} onChange={(e) => handleUpdateDraft("founderName", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-blue-500" />
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Founder Name</label>
+                          <input type="text" value={drafts["founderName"] || ""} onChange={(e) => handleUpdateDraft("founderName", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Founder Designation</label>
+                          <input type="text" value={drafts["founderDesignation"] || ""} onChange={(e) => handleUpdateDraft("founderDesignation", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-blue-500" />
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Founder Designation</label>
-                        <input type="text" value={drafts["founderDesignation"] || ""} onChange={(e) => handleUpdateDraft("founderDesignation", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Founder Message (English)</label>
-                        <textarea rows={3} value={drafts["founderMessageEn"] || ""} onChange={(e) => handleUpdateDraft("founderMessageEn", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Founder Message (Hindi)</label>
-                        <textarea rows={3} value={drafts["founderMessageHi"] || ""} onChange={(e) => handleUpdateDraft("founderMessageHi", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" />
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Founder Message</label>
+                        <textarea rows={5} value={drafts["founderMessage"] || drafts["founderMessageHi"] || drafts["founderMessageEn"] || ""} onChange={(e) => handleUpdateDraft("founderMessage", e.target.value)} placeholder="Enter Founder speech/message..." className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 leading-relaxed" />
                       </div>
                     </div>
                   </div>
@@ -201,16 +229,12 @@ export default function HomeStudio() {
                     <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 mb-4">Alerts & Marquees</h3>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Alert Banner (English)</label>
-                        <input type="text" value={drafts["alertBannerEn"] || ""} onChange={(e) => handleUpdateDraft("alertBannerEn", e.target.value)} className="w-full bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm font-semibold text-amber-900 focus:ring-2 focus:ring-amber-500" />
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Global Alert Banner</label>
+                        <input type="text" value={drafts["alertBanner"] || drafts["alertBannerHi"] || drafts["alertBannerEn"] || ""} onChange={(e) => handleUpdateDraft("alertBanner", e.target.value)} placeholder="Live emergency notice or news..." className="w-full bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm font-semibold text-amber-900 focus:ring-2 focus:ring-amber-500" />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Alert Banner (Hindi)</label>
-                        <input type="text" value={drafts["alertBannerHi"] || ""} onChange={(e) => handleUpdateDraft("alertBannerHi", e.target.value)} className="w-full bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm font-semibold text-amber-900 focus:ring-2 focus:ring-amber-500" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Helplines Marquee Text</label>
-                        <textarea rows={3} value={drafts["helplinesMarquee"] || ""} onChange={(e) => handleUpdateDraft("helplinesMarquee", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500" placeholder="Supports comma separated string..." />
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Helplines Marquee Ticker</label>
+                        <textarea rows={4} value={drafts["helplinesMarquee"] || ""} onChange={(e) => handleUpdateDraft("helplinesMarquee", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500" placeholder="Emergency contacts comma-separated..." />
                       </div>
                     </div>
                   </div>
@@ -231,7 +255,7 @@ export default function HomeStudio() {
                         <input type="text" value={drafts["tollFree"] || ""} onChange={(e) => handleUpdateDraft("tollFree", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-emerald-500" />
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Government Scheme URL</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Government Scheme Portal URL</label>
                         <input type="text" value={drafts["governmentSchemeUrl"] || ""} onChange={(e) => handleUpdateDraft("governmentSchemeUrl", e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-emerald-500" />
                       </div>
                       <div className="md:col-span-2">
