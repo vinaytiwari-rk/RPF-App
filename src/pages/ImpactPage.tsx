@@ -299,8 +299,17 @@ export default function ImpactPage() {
   }, [cmsConfig?.impactStats, cardImpact]);
 
   const liveDomains = useMemo(() => {
+    if (Array.isArray(cmsConfig?.impactDomains)) {
+      return [...cmsConfig.impactDomains]
+        .filter((d: any) => d && d.enabled !== false)
+        .sort(
+          (a: any, b: any) =>
+            (Number(a.order) || 0) - (Number(b.order) || 0)
+        );
+    }
+
     return IMPACT_DOMAINS;
-  }, [IMPACT_DOMAINS]);
+  }, [cmsConfig?.impactDomains, IMPACT_DOMAINS]);
 
   const filteredDomains = liveDomains.filter((d: any) => subTab === "all" || d.tab === subTab);
 
