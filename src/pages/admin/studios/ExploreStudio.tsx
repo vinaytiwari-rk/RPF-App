@@ -178,7 +178,7 @@ export default function ExploreStudio() {
 
       const hydrateCardsWithLinks = (cards: ServiceCard[]) => {
         return cards.map(card => {
-          if (Array.isArray(card.subLinks) && card.subLinks.length > 0) return card;
+          if (Array.isArray(card.subLinks)) return card;
           // Hydrate from serviceWebsiteLinks or default catalog
           const existingLinks = (Array.isArray(websiteMap[card.id]) && websiteMap[card.id].length > 0)
             ? websiteMap[card.id]
@@ -199,13 +199,13 @@ export default function ExploreStudio() {
         });
       };
 
-      if (Array.isArray(cms.featuredServices) && cms.featuredServices.length > 0) {
+      if (Array.isArray(cms.featuredServices)) {
         setFeaturedServices(hydrateCardsWithLinks(cms.featuredServices));
       } else {
         setFeaturedServices(hydrateCardsWithLinks(DEFAULT_FEATURED_SERVICES));
       }
 
-      if (Array.isArray(cms.allServices) && cms.allServices.length > 0) {
+      if (Array.isArray(cms.allServices)) {
         setAllServices(hydrateCardsWithLinks(cms.allServices));
       } else {
         setAllServices(hydrateCardsWithLinks(DEFAULT_ALL_SERVICES));
@@ -230,7 +230,7 @@ export default function ExploreStudio() {
       // Construct serviceWebsiteLinks map so both legacy and modern readers receive identical child links
       const serviceWebsiteLinks: Record<string, any[]> = {};
       [...featuredServices, ...allServices].forEach(s => {
-        if (s && s.id && Array.isArray(s.subLinks) && s.subLinks.length > 0) {
+        if (s && s.id && Array.isArray(s.subLinks)) {
           serviceWebsiteLinks[s.id] = s.subLinks
             .filter((l: any) => l && l.active !== false)
             .map((l: any) => ({
