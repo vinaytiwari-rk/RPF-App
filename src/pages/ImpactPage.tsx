@@ -299,22 +299,27 @@ export default function ImpactPage() {
   }, [cmsConfig?.impactStats, cardImpact]);
 
   const liveDomains = useMemo(() => {
-    if (Array.isArray(cmsConfig?.impactDomains)) {
-      return [...cmsConfig.impactDomains]
-        .filter((d: any) => d && d.enabled !== false)
-        .sort((a: any, b: any) => (Number(a.order) || 0) - (Number(b.order) || 0));
-    }
     return IMPACT_DOMAINS;
-  }, [cmsConfig?.impactDomains]);
+  }, [IMPACT_DOMAINS]);
 
   const filteredDomains = liveDomains.filter((d: any) => subTab === "all" || d.tab === subTab);
 
   const liveStories = useMemo(() => {
-    if (Array.isArray(cmsConfig?.testimonials) && cmsConfig.testimonials.length > 0) {
-      return cmsConfig.testimonials.filter((t: any) => t.enabled !== false);
+    if (Array.isArray(cmsConfig?.testimonials)) {
+      return [...cmsConfig.testimonials]
+        .filter((t: any) => t && t.enabled !== false)
+        .sort((a: any, b: any) => (Number(a.order) || 0) - (Number(b.order) || 0));
     }
     return [];
   }, [cmsConfig?.testimonials]);
+
+  const pageHeadline = isHi 
+    ? (cmsConfig?.impactHeadlineHi || "हमारा सामाजिक प्रभाव")
+    : (cmsConfig?.impactHeadlineEn || "Our Social Impact");
+    
+  const pageDescription = isHi
+    ? (cmsConfig?.impactDescHi || "पेयजल, स्वच्छता, रोजगार, स्वास्थ्य, महिला स्वावलंबन, पर्यावरण व भारतीय संस्कृति हेतु समर्पित कार्य।")
+    : (cmsConfig?.impactDescEn || "Field activities across sanitation, clean water, jobs, skills, free health, poor relief, environment & heritage.");
 
 
   return (
