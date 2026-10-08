@@ -315,3 +315,166 @@ export default function ImpactPage() {
     }
     return [];
   }, [cmsConfig?.testimonials]);
+
+
+  return (
+    <div className="min-h-screen bg-transparent pb-36 font-sans selection:bg-orange-100 animate-fadeIn text-slate-800">
+      {/* Header Banner (Vibrant Saffron-Emerald Brand Tricolor) */}
+      <div className="bg-gradient-to-br from-[#B9E5CC] via-[#FFF7E8] to-[#FFD49A] p-6 text-[#245D45] relative overflow-hidden shadow-md">
+        <div className="absolute top-0 right-0 w-44 h-44 bg-white/10 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />
+        <div className="relative z-10 max-w-2xl mx-auto space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-md border border-[#B9E5CC] text-[#245D45]">
+            <Activity className="w-3.5 h-3.5 text-[#D97706]" />
+            {isHi ? "सामाजिक प्रभाव" : "Impact"}
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight text-[#245D45]">
+            {pageHeadline}
+          </h1>
+          <p className="text-xs text-[#426B55] font-medium leading-relaxed max-w-xl">
+            {pageDescription}
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
+
+        {/* Tab 1: Field Impact & Relief */}
+        {activeMainTab === "impact" && (
+          <div className="space-y-5">
+            {/* LIVE IMPACT STATS COUNTERS (SYNCED DIRECTLY FROM CMS ADMIN) */}
+            <section className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-xs font-black uppercase tracking-wider text-[#166534]">
+                  {isHi ? "सामुदायिक प्रभाव आंकड़े" : "Key Impact Highlights"}
+                </h2>
+                <span className="text-[10px] font-bold text-slate-400">
+                  {isHi ? "प्रमाणित आंकड़े" : "Verified Metrics"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {liveStats.map((st: any, idx: number) => {
+                  const tones: ("saffron" | "green" | "gold" | "navy")[] = ["saffron", "green", "gold", "navy"];
+                  const tone = tones[idx % tones.length];
+                  return (
+                    <AnimatedMetricCard
+                      key={st.id || idx}
+                      label={isHi ? (st.labelHi || st.labelEn) : st.labelEn}
+                      value={Number(st.value) || 0}
+                      suffix={st.suffix || "+"}
+                      tone={tone}
+                      delay={idx * 0.08}
+                    />
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Category Filter Pills: All, Community, Care, Active */}
+            <section className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-xs font-black uppercase tracking-wider text-[#245D45]">
+                  {isHi ? "कार्यक्षेत्र श्रेणियां" : "Impact Categories"}
+                </h2>
+                <span className="text-[11px] font-bold text-slate-400">
+                  {filteredDomains.length} {isHi ? "पहल" : "Initiatives"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                {[
+                  { id: "all" as const, labelEn: "All Work", labelHi: "समस्त कार्य", icon: Sparkles },
+                  { id: "community" as const, labelEn: "Community", labelHi: "सामुदायिक कल्याण", icon: Users },
+                  { id: "care" as const, labelEn: "Care & Relief", labelHi: "स्वास्थ्य व सहायता", icon: Heart },
+                  { id: "active" as const, labelEn: "Active Ground", labelHi: "ऑन-फील्ड प्रोजेक्ट्स", icon: ShieldCheck },
+                ].map(({ id, labelEn, labelHi, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setSubTab(id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer border ${
+                      subTab === id
+                        ? "bg-[#D97706] border-[#D97706] text-white shadow-xs"
+                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{isHi ? labelHi : labelEn}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* Detailed Impact Domain Cards */}
+            <section className="space-y-3">
+              {filteredDomains.map((domain: any) => {
+                return (
+                  <div 
+                    key={domain.id} 
+                    className="bg-white rounded-[22px] border border-slate-200/80 p-4 shadow-2xs space-y-2 hover:border-slate-300 transition-all"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-[66px] w-[66px] shrink-0" aria-hidden="true">
+                          {serviceArtFor(domain.id) ? (
+                            <ServiceIllustration kind={serviceArtFor(domain.id)!} className="h-full w-full" />
+                          ) : (
+                            <div className={`h-full w-full rounded-2xl flex items-center justify-center border ${domain.color || "bg-orange-50 text-[#C2410C] border-orange-200"}`}>
+                              {renderDomainIcon(domain.iconName || domain.icon)}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold leading-snug text-[#166534] break-words">
+                            {isHi ? (domain.titleHi || domain.titleEn) : domain.titleEn}
+                          </h3>
+                          <span className="text-[9.5px] font-extrabold text-[#C2410C] uppercase tracking-wider">
+                            {isHi ? (domain.badgeHi || domain.badgeEn) : domain.badgeEn}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-xs leading-relaxed text-slate-600 font-medium pl-1">
+                      {isHi ? (domain.descHi || domain.descEn) : domain.descEn}
+                    </p>
+                  </div>
+                );
+              })}
+            </section>
+
+            {/* Citizen Testimonials & Ground Stories */}
+            {liveStories.length > 0 && (
+              <section className="space-y-3 bg-white rounded-3xl border border-slate-200 p-5 shadow-xs">
+                <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                  <MessageSquareQuote className="w-4 h-4 text-[#C2410C]" />
+                  <h3 className="text-xs font-black text-[#0A192F] uppercase tracking-wider">
+                    {isHi ? "नागरिक अनुभव एवं जन समीक्षा" : "Ground Voices & Stories"}
+                  </h3>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {liveStories.map((story: any) => (
+                    <div key={story.id} className="p-3.5 rounded-2xl bg-amber-50/40 border border-amber-200/60 space-y-2">
+                      <p className="text-xs text-slate-700 italic leading-relaxed">
+                        “{isHi ? (story.quoteHi || story.quoteEn) : story.quoteEn}”
+                      </p>
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-[#0A192F]">
+                          {isHi ? (story.nameHi || story.nameEn) : story.nameEn}
+                        </p>
+                        <p className="text-[10px] text-slate-500">
+                          {isHi ? (story.villageHi || story.villageEn) : story.villageEn}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+
