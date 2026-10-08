@@ -1,3 +1,122 @@
+import React, { useEffect, useState, useMemo } from "react";
+import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
+import {
+  Instagram,
+  Heart,
+  Briefcase,
+  Stethoscope,
+  Sparkles,
+  ExternalLink,
+  ChevronRight,
+  ShieldCheck,
+  Clock,
+  Droplets,
+  Trash2,
+  GraduationCap,
+  Trees,
+  Landmark,
+  HandHeart,
+  Wrench,
+  Users,
+  Search,
+  Send,
+  Activity,
+  Award,
+  TrendingUp,
+  MessageSquareQuote
+} from "lucide-react";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+import { useApp } from "../context/AppContext";
+import { AnimatedMetricCard, AnimatedNumber } from "../components/AnimatedMetricCard";
+
+type MainTab = "impact" | "volunteers" | "chat";
+type SubFilterTab = "all" | "community" | "care" | "active";
+
+const ICON_MAP: Record<string, any> = {
+  Trash2,
+  Droplets,
+  Briefcase,
+  Heart,
+  Wrench,
+  Stethoscope,
+  Trees,
+  Landmark,
+  GraduationCap,
+  Users,
+  Award,
+  ShieldCheck,
+  Sparkles,
+  HandHeart,
+  Activity,
+  TrendingUp
+};
+
+function renderDomainIcon(iconNameOrComp: any) {
+  if (!iconNameOrComp) return <Sparkles className="w-5 h-5 text-[#C2410C]" />;
+  if (typeof iconNameOrComp === "string") {
+    const Comp = ICON_MAP[iconNameOrComp] || Sparkles;
+    return <Comp className="w-5 h-5 text-[#C2410C]" />;
+  }
+  const Comp = iconNameOrComp;
+  return <Comp className="w-5 h-5 text-[#C2410C]" />;
+}
+
+interface ChatMessage {
+  id: string;
+  authorName: string;
+  text: string;
+  time?: string;
+}
+
+interface Volunteer {
+  id: string;
+  name: string;
+  role?: string;
+  city?: string;
+  skills?: string[] | string;
+}
+
+export default function ImpactPage() {
+  const navigate = useNavigate();
+  const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
+  const { user } = useAuth();
+  const { cmsConfig } = useApp();
+  const isHi = lang === "hi";
+
+  const [activeMainTab, setActiveMainTab] = useState<MainTab>("impact");
+  const [subTab, setSubTab] = useState<SubFilterTab>("all");
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+  const [cardImpact, setCardImpact] = useState<{ totalCards: number; scope: string } | null>(null);
+  useEffect(() => {
+    let active = true;
+    axios.get('/api/public/cards/impact', { timeout: 8000 }).then(({ data }) => {
+      if (active && data?.success && Number.isFinite(data.totalCards)) {
+        setCardImpact({ totalCards: data.totalCards, scope: data.scope });
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const [volunteerCityFilter, setVolunteerCityFilter] = useState("");
+
+  // Chat states
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { id: "c1", authorName: "Rohit Pandit", text: "Welcome to Samahit Activity & Impact Portal! Together we serve.", time: "10:30 AM" },
+    { id: "c2", authorName: "Sunita Verma", text: "Bhopal Pink E-Rickshaw drive was a great success today!", time: "11:15 AM" }
+  ]);
+  const [chatInput, setChatInput] = useState("");
+
+  useEffect(() => {
+    fetchVolunteers();
+  }, []);
+
+  const fetchVolunteers = async (city?: string) => {
+    try {
+      const res = await axios.get("/api/public/volunteers", { params: city ? { city } : {} });
+      if (res.data.success && Array.isArray(res.data.data)) {
+        setVolunteers(res.data.data);
       }
     } catch {
       setVolunteers([
