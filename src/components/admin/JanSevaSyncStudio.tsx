@@ -23,11 +23,11 @@ import {
 type Row = Record<string, unknown>;
 
 interface JanSevaSyncStudioProps {
-  cards: Row[];
+  cards?: Row[];
   totalCards?: number;
-  token: string;
-  onRefresh: () => void | Promise<void>;
-  exportCsv: (resource: string, filename: string) => void;
+  token?: string;
+  onRefresh?: () => void | Promise<void>;
+  exportCsv?: (resource: string, filename: string) => void;
 }
 
 function firstText(row: Row, keys: string[]): string {
@@ -99,7 +99,13 @@ const JAN_SEVA_BENEFITS_HI = [
   ["मानव अधिकार", "अन्याय और भ्रष्टाचार के खिलाफ जागरूकता फैलाना।"]
 ] as const;
 
-export default function JanSevaSyncStudio({ cards, totalCards = cards.length, token, onRefresh, exportCsv }: JanSevaSyncStudioProps) {
+export default function JanSevaSyncStudio({
+  cards = [],
+  totalCards = cards.length,
+  token = "",
+  onRefresh = () => {},
+  exportCsv = () => {}
+}: JanSevaSyncStudioProps = {}) {
   const [syncBusy, setSyncBusy] = useState(false);
   const [syncStatus, setSyncStatus] = useState("");
   const [cardFilter, setCardFilter] = useState<"all" | "pending" | "mirrored" | "approved">("all");

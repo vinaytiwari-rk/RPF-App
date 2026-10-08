@@ -563,7 +563,13 @@ export default function DashboardStudio() {
           </div>
 
           {/* Database Sync Studio Component */}
-          <JanSevaSyncStudio cards={data.cards} totalCards={typeof metrics.cards.value === "number" ? metrics.cards.value : data.cards.length} token={token} onRefresh={load} exportCsv={exportCsv} />
+          <JanSevaSyncStudio
+            cards={data.cards}
+            totalCards={typeof metrics.cards.value === "number" ? metrics.cards.value : data.cards.length}
+            token={token || ""}
+            onRefresh={load}
+            exportCsv={exportCsv}
+          />
         </div>
       )}
 
