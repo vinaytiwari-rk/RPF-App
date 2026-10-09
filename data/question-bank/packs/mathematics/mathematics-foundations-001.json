@@ -1,0 +1,232 @@
+{
+  "packId": "mathematics-foundations-001",
+  "version": 1,
+  "subject": "mathematics",
+  "category": "quantitative-aptitude",
+  "titleEn": "Mathematics — Foundations",
+  "titleHi": "गणित — आधारभूत प्रश्न",
+  "descEn": "Original bilingual arithmetic and quantitative aptitude questions.",
+  "descHi": "अंकगणित और मात्रात्मक योग्यता के मौलिक द्विभाषी प्रश्न।",
+  "iconName": "Calculator",
+  "color": "from-blue-600 to-cyan-600",
+  "badge": "Original practice",
+  "durationMinutes": 10,
+  "questions": [
+    {
+      "id": "math-001",
+      "subject": "mathematics",
+      "questionEn": "What is 15% of 240?",
+      "questionHi": "240 का 15% कितना है?",
+      "optionsEn": [
+        "24",
+        "30",
+        "36",
+        "40"
+      ],
+      "optionsHi": [
+        "24",
+        "30",
+        "36",
+        "40"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "10% of 240 is 24 and 5% is 12; total 36.",
+      "explanationHi": "240 का 10% 24 और 5% 12 है; कुल 36।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math-002",
+      "subject": "mathematics",
+      "questionEn": "Simplify: 3/4 + 1/8.",
+      "questionHi": "सरल करें: 3/4 + 1/8।",
+      "optionsEn": [
+        "4/12",
+        "7/8",
+        "5/8",
+        "1"
+      ],
+      "optionsHi": [
+        "4/12",
+        "7/8",
+        "5/8",
+        "1"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Convert 3/4 to 6/8; 6/8 + 1/8 = 7/8.",
+      "explanationHi": "3/4 को 6/8 लिखें; 6/8 + 1/8 = 7/8।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math-003",
+      "subject": "mathematics",
+      "questionEn": "A train travels 180 km in 3 hours. What is its average speed?",
+      "questionHi": "एक ट्रेन 3 घंटे में 180 किमी चलती है। औसत गति क्या है?",
+      "optionsEn": [
+        "45 km/h",
+        "50 km/h",
+        "60 km/h",
+        "90 km/h"
+      ],
+      "optionsHi": [
+        "45 किमी/घंटा",
+        "50 किमी/घंटा",
+        "60 किमी/घंटा",
+        "90 किमी/घंटा"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Average speed = distance ÷ time = 180 ÷ 3 = 60 km/h.",
+      "explanationHi": "औसत गति = दूरी ÷ समय = 180 ÷ 3 = 60 किमी/घंटा।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math-004",
+      "subject": "mathematics",
+      "questionEn": "Find the simple interest on ₹2,000 at 5% per year for 2 years.",
+      "questionHi": "₹2,000 पर 5% वार्षिक दर से 2 वर्षों का साधारण ब्याज ज्ञात करें।",
+      "optionsEn": [
+        "₹100",
+        "₹200",
+        "₹250",
+        "₹500"
+      ],
+      "optionsHi": [
+        "₹100",
+        "₹200",
+        "₹250",
+        "₹500"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "SI = principal × rate × time ÷ 100 = ₹200.",
+      "explanationHi": "साधारण ब्याज = मूलधन × दर × समय ÷ 100 = ₹200।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math-005",
+      "subject": "mathematics",
+      "questionEn": "If 5 notebooks cost ₹125, what is the cost of 8 at the same rate?",
+      "questionHi": "5 कॉपियों की कीमत ₹125 है। उसी दर पर 8 कॉपियों की कीमत क्या होगी?",
+      "optionsEn": [
+        "₹150",
+        "₹175",
+        "₹200",
+        "₹225"
+      ],
+      "optionsHi": [
+        "₹150",
+        "₹175",
+        "₹200",
+        "₹225"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "One notebook costs ₹25; 8 cost ₹200.",
+      "explanationHi": "एक कॉपी ₹25 की है; 8 कॉपियाँ ₹200 की होंगी।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math-006",
+      "subject": "mathematics",
+      "questionEn": "What is the HCF of 18 and 24?",
+      "questionHi": "18 और 24 का महत्तम समापवर्तक (HCF) क्या है?",
+      "optionsEn": [
+        "3",
+        "6",
+        "9",
+        "12"
+      ],
+      "optionsHi": [
+        "3",
+        "6",
+        "9",
+        "12"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The greatest number dividing both 18 and 24 is 6.",
+      "explanationHi": "18 और 24 दोनों को विभाजित करने वाली सबसे बड़ी संख्या 6 है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math-007",
+      "subject": "mathematics",
+      "questionEn": "A rectangle is 9 cm long and 4 cm wide. What is its perimeter?",
+      "questionHi": "एक आयत की लंबाई 9 सेमी और चौड़ाई 4 सेमी है। उसका परिमाप कितना है?",
+      "optionsEn": [
+        "13 cm",
+        "26 cm",
+        "36 cm",
+        "18 cm"
+      ],
+      "optionsHi": [
+        "13 सेमी",
+        "26 सेमी",
+        "36 सेमी",
+        "18 सेमी"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Perimeter = 2 × (9 + 4) = 26 cm.",
+      "explanationHi": "परिमाप = 2 × (9 + 4) = 26 सेमी।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math-008",
+      "subject": "mathematics",
+      "questionEn": "A number increases from 80 to 100. What is the percentage increase?",
+      "questionHi": "एक संख्या 80 से बढ़कर 100 हो जाती है। प्रतिशत वृद्धि कितनी है?",
+      "optionsEn": [
+        "20%",
+        "25%",
+        "Х30%",
+        "ґ40%"
+      ],
+      "optionsHi": [
+        "20%",
+        "25%",
+        "30%",
+        "40%"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Increase is 20; 20 ÷ 80 × 100 = 25%.",
+      "explanationHi": "वृद्धि 20 है; 20 ÷ 80 × 100 = 25%।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
