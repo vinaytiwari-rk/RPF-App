@@ -7,6 +7,9 @@ export interface QuizQuestion {
   correctIndex: number;
   explanationEn: string;
   explanationHi: string;
+  sourceLabel?: string;
+  sourceUrl?: string;
+  lastVerified?: string;
 }
 
 export interface QuizTopic {
@@ -27,35 +30,41 @@ export const QUIZ_TOPICS: QuizTopic[] = [
   // 1. Daily Current Affairs 2026
   {
     id: "daily_current_affairs",
-    titleEn: "Daily Current Affairs (दैनिक करेंट अफेयर्स)",
-    titleHi: "दैनिक करेंट अफेयर्स 2026",
-    descEn: "Latest national affairs, government schemes, awards, science & sports updates.",
-    descHi: "ताज़ा राष्ट्रीय घटनाक्रम, सरकारी योजनाएं, पुरस्कार, विज्ञान व खेलकूद से जुड़े महत्वपूर्ण प्रश्न।",
+    titleEn: "Government Programmes & Public Institutions",
+    titleHi: "सरकारी योजनाएँ एवं सार्वजनिक संस्थाएँ",
+    descEn: "Officially sourced government programmes and public institutions. Static offline questions; not a live daily-news feed.",
+    descHi: "सरकारी योजनाओं और सार्वजनिक संस्थाओं पर आधारित स्थिर ऑफलाइन प्रश्न; यह लाइव दैनिक समाचार फ़ीड नहीं है।",
     iconName: "Flame",
     color: "from-amber-600 to-orange-600",
-    badge: "ताज़ा अपडेट",
+    badge: "आधिकारिक स्रोत",
     questionsCount: 10,
     durationMinutes: 8,
     questions: [
       {
         id: "ca_1",
-        questionEn: "Which initiative was launched to empower digital public infrastructure across Indian villages in 2026?",
-        questionHi: "भारतीय गांवों में डिजिटल सार्वजनिक अवसंरचना को सशक्त बनाने के लिए कौन सी राष्ट्रीय पहल संचालित है?",
-        optionsEn: ["Digital Gramin Seva Mission", "BharatNet 3.0 & Gram Digital Hub", "PM Rural E-Kisan", "Smart Panchayat 2.0"],
-        optionsHi: ["डिजिटल ग्रामीण सेवा मिशन", "भारतनेट 3.0 व ग्राम डिजिटल हब", "पीएम रूरल ई-किसान", "स्मार्ट पंचायत 2.0"],
+        questionEn: "Which national programme aims to connect Gram Panchayats with broadband infrastructure?",
+        questionHi: "ग्राम पंचायतों को ब्रॉडबैंड अवसंरचना से जोड़ने का राष्ट्रीय कार्यक्रम कौन-सा है?",
+        optionsEn: ["Digital Gramin Seva Mission", "BharatNet", "PM Rural E-Kisan", "Smart Panchayat 2.0"],
+        optionsHi: ["डिजिटल ग्रामीण सेवा मिशन", "भारतनेट", "पीएम रूरल ई-किसान", "स्मार्ट पंचायत 2.0"],
         correctIndex: 1,
-        explanationEn: "BharatNet 3.0 aims to connect every gram panchayat with high-speed fiber and local digital kiosks.",
-        explanationHi: "भारतनेट 3.0 का उद्देश्य प्रत्येक ग्राम पंचायत को हाई-स्पीड फाइबर और डिजिटल नागरिक सेवा केंद्र से जोड़ना है।"
+        explanationEn: "BharatNet is the Government of India programme for broadband connectivity to Gram Panchayats.",
+        explanationHi: "भारतनेट ग्राम पंचायतों तक ब्रॉडबैंड कनेक्टिविटी पहुँचाने का भारत सरकार का कार्यक्रम है।",
+        sourceLabel: "Official government / institutional source",
+        sourceUrl: "https://bbnl.nic.in/",
+        lastVerified: "2026-10-09"
       },
       {
         id: "ca_2",
-        questionEn: "Who recently assumed charge as the Chief of Defence Staff (CDS) of India?",
-        questionHi: "वर्तमान में भारत के चीफ ऑफ डिफेंस स्टाफ (CDS) के रूप में तीनों सेनाओं का समन्वय कौन कर रहे हैं?",
-        optionsEn: ["General Anil Chauhan", "General Manoj Pande", "Admiral Dinesh Tripathi", "Air Chief Marshal AP Singh"],
-        optionsHi: ["जनरल अनिल चौहान", "जनरल मनोज पांडे", "एडमिरल दिनेश त्रिपाठी", "एयर चीफ मार्शल एपी सिंह"],
+        questionEn: "Which office coordinates tri-service matters among the Indian Armed Forces at the highest military staff level?",
+        questionHi: "भारतीय सशस्त्र सेनाओं के तीनों अंगों के बीच उच्च स्तर पर समन्वय से जुड़ा पद कौन-सा है?",
+        optionsEn: ["Chief of Defence Staff", "Chief Election Commissioner", "Cabinet Secretary", "Attorney General"],
+        optionsHi: ["चीफ ऑफ डिफेंस स्टाफ", "मुख्य निर्वाचन आयुक्त", "कैबिनेट सचिव", "महान्यायवादी"],
         correctIndex: 0,
-        explanationEn: "General Anil Chauhan serves as India's second Chief of Defence Staff.",
-        explanationHi: "जनरल अनिल चौहान भारत के दूसरे चीफ ऑफ डिफेंस स्टाफ (CDS) के रूप में सेवारत हैं।"
+        explanationEn: "The Chief of Defence Staff supports tri-service integration; avoid “current office-holder” questions in an offline bank unless regularly updated.",
+        explanationHi: "चीफ ऑफ डिफेंस स्टाफ तीनों सेनाओं के बीच समन्वय और एकीकरण से जुड़ा पद है; ऑफलाइन बैंक में वर्तमान पदाधिकारी के प्रश्न नियमित अपडेट के बिना नहीं रखने चाहिए।",
+        sourceLabel: "Official government / institutional source",
+        sourceUrl: "https://www.mod.gov.in/",
+        lastVerified: "2026-10-09"
       },
       {
         id: "ca_3",
@@ -89,23 +98,29 @@ export const QUIZ_TOPICS: QuizTopic[] = [
       },
       {
         id: "ca_6",
-        questionEn: "Which Indian digital public good crossed historic record transactions in UPI payments?",
-        questionHi: "भारत की कौन सी संस्था यूनिफाइड पेमेंट्स इंटरफेस (UPI) का संचालन और प्रबंधन करती है?",
+        questionEn: "Which organisation operates UPI in India?",
+        questionHi: "भारत में UPI का संचालन कौन करता है?",
         optionsEn: ["RBI", "NPCI (National Payments Corporation of India)", "SEBI", "NITI Aayog"],
         optionsHi: ["आरबीआई (RBI)", "NPCI (भारतीय राष्ट्रीय भुगतान निगम)", "सेबी (SEBI)", "नीति आयोग"],
         correctIndex: 1,
-        explanationEn: "NPCI operates UPI, IMPS, RuPay, and FASTag in India.",
-        explanationHi: "एनपीसीआई (NPCI) भारत में यूपीआई, आईएमपीएस, रूपे और फास्टैग का संचालन करती है।"
+        explanationEn: "NPCI operates UPI in India.",
+        explanationHi: "NPCI भारत में UPI का संचालन करता है।",
+        sourceLabel: "Official government / institutional source",
+        sourceUrl: "https://www.npci.org.in/what-we-do/upi/product-overview",
+        lastVerified: "2026-10-09"
       },
       {
         id: "ca_7",
-        questionEn: "What is the primary target group for the PM-KISAN Samman Nidhi scheme?",
-        questionHi: "प्रधानमंत्री किसान सम्मान निधि (PM-KISAN) योजना के तहत किसानों को प्रतिवर्ष कितनी वित्तीय सहायता दी जाती है?",
-        optionsEn: ["₹4,000", "₹6,000 (3 किस्तों में)", "₹10,000", "₹12,000"],
-        optionsHi: ["₹4,000", "₹6,000 (₹2000 की 3 किस्तों में)", "₹10,000", "₹12,000"],
+        questionEn: "How much annual assistance does PM-KISAN provide to an eligible farmer family?",
+        questionHi: "PM-KISAN के तहत पात्र किसान परिवार को प्रतिवर्ष कितनी सहायता मिलती है?",
+        optionsEn: ["₹4,000", "₹6,000 in three instalments", "₹10,000", "₹12,000"],
+        optionsHi: ["₹4,000", "तीन किस्तों में ₹6,000", "₹10,000", "₹12,000"],
         correctIndex: 1,
-        explanationEn: "Eligible farmer families receive ₹6,000 annually in three equal installments of ₹2,000 each.",
-        explanationHi: "पात्र किसान परिवारों को प्रतिवर्ष ₹2,000 की तीन समान किस्तों में ₹6,000 की प्रत्यक्ष सहायता मिलती है।"
+        explanationEn: "Eligible PM-KISAN beneficiaries receive ₹6,000 per year in three equal instalments.",
+        explanationHi: "पात्र PM-KISAN लाभार्थियों को तीन समान किस्तों में प्रतिवर्ष ₹6,000 मिलते हैं।",
+        sourceLabel: "Official government / institutional source",
+        sourceUrl: "https://services.india.gov.in/service/detail/pm-kisan-samman-nidhi",
+        lastVerified: "2026-10-09"
       },
       {
         id: "ca_8",
@@ -150,7 +165,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     iconName: "Scale",
     color: "from-blue-600 to-indigo-700",
     badge: "UPSC/SSC",
-    questionsCount: 10,
+    questionsCount: 13,
     durationMinutes: 10,
     questions: [
       {
@@ -253,6 +268,46 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         explanationEn: "Rajya Sabha is a permanent body, but its members are elected for a term of 6 years with 1/3 retiring every 2 years.",
         explanationHi: "राज्यसभा एक स्थायी सदन है जो कभी भंग नहीं होता, लेकिन इसके प्रत्येक सदस्य का कार्यकाल 6 वर्ष होता है।"
       }
+,
+      {
+        id: "pol_11",
+        questionEn: "Which Article guarantees the right to move the Supreme Court for enforcement of Fundamental Rights?",
+        questionHi: "मौलिक अधिकारों के प्रवर्तन के लिए सर्वोच्च न्यायालय जाने का अधिकार किस अनुच्छेद में है?",
+        optionsEn: ["Article 14","Article 21","Article 32","Article 51A"],
+        optionsHi: ["अनुच्छेद 14","अनुच्छेद 21","अनुच्छेद 32","अनुच्छेद 51A"],
+        correctIndex: 2,
+        explanationEn: "Article 32 guarantees the right to move the Supreme Court for enforcement of Fundamental Rights.",
+        explanationHi: "अनुच्छेद 32 मौलिक अधिकारों के प्रवर्तन के लिए सर्वोच्च न्यायालय जाने का अधिकार सुनिश्चित करता है।",
+        sourceLabel: "Legislative Department — Constitution of India",
+        sourceUrl: "https://www.legislative.gov.in/static/uploads/2025/07/c9fe9c9b6840524844316f74bb1c556c.pdf",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "pol_11b",
+        questionEn: "Which Article establishes the office of the Comptroller and Auditor General of India?",
+        questionHi: "भारत के नियंत्रक एवं महालेखापरीक्षक का पद किस अनुच्छेद में स्थापित है?",
+        optionsEn: ["Article 76","Article 148","Article 280","Article 324"],
+        optionsHi: ["अनुच्छेद 76","अनुच्छेद 148","अनुच्छेद 280","अनुच्छेद 324"],
+        correctIndex: 1,
+        explanationEn: "Article 148 provides for the Comptroller and Auditor General of India.",
+        explanationHi: "अनुच्छेद 148 भारत के नियंत्रक एवं महालेखापरीक्षक के पद का प्रावधान करता है।",
+        sourceLabel: "Legislative Department — Constitution of India",
+        sourceUrl: "https://www.legislative.gov.in/static/uploads/2025/07/c9fe9c9b6840524844316f74bb1c556c.pdf",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "pol_11c",
+        questionEn: "Which Part of the Constitution contains the Directive Principles of State Policy?",
+        questionHi: "राज्य के नीति-निदेशक तत्व संविधान के किस भाग में हैं?",
+        optionsEn: ["Part II","Part III","Part IV","Part IVA"],
+        optionsHi: ["भाग II","भाग III","भाग IV","भाग IVA"],
+        correctIndex: 2,
+        explanationEn: "The Directive Principles of State Policy are contained in Part IV.",
+        explanationHi: "राज्य के नीति-निदेशक तत्व संविधान के भाग IV में दिए गए हैं।",
+        sourceLabel: "Legislative Department — Constitution of India",
+        sourceUrl: "https://www.legislative.gov.in/static/uploads/2025/07/c9fe9c9b6840524844316f74bb1c556c.pdf",
+        lastVerified: "2026-10-09"
+      }
     ]
   },
 
@@ -265,7 +320,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     descHi: "सिंधु घाटी, मौर्य साम्राज्य, 1857 की क्रांति, गांधी युग व स्वतंत्रता आंदोलन के प्रश्न।",
     iconName: "BookOpen",
     color: "from-amber-700 to-yellow-800",
-    questionsCount: 10,
+    questionsCount: 13,
     durationMinutes: 10,
     questions: [
       {
@@ -368,6 +423,46 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         explanationEn: "Bal Gangadhar Tilak gave this famous slogan to inspire Indians towards self-rule.",
         explanationHi: "लोकमान्य बाल गंगाधर तिलक ने भारतीयों में आत्मसम्मान और पूर्ण स्वराज की भावना जगाने के लिए यह नारा दिया था।"
       }
+,
+      {
+        id: "his_11",
+        questionEn: "The Buddhist monuments at Sanchi are located in which Indian state?",
+        questionHi: "सांची के बौद्ध स्मारक भारत के किस राज्य में स्थित हैं?",
+        optionsEn: ["Uttar Pradesh","Madhya Pradesh","Bihar","Rajasthan"],
+        optionsHi: ["उत्तर प्रदेश","मध्य प्रदेश","बिहार","राजस्थान"],
+        correctIndex: 1,
+        explanationEn: "The Buddhist monuments at Sanchi are in Madhya Pradesh and are a UNESCO World Heritage Site.",
+        explanationHi: "सांची के बौद्ध स्मारक मध्य प्रदेश में हैं और UNESCO विश्व धरोहर स्थल हैं।",
+        sourceLabel: "UNESCO — Buddhist Monuments at Sanchi",
+        sourceUrl: "https://whc.unesco.org/en/list/524/",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "his_11b",
+        questionEn: "The Quit India Movement was launched in which year?",
+        questionHi: "भारत छोड़ो आंदोलन किस वर्ष शुरू हुआ था?",
+        optionsEn: ["1919","1920","1930","1942"],
+        optionsHi: ["1919","1920","1930","1942"],
+        correctIndex: 3,
+        explanationEn: "The Quit India resolution was adopted in August 1942.",
+        explanationHi: "भारत छोड़ो प्रस्ताव अगस्त 1942 में अपनाया गया था।",
+        sourceLabel: "Azadi Ka Amrit Mahotsav — Quit India Movement",
+        sourceUrl: "https://amritmahotsav.nic.in/quit-india-movement.htm",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "his_11c",
+        questionEn: "Who was a key organiser in founding the Indian National Congress in 1885?",
+        questionHi: "1885 में भारतीय राष्ट्रीय कांग्रेस की स्थापना में प्रमुख भूमिका किसकी थी?",
+        optionsEn: ["A. O. Hume","Lord Curzon","Lord Mountbatten","Warren Hastings"],
+        optionsHi: ["ए. ओ. ह्यूम","लॉर्ड कर्ज़न","लॉर्ड माउंटबेटन","वॉरेन हेस्टिंग्स"],
+        correctIndex: 0,
+        explanationEn: "A. O. Hume was a key organiser in the founding of the Indian National Congress in 1885.",
+        explanationHi: "ए. ओ. ह्यूम ने 1885 में भारतीय राष्ट्रीय कांग्रेस की स्थापना में प्रमुख भूमिका निभाई।",
+        sourceLabel: "Indian National Congress — Official Website",
+        sourceUrl: "https://www.inc.in/",
+        lastVerified: "2026-10-09"
+      }
     ]
   },
 
@@ -380,7 +475,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     descHi: "मानव शरीर, विटामिन, भौतिकी के नियम, रासायनिक सूत्र व पर्यावरण अध्ययन।",
     iconName: "Atom",
     color: "from-emerald-600 to-teal-700",
-    questionsCount: 10,
+    questionsCount: 13,
     durationMinutes: 8,
     questions: [
       {
@@ -483,6 +578,46 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         explanationEn: "Chlorophyll absorbs solar energy to synthesize food through photosynthesis.",
         explanationHi: "क्लोरोफिल सूर्य के प्रकाश को अवशोषित करके कार्बन डाइऑक्साइड और जल से ग्लूकोज बनाने में मदद करता है।"
       }
+,
+      {
+        id: "sci_11",
+        questionEn: "What is the approximate speed of light in vacuum?",
+        questionHi: "निर्वात में प्रकाश की लगभग चाल कितनी है?",
+        optionsEn: ["3 × 10⁶ m/s","3 × 10⁸ m/s","3 × 10⁴ m/s","3 × 10¹⁰ m/s"],
+        optionsHi: ["3 × 10⁶ मीटर/सेकंड","3 × 10⁸ मीटर/सेकंड","3 × 10⁴ मीटर/सेकंड","3 × 10¹⁰ मीटर/सेकंड"],
+        correctIndex: 1,
+        explanationEn: "The speed of light in vacuum is 299,792,458 metres per second, commonly rounded to 3 × 10⁸ m/s.",
+        explanationHi: "निर्वात में प्रकाश की चाल 299,792,458 मीटर प्रति सेकंड है, जिसे सामान्यतः 3 × 10⁸ m/s लिखा जाता है।",
+        sourceLabel: "NIST — Speed of Light",
+        sourceUrl: "https://physics.nist.gov/cgi-bin/cuu/Value?c",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "sci_11b",
+        questionEn: "Which gas do plants primarily absorb from the atmosphere during photosynthesis?",
+        questionHi: "प्रकाश संश्लेषण के दौरान पौधे वायुमंडल से मुख्यतः कौन-सी गैस लेते हैं?",
+        optionsEn: ["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"],
+        optionsHi: ["ऑक्सीजन","नाइट्रोजन","कार्बन डाइऑक्साइड","हाइड्रोजन"],
+        correctIndex: 2,
+        explanationEn: "Plants use carbon dioxide, water and light energy to produce sugars during photosynthesis.",
+        explanationHi: "प्रकाश संश्लेषण में पौधे कार्बन डाइऑक्साइड, पानी और प्रकाश ऊर्जा का उपयोग करके शर्करा बनाते हैं।",
+        sourceLabel: "NASA Climate Kids — Carbon Cycle",
+        sourceUrl: "https://climatekids.nasa.gov/carbon/",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "sci_11c",
+        questionEn: "What is the SI unit of electric current?",
+        questionHi: "विद्युत धारा की SI इकाई क्या है?",
+        optionsEn: ["Volt","Ohm","Ampere","Watt"],
+        optionsHi: ["वोल्ट","ओम","एम्पियर","वाट"],
+        correctIndex: 2,
+        explanationEn: "The ampere (A) is the SI base unit of electric current.",
+        explanationHi: "एम्पियर (A) विद्युत धारा की SI मूल इकाई है।",
+        sourceLabel: "BIPM — SI Brochure",
+        sourceUrl: "https://www.bipm.org/en/publications/si-brochure",
+        lastVerified: "2026-10-09"
+      }
     ]
   },
 
@@ -495,7 +630,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     descHi: "संख्या श्रृंखला, कोडिंग-डिकोडिंग, रक्त संबंध, दिशा परीक्षण व विश्लेषणात्मक तर्क।",
     iconName: "BrainCircuit",
     color: "from-purple-600 to-indigo-800",
-    questionsCount: 8,
+    questionsCount: 11,
     durationMinutes: 10,
     questions: [
       {
@@ -578,6 +713,43 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         explanationEn: "Formula: Total = (Left + Right) - 1. So Right = Total - Left + 1 = 30 - 12 + 1 = 19.",
         explanationHi: "सूत्र: दायां स्थान = (कुल छात्र - बायां स्थान) + 1 = (30 - 12) + 1 = 18 + 1 = 19वां।"
       }
+,
+      {
+        id: "rea_9",
+        questionEn: "Complete the sequence: 2, 6, 12, 20, 30, __.",
+        questionHi: "श्रृंखला पूरी करें: 2, 6, 12, 20, 30, __।",
+        optionsEn: ["36","40","42","44"],
+        optionsHi: ["36","40","42","44"],
+        correctIndex: 2,
+        explanationEn: "The differences are +4, +6, +8, +10, so the next difference is +12 and the answer is 42.",
+        explanationHi: "अंतर +4, +6, +8, +10 हैं; अगला अंतर +12 होगा, इसलिए उत्तर 42 है।",
+        sourceLabel: "Rule-derived reasoning question",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "rea_10",
+        questionEn: "If all roses are flowers and some flowers fade quickly, which conclusion must be true?",
+        questionHi: "यदि सभी गुलाब फूल हैं और कुछ फूल जल्दी मुरझाते हैं, तो कौन-सा निष्कर्ष निश्चित रूप से सही है?",
+        optionsEn: ["All roses fade quickly","No roses fade quickly","All roses are flowers","Some roses are not flowers"],
+        optionsHi: ["सभी गुलाब जल्दी मुरझाते हैं","कोई गुलाब जल्दी नहीं मुरझाता","सभी गुलाब फूल हैं","कुछ गुलाब फूल नहीं हैं"],
+        correctIndex: 2,
+        explanationEn: "The first premise directly guarantees that all roses are flowers; the second does not say whether roses fade quickly.",
+        explanationHi: "पहला कथन सीधे बताता है कि सभी गुलाब फूल हैं; दूसरा यह नहीं बताता कि गुलाब जल्दी मुरझाते हैं या नहीं।",
+        sourceLabel: "Formal logic — derived from stated premises",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "rea_11",
+        questionEn: "A clock shows 3:00. What is the smaller angle between its hour and minute hands?",
+        questionHi: "घड़ी में 3:00 बजे हैं। घंटे और मिनट की सुइयों के बीच छोटा कोण कितना होगा?",
+        optionsEn: ["45°","60°","90°","120°"],
+        optionsHi: ["45°","60°","90°","120°"],
+        correctIndex: 2,
+        explanationEn: "At 3:00 the hands form a right angle of 90 degrees.",
+        explanationHi: "3 बजे दोनों सुइयों के बीच 90 डिग्री का समकोण बनता है।",
+        sourceLabel: "Geometric calculation — derived from clock positions",
+        lastVerified: "2026-10-09"
+      }
     ]
   },
 
@@ -590,7 +762,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     descHi: "कंप्यूटर मेमोरी, इंटरनेट, शॉर्टकट की, साइबर सुरक्षा व सरकारी डिजिटल सेवाएं।",
     iconName: "Monitor",
     color: "from-sky-600 to-blue-800",
-    questionsCount: 8,
+    questionsCount: 11,
     durationMinutes: 8,
     questions: [
       {
@@ -672,6 +844,46 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         correctIndex: 1,
         explanationEn: "A firewall monitors and filters incoming and outgoing network traffic based on security rules.",
         explanationHi: "फ़ायरवॉल एक डिजिटल सुरक्षा दीवार की तरह काम करता है जो इंटरनेट से आने वाले वायरस और हैकर्स को रोकता है।"
+      }
+,
+      {
+        id: "comp_9",
+        questionEn: "What does HTTPS add to HTTP for web communication?",
+        questionHi: "वेब संचार में HTTPS, HTTP के मुकाबले कौन-सी मुख्य सुरक्षा सुविधा जोड़ता है?",
+        optionsEn: ["A guarantee that a site is honest","Encryption and server authentication using TLS","Unlimited internet speed","Automatic virus removal"],
+        optionsHi: ["यह गारंटी कि वेबसाइट ईमानदार है","TLS के माध्यम से एन्क्रिप्शन और सर्वर प्रमाणीकरण","असीमित इंटरनेट गति","वायरस अपने-आप हटाना"],
+        correctIndex: 1,
+        explanationEn: "HTTPS uses TLS to encrypt data in transit and authenticate the server; it does not guarantee trustworthy site content.",
+        explanationHi: "HTTPS, TLS के जरिए डेटा एन्क्रिप्ट करता है और सर्वर की पहचान जाँचता है; यह वेबसाइट की सामग्री ईमानदार होने की गारंटी नहीं देता।",
+        sourceLabel: "IETF — TLS 1.3",
+        sourceUrl: "https://www.rfc-editor.org/rfc/rfc8446",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "comp_10",
+        questionEn: "What is the safest response when an unexpected message asks you to share an OTP?",
+        questionHi: "जब कोई अनजान संदेश आपसे OTP साझा करने को कहे, तो सबसे सुरक्षित कदम क्या है?",
+        optionsEn: ["Share it quickly","Send it after checking the logo","Do not share it; verify through the official service independently","Post it in a group"],
+        optionsHi: ["तुरंत साझा करें","लोगो देखकर भेज दें","इसे साझा न करें; आधिकारिक सेवा से स्वतंत्र रूप से सत्यापन करें","समूह में डाल दें"],
+        correctIndex: 2,
+        explanationEn: "One-time passwords are authentication secrets and should not be shared with callers or message senders.",
+        explanationHi: "OTP प्रमाणीकरण का गोपनीय कोड है; इसे कॉल करने वाले या संदेश भेजने वाले के साथ साझा नहीं करना चाहिए।",
+        sourceLabel: "CERT-In — Cyber Safety guidance",
+        sourceUrl: "https://www.cert-in.org.in/",
+        lastVerified: "2026-10-09"
+      },
+      {
+        id: "comp_11",
+        questionEn: "What is multi-factor authentication (MFA)?",
+        questionHi: "मल्टी-फैक्टर ऑथेंटिकेशन (MFA) क्या है?",
+        optionsEn: ["Using the same password everywhere","Using two or more different categories of proof to verify identity","Changing a username daily","Installing two browsers"],
+        optionsHi: ["हर जगह एक ही पासवर्ड उपयोग करना","पहचान सत्यापित करने के लिए दो या अधिक अलग-अलग प्रकार के प्रमाण उपयोग करना","रोज़ username बदलना","दो ब्राउज़र इंस्टॉल करना"],
+        correctIndex: 1,
+        explanationEn: "MFA combines two or more different factor types, such as something you know, have, or are.",
+        explanationHi: "MFA में अलग-अलग प्रकार के दो या अधिक प्रमाण जोड़े जाते हैं, जैसे ज्ञान, पास में मौजूद वस्तु या जैविक पहचान।",
+        sourceLabel: "NIST — Digital Identity Guidelines",
+        sourceUrl: "https://pages.nist.gov/800-63-3/sp800-63b.html",
+        lastVerified: "2026-10-09"
       }
     ]
   }
