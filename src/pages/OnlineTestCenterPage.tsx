@@ -191,6 +191,7 @@ export default function OnlineTestCenterPage() {
       {/* Test Runner Modal */}
       {activeTopic && (
         <OnlineTestRunnerModal
+          key={activeTopic.id}
           topic={activeTopic}
           onClose={() => setActiveTopic(null)}
           lang={lang}
