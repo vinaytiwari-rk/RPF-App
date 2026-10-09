@@ -11,7 +11,7 @@ Build a 50,000+ question bank with a hybrid delivery model: bundled starter ques
 - The main Online Test Center imports `QUIZ_TOPICS` from `src/data/quiz/quizQuestionBank.ts`.
 - `src/routes/educationRoutes.ts` contains a separate three-question demo array; it is not the same question bank.
 - The existing `QuizQuestion` model has no source URL, publication date, verification date, subject metadata per question, or source attribution.
-- This branch adds the scalable pack contract, source registry, validation tooling, and build scripts. It does not claim that 50,000 questions have already been authored or verified.
+- This branch adds the scalable pack contract, source registry, validation tooling, build scripts, metadata-only source candidate collection, and portal integration for manifest-listed packs. It does not claim that 50,000 questions have already been authored or verified.
 
 ## Pack format
 
@@ -48,11 +48,17 @@ A source mention is not proof that a fact is correct. For changeable facts, cros
 7. For practice mode, local scoring is acceptable. For official/high-stakes results or certificates, validate submissions server-side because client-side answer keys can be inspected.
 8. Keep publisher article ingestion separate from question-pack publishing. Reviewers approve each question before it enters a published pack.
 
+## Current pilot packs
+
+The branch currently contains 60 pack questions: 10 source-attributed current-affairs pilot questions, 20 Constitution & Polity questions, 15 General Science questions, and 15 Indian Geography questions. This is a small working pilot, not the 50,000-question target. The legacy bundled bank is separate and should not be added to the published-pack count unless migrated and deduplicated.
+
+The Online Test Center now reads pack descriptors from the generated manifest and can open any listed pack, rather than hardcoding only the Current Affairs pack ID. The manifest is cached locally for offline catalog display; each question pack must be downloaded once before it can be used offline.
+
 ## Source registry
 
-See `data/question-bank/sources.json`. The registry deliberately marks some feeds as metadata-only/manual until their usage terms are confirmed.
+See `data/question-bank/sources.json`. The registry deliberately marks some feeds as metadata-only/manual until their usage terms are confirmed. Run `node scripts/collectQuestionSourceCandidates.mjs` to collect candidate metadata from feeds explicitly marked for automated metadata discovery. The script does not create questions or copy article body text; each candidate still requires human fact-checking and original question wording.
 
-## Validation
+## Validation and source discovery
 
 Run:
 
