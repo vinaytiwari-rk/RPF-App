@@ -51,7 +51,7 @@ export interface EpaperItem {
 }
 
 const DEFAULT_RADIO_STATIONS: RadioStation[] = [
-  ...rawChannels.slice(0, 30).map((s: any, idx: number) => ({
+  ...rawChannels.map((s: any, idx: number) => ({
     id: `akashvani-${idx + 1}`,
     name: s.name,
     url: s.url,
@@ -60,7 +60,7 @@ const DEFAULT_RADIO_STATIONS: RadioStation[] = [
     image: s.image,
     enabled: true
   })),
-  ...privateFm.slice(0, 20).map((s: any, idx: number) => ({
+  ...privateFm.map((s: any, idx: number) => ({
     id: `fm-${idx + 1}`,
     name: s.name,
     url: s.url,
