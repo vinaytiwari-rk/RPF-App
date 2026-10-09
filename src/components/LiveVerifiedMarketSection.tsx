@@ -630,7 +630,7 @@ export default function LiveVerifiedMarketSection({ marketConfig }: LiveVerified
       {/* LOCATION PICKER MODAL */}
       <AnimatePresence>
         {showCityPicker && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs">
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs">
             <motion.div
               initial={{ y: "100%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -733,13 +733,13 @@ export default function LiveVerifiedMarketSection({ marketConfig }: LiveVerified
       {/* BOTTOM SHEET / MODAL WITH FULL DETAILS */}
       <AnimatePresence>
         {activeSheet && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs">
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs">
             <motion.div
               initial={{ y: "100%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="w-full max-w-lg max-h-[85vh] flex flex-col bg-white rounded-t-[28px] sm:rounded-2xl shadow-2xl overflow-hidden border border-slate-200"
+              className="w-full max-w-lg max-h-[88vh] flex flex-col bg-white rounded-t-[28px] sm:rounded-2xl shadow-2xl overflow-hidden border border-slate-200"
             >
               {/* MODAL HEADER */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50/70">
@@ -777,7 +777,7 @@ export default function LiveVerifiedMarketSection({ marketConfig }: LiveVerified
               </div>
 
               {/* MODAL BODY */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 pb-12 sm:pb-6 space-y-4">
                 {/* 1. PANCHANG SHEET */}
                 {activeSheet === "panchang" && data?.panchang && (
                   <div className="space-y-3.5">
