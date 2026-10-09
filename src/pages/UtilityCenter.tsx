@@ -52,12 +52,12 @@ export default function UtilityCenter() {
           </button>
         </div>
         <h1 className="mt-2 text-2xl font-black text-[#243B32]">
-          {hi ? "यूटिलिटी और कैलकुलेटर" : "Utilities & Calculators"}
+          {hi ? "समाहित यूटिलिटी" : "Samahit Utilities"}
         </h1>
         <p className="mt-1 text-sm text-[#52685C]">
           {hi
-            ? "सभी कैलकुलेटर, वेबसाइट लिंक और उपयोगी टूल्स एक जगह।"
-            : "All calculators, website links and useful tools in one place."}
+            ? "उपयोगी डिजिटल टूल्स, वेबसाइट लिंक्स और रोजमर्रा की सुविधाएं एक जगह।"
+            : "Useful digital tools, website links and essential everyday utilities in one place."}
         </p>
       </header>
 
