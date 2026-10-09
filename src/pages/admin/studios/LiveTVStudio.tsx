@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import { useAuth } from "../../../context/AuthContext";
 import {
   Tv,
   Radio,
@@ -91,7 +92,8 @@ export default function LiveTVStudio() {
     data: any;
   } | null>(null);
 
-  const token = localStorage.getItem("token") || "";
+  const { token: authToken } = useAuth();
+  const token = authToken || localStorage.getItem("@rpf_token") || localStorage.getItem("token") || "";
 
   useEffect(() => {
     fetchCmsMedia();
@@ -693,25 +695,60 @@ export default function LiveTVStudio() {
                   {/* Quick Preview Area for Stream */}
                   {activeTab === "tv" && selectedItem.data.url && (
                     <div className="bg-slate-900 rounded-xl p-3 text-white">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400 mb-2">Live Embed Tester</p>
-                      <div className="aspect-video w-full rounded-lg overflow-hidden bg-black flex items-center justify-center">
-                        {selectedItem.data.url.includes("youtube.com") || selectedItem.data.url.includes("youtu.be") ? (
-                          <iframe
-                            src={
-                              selectedItem.data.url.includes("embed")
-                                ? selectedItem.data.url
-                                : `https://www.youtube.com/embed/${selectedItem.data.url.split("/").pop()}?autoplay=0`
-                            }
-                            title="Preview"
-                            className="w-full h-full border-0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          />
-                        ) : (
-                          <div className="text-center p-4 text-xs text-slate-400">
-                            Direct HLS Stream: <span className="font-mono text-white">{selectedItem.data.url}</span>
-                          </div>
-                        )}
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Live Stream Player Tester</p>
+                        <a
+                          href={selectedItem.data.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1 transition"
+                        >
+                          Open in Browser <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                      <div className="aspect-video w-full rounded-lg overflow-hidden bg-black flex items-center justify-center relative">
+                        {(() => {
+                          const url = selectedItem.data.url.trim();
+                          const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|watch\?v=|embed\/))([^?&/]+)/);
+                          if (ytMatch && ytMatch[1]) {
+                            return (
+                              <iframe
+                                src={`https://www.youtube.com/embed/${ytMatch[1]}?autoplay=0&rel=0`}
+                                title={selectedItem.data.name || "Live TV Preview"}
+                                className="w-full h-full border-0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            );
+                          }
+                          if (url.includes(".m3u8") || url.includes(".mp4") || url.startsWith("blob:") || url.includes("stream")) {
+                            return (
+                              <video
+                                key={url}
+                                src={url}
+                                controls
+                                playsInline
+                                className="w-full h-full object-contain"
+                              >
+                                Your browser does not support video playback.
+                              </video>
+                            );
+                          }
+                          return (
+                            <div className="text-center p-4">
+                              <p className="text-xs text-slate-300 font-semibold mb-1">Web Stream Channel</p>
+                              <p className="text-[10px] text-slate-400 font-mono break-all max-w-md mx-auto mb-3">{url}</p>
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition"
+                              >
+                                Test Stream Link <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}

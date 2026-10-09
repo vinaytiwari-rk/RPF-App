@@ -47,8 +47,9 @@ import {
   Layers
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAuth } from "../../../context/AuthContext";
 import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
-import { SERVICE_GOV_LINKS } from "../../../data/serviceGovLinks";
+import { SERVICE_GOV_LINKS, SERVICE_ALIASES, getGovLinksForService } from "../../../data/serviceGovLinks";
 
 export interface SubFeatureLink {
   id: string;
@@ -162,7 +163,8 @@ export default function ExploreStudio() {
   const [isEditing, setIsEditing] = useState(false);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
 
-  const token = localStorage.getItem("token") || "";
+  const { token: authToken } = useAuth();
+  const token = authToken || localStorage.getItem("@rpf_token") || localStorage.getItem("token") || "";
 
   useEffect(() => {
     fetchCmsData();
@@ -178,11 +180,15 @@ export default function ExploreStudio() {
 
       const hydrateCardsWithLinks = (cards: ServiceCard[]) => {
         return cards.map(card => {
-          if (Array.isArray(card.subLinks)) return card;
-          // Hydrate from serviceWebsiteLinks or default catalog
+          if (Array.isArray(card.subLinks) && card.subLinks.length > 0) return card;
+          // Hydrate from serviceWebsiteLinks or default catalog using alias lookup
+          const aliasKey = SERVICE_ALIASES[card.id] || card.id;
           const existingLinks = (Array.isArray(websiteMap[card.id]) && websiteMap[card.id].length > 0)
             ? websiteMap[card.id]
-            : (SERVICE_GOV_LINKS[card.id] || []);
+            : (Array.isArray(websiteMap[aliasKey]) && websiteMap[aliasKey].length > 0)
+            ? websiteMap[aliasKey]
+            : (SERVICE_GOV_LINKS[card.id] || SERVICE_GOV_LINKS[aliasKey] || getGovLinksForService(card.id));
+
           if (Array.isArray(existingLinks) && existingLinks.length > 0) {
             return {
               ...card,
@@ -337,15 +343,20 @@ export default function ExploreStudio() {
     }
   };
 
-  // Save changes to current card in inspector
-  const handleSaveCard = (card: ServiceCard) => {
+  // Update selected card and auto-sync to lists
+  const updateSelectedCard = (updatedCard: ServiceCard) => {
+    setSelectedCard(updatedCard);
     const isFeatured = activeTab === "featured";
     if (isFeatured) {
-      setFeaturedServices(prev => prev.map(s => (s.id === card.id ? card : s)));
+      setFeaturedServices(prev => prev.map(s => (s.id === updatedCard.id ? updatedCard : s)));
     } else {
-      setAllServices(prev => prev.map(s => (s.id === card.id ? card : s)));
+      setAllServices(prev => prev.map(s => (s.id === updatedCard.id ? updatedCard : s)));
     }
-    setSelectedCard(card);
+  };
+
+  // Save changes to current card in inspector
+  const handleSaveCard = (card: ServiceCard) => {
+    updateSelectedCard(card);
     toast.success("Card updated in draft");
   };
 
@@ -476,9 +487,9 @@ export default function ExploreStudio() {
       </div>
 
       {/* SPLIT PANE: SERVICES LIST & INSPECTOR */}
-      <div className="flex flex-col lg:flex-row gap-6 h-[70vh]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[75vh]">
         {/* LEFT COLUMN: CARDS LIST */}
-        <div className="w-full lg:w-7/12 flex flex-col space-y-2.5 overflow-y-auto pr-1 custom-scrollbar">
+        <div className="lg:col-span-5 flex flex-col space-y-2.5 max-h-[78vh] overflow-y-auto pr-1.5 custom-scrollbar">
           {loading ? (
             <div className="flex items-center justify-center py-12 text-slate-400 text-xs font-bold">
               <RefreshCw className="h-4 w-4 animate-spin mr-2" /> Loading services...
@@ -495,25 +506,25 @@ export default function ExploreStudio() {
                 <div
                   key={card.id}
                   onClick={() => { setSelectedCard(card); setIsEditing(true); }}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer bg-white flex items-center justify-between gap-3 hover:border-slate-300 hover:shadow-xs ${
+                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer bg-white flex items-center justify-between gap-3 hover:border-slate-300 hover:shadow-xs ${
                     isSelected ? "border-indigo-500 ring-2 ring-indigo-500/20 shadow-xs" : "border-slate-200"
                   }`}
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="h-11 w-11 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 shrink-0 font-bold">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 shrink-0 font-bold">
                       {React.createElement(AVAILABLE_ICONS[card.iconName] || Compass, { className: "h-5 w-5" })}
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
+                      <div className="flex items-center gap-1.5 mb-0.5">
                         <h3 className="text-xs font-bold text-slate-800 truncate">{card.title}</h3>
                         {card.category && (
-                          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded bg-slate-100 text-slate-600">
                             {card.category}
                           </span>
                         )}
                         {Array.isArray(card.subLinks) && card.subLinks.length > 0 && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {card.subLinks.length} sub-links
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            {card.subLinks.length} links
                           </span>
                         )}
                       </div>
@@ -527,7 +538,7 @@ export default function ExploreStudio() {
                     <button
                       onClick={() => { setSelectedCard(card); setIsEditing(true); }}
                       className="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition"
-                      title="Edit card & child links (बदलें)"
+                      title="Edit card & child links"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -581,7 +592,7 @@ export default function ExploreStudio() {
         </div>
 
         {/* RIGHT COLUMN: INSPECTOR & LIVE EDITOR */}
-        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[78vh]">
           {selectedCard ? (
             <div className="p-6 h-full flex flex-col justify-between overflow-y-auto custom-scrollbar">
               <div className="space-y-5">
@@ -612,7 +623,7 @@ export default function ExploreStudio() {
                     <input
                       type="text"
                       value={selectedCard.title}
-                      onChange={e => setSelectedCard({ ...selectedCard, title: e.target.value })}
+                      onChange={e => updateSelectedCard({ ...selectedCard, title: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
@@ -622,18 +633,18 @@ export default function ExploreStudio() {
                     <textarea
                       rows={2}
                       value={selectedCard.desc}
-                      onChange={e => setSelectedCard({ ...selectedCard, desc: e.target.value })}
+                      onChange={e => updateSelectedCard({ ...selectedCard, desc: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">In-App Route / External URL</label>
                       <input
                         type="text"
                         value={selectedCard.route}
-                        onChange={e => setSelectedCard({ ...selectedCard, route: e.target.value })}
+                        onChange={e => updateSelectedCard({ ...selectedCard, route: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -642,7 +653,7 @@ export default function ExploreStudio() {
                       <input
                         type="text"
                         value={selectedCard.category || ""}
-                        onChange={e => setSelectedCard({ ...selectedCard, category: e.target.value })}
+                        onChange={e => updateSelectedCard({ ...selectedCard, category: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -650,7 +661,7 @@ export default function ExploreStudio() {
 
                   {/* Visual Icon Picker */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Card Icon (आइकन चुनें)</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Card Icon</label>
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
@@ -661,7 +672,6 @@ export default function ExploreStudio() {
                         <span>{selectedCard.iconName || "Select Icon"}</span>
                         <Pencil className="h-3 w-3 text-slate-400 ml-1" />
                       </button>
-                      <span className="text-[11px] text-slate-400">Click to change icon visually (no coding)</span>
                     </div>
                   </div>
 
@@ -671,11 +681,8 @@ export default function ExploreStudio() {
                       <div>
                         <h4 className="text-xs font-black uppercase text-indigo-900 tracking-wider flex items-center gap-1.5">
                           <Layers className="h-4 w-4 text-indigo-600" />
-                          Sub-Features & Child Links (कार्ड के अंदर के लिंक्स)
+                          Sub-Features & Child Links
                         </h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          Add, edit or toggle features inside this card (e.g. Local Form, eRaktkosh link, Portals).
-                        </p>
                       </div>
                       <button
                         type="button"
@@ -683,12 +690,12 @@ export default function ExploreStudio() {
                           const newLink: SubFeatureLink = {
                             id: `link-${Date.now()}`,
                             title: "New Action / Portal Link",
-                            url: "/portal",
-                            isExternal: false,
+                            url: "https://",
+                            isExternal: true,
                             active: true
                           };
                           const existing = Array.isArray(selectedCard.subLinks) ? selectedCard.subLinks : [];
-                          setSelectedCard({ ...selectedCard, subLinks: [...existing, newLink] });
+                          updateSelectedCard({ ...selectedCard, subLinks: [...existing, newLink] });
                         }}
                         className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-indigo-700 bg-white border border-indigo-200 rounded-lg hover:bg-indigo-50 shadow-2xs"
                       >
@@ -696,7 +703,7 @@ export default function ExploreStudio() {
                       </button>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {(selectedCard.subLinks || []).length === 0 ? (
                         <p className="text-xs text-slate-400 italic py-2">
                           No inner links added yet. You can add local forms and external government portals here.
@@ -705,9 +712,9 @@ export default function ExploreStudio() {
                         selectedCard.subLinks!.map((linkItem, lIdx) => (
                           <div
                             key={linkItem.id}
-                            className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between gap-2 shadow-2xs"
+                            className="p-3 bg-white rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 shadow-2xs"
                           >
-                            <div className="flex-1 grid grid-cols-2 gap-2">
+                            <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
                               <input
                                 type="text"
                                 value={linkItem.title}
@@ -716,10 +723,10 @@ export default function ExploreStudio() {
                                   const updated = selectedCard.subLinks!.map((l, i) =>
                                     i === lIdx ? { ...l, title: val } : l
                                   );
-                                  setSelectedCard({ ...selectedCard, subLinks: updated });
+                                  updateSelectedCard({ ...selectedCard, subLinks: updated });
                                 }}
-                                placeholder="Link Title (e.g. eRaktkosh National Portal)"
-                                className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-semibold"
+                                placeholder="Link Title"
+                                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800"
                               />
                               <input
                                 type="text"
@@ -729,15 +736,27 @@ export default function ExploreStudio() {
                                   const updated = selectedCard.subLinks!.map((l, i) =>
                                     i === lIdx ? { ...l, url: val } : l
                                   );
-                                  setSelectedCard({ ...selectedCard, subLinks: updated });
+                                  updateSelectedCard({ ...selectedCard, subLinks: updated });
                                 }}
-                                placeholder="URL (e.g. https://eraktkosh.in)"
-                                className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-mono"
+                                placeholder="URL (e.g. https://...)"
+                                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-800"
                               />
                             </div>
 
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <label className="flex items-center gap-1 text-[10px] font-bold text-slate-600 cursor-pointer">
+                            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                              {linkItem.url && linkItem.url.startsWith("http") && (
+                                <a
+                                  href={linkItem.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition"
+                                  title="Test link in browser"
+                                >
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                </a>
+                              )}
+
+                              <label className="flex items-center gap-1 text-[11px] font-bold text-slate-600 cursor-pointer">
                                 <input
                                   type="checkbox"
                                   checked={linkItem.isExternal}
@@ -746,14 +765,14 @@ export default function ExploreStudio() {
                                     const updated = selectedCard.subLinks!.map((l, i) =>
                                       i === lIdx ? { ...l, isExternal: val } : l
                                     );
-                                    setSelectedCard({ ...selectedCard, subLinks: updated });
+                                    updateSelectedCard({ ...selectedCard, subLinks: updated });
                                   }}
-                                  className="h-3 w-3 rounded text-indigo-600"
+                                  className="h-3.5 w-3.5 rounded text-indigo-600"
                                 />
                                 External
                               </label>
 
-                              <div className="flex items-center border border-slate-200 rounded overflow-hidden bg-slate-50">
+                              <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
                                 <button
                                   type="button"
                                   disabled={lIdx === 0}
@@ -763,7 +782,7 @@ export default function ExploreStudio() {
                                     const tmp = links[lIdx];
                                     links[lIdx] = links[lIdx - 1];
                                     links[lIdx - 1] = tmp;
-                                    setSelectedCard({ ...selectedCard, subLinks: links });
+                                    updateSelectedCard({ ...selectedCard, subLinks: links });
                                   }}
                                   className="p-1 hover:bg-slate-200 text-slate-500 disabled:opacity-20 transition"
                                   title="Move Up"
@@ -779,7 +798,7 @@ export default function ExploreStudio() {
                                     const tmp = links[lIdx];
                                     links[lIdx] = links[lIdx + 1];
                                     links[lIdx + 1] = tmp;
-                                    setSelectedCard({ ...selectedCard, subLinks: links });
+                                    updateSelectedCard({ ...selectedCard, subLinks: links });
                                   }}
                                   className="p-1 hover:bg-slate-200 text-slate-500 disabled:opacity-20 transition"
                                   title="Move Down"
@@ -794,26 +813,26 @@ export default function ExploreStudio() {
                                   const updated = selectedCard.subLinks!.map((l, i) =>
                                     i === lIdx ? { ...l, active: !l.active } : l
                                   );
-                                  setSelectedCard({ ...selectedCard, subLinks: updated });
+                                  updateSelectedCard({ ...selectedCard, subLinks: updated });
                                 }}
-                                className={`p-1 rounded ${
-                                  linkItem.active ? "text-emerald-700 bg-emerald-50" : "text-slate-400 bg-slate-200"
+                                className={`p-1.5 rounded-lg transition ${
+                                  linkItem.active ? "text-emerald-700 bg-emerald-50 border border-emerald-200" : "text-slate-400 bg-slate-100"
                                 }`}
                                 title={linkItem.active ? "Active" : "Deactive"}
                               >
-                                {linkItem.active ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                                {linkItem.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => {
                                   const updated = selectedCard.subLinks!.filter((_, i) => i !== lIdx);
-                                  setSelectedCard({ ...selectedCard, subLinks: updated });
+                                  updateSelectedCard({ ...selectedCard, subLinks: updated });
                                 }}
-                                className="p-1 text-rose-500 hover:bg-rose-50 rounded"
+                                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition"
                                 title="Delete link"
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             </div>
                           </div>
@@ -821,34 +840,12 @@ export default function ExploreStudio() {
                       )}
                     </div>
                   </div>
-
-                  {/* Quick Preview Card */}
-                  <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/50">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 mb-2">Live Public App Preview</p>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-                          {React.createElement(AVAILABLE_ICONS[selectedCard.iconName] || Compass, { className: "h-5 w-5" })}
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-800">{selectedCard.title}</h4>
-                          <p className="text-[11px] text-slate-500">{selectedCard.desc}</p>
-                          {Array.isArray(selectedCard.subLinks) && selectedCard.subLinks.length > 0 && (
-                            <p className="text-[10px] text-indigo-600 font-bold mt-0.5">
-                              {selectedCard.subLinks.length} sub-links attached
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-bold text-indigo-600 font-mono">{selectedCard.route}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              {/* Bottom save button */}
-              <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
-                <span className="text-xs text-slate-400">Remember to Save & Publish when finished.</span>
+              {/* Bottom action bar */}
+              <div className="border-t border-slate-100 pt-4 mt-4 flex items-center justify-between">
+                <span className="text-xs text-slate-400">Updates sync to draft instantly. Click Save & Publish when ready.</span>
                 <button
                   onClick={() => handleSaveCard(selectedCard)}
                   className="px-5 py-2 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 text-xs transition"

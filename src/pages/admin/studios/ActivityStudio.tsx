@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import { useAuth } from "../../../context/AuthContext";
 import {
   Activity,
   ClipboardList,
@@ -95,7 +96,8 @@ export default function ActivityStudio() {
     data: any;
   } | null>(null);
 
-  const token = localStorage.getItem("token") || "";
+  const { token: authToken } = useAuth();
+  const token = authToken || localStorage.getItem("@rpf_token") || localStorage.getItem("token") || "";
 
   const fetchData = useCallback(async () => {
     setLoading(true);

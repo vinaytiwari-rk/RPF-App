@@ -9,7 +9,12 @@ export interface GovLink {
 }
 
 export const SERVICE_GOV_LINKS: Record<string, GovLink[]> = {
-  card: [],
+  card: [
+    { title: "Jan Seva Digital Application", titleHi: "जन सेवा डिजिटल आवेदन", desc: "Apply for your verified digital Jan Seva Identity Card.", descHi: "अपने सत्यापित जन सेवा पहचान पत्र के लिए आवेदन करें।", url: "/jan-seva-card", isGov: false },
+    { title: "MP e-District Citizen Services", titleHi: "एम.पी. ई-डिस्ट्रिक्ट नागरिक सेवाएं", desc: "Official MP government portal for domicile, income & caste certificates.", descHi: "मूल निवासी, आय और जाति प्रमाण पत्र के लिए आधिकारिक पोर्टल।", url: "https://edistrict.mp.gov.in/", isGov: true },
+    { title: "DigiLocker Identity Documents", titleHi: "डिजिलॉकर पहचान पत्र", desc: "Access Aadhaar, PAN and verified digital documents directly.", descHi: "आधार, पैन और सत्यापित डिजिटल दस्तावेज सीधे प्राप्त करें।", url: "https://www.digilocker.gov.in/", isGov: true },
+    { title: "National Portal of India", titleHi: "भारत का राष्ट्रीय पोर्टल", desc: "Single window access to central and state government services.", descHi: "केंद्रीय और राज्य सरकार की सेवाओं तक पहुंच।", url: "https://www.india.gov.in/", isGov: true }
+  ],
   blood: [
     { title: "e-RaktKosh Portal", titleHi: "ई-रक्तकोश पोर्टल", desc: "Centralized blood bank management system & donor finder by MoHFW.", descHi: "स्वास्थ्य मंत्रालय द्वारा केंद्रीयकृत रक्त बैंक प्रबंधन एवं दाता खोज।", url: "https://www.eraktkosh.in/", isGov: true },
     { title: "National Health Portal (NHP)", titleHi: "राष्ट्रीय स्वास्थ्य पोर्टल", desc: "Official health guidance & blood emergency directory.", descHi: "आधिकारिक स्वास्थ्य मार्गदर्शन और रक्त आपातकालीन निर्देशिका।", url: "https://www.nhp.gov.in/", isGov: true },
@@ -332,8 +337,58 @@ export const SERVICE_GOV_LINKS: Record<string, GovLink[]> = {
   ]
 };
 
+export const SERVICE_ALIASES: Record<string, string> = {
+  "jan-seva-card": "card",
+  "blood-network": "blood",
+  "grievances": "grievance",
+  "volunteering": "volunteers",
+  "jobs-portal": "jobs",
+  "employment": "jobs",
+  "food-support": "food",
+  "medicine-support": "medicine",
+  "education-aid": "education",
+  "women-safety": "women-safety",
+  "senior-citizens": "seniors",
+  "seniors": "seniors",
+  "animal-welfare": "animals",
+  "animals": "animals",
+  "environment": "environment",
+  "crowdfunding": "crowdfunding",
+  "religious-culture": "culture",
+  "culture": "culture",
+  "disaster-management": "disaster",
+  "disaster": "disaster",
+  "farmer-support": "farmer",
+  "farmer": "farmer",
+  "government-schemes": "schemes",
+  "schemes": "schemes",
+  "skills-training": "skills",
+  "skills": "skills",
+  "sos-system": "sos",
+  "sos": "sos",
+  "hindu-calendar": "hindu-calendar",
+  "news-feed": "news-feed",
+  "internet-radio": "internet-radio",
+  "transit-planner": "transit-planner",
+  "transit": "transit-planner",
+  "youth-empowerment": "youth",
+  "youth": "youth",
+  "nation-building": "nation",
+  "nation": "nation",
+  "health-care": "health-care",
+  "scholarships": "scholarships",
+  "national-directory": "directory",
+  "epaper-kiosk": "epaper"
+};
+
 export function getGovLinksForService(serviceId: string): GovLink[] {
-  return SERVICE_GOV_LINKS[serviceId] || [
+  const direct = SERVICE_GOV_LINKS[serviceId];
+  if (direct && direct.length > 0) return direct;
+  const alias = SERVICE_ALIASES[serviceId];
+  if (alias && SERVICE_GOV_LINKS[alias] && SERVICE_GOV_LINKS[alias].length > 0) {
+    return SERVICE_GOV_LINKS[alias];
+  }
+  return [
     { title: "National Portal of India", titleHi: "भारत का राष्ट्रीय पोर्टल", desc: "Official single window access to government services.", descHi: "सरकारी सेवाओं की आधिकारिक एकल खिड़की।", url: "https://www.india.gov.in/", isGov: true },
     { title: "MP e-Services Portal", titleHi: "एम.पी. ई-सेवा पोर्टल", desc: "Madhya Pradesh state e-services directory.", descHi: "मध्य प्रदेश राज्य ई-सेवाएं निर्देशिका।", url: "https://services.mp.gov.in/eservice/", isGov: true }
   ];

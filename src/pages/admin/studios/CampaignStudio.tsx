@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import { useAuth } from "../../../context/AuthContext";
 import {
   HeartHandshake,
   DollarSign,
@@ -72,7 +73,8 @@ export default function CampaignStudio() {
     data: any;
   } | null>(null);
 
-  const token = localStorage.getItem("token") || "";
+  const { token: authToken } = useAuth();
+  const token = authToken || localStorage.getItem("@rpf_token") || localStorage.getItem("token") || "";
   const authHeader = useCallback(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
   const fetchData = useCallback(async () => {

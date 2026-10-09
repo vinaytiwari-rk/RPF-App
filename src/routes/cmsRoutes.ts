@@ -154,64 +154,6 @@ router.get("/api/cms", async (req, res) => {
     if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
       let parsed = JSON.parse(result.rows[0].founderMessageEn);
       let modified = false;
-
-      if (Array.isArray(parsed.liveTvChannels)) {
-        const unwanted = new Set([
-          'uploaded-45', 'uploaded-46', 'uploaded-47', 'uploaded-50', 'uploaded-51',
-          'uploaded-52', 'uploaded-53', 'uploaded-43', 'uploaded-56', 'uploaded-57',
-          'uploaded-59', 'uploaded-60', 'uploaded-65', 'uploaded-66'
-        ]);
-
-        const beforeCount = parsed.liveTvChannels.length;
-        parsed.liveTvChannels = parsed.liveTvChannels.filter((c: any) => !c || !unwanted.has(c.id));
-        if (parsed.liveTvChannels.length !== beforeCount) {
-          modified = true;
-        }
-
-        const newChannelsMap = new Map([
-          ['uploaded-42', 'https://www.ndtv.com/livetv-ndtv24x7'],
-          ['uploaded-44', 'https://www.wionews.com/live-tv'],
-          ['uploaded-48', 'https://www.aajtak.in/livetv'],
-          ['uploaded-49', 'https://www.abplive.com/live-tv'],
-          ['uploaded-54', 'https://www.indiatvnews.com/livetv'],
-          ['uploaded-55', 'https://www.tv9hindi.com/live-tv']
-        ]);
-
-        let hasUpdates = false;
-        parsed.liveTvChannels = parsed.liveTvChannels.map((channel: any) => {
-          if (channel && channel.id && newChannelsMap.has(channel.id)) {
-            const newUrl = newChannelsMap.get(channel.id);
-            if (channel.url !== newUrl) {
-              channel.url = newUrl;
-              channel.videoId = "";
-              hasUpdates = true;
-            }
-          }
-          return channel;
-        });
-
-        const existingIds = new Set(parsed.liveTvChannels.map((c: any) => c?.id));
-        const newChannelsToAdd = [
-          { id: 'uploaded-61', name: 'France24', url: 'https://www.france24.com/en/live', category: 'News', enabled: true },
-          { id: 'uploaded-62', name: 'Al Jazeera', url: 'https://www.aljazeera.com/video/live', category: 'News', enabled: true },
-          { id: 'uploaded-63', name: 'Euro News', url: 'https://www.euronews.com/live', category: 'News', enabled: true },
-          { id: 'uploaded-64', name: 'CNN', url: 'https://edition.cnn.com/videos/fast/cnni-fast', category: 'News', enabled: true }
-        ];
-
-        newChannelsToAdd.forEach(nc => {
-          if (!existingIds.has(nc.id)) {
-            parsed.liveTvChannels.push({
-              ...nc,
-              order: parsed.liveTvChannels.length
-            });
-            hasUpdates = true;
-          }
-        });
-
-        if (hasUpdates) {
-          modified = true;
-        }
-      }
       if (!parsed.govSchemeUrl || parsed.govSchemeUrl === "https://www.myscheme.gov.in/find-scheme") {
         parsed.govSchemeUrl = "https://services.mp.gov.in/eservice/";
         modified = true;
