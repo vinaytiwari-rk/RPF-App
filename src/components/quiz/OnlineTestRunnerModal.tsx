@@ -15,6 +15,29 @@ interface Props {
   userName?: string;
 }
 
+function shuffleItems<T>(items: T[]): T[] {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function createAttemptQuestions(questions: QuizQuestion[], limit = 7): QuizQuestion[] {
+  return shuffleItems(questions)
+    .slice(0, Math.min(limit, questions.length))
+    .map((question) => {
+      const optionOrder = shuffleItems([0, 1, 2, 3]);
+      return {
+        ...question,
+        optionsEn: optionOrder.map((index) => question.optionsEn[index]),
+        optionsHi: optionOrder.map((index) => question.optionsHi[index]),
+        correctIndex: optionOrder.indexOf(question.correctIndex)
+      };
+    });
+}
+
 export default function OnlineTestRunnerModal({
   topic,
   onClose,
@@ -24,6 +47,7 @@ export default function OnlineTestRunnerModal({
   const isHi = lang === "hi";
 
   // State
+  const [testQuestions] = useState<QuizQuestion[]>(() => createAttemptQuestions(topic.questions, 7));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [timeLeft, setTimeLeft] = useState(topic.durationMinutes * 60);
@@ -55,8 +79,8 @@ export default function OnlineTestRunnerModal({
     return () => clearInterval(timer);
   }, [isSubmitted, timeLeft]);
 
-  const currentQ: QuizQuestion = topic.questions[currentIndex];
-  const totalQuestions = topic.questions.length;
+  const currentQ: QuizQuestion = testQuestions[currentIndex];
+  const totalQuestions = testQuestions.length;
 
   const handleSelectOption = (optionIndex: number) => {
     if (isSubmitted) return;
@@ -73,7 +97,7 @@ export default function OnlineTestRunnerModal({
 
   // Score Calculation
   const correctCount = Object.entries(userAnswers).filter(
-    ([qIdx, ansIdx]) => topic.questions[Number(qIdx)].correctIndex === ansIdx
+    ([qIdx, ansIdx]) => testQuestions[Number(qIdx)].correctIndex === ansIdx
   ).length;
 
   const percentage = Math.round((correctCount / totalQuestions) * 100);
@@ -351,7 +375,7 @@ export default function OnlineTestRunnerModal({
                 {isHi ? "सभी प्रश्नों के सही उत्तर व व्याख्या:" : "Answer Key & Explanations:"}
               </h4>
               <div className="space-y-3">
-                {topic.questions.map((q, idx) => {
+                {testQuestions.map((q, idx) => {
                   const userChoice = userAnswers[idx];
                   const isCorrect = userChoice === q.correctIndex;
                   const isSkipped = userChoice === undefined;
