@@ -112,7 +112,7 @@ export default function OnlineTestCenterPage() {
 
             <div className="mt-4 flex items-center justify-between border-t border-white/20 pt-3">
               <span className="text-xs font-bold text-amber-100">
-                {daily.questionsCount} {isHi ? "महत्वपूर्ण प्रश्न" : "Questions"}
+                {daily.questionsCount} {isHi ? "प्रश्नों के बैंक से यादृच्छिक प्रश्न" : "questions from the randomized bank"}
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-black text-orange-950 shadow group-hover:bg-amber-50">
                 <Play className="h-3.5 w-3.5 fill-current" />
@@ -165,7 +165,7 @@ export default function OnlineTestCenterPage() {
 
                 <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs font-bold text-[#245D45]">
                   <span className="text-[11px] text-slate-400">
-                    {topic.questionsCount} {isHi ? "प्रश्न" : "Questions"}
+                    {topic.questionsCount} {isHi ? "यादृच्छिक प्रश्न" : "randomized questions"}
                   </span>
                   <span className="inline-flex items-center gap-1 group-hover:translate-x-1 transition text-emerald-800">
                     {isHi ? "टेस्ट दें" : "Take Test"}
