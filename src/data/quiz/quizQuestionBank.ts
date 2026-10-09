@@ -119,7 +119,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         explanationEn: "Eligible PM-KISAN beneficiaries receive ₹6,000 per year in three equal instalments.",
         explanationHi: "पात्र PM-KISAN लाभार्थियों को तीन समान किस्तों में प्रतिवर्ष ₹6,000 मिलते हैं।",
         sourceLabel: "Official government / institutional source",
-        sourceUrl: "https://services.india.gov.in/service/detail/pm-kisan-samman-nidhi",
+        sourceUrl: "https://services.india.gov.in/service/detail/%E0%A4%AA%E0%A5%80%E0%A4%8F%E0%A4%AE-%E0%A4%95%E0%A4%BF%E0%A4%B8%E0%A4%BE%E0%A4%A8-%E0%A4%B8%E0%A4%AE%E0%A5%8D%E0%A4%AE%E0%A4%BE%E0%A4%A8-%E0%A4%A8%E0%A4%BF%E0%A4%A7%E0%A4%BF-1",
         lastVerified: "2026-10-09"
       },
       {
