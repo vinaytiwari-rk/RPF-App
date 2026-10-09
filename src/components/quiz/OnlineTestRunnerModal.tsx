@@ -7,6 +7,8 @@ import {
 import { jsPDF } from "jspdf";
 import toast from "react-hot-toast";
 import { QuizTopic, QuizQuestion } from "../../data/quiz/quizQuestionBank";
+import { createRandomizedAttempt } from "../../utils/quizAttempt";
+import { saveBlobToDownloads } from "../../utils/nativeFileDownload";
 
 interface Props {
   topic: QuizTopic;
@@ -22,6 +24,9 @@ export default function OnlineTestRunnerModal({
   userName = "Student"
 }: Props) {
   const isHi = lang === "hi";
+
+  // Each attempt uses a fresh random subset and randomized option order.
+  const [attemptQuestions] = useState(() => createRandomizedAttempt(topic.questions, 7));
 
   // State
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -55,8 +60,8 @@ export default function OnlineTestRunnerModal({
     return () => clearInterval(timer);
   }, [isSubmitted, timeLeft]);
 
-  const currentQ: QuizQuestion = topic.questions[currentIndex];
-  const totalQuestions = topic.questions.length;
+  const currentQ: QuizQuestion = attemptQuestions[currentIndex];
+  const totalQuestions = attemptQuestions.length;
 
   const handleSelectOption = (optionIndex: number) => {
     if (isSubmitted) return;
@@ -73,7 +78,7 @@ export default function OnlineTestRunnerModal({
 
   // Score Calculation
   const correctCount = Object.entries(userAnswers).filter(
-    ([qIdx, ansIdx]) => topic.questions[Number(qIdx)].correctIndex === ansIdx
+    ([qIdx, ansIdx]) => attemptQuestions[Number(qIdx)].correctIndex === ansIdx
   ).length;
 
   const percentage = Math.round((correctCount / totalQuestions) * 100);
@@ -86,7 +91,8 @@ export default function OnlineTestRunnerModal({
   };
 
   // Download Certificate PDF
-  const downloadCertificate = () => {
+  const downloadCertificate = async () => {
+    try {
     const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
     const width = 297;
     const height = 210;
@@ -169,8 +175,13 @@ export default function OnlineTestRunnerModal({
     doc.text("Authorized Examiner", width - 65, 178, { align: "center" });
     doc.text("RP Foundation Knowledge Wing", width - 65, 184, { align: "center" });
 
-    doc.save(`RPF_Certificate_${topic.id}_${percentage}pct.pdf`);
-    toast.success(isHi ? "सर्टिफिकेट डाउनलोड हो गया!" : "Certificate downloaded!");
+    const filename = `RPF_Certificate_${topic.id}_${percentage}pct.pdf`;
+    await saveBlobToDownloads(doc.output("blob"), filename, "application/pdf");
+    toast.success(isHi ? "सर्टिफिकेट Downloads/SAMAHIT में सेव हो गया!" : "Certificate saved to Downloads/SAMAHIT!");
+    } catch (error) {
+      console.error("Mock exam certificate download failed", error);
+      toast.error(isHi ? "सर्टिफिकेट सेव नहीं हो सका। कृपया फिर प्रयास करें।" : "Could not save certificate. Please try again.");
+    }
   };
 
   return (
@@ -351,7 +362,7 @@ export default function OnlineTestRunnerModal({
                 {isHi ? "सभी प्रश्नों के सही उत्तर व व्याख्या:" : "Answer Key & Explanations:"}
               </h4>
               <div className="space-y-3">
-                {topic.questions.map((q, idx) => {
+                {attemptQuestions.map((q, idx) => {
                   const userChoice = userAnswers[idx];
                   const isCorrect = userChoice === q.correctIndex;
                   const isSkipped = userChoice === undefined;
