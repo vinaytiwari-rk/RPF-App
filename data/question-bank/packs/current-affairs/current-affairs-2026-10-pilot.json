@@ -10,7 +10,7 @@
   "iconName": "Flame",
   "color": "from-amber-600 to-orange-600",
   "badge": "Source reviewed",
-  "questionsCount": 5,
+  "questionsCount": 10,
   "durationMinutes": 5,
   "questions": [
     {
@@ -181,6 +181,177 @@
         "publishedAt": "2026-10-07",
         "verifiedAt": "2026-10-09",
         "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261006-sme-purpose-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "economy",
+        "msme"
+      ],
+      "questionEn": "What is the stated purpose of the SME Growth Fund approved by the Union Cabinet in October 2026?",
+      "questionHi": "अक्टूबर 2026 में केंद्रीय मंत्रिमंडल द्वारा स्वीकृत SME Growth Fund का घोषित उद्देश्य क्या है?",
+      "optionsEn": [
+        "Direct equity investments in small and medium enterprises",
+        "Subsidies for overseas tourism",
+        "Loans only for large public-sector companies",
+        "Funding for international sports events"
+      ],
+      "optionsHi": [
+        "लघु और मध्यम उद्यमों में प्रत्यक्ष इक्विटी निवेश",
+        "विदेशी पर्यटन के लिए सब्सिडी",
+        "केवल बड़ी सार्वजनिक क्षेत्र की कंपनियों को ऋण",
+        "अंतरराष्ट्रीय खेल आयोजनों के लिए धन"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Cabinet release describes the fund as supporting direct equity investments in small and medium enterprises.",
+      "explanationHi": "मंत्रिमंडल की विज्ञप्ति में इस फंड का उद्देश्य लघु और मध्यम उद्यमों में प्रत्यक्ष इक्विटी निवेश बताया गया है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2319532&reg=48&lang=2",
+        "publishedAt": "2026-10-06",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261008-imc-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "technology",
+        "telecom"
+      ],
+      "questionEn": "Which edition of the India Mobile Congress did the Prime Minister inaugurate in October 2026?",
+      "questionHi": "अक्टूबर 2026 में प्रधानमंत्री ने India Mobile Congress के किस संस्करण का उद्घाटन किया?",
+      "optionsEn": [
+        "5th",
+        "7th",
+        "9th",
+        "10th"
+      ],
+      "optionsHi": [
+        "5वाँ",
+        "7वाँ",
+        "9वाँ",
+        "10वाँ"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The PIB release dated 8 October 2026 identifies the event as the 10th edition of India Mobile Congress.",
+      "explanationHi": "8 अक्टूबर 2026 की PIB विज्ञप्ति में इसे India Mobile Congress का 10वाँ संस्करण बताया गया है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2320680&reg=48&lang=2",
+        "publishedAt": "2026-10-08",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261005-kuno-cubs-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "environment",
+        "wildlife"
+      ],
+      "questionEn": "How many cubs were reported in the 5 October 2026 PIB update about an Indian-born cheetah at Kuno National Park?",
+      "questionHi": "कूनो राष्ट्रीय उद्यान में भारतीय मूल की चीता मादा से कितने शावकों के जन्म की जानकारी 5 अक्टूबर 2026 की PIB अपडेट में दी गई?",
+      "optionsEn": [
+        "2",
+        "3",
+        "5",
+        "7"
+      ],
+      "optionsHi": [
+        "2",
+        "3",
+        "5",
+        "7"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The PIB update reported the birth of five healthy cubs at Kuno National Park.",
+      "explanationHi": "PIB अपडेट में कूनो राष्ट्रीय उद्यान में पाँच स्वस्थ शावकों के जन्म की जानकारी दी गई।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2319097&reg=48&lang=2",
+        "publishedAt": "2026-10-05",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-toi-20261006-ppf-rate-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "medium",
+      "examTags": [
+        "economy",
+        "savings"
+      ],
+      "questionEn": "According to the Times of India report on small-savings rates for October–December 2026, what annual rate was listed for PPF?",
+      "questionHi": "अक्टूबर–दिसंबर 2026 की छोटी बचत योजनाओं की दरों पर Times of India की रिपोर्ट के अनुसार PPF की वार्षिक ब्याज दर कितनी बताई गई?",
+      "optionsEn": [
+        "6.5%",
+        "7.1%",
+        "7.7%",
+        "8.2%"
+      ],
+      "optionsHi": [
+        "6.5%",
+        "7.1%",
+        "7.7%",
+        "8.2%"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The report lists PPF at 7.1%; the Department of Economic Affairs is the official cross-check source for small-savings rate notifications.",
+      "explanationHi": "रिपोर्ट में PPF दर 7.1% दी गई है; छोटी बचत दरों की आधिकारिक पुष्टि के लिए आर्थिक कार्य विभाग का स्रोत भी रखा गया है।",
+      "source": {
+        "sourceId": "times_of_india",
+        "articleUrl": "https://timesofindia.indiatimes.com/business/india-business/ppf-at-7-1-scss-8-2-nsc-7-7-check-small-savings-interest-rates-for-october-december-2026-and-what-investors-will-earn-on-post-office-schemes-like-ssy-time-deposits/articleshow/134704207.cms",
+        "publishedAt": "2026-10-06",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://dea.gov.in/budget-division/475"
+      }
+    },
+    {
+      "id": "ca-drishti-20260528-sarthak-pds-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "medium",
+      "examTags": [
+        "economy",
+        "food-security",
+        "technology"
+      ],
+      "questionEn": "The SARTHAK-PDS scheme discussed by Drishti IAS is intended to modernize which public service system?",
+      "questionHi": "Drishti IAS में वर्णित SARTHAK-PDS योजना किस सार्वजनिक सेवा प्रणाली के आधुनिकीकरण से संबंधित है?",
+      "optionsEn": [
+        "Public Distribution System",
+        "Urban metro rail ticketing",
+        "Passport issuance",
+        "National highway toll collection"
+      ],
+      "optionsHi": [
+        "सार्वजनिक वितरण प्रणाली",
+        "शहरी मेट्रो रेल टिकटिंग",
+        "पासपोर्ट जारी करना",
+        "राष्ट्रीय राजमार्ग टोल संग्रह"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Drishti IAS analysis describes SARTHAK-PDS as a technology-led modernization of India's Public Distribution System; its facts should be cross-checked against official releases before wider publication.",
+      "explanationHi": "Drishti IAS का विश्लेषण SARTHAK-PDS को भारत की सार्वजनिक वितरण प्रणाली के तकनीक-आधारित आधुनिकीकरण से जोड़ता है; बड़े पैमाने पर प्रकाशित करने से पहले आधिकारिक स्रोत से तथ्य-जाँच आवश्यक है।",
+      "source": {
+        "sourceId": "drishti_ias",
+        "articleUrl": "https://www.drishtiias.com/current-affairs-news-analysis-editorials/news-analysis/28-05-2026",
+        "publishedAt": "2026-05-28",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/"
       }
     }
   ]
