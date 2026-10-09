@@ -11,6 +11,10 @@ jobs:
   triage:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      # Gemini CLI runs in a clean GitHub Actions checkout. Explicitly trust
+      # that workspace so headless issue triage does not fail the trust guard.
+      GEMINI_CLI_TRUST_WORKSPACE: "true"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
