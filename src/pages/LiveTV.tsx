@@ -5,6 +5,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns } from "lucide-react";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
 import { openExternalLink } from "../utils/browser";
+import { getMediaSourceType } from "../utils/mediaSourceType";
 
 const U: Record<string, string> = {
   aajtak: "Nq2wYlWFucg",
@@ -57,6 +58,7 @@ const canonical = (items: LiveTvChannel[]) =>
 const getId = (c: LiveTvChannel) =>
   c.videoId || c.url.match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|watch\?v=))([^?&/]+)/)?.[1];
 
+
 export default function LiveTV() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const navigate = useNavigate();
@@ -66,6 +68,7 @@ export default function LiveTV() {
   const [visibleCount, setVisibleCount] = useState(40);
   const [channels, setChannels] = useState<LiveTvChannel[]>(() => canonical(LIVE_TV_DEFAULTS));
   const [active, setActive] = useState<LiveTvChannel | null>(null);
+  const [playerError, setPlayerError] = useState("");
   const [, setServerControlled] = useState(false);
   const [layout, setLayout] = useState<"grid" | "list" | "compact" | "theater">("grid");
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -116,29 +119,43 @@ export default function LiveTV() {
     else setActive(null);
   };
 
-  // Initialize video.js player for non‑YouTube streams
+  // Initialize video.js player for non-YouTube streams.
+  // Detect MIME type per URL; a hard-coded HLS type breaks direct MP4/audio URLs.
   useEffect(() => {
-    if (active && videoRef.current && !embed) {
-      const srcUrl = active.url;
-      const player = videojs(videoRef.current, {
-        fluid: true,
-        autoplay: true,
-        controls: true,
-        preload: 'auto',
-        html5: {
-          vhs: {
-            enableLowInitialPlaylist: true,
-            smoothQualityChange: true,
-            fastReady: true,
-            useDeviceAmpSupported: true
-          }
-        }
-      });
-      player.src({ src: srcUrl, type: 'application/x-mpegURL' });
-      return () => {
-        player.dispose();
-      };
+    if (!active || !videoRef.current || embed) {
+      setPlayerError("");
+      return;
     }
+
+    setPlayerError("");
+    const srcUrl = active.url;
+    const player = videojs(videoRef.current, {
+      fluid: true,
+      autoplay: true,
+      controls: true,
+      preload: 'auto',
+      html5: {
+        vhs: {
+          enableLowInitialPlaylist: true,
+          smoothQualityChange: true,
+          fastReady: true,
+          useDeviceAmpSupported: true
+        }
+      }
+    });
+
+    const handlePlayerError = () => {
+      const error = player.error();
+      setPlayerError(error?.message || "This direct stream could not be played. The stream may be unavailable or blocked by its provider.");
+    };
+
+    player.on("error", handlePlayerError);
+    player.src({ src: srcUrl, type: getMediaSourceType(srcUrl) });
+
+    return () => {
+      player.off("error", handlePlayerError);
+      player.dispose();
+    };
   }, [active, embed]);
 
   return (
@@ -184,6 +201,20 @@ export default function LiveTV() {
                     className="video-js vjs-default-skin h-full w-full"
                     controls
                   />
+                  {playerError && (
+                    <div role="alert" className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-950/95 p-5 text-center">
+                      <p className="text-sm font-bold text-white">Stream playback failed</p>
+                      <p className="max-w-lg text-xs leading-relaxed text-slate-300">{playerError}</p>
+                      <p className="max-w-lg text-[11px] leading-relaxed text-slate-400">Some providers block in-app playback (CORS), require a valid session, or may have an offline stream.</p>
+                      <button
+                        type="button"
+                        onClick={() => openExternalLink(active.url, navigate, active.name)}
+                        className="rounded-xl bg-orange-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-orange-400"
+                      >
+                        {hi ? "ब्राउज़र में खोलें" : "Open in Browser"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

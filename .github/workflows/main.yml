@@ -3,15 +3,21 @@ on:
   issues:
     types: [opened]
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   triage:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-      
+        uses: actions/checkout@v5
+
       - name: Run Gemini CLI
-        uses: google-github-actions/run-gemini-cli@v1
+        # v0.1.22 is a published release; @v1 does not exist.
+        uses: google-github-actions/run-gemini-cli@v0.1.22
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          prompt: "Please review this new issue and suggest appropriate labels or immediate troubleshooting steps."
+          prompt: "Review this newly opened issue. Summarize the likely category, identify missing reproduction details, and suggest labels or immediate troubleshooting steps. Do not modify repository files."
