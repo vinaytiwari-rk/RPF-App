@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useState, useRef } from "react";
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 import { useNavigate, useOutletContext } from "react-router-dom";
@@ -121,7 +121,7 @@ export default function LiveTV() {
 
   // Initialize video.js player for non-YouTube streams.
   // Detect MIME type per URL; a hard-coded HLS type breaks direct MP4/audio URLs.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!active || !videoRef.current || embed) {
       setPlayerError("");
       return;
@@ -153,8 +153,16 @@ export default function LiveTV() {
     player.src({ src: srcUrl, type: getMediaSourceType(srcUrl) });
 
     return () => {
-      player.off("error", handlePlayerError);
-      player.dispose();
+      // Dispose before React removes the conditionally-rendered video node.
+      // Video.js mutates its player DOM; passive-effect cleanup can run after
+      // React has already detached children and trigger a removeChild DOMException.
+      try {
+        player.off("error", handlePlayerError);
+        if (!player.isDisposed()) player.dispose();
+      } catch (cleanupError) {
+        // Cleanup must never crash route transitions or the app error boundary.
+        console.warn("Live TV player cleanup failed safely", cleanupError);
+      }
     };
   }, [active, embed]);
 
