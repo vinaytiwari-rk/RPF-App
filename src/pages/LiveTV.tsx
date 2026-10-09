@@ -5,6 +5,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns } from "lucide-react";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
 import { openExternalLink } from "../utils/browser";
+import { getMediaSourceType } from "../utils/mediaSourceType";
 
 const U: Record<string, string> = {
   aajtak: "Nq2wYlWFucg",
@@ -57,24 +58,6 @@ const canonical = (items: LiveTvChannel[]) =>
 const getId = (c: LiveTvChannel) =>
   c.videoId || c.url.match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|watch\?v=))([^?&/]+)/)?.[1];
 
-// Infer media type from the URL path so query-string tokens do not affect detection.
-// Unknown extensionless direct streams keep the existing HLS default for compatibility.
-const getMediaSourceType = (rawUrl: string): string => {
-  try {
-    const path = new URL(rawUrl).pathname.toLowerCase();
-    if (path.endsWith(".m3u8")) return "application/x-mpegURL";
-    if (path.endsWith(".mp4") || path.endsWith(".m4v")) return "video/mp4";
-    if (path.endsWith(".webm")) return "video/webm";
-    if (path.endsWith(".ogv")) return "video/ogg";
-    if (path.endsWith(".mp3")) return "audio/mpeg";
-    if (path.endsWith(".aac")) return "audio/aac";
-    if (path.endsWith(".m4a")) return "audio/mp4";
-    if (path.endsWith(".ogg")) return "audio/ogg";
-    return "application/x-mpegURL";
-  } catch {
-    return "application/x-mpegURL";
-  }
-};
 
 export default function LiveTV() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
