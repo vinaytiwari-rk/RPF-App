@@ -7,6 +7,7 @@ public class MainActivity extends BridgeActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         registerPlugin(NativeBrowserPlugin.class);
         registerPlugin(NativePermissionsPlugin.class);
+        registerPlugin(NativeDownloadsPlugin.class);
         super.onCreate(savedInstanceState);
     }
 
