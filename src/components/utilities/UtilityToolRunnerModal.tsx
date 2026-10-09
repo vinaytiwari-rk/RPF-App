@@ -48,12 +48,12 @@ export default function UtilityToolRunnerModal({ tool, onClose, lang = "hi" }: P
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-xs sm:p-5">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-5 backdrop-blur-xs">
       <div 
         role="dialog"
         aria-modal="true"
         aria-labelledby="utility-runner-title"
-        className="relative flex max-h-[92vh] w-full max-w-2xl flex-col rounded-3xl bg-[#FFFBF2] shadow-2xl border border-emerald-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-t-[28px] sm:rounded-3xl bg-[#FFFBF2] shadow-2xl border border-emerald-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-emerald-900/10 bg-[#F0FAF4] px-5 py-4">
@@ -80,7 +80,7 @@ export default function UtilityToolRunnerModal({ tool, onClose, lang = "hi" }: P
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 text-[#243B32]">
+        <div className="flex-1 overflow-y-auto p-4 pb-24 sm:p-6 sm:pb-6 text-[#243B32]">
           <p className="mb-4 text-xs sm:text-sm text-[#52685C] bg-white/70 p-3 rounded-xl border border-emerald-50">
             {isHi ? tool.descHi : tool.descEn}
           </p>
