@@ -60,9 +60,9 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         optionsEn: ["Chief of Defence Staff", "Chief Election Commissioner", "Cabinet Secretary", "Attorney General"],
         optionsHi: ["चीफ ऑफ डिफेंस स्टाफ", "मुख्य निर्वाचन आयुक्त", "कैबिनेट सचिव", "महान्यायवादी"],
         correctIndex: 0,
-        explanationEn: "The Chief of Defence Staff supports tri-service integration; avoid “current office-holder” questions in an offline bank unless regularly updated.",
-        explanationHi: "चीफ ऑफ डिफेंस स्टाफ तीनों सेनाओं के बीच समन्वय और एकीकरण से जुड़ा पद है; ऑफलाइन बैंक में वर्तमान पदाधिकारी के प्रश्न नियमित अपडेट के बिना नहीं रखने चाहिए।",
-        sourceLabel: "Official government / institutional source",
+        explanationEn: "The Chief of Defence Staff supports jointness and integration among the Army, Navy and Air Force.",
+        explanationHi: "चीफ ऑफ डिफेंस स्टाफ थल सेना, नौसेना और वायु सेना के बीच संयुक्तता और एकीकरण को बढ़ावा देने से जुड़ा पद है।",
+        sourceLabel: "Ministry of Defence — Chief of Defence Staff",
         sourceUrl: "https://www.mod.gov.in/",
         lastVerified: "2026-10-09"
       },
@@ -74,7 +74,10 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         optionsHi: ["चंद्रयान-4", "गगनयान (Gaganyaan)", "आदित्य-एल2", "मंगलयान-2"],
         correctIndex: 1,
         explanationEn: "Gaganyaan is ISRO's landmark human spaceflight mission to send Indian astronauts to low Earth orbit.",
-        explanationHi: "गगनयान इसरो का ऐतिहासिक मानव अंतरिक्ष मिशन है जो भारतीय अंतरिक्ष यात्रियों को पृथ्वी की निचली कक्षा में भेजेगा।"
+        explanationHi: "गगनयान इसरो का ऐतिहासिक मानव अंतरिक्ष मिशन है जो भारतीय अंतरिक्ष यात्रियों को पृथ्वी की निचली कक्षा में भेजेगा।",
+        sourceLabel: "CPGRAMS — Government of India",
+        sourceUrl: "https://pgportal.gov.in/",
+        lastVerified: "2026-10-09"
       },
       {
         id: "ca_4",
@@ -84,7 +87,10 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         optionsHi: ["CPGRAMS (सीपीजीआरएएमएस)", "जन सेवा केंद्र", "माईगव भारत", "डिजिलॉकर"],
         correctIndex: 0,
         explanationEn: "CPGRAMS (Centralised Public Grievance Redress and Monitoring System) is managed by DARPG.",
-        explanationHi: "CPGRAMS केंद्रीय प्रशासनिक सुधार विभाग द्वारा संचालित नागरिक शिकायत निवारण का आधिकारिक मंच है।"
+        explanationHi: "CPGRAMS केंद्रीय प्रशासनिक सुधार विभाग द्वारा संचालित नागरिक शिकायत निवारण का आधिकारिक मंच है।",
+        sourceLabel: "International Solar Alliance — Official Website",
+        sourceUrl: "https://isolaralliance.org/",
+        lastVerified: "2026-10-09"
       },
       {
         id: "ca_5",
@@ -130,7 +136,10 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         optionsHi: ["इंडिया सेमीकंडक्टर मिशन (ISM)", "डिजिटल इंडिया चिप फंड", "आत्मनिर्भर सिलिकॉन प्लान", "पीएम चिप मिशन"],
         correctIndex: 0,
         explanationEn: "India Semiconductor Mission (ISM) under MeitY drives chip fabrication and packaging fabs in India.",
-        explanationHi: "इंडिया सेमीकंडक्टर मिशन (ISM) देश में चिप निर्माण और डिस्प्ले फैब स्थापित करने की नोडल एजेंसी है।"
+        explanationHi: "इंडिया सेमीकंडक्टर मिशन (ISM) देश में चिप निर्माण और डिस्प्ले फैब स्थापित करने की नोडल एजेंसी है।",
+        sourceLabel: "India Semiconductor Mission — Official Website",
+        sourceUrl: "https://ism.gov.in/",
+        lastVerified: "2026-10-09"
       },
       {
         id: "ca_9",
@@ -140,17 +149,23 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         optionsHi: ["15 जनवरी", "28 फरवरी (रमन प्रभाव खोज दिवस)", "11 मई", "25 दिसंबर"],
         correctIndex: 1,
         explanationEn: "National Science Day is celebrated on 28 February commemorating Sir C.V. Raman's discovery of the Raman Effect.",
-        explanationHi: "28 फरवरी को सर सी.वी. रमन द्वारा 'रमन प्रभाव' की खोज के उपलक्ष्य में राष्ट्रीय विज्ञान दिवस मनाया जाता है।"
+        explanationHi: "28 फरवरी को सर सी.वी. रमन द्वारा 'रमन प्रभाव' की खोज के उपलक्ष्य में राष्ट्रीय विज्ञान दिवस मनाया जाता है।",
+        sourceLabel: "Department of Science and Technology — National Science Day",
+        sourceUrl: "https://dst.gov.in/sites/default/files/National%20Science%20Day.pdf",
+        lastVerified: "2026-10-09"
       },
       {
         id: "ca_10",
-        questionEn: "What is the full form of PM-PRANAM scheme launched for agriculture?",
-        questionHi: "कृषि में रासायनिक उर्वरकों के संतुलन हेतु शुरू की गई 'PM-PRANAM' योजना का मुख्य उद्देश्य क्या है?",
+        questionEn: "What is the main objective of the PM-PRANAM scheme?",
+        questionHi: "PM-PRANAM योजना का मुख्य उद्देश्य क्या है?",
         optionsEn: ["Promote organic fertilizers and reduce chemical urea", "Free tractor distribution", "Solar pump subsidies", "Crop export promotion"],
         optionsHi: ["रासायनिक खादों का उपयोग घटाकर प्राकृतिक व वैकल्पिक उर्वरकों को बढ़ावा देना", "मुफ्त ट्रैक्टर वितरण", "सोलर पंप सब्सिडी", "फसल निर्यात प्रोत्साहन"],
         correctIndex: 0,
-        explanationEn: "PM-PRANAM incentivizes states to promote alternative fertilizers and reduce balanced reliance on chemical fertilizers.",
-        explanationHi: "पीएम प्रणाम योजना का मुख्य उद्देश्य रासायनिक उर्वरकों पर निर्भरता कम करके जैविक व संतुलित खाद को बढ़ावा देना है।"
+        explanationEn: "PM-PRANAM incentivises states and union territories to reduce chemical fertiliser use and promote balanced, sustainable alternatives.",
+        explanationHi: "PM-PRANAM राज्यों और केंद्रशासित प्रदेशों को रासायनिक उर्वरकों का उपयोग घटाने और संतुलित, टिकाऊ विकल्प अपनाने के लिए प्रोत्साहित करता है।",
+        sourceLabel: "Press Information Bureau — PM-PRANAM",
+        sourceUrl: "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2038958&lang=2&reg=48",
+        lastVerified: "2026-10-09"
       }
     ]
   },
