@@ -1,0 +1,177 @@
+{
+  "packId": "english-grammar-foundations-002",
+  "version": 1,
+  "subject": "english",
+  "category": "language-aptitude",
+  "titleEn": "English Grammar — Practice Set 2",
+  "titleHi": "अंग्रेज़ी व्याकरण — अभ्यास सेट 2",
+  "descEn": "Original grammar and vocabulary questions.",
+  "descHi": "व्याकरण और शब्दावली के मौलिक प्रश्न।",
+  "iconName": "Languages",
+  "color": "from-violet-600 to-purple-600",
+  "durationMinutes": 8,
+  "questions": [
+    {
+      "id": "eng2-001",
+      "subject": "english",
+      "questionEn": "Choose the correct past tense: “I ___ the letter yesterday.”",
+      "questionHi": "सही Past Tense चुनें: “I ___ the letter yesterday.”",
+      "optionsEn": [
+        "write",
+        "wrote",
+        "written",
+        "writing"
+      ],
+      "optionsHi": [
+        "write",
+        "wrote",
+        "written",
+        "writing"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "“Yesterday” indicates the simple past: wrote.",
+      "explanationHi": "“Yesterday” बीते समय को दर्शाता है; सही रूप wrote है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "eng2-002",
+      "subject": "english",
+      "questionEn": "Choose the synonym of “brief”.",
+      "questionHi": "“Brief” का समानार्थी शब्द चुनें।",
+      "optionsEn": [
+        "Concise",
+        "Vast",
+        "Heavy",
+        "Distant"
+      ],
+      "optionsHi": [
+        "संक्षिप्त",
+        "विशाल",
+        "भारी",
+        "दूर"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Brief means short in duration or concise in expression.",
+      "explanationHi": "Brief का अर्थ छोटा या संक्षिप्त होता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "eng2-003",
+      "subject": "english",
+      "questionEn": "Choose the antonym of “expand”.",
+      "questionHi": "“Expand” का विलोम चुनें।",
+      "optionsEn": [
+        "Extend",
+        "Enlarge",
+        "Contract",
+        "Increase"
+      ],
+      "optionsHi": [
+        "फैलाना",
+        "बढ़ाना",
+        "सिकोड़ना",
+        "वृद्धि करना"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Contract means to become smaller or reduce in size.",
+      "explanationHi": "Contract का अर्थ आकार में छोटा होना या सिकुड़ना है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "eng2-004",
+      "subject": "english",
+      "questionEn": "Fill in: Neither of the answers ___ correct.",
+      "questionHi": "रिक्त स्थान भरें: Neither of the answers ___ correct.",
+      "optionsEn": [
+        "are",
+        "were",
+        "is",
+        "have"
+      ],
+      "optionsHi": [
+        "are",
+        "were",
+        "is",
+        "have"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "“Neither” is treated as singular in this construction.",
+      "explanationHi": "इस रचना में “Neither” को एकवचन माना जाता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "eng2-005",
+      "subject": "english",
+      "questionEn": "Choose the correct preposition: “She is interested ___ music.”",
+      "questionHi": "सही preposition चुनें: “She is interested ___ music.”",
+      "optionsEn": [
+        "on",
+        "at",
+        "in",
+        "for"
+      ],
+      "optionsHi": [
+        "on",
+        "at",
+        "in",
+        "for"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The standard expression is “interested in”.",
+      "explanationHi": "मानक प्रयोग “interested in” है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "eng2-006",
+      "subject": "english",
+      "questionEn": "What is the noun form of “decide”?",
+      "questionHi": "“Decide” का noun form क्या है?",
+      "optionsEn": [
+        "Decisive",
+        "Decision",
+        "Decided",
+        "Decidingly"
+      ],
+      "optionsHi": [
+        "Decisive",
+        "Decision",
+        "Decided",
+        "Decidingly"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Decision is the noun derived from decide.",
+      "explanationHi": "Decision, decide से बना संज्ञा रूप है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
