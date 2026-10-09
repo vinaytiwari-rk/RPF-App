@@ -8,6 +8,7 @@ import {
 import { QUIZ_TOPICS, QuizTopic } from "../data/quiz/quizQuestionBank";
 import OnlineTestRunnerModal from "../components/quiz/OnlineTestRunnerModal";
 import { useAuth } from "../context/AuthContext";
+import { loadQuestionPack, toQuizTopic } from "../lib/quizQuestionBankPacks";
 
 type Lang = "en" | "hi";
 
@@ -27,6 +28,15 @@ export default function OnlineTestCenterPage() {
   const isHi = lang === "hi";
 
   const [activeTopic, setActiveTopic] = useState<QuizTopic | null>(null);
+
+  const handleStartTopic = async (topic: QuizTopic) => {
+    if (topic.id !== "daily_current_affairs") {
+      setActiveTopic(topic);
+      return;
+    }
+    const pack = await loadQuestionPack("current-affairs-2026-10-pilot");
+    setActiveTopic(pack ? toQuizTopic(pack) : topic);
+  };
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -86,11 +96,11 @@ export default function OnlineTestCenterPage() {
         {QUIZ_TOPICS.slice(0, 1).map((daily) => (
           <div
             key={daily.id}
-            onClick={() => setActiveTopic(daily)}
+            onClick={() => void handleStartTopic(daily)}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") setActiveTopic(daily);
+              if (e.key === "Enter" || e.key === " ") void handleStartTopic(daily);
             }}
             className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-600 to-amber-700 p-5 text-white shadow-lg transition hover:scale-[1.01] cursor-pointer"
           >
@@ -137,11 +147,11 @@ export default function OnlineTestCenterPage() {
             return (
               <div
                 key={topic.id}
-                onClick={() => setActiveTopic(topic)}
+                onClick={() => void handleStartTopic(topic)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") setActiveTopic(topic);
+                  if (e.key === "Enter" || e.key === " ") void handleStartTopic(topic);
                 }}
                 className="group relative flex flex-col justify-between rounded-2xl border border-[#D8E8DB] bg-white p-4 shadow-xs transition hover:border-[#245D45] hover:shadow-md cursor-pointer text-left"
               >
