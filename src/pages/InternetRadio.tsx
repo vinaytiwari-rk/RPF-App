@@ -33,6 +33,38 @@ const fallbackStations = allStationsRaw as RadioStation[];
 const validStations = (v: unknown): v is RadioStation[] =>
   Array.isArray(v) && v.every((s: any) => s && typeof s.name === 'string' && typeof s.url === 'string');
 
+const normalizeStationName = (name: string) => name.trim().toLocaleLowerCase();
+
+const mergeStationCatalogue = (bundled: RadioStation[], configured: unknown): RadioStation[] => {
+  const merged = new Map<string, RadioStation>();
+  bundled.forEach((station, index) => {
+    if (!station?.name?.trim() || !/^https?:\/\//i.test(station.url || '')) return;
+    const key = normalizeStationName(station.name);
+    merged.set(key, { ...station, order: Number.isFinite(station.order) ? station.order : index });
+  });
+
+  // CMS entries override matching bundled stations by name and may disable them.
+  // Stations missing from an older/incomplete CMS list remain available instead
+  // of silently shrinking the catalogue from 300+ bundled entries to ~50.
+  if (Array.isArray(configured)) {
+    configured.forEach((value, index) => {
+      const station = value as RadioStation;
+      if (!station || typeof station.name !== 'string' || !station.name.trim() ||
+          typeof station.url !== 'string' || !/^https?:\/\//i.test(station.url)) return;
+      const key = normalizeStationName(station.name);
+      const existing = merged.get(key);
+      merged.set(key, {
+        ...existing,
+        ...station,
+        enabled: station.enabled !== false,
+        order: Number.isFinite(station.order) ? station.order : (existing?.order ?? bundled.length + index),
+      });
+    });
+  }
+
+  return [...merged.values()].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+};
+
 function getRegionId(name: string) {
   const n = name.toLowerCase();
   if (n.includes('bhopal')) return 'Bhopal';
@@ -93,10 +125,8 @@ export default function InternetRadio() {
         const configured = d?.cms?.internetRadioStations;
         if (cancelled) return;
         if (Array.isArray(configured)) {
-          // Respect an intentionally empty admin station list rather than silently
-          // restoring bundled stations after the administrator removes them.
-          const ordered = configured.filter((s) => s && typeof s.name === 'string' && typeof s.url === 'string' && /^https?:\/\//i.test(s.url)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-          setStations(ordered);
+          const merged = mergeStationCatalogue(fallbackStations, configured);
+          setStations(merged);
           setSource('server');
           setStationLoadError(null);
         }
