@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Capacitor, registerPlugin } from "@capacitor/core";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
 import { PDFDocument } from "pdf-lib";
@@ -81,11 +82,69 @@ export default function EverydayToolPage() {
  const [width,setWidth]=useState(1200); const [quality,setQuality]=useState(0.8);
  const [file,setFile]=useState<File|null>(null);
  const [reminderText,setReminderText]=useState(""); const [reminderDate,setReminderDate]=useState("");
- const [reminders,setReminders]=useState<{id:string;text:string;when:string}[]>(()=>{try{const x=JSON.parse(read("samahit-reminders-v1")||"[]");return Array.isArray(x)?x:[];}catch{return [];}});
+ const [reminders,setReminders]=useState<{id:string;text:string;when:string;notificationId?:number}[]>(()=>{try{const x=JSON.parse(read("samahit-reminders-v1")||"[]");return Array.isArray(x)?x:[];}catch{return [];}});
  const [unitFrom,setUnitFrom]=useState("km"); const [unitTo,setUnitTo]=useState("mi"); const [unitAmount,setUnitAmount]=useState("1");
 
  useEffect(()=>{setError("");setBusy(false);setImages([]);setPdfs([]);setFile(null);},[tool]);
  const run=async(fn:()=>Promise<void>)=>{setError("");setBusy(true);try{await fn();}catch(e){setError(e instanceof Error?e.message:"Unable to process this file");}finally{setBusy(false);}};
+ const saveReminder = async () => {
+  const text = reminderText.trim();
+  const when = new Date(reminderDate);
+  if (!text || !reminderDate || !Number.isFinite(when.getTime()) || when.getTime() <= Date.now()) {
+    throw new Error("Enter a reminder and a future time");
+  }
+
+  let notificationId: number | undefined;
+  if (Capacitor.isNativePlatform()) {
+    let permission = await LocalNotifications.checkPermissions();
+    if (permission.display !== "granted") {
+      permission = await LocalNotifications.requestPermissions();
+    }
+    if (permission.display !== "granted") {
+      throw new Error("Notification permission is required to schedule an alarm");
+    }
+    notificationId = Math.max(1, Math.floor(Date.now() % 2_000_000_000));
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: notificationId,
+        title: "SAMAHIT Reminder",
+        body: text,
+        schedule: { at: when },
+      }],
+    });
+  }
+
+  const next = [...reminders, {
+    id: crypto.randomUUID(),
+    text,
+    when: reminderDate,
+    ...(notificationId ? { notificationId } : {}),
+  }];
+  if (!store("samahit-reminders-v1", JSON.stringify(next))) {
+    if (notificationId !== undefined) {
+      await LocalNotifications.cancel({ notifications: [{ id: notificationId }] }).catch(() => undefined);
+    }
+    throw new Error("Unable to save reminder on this device");
+  }
+  setReminders(next);
+  setReminderText("");
+  setReminderDate("");
+  setError("");
+  if (!Capacitor.isNativePlatform()) {
+    setError("Saved on this device. Browser reminders do not trigger background alarms.");
+  }
+};
+
+ const removeReminder = async (item: {id:string;text:string;when:string;notificationId?:number}) => {
+  if (item.notificationId !== undefined && Capacitor.isNativePlatform()) {
+    await LocalNotifications.cancel({ notifications: [{ id: item.notificationId }] });
+  }
+  const next = reminders.filter((entry) => entry.id !== item.id);
+  if (!store("samahit-reminders-v1", JSON.stringify(next))) {
+    throw new Error("Unable to update reminders on this device");
+  }
+  setReminders(next);
+};
  const title:Record<string,string>={notes:"Notes & Checklist",password:"Password Generator",qr:"QR Code Generator",date:"Date Calculator",image:"Image Resize & Convert", "image-pdf":"Images to PDF","pdf-merge":"Merge PDF","pdf-split":"Split PDF","pdf-compress":"Compress PDF","reminders":"Reminders","converter":"Unit Converter"};
  const input="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm";
  const button="rounded-xl bg-[#245D45] px-4 py-3 text-sm font-bold text-white disabled:opacity-50";
@@ -144,7 +203,7 @@ export default function EverydayToolPage() {
  {tool==="pdf-merge"&&<><UploadPicker multiple accept="application/pdf,.pdf" count={pdfs.length} label="Select PDFs to merge" hint="Choose up to 15 PDF files." onChange={files=>setPdfs(files.slice(0,15))}/><p>{pdfs.length} PDF(s) selected in merge order; maximum 15</p><button className={button} disabled={pdfs.length<2||busy} onClick={()=>void run(merge)}>Merge & Download</button></>}
  {tool==="pdf-split"&&<><UploadPicker accept="application/pdf,.pdf" fileName={file?.name||""} label="Select a PDF to split" hint="Choose the PDF you want to split into pages." onChange={files=>setFile(files[0]||null)}/><p className="text-xs">Downloads individual pages. Up to 100 pages; allow multiple downloads if prompted.</p><button className={button} disabled={!file||busy} onClick={()=>void run(split)}>Split into pages</button></>}
  {tool==="pdf-compress"&&<><p className="text-sm">Lossless PDF structure optimization. Image-heavy scanned PDFs may not shrink.</p><UploadPicker accept="application/pdf,.pdf" fileName={file?.name||""} label="Select a PDF to compress" hint="Choose the PDF you want to optimize on this device." onChange={files=>setFile(files[0]||null)}/><button className={button} disabled={!file||busy} onClick={()=>void run(compress)}>Optimize & Download PDF</button></>}
- {tool==="reminders"&&<><p className="text-xs">Offline reminders appear when you open this page. Background alarms require native notification permissions and are not enabled.</p><input className={input} placeholder="Reminder" maxLength={150} value={reminderText} onChange={e=>setReminderText(e.target.value)}/><input className={input} type="datetime-local" value={reminderDate} onChange={e=>setReminderDate(e.target.value)}/><button className={button} onClick={()=>{if(!reminderText.trim()||!reminderDate||Date.parse(reminderDate)<=Date.now()){setError("Enter a reminder and a future time");return;}const next=[...reminders,{id:crypto.randomUUID(),text:reminderText.trim(),when:reminderDate}];if(store("samahit-reminders-v1",JSON.stringify(next))){setReminders(next);setReminderText("");setReminderDate("");setError("");}else setError("Unable to save reminder");}}>Save Reminder</button>{[...reminders].sort((a,b)=>a.when.localeCompare(b.when)).map(item=><div key={item.id} className="flex items-center gap-2 rounded-xl border p-3"><span className="flex-1"><b>{item.text}</b><br/><small>{new Date(item.when).toLocaleString()} {Date.parse(item.when)<=Date.now()?"• Due":""}</small></span><button onClick={()=>{const next=reminders.filter(x=>x.id!==item.id);if(store("samahit-reminders-v1",JSON.stringify(next)))setReminders(next);else setError("Unable to save reminder");}}>Remove</button></div>)}</>}
+ {tool==="reminders"&&<><p className="text-xs">Android app reminders can trigger local notifications after permission is granted. In a browser, reminders are stored locally but cannot guarantee background alarms.</p><input className={input} placeholder="Reminder" maxLength={150} value={reminderText} onChange={e=>setReminderText(e.target.value)}/><input className={input} type="datetime-local" value={reminderDate} onChange={e=>setReminderDate(e.target.value)}/><button className={button} disabled={busy} onClick={()=>void run(saveReminder)}>Save Reminder & Schedule Notification</button>{[...reminders].sort((a,b)=>a.when.localeCompare(b.when)).map(item=><div key={item.id} className="flex items-center gap-2 rounded-xl border p-3"><span className="flex-1"><b>{item.text}</b><br/><small>{new Date(item.when).toLocaleString()} {Date.parse(item.when)<=Date.now()?"• Due":""}{item.notificationId!==undefined?" • Alarm scheduled":""}</small></span><button disabled={busy} onClick={()=>void run(()=>removeReminder(item))}>Remove</button></div>)}</>}
  {tool==="converter"&&<><input type="number" className={input} value={unitAmount} onChange={e=>setUnitAmount(e.target.value)}/><div className="grid grid-cols-2 gap-2">{[unitFrom,unitTo].map((v,i)=><select key={i} className={input} value={v} onChange={e=>i?setUnitTo(e.target.value):setUnitFrom(e.target.value)}>{[["km","Kilometres"],["mi","Miles"],["m","Metres"],["ft","Feet"],["kg","Kilograms"],["lb","Pounds"],["cm","Centimetres"],["in","Inches"]].map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>)}</div><p className="rounded-xl bg-emerald-50 p-4 font-bold">{(()=>{const factors:Record<string,number>={km:1000,mi:1609.344,m:1,ft:0.3048,kg:1,lb:0.45359237,cm:0.01,in:0.0254};const family=(x:string)=>x==="kg"||x==="lb"?"mass":"length";if(family(unitFrom)!==family(unitTo))return "Select compatible units";const n=Number(unitAmount);return Number.isFinite(n)?(n*factors[unitFrom]/factors[unitTo]).toLocaleString(undefined,{maximumFractionDigits:6})+" "+unitTo:"Enter a valid number";})()}</p></>}
  {busy&&<p role="status">Processing locally…</p>}{error&&<p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
  <p className="text-xs text-slate-500">Files are processed on this device; no file upload to Samahit servers. Password-protected or damaged PDFs may not be supported.</p>
