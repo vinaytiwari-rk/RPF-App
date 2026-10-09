@@ -155,7 +155,11 @@ export async function loadQuestionPack(packId: string): Promise<QuestionPack | n
     if (hash !== descriptor.sha256) throw new Error("Question pack integrity check failed.");
     const pack = JSON.parse(new TextDecoder().decode(buffer)) as QuestionPack;
     validatePack(pack, descriptor);
-    await writeCachedPack({ packId, version: descriptor.version, sha256: hash, data: pack, savedAt: Date.now() });
+    try {
+      await writeCachedPack({ packId, version: descriptor.version, sha256: hash, data: pack, savedAt: Date.now() });
+    } catch {
+      // The freshly verified pack remains usable for this session even if persistence is blocked.
+    }
     return pack;
   } catch {
     // Keep the last known-good pack available when a network update fails.
