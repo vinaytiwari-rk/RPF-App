@@ -173,6 +173,7 @@ export const DEFAULT_PROFILE_CONFIG: ProfileConfig = {
   ],
   accountItems: [
     { id: "item-activity", title: "My Activity", sub: "Your actions and impact", iconName: "Sparkles", route: "/activity", active: true },
+    { id: "item-reels", title: "Shorts & Reels", sub: "Foundation video feeds & reels", iconName: "Film", route: "/reels", active: true },
     { id: "item-edit-profile", title: "Edit Profile", sub: "Update your personal information", iconName: "User", route: "/profile?edit=1", active: true },
     { id: "item-certificates", title: "My Certificates", sub: "Certificates of service & impact", iconName: "Award", route: "/my-certificates", active: true },
     { id: "item-settings", title: "App Settings", sub: "Language, notifications & preferences", iconName: "Settings", route: "/settings", active: true }

@@ -5,7 +5,7 @@ import {
   Award, ChevronRight, HeartHandshake, IdCard, Mail, Phone, Settings, 
   ShieldCheck, User, LogOut, FileText, Camera, BadgeCheck,
   Lock, AlertTriangle, HelpCircle, Info, X, ExternalLink,
-  Clock, CheckCircle2, Sparkles, Users
+  Clock, CheckCircle2, Sparkles, Users, Film
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate, useOutletContext } from "react-router-dom";
@@ -127,6 +127,7 @@ export default function Profile() {
     }
     return [
       { icon: Sparkles, title: hi ? "मेरी गतिविधियाँ" : "My Activity", sub: hi ? "आपके कार्य और प्रभाव" : "Your actions and impact", route: "/activity", color: "bg-[#D97706]" },
+      { icon: Film, title: hi ? "शॉर्ट्स और रील्स" : "Shorts & Reels", sub: hi ? "फाउंडेशन के वीडियो व रील्स" : "Foundation video feeds & reels", route: "/reels", color: "bg-[#E67817]" },
       { icon: User, title: hi ? "प्रोफ़ाइल संपादित करें" : "Edit Profile", sub: hi ? "अपनी व्यक्तिगत जानकारी अपडेट करें" : "Update your personal information", route: "/profile?edit=1", color: "bg-[#245D45]" },
       { icon: Award, title: hi ? "मेरे प्रमाणपत्र" : "My Certificates", sub: hi ? "सेवा एवं भागीदारी प्रमाणपत्र" : "Certificates of service & impact", route: "/my-certificates", color: "bg-[#7C5C9E]" },
       { icon: Settings, title: hi ? "ऐप सेटिंग्स" : "App Settings", sub: hi ? "भाषा, सूचनाएं और ऐप प्राथमिकताएं" : "Language, notifications & preferences", route: "/settings", color: "bg-[#245D45]" },

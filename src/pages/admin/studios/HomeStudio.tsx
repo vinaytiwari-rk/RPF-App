@@ -454,7 +454,8 @@ export default function HomeStudio() {
           { id: "qa-3", title: "Employment", subtitle: "Job opportunities, skill training & career support", icon: "BriefcaseBusiness", route: "/employment", active: true, accentColor: "#167C5A" },
           { id: "qa-4", title: "Grievance", subtitle: "Submit public issues, track resolution & support status", icon: "ClipboardList", route: "/grievance", active: true, accentColor: "#14213D" },
           { id: "qa-5", title: "Samahit Utilities", subtitle: "Everyday tools, fasting tracker, breathing & digital utilities", icon: "Wrench", route: "/utilities", active: true, accentColor: "#0A192F" },
-          { id: "qa-6", title: "Smart Calculators", subtitle: "GST, split bill, BMI, loan EMI & all-in-one calculators", icon: "Calculator", route: "/utilities/calculators", active: true, accentColor: "#C2410C" }
+          { id: "qa-6", title: "Smart Calculators", subtitle: "GST, split bill, BMI, loan EMI & all-in-one calculators", icon: "Calculator", route: "/utilities/calculators", active: true, accentColor: "#C2410C" },
+          { id: "qa-7", title: "Shorts & Reels", subtitle: "Watch official foundation videos, updates & stories", icon: "Film", route: "/reels", active: true, accentColor: "#D97706" }
         ]);
       }
 

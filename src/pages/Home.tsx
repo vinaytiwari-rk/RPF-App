@@ -469,6 +469,13 @@ export default function Home() {
         icon: Calculator,
         route: "/utilities/calculators",
         accent: "text-[#C2410C] bg-orange-500/10 border border-orange-500/20"
+      },
+      {
+        title: "Shorts & Reels",
+        subtitle: "Watch official foundation videos, updates & stories",
+        icon: Compass,
+        route: "/reels",
+        accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
       }
     ];
   }, [cmsConfig?.quickAccessItems]);
