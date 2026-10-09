@@ -16,7 +16,8 @@
     "android:build": "npm run android:sync && cd android && gradlew assembleDebug",
     "quiz:bank:validate": "node scripts/validateQuestionBankPacks.mjs",
     "quiz:bank:manifest": "node scripts/buildQuestionBankManifest.mjs",
-    "quiz:bank:collect-candidates": "node scripts/collectQuestionSourceCandidates.mjs"
+    "quiz:bank:collect-candidates": "node scripts/collectQuestionSourceCandidates.mjs",
+    "quiz:bank:import": "node scripts/importQuestionBankBatch.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
