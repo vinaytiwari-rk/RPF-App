@@ -1,0 +1,177 @@
+{
+  "packId": "indian-history-foundations-002",
+  "version": 1,
+  "subject": "history",
+  "category": "social-science",
+  "titleEn": "Indian History — Practice Set 2",
+  "titleHi": "भारतीय इतिहास — अभ्यास सेट 2",
+  "descEn": "Original questions on Indian history.",
+  "descHi": "भारतीय इतिहास पर मौलिक प्रश्न।",
+  "iconName": "Landmark",
+  "color": "from-amber-600 to-orange-600",
+  "durationMinutes": 8,
+  "questions": [
+    {
+      "id": "hist2-001",
+      "subject": "history",
+      "questionEn": "Who founded the Mauryan Empire?",
+      "questionHi": "मौर्य साम्राज्य की स्थापना किसने की?",
+      "optionsEn": [
+        "Ashoka",
+        "Chandragupta Maurya",
+        "Bindusara",
+        "Harsha"
+      ],
+      "optionsHi": [
+        "अशोक",
+        "चंद्रगुप्त मौर्य",
+        "बिंदुसार",
+        "हर्ष"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Chandragupta Maurya founded the Mauryan Empire in the fourth century BCE.",
+      "explanationHi": "चंद्रगुप्त मौर्य ने चौथी शताब्दी ईसा पूर्व में मौर्य साम्राज्य की स्थापना की।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "hist2-002",
+      "subject": "history",
+      "questionEn": "Which movement began after the Jallianwala Bagh massacre and other events of 1919, under Gandhi's leadership in 1920?",
+      "questionHi": "1919 की घटनाओं के बाद गांधीजी के नेतृत्व में 1920 में कौन-सा आंदोलन शुरू हुआ?",
+      "optionsEn": [
+        "Non-Cooperation Movement",
+        "Quit India Movement",
+        "Swadeshi Movement of 1905",
+        "Khilafat ended in 1947"
+      ],
+      "optionsHi": [
+        "असहयोग आंदोलन",
+        "भारत छोड़ो आंदोलन",
+        "1905 का स्वदेशी आंदोलन",
+        "1947 में खिलाफत समाप्त"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Gandhi launched the Non-Cooperation Movement in 1920.",
+      "explanationHi": "गांधीजी ने 1920 में असहयोग आंदोलन शुरू किया।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "hist2-003",
+      "subject": "history",
+      "questionEn": "Who was the first woman ruler of the Delhi Sultanate?",
+      "questionHi": "दिल्ली सल्तनत की पहली महिला शासक कौन थीं?",
+      "optionsEn": [
+        "Nur Jahan",
+        "Razia Sultan",
+        "Chand Bibi",
+        "Jahanara"
+      ],
+      "optionsHi": [
+        "नूरजहाँ",
+        "रज़िया सुल्तान",
+        "चाँद बीबी",
+        "जहाँआरा"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Razia Sultan ruled the Delhi Sultanate in the thirteenth century.",
+      "explanationHi": "रज़िया सुल्तान ने तेरहवीं शताब्दी में दिल्ली सल्तनत पर शासन किया।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "hist2-004",
+      "subject": "history",
+      "questionEn": "The Battle of Plassey was fought in which year?",
+      "questionHi": "प्लासी का युद्ध किस वर्ष लड़ा गया?",
+      "optionsEn": [
+        "1757",
+        "1764",
+        "1773",
+        "1857"
+      ],
+      "optionsHi": [
+        "1757",
+        "1764",
+        "1773",
+        "1857"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Battle of Plassey took place in 1757.",
+      "explanationHi": "प्लासी का युद्ध 1757 में हुआ।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "hist2-005",
+      "subject": "history",
+      "questionEn": "Who gave the slogan “Do or Die” during the freedom struggle?",
+      "questionHi": "स्वतंत्रता संग्राम में “करो या मरो” का नारा किसने दिया?",
+      "optionsEn": [
+        "Bhagat Singh",
+        "Mahatma Gandhi",
+        "Bal Gangadhar Tilak",
+        "Lala Lajpat Rai"
+      ],
+      "optionsHi": [
+        "भगत सिंह",
+        "महात्मा गांधी",
+        "बाल गंगाधर तिलक",
+        "लाला लाजपत राय"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Gandhi gave the slogan during the Quit India Movement in 1942.",
+      "explanationHi": "गांधीजी ने 1942 के भारत छोड़ो आंदोलन के दौरान यह नारा दिया।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "hist2-006",
+      "subject": "history",
+      "questionEn": "Who was the first Governor-General of independent India?",
+      "questionHi": "स्वतंत्र भारत के पहले गवर्नर-जनरल कौन थे?",
+      "optionsEn": [
+        "C. Rajagopalachari",
+        "Lord Mountbatten",
+        "Dr. Rajendra Prasad",
+        "Jawaharlal Nehru"
+      ],
+      "optionsHi": [
+        "सी. राजगोपालाचारी",
+        "लॉर्ड माउंटबेटन",
+        "डॉ. राजेंद्र प्रसाद",
+        "जवाहरलाल नेहरू"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Lord Mountbatten served as the first Governor-General after independence; C. Rajagopalachari succeeded him.",
+      "explanationHi": "स्वतंत्रता के बाद लॉर्ड माउंटबेटन पहले गवर्नर-जनरल थे; उनके बाद सी. राजगोपालाचारी आए।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
