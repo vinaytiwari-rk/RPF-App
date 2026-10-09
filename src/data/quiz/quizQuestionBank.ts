@@ -100,7 +100,10 @@ export const QUIZ_TOPICS: QuizTopic[] = [
         optionsHi: ["नई दिल्ली", "गुरुग्राम, हरियाणा", "बेंगलुरु", "हैदराबाद"],
         correctIndex: 1,
         explanationEn: "The International Solar Alliance headquarters is located in Gurugram, Haryana, India.",
-        explanationHi: "अंतर्राष्ट्रीय सौर गठबंधन (ISA) का वैश्विक मुख्यालय गुरुग्राम (हरियाणा) में स्थित है।"
+        explanationHi: "अंतर्राष्ट्रीय सौर गठबंधन (ISA) का वैश्विक मुख्यालय गुरुग्राम (हरियाणा) में स्थित है।",
+        sourceLabel: "International Solar Alliance — Official Website",
+        sourceUrl: "https://isolaralliance.org/",
+        lastVerified: "2026-10-09"
       },
       {
         id: "ca_6",
