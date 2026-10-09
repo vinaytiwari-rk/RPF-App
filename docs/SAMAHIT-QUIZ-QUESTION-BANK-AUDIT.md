@@ -4,7 +4,7 @@ Audit date: 2026-10-09
 
 ## Findings
 
-- The original question bank is hardcoded in `src/data/quiz/quizQuestionBank.ts`; it does not fetch questions live from a government website or question API.
+- The original question bank had 56 hardcoded questions in `src/data/quiz/quizQuestionBank.ts`; it does not fetch questions live from a government website or question API.
 - The former “Daily Current Affairs 2026” label was misleading for an offline static bank. It has been renamed to “Government Programmes & Public Institutions” and explicitly says it is not a live daily-news feed.
 - Four entries had unsupported or mismatched wording (BharatNet claim, “recently” current CDS office-holder, a mismatched UPI question, and PM-KISAN prompt/answer mismatch). These have been rewritten, and source URLs/review dates added.
 - New source-linked questions have been added to Constitution, History, Science and Computer Literacy; additional reasoning questions are derived from explicit logic/arithmetic rules.
@@ -26,7 +26,12 @@ Audit date: 2026-10-09
 
 - BharatNet: https://bbnl.nic.in/
 - Ministry of Defence: https://www.mod.gov.in/
-- PM-KISAN: https://services.india.gov.in/service/detail/pm-kisan-samman-nidhi
+- CPGRAMS: https://pgportal.gov.in/
+- International Solar Alliance: https://isolaralliance.org/
+- India Semiconductor Mission: https://ism.gov.in/
+- Department of Science and Technology — National Science Day: https://dst.gov.in/sites/default/files/National%20Science%20Day.pdf
+- Press Information Bureau — PM-PRANAM: https://www.pib.gov.in/PressReleasePage.aspx?PRID=2038958&lang=2&reg=48
+- PM-KISAN: https://services.india.gov.in/service/detail/%E0%A4%AA%E0%A5%80%E0%A4%8F%E0%A4%AE-%E0%A4%95%E0%A4%BF%E0%A4%B8%E0%A4%BE%E0%A4%A8-%E0%A4%B8%E0%A4%AE%E0%A5%8D%E0%A4%AE%E0%A4%BE%E0%A4%A8-%E0%A4%A8%E0%A4%BF%E0%A4%A7%E0%A4%BF-1
 - NPCI — UPI: https://www.npci.org.in/what-we-do/upi/product-overview
 - Constitution of India: https://www.legislative.gov.in/static/uploads/2025/07/c9fe9c9b6840524844316f74bb1c556c.pdf
 - UNESCO — Sanchi: https://whc.unesco.org/en/list/524/
