@@ -1,0 +1,421 @@
+{
+  "packId": "general-science-foundations-001",
+  "version": 1,
+  "subject": "general-science",
+  "category": "general-knowledge",
+  "titleEn": "General Science — Foundations",
+  "titleHi": "सामान्य विज्ञान — आधारभूत प्रश्न",
+  "descEn": "Bilingual practice questions covering physics, chemistry, biology and space.",
+  "descHi": "भौतिकी, रसायन, जीवविज्ञान और अंतरिक्ष पर हिंदी-अंग्रेज़ी अभ्यास प्रश्न।",
+  "iconName": "Atom",
+  "color": "from-cyan-600 to-blue-700",
+  "badge": "Foundational pack",
+  "durationMinutes": 10,
+  "questions": [
+    {
+      "id": "sci-001",
+      "subject": "general-science",
+      "questionEn": "What is the SI unit of force?",
+      "questionHi": "बल की SI इकाई क्या है?",
+      "optionsEn": [
+        "Joule",
+        "Newton",
+        "Watt",
+        "Pascal"
+      ],
+      "optionsHi": [
+        "जूल",
+        "न्यूटन",
+        "वाट",
+        "पास्कल"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The SI unit of force is the newton (N).",
+      "explanationHi": "बल की SI इकाई न्यूटन (N) है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-002",
+      "subject": "general-science",
+      "questionEn": "Which gas do green plants absorb during photosynthesis?",
+      "questionHi": "प्रकाश संश्लेषण के दौरान हरे पौधे कौन-सी गैस ग्रहण करते हैं?",
+      "optionsEn": [
+        "Oxygen",
+        "Nitrogen",
+        "Carbon dioxide",
+        "Hydrogen"
+      ],
+      "optionsHi": [
+        "ऑक्सीजन",
+        "नाइट्रोजन",
+        "कार्बन डाइऑक्साइड",
+        "हाइड्रोजन"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Plants use carbon dioxide and water to make sugars during photosynthesis.",
+      "explanationHi": "प्रकाश संश्लेषण में पौधे कार्बन डाइऑक्साइड और पानी से शर्करा बनाते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-003",
+      "subject": "general-science",
+      "questionEn": "Which part of a cell contains most of its genetic material?",
+      "questionHi": "कोशिका के किस भाग में अधिकांश आनुवंशिक पदार्थ होता है?",
+      "optionsEn": [
+        "Ribosome",
+        "Nucleus",
+        "Cell wall",
+        "Vacuole"
+      ],
+      "optionsHi": [
+        "राइबोसोम",
+        "केंद्रक",
+        "कोशिका भित्ति",
+        "रिक्तिका"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "In eukaryotic cells, most DNA is located in the nucleus.",
+      "explanationHi": "यूकेरियोटिक कोशिकाओं में अधिकांश DNA केंद्रक में होता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-004",
+      "subject": "general-science",
+      "questionEn": "What is the chemical symbol for sodium?",
+      "questionHi": "सोडियम का रासायनिक प्रतीक क्या है?",
+      "optionsEn": [
+        "So",
+        "S",
+        "Na",
+        "N"
+      ],
+      "optionsHi": [
+        "So",
+        "S",
+        "Na",
+        "N"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Sodium's chemical symbol is Na, from the Latin name natrium.",
+      "explanationHi": "सोडियम का रासायनिक प्रतीक Na है, जो लैटिन नाम natrium से आया है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-005",
+      "subject": "general-science",
+      "questionEn": "Which vitamin is produced in the skin with sufficient sunlight exposure?",
+      "questionHi": "पर्याप्त धूप मिलने पर त्वचा में कौन-सा विटामिन बनता है?",
+      "optionsEn": [
+        "Vitamin A",
+        "Vitamin B12",
+        "Vitamin C",
+        "Vitamin D"
+      ],
+      "optionsHi": [
+        "विटामिन A",
+        "विटामिन B12",
+        "विटामिन C",
+        "विटामिन D"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "Ultraviolet B exposure enables the skin to synthesize vitamin D.",
+      "explanationHi": "पराबैंगनी-B किरणों के संपर्क से त्वचा में विटामिन D का निर्माण होता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-006",
+      "subject": "general-science",
+      "questionEn": "At standard atmospheric pressure, water boils at what temperature?",
+      "questionHi": "मानक वायुमंडलीय दाब पर पानी किस तापमान पर उबलता है?",
+      "optionsEn": [
+        "0°C",
+        "50°C",
+        "100°C",
+        "150°C"
+      ],
+      "optionsHi": [
+        "0°C",
+        "50°C",
+        "100°C",
+        "150°C"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Pure water boils at 100°C at one atmosphere of pressure.",
+      "explanationHi": "एक वायुमंडलीय दाब पर शुद्ध पानी 100°C पर उबलता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-007",
+      "subject": "general-science",
+      "questionEn": "Which blood cells primarily transport oxygen?",
+      "questionHi": "कौन-सी रक्त कोशिकाएँ मुख्य रूप से ऑक्सीजन पहुँचाती हैं?",
+      "optionsEn": [
+        "White blood cells",
+        "Red blood cells",
+        "Platelets",
+        "Plasma cells"
+      ],
+      "optionsHi": [
+        "श्वेत रक्त कोशिकाएँ",
+        "लाल रक्त कोशिकाएँ",
+        "प्लेटलेट्स",
+        "प्लाज्मा कोशिकाएँ"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Red blood cells carry oxygen using haemoglobin.",
+      "explanationHi": "लाल रक्त कोशिकाएँ हीमोग्लोबिन की सहायता से ऑक्सीजन पहुँचाती हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-008",
+      "subject": "general-science",
+      "questionEn": "Which organ filters blood and produces urine?",
+      "questionHi": "कौन-सा अंग रक्त को छानकर मूत्र बनाता है?",
+      "optionsEn": [
+        "Liver",
+        "Lung",
+        "Kidney",
+        "Pancreas"
+      ],
+      "optionsHi": [
+        "यकृत",
+        "फेफड़ा",
+        "गुर्दा",
+        "अग्न्याशय"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The kidneys filter blood and regulate fluid and electrolyte balance.",
+      "explanationHi": "गुर्दे रक्त को छानते हैं और द्रव तथा इलेक्ट्रोलाइट संतुलन बनाए रखते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-009",
+      "subject": "general-science",
+      "questionEn": "Which planet is known for its prominent ring system?",
+      "questionHi": "किस ग्रह के चारों ओर प्रमुख वलय प्रणाली है?",
+      "optionsEn": [
+        "Mars",
+        "Venus",
+        "Saturn",
+        "Mercury"
+      ],
+      "optionsHi": [
+        "मंगल",
+        "शुक्र",
+        "शनि",
+        "बुध"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Saturn is especially known for its extensive rings.",
+      "explanationHi": "शनि अपने विस्तृत वलयों के लिए विशेष रूप से प्रसिद्ध है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-010",
+      "subject": "general-science",
+      "questionEn": "What is the approximate speed of light in vacuum?",
+      "questionHi": "निर्वात में प्रकाश की लगभग गति कितनी है?",
+      "optionsEn": [
+        "3 × 10⁶ m/s",
+        "3 × 10⁸ m/s",
+        "3 × 10¹⁰ m/s",
+        "300 m/s"
+      ],
+      "optionsHi": [
+        "3 × 10⁶ मीटर/सेकंड",
+        "3 × 10⁸ मीटर/सेकंड",
+        "3 × 10¹⁰ मीटर/सेकंड",
+        "300 मीटर/सेकंड"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The speed of light in vacuum is approximately 299,792,458 metres per second.",
+      "explanationHi": "निर्वात में प्रकाश की गति लगभग 299,792,458 मीटर प्रति सेकंड है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-011",
+      "subject": "general-science",
+      "questionEn": "Which substance has the chemical formula H₂O?",
+      "questionHi": "H₂O किस पदार्थ का रासायनिक सूत्र है?",
+      "optionsEn": [
+        "Hydrogen peroxide",
+        "Water",
+        "Oxygen",
+        "Hydrogen"
+      ],
+      "optionsHi": [
+        "हाइड्रोजन पेरॉक्साइड",
+        "पानी",
+        "ऑक्सीजन",
+        "हाइड्रोजन"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "A water molecule contains two hydrogen atoms and one oxygen atom.",
+      "explanationHi": "पानी के एक अणु में दो हाइड्रोजन और एक ऑक्सीजन परमाणु होता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-012",
+      "subject": "general-science",
+      "questionEn": "Which force keeps planets in orbit around the Sun?",
+      "questionHi": "कौन-सा बल ग्रहों को सूर्य की कक्षा में बनाए रखता है?",
+      "optionsEn": [
+        "Magnetic force",
+        "Friction",
+        "Gravity",
+        "Nuclear force"
+      ],
+      "optionsHi": [
+        "चुंबकीय बल",
+        "घर्षण",
+        "गुरुत्वाकर्षण",
+        "नाभिकीय बल"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Gravity provides the principal attraction that keeps planets in orbit.",
+      "explanationHi": "गुरुत्वाकर्षण ग्रहों को कक्षा में बनाए रखने वाला मुख्य आकर्षण बल है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-013",
+      "subject": "general-science",
+      "questionEn": "Which part of the human brain helps coordinate balance and movement?",
+      "questionHi": "मानव मस्तिष्क का कौन-सा भाग संतुलन और गति के समन्वय में मदद करता है?",
+      "optionsEn": [
+        "Cerebellum",
+        "Medulla only",
+        "Hypothalamus",
+        "Cerebrum only"
+      ],
+      "optionsHi": [
+        "अनुमस्तिष्क",
+        "केवल मेडुला",
+        "हाइपोथैलेमस",
+        "केवल प्रमस्तिष्क"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The cerebellum contributes to coordination, posture and balance.",
+      "explanationHi": "अनुमस्तिष्क गति के समन्वय, मुद्रा और संतुलन में योगदान देता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-014",
+      "subject": "general-science",
+      "questionEn": "What is the pH of a neutral aqueous solution at about 25°C?",
+      "questionHi": "लगभग 25°C पर उदासीन जलीय विलयन का pH कितना होता है?",
+      "optionsEn": [
+        "3",
+        "5",
+        "7",
+        "10"
+      ],
+      "optionsHi": [
+        "3",
+        "5",
+        "7",
+        "10"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "At about 25°C, a neutral aqueous solution has pH 7.",
+      "explanationHi": "लगभग 25°C पर उदासीन जलीय विलयन का pH 7 होता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci-015",
+      "subject": "general-science",
+      "questionEn": "Which instrument measures atmospheric pressure?",
+      "questionHi": "वायुमंडलीय दाब मापने वाला यंत्र कौन-सा है?",
+      "optionsEn": [
+        "Thermometer",
+        "Barometer",
+        "Ammeter",
+        "Hygrometer"
+      ],
+      "optionsHi": [
+        "थर्मामीटर",
+        "बैरोमीटर",
+        "एमीटर",
+        "हाइग्रोमीटर"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "A barometer measures atmospheric pressure.",
+      "explanationHi": "बैरोमीटर वायुमंडलीय दाब मापता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
