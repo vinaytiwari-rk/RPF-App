@@ -8,6 +8,7 @@ import FileUpload from '../FileUpload';
 import { useApp, CmsConfig } from '../../context/AppContext';
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from '../../data/liveTvDefaults';
 import rawRadioStations from '../../data/akashvaniChannels.json';
+import privateFmStations from '../../data/privateFmChannels.json';
 import {
   Save,
   User,
@@ -28,7 +29,7 @@ import {
 import { Skeleton } from '../ui/Skeleton';
 
 type RadioStation = { name: string; url: string; image?: string; page?: string; enabled?: boolean; order?: number };
-const RADIO_DEFAULTS = rawRadioStations as RadioStation[];
+const RADIO_DEFAULTS = [...rawRadioStations, ...privateFmStations] as RadioStation[];
 
 const FACT_CHECK_DEFAULTS = [
   { name: "PIB Fact Check", nameHi: "पीआईबी फैक्ट चेक", url: "https://xcancel.com/pibfactcheck", description: "Press Information Bureau fact-checks regarding government policies.", descriptionHi: "सरकारी नीतियों के संबंध में तथ्य-जांच।" },
