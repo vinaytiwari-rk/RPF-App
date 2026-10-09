@@ -78,7 +78,7 @@ export default function OnlineTestRunnerModal({
 
   // Score Calculation
   const correctCount = Object.entries(userAnswers).filter(
-    ([qIdx, ansIdx]) => attemptQuestions[Number(qIdx)].correctIndex === ansIdx
+    ([qIdx, ansIdx]) => attemptQuestions[Number(qIdx)].correctIndex === Number(ansIdx)
   ).length;
 
   const percentage = Math.round((correctCount / totalQuestions) * 100);
