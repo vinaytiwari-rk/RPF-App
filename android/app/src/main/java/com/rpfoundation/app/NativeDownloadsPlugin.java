@@ -57,7 +57,10 @@ public class NativeDownloadsPlugin extends Plugin {
 
             ContentValues completed = new ContentValues();
             completed.put(MediaStore.MediaColumns.IS_PENDING, 0);
-            getContext().getContentResolver().update(savedUri, completed, null, null);
+            int finalized = getContext().getContentResolver().update(savedUri, completed, null, null);
+            if (finalized != 1) {
+                throw new IllegalStateException("Android could not finalize the file in Downloads");
+            }
 
             JSObject result = new JSObject();
             result.put("uri", savedUri.toString());
