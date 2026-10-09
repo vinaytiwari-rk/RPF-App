@@ -1,0 +1,177 @@
+{
+  "packId": "economics-civics-foundations-002",
+  "version": 1,
+  "subject": "social-science",
+  "category": "social-science",
+  "titleEn": "Social Science — Practice Set 2",
+  "titleHi": "सामाजिक विज्ञान — अभ्यास सेट 2",
+  "descEn": "Original questions on Indian civics and economics.",
+  "descHi": "भारतीय नागरिक शास्त्र और अर्थशास्त्र के मौलिक प्रश्न।",
+  "iconName": "Landmark",
+  "color": "from-teal-600 to-emerald-600",
+  "durationMinutes": 8,
+  "questions": [
+    {
+      "id": "ss2-001",
+      "subject": "social-science",
+      "questionEn": "Which sector includes farming and fishing?",
+      "questionHi": "कृषि और मत्स्य पालन किस क्षेत्र में आते हैं?",
+      "optionsEn": [
+        "Primary sector",
+        "Secondary sector",
+        "Tertiary sector",
+        "Quaternary sector only"
+      ],
+      "optionsHi": [
+        "प्राथमिक क्षेत्र",
+        "द्वितीयक क्षेत्र",
+        "तृतीयक क्षेत्र",
+        "केवल चतुर्थक क्षेत्र"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Farming and fishing use natural resources and belong to the primary sector.",
+      "explanationHi": "कृषि और मत्स्य पालन प्राकृतिक संसाधनों पर आधारित हैं और प्राथमिक क्षेत्र में आते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "ss2-002",
+      "subject": "social-science",
+      "questionEn": "What is barter?",
+      "questionHi": "वस्तु-विनिमय (Barter) क्या है?",
+      "optionsEn": [
+        "Exchange of goods or services without using money",
+        "A type of income tax",
+        "A bank loan",
+        "A stock market index"
+      ],
+      "optionsHi": [
+        "धन के बिना वस्तुओं या सेवाओं का आदान-प्रदान",
+        "आयकर का प्रकार",
+        "बैंक ऋण",
+        "शेयर बाजार सूचकांक"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Barter is a direct exchange of goods or services for other goods or services.",
+      "explanationHi": "वस्तु-विनिमय में वस्तुओं या सेवाओं का सीधा आदान-प्रदान होता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "ss2-003",
+      "subject": "social-science",
+      "questionEn": "Which constitutional body recommends the distribution of tax revenues between the Union and states?",
+      "questionHi": "केंद्र और राज्यों के बीच कर राजस्व के वितरण की सिफारिश कौन-सा संवैधानिक निकाय करता है?",
+      "optionsEn": [
+        "Finance Commission",
+        "Election Commission",
+        "UPSC",
+        "NITI Aayog"
+      ],
+      "optionsHi": [
+        "वित्त आयोग",
+        "निर्वाचन आयोग",
+        "संघ लोक सेवा आयोग",
+        "नीति आयोग"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Finance Commission is constituted under Article 280.",
+      "explanationHi": "वित्त आयोग का गठन अनुच्छेद 280 के अंतर्गत होता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "ss2-004",
+      "subject": "social-science",
+      "questionEn": "Which right allows citizens to seek information from public authorities under law?",
+      "questionHi": "कानून के अंतर्गत नागरिकों को लोक प्राधिकरणों से सूचना माँगने का अधिकार कौन-सा है?",
+      "optionsEn": [
+        "Right to Information",
+        "Right against Exploitation",
+        "Right to Religion",
+        "Right to Education only"
+      ],
+      "optionsHi": [
+        "सूचना का अधिकार",
+        "शोषण के विरुद्ध अधिकार",
+        "धर्म की स्वतंत्रता का अधिकार",
+        "केवल शिक्षा का अधिकार"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Right to Information Act, 2005 establishes a legal framework to request information from public authorities.",
+      "explanationHi": "सूचना का अधिकार अधिनियम, 2005 लोक प्राधिकरणों से सूचना माँगने की कानूनी व्यवस्था देता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "ss2-005",
+      "subject": "social-science",
+      "questionEn": "A general rise in demand with unchanged supply tends to put what pressure on price?",
+      "questionHi": "आपूर्ति समान रहने पर माँग बढ़ने से कीमत पर सामान्यतः क्या प्रभाव पड़ता है?",
+      "optionsEn": [
+        "Downward pressure",
+        "Upward pressure",
+        "No possible effect ever",
+        "Price must become zero"
+      ],
+      "optionsHi": [
+        "कीमत घटने का दबाव",
+        "कीमत बढ़ने का दबाव",
+        "कभी कोई प्रभाव नहीं",
+        "कीमत शून्य हो जाएगी"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Other things equal, higher demand tends to raise the market-clearing price.",
+      "explanationHi": "अन्य स्थितियाँ समान हों तो माँग बढ़ने से संतुलन कीमत बढ़ने की प्रवृत्ति होती है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "ss2-006",
+      "subject": "social-science",
+      "questionEn": "Which institution audits the accounts of the Union and state governments in India?",
+      "questionHi": "भारत में केंद्र और राज्य सरकारों के खातों का लेखा-परीक्षण कौन करता है?",
+      "optionsEn": [
+        "Comptroller and Auditor General of India",
+        "Attorney General",
+        "Chief Election Commissioner",
+        "Cabinet Secretary"
+      ],
+      "optionsHi": [
+        "भारत के नियंत्रक एवं महालेखा परीक्षक",
+        "महान्यायवादी",
+        "मुख्य निर्वाचन आयुक्त",
+        "कैबिनेट सचिव"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The CAG audits government accounts as provided by the Constitution and law.",
+      "explanationHi": "CAG संविधान और कानून के अनुसार सरकारी खातों का लेखा-परीक्षण करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
