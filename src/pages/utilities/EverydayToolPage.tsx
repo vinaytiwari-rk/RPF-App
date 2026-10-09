@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
 import { PDFDocument } from "pdf-lib";
@@ -6,7 +7,51 @@ import { jsPDF } from "jspdf";
 import { FileImage, UploadCloud, X } from "lucide-react";
 import Shell from "./UtilityPageShell";
 
-const save = (blob: Blob, name: string) => { const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); window.setTimeout(()=>URL.revokeObjectURL(url),60000); };
+interface NativeDownloadsPlugin {
+  saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
+}
+
+const NativeDownloads = registerPlugin<NativeDownloadsPlugin>("NativeDownloads");
+
+const save = async (blob: Blob, name: string): Promise<void> => {
+  if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android") {
+    // Android WebView anchor downloads are unreliable. Save through the native
+    // MediaStore plugin, which writes to Downloads/SAMAHIT and rejects on failure.
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)));
+    }
+    const extension = name.toLowerCase().split(".").pop();
+    const fallbackMime = extension === "pdf" ? "application/pdf"
+      : extension === "jpg" || extension === "jpeg" ? "image/jpeg"
+      : extension === "png" ? "image/png"
+      : extension === "webp" ? "image/webp"
+      : extension === "zip" ? "application/zip"
+      : "application/octet-stream";
+    const saved = await NativeDownloads.saveToDownloads({
+      filename: name,
+      mimeType: blob.type || fallbackMime,
+      data: btoa(binary),
+    });
+    if (!saved?.uri || !saved.filename) {
+      throw new Error("Android did not confirm that the file was saved");
+    }
+    return;
+  }
+
+  // Browser fallback. A browser may show its own download UI.
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+};
 const read = (key: string) => { try { return localStorage.getItem(key)||""; } catch { return ""; } };
 const store = (key:string,value:string) => { try { localStorage.setItem(key,value); return true; } catch { return false; } };
 const UploadPicker = ({ multiple=false, accept, count=0, fileName="", onChange, label, hint }: { multiple?: boolean; accept: string; count?: number; fileName?: string; onChange: (files: File[]) => void; label: string; hint: string }) => (
@@ -45,11 +90,11 @@ export default function EverydayToolPage() {
  const input="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm";
  const button="rounded-xl bg-[#245D45] px-4 py-3 text-sm font-bold text-white disabled:opacity-50";
  const makePassword=()=>{const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*";const bytes=new Uint32Array(24);crypto.getRandomValues(bytes);setPassword(Array.from(bytes,n=>chars[n%chars.length]).join(""));};
- const processImage=async()=>{if(!file)throw Error("Choose an image");const bmp=await createImageBitmap(file);try{const ratio=Math.min(1,Math.max(100,width)/bmp.width);const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bmp.width*ratio));canvas.height=Math.max(1,Math.round(bmp.height*ratio));const ctx=canvas.getContext("2d");if(!ctx)throw Error("Canvas unavailable");ctx.drawImage(bmp,0,0,canvas.width,canvas.height);const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error("Conversion failed")),"image/jpeg",quality));save(blob,"samahit-image.jpg");}finally{bmp.close();}};
- const makePdf=async()=>{if(!images.length)throw Error("Choose images");const pdf=new jsPDF({unit:"mm",format:"a4"});for(let i=0;i<images.length;i++){const f=images[i];if(f.size>20_000_000)throw Error("Image exceeds 20 MB");const bmp=await createImageBitmap(f);try{const c=document.createElement("canvas");const scale=Math.min(1,1800/Math.max(bmp.width,bmp.height));c.width=Math.max(1,Math.round(bmp.width*scale));c.height=Math.max(1,Math.round(bmp.height*scale));c.getContext("2d")?.drawImage(bmp,0,0,c.width,c.height);const data=c.toDataURL("image/jpeg",0.8);const ratio=Math.min(190/c.width,277/c.height);if(i)pdf.addPage();pdf.addImage(data,"JPEG",(210-c.width*ratio)/2,(297-c.height*ratio)/2,c.width*ratio,c.height*ratio);}finally{bmp.close();}}pdf.save("samahit-images.pdf");};
- const merge=async()=>{if(pdfs.length<2)throw Error("Select at least two PDFs");const out=await PDFDocument.create();for(const f of pdfs){if(f.size>30_000_000)throw Error("PDF exceeds 30 MB");const src=await PDFDocument.load(await f.arrayBuffer());const pages=await out.copyPages(src,src.getPageIndices());pages.forEach(p=>out.addPage(p));}save(new Blob([new Uint8Array(await out.save()) as BlobPart],{type:"application/pdf"}),"samahit-merged.pdf");};
- const compress=async()=>{if(!file)throw Error("Choose a PDF");if(file.size>30_000_000)throw Error("PDF exceeds 30 MB");const doc=await PDFDocument.load(await file.arrayBuffer());const bytes=await doc.save({useObjectStreams:true,objectsPerTick:25});const blob=new Blob([new Uint8Array(bytes) as BlobPart],{type:"application/pdf"});save(blob,"samahit-optimized.pdf");if(blob.size>=file.size)setError("This PDF is already compressed; output may not be smaller. Scanned images need image recompression.");};
- const split=async()=>{if(!file)throw Error("Choose a PDF");const src=await PDFDocument.load(await file.arrayBuffer());const n=src.getPageCount();if(n>100)throw Error("For device safety, split files up to 100 pages");for(let i=0;i<n;i++){const out=await PDFDocument.create();const [p]=await out.copyPages(src,[i]);out.addPage(p);save(new Blob([new Uint8Array(await out.save()) as BlobPart],{type:"application/pdf"}),`samahit-page-${i+1}.pdf`);}};
+ const processImage=async()=>{if(!file)throw Error("Choose an image");const bmp=await createImageBitmap(file);try{const ratio=Math.min(1,Math.max(100,width)/bmp.width);const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bmp.width*ratio));canvas.height=Math.max(1,Math.round(bmp.height*ratio));const ctx=canvas.getContext("2d");if(!ctx)throw Error("Canvas unavailable");ctx.drawImage(bmp,0,0,canvas.width,canvas.height);const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error("Conversion failed")),"image/jpeg",quality));await save(blob,"samahit-image.jpg");}finally{bmp.close();}};
+ const makePdf=async()=>{if(!images.length)throw Error("Choose images");const pdf=new jsPDF({unit:"mm",format:"a4"});for(let i=0;i<images.length;i++){const f=images[i];if(f.size>20_000_000)throw Error("Image exceeds 20 MB");const bmp=await createImageBitmap(f);try{const c=document.createElement("canvas");const scale=Math.min(1,1800/Math.max(bmp.width,bmp.height));c.width=Math.max(1,Math.round(bmp.width*scale));c.height=Math.max(1,Math.round(bmp.height*scale));c.getContext("2d")?.drawImage(bmp,0,0,c.width,c.height);const data=c.toDataURL("image/jpeg",0.8);const ratio=Math.min(190/c.width,277/c.height);if(i)pdf.addPage();pdf.addImage(data,"JPEG",(210-c.width*ratio)/2,(297-c.height*ratio)/2,c.width*ratio,c.height*ratio);}finally{bmp.close();}}await save(pdf.output("blob"),"samahit-images.pdf");};
+ const merge=async()=>{if(pdfs.length<2)throw Error("Select at least two PDFs");const out=await PDFDocument.create();for(const f of pdfs){if(f.size>30_000_000)throw Error("PDF exceeds 30 MB");const src=await PDFDocument.load(await f.arrayBuffer());const pages=await out.copyPages(src,src.getPageIndices());pages.forEach(p=>out.addPage(p));}await save(new Blob([new Uint8Array(await out.save()) as BlobPart],{type:"application/pdf"}),"samahit-merged.pdf");};
+ const compress=async()=>{if(!file)throw Error("Choose a PDF");if(file.size>30_000_000)throw Error("PDF exceeds 30 MB");const doc=await PDFDocument.load(await file.arrayBuffer());const bytes=await doc.save({useObjectStreams:true,objectsPerTick:25});const blob=new Blob([new Uint8Array(bytes) as BlobPart],{type:"application/pdf"});await save(blob,"samahit-optimized.pdf");if(blob.size>=file.size)setError("This PDF is already compressed; output may not be smaller. Scanned images need image recompression.");};
+ const split=async()=>{if(!file)throw Error("Choose a PDF");const src=await PDFDocument.load(await file.arrayBuffer());const n=src.getPageCount();if(n>100)throw Error("For device safety, split files up to 100 pages");for(let i=0;i<n;i++){const out=await PDFDocument.create();const [p]=await out.copyPages(src,[i]);out.addPage(p);await save(new Blob([new Uint8Array(await out.save()) as BlobPart],{type:"application/pdf"}),`samahit-page-${i+1}.pdf`);}};
  return <Shell title={title[tool||""]||"Utility"} onBack={()=>nav("/utilities")}>
  <div className="space-y-4 text-[#243B32]">
  {tool==="notes"&&<><textarea className={input+" min-h-40"} aria-label="Notes" placeholder="Write notes here..." value={notes} onChange={e=>{setNotes(e.target.value);if(!store("samahit-utility-notes-v1",e.target.value))setError("Device storage is full or disabled");}}/><p className="text-xs text-slate-500">Saved locally on this device. Clearing app data deletes notes.</p><div className="flex gap-2"><input className={input} value={task} onChange={e=>setTask(e.target.value)} placeholder="Add checklist item"/><button className={button} onClick={()=>{if(!task.trim())return;const next=[...tasks,{text:task.trim(),done:false}];if(store("samahit-utility-tasks-v1",JSON.stringify(next))){setTasks(next);setTask("");}else setError("Unable to save checklist");}}>Add</button></div>{tasks.map((t,i)=><div key={i} className="flex items-center gap-2"><input type="checkbox" checked={t.done} onChange={()=>{const next=tasks.map((x,j)=>j===i?{...x,done:!x.done}:x);if(store("samahit-utility-tasks-v1",JSON.stringify(next)))setTasks(next);else setError("Unable to save checklist");}}/><span className={"flex-1 "+(t.done?"line-through":"")}>{t.text}</span><button aria-label="Remove task" onClick={()=>{const next=tasks.filter((_,j)=>j!==i);if(store("samahit-utility-tasks-v1",JSON.stringify(next)))setTasks(next);else setError("Unable to save checklist");}}>✕</button></div>)}</>}
