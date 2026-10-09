@@ -38,13 +38,14 @@ export default function MainLayout() {
 
   const nav = (p: string) => { navigate(p); };
 
-  const roots = ["/", "/services", "/impact", "/activity", "/profile"];
+  const roots = ["/", "/services", "/impact", "/activity", "/profile", "/reels", "/instagram"];
   const root = roots.includes(location.pathname);
   const items = [
     { path: "/", label: "Home", icon: Home },
-    { path: "/impact", label: "Impact", icon: HeartHandshake },
+    { path: "/reels", label: "Reels", icon: Clapperboard },
     { path: "/live-tv", label: "Live TV", icon: Tv },
     { path: "/services", label: "Explore", icon: Compass },
+    { path: "/impact", label: "Impact", icon: HeartHandshake },
     { path: "/profile", label: "Profile", icon: User }
   ];
 

@@ -305,7 +305,8 @@ export function extractInstagramEmbedUrl(url: string): { embedUrl: string; short
 
 export default function ReelsStudio() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token: authToken } = useAuth();
+  const token = authToken || localStorage.getItem("@rpf_token") || localStorage.getItem("token") || "";
   const [posts, setPosts] = useState<InstagramPost[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [filterPlatform, setFilterPlatform] = useState<"all" | "youtube" | "instagram">("all");

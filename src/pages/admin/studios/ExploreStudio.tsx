@@ -146,7 +146,8 @@ export const DEFAULT_ALL_SERVICES: ServiceCard[] = [
   { id: "national-directory", title: "National Directory", desc: "Government contacts & helplines", iconName: "BookOpen", route: "/directory", category: "Information", active: true },
   { id: "peoples-university", title: "People's University Portal", desc: "Official University Information", iconName: "GraduationCap", route: "https://www.peoplesuniversity.edu.in/", category: "Education", active: true },
   { id: "fact-check", title: "Fact Check Hub", desc: "Check claims and viral news", iconName: "ShieldCheck", route: "/fact-check", category: "Information", active: true },
-  { id: "live-tv", title: "Live Broadcast TV", desc: "Official news & culture channels", iconName: "Tv", route: "/live-tv", category: "Broadcast", active: true }
+  { id: "live-tv", title: "Live Broadcast TV", desc: "Official news & culture channels", iconName: "Tv", route: "/live-tv", category: "Broadcast", active: true },
+  { id: "social-reels", title: "Shorts & Reels", desc: "Official videos, shorts & foundation reels", iconName: "Film", route: "/reels", category: "Broadcast", active: true }
 ];
 
 export default function ExploreStudio() {
