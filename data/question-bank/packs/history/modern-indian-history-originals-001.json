@@ -1,0 +1,233 @@
+{
+  "packId": "modern-indian-history-originals-001",
+  "version": 1,
+  "subject": "modern-indian-history",
+  "category": "general-knowledge",
+  "titleEn": "Modern Indian History — Original Practice Set 001",
+  "titleHi": "आधुनिक भारतीय इतिहास — मौलिक अभ्यास सेट 001",
+  "descEn": "Original bilingual questions based on standard school-level history topics; not copied from commercial guidebooks.",
+  "descHi": "मानक इतिहास पाठ्यविषयों पर आधारित मौलिक द्विभाषी प्रश्न; किसी व्यावसायिक गाइड से कॉपी नहीं।",
+  "iconName": "Landmark",
+  "color": "from-amber-600 to-orange-700",
+  "badge": "Original practice",
+  "durationMinutes": 10,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "modern-indian-history-001",
+      "subject": "modern-indian-history",
+      "questionEn": "Who founded the Indian National Congress in 1885 with the support of other early leaders?",
+      "questionHi": "1885 में अन्य प्रारंभिक नेताओं के सहयोग से भारतीय राष्ट्रीय कांग्रेस की स्थापना किसने की?",
+      "optionsEn": [
+        "Dadabhai Naoroji",
+        "A. O. Hume",
+        "Bal Gangadhar Tilak",
+        "Gopal Krishna Gokhale"
+      ],
+      "optionsHi": [
+        "दादाभाई नौरोजी",
+        "ए. ओ. ह्यूम",
+        "बाल गंगाधर तिलक",
+        "गोपाल कृष्ण गोखले"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "A. O. Hume helped establish the Indian National Congress in 1885.",
+      "explanationHi": "A. ओ. ह्यूम ने 1885 में भारतीय राष्ट्रीय कांग्रेस की स्थापना में प्रमुख भूमिका निभाई।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "modern-indian-history-002",
+      "subject": "modern-indian-history",
+      "questionEn": "The Swadeshi Movement gained major momentum after which event in 1905?",
+      "questionHi": "1905 में किस घटना के बाद स्वदेशी आंदोलन को बड़ा बल मिला?",
+      "optionsEn": [
+        "Jallianwala Bagh massacre",
+        "Partition of Bengal",
+        "Simon Commission",
+        "Quit India Movement"
+      ],
+      "optionsHi": [
+        "जलियांवाला बाग हत्याकांड",
+        "बंगाल विभाजन",
+        "साइमन कमीशन",
+        "भारत छोड़ो आंदोलन"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The 1905 partition of Bengal triggered a widespread Swadeshi response.",
+      "explanationHi": "1905 में बंगाल विभाजन के विरोध में स्वदेशी आंदोलन व्यापक हुआ।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "modern-indian-history-003",
+      "subject": "modern-indian-history",
+      "questionEn": "Who led the Dandi March in 1930?",
+      "questionHi": "1930 में दांडी मार्च का नेतृत्व किसने किया?",
+      "optionsEn": [
+        "Jawaharlal Nehru",
+        "Mahatma Gandhi",
+        "Sardar Patel",
+        "Subhas Chandra Bose"
+      ],
+      "optionsHi": [
+        "जवाहरलाल नेहरू",
+        "महात्मा गांधी",
+        "सरदार पटेल",
+        "सुभाष चंद्र बोस"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Gandhi led the salt march from Sabarmati to Dandi to protest the salt laws.",
+      "explanationHi": "गांधीजी ने नमक कानून के विरोध में साबरमती से दांडी तक मार्च किया।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "modern-indian-history-004",
+      "subject": "modern-indian-history",
+      "questionEn": "The Quit India Movement was launched in which year?",
+      "questionHi": "भारत छोड़ो आंदोलन किस वर्ष शुरू हुआ?",
+      "optionsEn": [
+        "1919",
+        "1920",
+        "1930",
+        "1942"
+      ],
+      "optionsHi": [
+        "1919",
+        "1920",
+        "1930",
+        "1942"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The All India Congress Committee adopted the Quit India resolution in August 1942.",
+      "explanationHi": "अखिल भारतीय कांग्रेस समिति ने अगस्त 1942 में भारत छोड़ो प्रस्ताव स्वीकार किया।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "modern-indian-history-005",
+      "subject": "modern-indian-history",
+      "questionEn": "Who was the first Governor-General of independent India?",
+      "questionHi": "स्वतंत्र भारत के पहले गवर्नर-जनरल कौन थे?",
+      "optionsEn": [
+        "C. Rajagopalachari",
+        "Lord Mountbatten",
+        "Rajendra Prasad",
+        "Lord Wavell"
+      ],
+      "optionsHi": [
+        "सी. राजगोपालाचारी",
+        "लॉर्ड माउंटबेटन",
+        "राजेंद्र प्रसाद",
+        "लॉर्ड वेवेल"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Lord Mountbatten served as the first Governor-General after independence; C. Rajagopalachari succeeded him.",
+      "explanationHi": "लॉर्ड माउंटबेटन स्वतंत्र भारत के पहले गवर्नर-जनरल थे; उनके बाद सी. राजगोपालाचारी आए।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "modern-indian-history-006",
+      "subject": "modern-indian-history",
+      "questionEn": "The Battle of Plassey took place in which year?",
+      "questionHi": "प्लासी का युद्ध किस वर्ष हुआ था?",
+      "optionsEn": [
+        "1757",
+        "1764",
+        "1773",
+        "1857"
+      ],
+      "optionsHi": [
+        "1757",
+        "1764",
+        "1773",
+        "1857"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Battle of Plassey in 1757 strengthened East India Company power in Bengal.",
+      "explanationHi": "1757 के प्लासी युद्ध से बंगाल में ईस्ट इंडिया कंपनी की शक्ति बढ़ी।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "modern-indian-history-007",
+      "subject": "modern-indian-history",
+      "questionEn": "Who founded the Arya Samaj in 1875?",
+      "questionHi": "1875 में आर्य समाज की स्थापना किसने की?",
+      "optionsEn": [
+        "Raja Ram Mohan Roy",
+        "Swami Vivekananda",
+        "Swami Dayanand Saraswati",
+        "Ishwar Chandra Vidyasagar"
+      ],
+      "optionsHi": [
+        "राजा राममोहन राय",
+        "स्वामी विवेकानंद",
+        "स्वामी दयानंद सरस्वती",
+        "ईश्वरचंद्र विद्यासागर"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Swami Dayanand Saraswati founded the Arya Samaj in Bombay in 1875.",
+      "explanationHi": "स्वामी दयानंद सरस्वती ने 1875 में बंबई में आर्य समाज की स्थापना की।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "modern-indian-history-008",
+      "subject": "modern-indian-history",
+      "questionEn": "The Permanent Settlement of Bengal is associated with which Governor-General?",
+      "questionHi": "बंगाल का स्थायी बंदोबस्त किस गवर्नर-जनरल से संबंधित है?",
+      "optionsEn": [
+        "Lord Cornwallis",
+        "Lord Dalhousie",
+        "Warren Hastings",
+        "Lord Curzon"
+      ],
+      "optionsHi": [
+        "लॉर्ड कॉर्नवालिस",
+        "लॉर्ड डलहौजी",
+        "वॉरेन हेस्टिंग्स",
+        "लॉर्ड कर्जन"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Lord Cornwallis introduced the Permanent Settlement in 1793.",
+      "explanationHi": "लॉर्ड कॉर्नवालिस ने 1793 में स्थायी बंदोबस्त लागू किया।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
