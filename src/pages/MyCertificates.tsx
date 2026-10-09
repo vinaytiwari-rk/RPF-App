@@ -81,7 +81,7 @@ export default function MyCertificates() {
     } finally {
       setDownloadBusy(false);
     }
-  };;
+  };
 
   return (
     <main className="min-h-full bg-[#FFF7E8] pb-16 text-[#243B32]">
