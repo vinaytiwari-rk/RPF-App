@@ -1652,6 +1652,12 @@ function FertilizerCalcEngine({ isHi }: { isHi: boolean }) {
         </div>
       </div>
 
+      <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs leading-relaxed text-amber-950">
+        {isHi
+          ? "महत्वपूर्ण: खाद व बीज की मात्रा केवल सामान्य अनुमान है। सही मात्रा फसल की किस्म, मिट्टी की जाँच, सिंचाई और स्थानीय कृषि सलाह पर निर्भर करती है। उपयोग से पहले कृषि विशेषज्ञ से पुष्टि करें।"
+          : "Important: These fertilizer and seed quantities are illustrative estimates only. Actual rates depend on crop variety, soil test, irrigation and local agricultural guidance. Confirm with an agricultural expert before use."}
+      </div>
+
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
         <h4 className="text-xs font-black uppercase text-emerald-900 tracking-wider mb-3">
           {isHi ? "कुल आवश्यक खाद व बीज की मात्रा:" : "Required Fertilizer & Seeds:"}
@@ -1820,6 +1826,12 @@ function LandConverterEngine({ isHi }: { isHi: boolean }) {
           </select>
         </div>
       </div>
+
+      <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
+        {isHi
+          ? "नोट: यहाँ 1 बीघा = 27,225 वर्ग फुट का अनुमान लिया गया है। बीघा का वास्तविक माप राज्य/जिले के अनुसार बदल सकता है; जमीन के आधिकारिक काम में स्थानीय मान की पुष्टि करें।"
+          : "Note: This uses an assumed bigha of 27,225 sq ft. The actual bigha varies by state/district; verify the local standard for official land use."}
+      </p>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
         <div className="rounded-xl border bg-white p-3 text-center border-slate-200">
@@ -2245,11 +2257,14 @@ function CgpaPercentageEngine({ isHi }: { isHi: boolean }) {
   const [cgpa, setCgpa] = useState("8.4");
   const [board, setBoard] = useState<"cbse" | "aicte" | "general">("cbse");
 
-  const val = Number(cgpa) || 0;
+  const val = cgpa.trim() === "" ? NaN : Number(cgpa);
+  const validCgpa = Number.isFinite(val) && val >= 0 && val <= 10;
   let percent = 0;
-  if (board === "cbse") percent = val * 9.5;
-  else if (board === "aicte") percent = (val - 0.75) * 10;
-  else percent = val * 10;
+  if (validCgpa) {
+    if (board === "cbse") percent = val * 9.5;
+    else if (board === "aicte") percent = (val - 0.75) * 10;
+    else percent = val * 10;
+  }
 
   return (
     <div className="space-y-4">
@@ -2261,12 +2276,15 @@ function CgpaPercentageEngine({ isHi }: { isHi: boolean }) {
 
       <div>
         <label className="text-xs font-bold text-slate-700">{isHi ? "CGPA स्कोर (1 से 10)" : "CGPA Score"}</label>
-        <input type="number" step="0.01" max={10} value={cgpa} onChange={(e) => setCgpa(e.target.value)} className="w-full mt-1 rounded-xl border p-2.5 text-base font-bold bg-white" />
+        <input type="number" step="0.01" min={0} max={10} value={cgpa} onChange={(e) => setCgpa(e.target.value)} className="w-full mt-1 rounded-xl border p-2.5 text-base font-bold bg-white" />
       </div>
 
+      {!validCgpa && <p role="alert" className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">{isHi ? "कृपया 0 से 10 के बीच वैध CGPA दर्ज करें।" : "Enter a valid CGPA between 0 and 10."}</p>}
+
       <div className="rounded-2xl border border-emerald-300 bg-emerald-50/70 p-5 text-center">
-        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">{isHi ? "समतुल्य प्रतिशत" : "Equivalent Percentage"}</span>
-        <p className="mt-2 text-4xl font-black text-[#243B32]">{percent.toFixed(2)} %</p>
+        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">{isHi ? "अनुमानित समतुल्य प्रतिशत" : "Estimated Equivalent Percentage"}</span>
+        <p className="mt-2 text-4xl font-black text-[#243B32]">{validCgpa ? `${percent.toFixed(2)} %` : "—"}</p>
+        <p className="mt-2 text-xs leading-relaxed text-slate-600">{isHi ? "यह सामान्य सूत्रों पर आधारित अनुमान है। अपने बोर्ड/विश्वविद्यालय के आधिकारिक नियम देखें; सभी संस्थानों के लिए एक ही सूत्र लागू नहीं होता।" : "This is an estimate using common formulas. Check your board/university rules; one formula does not apply to every institution."}</p>
       </div>
     </div>
   );
@@ -2322,7 +2340,13 @@ function StudentLeaveEngine({ isHi, copyToClipboard }: { isHi: boolean; copyToCl
 function CustomerKhataBookEngine({ isHi }: { isHi: boolean }) {
   const [khata, setKhata] = useState<{ id: string; name: string; dues: number }[]>(() => {
     try {
-      return JSON.parse(localStorage.getItem("samahit_khata_v1") || "[]");
+      const parsed: unknown = JSON.parse(localStorage.getItem("samahit_khata_v1") || "[]");
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((item): item is { id: string; name: string; dues: number } =>
+        item !== null && typeof item === "object" &&
+        typeof item.id === "string" && typeof item.name === "string" &&
+        typeof item.dues === "number" && Number.isFinite(item.dues)
+      );
     } catch {
       return [];
     }
@@ -2330,17 +2354,24 @@ function CustomerKhataBookEngine({ isHi }: { isHi: boolean }) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
 
-  const saveKhata = (next: any) => {
-    setKhata(next);
-    localStorage.setItem("samahit_khata_v1", JSON.stringify(next));
+  const saveKhata = (next: { id: string; name: string; dues: number }[]) => {
+    try {
+      localStorage.setItem("samahit_khata_v1", JSON.stringify(next));
+      setKhata(next);
+      return true;
+    } catch {
+      toast.error(isHi ? "फोन में खाता सेव नहीं हो सका। स्टोरेज जाँचें।" : "Could not save the account on this device. Check storage.");
+      return false;
+    }
   };
 
   const addEntry = () => {
     if (!name.trim()) return;
     const next = [...khata, { id: Date.now().toString(), name: name.trim(), dues: Number(amount) || 0 }];
-    saveKhata(next);
-    setName("");
-    setAmount("");
+    if (saveKhata(next)) {
+      setName("");
+      setAmount("");
+    }
   };
 
   const removeEntry = (id: string) => {
@@ -3023,8 +3054,8 @@ function BpSugarTrackerEngine({ isHi }: { isHi: boolean; downloadBlob: any }) {
 function EmergencyHelplinesEngine({ isHi }: { isHi: boolean }) {
   const helplines = [
     { num: "112", titleHi: "अखिल भारतीय आपातकालीन नंबर", titleEn: "National Emergency Helpline" },
-    { num: "108", titleHi: "एम्बुलेंस सेवा", titleEn: "Ambulance Emergency" },
-    { num: "1090", titleHi: "महिला हेल्पलाइन", titleEn: "Women Helpline" },
+    { num: "102", titleHi: "राष्ट्रीय एम्बुलेंस सेवा", titleEn: "National Ambulance Service" },
+    { num: "181", titleHi: "महिला हेल्पलाइन", titleEn: "Women Helpline" },
     { num: "1930", titleHi: "साइबर फ्रॉड हेल्पलाइन", titleEn: "Cyber Crime Financial Fraud" },
     { num: "1098", titleHi: "चाइल्डलाइन (बच्चों की सुरक्षा)", titleEn: "Childline Emergency" },
     { num: "14567", titleHi: "वरिष्ठ नागरिक एल्डरलाइन", titleEn: "Senior Citizen Elderline" },
@@ -3435,12 +3466,15 @@ function PhotoMetadataCleanerEngine({ isHi, downloadBlob }: { isHi: boolean; dow
       ctx.drawImage(bmp, 0, 0);
       bmp.close();
 
-      canvas.toBlob((b) => {
-        if (b) {
-          downloadBlob(b, `cleaned_${file.name.replace(/\.[^.]+$/, "")}.jpg`);
-          toast.success(isHi ? "लोकेशन व गुप्त डेटा हट गया!" : "GPS metadata stripped!");
-        }
-      }, "image/jpeg", 0.92);
+      const cleanedBlob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => blob ? resolve(blob) : reject(new Error("Could not export cleaned image")),
+          "image/jpeg",
+          0.92
+        );
+      });
+      // The shared downloader owns success/error feedback; do not claim success before save completes.
+      await downloadBlob(cleanedBlob, `cleaned_${file.name.replace(/\.[^.]+$/, "")}.jpg`);
     } catch (e: any) {
       toast.error(e.message || "Failed to strip metadata");
     } finally {
