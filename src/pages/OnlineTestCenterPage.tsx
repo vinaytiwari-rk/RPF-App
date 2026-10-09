@@ -1,0 +1,192 @@
+import React, { useState } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import {
+  ArrowLeft, GraduationCap, Flame, Scale, BookOpen, Atom,
+  BrainCircuit, Monitor, Play, Clock, CheckCircle2, Award,
+  Sparkles, ShieldCheck, ChevronRight
+} from "lucide-react";
+import { QUIZ_TOPICS, QuizTopic } from "../data/quiz/quizQuestionBank";
+import OnlineTestRunnerModal from "../components/quiz/OnlineTestRunnerModal";
+import { useAuth } from "../context/AuthContext";
+
+type Lang = "en" | "hi";
+
+const TOPIC_ICONS: Record<string, React.ElementType> = {
+  Flame,
+  Scale,
+  BookOpen,
+  Atom,
+  BrainCircuit,
+  Monitor,
+};
+
+export default function OnlineTestCenterPage() {
+  const { lang } = useOutletContext<{ lang: Lang }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isHi = lang === "hi";
+
+  const [activeTopic, setActiveTopic] = useState<QuizTopic | null>(null);
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/services");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FFF7E8] p-3 sm:p-5 pb-32">
+      {/* Header Banner */}
+      <header className="rounded-3xl bg-[#F0FAF4] p-5 shadow-sm border border-emerald-100/70">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[#245D45]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
+              <GraduationCap className="h-4 w-4" />
+            </span>
+            <span className="text-[11px] font-black uppercase tracking-widest text-[#245D45]">
+              {isHi ? "समाहित ऑनलाइन परीक्षा व मॉक टेस्ट" : "Samahit Online Test & Assessment"}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleBack}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/95 border border-emerald-200/60 text-[#243B32] shadow-2xs hover:bg-emerald-50 transition"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-4.5 w-4.5" />
+          </button>
+        </div>
+
+        <h1 className="mt-3 text-2xl sm:text-3xl font-black text-[#243B32]">
+          {isHi ? "ऑनलाइन टेस्ट एवं मूल्यांकन पोर्टल" : "Online Test & Mock Exam Portal"}
+        </h1>
+        <p className="mt-1 text-xs sm:text-sm text-[#52685C] max-w-xl">
+          {isHi
+            ? "सरकारी भर्ती, सामान्य ज्ञान, तार्किक क्षमता और दैनिक करेंट अफेयर्स के मानक मॉक टेस्ट। टेस्ट पूरा करें और तुरंत प्रशस्ति पत्र (Certificate) प्राप्त करें।"
+            : "Standard mock exams for Govt recruitment, General Knowledge, Reasoning & Current Affairs. Submit test and download instant Merit Certificate."}
+        </p>
+
+        {/* Quick Highlights */}
+        <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-bold text-emerald-900">
+          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-700" />
+            {isHi ? "100% निःशुल्क व ऑफलाइन फ्रेंडली" : "100% Free & Fast"}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
+            <Award className="h-3.5 w-3.5 text-amber-600" />
+            {isHi ? "सर्टिफिकेट डाउनलोड उपलब्ध" : "PDF Certificate Included"}
+          </span>
+        </div>
+      </header>
+
+      {/* Featured Daily Current Affairs Hero Card */}
+      <section className="mt-4">
+        {QUIZ_TOPICS.slice(0, 1).map((daily) => (
+          <div
+            key={daily.id}
+            onClick={() => setActiveTopic(daily)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") setActiveTopic(daily);
+            }}
+            className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-600 to-amber-700 p-5 text-white shadow-lg transition hover:scale-[1.01] cursor-pointer"
+          >
+            <div className="flex items-start justify-between">
+              <span className="rounded-full bg-white/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-xs">
+                🔥 {isHi ? "आज का विशेष लाइव टेस्ट" : "Today's Live Test"}
+              </span>
+              <span className="flex items-center gap-1 text-xs font-bold bg-white/20 px-2.5 py-0.5 rounded-full">
+                <Clock className="h-3 w-3" /> {daily.durationMinutes} {isHi ? "मिनट" : "mins"}
+              </span>
+            </div>
+
+            <h2 className="mt-3 text-lg sm:text-xl font-black leading-snug">
+              {isHi ? daily.titleHi : daily.titleEn}
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-amber-100/90 leading-relaxed max-w-lg">
+              {isHi ? daily.descHi : daily.descEn}
+            </p>
+
+            <div className="mt-4 flex items-center justify-between border-t border-white/20 pt-3">
+              <span className="text-xs font-bold text-amber-100">
+                {daily.questionsCount} {isHi ? "महत्वपूर्ण प्रश्न" : "Questions"}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-black text-orange-950 shadow group-hover:bg-amber-50">
+                <Play className="h-3.5 w-3.5 fill-current" />
+                {isHi ? "अभी टेस्ट शुरू करें" : "Start Test Now"}
+              </span>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Topics Grid */}
+      <div className="mt-6">
+        <h3 className="text-base font-black text-[#243B32] mb-3 flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-emerald-700" />
+          {isHi ? "सभी विषयवार मॉक टेस्ट श्रृंखला:" : "Subject-wise Mock Tests:"}
+        </h3>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {QUIZ_TOPICS.slice(1).map((topic) => {
+            const IconComponent = TOPIC_ICONS[topic.iconName] || BookOpen;
+
+            return (
+              <div
+                key={topic.id}
+                onClick={() => setActiveTopic(topic)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") setActiveTopic(topic);
+                }}
+                className="group relative flex flex-col justify-between rounded-2xl border border-[#D8E8DB] bg-white p-4 shadow-xs transition hover:border-[#245D45] hover:shadow-md cursor-pointer text-left"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F0FAF4] text-[#245D45] group-hover:bg-[#245D45] group-hover:text-white transition">
+                      <IconComponent className="h-5 w-5" />
+                    </span>
+                    <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                      <Clock className="h-3 w-3" /> {topic.durationMinutes} min
+                    </span>
+                  </div>
+
+                  <h4 className="mt-3 text-sm sm:text-base font-extrabold text-[#243B32] group-hover:text-[#245D45] transition line-clamp-1">
+                    {isHi ? topic.titleHi : topic.titleEn}
+                  </h4>
+                  <p className="mt-1 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                    {isHi ? topic.descHi : topic.descEn}
+                  </p>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs font-bold text-[#245D45]">
+                  <span className="text-[11px] text-slate-400">
+                    {topic.questionsCount} {isHi ? "प्रश्न" : "Questions"}
+                  </span>
+                  <span className="inline-flex items-center gap-1 group-hover:translate-x-1 transition text-emerald-800">
+                    {isHi ? "टेस्ट दें" : "Take Test"}
+                    <ChevronRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Test Runner Modal */}
+      {activeTopic && (
+        <OnlineTestRunnerModal
+          topic={activeTopic}
+          onClose={() => setActiveTopic(null)}
+          lang={lang}
+          userName={user?.full_name || "Samahit Student"}
+        />
+      )}
+    </div>
+  );
+}

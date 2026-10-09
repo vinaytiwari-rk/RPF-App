@@ -23,6 +23,7 @@ import BrandLoader from "../components/BrandLoader";
 const REMOVED_SERVICE_IDS = new Set<string>(["countries","earthquakes","fuel-tracker","gps-toolkit","vitals","medications","medical-dict","period-tracker","child-tracker","resume-builder","doc-scanner","ai-chat","story-library","decision-maker","morse-code","habit-tracker","fasting-tracker","typing-speed","quick-calculator"]);
 
 const EXPLORE_LINKS = [
+  { id: "online-test", category: "education", iconName: "GraduationCap", titleEn: "Online Mock Test & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", descEn: "Govt exams, GK, reasoning & merit certificates", descHi: "सरकारी भर्ती, सामान्य ज्ञान व टेस्ट सर्टिफिकेट", route: "/online-test" },
   { id: "epaper", category: "community", iconName: "Newspaper", titleEn: "Epaper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Read today's leading daily e-papers", descHi: "आज के प्रमुख दैनिक ई-पेपर पढ़ें", route: "/epaper" },
   { id: "directory", category: "government", iconName: "BookOpen", titleEn: "National Directory", titleHi: "राष्ट्रीय निर्देशिका", descEn: "Government contacts & helplines", descHi: "सरकारी संपर्क और उपयोगिता निर्देशिका", route: "/directory" },
   { id: "peoples-university", category: "education", iconName: "GraduationCap", titleEn: "People's University Portal", titleHi: "पीपुल्स यूनिवर्सिटी पोर्टल", descEn: "Official University Information", descHi: "आधिकारिक विश्वविद्यालय पोर्टल", url: "https://www.peoplesuniversity.edu.in/" },

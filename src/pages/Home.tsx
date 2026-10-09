@@ -1,6 +1,6 @@
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
-import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, CloudSun } from "lucide-react";
+import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, CloudSun, GraduationCap } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -469,6 +469,13 @@ export default function Home() {
         icon: Calculator,
         route: "/utilities/calculators",
         accent: "text-[#C2410C] bg-orange-500/10 border border-orange-500/20"
+      },
+      {
+        title: "Online Mock Test",
+        subtitle: "Govt exam mock test, daily current affairs & merit certificates",
+        icon: GraduationCap,
+        route: "/online-test",
+        accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20"
       },
       {
         title: "Shorts & Reels",
