@@ -76,6 +76,8 @@ jobs:
           done
       - name: Audit SAMAHIT utility catalog and offline exports
         run: npm run audit:samahit
+      - name: Test Live TV direct-stream MIME type selection
+        run: npm run audit:live-tv
       - name: Verify required modules
         run: |
           node -e "console.log('react-router-dom@' + require('./node_modules/react-router-dom/package.json').version)"
