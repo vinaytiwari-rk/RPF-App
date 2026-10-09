@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx server.ts",
-    "build": "node scripts/writeAppVersion.cjs && cross-env GOMAXPROCS=1 RAYON_NUM_THREADS=1 UV_THREADPOOL_SIZE=1 NODE_OPTIONS=\"--max-old-space-size=2048\" vite build && node scripts/copyDistIndex.cjs && esbuild server.ts --bundle --platform=node --outfile=server.cjs",
+    "build": "node scripts/buildQuestionBankManifest.mjs && node scripts/writeAppVersion.cjs && cross-env GOMAXPROCS=1 RAYON_NUM_THREADS=1 UV_THREADPOOL_SIZE=1 NODE_OPTIONS=\"--max-old-space-size=2048\" vite build && node scripts/copyDistIndex.cjs && esbuild server.ts --bundle --platform=node --outfile=server.cjs",
     "start": "node server.cjs",
     "clean": "rm -rf dist server.js server.cjs",
     "lint": "tsc --noEmit",
@@ -14,7 +14,8 @@
     "migrate": "node scripts/runMigrations.cjs",
     "android:sync": "npm run build && npx cap sync android",
     "android:build": "npm run android:sync && cd android && gradlew assembleDebug",
-    "quiz:bank:validate": "node scripts/validateQuestionBankPacks.mjs"
+    "quiz:bank:validate": "node scripts/validateQuestionBankPacks.mjs",
+    "quiz:bank:manifest": "node scripts/buildQuestionBankManifest.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
