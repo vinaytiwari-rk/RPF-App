@@ -30,6 +30,26 @@ import { Skeleton } from '../ui/Skeleton';
 
 type RadioStation = { name: string; url: string; image?: string; page?: string; enabled?: boolean; order?: number };
 const RADIO_DEFAULTS = [...rawRadioStations, ...privateFmStations] as RadioStation[];
+const normalizeRadioName = (name: string) => name.trim().toLocaleLowerCase();
+const mergeRadioDefaults = (configured: unknown): RadioStation[] => {
+  const merged = new Map<string, RadioStation>();
+  RADIO_DEFAULTS.forEach((station, index) => {
+    const key = normalizeRadioName(station.name);
+    if (key && /^https?:\\/\\//i.test(station.url || "")) {
+      merged.set(key, { ...station, order: station.order ?? index, enabled: station.enabled !== false });
+    }
+  });
+  if (Array.isArray(configured)) {
+    configured.forEach((value: any, index) => {
+      if (!value || typeof value.name !== "string" || !value.name.trim() ||
+          typeof value.url !== "string" || !/^https?:\\/\\//i.test(value.url)) return;
+      const key = normalizeRadioName(value.name);
+      const existing = merged.get(key);
+      merged.set(key, { ...existing, ...value, order: value.order ?? existing?.order ?? RADIO_DEFAULTS.length + index, enabled: value.enabled !== false });
+    });
+  }
+  return [...merged.values()].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+};
 
 const FACT_CHECK_DEFAULTS = [
   { name: "PIB Fact Check", nameHi: "पीआईबी फैक्ट चेक", url: "https://xcancel.com/pibfactcheck", description: "Press Information Bureau fact-checks regarding government policies.", descriptionHi: "सरकारी नीतियों के संबंध में तथ्य-जांच।" },
@@ -78,9 +98,7 @@ export const CmsSettings = () => {
     ? (cms as any).liveTvChannels
     : LIVE_TV_DEFAULTS;
 
-  const radios: RadioStation[] = Array.isArray((cms as any)?.internetRadioStations)
-    ? (cms as any).internetRadioStations
-    : RADIO_DEFAULTS;
+  const radios: RadioStation[] = mergeRadioDefaults((cms as any)?.internetRadioStations);
 
   const factChecks = Array.isArray((cms as any)?.factCheckSources)
     ? (cms as any).factCheckSources
