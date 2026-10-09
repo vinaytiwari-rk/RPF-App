@@ -549,8 +549,8 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
   {
     id: "scam_alert_checklist",
     categoryId: "cyber_media",
-    titleEn: "Cyber Fraud & Scam Message Detector",
-    titleHi: "साइबर फ्रॉड व फर्जी मैसेज पहचान गाइड",
+    titleEn: "Scam Message Safety Checklist",
+    titleHi: "साइबर धोखाधड़ी जाँच सूची",
     descEn: "5-point verification checklist to detect fake lottery, part-time jobs, and suspicious APK files.",
     descHi: "क्या यह लॉटरी, बैंक कॉल या पार्ट-टाइम जॉब का मैसेज असली है या फ्रॉड? 5 बिंदुओं में जांचें।",
     iconName: "AlertOctagon",
