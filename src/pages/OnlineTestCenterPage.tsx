@@ -184,7 +184,7 @@ export default function OnlineTestCenterPage() {
           topic={activeTopic}
           onClose={() => setActiveTopic(null)}
           lang={lang}
-          userName={user?.full_name || "Samahit Student"}
+          userName={user?.displayName || user?.name || "Samahit Student"}
         />
       )}
     </div>
