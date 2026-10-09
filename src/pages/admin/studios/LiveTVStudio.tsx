@@ -77,7 +77,7 @@ const mergeRadioCatalogue = (configured: unknown): RadioStation[] => {
   const merged = new Map<string, RadioStation>();
   DEFAULT_RADIO_STATIONS.forEach((station, index) => {
     const key = normalizeRadioName(station.name);
-    if (key && /^https?:\\/\\//i.test(station.url)) {
+    if (key && (station.url.startsWith("http://") || station.url.startsWith("https://"))) {
       merged.set(key, { ...station, enabled: station.enabled !== false });
     }
   });
@@ -85,7 +85,7 @@ const mergeRadioCatalogue = (configured: unknown): RadioStation[] => {
     configured.forEach((value) => {
       const station = value as RadioStation;
       if (!station || typeof station.name !== "string" || !station.name.trim() ||
-          typeof station.url !== "string" || !/^https?:\\/\\//i.test(station.url)) return;
+          typeof station.url !== "string" || !(station.url.startsWith("http://") || station.url.startsWith("https://"))) return;
       const key = normalizeRadioName(station.name);
       merged.set(key, { ...merged.get(key), ...station, enabled: station.enabled !== false });
     });
