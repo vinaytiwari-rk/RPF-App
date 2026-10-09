@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import BrandLoader from "../components/BrandLoader";
 import { toast } from "react-hot-toast";
 import QRCode from "react-qr-code";
+import { saveBlobToDownloads } from "../utils/nativeFileDownload";
 
 type CertificateRule = { id:string; title:string; title_hi?:string; min_hours:number; min_reports:number; min_tasks:number; active:boolean };
 type Certificate = {
@@ -64,15 +65,23 @@ export default function MyCertificates() {
     if (!selectedCert || downloadBusy) return;
     setDownloadBusy(true);
     try {
-      const response = await fetch(`/api/certificates/download/${encodeURIComponent(selectedCert.certificate_id)}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-      if (!response.ok) throw new Error("Download failed");
+      const response = await fetch(`/api/certificates/download/${encodeURIComponent(selectedCert.certificate_id)}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) {
+        const message = await response.text().catch(() => "");
+        throw new Error(message || `Certificate download failed (${response.status})`);
+      }
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `Certificate_${selectedCert.certificate_id}.pdf`; document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    } catch { toast.error(hi ? "PDF डाउनलोड नहीं हो सका" : "PDF download failed"); }
-    finally { setDownloadBusy(false); }
-  };
+      await saveBlobToDownloads(blob, `Certificate_${selectedCert.certificate_id}.pdf`, "application/pdf");
+      toast.success(hi ? "प्रमाणपत्र Downloads/SAMAHIT में सेव हो गया" : "Certificate saved to Downloads/SAMAHIT");
+    } catch (error) {
+      console.error("Certificate download failed", error);
+      toast.error(hi ? "PDF सेव नहीं हो सकी। कृपया दोबारा प्रयास करें।" : "Could not save the PDF. Please try again.");
+    } finally {
+      setDownloadBusy(false);
+    }
+  };;
 
   return (
     <main className="min-h-full bg-[#FFF7E8] pb-16 text-[#243B32]">
