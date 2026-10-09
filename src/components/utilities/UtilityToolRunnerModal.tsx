@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import { 
   X, Download, Copy, Check, Share2, Printer, 
   UploadCloud, AlertCircle, RefreshCw, FileText, 
@@ -9,6 +10,12 @@ import { PDFDocument } from "pdf-lib";
 import QRCode from "react-qr-code";
 import toast from "react-hot-toast";
 import { UtilityToolDefinition } from "../../data/utilityToolsCatalog";
+
+interface NativeDownloadsPlugin {
+  saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
+}
+
+const NativeDownloads = registerPlugin<NativeDownloadsPlugin>("NativeDownloads");
 
 interface Props {
   tool: UtilityToolDefinition;
@@ -27,16 +34,55 @@ export default function UtilityToolRunnerModal({ tool, onClose, lang = "hi" }: P
     };
   }, []);
 
-  const downloadBlob = (blob: Blob, filename: string) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-    toast.success(isHi ? "फाइल सफलतापूर्वक डाउनलोड हुई!" : "File downloaded successfully!");
+  const downloadBlob = async (blob: Blob, filename: string) => {
+    try {
+      if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android") {
+        // A WebView anchor click does not reliably persist Blob downloads to Android storage.
+        // Use the native MediaStore Downloads collection and report success only after it resolves.
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error("Could not read the generated file"));
+          reader.onload = () => {
+            const result = typeof reader.result === "string" ? reader.result : "";
+            const comma = result.indexOf(",");
+            if (comma < 0) reject(new Error("Could not encode the generated file"));
+            else resolve(result.slice(comma + 1));
+          };
+          reader.readAsDataURL(blob);
+        });
+        const saved = await NativeDownloads.saveToDownloads({
+          filename,
+          mimeType: blob.type || "application/octet-stream",
+          data: dataUrl,
+        });
+        toast.success(
+          isHi
+            ? `फाइल Downloads में सेव हुई: ${saved.filename}`
+            : `Saved to Downloads: ${saved.filename}`
+        );
+        return;
+      }
+
+      // Browser fallback for the web version.
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+      toast.success(isHi ? "डाउनलोड अनुरोध भेज दिया गया। Downloads फ़ोल्डर जाँचें।" : "Download requested. Check your Downloads folder.");
+    } catch (error) {
+      console.error("[SAMAHIT Utility] Download failed", error);
+      const detail = error instanceof Error ? error.message : String(error);
+      toast.error(
+        isHi
+          ? `फाइल सेव नहीं हुई: ${detail}`
+          : `Could not save file: ${detail}`
+      );
+    }
   };
 
   const copyToClipboard = (text: string) => {
