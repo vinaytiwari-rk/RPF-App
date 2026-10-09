@@ -1,0 +1,358 @@
+{
+  "packId": "current-affairs-2026-10-pilot",
+  "version": 1,
+  "subject": "current-affairs",
+  "category": "current_affairs",
+  "titleEn": "Current Affairs — October 2026 (Pilot)",
+  "titleHi": "करेंट अफेयर्स — अक्टूबर 2026 (प्रारंभिक पैक)",
+  "descEn": "A small, source-attributed pilot pack. Expand only after fact review.",
+  "descHi": "स्रोत-संदर्भ सहित शुरुआती पैक। तथ्य-जाँच के बाद ही विस्तार करें।",
+  "iconName": "Flame",
+  "color": "from-amber-600 to-orange-600",
+  "badge": "Source reviewed",
+  "questionsCount": 10,
+  "durationMinutes": 5,
+  "questions": [
+    {
+      "id": "ca-pib-20261008-gst-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "general-awareness",
+        "government"
+      ],
+      "questionEn": "Which body issued the recommendations on 8 October 2026 aimed at a simpler, trust-based GST administration?",
+      "questionHi": "8 अक्टूबर 2026 को सरल और विश्वास-आधारित GST प्रशासन के लिए सिफारिशें किस निकाय ने जारी कीं?",
+      "optionsEn": [
+        "GST Council",
+        "Reserve Bank of India",
+        "Securities and Exchange Board of India",
+        "NITI Aayog"
+      ],
+      "optionsHi": [
+        "GST परिषद",
+        "भारतीय रिज़र्व बैंक",
+        "भारतीय प्रतिभूति और विनिमय बोर्ड",
+        "नीति आयोग"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The PIB release identifies the recommendations as those of the GST Council.",
+      "explanationHi": "PIB की विज्ञप्ति में इन्हें GST परिषद की सिफारिशें बताया गया है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2320934&reg=48&lang=2",
+        "publishedAt": "2026-10-08",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261006-sme-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "economy",
+        "government"
+      ],
+      "questionEn": "What amount did the Union Cabinet approve as a commitment toward establishing the SME Growth Fund in October 2026?",
+      "questionHi": "अक्टूबर 2026 में SME Growth Fund की स्थापना के लिए केंद्रीय मंत्रिमंडल ने कितनी राशि की प्रतिबद्धता को मंजूरी दी?",
+      "optionsEn": [
+        "₹1,000 crore",
+        "₹5,000 crore",
+        "₹10,000 crore",
+        "₹20,000 crore"
+      ],
+      "optionsHi": [
+        "₹1,000 करोड़",
+        "₹5,000 करोड़",
+        "₹10,000 करोड़",
+        "₹20,000 करोड़"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The PIB Cabinet release states a commitment of ₹10,000 crore for the SME Growth Fund.",
+      "explanationHi": "PIB की मंत्रिमंडल संबंधी विज्ञप्ति में SME Growth Fund के लिए ₹10,000 करोड़ की प्रतिबद्धता बताई गई है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2319532&reg=48&lang=2",
+        "publishedAt": "2026-10-06",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261006-esanjeevani-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "health",
+        "digital-public-services"
+      ],
+      "questionEn": "What milestone in teleconsultations did the e-Sanjeevani service report in the PIB release dated 6 October 2026?",
+      "questionHi": "6 अक्टूबर 2026 की PIB विज्ञप्ति के अनुसार e-Sanjeevani सेवा ने टेली-परामर्श में कौन-सा पड़ाव पार किया?",
+      "optionsEn": [
+        "5 crore",
+        "10 crore",
+        "25 crore",
+        "50 crore"
+      ],
+      "optionsHi": [
+        "5 करोड़",
+        "10 करोड़",
+        "25 करोड़",
+        "50 करोड़"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The PIB release reports that e-Sanjeevani crossed 50 crore teleconsultations.",
+      "explanationHi": "PIB की विज्ञप्ति के अनुसार e-Sanjeevani ने 50 करोड़ टेली-परामर्श का आँकड़ा पार किया।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2319427&reg=48&lang=2",
+        "publishedAt": "2026-10-06",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261005-kuno-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "environment",
+        "wildlife"
+      ],
+      "questionEn": "According to the PIB release dated 5 October 2026, India's cheetah population reached what reported total after five cubs were born at Kuno National Park?",
+      "questionHi": "5 अक्टूबर 2026 की PIB विज्ञप्ति के अनुसार कूनो राष्ट्रीय उद्यान में पाँच शावकों के जन्म के बाद भारत में चीतों की कुल बताई गई संख्या कितनी हुई?",
+      "optionsEn": [
+        "45",
+        "50",
+        "55",
+        "60"
+      ],
+      "optionsHi": [
+        "45",
+        "50",
+        "55",
+        "60"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The release reports five cubs and says India's cheetah population reached 60.",
+      "explanationHi": "विज्ञप्ति में पाँच शावकों के जन्म और भारत में चीतों की संख्या 60 होने की जानकारी दी गई है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2319097&reg=48&lang=2",
+        "publishedAt": "2026-10-05",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261007-cop31-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "medium",
+      "examTags": [
+        "environment",
+        "international-relations"
+      ],
+      "questionEn": "In its 7 October 2026 statement on COP31, what did India call for the conference to emphasize?",
+      "questionHi": "COP31 पर 7 अक्टूबर 2026 के वक्तव्य में भारत ने सम्मेलन में किस बात पर ज़ोर देने का आह्वान किया?",
+      "optionsEn": [
+        "Closing implementation gaps and fulfilling commitments under the Paris Agreement",
+        "Replacing the Paris Agreement with a new treaty",
+        "Ending all climate adaptation funding",
+        "Limiting climate discussions to trade tariffs"
+      ],
+      "optionsHi": [
+        "पेरिस समझौते के तहत क्रियान्वयन की कमियों को दूर करना और प्रतिबद्धताएँ पूरी करना",
+        "पेरिस समझौते को नए समझौते से बदलना",
+        "जलवायु अनुकूलन के सभी वित्तपोषण को समाप्त करना",
+        "जलवायु चर्चा को केवल व्यापार शुल्क तक सीमित करना"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The PIB release says COP31 should focus on closing gaps, fulfilling commitments, and accelerating implementation of the Paris Agreement.",
+      "explanationHi": "PIB की विज्ञप्ति के अनुसार COP31 में कमियों को दूर करने, प्रतिबद्धताएँ पूरी करने और पेरिस समझौते के क्रियान्वयन में तेजी लाने पर ध्यान देना चाहिए।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2319890&reg=48&lang=2",
+        "publishedAt": "2026-10-07",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261006-sme-purpose-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "economy",
+        "msme"
+      ],
+      "questionEn": "What is the stated purpose of the SME Growth Fund approved by the Union Cabinet in October 2026?",
+      "questionHi": "अक्टूबर 2026 में केंद्रीय मंत्रिमंडल द्वारा स्वीकृत SME Growth Fund का घोषित उद्देश्य क्या है?",
+      "optionsEn": [
+        "Direct equity investments in small and medium enterprises",
+        "Subsidies for overseas tourism",
+        "Loans only for large public-sector companies",
+        "Funding for international sports events"
+      ],
+      "optionsHi": [
+        "लघु और मध्यम उद्यमों में प्रत्यक्ष इक्विटी निवेश",
+        "विदेशी पर्यटन के लिए सब्सिडी",
+        "केवल बड़ी सार्वजनिक क्षेत्र की कंपनियों को ऋण",
+        "अंतरराष्ट्रीय खेल आयोजनों के लिए धन"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Cabinet release describes the fund as supporting direct equity investments in small and medium enterprises.",
+      "explanationHi": "मंत्रिमंडल की विज्ञप्ति में इस फंड का उद्देश्य लघु और मध्यम उद्यमों में प्रत्यक्ष इक्विटी निवेश बताया गया है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2319532&reg=48&lang=2",
+        "publishedAt": "2026-10-06",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261008-imc-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "technology",
+        "telecom"
+      ],
+      "questionEn": "Which edition of the India Mobile Congress did the Prime Minister inaugurate in October 2026?",
+      "questionHi": "अक्टूबर 2026 में प्रधानमंत्री ने India Mobile Congress के किस संस्करण का उद्घाटन किया?",
+      "optionsEn": [
+        "5th",
+        "7th",
+        "9th",
+        "10th"
+      ],
+      "optionsHi": [
+        "5वाँ",
+        "7वाँ",
+        "9वाँ",
+        "10वाँ"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The PIB release dated 8 October 2026 identifies the event as the 10th edition of India Mobile Congress.",
+      "explanationHi": "8 अक्टूबर 2026 की PIB विज्ञप्ति में इसे India Mobile Congress का 10वाँ संस्करण बताया गया है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2320680&reg=48&lang=2",
+        "publishedAt": "2026-10-08",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-pib-20261005-kuno-cubs-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "easy",
+      "examTags": [
+        "environment",
+        "wildlife"
+      ],
+      "questionEn": "How many cubs were reported in the 5 October 2026 PIB update about an Indian-born cheetah at Kuno National Park?",
+      "questionHi": "कूनो राष्ट्रीय उद्यान में भारतीय मूल की चीता मादा से कितने शावकों के जन्म की जानकारी 5 अक्टूबर 2026 की PIB अपडेट में दी गई?",
+      "optionsEn": [
+        "2",
+        "3",
+        "5",
+        "7"
+      ],
+      "optionsHi": [
+        "2",
+        "3",
+        "5",
+        "7"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The PIB update reported the birth of five healthy cubs at Kuno National Park.",
+      "explanationHi": "PIB अपडेट में कूनो राष्ट्रीय उद्यान में पाँच स्वस्थ शावकों के जन्म की जानकारी दी गई।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2319097&reg=48&lang=2",
+        "publishedAt": "2026-10-05",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/AllRelease.aspx?lang=1&reg=23"
+      }
+    },
+    {
+      "id": "ca-toi-20261006-ppf-rate-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "medium",
+      "examTags": [
+        "economy",
+        "savings"
+      ],
+      "questionEn": "According to the Times of India report on small-savings rates for October–December 2026, what annual rate was listed for PPF?",
+      "questionHi": "अक्टूबर–दिसंबर 2026 की छोटी बचत योजनाओं की दरों पर Times of India की रिपोर्ट के अनुसार PPF की वार्षिक ब्याज दर कितनी बताई गई?",
+      "optionsEn": [
+        "6.5%",
+        "7.1%",
+        "7.7%",
+        "8.2%"
+      ],
+      "optionsHi": [
+        "6.5%",
+        "7.1%",
+        "7.7%",
+        "8.2%"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The report lists PPF at 7.1%; the Department of Economic Affairs is the official cross-check source for small-savings rate notifications.",
+      "explanationHi": "रिपोर्ट में PPF दर 7.1% दी गई है; छोटी बचत दरों की आधिकारिक पुष्टि के लिए आर्थिक कार्य विभाग का स्रोत भी रखा गया है।",
+      "source": {
+        "sourceId": "times_of_india",
+        "articleUrl": "https://timesofindia.indiatimes.com/business/india-business/ppf-at-7-1-scss-8-2-nsc-7-7-check-small-savings-interest-rates-for-october-december-2026-and-what-investors-will-earn-on-post-office-schemes-like-ssy-time-deposits/articleshow/134704207.cms",
+        "publishedAt": "2026-10-06",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://dea.gov.in/budget-division/475"
+      }
+    },
+    {
+      "id": "ca-drishti-20260528-sarthak-pds-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "difficulty": "medium",
+      "examTags": [
+        "economy",
+        "food-security",
+        "technology"
+      ],
+      "questionEn": "The SARTHAK-PDS scheme discussed by Drishti IAS is intended to modernize which public service system?",
+      "questionHi": "Drishti IAS में वर्णित SARTHAK-PDS योजना किस सार्वजनिक सेवा प्रणाली के आधुनिकीकरण से संबंधित है?",
+      "optionsEn": [
+        "Public Distribution System",
+        "Urban metro rail ticketing",
+        "Passport issuance",
+        "National highway toll collection"
+      ],
+      "optionsHi": [
+        "सार्वजनिक वितरण प्रणाली",
+        "शहरी मेट्रो रेल टिकटिंग",
+        "पासपोर्ट जारी करना",
+        "राष्ट्रीय राजमार्ग टोल संग्रह"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Drishti IAS analysis describes SARTHAK-PDS as a technology-led modernization of India's Public Distribution System. PIB's official Cabinet release independently confirms the scheme and its purpose.",
+      "explanationHi": "Drishti IAS का विश्लेषण SARTHAK-PDS को भारत की सार्वजनिक वितरण प्रणाली के तकनीक-आधारित आधुनिकीकरण से जोड़ता है। PIB की आधिकारिक मंत्रिमंडल विज्ञप्ति योजना और उसके उद्देश्य की स्वतंत्र पुष्टि करती है।",
+      "source": {
+        "sourceId": "drishti_ias",
+        "articleUrl": "https://www.drishtiias.com/current-affairs-news-analysis-editorials/news-analysis/28-05-2026",
+        "publishedAt": "2026-05-28",
+        "verifiedAt": "2026-10-09",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2265788&lang=1&reg=5"
+      }
+    }
+  ]
+}

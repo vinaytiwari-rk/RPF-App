@@ -1,0 +1,556 @@
+{
+  "packId": "constitution-polity-foundations-001",
+  "version": 1,
+  "subject": "constitution-polity",
+  "category": "general-knowledge",
+  "titleEn": "Indian Constitution & Polity — Foundations",
+  "titleHi": "भारतीय संविधान एवं राजव्यवस्था — आधारभूत प्रश्न",
+  "descEn": "Original bilingual practice questions on constitutional structure and institutions.",
+  "descHi": "संविधान की संरचना और संस्थाओं पर हिंदी-अंग्रेज़ी अभ्यास प्रश्न।",
+  "iconName": "Scale",
+  "color": "from-blue-600 to-indigo-700",
+  "badge": "Foundational pack",
+  "durationMinutes": 12,
+  "questions": [
+    {
+      "id": "polity-001",
+      "subject": "constitution-polity",
+      "questionEn": "Which part of the Constitution contains Fundamental Rights?",
+      "questionHi": "संविधान के किस भाग में मौलिक अधिकार दिए गए हैं?",
+      "optionsEn": [
+        "Part II",
+        "Part III",
+        "Part IV",
+        "Part IVA"
+      ],
+      "optionsHi": [
+        "भाग II",
+        "भाग III",
+        "भाग IV",
+        "भाग IVA"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Fundamental Rights are contained in Part III, Articles 12–35.",
+      "explanationHi": "मौलिक अधिकार भाग III में अनुच्छेद 12–35 के अंतर्गत हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-002",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article guarantees equality before the law?",
+      "questionHi": "कौन-सा अनुच्छेद कानून के समक्ष समानता की गारंटी देता है?",
+      "optionsEn": [
+        "Article 14",
+        "Article 19",
+        "Article 21",
+        "Article 32"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 14",
+        "अनुच्छेद 19",
+        "अनुच्छेद 21",
+        "अनुच्छेद 32"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Article 14 provides equality before law and equal protection of the laws.",
+      "explanationHi": "अनुच्छेद 14 कानून के समक्ष समानता और कानूनों के समान संरक्षण का प्रावधान करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-003",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article protects life and personal liberty?",
+      "questionHi": "जीवन और व्यक्तिगत स्वतंत्रता का संरक्षण कौन-सा अनुच्छेद करता है?",
+      "optionsEn": [
+        "Article 15",
+        "Article 17",
+        "Article 21",
+        "Article 25"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 15",
+        "अनुच्छेद 17",
+        "अनुच्छेद 21",
+        "अनुच्छेद 25"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Article 21 protects life and personal liberty according to procedure established by law.",
+      "explanationHi": "अनुच्छेद 21 विधि द्वारा स्थापित प्रक्रिया के अनुसार जीवन और व्यक्तिगत स्वतंत्रता की रक्षा करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-004",
+      "subject": "constitution-polity",
+      "questionEn": "Who appoints the Prime Minister of India?",
+      "questionHi": "भारत के प्रधानमंत्री की नियुक्ति कौन करता है?",
+      "optionsEn": [
+        "Chief Justice of India",
+        "President of India",
+        "Lok Sabha Speaker",
+        "Vice-President"
+      ],
+      "optionsHi": [
+        "भारत के मुख्य न्यायाधीश",
+        "भारत के राष्ट्रपति",
+        "लोकसभा अध्यक्ष",
+        "उपराष्ट्रपति"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The President appoints the Prime Minister under Article 75.",
+      "explanationHi": "अनुच्छेद 75 के अंतर्गत राष्ट्रपति प्रधानमंत्री की नियुक्ति करते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-005",
+      "subject": "constitution-polity",
+      "questionEn": "What is the maximum strength of the Rajya Sabha under the Constitution?",
+      "questionHi": "संविधान के अनुसार राज्यसभा की अधिकतम सदस्य संख्या कितनी है?",
+      "optionsEn": [
+        "238",
+        "245",
+        "250",
+        "252"
+      ],
+      "optionsHi": [
+        "238",
+        "245",
+        "250",
+        "252"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Constitution provides a maximum Rajya Sabha strength of 250 members.",
+      "explanationHi": "संविधान राज्यसभा की अधिकतम सदस्य संख्या 250 निर्धारित करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-006",
+      "subject": "constitution-polity",
+      "questionEn": "Which House of Parliament is a permanent body?",
+      "questionHi": "संसद का कौन-सा सदन स्थायी सदन है?",
+      "optionsEn": [
+        "Lok Sabha",
+        "Rajya Sabha",
+        "Both Houses",
+        "Neither House"
+      ],
+      "optionsHi": [
+        "लोकसभा",
+        "राज्यसभा",
+        "दोनों सदन",
+        "कोई भी नहीं"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Rajya Sabha is not subject to dissolution; one-third of its members retire every two years.",
+      "explanationHi": "राज्यसभा भंग नहीं होती; इसके लगभग एक-तिहाई सदस्य हर दो वर्ष में सेवानिवृत्त होते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-007",
+      "subject": "constitution-polity",
+      "questionEn": "Who is the ex-officio Chairman of the Rajya Sabha?",
+      "questionHi": "राज्यसभा का पदेन सभापति कौन होता है?",
+      "optionsEn": [
+        "President",
+        "Prime Minister",
+        "Vice-President",
+        "Speaker of Lok Sabha"
+      ],
+      "optionsHi": [
+        "राष्ट्रपति",
+        "प्रधानमंत्री",
+        "उपराष्ट्रपति",
+        "लोकसभा अध्यक्ष"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Vice-President of India serves as the ex-officio Chairman of the Rajya Sabha.",
+      "explanationHi": "भारत के उपराष्ट्रपति राज्यसभा के पदेन सभापति होते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-008",
+      "subject": "constitution-polity",
+      "questionEn": "Which Constitutional Amendment lowered the voting age from 21 to 18?",
+      "questionHi": "किस संविधान संशोधन ने मतदान की आयु 21 से घटाकर 18 वर्ष की?",
+      "optionsEn": [
+        "42nd",
+        "44th",
+        "61st",
+        "73rd"
+      ],
+      "optionsHi": [
+        "42वाँ",
+        "44वाँ",
+        "61वाँ",
+        "73वाँ"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The 61st Constitutional Amendment Act, 1988 lowered the voting age to 18.",
+      "explanationHi": "61वें संविधान संशोधन अधिनियम, 1988 ने मतदान की आयु 18 वर्ष की।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-009",
+      "subject": "constitution-polity",
+      "questionEn": "Which body conducts elections to Parliament and State Legislatures?",
+      "questionHi": "संसद और राज्य विधानमंडलों के चुनाव कौन कराता है?",
+      "optionsEn": [
+        "Union Public Service Commission",
+        "Election Commission of India",
+        "Finance Commission",
+        "NITI Aayog"
+      ],
+      "optionsHi": [
+        "संघ लोक सेवा आयोग",
+        "भारत निर्वाचन आयोग",
+        "वित्त आयोग",
+        "नीति आयोग"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Election Commission of India supervises elections under Article 324.",
+      "explanationHi": "अनुच्छेद 324 के अंतर्गत भारत निर्वाचन आयोग चुनावों का अधीक्षण करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-010",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article provides for the Finance Commission?",
+      "questionHi": "वित्त आयोग का प्रावधान किस अनुच्छेद में है?",
+      "optionsEn": [
+        "Article 148",
+        "Article 280",
+        "Article 324",
+        "Article 356"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 148",
+        "अनुच्छेद 280",
+        "अनुच्छेद 324",
+        "अनुच्छेद 356"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Article 280 provides for the Finance Commission.",
+      "explanationHi": "अनुच्छेद 280 वित्त आयोग का प्रावधान करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-011",
+      "subject": "constitution-polity",
+      "questionEn": "Which Schedule contains the Union, State and Concurrent Lists?",
+      "questionHi": "संघ, राज्य और समवर्ती सूचियाँ किस अनुसूची में हैं?",
+      "optionsEn": [
+        "Fifth Schedule",
+        "Seventh Schedule",
+        "Eighth Schedule",
+        "Tenth Schedule"
+      ],
+      "optionsHi": [
+        "पाँचवीं अनुसूची",
+        "सातवीं अनुसूची",
+        "आठवीं अनुसूची",
+        "दसवीं अनुसूची"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Seventh Schedule distributes legislative subjects among the Union, States and Concurrent List.",
+      "explanationHi": "सातवीं अनुसूची संघ, राज्य और समवर्ती सूचियों के विषयों का विभाजन करती है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-012",
+      "subject": "constitution-polity",
+      "questionEn": "Which amendment added Fundamental Duties to the Constitution?",
+      "questionHi": "किस संशोधन ने संविधान में मौलिक कर्तव्य जोड़े?",
+      "optionsEn": [
+        "24th Amendment",
+        "42nd Amendment",
+        "44th Amendment",
+        "52nd Amendment"
+      ],
+      "optionsHi": [
+        "24वाँ संशोधन",
+        "42वाँ संशोधन",
+        "44वाँ संशोधन",
+        "52वाँ संशोधन"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The 42nd Constitutional Amendment Act, 1976 added Fundamental Duties.",
+      "explanationHi": "42वें संविधान संशोधन अधिनियम, 1976 द्वारा मौलिक कर्तव्य जोड़े गए।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-013",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article deals with the abolition of untouchability?",
+      "questionHi": "अस्पृश्यता के उन्मूलन से कौन-सा अनुच्छेद संबंधित है?",
+      "optionsEn": [
+        "Article 14",
+        "Article 16",
+        "Article 17",
+        "Article 18"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 14",
+        "अनुच्छेद 16",
+        "अनुच्छेद 17",
+        "अनुच्छेद 18"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Article 17 abolishes untouchability and forbids its practice in any form.",
+      "explanationHi": "अनुच्छेद 17 अस्पृश्यता का उन्मूलन करता है और इसके किसी भी रूप में व्यवहार को निषिद्ध करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-014",
+      "subject": "constitution-polity",
+      "questionEn": "Who presides over a joint sitting of both Houses of Parliament?",
+      "questionHi": "संसद के दोनों सदनों की संयुक्त बैठक की अध्यक्षता कौन करता है?",
+      "optionsEn": [
+        "President",
+        "Vice-President",
+        "Speaker of Lok Sabha",
+        "Leader of the House"
+      ],
+      "optionsHi": [
+        "राष्ट्रपति",
+        "उपराष्ट्रपति",
+        "लोकसभा अध्यक्ष",
+        "सदन के नेता"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Speaker of the Lok Sabha presides over a joint sitting of Parliament.",
+      "explanationHi": "संसद की संयुक्त बैठक की अध्यक्षता लोकसभा अध्यक्ष करते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-015",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article provides for the office of the Comptroller and Auditor General of India?",
+      "questionHi": "भारत के नियंत्रक एवं महालेखा परीक्षक के पद का प्रावधान किस अनुच्छेद में है?",
+      "optionsEn": [
+        "Article 76",
+        "Article 148",
+        "Article 165",
+        "Article 280"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 76",
+        "अनुच्छेद 148",
+        "अनुच्छेद 165",
+        "अनुच्छेद 280"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Article 148 establishes the office of the Comptroller and Auditor General of India.",
+      "explanationHi": "अनुच्छेद 148 भारत के नियंत्रक एवं महालेखा परीक्षक के पद का प्रावधान करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-016",
+      "subject": "constitution-polity",
+      "questionEn": "Which amendment gave constitutional status to Panchayati Raj institutions?",
+      "questionHi": "किस संशोधन ने पंचायती राज संस्थाओं को संवैधानिक दर्जा दिया?",
+      "optionsEn": [
+        "42nd",
+        "52nd",
+        "73rd",
+        "74th"
+      ],
+      "optionsHi": [
+        "42वाँ",
+        "52वाँ",
+        "73वाँ",
+        "74वाँ"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The 73rd Amendment Act, 1992 added Part IX concerning Panchayats.",
+      "explanationHi": "73वें संशोधन अधिनियम, 1992 ने पंचायतों से संबंधित भाग IX जोड़ा।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-017",
+      "subject": "constitution-polity",
+      "questionEn": "Which amendment gave constitutional status to municipalities?",
+      "questionHi": "किस संशोधन ने नगरपालिकाओं को संवैधानिक दर्जा दिया?",
+      "optionsEn": [
+        "61st",
+        "73rd",
+        "74th",
+        "86th"
+      ],
+      "optionsHi": [
+        "61वाँ",
+        "73वाँ",
+        "74वाँ",
+        "86वाँ"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The 74th Amendment Act, 1992 added Part IXA concerning municipalities.",
+      "explanationHi": "74वें संशोधन अधिनियम, 1992 ने नगरपालिकाओं से संबंधित भाग IXA जोड़ा।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-018",
+      "subject": "constitution-polity",
+      "questionEn": "How many languages are currently listed in the Eighth Schedule of the Constitution?",
+      "questionHi": "संविधान की आठवीं अनुसूची में वर्तमान में कितनी भाषाएँ सूचीबद्ध हैं?",
+      "optionsEn": [
+        "18",
+        "20",
+        "22",
+        "24"
+      ],
+      "optionsHi": [
+        "18",
+        "20",
+        "22",
+        "24"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Eighth Schedule currently lists 22 languages.",
+      "explanationHi": "आठवीं अनुसूची में वर्तमान में 22 भाषाएँ सूचीबद्ध हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-019",
+      "subject": "constitution-polity",
+      "questionEn": "Who has the power to promulgate ordinances when Parliament is not in session?",
+      "questionHi": "संसद का सत्र न होने पर अध्यादेश जारी करने की शक्ति किसके पास है?",
+      "optionsEn": [
+        "Prime Minister",
+        "President",
+        "Chief Justice of India",
+        "Lok Sabha Speaker"
+      ],
+      "optionsHi": [
+        "प्रधानमंत्री",
+        "राष्ट्रपति",
+        "भारत के मुख्य न्यायाधीश",
+        "लोकसभा अध्यक्ष"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Article 123 empowers the President to promulgate ordinances when both Houses are not in session, subject to constitutional conditions.",
+      "explanationHi": "अनुच्छेद 123 संवैधानिक शर्तों के अधीन संसद के दोनों सदनों का सत्र न होने पर राष्ट्रपति को अध्यादेश जारी करने की शक्ति देता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "polity-020",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article describes the procedure for amending the Constitution?",
+      "questionHi": "संविधान संशोधन की प्रक्रिया किस अनुच्छेद में दी गई है?",
+      "optionsEn": [
+        "Article 352",
+        "Article 356",
+        "Article 368",
+        "Article 370"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 352",
+        "अनुच्छेद 356",
+        "अनुच्छेद 368",
+        "अनुच्छेद 370"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Article 368 lays down the constitutional amendment procedure.",
+      "explanationHi": "अनुच्छेद 368 संविधान संशोधन की प्रक्रिया निर्धारित करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}

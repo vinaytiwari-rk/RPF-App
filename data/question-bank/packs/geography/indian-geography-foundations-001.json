@@ -1,0 +1,421 @@
+{
+  "packId": "indian-geography-foundations-001",
+  "version": 1,
+  "subject": "indian-geography",
+  "category": "general-knowledge",
+  "titleEn": "Indian Geography — Foundations",
+  "titleHi": "भारत का भूगोल — आधारभूत प्रश्न",
+  "descEn": "Bilingual practice questions on Indian rivers, landforms, soils and states.",
+  "descHi": "भारतीय नदियों, स्थलरूपों, मिट्टी और राज्यों पर हिंदी-अंग्रेज़ी अभ्यास प्रश्न।",
+  "iconName": "BookOpen",
+  "color": "from-emerald-600 to-teal-700",
+  "badge": "Foundational pack",
+  "durationMinutes": 10,
+  "questions": [
+    {
+      "id": "geo-001",
+      "subject": "indian-geography",
+      "questionEn": "Which is the largest Indian state by area?",
+      "questionHi": "क्षेत्रफल की दृष्टि से भारत का सबसे बड़ा राज्य कौन-सा है?",
+      "optionsEn": [
+        "Madhya Pradesh",
+        "Maharashtra",
+        "Rajasthan",
+        "Uttar Pradesh"
+      ],
+      "optionsHi": [
+        "मध्य प्रदेश",
+        "महाराष्ट्र",
+        "राजस्थान",
+        "उत्तर प्रदेश"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Rajasthan is India's largest state by area.",
+      "explanationHi": "क्षेत्रफल की दृष्टि से राजस्थान भारत का सबसे बड़ा राज्य है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-002",
+      "subject": "indian-geography",
+      "questionEn": "Which is the longest river that flows entirely within India?",
+      "questionHi": "पूरी तरह भारत में बहने वाली सबसे लंबी नदी कौन-सी है?",
+      "optionsEn": [
+        "Godavari",
+        "Narmada",
+        "Kaveri",
+        "Mahanadi"
+      ],
+      "optionsHi": [
+        "गोदावरी",
+        "नर्मदा",
+        "कावेरी",
+        "महानदी"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Godavari is commonly described as the longest river flowing entirely within India.",
+      "explanationHi": "गोदावरी को सामान्यतः पूरी तरह भारत में बहने वाली सबसे लंबी नदी माना जाता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-003",
+      "subject": "indian-geography",
+      "questionEn": "Which Indian state has the longest coastline?",
+      "questionHi": "भारत में सबसे लंबी तटरेखा किस राज्य की है?",
+      "optionsEn": [
+        "Tamil Nadu",
+        "Andhra Pradesh",
+        "Gujarat",
+        "Kerala"
+      ],
+      "optionsHi": [
+        "तमिलनाडु",
+        "आंध्र प्रदेश",
+        "गुजरात",
+        "केरल"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Gujarat has the longest coastline among Indian states.",
+      "explanationHi": "भारतीय राज्यों में गुजरात की तटरेखा सबसे लंबी है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-004",
+      "subject": "indian-geography",
+      "questionEn": "The Tropic of Cancer passes through how many Indian states?",
+      "questionHi": "कर्क रेखा भारत के कितने राज्यों से होकर गुजरती है?",
+      "optionsEn": [
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "optionsHi": [
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Tropic of Cancer crosses eight Indian states.",
+      "explanationHi": "कर्क रेखा भारत के आठ राज्यों से होकर गुजरती है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-005",
+      "subject": "indian-geography",
+      "questionEn": "Which is the highest mountain peak located entirely within India?",
+      "questionHi": "पूरी तरह भारत में स्थित सबसे ऊँची पर्वत चोटी कौन-सी है?",
+      "optionsEn": [
+        "Nanda Devi",
+        "Kangchenjunga",
+        "Anamudi",
+        "Kamet"
+      ],
+      "optionsHi": [
+        "नंदा देवी",
+        "कंचनजंघा",
+        "अनामुडी",
+        "कामेत"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Nanda Devi is the highest peak located wholly within India; Kangchenjunga lies on the India–Nepal border.",
+      "explanationHi": "पूरी तरह भारत में स्थित सबसे ऊँची चोटी नंदा देवी है; कंचनजंघा भारत-नेपाल सीमा पर है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-006",
+      "subject": "indian-geography",
+      "questionEn": "Which soil type is especially associated with cotton cultivation in India?",
+      "questionHi": "भारत में कपास की खेती के लिए कौन-सी मिट्टी विशेष रूप से उपयुक्त मानी जाती है?",
+      "optionsEn": [
+        "Laterite soil",
+        "Black soil",
+        "Mountain soil",
+        "Desert soil"
+      ],
+      "optionsHi": [
+        "लैटेराइट मिट्टी",
+        "काली मिट्टी",
+        "पर्वतीय मिट्टी",
+        "मरुस्थलीय मिट्टी"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Black soil retains moisture and is traditionally associated with cotton cultivation.",
+      "explanationHi": "काली मिट्टी नमी बनाए रखती है और परंपरागत रूप से कपास की खेती से जुड़ी है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-007",
+      "subject": "indian-geography",
+      "questionEn": "Which Indian state is known as the leading producer of tea?",
+      "questionHi": "भारत में चाय के प्रमुख उत्पादक राज्य के रूप में कौन-सा राज्य प्रसिद्ध है?",
+      "optionsEn": [
+        "Assam",
+        "Punjab",
+        "Rajasthan",
+        "Haryana"
+      ],
+      "optionsHi": [
+        "असम",
+        "पंजाब",
+        "राजस्थान",
+        "हरियाणा"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Assam is one of India's major tea-producing states and is widely known for tea production.",
+      "explanationHi": "असम भारत के प्रमुख चाय उत्पादक राज्यों में से एक है और चाय उत्पादन के लिए प्रसिद्ध है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-008",
+      "subject": "indian-geography",
+      "questionEn": "The Sundarbans delta is formed mainly by which river system?",
+      "questionHi": "सुंदरबन डेल्टा मुख्यतः किस नदी तंत्र से बना है?",
+      "optionsEn": [
+        "Indus system",
+        "Ganga–Brahmaputra–Meghna system",
+        "Godavari–Krishna system",
+        "Narmada–Tapti system"
+      ],
+      "optionsHi": [
+        "सिंधु तंत्र",
+        "गंगा–ब्रह्मपुत्र–मेघना तंत्र",
+        "गोदावरी–कृष्णा तंत्र",
+        "नर्मदा–ताप्ती तंत्र"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Sundarbans form part of the vast Ganga–Brahmaputra–Meghna delta.",
+      "explanationHi": "सुंदरबन विशाल गंगा–ब्रह्मपुत्र–मेघना डेल्टा का हिस्सा है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-009",
+      "subject": "indian-geography",
+      "questionEn": "Which Indian state has the largest area of mangrove cover?",
+      "questionHi": "भारत में मैंग्रोव वन क्षेत्र सबसे अधिक किस राज्य में है?",
+      "optionsEn": [
+        "Odisha",
+        "West Bengal",
+        "Gujarat",
+        "Andhra Pradesh"
+      ],
+      "optionsHi": [
+        "ओडिशा",
+        "पश्चिम बंगाल",
+        "गुजरात",
+        "आंध्र प्रदेश"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "West Bengal contains the largest share of India's mangrove cover, including the Sundarbans.",
+      "explanationHi": "सुंदरबन सहित भारत के मैंग्रोव वन क्षेत्र का सबसे बड़ा हिस्सा पश्चिम बंगाल में है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-010",
+      "subject": "indian-geography",
+      "questionEn": "Which river is known as the 'Dakshin Ganga' or Ganga of the South?",
+      "questionHi": "किस नदी को 'दक्षिण गंगा' कहा जाता है?",
+      "optionsEn": [
+        "Krishna",
+        "Kaveri",
+        "Godavari",
+        "Tungabhadra"
+      ],
+      "optionsHi": [
+        "कृष्णा",
+        "कावेरी",
+        "गोदावरी",
+        "तुंगभद्रा"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Godavari is often called the Dakshin Ganga because of its length and importance in peninsular India.",
+      "explanationHi": "लंबाई और प्रायद्वीपीय भारत में महत्व के कारण गोदावरी को अक्सर दक्षिण गंगा कहा जाता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-011",
+      "subject": "indian-geography",
+      "questionEn": "Which Indian state is the largest producer of coffee?",
+      "questionHi": "भारत में कॉफी का सबसे बड़ा उत्पादक राज्य कौन-सा है?",
+      "optionsEn": [
+        "Kerala",
+        "Tamil Nadu",
+        "Karnataka",
+        "Telangana"
+      ],
+      "optionsHi": [
+        "केरल",
+        "तमिलनाडु",
+        "कर्नाटक",
+        "तेलंगाना"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Karnataka is India's leading coffee-producing state.",
+      "explanationHi": "कर्नाटक भारत का प्रमुख कॉफी उत्पादक राज्य है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-012",
+      "subject": "indian-geography",
+      "questionEn": "Which desert lies mainly in western Rajasthan?",
+      "questionHi": "पश्चिमी राजस्थान में मुख्य रूप से कौन-सा मरुस्थल स्थित है?",
+      "optionsEn": [
+        "Sahara",
+        "Gobi",
+        "Thar",
+        "Kalahari"
+      ],
+      "optionsHi": [
+        "सहारा",
+        "गोबी",
+        "थार",
+        "कालाहारी"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Thar Desert extends across western Rajasthan and into neighbouring Pakistan.",
+      "explanationHi": "थार मरुस्थल पश्चिमी राजस्थान से होकर पड़ोसी पाकिस्तान तक फैला है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-013",
+      "subject": "indian-geography",
+      "questionEn": "Which Indian river flows through a rift valley between the Vindhya and Satpura ranges?",
+      "questionHi": "विंध्य और सतपुड़ा पर्वतमालाओं के बीच भ्रंश घाटी से कौन-सी नदी बहती है?",
+      "optionsEn": [
+        "Yamuna",
+        "Narmada",
+        "Ganga",
+        "Brahmaputra"
+      ],
+      "optionsHi": [
+        "यमुना",
+        "नर्मदा",
+        "गंगा",
+        "ब्रह्मपुत्र"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Narmada flows westward through a rift valley between the Vindhya and Satpura ranges.",
+      "explanationHi": "नर्मदा विंध्य और सतपुड़ा पर्वतमालाओं के बीच भ्रंश घाटी से पश्चिम की ओर बहती है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-014",
+      "subject": "indian-geography",
+      "questionEn": "Which Indian state is the largest by population according to the 2011 Census?",
+      "questionHi": "2011 की जनगणना के अनुसार जनसंख्या में भारत का सबसे बड़ा राज्य कौन-सा था?",
+      "optionsEn": [
+        "Bihar",
+        "Maharashtra",
+        "Uttar Pradesh",
+        "West Bengal"
+      ],
+      "optionsHi": [
+        "बिहार",
+        "महाराष्ट्र",
+        "उत्तर प्रदेश",
+        "पश्चिम बंगाल"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Uttar Pradesh had the largest population among Indian states in the 2011 Census.",
+      "explanationHi": "2011 की जनगणना में उत्तर प्रदेश की जनसंख्या भारतीय राज्यों में सबसे अधिक थी।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "geo-015",
+      "subject": "indian-geography",
+      "questionEn": "Which ocean lies to the south of India?",
+      "questionHi": "भारत के दक्षिण में कौन-सा महासागर स्थित है?",
+      "optionsEn": [
+        "Atlantic Ocean",
+        "Arctic Ocean",
+        "Indian Ocean",
+        "Pacific Ocean"
+      ],
+      "optionsHi": [
+        "अटलांटिक महासागर",
+        "आर्कटिक महासागर",
+        "हिंद महासागर",
+        "प्रशांत महासागर"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Indian Ocean lies to the south of the Indian subcontinent.",
+      "explanationHi": "भारतीय उपमहाद्वीप के दक्षिण में हिंद महासागर स्थित है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}

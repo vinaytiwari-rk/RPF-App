@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "policy": {
+    "storeArticleText": false,
+    "storeHeadlinesOrExcerptsAsQuestions": false,
+    "requireOriginalQuestionWording": true,
+    "requireFactCheckForCurrentAffairs": true,
+    "note": "Use publisher pages as discovery and attribution references. Write original questions from independently verified facts. Do not bulk-copy or redistribute publisher RSS/article content without the relevant permission or licence."
+  },
+  "sources": [
+    {
+      "id": "pib",
+      "name": "Press Information Bureau (PIB)",
+      "url": "https://pib.gov.in/",
+      "feedUrl": "https://pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=1",
+      "role": "primary_official_fact_check",
+      "currentAffairs": true,
+      "automatedMetadataFetch": true,
+      "contentReuse": "Use official releases to verify facts; write original questions and retain attribution URL."
+    },
+    {
+      "id": "sarkaritel",
+      "name": "SarkariTel",
+      "url": "https://www.sarkaritel.com/",
+      "feedUrl": null,
+      "role": "discovery_and_secondary_cross_check",
+      "currentAffairs": true,
+      "automatedMetadataFetch": false,
+      "contentReuse": "Manual source review until an official feed/API and reuse terms are confirmed."
+    },
+    {
+      "id": "drishti_ias",
+      "name": "Drishti IAS",
+      "url": "https://www.drishtiias.com/",
+      "feedUrl": "https://www.drishtiias.com/rss.rss",
+      "hindiFeedUrl": "https://www.drishtiias.com/hindi/rss.rss",
+      "role": "discovery_and_secondary_cross_check",
+      "currentAffairs": true,
+      "automatedMetadataFetch": true,
+      "contentReuse": "Use links for discovery; independently verify factual claims and write original questions."
+    },
+    {
+      "id": "the_hindu",
+      "name": "The Hindu",
+      "url": "https://www.thehindu.com/",
+      "feedUrl": "https://www.thehindu.com/feeder/default.rss",
+      "role": "news_discovery_and_secondary_cross_check",
+      "currentAffairs": true,
+      "automatedMetadataFetch": false,
+      "contentReuse": "Feed/content reuse terms must be checked before automated ingestion or redistribution; use article URLs as references only until approved."
+    },
+    {
+      "id": "times_of_india",
+      "name": "The Times of India",
+      "url": "https://timesofindia.indiatimes.com/",
+      "feedUrl": "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
+      "role": "news_discovery_and_secondary_cross_check",
+      "currentAffairs": true,
+      "automatedMetadataFetch": false,
+      "contentReuse": "TOI RSS terms restrict redistribution and commercial use. Do not ingest/store/re-publish feed content without written permission/licence. Use independently verified facts and link to sources."
+    }
+  ]
+}

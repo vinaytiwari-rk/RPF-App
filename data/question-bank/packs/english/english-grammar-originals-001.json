@@ -1,0 +1,233 @@
+{
+  "packId": "english-grammar-originals-001",
+  "version": 1,
+  "subject": "english-grammar",
+  "category": "general-knowledge",
+  "titleEn": "English Grammar & Vocabulary — Original Practice Set 001",
+  "titleHi": "अंग्रेज़ी व्याकरण एवं शब्दावली — मौलिक अभ्यास सेट 001",
+  "descEn": "Original bilingual grammar and vocabulary practice for competitive exams.",
+  "descHi": "प्रतियोगी परीक्षाओं के लिए मौलिक द्विभाषी अंग्रेज़ी व्याकरण और शब्दावली अभ्यास।",
+  "iconName": "Languages",
+  "color": "from-violet-600 to-purple-700",
+  "badge": "Original practice",
+  "durationMinutes": 10,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "english-grammar-001",
+      "subject": "english-grammar",
+      "questionEn": "Choose the correctly spelled word.",
+      "questionHi": "सही वर्तनी वाला शब्द चुनें।",
+      "optionsEn": [
+        "Accomodation",
+        "Accommodation",
+        "Acommodation",
+        "Accommadation"
+      ],
+      "optionsHi": [
+        "Accomodation",
+        "Accommodation",
+        "Acommodation",
+        "Accommadation"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Accommodation is spelled with double c and double m.",
+      "explanationHi": "Accommodation की सही वर्तनी में double c और double m आते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "english-grammar-002",
+      "subject": "english-grammar",
+      "questionEn": "Choose the antonym of “ancient”.",
+      "questionHi": "“Ancient” का विलोम चुनें।",
+      "optionsEn": [
+        "Old",
+        "Antique",
+        "Modern",
+        "Historic"
+      ],
+      "optionsHi": [
+        "पुराना",
+        "प्राचीन",
+        "आधुनिक",
+        "ऐतिहासिक"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Modern means relating to the present or recent times; it contrasts with ancient.",
+      "explanationHi": "Modern का अर्थ वर्तमान या हाल के समय से संबंधित है; यह ancient का विलोम है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "english-grammar-003",
+      "subject": "english-grammar",
+      "questionEn": "Select the correct verb: “She ___ to work every day.”",
+      "questionHi": "सही क्रिया चुनें: “She ___ to work every day.”",
+      "optionsEn": [
+        "go",
+        "going",
+        "goes",
+        "gone"
+      ],
+      "optionsHi": [
+        "go",
+        "going",
+        "goes",
+        "gone"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "With third-person singular subject “she” in the simple present, use “goes.”",
+      "explanationHi": "Simple present में third-person singular “she” के साथ “goes” आता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "english-grammar-004",
+      "subject": "english-grammar",
+      "questionEn": "Choose the synonym of “brief”.",
+      "questionHi": "“Brief” का समानार्थी शब्द चुनें।",
+      "optionsEn": [
+        "Lengthy",
+        "Concise",
+        "Complex",
+        "Unclear"
+      ],
+      "optionsHi": [
+        "लंबा",
+        "संक्षिप्त",
+        "जटिल",
+        "अस्पष्ट"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Concise means short and expressing much in few words.",
+      "explanationHi": "Concise का अर्थ कम शब्दों में संक्षिप्त रूप से कहना है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "english-grammar-005",
+      "subject": "english-grammar",
+      "questionEn": "Identify the noun in the sentence: “Honesty is valued.”",
+      "questionHi": "वाक्य में संज्ञा पहचानें: “Honesty is valued.”",
+      "optionsEn": [
+        "is",
+        "valued",
+        "Honesty",
+        "None"
+      ],
+      "optionsHi": [
+        "is",
+        "valued",
+        "Honesty",
+        "कोई नहीं"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Honesty is an abstract noun naming a quality.",
+      "explanationHi": "Honesty एक भाववाचक संज्ञा है, जो गुण का नाम बताती है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "english-grammar-006",
+      "subject": "english-grammar",
+      "questionEn": "Choose the correct article: “He is ___ honest person.”",
+      "questionHi": "सही article चुनें: “He is ___ honest person.”",
+      "optionsEn": [
+        "a",
+        "an",
+        "the",
+        "no article"
+      ],
+      "optionsHi": [
+        "a",
+        "an",
+        "the",
+        "कोई article नहीं"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Use “an” before a vowel sound; the h in honest is silent.",
+      "explanationHi": "honest में h मौन है और शुरुआत स्वर-ध्वनि से होती है, इसलिए “an” आएगा।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "english-grammar-007",
+      "subject": "english-grammar",
+      "questionEn": "Choose the correct passive form: “The chef prepared the meal.”",
+      "questionHi": "सही passive form चुनें: “The chef prepared the meal.”",
+      "optionsEn": [
+        "The meal prepared the chef.",
+        "The meal was prepared by the chef.",
+        "The meal is prepare by chef.",
+        "The chef was prepared by the meal."
+      ],
+      "optionsHi": [
+        "The meal prepared the chef.",
+        "The meal was prepared by the chef.",
+        "The meal is prepare by chef.",
+        "The chef was prepared by the meal."
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Simple past active changes to was/were + past participle in passive voice.",
+      "explanationHi": "Simple past passive में was/were + past participle प्रयोग होता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "english-grammar-008",
+      "subject": "english-grammar",
+      "questionEn": "Choose the correctly punctuated sentence.",
+      "questionHi": "सही विराम-चिह्न वाला वाक्य चुनें।",
+      "optionsEn": [
+        "Lets eat, children.",
+        "Let's eat children.",
+        "Lets eat children!",
+        "Let's eat, children."
+      ],
+      "optionsHi": [
+        "Lets eat, children.",
+        "Let's eat children.",
+        "Lets eat children!",
+        "Let's eat, children."
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The apostrophe marks the contraction “Let's,” and the comma addresses “children.”",
+      "explanationHi": "Let's में apostrophe लगता है और बच्चों को संबोधित करने के लिए comma आता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
