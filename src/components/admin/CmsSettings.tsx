@@ -35,14 +35,14 @@ const mergeRadioDefaults = (configured: unknown): RadioStation[] => {
   const merged = new Map<string, RadioStation>();
   RADIO_DEFAULTS.forEach((station, index) => {
     const key = normalizeRadioName(station.name);
-    if (key && /^https?:\\/\\//i.test(station.url || "")) {
+    if (key && (station.url?.startsWith("http://") || station.url?.startsWith("https://"))) {
       merged.set(key, { ...station, order: station.order ?? index, enabled: station.enabled !== false });
     }
   });
   if (Array.isArray(configured)) {
     configured.forEach((value: any, index) => {
       if (!value || typeof value.name !== "string" || !value.name.trim() ||
-          typeof value.url !== "string" || !/^https?:\\/\\//i.test(value.url)) return;
+          typeof value.url !== "string" || !(value.url.startsWith("http://") || value.url.startsWith("https://"))) return;
       const key = normalizeRadioName(value.name);
       const existing = merged.get(key);
       merged.set(key, { ...existing, ...value, order: value.order ?? existing?.order ?? RADIO_DEFAULTS.length + index, enabled: value.enabled !== false });
