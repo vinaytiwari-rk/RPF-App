@@ -296,6 +296,50 @@ function ToolEngineDispatcher({
       return <DeveloperTextToolsEngine mode="html" isHi={isHi} copyToClipboard={copyToClipboard} />;
     case "uuid_generator":
       return <DeveloperTextToolsEngine mode="uuid" isHi={isHi} copyToClipboard={copyToClipboard} />;
+    case "case_converter": return <ExtraUtilityEngine mode="case_converter" isHi={isHi} />;
+    case "whitespace_cleaner": return <ExtraUtilityEngine mode="whitespace_cleaner" isHi={isHi} />;
+    case "line_sorter": return <ExtraUtilityEngine mode="line_sorter" isHi={isHi} />;
+    case "duplicate_line_remover": return <ExtraUtilityEngine mode="duplicate_line_remover" isHi={isHi} />;
+    case "text_reverse": return <ExtraUtilityEngine mode="text_reverse" isHi={isHi} />;
+    case "slug_generator": return <ExtraUtilityEngine mode="slug_generator" isHi={isHi} />;
+    case "url_parser": return <ExtraUtilityEngine mode="url_parser" isHi={isHi} />;
+    case "query_string_parser": return <ExtraUtilityEngine mode="query_string_parser" isHi={isHi} />;
+    case "regex_tester": return <ExtraUtilityEngine mode="regex_tester" isHi={isHi} />;
+    case "timestamp_converter": return <ExtraUtilityEngine mode="timestamp_converter" isHi={isHi} />;
+    case "date_to_timestamp": return <ExtraUtilityEngine mode="date_to_timestamp" isHi={isHi} />;
+    case "color_converter": return <ExtraUtilityEngine mode="color_converter" isHi={isHi} />;
+    case "password_generator": return <ExtraUtilityEngine mode="password_generator" isHi={isHi} />;
+    case "hash_generator": return <ExtraUtilityEngine mode="hash_generator" isHi={isHi} />;
+    case "csv_json_converter": return <ExtraUtilityEngine mode="csv_json_converter" isHi={isHi} />;
+    case "json_csv_converter": return <ExtraUtilityEngine mode="json_csv_converter" isHi={isHi} />;
+    case "xml_escape": return <ExtraUtilityEngine mode="xml_escape" isHi={isHi} />;
+    case "unicode_inspector": return <ExtraUtilityEngine mode="unicode_inspector" isHi={isHi} />;
+    case "number_base_converter": return <ExtraUtilityEngine mode="number_base_converter" isHi={isHi} />;
+    case "percentage_calculator": return <ExtraUtilityEngine mode="percentage_calculator" isHi={isHi} />;
+    case "date_difference": return <ExtraUtilityEngine mode="date_difference" isHi={isHi} />;
+    case "age_calculator": return <ExtraUtilityEngine mode="age_calculator" isHi={isHi} />;
+    case "tip_calculator": return <ExtraUtilityEngine mode="tip_calculator" isHi={isHi} />;
+    case "loan_payment_calculator": return <ExtraUtilityEngine mode="loan_payment_calculator" isHi={isHi} />;
+    case "unit_length_converter": return <ExtraUtilityEngine mode="unit_length_converter" isHi={isHi} />;
+    case "unit_weight_converter": return <ExtraUtilityEngine mode="unit_weight_converter" isHi={isHi} />;
+    case "unit_temperature_converter": return <ExtraUtilityEngine mode="unit_temperature_converter" isHi={isHi} />;
+    case "word_counter": return <ExtraUtilityEngine mode="word_counter" isHi={isHi} />;
+    case "text_diff": return <ExtraUtilityEngine mode="text_diff" isHi={isHi} />;
+    case "random_number_generator": return <ExtraUtilityEngine mode="random_number_generator" isHi={isHi} />;
+    case "random_picker": return <ExtraUtilityEngine mode="random_picker" isHi={isHi} />;
+    case "password_strength_checker": return <ExtraUtilityEngine mode="password_strength_checker" isHi={isHi} />;
+    case "json_path_extractor": return <ExtraUtilityEngine mode="json_path_extractor" isHi={isHi} />;
+    case "markdown_table_generator": return <ExtraUtilityEngine mode="markdown_table_generator" isHi={isHi} />;
+    case "csv_delimiter_converter": return <ExtraUtilityEngine mode="csv_delimiter_converter" isHi={isHi} />;
+    case "date_add_subtract": return <ExtraUtilityEngine mode="date_add_subtract" isHi={isHi} />;
+    case "business_days_calculator": return <ExtraUtilityEngine mode="business_days_calculator" isHi={isHi} />;
+    case "unit_area_converter": return <ExtraUtilityEngine mode="unit_area_converter" isHi={isHi} />;
+    case "unit_volume_converter": return <ExtraUtilityEngine mode="unit_volume_converter" isHi={isHi} />;
+    case "unit_speed_converter": return <ExtraUtilityEngine mode="unit_speed_converter" isHi={isHi} />;
+    case "data_size_converter": return <ExtraUtilityEngine mode="data_size_converter" isHi={isHi} />;
+    case "discount_calculator": return <ExtraUtilityEngine mode="discount_calculator" isHi={isHi} />;
+    case "compound_interest_calculator": return <ExtraUtilityEngine mode="compound_interest_calculator" isHi={isHi} />;
+    case "random_team_splitter": return <ExtraUtilityEngine mode="random_team_splitter" isHi={isHi} />;
 
     default:
       return (
@@ -3751,3 +3795,77 @@ function JsonFormatterEngine({ isHi, copyToClipboard }: { isHi: boolean; copyToC
     </div>
   );
 }
+
+
+function ExtraUtilityEngine({ mode, isHi }: { mode: string; isHi: boolean }) {
+  const [input,setInput]=useState("");
+  const [output,setOutput]=useState("");
+  const [secondInput,setSecondInput]=useState("");
+  const [error,setError]=useState("");
+  const [reverse,setReverse]=useState(false);
+  const [length,setLength]=useState(20);
+  const names:Record<string,[string,string]> = {
+    case_converter:["Text Case Converter","टेक्स्ट केस कन्वर्टर"],whitespace_cleaner:["Whitespace Cleaner","स्पेस क्लीनर"],line_sorter:["Line Sorter","लाइन क्रमबद्ध करें"],duplicate_line_remover:["Duplicate Line Remover","डुप्लिकेट लाइन हटाएँ"],text_reverse:["Text Reverser","टेक्स्ट उल्टा करें"],slug_generator:["URL Slug Generator","URL स्लग जनरेटर"],url_parser:["URL Parser","URL पार्सर"],query_string_parser:["Query String Parser","Query String पार्सर"],regex_tester:["Regex Tester","Regex टेस्टर"],timestamp_converter:["Unix Timestamp Converter","Unix Timestamp कन्वर्टर"],date_to_timestamp:["Date to Unix Timestamp","तारीख से Unix Timestamp"],color_converter:["HEX/RGB Color Converter","HEX/RGB रंग कन्वर्टर"],password_generator:["Secure Password Generator","पासवर्ड जनरेटर"],word_counter:["Word & Character Counter","शब्द व अक्षर गणक"],text_diff:["Text Difference Checker","टेक्स्ट अंतर जाँचें"],random_number_generator:["Random Number Generator","रैंडम संख्या जनरेटर"],random_picker:["Random Name Picker","रैंडम नाम चुनें"],password_strength_checker:["Password Strength Checker","पासवर्ड मजबूती जाँचें"],json_path_extractor:["JSON Path Extractor","JSON Path एक्सट्रैक्टर"],markdown_table_generator:["Markdown Table Generator","Markdown टेबल जनरेटर"],csv_delimiter_converter:["CSV Delimiter Converter","CSV Delimiter कन्वर्टर"],date_add_subtract:["Date Add/Subtract Calculator","तारीख जोड़ें/घटाएँ"],business_days_calculator:["Business Days Calculator","कार्यदिवस गणक"],unit_area_converter:["Area Unit Converter","क्षेत्रफल इकाई कन्वर्टर"],unit_volume_converter:["Volume Unit Converter","आयतन इकाई कन्वर्टर"],unit_speed_converter:["Speed Unit Converter","गति इकाई कन्वर्टर"],data_size_converter:["Data Size Converter","डेटा आकार कन्वर्टर"],discount_calculator:["Discount Calculator","छूट गणक"],compound_interest_calculator:["Compound Interest Calculator","चक्रवृद्धि ब्याज गणक"],random_team_splitter:["Random Team Splitter","रैंडम टीम बाँटें"],hash_generator:["SHA Hash Generator","SHA Hash जनरेटर"],csv_json_converter:["CSV to JSON Converter","CSV से JSON"],json_csv_converter:["JSON to CSV Converter","JSON से CSV"],xml_escape:["XML Escape/Unescape","XML एस्केप टूल"],unicode_inspector:["Unicode Inspector","Unicode निरीक्षक"],number_base_converter:["Number Base Converter","Number Base कन्वर्टर"],percentage_calculator:["Percentage Calculator","प्रतिशत गणक"],date_difference:["Date Difference Calculator","तारीख अंतर गणक"],age_calculator:["Age Calculator","आयु गणक"],tip_calculator:["Tip & Bill Split Calculator","टिप व बिल बाँटें"],loan_payment_calculator:["Loan EMI Calculator","लोन EMI गणक"],unit_length_converter:["Length Unit Converter","लंबाई इकाई कन्वर्टर"],unit_weight_converter:["Weight Unit Converter","वजन इकाई कन्वर्टर"],unit_temperature_converter:["Temperature Converter","तापमान कन्वर्टर"]
+  };
+  const process = async () => {
+    setError(""); setOutput("");
+    try {
+      const lines=input.split(/\r?\n/), p=input.split(",").map(x=>x.trim());
+      let out="";
+      switch(mode) {
+        case "case_converter": out=reverse?input.toLowerCase():input.toUpperCase(); break;
+        case "whitespace_cleaner": out=lines.map(x=>x.trim().replace(/[ \t]+/g," ")).filter((x,i,a)=>x||(i>0&&a[i-1]!=="")).join("\n"); break;
+        case "line_sorter": out=lines.sort((a,b)=>reverse?b.localeCompare(a):a.localeCompare(b)).join("\n"); break;
+        case "duplicate_line_remover": out=Array.from(new Set(lines)).join("\n"); break;
+        case "text_reverse": out=Array.from(input).reverse().join(""); break;
+        case "slug_generator": out=input.normalize("NFKD").toLowerCase().trim().replace(/[^\p{L}\p{N}]+/gu,"-").replace(/^-+|-+$/g,""); break;
+        case "url_parser": {const u=new URL(input.trim());out=JSON.stringify({protocol:u.protocol,host:u.host,path:u.pathname,query:u.search,fragment:u.hash,origin:u.origin},null,2);break;}
+        case "query_string_parser": {const s=input.trim(),q=s.includes("?")?new URL(s).searchParams:new URLSearchParams(s.replace(/^\?/,""));const o:Record<string,string|string[]>={};q.forEach((v,k)=>{if(k in o)o[k]=Array.isArray(o[k])?[...(o[k] as string[]),v]:[o[k] as string,v];else o[k]=v;});out=JSON.stringify(o,null,2);break;}
+        case "regex_tester": {const re=new RegExp(lines[0]||"",lines[1]||"g"),t=lines.slice(2).join("\n"),f=re.flags.includes("g")?re.flags:re.flags+"g";out=JSON.stringify(Array.from(t.matchAll(new RegExp(re.source,f))).map(m=>({match:m[0],index:m.index,groups:m.slice(1)})),null,2);break;}
+        case "timestamp_converter": {const n=Number(input.trim());if(!Number.isFinite(n))throw Error("Enter a timestamp.");const d=new Date(Math.abs(n)<1e12?n*1000:n);if(Number.isNaN(d.getTime()))throw Error("Timestamp out of range.");out="ISO: "+d.toISOString()+"\nLocal: "+d.toString();break;}
+        case "date_to_timestamp": {const d=new Date(input.trim());if(Number.isNaN(d.getTime()))throw Error("Enter a valid date/time.");out="Seconds: "+Math.floor(d.getTime()/1000)+"\nMilliseconds: "+d.getTime()+"\nISO: "+d.toISOString();break;}
+        case "color_converter": {const h=input.trim().match(/^#?([\da-f]{3}|[\da-f]{6})$/i),r=input.trim().match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);if(h){let x=h[1];if(x.length===3)x=x.split("").map(c=>c+c).join("");const n=parseInt(x,16);out="HEX: #"+x.toUpperCase()+"\nRGB: rgb("+(n>>16)+", "+((n>>8)&255)+", "+(n&255)+")";}else if(r){const a=r.slice(1).map(Number);if(a.some(x=>x>255))throw Error("RGB values must be 0–255.");out="HEX: #"+a.map(x=>x.toString(16).padStart(2,"0")).join("").toUpperCase();}else throw Error("Use #RRGGBB or rgb(r, g, b).");break;}
+        case "password_generator": {const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%*-_";const b=new Uint32Array(length);if(!globalThis.crypto?.getRandomValues)throw Error("Secure random generator unavailable.");crypto.getRandomValues(b);out=Array.from(b,x=>chars[x%chars.length]).join("");break;}
+        case "hash_generator": {const b=new TextEncoder().encode(input),hex=(v:ArrayBuffer)=>Array.from(new Uint8Array(v),x=>x.toString(16).padStart(2,"0")).join("");out="SHA-256: "+hex(await crypto.subtle.digest("SHA-256",b))+"\nSHA-1: "+hex(await crypto.subtle.digest("SHA-1",b));break;}
+        case "csv_json_converter": {const rows=input.trim().split(/\r?\n/).map(line=>{const a:string[]=[];let v="",q=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'&&q&&line[i+1]==='"'){v+='"';i++;}else if(c==='"')q=!q;else if(c===","&&!q){a.push(v);v="";}else v+=c;}a.push(v);return a;});if(rows.length<2)throw Error("Include header and data rows.");out=JSON.stringify(rows.slice(1).map(row=>Object.fromEntries(rows[0].map((k,i)=>[k,row[i]||""]))),null,2);break;}
+        case "json_csv_converter": {const d=JSON.parse(input);if(!Array.isArray(d)||d.some(x=>!x||typeof x!=="object"||Array.isArray(x)))throw Error("Input must be an array of objects.");const keys=Array.from(new Set(d.flatMap((x:Record<string,unknown>)=>Object.keys(x))));const q=(v:unknown)=>{const s=typeof v==="string"?v:JSON.stringify(v)??"";return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};out=[keys.map(q).join(","),...d.map((x:Record<string,unknown>)=>keys.map(k=>q(x[k])).join(","))].join("\n");break;}
+        case "xml_escape": out=reverse?input.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,"&"):input.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");break;
+        case "unicode_inspector": out=Array.from(input).map((c,i)=>i+": "+JSON.stringify(c)+" U+"+c.codePointAt(0)!.toString(16).toUpperCase().padStart(4,"0")).join("\n");break;
+        case "number_base_converter": {const base=Number(p[1]||10);if(![2,8,10,16].includes(base))throw Error("Use source base 2, 8, 10, or 16.");const n=parseInt(p[0],base);if(!Number.isSafeInteger(n))throw Error("Enter a valid integer and source base.");out="Binary: "+n.toString(2)+"\nOctal: "+n.toString(8)+"\nDecimal: "+n+"\nHex: "+n.toString(16).toUpperCase();break;}
+        case "percentage_calculator": {const [a,b]=p.map(Number);if(p.length<2||!Number.isFinite(a+b)||b===0)throw Error("Enter value,total.");out=(a/b*100).toFixed(4)+"%";break;}
+        case "date_difference": {const [a,b]=p,x=Date.parse(a+"T00:00:00Z"),y=Date.parse(b+"T00:00:00Z");if(!Number.isFinite(x)||!Number.isFinite(y))throw Error("Use YYYY-MM-DD,YYYY-MM-DD.");out=Math.round(Math.abs(y-x)/86400000)+" days";break;}
+        case "age_calculator": {const d=new Date(input.trim()+"T00:00:00");if(Number.isNaN(d.getTime())||d>new Date())throw Error("Enter past date YYYY-MM-DD.");const n=new Date();let y=n.getFullYear()-d.getFullYear(),m=n.getMonth()-d.getMonth(),day=n.getDate()-d.getDate();if(day<0){m--;day+=new Date(n.getFullYear(),n.getMonth(),0).getDate();}if(m<0){y--;m+=12;}out="Years: "+y+"\nMonths: "+m+"\nDays: "+day;break;}
+        case "tip_calculator": {const [b,t,n]=p.map(Number);if(p.length<3||b<0||t<0||n<1||!Number.isFinite(b+t+n))throw Error("Enter bill,tip%,people.");const tip=b*t/100;out="Tip: "+tip.toFixed(2)+"\nTotal: "+(b+tip).toFixed(2)+"\nEach: "+((b+tip)/n).toFixed(2);break;}
+        case "loan_payment_calculator": {const [a,r,m]=p.map(Number);if(p.length<3||a<=0||r<0||m<1||!Number.isFinite(a+r+m))throw Error("Enter principal,annual-rate,months.");const rate=r/1200,emi=rate===0?a/m:a*rate*Math.pow(1+rate,m)/(Math.pow(1+rate,m)-1);out="Monthly EMI: "+emi.toFixed(2)+"\nTotal: "+(emi*m).toFixed(2)+"\nInterest: "+(emi*m-a).toFixed(2);break;}
+        case "unit_length_converter": {const [v,f,t]=p,u:Record<string,number>={mm:.001,cm:.01,m:1,km:1000,in:.0254,inch:.0254,ft:.3048,feet:.3048,yd:.9144,mile:1609.344},n=Number(v);if(!Number.isFinite(n)||!u[f?.toLowerCase()]||!u[t?.toLowerCase()])throw Error("Use value,from,to (mm cm m km in ft yd mile).");out=String(n*u[f.toLowerCase()]/u[t.toLowerCase()]);break;}
+        case "unit_weight_converter": {const [v,f,t]=p,u:Record<string,number>={mg:.000001,g:.001,kg:1,oz:.028349523125,lb:.45359237},n=Number(v);if(!Number.isFinite(n)||!u[f?.toLowerCase()]||!u[t?.toLowerCase()])throw Error("Use value,from,to (mg g kg oz lb).");out=String(n*u[f.toLowerCase()]/u[t.toLowerCase()]);break;}
+        case "unit_temperature_converter": {const [v,f,t]=p,n=Number(v),a=f?.toUpperCase(),b=t?.toUpperCase();if(!Number.isFinite(n)||!["C","F","K"].includes(a)||!["C","F","K"].includes(b))throw Error("Use value,C/F/K,C/F/K.");const c=a==="C"?n:a==="F"?(n-32)*5/9:n-273.15;out=(b==="C"?c:b==="F"?c*9/5+32:c+273.15).toFixed(4)+" "+b;break;}
+
+        case "word_counter": out="Words: "+(input.trim()?input.trim().split(/\s+/).length:0)+"\nCharacters: "+input.length+"\nCharacters (no spaces): "+input.replace(/\s/g,"").length+"\nSentences: "+(input.trim()?input.split(/[.!?]+/).filter(x=>x.trim()).length:0)+"\nParagraphs: "+(input.trim()?input.split(/\n\s*\n/).filter(x=>x.trim()).length:0);break;
+        case "text_diff": {const a=input.split(/\r?\n/),b=secondInput.split(/\r?\n/);out="LEFT ONLY:\n"+a.filter(x=>!b.includes(x)).join("\n")+"\n\nRIGHT ONLY:\n"+b.filter(x=>!a.includes(x)).join("\n");break;}
+        case "random_number_generator": {const [a,b]=input.split(",").map(Number);if(!Number.isSafeInteger(a)||!Number.isSafeInteger(b)||b<a)throw Error("Enter min,max integers.");const n=new Uint32Array(1);crypto.getRandomValues(n);out=String(a+(n[0]%(b-a+1)));break;}
+        case "random_picker": {const a=lines.map(x=>x.trim()).filter(Boolean);if(!a.length)throw Error("Enter one choice per line.");const n=new Uint32Array(1);crypto.getRandomValues(n);out=a[n[0]%a.length];break;}
+        case "password_strength_checker": {const s=input,checks=[s.length>=12,s.length>=16,/[a-z]/.test(s),/[A-Z]/.test(s),/\d/.test(s),/[^A-Za-z0-9]/.test(s)];out="Length: "+s.length+"\nCriteria passed: "+checks.filter(Boolean).length+"/6\nAssessment: "+(checks.filter(Boolean).length>=5?"Stronger (still unique per site)":checks.filter(Boolean).length>=3?"Moderate":"Weak")+"\nNever reuse passwords or share them.";break;}
+        case "json_path_extractor": {const d=JSON.parse(input);const path=secondInput.trim();const v=path.split(".").filter(Boolean).reduce((o,k)=>o==null?undefined:(o as Record<string,unknown>)[k],d as unknown);if(v===undefined)throw Error("Path not found. Enter path in the second field.");out=JSON.stringify(v,null,2)??String(v);break;}
+        case "markdown_table_generator": {const rows=input.trim().split(/\r?\n/).map(x=>x.split(",").map(y=>y.trim()));if(!rows.length||!rows[0].length)throw Error("Enter comma-separated rows.");const row=(a:string[])=>"| "+a.map(x=>x.replace(/\|/g,"\\|")).join(" | ")+" |";out=[row(rows[0]),row(rows[0].map(()=>"---")),...rows.slice(1).map(row)].join("\n");break;}
+        case "csv_delimiter_converter": {const d=reverse?";":"\\t";out=lines.map(x=>x.split(",").map(v=>v.trim()).join(d)).join("\n");break;}
+        case "date_add_subtract": {const [date,daysRaw]=input.split(",").map(x=>x.trim()),days=Number(daysRaw),d=new Date(date+"T12:00:00");if(Number.isNaN(d.getTime())||!Number.isInteger(days))throw Error("Enter YYYY-MM-DD,days (negative subtracts).");d.setDate(d.getDate()+days);out=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");break;}
+        case "business_days_calculator": {const [a,b]=input.split(",").map(x=>x.trim()),d=new Date(a+"T12:00:00Z"),end=new Date(b+"T12:00:00Z");if(Number.isNaN(d.getTime())||Number.isNaN(end.getTime()))throw Error("Enter YYYY-MM-DD,YYYY-MM-DD.");let n=0;for(let x=d.getTime();x<=end.getTime();x+=86400000){const w=new Date(x).getUTCDay();if(w!==0&&w!==6)n++;}out="Weekdays (inclusive): "+n;break;}
+        case "unit_area_converter": {const [v,f,t]=input.split(",").map(x=>x.trim().toLowerCase()),u:Record<string,number>={"m2":1,"sqm":1,"ft2":0.09290304,"sqft":0.09290304,acre:4046.8564224,hectare:10000,ha:10000},n=Number(v);if(!Number.isFinite(n)||!u[f]||!u[t])throw Error("Use value,m2/ft2/acre/hectare,target unit.");out=String(n*u[f]/u[t]);break;}
+        case "unit_volume_converter": {const [v,f,t]=input.split(",").map(x=>x.trim().toLowerCase()),u:Record<string,number>={ml:.001,l:1,liter:1,m3:1000,gallon:3.785411784},n=Number(v);if(!Number.isFinite(n)||!u[f]||!u[t])throw Error("Use value,ml/l/m3/gallon,target unit.");out=String(n*u[f]/u[t]);break;}
+        case "unit_speed_converter": {const [v,f,t]=input.split(",").map(x=>x.trim().toLowerCase()),u:Record<string,number>={"km/h":1,"kmh":1,"m/s":3.6,mph:1.609344},n=Number(v);if(!Number.isFinite(n)||!u[f]||!u[t])throw Error("Use value,km/h/m/s/mph,target unit.");out=String(n*u[f]/u[t]);break;}
+        case "data_size_converter": {const [v,f,t]=input.split(",").map(x=>x.trim().toLowerCase()),u:Record<string,number>={b:1,byte:1,kb:1000,mb:1e6,gb:1e9,kib:1024,mib:1048576,gib:1073741824},n=Number(v);if(!Number.isFinite(n)||n<0||!u[f]||!u[t])throw Error("Use value,byte/KB/MB/GB/KiB/MiB/GiB,target unit.");out=String(n*u[f]/u[t]);break;}
+        case "discount_calculator": {const [price,discount]=input.split(",").map(Number);if(!Number.isFinite(price+discount)||price<0||discount<0||discount>100)throw Error("Enter price,discount percent (0–100).");out="Savings: "+(price*discount/100).toFixed(2)+"\nFinal price: "+(price*(1-discount/100)).toFixed(2);break;}
+        case "compound_interest_calculator": {const [p,r,y,n=1]=input.split(",").map(Number);if(!Number.isFinite(p+r+y+n)||p<0||r<0||y<0||n<1)throw Error("Enter principal,annual-rate,years,compounds-per-year.");const total=p*Math.pow(1+r/100/n,n*y);out="Final amount: "+total.toFixed(2)+"\nInterest earned: "+(total-p).toFixed(2);break;}
+        case "random_team_splitter": {const people=lines.map(x=>x.trim()).filter(Boolean);const teams=Number(secondInput);if(!Number.isInteger(teams)||teams<1||teams>people.length)throw Error("Enter number of teams in the second field.");for(let i=people.length-1;i>0;i--){const n=new Uint32Array(1);crypto.getRandomValues(n);const j=n[0]%(i+1);[people[i],people[j]]=[people[j],people[i]];}const result=Array.from({length:teams},()=>[] as string[]);people.forEach((p,i)=>result[i%teams].push(p));out=result.map((t,i)=>"Team "+(i+1)+":\n"+t.join("\n")).join("\n\n");break;}
+
+        default: throw Error("Unknown utility.");
+      }
+      setOutput(out);
+    } catch(e) {setError(e instanceof Error?e.message:"Unable to process input.");}
+  };
+  const directions=["case_converter","line_sorter","xml_escape","csv_delimiter_converter"].includes(mode);
+  const hints:Record<string,string>={regex_tester:"Line 1 pattern; line 2 flags; remaining lines text",percentage_calculator:"value,total (e.g. 25,200)",date_difference:"YYYY-MM-DD,YYYY-MM-DD",tip_calculator:"bill,tip-percent,people",loan_payment_calculator:"principal,annual-rate,months",unit_length_converter:"12,cm,inch",unit_weight_converter:"2,kg,lb",unit_temperature_converter:"100,C,F",number_base_converter:"255,10 (value,base)"};
+  return <div className="space-y-3"><h3 className="text-sm font-semibold text-slate-800">{isHi?names[mode][1]:names[mode][0]}</h3><p className="text-xs text-slate-500">{isHi?"डेटा आपके डिवाइस पर प्रोसेस होता है।":"Processed locally on your device."}</p><p className="text-xs text-slate-500">{hints[mode]||"Enter input and run the tool."}</p>{directions&&<div className="flex gap-2"><button type="button" className="rounded-lg border px-3 py-2 text-xs" onClick={()=>setReverse(false)}>{mode==="case_converter"?"UPPERCASE":"Ascending / Encode"}</button><button type="button" className="rounded-lg border px-3 py-2 text-xs" onClick={()=>setReverse(true)}>{mode==="case_converter"?"lowercase":"Descending / Decode"}</button></div>}{mode==="password_generator"&&<label className="block text-xs">Length: {length}<input type="range" min={8} max={64} value={length} onChange={e=>setLength(Number(e.target.value))} className="w-full"/></label>}<textarea value={input} onChange={e=>{setInput(e.target.value);setOutput("");setError("");}} rows={6} spellCheck={false} placeholder={hints[mode]||"Enter text..."} className="w-full rounded-xl border border-slate-300 bg-white p-3 font-mono text-xs text-slate-800"/><textarea value={secondInput} onChange={e=>setSecondInput(e.target.value)} rows={1} placeholder={mode==="text_diff"?"Second text block":mode==="json_path_extractor"?"Path e.g. user.name":mode==="random_team_splitter"?"Number of teams":""} className="w-full rounded-xl border border-slate-300 bg-white p-3 font-mono text-xs text-slate-800"/><div className="flex flex-wrap gap-2"><button type="button" className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-[#245D45]" onClick={()=>void process()}>{isHi?"चलाएँ":"Run tool"}</button><button type="button" disabled={!output} className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-[#245D45]" onClick={()=>void navigator.clipboard?.writeText(output)}>{isHi?"परिणाम कॉपी करें":"Copy result"}</button><button type="button" className="rounded-xl border border-slate-200 px-3 py-2 text-xs" onClick={()=>{setInput("");setOutput("");setError("");}}>{isHi?"साफ़ करें":"Clear"}</button></div>{error&&<p role="alert" className="rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</p>}{output&&<textarea readOnly value={output} rows={8} className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800"/>}</div>;
+}
+

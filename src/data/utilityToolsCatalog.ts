@@ -643,5 +643,225 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     iconName: "Fingerprint",
     badge: "100% Offline",
     keywords: ["uuid", "guid", "random id", "developer tools", "identifier"]
+  },
+  {
+    id: "case_converter", categoryId: "cyber_media", titleEn: "Text Case Converter", titleHi: "टेक्स्ट केस कन्वर्टर",
+    descEn: "Change text case locally.", descHi: "टेक्स्ट का केस बदलें।", iconName: "Type", badge: "Offline",
+    keywords: ["case converter", "utility", "offline"]
+  },
+  {
+    id: "whitespace_cleaner", categoryId: "cyber_media", titleEn: "Whitespace Cleaner", titleHi: "स्पेस क्लीनर",
+    descEn: "Normalize repeated spaces and blank lines.", descHi: "अतिरिक्त स्पेस साफ करें।", iconName: "Text", badge: "Offline",
+    keywords: ["whitespace cleaner", "utility", "offline"]
+  },
+  {
+    id: "line_sorter", categoryId: "cyber_media", titleEn: "Line Sorter", titleHi: "लाइन क्रमबद्ध करें",
+    descEn: "Sort lines ascending or descending.", descHi: "लाइनें क्रम में लगाएँ।", iconName: "List", badge: "Offline",
+    keywords: ["line sorter", "utility", "offline"]
+  },
+  {
+    id: "duplicate_line_remover", categoryId: "cyber_media", titleEn: "Duplicate Line Remover", titleHi: "डुप्लिकेट लाइन हटाएँ",
+    descEn: "Remove repeated lines.", descHi: "दोहराई लाइनें हटाएँ।", iconName: "List", badge: "Offline",
+    keywords: ["duplicate line remover", "utility", "offline"]
+  },
+  {
+    id: "text_reverse", categoryId: "cyber_media", titleEn: "Text Reverser", titleHi: "टेक्स्ट उल्टा करें",
+    descEn: "Reverse Unicode text.", descHi: "टेक्स्ट उल्टा करें।", iconName: "Repeat", badge: "Offline",
+    keywords: ["text reverse", "utility", "offline"]
+  },
+  {
+    id: "slug_generator", categoryId: "cyber_media", titleEn: "URL Slug Generator", titleHi: "URL स्लग जनरेटर",
+    descEn: "Create a URL-safe slug.", descHi: "URL slug बनाएँ।", iconName: "Link", badge: "Offline",
+    keywords: ["slug generator", "utility", "offline"]
+  },
+  {
+    id: "url_parser", categoryId: "cyber_media", titleEn: "URL Parser", titleHi: "URL पार्सर",
+    descEn: "Parse URL parts locally.", descHi: "URL के हिस्से निकालें।", iconName: "Globe", badge: "Offline",
+    keywords: ["url parser", "utility", "offline"]
+  },
+  {
+    id: "query_string_parser", categoryId: "cyber_media", titleEn: "Query String Parser", titleHi: "Query String पार्सर",
+    descEn: "Convert query parameters to JSON.", descHi: "Query parameters को JSON करें।", iconName: "Braces", badge: "Offline",
+    keywords: ["query string parser", "utility", "offline"]
+  },
+  {
+    id: "regex_tester", categoryId: "cyber_media", titleEn: "Regular Expression Tester", titleHi: "Regex टेस्टर",
+    descEn: "Test a regular expression locally.", descHi: "Regular expression जाँचें।", iconName: "Search", badge: "Offline",
+    keywords: ["regex tester", "utility", "offline"]
+  },
+  {
+    id: "timestamp_converter", categoryId: "cyber_media", titleEn: "Unix Timestamp Converter", titleHi: "Unix Timestamp कन्वर्टर",
+    descEn: "Convert Unix seconds or milliseconds to a date.", descHi: "Unix timestamp को तारीख में बदलें।", iconName: "Clock", badge: "Offline",
+    keywords: ["timestamp converter", "utility", "offline"]
+  },
+  {
+    id: "date_to_timestamp", categoryId: "cyber_media", titleEn: "Date to Unix Timestamp", titleHi: "तारीख से Unix Timestamp",
+    descEn: "Convert date/time to Unix timestamps.", descHi: "तारीख को Unix timestamp में बदलें।", iconName: "Calendar", badge: "Offline",
+    keywords: ["date to timestamp", "utility", "offline"]
+  },
+  {
+    id: "color_converter", categoryId: "cyber_media", titleEn: "HEX/RGB Color Converter", titleHi: "HEX/RGB रंग कन्वर्टर",
+    descEn: "Convert HEX and RGB colors.", descHi: "HEX और RGB रंग बदलें।", iconName: "Palette", badge: "Offline",
+    keywords: ["color converter", "utility", "offline"]
+  },
+  {
+    id: "password_generator", categoryId: "cyber_media", titleEn: "Secure Password Generator", titleHi: "पासवर्ड जनरेटर",
+    descEn: "Generate a secure random password.", descHi: "सुरक्षित random पासवर्ड बनाएँ।", iconName: "KeyRound", badge: "Offline",
+    keywords: ["password generator", "utility", "offline"]
+  },
+  {
+    id: "hash_generator", categoryId: "cyber_media", titleEn: "SHA Hash Generator", titleHi: "SHA Hash जनरेटर",
+    descEn: "Generate SHA-256 and SHA-1 hashes.", descHi: "SHA hash बनाएँ।", iconName: "Fingerprint", badge: "Offline",
+    keywords: ["hash generator", "utility", "offline"]
+  },
+  {
+    id: "csv_json_converter", categoryId: "cyber_media", titleEn: "CSV to JSON Converter", titleHi: "CSV से JSON",
+    descEn: "Convert CSV records into JSON.", descHi: "CSV को JSON में बदलें।", iconName: "FileJson", badge: "Offline",
+    keywords: ["csv json converter", "utility", "offline"]
+  },
+  {
+    id: "json_csv_converter", categoryId: "cyber_media", titleEn: "JSON to CSV Converter", titleHi: "JSON से CSV",
+    descEn: "Convert JSON object arrays into CSV.", descHi: "JSON को CSV में बदलें।", iconName: "FileSpreadsheet", badge: "Offline",
+    keywords: ["json csv converter", "utility", "offline"]
+  },
+  {
+    id: "xml_escape", categoryId: "cyber_media", titleEn: "XML Escape/Unescape", titleHi: "XML एस्केप टूल",
+    descEn: "Escape or decode XML entities.", descHi: "XML entities encode/decode करें।", iconName: "Code", badge: "Offline",
+    keywords: ["xml escape", "utility", "offline"]
+  },
+  {
+    id: "unicode_inspector", categoryId: "cyber_media", titleEn: "Unicode Inspector", titleHi: "Unicode निरीक्षक",
+    descEn: "Show Unicode code points for characters.", descHi: "Unicode code points दिखाएँ।", iconName: "Binary", badge: "Offline",
+    keywords: ["unicode inspector", "utility", "offline"]
+  },
+  {
+    id: "number_base_converter", categoryId: "cyber_media", titleEn: "Number Base Converter", titleHi: "Number Base कन्वर्टर",
+    descEn: "Convert integers between binary, octal, decimal and hex.", descHi: "Number bases बदलें।", iconName: "Calculator", badge: "Offline",
+    keywords: ["number base converter", "utility", "offline"]
+  },
+  {
+    id: "percentage_calculator", categoryId: "cyber_media", titleEn: "Percentage Calculator", titleHi: "प्रतिशत गणक",
+    descEn: "Calculate percentage between two values.", descHi: "प्रतिशत निकालें।", iconName: "Percent", badge: "Offline",
+    keywords: ["percentage calculator", "utility", "offline"]
+  },
+  {
+    id: "date_difference", categoryId: "cyber_media", titleEn: "Date Difference Calculator", titleHi: "तारीख अंतर गणक",
+    descEn: "Calculate days between two dates.", descHi: "दो तारीखों के बीच दिन गिनें।", iconName: "CalendarDays", badge: "Offline",
+    keywords: ["date difference", "utility", "offline"]
+  },
+  {
+    id: "age_calculator", categoryId: "cyber_media", titleEn: "Age Calculator", titleHi: "आयु गणक",
+    descEn: "Calculate age from date of birth.", descHi: "जन्मतिथि से आयु निकालें।", iconName: "Cake", badge: "Offline",
+    keywords: ["age calculator", "utility", "offline"]
+  },
+  {
+    id: "tip_calculator", categoryId: "cyber_media", titleEn: "Tip & Bill Split Calculator", titleHi: "टिप व बिल बाँटें",
+    descEn: "Calculate tip and per-person total.", descHi: "टिप और प्रति व्यक्ति बिल निकालें।", iconName: "Receipt", badge: "Offline",
+    keywords: ["tip calculator", "utility", "offline"]
+  },
+  {
+    id: "loan_payment_calculator", categoryId: "cyber_media", titleEn: "Loan EMI Calculator", titleHi: "लोन EMI गणक",
+    descEn: "Estimate monthly loan EMI.", descHi: "लोन EMI का अनुमान लगाएँ।", iconName: "Landmark", badge: "Offline",
+    keywords: ["loan payment calculator", "utility", "offline"]
+  },
+  {
+    id: "unit_length_converter", categoryId: "cyber_media", titleEn: "Length Unit Converter", titleHi: "लंबाई इकाई कन्वर्टर",
+    descEn: "Convert common length units.", descHi: "लंबाई की इकाइयाँ बदलें।", iconName: "Ruler", badge: "Offline",
+    keywords: ["unit length converter", "utility", "offline"]
+  },
+  {
+    id: "unit_weight_converter", categoryId: "cyber_media", titleEn: "Weight Unit Converter", titleHi: "वजन इकाई कन्वर्टर",
+    descEn: "Convert common weight units.", descHi: "वजन की इकाइयाँ बदलें।", iconName: "Weight", badge: "Offline",
+    keywords: ["unit weight converter", "utility", "offline"]
+  },
+  {
+    id: "unit_temperature_converter", categoryId: "cyber_media", titleEn: "Temperature Converter", titleHi: "तापमान कन्वर्टर",
+    descEn: "Convert Celsius, Fahrenheit and Kelvin.", descHi: "तापमान इकाइयाँ बदलें।", iconName: "Thermometer", badge: "Offline",
+    keywords: ["unit temperature converter", "utility", "offline"]
+  },
+  {
+    id: "word_counter", categoryId: "cyber_media", titleEn: "Word & Character Counter", titleHi: "शब्द व अक्षर गणक",
+    descEn: "Count words, characters, sentences and paragraphs.", descHi: "शब्द, अक्षर, वाक्य और अनुच्छेद गिनें।", iconName: "WholeWord", badge: "Offline",
+    keywords: ["word counter", "utility", "offline"]
+  },
+  {
+    id: "text_diff", categoryId: "cyber_media", titleEn: "Text Difference Checker", titleHi: "टेक्स्ट अंतर जाँचें",
+    descEn: "Compare two text blocks line by line.", descHi: "दो टेक्स्ट ब्लॉक की तुलना करें।", iconName: "GitCompare", badge: "Offline",
+    keywords: ["text diff", "utility", "offline"]
+  },
+  {
+    id: "random_number_generator", categoryId: "cyber_media", titleEn: "Random Number Generator", titleHi: "रैंडम संख्या जनरेटर",
+    descEn: "Generate random integers within a chosen range.", descHi: "दी गई सीमा में random integer बनाएँ।", iconName: "Dices", badge: "Offline",
+    keywords: ["random number generator", "utility", "offline"]
+  },
+  {
+    id: "random_picker", categoryId: "cyber_media", titleEn: "Random Name Picker", titleHi: "रैंडम नाम चुनें",
+    descEn: "Pick a random entry from a newline-separated list.", descHi: "सूची में से random नाम चुनें।", iconName: "Shuffle", badge: "Offline",
+    keywords: ["random picker", "utility", "offline"]
+  },
+  {
+    id: "password_strength_checker", categoryId: "cyber_media", titleEn: "Password Strength Checker", titleHi: "पासवर्ड मजबूती जाँचें",
+    descEn: "Give local feedback on password length and character variety.", descHi: "पासवर्ड की लंबाई व विविधता जाँचें।", iconName: "ShieldCheck", badge: "Offline",
+    keywords: ["password strength checker", "utility", "offline"]
+  },
+  {
+    id: "json_path_extractor", categoryId: "cyber_media", titleEn: "JSON Path Extractor", titleHi: "JSON Path एक्सट्रैक्टर",
+    descEn: "Read a simple dot-separated path from JSON.", descHi: "JSON से dot-separated path का मान निकालें।", iconName: "Braces", badge: "Offline",
+    keywords: ["json path extractor", "utility", "offline"]
+  },
+  {
+    id: "markdown_table_generator", categoryId: "cyber_media", titleEn: "Markdown Table Generator", titleHi: "Markdown टेबल जनरेटर",
+    descEn: "Convert comma-separated rows into a Markdown table.", descHi: "CSV-जैसी पंक्तियों से Markdown टेबल बनाएँ।", iconName: "Table", badge: "Offline",
+    keywords: ["markdown table generator", "utility", "offline"]
+  },
+  {
+    id: "csv_delimiter_converter", categoryId: "cyber_media", titleEn: "CSV Delimiter Converter", titleHi: "CSV Delimiter कन्वर्टर",
+    descEn: "Convert comma-separated data to tab-separated or semicolon-separated data.", descHi: "Comma-separated data को tab या semicolon में बदलें।", iconName: "Columns", badge: "Offline",
+    keywords: ["csv delimiter converter", "utility", "offline"]
+  },
+  {
+    id: "date_add_subtract", categoryId: "cyber_media", titleEn: "Date Add/Subtract Calculator", titleHi: "तारीख जोड़ें/घटाएँ",
+    descEn: "Add or subtract days from a date.", descHi: "तारीख में दिन जोड़ें या घटाएँ।", iconName: "CalendarPlus", badge: "Offline",
+    keywords: ["date add subtract", "utility", "offline"]
+  },
+  {
+    id: "business_days_calculator", categoryId: "cyber_media", titleEn: "Business Days Calculator", titleHi: "कार्यदिवस गणक",
+    descEn: "Count weekdays between two dates, excluding weekends.", descHi: "दो तारीखों के बीच सप्ताहांत हटाकर कार्यदिवस गिनें।", iconName: "BriefcaseBusiness", badge: "Offline",
+    keywords: ["business days calculator", "utility", "offline"]
+  },
+  {
+    id: "unit_area_converter", categoryId: "cyber_media", titleEn: "Area Unit Converter", titleHi: "क्षेत्रफल इकाई कन्वर्टर",
+    descEn: "Convert square meters, square feet, acres and hectares.", descHi: "वर्ग मीटर, वर्ग फुट, एकड़ और हेक्टेयर बदलें।", iconName: "Ruler", badge: "Offline",
+    keywords: ["unit area converter", "utility", "offline"]
+  },
+  {
+    id: "unit_volume_converter", categoryId: "cyber_media", titleEn: "Volume Unit Converter", titleHi: "आयतन इकाई कन्वर्टर",
+    descEn: "Convert liters, milliliters, cubic meters and US gallons.", descHi: "लीटर, मिलीलीटर, घन मीटर और गैलन बदलें।", iconName: "FlaskConical", badge: "Offline",
+    keywords: ["unit volume converter", "utility", "offline"]
+  },
+  {
+    id: "unit_speed_converter", categoryId: "cyber_media", titleEn: "Speed Unit Converter", titleHi: "गति इकाई कन्वर्टर",
+    descEn: "Convert km/h, m/s and mph.", descHi: "km/h, m/s और mph बदलें।", iconName: "Gauge", badge: "Offline",
+    keywords: ["unit speed converter", "utility", "offline"]
+  },
+  {
+    id: "data_size_converter", categoryId: "cyber_media", titleEn: "Data Size Converter", titleHi: "डेटा आकार कन्वर्टर",
+    descEn: "Convert bytes, KB, MB and GB using decimal or binary units.", descHi: "Bytes, KB, MB और GB बदलें।", iconName: "HardDrive", badge: "Offline",
+    keywords: ["data size converter", "utility", "offline"]
+  },
+  {
+    id: "discount_calculator", categoryId: "cyber_media", titleEn: "Discount Calculator", titleHi: "छूट गणक",
+    descEn: "Calculate discounted price and savings.", descHi: "छूट के बाद कीमत व बचत निकालें।", iconName: "BadgePercent", badge: "Offline",
+    keywords: ["discount calculator", "utility", "offline"]
+  },
+  {
+    id: "compound_interest_calculator", categoryId: "cyber_media", titleEn: "Compound Interest Calculator", titleHi: "चक्रवृद्धि ब्याज गणक",
+    descEn: "Estimate compound interest from principal, rate, years and compounding frequency.", descHi: "मूलधन, दर, समय और compounding से ब्याज निकालें।", iconName: "ChartNoAxesCombined", badge: "Offline",
+    keywords: ["compound interest calculator", "utility", "offline"]
+  },
+  {
+    id: "random_team_splitter", categoryId: "cyber_media", titleEn: "Random Team Splitter", titleHi: "रैंडम टीम बाँटें",
+    descEn: "Split a list of names into a chosen number of random teams.", descHi: "नामों को random टीमों में बाँटें।", iconName: "Users", badge: "Offline",
+    keywords: ["random team splitter", "utility", "offline"]
   }
 ];
