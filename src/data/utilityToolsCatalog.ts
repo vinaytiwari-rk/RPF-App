@@ -1119,5 +1119,105 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "img_rounded_corners", categoryId: "image_tools", titleEn: "Image Rounded Corners", titleHi: "गोल किनारे (Rounded Corners)",
     descEn: "Give smooth modern rounded corners to any rectangular picture.", descHi: "चौकोर फोटो के कोनों को आधुनिक गोल आकार (Rounded) दें।", iconName: "CircleDot", badge: "100% Offline",
     keywords: ["rounded corners", "round photo", "corner radius"]
+  },
+  {
+    id: "img_transparency_maker", categoryId: "image_tools", titleEn: "Image Transparency Maker", titleHi: "इमेज ट्रांसपेरेंसी मेकर",
+    descEn: "Adjust alpha opacity and transparency levels for PNG graphics.", descHi: "फोटो की पारदर्शिता (Opacity / Transparency) आसानी से सेट करें।", iconName: "Sparkles", badge: "100% Offline",
+    keywords: ["image transparency", "photo opacity", "transparent png"]
+  },
+  {
+    id: "img_watermark_adder", categoryId: "image_tools", titleEn: "Image Watermark Adder", titleHi: "फोटो वाटरमार्क एडर",
+    descEn: "Add secure custom text watermark stamps across your photos.", descHi: "अपनी तस्वीरों पर अपना नाम या संस्था का वाटरमार्क लगाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["image watermark", "add watermark", "photo stamp"]
+  },
+  {
+    id: "img_metadata_viewer", categoryId: "image_tools", titleEn: "Image Metadata Viewer", titleHi: "इमेज मेटाडेटा व्यूअर",
+    descEn: "Inspect image file properties, dimensions, aspect ratio, and size.", descHi: "फोटो का आकार, पिक्सेल डाइमेंशन व मेटाडेटा विवरण देखें।", iconName: "Eye", badge: "100% Offline",
+    keywords: ["image metadata", "photo info", "inspect image"]
+  },
+  {
+    id: "img_exif_remover", categoryId: "image_tools", titleEn: "Image EXIF Remover", titleHi: "EXIF व GPS डेटा रिमूवर",
+    descEn: "Strip privacy metadata, GPS location, and camera details safely.", descHi: "प्राइवेसी सुरक्षा हेतु फोटो से कैमरा और लोकेशन डेटा हटाएं।", iconName: "Shield", badge: "100% Offline",
+    keywords: ["remove exif", "strip exif", "photo privacy"]
+  },
+  {
+    id: "img_dpi_changer", categoryId: "image_tools", titleEn: "Image DPI Changer", titleHi: "इमेज DPI व प्रिंट स्केल",
+    descEn: "Optimize print resolution scales for 72, 150, or 300 DPI documents.", descHi: "प्रिंट और डॉक्यूमेंट्स हेतु फोटो का DPI स्केल एडजस्ट करें।", iconName: "Printer", badge: "100% Offline",
+    keywords: ["image dpi", "change dpi", "print resolution"]
+  },
+  {
+    id: "img_aspect_ratio", categoryId: "image_tools", titleEn: "Aspect Ratio Converter", titleHi: "आस्पेक्ट रेशियो कनवर्टर",
+    descEn: "Fit or pad images into standard ratios (1:1, 4:3, 16:9, 9:16).", descHi: "सोशल मीडिया या फॉर्म के अनुसार आस्पेक्ट रेशियो बदलें।", iconName: "Maximize", badge: "100% Offline",
+    keywords: ["aspect ratio", "16:9 converter", "square photo"]
+  },
+  {
+    id: "img_grayscale_filter", categoryId: "image_tools", titleEn: "Grayscale Converter", titleHi: "ब्लैक एंड व्हाइट कनवर्टर",
+    descEn: "Convert colored photos into clean monochrome black and white.", descHi: "रंगीन फोटो को साफ़ ब्लैक एंड व्हाइट (B&W) में बदलें।", iconName: "Palette", badge: "100% Offline",
+    keywords: ["grayscale converter", "black and white", "monochrome"]
+  },
+  {
+    id: "img_sepia_filter", categoryId: "image_tools", titleEn: "Image Sepia Filter", titleHi: "सेपिया विंटेज फिल्टर",
+    descEn: "Apply classic warm vintage sepia photo tone with adjustable slider.", descHi: "फोटो में खूबसूरत विंटेज सेपिया टोन प्रभाव जोड़ें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["sepia filter", "vintage photo", "retro effect"]
+  },
+  {
+    id: "img_blur_tool", categoryId: "image_tools", titleEn: "Image Blur Tool", titleHi: "इमेज ब्लर टूल",
+    descEn: "Apply smooth blur effect to soften details or background.", descHi: "फोटो में स्मूथ ब्लर (धुंधलापन) प्रभाव लागू करें।", iconName: "Sparkles", badge: "100% Offline",
+    keywords: ["image blur", "blur photo", "gaussian blur"]
+  },
+  {
+    id: "img_sharpen_tool", categoryId: "image_tools", titleEn: "Image Sharpen Tool", titleHi: "इमेज शार्पन टूल",
+    descEn: "Enhance edge contrast and clarify blurred image details.", descHi: "धुंधली फोटो के किनारों को तेज व स्पष्ट (Sharpen) बनाएं।", iconName: "Sparkles", badge: "100% Offline",
+    keywords: ["sharpen image", "enhance photo", "unsharp mask"]
+  },
+  {
+    id: "img_brightness_adjust", categoryId: "image_tools", titleEn: "Brightness Adjuster", titleHi: "ब्राइटनेस (चमक) एडजस्टर",
+    descEn: "Fine-tune and lighten dark photos or tone down overexposure.", descHi: "अंधेरे वाली फोटो में चमक बढ़ाएं या अधिक रोशनी संतुलित करें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["brightness adjust", "lighten photo", "photo brightness"]
+  },
+  {
+    id: "img_contrast_adjust", categoryId: "image_tools", titleEn: "Contrast Adjuster", titleHi: "कंट्रास्ट एडजस्टर",
+    descEn: "Boost contrast for vivid definition between highlights and shadows.", descHi: "फोटो का कंट्रास्ट बढ़ाकर रंगों में गहराई और निखार लाएं।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["contrast adjust", "boost contrast", "photo clarity"]
+  },
+  {
+    id: "img_saturation_adjust", categoryId: "image_tools", titleEn: "Saturation Adjuster", titleHi: "कलर सैचुरेशन एडजस्टर",
+    descEn: "Intensify rich vibrant colors or desaturate toward muted tones.", descHi: "फोटो के रंगों को अधिक चटख व जीवंत बनाएं।", iconName: "Palette", badge: "100% Offline",
+    keywords: ["saturation adjust", "vibrant colors", "photo saturation"]
+  },
+  {
+    id: "img_hue_changer", categoryId: "image_tools", titleEn: "Image Hue Changer", titleHi: "ह्यू (रंग टोन) रोटेटर",
+    descEn: "Shift overall color balance and spectrum across full 360 degrees.", descHi: "कलर व्हील के अनुसार फोटो की संपूर्ण रंग टोन बदलें।", iconName: "RefreshCw", badge: "100% Offline",
+    keywords: ["hue changer", "hue rotate", "color shift"]
+  },
+  {
+    id: "img_color_picker", categoryId: "image_tools", titleEn: "Image Color Picker", titleHi: "इमेज कलर पिकर (आईड्रॉपर)",
+    descEn: "Click any spot on your photo to extract exact HEX and RGB color.", descHi: "फोटो पर क्लिक करके उसका सटीक HEX और RGB कोड पाएं।", iconName: "Palette", badge: "100% Offline",
+    keywords: ["image color picker", "eyedropper", "hex color code"]
+  },
+  {
+    id: "img_palette_extractor", categoryId: "image_tools", titleEn: "Palette Extractor", titleHi: "कलर पैलेट एक्सट्रैक्टर",
+    descEn: "Generate the top dominant color palette swatches from any photo.", descHi: "फोटो से प्रमुख 8 रंगों का खूबसूरत पैलेट निकालें।", iconName: "Palette", badge: "100% Offline",
+    keywords: ["palette extractor", "color swatches", "dominant colors"]
+  },
+  {
+    id: "img_overlay_tool", categoryId: "image_tools", titleEn: "Image Overlay Tool", titleHi: "इमेज ओवरले व ब्लेंडर",
+    descEn: "Blend two pictures together with multiple blending modes.", descHi: "दो तस्वीरों को आपस में मिलाकर कलात्मक ओवरले बनाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["image overlay", "blend images", "double exposure"]
+  },
+  {
+    id: "img_collage_maker", categoryId: "image_tools", titleEn: "Image Collage Maker", titleHi: "फोटो कोलाज मेकर",
+    descEn: "Combine 2 to 4 photos into a neat side-by-side or 2x2 grid collage.", descHi: "2 से 4 फोटो को मिलाकर सुंदर ग्रिड कोलाज बनाएं।", iconName: "Grid", badge: "100% Offline",
+    keywords: ["collage maker", "photo grid", "combine photos"]
+  },
+  {
+    id: "img_splitter", categoryId: "image_tools", titleEn: "Image Splitter", titleHi: "इमेज स्प्लिटर (ग्रिड कट)",
+    descEn: "Slice large pictures into 2x2 or 3x3 equal square grid tiles.", descHi: "बड़ी फोटो को 2x2 या 3x3 के बराबर हिस्सों में विभाजित करें।", iconName: "Split", badge: "100% Offline",
+    keywords: ["image splitter", "split photo", "grid tiles"]
+  },
+  {
+    id: "img_frame_extractor", categoryId: "image_tools", titleEn: "Image Frame Extractor", titleHi: "इमेज फ्रेम एक्सट्रैक्टर",
+    descEn: "Capture high-resolution still frames and render crisp photo snapshots.", descHi: "ग्राफिक्स से सटीक हाई-क्वालिटी स्थिर फ्रेम कैप्चर करें।", iconName: "FileImage", badge: "100% Offline",
+    keywords: ["frame extractor", "snapshot", "still frame"]
   }
 ];

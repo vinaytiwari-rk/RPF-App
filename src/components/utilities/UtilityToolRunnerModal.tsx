@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { UtilityToolDefinition } from "../../data/utilityToolsCatalog";
 import PdfToolsEngine from "./engines/pdfToolsEngine";
 import ImageToolsEngine from "./engines/imageToolsEngine";
+import ImageAdvancedToolsEngine from "./engines/imageAdvancedToolsEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -398,6 +399,29 @@ function ToolEngineDispatcher({
     case "img_border_adder":
     case "img_rounded_corners":
       return <ImageToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    // 19. 100% Offline Image Filters, Colors & Manipulation Suite (Phase 4 - 20 Tools)
+    case "img_transparency_maker":
+    case "img_watermark_adder":
+    case "img_metadata_viewer":
+    case "img_exif_remover":
+    case "img_dpi_changer":
+    case "img_aspect_ratio":
+    case "img_grayscale_filter":
+    case "img_sepia_filter":
+    case "img_blur_tool":
+    case "img_sharpen_tool":
+    case "img_brightness_adjust":
+    case "img_contrast_adjust":
+    case "img_saturation_adjust":
+    case "img_hue_changer":
+    case "img_color_picker":
+    case "img_palette_extractor":
+    case "img_overlay_tool":
+    case "img_collage_maker":
+    case "img_splitter":
+    case "img_frame_extractor":
+      return <ImageAdvancedToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (
