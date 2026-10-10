@@ -21,6 +21,7 @@ export interface UtilityCategoryDefinition {
 export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "all", titleEn: "All Tools", titleHi: "सभी टूल्स", iconName: "LayoutGrid", accent: "from-emerald-600 to-teal-700" },
   { id: "pdf_tools", titleEn: "PDF Tools (30)", titleHi: "PDF टूल्स (30)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
+  { id: "image_tools", titleEn: "Image Tools (40)", titleHi: "इमेज टूल्स (40)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
   { id: "govt_forms", titleEn: "Govt Forms & Recruitment", titleHi: "सरकारी भर्ती व फॉर्म", iconName: "BadgeCheck", accent: "from-amber-600 to-orange-700" },
   { id: "pdf_docs", titleEn: "PDF & Document Office", titleHi: "दस्तावेज व PDF ऑफिस", iconName: "FileText", accent: "from-blue-600 to-indigo-700" },
   { id: "legal_drafts", titleEn: "Legal Drafts & Notices", titleHi: "कानूनी आवेदन व प्रारूप", iconName: "Scale", accent: "from-purple-600 to-indigo-800" },
@@ -1016,5 +1017,107 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "pdf_nup_imposition", categoryId: "pdf_tools", titleEn: "PDF N-up Imposition", titleHi: "PDF 2-Up / 4-Up लेआउट",
     descEn: "Arrange multiple pages side-by-side onto a single printed sheet.", descHi: "कागज़ की बचत हेतु 2 या 4 पेजों को एक ही पेज पर व्यवस्थित करें।", iconName: "Grid", badge: "100% Offline",
     keywords: ["n up", "2 up pdf", "4 up pdf", "multi page sheet"]
+  },
+
+  // 18. 100% Offline Image Tools Suite (Phase 3 - 20 Tools)
+  {
+    id: "img_jpg_to_png", categoryId: "image_tools", titleEn: "JPG to PNG", titleHi: "JPG से PNG कनवर्टर",
+    descEn: "Convert JPG photos to lossless PNG format with transparent support.", descHi: "JPG फोटो को बिना क्वालिटी खोए PNG में बदलें।", iconName: "Image", badge: "100% Offline",
+    keywords: ["jpg to png", "convert jpg to png", "png converter"]
+  },
+  {
+    id: "img_png_to_jpg", categoryId: "image_tools", titleEn: "PNG to JPG", titleHi: "PNG से JPG कनवर्टर",
+    descEn: "Convert PNG images to standard lightweight JPG format.", descHi: "PNG फोटो को हल्के और कॉम्पैक्ट JPG फॉर्मेट में बदलें।", iconName: "Image", badge: "100% Offline",
+    keywords: ["png to jpg", "convert png to jpg", "jpg converter"]
+  },
+  {
+    id: "img_jpg_to_webp", categoryId: "image_tools", titleEn: "JPG to WebP", titleHi: "JPG से WebP कनवर्टर",
+    descEn: "Convert JPG to next-gen WebP format for fast web and app loading.", descHi: "JPG फोटो को आधुनिक हल्के WebP फॉर्मेट में बदलें।", iconName: "FileImage", badge: "100% Offline",
+    keywords: ["jpg to webp", "webp converter", "next gen image"]
+  },
+  {
+    id: "img_webp_to_jpg", categoryId: "image_tools", titleEn: "WebP to JPG", titleHi: "WebP से JPG कनवर्टर",
+    descEn: "Convert WebP images back into standard universal JPG pictures.", descHi: "WebP फोटो को मानक JPG फॉर्मेट में बदलें।", iconName: "Image", badge: "100% Offline",
+    keywords: ["webp to jpg", "convert webp", "jpg format"]
+  },
+  {
+    id: "img_png_to_webp", categoryId: "image_tools", titleEn: "PNG to WebP", titleHi: "PNG से WebP कनवर्टर",
+    descEn: "Shrink PNG images by converting them to highly compressed WebP.", descHi: "PNG फोटो को सुपर कंप्रेस्ड WebP फॉर्मेट में बदलें।", iconName: "FileImage", badge: "100% Offline",
+    keywords: ["png to webp", "webp compress", "small image"]
+  },
+  {
+    id: "img_webp_to_png", categoryId: "image_tools", titleEn: "WebP to PNG", titleHi: "WebP से PNG कनवर्टर",
+    descEn: "Convert WebP files into transparent lossless PNG graphics.", descHi: "WebP फोटो को पारदर्शी PNG फॉर्मेट में बदलें।", iconName: "Image", badge: "100% Offline",
+    keywords: ["webp to png", "convert webp to png", "transparent png"]
+  },
+  {
+    id: "img_jpg_to_bmp", categoryId: "image_tools", titleEn: "JPG to BMP", titleHi: "JPG से BMP कनवर्टर",
+    descEn: "Convert JPG photos to uncompressed standard Bitmap (BMP) format.", descHi: "JPG को मानक बिटमैप (BMP) इमेज में बदलें।", iconName: "Image", badge: "100% Offline",
+    keywords: ["jpg to bmp", "bmp converter", "bitmap image"]
+  },
+  {
+    id: "img_bmp_to_png", categoryId: "image_tools", titleEn: "BMP to PNG", titleHi: "BMP से PNG कनवर्टर",
+    descEn: "Convert heavy BMP bitmaps into modern compressed PNG pictures.", descHi: "भारी BMP फोटो को हल्की PNG में बदलें।", iconName: "FileImage", badge: "100% Offline",
+    keywords: ["bmp to png", "convert bmp", "png format"]
+  },
+  {
+    id: "img_tiff_to_jpg", categoryId: "image_tools", titleEn: "TIFF to JPG", titleHi: "TIFF से JPG कनवर्टर",
+    descEn: "Convert scanner TIFF/TIF files into easy-to-share JPG format.", descHi: "स्कैनर की TIFF फाइलों को आम JPG में बदलें।", iconName: "Image", badge: "100% Offline",
+    keywords: ["tiff to jpg", "tif to jpg", "scanner image"]
+  },
+  {
+    id: "img_ico_to_png", categoryId: "image_tools", titleEn: "ICO to PNG", titleHi: "ICO से PNG कनवर्टर",
+    descEn: "Extract favicon and app icon files (.ico) into clean PNG icons.", descHi: "फेविकॉन और ICO फाइलों को PNG आइकन में बदलें।", iconName: "AppWindow", badge: "100% Offline",
+    keywords: ["ico to png", "favicon extractor", "app icon"]
+  },
+  {
+    id: "img_png_to_ico", categoryId: "image_tools", titleEn: "PNG to ICO", titleHi: "PNG से ICO (Favicon मेकर)",
+    descEn: "Create website favicon and Windows app icon (.ico) from any PNG.", descHi: "किसी भी PNG से वेबसाइट फेविकॉन या ICO बनाएं।", iconName: "AppWindow", badge: "100% Offline",
+    keywords: ["png to ico", "favicon maker", "ico generator"]
+  },
+  {
+    id: "img_to_base64", categoryId: "image_tools", titleEn: "Image to Base64", titleHi: "इमेज से Base64 कोड",
+    descEn: "Convert image files into base64 data URI string for web embedding.", descHi: "फोटो को Base64 टेक्स्ट कोड में बदलें (HTML/CSS हेतु)।", iconName: "Binary", badge: "100% Offline",
+    keywords: ["image to base64", "base64 image", "data uri"]
+  },
+  {
+    id: "img_base64_to_img", categoryId: "image_tools", titleEn: "Base64 to Image", titleHi: "Base64 से इमेज मेकर",
+    descEn: "Decode Base64 string data back into a downloadable image file.", descHi: "Base64 कोड को वापस फोटो/इमेज में बदलकर डाउनलोड करें।", iconName: "Image", badge: "100% Offline",
+    keywords: ["base64 to image", "decode base64", "base64 png"]
+  },
+  {
+    id: "img_compressor", categoryId: "image_tools", titleEn: "Image Compressor", titleHi: "इमेज कंप्रेसर (KB घटाएं)",
+    descEn: "Reduce image file size with visual quality slider (10% - 95%).", descHi: "फोटो की क्वालिटी नियंत्रित कर साइज (KB) कम करें।", iconName: "FileArchive", badge: "100% Offline",
+    keywords: ["image compressor", "compress photo", "reduce photo kb"]
+  },
+  {
+    id: "img_resizer", categoryId: "image_tools", titleEn: "Image Resizer", titleHi: "इमेज रीसाइज़र (पिक्सेल बदलें)",
+    descEn: "Change image width and height in pixels with aspect ratio lock.", descHi: "फोटो की चौड़ाई और ऊंचाई (पिक्सेल) अपनी इच्छानुसार बदलें।", iconName: "Maximize", badge: "100% Offline",
+    keywords: ["image resizer", "resize photo", "pixel dimensions"]
+  },
+  {
+    id: "img_cropper", categoryId: "image_tools", titleEn: "Image Cropper", titleHi: "इमेज क्रॉपर (मार्जिन ट्रिम)",
+    descEn: "Crop borders and trim outer margins evenly across the picture.", descHi: "फोटो के बाहरी किनारे व बॉर्डर आसानी से ट्रिम करें।", iconName: "Crop", badge: "100% Offline",
+    keywords: ["image cropper", "crop photo", "trim border"]
+  },
+  {
+    id: "img_rotator", categoryId: "image_tools", titleEn: "Image Rotator", titleHi: "इमेज रोटेटर (घुमाएं)",
+    descEn: "Rotate images 90°, 180°, or 270° clockwise or counter-clockwise.", descHi: "उल्टी या टेढ़ी फोटो को 90°, 180° या 270° सीधा करें।", iconName: "RotateCw", badge: "100% Offline",
+    keywords: ["rotate image", "turn photo", "photo rotator"]
+  },
+  {
+    id: "img_flipper", categoryId: "image_tools", titleEn: "Image Flipper", titleHi: "इमेज फ्लिपर (Mirror / Flip)",
+    descEn: "Flip images horizontally (mirror reflection) or vertically.", descHi: "फोटो को आईने की तरह (Mirror) या उल्टा फ्लिप करें।", iconName: "FlipHorizontal", badge: "100% Offline",
+    keywords: ["flip image", "mirror photo", "flip horizontal"]
+  },
+  {
+    id: "img_border_adder", categoryId: "image_tools", titleEn: "Image Border Adder", titleHi: "फोटो फ्रेम व बॉर्डर मेकर",
+    descEn: "Add stylish colored solid borders or photo frame around pictures.", descHi: "फोटो के चारों ओर रंगीन बॉर्डर या फ्रेम लगाएं।", iconName: "Square", badge: "100% Offline",
+    keywords: ["image border", "photo frame", "add border"]
+  },
+  {
+    id: "img_rounded_corners", categoryId: "image_tools", titleEn: "Image Rounded Corners", titleHi: "गोल किनारे (Rounded Corners)",
+    descEn: "Give smooth modern rounded corners to any rectangular picture.", descHi: "चौकोर फोटो के कोनों को आधुनिक गोल आकार (Rounded) दें।", iconName: "CircleDot", badge: "100% Offline",
+    keywords: ["rounded corners", "round photo", "corner radius"]
   }
 ];

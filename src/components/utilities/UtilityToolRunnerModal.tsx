@@ -11,6 +11,7 @@ import QRCode from "react-qr-code";
 import toast from "react-hot-toast";
 import { UtilityToolDefinition } from "../../data/utilityToolsCatalog";
 import PdfToolsEngine from "./engines/pdfToolsEngine";
+import ImageToolsEngine from "./engines/imageToolsEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -374,6 +375,29 @@ function ToolEngineDispatcher({
     case "pdf_booklet_maker":
     case "pdf_nup_imposition":
       return <PdfToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    // 18. 100% Offline Image Tools Suite (Phase 3 - 20 Tools)
+    case "img_jpg_to_png":
+    case "img_png_to_jpg":
+    case "img_jpg_to_webp":
+    case "img_webp_to_jpg":
+    case "img_png_to_webp":
+    case "img_webp_to_png":
+    case "img_jpg_to_bmp":
+    case "img_bmp_to_png":
+    case "img_tiff_to_jpg":
+    case "img_ico_to_png":
+    case "img_png_to_ico":
+    case "img_to_base64":
+    case "img_base64_to_img":
+    case "img_compressor":
+    case "img_resizer":
+    case "img_cropper":
+    case "img_rotator":
+    case "img_flipper":
+    case "img_border_adder":
+    case "img_rounded_corners":
+      return <ImageToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (
