@@ -386,7 +386,7 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
                 ☀️ {data?.panchang?.sunrise || "—"} • 🌙 {data?.panchang?.sunset || "—"}
               </div>
               {data?.panchang?.unavailable && <div className="text-[10px] text-amber-700">Live Panchang temporarily unavailable</div>}
-            </div>            </div>
+            </div>
           </div>
 
           <div className="mt-2 pt-1.5 border-t border-emerald-100 flex items-center justify-between text-[11px]">
