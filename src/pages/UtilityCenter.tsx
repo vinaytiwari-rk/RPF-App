@@ -2,9 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import {
   ArrowLeft, Search, ShieldCheck, Sparkles, ChevronRight,
-  LayoutGrid, BadgeCheck, FileText, Scale, Sprout, Maximize2,
-  Briefcase, GraduationCap, Store, Landmark, ShieldAlert,
-  HeartPulse, HeartHandshake, Award, Home, Compass, X
+  LayoutGrid, FileText, Image, FileSpreadsheet, FileType, Video, Music, X
 } from "lucide-react";
 import {
   UTILITY_CATEGORIES,
@@ -19,21 +17,12 @@ type Lang = "en" | "hi";
 // Icon mapping for dynamic category chip icons
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   LayoutGrid,
-  BadgeCheck,
   FileText,
-  Scale,
-  Sprout,
-  Maximize2,
-  Briefcase,
-  GraduationCap,
-  Store,
-  Landmark,
-  ShieldAlert,
-  HeartPulse,
-  HeartHandshake,
-  Award,
-  Home,
-  Compass,
+  Image,
+  FileSpreadsheet,
+  FileType,
+  Video,
+  Music,
   ShieldCheck,
 };
 
@@ -99,8 +88,8 @@ export default function UtilityCenter() {
         </h1>
         <p className="mt-1 text-xs sm:text-sm text-[#52685C] max-w-xl">
           {isHi
-            ? "16 महत्वपूर्ण श्रेणियां और 40+ कामकाजी टूल्स—0% सर्वर लोड, 100% ऑफलाइन, सीधे आपके फोन में सुरक्षित।"
-            : "16 essential categories & 40+ practical tools—0% server load, 100% client-side privacy on your device."}
+            ? "PDF, इमेज, Excel, Word, वीडियो और ऑडियो के लिए 6 श्रेणियां—जहाँ संभव हो, काम आपके डिवाइस पर ही।"
+            : "6 file-tool categories for PDF, image, Excel, Word, video and audio workflows—processed locally where supported."}
         </p>
 
         {/* Search Bar */}
