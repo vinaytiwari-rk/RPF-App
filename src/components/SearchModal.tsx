@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Search, X, ChevronRight, Compass, HeartPulse, BriefcaseBusiness, ClipboardList, ShieldAlert, Radio, Tv, Newspaper, Calendar, Heart, FileText, Flame, Wind, Clock, ScanLine, Sparkles, BookOpen, UserRound, Users, FileCheck } from "lucide-react";
+import { Search, X, ChevronRight, Compass, HeartPulse, BriefcaseBusiness, ClipboardList, ShieldAlert, Radio, Tv, Newspaper, Calendar, Heart, FileText, Flame, Wind, Clock, ScanLine, Sparkles, BookOpen, UserRound, Users, FileCheck, Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { VoiceSearch } from "./VoiceSearch";
@@ -36,6 +36,7 @@ const SEARCH_ITEMS: SearchItem[] = [
 
   // Tools & Utilities
   { id: "tools-center", title: "Samahit Utilities", category: "Utilities & Tools", description: "All productivity, health and daily utility tools", keywords: ["tools", "utilities", "center", "apps", "widgets"], route: "/utilities", icon: Sparkles, accent: "bg-indigo-50 text-indigo-600" },
+  { id: "calculator-center", title: "Calculator Center", category: "Utilities & Tools", description: "All calculators in one dedicated directory", keywords: ["calculator", "calculators", "emi", "gst", "bmi", "percentage", "interest"], route: "/utilities/calculators", icon: Calculator, accent: "bg-emerald-50 text-emerald-700" },
   { id: "fasting", title: "Fasting Tracker", category: "Utilities & Tools", description: "Track Vrat, Fasting windows and wellness routines", keywords: ["fasting", "vrat", "upvas", "health", "diet", "tracker"], route: "/utilities/fasting-tracker", icon: Flame, accent: "bg-orange-50 text-orange-600" },
   { id: "breathing", title: "Breathing Meditator", category: "Utilities & Tools", description: "Pranayama and guided deep breathing exercise", keywords: ["meditation", "breath", "pranayama", "relax", "yoga", "mindfulness"], route: "/utilities/breathing-meditator", icon: Wind, accent: "bg-sky-50 text-sky-600" },
   { id: "doc-scanner", title: "Document Scanner", category: "Utilities & Tools", description: "Scan documents, ID cards and papers using camera", keywords: ["scan", "scanner", "doc", "pdf", "camera", "photo"], route: "/doc-scanner", icon: ScanLine, accent: "bg-emerald-50 text-emerald-600" },
@@ -187,7 +188,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
                 <div className="py-12 text-center">
                   <Search className="mx-auto h-10 w-10 text-slate-300" />
                   <p className="mt-3 text-[14px] font-bold text-slate-700">No results found for "{query}"</p>
-                  <p className="mt-1 text-[11px] text-slate-400">Try searching for "Jan Seva", "Blood", "Jobs", "Radio" or "Calculators"</p>
+                  <p className="mt-1 text-[11px] text-slate-400">Try searching for "Jan Seva", "Blood", "Jobs", "Radio" or "Calculator Center"</p>
                 </div>
               )
             ) : (
