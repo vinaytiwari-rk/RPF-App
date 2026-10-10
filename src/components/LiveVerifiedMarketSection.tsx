@@ -116,9 +116,10 @@ type ActiveSheet = null | "panchang" | "bullion" | "vegetables" | "mandi" | "fue
 
 export interface LiveVerifiedMarketSectionProps {
   marketConfig?: any;
+  mode?: "all" | "panchang" | "market";
 }
 
-export default function LiveVerifiedMarketSection({ marketConfig }: LiveVerifiedMarketSectionProps = {}) {
+export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }: LiveVerifiedMarketSectionProps = {}) {
   const { cmsConfig } = useApp();
   const activeMarketConfig = marketConfig || cmsConfig?.marketConfig;
 
@@ -276,13 +277,13 @@ export default function LiveVerifiedMarketSection({ marketConfig }: LiveVerified
     return null;
   }
 
-  const panchangEnabled = activeMarketConfig?.panchangEnabled !== false;
-  const goldSilverEnabled = activeMarketConfig?.goldSilverEnabled !== false;
-  const vegetableEnabled = activeMarketConfig?.vegetableEnabled !== false;
-  const fuelEnabled = activeMarketConfig?.fuelEnabled !== false;
-  const mandiEnabled = activeMarketConfig?.mandiEnabled !== false;
+  const panchangEnabled = mode !== "market" && activeMarketConfig?.panchangEnabled !== false;
+  const goldSilverEnabled = mode !== "panchang" && activeMarketConfig?.goldSilverEnabled !== false;
+  const vegetableEnabled = mode !== "panchang" && activeMarketConfig?.vegetableEnabled !== false;
+  const fuelEnabled = mode !== "panchang" && activeMarketConfig?.fuelEnabled !== false;
+  const mandiEnabled = mode !== "panchang" && activeMarketConfig?.mandiEnabled !== false;
 
-  const customItems = Array.isArray(activeMarketConfig?.marketItems)
+  const customItems = mode !== "panchang" && Array.isArray(activeMarketConfig?.marketItems)
     ? activeMarketConfig.marketItems.filter((m: any) => m.category === "custom" && m.active !== false)
     : [];
 
@@ -296,7 +297,7 @@ export default function LiveVerifiedMarketSection({ marketConfig }: LiveVerified
         <div className="flex items-center gap-1.5 min-w-0">
           <ShieldCheck className="h-4 w-4 text-[#167C5A] shrink-0" />
           <h2 className="text-[13px] sm:text-[14px] font-black uppercase tracking-wider text-[#14213D] truncate">
-            Live Market & Panchang
+            {mode === "panchang" ? "Panchang" : mode === "market" ? "Live Market" : "Live Market & Panchang"}
           </h2>
         </div>
 
