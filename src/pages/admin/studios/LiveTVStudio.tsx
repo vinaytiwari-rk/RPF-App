@@ -51,7 +51,7 @@ export interface EpaperItem {
 }
 
 const DEFAULT_RADIO_STATIONS: RadioStation[] = [
-  ...rawChannels.slice(0, 30).map((s: any, idx: number) => ({
+  ...rawChannels.map((s: any, idx: number) => ({
     id: `akashvani-${idx + 1}`,
     name: s.name,
     url: s.url,
@@ -60,7 +60,7 @@ const DEFAULT_RADIO_STATIONS: RadioStation[] = [
     image: s.image,
     enabled: true
   })),
-  ...privateFm.slice(0, 20).map((s: any, idx: number) => ({
+  ...privateFm.map((s: any, idx: number) => ({
     id: `fm-${idx + 1}`,
     name: s.name,
     url: s.url,
@@ -70,6 +70,28 @@ const DEFAULT_RADIO_STATIONS: RadioStation[] = [
     enabled: true
   }))
 ];
+
+const normalizeRadioName = (name: string) => name.trim().toLocaleLowerCase();
+
+const mergeRadioCatalogue = (configured: unknown): RadioStation[] => {
+  const merged = new Map<string, RadioStation>();
+  DEFAULT_RADIO_STATIONS.forEach((station, index) => {
+    const key = normalizeRadioName(station.name);
+    if (key && (station.url.startsWith("http://") || station.url.startsWith("https://"))) {
+      merged.set(key, { ...station, enabled: station.enabled !== false });
+    }
+  });
+  if (Array.isArray(configured)) {
+    configured.forEach((value) => {
+      const station = value as RadioStation;
+      if (!station || typeof station.name !== "string" || !station.name.trim() ||
+          typeof station.url !== "string" || !(station.url.startsWith("http://") || station.url.startsWith("https://"))) return;
+      const key = normalizeRadioName(station.name);
+      merged.set(key, { ...merged.get(key), ...station, enabled: station.enabled !== false });
+    });
+  }
+  return [...merged.values()];
+};
 
 export default function LiveTVStudio() {
   const [activeTab, setActiveTab] = useState<MediaType>("tv");
@@ -119,7 +141,7 @@ export default function LiveTVStudio() {
 
       // Internet Radio Stations (respect saved array even if empty)
       if (Array.isArray(cms.internetRadioStations)) {
-        setRadioStations(cms.internetRadioStations);
+        setRadioStations(mergeRadioCatalogue(cms.internetRadioStations));
       } else {
         setRadioStations(DEFAULT_RADIO_STATIONS);
       }
