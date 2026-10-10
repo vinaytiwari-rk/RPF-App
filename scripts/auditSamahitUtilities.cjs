@@ -50,6 +50,7 @@ console.log(` - Catalog tools: ${tools.length}`);
 console.log(" - Audit evaluated catalog and dispatcher from the same checked-out commit");
 console.log(` - Unique dispatcher handlers: ${uniqueCases.length}`);
 console.log(" - Catalog/dispatcher mapping: complete, no duplicates");
+console.log(" - All checks run against the same commit checkout");
 console.log(" - Native Android save path: present in both utility interfaces");
 console.log(" - Everyday PDF export bypass: none detected");
 console.log(" - Direct network requests in main utility engine: none detected");
