@@ -292,8 +292,8 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
 
   return (
     <section className="pt-2">
-      {/* SECTION HEADER WITH LOCATION SELECTOR & VIEW MODE TOGGLE */}
-      <div className="mb-2.5 flex items-center justify-between px-0.5 gap-2">
+      {/* Market controls are only shown outside the compact Home Panchang card. */}
+      {mode !== "panchang" && <div className="mb-2.5 flex items-center justify-between px-0.5 gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <ShieldCheck className="h-4 w-4 text-[#167C5A] shrink-0" />
           <h2 className="text-[13px] sm:text-[14px] font-black uppercase tracking-wider text-[#14213D] truncate">
@@ -333,12 +333,14 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
             <ChevronDown className="h-3 w-3 text-emerald-600" />
           </button>
         </div>
-      </div>
+      </div>}
 
       {/* 5 CARDS CONTAINER: GRID VIEW (ALL 5 FULLY VISIBLE) OR HORIZONTAL SWIPE */}
       <div
         className={
-          viewMode === "grid"
+          mode === "panchang"
+            ? "grid grid-cols-1 gap-2 pt-0.5 pb-1"
+            : viewMode === "grid"
             ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-0.5 pb-1"
             : "flex gap-2.5 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none snap-x snap-mandatory"
         }
@@ -349,36 +351,36 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("panchang")}
           className={`${
-            viewMode === "scroll" ? "snap-start min-w-[215px] sm:min-w-[235px] flex-1" : ""
+            mode === "panchang" ? "w-full" : viewMode === "scroll" ? "snap-start min-w-[215px] sm:min-w-[235px] flex-1" : ""
           } rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 p-3 shadow-2xs cursor-pointer hover:border-emerald-400 transition-all flex flex-col justify-between`}
         >
           <div>
             <div className="flex items-center justify-between text-[#15803D]">
               <div className="flex items-center gap-1.5">
                 <Sun className="h-4 w-4 text-[#16A34A] shrink-0" />
-                <span className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider">Panchang</span>
+                <span className="text-[11px] sm:text-xs font-semibold tracking-normal">Aaj ka Panchang</span>
               </div>
-              <span className="text-[8.5px] font-bold text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md">
+              <span className="text-[9px] font-medium text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md">
                 वैदिक • Live
               </span>
             </div>
 
             <div className="mt-2 space-y-0.5">
-              <div className="text-[12.5px] sm:text-[13px] font-bold text-[#14213D] line-clamp-1">
+              <div className="text-[13px] sm:text-sm font-semibold text-[#14213D] line-clamp-1">
                 {data?.panchang?.tithi || (isLoadingData ? "Fetching Panchang…" : "Krishna Saptami / Ashtami")}
               </div>
-              <div className="text-[10.5px] sm:text-[11px] font-semibold text-emerald-800 line-clamp-1">
+              <div className="text-[11px] sm:text-xs font-medium text-emerald-800 line-clamp-1">
                 {data?.panchang?.samvat || "Vikram Samvat 2083"}
               </div>
-              <div className="text-[10px] text-slate-500 font-medium line-clamp-1">
+              <div className="text-[11px] text-slate-600 font-normal line-clamp-1">
                 ☀️ {data?.panchang?.sunrise || "05:38 AM"} • 🌙 {data?.panchang?.sunset || "05:31 PM"}
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-1.5 border-t border-emerald-100 flex items-center justify-between text-[10px]">
-            <span className="text-emerald-800 font-bold">Muhurat & Timings</span>
-            <span className="text-[#15803D] font-extrabold flex items-center">
+          <div className="mt-2 pt-1.5 border-t border-emerald-100 flex items-center justify-between text-[11px]">
+            <span className="text-emerald-800 font-medium">Muhurat & Timings</span>
+            <span className="text-[#15803D] font-semibold flex items-center">
               View <ChevronRight className="h-3 w-3" />
             </span>
           </div>
