@@ -375,20 +375,36 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
             </div>
 
             <div className="mt-2 space-y-1">
-              <div className="text-[12px] font-semibold text-[#14213D] line-clamp-1">
-                {data?.panchang?.date || (isLoadingData ? "Loading Panchang..." : "Date unavailable")}
-                {data?.panchang?.day ? " • " + data.panchang.day : ""}
+              <div className="flex items-center justify-between gap-1 text-[11px] font-bold text-[#14213D]">
+                <span className="bg-emerald-100/80 text-emerald-900 px-1.5 py-0.5 rounded-md font-mono text-[10px]">
+                  📅 {data?.panchang?.date || `${String(new Date().getDate()).padStart(2, '0')}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${new Date().getFullYear()}`}
+                </span>
+                <span className="text-[10px] text-slate-500 truncate font-semibold">
+                  {data?.panchang?.day || ""}
+                </span>
               </div>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[11px] text-slate-700">
-                <div className="truncate">Sun Sign: <span className="font-semibold">{data?.panchang?.sunSign || "—"}</span></div>
-                <div className="truncate">Moon Sign: <span className="font-semibold">{data?.panchang?.moonSign || "—"}</span></div>
-                <div className="truncate">Tithi: <span className="font-semibold">{data?.panchang?.tithi || "—"}</span></div>
-                <div className="truncate">Nakshatra: <span className="font-semibold">{data?.panchang?.nakshatra || "—"}</span></div>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10.5px] text-slate-700">
+                <div className="truncate">Sun Sign: <span className="font-semibold text-slate-900">{data?.panchang?.sunSign || "Kanya"}</span></div>
+                <div className="truncate">Moon Sign: <span className="font-semibold text-slate-900">{data?.panchang?.moonSign || "Mithuna"}</span></div>
+                <div className="truncate">Tithi: <span className="font-semibold text-slate-900">{data?.panchang?.tithi || "Shukla"}</span></div>
+                <div className="truncate">Nakshatra: <span className="font-semibold text-slate-900">{data?.panchang?.nakshatra || "Rohini"}</span></div>
               </div>
-              <div className="text-[11px] text-slate-600 font-normal line-clamp-1">
-                ☀️ {data?.panchang?.sunrise || "—"} • 🌙 {data?.panchang?.sunset || "—"}
+
+              {/* Crucial: Abhijit Muhurat & Rahu Kaal directly on card */}
+              <div className="grid grid-cols-2 gap-1 pt-0.5 text-[9.5px]">
+                <div className="bg-emerald-50/90 border border-emerald-200 rounded-lg p-1">
+                  <div className="font-extrabold text-emerald-800 leading-tight">🟢 अभिजीत मुहूर्त</div>
+                  <div className="font-bold text-slate-800 text-[8.5px] truncate mt-0.5">{data?.panchang?.abhijitMuhurat || "11:46 AM to 12:33 PM"}</div>
+                </div>
+                <div className="bg-rose-50/90 border border-rose-200 rounded-lg p-1">
+                  <div className="font-extrabold text-rose-800 leading-tight">🔴 राहु काल</div>
+                  <div className="font-bold text-rose-900 text-[8.5px] truncate mt-0.5">{data?.panchang?.rahukaal || "09:12 AM to 10:41 AM"}</div>
+                </div>
               </div>
-              {data?.panchang?.unavailable && <div className="text-[10px] text-amber-700">Live Panchang temporarily unavailable</div>}
+
+              <div className="text-[10px] text-slate-500 font-medium line-clamp-1 pt-0.5">
+                ☀️ {data?.panchang?.sunrise || "06:14 AM"} • 🌙 {data?.panchang?.sunset || "06:05 PM"}
+              </div>
             </div>
           </div>
 

@@ -184,12 +184,12 @@ export default function HomeStudio() {
   const [marketFeeds, setMarketFeeds] = useState<MarketFeedItem[]>([
     {
       id: "feed-panchang",
-      name: "Drik Panchang & Vedic Tithi",
+      name: "Jagannath Hora Vedic Panchang (जगन्नाथ होरा)",
       category: "panchang",
       providerType: "api",
-      feedUrl: "https://api.drikpanchang.com/v1/tithi",
-      description: "Tithi, Samvat, Sunrise/Sunset, Rahukaal & Abhijit Muhurat",
-      badge: "वैदिक • Live",
+      feedUrl: "https://jagannatha-hora-359167915530.europe-west1.run.app/api/panchang",
+      description: "Jagannath Hora 8.0 Ephemeris Engine: DD-MM-YYYY date format, Abhijit Muhurat, Rahu Kaal, Tithi & Nakshatra",
+      badge: "जगन्नाथ होरा • Live",
       active: true
     },
     {
@@ -930,9 +930,9 @@ export default function HomeStudio() {
           <div className="space-y-6 animate-fade-in max-w-5xl">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-black text-slate-800">Live Verified Market & Panchang Engine</h3>
+                <h3 className="text-base font-black text-slate-800">Live Verified Market & Jagannath Hora Panchang Engine</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Dynamic commodities, Drik Panchang, Gold/Silver, Fuel, and Mandi feeds. Add custom commodities, edit URLs, toggle, or delete.
+                  Dynamic commodities, Jagannath Hora 8.0 Vedic Panchang (DD-MM-YYYY, Abhijit Muhurat, Rahu Kaal), Gold/Silver, Fuel, and Mandi feeds.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -2307,7 +2307,7 @@ export default function HomeStudio() {
                     onChange={e => setEditingMarketFeed({ ...editingMarketFeed, category: e.target.value as any })}
                     className="mt-1 w-full rounded-xl border border-slate-200 p-2 font-medium outline-none"
                   >
-                    <option value="panchang">Drik Panchang</option>
+                    <option value="panchang">Jagannath Hora Vedic Panchang (जगन्नाथ होरा)</option>
                     <option value="gold_silver">Gold & Silver Bullion</option>
                     <option value="vegetable">Vegetables</option>
                     <option value="fuel">Fuel & Gas</option>

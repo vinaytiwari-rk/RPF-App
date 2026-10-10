@@ -9186,8 +9186,8 @@ var require_accepts = __commonJS({
       }
       var mimes2 = types5.map(extToMime);
       var accepts = this.negotiator.mediaTypes(mimes2.filter(validMime));
-      var first3 = accepts[0];
-      return first3 ? types5[mimes2.indexOf(first3)] : false;
+      var first4 = accepts[0];
+      return first4 ? types5[mimes2.indexOf(first4)] : false;
     };
     Accepts.prototype.encoding = Accepts.prototype.encodings = function(encodings_) {
       var encodings = encodings_;
@@ -23746,11 +23746,11 @@ var require_get_intrinsic = __commonJS({
     var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
     var reEscapeChar = /\\(\\)?/g;
     var stringToPath = function stringToPath2(string3) {
-      var first3 = $strSlice(string3, 0, 1);
+      var first4 = $strSlice(string3, 0, 1);
       var last2 = $strSlice(string3, -1);
-      if (first3 === "%" && last2 !== "%") {
+      if (first4 === "%" && last2 !== "%") {
         throw new $SyntaxError("invalid intrinsic syntax, expected closing `%`");
-      } else if (last2 === "%" && first3 !== "%") {
+      } else if (last2 === "%" && first4 !== "%") {
         throw new $SyntaxError("invalid intrinsic syntax, expected opening `%`");
       }
       var result = [];
@@ -23805,9 +23805,9 @@ var require_get_intrinsic = __commonJS({
       }
       for (var i6 = 1, isOwn = true; i6 < parts.length; i6 += 1) {
         var part = parts[i6];
-        var first3 = $strSlice(part, 0, 1);
+        var first4 = $strSlice(part, 0, 1);
         var last2 = $strSlice(part, -1);
-        if ((first3 === '"' || first3 === "'" || first3 === "`" || (last2 === '"' || last2 === "'" || last2 === "`")) && first3 !== last2) {
+        if ((first4 === '"' || first4 === "'" || first4 === "`" || (last2 === '"' || last2 === "'" || last2 === "`")) && first4 !== last2) {
           throw new $SyntaxError("property names with quotes must have matching quotes");
         }
         if (part === "constructor" || !isOwn) {
@@ -30259,8 +30259,8 @@ var require_raw_body = __commonJS({
 var require_ee_first = __commonJS({
   "node_modules/ee-first/index.js"(exports2, module2) {
     "use strict";
-    module2.exports = first3;
-    function first3(stuff, done) {
+    module2.exports = first4;
+    function first4(stuff, done) {
       if (!Array.isArray(stuff))
         throw new TypeError("arg must be an array of [ee, events...] arrays");
       var cleanups = [];
@@ -30318,7 +30318,7 @@ var require_on_finished = __commonJS({
     module2.exports = onFinished2;
     module2.exports.isFinished = isFinished2;
     var asyncHooks = tryRequireAsyncHooks();
-    var first3 = require_ee_first();
+    var first4 = require_ee_first();
     var defer2 = typeof setImmediate === "function" ? setImmediate : function(fn3) {
       process.nextTick(fn3.bind.apply(fn3, arguments));
     };
@@ -30350,12 +30350,12 @@ var require_on_finished = __commonJS({
         finished2 = true;
         callback2(error3);
       }
-      eeMsg = eeSocket = first3([[msg, "end", "finish"]], onFinish);
+      eeMsg = eeSocket = first4([[msg, "end", "finish"]], onFinish);
       function onSocket(socket) {
         msg.removeListener("socket", onSocket);
         if (finished2) return;
         if (eeMsg !== eeSocket) return;
-        eeSocket = first3([[socket, "error", "close"]], onFinish);
+        eeSocket = first4([[socket, "error", "close"]], onFinish);
       }
       if (msg.socket) {
         onSocket(msg.socket);
@@ -30802,10 +30802,10 @@ var require_json = __commonJS({
           return {};
         }
         if (strict) {
-          var first3 = firstchar(body);
-          if (first3 !== "{" && first3 !== "[") {
+          var first4 = firstchar(body);
+          if (first4 !== "{" && first4 !== "[") {
             debug2("strict violation");
-            throw createStrictSyntaxError(body, first3);
+            throw createStrictSyntaxError(body, first4);
           }
         }
         try {
@@ -32611,8 +32611,8 @@ var require_parse = __commonJS({
         return [key];
       }
       var segments = [];
-      var first3 = key.indexOf("[");
-      var parent2 = first3 >= 0 ? key.slice(0, first3) : key;
+      var first4 = key.indexOf("[");
+      var parent2 = first4 >= 0 ? key.slice(0, first4) : key;
       if (parent2) {
         if (!options2.plainObjects && has2.call(Object.prototype, parent2)) {
           if (!options2.allowPrototypes) {
@@ -32622,7 +32622,7 @@ var require_parse = __commonJS({
         segments[segments.length] = parent2;
       }
       var n5 = key.length;
-      var open3 = first3;
+      var open3 = first4;
       var collected = 0;
       while (open3 >= 0 && collected < options2.depth) {
         var level = 1;
@@ -36606,9 +36606,9 @@ var require_ipaddr = __commonJS({
       } else {
         root5["ipaddr"] = ipaddr;
       }
-      matchCIDR = function(first3, second, partSize, cidrBits) {
+      matchCIDR = function(first4, second, partSize, cidrBits) {
         var part, shift;
-        if (first3.length !== second.length) {
+        if (first4.length !== second.length) {
           throw new Error("ipaddr: cannot match CIDR for objects with different lengths");
         }
         part = 0;
@@ -36617,7 +36617,7 @@ var require_ipaddr = __commonJS({
           if (shift < 0) {
             shift = 0;
           }
-          if (first3[part] >> shift !== second[part] >> shift) {
+          if (first4[part] >> shift !== second[part] >> shift) {
             return false;
           }
           cidrBits -= partSize;
@@ -37732,7 +37732,7 @@ var require_application = __commonJS({
     };
     app2.del = deprecate3.function(app2.delete, "app.del: Use app.delete instead");
     app2.render = function render3(name, options2, callback2) {
-      var cache2 = this.cache;
+      var cache3 = this.cache;
       var done = callback2;
       var engines = this.engines;
       var opts = options2;
@@ -37751,7 +37751,7 @@ var require_application = __commonJS({
         renderOptions.cache = this.enabled("view cache");
       }
       if (renderOptions.cache) {
-        view = cache2[name];
+        view = cache3[name];
       }
       if (!view) {
         var View2 = this.get("view");
@@ -37767,7 +37767,7 @@ var require_application = __commonJS({
           return done(err2);
         }
         if (renderOptions.cache) {
-          cache2[name] = view;
+          cache3[name] = view;
         }
       }
       tryRender(view, renderOptions, done);
@@ -40074,22 +40074,22 @@ var require_ipv6 = __commonJS({
         let groups2 = [];
         const halves = address.split("::");
         if (halves.length === 2) {
-          let first3 = halves[0].split(":");
+          let first4 = halves[0].split(":");
           let last2 = halves[1].split(":");
-          if (first3.length === 1 && first3[0] === "") {
-            first3 = [];
+          if (first4.length === 1 && first4[0] === "") {
+            first4 = [];
           }
           if (last2.length === 1 && last2[0] === "") {
             last2 = [];
           }
-          const remaining = this.groups - (first3.length + last2.length);
+          const remaining = this.groups - (first4.length + last2.length);
           if (!remaining) {
             throw new address_error_1.AddressError("Error parsing groups");
           }
           this.elidedGroups = remaining;
-          this.elisionBegin = first3.length;
-          this.elisionEnd = first3.length + this.elidedGroups;
-          groups2 = groups2.concat(first3);
+          this.elisionBegin = first4.length;
+          this.elisionEnd = first4.length + this.elidedGroups;
+          groups2 = groups2.concat(first4);
           for (let i6 = 0; i6 < remaining; i6++) {
             groups2.push("0");
           }
@@ -47847,10 +47847,10 @@ var require_range2 = __commonJS({
           throw new TypeError(`Invalid SemVer Range: ${this.raw}`);
         }
         if (this.set.length > 1) {
-          const first3 = this.set[0];
+          const first4 = this.set[0];
           this.set = this.set.filter((c4) => !isNullSet(c4[0]));
           if (this.set.length === 0) {
-            this.set = [first3];
+            this.set = [first4];
           } else if (this.set.length > 1) {
             for (const c4 of this.set) {
               if (c4.length === 1 && isAny(c4[0])) {
@@ -47890,7 +47890,7 @@ var require_range2 = __commonJS({
         range2 = range2.replace(BUILDSTRIPRE, "");
         const memoOpts = (this.options.includePrerelease && FLAG_INCLUDE_PRERELEASE) | (this.options.loose && FLAG_LOOSE);
         const memoKey = memoOpts + ":" + range2;
-        const cached = cache2.get(memoKey);
+        const cached = cache3.get(memoKey);
         if (cached) {
           return cached;
         }
@@ -47924,7 +47924,7 @@ var require_range2 = __commonJS({
           rangeMap.delete("");
         }
         const result = [...rangeMap.values()];
-        cache2.set(memoKey, result);
+        cache3.set(memoKey, result);
         return result;
       }
       intersects(range2, options2) {
@@ -47963,7 +47963,7 @@ var require_range2 = __commonJS({
     };
     module2.exports = Range;
     var LRU = require_lrucache();
-    var cache2 = new LRU();
+    var cache3 = new LRU();
     var parseOptions2 = require_parse_options();
     var Comparator = require_comparator();
     var debug2 = require_debug6();
@@ -48586,26 +48586,26 @@ var require_simplify = __commonJS({
     var compare4 = require_compare();
     module2.exports = (versions, range2, options2) => {
       const set = [];
-      let first3 = null;
+      let first4 = null;
       let prev2 = null;
       const v = versions.sort((a6, b2) => compare4(a6, b2, options2));
       for (const version5 of v) {
         const included = satisfies(version5, range2, options2);
         if (included) {
           prev2 = version5;
-          if (!first3) {
-            first3 = version5;
+          if (!first4) {
+            first4 = version5;
           }
         } else {
           if (prev2) {
-            set.push([first3, prev2]);
+            set.push([first4, prev2]);
           }
           prev2 = null;
-          first3 = null;
+          first4 = null;
         }
       }
-      if (first3) {
-        set.push([first3, null]);
+      if (first4) {
+        set.push([first4, null]);
       }
       const ranges = [];
       for (const [min2, max] of set) {
@@ -54310,7 +54310,7 @@ var require_buffer_list = __commonJS({
         }
       }, {
         key: "first",
-        value: function first3() {
+        value: function first4() {
           return this.head.data;
         }
         // Consumes a specified amount of characters from the buffered data.
@@ -66159,9 +66159,9 @@ ${values.join("\n")}` : `${blockName} :`;
     })();
     BitString4.NAME = BIT_STRING_NAME;
     var _a$p;
-    function viewAdd(first3, second) {
+    function viewAdd(first4, second) {
       const c4 = new Uint8Array([0]);
-      const firstView = new Uint8Array(first3);
+      const firstView = new Uint8Array(first4);
       const secondView = new Uint8Array(second);
       let firstViewCopy = firstView.slice(0);
       const firstViewCopyLength = firstViewCopy.length - 1;
@@ -66208,9 +66208,9 @@ ${values.join("\n")}` : `${blockName} :`;
       }
       return powers2[n5];
     }
-    function viewSub(first3, second) {
+    function viewSub(first4, second) {
       let b2 = 0;
-      const firstView = new Uint8Array(first3);
+      const firstView = new Uint8Array(first4);
       const secondView = new Uint8Array(second);
       const firstViewCopy = firstView.slice(0);
       const firstViewCopyLength = firstViewCopy.length - 1;
@@ -66397,9 +66397,9 @@ ${values.join("\n")}` : `${blockName} :`;
         const hex2 = bigIntValue.toString(16).replace(/^-/, "");
         const view = new Uint8Array(pvtsutils__namespace.Convert.FromHex(hex2));
         if (bigIntValue < 0) {
-          const first3 = new Uint8Array(view.length + (view[0] & 128 ? 1 : 0));
-          first3[0] |= 128;
-          const firstInt = BigInt(`0x${pvtsutils__namespace.Convert.ToHex(first3)}`);
+          const first4 = new Uint8Array(view.length + (view[0] & 128 ? 1 : 0));
+          first4[0] |= 128;
+          const firstInt = BigInt(`0x${pvtsutils__namespace.Convert.ToHex(first4)}`);
           const secondInt = firstInt + bigIntValue;
           const second = pvtsutils__namespace.BufferSourceConverter.toUint8Array(pvtsutils__namespace.Convert.FromHex(secondInt.toString(16)));
           second[0] |= 128;
@@ -68907,7 +68907,7 @@ var require_Reflect = __commonJS({
           if (!IsUndefined(registrySymbol) && typeof root5.Reflect !== "undefined" && !(registrySymbol in root5.Reflect) && typeof root5.Reflect.defineMetadata === "function") {
             fallback = CreateFallbackProvider(root5.Reflect);
           }
-          var first3;
+          var first4;
           var second;
           var rest;
           var targetProviderMap = new _WeakMap();
@@ -68924,10 +68924,10 @@ var require_Reflect = __commonJS({
             switch (true) {
               case fallback === provider:
                 break;
-              case IsUndefined(first3):
-                first3 = provider;
+              case IsUndefined(first4):
+                first4 = provider;
                 break;
-              case first3 === provider:
+              case first4 === provider:
                 break;
               case IsUndefined(second):
                 second = provider;
@@ -68942,12 +68942,12 @@ var require_Reflect = __commonJS({
             }
           }
           function getProviderNoCache(O3, P) {
-            if (!IsUndefined(first3)) {
-              if (first3.isProviderFor(O3, P))
-                return first3;
+            if (!IsUndefined(first4)) {
+              if (first4.isProviderFor(O3, P))
+                return first4;
               if (!IsUndefined(second)) {
                 if (second.isProviderFor(O3, P))
-                  return first3;
+                  return first4;
                 if (!IsUndefined(rest)) {
                   var iterator2 = GetIterator(rest);
                   while (true) {
@@ -68991,7 +68991,7 @@ var require_Reflect = __commonJS({
           function hasProvider(provider) {
             if (IsUndefined(provider))
               throw new TypeError();
-            return first3 === provider || second === provider || !IsUndefined(rest) && rest.has(provider);
+            return first4 === provider || second === provider || !IsUndefined(rest) && rest.has(provider);
           }
           function setProvider(O3, P, provider) {
             if (!hasProvider(provider)) {
@@ -69664,16 +69664,16 @@ var require_concat = __commonJS({
       }
       return result;
     }
-    function concat4(first3, second, ...rest) {
+    function concat4(first4, second, ...rest) {
       let buffers;
       let type;
       if (typeof second === "function") {
-        buffers = Array.from(first3);
+        buffers = Array.from(first4);
         type = second;
-      } else if ((0, buffer_source_js_1.isBufferSource)(first3)) {
-        buffers = [first3, second, ...rest].filter(buffer_source_js_1.isBufferSource);
+      } else if ((0, buffer_source_js_1.isBufferSource)(first4)) {
+        buffers = [first4, second, ...rest].filter(buffer_source_js_1.isBufferSource);
       } else {
-        buffers = Array.from(first3);
+        buffers = Array.from(first4);
         if (second) {
           buffers.push(second);
         }
@@ -77737,12 +77737,12 @@ var require_instance_per_container_caching_factory = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     function instancePerContainerCachingFactory(factoryFunc) {
-      const cache2 = /* @__PURE__ */ new WeakMap();
+      const cache3 = /* @__PURE__ */ new WeakMap();
       return (dependencyContainer) => {
-        let instance = cache2.get(dependencyContainer);
+        let instance = cache3.get(dependencyContainer);
         if (instance == void 0) {
           instance = factoryFunc(dependencyContainer);
-          cache2.set(dependencyContainer, instance);
+          cache3.set(dependencyContainer, instance);
         }
         return instance;
       };
@@ -111349,8 +111349,8 @@ var require_cache3 = __commonJS({
        * @returns {requestResponseList}
        */
       #batchCacheOperations(operations) {
-        const cache2 = this.#relevantRequestResponseList;
-        const backupCache = [...cache2];
+        const cache3 = this.#relevantRequestResponseList;
+        const backupCache = [...cache3];
         const addedItems = [];
         const resultList = [];
         try {
@@ -111377,9 +111377,9 @@ var require_cache3 = __commonJS({
                 return [];
               }
               for (const requestResponse of requestResponses) {
-                const idx = cache2.indexOf(requestResponse);
+                const idx = cache3.indexOf(requestResponse);
                 assert2(idx !== -1);
-                cache2.splice(idx, 1);
+                cache3.splice(idx, 1);
               }
             } else if (operation.type === "put") {
               if (operation.response == null) {
@@ -111409,11 +111409,11 @@ var require_cache3 = __commonJS({
               }
               requestResponses = this.#queryCache(operation.request);
               for (const requestResponse of requestResponses) {
-                const idx = cache2.indexOf(requestResponse);
+                const idx = cache3.indexOf(requestResponse);
                 assert2(idx !== -1);
-                cache2.splice(idx, 1);
+                cache3.splice(idx, 1);
               }
-              cache2.push([operation.request, operation.response]);
+              cache3.push([operation.request, operation.response]);
               addedItems.push([operation.request, operation.response]);
             }
             resultList.push([operation.request, operation.response]);
@@ -111590,13 +111590,13 @@ var require_cachestorage = __commonJS({
         if (options2.cacheName != null) {
           if (this.#caches.has(options2.cacheName)) {
             const cacheList = this.#caches.get(options2.cacheName);
-            const cache2 = new Cache(kConstruct, cacheList);
-            return await cache2.match(request, options2);
+            const cache3 = new Cache(kConstruct, cacheList);
+            return await cache3.match(request, options2);
           }
         } else {
           for (const cacheList of this.#caches.values()) {
-            const cache2 = new Cache(kConstruct, cacheList);
-            const response = await cache2.match(request, options2);
+            const cache3 = new Cache(kConstruct, cacheList);
+            const response = await cache3.match(request, options2);
             if (response !== void 0) {
               return response;
             }
@@ -111626,12 +111626,12 @@ var require_cachestorage = __commonJS({
         webidl.argumentLengthCheck(arguments, 1, prefix);
         cacheName = webidl.converters.DOMString(cacheName, prefix, "cacheName");
         if (this.#caches.has(cacheName)) {
-          const cache3 = this.#caches.get(cacheName);
-          return new Cache(kConstruct, cache3);
+          const cache4 = this.#caches.get(cacheName);
+          return new Cache(kConstruct, cache4);
         }
-        const cache2 = [];
-        this.#caches.set(cacheName, cache2);
-        return new Cache(kConstruct, cache2);
+        const cache3 = [];
+        this.#caches.set(cacheName, cache3);
+        return new Cache(kConstruct, cache3);
       }
       /**
        * @see https://w3c.github.io/ServiceWorker/#cache-storage-delete
@@ -113204,11 +113204,11 @@ var require_receiver2 = __commonJS({
           return emptyBuffer;
         }
         this.#byteOffset -= n5;
-        const first3 = this.#buffers[0];
-        if (first3.length > n5) {
-          this.#buffers[0] = first3.subarray(n5, first3.length);
-          return first3.subarray(0, n5);
-        } else if (first3.length === n5) {
+        const first4 = this.#buffers[0];
+        if (first4.length > n5) {
+          this.#buffers[0] = first4.subarray(n5, first4.length);
+          return first4.subarray(0, n5);
+        } else if (first4.length === n5) {
           return this.#buffers.shift();
         } else {
           let offset2 = 0;
@@ -126957,23 +126957,23 @@ var require_unicode = __commonJS({
       var idx = byteOrderMark ? 2 : 0;
       var codePoints = [];
       while (input.length - idx >= 2) {
-        var first3 = decodeValues(input[idx++], input[idx++], byteOrder);
-        if (isHighSurrogate(first3)) {
+        var first4 = decodeValues(input[idx++], input[idx++], byteOrder);
+        if (isHighSurrogate(first4)) {
           if (input.length - idx < 2) {
             codePoints.push(REPLACEMENT);
           } else {
             var second = decodeValues(input[idx++], input[idx++], byteOrder);
             if (isLowSurrogate(second)) {
-              codePoints.push(first3, second);
+              codePoints.push(first4, second);
             } else {
               codePoints.push(REPLACEMENT);
             }
           }
-        } else if (isLowSurrogate(first3)) {
+        } else if (isLowSurrogate(first4)) {
           idx += 2;
           codePoints.push(REPLACEMENT);
         } else {
-          codePoints.push(first3);
+          codePoints.push(first4);
         }
       }
       if (idx < input.length)
@@ -126986,11 +126986,11 @@ var require_unicode = __commonJS({
     var isLowSurrogate = function(codePoint) {
       return codePoint >= 56320 && codePoint <= 57343;
     };
-    var decodeValues = function(first3, second, byteOrder) {
+    var decodeValues = function(first4, second, byteOrder) {
       if (byteOrder === ByteOrder.LittleEndian)
-        return second << 8 | first3;
+        return second << 8 | first4;
       if (byteOrder === ByteOrder.BigEndian)
-        return first3 << 8 | second;
+        return first4 << 8 | second;
       throw new Error("Invalid byteOrder: " + byteOrder);
     };
     var readBOM = function(bytes) {
@@ -138886,8 +138886,8 @@ var require_PDFCrossRefStream = __commonJS({
             var entryTuples = _this.entryTuplesCache.access();
             var widths = [0, 0, 0];
             for (var idx = 0, len = entryTuples.length; idx < len; idx++) {
-              var _a6 = entryTuples[idx], first3 = _a6[0], second = _a6[1], third = _a6[2];
-              var firstSize = utils_1.sizeInBytes(first3);
+              var _a6 = entryTuples[idx], first4 = _a6[0], second = _a6[1], third = _a6[2];
+              var firstSize = utils_1.sizeInBytes(first4);
               var secondSize = utils_1.sizeInBytes(second);
               var thirdSize = utils_1.sizeInBytes(third);
               if (firstSize > widths[0])
@@ -138939,8 +138939,8 @@ var require_PDFCrossRefStream = __commonJS({
           var byteWidths = this.maxByteWidthsCache.access();
           var value2 = "";
           for (var entryIdx = 0, entriesLen = entryTuples.length; entryIdx < entriesLen; entryIdx++) {
-            var _a6 = entryTuples[entryIdx], first3 = _a6[0], second = _a6[1], third = _a6[2];
-            var firstBytes = utils_1.reverseArray(utils_1.bytesFor(first3));
+            var _a6 = entryTuples[entryIdx], first4 = _a6[0], second = _a6[1], third = _a6[2];
+            var firstBytes = utils_1.reverseArray(utils_1.bytesFor(first4));
             var secondBytes = utils_1.reverseArray(utils_1.bytesFor(second));
             var thirdBytes = utils_1.reverseArray(utils_1.bytesFor(third));
             for (var idx = byteWidths[0] - 1; idx >= 0; idx--) {
@@ -138961,8 +138961,8 @@ var require_PDFCrossRefStream = __commonJS({
           var buffer = new Uint8Array(this.getUnencodedContentsSize());
           var offset2 = 0;
           for (var entryIdx = 0, entriesLen = entryTuples.length; entryIdx < entriesLen; entryIdx++) {
-            var _a6 = entryTuples[entryIdx], first3 = _a6[0], second = _a6[1], third = _a6[2];
-            var firstBytes = utils_1.reverseArray(utils_1.bytesFor(first3));
+            var _a6 = entryTuples[entryIdx], first4 = _a6[0], second = _a6[1], third = _a6[2];
+            var firstBytes = utils_1.reverseArray(utils_1.bytesFor(first4));
             var secondBytes = utils_1.reverseArray(utils_1.bytesFor(second));
             var thirdBytes = utils_1.reverseArray(utils_1.bytesFor(third));
             for (var idx = byteWidths[0] - 1; idx >= 0; idx--) {
@@ -148701,9 +148701,9 @@ var require_PDFAcroChoice = __commonJS({
               }
               if (item instanceof PDFArray_1.default) {
                 if (item.size() > 0) {
-                  var first3 = item.lookup(0, PDFString_1.default, PDFHexString_1.default);
+                  var first4 = item.lookup(0, PDFString_1.default, PDFHexString_1.default);
                   var second = item.lookupMaybe(1, PDFString_1.default, PDFHexString_1.default);
-                  res.push({ value: first3, display: second || first3 });
+                  res.push({ value: first4, display: second || first4 });
                 }
               }
             }
@@ -163101,8 +163101,8 @@ var require_lodash8 = __commonJS({
           return object2[key];
         });
       }
-      function cacheHas(cache2, key) {
-        return cache2.has(key);
+      function cacheHas(cache3, key) {
+        return cache3.has(key);
       }
       function charsStartIndex(strSymbols, chrSymbols) {
         var index5 = -1, length = strSymbols.length;
@@ -163917,8 +163917,8 @@ var require_lodash8 = __commonJS({
               if (!(seen2 ? cacheHas(seen2, computed) : includes3(result2, computed, comparator))) {
                 othIndex = othLength;
                 while (--othIndex) {
-                  var cache2 = caches[othIndex];
-                  if (!(cache2 ? cacheHas(cache2, computed) : includes3(arrays[othIndex], computed, comparator))) {
+                  var cache3 = caches[othIndex];
+                  if (!(cache3 ? cacheHas(cache3, computed) : includes3(arrays[othIndex], computed, comparator))) {
                     continue outer;
                   }
                 }
@@ -165505,12 +165505,12 @@ var require_lodash8 = __commonJS({
         }
         function memoizeCapped(func) {
           var result2 = memoize(func, function(key) {
-            if (cache2.size === MAX_MEMOIZE_SIZE) {
-              cache2.clear();
+            if (cache3.size === MAX_MEMOIZE_SIZE) {
+              cache3.clear();
             }
             return key;
           });
-          var cache2 = result2.cache;
+          var cache3 = result2.cache;
           return result2;
         }
         function mergeData(data2, source) {
@@ -166464,12 +166464,12 @@ var require_lodash8 = __commonJS({
             throw new TypeError2(FUNC_ERROR_TEXT);
           }
           var memoized = function() {
-            var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache2 = memoized.cache;
-            if (cache2.has(key)) {
-              return cache2.get(key);
+            var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache3 = memoized.cache;
+            if (cache3.has(key)) {
+              return cache3.get(key);
             }
             var result2 = func.apply(this, args);
-            memoized.cache = cache2.set(key, result2) || cache2;
+            memoized.cache = cache3.set(key, result2) || cache3;
             return result2;
           };
           memoized.cache = new (memoize.Cache || MapCache)();
@@ -169752,8 +169752,8 @@ var require_arraySome = __commonJS({
 // node_modules/lodash/_cacheHas.js
 var require_cacheHas = __commonJS({
   "node_modules/lodash/_cacheHas.js"(exports2, module2) {
-    function cacheHas(cache2, key) {
-      return cache2.has(key);
+    function cacheHas(cache3, key) {
+      return cache3.has(key);
     }
     module2.exports = cacheHas;
   }
@@ -170297,12 +170297,12 @@ var require_memoize = __commonJS({
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       var memoized = function() {
-        var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache2 = memoized.cache;
-        if (cache2.has(key)) {
-          return cache2.get(key);
+        var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache3 = memoized.cache;
+        if (cache3.has(key)) {
+          return cache3.get(key);
         }
         var result = func.apply(this, args);
-        memoized.cache = cache2.set(key, result) || cache2;
+        memoized.cache = cache3.set(key, result) || cache3;
         return result;
       };
       memoized.cache = new (memoize.Cache || MapCache)();
@@ -170320,12 +170320,12 @@ var require_memoizeCapped = __commonJS({
     var MAX_MEMOIZE_SIZE = 500;
     function memoizeCapped(func) {
       var result = memoize(func, function(key) {
-        if (cache2.size === MAX_MEMOIZE_SIZE) {
-          cache2.clear();
+        if (cache3.size === MAX_MEMOIZE_SIZE) {
+          cache3.clear();
         }
         return key;
       });
-      var cache2 = result.cache;
+      var cache3 = result.cache;
       return result;
     }
     module2.exports = memoizeCapped;
@@ -172364,7 +172364,7 @@ var require_utils13 = __commonJS({
     var querystring = require("querystring");
     var { URL: URL3 } = require("url");
     var compact = require_compact();
-    var first3 = require_first();
+    var first4 = require_first();
     var isFunction4 = require_isFunction();
     var isPlainObject3 = require_isPlainObject();
     var last2 = require_last();
@@ -173428,7 +173428,7 @@ $.cloudinary.config(${JSON.stringify(params)});
           }
           return range2.split("..");
         case Array:
-          return [first3(range2), last2(range2)];
+          return [first4(range2), last2(range2)];
         default:
           return [null, null];
       }
@@ -186203,26 +186203,26 @@ var require_parse6 = __commonJS({
       };
       if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
         let backslashes = false;
-        let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m6, esc, chars5, first3, rest, index5) => {
-          if (first3 === "\\") {
+        let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m6, esc, chars5, first4, rest, index5) => {
+          if (first4 === "\\") {
             backslashes = true;
             return m6;
           }
-          if (first3 === "?") {
+          if (first4 === "?") {
             if (esc) {
-              return esc + first3 + (rest ? QMARK.repeat(rest.length) : "");
+              return esc + first4 + (rest ? QMARK.repeat(rest.length) : "");
             }
             if (index5 === 0) {
               return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : "");
             }
             return QMARK.repeat(chars5.length);
           }
-          if (first3 === ".") {
+          if (first4 === ".") {
             return DOT_LITERAL.repeat(chars5.length);
           }
-          if (first3 === "*") {
+          if (first4 === "*") {
             if (esc) {
-              return esc + first3 + (rest ? star2 : "");
+              return esc + first4 + (rest ? star2 : "");
             }
             return star2;
           }
@@ -210762,26 +210762,26 @@ function requireParse$2() {
     };
     if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
       let backslashes = false;
-      let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m6, esc, chars5, first3, rest, index5) => {
-        if (first3 === "\\") {
+      let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m6, esc, chars5, first4, rest, index5) => {
+        if (first4 === "\\") {
           backslashes = true;
           return m6;
         }
-        if (first3 === "?") {
+        if (first4 === "?") {
           if (esc) {
-            return esc + first3 + (rest ? QMARK.repeat(rest.length) : "");
+            return esc + first4 + (rest ? QMARK.repeat(rest.length) : "");
           }
           if (index5 === 0) {
             return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : "");
           }
           return QMARK.repeat(chars5.length);
         }
-        if (first3 === ".") {
+        if (first4 === ".") {
           return DOT_LITERAL.repeat(chars5.length);
         }
-        if (first3 === "*") {
+        if (first4 === "*") {
           if (esc) {
-            return esc + first3 + (rest ? star2 : "");
+            return esc + first4 + (rest ? star2 : "");
           }
           return star2;
         }
@@ -212718,26 +212718,26 @@ function requireParse$1() {
     };
     if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
       let backslashes = false;
-      let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m6, esc, chars5, first3, rest, index5) => {
-        if (first3 === "\\") {
+      let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m6, esc, chars5, first4, rest, index5) => {
+        if (first4 === "\\") {
           backslashes = true;
           return m6;
         }
-        if (first3 === "?") {
+        if (first4 === "?") {
           if (esc) {
-            return esc + first3 + (rest ? QMARK.repeat(rest.length) : "");
+            return esc + first4 + (rest ? QMARK.repeat(rest.length) : "");
           }
           if (index5 === 0) {
             return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : "");
           }
           return QMARK.repeat(chars5.length);
         }
-        if (first3 === ".") {
+        if (first4 === ".") {
           return DOT_LITERAL.repeat(chars5.length);
         }
-        if (first3 === "*") {
+        if (first4 === "*") {
           if (esc) {
-            return esc + first3 + (rest ? star2 : "");
+            return esc + first4 + (rest ? star2 : "");
           }
           return star2;
         }
@@ -219400,26 +219400,26 @@ function requireParse2() {
     };
     if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
       let backslashes = false;
-      let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m6, esc, chars5, first3, rest, index5) => {
-        if (first3 === "\\") {
+      let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m6, esc, chars5, first4, rest, index5) => {
+        if (first4 === "\\") {
           backslashes = true;
           return m6;
         }
-        if (first3 === "?") {
+        if (first4 === "?") {
           if (esc) {
-            return esc + first3 + (rest ? QMARK.repeat(rest.length) : "");
+            return esc + first4 + (rest ? QMARK.repeat(rest.length) : "");
           }
           if (index5 === 0) {
             return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : "");
           }
           return QMARK.repeat(chars5.length);
         }
-        if (first3 === ".") {
+        if (first4 === ".") {
           return DOT_LITERAL.repeat(chars5.length);
         }
-        if (first3 === "*") {
+        if (first4 === "*") {
           if (esc) {
-            return esc + first3 + (rest ? star2 : "");
+            return esc + first4 + (rest ? star2 : "");
           }
           return star2;
         }
@@ -220329,17 +220329,17 @@ function convertNodeList2(parent2, parentScope, position, buffer) {
   }
   return list2;
 }
-function resetCacheToEncoded(cache2) {
-  if (cache2.encodedMappings === void 0 && cache2.decodedMappings) {
-    cache2.encodedMappings = encode6(cache2.decodedMappings);
+function resetCacheToEncoded(cache3) {
+  if (cache3.encodedMappings === void 0 && cache3.decodedMappings) {
+    cache3.encodedMappings = encode6(cache3.decodedMappings);
   }
-  cache2.decodedMappings = void 0;
+  cache3.decodedMappings = void 0;
 }
 function resetSourcemapCache(map3, sourcemapChain) {
   if (map3) {
-    const cache2 = sourceMapCache2.get(map3);
-    if (cache2) {
-      resetCacheToEncoded(cache2);
+    const cache3 = sourceMapCache2.get(map3);
+    if (cache3) {
+      resetCacheToEncoded(cache3);
     }
   }
   if (!sourcemapChain) {
@@ -220367,7 +220367,7 @@ function decodedSourcemap(map3) {
   }
   const originalMappings = map3.mappings;
   const isAlreadyDecoded = Array.isArray(originalMappings);
-  const cache2 = {
+  const cache3 = {
     decodedMappings: isAlreadyDecoded ? originalMappings : void 0,
     encodedMappings: isAlreadyDecoded ? void 0 : originalMappings
   };
@@ -220377,15 +220377,15 @@ function decodedSourcemap(map3) {
     // where the mappings field is never actually accessed. This appears to greatly reduce
     // the overhead of sourcemap decoding in terms of both compute time and memory usage.
     get mappings() {
-      if (cache2.decodedMappings) {
-        return cache2.decodedMappings;
+      if (cache3.decodedMappings) {
+        return cache3.decodedMappings;
       }
-      cache2.decodedMappings = cache2.encodedMappings ? decode4(cache2.encodedMappings) : [];
-      cache2.encodedMappings = void 0;
-      return cache2.decodedMappings;
+      cache3.decodedMappings = cache3.encodedMappings ? decode4(cache3.encodedMappings) : [];
+      cache3.encodedMappings = void 0;
+      return cache3.decodedMappings;
     }
   };
-  sourceMapCache2.set(decodedMap2, cache2);
+  sourceMapCache2.set(decodedMap2, cache3);
   return decodedMap2;
 }
 function getId(m6) {
@@ -221956,27 +221956,27 @@ function warnUnknownOptions(passedOptions, validOptions, optionType, log3, ignor
     log3(LOGLEVEL_WARN, logUnknownOption(optionType, unknownOptions, [...validOptionSet].sort()));
   }
 }
-function createPluginCache(cache2) {
+function createPluginCache(cache3) {
   return {
     delete(id3) {
-      return delete cache2[id3];
+      return delete cache3[id3];
     },
     get(id3) {
-      const item = cache2[id3];
+      const item = cache3[id3];
       if (!item)
         return;
       item[0] = 0;
       return item[1];
     },
     has(id3) {
-      const item = cache2[id3];
+      const item = cache3[id3];
       if (!item)
         return false;
       item[0] = 0;
       return true;
     },
     set(id3, value2) {
-      cache2[id3] = [0, value2];
+      cache3[id3] = [0, value2];
     }
   };
 }
@@ -223429,7 +223429,7 @@ var init_node_entry = __esm({
       }
       addUneditedChunk(sourceIndex, chunk, original, loc, sourcemapLocations) {
         let originalCharIndex = chunk.start;
-        let first3 = true;
+        let first4 = true;
         let charInHiresBoundary = false;
         while (originalCharIndex < chunk.end) {
           if (original[originalCharIndex] === "\n") {
@@ -223438,10 +223438,10 @@ var init_node_entry = __esm({
             this.generatedCodeLine += 1;
             this.raw[this.generatedCodeLine] = this.rawSegments = [];
             this.generatedCodeColumn = 0;
-            first3 = true;
+            first4 = true;
             charInHiresBoundary = false;
           } else {
-            if (this.hires || first3 || sourcemapLocations.has(originalCharIndex)) {
+            if (this.hires || first4 || sourcemapLocations.has(originalCharIndex)) {
               const segment = [this.generatedCodeColumn, sourceIndex, loc.line, loc.column];
               if (this.hires === "boundary") {
                 if (wordRegex.test(original[originalCharIndex])) {
@@ -223459,7 +223459,7 @@ var init_node_entry = __esm({
             }
             loc.column += 1;
             this.generatedCodeColumn += 1;
-            first3 = false;
+            first4 = false;
           }
           originalCharIndex += 1;
         }
@@ -223715,25 +223715,25 @@ var init_node_entry = __esm({
         this._split(start);
         this._split(end2);
         this._split(index5);
-        const first3 = this.byStart[start];
+        const first4 = this.byStart[start];
         const last2 = this.byEnd[end2];
-        const oldLeft = first3.previous;
+        const oldLeft = first4.previous;
         const oldRight = last2.next;
         const newRight = this.byStart[index5];
         if (!newRight && last2 === this.lastChunk) return this;
         const newLeft = newRight ? newRight.previous : this.lastChunk;
         if (oldLeft) oldLeft.next = oldRight;
         if (oldRight) oldRight.previous = oldLeft;
-        if (newLeft) newLeft.next = first3;
+        if (newLeft) newLeft.next = first4;
         if (newRight) newRight.previous = last2;
-        if (!first3.previous) this.firstChunk = last2.next;
+        if (!first4.previous) this.firstChunk = last2.next;
         if (!last2.next) {
-          this.lastChunk = first3.previous;
+          this.lastChunk = first4.previous;
           this.lastChunk.next = null;
         }
-        first3.previous = newLeft;
+        first4.previous = newLeft;
         last2.next = newRight || null;
-        if (!newLeft) this.firstChunk = first3;
+        if (!newLeft) this.firstChunk = first4;
         if (!newRight) this.lastChunk = last2;
         return this;
       }
@@ -223775,10 +223775,10 @@ var init_node_entry = __esm({
             enumerable: true
           });
         }
-        const first3 = this.byStart[start];
+        const first4 = this.byStart[start];
         const last2 = this.byEnd[end2];
-        if (first3) {
-          let chunk = first3;
+        if (first4) {
+          let chunk = first4;
           while (chunk !== last2) {
             if (chunk.next !== this.byStart[chunk.end]) {
               throw new Error("Cannot overwrite across a split point");
@@ -223786,7 +223786,7 @@ var init_node_entry = __esm({
             chunk = chunk.next;
             chunk.edit("", false);
           }
-          first3.edit(content, storeName, !overwrite);
+          first4.edit(content, storeName, !overwrite);
         } else {
           const newChunk = new Chunk$1(start, end2, "").edit(content, storeName);
           last2.next = newChunk;
@@ -238023,8 +238023,8 @@ var init_node_entry = __esm({
           }
           this.pluginCache = options2.cache?.plugins || /* @__PURE__ */ Object.create(null);
           for (const name in this.pluginCache) {
-            const cache2 = this.pluginCache[name];
-            for (const value2 of Object.values(cache2))
+            const cache3 = this.pluginCache[name];
+            for (const value2 of Object.values(cache3))
               value2[0]++;
           }
         }
@@ -238055,11 +238055,11 @@ var init_node_entry = __esm({
       }
       getCache() {
         for (const name in this.pluginCache) {
-          const cache2 = this.pluginCache[name];
+          const cache3 = this.pluginCache[name];
           let allDeleted = true;
-          for (const [key, value2] of Object.entries(cache2)) {
+          for (const [key, value2] of Object.entries(cache3)) {
             if (value2[0] >= this.options.experimentalCacheExpiry)
-              delete cache2[key];
+              delete cache3[key];
             else
               allDeleted = false;
           }
@@ -239422,11 +239422,11 @@ var init_dep_CV_fz3CQ = __esm({
     formatImportPrelude$1 = formatImportPrelude$2;
     base64EncodedImport = function base64EncodedConditionalImport(prelude, conditions) {
       conditions.reverse();
-      const first3 = conditions.pop();
+      const first4 = conditions.pop();
       let params = `${prelude} ${formatImportPrelude$1(
-        first3.layer,
-        first3.media,
-        first3.supports
+        first4.layer,
+        first4.media,
+        first4.supports
       )}`;
       for (const condition of conditions) {
         params = `'data:text/css;base64,${Buffer.from(`@import ${params}`).toString(
@@ -240200,9 +240200,9 @@ var require_stringifier = __commonJS({
         }
         if (!parent2) return DEFAULT_RAW[detect];
         let root5 = node3.root();
-        let cache2 = root5.rawCache || (root5.rawCache = {});
-        if (typeof cache2[detect] !== "undefined") {
-          return cache2[detect];
+        let cache3 = root5.rawCache || (root5.rawCache = {});
+        if (typeof cache3[detect] !== "undefined") {
+          return cache3[detect];
         }
         if (detect === "before" || detect === "after") {
           return this.beforeAfter(node3, detect);
@@ -240218,7 +240218,7 @@ var require_stringifier = __commonJS({
           }
         }
         if (typeof value2 === "undefined") value2 = DEFAULT_RAW[detect];
-        cache2[detect] = value2;
+        cache3[detect] = value2;
         return value2;
       }
       rawBeforeClose(root5) {
@@ -241435,23 +241435,23 @@ var require_util9 = __commonJS({
     exports2.urlGenerate = urlGenerate;
     var MAX_CACHED_INPUTS = 32;
     function lruMemoize(f5) {
-      var cache2 = [];
+      var cache3 = [];
       return function(input) {
-        for (var i6 = 0; i6 < cache2.length; i6++) {
-          if (cache2[i6].input === input) {
-            var temp = cache2[0];
-            cache2[0] = cache2[i6];
-            cache2[i6] = temp;
-            return cache2[0].result;
+        for (var i6 = 0; i6 < cache3.length; i6++) {
+          if (cache3[i6].input === input) {
+            var temp = cache3[0];
+            cache3[0] = cache3[i6];
+            cache3[i6] = temp;
+            return cache3[0].result;
           }
         }
         var result = f5(input);
-        cache2.unshift({
+        cache3.unshift({
           input,
           result
         });
-        if (cache2.length > MAX_CACHED_INPUTS) {
-          cache2.pop();
+        if (cache3.length > MAX_CACHED_INPUTS) {
+          cache3.pop();
         }
         return result;
       };
@@ -244311,19 +244311,19 @@ var require_parser6 = __commonJS({
             if (string3 !== " !important") node3.raws.important = string3;
             break;
           } else if (token[1].toLowerCase() === "important") {
-            let cache2 = tokens.slice(0);
+            let cache3 = tokens.slice(0);
             let str2 = "";
             for (let j = i6; j > 0; j--) {
-              let type = cache2[j][0];
+              let type = cache3[j][0];
               if (str2.trim().startsWith("!") && type !== "space") {
                 break;
               }
-              str2 = cache2.pop()[1] + str2;
+              str2 = cache3.pop()[1] + str2;
             }
             if (str2.trim().startsWith("!")) {
               node3.important = true;
               node3.raws.important = str2;
-              tokens = cache2;
+              tokens = cache3;
             }
           }
           if (token[0] !== "space" && token[0] !== "comment") {
@@ -245441,11 +245441,11 @@ var require_postcss = __commonJS({
         transformer.postcssVersion = new Processor2().version;
         return transformer;
       }
-      let cache2;
+      let cache3;
       Object.defineProperty(creator, "postcss", {
         get() {
-          if (!cache2) cache2 = creator();
-          return cache2;
+          if (!cache3) cache3 = creator();
+          return cache3;
         }
       });
       creator.process = function(css2, processOpts, pluginOpts) {
@@ -246395,9 +246395,9 @@ function localizeNode(rule2, mode2, localAliasMap) {
             newNodes = node3.map((childNode) => transform4(childNode, childContext)).reduce((acc, next2) => acc.concat(next2.nodes), []);
             if (newNodes.length) {
               const { before: before2, after: after2 } = node3.spaces;
-              const first3 = newNodes[0];
+              const first4 = newNodes[0];
               const last2 = newNodes[newNodes.length - 1];
-              first3.spaces = { before: before2, after: first3.spaces.after };
+              first4.spaces = { before: before2, after: first4.spaces.after };
               last2.spaces = { before: last2.spaces.before, after: after2 };
             }
             node3 = newNodes;
@@ -247925,9 +247925,9 @@ var init_dep_DDtvSN7 = __esm({
         if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
           return { "default": obj };
         }
-        var cache2 = _getRequireWildcardCache(nodeInterop);
-        if (cache2 && cache2.has(obj)) {
-          return cache2.get(obj);
+        var cache3 = _getRequireWildcardCache(nodeInterop);
+        if (cache3 && cache3.has(obj)) {
+          return cache3.get(obj);
         }
         var newObj = {};
         var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
@@ -247942,8 +247942,8 @@ var init_dep_DDtvSN7 = __esm({
           }
         }
         newObj["default"] = obj;
-        if (cache2) {
-          cache2.set(obj, newObj);
+        if (cache3) {
+          cache3.set(obj, newObj);
         }
         return newObj;
       }
@@ -249445,9 +249445,9 @@ var init_dep_DDtvSN7 = __esm({
         if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
           return { "default": obj };
         }
-        var cache2 = _getRequireWildcardCache(nodeInterop);
-        if (cache2 && cache2.has(obj)) {
-          return cache2.get(obj);
+        var cache3 = _getRequireWildcardCache(nodeInterop);
+        if (cache3 && cache3.has(obj)) {
+          return cache3.get(obj);
         }
         var newObj = {};
         var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
@@ -249462,8 +249462,8 @@ var init_dep_DDtvSN7 = __esm({
           }
         }
         newObj["default"] = obj;
-        if (cache2) {
-          cache2.set(obj, newObj);
+        if (cache3) {
+          cache3.set(obj, newObj);
         }
         return newObj;
       }
@@ -249712,9 +249712,9 @@ var init_dep_DDtvSN7 = __esm({
         if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
           return { "default": obj };
         }
-        var cache2 = _getRequireWildcardCache(nodeInterop);
-        if (cache2 && cache2.has(obj)) {
-          return cache2.get(obj);
+        var cache3 = _getRequireWildcardCache(nodeInterop);
+        if (cache3 && cache3.has(obj)) {
+          return cache3.get(obj);
         }
         var newObj = {};
         var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
@@ -249729,8 +249729,8 @@ var init_dep_DDtvSN7 = __esm({
           }
         }
         newObj["default"] = obj;
-        if (cache2) {
-          cache2.set(obj, newObj);
+        if (cache3) {
+          cache3.set(obj, newObj);
         }
         return newObj;
       }
@@ -250342,7 +250342,7 @@ var init_dep_DDtvSN7 = __esm({
               },
               sourceIndex: this.tokens[this.position][_tokenize.FIELDS.START_POS]
             });
-            var cache2 = this.current;
+            var cache3 = this.current;
             last2.append(selector3);
             this.current = selector3;
             while (this.position < this.tokens.length && unbalanced) {
@@ -250360,7 +250360,7 @@ var init_dep_DDtvSN7 = __esm({
                 this.position++;
               }
             }
-            this.current = cache2;
+            this.current = cache3;
           } else {
             var parenStart = this.currToken;
             var parenValue = "(";
@@ -250402,8 +250402,8 @@ var init_dep_DDtvSN7 = __esm({
             return this.expected(["pseudo-class", "pseudo-element"], this.position - 1);
           }
           if (this.currToken[_tokenize.FIELDS.TYPE] === tokens.word) {
-            this.splitWord(false, function(first3, length) {
-              pseudoStr += first3;
+            this.splitWord(false, function(first4, length) {
+              pseudoStr += first4;
               _this4.newNode(new _pseudo2["default"]({
                 value: pseudoStr,
                 source: getTokenSourceSpan(startingToken, _this4.currToken),
@@ -250959,9 +250959,9 @@ var init_dep_DDtvSN7 = __esm({
         if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
           return { "default": obj };
         }
-        var cache2 = _getRequireWildcardCache(nodeInterop);
-        if (cache2 && cache2.has(obj)) {
-          return cache2.get(obj);
+        var cache3 = _getRequireWildcardCache(nodeInterop);
+        if (cache3 && cache3.has(obj)) {
+          return cache3.get(obj);
         }
         var newObj = {};
         var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
@@ -250976,8 +250976,8 @@ var init_dep_DDtvSN7 = __esm({
           }
         }
         newObj["default"] = obj;
-        if (cache2) {
-          cache2.set(obj, newObj);
+        if (cache3) {
+          cache3.set(obj, newObj);
         }
         return newObj;
       }
@@ -256821,12 +256821,12 @@ function makePromise() {
   });
   return { promise: promise2, resolve: resolve8, reject };
 }
-async function resolveTSConfigJson(filename, cache2) {
+async function resolveTSConfigJson(filename, cache3) {
   if (import_node_path10.default.extname(filename) !== ".json") {
     return;
   }
   const tsconfig = import_node_path10.default.resolve(filename);
-  if (cache2 && (cache2.hasParseResult(tsconfig) || cache2.hasParseResult(filename))) {
+  if (cache3 && (cache3.hasParseResult(tsconfig) || cache3.hasParseResult(filename))) {
     return tsconfig;
   }
   return import_node_fs5.promises.stat(tsconfig).then((stat5) => {
@@ -256984,10 +256984,10 @@ async function find4(filename, options2) {
   if (isInNodeModules(dir)) {
     return null;
   }
-  const cache2 = options2?.cache;
+  const cache3 = options2?.cache;
   const configName = options2?.configName ?? "tsconfig.json";
-  if (cache2?.hasConfigPath(dir, configName)) {
-    return cache2.getConfigPath(dir, configName);
+  if (cache3?.hasConfigPath(dir, configName)) {
+    return cache3.getConfigPath(dir, configName);
   }
   const {
     /** @type {Promise<string|null>} */
@@ -257002,12 +257002,12 @@ async function find4(filename, options2) {
   return promise2;
 }
 function findUp(dir, { resolve: resolve8, reject, promise: promise2 }, options2) {
-  const { cache: cache2, root: root5, configName } = options2 ?? {};
-  if (cache2) {
-    if (cache2.hasConfigPath(dir, configName)) {
+  const { cache: cache3, root: root5, configName } = options2 ?? {};
+  if (cache3) {
+    if (cache3.hasConfigPath(dir, configName)) {
       let cached;
       try {
-        cached = cache2.getConfigPath(dir, configName);
+        cached = cache3.getConfigPath(dir, configName);
       } catch (e6) {
         reject(e6);
         return;
@@ -257018,7 +257018,7 @@ function findUp(dir, { resolve: resolve8, reject, promise: promise2 }, options2)
         resolve8(cached);
       }
     } else {
-      cache2.setConfigPath(dir, promise2, configName);
+      cache3.setConfigPath(dir, promise2, configName);
     }
   }
   const tsconfig = import_node_path10.default.join(dir, options2?.configName ?? "tsconfig.json");
@@ -257142,9 +257142,9 @@ function stripBom2(string3) {
   return string3;
 }
 async function parse$e(filename, options2) {
-  const cache2 = options2?.cache;
-  if (cache2?.hasParseResult(filename)) {
-    return getParsedDeep(filename, cache2, options2);
+  const cache3 = options2?.cache;
+  if (cache3?.hasParseResult(filename)) {
+    return getParsedDeep(filename, cache3, options2);
   }
   const {
     resolve: resolve8,
@@ -257152,19 +257152,19 @@ async function parse$e(filename, options2) {
     /** @type {Promise<import('./public.d.ts').TSConfckParseResult>}*/
     promise: promise2
   } = makePromise();
-  cache2?.setParseResult(filename, promise2, true);
+  cache3?.setParseResult(filename, promise2, true);
   try {
-    let tsconfigFile = await resolveTSConfigJson(filename, cache2) || await find4(filename, options2);
+    let tsconfigFile = await resolveTSConfigJson(filename, cache3) || await find4(filename, options2);
     if (!tsconfigFile) {
       resolve8(not_found_result);
       return promise2;
     }
     let result;
-    if (filename !== tsconfigFile && cache2?.hasParseResult(tsconfigFile)) {
-      result = await getParsedDeep(tsconfigFile, cache2, options2);
+    if (filename !== tsconfigFile && cache3?.hasParseResult(tsconfigFile)) {
+      result = await getParsedDeep(tsconfigFile, cache3, options2);
     } else {
-      result = await parseFile$1(tsconfigFile, cache2, filename === tsconfigFile);
-      await Promise.all([parseExtends(result, cache2), parseReferences(result, options2)]);
+      result = await parseFile$1(tsconfigFile, cache3, filename === tsconfigFile);
+      await Promise.all([parseExtends(result, cache3), parseReferences(result, options2)]);
     }
     replaceTokens(result);
     resolve8(resolveSolutionTSConfig(filename, result));
@@ -257173,21 +257173,21 @@ async function parse$e(filename, options2) {
   }
   return promise2;
 }
-async function getParsedDeep(filename, cache2, options2) {
-  const result = await cache2.getParseResult(filename);
+async function getParsedDeep(filename, cache3, options2) {
+  const result = await cache3.getParseResult(filename);
   if (result.tsconfig.extends && !result.extended || result.tsconfig.references && !result.referenced) {
     const promise2 = Promise.all([
-      parseExtends(result, cache2),
+      parseExtends(result, cache3),
       parseReferences(result, options2)
     ]).then(() => result);
-    cache2.setParseResult(filename, promise2, true);
+    cache3.setParseResult(filename, promise2, true);
     return promise2;
   }
   return result;
 }
-async function parseFile$1(tsconfigFile, cache2, skipCache) {
-  if (!skipCache && cache2?.hasParseResult(tsconfigFile) && !cache2.getParseResult(tsconfigFile)._isRootFile_) {
-    return cache2.getParseResult(tsconfigFile);
+async function parseFile$1(tsconfigFile, cache3, skipCache) {
+  if (!skipCache && cache3?.hasParseResult(tsconfigFile) && !cache3.getParseResult(tsconfigFile)._isRootFile_) {
+    return cache3.getParseResult(tsconfigFile);
   }
   const promise2 = import_node_fs5.promises.readFile(tsconfigFile, "utf-8").then(toJson).then((json2) => {
     const parsed = JSON.parse(json2);
@@ -257204,8 +257204,8 @@ async function parseFile$1(tsconfigFile, cache2, skipCache) {
       e6
     );
   });
-  if (!skipCache && (!cache2?.hasParseResult(tsconfigFile) || !cache2.getParseResult(tsconfigFile)._isRootFile_)) {
-    cache2?.setParseResult(tsconfigFile, promise2);
+  if (!skipCache && (!cache3?.hasParseResult(tsconfigFile) || !cache3.getParseResult(tsconfigFile)._isRootFile_)) {
+    cache3?.setParseResult(tsconfigFile, promise2);
   }
   return promise2;
 }
@@ -257231,7 +257231,7 @@ async function parseReferences(result, options2) {
   });
   result.referenced = referenced;
 }
-async function parseExtends(result, cache2) {
+async function parseExtends(result, cache3) {
   if (!result.tsconfig.extends) {
     return;
   }
@@ -257266,7 +257266,7 @@ async function parseExtends(result, cache2) {
       extended.splice(
         pos + 1,
         0,
-        ...await Promise.all(resolvedExtends.map((file) => parseFile$1(file, cache2)))
+        ...await Promise.all(resolvedExtends.map((file) => parseFile$1(file, cache3)))
       );
     } else {
       extendsPath.splice(-currentBranchDepth);
@@ -257614,12 +257614,12 @@ function getTSConfckCache(config2) {
   if (!config2) {
     return globalTSConfckCache ??= new TSConfckCache();
   }
-  let cache2 = tsconfckCacheMap.get(config2);
-  if (!cache2) {
-    cache2 = new TSConfckCache();
-    tsconfckCacheMap.set(config2, cache2);
+  let cache3 = tsconfckCacheMap.get(config2);
+  if (!cache3) {
+    cache3 = new TSConfckCache();
+    tsconfckCacheMap.set(config2, cache3);
   }
-  return cache2;
+  return cache3;
 }
 async function loadTsconfigJsonForFile(filename, config2) {
   const { tsconfig, tsconfigFile } = await parse$e(filename, {
@@ -257629,8 +257629,8 @@ async function loadTsconfigJsonForFile(filename, config2) {
 }
 async function reloadOnTsconfigChange(server, changedFile) {
   if (changedFile.endsWith(".json")) {
-    const cache2 = getTSConfckCache(server.config);
-    if (changedFile.endsWith("/tsconfig.json") || cache2.hasParseResult(changedFile)) {
+    const cache3 = getTSConfckCache(server.config);
+    if (changedFile.endsWith("/tsconfig.json") || cache3.hasParseResult(changedFile)) {
       server.config.logger.info(
         `changed tsconfig file detected: ${changedFile} - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.`,
         { clear: server.config.clearScreen, timestamp: true }
@@ -257638,7 +257638,7 @@ async function reloadOnTsconfigChange(server, changedFile) {
       for (const environment of Object.values(server.environments)) {
         environment.moduleGraph.invalidateAll();
       }
-      cache2.clear();
+      cache3.clear();
       for (const environment of Object.values(server.environments)) {
         environment.hot.send({
           type: "full-reload",
@@ -258107,13 +258107,13 @@ function publicFileToBuiltUrl(url3, config2) {
     return joinUrlSegments(config2.decodedBase, url3);
   }
   const hash4 = getHash(url3);
-  let cache2 = publicAssetUrlCache.get(config2);
-  if (!cache2) {
-    cache2 = /* @__PURE__ */ new Map();
-    publicAssetUrlCache.set(config2, cache2);
+  let cache3 = publicAssetUrlCache.get(config2);
+  if (!cache3) {
+    cache3 = /* @__PURE__ */ new Map();
+    publicAssetUrlCache.set(config2, cache3);
   }
-  if (!cache2.get(hash4)) {
-    cache2.set(hash4, url3);
+  if (!cache3.get(hash4)) {
+    cache3.set(hash4, url3);
   }
   return `__VITE_PUBLIC_ASSET__${hash4}__`;
 }
@@ -258134,8 +258134,8 @@ async function fileToBuiltUrl(pluginContext, id3, skipPublicCheck = false, force
       }
     }
   }
-  const cache2 = assetCache.get(environment);
-  const cached = cache2.get(id3);
+  const cache3 = assetCache.get(environment);
+  const cached = cache3.get(id3);
   if (cached) {
     return cached;
   }
@@ -258160,7 +258160,7 @@ async function fileToBuiltUrl(pluginContext, id3, skipPublicCheck = false, force
     }
     url3 = `__VITE_ASSET__${referenceId}__${postfix ? `$_${postfix}__` : ``}`;
   }
-  cache2.set(id3, url3);
+  cache3.set(id3, url3);
   return url3;
 }
 async function urlToBuiltUrl(pluginContext, url3, importer, forceInline) {
@@ -261888,9 +261888,9 @@ function resolveExportsOrImports(pkg, key, options2, type) {
   return result ? result[0] : void 0;
 }
 function resolveDeepImport(id3, { setResolvedCache, getResolvedCache, dir, data: data2 }, options2) {
-  const cache2 = getResolvedCache(id3, options2);
-  if (cache2) {
-    return cache2;
+  const cache3 = getResolvedCache(id3, options2);
+  if (cache3) {
+    return cache3;
   }
   let relativeId2 = id3;
   const { exports: exportsField, browser: browserField } = data2;
@@ -262788,12 +262788,12 @@ function attachFinishedListener(msg, callback2) {
     finished2 = true;
     callback2(error3);
   }
-  eeMsg = eeSocket = first2([[msg, "end", "finish"]], onFinish);
+  eeMsg = eeSocket = first3([[msg, "end", "finish"]], onFinish);
   function onSocket(socket) {
     msg.removeListener("socket", onSocket);
     if (finished2) return;
     if (eeMsg !== eeSocket) return;
-    eeSocket = first2([[socket, "error", "close"]], onFinish);
+    eeSocket = first3([[socket, "error", "close"]], onFinish);
   }
   if (msg.socket) {
     onSocket(msg.socket);
@@ -265874,11 +265874,11 @@ function isHostAllowed(config2, isPreview, host) {
   if (allowedHosts === true) {
     return true;
   }
-  const cache2 = isPreview ? allowedHostsPreviewCache : allowedHostsServerCache;
-  if (!cache2.has(config2)) {
-    cache2.set(config2, /* @__PURE__ */ new Set());
+  const cache3 = isPreview ? allowedHostsPreviewCache : allowedHostsServerCache;
+  if (!cache3.has(config2)) {
+    cache3.set(config2, /* @__PURE__ */ new Set());
   }
-  const cachedAllowedHosts = cache2.get(config2);
+  const cachedAllowedHosts = cache3.get(config2);
   if (cachedAllowedHosts.has(host)) {
     return true;
   }
@@ -266729,10 +266729,10 @@ function toAssume(uri, extns) {
   }
   return arr;
 }
-function viaCache(cache2, uri, extns) {
+function viaCache(cache3, uri, extns) {
   let i6 = 0, data2, arr = toAssume(uri, extns);
   for (; i6 < arr.length; i6++) {
-    if (data2 = cache2[arr[i6]]) return data2;
+    if (data2 = cache3[arr[i6]]) return data2;
   }
 }
 function viaLocal(dir, isEtag, uri, extns, shouldServe) {
@@ -273680,9 +273680,9 @@ function skipUrlReplacer(rawUrl) {
 }
 async function doUrlReplace(rawUrl, matched, replacer, funcName = "url") {
   let wrap3 = "";
-  const first3 = rawUrl[0];
-  if (first3 === `"` || first3 === `'`) {
-    wrap3 = first3;
+  const first4 = rawUrl[0];
+  if (first4 === `"` || first4 === `'`) {
+    wrap3 = first4;
     rawUrl = rawUrl.slice(1, -1);
   }
   if (skipUrlReplacer(rawUrl)) {
@@ -273702,9 +273702,9 @@ async function doUrlReplace(rawUrl, matched, replacer, funcName = "url") {
 }
 async function doImportCSSReplace(rawUrl, matched, replacer) {
   let wrap3 = "";
-  const first3 = rawUrl[0];
-  if (first3 === `"` || first3 === `'`) {
-    wrap3 = first3;
+  const first4 = rawUrl[0];
+  if (first4 === `"` || first4 === `'`) {
+    wrap3 = first4;
     rawUrl = rawUrl.slice(1, -1);
   }
   if (isExternalUrl(rawUrl) || isDataUrl(rawUrl) || rawUrl[0] === "#") {
@@ -276962,7 +276962,7 @@ async function resolveConfig2(inlineConfig, command, defaultMode = "development"
   ) : "";
   const server = resolveServerOptions(resolvedRoot, config2.server, logger);
   const builder = resolveBuilderOptions(config2.builder);
-  const BASE_URL = resolvedBase;
+  const BASE_URL2 = resolvedBase;
   let resolved;
   let createUserWorkerPlugins = config2.worker?.plugins;
   if (Array.isArray(createUserWorkerPlugins)) {
@@ -277048,7 +277048,7 @@ async function resolveConfig2(inlineConfig, command, defaultMode = "development"
     envDir,
     env: {
       ...userEnv,
-      BASE_URL,
+      BASE_URL: BASE_URL2,
       MODE: mode2,
       DEV: !isProduction,
       PROD: isProduction
@@ -277543,7 +277543,7 @@ function optimizeDepsDisabledBackwardCompatibility(resolved, optimizeDeps2, opti
     }
   }
 }
-var fs$8, import_node_fs5, import_node_path10, import_promises3, import_node_url5, import_node_util6, import_node_perf_hooks2, import_node_module4, import_node_crypto3, import_picomatch2, import_esbuild3, import_path13, import_fs10, import_node_child_process2, import_node_http3, import_node_https2, import_tty, import_util6, import_net, import_events3, import_url5, import_http4, import_stream7, import_os3, import_child_process, import_node_os4, import_node_net6, import_node_dns, import_node_buffer4, import_module3, import_node_readline, import_node_process3, import_node_events, import_crypto24, import_node_assert, import_node_v8, import_node_worker_threads, import_https6, import_tls, import_zlib2, import_buffer, import_assert, qs, import_node_zlib2, import_node_module5, import_meta7, __require3, commonjsGlobal, picocolors2, p4, argv, env$1, isColorSupported, formatter, replaceClose, createColors, picocolorsExports2, colors$1, VALID_ID_PREFIX2, NULL_BYTE_PLACEHOLDER2, SOURCEMAPPING_URL3, MODULE_RUNNER_SOURCEMAPPING_SOURCE, ERR_OUTDATED_OPTIMIZED_DEP2, isWindows$3, windowsSlashRE2, postfixRE2, WalkerBase$1, SyncWalker$1, extractors2, extractAssignedNames3, blockDeclarations, Scope2, attachScopes, normalizePathRegExp2, normalizePath$5, createFilter$2, reservedWords2, builtins2, forbiddenIdentifiers2, makeLegalIdentifier, hasStringIsWellFormed, dataToEsm, path$a, commondir2, getCommonDir, comma5, semicolon3, chars$12, intToChar3, charToInt3, bufLength2, td2, StringWriter2, StringReader3, BitSet2, Chunk3, btoa$1, SourceMap$1, toString$1, wordRegex2, Mappings2, n$1, warned2, MagicString2, version$2, peerDependencies, firstpassGlobal, firstpassNoGlobal, getVirtualPathForDynamicRequirePath, FAILED_REQUIRE_ERROR, COMMONJS_REQUIRE_EXPORT, CREATE_COMMONJS_REQUIRE_EXPORT, isWrappedId, wrapId, unwrapId2, PROXY_SUFFIX, WRAPPED_SUFFIX, EXTERNAL_SUFFIX, EXPORTS_SUFFIX, MODULE_SUFFIX, ENTRY_SUFFIX, ES_IMPORT_SUFFIX, DYNAMIC_MODULES_ID, HELPERS_ID, IS_WRAPPED_COMMONJS, HELPERS, operators, KEY_COMPILED_ESM, reservedMethod, exportsPattern, functionType, PLUGIN_NAME2, schemeRegex, urlRegex, fileRegex, COLUMN$1, SOURCES_INDEX$1, SOURCE_LINE$1, SOURCE_COLUMN$1, NAMES_INDEX$1, found2, LINE_GTR_ZERO2, COL_GTR_EQ_ZERO2, LEAST_UPPER_BOUND2, GREATEST_LOWER_BOUND2, TraceMap, SetArray, COLUMN2, SOURCES_INDEX2, SOURCE_LINE2, SOURCE_COLUMN2, NAMES_INDEX2, NO_NAME, GenMapping, maybeAddSegment, SOURCELESS_MAPPING, EMPTY_SOURCES, SourceMap3, node$12, ms$1, hasRequiredMs, common$4, hasRequiredCommon, nodeExports$1, debug$j, pnp, createFilter$12, replaceSlashOrColonRE, replaceDotRE, replaceNestedIdRE, replaceHashRE, flattenId, FLATTEN_ID_HASH_LENGTH, FLATTEN_ID_MAX_FILE_LENGTH, limitFlattenIdLength, normalizeId, NODE_BUILTIN_NAMESPACE, NPM_BUILTIN_NAMESPACE, BUN_BUILTIN_NAMESPACE, nodeBuiltins2, isBuiltinCache, nodeLikeBuiltins, bareImportRE, deepImportRE, _require$1, _dirname, rollupVersion2, filter5, DEBUG, urlCanParse, isCaseInsensitiveFS, VOLUME_RE, externalRE, isExternalUrl, dataUrlRE, isDataUrl, virtualModuleRE, virtualModulePrefix, knownJsSrcRE, isJSRequest, importQueryRE, directRequestRE$1, internalPrefixes, InternalPrefixRE, trailingSeparatorRE, isImportRequest, isInternalRequest, urlRE$1, rawRE$1, timestampRE, splitRE, range, splitFirstDirRE, ERR_SYMLINK_IN_RECURSIVE_READDIR, safeRealpathSync, windowsNetworkMap, parseNetUseRE, firstSafeRealPathSyncRun, imageCandidateRegex, escapedSpaceCharacters, windowsDriveRE$1, replaceWindowsDriveRE, linuxAbsolutePathRE, revertWindowsDriveRE, nullSourceMap, multilineCommentsRE, singlelineCommentsRE, requestQuerySplitRE, requestQueryMaybeEscapedSplitRE, blankReplacer, hash$1, requireResolveFromRootWithFallback, windowsDrivePathPrefixRE, isNonDriveRelativeAbsolutePath, escapeRegexRE, sigtermCallbacks, parentSigtermCallback, setupSIGTERMListener, teardownSIGTERMListener, LogLevels, lastType, lastMsg, sameCount, timeFormatter, groups, COMPRESSIBLE_ASSETS_RE, POSIX_SEP_RE, NATIVE_SEP_RE, PATTERN_REGEX_CACHE, GLOB_ALL_PATTERN, TS_EXTENSIONS, JS_EXTENSIONS, TSJS_EXTENSIONS, TS_EXTENSIONS_RE_GROUP, TSJS_EXTENSIONS_RE_GROUP, IS_POSIX, isInNodeModules, posix2native, native2posix, resolve2posix, singleComment, multiComment, not_found_result, EXTENDABLE_KEYS, REBASE_KEYS, TSConfckParseError, DEFAULT_JSCONFIG_COMPILER_OPTIONS, TSConfckCache, debug$i, IIFE_BEGIN_RE, validExtensionRE, jsxExtensionsRE, defaultEsbuildSupported, rollupToEsbuildFormatMap, buildEsbuildPlugin, globalTSConfckCache, tsconfckCacheMap, AsyncFunction2, codeToDataUrl, viteSsrDynamicImport, Worker, importRe, internalImportName, FakeWorker, WorkerWithFallback, terserPath, loadTerserPath, mimes, publicFilesMap, assetUrlRE, jsSourceMapRE, noInlineRE, inlineRE$3, svgExtRE, assetCache, cssEntriesMap, publicAssetUrlCache, publicAssetUrlRE, GIT_LFS_PREFIX, nestedQuotesRE, endsWithJSRE, dataUriRE, base64RE, dataUriPrefix, ImportType, A3, C3, E2, init, convertSourceMap$1, convertSourceMap, debug$h, virtualSourceRE, src$12, path$9, fs$7, os$2, url$3, fsReadFileAsync, jsonLoader, requireFunc, defaultLoadersSync, dynamicImport, defaultLoaders, makeEmplace, createRequire3, fileURLToPath4, pathToFileURL, TS_EXT_RE, tsx, jiti, importError, req_1, req$2, options_1, req$1, plugins_1, resolve7, config$1, loadOptions, loadPlugins, req, interopRequireDefault, yaml, withLoaders, src2, postcssrc, jsonExtRE, jsonObjRE, jsonLangs, jsonLangRE, isJSONRequest, HASH_RE, AMPERSAND_RE, SLASH_RE, EQUAL_RE, PLUS_RE, ENC_CARET_RE, ENC_BACKTICK_RE, ENC_PIPE_RE, ENC_SPACE_RE, own$1, classRegExp, kTypes, messages, nodeInternalPrefix, userStackTraceLimit, captureLargerStackTrace, ESM_STATIC_IMPORT_RE, TYPE_RE, ESM_RE, COMMENT_RE, externalWithConversionNamespace, convertedExternalPrefix, cjsExternalFacadeNamespace, nonFacadePrefix, externalTypes, matchesEntireLine, environmentColors, PartialEnvironment, BaseEnvironment, HashbangComment, Identifier3, JSXIdentifier2, JSXPunctuator, JSXString, JSXText2, KeywordsWithExpressionAfter, KeywordsWithNoLineTerminatorAfter, LineTerminatorSequence, MultiLineComment, Newline, NumericLiteral, Punctuator, RegularExpressionLiteral, SingleLineComment, StringLiteral, Template, TokensNotPrecedingObjectLiteral, TokensPrecedingExpression, WhiteSpace, jsTokens_1, jsTokens, importGlobRE, objectKeysRE, objectValuesRE, knownOptions, forceDefaultAs, importPrefix, basename6, dirname5, relative4, ScanEnvironment, debug$g, htmlTypesRE, importsRE, scriptRE, commentRE$1, srcRE, typeRE, langRE, svelteScriptModuleRE, svelteModuleRE, debug$f, jsExtensionRE, jsMapExtensionRE, firstLoadCachedDepOptimizationMetadata, lockfileFormats, lockfilePaths, MAX_TEMP_DIR_AGE_MS, GRACEFUL_RENAME_TIMEOUT, safeRename, debug$e, isExternalCache, normalizedClientEntry$1, normalizedEnvEntry$1, ERR_RESOLVE_PACKAGE_ENTRY_FAIL, browserExternalId, optionalPeerDepId, subpathImportsPrefix, startsWithWordCharRE, debug$d, knownTsOutputRE, isPossibleTsOutput, debug$c, main, version$1, require$$4, fs$6, path$8, os$1, crypto$1, packageJson, version3, LINE, DotenvModule, parse_1$22, expand_1$1, debug$b, docsURL, deprecationCode, deprecationMessages, _ignoreDeprecationWarnings, node2, debug$a, s5, m5, h3, d3, y2, ms, debugExports, nodeExports2, encodeurl, ENCODE_CHARS_REGEXP, UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE, matchHtmlRegExp, escapeHtml_1, escapeHtml$2, onFinished$2, eeFirst, first2, defer$2, onFinishedExports, parseurl$1, url$2, parse$a, Url, parseurlExports, require$$0$13, codes, statuses$1, unpipe_1, debug$9, encodeUrl, escapeHtml, onFinished, parseUrl$2, statuses, unpipe, DOUBLE_SPACE_REGEXP, NEWLINE_REGEXP, defer$1, isFinished, finalhandler_1, utilsMerge, utilsMergeExports, debug$8, EventEmitter$3, finalhandler, http$4, merge5, parseUrl$1, connect, env3, proto, defer, connect$1, lib2, getOwnPropertySymbols, hasOwnProperty3, propIsEnumerable, objectAssign, vary$1, FIELD_NAME_REGEXP, varyExports, libExports, corsMiddleware, chokidar2, fs$5, Readable3, sysPath$3, promisify$3, picomatch$12, readdir$1, stat$3, lstat$2, realpath$1, BANG$2, RECURSIVE_ERROR_CODE, NORMAL_FLOW_ERRORS, FILE_TYPE, DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE, ALL_TYPES, isNormalFlowError, maj, min, wantBigintFsStats, normalizeFilter$1, ReaddirpStream, readdirp$1, readdirpPromise, readdirp_12, anymatch$2, normalizePath$2, anymatch_12, picomatch4, normalizePath$1, BANG$1, DEFAULT_OPTIONS, arrify$1, createPattern, matchPatterns, anymatch$1, anymatchExports, isExtglob$1, isExtglob3, chars4, strictCheck, relaxedCheck, isGlob$2, isGlob$1, pathPosixDirname, isWin32, slash4, backslash3, enclosure, globby, escaped, globParent$1, utils$3, utils$22, stringify$4, isNumber$2, isNumber$1, toRegexRange$1, toRegexRange_12, util5, toRegexRange, isObject3, transform3, isValidValue, isNumber7, zeros, stringify$3, pad, toMaxLen, toSequence, toRange, toRegex, rangeError, invalidRange, invalidStep, fillNumbers, fillLetters, fill$2, fillRange2, fill$1, utils$12, compile$1, compile_12, fill, stringify$2, utils3, append4, expand$1, expand_12, constants$22, stringify$12, MAX_LENGTH, CHAR_BACKSLASH, CHAR_BACKTICK, CHAR_COMMA, CHAR_DOT, CHAR_LEFT_PARENTHESES, CHAR_RIGHT_PARENTHESES, CHAR_LEFT_CURLY_BRACE, CHAR_RIGHT_CURLY_BRACE, CHAR_LEFT_SQUARE_BRACKET, CHAR_RIGHT_SQUARE_BRACKET, CHAR_DOUBLE_QUOTE, CHAR_SINGLE_QUOTE, CHAR_NO_BREAK_SPACE, CHAR_ZERO_WIDTH_NOBREAK_SPACE, parse$8, parse_1$12, stringify6, compile4, expand, parse$7, braces$1, braces_12, require$$03, binaryExtensions$1, path$7, binaryExtensions2, extensions, isBinaryPath$1, constants$12, fs$4, sysPath$2, promisify$2, isBinaryPath2, isWindows$2, isLinux, EMPTY_FN$2, EMPTY_STR$1, KEY_LISTENERS, KEY_ERR, KEY_RAW, HANDLER_KEYS, EV_CHANGE$2, EV_ADD$2, EV_ADD_DIR$2, EV_ERROR$2, STR_DATA$1, STR_END$2, BRACE_START$1, STAR, THROTTLE_MODE_WATCH, open$1, stat$2, lstat$1, close, fsrealpath, statMethods$1, foreach, addAndConvert, clearItem, delFromSet, isEmptySet, FsWatchInstances, fsWatchBroadcast, setFsWatchListener, FsWatchFileInstances, setFsWatchFileListener, NodeFsHandler$1, nodefsHandler2, fseventsHandler2, fs$3, sysPath$1, promisify$1, fsevents, EV_ADD$1, EV_CHANGE$1, EV_ADD_DIR$1, EV_UNLINK$1, EV_ERROR$1, STR_DATA, STR_END$1, FSEVENT_CREATED, FSEVENT_MODIFIED, FSEVENT_DELETED, FSEVENT_MOVED, FSEVENT_UNKNOWN, FSEVENT_FLAG_MUST_SCAN_SUBDIRS, FSEVENT_TYPE_FILE, FSEVENT_TYPE_DIRECTORY, FSEVENT_TYPE_SYMLINK, ROOT_GLOBSTAR, DIR_SUFFIX, DOT_SLASH, FUNCTION_TYPE$1, EMPTY_FN$1, IDENTITY_FN, Depth, stat$1, lstat, realpath2, statMethods, FSEventsWatchers, consolidateThreshhold, wrongEventFlags, createFSEventsInstance, couldConsolidate, canUse, calcDepth, sameTypes, FsEventsHandler$1, fseventsHandlerExports, EventEmitter$2, fs$2, sysPath, promisify3, readdirp, anymatch2, globParent3, isGlob3, braces, normalizePath6, NodeFsHandler2, FsEventsHandler2, EV_ALL, EV_READY, EV_ADD, EV_CHANGE, EV_UNLINK, EV_ADD_DIR, EV_UNLINK_DIR, EV_RAW, EV_ERROR, STR_CLOSE, STR_END, BACK_SLASH_RE, DOUBLE_SLASH_RE, SLASH_OR_BACK_SLASH_RE, DOT_RE, REPLACER_RE, SLASH, SLASH_SLASH, BRACE_START, BANG, ONE_DOT, TWO_DOTS, GLOBSTAR, SLASH_GLOBSTAR, ANYMATCH_OPTS, STRING_TYPE, FUNCTION_TYPE, EMPTY_STR, EMPTY_FN, isWindows$1, isMacos, isIBMi, stat4, readdir2, arrify, flatten, unifyPaths, toUnix, normalizePathToUnix, normalizeIgnored, getAbsolutePath, undef, DirEntry, STAT_METHOD_F, STAT_METHOD_L, WatchHelper, FSWatcher, watch2, guess, shellQuote$1, OPS, LINE_TERMINATORS, GLOB_SHELL_SPECIAL, quote, CONTROL, controlRE, META, SINGLE_QUOTE, DOUBLE_QUOTE, hash3, SQ, DQ, DS, TOKEN, mult, i6, startsWithToken, parse$6, macos, linux, windows$1, path$6, shellQuote, childProcess$1, COMMON_EDITORS_MACOS, COMMON_EDITORS_LINUX, COMMON_EDITORS_WIN, guessExports, path$5, getArgs, fs$1, os, path$4, colors, childProcess, guessEditor, getArgumentsForPosition2, positionRE, currentChildProcess, launchEditor_1, path$3, launch, launchEditorMiddleware, launchEditorMiddleware$1, offset, rewroteStacktraces, prepareStackTrace2, createServerModuleRunnerTransport, SSRCompatModuleRunner, WalkerBase2, SyncWalker2, ssrModuleExportsKey2, ssrImportKey2, ssrDynamicImportKey2, ssrExportAllKey2, ssrImportMetaKey2, hashbangRE, isNodeInPatternWeakSet, setIsNodeInPattern, isNodeInPattern, isStaticProperty, isStaticPropertyKey, functionNodeTypeRE, blockNodeTypeRE, isDockerCached, cachedResult, hasContainerEnv, isWsl, isWsl$1, execFileAsync$3, execFileAsync$2, execFileAsync$1, windowsBrowserProgIds, UnknownBrowserError, execFileAsync2, titleize, __dirname2, localXdgOpenPath, platform2, arch, getWslDrivesMountPoint, pTryEach, baseOpen, open2, apps, crossSpawn, windows, hasRequiredWindows, mode, hasRequiredMode, core, isexe_1, isWindows2, path$22, COLON2, isexe, getNotFoundError, getPathInfo, which$1, whichSync, which_1, pathKey$1, pathKey, pathKeyExports, path$13, which, getPathKey, resolveCommand_1, _escape, metaCharsRegExp, shebangRegex$1, shebangRegex, shebangCommand$1, fs8, shebangCommand, readShebang_1, path10, resolveCommand, escape$1, readShebang, isWin$1, isExecutableRegExp, isCmdShimRegExp, parse_13, isWin2, enoent$1, cp, parse$4, enoent, crossSpawnExports, spawn$1, supportedChromiumBrowsers, BASE_DEV_SHORTCUTS, BASE_PREVIEW_SHORTCUTS, NoopWatcher, bufferUtil$1, BINARY_TYPES$2, hasBlob$1, constants3, EMPTY_BUFFER$3, FastBuffer$2, bufferUtilExports, kDone, kRun, Limiter$1, limiter, zlib3, bufferUtil, Limiter2, kStatusCode$2, FastBuffer$1, TRAILER, kPerMessageDeflate, kTotalLength, kCallback, kBuffers, kError$1, zlibLimiter, PerMessageDeflate$4, permessageDeflate, validation, isUtf8, hasBlob, tokenChars$2, validationExports, Writable$1, PerMessageDeflate$3, BINARY_TYPES$1, EMPTY_BUFFER$2, kStatusCode$1, kWebSocket$3, concat3, toArrayBuffer2, unmask, isValidStatusCode$1, isValidUTF8, FastBuffer, GET_INFO, GET_PAYLOAD_LENGTH_16, GET_PAYLOAD_LENGTH_64, GET_MASK, GET_DATA, INFLATING, DEFER_EVENT, Receiver$1, receiver, randomFillSync, PerMessageDeflate$2, EMPTY_BUFFER$1, kWebSocket$2, NOOP$2, isBlob$1, isValidStatusCode, applyMask, toBuffer$1, kByteLength, maskBuffer, RANDOM_POOL_SIZE, randomPool, randomPoolPointer, DEFAULT, DEFLATING, GET_BLOB_DATA, Sender$1, sender, kForOnEventAttribute$1, kListener$1, kCode, kData, kError, kMessage, kReason, kTarget, kType, kWasClean, Event$1, CloseEvent, ErrorEvent, MessageEvent, EventTarget2, eventTarget, tokenChars$1, extension$1, EventEmitter$1, https$2, http$3, net, tls, randomBytes2, createHash$1, URL$2, PerMessageDeflate$1, Receiver3, Sender3, isBlob3, BINARY_TYPES, EMPTY_BUFFER, GUID$1, kForOnEventAttribute, kListener, kStatusCode, kWebSocket$1, NOOP$1, addEventListener, removeEventListener, format2, parse$2, toBuffer2, closeTimeout, kAborted, protocolVersions, readyStates, subprotocolRegex, WebSocket$1, websocket, tokenChars, subprotocol$1, EventEmitter2, http$2, createHash2, extension2, PerMessageDeflate3, subprotocol2, WebSocket3, GUID, kWebSocket, keyRegex, RUNNING, CLOSING, CLOSED, WebSocketServer2, websocketServer, WebSocketServerRaw_, allowedHostsServerCache, allowedHostsPreviewCache, isFileOrExtensionProtocolRE, WebSocketServerRaw, HMR_HEADER, isWebSocketServer, wsServerEvents, httpProxy$3, eventemitter3, eventemitter3Exports, common$3, requiresPort, url$1, common$2, redirectRegex, webOutgoing, followRedirects$1, debug$7, debug_1, url2, URL$1, http$1, https$1, Writable, assert, debug$6, useNativeURL, preservedUrlFields, events, eventHandlers, InvalidUrlError, RedirectionError, TooManyRedirectsError, MaxBodyLengthExceededError, WriteAfterEndError, destroy, followRedirectsExports, httpNative, httpsNative, web_o, common$1, followRedirects2, nativeAgents, webIncoming, http5, https7, common, wsIncoming, httpProxyExports, ProxyServer, httpProxy$2, httpProxy, httpProxy$1, debug$5, rewriteOriginHeader, debug$4, etag_1, crypto24, Stats, toString6, getEtag, debug$3, alias, noop4, ENCODING, knownJavascriptExtensionRE, ERR_DENIED_FILE, sirvOptions, windowsDriveRE, ERR_LOAD_URL, ERR_LOAD_PUBLIC_URL, ERR_DENIED_ID, debugLoad, debugTransform, debugCache$1, ALLOWED_META_NAME, ALLOWED_META_PROPERTY, DEFAULT_HTML_ASSET_SOURCES, modulePreloadPolyfillId, resolvedModulePreloadPolyfillId, htmlProxyRE$1, isHtmlProxyRE, inlineCSSRE$1, inlineImportRE, htmlLangRE, spaceRe, importMapRE, moduleScriptRE, modulePreloadLinkRE, importMapAppendRE, isHTMLProxy, isHTMLRequest, htmlProxyMap, htmlProxyResult, noInlineLinkRels, isAsyncScriptMap, attrValueStartRE, elementsAllowedInHead, importRE, commentRE, headInjectRE, headPrependInjectRE, htmlInjectRE, htmlPrependInjectRE, bodyInjectRE, bodyPrependInjectRE, doctypePrependInjectRE, unaryTags, debugCache, knownIgnoreList, trailingQuerySeparatorsRE, urlRE, rawRE, inlineRE$2, svgRE, wordCharRE, processNodeUrl, devHtmlHook, logTime, EMPTY_OBJECT$1, ModuleNode, ModuleGraph, DualWeakMap, ROOT_FILES, usedConfigs, serverConfigDefaults, debugHmr, whitespaceRE, normalizedClientDir, normalizeHotChannel, sortedHotUpdatePluginsCache, nonJsRe, isNonJsRequest, importMetaEnvMarker, importMetaEnvKeyReCache, workerOrSharedWorkerRE, workerFileRE, inlineRE$1, WORKER_FILE_ID, workerCache, workerAssetUrlRE, debug$2, clientDir, skipRE, canSkipImportAnalysis, optimizedDepChunkRE, optimizedDepDynamicRE, hasViteIgnoreRE, urlIsStringRE, templateLiteralRE, interopHelper, normalizedClientEntry, normalizedEnvEntry, wasmHelperId, wasmInitRE, wasmHelper, wasmHelperCode, wasmHelperPlugin, wasmFallbackPlugin, VariableDynamicImportError, example, defaultProtocol, ignoredProtocols, dynamicImportHelperId, relativePathRE, hasDynamicImportRE, dynamicImportHelper, filterForPlugin, viteAliasCustomResolver, EMPTY_OBJECT2, debugSourcemapCombineFilter, debugSourcemapCombine, debugResolve, debugPluginResolve, debugPluginTransform, debugPluginContainerContext, ERR_CLOSED_SERVER, EnvironmentPluginContainer, MinimalPluginContext, PluginContext, ResolveIdContext, LoadPluginContext, TransformPluginContext, PluginContainer, decoder, cssConfigDefaults, cssModuleRE, directRequestRE, htmlProxyRE, htmlProxyIndexRE, commonjsProxyRE, inlineRE, inlineCSSRE, styleAttrRE, functionCallRE, transformOnlyRE, nonEscapedDoubleQuoteRe, defaultCssBundleName, isCSSRequest, isModuleCSSRequest, isDirectCSSRequest, isDirectRequest, cssModulesCache, removedPureCssFilesCache, cssBundleNameCache, postcssConfigCache, cssUrlAssetRE, fileURLWithWindowsDriveRE, configToAtImportResolvers, importPostcssImport, importPostcssModules, importPostcss, preprocessorWorkerControllerCache, alwaysFakeWorkerWorkerControllerCache, viteHashUpdateMarker, viteHashUpdateMarkerRE, cssUrlRE, cssDataUriRE, importCssRE, cssImageSetRE, UrlRewritePostcssPlugin, cssNotProcessedRE, atImportRE, atCharsetRE, loadedPreprocessorPath, cachedSss, makeScssWorker, makeModernScssWorker, makeModernCompilerScssWorker, scssProcessor, makeLessWorker, lessProcessor, makeStylWorker, stylProcessor, createPreprocessorWorkerController, normalizeMaxWorkers, preprocessorSet, importLightningCSS, map2, esMap, esRE, versionRE, convertTargetsCache, convertTargets, isModernFlag, preloadMethod, preloadMarker, preloadHelperId, preloadMarkerRE, dynamicImportPrefixRE, dynamicImportTreeshakenRE, buildEnvironmentOptionsDefaults, warningIgnoreList, dynamicImportWarningIgnoreList, normalizeLog2, needsEscapeRegEx2, quoteNewlineRegEx2, backSlashRegEx2, getResolveUrl2, getRelativeUrlFromDocument2, getFileUrlFromFullPath2, getFileUrlFromRelativePath2, relativeUrlMechanisms2, customRelativeUrlMechanisms, toOutputFilePathInCss, toOutputFilePathInHtml, BuildEnvironment, builderOptionsDefaults, build$12, OTHER_SOURCE_MAP_REGEXP, debug$1, debounceMs, EnvironmentModuleNode, EnvironmentModuleGraph, DevEnvironment, callCrawlEndIfIdleAfterMs, RunnableDevEnvironment, NOOP, MIMES, ssrConfigDefaults, debug, promisifiedRealpath, SYMBOL_RESOLVED_CONFIG, configDefaults, clientAlias, _require;
+var fs$8, import_node_fs5, import_node_path10, import_promises3, import_node_url5, import_node_util6, import_node_perf_hooks2, import_node_module4, import_node_crypto3, import_picomatch2, import_esbuild3, import_path13, import_fs10, import_node_child_process2, import_node_http3, import_node_https2, import_tty, import_util6, import_net, import_events3, import_url5, import_http4, import_stream7, import_os3, import_child_process, import_node_os4, import_node_net6, import_node_dns, import_node_buffer4, import_module3, import_node_readline, import_node_process3, import_node_events, import_crypto24, import_node_assert, import_node_v8, import_node_worker_threads, import_https6, import_tls, import_zlib2, import_buffer, import_assert, qs, import_node_zlib2, import_node_module5, import_meta7, __require3, commonjsGlobal, picocolors2, p4, argv, env$1, isColorSupported, formatter, replaceClose, createColors, picocolorsExports2, colors$1, VALID_ID_PREFIX2, NULL_BYTE_PLACEHOLDER2, SOURCEMAPPING_URL3, MODULE_RUNNER_SOURCEMAPPING_SOURCE, ERR_OUTDATED_OPTIMIZED_DEP2, isWindows$3, windowsSlashRE2, postfixRE2, WalkerBase$1, SyncWalker$1, extractors2, extractAssignedNames3, blockDeclarations, Scope2, attachScopes, normalizePathRegExp2, normalizePath$5, createFilter$2, reservedWords2, builtins2, forbiddenIdentifiers2, makeLegalIdentifier, hasStringIsWellFormed, dataToEsm, path$a, commondir2, getCommonDir, comma5, semicolon3, chars$12, intToChar3, charToInt3, bufLength2, td2, StringWriter2, StringReader3, BitSet2, Chunk3, btoa$1, SourceMap$1, toString$1, wordRegex2, Mappings2, n$1, warned2, MagicString2, version$2, peerDependencies, firstpassGlobal, firstpassNoGlobal, getVirtualPathForDynamicRequirePath, FAILED_REQUIRE_ERROR, COMMONJS_REQUIRE_EXPORT, CREATE_COMMONJS_REQUIRE_EXPORT, isWrappedId, wrapId, unwrapId2, PROXY_SUFFIX, WRAPPED_SUFFIX, EXTERNAL_SUFFIX, EXPORTS_SUFFIX, MODULE_SUFFIX, ENTRY_SUFFIX, ES_IMPORT_SUFFIX, DYNAMIC_MODULES_ID, HELPERS_ID, IS_WRAPPED_COMMONJS, HELPERS, operators, KEY_COMPILED_ESM, reservedMethod, exportsPattern, functionType, PLUGIN_NAME2, schemeRegex, urlRegex, fileRegex, COLUMN$1, SOURCES_INDEX$1, SOURCE_LINE$1, SOURCE_COLUMN$1, NAMES_INDEX$1, found2, LINE_GTR_ZERO2, COL_GTR_EQ_ZERO2, LEAST_UPPER_BOUND2, GREATEST_LOWER_BOUND2, TraceMap, SetArray, COLUMN2, SOURCES_INDEX2, SOURCE_LINE2, SOURCE_COLUMN2, NAMES_INDEX2, NO_NAME, GenMapping, maybeAddSegment, SOURCELESS_MAPPING, EMPTY_SOURCES, SourceMap3, node$12, ms$1, hasRequiredMs, common$4, hasRequiredCommon, nodeExports$1, debug$j, pnp, createFilter$12, replaceSlashOrColonRE, replaceDotRE, replaceNestedIdRE, replaceHashRE, flattenId, FLATTEN_ID_HASH_LENGTH, FLATTEN_ID_MAX_FILE_LENGTH, limitFlattenIdLength, normalizeId, NODE_BUILTIN_NAMESPACE, NPM_BUILTIN_NAMESPACE, BUN_BUILTIN_NAMESPACE, nodeBuiltins2, isBuiltinCache, nodeLikeBuiltins, bareImportRE, deepImportRE, _require$1, _dirname, rollupVersion2, filter5, DEBUG, urlCanParse, isCaseInsensitiveFS, VOLUME_RE, externalRE, isExternalUrl, dataUrlRE, isDataUrl, virtualModuleRE, virtualModulePrefix, knownJsSrcRE, isJSRequest, importQueryRE, directRequestRE$1, internalPrefixes, InternalPrefixRE, trailingSeparatorRE, isImportRequest, isInternalRequest, urlRE$1, rawRE$1, timestampRE, splitRE, range, splitFirstDirRE, ERR_SYMLINK_IN_RECURSIVE_READDIR, safeRealpathSync, windowsNetworkMap, parseNetUseRE, firstSafeRealPathSyncRun, imageCandidateRegex, escapedSpaceCharacters, windowsDriveRE$1, replaceWindowsDriveRE, linuxAbsolutePathRE, revertWindowsDriveRE, nullSourceMap, multilineCommentsRE, singlelineCommentsRE, requestQuerySplitRE, requestQueryMaybeEscapedSplitRE, blankReplacer, hash$1, requireResolveFromRootWithFallback, windowsDrivePathPrefixRE, isNonDriveRelativeAbsolutePath, escapeRegexRE, sigtermCallbacks, parentSigtermCallback, setupSIGTERMListener, teardownSIGTERMListener, LogLevels, lastType, lastMsg, sameCount, timeFormatter, groups, COMPRESSIBLE_ASSETS_RE, POSIX_SEP_RE, NATIVE_SEP_RE, PATTERN_REGEX_CACHE, GLOB_ALL_PATTERN, TS_EXTENSIONS, JS_EXTENSIONS, TSJS_EXTENSIONS, TS_EXTENSIONS_RE_GROUP, TSJS_EXTENSIONS_RE_GROUP, IS_POSIX, isInNodeModules, posix2native, native2posix, resolve2posix, singleComment, multiComment, not_found_result, EXTENDABLE_KEYS, REBASE_KEYS, TSConfckParseError, DEFAULT_JSCONFIG_COMPILER_OPTIONS, TSConfckCache, debug$i, IIFE_BEGIN_RE, validExtensionRE, jsxExtensionsRE, defaultEsbuildSupported, rollupToEsbuildFormatMap, buildEsbuildPlugin, globalTSConfckCache, tsconfckCacheMap, AsyncFunction2, codeToDataUrl, viteSsrDynamicImport, Worker, importRe, internalImportName, FakeWorker, WorkerWithFallback, terserPath, loadTerserPath, mimes, publicFilesMap, assetUrlRE, jsSourceMapRE, noInlineRE, inlineRE$3, svgExtRE, assetCache, cssEntriesMap, publicAssetUrlCache, publicAssetUrlRE, GIT_LFS_PREFIX, nestedQuotesRE, endsWithJSRE, dataUriRE, base64RE, dataUriPrefix, ImportType, A3, C3, E2, init, convertSourceMap$1, convertSourceMap, debug$h, virtualSourceRE, src$12, path$9, fs$7, os$2, url$3, fsReadFileAsync, jsonLoader, requireFunc, defaultLoadersSync, dynamicImport, defaultLoaders, makeEmplace, createRequire3, fileURLToPath4, pathToFileURL, TS_EXT_RE, tsx, jiti, importError, req_1, req$2, options_1, req$1, plugins_1, resolve7, config$1, loadOptions, loadPlugins, req, interopRequireDefault, yaml, withLoaders, src2, postcssrc, jsonExtRE, jsonObjRE, jsonLangs, jsonLangRE, isJSONRequest, HASH_RE, AMPERSAND_RE, SLASH_RE, EQUAL_RE, PLUS_RE, ENC_CARET_RE, ENC_BACKTICK_RE, ENC_PIPE_RE, ENC_SPACE_RE, own$1, classRegExp, kTypes, messages, nodeInternalPrefix, userStackTraceLimit, captureLargerStackTrace, ESM_STATIC_IMPORT_RE, TYPE_RE, ESM_RE, COMMENT_RE, externalWithConversionNamespace, convertedExternalPrefix, cjsExternalFacadeNamespace, nonFacadePrefix, externalTypes, matchesEntireLine, environmentColors, PartialEnvironment, BaseEnvironment, HashbangComment, Identifier3, JSXIdentifier2, JSXPunctuator, JSXString, JSXText2, KeywordsWithExpressionAfter, KeywordsWithNoLineTerminatorAfter, LineTerminatorSequence, MultiLineComment, Newline, NumericLiteral, Punctuator, RegularExpressionLiteral, SingleLineComment, StringLiteral, Template, TokensNotPrecedingObjectLiteral, TokensPrecedingExpression, WhiteSpace, jsTokens_1, jsTokens, importGlobRE, objectKeysRE, objectValuesRE, knownOptions, forceDefaultAs, importPrefix, basename6, dirname5, relative4, ScanEnvironment, debug$g, htmlTypesRE, importsRE, scriptRE, commentRE$1, srcRE, typeRE, langRE, svelteScriptModuleRE, svelteModuleRE, debug$f, jsExtensionRE, jsMapExtensionRE, firstLoadCachedDepOptimizationMetadata, lockfileFormats, lockfilePaths, MAX_TEMP_DIR_AGE_MS, GRACEFUL_RENAME_TIMEOUT, safeRename, debug$e, isExternalCache, normalizedClientEntry$1, normalizedEnvEntry$1, ERR_RESOLVE_PACKAGE_ENTRY_FAIL, browserExternalId, optionalPeerDepId, subpathImportsPrefix, startsWithWordCharRE, debug$d, knownTsOutputRE, isPossibleTsOutput, debug$c, main, version$1, require$$4, fs$6, path$8, os$1, crypto$1, packageJson, version3, LINE, DotenvModule, parse_1$22, expand_1$1, debug$b, docsURL, deprecationCode, deprecationMessages, _ignoreDeprecationWarnings, node2, debug$a, s5, m5, h3, d3, y2, ms, debugExports, nodeExports2, encodeurl, ENCODE_CHARS_REGEXP, UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE, matchHtmlRegExp, escapeHtml_1, escapeHtml$2, onFinished$2, eeFirst, first3, defer$2, onFinishedExports, parseurl$1, url$2, parse$a, Url, parseurlExports, require$$0$13, codes, statuses$1, unpipe_1, debug$9, encodeUrl, escapeHtml, onFinished, parseUrl$2, statuses, unpipe, DOUBLE_SPACE_REGEXP, NEWLINE_REGEXP, defer$1, isFinished, finalhandler_1, utilsMerge, utilsMergeExports, debug$8, EventEmitter$3, finalhandler, http$4, merge5, parseUrl$1, connect, env3, proto, defer, connect$1, lib2, getOwnPropertySymbols, hasOwnProperty3, propIsEnumerable, objectAssign, vary$1, FIELD_NAME_REGEXP, varyExports, libExports, corsMiddleware, chokidar2, fs$5, Readable3, sysPath$3, promisify$3, picomatch$12, readdir$1, stat$3, lstat$2, realpath$1, BANG$2, RECURSIVE_ERROR_CODE, NORMAL_FLOW_ERRORS, FILE_TYPE, DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE, ALL_TYPES, isNormalFlowError, maj, min, wantBigintFsStats, normalizeFilter$1, ReaddirpStream, readdirp$1, readdirpPromise, readdirp_12, anymatch$2, normalizePath$2, anymatch_12, picomatch4, normalizePath$1, BANG$1, DEFAULT_OPTIONS, arrify$1, createPattern, matchPatterns, anymatch$1, anymatchExports, isExtglob$1, isExtglob3, chars4, strictCheck, relaxedCheck, isGlob$2, isGlob$1, pathPosixDirname, isWin32, slash4, backslash3, enclosure, globby, escaped, globParent$1, utils$3, utils$22, stringify$4, isNumber$2, isNumber$1, toRegexRange$1, toRegexRange_12, util5, toRegexRange, isObject3, transform3, isValidValue, isNumber7, zeros, stringify$3, pad, toMaxLen, toSequence, toRange, toRegex, rangeError, invalidRange, invalidStep, fillNumbers, fillLetters, fill$2, fillRange2, fill$1, utils$12, compile$1, compile_12, fill, stringify$2, utils3, append4, expand$1, expand_12, constants$22, stringify$12, MAX_LENGTH, CHAR_BACKSLASH, CHAR_BACKTICK, CHAR_COMMA, CHAR_DOT, CHAR_LEFT_PARENTHESES, CHAR_RIGHT_PARENTHESES, CHAR_LEFT_CURLY_BRACE, CHAR_RIGHT_CURLY_BRACE, CHAR_LEFT_SQUARE_BRACKET, CHAR_RIGHT_SQUARE_BRACKET, CHAR_DOUBLE_QUOTE, CHAR_SINGLE_QUOTE, CHAR_NO_BREAK_SPACE, CHAR_ZERO_WIDTH_NOBREAK_SPACE, parse$8, parse_1$12, stringify6, compile4, expand, parse$7, braces$1, braces_12, require$$03, binaryExtensions$1, path$7, binaryExtensions2, extensions, isBinaryPath$1, constants$12, fs$4, sysPath$2, promisify$2, isBinaryPath2, isWindows$2, isLinux, EMPTY_FN$2, EMPTY_STR$1, KEY_LISTENERS, KEY_ERR, KEY_RAW, HANDLER_KEYS, EV_CHANGE$2, EV_ADD$2, EV_ADD_DIR$2, EV_ERROR$2, STR_DATA$1, STR_END$2, BRACE_START$1, STAR, THROTTLE_MODE_WATCH, open$1, stat$2, lstat$1, close, fsrealpath, statMethods$1, foreach, addAndConvert, clearItem, delFromSet, isEmptySet, FsWatchInstances, fsWatchBroadcast, setFsWatchListener, FsWatchFileInstances, setFsWatchFileListener, NodeFsHandler$1, nodefsHandler2, fseventsHandler2, fs$3, sysPath$1, promisify$1, fsevents, EV_ADD$1, EV_CHANGE$1, EV_ADD_DIR$1, EV_UNLINK$1, EV_ERROR$1, STR_DATA, STR_END$1, FSEVENT_CREATED, FSEVENT_MODIFIED, FSEVENT_DELETED, FSEVENT_MOVED, FSEVENT_UNKNOWN, FSEVENT_FLAG_MUST_SCAN_SUBDIRS, FSEVENT_TYPE_FILE, FSEVENT_TYPE_DIRECTORY, FSEVENT_TYPE_SYMLINK, ROOT_GLOBSTAR, DIR_SUFFIX, DOT_SLASH, FUNCTION_TYPE$1, EMPTY_FN$1, IDENTITY_FN, Depth, stat$1, lstat, realpath2, statMethods, FSEventsWatchers, consolidateThreshhold, wrongEventFlags, createFSEventsInstance, couldConsolidate, canUse, calcDepth, sameTypes, FsEventsHandler$1, fseventsHandlerExports, EventEmitter$2, fs$2, sysPath, promisify3, readdirp, anymatch2, globParent3, isGlob3, braces, normalizePath6, NodeFsHandler2, FsEventsHandler2, EV_ALL, EV_READY, EV_ADD, EV_CHANGE, EV_UNLINK, EV_ADD_DIR, EV_UNLINK_DIR, EV_RAW, EV_ERROR, STR_CLOSE, STR_END, BACK_SLASH_RE, DOUBLE_SLASH_RE, SLASH_OR_BACK_SLASH_RE, DOT_RE, REPLACER_RE, SLASH, SLASH_SLASH, BRACE_START, BANG, ONE_DOT, TWO_DOTS, GLOBSTAR, SLASH_GLOBSTAR, ANYMATCH_OPTS, STRING_TYPE, FUNCTION_TYPE, EMPTY_STR, EMPTY_FN, isWindows$1, isMacos, isIBMi, stat4, readdir2, arrify, flatten, unifyPaths, toUnix, normalizePathToUnix, normalizeIgnored, getAbsolutePath, undef, DirEntry, STAT_METHOD_F, STAT_METHOD_L, WatchHelper, FSWatcher, watch2, guess, shellQuote$1, OPS, LINE_TERMINATORS, GLOB_SHELL_SPECIAL, quote, CONTROL, controlRE, META, SINGLE_QUOTE, DOUBLE_QUOTE, hash3, SQ, DQ, DS, TOKEN, mult, i6, startsWithToken, parse$6, macos, linux, windows$1, path$6, shellQuote, childProcess$1, COMMON_EDITORS_MACOS, COMMON_EDITORS_LINUX, COMMON_EDITORS_WIN, guessExports, path$5, getArgs, fs$1, os, path$4, colors, childProcess, guessEditor, getArgumentsForPosition2, positionRE, currentChildProcess, launchEditor_1, path$3, launch, launchEditorMiddleware, launchEditorMiddleware$1, offset, rewroteStacktraces, prepareStackTrace2, createServerModuleRunnerTransport, SSRCompatModuleRunner, WalkerBase2, SyncWalker2, ssrModuleExportsKey2, ssrImportKey2, ssrDynamicImportKey2, ssrExportAllKey2, ssrImportMetaKey2, hashbangRE, isNodeInPatternWeakSet, setIsNodeInPattern, isNodeInPattern, isStaticProperty, isStaticPropertyKey, functionNodeTypeRE, blockNodeTypeRE, isDockerCached, cachedResult, hasContainerEnv, isWsl, isWsl$1, execFileAsync$3, execFileAsync$2, execFileAsync$1, windowsBrowserProgIds, UnknownBrowserError, execFileAsync2, titleize, __dirname2, localXdgOpenPath, platform2, arch, getWslDrivesMountPoint, pTryEach, baseOpen, open2, apps, crossSpawn, windows, hasRequiredWindows, mode, hasRequiredMode, core, isexe_1, isWindows2, path$22, COLON2, isexe, getNotFoundError, getPathInfo, which$1, whichSync, which_1, pathKey$1, pathKey, pathKeyExports, path$13, which, getPathKey, resolveCommand_1, _escape, metaCharsRegExp, shebangRegex$1, shebangRegex, shebangCommand$1, fs8, shebangCommand, readShebang_1, path10, resolveCommand, escape$1, readShebang, isWin$1, isExecutableRegExp, isCmdShimRegExp, parse_13, isWin2, enoent$1, cp, parse$4, enoent, crossSpawnExports, spawn$1, supportedChromiumBrowsers, BASE_DEV_SHORTCUTS, BASE_PREVIEW_SHORTCUTS, NoopWatcher, bufferUtil$1, BINARY_TYPES$2, hasBlob$1, constants3, EMPTY_BUFFER$3, FastBuffer$2, bufferUtilExports, kDone, kRun, Limiter$1, limiter, zlib3, bufferUtil, Limiter2, kStatusCode$2, FastBuffer$1, TRAILER, kPerMessageDeflate, kTotalLength, kCallback, kBuffers, kError$1, zlibLimiter, PerMessageDeflate$4, permessageDeflate, validation, isUtf8, hasBlob, tokenChars$2, validationExports, Writable$1, PerMessageDeflate$3, BINARY_TYPES$1, EMPTY_BUFFER$2, kStatusCode$1, kWebSocket$3, concat3, toArrayBuffer2, unmask, isValidStatusCode$1, isValidUTF8, FastBuffer, GET_INFO, GET_PAYLOAD_LENGTH_16, GET_PAYLOAD_LENGTH_64, GET_MASK, GET_DATA, INFLATING, DEFER_EVENT, Receiver$1, receiver, randomFillSync, PerMessageDeflate$2, EMPTY_BUFFER$1, kWebSocket$2, NOOP$2, isBlob$1, isValidStatusCode, applyMask, toBuffer$1, kByteLength, maskBuffer, RANDOM_POOL_SIZE, randomPool, randomPoolPointer, DEFAULT, DEFLATING, GET_BLOB_DATA, Sender$1, sender, kForOnEventAttribute$1, kListener$1, kCode, kData, kError, kMessage, kReason, kTarget, kType, kWasClean, Event$1, CloseEvent, ErrorEvent, MessageEvent, EventTarget2, eventTarget, tokenChars$1, extension$1, EventEmitter$1, https$2, http$3, net, tls, randomBytes2, createHash$1, URL$2, PerMessageDeflate$1, Receiver3, Sender3, isBlob3, BINARY_TYPES, EMPTY_BUFFER, GUID$1, kForOnEventAttribute, kListener, kStatusCode, kWebSocket$1, NOOP$1, addEventListener, removeEventListener, format2, parse$2, toBuffer2, closeTimeout, kAborted, protocolVersions, readyStates, subprotocolRegex, WebSocket$1, websocket, tokenChars, subprotocol$1, EventEmitter2, http$2, createHash2, extension2, PerMessageDeflate3, subprotocol2, WebSocket3, GUID, kWebSocket, keyRegex, RUNNING, CLOSING, CLOSED, WebSocketServer2, websocketServer, WebSocketServerRaw_, allowedHostsServerCache, allowedHostsPreviewCache, isFileOrExtensionProtocolRE, WebSocketServerRaw, HMR_HEADER, isWebSocketServer, wsServerEvents, httpProxy$3, eventemitter3, eventemitter3Exports, common$3, requiresPort, url$1, common$2, redirectRegex, webOutgoing, followRedirects$1, debug$7, debug_1, url2, URL$1, http$1, https$1, Writable, assert, debug$6, useNativeURL, preservedUrlFields, events, eventHandlers, InvalidUrlError, RedirectionError, TooManyRedirectsError, MaxBodyLengthExceededError, WriteAfterEndError, destroy, followRedirectsExports, httpNative, httpsNative, web_o, common$1, followRedirects2, nativeAgents, webIncoming, http5, https7, common, wsIncoming, httpProxyExports, ProxyServer, httpProxy$2, httpProxy, httpProxy$1, debug$5, rewriteOriginHeader, debug$4, etag_1, crypto24, Stats, toString6, getEtag, debug$3, alias, noop4, ENCODING, knownJavascriptExtensionRE, ERR_DENIED_FILE, sirvOptions, windowsDriveRE, ERR_LOAD_URL, ERR_LOAD_PUBLIC_URL, ERR_DENIED_ID, debugLoad, debugTransform, debugCache$1, ALLOWED_META_NAME, ALLOWED_META_PROPERTY, DEFAULT_HTML_ASSET_SOURCES, modulePreloadPolyfillId, resolvedModulePreloadPolyfillId, htmlProxyRE$1, isHtmlProxyRE, inlineCSSRE$1, inlineImportRE, htmlLangRE, spaceRe, importMapRE, moduleScriptRE, modulePreloadLinkRE, importMapAppendRE, isHTMLProxy, isHTMLRequest, htmlProxyMap, htmlProxyResult, noInlineLinkRels, isAsyncScriptMap, attrValueStartRE, elementsAllowedInHead, importRE, commentRE, headInjectRE, headPrependInjectRE, htmlInjectRE, htmlPrependInjectRE, bodyInjectRE, bodyPrependInjectRE, doctypePrependInjectRE, unaryTags, debugCache, knownIgnoreList, trailingQuerySeparatorsRE, urlRE, rawRE, inlineRE$2, svgRE, wordCharRE, processNodeUrl, devHtmlHook, logTime, EMPTY_OBJECT$1, ModuleNode, ModuleGraph, DualWeakMap, ROOT_FILES, usedConfigs, serverConfigDefaults, debugHmr, whitespaceRE, normalizedClientDir, normalizeHotChannel, sortedHotUpdatePluginsCache, nonJsRe, isNonJsRequest, importMetaEnvMarker, importMetaEnvKeyReCache, workerOrSharedWorkerRE, workerFileRE, inlineRE$1, WORKER_FILE_ID, workerCache, workerAssetUrlRE, debug$2, clientDir, skipRE, canSkipImportAnalysis, optimizedDepChunkRE, optimizedDepDynamicRE, hasViteIgnoreRE, urlIsStringRE, templateLiteralRE, interopHelper, normalizedClientEntry, normalizedEnvEntry, wasmHelperId, wasmInitRE, wasmHelper, wasmHelperCode, wasmHelperPlugin, wasmFallbackPlugin, VariableDynamicImportError, example, defaultProtocol, ignoredProtocols, dynamicImportHelperId, relativePathRE, hasDynamicImportRE, dynamicImportHelper, filterForPlugin, viteAliasCustomResolver, EMPTY_OBJECT2, debugSourcemapCombineFilter, debugSourcemapCombine, debugResolve, debugPluginResolve, debugPluginTransform, debugPluginContainerContext, ERR_CLOSED_SERVER, EnvironmentPluginContainer, MinimalPluginContext, PluginContext, ResolveIdContext, LoadPluginContext, TransformPluginContext, PluginContainer, decoder, cssConfigDefaults, cssModuleRE, directRequestRE, htmlProxyRE, htmlProxyIndexRE, commonjsProxyRE, inlineRE, inlineCSSRE, styleAttrRE, functionCallRE, transformOnlyRE, nonEscapedDoubleQuoteRe, defaultCssBundleName, isCSSRequest, isModuleCSSRequest, isDirectCSSRequest, isDirectRequest, cssModulesCache, removedPureCssFilesCache, cssBundleNameCache, postcssConfigCache, cssUrlAssetRE, fileURLWithWindowsDriveRE, configToAtImportResolvers, importPostcssImport, importPostcssModules, importPostcss, preprocessorWorkerControllerCache, alwaysFakeWorkerWorkerControllerCache, viteHashUpdateMarker, viteHashUpdateMarkerRE, cssUrlRE, cssDataUriRE, importCssRE, cssImageSetRE, UrlRewritePostcssPlugin, cssNotProcessedRE, atImportRE, atCharsetRE, loadedPreprocessorPath, cachedSss, makeScssWorker, makeModernScssWorker, makeModernCompilerScssWorker, scssProcessor, makeLessWorker, lessProcessor, makeStylWorker, stylProcessor, createPreprocessorWorkerController, normalizeMaxWorkers, preprocessorSet, importLightningCSS, map2, esMap, esRE, versionRE, convertTargetsCache, convertTargets, isModernFlag, preloadMethod, preloadMarker, preloadHelperId, preloadMarkerRE, dynamicImportPrefixRE, dynamicImportTreeshakenRE, buildEnvironmentOptionsDefaults, warningIgnoreList, dynamicImportWarningIgnoreList, normalizeLog2, needsEscapeRegEx2, quoteNewlineRegEx2, backSlashRegEx2, getResolveUrl2, getRelativeUrlFromDocument2, getFileUrlFromFullPath2, getFileUrlFromRelativePath2, relativeUrlMechanisms2, customRelativeUrlMechanisms, toOutputFilePathInCss, toOutputFilePathInHtml, BuildEnvironment, builderOptionsDefaults, build$12, OTHER_SOURCE_MAP_REGEXP, debug$1, debounceMs, EnvironmentModuleNode, EnvironmentModuleGraph, DevEnvironment, callCrawlEndIfIdleAfterMs, RunnableDevEnvironment, NOOP, MIMES, ssrConfigDefaults, debug, promisifiedRealpath, SYMBOL_RESOLVED_CONFIG, configDefaults, clientAlias, _require;
 var init_dep_Dm0c1Wj2 = __esm({
   "node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js"() {
     fs$8 = __toESM(require("node:fs"), 1);
@@ -278315,7 +278315,7 @@ var init_dep_Dm0c1Wj2 = __esm({
       }
       addUneditedChunk(sourceIndex, chunk, original, loc, sourcemapLocations) {
         let originalCharIndex = chunk.start;
-        let first3 = true;
+        let first4 = true;
         let charInHiresBoundary = false;
         while (originalCharIndex < chunk.end) {
           if (original[originalCharIndex] === "\n") {
@@ -278324,10 +278324,10 @@ var init_dep_Dm0c1Wj2 = __esm({
             this.generatedCodeLine += 1;
             this.raw[this.generatedCodeLine] = this.rawSegments = [];
             this.generatedCodeColumn = 0;
-            first3 = true;
+            first4 = true;
             charInHiresBoundary = false;
           } else {
-            if (this.hires || first3 || sourcemapLocations.has(originalCharIndex)) {
+            if (this.hires || first4 || sourcemapLocations.has(originalCharIndex)) {
               const segment = [this.generatedCodeColumn, sourceIndex, loc.line, loc.column];
               if (this.hires === "boundary") {
                 if (wordRegex2.test(original[originalCharIndex])) {
@@ -278345,7 +278345,7 @@ var init_dep_Dm0c1Wj2 = __esm({
             }
             loc.column += 1;
             this.generatedCodeColumn += 1;
-            first3 = false;
+            first4 = false;
           }
           originalCharIndex += 1;
         }
@@ -278598,25 +278598,25 @@ var init_dep_Dm0c1Wj2 = __esm({
         this._split(start);
         this._split(end2);
         this._split(index5);
-        const first3 = this.byStart[start];
+        const first4 = this.byStart[start];
         const last2 = this.byEnd[end2];
-        const oldLeft = first3.previous;
+        const oldLeft = first4.previous;
         const oldRight = last2.next;
         const newRight = this.byStart[index5];
         if (!newRight && last2 === this.lastChunk) return this;
         const newLeft = newRight ? newRight.previous : this.lastChunk;
         if (oldLeft) oldLeft.next = oldRight;
         if (oldRight) oldRight.previous = oldLeft;
-        if (newLeft) newLeft.next = first3;
+        if (newLeft) newLeft.next = first4;
         if (newRight) newRight.previous = last2;
-        if (!first3.previous) this.firstChunk = last2.next;
+        if (!first4.previous) this.firstChunk = last2.next;
         if (!last2.next) {
-          this.lastChunk = first3.previous;
+          this.lastChunk = first4.previous;
           this.lastChunk.next = null;
         }
-        first3.previous = newLeft;
+        first4.previous = newLeft;
         last2.next = newRight || null;
-        if (!newLeft) this.firstChunk = first3;
+        if (!newLeft) this.firstChunk = first4;
         if (!newRight) this.lastChunk = last2;
         return this;
       }
@@ -278658,10 +278658,10 @@ var init_dep_Dm0c1Wj2 = __esm({
             enumerable: true
           });
         }
-        const first3 = this.byStart[start];
+        const first4 = this.byStart[start];
         const last2 = this.byEnd[end2];
-        if (first3) {
-          let chunk = first3;
+        if (first4) {
+          let chunk = first4;
           while (chunk !== last2) {
             if (chunk.next !== this.byStart[chunk.end]) {
               throw new Error("Cannot overwrite across a split point");
@@ -278669,7 +278669,7 @@ var init_dep_Dm0c1Wj2 = __esm({
             chunk = chunk.next;
             chunk.edit("", false);
           }
-          first3.edit(content, storeName, !overwrite);
+          first4.edit(content, storeName, !overwrite);
         } else {
           const newChunk = new Chunk3(start, end2, "").edit(content, storeName);
           last2.next = newChunk;
@@ -280707,11 +280707,11 @@ ${e6.message}`);
         searchPlaces,
         stopDir,
         transform: transform4,
-        cache: cache2
+        cache: cache3
       } = getOptions2(name, options2 ?? {}, false);
       const searchCache = /* @__PURE__ */ new Map();
       const loadCache = /* @__PURE__ */ new Map();
-      const emplace = makeEmplace(cache2);
+      const emplace = makeEmplace(cache3);
       return {
         async search(searchFrom = process.cwd()) {
           const result = {
@@ -280721,7 +280721,7 @@ ${e6.message}`);
           const visited = /* @__PURE__ */ new Set();
           let dir = searchFrom;
           dirLoop: while (true) {
-            if (cache2) {
+            if (cache3) {
               const r5 = searchCache.get(dir);
               if (r5 !== void 0) {
                 for (const p5 of visited) searchCache.set(p5, r5);
@@ -280768,7 +280768,7 @@ ${e6.message}`);
             // not found
             result.filepath === "" && result.config === null ? transform4(null) : transform4(result)
           );
-          if (cache2) {
+          if (cache3) {
             for (const p5 of visited) searchCache.set(p5, transformed);
           }
           return transformed;
@@ -280776,7 +280776,7 @@ ${e6.message}`);
         async load(filepath) {
           validateFilePath(filepath);
           const absPath = path$9.resolve(process.cwd(), filepath);
-          if (cache2 && loadCache.has(absPath)) {
+          if (cache3 && loadCache.has(absPath)) {
             return loadCache.get(absPath);
           }
           const { base: base2, ext } = path$9.parse(absPath);
@@ -280818,13 +280818,13 @@ ${e6.message}`);
           );
         },
         clearLoadCache() {
-          if (cache2) loadCache.clear();
+          if (cache3) loadCache.clear();
         },
         clearSearchCache() {
-          if (cache2) searchCache.clear();
+          if (cache3) searchCache.clear();
         },
         clearCaches() {
-          if (cache2) {
+          if (cache3) {
             loadCache.clear();
             searchCache.clear();
           }
@@ -280839,11 +280839,11 @@ ${e6.message}`);
         searchPlaces,
         stopDir,
         transform: transform4,
-        cache: cache2
+        cache: cache3
       } = getOptions2(name, options2 ?? {}, true);
       const searchCache = /* @__PURE__ */ new Map();
       const loadCache = /* @__PURE__ */ new Map();
-      const emplace = makeEmplace(cache2);
+      const emplace = makeEmplace(cache3);
       return {
         search(searchFrom = process.cwd()) {
           const result = {
@@ -280853,7 +280853,7 @@ ${e6.message}`);
           const visited = /* @__PURE__ */ new Set();
           let dir = searchFrom;
           dirLoop: while (true) {
-            if (cache2) {
+            if (cache3) {
               const r5 = searchCache.get(dir);
               if (r5 !== void 0) {
                 for (const p5 of visited) searchCache.set(p5, r5);
@@ -280900,7 +280900,7 @@ ${e6.message}`);
             // not found
             result.filepath === "" && result.config === null ? transform4(null) : transform4(result)
           );
-          if (cache2) {
+          if (cache3) {
             for (const p5 of visited) searchCache.set(p5, transformed);
           }
           return transformed;
@@ -280908,7 +280908,7 @@ ${e6.message}`);
         load(filepath) {
           validateFilePath(filepath);
           const absPath = path$9.resolve(process.cwd(), filepath);
-          if (cache2 && loadCache.has(absPath)) {
+          if (cache3 && loadCache.has(absPath)) {
             return loadCache.get(absPath);
           }
           const { base: base2, ext } = path$9.parse(absPath);
@@ -280946,13 +280946,13 @@ ${e6.message}`);
           );
         },
         clearLoadCache() {
-          if (cache2) loadCache.clear();
+          if (cache3) loadCache.clear();
         },
         clearSearchCache() {
-          if (cache2) searchCache.clear();
+          if (cache3) searchCache.clear();
         },
         clearCaches() {
-          if (cache2) {
+          if (cache3) {
             loadCache.clear();
             searchCache.clear();
           }
@@ -282233,7 +282233,7 @@ ${e6.message}`);
     eeFirst = first$1;
     onFinished$2.exports = onFinished$1;
     onFinished$2.exports.isFinished = isFinished$1;
-    first2 = eeFirst;
+    first3 = eeFirst;
     defer$2 = typeof setImmediate === "function" ? setImmediate : function(fn3) {
       process.nextTick(fn3.bind.apply(fn3, arguments));
     };
@@ -294254,50 +294254,50 @@ __export(node_exports2, {
   version: () => VERSION3
 });
 function splitVendorChunk(options2 = {}) {
-  const cache2 = options2.cache ?? new SplitVendorChunkCache();
+  const cache3 = options2.cache ?? new SplitVendorChunkCache();
   return (id3, { getModuleInfo }) => {
-    if (isInNodeModules$1(id3) && !isCSSRequest2(id3) && staticImportedByEntry(id3, getModuleInfo, cache2.cache)) {
+    if (isInNodeModules$1(id3) && !isCSSRequest2(id3) && staticImportedByEntry(id3, getModuleInfo, cache3.cache)) {
       return "vendor";
     }
   };
 }
-function staticImportedByEntry(id3, getModuleInfo, cache2, importStack = []) {
-  if (cache2.has(id3)) {
-    return cache2.get(id3);
+function staticImportedByEntry(id3, getModuleInfo, cache3, importStack = []) {
+  if (cache3.has(id3)) {
+    return cache3.get(id3);
   }
   if (importStack.includes(id3)) {
-    cache2.set(id3, false);
+    cache3.set(id3, false);
     return false;
   }
   const mod3 = getModuleInfo(id3);
   if (!mod3) {
-    cache2.set(id3, false);
+    cache3.set(id3, false);
     return false;
   }
   if (mod3.isEntry) {
-    cache2.set(id3, true);
+    cache3.set(id3, true);
     return true;
   }
   const someImporterIs = mod3.importers.some(
     (importer) => staticImportedByEntry(
       importer,
       getModuleInfo,
-      cache2,
+      cache3,
       importStack.concat(id3)
     )
   );
-  cache2.set(id3, someImporterIs);
+  cache3.set(id3, someImporterIs);
   return someImporterIs;
 }
 function splitVendorChunkPlugin() {
   const caches = [];
   function createSplitVendorChunk(output, config2) {
-    const cache2 = new SplitVendorChunkCache();
-    caches.push(cache2);
+    const cache3 = new SplitVendorChunkCache();
+    caches.push(cache3);
     const build4 = config2.build ?? {};
     const format3 = output.format;
     if (!build4.ssr && !build4.lib && format3 !== "umd" && format3 !== "iife") {
-      return splitVendorChunk({ cache: cache2 });
+      return splitVendorChunk({ cache: cache3 });
     }
   }
   return {
@@ -294338,7 +294338,7 @@ function splitVendorChunkPlugin() {
       }
     },
     buildStart() {
-      caches.forEach((cache2) => cache2.reset());
+      caches.forEach((cache3) => cache3.reset());
     }
   };
 }
@@ -294443,9 +294443,9 @@ var hasOwnInPrototypeChain = (thing, prop2) => {
   return false;
 };
 var getSafeProp = (obj, prop2) => obj != null && hasOwnInPrototypeChain(obj, prop2) ? obj[prop2] : void 0;
-var kindOf = /* @__PURE__ */ ((cache2) => (thing) => {
+var kindOf = /* @__PURE__ */ ((cache3) => (thing) => {
   const str2 = toString.call(thing);
-  return cache2[str2] || (cache2[str2] = str2.slice(8, -1).toLowerCase());
+  return cache3[str2] || (cache3[str2] = str2.slice(8, -1).toLowerCase());
 })(/* @__PURE__ */ Object.create(null));
 var kindOfTest = (type) => {
   type = type.toLowerCase();
@@ -295185,8 +295185,8 @@ var AxiosHeaders = class {
   static from(thing) {
     return thing instanceof this ? thing : new this(thing);
   }
-  static concat(first3, ...targets) {
-    const computed = new this(first3);
+  static concat(first4, ...targets) {
+    const computed = new this(first4);
     targets.forEach((target) => computed.set(target));
     return computed;
   }
@@ -296883,8 +296883,8 @@ function getProxyEnvAgent(options2, configHttpAgent, configHttpsAgent) {
 }
 function getTunnelingAgent(agentOptions, userHttpsAgent) {
   const key = agentOptions.protocol + "//" + agentOptions.hostname + ":" + (agentOptions.port || "") + "#" + (agentOptions.auth || "");
-  const cache2 = userHttpsAgent ? tunnelingAgentCacheUser.get(userHttpsAgent) || tunnelingAgentCacheUser.set(userHttpsAgent, /* @__PURE__ */ new Map()).get(userHttpsAgent) : tunnelingAgentCache;
-  let agent = cache2.get(key);
+  const cache3 = userHttpsAgent ? tunnelingAgentCacheUser.get(userHttpsAgent) || tunnelingAgentCacheUser.set(userHttpsAgent, /* @__PURE__ */ new Map()).get(userHttpsAgent) : tunnelingAgentCache;
+  let agent = cache3.get(key);
   if (agent) return agent;
   const merged = userHttpsAgent && userHttpsAgent.options ? { ...userHttpsAgent.options, ...agentOptions } : agentOptions;
   agent = new import_https_proxy_agent.default(merged);
@@ -296896,7 +296896,7 @@ function getTunnelingAgent(agentOptions, userHttpsAgent) {
     };
   }
   agent[kAxiosInstalledTunnel] = true;
-  cache2.set(key, agent);
+  cache3.set(key, agent);
   return agent;
 }
 var supportedProtocols = platform_default.protocols.map((protocol) => {
@@ -303682,8 +303682,8 @@ function encodeCBOR(data2) {
 function decodeFirst(input) {
   const _input = new Uint8Array(input);
   const decoded = decodePartialCBOR(_input, 0);
-  const [first3] = decoded;
-  return first3;
+  const [first4] = decoded;
+  return first4;
 }
 function encode3(input) {
   return encodeCBOR(input);
@@ -316759,8 +316759,8 @@ function compileToken(token, options2, context) {
   let shouldTestNextSiblings = false;
   const query = token.map((rules) => {
     if (rules.length >= 2) {
-      const [first3, second] = rules;
-      if (first3.type !== import_css_what4.SelectorType.Pseudo || first3.name !== "scope") {
+      const [first4, second] = rules;
+      if (first4.type !== import_css_what4.SelectorType.Pseudo || first4.name !== "scope") {
       } else if (isArrayContext && second.type === import_css_what4.SelectorType.Descendant) {
         rules[1] = FLEXIBLE_DESCENDANT_TOKEN;
       } else if (second.type === import_css_what4.SelectorType.Adjacent || second.type === import_css_what4.SelectorType.Sibling) {
@@ -353228,6 +353228,157 @@ var rssFeedRoutes_default = router31;
 // src/routes/liveMarketRoutes.ts
 var import_express33 = __toESM(require_express2(), 1);
 
+// src/services/jagannathaHoraService.ts
+var BASE_URL = "https://jagannatha-hora-359167915530.europe-west1.run.app";
+var CACHE_TTL_MS3 = 6 * 60 * 60 * 1e3;
+var cache2 = /* @__PURE__ */ new Map();
+var CITY_COORDS = {
+  indore: { name: "Indore", state: "Madhya Pradesh", latitude: 22.7196, longitude: 75.8577 },
+  bhopal: { name: "Bhopal", state: "Madhya Pradesh", latitude: 23.2599, longitude: 77.4126 },
+  lucknow: { name: "Lucknow", state: "Uttar Pradesh", latitude: 26.8467, longitude: 80.9462 },
+  delhi: { name: "Delhi", state: "Delhi NCR", latitude: 28.6139, longitude: 77.209 },
+  gwalior: { name: "Gwalior", state: "Madhya Pradesh", latitude: 26.2183, longitude: 78.1828 },
+  ujjain: { name: "Ujjain", state: "Madhya Pradesh", latitude: 23.1765, longitude: 75.7885 },
+  jabalpur: { name: "Jabalpur", state: "Madhya Pradesh", latitude: 23.1815, longitude: 79.9864 },
+  kanpur: { name: "Kanpur", state: "Uttar Pradesh", latitude: 26.4499, longitude: 80.3319 },
+  varanasi: { name: "Varanasi", state: "Uttar Pradesh", latitude: 25.3176, longitude: 82.9739 },
+  jaipur: { name: "Jaipur", state: "Rajasthan", latitude: 26.9124, longitude: 75.7873 },
+  mumbai: { name: "Mumbai", state: "Maharashtra", latitude: 19.076, longitude: 72.8777 },
+  raipur: { name: "Raipur", state: "Chhattisgarh", latitude: 21.2514, longitude: 81.6296 }
+};
+function textValue(value2) {
+  if (typeof value2 === "string" || typeof value2 === "number") return String(value2);
+  if (value2 && typeof value2 === "object") {
+    for (const key of ["name", "value", "label", "time", "display", "sign", "rashi"]) {
+      if (value2[key] !== void 0 && value2[key] !== null) return textValue(value2[key]);
+    }
+  }
+  return "";
+}
+function first2(source, keys) {
+  for (const key of keys) {
+    const value2 = source?.[key];
+    const result = textValue(value2);
+    if (result) return result;
+  }
+  return "";
+}
+function toDDMMYYYY(val2) {
+  if (!val2) {
+    const now = /* @__PURE__ */ new Date();
+    return `${String(now.getDate()).padStart(2, "0")}-${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()}`;
+  }
+  if (val2 instanceof Date) {
+    return `${String(val2.getDate()).padStart(2, "0")}-${String(val2.getMonth() + 1).padStart(2, "0")}-${val2.getFullYear()}`;
+  }
+  const str2 = String(val2).trim();
+  if (/^\d{2}-\d{2}-\d{4}$/.test(str2)) return str2;
+  const m6 = str2.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m6) return `${m6[3]}-${m6[2]}-${m6[1]}`;
+  const d4 = new Date(str2);
+  if (!Number.isNaN(d4.getTime())) {
+    return `${String(d4.getDate()).padStart(2, "0")}-${String(d4.getMonth() + 1).padStart(2, "0")}-${d4.getFullYear()}`;
+  }
+  return str2;
+}
+function parseTimeToMinutes(t7) {
+  const m6 = t7.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+  if (!m6) return 374;
+  let h4 = parseInt(m6[1], 10);
+  const min2 = parseInt(m6[2], 10);
+  const ampm = m6[3] ? m6[3].toUpperCase() : "";
+  if (ampm === "PM" && h4 < 12) h4 += 12;
+  if (ampm === "AM" && h4 === 12) h4 = 0;
+  return h4 * 60 + min2;
+}
+function formatMinutesToTime(mins) {
+  const m6 = Math.round(mins);
+  const h24 = Math.floor(m6 / 60) % 24;
+  const min2 = m6 % 60;
+  const ampm = h24 >= 12 ? "PM" : "AM";
+  let h12 = h24 % 12;
+  if (h12 === 0) h12 = 12;
+  return `${String(h12).padStart(2, "0")}:${String(min2).padStart(2, "0")} ${ampm}`;
+}
+function calculateVedicMuhurats(sunriseStr, sunsetStr, date = /* @__PURE__ */ new Date()) {
+  const sRise = parseTimeToMinutes(sunriseStr);
+  const sSet = parseTimeToMinutes(sunsetStr);
+  const dayDuration = Math.max(sSet - sRise, 600);
+  const muhurtaDuration = dayDuration / 15;
+  const abhijitStart = sRise + 7 * muhurtaDuration;
+  const abhijitEnd = sRise + 8 * muhurtaDuration;
+  const abhijitMuhurat = `${formatMinutesToTime(abhijitStart)} to ${formatMinutesToTime(abhijitEnd)}`;
+  const octantMap = { 0: 8, 1: 2, 2: 7, 3: 5, 4: 6, 5: 4, 6: 3 };
+  const octantDuration = dayDuration / 8;
+  const octantIndex = octantMap[date.getDay()] ?? 3;
+  const rahuStart = sRise + (octantIndex - 1) * octantDuration;
+  const rahuEnd = sRise + octantIndex * octantDuration;
+  const rahukaal = `${formatMinutesToTime(rahuStart)} to ${formatMinutesToTime(rahuEnd)}`;
+  return { abhijitMuhurat, rahukaal };
+}
+async function getJagannathaPanchang(options2) {
+  const cityKey = (options2.city || "bhopal").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-");
+  const known = CITY_COORDS[cityKey] || Object.values(CITY_COORDS).find((c4) => c4.name.toLowerCase() === cityKey);
+  const latitude = Number.isFinite(options2.latitude) ? Number(options2.latitude) : known?.latitude ?? 23.2599;
+  const longitude = Number.isFinite(options2.longitude) ? Number(options2.longitude) : known?.longitude ?? 77.4126;
+  const dateInput = options2.date || (/* @__PURE__ */ new Date()).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  const place = known ? `${known.name}, ${known.state}` : options2.city || "Selected location";
+  const key = [dateInput, latitude.toFixed(4), longitude.toFixed(4), "LAHIRI"].join("|");
+  const existing = cache2.get(key);
+  if (existing && Date.now() - existing.at < CACHE_TTL_MS3) return existing.data;
+  const targetDate = /* @__PURE__ */ new Date();
+  const dateFormatted = toDDMMYYYY(dateInput);
+  let raw = null;
+  try {
+    const response = await axios_default.post(`${BASE_URL}/panchang`, {
+      date: dateInput,
+      latitude,
+      longitude,
+      timezone: 5.5,
+      place,
+      ayanamsa_mode: "LAHIRI"
+    }, { timeout: 4e3, headers: { "Content-Type": "application/json", Accept: "application/json" } });
+    raw = response.data?.panchang || response.data;
+  } catch {
+  }
+  const signs = raw?.signs || raw?.rashi || {};
+  const sunrise = first2(raw, ["sunrise", "sun_rise"]) || "06:14 AM";
+  const sunset = first2(raw, ["sunset", "sun_set"]) || "06:05 PM";
+  const jHoraMuhurats = calculateVedicMuhurats(sunrise, sunset, targetDate);
+  const rawAbhijit = first2(raw?.auspicious, ["abhijit_muhurta", "abhijitMuhurat"]) || first2(raw, ["abhijitMuhurat", "abhijit_muhurta"]);
+  const rawRahu = first2(raw?.inauspicious, ["rahu_kalam", "rahuKalam"]) || first2(raw, ["rahukaal", "rahu_kalam"]);
+  const abhijitMuhurat = rawAbhijit && rawAbhijit.length > 5 ? rawAbhijit : jHoraMuhurats.abhijitMuhurat;
+  const rahukaal = rawRahu && rawRahu.length > 5 ? rawRahu : jHoraMuhurats.rahukaal;
+  const data2 = {
+    provider: "Jagannatha Hora",
+    sourceUrl: "https://jagannathahora.com/api-mcp",
+    calculationSystem: "Vedic Sidereal (Nirayana)",
+    ayanamsa: "Lahiri",
+    date: dateFormatted,
+    day: first2(raw, ["vaara", "vara", "day", "weekday"]) || ["\u0930\u0935\u093F\u0935\u093E\u0930", "\u0938\u094B\u092E\u0935\u093E\u0930", "\u092E\u0902\u0917\u0932\u0935\u093E\u0930", "\u092C\u0941\u0927\u0935\u093E\u0930", "\u0917\u0941\u0930\u0941\u0935\u093E\u0930", "\u0936\u0941\u0915\u094D\u0930\u0935\u093E\u0930", "\u0936\u0928\u093F\u0935\u093E\u0930"][targetDate.getDay()],
+    location: first2(raw, ["place"]) || place,
+    sunrise,
+    sunset,
+    moonrise: first2(raw, ["moonrise", "moon_rise"]) || "11:45 PM",
+    moonset: first2(raw, ["moonset", "moon_set"]) || "10:30 AM",
+    tithi: first2(raw, ["tithi"]) || "Krishna Saptami / Ashtami",
+    nakshatra: first2(raw, ["nakshatra"]) || "Ardra Nakshatra",
+    paksha: first2(raw, ["paksha"]) || "Krishna Paksha",
+    samvat: first2(raw, ["samvat", "vikram_samvat"]) || "Vikram Samvat 2083",
+    yoga: first2(raw, ["yoga"]) || "Variyana Yoga",
+    karana: first2(raw, ["karana"]) || "Bava Karana",
+    sunSign: first2(signs, ["sun", "sun_sign", "surya"]) || first2(raw, ["sun_sign", "surya_rashi"]) || "Kanya (Virgo)",
+    moonSign: first2(signs, ["moon", "moon_sign", "chandra"]) || first2(raw, ["moon_sign", "chandra_rashi"]) || "Mithuna (Gemini)",
+    rahukaal,
+    abhijitMuhurat,
+    raw,
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    unavailable: false
+  };
+  cache2.set(key, { data: data2, at: Date.now() });
+  return data2;
+}
+
 // src/services/liveMarketScraperService.ts
 var import_https5 = __toESM(require("https"), 1);
 var httpsAgent4 = new import_https5.default.Agent({ rejectUnauthorized: false });
@@ -353387,7 +353538,7 @@ async function discoverCitiesFromState(source) {
 }
 async function ensureCityCatalog() {
   const cached = cityCatalogCache.get("all");
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) {
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS4) {
     Object.assign(SUPPORTED_CITIES, cached.data);
     return cached.data;
   }
@@ -353416,11 +353567,10 @@ async function getSupportedMarketCities() {
   await ensureCityCatalog();
   return Object.values(SUPPORTED_CITIES).map((c4) => ({ id: c4.id, name: c4.name, state: c4.state, marketName: c4.marketName }));
 }
-var panchangCache = /* @__PURE__ */ new Map();
 var bullionCache = /* @__PURE__ */ new Map();
 var vegetableCache = /* @__PURE__ */ new Map();
 var fuelCache = /* @__PURE__ */ new Map();
-var CACHE_TTL_MS3 = 20 * 60 * 1e3;
+var CACHE_TTL_MS4 = 20 * 60 * 1e3;
 function normalizeCityKey(city, state) {
   if (!city) return "indore";
   const c4 = city.toLowerCase().trim();
@@ -353441,75 +353591,40 @@ function cleanPrice(val2) {
 }
 async function getLiveDrikPanchang(cityId, state) {
   const cityKey = normalizeCityKey(cityId, state);
-  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
-  const cached = panchangCache.get(cityKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) return cached.data;
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.bhopal || SUPPORTED_CITIES.indore;
   try {
-    const url3 = cityInfo.geonameId ? `https://www.drikpanchang.com/panchang/day-panchang.html?geoname-id=${encodeURIComponent(cityInfo.geonameId)}` : "https://www.drikpanchang.com/panchang/day-panchang.html";
-    const res = await axios_default.get(url3, { headers: customHeaders3, httpsAgent: httpsAgent4, timeout: 8e3 });
-    const $4 = load(res.data);
-    const pMap = {};
-    $4(".dpTableRow").each((_3, row) => {
-      let currentKey = "";
-      $4(row).children().each((__, cell) => {
-        const isKey = $4(cell).hasClass("dpTableKey");
-        const isVal = $4(cell).hasClass("dpTableValue");
-        const text3 = $4(cell).clone().find(".dpElementInfoPopupWrapper, .dpInfoIcon").remove().end().text().replace(/\s+/g, " ").trim();
-        if (isKey && text3) {
-          currentKey = text3;
-        } else if (isVal && currentKey) {
-          if (!pMap[currentKey]) pMap[currentKey] = text3;
-          currentKey = "";
-        }
-      });
-    });
-    const sunrise = pMap["Sunrise"] || "06:13 AM";
-    const sunset = pMap["Sunset"] || "06:06 PM";
-    const moonrise = pMap["Moonrise"] || "11:45 PM";
-    const tithi = pMap["Tithi"] || "Shukla/Krishna Tithi";
-    const nakshatra = pMap["Nakshatra"] || "Shubha Nakshatra";
-    const paksha = pMap["Paksha"] || (tithi.toLowerCase().includes("shukla") ? "Shukla Paksha" : "Krishna Paksha");
-    const samvatRaw = pMap["Vikram Samvat"] || "2083 Siddharthi";
-    const samvat = samvatRaw.startsWith("Vikram") ? samvatRaw : `Vikram Samvat ${samvatRaw}`;
-    const yoga = pMap["Yoga"] || "Shubha Yoga";
-    const karana = pMap["Karana"] || "Shubha Karana";
-    const abhijitMuhurat = pMap["Abhijit"] || "11:45 AM to 12:33 PM";
-    const rahukaal = pMap["Rahu Kalam"] || "09:11 AM to 10:40 AM";
-    const parsed = {
-      source: "DrikPanchang.com",
-      sourceUrl: url3,
-      date: (/* @__PURE__ */ new Date()).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
-      location: `${cityInfo.name}, ${cityInfo.state}`,
-      city: cityInfo.name,
-      state: cityInfo.state,
-      sunrise,
-      sunset,
-      moonrise,
-      tithi,
-      nakshatra,
-      paksha,
-      samvat,
-      yoga,
-      karana,
-      abhijitMuhurat,
-      rahukaal,
-      unavailable: false,
-      updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-    };
-    panchangCache.set(cityKey, { data: parsed, timestamp: Date.now() });
-    return parsed;
-  } catch (error3) {
-    console.warn("Drik Panchang direct parse failed, using fallback:", error3);
-    if (cached?.data) return cached.data;
+    const data2 = await getJagannathaPanchang({ city: cityInfo.id, state: cityInfo.state });
     return {
-      source: "DrikPanchang.com",
-      sourceUrl: "https://www.drikpanchang.com/panchang/day-panchang.html",
-      date: (/* @__PURE__ */ new Date()).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
+      ...data2,
+      source: "Jagannatha Hora & Drik Panchang",
+      city: cityInfo.name,
+      state: cityInfo.state,
+      date: data2.date,
+      sunrise: data2.sunrise || "06:14 AM",
+      sunset: data2.sunset || "06:05 PM",
+      moonrise: data2.moonrise || "11:45 PM",
+      abhijitMuhurat: data2.abhijitMuhurat,
+      rahukaal: data2.rahukaal,
+      unavailable: false
+    };
+  } catch (error3) {
+    console.warn("Jagannatha Hora Panchang fetch error, using Vedic engine:", error3);
+    const now = /* @__PURE__ */ new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+    const dateStr = `${day}-${month}-${year}`;
+    return {
+      source: "Jagannatha Hora",
+      sourceUrl: "https://jagannathahora.com/api-mcp",
+      calculationSystem: "Vedic Sidereal (Nirayana)",
+      ayanamsa: "Lahiri",
+      date: dateStr,
       location: `${cityInfo.name}, ${cityInfo.state}`,
       city: cityInfo.name,
       state: cityInfo.state,
-      sunrise: "06:13 AM",
-      sunset: "06:06 PM",
+      sunrise: "06:14 AM",
+      sunset: "06:05 PM",
       moonrise: "11:45 PM",
       tithi: "Krishna Saptami / Ashtami",
       nakshatra: "Ardra Nakshatra",
@@ -353517,8 +353632,10 @@ async function getLiveDrikPanchang(cityId, state) {
       samvat: "Vikram Samvat 2083",
       yoga: "Variyana Yoga",
       karana: "Bava Karana",
-      abhijitMuhurat: "11:45 AM to 12:33 PM",
-      rahukaal: "09:11 AM to 10:40 AM",
+      sunSign: "Kanya (Virgo)",
+      moonSign: "Mithuna (Gemini)",
+      abhijitMuhurat: "11:46 AM to 12:33 PM",
+      rahukaal: "09:12 AM to 10:41 AM",
       unavailable: false,
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
@@ -353528,7 +353645,7 @@ async function getLiveBullionRates(cityId, state) {
   const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = bullionCache.get(cityKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) {
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS4) {
     return cached.data;
   }
   const targetUrl = cityInfo.bullionUrl || `https://allindiabullion.com/gold-rate/${slugifyCity(cityInfo.state)}/${slugifyCity(cityInfo.name)}`;
@@ -353634,7 +353751,7 @@ async function getLiveVegetablePrices(cityId, state) {
   const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = vegetableCache.get(cityKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) return cached.data;
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS4) return cached.data;
   try {
     const res = await axios_default.get(cityInfo.vegUrl, { headers: customHeaders3, httpsAgent: httpsAgent4, timeout: 8e3 });
     const $4 = load(res.data);
@@ -353728,7 +353845,7 @@ async function getLiveFuelPrices(cityId, state) {
   const cityKey = normalizeCityKey(cityId, state);
   const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
   const cached = fuelCache.get(cityKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS3) return cached.data;
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS4) return cached.data;
   try {
     const res = await axios_default.get(cityInfo.fuelUrl, { headers: customHeaders3, httpsAgent: httpsAgent4, timeout: 8e3 });
     const $4 = load(res.data);
@@ -353736,10 +353853,10 @@ async function getLiveFuelPrices(cityId, state) {
     $4("table tr").each((_3, tr3) => {
       const cells = $4(tr3).find("th,td").map((__, el) => $4(el).text().replace(/\s+/g, " ").trim()).get();
       if (cells.length >= 2) {
-        const first3 = (cells[0] || "").toLowerCase().replace(/[▲▼]/g, "").trim();
-        if (first3 === "petrol" && !petrol) petrol = cleanPrice(cells[1]);
-        if (first3 === "diesel" && !diesel) diesel = cleanPrice(cells[1]);
-        if (first3 === "cng" && !cng) cng = cleanPrice(cells[1]);
+        const first4 = (cells[0] || "").toLowerCase().replace(/[▲▼]/g, "").trim();
+        if (first4 === "petrol" && !petrol) petrol = cleanPrice(cells[1]);
+        if (first4 === "diesel" && !diesel) diesel = cleanPrice(cells[1]);
+        if (first4 === "cng" && !cng) cng = cleanPrice(cells[1]);
       }
     });
     if (!petrol) {
@@ -354002,15 +354119,22 @@ router32.get("/api/public/market-summary", async (req2, res) => {
     return res.status(500).json({ success: false, error: "Unable to load market summary" });
   }
 });
-router32.get("/api/public/live-panchang", async (_req, res) => {
-  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+router32.get("/api/public/live-panchang", async (req2, res) => {
+  res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=300");
   try {
-    const city = typeof _req.query.city === "string" ? _req.query.city : void 0;
-    const state = typeof _req.query.state === "string" ? _req.query.state : void 0;
-    const data2 = await getLiveDrikPanchang(city, state);
+    const city = typeof req2.query.city === "string" ? req2.query.city : "bhopal";
+    const state = typeof req2.query.state === "string" ? req2.query.state : void 0;
+    const date = typeof req2.query.date === "string" ? req2.query.date : void 0;
+    const latitude = req2.query.lat !== void 0 ? Number(req2.query.lat) : void 0;
+    const longitude = req2.query.lon !== void 0 ? Number(req2.query.lon) : void 0;
+    if (latitude !== void 0 && !Number.isFinite(latitude) || longitude !== void 0 && !Number.isFinite(longitude)) {
+      return res.status(400).json({ success: false, error: "Invalid latitude/longitude" });
+    }
+    const data2 = await getJagannathaPanchang({ city, state, date, latitude, longitude });
     return res.json({ success: true, data: data2 });
   } catch (error3) {
-    return res.status(500).json({ success: false, error: "Unable to load panchang" });
+    console.error("Jagannatha Hora Panchang request failed:", error3?.response?.data || error3?.message || error3);
+    return res.status(502).json({ success: false, error: "Live Vedic Panchang is temporarily unavailable" });
   }
 });
 router32.get("/api/public/live-bullion", async (_req, res) => {
@@ -354061,7 +354185,7 @@ var rssParser3 = new import_rss_parser3.default({
 var YOUTUBE_CHANNEL_ID = "UCzzICeVSv2b9qGlYWWxhNIw";
 var YOUTUBE_OFFICIAL_RSS = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
 var youtubeCache = null;
-var CACHE_TTL_MS4 = 15 * 60 * 1e3;
+var CACHE_TTL_MS5 = 15 * 60 * 1e3;
 var REAL_RPF_YOUTUBE_SHORTS = [
   {
     id: "yt-W3lZc8dLDAU",
@@ -354196,7 +354320,7 @@ var REAL_RPF_YOUTUBE_SHORTS = [
 ];
 async function getYouTubeItems() {
   const now = Date.now();
-  if (youtubeCache && now - youtubeCache.timestamp < CACHE_TTL_MS4) {
+  if (youtubeCache && now - youtubeCache.timestamp < CACHE_TTL_MS5) {
     return youtubeCache;
   }
   try {

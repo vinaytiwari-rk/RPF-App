@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const read = (file) => fs.readFileSync(path.join(process.cwd(), file), "utf8");
+const read = (file) => fs.readFileSync(path.join(process.cwd(), file), "utf8").replace(/\r\n/g, "\n");
 const catalog = read("src/data/utilityToolsCatalog.ts");
 const runner = read("src/components/utilities/UtilityToolRunnerModal.tsx");
 const everyday = read("src/pages/utilities/EverydayToolPage.tsx");

@@ -9,6 +9,20 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(NativePermissionsPlugin.class);
         registerPlugin(NativeDownloadsPlugin.class);
         super.onCreate(savedInstanceState);
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+                try {
+                    android.app.DownloadManager.Request request = new android.app.DownloadManager.Request(android.net.Uri.parse(url));
+                    request.setMimeType(mimetype);
+                    request.allowScanningByMediaScanner();
+                    request.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    String fileName = android.webkit.URLUtil.guessFileName(url, contentDisposition, mimetype);
+                    request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, "SAMAHIT/" + fileName);
+                    android.app.DownloadManager dm = (android.app.DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                    if (dm != null) dm.enqueue(request);
+                } catch (Exception ignored) {}
+            });
+        }
     }
 
     @Override protected void onNewIntent(android.content.Intent intent) {

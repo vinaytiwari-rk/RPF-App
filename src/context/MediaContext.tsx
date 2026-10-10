@@ -64,6 +64,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const audio = new Audio();
     audio.preload = 'auto';
+    audio.crossOrigin = 'anonymous';
     audioRef.current = audio;
 
     const onPlay = () => {
@@ -142,75 +143,82 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     audio.muted = isRadioMuted;
 
     try {
-      if (/\.m3u8(?:\?|$)/i.test(station.url)) {
-        // Prefer native HLS (including Android WebViews that expose it) before
-        // importing hls.js. Native playback stays within the tap gesture.
-        if (audio.canPlayType('application/vnd.apple.mpegurl') || audio.canPlayType('application/x-mpegURL')) {
-          audio.src = station.url;
-          await audio.play();
-          setIsRadioPlaying(true);
-          return;
-        }
-        const Hls = (await import('hls.js')).default;
-        if (!isCurrent()) return;
-        if (Hls.isSupported()) {
-          const hls = new Hls({
-            lowLatencyMode: true,
-            maxBufferLength: 8,
-            enableWorker: true,
-            manifestLoadingMaxRetry: 3,
-            levelLoadingMaxRetry: 3,
-          });
-          hlsRef.current = hls;
-          hls.loadSource(station.url);
-          hls.attachMedia(audio);
-          hls.on(Hls.Events.MANIFEST_PARSED, async () => {
+      const isHlsStream = /\.m3u8(?:\?|$)/i.test(station.url);
+      const Hls = (await import('hls.js')).default;
+
+      if (isHlsStream && Hls.isSupported()) {
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: false,
+          backBufferLength: 30,
+          maxBufferLength: 20,
+          maxMaxBufferLength: 40,
+          manifestLoadingMaxRetry: 5,
+          manifestLoadingRetryDelay: 1000,
+          levelLoadingMaxRetry: 5,
+          fragLoadingMaxRetry: 5,
+        });
+        hlsRef.current = hls;
+        hls.loadSource(station.url);
+        hls.attachMedia(audio);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, async () => {
+          if (!isCurrent()) return;
+          try {
+            await audio.play();
+            if (isCurrent()) {
+              setIsRadioPlaying(true);
+              setRadioError(null);
+            }
+          } catch {
             if (!isCurrent()) return;
-            try {
-              await audio.play();
-              if (isCurrent()) setIsRadioPlaying(true);
-            } catch {
-              if (!isCurrent()) return;
-              setIsRadioPlaying(false);
-              setRadioError('Tap play to start');
-            } finally {
-              if (isCurrent()) setIsRadioLoading(false);
-            }
-          });
-          let recoveryAttempts = 0;
-          hls.on(Hls.Events.ERROR, (_: any, data: any) => {
-            if (!isCurrent() || !data.fatal) return;
-            if (recoveryAttempts++ < 2 && data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-              hls.startLoad();
-              setRadioError('Radio connection interrupted. Retrying stream…');
-              return;
-            }
-            if (recoveryAttempts <= 2 && data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-              hls.recoverMediaError();
-              setRadioError('Recovering radio playback…');
-              return;
-            }
-            hls.destroy();
-            hlsRef.current = null;
-            setRadioError('This station stream is unavailable. Please try another station.');
-            setIsRadioLoading(false);
             setIsRadioPlaying(false);
-          });
-          return;
-        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-          audio.src = station.url;
-        } else {
-          throw new Error('HLS unsupported');
-        }
+            setRadioError('Tap play button to start streaming');
+          } finally {
+            if (isCurrent()) setIsRadioLoading(false);
+          }
+        });
+
+        let recoveryAttempts = 0;
+        hls.on(Hls.Events.ERROR, (_: any, data: any) => {
+          if (!isCurrent() || !data.fatal) return;
+          if (recoveryAttempts++ < 3 && data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            hls.startLoad();
+            setRadioError('Buffering live stream…');
+            return;
+          }
+          if (recoveryAttempts <= 3 && data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+            hls.recoverMediaError();
+            setRadioError('Stabilizing stream…');
+            return;
+          }
+          hls.destroy();
+          hlsRef.current = null;
+          setRadioError('This station stream is currently unreachable. Please try another station.');
+          setIsRadioLoading(false);
+          setIsRadioPlaying(false);
+        });
+        return;
+      } else if (isHlsStream && (audio.canPlayType('application/vnd.apple.mpegurl') || audio.canPlayType('application/x-mpegURL'))) {
+        // Native HLS fallback (primarily iOS Safari)
+        audio.src = station.url;
       } else {
+        // Direct stream (MP3/AAC/Shoutcast/Icecast)
         audio.src = station.url;
       }
 
       await audio.play();
-      if (isCurrent()) setIsRadioPlaying(true);
-    } catch {
+      if (isCurrent()) {
+        setIsRadioPlaying(true);
+        setRadioError(null);
+      }
+    } catch (err: any) {
       if (!isCurrent()) return;
-      setRadioError('Could not start this stream. Please try another station or check your connection.');
+      if (err?.name === 'NotAllowedError') {
+        setRadioError('Tap play button to start audio stream.');
+      } else {
+        setRadioError('Could not start this stream. Please try another station or check your connection.');
+      }
     } finally {
       if (isCurrent() && !hlsRef.current) {
         setIsRadioLoading(false);

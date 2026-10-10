@@ -33,9 +33,29 @@ export async function saveBlobToDownloads(
   if (!blob.size) throw new Error("The generated file is empty.");
 
   if (Capacitor.getPlatform() === "android") {
-    const data = arrayBufferToBase64(await blob.arrayBuffer());
-    await NativeDownloads.saveToDownloads({ filename, mimeType, data });
-    return;
+    try {
+      const data = arrayBufferToBase64(await blob.arrayBuffer());
+      await NativeDownloads.saveToDownloads({ filename, mimeType, data });
+      return;
+    } catch (pluginError) {
+      console.warn("NativeDownloads plugin failed, falling back:", pluginError);
+    }
+  }
+
+  // Mobile Web fallback (Chrome for Android / Samsung Internet)
+  if (typeof navigator !== "undefined" && navigator.canShare) {
+    try {
+      const file = new File([blob], filename, { type: mimeType });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: filename,
+        });
+        return;
+      }
+    } catch (shareError: any) {
+      if (shareError?.name === "AbortError") return;
+    }
   }
 
   const url = URL.createObjectURL(blob);

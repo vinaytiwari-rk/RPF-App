@@ -781,7 +781,9 @@ export default function LiveTVStudio() {
                           }
                           return (
                             <div className="text-center p-4">
-                              <p className="text-xs text-slate-300 font-semibold mb-1">Web Stream Channel</p>
+                              <p className="text-xs text-slate-200 font-bold mb-1">
+                                Android Mobile & Web Live Stream (मोबाइल ऐप व वेब लाइव स्ट्रीम)
+                              </p>
                               <p className="text-[10px] text-slate-400 font-mono break-all max-w-md mx-auto mb-3">{url}</p>
                               <a
                                 href={url}
