@@ -284,6 +284,8 @@ function ToolEngineDispatcher({
       return <PhotoMetadataCleanerEngine isHi={isHi} downloadBlob={downloadBlob} />;
     case "offline_qr_tool":
       return <OfflineQrToolEngine isHi={isHi} downloadBlob={downloadBlob} />;
+    case "text_toolkit":
+      return <TextToolkitEngine isHi={isHi} copyToClipboard={copyToClipboard} />;
 
     default:
       return (
@@ -3562,6 +3564,75 @@ function OfflineQrToolEngine({ isHi, downloadBlob }: { isHi: boolean; downloadBl
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+
+function TextToolkitEngine({ isHi, copyToClipboard }: { isHi: boolean; copyToClipboard: (text: string) => void }) {
+  const [text, setText] = useState("");
+
+  const transform = (operation: "upper" | "lower" | "title" | "trim" | "sort" | "unique") => {
+    setText((current) => {
+      if (operation === "upper") return current.toLocaleUpperCase();
+      if (operation === "lower") return current.toLocaleLowerCase();
+      if (operation === "title") {
+        return current.toLocaleLowerCase().replace(/(^|[\\s([{])([\\p{L}\\p{N}])/gu, (_match, prefix: string, letter: string) => prefix + letter.toLocaleUpperCase());
+      }
+      if (operation === "trim") {
+        return current.split("\\n").map((line) => line.replace(/[\\t ]+/g, " ").trim()).join("\\n").trim();
+      }
+      const lines = current.split(/\\r?\\n/);
+      if (operation === "sort") return lines.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })).join("\\n");
+      const seen = new Set<string>();
+      return lines.filter((line) => {
+        const key = line.trim();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).join("\\n");
+    });
+  };
+
+  const words = text.trim() ? text.trim().split(/\\s+/u).length : 0;
+  const lines = text.length ? text.split(/\\r?\\n/).length : 0;
+  const actionClass = "rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-[#245D45] hover:bg-emerald-50 active:scale-[.99]";
+
+  return (
+    <div className="space-y-4">
+      <textarea
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        rows={8}
+        spellCheck={false}
+        placeholder={isHi ? "यहाँ टेक्स्ट लिखें या पेस्ट करें…" : "Type or paste your text here…"}
+        className="w-full resize-y rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-800 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+      />
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-xl bg-emerald-50 p-3 text-center">
+          <div className="text-xl font-bold text-[#245D45]">{words}</div>
+          <div className="text-[11px] text-slate-600">{isHi ? "शब्द" : "Words"}</div>
+        </div>
+        <div className="rounded-xl bg-emerald-50 p-3 text-center">
+          <div className="text-xl font-bold text-[#245D45]">{text.length}</div>
+          <div className="text-[11px] text-slate-600">{isHi ? "अक्षर (स्पेस सहित)" : "Characters"}</div>
+        </div>
+        <div className="rounded-xl bg-emerald-50 p-3 text-center">
+          <div className="text-xl font-bold text-[#245D45]">{lines}</div>
+          <div className="text-[11px] text-slate-600">{isHi ? "लाइनें" : "Lines"}</div>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className={actionClass} onClick={() => transform("upper")}>{isHi ? "अपरकेस" : "UPPERCASE"}</button>
+        <button type="button" className={actionClass} onClick={() => transform("lower")}>{isHi ? "लोअरकेस" : "lowercase"}</button>
+        <button type="button" className={actionClass} onClick={() => transform("title")}>{isHi ? "Title Case" : "Title Case"}</button>
+        <button type="button" className={actionClass} onClick={() => transform("trim")}>{isHi ? "स्पेस साफ़ करें" : "Clean spaces"}</button>
+        <button type="button" className={actionClass} onClick={() => transform("sort")}>{isHi ? "लाइनें क्रम में" : "Sort lines"}</button>
+        <button type="button" className={actionClass} onClick={() => transform("unique")}>{isHi ? "डुप्लिकेट हटाएं" : "Remove duplicates"}</button>
+        <button type="button" className={actionClass} onClick={() => copyToClipboard(text)} disabled={!text}>{isHi ? "टेक्स्ट कॉपी करें" : "Copy text"}</button>
+        <button type="button" className={actionClass} onClick={() => setText("")} disabled={!text}>{isHi ? "साफ़ करें" : "Clear"}</button>
+      </div>
+      <p className="text-xs text-slate-500">{isHi ? "आपका टेक्स्ट इसी डिवाइस पर प्रोसेस होता है; किसी सर्वर पर अपलोड नहीं होता।" : "Text is processed locally on this device and is not uploaded to a server."}</p>
     </div>
   );
 }
