@@ -286,6 +286,8 @@ function ToolEngineDispatcher({
       return <OfflineQrToolEngine isHi={isHi} downloadBlob={downloadBlob} />;
     case "text_toolkit":
       return <TextToolkitEngine isHi={isHi} copyToClipboard={copyToClipboard} />;
+    case "json_formatter":
+      return <JsonFormatterEngine isHi={isHi} copyToClipboard={copyToClipboard} />;
 
     default:
       return (
@@ -3633,6 +3635,49 @@ function TextToolkitEngine({ isHi, copyToClipboard }: { isHi: boolean; copyToCli
         <button type="button" className={actionClass} onClick={() => setText("")} disabled={!text}>{isHi ? "साफ़ करें" : "Clear"}</button>
       </div>
       <p className="text-xs text-slate-500">{isHi ? "आपका टेक्स्ट इसी डिवाइस पर प्रोसेस होता है; किसी सर्वर पर अपलोड नहीं होता।" : "Text is processed locally on this device and is not uploaded to a server."}</p>
+    </div>
+  );
+}
+
+
+function JsonFormatterEngine({ isHi, copyToClipboard }: { isHi: boolean; copyToClipboard: (text: string) => void }) {
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+
+  const processJson = (mode: "format" | "minify" | "validate") => {
+    try {
+      const parsed: unknown = JSON.parse(input);
+      setError("");
+      if (mode === "validate") {
+        setOutput(isHi ? "JSON सही है।" : "Valid JSON.");
+      } else if (mode === "format") {
+        setOutput(JSON.stringify(parsed, null, 2));
+      } else {
+        setOutput(JSON.stringify(parsed));
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Invalid JSON";
+      setError(message);
+      setOutput("");
+    }
+  };
+
+  const actionClass = "rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-[#245D45] hover:bg-emerald-50 disabled:opacity-50";
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-slate-500">{isHi ? "JSON को सुंदर फॉर्मेट करें, छोटा करें या syntax जाँचें। डेटा इसी डिवाइस पर रहता है।" : "Format, minify, or validate JSON locally. Your data stays on this device."}</p>
+      <label className="block text-sm font-semibold text-slate-700">{isHi ? "इनपुट JSON" : "Input JSON"}</label>
+      <textarea value={input} onChange={(event) => { setInput(event.target.value); setError(""); setOutput(""); }} rows={8} spellCheck={false} placeholder={'{"name":"Samahit","active":true}'} className="w-full resize-y rounded-xl border border-slate-300 bg-white p-3 font-mono text-xs text-slate-800 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100" />
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className={actionClass} onClick={() => processJson("format")} disabled={!input.trim()}>{isHi ? "फॉर्मेट करें" : "Format JSON"}</button>
+        <button type="button" className={actionClass} onClick={() => processJson("minify")} disabled={!input.trim()}>{isHi ? "Minify करें" : "Minify"}</button>
+        <button type="button" className={actionClass} onClick={() => processJson("validate")} disabled={!input.trim()}>{isHi ? "जाँचें" : "Validate"}</button>
+        <button type="button" className={actionClass} onClick={() => copyToClipboard(output)} disabled={!output}>{isHi ? "परिणाम कॉपी करें" : "Copy result"}</button>
+        <button type="button" className={actionClass} onClick={() => { setInput(""); setOutput(""); setError(""); }}>{isHi ? "साफ़ करें" : "Clear"}</button>
+      </div>
+      {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">{isHi ? "JSON में त्रुटि: " : "JSON error: "}{error}</div>}
+      {output && <div><label className="mb-1 block text-sm font-semibold text-slate-700">{isHi ? "परिणाम" : "Result"}</label><textarea readOnly value={output} rows={8} className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800" /></div>}
     </div>
   );
 }
