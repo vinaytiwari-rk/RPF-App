@@ -288,6 +288,14 @@ function ToolEngineDispatcher({
       return <TextToolkitEngine isHi={isHi} copyToClipboard={copyToClipboard} />;
     case "json_formatter":
       return <JsonFormatterEngine isHi={isHi} copyToClipboard={copyToClipboard} />;
+    case "url_encoder":
+      return <DeveloperTextToolsEngine mode="url" isHi={isHi} copyToClipboard={copyToClipboard} />;
+    case "base64_converter":
+      return <DeveloperTextToolsEngine mode="base64" isHi={isHi} copyToClipboard={copyToClipboard} />;
+    case "html_entity_tool":
+      return <DeveloperTextToolsEngine mode="html" isHi={isHi} copyToClipboard={copyToClipboard} />;
+    case "uuid_generator":
+      return <DeveloperTextToolsEngine mode="uuid" isHi={isHi} copyToClipboard={copyToClipboard} />;
 
     default:
       return (
@@ -3637,6 +3645,68 @@ function TextToolkitEngine({ isHi, copyToClipboard }: { isHi: boolean; copyToCli
       <p className="text-xs text-slate-500">{isHi ? "आपका टेक्स्ट इसी डिवाइस पर प्रोसेस होता है; किसी सर्वर पर अपलोड नहीं होता।" : "Text is processed locally on this device and is not uploaded to a server."}</p>
     </div>
   );
+}
+
+
+
+function DeveloperTextToolsEngine({ mode, isHi, copyToClipboard }: { mode: "url" | "base64" | "html" | "uuid"; isHi: boolean; copyToClipboard: (text: string) => void }) {
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const [direction, setDirection] = useState<"encode" | "decode">("encode");
+  const actionClass = "rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-[#245D45] hover:bg-emerald-50 disabled:opacity-50";
+  const labels = {
+    url: { en: "URL Encoder / Decoder", hi: "URL एन्कोडर / डिकोडर", hintEn: "Encode text for URLs or decode percent-encoded text.", hintHi: "URL के लिए टेक्स्ट encode करें या encoded टेक्स्ट decode करें." },
+    base64: { en: "Base64 Converter", hi: "Base64 कन्वर्टर", hintEn: "Encode or decode UTF-8 text locally.", hintHi: "UTF-8 टेक्स्ट को स्थानीय रूप से encode या decode करें." },
+    html: { en: "HTML Entity Tool", hi: "HTML Entity टूल", hintEn: "Escape HTML special characters or decode entities.", hintHi: "HTML के विशेष अक्षर encode करें या entities decode करें." },
+    uuid: { en: "UUID Generator", hi: "UUID जनरेटर", hintEn: "Generate a random UUID locally.", hintHi: "स्थानीय रूप से random UUID बनाएँ." },
+  }[mode];
+  const process = () => {
+    setError("");
+    try {
+      if (mode === "uuid") {
+        const generated = Array.from({ length: 5 }, (_, i) => {
+          const bytes = new Uint8Array(16);
+          if (typeof crypto !== "undefined" && crypto.getRandomValues) crypto.getRandomValues(bytes);
+          else for (let j = 0; j < bytes.length; j++) bytes[j] = Math.floor(Math.random() * 256);
+          bytes[6] = (bytes[6] & 0x0f) | 0x40;
+          bytes[8] = (bytes[8] & 0x3f) | 0x80;
+          const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+          return [hex.slice(0,8), hex.slice(8,12), hex.slice(12,16), hex.slice(16,20), hex.slice(20)].join("-");
+        });
+        setOutput(generated.join("\n"));
+        return;
+      }
+      if (mode === "url") setOutput(direction === "encode" ? encodeURIComponent(input) : decodeURIComponent(input));
+      else if (mode === "base64") {
+        if (direction === "encode") {
+          const bytes = new TextEncoder().encode(input);
+          let binary = "";
+          bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+          setOutput(btoa(binary));
+        } else {
+          const binary = atob(input.trim());
+          const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+          setOutput(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+        }
+      } else if (direction === "encode") {
+        setOutput(input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"));
+      } else {
+        setOutput(input.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&#x27;/gi, "'").replace(/&amp;/g, "&").replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/&#x([\da-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16))));
+      }
+    } catch (e) {
+      setOutput("");
+      setError(e instanceof Error ? e.message : "Unable to process input");
+    }
+  };
+  return <div className="space-y-3">
+    <div><h3 className="text-sm font-semibold text-slate-800">{isHi ? labels.hi : labels.en}</h3><p className="mt-1 text-xs text-slate-500">{isHi ? labels.hintHi : labels.hintEn} {isHi ? "डेटा आपके डिवाइस पर ही रहता है।" : "Data stays on this device."}</p></div>
+    {mode !== "uuid" && <div className="flex gap-2"><button type="button" className={actionClass} onClick={() => setDirection("encode")}>{isHi ? "Encode" : "Encode"}</button><button type="button" className={actionClass} onClick={() => setDirection("decode")}>{isHi ? "Decode" : "Decode"}</button><span className="self-center text-xs text-slate-500">{direction.toUpperCase()}</span></div>}
+    {mode !== "uuid" && <textarea value={input} onChange={(e) => { setInput(e.target.value); setOutput(""); setError(""); }} rows={6} spellCheck={false} className="w-full rounded-xl border border-slate-300 bg-white p-3 font-mono text-xs text-slate-800" placeholder={isHi ? "यहाँ टेक्स्ट लिखें..." : "Enter text here..."} />}
+    <div className="flex flex-wrap gap-2"><button type="button" className={actionClass} onClick={process}>{mode === "uuid" ? (isHi ? "UUID बनाएँ" : "Generate UUIDs") : (isHi ? "चलाएँ" : "Convert")}</button><button type="button" className={actionClass} disabled={!output} onClick={() => copyToClipboard(output)}>{isHi ? "कॉपी करें" : "Copy result"}</button><button type="button" className={actionClass} onClick={() => { setInput(""); setOutput(""); setError(""); }}>{isHi ? "साफ़ करें" : "Clear"}</button></div>
+    {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</p>}
+    {output && <textarea readOnly value={output} rows={mode === "uuid" ? 6 : 6} className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800" />}
+  </div>;
 }
 
 
