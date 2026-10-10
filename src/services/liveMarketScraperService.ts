@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 import https from "https";
+import { getJagannathaPanchang } from "./jagannathaHoraService.js";
 
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const customHeaders = {
@@ -266,91 +267,45 @@ function cleanPrice(val?: string): string {
 // 1. DRIK PANCHANG SCRAPER (Source: drikpanchang.com)
 export async function getLiveDrikPanchang(cityId?: string, state?: string) {
   const cityKey = normalizeCityKey(cityId, state);
-  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.indore;
-  const cached = panchangCache.get(cityKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
-
+  const cityInfo = SUPPORTED_CITIES[cityKey] || SUPPORTED_CITIES.bhopal || SUPPORTED_CITIES.indore;
   try {
-    const url = cityInfo.geonameId
-      ? `https://www.drikpanchang.com/panchang/day-panchang.html?geoname-id=${encodeURIComponent(cityInfo.geonameId)}`
-      : "https://www.drikpanchang.com/panchang/day-panchang.html";
-    const res = await axios.get(url, { headers: customHeaders, httpsAgent, timeout: 8000 });
-    const $ = cheerio.load(res.data);
-
-    const pMap: Record<string, string> = {};
-    $(".dpTableRow").each((_, row) => {
-      let currentKey = "";
-      $(row).children().each((__, cell) => {
-        const isKey = $(cell).hasClass("dpTableKey");
-        const isVal = $(cell).hasClass("dpTableValue");
-        const text = $(cell).clone().find(".dpElementInfoPopupWrapper, .dpInfoIcon").remove().end().text().replace(/\s+/g, " ").trim();
-        if (isKey && text) {
-          currentKey = text;
-        } else if (isVal && currentKey) {
-          if (!pMap[currentKey]) pMap[currentKey] = text;
-          currentKey = "";
-        }
-      });
-    });
-
-    const sunrise = pMap["Sunrise"] || "06:13 AM";
-    const sunset = pMap["Sunset"] || "06:06 PM";
-    const moonrise = pMap["Moonrise"] || "11:45 PM";
-    const tithi = pMap["Tithi"] || "Shukla/Krishna Tithi";
-    const nakshatra = pMap["Nakshatra"] || "Shubha Nakshatra";
-    const paksha = pMap["Paksha"] || (tithi.toLowerCase().includes("shukla") ? "Shukla Paksha" : "Krishna Paksha");
-    const samvatRaw = pMap["Vikram Samvat"] || "2083 Siddharthi";
-    const samvat = samvatRaw.startsWith("Vikram") ? samvatRaw : `Vikram Samvat ${samvatRaw}`;
-    const yoga = pMap["Yoga"] || "Shubha Yoga";
-    const karana = pMap["Karana"] || "Shubha Karana";
-    const abhijitMuhurat = pMap["Abhijit"] || "11:45 AM to 12:33 PM";
-    const rahukaal = pMap["Rahu Kalam"] || "09:11 AM to 10:40 AM";
-
-    const parsed = {
-      source: "DrikPanchang.com",
-      sourceUrl: url,
-      date: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
-      location: `${cityInfo.name}, ${cityInfo.state}`,
-      city: cityInfo.name,
-      state: cityInfo.state,
-      sunrise,
-      sunset,
-      moonrise,
-      tithi,
-      nakshatra,
-      paksha,
-      samvat,
-      yoga,
-      karana,
-      abhijitMuhurat,
-      rahukaal,
-      unavailable: false,
-      updatedAt: new Date().toISOString()
-    };
-    panchangCache.set(cityKey, { data: parsed, timestamp: Date.now() });
-    return parsed;
-  } catch (error) {
-    console.warn("Drik Panchang direct parse failed, using fallback:", error);
-    if (cached?.data) return cached.data;
+    const data = await getJagannathaPanchang({ city: cityInfo.id, state: cityInfo.state });
     return {
-      source: "DrikPanchang.com",
-      sourceUrl: "https://www.drikpanchang.com/panchang/day-panchang.html",
-      date: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
+      ...data,
+      source: data.provider,
+      city: cityInfo.name,
+      state: cityInfo.state,
+      date: data.date,
+      sunrise: data.sunrise || "",
+      sunset: data.sunset || "",
+      moonrise: data.moonrise || "",
+      unavailable: false
+    };
+  } catch (error) {
+    console.warn("Jagannatha Hora Panchang unavailable:", error);
+    return {
+      source: "Jagannatha Hora",
+      sourceUrl: "https://jagannathahora.com/api-mcp",
+      calculationSystem: "Vedic Sidereal (Nirayana)",
+      ayanamsa: "Lahiri",
+      date: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }),
       location: `${cityInfo.name}, ${cityInfo.state}`,
       city: cityInfo.name,
       state: cityInfo.state,
-      sunrise: "06:13 AM",
-      sunset: "06:06 PM",
-      moonrise: "11:45 PM",
-      tithi: "Krishna Saptami / Ashtami",
-      nakshatra: "Ardra Nakshatra",
-      paksha: "Krishna Paksha",
-      samvat: "Vikram Samvat 2083",
-      yoga: "Variyana Yoga",
-      karana: "Bava Karana",
-      abhijitMuhurat: "11:45 AM to 12:33 PM",
-      rahukaal: "09:11 AM to 10:40 AM",
-      unavailable: false,
+      sunrise: "",
+      sunset: "",
+      moonrise: "",
+      tithi: "",
+      nakshatra: "",
+      paksha: "",
+      samvat: "",
+      yoga: "",
+      karana: "",
+      sunSign: "",
+      moonSign: "",
+      abhijitMuhurat: "",
+      rahukaal: "",
+      unavailable: true,
       updatedAt: new Date().toISOString()
     };
   }
