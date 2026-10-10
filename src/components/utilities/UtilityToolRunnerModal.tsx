@@ -10,6 +10,7 @@ import { PDFDocument } from "pdf-lib";
 import QRCode from "react-qr-code";
 import toast from "react-hot-toast";
 import { UtilityToolDefinition } from "../../data/utilityToolsCatalog";
+import PdfToolsEngine from "./engines/pdfToolsEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -340,6 +341,39 @@ function ToolEngineDispatcher({
     case "discount_calculator": return <ExtraUtilityEngine mode="discount_calculator" isHi={isHi} />;
     case "compound_interest_calculator": return <ExtraUtilityEngine mode="compound_interest_calculator" isHi={isHi} />;
     case "random_team_splitter": return <ExtraUtilityEngine mode="random_team_splitter" isHi={isHi} />;
+
+    // 17. 100% Offline PDF Tools Suite (Phase 2 - 30 Tools)
+    case "pdf_merge_tool":
+    case "pdf_split_tool":
+    case "pdf_compress_tool":
+    case "pdf_extract_pages":
+    case "pdf_delete_pages":
+    case "pdf_reorder_pages":
+    case "pdf_rotate_pages":
+    case "pdf_crop_pages":
+    case "pdf_resize_pages":
+    case "pdf_page_numbers":
+    case "pdf_watermark_adder":
+    case "pdf_metadata_viewer":
+    case "pdf_metadata_editor":
+    case "pdf_attachment_extractor":
+    case "pdf_bookmark_editor":
+    case "pdf_text_extractor":
+    case "pdf_image_extractor":
+    case "pdf_page_label_editor":
+    case "pdf_blank_page_inserter":
+    case "pdf_blank_page_remover":
+    case "pdf_compare_tool":
+    case "pdf_diff_viewer":
+    case "pdf_password_protect":
+    case "pdf_form_filler":
+    case "pdf_annotation_tool":
+    case "pdf_highlighter_tool":
+    case "pdf_header_footer":
+    case "pdf_page_duplication":
+    case "pdf_booklet_maker":
+    case "pdf_nup_imposition":
+      return <PdfToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (

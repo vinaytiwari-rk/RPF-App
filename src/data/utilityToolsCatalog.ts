@@ -20,6 +20,7 @@ export interface UtilityCategoryDefinition {
 
 export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "all", titleEn: "All Tools", titleHi: "सभी टूल्स", iconName: "LayoutGrid", accent: "from-emerald-600 to-teal-700" },
+  { id: "pdf_tools", titleEn: "PDF Tools (30)", titleHi: "PDF टूल्स (30)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
   { id: "govt_forms", titleEn: "Govt Forms & Recruitment", titleHi: "सरकारी भर्ती व फॉर्म", iconName: "BadgeCheck", accent: "from-amber-600 to-orange-700" },
   { id: "pdf_docs", titleEn: "PDF & Document Office", titleHi: "दस्तावेज व PDF ऑफिस", iconName: "FileText", accent: "from-blue-600 to-indigo-700" },
   { id: "legal_drafts", titleEn: "Legal Drafts & Notices", titleHi: "कानूनी आवेदन व प्रारूप", iconName: "Scale", accent: "from-purple-600 to-indigo-800" },
@@ -863,5 +864,157 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "random_team_splitter", categoryId: "cyber_media", titleEn: "Random Team Splitter", titleHi: "रैंडम टीम बाँटें",
     descEn: "Split a list of names into a chosen number of random teams.", descHi: "नामों को random टीमों में बाँटें।", iconName: "Users", badge: "Offline",
     keywords: ["random team splitter", "utility", "offline"]
+  },
+
+  // 17. 100% Offline PDF Tools Suite (Phase 2 - 30 Tools)
+  {
+    id: "pdf_merge_tool", categoryId: "pdf_tools", titleEn: "Merge PDF", titleHi: "मर्ज PDF (फाइलें जोड़ें)",
+    descEn: "Combine multiple PDF files into a single unified document offline.", descHi: "दो या अधिक PDF फाइलों को बिना इंटरनेट एक में जोड़ें।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["pdf merge", "merge pdf", "combine pdf", "join pdf", "pdf tools"]
+  },
+  {
+    id: "pdf_split_tool", categoryId: "pdf_tools", titleEn: "Split PDF", titleHi: "स्प्लिट PDF (पेज अलग करें)",
+    descEn: "Extract specific page ranges or split a PDF into separate files.", descHi: "PDF में से खास पेज अलग करें या विभाजित करें।", iconName: "Scissors", badge: "100% Offline",
+    keywords: ["pdf split", "split pdf", "extract pages", "separate pdf"]
+  },
+  {
+    id: "pdf_compress_tool", categoryId: "pdf_tools", titleEn: "Compress PDF", titleHi: "कंप्रेस PDF (साइज घटाएं)",
+    descEn: "Reduce PDF file size locally using stream compression.", descHi: "PDF फाइल का आकार डिवाइस पर ही कम करें।", iconName: "FileArchive", badge: "100% Offline",
+    keywords: ["pdf compress", "compress pdf", "reduce pdf size", "kb shrink"]
+  },
+  {
+    id: "pdf_extract_pages", categoryId: "pdf_tools", titleEn: "PDF Page Extractor", titleHi: "PDF पेज एक्सट्रैक्टर",
+    descEn: "Extract chosen pages from a PDF into a brand new document.", descHi: "PDF से चयनित पेज निकाल कर नया PDF बनाएं।", iconName: "FileSpreadsheet", badge: "100% Offline",
+    keywords: ["extract pages", "pdf extract", "page extractor"]
+  },
+  {
+    id: "pdf_delete_pages", categoryId: "pdf_tools", titleEn: "PDF Page Deleter", titleHi: "PDF पेज हटाएं (Deleter)",
+    descEn: "Permanently remove unwanted pages from your PDF file.", descHi: "PDF से फालतू पेज हटाकर साफ कॉपी बनाएं।", iconName: "Trash2", badge: "100% Offline",
+    keywords: ["delete pdf pages", "remove pages", "pdf page deleter"]
+  },
+  {
+    id: "pdf_reorder_pages", categoryId: "pdf_tools", titleEn: "PDF Page Reorder", titleHi: "PDF पेज क्रम बदलें",
+    descEn: "Change the sequence and order of pages in your PDF document.", descHi: "PDF के पेजों का क्रम अपनी मर्जी से व्यवस्थित करें।", iconName: "ArrowUpDown", badge: "100% Offline",
+    keywords: ["reorder pdf", "sort pages", "page sequence"]
+  },
+  {
+    id: "pdf_rotate_pages", categoryId: "pdf_tools", titleEn: "PDF Page Rotator", titleHi: "PDF पेज घुमाएं (Rotator)",
+    descEn: "Rotate PDF pages 90, 180, or 270 degrees clockwise or counter-clockwise.", descHi: "उल्टे या आड़े PDF पेजों को 90°, 180° या 270° सीधा करें।", iconName: "RotateCw", badge: "100% Offline",
+    keywords: ["rotate pdf", "turn pdf", "pdf page rotator"]
+  },
+  {
+    id: "pdf_crop_pages", categoryId: "pdf_tools", titleEn: "PDF Page Cropper", titleHi: "PDF पेज क्रॉप करें",
+    descEn: "Trim page margins and crop content borders locally.", descHi: "PDF पेजों के किनारे व मार्जिन क्रॉप करें।", iconName: "Crop", badge: "100% Offline",
+    keywords: ["crop pdf", "trim pdf", "pdf cropper"]
+  },
+  {
+    id: "pdf_resize_pages", categoryId: "pdf_tools", titleEn: "PDF Page Resizer", titleHi: "PDF पेज रीसाइज़र",
+    descEn: "Change PDF dimensions to standard A4, Letter or Legal sizes.", descHi: "PDF पेज साइज को A4, Letter या Legal में बदलें।", iconName: "Maximize", badge: "100% Offline",
+    keywords: ["resize pdf", "a4 pdf", "page resizer", "letter legal"]
+  },
+  {
+    id: "pdf_page_numbers", categoryId: "pdf_tools", titleEn: "PDF Page Numbering", titleHi: "PDF पेज नंबर जोड़ें",
+    descEn: "Insert page numbers automatically on header or footer.", descHi: "PDF के प्रत्येक पेज पर क्रमवार पेज संख्या जोड़ें।", iconName: "Binary", badge: "100% Offline",
+    keywords: ["pdf page numbers", "add page number", "numbering"]
+  },
+  {
+    id: "pdf_watermark_adder", categoryId: "pdf_tools", titleEn: "PDF Watermark Adder", titleHi: "PDF वाटरमार्क लगाएं",
+    descEn: "Add transparent text watermarks across all pages of your PDF.", descHi: "दस्तावेज़ सुरक्षा हेतु सभी पेजों पर वाटरमार्क लगाएं।", iconName: "Stamp", badge: "100% Offline",
+    keywords: ["watermark pdf", "add watermark", "confidential draft"]
+  },
+  {
+    id: "pdf_metadata_viewer", categoryId: "pdf_tools", titleEn: "PDF Metadata Viewer", titleHi: "PDF मेटाडेटा देखें",
+    descEn: "Inspect embedded title, author, creation date and producer info.", descHi: "PDF में छिपा टाइटल, लेखक, तारीख व सॉफ्टवेयर जानकारी देखें।", iconName: "Info", badge: "100% Offline",
+    keywords: ["pdf metadata", "view metadata", "pdf info"]
+  },
+  {
+    id: "pdf_metadata_editor", categoryId: "pdf_tools", titleEn: "PDF Metadata Editor", titleHi: "PDF मेटाडेटा संपादक",
+    descEn: "Edit document title, author, subject and keywords locally.", descHi: "PDF का टाइटल, ऑथर, सब्जेक्ट व कीवर्ड्स बदलें।", iconName: "Edit", badge: "100% Offline",
+    keywords: ["edit metadata", "pdf metadata editor", "set title author"]
+  },
+  {
+    id: "pdf_attachment_extractor", categoryId: "pdf_tools", titleEn: "PDF Attachment Extractor", titleHi: "PDF अटैचमेंट एक्सट्रैक्टर",
+    descEn: "Extract embedded file attachments packaged inside a PDF.", descHi: "PDF के भीतर जुड़ी अतिरिक्त फाइलें व अटैचमेंट निकालें।", iconName: "Paperclip", badge: "100% Offline",
+    keywords: ["pdf attachment", "extract attachments", "embedded files"]
+  },
+  {
+    id: "pdf_bookmark_editor", categoryId: "pdf_tools", titleEn: "PDF Bookmark Editor", titleHi: "PDF बुकमार्क संपादक",
+    descEn: "Create and update PDF outline bookmarks and table of contents.", descHi: "PDF में इंडेक्स, विषय-सूची और बुकमार्क व्यवस्थित करें।", iconName: "Bookmark", badge: "100% Offline",
+    keywords: ["bookmarks", "pdf outline", "table of contents"]
+  },
+  {
+    id: "pdf_text_extractor", categoryId: "pdf_tools", titleEn: "PDF Text Extractor", titleHi: "PDF टेक्स्ट एक्सट्रैक्टर",
+    descEn: "Extract readable text content from PDF without internet.", descHi: "PDF से टेक्स्ट निकालें और कॉपी या टेक्स्ट फाइल सेव करें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["pdf text extract", "copy text from pdf", "pdf to txt"]
+  },
+  {
+    id: "pdf_image_extractor", categoryId: "pdf_tools", titleEn: "PDF Image Extractor", titleHi: "PDF इमेज एक्सट्रैक्टर",
+    descEn: "Detect and extract embedded images from PDF pages.", descHi: "PDF में मौजूद फोटो व तस्वीरें बाहर निकालें।", iconName: "Image", badge: "100% Offline",
+    keywords: ["extract images pdf", "pdf to image", "pdf photos"]
+  },
+  {
+    id: "pdf_page_label_editor", categoryId: "pdf_tools", titleEn: "PDF Page Label Editor", titleHi: "PDF पेज लेबल संपादक",
+    descEn: "Configure Roman numerals or decimal page numbering schemes.", descHi: "रोमन (i, ii) या दशमलव (1, 2) पेज लेबलिंग सेट करें।", iconName: "Tag", badge: "100% Offline",
+    keywords: ["page labels", "roman numerals", "pdf numbering"]
+  },
+  {
+    id: "pdf_blank_page_inserter", categoryId: "pdf_tools", titleEn: "PDF Blank Page Inserter", titleHi: "PDF खाली पेज जोड़ें",
+    descEn: "Insert fresh blank pages at any position in your document.", descHi: "PDF में किसी भी पेज के आगे या पीछे खाली पेज जोड़ें।", iconName: "FilePlus", badge: "100% Offline",
+    keywords: ["insert blank page", "add empty page", "blank sheet"]
+  },
+  {
+    id: "pdf_blank_page_remover", categoryId: "pdf_tools", titleEn: "PDF Blank Page Remover", titleHi: "PDF खाली पेज हटाएं",
+    descEn: "Detect and remove trailing or accidental blank pages from PDF.", descHi: "दस्तावेज़ में से खाली या छूटे हुए पेज साफ करें।", iconName: "FileMinus", badge: "100% Offline",
+    keywords: ["remove blank pages", "delete empty page", "clean pdf"]
+  },
+  {
+    id: "pdf_compare_tool", categoryId: "pdf_tools", titleEn: "PDF Compare", titleHi: "PDF तुलना (Compare)",
+    descEn: "Compare two PDF files side-by-side for page count and size differences.", descHi: "दो PDF फाइलों के पेज व आकार की त्वरित तुलना करें।", iconName: "Columns", badge: "100% Offline",
+    keywords: ["compare pdf", "pdf comparison", "two pdf files"]
+  },
+  {
+    id: "pdf_diff_viewer", categoryId: "pdf_tools", titleEn: "PDF Diff Viewer", titleHi: "PDF Diff व्यूअर",
+    descEn: "Inspect changes and text revisions between two PDF documents.", descHi: "दो PDF संस्करणों के बीच अंतर और संशोधन देखें।", iconName: "GitCompare", badge: "100% Offline",
+    keywords: ["pdf diff", "diff viewer", "revisions", "changes"]
+  },
+  {
+    id: "pdf_password_protect", categoryId: "pdf_tools", titleEn: "PDF Password Protector", titleHi: "PDF पासवर्ड सुरक्षा",
+    descEn: "Lock and protect sensitive PDF documents with secure password policy.", descHi: "महत्वपूर्ण PDF को सुरक्षित पासवर्ड से लॉक करें।", iconName: "Lock", badge: "100% Offline",
+    keywords: ["protect pdf", "password protect", "pdf lock", "encrypt pdf"]
+  },
+  {
+    id: "pdf_form_filler", categoryId: "pdf_tools", titleEn: "PDF Form Filler", titleHi: "PDF फॉर्म फिलर",
+    descEn: "Inspect, fill interactive AcroForm fields, and export filled PDF.", descHi: "इंटरैक्टिव सरकारी PDF फॉर्म भरें और सेव करें।", iconName: "CheckSquare", badge: "100% Offline",
+    keywords: ["fill pdf form", "form filler", "acroform", "pdf fill"]
+  },
+  {
+    id: "pdf_annotation_tool", categoryId: "pdf_tools", titleEn: "PDF Annotation Tool", titleHi: "PDF एनोटेशन टूल",
+    descEn: "Add notes, verification stamps and review comments on PDF pages.", descHi: "PDF पर सत्यापन नोट, मुहर या समीक्षा टिप्पणी जोड़ें।", iconName: "MessageSquare", badge: "100% Offline",
+    keywords: ["annotate pdf", "add note", "pdf comment", "stamp"]
+  },
+  {
+    id: "pdf_highlighter_tool", categoryId: "pdf_tools", titleEn: "PDF Highlighter", titleHi: "PDF हाइलाइटर",
+    descEn: "Apply bright transparent highlight bars over text and headers.", descHi: "जरूरी लाइन या शीर्षक पर पीला/हरा हाइलाइटर लगाएं।", iconName: "Highlighter", badge: "100% Offline",
+    keywords: ["highlight pdf", "highlighter tool", "pdf mark"]
+  },
+  {
+    id: "pdf_header_footer", categoryId: "pdf_tools", titleEn: "PDF Header & Footer Adder", titleHi: "PDF हेडर व फुटर जोड़ें",
+    descEn: "Add custom top header and bottom footer text across all pages.", descHi: "सभी पेजों पर आधिकारिक हेडर व फुटर टेक्स्ट जोड़ें।", iconName: "PanelTop", badge: "100% Offline",
+    keywords: ["header footer", "add header", "add footer", "pdf header"]
+  },
+  {
+    id: "pdf_page_duplication", categoryId: "pdf_tools", titleEn: "PDF Page Duplication", titleHi: "PDF पेज डुप्लिकेट करें",
+    descEn: "Duplicate admission tickets, token slips or certificate pages.", descHi: "किसी खास पेज की कई प्रतियां PDF के अंदर ही बनाएं।", iconName: "Copy", badge: "100% Offline",
+    keywords: ["duplicate pages", "copy page", "multiple slips"]
+  },
+  {
+    id: "pdf_booklet_maker", categoryId: "pdf_tools", titleEn: "PDF Booklet Maker", titleHi: "PDF बुकलेट मेकर",
+    descEn: "Reorder and format pages for saddle-stitch 4-page booklet printing.", descHi: "किताब या बुकलेट प्रिंटिंग हेतु 4 के गुणांक में पेज सेट करें।", iconName: "BookOpen", badge: "100% Offline",
+    keywords: ["booklet maker", "saddle stitch", "print booklet"]
+  },
+  {
+    id: "pdf_nup_imposition", categoryId: "pdf_tools", titleEn: "PDF N-up Imposition", titleHi: "PDF 2-Up / 4-Up लेआउट",
+    descEn: "Arrange multiple pages side-by-side onto a single printed sheet.", descHi: "कागज़ की बचत हेतु 2 या 4 पेजों को एक ही पेज पर व्यवस्थित करें।", iconName: "Grid", badge: "100% Offline",
+    keywords: ["n up", "2 up pdf", "4 up pdf", "multi page sheet"]
   }
 ];
