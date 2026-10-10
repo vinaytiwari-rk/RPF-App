@@ -150,7 +150,8 @@ export default function LiveTV() {
     };
 
     player.on("error", handlePlayerError);
-    player.src({ src: srcUrl, type: getMediaSourceType(srcUrl) });
+    const sourceType = getMediaSourceType(srcUrl);
+    player.src(sourceType ? { src: srcUrl, type: sourceType } : { src: srcUrl });
 
     return () => {
       // Dispose before React removes the conditionally-rendered video node.
