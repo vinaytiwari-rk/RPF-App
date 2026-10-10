@@ -354782,7 +354782,7 @@ JSON Schema for each object:
   "explanationHi": "\u0939\u093F\u0902\u0926\u0940 \u092E\u0947\u0902 \u0935\u093F\u0938\u094D\u0924\u0943\u0924 \u0935\u094D\u092F\u093E\u0916\u094D\u092F\u093E"
 }`;
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.8-flash",
       contents: prompt,
       config: {
         temperature: 0.3,

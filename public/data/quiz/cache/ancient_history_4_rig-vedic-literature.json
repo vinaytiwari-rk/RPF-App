@@ -1,0 +1,202 @@
+[
+  {
+    "id": "ancient_history_4_rig-vedic-literature_1",
+    "questionEn": "How many Mandalas are there in the Rig Veda?",
+    "questionHi": "ऋग्वेद में कितने मंडल हैं?",
+    "optionsEn": [
+      "8",
+      "9",
+      "10",
+      "12"
+    ],
+    "optionsHi": [
+      "8",
+      "9",
+      "10",
+      "12"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The Rig Veda, the oldest of the four Vedas, is divided into 10 Mandalas (books). It contains 1028 Suktas (hymns), including the 11 Valakhilya hymns, and about 10,600 verses.",
+    "explanationHi": "ऋग्वेद, जो चारों वेदों में सबसे पुराना है, 10 मंडलों (पुस्तकों) में विभाजित है। इसमें 11 बालखिल्य भजनों सहित 1028 सूक्त (भजन) और लगभग 10,600 छंद शामिल हैं।"
+  },
+  {
+    "id": "ancient_history_4_rig-vedic-literature_2",
+    "questionEn": "Which Rig Vedic deity is most frequently mentioned in its hymns, often referred to as 'Purandara'?",
+    "questionHi": "ऋग्वेद के भजनों में किस ऋग्वैदिक देवता का सबसे अधिक बार उल्लेख किया गया है, जिन्हें अक्सर 'पुरंदर' कहा जाता है?",
+    "optionsEn": [
+      "Agni",
+      "Indra",
+      "Varuna",
+      "Soma"
+    ],
+    "optionsHi": [
+      "अग्नि",
+      "इंद्र",
+      "वरुण",
+      "सोम"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "Indra is the most prominent deity in the Rig Veda, with about 250 hymns dedicated to him. He is often called 'Purandara' (breaker of forts) and is associated with thunder, rain, and warfare. Agni (fire god) is the second most important, mentioned about 200 times.",
+    "explanationHi": "इंद्र ऋग्वेद में सबसे प्रमुख देवता हैं, जिन्हें लगभग 250 भजन समर्पित हैं। उन्हें अक्सर 'पुरंदर' (किलों को तोड़ने वाला) कहा जाता है और वे गर्जना, वर्षा और युद्ध से जुड़े हैं। अग्नि (अग्नि देवता) दूसरे सबसे महत्वपूर्ण हैं, जिनका उल्लेख लगभग 200 बार किया गया है।"
+  },
+  {
+    "id": "ancient_history_4_rig-vedic-literature_3",
+    "questionEn": "The famous 'Purusha Sukta' which first mentions the division of society into four Varnas, is found in which Mandala of the Rig Veda?",
+    "questionHi": "प्रसिद्ध 'पुरुष सूक्त', जिसमें पहली बार समाज को चार वर्णों में विभाजित करने का उल्लेख है, ऋग्वेद के किस मंडल में पाया जाता है?",
+    "optionsEn": [
+      "Second Mandala",
+      "Seventh Mandala",
+      "Ninth Mandala",
+      "Tenth Mandala"
+    ],
+    "optionsHi": [
+      "द्वितीय मंडल",
+      "सप्तम मंडल",
+      "नवम मंडल",
+      "दशम मंडल"
+    ],
+    "correctIndex": 3,
+    "explanationEn": "The 'Purusha Sukta' (Hymn of the Cosmic Man), which describes the origin of the four Varnas (Brahmin, Kshatriya, Vaishya, Shudra) from the primeval being, is found in the Tenth Mandala of the Rig Veda. This Mandala, along with the first, is generally considered to be a later addition to the Rig Veda.",
+    "explanationHi": "प्रसिद्ध 'पुरुष सूक्त' (ब्रह्मांडीय पुरुष का भजन), जो आदिम पुरुष से चार वर्णों (ब्राह्मण, क्षत्रिय, वैश्य, शूद्र) की उत्पत्ति का वर्णन करता है, ऋग्वेद के दशम मंडल में पाया जाता है। यह मंडल, पहले मंडल के साथ, आमतौर पर ऋग्वेद में बाद में जोड़ा गया माना जाता है।"
+  },
+  {
+    "id": "ancient_history_4_rig-vedic-literature_4",
+    "questionEn": "Which river is most revered in the Rig Veda, often called 'Naditama' (best of rivers) and associated with divinity?",
+    "questionHi": "ऋग्वेद में किस नदी को सबसे पवित्र माना गया है, जिसे अक्सर 'नदीतमा' (नदियों में श्रेष्ठ) कहा जाता है और दिव्यता से जोड़ा जाता है?",
+    "optionsEn": [
+      "Sindhu",
+      "Vitasta",
+      "Saraswati",
+      "Yamuna"
+    ],
+    "optionsHi": [
+      "सिंधु",
+      "वितस्ता",
+      "सरस्वती",
+      "यमुना"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The river Saraswati is highly revered in the Rig Veda. It is frequently praised as 'Naditama' (best of rivers), 'Devitama' (best of goddesses), and 'Ambitama' (best of mothers), indicating its significant cultural and religious importance to the Rig Vedic people. While Sindhu (Indus) is mentioned more often, Saraswati holds a special sacred status.",
+    "explanationHi": "ऋग्वेद में सरस्वती नदी को अत्यधिक पवित्र माना गया है। इसे अक्सर 'नदीतमा' (नदियों में श्रेष्ठ), 'देवितमा' (देवियों में श्रेष्ठ) और 'अम्बितमा' (माताओं में श्रेष्ठ) के रूप में सराहा गया है, जो ऋग्वैदिक लोगों के लिए इसके महत्वपूर्ण सांस्कृतिक और धार्मिक महत्व को दर्शाता है। जबकि सिंधु (इंडस) का उल्लेख अधिक बार किया गया है, सरस्वती को एक विशेष पवित्र दर्जा प्राप्त है।"
+  },
+  {
+    "id": "ancient_history_4_rig-vedic-literature_5",
+    "questionEn": "What was the most important form of wealth in the Rig Vedic period?",
+    "questionHi": "ऋग्वैदिक काल में धन का सबसे महत्वपूर्ण रूप क्या था?",
+    "optionsEn": [
+      "Land",
+      "Gold",
+      "Cattle",
+      "Grains"
+    ],
+    "optionsHi": [
+      "भूमि",
+      "सोना",
+      "पशुधन",
+      "अनाज"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "In the Rig Vedic period, cattle (Gau) were considered the most important form of wealth. Prayers for cattle were common, and battles were often fought over them (Gavishti, meaning 'search for cows'). Land ownership was not as prominent as in later periods, and agriculture was secondary to pastoralism.",
+    "explanationHi": "ऋग्वैदिक काल में पशुधन (गौ) को धन का सबसे महत्वपूर्ण रूप माना जाता था। पशुओं के लिए प्रार्थनाएँ आम थीं, और उनके लिए अक्सर युद्ध लड़े जाते थे (गविष्टि, जिसका अर्थ है 'गायों की खोज')। भूमि का स्वामित्व बाद के कालों जितना प्रमुख नहीं था, और कृषि पशुपालन की तुलना में द्वितीयक थी।"
+  },
+  {
+    "id": "ancient_history_4_rig-vedic-literature_6",
+    "questionEn": "In the Rig Vedic period, 'Sabha' and 'Samiti' were two important political institutions. What was their primary function?",
+    "questionHi": "ऋग्वैदिक काल में 'सभा' और 'समिति' दो महत्वपूर्ण राजनीतिक संस्थाएँ थीं। उनका प्राथमिक कार्य क्या था?",
+    "optionsEn": [
+      "Religious rituals",
+      "Judicial administration",
+      "Tribal assemblies",
+      "Military training"
+    ],
+    "optionsHi": [
+      "धार्मिक अनुष्ठान",
+      "न्यायिक प्रशासन",
+      "जनजातीय सभाएँ",
+      "सैन्य प्रशिक्षण"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Sabha and Samiti were important tribal assemblies in the Rig Vedic period. The Sabha was typically an assembly of elders or nobles, while the Samiti was a general assembly of the people, where important matters of the tribe were discussed and decisions made, including the election of the king (Rajan).",
+    "explanationHi": "सभा और समिति ऋग्वैदिक काल में महत्वपूर्ण जनजातीय सभाएँ थीं। सभा आमतौर पर बुजुर्गों या कुलीनों की एक सभा थी, जबकि समिति लोगों की एक सामान्य सभा थी, जहाँ जनजाति के महत्वपूर्ण मामलों पर चर्चा की जाती थी और निर्णय लिए जाते थे, जिसमें राजा (राजन) का चुनाव भी शामिल था।"
+  },
+  {
+    "id": "ancient_history_4_rig-vedic-literature_7",
+    "questionEn": "Which Rig Vedic hymn deals with the philosophical speculation about the origin of the universe and the nature of creation?",
+    "questionHi": "ऋग्वेद का कौन सा भजन ब्रह्मांड की उत्पत्ति और सृष्टि की प्रकृति के बारे में दार्शनिक अटकलों से संबंधित है?",
+    "optionsEn": [
+      "Purusha Sukta",
+      "Nasadiya Sukta",
+      "Hiranyagarbha Sukta",
+      "Ushas Sukta"
+    ],
+    "optionsHi": [
+      "पुरुष सूक्त",
+      "नासदीय सूक्त",
+      "हिरण्यगर्भ सूक्त",
+      "उषास सूक्त"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "The 'Nasadiya Sukta' (Hymn of Creation) in the Tenth Mandala of the Rig Veda is a profound philosophical hymn that speculates on the origin of the universe, questioning what existed before creation and even expressing doubt about whether the gods themselves knew the ultimate origin. It is a cornerstone of early Indian philosophical thought.",
+    "explanationHi": "ऋग्वेद के दशम मंडल में 'नासदीय सूक्त' (सृष्टि का भजन) एक गहरा दार्शनिक भजन है जो ब्रह्मांड की उत्पत्ति पर अटकलें लगाता है, यह सवाल करता है कि सृष्टि से पहले क्या मौजूद था और यहाँ तक कि इस बात पर भी संदेह व्यक्त करता है कि क्या देवता स्वयं अंतिम उत्पत्ति जानते थे। यह प्रारंभिक भारतीय दार्शनिक विचार की आधारशिला है।"
+  },
+  {
+    "id": "ancient_history_4_rig-vedic-literature_8",
+    "questionEn": "The famous 'Battle of Ten Kings' (Dasharajna War) mentioned in the Rig Veda was fought on the banks of which river?",
+    "questionHi": "ऋग्वेद में वर्णित प्रसिद्ध 'दशराज्ञ युद्ध' (दस राजाओं का युद्ध) किस नदी के किनारे लड़ा गया था?",
+    "optionsEn": [
+      "Sindhu",
+      "Saraswati",
+      "Parushni",
+      "Sutudri"
+    ],
+    "optionsHi": [
+      "सिंधु",
+      "सरस्वती",
+      "परुष्णी",
+      "शुतुद्री"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The 'Dasharajna War' or Battle of Ten Kings is a significant event mentioned in the Seventh Mandala of the Rig Veda. It was fought between King Sudas of the Bharata tribe (supported by Rishi Vasishtha) and a confederacy of ten kings (led by Vishwamitra) on the banks of the river Parushni, which is identified with the modern-day Ravi river.",
+    "explanationHi": "दशराज्ञ युद्ध या दस राजाओं का युद्ध ऋग्वेद के सप्तम मंडल में वर्णित एक महत्वपूर्ण घटना है। यह भरत जनजाति के राजा सुदास (ऋषि वशिष्ठ द्वारा समर्थित) और दस राजाओं के एक संघ (विश्वामित्र के नेतृत्व में) के बीच परुष्णी नदी के किनारे लड़ा गया था, जिसकी पहचान आधुनिक रावी नदी से की जाती है।"
+  },
+  {
+    "id": "ancient_history_4_rig-vedic-literature_9",
+    "questionEn": "In the Rig Vedic context, the term 'Gavishti' primarily refers to:",
+    "questionHi": "ऋग्वैदिक संदर्भ में, 'गविष्टि' शब्द मुख्य रूप से संदर्भित करता है:",
+    "optionsEn": [
+      "A type of sacrifice",
+      "Search for cows",
+      "A unit of measurement",
+      "A form of marriage"
+    ],
+    "optionsHi": [
+      "एक प्रकार का यज्ञ",
+      "गायों की खोज",
+      "माप की एक इकाई",
+      "विवाह का एक रूप"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "The term 'Gavishti' literally means 'search for cows' (from 'go' meaning cow). In the Rig Vedic context, it often refers to raids or battles undertaken by tribes to acquire cattle, which were the primary form of wealth and a source of sustenance. This highlights the pastoral nature of the Rig Vedic society.",
+    "explanationHi": "'गविष्टि' शब्द का शाब्दिक अर्थ 'गायों की खोज' (गो शब्द से) है। ऋग्वैदिक संदर्भ में, यह अक्सर जनजातियों द्वारा पशुधन प्राप्त करने के लिए किए गए छापों या लड़ाइयों को संदर्भित करता है, जो धन का प्राथमिक रूप और जीविका का स्रोत थे। यह ऋग्वैदिक समाज की पशुचारण प्रकृति पर प्रकाश डालता है।"
+  },
+  {
+    "id": "ancient_history_4_rig-vedic-literature_10",
+    "questionEn": "Which of the following statements about the Rig Veda is NOT correct?",
+    "questionHi": "ऋग्वेद के बारे में निम्नलिखित में से कौन सा कथन सही नहीं है?",
+    "optionsEn": [
+      "It is the oldest of the four Vedas.",
+      "It primarily consists of hymns praising various deities.",
+      "The Sama Veda is largely derived from the Rig Veda.",
+      "It contains detailed instructions for performing sacrifices and rituals."
+    ],
+    "optionsHi": [
+      "यह चारों वेदों में सबसे पुराना है।",
+      "इसमें मुख्य रूप से विभिन्न देवताओं की स्तुति करने वाले भजन शामिल हैं।",
+      "सामवेद काफी हद तक ऋग्वेद से लिया गया है।",
+      "इसमें यज्ञों और अनुष्ठानों को करने के लिए विस्तृत निर्देश शामिल हैं।"
+    ],
+    "correctIndex": 3,
+    "explanationEn": "The Rig Veda is indeed the oldest Veda and primarily a collection of hymns (Suktas) dedicated to various deities. The Sama Veda consists mainly of hymns taken from the Rig Veda, set to musical notations. However, detailed instructions for performing sacrifices and rituals are primarily found in the Yajur Veda and the later Brahmanas, not the Rig Veda itself.",
+    "explanationHi": "ऋग्वेद वास्तव में सबसे पुराना वेद है और मुख्य रूप से विभिन्न देवताओं को समर्पित भजनों (सूक्तों) का संग्रह है। सामवेद में मुख्य रूप से ऋग्वेद से लिए गए भजन शामिल हैं, जिन्हें संगीतबद्ध किया गया है। हालांकि, यज्ञों और अनुष्ठानों को करने के लिए विस्तृत निर्देश मुख्य रूप से यजुर्वेद और बाद के ब्राह्मणों में पाए जाते हैं, न कि स्वयं ऋग्वेद में।"
+  }
+]

@@ -1,0 +1,202 @@
+[
+  {
+    "id": "ancient_history_6_later-vedic-literature_1",
+    "questionEn": "Which of the following Later Vedic texts primarily deals with charms, spells, and incantations to ward off evil and diseases, and also contains information about daily life and popular beliefs?",
+    "questionHi": "निम्नलिखित में से कौन सा उत्तर वैदिक ग्रंथ मुख्य रूप से बुराई और बीमारियों को दूर करने के लिए आकर्षण, मंत्र और जादू-टोना से संबंधित है, और इसमें दैनिक जीवन और लोकप्रिय मान्यताओं के बारे में भी जानकारी है?",
+    "optionsEn": [
+      "Rigveda",
+      "Samaveda",
+      "Yajurveda",
+      "Atharvaveda"
+    ],
+    "optionsHi": [
+      "ऋग्वेद",
+      "सामवेद",
+      "यजुर्वेद",
+      "अथर्ववेद"
+    ],
+    "correctIndex": 3,
+    "explanationEn": "The Atharvaveda is unique among the Vedic texts for its focus on practical aspects of life, including charms, spells, and incantations for healing, protection, and prosperity. It also provides insights into the popular beliefs and daily life of the people during the Later Vedic period, unlike the other Vedas which are more ritualistic or hymn-based.",
+    "explanationHi": "अथर्ववेद वैदिक ग्रंथों में अपने व्यावहारिक जीवन पर ध्यान केंद्रित करने के लिए अद्वितीय है, जिसमें उपचार, सुरक्षा और समृद्धि के लिए आकर्षण, मंत्र और जादू-टोना शामिल हैं। यह उत्तर वैदिक काल के दौरान लोगों की लोकप्रिय मान्यताओं और दैनिक जीवन में भी अंतर्दृष्टि प्रदान करता है, अन्य वेदों के विपरीत जो अधिक कर्मकांडी या भजन-आधारित हैं।"
+  },
+  {
+    "id": "ancient_history_6_later-vedic-literature_2",
+    "questionEn": "The Shatapatha Brahmana, known for its elaborate explanations of Vedic rituals and sacrifices, is associated with which of the following Vedas?",
+    "questionHi": "शतपथ ब्राह्मण, जो वैदिक अनुष्ठानों और यज्ञों की विस्तृत व्याख्याओं के लिए जाना जाता है, निम्नलिखित में से किस वेद से संबंधित है?",
+    "optionsEn": [
+      "Rigveda",
+      "Samaveda",
+      "Yajurveda",
+      "Atharvaveda"
+    ],
+    "optionsHi": [
+      "ऋग्वेद",
+      "सामवेद",
+      "यजुर्वेद",
+      "अथर्ववेद"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The Shatapatha Brahmana is the most extensive and important Brahmana text, providing detailed commentaries on Vedic rituals, particularly those related to sacrifices. It is specifically associated with the Shukla (White) Yajurveda.",
+    "explanationHi": "शतपथ ब्राह्मण सबसे व्यापक और महत्वपूर्ण ब्राह्मण ग्रंथ है, जो वैदिक अनुष्ठानों, विशेष रूप से यज्ञों से संबंधित विस्तृत टीकाएँ प्रदान करता है। यह विशेष रूप से शुक्ल (श्वेत) यजुर्वेद से संबंधित है।"
+  },
+  {
+    "id": "ancient_history_6_later-vedic-literature_3",
+    "questionEn": "Which of the following philosophical concepts, central to the Upanishads, refers to the ultimate reality of the universe and the individual soul's identity with it?",
+    "questionHi": "उपनिषदों के केंद्रीय दार्शनिक अवधारणाओं में से कौन सी ब्रह्मांड की परम वास्तविकता और उसके साथ व्यक्तिगत आत्मा की पहचान को संदर्भित करती है?",
+    "optionsEn": [
+      "Dharma",
+      "Karma",
+      "Brahman-Atman",
+      "Moksha"
+    ],
+    "optionsHi": [
+      "धर्म",
+      "कर्म",
+      "ब्रह्म-आत्मा",
+      "मोक्ष"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The core teaching of the Upanishads revolves around the identity of Atman (the individual soul) with Brahman (the universal soul or ultimate reality). This concept posits that the essence of an individual is one with the essence of the cosmos. Dharma, Karma, and Moksha are related concepts but Brahman-Atman is the fundamental philosophical identity.",
+    "explanationHi": "उपनिषदों का मूल सिद्धांत आत्मा (व्यक्तिगत आत्मा) की ब्रह्म (सार्वभौमिक आत्मा या परम वास्तविकता) के साथ पहचान के इर्द-गिर्द घूमता है। यह अवधारणा मानती है कि एक व्यक्ति का सार ब्रह्मांड के सार के साथ एक है। धर्म, कर्म और मोक्ष संबंधित अवधारणाएँ हैं, लेकिन ब्रह्म-आत्मा मौलिक दार्शनिक पहचान है।"
+  },
+  {
+    "id": "ancient_history_6_later-vedic-literature_4",
+    "questionEn": "The Samaveda is primarily a collection of hymns meant to be chanted during specific rituals, particularly the Soma sacrifice. It is often considered the foundation of which of the following?",
+    "questionHi": "सामवेद मुख्य रूप से विशिष्ट अनुष्ठानों, विशेषकर सोम यज्ञ के दौरान गाए जाने वाले भजनों का संग्रह है। इसे अक्सर निम्नलिखित में से किसका आधार माना जाता है?",
+    "optionsEn": [
+      "Indian philosophy",
+      "Indian architecture",
+      "Indian classical music",
+      "Indian legal system"
+    ],
+    "optionsHi": [
+      "भारतीय दर्शन",
+      "भारतीय वास्तुकला",
+      "भारतीय शास्त्रीय संगीत",
+      "भारतीय कानूनी प्रणाली"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The Samaveda consists of melodies and chants (Samans) derived mostly from the Rigveda, which were set to music for ritualistic purposes. It is widely regarded as the earliest source and foundation of Indian classical music, with its systematic arrangement of musical notes and rhythms.",
+    "explanationHi": "सामवेद में मुख्य रूप से ऋग्वेद से ली गई धुनें और मंत्र (सामन) शामिल हैं, जिन्हें अनुष्ठानिक उद्देश्यों के लिए संगीतबद्ध किया गया था। इसे भारतीय शास्त्रीय संगीत का सबसे प्रारंभिक स्रोत और आधार माना जाता है, जिसमें संगीत के स्वरों और लय की व्यवस्थित व्यवस्था है।"
+  },
+  {
+    "id": "ancient_history_6_later-vedic-literature_5",
+    "questionEn": "Which category of Later Vedic texts served as a bridge between the ritualistic Brahmanas and the philosophical Upanishads, often containing mystical and symbolic interpretations of sacrifices meant for hermits and ascetics living in forests?",
+    "questionHi": "उत्तर वैदिक ग्रंथों की कौन सी श्रेणी कर्मकांडी ब्राह्मणों और दार्शनिक उपनिषदों के बीच एक सेतु का काम करती थी, जिसमें अक्सर जंगलों में रहने वाले तपस्वियों और संन्यासियों के लिए बलिदानों की रहस्यमय और प्रतीकात्मक व्याख्याएँ होती थीं?",
+    "optionsEn": [
+      "Samhitas",
+      "Vedangas",
+      "Aranyakas",
+      "Sutras"
+    ],
+    "optionsHi": [
+      "संहिताएँ",
+      "वेदांग",
+      "आरण्यक",
+      "सूत्र"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Aranyakas, literally 'forest texts', were composed for hermits and ascetics living in forests. They represent a transitional phase, moving away from the purely ritualistic focus of the Brahmanas towards the introspective and philosophical speculations found in the Upanishads, often providing mystical interpretations of rituals.",
+    "explanationHi": "आरण्यक, जिसका शाब्दिक अर्थ 'वन ग्रंथ' है, जंगलों में रहने वाले तपस्वियों और संन्यासियों के लिए रचे गए थे। वे एक संक्रमणकालीन चरण का प्रतिनिधित्व करते हैं, ब्राह्मणों के विशुद्ध कर्मकांडी फोकस से उपनिषदों में पाए जाने वाले आत्मनिरीक्षण और दार्शनिक अटकलों की ओर बढ़ते हुए, अक्सर अनुष्ठानों की रहस्यमय व्याख्याएँ प्रदान करते हैं।"
+  },
+  {
+    "id": "ancient_history_6_later-vedic-literature_6",
+    "questionEn": "The Yajurveda is unique among the Vedas for being divided into two main branches, namely:",
+    "questionHi": "यजुर्वेद वेदों में अद्वितीय है क्योंकि यह दो मुख्य शाखाओं में विभाजित है, अर्थात्:",
+    "optionsEn": [
+      "Shukla and Krishna",
+      "Purva and Uttara",
+      "Brihat and Laghu",
+      "Aranya and Grihya"
+    ],
+    "optionsHi": [
+      "शुक्ल और कृष्ण",
+      "पूर्व और उत्तर",
+      "बृहत् और लघु",
+      "आरण्य और गृह्य"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "The Yajurveda is indeed unique for its division into two primary branches: the Shukla (White) Yajurveda and the Krishna (Black) Yajurveda. The Shukla Yajurveda contains only the mantras (hymns and sacrificial formulas), while the Krishna Yajurveda includes both the mantras and their prose explanations (Brahmanas) within the same text.",
+    "explanationHi": "यजुर्वेद वास्तव में अपनी दो प्राथमिक शाखाओं में विभाजन के लिए अद्वितीय है: शुक्ल (श्वेत) यजुर्वेद और कृष्ण (कृष्ण) यजुर्वेद। शुक्ल यजुर्वेद में केवल मंत्र (भजन और यज्ञ सूत्र) होते हैं, जबकि कृष्ण यजुर्वेद में एक ही ग्रंथ के भीतर मंत्र और उनकी गद्य व्याख्याएँ (ब्राह्मण) दोनों शामिल होती हैं।"
+  },
+  {
+    "id": "ancient_history_6_later-vedic-literature_7",
+    "questionEn": "The famous dictum \"Satyameva Jayate\" (Truth alone triumphs) is derived from which of the following Upanishads?",
+    "questionHi": "प्रसिद्ध सूक्ति \"सत्यमेव जयते\" (सत्य की ही विजय होती है) निम्नलिखित में से किस उपनिषद से ली गई है?",
+    "optionsEn": [
+      "Chandogya Upanishad",
+      "Brihadaranyaka Upanishad",
+      "Mundaka Upanishad",
+      "Katha Upanishad"
+    ],
+    "optionsHi": [
+      "छान्दोग्य उपनिषद",
+      "बृहदारण्यक उपनिषद",
+      "मुंडक उपनिषद",
+      "कठ उपनिषद"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The phrase \"Satyameva Jayate\" is a mantra from the Mundaka Upanishad (3.1.6). It is a significant philosophical statement emphasizing the ultimate victory of truth and is also the national motto of India.",
+    "explanationHi": "वाक्यांश \"सत्यमेव जयते\" मुंडक उपनिषद (3.1.6) का एक मंत्र है। यह सत्य की अंतिम विजय पर जोर देने वाला एक महत्वपूर्ण दार्शनिक कथन है और यह भारत का राष्ट्रीय आदर्श वाक्य भी है।"
+  },
+  {
+    "id": "ancient_history_6_later-vedic-literature_8",
+    "questionEn": "During the Later Vedic period, the Varna system became more stratified and hereditary. Which of the following texts extensively discusses the rituals and social hierarchy, often emphasizing the pre-eminence of the Brahmanas?",
+    "questionHi": "उत्तर वैदिक काल के दौरान, वर्ण व्यवस्था अधिक स्तरीकृत और वंशानुगत हो गई। निम्नलिखित में से कौन सा ग्रंथ अनुष्ठानों और सामाजिक पदानुक्रम पर विस्तार से चर्चा करता है, अक्सर ब्राह्मणों की प्रधानता पर जोर देता है?",
+    "optionsEn": [
+      "Rigveda Samhita",
+      "Atharvaveda",
+      "Brahmanas",
+      "Upanishads"
+    ],
+    "optionsHi": [
+      "ऋग्वेद संहिता",
+      "अथर्ववेद",
+      "ब्राह्मण",
+      "उपनिषद"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The Brahmanas, being commentaries on Vedic rituals, extensively detail the procedures of sacrifices and the roles of various social groups (varnas) within them. They often emphasize the pre-eminence and ritualistic authority of the Brahmanas, reflecting the increasing rigidity and hierarchy of the Varna system in the Later Vedic period.",
+    "explanationHi": "ब्राह्मण ग्रंथ, वैदिक अनुष्ठानों पर टीकाएँ होने के कारण, यज्ञों की प्रक्रियाओं और उनमें विभिन्न सामाजिक समूहों (वर्णों) की भूमिकाओं का विस्तार से वर्णन करते हैं। वे अक्सर ब्राह्मणों की प्रधानता और अनुष्ठानिक अधिकार पर जोर देते हैं, जो उत्तर वैदिक काल में वर्ण व्यवस्था की बढ़ती कठोरता और पदानुक्रम को दर्शाता है।"
+  },
+  {
+    "id": "ancient_history_6_later-vedic-literature_9",
+    "questionEn": "Arrange the following categories of Vedic literature in their correct chronological order of development:\n1. Samhitas\n2. Aranyakas\n3. Brahmanas\n4. Upanishads",
+    "questionHi": "वैदिक साहित्य की निम्नलिखित श्रेणियों को उनके विकास के सही कालानुक्रमिक क्रम में व्यवस्थित करें:\n1. संहिताएँ\n2. आरण्यक\n3. ब्राह्मण\n4. उपनिषद",
+    "optionsEn": [
+      "1, 3, 2, 4",
+      "1, 2, 3, 4",
+      "3, 1, 4, 2",
+      "1, 3, 4, 2"
+    ],
+    "optionsHi": [
+      "1, 3, 2, 4",
+      "1, 2, 3, 4",
+      "3, 1, 4, 2",
+      "1, 3, 4, 2"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "The chronological order of development of Vedic literature is: Samhitas (the earliest hymns and mantras), followed by Brahmanas (prose commentaries on rituals), then Aranyakas (forest treatises, bridging rituals and philosophy), and finally Upanishads (philosophical treatises focusing on spiritual knowledge).",
+    "explanationHi": "वैदिक साहित्य के विकास का कालानुक्रमिक क्रम है: संहिताएँ (सबसे प्रारंभिक भजन और मंत्र), उसके बाद ब्राह्मण (अनुष्ठानों पर गद्य टीकाएँ), फिर आरण्यक (वन ग्रंथ, अनुष्ठानों और दर्शन को जोड़ते हुए), और अंत में उपनिषद (आध्यात्मिक ज्ञान पर केंद्रित दार्शनिक ग्रंथ)।"
+  },
+  {
+    "id": "ancient_history_6_later-vedic-literature_10",
+    "questionEn": "The concepts of Karma (action and its consequences) and Rebirth (transmigration of soul) are prominently developed and discussed for the first time in which of the following categories of Later Vedic literature?",
+    "questionHi": "कर्म (कार्य और उसके परिणाम) और पुनर्जन्म (आत्मा का एक शरीर से दूसरे शरीर में जाना) की अवधारणाएँ उत्तर वैदिक साहित्य की निम्नलिखित में से किस श्रेणी में पहली बार प्रमुखता से विकसित और चर्चा की गई हैं?",
+    "optionsEn": [
+      "Samhitas",
+      "Brahmanas",
+      "Aranyakas",
+      "Upanishads"
+    ],
+    "optionsHi": [
+      "संहिताएँ",
+      "ब्राह्मण",
+      "आरण्यक",
+      "उपनिषद"
+    ],
+    "correctIndex": 3,
+    "explanationEn": "While nascent ideas might exist in earlier texts, the doctrines of Karma (the law of action and its consequences) and Rebirth (the transmigration of the soul from one body to another) are systematically and extensively explored and articulated for the first time in the Upanishads. These concepts represent a significant philosophical shift from the earlier Vedic focus on rituals and sacrifices.",
+    "explanationHi": "जबकि प्रारंभिक ग्रंथों में प्रारंभिक विचार मौजूद हो सकते हैं, कर्म (कार्य और उसके परिणामों का नियम) और पुनर्जन्म (आत्मा का एक शरीर से दूसरे शरीर में जाना) के सिद्धांत उपनिषदों में पहली बार व्यवस्थित रूप से और विस्तार से खोजे और व्यक्त किए गए हैं। ये अवधारणाएँ अनुष्ठानों और यज्ञों पर प्रारंभिक वैदिक फोकस से एक महत्वपूर्ण दार्शनिक बदलाव का प्रतिनिधित्व करती हैं।"
+  }
+]

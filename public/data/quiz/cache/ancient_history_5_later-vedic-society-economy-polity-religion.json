@@ -1,0 +1,202 @@
+[
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_1",
+    "questionEn": "Which of the following statements accurately describes the Varna system during the Later Vedic period?",
+    "questionHi": "उत्तर वैदिक काल के दौरान वर्ण व्यवस्था का सटीक वर्णन निम्नलिखित में से कौन सा कथन करता है?",
+    "optionsEn": [
+      "Varna was solely based on occupation and was flexible.",
+      "The Shudras emerged as a distinct Varna, primarily serving the other three.",
+      "Women had equal status and could participate in all rituals.",
+      "The Vaishyas were primarily priests and teachers."
+    ],
+    "optionsHi": [
+      "वर्ण केवल व्यवसाय पर आधारित था और लचीला था।",
+      "शूद्र एक विशिष्ट वर्ण के रूप में उभरे, जो मुख्य रूप से अन्य तीन की सेवा करते थे।",
+      "महिलाओं को समान दर्जा प्राप्त था और वे सभी अनुष्ठानों में भाग ले सकती थीं।",
+      "वैश्य मुख्य रूप से पुजारी और शिक्षक थे।"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "During the Later Vedic period, the Varna system became more rigid and hereditary. The Shudras emerged as a distinct fourth Varna, whose primary role was to serve the upper three Varnas (Brahmin, Kshatriya, and Vaishya). The Vaishyas were primarily engaged in agriculture, cattle rearing, and trade, not priesthood. The status of women generally declined, and they lost much of their earlier freedom and participation in public life.",
+    "explanationHi": "उत्तर वैदिक काल के दौरान, वर्ण व्यवस्था अधिक कठोर और वंशानुगत हो गई। शूद्र एक विशिष्ट चौथे वर्ण के रूप में उभरे, जिनकी प्राथमिक भूमिका अन्य तीन वर्णों (ब्राह्मण, क्षत्रिय और वैश्य) की सेवा करना था। वैश्य मुख्य रूप से कृषि, पशुपालन और व्यापार में लगे थे, न कि पुरोहिती में। महिलाओं की स्थिति में आम तौर पर गिरावट आई, और उन्होंने सार्वजनिक जीवन में अपनी प्रारंभिक स्वतंत्रता और भागीदारी खो दी।"
+  },
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_2",
+    "questionEn": "What was the primary economic activity of the Later Vedic people, significantly aided by a new technological development?",
+    "questionHi": "उत्तर वैदिक लोगों की प्राथमिक आर्थिक गतिविधि क्या थी, जिसे एक नए तकनीकी विकास से काफी सहायता मिली?",
+    "optionsEn": [
+      "Pastoralism, with cattle rearing as the main source of wealth.",
+      "Trade and commerce, facilitated by extensive use of coinage.",
+      "Agriculture, especially with the use of iron implements.",
+      "Hunting and gathering, supplemented by shifting cultivation."
+    ],
+    "optionsHi": [
+      "पशुपालन, जिसमें पशुधन मुख्य धन का स्रोत था।",
+      "व्यापार और वाणिज्य, सिक्कों के व्यापक उपयोग से सुगम।",
+      "कृषि, विशेष रूप से लोहे के औजारों के उपयोग से।",
+      "शिकार और संग्रह, स्थानांतरी कृषि द्वारा पूरक।"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The Later Vedic period saw a significant shift from pastoralism to agriculture as the primary economic activity. The widespread use of iron implements, particularly iron axes and ploughshares, facilitated the clearing of dense forests in the Ganga-Yamuna Doab and enabled extensive cultivation, leading to settled agricultural communities.",
+    "explanationHi": "उत्तर वैदिक काल में प्राथमिक आर्थिक गतिविधि के रूप में पशुपालन से कृषि की ओर एक महत्वपूर्ण बदलाव देखा गया। लोहे के औजारों, विशेष रूप से लोहे की कुल्हाड़ियों और हल के फालों के व्यापक उपयोग ने गंगा-यमुना दोआब में घने जंगलों को साफ करने में सुविधा प्रदान की और व्यापक खेती को सक्षम बनाया, जिससे स्थायी कृषि समुदाय बने।"
+  },
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_3",
+    "questionEn": "During the Later Vedic period, the concept of kingship evolved significantly. Which of the following rituals was performed to strengthen the king's position and territorial claims?",
+    "questionHi": "उत्तर वैदिक काल के दौरान, राजत्व की अवधारणा में महत्वपूर्ण विकास हुआ। राजा की स्थिति और क्षेत्रीय दावों को मजबूत करने के लिए निम्नलिखित में से कौन सा अनुष्ठान किया जाता था?",
+    "optionsEn": [
+      "Soma Yajna",
+      "Ashvamedha Yajna",
+      "Agnishtoma",
+      "Vajapeya"
+    ],
+    "optionsHi": [
+      "सोम यज्ञ",
+      "अश्वमेध यज्ञ",
+      "अग्निष्टोम",
+      "वाजपेय"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "The Ashvamedha Yajna (horse sacrifice) was a grand ritual performed by powerful kings to assert their imperial sovereignty and territorial claims over neighboring regions. It was a clear demonstration of the king's growing power and ambition to establish a large kingdom. Vajapeya was another ritual to re-establish the king's power, often involving a chariot race, but Ashvamedha was specifically for territorial assertion.",
+    "explanationHi": "अश्वमेध यज्ञ (घोड़ा बलिदान) एक भव्य अनुष्ठान था जिसे शक्तिशाली राजा अपनी शाही संप्रभुता और पड़ोसी क्षेत्रों पर क्षेत्रीय दावों को asserting करने के लिए करते थे। यह राजा की बढ़ती शक्ति और एक बड़े राज्य की स्थापना की महत्वाकांक्षा का एक स्पष्ट प्रदर्शन था। वाजपेय राजा की शक्ति को फिर से स्थापित करने के लिए एक और अनुष्ठान था, जिसमें अक्सर रथ दौड़ शामिल होती थी, लेकिन अश्वमेध विशेष रूप से क्षेत्रीय दावे के लिए था।"
+  },
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_4",
+    "questionEn": "Which of the following deities, prominent in the Early Vedic period, lost their significance during the Later Vedic period, while new deities gained prominence?",
+    "questionHi": "प्रारंभिक वैदिक काल में प्रमुख रहे निम्नलिखित में से कौन से देवता उत्तर वैदिक काल में अपना महत्व खो बैठे, जबकि नए देवताओं ने प्रमुखता प्राप्त की?",
+    "optionsEn": [
+      "Prajapati, Vishnu, Rudra",
+      "Indra, Agni, Varuna",
+      "Brahma, Shiva, Vishnu",
+      "Pushan, Maruts, Aditi"
+    ],
+    "optionsHi": [
+      "प्रजापति, विष्णु, रुद्र",
+      "इंद्र, अग्नि, वरुण",
+      "ब्रह्मा, शिव, विष्णु",
+      "पूषन, मरुत, अदिति"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "In the Early Vedic period, Indra (god of thunder and war), Agni (fire god), and Varuna (cosmic order) were the most important deities. However, during the Later Vedic period, their importance declined. New deities like Prajapati (the creator), Vishnu (the preserver), and Rudra (the destroyer, later identified with Shiva) gained prominence, reflecting a shift in religious focus.",
+    "explanationHi": "प्रारंभिक वैदिक काल में, इंद्र (गरज और युद्ध के देवता), अग्नि (अग्नि देवता), और वरुण (ब्रह्मांडीय व्यवस्था) सबसे महत्वपूर्ण देवता थे। हालांकि, उत्तर वैदिक काल के दौरान, उनका महत्व कम हो गया। प्रजापति (निर्माता), विष्णु (संरक्षक), और रुद्र (विनाशक, बाद में शिव के रूप में पहचाने गए) जैसे नए देवताओं ने प्रमुखता प्राप्त की, जो धार्मिक ध्यान में बदलाव को दर्शाता है।"
+  },
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_5",
+    "questionEn": "The concept of 'Ashramas' (stages of life) was fully developed during the Later Vedic period. Which of the following correctly lists the four Ashramas in their traditional order?",
+    "questionHi": "'आश्रम' (जीवन के चरण) की अवधारणा उत्तर वैदिक काल में पूरी तरह से विकसित हुई। निम्नलिखित में से कौन सा पारंपरिक क्रम में चार आश्रमों को सही ढंग से सूचीबद्ध करता है?",
+    "optionsEn": [
+      "Brahmacharya, Grihastha, Vanaprastha, Sannyasa",
+      "Grihastha, Brahmacharya, Sannyasa, Vanaprastha",
+      "Vanaprastha, Sannyasa, Brahmacharya, Grihastha",
+      "Sannyasa, Grihastha, Brahmacharya, Vanaprastha"
+    ],
+    "optionsHi": [
+      "ब्रह्मचर्य, गृहस्थ, वानप्रस्थ, संन्यास",
+      "गृहस्थ, ब्रह्मचर्य, संन्यास, वानप्रस्थ",
+      "वानप्रस्थ, संन्यास, ब्रह्मचर्य, गृहस्थ",
+      "संन्यास, गृहस्थ, ब्रह्मचर्य, वानप्रस्थ"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "The concept of Ashramas, or four stages of life, was fully elaborated in the Later Vedic period, primarily for the upper three varnas. These stages are: Brahmacharya (student life), Grihastha (householder life), Vanaprastha (forest dweller/retirement), and Sannyasa (renunciation/ascetic life).",
+    "explanationHi": "आश्रमों, या जीवन के चार चरणों की अवधारणा, उत्तर वैदिक काल में पूरी तरह से विस्तृत की गई थी, मुख्य रूप से ऊपरी तीन वर्णों के लिए। ये चरण हैं: ब्रह्मचर्य (छात्र जीवन), गृहस्थ (गृहस्थ जीवन), वानप्रस्थ (वनवासी/सेवानिवृत्ति), और संन्यास (त्याग/संन्यासी जीवन)।"
+  },
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_6",
+    "questionEn": "During the Later Vedic period, specialized crafts and trade activities saw growth. Which of the following was NOT a prominent craft or economic activity of this period?",
+    "questionHi": "उत्तर वैदिक काल के दौरान, विशिष्ट शिल्पों और व्यापारिक गतिविधियों में वृद्धि देखी गई। निम्नलिखित में से कौन सा इस काल का प्रमुख शिल्प या आर्थिक गतिविधि नहीं था?",
+    "optionsEn": [
+      "Pottery making (especially Painted Grey Ware)",
+      "Metalworking (copper and iron)",
+      "Extensive maritime trade with distant lands",
+      "Weaving and carpentry"
+    ],
+    "optionsHi": [
+      "मिट्टी के बर्तन बनाना (विशेषकर चित्रित धूसर मृदभांड)",
+      "धातु कर्म (तांबा और लोहा)",
+      "दूर देशों के साथ व्यापक समुद्री व्यापार",
+      "बुनाई और बढ़ईगीरी"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "While internal trade and specialized crafts like pottery (Painted Grey Ware), metalworking (with iron gaining prominence), weaving, and carpentry were significant during the Later Vedic period, there is no substantial evidence of extensive maritime trade with distant lands. The economy was primarily agrarian and regional.",
+    "explanationHi": "जबकि उत्तर वैदिक काल के दौरान आंतरिक व्यापार और मिट्टी के बर्तन (चित्रित धूसर मृदभांड), धातु कर्म (लोहे का महत्व बढ़ रहा था), बुनाई और बढ़ईगीरी जैसे विशिष्ट शिल्प महत्वपूर्ण थे, दूर देशों के साथ व्यापक समुद्री व्यापार का कोई ठोस प्रमाण नहीं है। अर्थव्यवस्था मुख्य रूप से कृषि प्रधान और क्षेत्रीय थी।"
+  },
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_7",
+    "questionEn": "How did the status of popular assemblies like Sabha and Samiti change during the Later Vedic period compared to the Early Vedic period?",
+    "questionHi": "प्रारंभिक वैदिक काल की तुलना में उत्तर वैदिक काल के दौरान सभा और समिति जैसी लोकप्रिय सभाओं की स्थिति में क्या परिवर्तन आया?",
+    "optionsEn": [
+      "Their power and influence significantly increased, challenging the king's authority.",
+      "They continued to hold the same level of power and were central to governance.",
+      "Their importance declined, and the king's power became more centralized and absolute.",
+      "They were completely abolished, and new administrative bodies were formed."
+    ],
+    "optionsHi": [
+      "उनकी शक्ति और प्रभाव में काफी वृद्धि हुई, जिससे राजा के अधिकार को चुनौती मिली।",
+      "उन्होंने समान स्तर की शक्ति बनाए रखी और शासन के केंद्र में थे।",
+      "उनका महत्व कम हो गया, और राजा की शक्ति अधिक केंद्रीकृत और निरंकुश हो गई।",
+      "उन्हें पूरी तरह से समाप्त कर दिया गया, और नए प्रशासनिक निकाय बनाए गए।"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "In the Early Vedic period, Sabha and Samiti held considerable power and could even elect or depose kings. However, during the Later Vedic period, with the rise of powerful territorial states and the increasing centralization of royal authority, the influence of these popular assemblies significantly declined. The king's power became more absolute, and the assemblies became more subservient.",
+    "explanationHi": "प्रारंभिक वैदिक काल में, सभा और समिति के पास काफी शक्ति थी और वे राजाओं का चुनाव या उन्हें पदच्युत भी कर सकते थे। हालांकि, उत्तर वैदिक काल के दौरान, शक्तिशाली क्षेत्रीय राज्यों के उदय और शाही अधिकार के बढ़ते केंद्रीकरण के साथ, इन लोकप्रिय सभाओं का प्रभाव काफी कम हो गया। राजा की शक्ति अधिक निरंकुश हो गई, और सभाएँ अधिक अधीनस्थ हो गईं।"
+  },
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_8",
+    "questionEn": "The philosophical texts known as the Upanishads emerged towards the end of the Later Vedic period. What was their primary focus?",
+    "questionHi": "उत्तर वैदिक काल के अंत में उपनिषद नामक दार्शनिक ग्रंथ उभरे। उनका प्राथमिक ध्यान किस पर था?",
+    "optionsEn": [
+      "Elaborate descriptions of sacrificial rituals and their procedures.",
+      "Hymns praising various natural deities for prosperity.",
+      "Speculative and philosophical inquiries into the nature of soul (Atman) and ultimate reality (Brahman).",
+      "Rules and regulations for the Varna system and social conduct."
+    ],
+    "optionsHi": [
+      "बलिदान अनुष्ठानों और उनकी प्रक्रियाओं का विस्तृत विवरण।",
+      "समृद्धि के लिए विभिन्न प्राकृतिक देवताओं की स्तुति में भजन।",
+      "आत्मा (आत्मन) और परम वास्तविकता (ब्रह्म) की प्रकृति में सट्टा और दार्शनिक पूछताछ।",
+      "वर्ण व्यवस्था और सामाजिक आचरण के लिए नियम और कानून।"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The Upanishads represent a significant shift in Vedic thought from ritualistic practices to philosophical speculation. Their primary focus was on profound inquiries into the nature of the individual soul (Atman), the universal soul or ultimate reality (Brahman), the concept of Karma, and the path to liberation (Moksha). They are considered the foundational texts of Vedanta philosophy.",
+    "explanationHi": "उपनिषद वैदिक विचार में अनुष्ठानिक प्रथाओं से दार्शनिक अटकलों की ओर एक महत्वपूर्ण बदलाव का प्रतिनिधित्व करते हैं। उनका प्राथमिक ध्यान व्यक्तिगत आत्मा (आत्मन), सार्वभौमिक आत्मा या परम वास्तविकता (ब्रह्म), कर्म की अवधारणा और मुक्ति (मोक्ष) के मार्ग की गहन पूछताछ पर था। उन्हें वेदांत दर्शन के मूलभूत ग्रंथ माना जाता है।"
+  },
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_9",
+    "questionEn": "Which of the following statements best describes the position of women in Later Vedic society?",
+    "questionHi": "उत्तर वैदिक समाज में महिलाओं की स्थिति का सबसे अच्छा वर्णन निम्नलिखित में से कौन सा कथन करता है?",
+    "optionsEn": [
+      "Women enjoyed greater freedom and participated actively in public assemblies.",
+      "They were generally relegated to subordinate positions, losing their right to inherit property and participate in assemblies.",
+      "Child marriage was strictly prohibited, and widow remarriage was common.",
+      "They had equal access to education and could become priests."
+    ],
+    "optionsHi": [
+      "महिलाओं ने अधिक स्वतंत्रता का आनंद लिया और सार्वजनिक सभाओं में सक्रिय रूप से भाग लिया।",
+      "उन्हें आम तौर पर अधीनस्थ पदों पर रखा गया था, संपत्ति विरासत में लेने और सभाओं में भाग लेने का अधिकार खो दिया था।",
+      "बाल विवाह पर कड़ा प्रतिबंध था, और विधवा पुनर्विवाह आम था।",
+      "उन्हें शिक्षा तक समान पहुंच थी और वे पुजारी बन सकती थीं।"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "The status of women in Later Vedic society generally declined compared to the Early Vedic period. They were increasingly relegated to subordinate positions within the household, lost their right to inherit property, and were excluded from public assemblies like the Sabha and Samiti. Child marriage became more prevalent, and widow remarriage was discouraged.",
+    "explanationHi": "उत्तर वैदिक समाज में महिलाओं की स्थिति प्रारंभिक वैदिक काल की तुलना में आम तौर पर गिर गई। उन्हें घर के भीतर तेजी से अधीनस्थ पदों पर रखा गया, संपत्ति विरासत में लेने का अधिकार खो दिया, और सभा और समिति जैसी सार्वजनिक सभाओं से बाहर रखा गया। बाल विवाह अधिक प्रचलित हो गया, और विधवा पुनर्विवाह को हतोत्साहित किया गया।"
+  },
+  {
+    "id": "ancient_history_5_later-vedic-society-economy-polity-religion_10",
+    "questionEn": "Unlike the Early Vedic period where voluntary offerings (bali) were common, what significant change occurred in the system of revenue collection during the Later Vedic period?",
+    "questionHi": "प्रारंभिक वैदिक काल के विपरीत जहाँ स्वैच्छिक भेंट (बलि) आम थी, उत्तर वैदिक काल के दौरान राजस्व संग्रह की प्रणाली में क्या महत्वपूर्ण परिवर्तन आया?",
+    "optionsEn": [
+      "The king relied solely on gifts from conquered territories.",
+      "Regular, compulsory taxes (bali) were imposed on the people.",
+      "Trade tariffs became the primary source of royal income.",
+      "Land ownership was entirely communal, and no taxes were collected."
+    ],
+    "optionsHi": [
+      "राजा केवल विजित क्षेत्रों से प्राप्त उपहारों पर निर्भर था।",
+      "लोगों पर नियमित, अनिवार्य कर (बलि) लगाए गए।",
+      "व्यापार शुल्क शाही आय का प्राथमिक स्रोत बन गया।",
+      "भूमि का स्वामित्व पूरी तरह से सांप्रदायिक था, और कोई कर एकत्र नहीं किया गया था।"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "In the Early Vedic period, 'bali' was a voluntary offering made by the people to the king. However, with the emergence of larger territorial states and a more powerful, centralized monarchy in the Later Vedic period, 'bali' transformed into a regular and compulsory tax. This tax was primarily collected from the Vaishyas, who were the producers (farmers, artisans, traders).",
+    "explanationHi": "प्रारंभिक वैदिक काल में, 'बलि' लोगों द्वारा राजा को दी जाने वाली एक स्वैच्छिक भेंट थी। हालांकि, उत्तर वैदिक काल में बड़े क्षेत्रीय राज्यों और एक अधिक शक्तिशाली, केंद्रीकृत राजशाही के उदय के साथ, 'बलि' एक नियमित और अनिवार्य कर में बदल गया। यह कर मुख्य रूप से वैश्यों से एकत्र किया जाता था, जो उत्पादक (किसान, कारीगर, व्यापारी) थे।"
+  }
+]

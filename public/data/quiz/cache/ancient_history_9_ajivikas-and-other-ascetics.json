@@ -1,0 +1,202 @@
+[
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_1",
+    "questionEn": "Who among the following was the founder of the Ajivika sect?",
+    "questionHi": "निम्नलिखित में से कौन आजीविक संप्रदाय का संस्थापक था?",
+    "optionsEn": [
+      "Mahavira",
+      "Makkhali Gosala",
+      "Purana Kassapa",
+      "Ajita Kesakambali"
+    ],
+    "optionsHi": [
+      "महावीर",
+      "मक्खलि गोसाल",
+      "पूरण कस्सप",
+      "अजित केसकंबलि"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "Makkhali Gosala was the founder and leader of the Ajivika sect, a prominent ascetic movement in ancient India contemporary with early Buddhism and Jainism. Mahavira was the 24th Tirthankara of Jainism. Purana Kassapa and Ajita Kesakambali were other prominent ascetic teachers of that era, each with their own distinct philosophical views.",
+    "explanationHi": "मक्खलि गोसाल आजीविक संप्रदाय के संस्थापक और नेता थे, जो प्रारंभिक बौद्ध धर्म और जैन धर्म के समकालीन प्राचीन भारत में एक प्रमुख तपस्वी आंदोलन था। महावीर जैन धर्म के 24वें तीर्थंकर थे। पूरण कस्सप और अजित केसकंबलि उस युग के अन्य प्रमुख तपस्वी शिक्षक थे, जिनमें से प्रत्येक के अपने विशिष्ट दार्शनिक विचार थे।"
+  },
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_2",
+    "questionEn": "The central doctrine of the Ajivika philosophy is known as:",
+    "questionHi": "आजीविक दर्शन का केंद्रीय सिद्धांत किस नाम से जाना जाता है?",
+    "optionsEn": [
+      "Karma (Action)",
+      "Ahimsa (Non-violence)",
+      "Niyati (Fate/Destiny)",
+      "Anatta (Non-self)"
+    ],
+    "optionsHi": [
+      "कर्म",
+      "अहिंसा",
+      "नियति (भाग्य)",
+      "अनत्ता (अनात्मन)"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The Ajivika philosophy is most famously associated with the doctrine of Niyati, which posits that everything is strictly predetermined and that human effort has no bearing on one's destiny. This fatalistic view distinguished them from other contemporary schools like Buddhism and Jainism, which emphasized karma and individual effort.",
+    "explanationHi": "आजीविक दर्शन सबसे प्रसिद्ध रूप से नियति के सिद्धांत से जुड़ा है, जो यह मानता है कि सब कुछ सख्ती से पूर्वनिर्धारित है और मानवीय प्रयासों का किसी के भाग्य पर कोई असर नहीं पड़ता है। यह भाग्यवादी दृष्टिकोण उन्हें बौद्ध धर्म और जैन धर्म जैसे अन्य समकालीन विद्यालयों से अलग करता था, जो कर्म और व्यक्तिगत प्रयास पर जोर देते थे।"
+  },
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_3",
+    "questionEn": "Which Mauryan emperor is credited with donating cave dwellings in the Barabar Hills to the Ajivika ascetics?",
+    "questionHi": "किस मौर्य सम्राट को बराबर पहाड़ियों में आजीविक तपस्वियों को गुफा निवास दान करने का श्रेय दिया जाता है?",
+    "optionsEn": [
+      "Chandragupta Maurya",
+      "Bindusara",
+      "Ashoka",
+      "Dasharatha"
+    ],
+    "optionsHi": [
+      "चंद्रगुप्त मौर्य",
+      "बिंदुसार",
+      "अशोक",
+      "दशरथ"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Emperor Ashoka, known for his patronage of various religious sects, donated several rock-cut caves in the Barabar Hills (Bihar) to the Ajivika ascetics. His grandson, Dasharatha, also continued this tradition by donating caves in the Nagarjuni Hills to the Ajivikas. The question specifically asks about Barabar Hills, which is primarily associated with Ashoka's donations.",
+    "explanationHi": "सम्राट अशोक, जो विभिन्न धार्मिक संप्रदायों के संरक्षण के लिए जाने जाते थे, ने बराबर पहाड़ियों (बिहार) में कई चट्टानों को काटकर बनाई गई गुफाओं को आजीविक तपस्वियों को दान किया था। उनके पोते, दशरथ ने भी नागार्जुनी पहाड़ियों में आजीविकों को गुफाएँ दान करके इस परंपरा को जारी रखा। प्रश्न विशेष रूप से बराबर पहाड़ियों के बारे में पूछता है, जो मुख्य रूप से अशोक के दान से जुड़ा है।"
+  },
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_4",
+    "questionEn": "Which of the following ancient Indian philosophical schools is primarily materialistic and rejects the authority of the Vedas?",
+    "questionHi": "निम्नलिखित में से कौन सा प्राचीन भारतीय दार्शनिक मत मुख्य रूप से भौतिकवादी है और वेदों के अधिकार को अस्वीकार करता है?",
+    "optionsEn": [
+      "Nyaya",
+      "Vaisheshika",
+      "Charvaka (Lokayata)",
+      "Mimamsa"
+    ],
+    "optionsHi": [
+      "न्याय",
+      "वैशेषिक",
+      "चार्वाक (लोकायत)",
+      "मीमांसा"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The Charvaka school, also known as Lokayata, is a heterodox (nastika) school of ancient Indian philosophy. It is characterized by its radical materialism, empiricism, and skepticism towards religious doctrines, the afterlife, and the authority of the Vedas. Nyaya, Vaisheshika, and Mimamsa are orthodox (astika) schools that accept Vedic authority.",
+    "explanationHi": "चार्वाक मत, जिसे लोकायत के नाम से भी जाना जाता है, प्राचीन भारतीय दर्शन का एक विधर्मी (नास्तिक) मत है। यह अपने कट्टर भौतिकवाद, अनुभववाद और धार्मिक सिद्धांतों, परलोक तथा वेदों के अधिकार के प्रति संशयवाद की विशेषता रखता है। न्याय, वैशेषिक और मीमांसा आस्तिक मत हैं जो वैदिक अधिकार को स्वीकार करते हैं।"
+  },
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_5",
+    "questionEn": "Purana Kassapa, a contemporary of Buddha, was associated with which of the following doctrines?",
+    "questionHi": "बुद्ध के समकालीन पूरण कस्सप निम्नलिखित में से किस सिद्धांत से जुड़े थे?",
+    "optionsEn": [
+      "Niyati (Fatalism)",
+      "Akriyavada (Non-action)",
+      "Ucchedavada (Annihilationism)",
+      "Ahetuvada (Non-causation)"
+    ],
+    "optionsHi": [
+      "नियति (भाग्यवादिता)",
+      "अक्रियावाद (कर्महीनता)",
+      "उच्छेदवाद (विनाशवाद)",
+      "अहेतुवाद (अकारणता)"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "Purana Kassapa was a proponent of Akriyavada, the doctrine of non-action. He believed that there is no merit or demerit in actions, whether good or bad. This meant that actions had no moral consequences, and thus, there was no need for moral effort or ascetic practices to achieve salvation.",
+    "explanationHi": "पूरण कस्सप अक्रियावाद के समर्थक थे, जो कर्महीनता का सिद्धांत है। उनका मानना था कि अच्छे या बुरे, किसी भी कार्य में कोई पुण्य या पाप नहीं होता है। इसका मतलब था कि कार्यों के कोई नैतिक परिणाम नहीं होते हैं, और इस प्रकार, मोक्ष प्राप्त करने के लिए नैतिक प्रयास या तपस्या की आवश्यकता नहीं थी।"
+  },
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_6",
+    "questionEn": "Ajita Kesakambali is known for propagating which philosophical view?",
+    "questionHi": "अजित केसकंबलि किस दार्शनिक मत के प्रचार के लिए जाने जाते हैं?",
+    "optionsEn": [
+      "Eternalism",
+      "Fatalism",
+      "Materialism (Ucchedavada)",
+      "Scepticism"
+    ],
+    "optionsHi": [
+      "शाश्वतवाद",
+      "भाग्यवादिता",
+      "भौतिकवाद (उच्छेदवाद)",
+      "संशयवाद"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Ajita Kesakambali was a radical materialist and an exponent of Ucchedavada (annihilationism). He denied the existence of a soul, an afterlife, and the karmic consequences of actions. He believed that the body and soul are annihilated at death, and there is nothing beyond the material existence.",
+    "explanationHi": "अजित केसकंबलि एक कट्टर भौतिकवादी और उच्छेदवाद (विनाशवाद) के प्रतिपादक थे। उन्होंने आत्मा, परलोक और कर्मों के कर्मफल के अस्तित्व को अस्वीकार किया। उनका मानना था कि मृत्यु पर शरीर और आत्मा का विनाश हो जाता है, और भौतिक अस्तित्व से परे कुछ भी नहीं है।"
+  },
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_7",
+    "questionEn": "Sanjaya Belatthaputta was known for his doctrine of:",
+    "questionHi": "संजय बेलट्ठपुत्त अपने किस सिद्धांत के लिए जाने जाते थे?",
+    "optionsEn": [
+      "Niyati (Fatalism)",
+      "Akriyavada (Non-action)",
+      "Agnosticism/Scepticism (Amaravikkhepavada)",
+      "Shunyavada (Nihilism)"
+    ],
+    "optionsHi": [
+      "नियति (भाग्यवादिता)",
+      "अक्रियावाद (कर्महीनता)",
+      "अज्ञेयवाद/संशयवाद (अमरविक्खेपवाद)",
+      "शून्यवाद (निहिलिज्म)"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Sanjaya Belatthaputta was an agnostic or a skeptic, whose doctrine was known as Amaravikkhepavada (eel-wriggling). He refused to give a definitive answer on metaphysical questions, believing that such answers could lead to attachment or aversion, which were obstacles to liberation. He maintained that it was impossible to know for certain.",
+    "explanationHi": "संजय बेलट्ठपुत्त एक अज्ञेयवादी या संशयवादी थे, जिनका सिद्धांत अमरविक्खेपवाद (मछली की तरह फिसलने वाला) के नाम से जाना जाता था। उन्होंने आध्यात्मिक प्रश्नों पर निश्चित उत्तर देने से इनकार कर दिया, यह मानते हुए कि ऐसे उत्तर लगाव या घृणा को जन्म दे सकते हैं, जो मुक्ति में बाधा थे। उन्होंने यह बनाए रखा कि निश्चित रूप से जानना असंभव था।"
+  },
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_8",
+    "questionEn": "Which of the following factors is NOT generally cited as a reason for the decline of the Ajivika sect?",
+    "questionHi": "निम्नलिखित में से कौन सा कारक आमतौर पर आजीविक संप्रदाय के पतन का कारण नहीं बताया जाता है?",
+    "optionsEn": [
+      "Lack of strong scriptural tradition",
+      "Opposition from mainstream religions",
+      "Lack of royal patronage after Mauryas",
+      "Assimilation into Jainism"
+    ],
+    "optionsHi": [
+      "मजबूत शास्त्रीय परंपरा का अभाव",
+      "मुख्यधारा के धर्मों से विरोध",
+      "मौर्यों के बाद शाही संरक्षण का अभाव",
+      "जैन धर्म में आत्मसात होना"
+    ],
+    "correctIndex": 3,
+    "explanationEn": "The Ajivika sect, while having some similarities in ascetic practices with Jainism, maintained its distinct identity and doctrine (especially Niyati). It did not assimilate into Jainism. Its decline is often attributed to factors like the lack of a strong scriptural tradition, intense opposition from growing mainstream religions like Buddhism and Jainism, and the eventual withdrawal of significant royal patronage after the Mauryan period.",
+    "explanationHi": "आजीविक संप्रदाय, जैन धर्म के साथ तपस्वी प्रथाओं में कुछ समानताएं होने के बावजूद, अपनी विशिष्ट पहचान और सिद्धांत (विशेषकर नियति) को बनाए रखा। यह जैन धर्म में आत्मसात नहीं हुआ। इसके पतन का श्रेय अक्सर मजबूत शास्त्रीय परंपरा के अभाव, बौद्ध धर्म और जैन धर्म जैसे बढ़ते मुख्यधारा के धर्मों से तीव्र विरोध, और मौर्य काल के बाद महत्वपूर्ण शाही संरक्षण की अंततः वापसी जैसे कारकों को दिया जाता है।"
+  },
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_9",
+    "questionEn": "Which of the following statements is true regarding the Ajivika sect?",
+    "questionHi": "आजीविक संप्रदाय के संबंध में निम्नलिखित में से कौन सा कथन सत्य है?",
+    "optionsEn": [
+      "They believed in strict asceticism and self-mortification.",
+      "They rejected the concept of Niyati (fate).",
+      "They were strong proponents of the Vedic rituals.",
+      "They believed in a creator god."
+    ],
+    "optionsHi": [
+      "वे कठोर तपस्या और आत्म-यातना में विश्वास करते थे।",
+      "उन्होंने नियति (भाग्य) की अवधारणा को अस्वीकार कर दिया।",
+      "वे वैदिक अनुष्ठानों के प्रबल समर्थक थे।",
+      "वे एक सृष्टिकर्ता ईश्वर में विश्वास करते थे।"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "The Ajivikas were known for their extreme asceticism and self-mortification, believing that such practices were necessary to exhaust the karma that was predetermined by Niyati. They were fatalists (believed in Niyati), rejected Vedic authority and rituals, and did not believe in a creator god.",
+    "explanationHi": "आजीविक अपनी अत्यधिक तपस्या और आत्म-यातना के लिए जाने जाते थे, उनका मानना था कि नियति द्वारा पूर्वनिर्धारित कर्म को समाप्त करने के लिए ऐसी प्रथाएं आवश्यक थीं। वे भाग्यवादी थे (नियति में विश्वास करते थे), वैदिक अधिकार और अनुष्ठानों को अस्वीकार करते थे, और एक सृष्टिकर्ता ईश्वर में विश्वास नहीं करते थे।"
+  },
+  {
+    "id": "ancient_history_9_ajivikas-and-other-ascetics_10",
+    "questionEn": "What was a common characteristic shared by many of the early ascetic movements (like Ajivikas, Charvakas, early Jains) in ancient India, distinct from orthodox Vedic traditions?",
+    "questionHi": "प्राचीन भारत में कई प्रारंभिक तपस्वी आंदोलनों (जैसे आजीविक, चार्वाक, प्रारंभिक जैन) द्वारा साझा की गई एक सामान्य विशेषता क्या थी, जो रूढ़िवादी वैदिक परंपराओं से भिन्न थी?",
+    "optionsEn": [
+      "Belief in the infallibility of the Vedas",
+      "Emphasis on elaborate sacrificial rituals",
+      "Rejection of the caste system and ritualistic purity",
+      "Strong belief in a personal God"
+    ],
+    "optionsHi": [
+      "वेदों की अचूकता में विश्वास",
+      "विस्तृत बलि अनुष्ठानों पर जोर",
+      "जाति व्यवस्था और अनुष्ठानिक शुद्धता का खंडन",
+      "एक व्यक्तिगत ईश्वर में दृढ़ विश्वास"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Many heterodox ascetic movements of ancient India, including Ajivikas and early Jains, challenged the established Brahmanical social order, which was based on the caste system and ritualistic purity. They often advocated for a more egalitarian approach and rejected the inherent superiority of Brahmins or the efficacy of Vedic rituals. Charvakas, being materialists, also rejected these.",
+    "explanationHi": "प्राचीन भारत के कई विधर्मी तपस्वी आंदोलनों, जिनमें आजीविक और प्रारंभिक जैन शामिल थे, ने स्थापित ब्राह्मणवादी सामाजिक व्यवस्था को चुनौती दी, जो जाति व्यवस्था और अनुष्ठानिक शुद्धता पर आधारित थी। उन्होंने अक्सर अधिक समतावादी दृष्टिकोण की वकालत की और ब्राह्मणों की अंतर्निहित श्रेष्ठता या वैदिक अनुष्ठानों की प्रभावकारिता को अस्वीकार कर दिया। चार्वाक, भौतिकवादी होने के कारण, इन्हें भी अस्वीकार करते थे।"
+  }
+]

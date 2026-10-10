@@ -1,0 +1,202 @@
+[
+  {
+    "id": "ancient_history_1_prehistoric-india_1",
+    "questionEn": "Which of the following tools is NOT primarily associated with the Lower Paleolithic period in India?",
+    "questionHi": "निम्नलिखित में से कौन सा उपकरण भारत में निम्न पुरापाषाण काल से मुख्य रूप से संबंधित नहीं है?",
+    "optionsEn": [
+      "Hand axes",
+      "Cleavers",
+      "Choppers",
+      "Microliths"
+    ],
+    "optionsHi": [
+      "हस्त कुल्हाड़ी",
+      "विदारणी",
+      "चापर",
+      "माइक्रोलिथ"
+    ],
+    "correctIndex": 3,
+    "explanationEn": "The Lower Paleolithic period is characterized by crude tools like hand axes, cleavers, and choppers. Microliths, which are small, finely worked stone tools, are the characteristic tools of the Mesolithic period, marking a significant technological advancement.",
+    "explanationHi": "निम्न पुरापाषाण काल की विशेषता हस्त कुल्हाड़ी, विदारणी और चापर जैसे मोटे औजार थे। माइक्रोलिथ, जो छोटे, बारीक गढ़े हुए पत्थर के औजार हैं, मध्यपाषाण काल के विशिष्ट उपकरण हैं, जो एक महत्वपूर्ण तकनीकी प्रगति को दर्शाते हैं।"
+  },
+  {
+    "id": "ancient_history_1_prehistoric-india_2",
+    "questionEn": "Consider the following statements regarding the Mesolithic period in India:\n1. It witnessed the first evidence of animal domestication.\n2. Microliths were the characteristic tools of this period.\n3. Rock paintings became widespread during this time.\nWhich of the statements given above are correct?",
+    "questionHi": "भारत में मध्यपाषाण काल के संबंध में निम्नलिखित कथनों पर विचार करें:\n1. इसमें पशुपालन का पहला प्रमाण देखा गया।\n2. माइक्रोलिथ इस काल के विशिष्ट उपकरण थे।\n3. इस दौरान शैल चित्र व्यापक हो गए।\nऊपर दिए गए कथनों में से कौन से सही हैं?",
+    "optionsEn": [
+      "1 and 2 only",
+      "2 and 3 only",
+      "1 and 3 only",
+      "1, 2 and 3"
+    ],
+    "optionsHi": [
+      "केवल 1 और 2",
+      "केवल 2 और 3",
+      "केवल 1 और 3",
+      "1, 2 और 3"
+    ],
+    "correctIndex": 3,
+    "explanationEn": "All three statements are correct. The Mesolithic period (c. 10,000 - 6,000 BCE) is a transitional phase between the Paleolithic and Neolithic ages. It saw the development of microlithic tools, early evidence of animal domestication (e.g., at Bagor and Adamgarh), and a proliferation of rock art, particularly in shelters like Bhimbetka.",
+    "explanationHi": "तीनों कथन सही हैं। मध्यपाषाण काल (लगभग 10,000 - 6,000 ईसा पूर्व) पुरापाषाण और नवपाषाण युग के बीच एक संक्रमणकालीन चरण है। इसमें माइक्रोलिथिक औजारों का विकास, पशुपालन के शुरुआती प्रमाण (जैसे बागोर और आदमगढ़ में), और शैल कला का प्रसार देखा गया, विशेष रूप से भीमबेटका जैसे आश्रयों में।"
+  },
+  {
+    "id": "ancient_history_1_prehistoric-india_3",
+    "questionEn": "The term \"Neolithic Revolution\" primarily refers to which of the following major transformations?",
+    "questionHi": "शब्द \"नवपाषाण क्रांति\" मुख्य रूप से निम्नलिखित में से किस प्रमुख परिवर्तन को संदर्भित करता है?",
+    "optionsEn": [
+      "Development of metal tools",
+      "Emergence of urban centers",
+      "Transition from food gathering to food production",
+      "Invention of writing systems"
+    ],
+    "optionsHi": [
+      "धातु के औजारों का विकास",
+      "शहरी केंद्रों का उदय",
+      "भोजन संग्रह से भोजन उत्पादन में संक्रमण",
+      "लेखन प्रणालियों का आविष्कार"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The 'Neolithic Revolution', coined by V. Gordon Childe, refers to the profound shift in human history from a nomadic hunting-gathering lifestyle to a settled agricultural one, involving the domestication of plants and animals. This led to the establishment of permanent settlements and significant population growth.",
+    "explanationHi": "वी. गॉर्डन चाइल्ड द्वारा गढ़ा गया 'नवपाषाण क्रांति' शब्द मानव इतिहास में खानाबदोश शिकार-संग्रह जीवन शैली से एक स्थायी कृषि जीवन शैली में गहरे बदलाव को संदर्भित करता है, जिसमें पौधों और जानवरों का पालतूकरण शामिल है। इससे स्थायी बस्तियों की स्थापना और महत्वपूर्ण जनसंख्या वृद्धि हुई।"
+  },
+  {
+    "id": "ancient_history_1_prehistoric-india_4",
+    "questionEn": "Mehrgarh, an important Neolithic site, is located in which modern-day region?",
+    "questionHi": "मेहरगढ़, एक महत्वपूर्ण नवपाषाण स्थल, आधुनिक समय के किस क्षेत्र में स्थित है?",
+    "optionsEn": [
+      "Balochistan",
+      "Uttar Pradesh",
+      "Rajasthan",
+      "Madhya Pradesh"
+    ],
+    "optionsHi": [
+      "बलूचिस्तान",
+      "उत्तर प्रदेश",
+      "राजस्थान",
+      "मध्य प्रदेश"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "Mehrgarh is one of the most important Neolithic sites in the Indian subcontinent, located on the Kachi Plain of Balochistan, Pakistan. It provides the earliest evidence of farming and pastoralism in South Asia, dating back to around 7000 BCE.",
+    "explanationHi": "मेहरगढ़ भारतीय उपमहाद्वीप के सबसे महत्वपूर्ण नवपाषाण स्थलों में से एक है, जो पाकिस्तान के बलूचिस्तान के काची मैदान में स्थित है। यह दक्षिण एशिया में खेती और पशुपालन का सबसे पहला प्रमाण प्रदान करता है, जो लगभग 7000 ईसा पूर्व का है।"
+  },
+  {
+    "id": "ancient_history_1_prehistoric-india_5",
+    "questionEn": "Arrange the following prehistoric periods in India in chronological order from earliest to latest:\n1. Mesolithic\n2. Neolithic\n3. Lower Paleolithic\n4. Chalcolithic",
+    "questionHi": "भारत में निम्नलिखित प्रागैतिहासिक कालों को सबसे प्राचीन से नवीनतम कालानुक्रमिक क्रम में व्यवस्थित करें:\n1. मध्यपाषाण काल\n2. नवपाषाण काल\n3. निम्न पुरापाषाण काल\n4. ताम्रपाषाण काल",
+    "optionsEn": [
+      "3-1-2-4",
+      "1-3-2-4",
+      "3-2-1-4",
+      "2-1-3-4"
+    ],
+    "optionsHi": [
+      "3-1-2-4",
+      "1-3-2-4",
+      "3-2-1-4",
+      "2-1-3-4"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "The correct chronological order of the prehistoric periods is: Lower Paleolithic (earliest), followed by Mesolithic, then Neolithic, and finally Chalcolithic (latest among these). The Paleolithic period is the oldest and longest, followed by the transitional Mesolithic, the agricultural Neolithic, and then the Chalcolithic which saw the first use of copper.",
+    "explanationHi": "प्रागैतिहासिक कालों का सही कालानुक्रमिक क्रम है: निम्न पुरापाषाण काल (सबसे प्राचीन), उसके बाद मध्यपाषाण काल, फिर नवपाषाण काल, और अंत में ताम्रपाषाण काल (इनमें सबसे नवीनतम)। पुरापाषाण काल सबसे पुराना और सबसे लंबा है, उसके बाद संक्रमणकालीन मध्यपाषाण काल, कृषि प्रधान नवपाषाण काल, और फिर ताम्रपाषाण काल जिसमें तांबे का पहला उपयोग देखा गया।"
+  },
+  {
+    "id": "ancient_history_1_prehistoric-india_6",
+    "questionEn": "The Jorwe culture, a prominent Chalcolithic culture, is primarily associated with which Indian state?",
+    "questionHi": "जोरवे संस्कृति, एक प्रमुख ताम्रपाषाण संस्कृति, मुख्य रूप से किस भारतीय राज्य से संबंधित है?",
+    "optionsEn": [
+      "Maharashtra",
+      "Rajasthan",
+      "Madhya Pradesh",
+      "Gujarat"
+    ],
+    "optionsHi": [
+      "महाराष्ट्र",
+      "राजस्थान",
+      "मध्य प्रदेश",
+      "गुजरात"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "The Jorwe culture is the most important Chalcolithic culture of Deccan India, primarily found in Maharashtra. Key sites include Daimabad, Inamgaon, and Nevasa. It is known for its distinctive pottery, agricultural practices, and village settlements.",
+    "explanationHi": "जोरवे संस्कृति दक्कन भारत की सबसे महत्वपूर्ण ताम्रपाषाण संस्कृति है, जो मुख्य रूप से महाराष्ट्र में पाई जाती है। प्रमुख स्थलों में दैमाबाद, इनामगांव और नेवासा शामिल हैं। यह अपनी विशिष्ट मृदभांड, कृषि पद्धतियों और ग्रामीण बस्तियों के लिए जानी जाती है।"
+  },
+  {
+    "id": "ancient_history_1_prehistoric-india_7",
+    "questionEn": "The famous rock shelters of Bhimbetka, known for their prehistoric rock paintings, are located in which state?",
+    "questionHi": "भीमबेटका के प्रसिद्ध शैल आश्रय, जो अपने प्रागैतिहासिक शैल चित्रों के लिए जाने जाते हैं, किस राज्य में स्थित हैं?",
+    "optionsEn": [
+      "Madhya Pradesh",
+      "Karnataka",
+      "Andhra Pradesh",
+      "Odisha"
+    ],
+    "optionsHi": [
+      "मध्य प्रदेश",
+      "कर्नाटक",
+      "आंध्र प्रदेश",
+      "ओडिशा"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "The Bhimbetka rock shelters are an archaeological site in central India that spans the Paleolithic and Mesolithic periods, as well as the historic period. They are located in the Raisen District of Madhya Pradesh and are a UNESCO World Heritage Site, famous for their numerous rock paintings depicting prehistoric life.",
+    "explanationHi": "भीमबेटका के शैल आश्रय मध्य भारत में एक पुरातात्विक स्थल हैं जो पुरापाषाण और मध्यपाषाण काल के साथ-साथ ऐतिहासिक काल तक फैले हुए हैं। वे मध्य प्रदेश के रायसेन जिले में स्थित हैं और एक यूनेस्को विश्व धरोहर स्थल हैं, जो प्रागैतिहासिक जीवन को दर्शाने वाले अपने असंख्य शैल चित्रों के लिए प्रसिद्ध हैं।"
+  },
+  {
+    "id": "ancient_history_1_prehistoric-india_8",
+    "questionEn": "The earliest evidence of cultivation of wheat and barley in the Indian subcontinent has been found at which site?",
+    "questionHi": "भारतीय उपमहाद्वीप में गेहूं और जौ की खेती का सबसे पहला प्रमाण किस स्थल पर पाया गया है?",
+    "optionsEn": [
+      "Burzahom",
+      "Chirand",
+      "Mehrgarh",
+      "Koldihwa"
+    ],
+    "optionsHi": [
+      "बुर्जहोम",
+      "चिरंद",
+      "मेहरगढ़",
+      "कोल्डीहवा"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Mehrgarh, located in Balochistan (Pakistan), provides the earliest and most conclusive evidence of agricultural practices in the Indian subcontinent, with cultivation of wheat and barley dating back to around 7000 BCE. While Koldihwa has evidence of early rice cultivation, Mehrgarh holds the record for wheat and barley.",
+    "explanationHi": "बलूचिस्तान (पाकिस्तान) में स्थित मेहरगढ़, भारतीय उपमहाद्वीप में कृषि पद्धतियों का सबसे पहला और सबसे निर्णायक प्रमाण प्रदान करता है, जिसमें गेहूं और जौ की खेती लगभग 7000 ईसा पूर्व की है। जबकि कोल्डीहवा में शुरुआती चावल की खेती के प्रमाण हैं, मेहरगढ़ गेहूं और जौ के लिए रिकॉर्ड रखता है।"
+  },
+  {
+    "id": "ancient_history_1_prehistoric-india_9",
+    "questionEn": "Which of the following Neolithic sites is known for pit-dwellings and the practice of burying pet animals with their masters?",
+    "questionHi": "निम्नलिखित में से कौन सा नवपाषाण स्थल गर्त-आवासों और अपने मालिकों के साथ पालतू जानवरों को दफनाने की प्रथा के लिए जाना जाता है?",
+    "optionsEn": [
+      "Utnur",
+      "Maski",
+      "Burzahom",
+      "Piklihal"
+    ],
+    "optionsHi": [
+      "उतनूर",
+      "मास्की",
+      "बुर्जहोम",
+      "पिकलीहाल"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Burzahom, a Neolithic site in Kashmir, is unique for its pit-dwellings (underground houses) designed to protect inhabitants from the cold. It is also notable for the practice of burying pet dogs with their human masters, indicating a close relationship between humans and animals.",
+    "explanationHi": "कश्मीर में एक नवपाषाण स्थल बुर्जहोम, अपने गर्त-आवासों (भूमिगत घरों) के लिए अद्वितीय है जो निवासियों को ठंड से बचाने के लिए डिज़ाइन किए गए थे। यह अपने मानव मालिकों के साथ पालतू कुत्तों को दफनाने की प्रथा के लिए भी उल्लेखनीय है, जो मनुष्यों और जानवरों के बीच घनिष्ठ संबंध को दर्शाता है।"
+  },
+  {
+    "id": "ancient_history_1_prehistoric-india_10",
+    "questionEn": "The term 'Chalcolithic' refers to a period when humans used tools made of:",
+    "questionHi": "शब्द 'ताम्रपाषाण' उस काल को संदर्भित करता है जब मनुष्य द्वारा बनाए गए औजारों का उपयोग किया जाता था:",
+    "optionsEn": [
+      "Only stone",
+      "Only copper",
+      "Both stone and copper",
+      "Iron"
+    ],
+    "optionsHi": [
+      "केवल पत्थर",
+      "केवल तांबा",
+      "पत्थर और तांबा दोनों",
+      "लोहा"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "The term 'Chalcolithic' is derived from Greek words 'khalkos' (copper) and 'lithos' (stone). It refers to the Copper Age, a period characterized by the use of both copper and stone tools. This period marks the first use of metal by humans, alongside continued reliance on stone tools.",
+    "explanationHi": "शब्द 'ताम्रपाषाण' ग्रीक शब्दों 'खालकोस' (तांबा) और 'लिथोस' (पत्थर) से लिया गया है। यह ताम्र युग को संदर्भित करता है, एक ऐसा काल जिसकी विशेषता तांबे और पत्थर दोनों के औजारों का उपयोग था। यह काल मानव द्वारा धातु के पहले उपयोग को चिह्नित करता है, साथ ही पत्थर के औजारों पर निरंतर निर्भरता भी।"
+  }
+]

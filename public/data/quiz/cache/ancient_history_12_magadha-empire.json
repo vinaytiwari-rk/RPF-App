@@ -1,0 +1,202 @@
+[
+  {
+    "id": "ancient_history_12_magadha-empire_1",
+    "questionEn": "Which dynasty was the first to establish a powerful empire in Magadha?",
+    "questionHi": "मगध में एक शक्तिशाली साम्राज्य स्थापित करने वाला पहला राजवंश कौन सा था?",
+    "optionsEn": [
+      "Haryanka Dynasty",
+      "Shishunaga Dynasty",
+      "Nanda Dynasty",
+      "Maurya Dynasty"
+    ],
+    "optionsHi": [
+      "हर्यंक राजवंश",
+      "शिशुनाग राजवंश",
+      "नंद राजवंश",
+      "मौर्य राजवंश"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "The Haryanka Dynasty is considered the first major dynasty to establish a powerful empire in Magadha. Bimbisara, the founder of this dynasty, significantly expanded the Magadhan territory and laid the foundation for its future dominance.",
+    "explanationHi": "हर्यंक राजवंश को मगध में एक शक्तिशाली साम्राज्य स्थापित करने वाला पहला प्रमुख राजवंश माना जाता है। इस राजवंश के संस्थापक बिम्बिसार ने मगध के क्षेत्र का महत्वपूर्ण विस्तार किया और उसके भविष्य के प्रभुत्व की नींव रखी।"
+  },
+  {
+    "id": "ancient_history_12_magadha-empire_2",
+    "questionEn": "Who shifted the capital of Magadha from Rajagriha to Pataliputra?",
+    "questionHi": "मगध की राजधानी राजगृह से पाटलिपुत्र किसने स्थानांतरित की?",
+    "optionsEn": [
+      "Bimbisara",
+      "Ajatashatru",
+      "Udayin",
+      "Shishunaga"
+    ],
+    "optionsHi": [
+      "बिम्बिसार",
+      "अजातशत्रु",
+      "उदायिन",
+      "शिशुनाग"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Udayin, the son and successor of Ajatashatru, is credited with shifting the capital of Magadha from Rajagriha to Pataliputra. He built the city of Pataliputra at the confluence of the Ganga and Son rivers, recognizing its strategic importance.",
+    "explanationHi": "अजातशत्रु के पुत्र और उत्तराधिकारी उदाइन को मगध की राजधानी राजगृह से पाटलिपुत्र स्थानांतरित करने का श्रेय दिया जाता है। उन्होंने गंगा और सोन नदियों के संगम पर पाटलिपुत्र शहर का निर्माण किया, इसकी रणनीतिक महत्व को पहचानते हुए।"
+  },
+  {
+    "id": "ancient_history_12_magadha-empire_3",
+    "questionEn": "Which of the following factors primarily contributed to the rise of Magadha as a powerful Mahajanapada?",
+    "questionHi": "निम्नलिखित में से किस कारक ने मगध के एक शक्तिशाली महाजनपद के रूप में उदय में मुख्य रूप से योगदान दिया?",
+    "optionsEn": [
+      "Abundant iron ore resources",
+      "Fertile Gangetic plains for agriculture",
+      "Strategic location of its capitals",
+      "All of the above"
+    ],
+    "optionsHi": [
+      "प्रचुर लौह अयस्क संसाधन",
+      "कृषि के लिए उपजाऊ गंगा के मैदान",
+      "इसकी राजधानियों का रणनीतिक स्थान",
+      "उपरोक्त सभी"
+    ],
+    "correctIndex": 3,
+    "explanationEn": "Magadha's rise was due to a combination of factors: abundant iron ore in the region (modern-day Jharkhand) for weapons and tools, fertile Gangetic plains providing agricultural surplus, and the strategic location of its capitals (Rajagriha and Pataliputra) surrounded by hills or rivers, offering natural defense and control over trade routes.",
+    "explanationHi": "मगध का उदय कई कारकों के संयोजन के कारण हुआ था: क्षेत्र में प्रचुर लौह अयस्क (आधुनिक झारखंड) हथियारों और औजारों के लिए, उपजाऊ गंगा के मैदानों से कृषि अधिशेष, और इसकी राजधानियों (राजगृह और पाटलिपुत्र) का रणनीतिक स्थान जो पहाड़ियों या नदियों से घिरे थे, प्राकृतिक रक्षा और व्यापार मार्गों पर नियंत्रण प्रदान करते थे।"
+  },
+  {
+    "id": "ancient_history_12_magadha-empire_4",
+    "questionEn": "During whose reign was the First Buddhist Council held at Rajagriha?",
+    "questionHi": "राजगृह में प्रथम बौद्ध संगीति किसके शासनकाल में आयोजित की गई थी?",
+    "optionsEn": [
+      "Bimbisara",
+      "Ajatashatru",
+      "Udayin",
+      "Kalashoka"
+    ],
+    "optionsHi": [
+      "बिम्बिसार",
+      "अजातशत्रु",
+      "उदायिन",
+      "कालाशोक"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "The First Buddhist Council was held at Rajagriha (modern-day Rajgir) in 483 BCE, shortly after the Mahaparinirvana of Gautama Buddha. It was convened under the patronage of King Ajatashatru of the Haryanka dynasty, with Mahakassapa presiding.",
+    "explanationHi": "प्रथम बौद्ध संगीति 483 ईसा पूर्व में गौतम बुद्ध के महापरिनिर्वाण के तुरंत बाद राजगृह (आधुनिक राजगीर) में आयोजित की गई थी। यह हर्यंक राजवंश के राजा अजातशत्रु के संरक्षण में बुलाई गई थी, जिसकी अध्यक्षता महाकस्सप ने की थी।"
+  },
+  {
+    "id": "ancient_history_12_magadha-empire_5",
+    "questionEn": "Who was the founder of the Nanda dynasty, known for his immense wealth and military power?",
+    "questionHi": "नंद राजवंश का संस्थापक कौन था, जो अपनी अपार धन-संपत्ति और सैन्य शक्ति के लिए जाना जाता था?",
+    "optionsEn": [
+      "Mahapadma Nanda",
+      "Dhana Nanda",
+      "Shishunaga",
+      "Kalashoka"
+    ],
+    "optionsHi": [
+      "महापद्म नंद",
+      "धनानंद",
+      "शिशुनाग",
+      "कालाशोक"
+    ],
+    "correctIndex": 0,
+    "explanationEn": "Mahapadma Nanda was the founder of the Nanda dynasty. He is often described as a powerful and ambitious ruler who overthrew the Shishunaga dynasty and established a vast empire. He is also known as 'Ekarat' (sole sovereign) and 'Sarvakshatrantaka' (destroyer of all Kshatriyas).",
+    "explanationHi": "महापद्म नंद नंद राजवंश के संस्थापक थे। उन्हें अक्सर एक शक्तिशाली और महत्वाकांक्षी शासक के रूप में वर्णित किया जाता है, जिन्होंने शिशुनाग राजवंश को उखाड़ फेंका और एक विशाल साम्राज्य स्थापित किया। उन्हें 'एकराट' (एकमात्र संप्रभु) और 'सर्वक्षत्रान्तक' (सभी क्षत्रियों का नाश करने वाला) के रूप में भी जाना जाता है।"
+  },
+  {
+    "id": "ancient_history_12_magadha-empire_6",
+    "questionEn": "Who was the last ruler of the Nanda dynasty, overthrown by Chandragupta Maurya?",
+    "questionHi": "नंद राजवंश का अंतिम शासक कौन था, जिसे चंद्रगुप्त मौर्य ने उखाड़ फेंका था?",
+    "optionsEn": [
+      "Mahapadma Nanda",
+      "Dhana Nanda",
+      "Ugrasena",
+      "Kalashoka"
+    ],
+    "optionsHi": [
+      "महापद्म नंद",
+      "धनानंद",
+      "उग्रसेन",
+      "कालाशोक"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "Dhana Nanda was the last ruler of the Nanda dynasty. His unpopularity, coupled with the strategic brilliance of Chanakya and the military prowess of Chandragupta Maurya, led to his overthrow and the establishment of the Mauryan Empire around 322 BCE.",
+    "explanationHi": "धनानंद नंद राजवंश का अंतिम शासक था। उनकी अलोकप्रियता, चाणक्य की रणनीतिक प्रतिभा और चंद्रगुप्त मौर्य की सैन्य शक्ति के साथ मिलकर, उनके पतन और लगभग 322 ईसा पूर्व में मौर्य साम्राज्य की स्थापना का कारण बनी।"
+  },
+  {
+    "id": "ancient_history_12_magadha-empire_7",
+    "questionEn": "Which Magadhan king is credited with destroying the power of the Avanti kingdom and making it a part of Magadha?",
+    "questionHi": "किस मगध नरेश को अवंती राज्य की शक्ति को नष्ट करने और उसे मगध का हिस्सा बनाने का श्रेय दिया जाता है?",
+    "optionsEn": [
+      "Bimbisara",
+      "Ajatashatru",
+      "Shishunaga",
+      "Mahapadma Nanda"
+    ],
+    "optionsHi": [
+      "बिम्बिसार",
+      "अजातशत्रु",
+      "शिशुनाग",
+      "महापद्म नंद"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Shishunaga, the founder of the Shishunaga dynasty, is credited with the significant achievement of conquering the powerful kingdom of Avanti (with its capital Ujjain). This conquest ended the long-standing rivalry between Magadha and Avanti and further expanded Magadha's influence.",
+    "explanationHi": "शिशुनाग राजवंश के संस्थापक शिशुनाग को अवंती (जिसकी राजधानी उज्जैन थी) के शक्तिशाली राज्य को जीतने की महत्वपूर्ण उपलब्धि का श्रेय दिया जाता है। इस विजय ने मगध और अवंती के बीच लंबे समय से चली आ रही प्रतिद्वंद्विता को समाप्त कर दिया और मगध के प्रभाव का और विस्तार किया।"
+  },
+  {
+    "id": "ancient_history_12_magadha-empire_8",
+    "questionEn": "The powerful Vajji confederacy, with Vaishali as its capital, was finally annexed into the Magadhan empire by which ruler?",
+    "questionHi": "शक्तिशाली वज्जि संघ, जिसकी राजधानी वैशाली थी, को अंततः किस शासक द्वारा मगध साम्राज्य में मिला लिया गया था?",
+    "optionsEn": [
+      "Bimbisara",
+      "Ajatashatru",
+      "Udayin",
+      "Mahapadma Nanda"
+    ],
+    "optionsHi": [
+      "बिम्बिसार",
+      "अजातशत्रु",
+      "उदायिन",
+      "महापद्म नंद"
+    ],
+    "correctIndex": 1,
+    "explanationEn": "Ajatashatru, the Haryanka ruler, waged a long and arduous war against the Vajji confederacy. He eventually succeeded in annexing Vaishali and the entire Vajji territory into the Magadhan empire, using innovative war machines like 'Rathamusala' (chariot with a mace) and 'Mahashilakantaka' (large stone-throwing engine).",
+    "explanationHi": "हर्यंक शासक अजातशत्रु ने वज्जि संघ के खिलाफ एक लंबा और कठिन युद्ध लड़ा। उन्होंने अंततः वैशाली और पूरे वज्जि क्षेत्र को मगध साम्राज्य में मिलाने में सफलता प्राप्त की, जिसमें 'रथमुसल' (गदा वाला रथ) और 'महाशिलाकंटक' (बड़ी पत्थर फेंकने वाली मशीन) जैसे नवीन युद्ध यंत्रों का उपयोग किया।"
+  },
+  {
+    "id": "ancient_history_12_magadha-empire_9",
+    "questionEn": "Which of the following Magadhan rulers was a contemporary of both Mahavira and Gautama Buddha?",
+    "questionHi": "निम्नलिखित में से कौन सा मगध शासक महावीर और गौतम बुद्ध दोनों का समकालीन था?",
+    "optionsEn": [
+      "Bimbisara",
+      "Ajatashatru",
+      "Udayin",
+      "Both 1 and 2"
+    ],
+    "optionsHi": [
+      "बिम्बिसार",
+      "अजातशत्रु",
+      "उदायिन",
+      "1 और 2 दोनों"
+    ],
+    "correctIndex": 3,
+    "explanationEn": "Both Bimbisara and his son Ajatashatru were contemporaries of Mahavira and Gautama Buddha. Mahavira and Buddha lived and preached during their reigns, and both rulers had interactions with these spiritual leaders, showing respect and patronage to their respective faiths.",
+    "explanationHi": "बिम्बिसार और उनके पुत्र अजातशत्रु दोनों महावीर और गौतम बुद्ध के समकालीन थे। महावीर और बुद्ध उनके शासनकाल के दौरान रहते और उपदेश देते थे, और दोनों शासकों ने इन आध्यात्मिक नेताओं के साथ बातचीत की थी, अपने-अपने धर्मों के प्रति सम्मान और संरक्षण दिखाया था।"
+  },
+  {
+    "id": "ancient_history_12_magadha-empire_10",
+    "questionEn": "Pataliputra, the capital of Magadha, was strategically important due to its location at the confluence of which rivers?",
+    "questionHi": "मगध की राजधानी पाटलिपुत्र, किन नदियों के संगम पर स्थित होने के कारण रणनीतिक रूप से महत्वपूर्ण थी?",
+    "optionsEn": [
+      "Ganga and Yamuna",
+      "Ganga and Son",
+      "Ganga, Son, and Gandak",
+      "Ganga, Son, Gandak, and Ghaghara"
+    ],
+    "optionsHi": [
+      "गंगा और यमुना",
+      "गंगा और सोन",
+      "गंगा, सोन और गंडक",
+      "गंगा, सोन, गंडक और घाघरा"
+    ],
+    "correctIndex": 2,
+    "explanationEn": "Pataliputra (modern-day Patna) was strategically located at the confluence of the Ganga, Son, and Gandak rivers. This 'water fort' (Jaladurga) provided natural defense from three sides and facilitated trade and communication through riverine routes, making it an ideal capital for a growing empire.",
+    "explanationHi": "पाटलिपुत्र (आधुनिक पटना) गंगा, सोन और गंडक नदियों के संगम पर रणनीतिक रूप से स्थित था। यह 'जलदुर्ग' तीन तरफ से प्राकृतिक रक्षा प्रदान करता था और नदी मार्गों के माध्यम से व्यापार और संचार को सुगम बनाता था, जिससे यह एक बढ़ते साम्राज्य के लिए एक आदर्श राजधानी बन गया।"
+  }
+]
