@@ -1,0 +1,233 @@
+{
+  "packId": "general-science-foundations-002",
+  "version": 1,
+  "subject": "general-science",
+  "category": "general-science",
+  "titleEn": "General Science — Applied Foundations 002",
+  "titleHi": "सामान्य विज्ञान — अनुप्रयुक्त आधार 002",
+  "descEn": "Original bilingual questions on electricity, chemistry, optics and cell biology.",
+  "descHi": "विद्युत, रसायन, प्रकाशिकी और कोशिका जीवविज्ञान पर मौलिक द्विभाषी प्रश्न।",
+  "iconName": "Atom",
+  "color": "from-cyan-600 to-blue-700",
+  "badge": "Original practice",
+  "durationMinutes": 8,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "sci2-001",
+      "subject": "general-science",
+      "questionEn": "What is the SI unit of electrical resistance?",
+      "questionHi": "विद्युत प्रतिरोध की SI इकाई क्या है?",
+      "optionsEn": [
+        "Volt",
+        "Ohm",
+        "Ampere",
+        "Coulomb"
+      ],
+      "optionsHi": [
+        "वोल्ट",
+        "ओम",
+        "एम्पियर",
+        "कूलॉम"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Electrical resistance is measured in ohms, symbol Ω.",
+      "explanationHi": "विद्युत प्रतिरोध ओम में मापा जाता है, जिसका प्रतीक Ω है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci2-002",
+      "subject": "general-science",
+      "questionEn": "Atoms of the same element with different numbers of neutrons are called what?",
+      "questionHi": "एक ही तत्व के ऐसे परमाणु जिनमें न्यूट्रॉन की संख्या अलग हो, क्या कहलाते हैं?",
+      "optionsEn": [
+        "Ions",
+        "Isotopes",
+        "Isobars",
+        "Molecules"
+      ],
+      "optionsHi": [
+        "आयन",
+        "समस्थानिक",
+        "समभारिक",
+        "अणु"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Isotopes have the same number of protons but different numbers of neutrons.",
+      "explanationHi": "समस्थानिकों में प्रोटॉनों की संख्या समान, लेकिन न्यूट्रॉनों की संख्या अलग होती है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci2-003",
+      "subject": "general-science",
+      "questionEn": "Which bond forms when atoms share electron pairs?",
+      "questionHi": "जब परमाणु इलेक्ट्रॉन-युग्म साझा करते हैं, तो कौन-सा बंध बनता है?",
+      "optionsEn": [
+        "Ionic bond",
+        "Covalent bond",
+        "Metallic bond only",
+        "Hydrogen bond only"
+      ],
+      "optionsHi": [
+        "आयनिक बंध",
+        "सहसंयोजक बंध",
+        "केवल धात्विक बंध",
+        "केवल हाइड्रोजन बंध"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "A covalent bond involves sharing electron pairs between atoms.",
+      "explanationHi": "सहसंयोजक बंध में परमाणुओं के बीच इलेक्ट्रॉन-युग्म साझा होते हैं।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci2-004",
+      "subject": "general-science",
+      "questionEn": "In eukaryotic cells, which organelle is a major site of ATP production during aerobic respiration?",
+      "questionHi": "यूकेरियोटिक कोशिकाओं में वायवीय श्वसन के दौरान ATP उत्पादन का प्रमुख स्थल कौन-सा कोशिकांग है?",
+      "optionsEn": [
+        "Golgi apparatus",
+        "Mitochondrion",
+        "Lysosome",
+        "Nucleolus"
+      ],
+      "optionsHi": [
+        "गॉल्जी तंत्र",
+        "माइटोकॉन्ड्रिया",
+        "लाइसोसोम",
+        "केंद्रिका"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Mitochondria generate much of the ATP used during aerobic respiration.",
+      "explanationHi": "वायवीय श्वसन के दौरान उपयोग होने वाले ATP का बड़ा भाग माइटोकॉन्ड्रिया बनाते हैं।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci2-005",
+      "subject": "general-science",
+      "questionEn": "Which lens converges parallel rays of light toward a focal point?",
+      "questionHi": "कौन-सा लेंस प्रकाश की समानांतर किरणों को फोकस की ओर अभिसरित करता है?",
+      "optionsEn": [
+        "Concave lens",
+        "Convex lens",
+        "Plane glass plate",
+        "Prism only"
+      ],
+      "optionsHi": [
+        "अवतल लेंस",
+        "उत्तल लेंस",
+        "समतल काँच की पट्टी",
+        "केवल प्रिज़्म"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "A convex converging lens brings parallel rays toward its principal focus.",
+      "explanationHi": "अभिसारी उत्तल लेंस समानांतर किरणों को अपने मुख्य फोकस की ओर लाता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci2-006",
+      "subject": "general-science",
+      "questionEn": "What is evaporation?",
+      "questionHi": "वाष्पीकरण क्या है?",
+      "optionsEn": [
+        "A liquid changing to gas at its surface below the boiling point",
+        "A gas changing directly to solid",
+        "A solid changing directly to liquid",
+        "A liquid freezing throughout"
+      ],
+      "optionsHi": [
+        "क्वथनांक से कम तापमान पर द्रव का सतह से गैस में बदलना",
+        "गैस का सीधे ठोस बनना",
+        "ठोस का सीधे द्रव बनना",
+        "द्रव का पूरी तरह जमना"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Evaporation is surface vaporization that can occur below a liquid's boiling point.",
+      "explanationHi": "वाष्पीकरण सतह पर होने वाला परिवर्तन है, जो द्रव के क्वथनांक से कम तापमान पर भी हो सकता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci2-007",
+      "subject": "general-science",
+      "questionEn": "Which gas makes up the largest share of Earth's dry atmosphere?",
+      "questionHi": "पृथ्वी के शुष्क वायुमंडल में सबसे अधिक मात्रा किस गैस की है?",
+      "optionsEn": [
+        "Oxygen",
+        "Carbon dioxide",
+        "Nitrogen",
+        "Argon"
+      ],
+      "optionsHi": [
+        "ऑक्सीजन",
+        "कार्बन डाइऑक्साइड",
+        "नाइट्रोजन",
+        "आर्गन"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Nitrogen accounts for about 78% of Earth's dry atmosphere by volume.",
+      "explanationHi": "आयतन के आधार पर पृथ्वी के शुष्क वायुमंडल का लगभग 78% नाइट्रोजन है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "sci2-008",
+      "subject": "general-science",
+      "questionEn": "What is the SI unit of electric charge?",
+      "questionHi": "विद्युत आवेश की SI इकाई क्या है?",
+      "optionsEn": [
+        "Watt",
+        "Coulomb",
+        "Tesla",
+        "Henry"
+      ],
+      "optionsHi": [
+        "वाट",
+        "कूलॉम",
+        "टेस्ला",
+        "हेनरी"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Electric charge is measured in coulombs, symbol C.",
+      "explanationHi": "विद्युत आवेश कूलॉम में मापा जाता है, जिसका प्रतीक C है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
