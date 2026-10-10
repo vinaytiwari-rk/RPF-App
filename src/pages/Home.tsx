@@ -557,7 +557,7 @@ export default function Home() {
         </motion.section>
 
         {/* 2. LIVE VERIFIED MARKET & PANCHANG SECTION (Directly below Greeting & Explore community services) */}
-        <LiveVerifiedMarketSection />
+        <LiveVerifiedMarketSection mode="panchang" />
 
         {/* 3. THOUGHT OF THE DAY */}
         {cmsConfig?.thoughtConfig?.enabled !== false && (
