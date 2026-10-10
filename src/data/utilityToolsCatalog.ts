@@ -576,5 +576,16 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descHi: "बिना इंटरनेट के किसी भी टेक्स्ट, वाईफाई, फोन नंबर या UPI का तुरंत QR कोड बनाएं।",
     iconName: "QrCode",
     keywords: ["qr code", "qr maker", "upi qr", "wifi qr", "scanner"]
+  },
+  {
+    id: "text_toolkit",
+    categoryId: "cyber_media",
+    titleEn: "Text Toolkit & Cleaner",
+    titleHi: "टेक्स्ट टूलकिट व क्लीनर",
+    descEn: "Count words and characters, change letter case, clean extra spaces, sort lines and remove duplicates offline.",
+    descHi: "शब्द/अक्षर गिनें, अंग्रेज़ी अक्षर बदलें, अतिरिक्त स्पेस हटाएं, लाइनें क्रम में लगाएं और डुप्लिकेट हटाएं—बिना इंटरनेट।",
+    iconName: "FileText",
+    badge: "100% Offline",
+    keywords: ["text", "word count", "character count", "uppercase", "lowercase", "sort lines", "duplicate lines", "clean text", "space remover"]
   }
 ];
