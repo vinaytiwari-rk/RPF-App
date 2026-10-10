@@ -273,7 +273,7 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
     }
   };
 
-  if (activeMarketConfig && activeMarketConfig.enabled === false) {
+  if (mode !== "panchang" && activeMarketConfig && activeMarketConfig.enabled === false) {
     return null;
   }
 
