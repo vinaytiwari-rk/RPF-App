@@ -132,16 +132,11 @@ export const DEFAULT_ALL_SERVICES: ServiceCard[] = [
   { id: "government-schemes", title: "Government Schemes", desc: "Eligibility calculator & guides", iconName: "FileText", route: "/services/schemes", category: "Empowerment", active: true },
   { id: "skills-training", title: "Skills Training", desc: "Tailoring, coding & courses", iconName: "GraduationCap", route: "/services/skills", category: "Empowerment", active: true },
   { id: "sos-system", title: "SOS System", desc: "Emergency panic & location", iconName: "ShieldAlert", route: "/sos", category: "Urgent", active: true },
-  { id: "hindu-calendar", title: "Hindu Calendar", desc: "Tithis & Festivals", iconName: "Calendar", route: "/hindu-calendar", category: "Civic", active: true },
   { id: "news-feed", title: "News Feed", desc: "Top headlines & stories", iconName: "Newspaper", route: "/news", category: "Information", active: true },
   { id: "internet-radio", title: "Internet Radio", desc: "Live radio stations", iconName: "Radio", route: "/internet-radio", category: "Broadcast", active: true },
   { id: "transit-planner", title: "Transit Planner", desc: "Bus & Metro Routes", iconName: "Bus", route: "/services/transit", category: "Daily Utility", active: true },
   { id: "youth-empowerment", title: "Youth Empowerment", desc: "Leadership, sports & career guidance for youth", iconName: "Sparkles", route: "/services/youth", category: "Empowerment", active: true },
   { id: "nation-building", title: "Nation Building", desc: "National programs, civic duty & patriotic initiatives", iconName: "Flag", route: "/services/nation", category: "Civic", active: true },
-  { id: "daily-utility", title: "Daily Utility Center", desc: "BMI, bill split, Pomodoro, breathing, Morse, habits & more", iconName: "Wrench", route: "/daily-utility", category: "Daily Utility", active: true },
-  { id: "bmi-calculator", title: "BMI Calculator", desc: "Calculate BMI offline", iconName: "Calculator", route: "/bmi-calculator", category: "Daily Utility", active: true },
-  { id: "pomodoro-timer", title: "Pomodoro Timer", desc: "Focus and break timer", iconName: "Clock", route: "/pomodoro", category: "Daily Utility", active: true },
-  { id: "breathing-meditator", title: "Breathing Meditator", desc: "Guided breathing cycles", iconName: "Wind", route: "/breathing-meditator", category: "Daily Utility", active: true },
   { id: "epaper-kiosk", title: "Epaper Kiosk", desc: "Read today's leading daily e-papers", iconName: "FileText", route: "/epaper", category: "Information", active: true },
   { id: "national-directory", title: "National Directory", desc: "Government contacts & helplines", iconName: "BookOpen", route: "/directory", category: "Information", active: true },
   { id: "peoples-university", title: "People's University Portal", desc: "Official University Information", iconName: "GraduationCap", route: "https://www.peoplesuniversity.edu.in/", category: "Education", active: true },
@@ -150,6 +145,16 @@ export const DEFAULT_ALL_SERVICES: ServiceCard[] = [
   { id: "social-reels", title: "Shorts & Reels", desc: "Official videos, shorts & foundation reels", iconName: "Film", route: "/reels", category: "Broadcast", active: true },
   { id: "online-test", title: "Online Mock Test & Quiz", desc: "Govt exams, GK, reasoning & merit certificates", iconName: "GraduationCap", route: "/online-test", category: "Education", active: true }
 ];
+
+export const EXCLUDED_EXPLORE_SERVICE_IDS = new Set<string>([
+  "daily-utility",
+  "utility-center",
+  "bmi-calculator",
+  "pomodoro",
+  "pomodoro-timer",
+  "breathing-meditator",
+  "hindu-calendar"
+]);
 
 export default function ExploreStudio() {
   const [activeTab, setActiveTab] = useState<"featured" | "all">("all");
@@ -208,15 +213,15 @@ export default function ExploreStudio() {
       };
 
       if (Array.isArray(cms.featuredServices)) {
-        setFeaturedServices(hydrateCardsWithLinks(cms.featuredServices));
+        setFeaturedServices(hydrateCardsWithLinks(cms.featuredServices.filter((s: any) => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id))));
       } else {
-        setFeaturedServices(hydrateCardsWithLinks(DEFAULT_FEATURED_SERVICES));
+        setFeaturedServices(hydrateCardsWithLinks(DEFAULT_FEATURED_SERVICES.filter((s: any) => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id))));
       }
 
       if (Array.isArray(cms.allServices)) {
-        setAllServices(hydrateCardsWithLinks(cms.allServices));
+        setAllServices(hydrateCardsWithLinks(cms.allServices.filter((s: any) => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id))));
       } else {
-        setAllServices(hydrateCardsWithLinks(DEFAULT_ALL_SERVICES));
+        setAllServices(hydrateCardsWithLinks(DEFAULT_ALL_SERVICES.filter((s: any) => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id))));
       }
     } catch {
       toast.error("Failed to load CMS data, loading default catalog");
@@ -235,10 +240,13 @@ export default function ExploreStudio() {
     setSaving(true);
     const toastId = toast.loading("Saving and publishing Explore services...");
     try {
+      const cleanFeatured = featuredServices.filter(s => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id));
+      const cleanAll = allServices.filter(s => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id));
+
       // Construct serviceWebsiteLinks map so both legacy and modern readers receive identical child links
       const serviceWebsiteLinks: Record<string, any[]> = {};
-      [...featuredServices, ...allServices].forEach(s => {
-        if (s && s.id && Array.isArray(s.subLinks)) {
+      [...cleanFeatured, ...cleanAll].forEach(s => {
+        if (s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id) && Array.isArray(s.subLinks)) {
           serviceWebsiteLinks[s.id] = s.subLinks
             .filter((l: any) => l && l.active !== false)
             .map((l: any) => ({
@@ -253,8 +261,8 @@ export default function ExploreStudio() {
       });
 
       const patch = {
-        featuredServices,
-        allServices,
+        featuredServices: cleanFeatured,
+        allServices: cleanAll,
         serviceWebsiteLinks
       };
 

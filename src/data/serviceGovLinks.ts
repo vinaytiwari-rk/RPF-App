@@ -199,27 +199,6 @@ export const SERVICE_GOV_LINKS: Record<string, GovLink[]> = {
     { title: "Ixigo Train & Flight Transit", titleHi: "इक्सिगो ट्रेन एवं फ्लाइट", desc: "Live train running status, PNR status & fare alerts.", descHi: "लाइव ट्रेन स्थिति, पीएनआर स्थिति और किराए की चेतावनी।", url: "https://www.ixigo.com/", isGov: false },
     { title: "Moovit Urban Transit App", titleHi: "मूविट अर्बन ट्रांजिट गाइड", desc: "Real-time bus schedules, metro maps & transit planner.", descHi: "रियल-टाइम बस समय सारणी, मेट्रो मानचित्र।", url: "https://moovitapp.com/", isGov: false }
   ],
-  "daily-utility": [
-    { title: "BMI Calculator & Health Tracker", titleHi: "बीएमआई कैलकुलेटर व स्वास्थ्य ट्रैकर", desc: "Calculate Body Mass Index and ideal body weight standards.", descHi: "शरीर द्रव्यमान सूचकांक और आदर्श वजन मानकों की गणना करें।", url: "/bmi-calculator", isGov: false },
-    { title: "Pomodoro Focus & Break Timer", titleHi: "पोमोडोरो फोकस टाइमर", desc: "Boost study and work productivity with timed focus cycles.", descHi: "समयबद्ध फोकस चक्रों के साथ अध्ययन और कार्य उत्पादकता बढ़ाएं।", url: "/pomodoro", isGov: false },
-    { title: "Guided Breathing Meditator", titleHi: "गैडेड ब्रीदिंग मेडिटेशन", desc: "Guided relaxation, stress-relief and mindfulness breathing rhythms.", descHi: "तनाव मुक्ति और मानसिक शांति के लिए श्वास व्यायाम।", url: "/breathing-meditator", isGov: false },
-    { title: "Online Mock Tests & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", desc: "AI-powered UPSC, SSC, PSC competitive test practice.", descHi: "सरकारी भर्ती व प्रतियोगी परीक्षाओं के लिए ऑनलाइन अभ्यास।", url: "/online-test", isGov: false },
-    { title: "National Portal of India", titleHi: "भारत का राष्ट्रीय पोर्टल", desc: "Centralized civic utilities, forms and directory.", descHi: "केंद्रीय नागरिक सेवाएं और सरकारी प्रपत्र।", url: "https://www.india.gov.in/", isGov: true },
-    { title: "MP e-Services Citizen Portal", titleHi: "एम.पी. ई-सेवा नागरिक पोर्टल", desc: "State citizen certificates, utility bill pay and licenses.", descHi: "राज्य नागरिक प्रमाण पत्र और जनोपयोगी सेवाएं।", url: "https://services.mp.gov.in/eservice/", isGov: true }
-  ],
-  "bmi-calculator": [
-    { title: "RPF BMI Calculator", titleHi: "आरपीएफ बीएमआई कैलकुलेटर", desc: "Interactive body mass index calculator and health indicator.", descHi: "इंटरैक्टिव बीएमआई कैलकुलेटर और स्वास्थ्य संकेतक।", url: "/bmi-calculator", isGov: false },
-    { title: "WHO Healthy Weight Guidelines", titleHi: "डब्ल्यूएचओ स्वस्थ वजन दिशानिर्देश", desc: "World Health Organization standards on BMI & obesity.", descHi: "विश्व स्वास्थ्य संगठन के बीएमआई और वजन मानक।", url: "https://www.who.int/", isGov: true },
-    { title: "Fit India Movement", titleHi: "फिट इंडिया मूवमेंट", desc: "Official Government of India fitness challenges and healthy lifestyle guide.", descHi: "भारत सरकार का आधिकारिक फिटनेस और स्वस्थ जीवन शैली पोर्टल।", url: "https://fitindia.gov.in/", isGov: true }
-  ],
-  "pomodoro-timer": [
-    { title: "Pomodoro Focus Timer", titleHi: "पोमोडोरो फोकस टाइमर", desc: "Structured work & study interval productivity timer.", descHi: "संरचित कार्य और अध्ययन अंतराल उत्पादकता टाइमर।", url: "/pomodoro", isGov: false },
-    { title: "Pomodoro Technique Guide", titleHi: "पोमोडोरो तकनीक गाइड", desc: "Scientifically proven time management technique for learners.", descHi: "शिक्षार्थियों के लिए समय प्रबंधन तकनीक।", url: "https://en.wikipedia.org/wiki/Pomodoro_Technique", isGov: false }
-  ],
-  "breathing-meditator": [
-    { title: "Breathing Meditator", titleHi: "ब्रीदिंग मेडिटेटर", desc: "Guided pranayama and box breathing cycles for stress reduction.", descHi: "तनाव कम करने के लिए निर्देशित प्राणायाम और श्वास चक्र।", url: "/breathing-meditator", isGov: false },
-    { title: "Yoga & Wellness Portal (Ayush)", titleHi: "आयुष योग एवं कल्याण पोर्टल", desc: "Ministry of Ayush official pranayama & mental wellness guidelines.", descHi: "आयुष मंत्रालय के आधिकारिक प्राणायाम और मानसिक कल्याण दिशानिर्देश।", url: "https://yoga.ayush.gov.in/", isGov: true }
-  ],
   youth: [
     { title: "Mera Yuva Bharat (MY Bharat)", titleHi: "मेरा युवा भारत (माय भारत)", desc: "Autonomous body for youth development & civic participation.", descHi: "युवा विकास और नागरिक भागीदारी के लिए स्वायत्त निकाय।", url: "https://mybharat.gov.in/", isGov: true },
     { title: "Ministry of Youth Affairs & Sports", titleHi: "युवा कार्यक्रम एवं खेल मंत्रालय", desc: "Youth empowerment, sports grants & National Youth Awards.", descHi: "युवा सशक्तिकरण, खेल अनुदान और राष्ट्रीय युवा पुरस्कार।", url: "https://yas.nic.in/", isGov: true },
@@ -234,15 +213,6 @@ export const SERVICE_GOV_LINKS: Record<string, GovLink[]> = {
     { title: "Azadi Ka Amrit Mahotsav", titleHi: "आजादी का अमृत महोत्सव", desc: "National celebrations & patriotic initiatives.", descHi: "राष्ट्रीय समारोह और देशभक्तिपूर्ण पहल।", url: "https://amritmahotsav.nic.in/", isGov: true },
     { title: "NITI Aayog India Knowledge", titleHi: "नीति आयोग भारत ज्ञान हब", desc: "National policy research, aspirational districts & development.", descHi: "राष्ट्रीय नीति अनुसंधान और विकास।", url: "https://niti.gov.in/", isGov: true },
     { title: "Constitution of India Archive", titleHi: "भारत का संविधान पोर्टल", desc: "Interactive digital archive of the Constitution of India.", descHi: "भारत के संविधान का डिजिटल संग्रह।", url: "https://www.constitutionofindia.net/", isGov: false },
-    { title: "National Informatics Centre (NIC)", titleHi: "राष्ट्रीय सूचना विज्ञान केंद्र", desc: "Technology backbone of Indian e-governance.", descHi: "भारतीय ई-गवर्नेंस का प्रौद्योगिकी रीढ़।", url: "https://www.nic.in/", isGov: true }
-  ],
-  "hindu-calendar": [
-    { title: "Rashtriya Panchang (IMD)", titleHi: "राष्ट्रीय पंचांग (आईएमडी)", desc: "Official Indian National Calendar published by Poshtik.", descHi: "पोष्टिक द्वारा प्रकाशित आधिकारिक भारतीय राष्ट्रीय पंचांग।", url: "https://poshtik.gov.in/", isGov: true },
-    { title: "Ministry of Culture Festivals", titleHi: "संस्कृति मंत्रालय त्यौहार", desc: "Official calendar of Indian heritage & traditional festivals.", descHi: "भारतीय विरासत और पारंपरिक त्योहारों का आधिकारिक कैलेंडर।", url: "https://www.indiaculture.gov.in/", isGov: true },
-    { title: "Drik Panchang Official", titleHi: "दृक पंचांग आधिकारिक पोर्टल", desc: "Accurate Hindu Panchang, Tithi, Nakshatra & Muhurat finder.", descHi: "सटीक हिंदू पंचांग, तिथि, नक्षत्र और मुहूर्त।", url: "https://www.drikpanchang.com/", isGov: false },
-    { title: "AstroSage Hindu Calendar", titleHi: "एस्ट्रोसेज हिंदू पंचांग", desc: "Detailed Indian festivals, Vrat dates and Hindu calendar.", descHi: "विस्तृत भारतीय त्यौहार, व्रत तिथियां और पंचांग।", url: "https://www.astrosage.com/panchang/", isGov: false },
-    { title: "Hindu Blog Festivals Guide", titleHi: "हिंदू ब्लॉग त्यौहार गाइड", desc: "Traditions, rituals, fasts and auspicious dates guide.", descHi: "परंपराएं, अनुष्ठान, व्रत और शुभ तिथियां।", url: "https://www.hindu-blog.com/", isGov: false },
-    { title: "TemplePurohit Cultural Guide", titleHi: "मंदिर पुरोहित सांस्कृतिक निर्देशिका", desc: "Vedic culture, temple history and festival calendars.", descHi: "वैदिक संस्कृति, मंदिर का इतिहास और त्योहारों का पंचांग।", url: "https://www.templepurohit.com/", isGov: false }
   ],
   "news-feed": [
     { title: "Press Information Bureau (PIB)", titleHi: "प्रेस सूचना ब्यूरो (पीआईबी)", desc: "Official press releases and verified news from Government of India.", descHi: "भारत सरकार की आधिकारिक प्रेस विज्ञप्तियां।", url: "https://pib.gov.in/", isGov: true },
@@ -375,7 +345,6 @@ export const SERVICE_ALIASES: Record<string, string> = {
   "skills": "skills",
   "sos-system": "sos",
   "sos": "sos",
-  "hindu-calendar": "hindu-calendar",
   "news-feed": "news-feed",
   "internet-radio": "internet-radio",
   "transit-planner": "transit-planner",
@@ -384,10 +353,6 @@ export const SERVICE_ALIASES: Record<string, string> = {
   "youth": "youth",
   "nation-building": "nation",
   "nation": "nation",
-  "daily-utility": "daily-utility",
-  "bmi-calculator": "bmi-calculator",
-  "pomodoro-timer": "pomodoro-timer",
-  "breathing-meditator": "breathing-meditator",
   "epaper-kiosk": "epaper",
   "epaper": "epaper",
   "national-directory": "directory",

@@ -21,7 +21,34 @@ import { openExternalLink } from "../utils/browser";
 import BrandLoader from "../components/BrandLoader";
 import LiveVerifiedMarketSection from "../components/LiveVerifiedMarketSection";
 
-const REMOVED_SERVICE_IDS = new Set<string>(["countries","earthquakes","fuel-tracker","gps-toolkit","vitals","medications","medical-dict","period-tracker","child-tracker","resume-builder","doc-scanner","ai-chat","story-library","decision-maker","morse-code","habit-tracker","fasting-tracker","typing-speed","quick-calculator"]);
+const REMOVED_SERVICE_IDS = new Set<string>([
+  "countries",
+  "earthquakes",
+  "fuel-tracker",
+  "gps-toolkit",
+  "vitals",
+  "medications",
+  "medical-dict",
+  "period-tracker",
+  "child-tracker",
+  "resume-builder",
+  "doc-scanner",
+  "ai-chat",
+  "story-library",
+  "decision-maker",
+  "morse-code",
+  "habit-tracker",
+  "fasting-tracker",
+  "typing-speed",
+  "quick-calculator",
+  "daily-utility",
+  "utility-center",
+  "bmi-calculator",
+  "pomodoro",
+  "pomodoro-timer",
+  "breathing-meditator",
+  "hindu-calendar"
+]);
 
 const EXPLORE_LINKS = [
   { id: "online-test", category: "education", iconName: "GraduationCap", titleEn: "Online Mock Test & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", descEn: "Govt exams, GK, reasoning & merit certificates", descHi: "सरकारी भर्ती, सामान्य ज्ञान व टेस्ट सर्टिफिकेट", route: "/online-test" },
@@ -51,10 +78,10 @@ export default function Services() {
   const [, setWebResults] = useState<any[]>([]);
   const [, setWebLoading] = useState(false);
 
-  const HEALTH_SERVICES = ["health-care", "women-safety", "seniors", "medicine", "blood", "food", "bmi-calculator", "breathing-meditator"];
-  const EDUCATION_SERVICES = ["education", "scholarships", "skills", "peoples-university", "pomodoro"];
+  const HEALTH_SERVICES = ["health-care", "women-safety", "seniors", "medicine", "blood", "food"];
+  const EDUCATION_SERVICES = ["education", "scholarships", "skills", "peoples-university"];
   const GOV_SERVICES = ["card", "schemes", "farmer", "grievance", "disaster", "directory"];
-  const COMMUNITY_SERVICES = ["donations", "volunteers", "animals", "environment", "crowdfunding", "culture", "sos", "youth", "nation", "internet-radio", "epaper", "fact-check", "live-tv", "hindu-calendar"];
+  const COMMUNITY_SERVICES = ["donations", "volunteers", "animals", "environment", "crowdfunding", "culture", "sos", "youth", "nation", "internet-radio", "epaper", "fact-check", "live-tv"];
 
   const categories = [
     { id: "all", en: "All Services", hi: "सभी सेवाएं" },
