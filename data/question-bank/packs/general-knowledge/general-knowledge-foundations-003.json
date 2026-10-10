@@ -1,0 +1,233 @@
+{
+  "packId": "general-knowledge-foundations-003",
+  "version": 1,
+  "subject": "general-knowledge",
+  "category": "general-knowledge",
+  "titleEn": "General Knowledge — Foundations 003",
+  "titleHi": "सामान्य ज्ञान — आधार सेट 003",
+  "descEn": "Original bilingual questions on Indian culture and public knowledge.",
+  "descHi": "भारतीय संस्कृति और सामान्य ज्ञान पर मौलिक द्विभाषी प्रश्न।",
+  "iconName": "BookOpen",
+  "color": "from-emerald-600 to-teal-700",
+  "badge": "Original practice",
+  "durationMinutes": 8,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "gk3-001",
+      "subject": "general-knowledge",
+      "questionEn": "Which Kerala dance-drama is known for elaborate facial makeup and expressive storytelling?",
+      "questionHi": "केरल की कौन-सी नृत्य-नाट्य परंपरा विस्तृत चेहरे के श्रृंगार और भावपूर्ण कथावाचन के लिए प्रसिद्ध है?",
+      "optionsEn": [
+        "Mohiniyattam",
+        "Kathakali",
+        "Kuchipudi",
+        "Sattriya"
+      ],
+      "optionsHi": [
+        "मोहिनीअट्टम",
+        "कथकली",
+        "कुचिपुड़ी",
+        "सत्रिया"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Kathakali combines dance, music and dramatic storytelling, traditionally using elaborate makeup.",
+      "explanationHi": "कथकली में नृत्य, संगीत और नाटकीय कथावाचन का मेल होता है तथा इसमें पारंपरिक रूप से विस्तृत श्रृंगार किया जाता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "gk3-002",
+      "subject": "general-knowledge",
+      "questionEn": "Who was the first Indian to receive a Nobel Prize?",
+      "questionHi": "नोबेल पुरस्कार प्राप्त करने वाले पहले भारतीय कौन थे?",
+      "optionsEn": [
+        "C. V. Raman",
+        "Amartya Sen",
+        "Rabindranath Tagore",
+        "Mother Teresa"
+      ],
+      "optionsHi": [
+        "सी. वी. रमन",
+        "अमर्त्य सेन",
+        "रवीन्द्रनाथ टैगोर",
+        "मदर टेरेसा"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Rabindranath Tagore received the 1913 Nobel Prize in Literature.",
+      "explanationHi": "रवीन्द्रनाथ टैगोर को 1913 में साहित्य का नोबेल पुरस्कार मिला था।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "gk3-003",
+      "subject": "general-knowledge",
+      "questionEn": "Which instrument is especially associated with the performances of Ustad Bismillah Khan?",
+      "questionHi": "उस्ताद बिस्मिल्लाह ख़ाँ की प्रस्तुतियों से विशेष रूप से कौन-सा वाद्ययंत्र जुड़ा है?",
+      "optionsEn": [
+        "Sarod",
+        "Shehnai",
+        "Sitar",
+        "Santoor"
+      ],
+      "optionsHi": [
+        "सरोद",
+        "शहनाई",
+        "सितार",
+        "संतूर"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Bismillah Khan was a celebrated shehnai maestro.",
+      "explanationHi": "बिस्मिल्लाह ख़ाँ प्रसिद्ध शहनाई वादक थे।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "gk3-004",
+      "subject": "general-knowledge",
+      "questionEn": "The Hornbill Festival is primarily associated with which Indian state?",
+      "questionHi": "हॉर्नबिल महोत्सव मुख्यतः भारत के किस राज्य से जुड़ा है?",
+      "optionsEn": [
+        "Manipur",
+        "Meghalaya",
+        "Mizoram",
+        "Nagaland"
+      ],
+      "optionsHi": [
+        "मणिपुर",
+        "मेघालय",
+        "मिज़ोरम",
+        "नागालैंड"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "Nagaland organizes the Hornbill Festival to showcase Naga traditions.",
+      "explanationHi": "नागालैंड नागा समुदायों की परंपराओं को प्रदर्शित करने के लिए हॉर्नबिल महोत्सव आयोजित करता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "gk3-005",
+      "subject": "general-knowledge",
+      "questionEn": "Which place is traditionally associated with Gautama Buddha attaining enlightenment?",
+      "questionHi": "गौतम बुद्ध को ज्ञान प्राप्त होने से परंपरागत रूप से कौन-सा स्थान जुड़ा है?",
+      "optionsEn": [
+        "Bodh Gaya",
+        "Sarnath",
+        "Kushinagar",
+        "Lumbini"
+      ],
+      "optionsHi": [
+        "बोधगया",
+        "सारनाथ",
+        "कुशीनगर",
+        "लुंबिनी"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Bodh Gaya in present-day Bihar is the traditional site of the Buddha's enlightenment.",
+      "explanationHi": "वर्तमान बिहार में स्थित बोधगया बुद्ध को ज्ञान प्राप्त होने का पारंपरिक स्थल है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "gk3-006",
+      "subject": "general-knowledge",
+      "questionEn": "What is the national aquatic animal of India?",
+      "questionHi": "भारत का राष्ट्रीय जलीय जीव कौन-सा है?",
+      "optionsEn": [
+        "Olive ridley turtle",
+        "Ganges river dolphin",
+        "Blue whale",
+        "Gharial"
+      ],
+      "optionsHi": [
+        "ऑलिव रिडले कछुआ",
+        "गंगा नदी डॉल्फ़िन",
+        "नीली व्हेल",
+        "घड़ियाल"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "India's national aquatic animal is the Ganges river dolphin.",
+      "explanationHi": "भारत का राष्ट्रीय जलीय जीव गंगा नदी डॉल्फ़िन है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "gk3-007",
+      "subject": "general-knowledge",
+      "questionEn": "Which Indian lunar mission achieved a soft landing near the Moon's south polar region in August 2023?",
+      "questionHi": "अगस्त 2023 में चंद्रमा के दक्षिणी ध्रुवीय क्षेत्र के पास सफल सॉफ्ट लैंडिंग किस भारतीय चंद्र मिशन ने की?",
+      "optionsEn": [
+        "Chandrayaan-1",
+        "Mangalyaan",
+        "Chandrayaan-3",
+        "Aditya-L1"
+      ],
+      "optionsHi": [
+        "चंद्रयान-1",
+        "मंगलयान",
+        "चंद्रयान-3",
+        "आदित्य-L1"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Chandrayaan-3 lander achieved a soft landing on 23 August 2023.",
+      "explanationHi": "चंद्रयान-3 के लैंडर ने 23 अगस्त 2023 को चंद्रमा पर सॉफ्ट लैंडिंग की।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "gk3-008",
+      "subject": "general-knowledge",
+      "questionEn": "Which United Nations agency publishes the annual Human Development Report?",
+      "questionHi": "वार्षिक मानव विकास रिपोर्ट संयुक्त राष्ट्र की कौन-सी संस्था प्रकाशित करती है?",
+      "optionsEn": [
+        "UNICEF",
+        "United Nations Development Programme (UNDP)",
+        "World Health Organization",
+        "UNESCO"
+      ],
+      "optionsHi": [
+        "यूनिसेफ़",
+        "संयुक्त राष्ट्र विकास कार्यक्रम (UNDP)",
+        "विश्व स्वास्थ्य संगठन",
+        "यूनेस्को"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Human Development Report is published by UNDP.",
+      "explanationHi": "मानव विकास रिपोर्ट UNDP द्वारा प्रकाशित की जाती है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
