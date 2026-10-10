@@ -74,7 +74,13 @@ interface MarketSummary {
     source: string;
     sourceUrl: string;
     date: string;
+    day?: string;
     location: string;
+    sunSign?: string;
+    moonSign?: string;
+    provider?: string;
+    calculationSystem?: string;
+    ayanamsa?: string;
     sunrise: string;
     sunset: string;
     tithi: string;
@@ -358,24 +364,29 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
             <div className="flex items-center justify-between text-[#15803D]">
               <div className="flex items-center gap-1.5">
                 <Sun className="h-4 w-4 text-[#16A34A] shrink-0" />
-                <span className="text-[11px] sm:text-xs font-semibold tracking-normal">Aaj ka Panchang</span>
+                <span className="text-[11px] sm:text-xs font-semibold tracking-normal">Today's Panchang</span>
               </div>
               <span className="text-[9px] font-medium text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded-md">
                 वैदिक • Live
               </span>
             </div>
 
-            <div className="mt-2 space-y-0.5">
-              <div className="text-[13px] sm:text-sm font-semibold text-[#14213D] line-clamp-1">
-                {data?.panchang?.tithi || (isLoadingData ? "Fetching Panchang…" : "Krishna Saptami / Ashtami")}
+            <div className="mt-2 space-y-1">
+              <div className="text-[12px] font-semibold text-[#14213D] line-clamp-1">
+                {data?.panchang?.date || (isLoadingData ? "Loading Panchang..." : "Date unavailable")}
+                {data?.panchang?.day ? " • " + data.panchang.day : ""}
               </div>
-              <div className="text-[11px] sm:text-xs font-medium text-emerald-800 line-clamp-1">
-                {data?.panchang?.samvat || "Vikram Samvat 2083"}
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[11px] text-slate-700">
+                <div className="truncate">Sun Sign: <span className="font-semibold">{data?.panchang?.sunSign || "—"}</span></div>
+                <div className="truncate">Moon Sign: <span className="font-semibold">{data?.panchang?.moonSign || "—"}</span></div>
+                <div className="truncate">Tithi: <span className="font-semibold">{data?.panchang?.tithi || "—"}</span></div>
+                <div className="truncate">Nakshatra: <span className="font-semibold">{data?.panchang?.nakshatra || "—"}</span></div>
               </div>
               <div className="text-[11px] text-slate-600 font-normal line-clamp-1">
-                ☀️ {data?.panchang?.sunrise || "05:38 AM"} • 🌙 {data?.panchang?.sunset || "05:31 PM"}
+                ☀️ {data?.panchang?.sunrise || "—"} • 🌙 {data?.panchang?.sunset || "—"}
               </div>
-            </div>
+              {data?.panchang?.unavailable && <div className="text-[10px] text-amber-700">Live Panchang temporarily unavailable</div>}
+            </div>            </div>
           </div>
 
           <div className="mt-2 pt-1.5 border-t border-emerald-100 flex items-center justify-between text-[11px]">
