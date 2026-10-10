@@ -1,0 +1,233 @@
+{
+  "packId": "reasoning-foundations-003",
+  "version": 1,
+  "subject": "reasoning",
+  "category": "reasoning",
+  "titleEn": "Logical Reasoning — Practice Set 003",
+  "titleHi": "तार्किक क्षमता — अभ्यास सेट 003",
+  "descEn": "Original bilingual number-series, coding, direction and deduction questions.",
+  "descHi": "संख्या-श्रृंखला, कूटलेखन, दिशा और निष्कर्ष पर मौलिक द्विभाषी प्रश्न।",
+  "iconName": "BrainCircuit",
+  "color": "from-violet-600 to-indigo-700",
+  "badge": "Original practice",
+  "durationMinutes": 8,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "rs3-001",
+      "subject": "reasoning",
+      "questionEn": "Find the next number: 3, 8, 15, 24, 35, __.",
+      "questionHi": "अगली संख्या ज्ञात करें: 3, 8, 15, 24, 35, __।",
+      "optionsEn": [
+        "45",
+        "46",
+        "48",
+        "50"
+      ],
+      "optionsHi": [
+        "45",
+        "46",
+        "48",
+        "50"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The differences are 5, 7, 9 and 11; the next difference is 13, giving 48.",
+      "explanationHi": "अंतर 5, 7, 9 और 11 हैं; अगला अंतर 13 होगा, इसलिए संख्या 48 है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "rs3-002",
+      "subject": "reasoning",
+      "questionEn": "Complete the letter series: B, D, G, K, P, __.",
+      "questionHi": "अक्षर-श्रृंखला पूरी करें: B, D, G, K, P, __।",
+      "optionsEn": [
+        "U",
+        "V",
+        "W",
+        "X"
+      ],
+      "optionsHi": [
+        "U",
+        "V",
+        "W",
+        "X"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The jumps are +2, +3, +4 and +5 letters; the next jump is +6, from P to V.",
+      "explanationHi": "अक्षरों में क्रमशः +2, +3, +4 और +5 की छलाँग है; अगली छलाँग +6 होगी, इसलिए P के बाद V आएगा।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "rs3-003",
+      "subject": "reasoning",
+      "questionEn": "If each letter is replaced by the next letter in the alphabet, CAT becomes DBU. What does DOG become?",
+      "questionHi": "यदि हर अक्षर को वर्णमाला के अगले अक्षर से बदला जाए, तो CAT का DBU बनता है। DOG क्या बनेगा?",
+      "optionsEn": [
+        "EPH",
+        "EOG",
+        "FPH",
+        "DPH"
+      ],
+      "optionsHi": [
+        "EPH",
+        "EOG",
+        "FPH",
+        "DPH"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "D→E, O→P and G→H, so DOG becomes EPH.",
+      "explanationHi": "D→E, O→P और G→H, इसलिए DOG का कूट EPH होगा।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "rs3-004",
+      "subject": "reasoning",
+      "questionEn": "A is north of B, and B is east of C. In which direction is A from C?",
+      "questionHi": "A, B के उत्तर में है और B, C के पूर्व में है। C की तुलना में A किस दिशा में है?",
+      "optionsEn": [
+        "South-east",
+        "North-east",
+        "North-west",
+        "South-west"
+      ],
+      "optionsHi": [
+        "दक्षिण-पूर्व",
+        "उत्तर-पूर्व",
+        "उत्तर-पश्चिम",
+        "दक्षिण-पश्चिम"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "From C to B is east, then from B to A is north; overall A is north-east of C.",
+      "explanationHi": "C से B जाने पर पूर्व और B से A जाने पर उत्तर की दिशा मिलती है; अतः A, C के उत्तर-पूर्व में है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "rs3-005",
+      "subject": "reasoning",
+      "questionEn": "All librarians are readers. All readers are learners. Which conclusion must be true?",
+      "questionHi": "सभी पुस्तकालयाध्यक्ष पाठक हैं। सभी पाठक सीखने वाले हैं। कौन-सा निष्कर्ष निश्चित रूप से सही है?",
+      "optionsEn": [
+        "All librarians are learners",
+        "All learners are librarians",
+        "No librarian is a learner",
+        "Some readers are not learners"
+      ],
+      "optionsHi": [
+        "सभी पुस्तकालयाध्यक्ष सीखने वाले हैं",
+        "सभी सीखने वाले पुस्तकालयाध्यक्ष हैं",
+        "कोई पुस्तकालयाध्यक्ष सीखने वाला नहीं है",
+        "कुछ पाठक सीखने वाले नहीं हैं"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "If every librarian is a reader and every reader is a learner, every librarian must be a learner.",
+      "explanationHi": "यदि प्रत्येक पुस्तकालयाध्यक्ष पाठक है और प्रत्येक पाठक सीखने वाला है, तो प्रत्येक पुस्तकालयाध्यक्ष सीखने वाला भी होगा।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "rs3-006",
+      "subject": "reasoning",
+      "questionEn": "Five workers finish a job in 12 days at the same rate. How many days would ten workers need?",
+      "questionHi": "समान गति से पाँच कर्मचारी एक काम 12 दिनों में पूरा करते हैं। दस कर्मचारियों को कितने दिन लगेंगे?",
+      "optionsEn": [
+        "3 days",
+        "4 days",
+        "5 days",
+        "6 days"
+      ],
+      "optionsHi": [
+        "3 दिन",
+        "4 दिन",
+        "5 दिन",
+        "6 दिन"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "Doubling the workforce halves the time: 12 × 5 ÷ 10 = 6 days.",
+      "explanationHi": "कर्मचारियों की संख्या दोगुनी होने पर समय आधा होगा: 12 × 5 ÷ 10 = 6 दिन।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "rs3-007",
+      "subject": "reasoning",
+      "questionEn": "What is the second-largest number in this set: 14, 3, 9, 20, 7?",
+      "questionHi": "इस समूह में दूसरी सबसे बड़ी संख्या कौन-सी है: 14, 3, 9, 20, 7?",
+      "optionsEn": [
+        "9",
+        "14",
+        "20",
+        "7"
+      ],
+      "optionsHi": [
+        "9",
+        "14",
+        "20",
+        "7"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "In descending order the numbers are 20, 14, 9, 7, 3; the second is 14.",
+      "explanationHi": "घटते क्रम में संख्याएँ 20, 14, 9, 7, 3 हैं; दूसरी संख्या 14 है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "rs3-008",
+      "subject": "reasoning",
+      "questionEn": "Complete the analogy: 7 : 49 :: 9 : __.",
+      "questionHi": "सादृश्य पूरा करें: 7 : 49 :: 9 : __।",
+      "optionsEn": [
+        "63",
+        "72",
+        "81",
+        "90"
+      ],
+      "optionsHi": [
+        "63",
+        "72",
+        "81",
+        "90"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The relationship is squaring the number: 7² = 49, so 9² = 81.",
+      "explanationHi": "संबंध संख्या का वर्ग करना है: 7² = 49, इसलिए 9² = 81।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
