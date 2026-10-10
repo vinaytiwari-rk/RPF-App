@@ -186,8 +186,6 @@ function ToolEngineDispatcher({
     // 4. Agriculture & Farming
 
     // 5. Land & Measurement
-    case "land_converter":
-      return <LandConverterEngine isHi={isHi} />;
     case "rupees_to_words":
       return <RupeesToWordsEngine isHi={isHi} copyToClipboard={copyToClipboard} />;
 
