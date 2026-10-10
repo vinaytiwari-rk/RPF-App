@@ -65,6 +65,7 @@ import adminDynamicRoutes from './src/routes/adminDynamicRoutes.js';
 import rssFeedRoutes from './src/routes/rssFeedRoutes.js';
 import liveMarketRoutes from './src/routes/liveMarketRoutes.js';
 import socialRssRoutes from './src/routes/socialRssRoutes.js';
+import { quizRouter } from './src/routes/quizRoutes.js';
 
 
 import { setDbPool } from "./src/controllers/adminHqController.js";
@@ -181,6 +182,7 @@ app.use(adminDynamicRoutes);
 app.use('/', rssFeedRoutes);
 app.use('/', liveMarketRoutes);
 app.use('/', socialRssRoutes);
+app.use('/', quizRouter);
 
 
 
