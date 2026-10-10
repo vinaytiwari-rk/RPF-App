@@ -13,6 +13,9 @@ const duplicateIds = tools.map((tool) => tool.id).filter((id, index, all) => all
 const missingHandlers = tools.filter((tool) => !uniqueCases.includes(tool.id));
 const orphanHandlers = uniqueCases.filter((id) => !tools.some((tool) => tool.id === id));
 const failures = [];
+const forbiddenCalculatorIds = ["exam_age_calc","fertilizer_seed_calc","crop_profit_planner","pesticide_spray_ratio","cgpa_percentage_calc","gramin_byaj_calc","pregnancy_edd_calc","electricity_estimator","split_bill_expense","trip_fuel_mileage","percentage_calculator","date_difference","age_calculator","tip_calculator","loan_payment_calculator","date_add_subtract","business_days_calculator","discount_calculator","compound_interest_calculator"];
+const calculatorTools = tools.filter((tool) => forbiddenCalculatorIds.includes(tool.id));
+if (calculatorTools.length) failures.push(`Calculator tools must not be in the utility catalog: ${calculatorTools.map((tool) => tool.id).join(", ")}`);
 
 if (tools.length === 0) failures.push("Utility catalog is empty; expected at least one catalog tool");
 if (duplicateIds.length) failures.push(`Duplicate catalog IDs: ${duplicateIds.join(", ")}`);
