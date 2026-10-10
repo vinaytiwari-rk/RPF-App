@@ -299,7 +299,8 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
   return (
     <section className="pt-2">
       {/* Market controls are only shown outside the compact Home Panchang card. */}
-      {mode !== "panchang" && <div className="mb-2.5 flex items-center justify-between px-0.5 gap-2">
+      {mode !== "panchang" && (
+      <div className="mb-2.5 flex items-center justify-between px-0.5 gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <ShieldCheck className="h-4 w-4 text-[#167C5A] shrink-0" />
           <h2 className="text-[13px] sm:text-[14px] font-black uppercase tracking-wider text-[#14213D] truncate">
@@ -339,7 +340,8 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
             <ChevronDown className="h-3 w-3 text-emerald-600" />
           </button>
         </div>
-      </div>}
+      </div>
+      )}
 
       {/* 5 CARDS CONTAINER: GRID VIEW (ALL 5 FULLY VISIBLE) OR HORIZONTAL SWIPE */}
       <div
@@ -353,6 +355,7 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
       >
         {/* CARD 1: LIVE DRIK PANCHANG */}
         {panchangEnabled && (
+          <React.Fragment>
         <motion.div
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSheet("panchang")}
@@ -396,6 +399,7 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
             </span>
           </div>
         </motion.div>
+          </React.Fragment>
         )}
 
         {/* CARD 2: LIVE BULLION GOLD & SILVER */}
