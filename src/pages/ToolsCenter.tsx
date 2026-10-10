@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronRight, Wrench, LayoutGrid } from "lucide-react";
+import { ChevronRight, Wrench, LayoutGrid, Calculator } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
 type Lang = "en" | "hi";
@@ -21,8 +21,11 @@ export default function ToolsCenter() {
       </header>
 
       <section className="mt-7 space-y-3">
+        <button onClick={() => navigate("/utilities/calculators")} className="flex w-full items-center gap-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-left shadow-sm">
+          <Calculator className="h-6 w-6 text-blue-800" /><span className="flex-1 font-extrabold text-blue-950">{hi ? "Calculator Center — सभी कैलकुलेटर" : "Calculator Center — All Calculators"}</span><ChevronRight className="h-5 w-5 text-blue-800" />
+        </button>
         <button onClick={() => navigate("/utilities")} className="flex w-full items-center gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-left shadow-sm">
-          <LayoutGrid className="h-6 w-6 text-emerald-800" /><span className="flex-1 font-extrabold text-emerald-950">{hi ? "सभी यूटिलिटी और जरूरी टूल्स" : "All Utilities & Essential Tools"}</span><ChevronRight className="h-5 w-5 text-emerald-800" />
+          <LayoutGrid className="h-6 w-6 text-emerald-800" /><span className="flex-1 font-extrabold text-emerald-950">{hi ? "फाइल टूल्स — PDF, Image, Excel, Word, Video, Audio" : "File Tools — PDF, Image, Excel, Word, Video & Audio"}</span><ChevronRight className="h-5 w-5 text-emerald-800" />
         </button>
       </section>
     </div>
