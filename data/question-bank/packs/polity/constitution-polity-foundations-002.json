@@ -1,0 +1,233 @@
+{
+  "packId": "constitution-polity-foundations-002",
+  "version": 1,
+  "subject": "constitution-polity",
+  "category": "polity",
+  "titleEn": "Indian Constitution & Polity — Practice Set 002",
+  "titleHi": "भारतीय संविधान एवं राजव्यवस्था — अभ्यास सेट 002",
+  "descEn": "Original bilingual practice on constitutional institutions and parliamentary procedure.",
+  "descHi": "संवैधानिक संस्थाओं और संसदीय प्रक्रिया पर मौलिक द्विभाषी अभ्यास।",
+  "iconName": "Scale",
+  "color": "from-amber-600 to-orange-700",
+  "badge": "Original practice",
+  "durationMinutes": 8,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "polity2-001",
+      "subject": "constitution-polity",
+      "questionEn": "Which Schedule contains the rules on disqualification of legislators for changing party affiliation?",
+      "questionHi": "दल बदलने के आधार पर विधायकों की अयोग्यता के नियम किस अनुसूची में हैं?",
+      "optionsEn": [
+        "Eighth Schedule",
+        "Ninth Schedule",
+        "Tenth Schedule",
+        "Twelfth Schedule"
+      ],
+      "optionsHi": [
+        "आठवीं अनुसूची",
+        "नौवीं अनुसूची",
+        "दसवीं अनुसूची",
+        "बारहवीं अनुसूची"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Tenth Schedule deals with disqualification on grounds of defection.",
+      "explanationHi": "दसवीं अनुसूची दल-बदल के आधार पर अयोग्यता से संबंधित है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "polity"
+      ]
+    },
+    {
+      "id": "polity2-002",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article provides for Public Service Commissions for the Union and States?",
+      "questionHi": "केंद्र और राज्यों के लोक सेवा आयोगों का प्रावधान किस अनुच्छेद में है?",
+      "optionsEn": [
+        "Article 280",
+        "Article 315",
+        "Article 324",
+        "Article 356"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 280",
+        "अनुच्छेद 315",
+        "अनुच्छेद 324",
+        "अनुच्छेद 356"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Article 315 provides for Union and State Public Service Commissions.",
+      "explanationHi": "अनुच्छेद 315 संघ और राज्य लोक सेवा आयोगों का प्रावधान करता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "polity"
+      ]
+    },
+    {
+      "id": "polity2-003",
+      "subject": "constitution-polity",
+      "questionEn": "Which writ directs a public authority to carry out a legal duty?",
+      "questionHi": "कौन-सी रिट लोक प्राधिकरण को कानूनी कर्तव्य निभाने का निर्देश देती है?",
+      "optionsEn": [
+        "Habeas corpus",
+        "Mandamus",
+        "Quo warranto",
+        "Certiorari"
+      ],
+      "optionsHi": [
+        "बंदी प्रत्यक्षीकरण",
+        "परमादेश",
+        "अधिकार-पृच्छा",
+        "उत्प्रेषण"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Mandamus directs an authority to perform a duty required by law.",
+      "explanationHi": "परमादेश प्राधिकरण को कानून द्वारा अपेक्षित कर्तव्य निभाने का निर्देश देता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "polity"
+      ]
+    },
+    {
+      "id": "polity2-004",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article defines a Money Bill?",
+      "questionHi": "धन विधेयक को कौन-सा अनुच्छेद परिभाषित करता है?",
+      "optionsEn": [
+        "Article 108",
+        "Article 110",
+        "Article 112",
+        "Article 123"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 108",
+        "अनुच्छेद 110",
+        "अनुच्छेद 112",
+        "अनुच्छेद 123"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Article 110 defines a Money Bill for constitutional purposes.",
+      "explanationHi": "अनुच्छेद 110 संवैधानिक प्रयोजन के लिए धन विधेयक को परिभाषित करता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "polity"
+      ]
+    },
+    {
+      "id": "polity2-005",
+      "subject": "constitution-polity",
+      "questionEn": "What is the minimum age for membership of the Rajya Sabha?",
+      "questionHi": "राज्यसभा की सदस्यता के लिए न्यूनतम आयु क्या है?",
+      "optionsEn": [
+        "21 years",
+        "25 years",
+        "30 years",
+        "35 years"
+      ],
+      "optionsHi": [
+        "21 वर्ष",
+        "25 वर्ष",
+        "30 वर्ष",
+        "35 वर्ष"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "A Rajya Sabha member must be at least 30 years old.",
+      "explanationHi": "राज्यसभा सदस्य की आयु कम-से-कम 30 वर्ष होनी चाहिए।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "polity"
+      ]
+    },
+    {
+      "id": "polity2-006",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article establishes the GST Council?",
+      "questionHi": "GST परिषद किस अनुच्छेद के अंतर्गत स्थापित है?",
+      "optionsEn": [
+        "Article 246A",
+        "Article 269A",
+        "Article 279A",
+        "Article 280"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 246A",
+        "अनुच्छेद 269A",
+        "अनुच्छेद 279A",
+        "अनुच्छेद 280"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Article 279A provides for the GST Council.",
+      "explanationHi": "अनुच्छेद 279A में GST परिषद का प्रावधान है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "polity"
+      ]
+    },
+    {
+      "id": "polity2-007",
+      "subject": "constitution-polity",
+      "questionEn": "Which Article covers the President of India's pardoning powers?",
+      "questionHi": "भारत के राष्ट्रपति की क्षमादान शक्ति किस अनुच्छेद में है?",
+      "optionsEn": [
+        "Article 72",
+        "Article 74",
+        "Article 76",
+        "Article 80"
+      ],
+      "optionsHi": [
+        "अनुच्छेद 72",
+        "अनुच्छेद 74",
+        "अनुच्छेद 76",
+        "अनुच्छेद 80"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Article 72 covers specified pardoning powers of the President.",
+      "explanationHi": "अनुच्छेद 72 राष्ट्रपति की निर्दिष्ट क्षमादान शक्तियों से संबंधित है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "polity"
+      ]
+    },
+    {
+      "id": "polity2-008",
+      "subject": "constitution-polity",
+      "questionEn": "Under Article 100, what fraction of a House's total membership is its usual constitutional quorum?",
+      "questionHi": "अनुच्छेद 100 के अनुसार सदन की कुल सदस्यता का कितना भाग सामान्य संवैधानिक गणपूर्ति है?",
+      "optionsEn": [
+        "One-twentieth",
+        "One-tenth",
+        "One-fourth",
+        "One-third"
+      ],
+      "optionsHi": [
+        "एक-बीसवाँ",
+        "एक-दसवाँ",
+        "एक-चौथाई",
+        "एक-तिहाई"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The usual constitutional quorum is one-tenth of the House's total membership.",
+      "explanationHi": "सामान्य संवैधानिक गणपूर्ति सदन की कुल सदस्यता का एक-दसवाँ भाग है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "polity"
+      ]
+    }
+  ]
+}
