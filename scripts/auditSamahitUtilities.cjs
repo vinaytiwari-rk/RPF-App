@@ -13,6 +13,15 @@ const duplicateIds = tools.map((tool) => tool.id).filter((id, index, all) => all
 const missingHandlers = tools.filter((tool) => !uniqueCases.includes(tool.id));
 const orphanHandlers = uniqueCases.filter((id) => !tools.some((tool) => tool.id === id));
 const failures = [];
+const categoryIds = [...catalog.matchAll(/\{ id: "([^"]+)", titleEn:/g)].map((match) => match[1]);
+const requiredCategories = ["all", "pdf_tools", "image_tools", "excel_tools", "word_tools", "video_tools", "audio_tools"];
+if (JSON.stringify(categoryIds) !== JSON.stringify(requiredCategories)) {
+  failures.push(`Utility categories must be exactly: ${requiredCategories.join(", ")}; found: ${categoryIds.join(", ")}`);
+}
+const toolCategoryIds = [...catalog.matchAll(/categoryId:\s*"([^"]+)"/g)].map((match) => match[1]);
+const invalidCategories = [...new Set(toolCategoryIds.filter((id) => !requiredCategories.includes(id) || id === "all"))];
+if (invalidCategories.length) failures.push(`Tools use unsupported categories: ${invalidCategories.join(", ")}`);
+
 const forbiddenCalculatorIds = ["exam_age_calc","fertilizer_seed_calc","crop_profit_planner","pesticide_spray_ratio","cgpa_percentage_calc","gramin_byaj_calc","pregnancy_edd_calc","electricity_estimator","split_bill_expense","trip_fuel_mileage","percentage_calculator","date_difference","age_calculator","tip_calculator","loan_payment_calculator","date_add_subtract","business_days_calculator","discount_calculator","compound_interest_calculator"];
 const calculatorTools = tools.filter((tool) => forbiddenCalculatorIds.includes(tool.id));
 if (calculatorTools.length) failures.push(`Calculator tools must not be in the utility catalog: ${calculatorTools.map((tool) => tool.id).join(", ")}`);
