@@ -1,0 +1,233 @@
+{
+  "packId": "indian-geography-foundations-002",
+  "version": 1,
+  "subject": "indian-geography",
+  "category": "geography",
+  "titleEn": "Geography — Physical Patterns 002",
+  "titleHi": "भूगोल — भौतिक स्वरूप 002",
+  "descEn": "Original bilingual questions on coasts, climate systems and landforms.",
+  "descHi": "तटों, जलवायु प्रणालियों और स्थलरूपों पर मौलिक द्विभाषी प्रश्न।",
+  "iconName": "BookOpen",
+  "color": "from-blue-600 to-cyan-700",
+  "badge": "Original practice",
+  "durationMinutes": 8,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "geo2-001",
+      "subject": "indian-geography",
+      "questionEn": "The Coromandel Coast lies mainly along which body of water?",
+      "questionHi": "कोरोमंडल तट मुख्यतः किस जल निकाय के किनारे स्थित है?",
+      "optionsEn": [
+        "Arabian Sea",
+        "Bay of Bengal",
+        "Gulf of Kachchh",
+        "Andaman Sea"
+      ],
+      "optionsHi": [
+        "अरब सागर",
+        "बंगाल की खाड़ी",
+        "कच्छ की खाड़ी",
+        "अंडमान सागर"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Coromandel Coast is on the southeastern coast of India along the Bay of Bengal.",
+      "explanationHi": "कोरोमंडल तट भारत के दक्षिण-पूर्वी तट पर बंगाल की खाड़ी के किनारे है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "geography"
+      ]
+    },
+    {
+      "id": "geo2-002",
+      "subject": "indian-geography",
+      "questionEn": "A rain-shadow region is generally found on which side of a mountain range?",
+      "questionHi": "वर्षा-छाया क्षेत्र सामान्यतः पर्वत-श्रेणी के किस ओर मिलता है?",
+      "optionsEn": [
+        "Windward side facing moist winds",
+        "Leeward side sheltered from moist winds",
+        "Only directly above the summit",
+        "Only on an ocean island"
+      ],
+      "optionsHi": [
+        "नम हवाओं की ओर मुख वाली पवनाभिमुख दिशा",
+        "नम हवाओं से आड़ वाली पवनविमुख दिशा",
+        "केवल शिखर के ठीक ऊपर",
+        "केवल महासागरीय द्वीप पर"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Moist air loses much of its moisture on the windward slope, leaving the leeward side relatively dry.",
+      "explanationHi": "नम हवा पवनाभिमुख ढलान पर काफी नमी खो देती है, इसलिए पवनविमुख भाग अपेक्षाकृत शुष्क रहता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "geography"
+      ]
+    },
+    {
+      "id": "geo2-003",
+      "subject": "indian-geography",
+      "questionEn": "In which atmospheric layer is most of the protective ozone layer located?",
+      "questionHi": "सुरक्षात्मक ओज़ोन परत का अधिकांश भाग वायुमंडल की किस परत में है?",
+      "optionsEn": [
+        "Troposphere",
+        "Stratosphere",
+        "Mesosphere",
+        "Exosphere"
+      ],
+      "optionsHi": [
+        "क्षोभमंडल",
+        "समतापमंडल",
+        "मध्यमंडल",
+        "बहिर्मंडल"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Most atmospheric ozone is concentrated in the stratosphere, where it absorbs much harmful ultraviolet radiation.",
+      "explanationHi": "वायुमंडलीय ओज़ोन का अधिकांश भाग समतापमंडल में केंद्रित है, जहाँ यह हानिकारक पराबैंगनी विकिरण का बड़ा हिस्सा अवशोषित करता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "geography"
+      ]
+    },
+    {
+      "id": "geo2-004",
+      "subject": "indian-geography",
+      "questionEn": "El Niño is associated with unusual warming of which region?",
+      "questionHi": "एल नीनो किस क्षेत्र के असामान्य गर्म होने से संबंधित है?",
+      "optionsEn": [
+        "North Atlantic near Greenland",
+        "Central and eastern equatorial Pacific Ocean",
+        "Southern Indian Ocean only",
+        "Arctic Ocean around the pole"
+      ],
+      "optionsHi": [
+        "ग्रीनलैंड के पास उत्तरी अटलांटिक",
+        "भूमध्यरेखीय प्रशांत महासागर का मध्य और पूर्वी भाग",
+        "केवल दक्षिणी हिंद महासागर",
+        "ध्रुव के आसपास आर्कटिक महासागर"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "El Niño involves periodic warming of surface waters in the central and eastern equatorial Pacific.",
+      "explanationHi": "एल नीनो में मध्य और पूर्वी भूमध्यरेखीय प्रशांत क्षेत्र के सतही जल का समय-समय पर गर्म होना शामिल है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "geography"
+      ]
+    },
+    {
+      "id": "geo2-005",
+      "subject": "indian-geography",
+      "questionEn": "Laterite soils commonly develop under which combination of conditions?",
+      "questionHi": "लैटेराइट मिट्टी सामान्यतः किन परिस्थितियों में बनती है?",
+      "optionsEn": [
+        "Cold and dry climate with little leaching",
+        "High temperature and heavy rainfall causing intense leaching",
+        "Permanent ice cover",
+        "Only volcanic ash without weathering"
+      ],
+      "optionsHi": [
+        "कम निक्षालन वाली ठंडी और शुष्क जलवायु",
+        "उच्च तापमान और भारी वर्षा, जिससे तीव्र निक्षालन हो",
+        "स्थायी हिमावरण",
+        "अपक्षय के बिना केवल ज्वालामुखीय राख"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Warm, wet conditions promote chemical weathering and leaching, which can form lateritic soils.",
+      "explanationHi": "गर्म और आर्द्र परिस्थितियाँ रासायनिक अपक्षय तथा निक्षालन को बढ़ाती हैं, जिससे लैटेराइट मिट्टी बन सकती है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "geography"
+      ]
+    },
+    {
+      "id": "geo2-006",
+      "subject": "indian-geography",
+      "questionEn": "Which warm ocean-current system helps moderate winters in western Europe?",
+      "questionHi": "कौन-सी गर्म महासागरीय धारा प्रणाली पश्चिमी यूरोप की सर्दियों को अपेक्षाकृत सौम्य बनाने में मदद करती है?",
+      "optionsEn": [
+        "Labrador Current",
+        "North Atlantic Drift",
+        "Benguela Current",
+        "Peru (Humboldt) Current"
+      ],
+      "optionsHi": [
+        "लैब्राडोर धारा",
+        "उत्तर अटलांटिक प्रवाह",
+        "बेंगुएला धारा",
+        "पेरू (हम्बोल्ट) धारा"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The North Atlantic Drift carries relatively warm water toward the northeast Atlantic and influences nearby climates.",
+      "explanationHi": "उत्तर अटलांटिक प्रवाह अपेक्षाकृत गर्म जल को उत्तर-पूर्वी अटलांटिक की ओर ले जाता है और आसपास की जलवायु को प्रभावित करता है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "geography"
+      ]
+    },
+    {
+      "id": "geo2-007",
+      "subject": "indian-geography",
+      "questionEn": "Which is the world's largest hot desert by area?",
+      "questionHi": "क्षेत्रफल के आधार पर विश्व का सबसे बड़ा गर्म मरुस्थल कौन-सा है?",
+      "optionsEn": [
+        "Gobi",
+        "Kalahari",
+        "Sahara",
+        "Great Victoria Desert"
+      ],
+      "optionsHi": [
+        "गोबी",
+        "कालाहारी",
+        "सहारा",
+        "ग्रेट विक्टोरिया मरुस्थल"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Sahara in northern Africa is the largest hot desert; Antarctica is larger but is a cold desert.",
+      "explanationHi": "उत्तरी अफ्रीका का सहारा सबसे बड़ा गर्म मरुस्थल है; अंटार्कटिका बड़ा है, लेकिन वह शीत मरुस्थल है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "geography"
+      ]
+    },
+    {
+      "id": "geo2-008",
+      "subject": "indian-geography",
+      "questionEn": "Which line of longitude is defined as 0 degrees?",
+      "questionHi": "0 डिग्री देशांतर के रूप में किस रेखा को परिभाषित किया गया है?",
+      "optionsEn": [
+        "International Date Line",
+        "Equator",
+        "Prime Meridian",
+        "Tropic of Capricorn"
+      ],
+      "optionsHi": [
+        "अंतरराष्ट्रीय तिथि रेखा",
+        "भूमध्य रेखा",
+        "प्रधान मध्याह्न रेखा",
+        "मकर रेखा"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Prime Meridian at Greenwich is the reference for 0° longitude.",
+      "explanationHi": "ग्रीनविच से गुजरने वाली प्रधान मध्याह्न रेखा 0° देशांतर का संदर्भ है।",
+      "difficulty": "medium",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "geography"
+      ]
+    }
+  ]
+}
