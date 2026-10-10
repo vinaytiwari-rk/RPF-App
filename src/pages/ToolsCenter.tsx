@@ -1,5 +1,5 @@
 import React from "react";
-import { Calculator, ChevronRight, Wrench, LayoutGrid } from "lucide-react";
+import { ChevronRight, Wrench, LayoutGrid } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
 type Lang = "en" | "hi";
@@ -23,19 +23,6 @@ export default function ToolsCenter() {
       <section className="mt-7 space-y-3">
         <button onClick={() => navigate("/utilities")} className="flex w-full items-center gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-left shadow-sm">
           <LayoutGrid className="h-6 w-6 text-emerald-800" /><span className="flex-1 font-extrabold text-emerald-950">{hi ? "सभी यूटिलिटी और जरूरी टूल्स" : "All Utilities & Essential Tools"}</span><ChevronRight className="h-5 w-5 text-emerald-800" />
-        </button>
-        <button
-          onClick={() => navigate("/utilities/calculators")}
-          className="flex w-full items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 text-left shadow-sm transition active:scale-[.98] hover:shadow-md"
-        >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
-            <Calculator className="h-6 w-6" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="font-extrabold text-slate-900">{hi ? "कैलकुलेटर सेंटर" : "Calculator Center"}</h3>
-            <p className="mt-1 text-xs font-medium text-slate-500">{hi ? "सभी कैलकुलेटर और गणना टूल" : "All calculators and calculation tools"}</p>
-          </div>
-          <ChevronRight className="h-5 w-5 text-slate-300" />
         </button>
       </section>
     </div>
