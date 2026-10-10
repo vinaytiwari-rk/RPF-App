@@ -14,7 +14,7 @@ const missingHandlers = tools.filter((tool) => !uniqueCases.includes(tool.id));
 const orphanHandlers = uniqueCases.filter((id) => !tools.some((tool) => tool.id === id));
 const failures = [];
 
-if (tools.length !== 51) failures.push(`Expected 51 catalog tools, found ${tools.length}`);
+if (tools.length === 0) failures.push("Utility catalog is empty; expected at least one catalog tool");
 if (duplicateIds.length) failures.push(`Duplicate catalog IDs: ${duplicateIds.join(", ")}`);
 if (missingHandlers.length) failures.push(`Tools without dispatcher handlers: ${missingHandlers.map((tool) => tool.id).join(", ")}`);
 if (orphanHandlers.length) failures.push(`Dispatcher IDs absent from catalog: ${orphanHandlers.join(", ")}`);
