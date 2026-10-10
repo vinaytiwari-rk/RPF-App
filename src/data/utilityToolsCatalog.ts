@@ -62,17 +62,7 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     badge: "Form Mandate",
     keywords: ["slate", "dop", "date of photo", "candidate name", "passport photo", "exam form"]
   },
-  {
-    id: "exam_age_calc",
-    categoryId: "govt_forms",
-    titleEn: "Govt Exam Cut-Off Age Calculator",
-    titleHi: "सरकारी भर्ती कट-ऑफ आयु गणक",
-    descEn: "Calculate exact age in years, months and days as on official recruitment cut-off date.",
-    descHi: "भर्ती विज्ञापन की कट-ऑफ तारीख (e.g. 01/01/2026) पर अपनी सटीक आयु वर्ष, माह व दिन में निकालें।",
-    iconName: "Clock",
-    keywords: ["age", "cutoff", "exam age", "eligibility", "recruitment", "dob", "aayu"]
-  },
-  {
+    {
     id: "aadhaar_masker",
     categoryId: "govt_forms",
     titleEn: "ID Card Masker & Privacy Redactor",
@@ -180,37 +170,7 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
   },
 
   // 4. Agriculture & Farming
-  {
-    id: "fertilizer_seed_calc",
-    categoryId: "agriculture",
-    titleEn: "Fertilizer & Seed Rate Calculator",
-    titleHi: "खाद व बीज मात्रा गणक",
-    descEn: "Accurate Urea, DAP, Potash and seed requirement per Bigha/Acre for Wheat, Soy, Paddy.",
-    descHi: "रकबे (बीघा/एकड़) के आधार पर गेहूं, धान, सोयाबीन हेतु यूरिया, डीएपी, पोटाश व बीज की सही मात्रा।",
-    iconName: "Sprout",
-    keywords: ["khad", "fertilizer", "urea", "dap", "seed", "beej", "kisan", "crop"]
-  },
-  {
-    id: "crop_profit_planner",
-    categoryId: "agriculture",
-    titleEn: "Crop Cost & Profit Planner (फसल लागत डायरी)",
-    titleHi: "फसल लागत व शुद्ध मुनाफा डायरी",
-    descEn: "Log plowing, seed, irrigation, harvesting cost vs mandi sale return for net profit.",
-    descHi: "जुताई, बुवाई, खाद, दवाई और कटाई खर्च जोड़कर मंडी बिक्री पर शुद्ध बचत का ऑफलाइन हिसाब।",
-    iconName: "Coins",
-    keywords: ["crop cost", "profit", "fasal kharch", "kisan labh", "mandi"]
-  },
-  {
-    id: "pesticide_spray_ratio",
-    categoryId: "agriculture",
-    titleEn: "Pesticide Spray Pump Dilution Calculator",
-    titleHi: "कीटनाशक स्प्रे पंप घोल गणक",
-    descEn: "Calculate exact ml/gram chemical dose per 15-litre/20-litre water spray pump.",
-    descHi: "15 या 20 लीटर स्प्रे पंप हेतु कितने एमएल कीटनाशक या टॉनिक मिलाना है, उसका सटीक गणित।",
-    iconName: "Pipette",
-    keywords: ["pesticide", "spray", "pump", "kitnashak", "dawai ratio"]
-  },
-
+      
   // 5. Land & Measurement
   {
     id: "land_converter",
@@ -276,17 +236,7 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     iconName: "BookOpen",
     keywords: ["assignment", "cover page", "front page", "project", "college", "school"]
   },
-  {
-    id: "cgpa_percentage_calc",
-    categoryId: "education",
-    titleEn: "CGPA to Percentage Converter (All Boards)",
-    titleHi: "CGPA से प्रतिशत कन्वर्टर (सभी बोर्ड)",
-    descEn: "Official formula conversion for CBSE (x9.5), MP Board, AICTE, and State Universities.",
-    descHi: "सीबीएसई (9.5 फॉर्मूला), एमपी बोर्ड, एआईसीटीई व विश्वविद्यालय अनुसार सीजीपीए से प्रतिशत निकालें।",
-    iconName: "GraduationCap",
-    keywords: ["cgpa", "percentage", "sgpa", "marks", "cbse", "percent"]
-  },
-  {
+    {
     id: "student_leave_application",
     categoryId: "education",
     titleEn: "School / College Leave Application",
@@ -341,17 +291,7 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     iconName: "CheckSquare",
     keywords: ["cheque", "bank check", "deposit slip", "bank guide", "draft cheque"]
   },
-  {
-    id: "gramin_byaj_calc",
-    categoryId: "banking_finance",
-    titleEn: "Gramin Monthly Interest (₹ सैकड़ा ब्याज)",
-    titleHi: "ग्रामीण मासिक ब्याज गणक (₹ सैकड़ा हिसाब)",
-    descEn: "Transparent calculation for 1%, 2%, 3% per month village interest with exact days.",
-    descHi: "गांव-देहात में चलने वाले ₹1, ₹2, ₹3 सैकड़ा मासिक ब्याज और मूलधन का पारदर्शी दिन-वार हिसाब।",
-    iconName: "Percent",
-    keywords: ["byaj", "gramin byaj", "saikda", "monthly interest", "sahukari", "sood"]
-  },
-  {
+    {
     id: "daily_wages_slip",
     categoryId: "banking_finance",
     titleEn: "Daily Wages & Labor Attendance Register",
@@ -438,17 +378,7 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
   },
 
   // 12. Women & Child Care
-  {
-    id: "pregnancy_edd_calc",
-    categoryId: "women_child",
-    titleEn: "Pregnancy Due Date & Week Calculator (EDD)",
-    titleHi: "गर्भावस्था सप्ताह व अनुमानित प्रसव तिथि (EDD)",
-    descEn: "Calculate estimated date of delivery (EDD) and current pregnancy week from Last Period (LMP).",
-    descHi: "अंतिम मासिक धर्म (LMP) तारीख डालकर अनुमानित प्रसव तारीख, वर्तमान हफ्ता व जरूरी सलाह जानें।",
-    iconName: "Baby",
-    keywords: ["pregnancy", "edd", "due date", "garbhvastha", "delivery date", "lmp"]
-  },
-  {
+    {
     id: "child_vaccine_tracker",
     categoryId: "women_child",
     titleEn: "Child Vaccination Schedule (जन्म से 5 वर्ष)",
@@ -502,29 +432,9 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     iconName: "CalendarCheck",
     keywords: ["milk register", "maid attendance", "doodh hisab", "kamwali", "daily attendance"]
   },
-  {
-    id: "electricity_estimator",
-    categoryId: "home_ration",
-    titleEn: "Electricity Appliance Watt & Unit Estimator",
-    titleHi: "घरेलू बिजली उपकरण व यूनिट गणक",
-    descEn: "Estimate monthly power units (kWh) consumed by AC, Fan, Refrigerator and approx cost.",
-    descHi: "पंखा, एसी, फ्रिज, मोटर कितने घंटे चले = कितनी यूनिट बिजली बनी और कितना बिल आएगा, इसका आकलन।",
-    iconName: "Zap",
-    keywords: ["electricity", "bijli unit", "bill estimator", "watt", "power consumption"]
-  },
-
+  
   // 15. Friends & Travel
-  {
-    id: "split_bill_expense",
-    categoryId: "friends_travel",
-    titleEn: "Split Bill & Group Expense Calculator",
-    titleHi: "दोस्तों का खर्चा बंटवारा (Split Bill)",
-    descEn: "Calculate who paid what and who owes whom for parties, group travel and shared dinners.",
-    descHi: "पार्टी, पिकनिक या डिनर में किसने कितना दिया, और किसे किसको कितने रुपये देने हैं (खर्चा बराबर)।",
-    iconName: "Users2",
-    keywords: ["split bill", "hisaab", "dost kharcha", "group expense", "party share"]
-  },
-  {
+    {
     id: "trip_packing_checklist",
     categoryId: "friends_travel",
     titleEn: "Smart Travel Luggage Packing Checklist",
@@ -534,17 +444,7 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     iconName: "Luggage",
     keywords: ["packing", "travel", "yatra", "luggage", "safar checklist"]
   },
-  {
-    id: "trip_fuel_mileage",
-    categoryId: "friends_travel",
-    titleEn: "Trip Fuel & Mileage Sharing Calculator",
-    titleHi: "सफर पेट्रोल-डीजल खर्च शेयरिंग गणक",
-    descEn: "Total trip kilometers, vehicle mileage and fuel rate divided among travelers.",
-    descHi: "गाड़ी से कुल किमी यात्रा, माइलेज और पेट्रोल रेट डालकर प्रति व्यक्ति खर्च तुरंत निकालें।",
-    iconName: "Fuel",
-    keywords: ["fuel", "mileage", "petrol cost", "trip cost", "car sharing"]
-  },
-
+  
   // 16. Cyber Safety & Media
   {
     id: "scam_alert_checklist",
@@ -739,32 +639,7 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descEn: "Convert integers between binary, octal, decimal and hex.", descHi: "Number bases बदलें।", iconName: "Calculator", badge: "Offline",
     keywords: ["number base converter", "utility", "offline"]
   },
-  {
-    id: "percentage_calculator", categoryId: "cyber_media", titleEn: "Percentage Calculator", titleHi: "प्रतिशत गणक",
-    descEn: "Calculate percentage between two values.", descHi: "प्रतिशत निकालें।", iconName: "Percent", badge: "Offline",
-    keywords: ["percentage calculator", "utility", "offline"]
-  },
-  {
-    id: "date_difference", categoryId: "cyber_media", titleEn: "Date Difference Calculator", titleHi: "तारीख अंतर गणक",
-    descEn: "Calculate days between two dates.", descHi: "दो तारीखों के बीच दिन गिनें।", iconName: "CalendarDays", badge: "Offline",
-    keywords: ["date difference", "utility", "offline"]
-  },
-  {
-    id: "age_calculator", categoryId: "cyber_media", titleEn: "Age Calculator", titleHi: "आयु गणक",
-    descEn: "Calculate age from date of birth.", descHi: "जन्मतिथि से आयु निकालें।", iconName: "Cake", badge: "Offline",
-    keywords: ["age calculator", "utility", "offline"]
-  },
-  {
-    id: "tip_calculator", categoryId: "cyber_media", titleEn: "Tip & Bill Split Calculator", titleHi: "टिप व बिल बाँटें",
-    descEn: "Calculate tip and per-person total.", descHi: "टिप और प्रति व्यक्ति बिल निकालें।", iconName: "Receipt", badge: "Offline",
-    keywords: ["tip calculator", "utility", "offline"]
-  },
-  {
-    id: "loan_payment_calculator", categoryId: "cyber_media", titleEn: "Loan EMI Calculator", titleHi: "लोन EMI गणक",
-    descEn: "Estimate monthly loan EMI.", descHi: "लोन EMI का अनुमान लगाएँ।", iconName: "Landmark", badge: "Offline",
-    keywords: ["loan payment calculator", "utility", "offline"]
-  },
-  {
+            {
     id: "unit_length_converter", categoryId: "cyber_media", titleEn: "Length Unit Converter", titleHi: "लंबाई इकाई कन्वर्टर",
     descEn: "Convert common length units.", descHi: "लंबाई की इकाइयाँ बदलें।", iconName: "Ruler", badge: "Offline",
     keywords: ["unit length converter", "utility", "offline"]
@@ -819,17 +694,7 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descEn: "Convert comma-separated data to tab-separated or semicolon-separated data.", descHi: "Comma-separated data को tab या semicolon में बदलें।", iconName: "Columns", badge: "Offline",
     keywords: ["csv delimiter converter", "utility", "offline"]
   },
-  {
-    id: "date_add_subtract", categoryId: "cyber_media", titleEn: "Date Add/Subtract Calculator", titleHi: "तारीख जोड़ें/घटाएँ",
-    descEn: "Add or subtract days from a date.", descHi: "तारीख में दिन जोड़ें या घटाएँ।", iconName: "CalendarPlus", badge: "Offline",
-    keywords: ["date add subtract", "utility", "offline"]
-  },
-  {
-    id: "business_days_calculator", categoryId: "cyber_media", titleEn: "Business Days Calculator", titleHi: "कार्यदिवस गणक",
-    descEn: "Count weekdays between two dates, excluding weekends.", descHi: "दो तारीखों के बीच सप्ताहांत हटाकर कार्यदिवस गिनें।", iconName: "BriefcaseBusiness", badge: "Offline",
-    keywords: ["business days calculator", "utility", "offline"]
-  },
-  {
+      {
     id: "unit_area_converter", categoryId: "cyber_media", titleEn: "Area Unit Converter", titleHi: "क्षेत्रफल इकाई कन्वर्टर",
     descEn: "Convert square meters, square feet, acres and hectares.", descHi: "वर्ग मीटर, वर्ग फुट, एकड़ और हेक्टेयर बदलें।", iconName: "Ruler", badge: "Offline",
     keywords: ["unit area converter", "utility", "offline"]
@@ -849,17 +714,7 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descEn: "Convert bytes, KB, MB and GB using decimal or binary units.", descHi: "Bytes, KB, MB और GB बदलें।", iconName: "HardDrive", badge: "Offline",
     keywords: ["data size converter", "utility", "offline"]
   },
-  {
-    id: "discount_calculator", categoryId: "cyber_media", titleEn: "Discount Calculator", titleHi: "छूट गणक",
-    descEn: "Calculate discounted price and savings.", descHi: "छूट के बाद कीमत व बचत निकालें।", iconName: "BadgePercent", badge: "Offline",
-    keywords: ["discount calculator", "utility", "offline"]
-  },
-  {
-    id: "compound_interest_calculator", categoryId: "cyber_media", titleEn: "Compound Interest Calculator", titleHi: "चक्रवृद्धि ब्याज गणक",
-    descEn: "Estimate compound interest from principal, rate, years and compounding frequency.", descHi: "मूलधन, दर, समय और compounding से ब्याज निकालें।", iconName: "ChartNoAxesCombined", badge: "Offline",
-    keywords: ["compound interest calculator", "utility", "offline"]
-  },
-  {
+      {
     id: "random_team_splitter", categoryId: "cyber_media", titleEn: "Random Team Splitter", titleHi: "रैंडम टीम बाँटें",
     descEn: "Split a list of names into a chosen number of random teams.", descHi: "नामों को random टीमों में बाँटें।", iconName: "Users", badge: "Offline",
     keywords: ["random team splitter", "utility", "offline"]
