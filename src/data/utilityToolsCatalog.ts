@@ -22,6 +22,7 @@ export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "all", titleEn: "All Tools", titleHi: "सभी टूल्स", iconName: "LayoutGrid", accent: "from-emerald-600 to-teal-700" },
   { id: "pdf_tools", titleEn: "PDF Tools (30)", titleHi: "PDF टूल्स (30)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
   { id: "image_tools", titleEn: "Image Tools (40)", titleHi: "इमेज टूल्स (40)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
+  { id: "word_text_tools", titleEn: "Word & Text Tools (40)", titleHi: "वर्ड व टेक्स्ट टूल्स (40)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
   { id: "govt_forms", titleEn: "Govt Forms & Recruitment", titleHi: "सरकारी भर्ती व फॉर्म", iconName: "BadgeCheck", accent: "from-amber-600 to-orange-700" },
   { id: "pdf_docs", titleEn: "PDF & Document Office", titleHi: "दस्तावेज व PDF ऑफिस", iconName: "FileText", accent: "from-blue-600 to-indigo-700" },
   { id: "legal_drafts", titleEn: "Legal Drafts & Notices", titleHi: "कानूनी आवेदन व प्रारूप", iconName: "Scale", accent: "from-purple-600 to-indigo-800" },
@@ -1219,5 +1220,208 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "img_frame_extractor", categoryId: "image_tools", titleEn: "Image Frame Extractor", titleHi: "इमेज फ्रेम एक्सट्रैक्टर",
     descEn: "Capture high-resolution still frames and render crisp photo snapshots.", descHi: "ग्राफिक्स से सटीक हाई-क्वालिटी स्थिर फ्रेम कैप्चर करें।", iconName: "FileImage", badge: "100% Offline",
     keywords: ["frame extractor", "snapshot", "still frame"]
+  },
+  // -----------------------------------------------------------------
+  // 18. Phase 5: Word & Text Tools Suite (40 Tools)
+  // -----------------------------------------------------------------
+  {
+    id: "text_docx_to_txt", categoryId: "word_text_tools", titleEn: "DOCX to TXT", titleHi: "DOCX से सादा टेक्स्ट (TXT)",
+    descEn: "Extract pure text from Word DOCX documents completely offline.", descHi: "वर्ड DOCX फाइल से बिना इंटरनेट सारा टेक्स्ट निकालें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["docx to txt", "word to text", "extract text"]
+  },
+  {
+    id: "text_txt_to_docx", categoryId: "word_text_tools", titleEn: "TXT to DOCX", titleHi: "TXT से वर्ड DOCX फाइल",
+    descEn: "Convert plain text files into editable Microsoft Word documents.", descHi: "सादे टेक्स्ट को माइक्रोसॉफ्ट वर्ड DOCX में बदलें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["txt to docx", "text to word", "generate docx"]
+  },
+  {
+    id: "text_docx_to_md", categoryId: "word_text_tools", titleEn: "DOCX to Markdown", titleHi: "DOCX से Markdown कनवर्टर",
+    descEn: "Convert Word DOCX files into clean Markdown format.", descHi: "वर्ड डॉक्यूमेंट को Markdown (.md) फाइल में बदलें।", iconName: "FileCode", badge: "100% Offline",
+    keywords: ["docx to markdown", "word to md", "markdown converter"]
+  },
+  {
+    id: "text_md_to_docx", categoryId: "word_text_tools", titleEn: "Markdown to DOCX", titleHi: "Markdown से Word DOCX",
+    descEn: "Generate standard formatted Word document from Markdown notes.", descHi: "Markdown नोट्स को सीधे Word DOCX में परिवर्तित करें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["markdown to docx", "md to word", "export docx"]
+  },
+  {
+    id: "text_md_to_html", categoryId: "word_text_tools", titleEn: "Markdown to HTML", titleHi: "Markdown से HTML कनवर्टर",
+    descEn: "Convert Markdown headings, bold, code into HTML markup.", descHi: "Markdown को साफ़ सुथरे HTML कोड में बदलें।", iconName: "FileCode", badge: "100% Offline",
+    keywords: ["markdown to html", "md to html", "render markdown"]
+  },
+  {
+    id: "text_html_to_md", categoryId: "word_text_tools", titleEn: "HTML to Markdown", titleHi: "HTML से Markdown कनवर्टर",
+    descEn: "Clean HTML tags and convert web articles into Markdown.", descHi: "HTML कोड से साफ़ Markdown नोट्स तैयार करें।", iconName: "FileCode", badge: "100% Offline",
+    keywords: ["html to markdown", "html to md", "web to markdown"]
+  },
+  {
+    id: "text_txt_to_html", categoryId: "word_text_tools", titleEn: "TXT to HTML", titleHi: "TXT से HTML पैराग्राफ",
+    descEn: "Wrap plain text paragraphs with standard HTML tags.", descHi: "सादे टेक्स्ट को HTML पैराग्राफ कोड में बदलें।", iconName: "FileCode", badge: "100% Offline",
+    keywords: ["txt to html", "text to web", "html converter"]
+  },
+  {
+    id: "text_html_to_txt", categoryId: "word_text_tools", titleEn: "HTML to TXT", titleHi: "HTML से सादा टेक्स्ट",
+    descEn: "Strip all HTML tags and retrieve readable plain text.", descHi: "HTML टैग्स हटाकर केवल पढ़ने योग्य टेक्स्ट निकालें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["html to txt", "strip html", "clean text"]
+  },
+  {
+    id: "text_rtf_to_txt", categoryId: "word_text_tools", titleEn: "RTF to TXT", titleHi: "RTF से सादा टेक्स्ट",
+    descEn: "Remove RTF formatting tags and extract pure plain text.", descHi: "रिच टेक्स्ट फॉर्मेट (RTF) से टेक्स्ट निकालें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["rtf to txt", "rtf converter", "strip rtf"]
+  },
+  {
+    id: "text_case_converter", categoryId: "word_text_tools", titleEn: "Text Case Converter", titleHi: "टेक्स्ट केस कनवर्टर",
+    descEn: "Change text cases between uppercase, lowercase, title, and sentence.", descHi: "टेक्स्ट को विभिन्न केस (बड़ा, छोटा, टाइटल) में बदलें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["case converter", "change case", "text casing"]
+  },
+  {
+    id: "text_uppercase", categoryId: "word_text_tools", titleEn: "UPPERCASE Converter", titleHi: "UPPERCASE (सभी बड़े अक्षर)",
+    descEn: "Convert all letters in the text to UPPERCASE quickly.", descHi: "टेक्स्ट के सभी अक्षरों को कैपिटल (UPPERCASE) करें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["uppercase", "capital letters", "all caps"]
+  },
+  {
+    id: "text_lowercase", categoryId: "word_text_tools", titleEn: "lowercase Converter", titleHi: "lowercase (सभी छोटे अक्षर)",
+    descEn: "Convert entire text to lowercase small letters.", descHi: "टेक्स्ट के सभी अक्षरों को छोटे (lowercase) में बदलें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["lowercase", "small letters", "lower"]
+  },
+  {
+    id: "text_title_case", categoryId: "word_text_tools", titleEn: "Title Case Converter", titleHi: "Title Case (शीर्षक केस)",
+    descEn: "Capitalize the First Letter of Each Word in your text.", descHi: "प्रत्येक शब्द के पहले अक्षर को बड़ा (Capital) बनाएं।", iconName: "Type", badge: "100% Offline",
+    keywords: ["title case", "capitalize words", "heading case"]
+  },
+  {
+    id: "text_sentence_case", categoryId: "word_text_tools", titleEn: "Sentence Case Converter", titleHi: "Sentence Case (वाक्य केस)",
+    descEn: "Capitalize only the first letter of each sentence naturally.", descHi: "हर वाक्य का पहला अक्षर कैपिटल करें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["sentence case", "grammar case", "capitalize sentence"]
+  },
+  {
+    id: "text_reverser", categoryId: "word_text_tools", titleEn: "Text Reverser", titleHi: "टेक्स्ट उल्टा करें (Reverse)",
+    descEn: "Reverse letter order backwards across the entire string.", descHi: "टेक्स्ट के सभी अक्षरों को विपरीत क्रम में उलटें।", iconName: "RefreshCw", badge: "100% Offline",
+    keywords: ["text reverser", "reverse text", "backward string"]
+  },
+  {
+    id: "text_word_counter", categoryId: "word_text_tools", titleEn: "Word Counter", titleHi: "शब्द गणक (Word Counter)",
+    descEn: "Count words, characters, and paragraphs in your document.", descHi: "दस्तावेज़ में कुल शब्द, अक्षर और पैराग्राफ गिनें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["word counter", "count words", "word count"]
+  },
+  {
+    id: "text_char_counter", categoryId: "word_text_tools", titleEn: "Character Counter", titleHi: "अक्षर गणक (Char Counter)",
+    descEn: "Count total characters, letters, digits, and spaces.", descHi: "कुल वर्ण, अंक, खाली स्थान और अक्षर गिनें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["character counter", "char count", "count letters"]
+  },
+  {
+    id: "text_line_counter", categoryId: "word_text_tools", titleEn: "Line Counter", titleHi: "पंक्ति गणक (Line Counter)",
+    descEn: "Count total lines, non-empty lines, and blank rows.", descHi: "कुल पंक्तियां, भरी हुई पंक्तियां और रिक्त लाइनें गिनें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["line counter", "count lines", "rows count"]
+  },
+  {
+    id: "text_sort_alpha", categoryId: "word_text_tools", titleEn: "Text Sorter Alphabetically", titleHi: "वर्णमाला क्रमबद्धता (A-Z)",
+    descEn: "Sort text lines alphabetically from A to Z in natural order.", descHi: "पंक्तियों को वर्णमाला के अनुसार (A से Z) क्रमबद्ध करें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["sort lines", "alphabetical sort", "order lines"]
+  },
+  {
+    id: "text_line_dedup", categoryId: "word_text_tools", titleEn: "Text Line Deduplicator", titleHi: "डुप्लीकेट लाइन रिमूवर",
+    descEn: "Remove duplicate and repeated lines from lists instantly.", descHi: "सूची में से बार-बार आने वाली पंक्तियाँ हटाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["deduplicate lines", "remove duplicates", "unique lines"]
+  },
+  {
+    id: "text_whitespace_cleaner", categoryId: "word_text_tools", titleEn: "Whitespace Cleaner", titleHi: "अतिरिक्त स्पेस हटाएं",
+    descEn: "Clean up trailing spaces, excessive tabs, and irregular whitespace.", descHi: "अनावश्यक अतिरिक्त खाली स्थान (स्पेस) साफ़ करें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["clean whitespace", "trim spaces", "remove extra space"]
+  },
+  {
+    id: "text_blank_line_remover", categoryId: "word_text_tools", titleEn: "Blank Line Remover", titleHi: "खाली पंक्तियाँ हटाएं",
+    descEn: "Remove empty and blank lines across large texts cleanly.", descHi: "टेक्स्ट में से सभी खाली और रिक्त लाइनें हटाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["remove blank lines", "empty lines remover", "compact text"]
+  },
+  {
+    id: "text_line_number_adder", categoryId: "word_text_tools", titleEn: "Line Number Adder", titleHi: "पंक्ति क्रमांक जोड़ें (1, 2, 3...)",
+    descEn: "Add numbered prefix (1., 2., 3...) to each line in text.", descHi: "प्रत्येक पंक्ति के आगे नंबर (क्रम संख्या) जोड़ें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["add line numbers", "number lines", "list numbering"]
+  },
+  {
+    id: "text_line_number_remover", categoryId: "word_text_tools", titleEn: "Line Number Remover", titleHi: "पंक्ति क्रमांक हटाएं",
+    descEn: "Strip leading numbers, bullets, and numbering prefixes from lines.", descHi: "पंक्तियों के आगे से नंबर और बुलेट्स हटाएं।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["remove line numbers", "strip numbers", "unnumber lines"]
+  },
+  {
+    id: "text_prefix_adder", categoryId: "word_text_tools", titleEn: "Text Prefix Adder", titleHi: "प्रीफिक्स (Prefix) एडर",
+    descEn: "Add custom prefix text or symbol to the start of every line.", descHi: "प्रत्येक पंक्ति के प्रारंभ में कोई भी शब्द या चिन्ह जोड़ें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["add prefix", "line prefix", "prepend text"]
+  },
+  {
+    id: "text_suffix_adder", categoryId: "word_text_tools", titleEn: "Text Suffix Adder", titleHi: "सफिक्स (Suffix) एडर",
+    descEn: "Append custom suffix character or note to the end of every line.", descHi: "प्रत्येक पंक्ति के अंत में कोई भी शब्द या चिन्ह जोड़ें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["add suffix", "line suffix", "append text"]
+  },
+  {
+    id: "text_wrap_formatter", categoryId: "word_text_tools", titleEn: "Text Wrap Formatter", titleHi: "टेक्स्ट रैप फॉर्मेटर",
+    descEn: "Format long text by wrapping lines cleanly at specified column limit.", descHi: "लंबी लाइनों को निर्धारित सीमा (80 वर्ण) पर स्वतः मोड़ें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["text wrap", "line wrap", "column format"]
+  },
+  {
+    id: "text_word_frequency", categoryId: "word_text_tools", titleEn: "Word Frequency Analyzer", titleHi: "शब्द आवृत्ति विश्लेषक",
+    descEn: "Analyze top recurring words and calculate occurrence percentages.", descHi: "दस्तावेज़ में सबसे अधिक इस्तेमाल हुए शब्दों की सूची देखें।", iconName: "Search", badge: "100% Offline",
+    keywords: ["word frequency", "keyword density", "word count analysis"]
+  },
+  {
+    id: "text_stopword_remover", categoryId: "word_text_tools", titleEn: "Stopword Remover", titleHi: "स्टॉपवर्ड्स रिमूवर",
+    descEn: "Filter out common filler and stop words for NLP and search.", descHi: "व्याकरणिक सामान्य शब्द (is, the, का, के) हटाकर मुख्य शब्द रखें।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["stopword remover", "nlp text", "clean keywords"]
+  },
+  {
+    id: "text_unicode_normalizer", categoryId: "word_text_tools", titleEn: "Unicode Normalizer", titleHi: "Unicode नॉर्मलाइज़र",
+    descEn: "Normalize Unicode accented glyphs and special character variants.", descHi: "यूनिकोड और विशेष अक्षरों को मानक रूप में सामान्यीकृत करें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["unicode normalizer", "nfc normalizer", "clean unicode"]
+  },
+  {
+    id: "text_smart_quotes", categoryId: "word_text_tools", titleEn: "Smart Quote Converter", titleHi: "स्मार्ट कोट्स से सादा कोट्स",
+    descEn: "Convert curly smart quotes into standard straight ASCII quotes.", descHi: "घुमावदार स्मार्ट कोट्स को सीधे मानक कोट्स में बदलें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["smart quotes", "curly quotes", "straight quotes"]
+  },
+  {
+    id: "text_diff_viewer", categoryId: "word_text_tools", titleEn: "Text Difference Viewer", titleHi: "टेक्स्ट अंतर दर्शक (Diff)",
+    descEn: "Compare two documents side-by-side and highlight unique lines.", descHi: "दो टेक्स्ट फाइलों में अंतर देखें कि क्या नया जुड़ा या हटा।", iconName: "GitCompare", badge: "100% Offline",
+    keywords: ["text diff", "compare text", "find differences"]
+  },
+  {
+    id: "text_inline_diff", categoryId: "word_text_tools", titleEn: "Inline Text Diff", titleHi: "इनलाइन टेक्स्ट अंतर (Inline Diff)",
+    descEn: "View word-by-word additions and deletions inline in real-time.", descHi: "शब्द-दर-शब्द बदलावों को सीधे वाक्य में देखें।", iconName: "GitCompare", badge: "100% Offline",
+    keywords: ["inline diff", "word diff", "track changes"]
+  },
+  {
+    id: "text_unified_diff", categoryId: "word_text_tools", titleEn: "Unified Diff Generator", titleHi: "यूनिफाइड डिफ जनरेटर (Patch)",
+    descEn: "Generate standard unified diff patch representation (+ / -).", descHi: "मानक यूनिफाइड डिफ प्रारूप (+ और -) में अंतर तैयार करें।", iconName: "GitCompare", badge: "100% Offline",
+    keywords: ["unified diff", "patch generator", "git diff"]
+  },
+  {
+    id: "text_regex_tester", categoryId: "word_text_tools", titleEn: "Regex Tester", titleHi: "रेगेक्स (Regex) टेस्टर",
+    descEn: "Test regular expressions and inspect matched tokens in text.", descHi: "रेगुलर एक्सप्रेशन पैटर्न चलाकर मैच की जाँच करें।", iconName: "Search", badge: "100% Offline",
+    keywords: ["regex tester", "test regex", "regular expression"]
+  },
+  {
+    id: "text_regex_validator", categoryId: "word_text_tools", titleEn: "Regex Validator", titleHi: "रेगेक्स वैधता जांच (Validator)",
+    descEn: "Validate regular expression syntax and identify parsing errors.", descHi: "रेगेक्स सिंटैक्स सही है या अमान्य, तुरंत जांचें।", iconName: "Check", badge: "100% Offline",
+    keywords: ["regex validator", "validate regex", "check pattern"]
+  },
+  {
+    id: "text_search_replace", categoryId: "word_text_tools", titleEn: "Text Search and Replace", titleHi: "खोजें और बदलें (Find & Replace)",
+    descEn: "Search occurrences of words and replace them across entire text.", descHi: "पूरे टेक्स्ट में से कोई भी शब्द खोजें और तुरंत बदलें।", iconName: "Search", badge: "100% Offline",
+    keywords: ["search replace", "find replace", "replace words"]
+  },
+  {
+    id: "text_snippet_extractor", categoryId: "word_text_tools", titleEn: "Text Snippet Extractor", titleHi: "टेक्स्ट स्निपेट एक्सट्रैक्टर",
+    descEn: "Extract concise overview summary snippets from large articles.", descHi: "बड़ी सामग्री में से संक्षिप्त मुख्य स्निपेट निकालें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["extract snippet", "summary snippet", "text excerpt"]
+  },
+  {
+    id: "text_punctuation_remover", categoryId: "word_text_tools", titleEn: "Punctuation Remover", titleHi: "विराम चिन्ह रिमूवर",
+    descEn: "Strip all punctuation marks, commas, and dots from sentences.", descHi: "टेक्स्ट से सभी विराम चिन्ह, कॉमा, और बिंदु हटाएं।", iconName: "Type", badge: "100% Offline",
+    keywords: ["punctuation remover", "strip punctuation", "clean symbols"]
+  },
+  {
+    id: "text_similarity_comparator", categoryId: "word_text_tools", titleEn: "Text Similarity Comparator", titleHi: "टेक्स्ट समानता गणक (%)",
+    descEn: "Calculate Jaccard content similarity score between two texts.", descHi: "दो लेखों के बीच समानता प्रतिशत (%) और कॉमन शब्द निकालें।", iconName: "GitCompare", badge: "100% Offline",
+    keywords: ["text similarity", "similarity score", "compare content"]
   }
 ];

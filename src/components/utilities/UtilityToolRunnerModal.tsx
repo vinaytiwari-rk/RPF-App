@@ -13,6 +13,7 @@ import { UtilityToolDefinition } from "../../data/utilityToolsCatalog";
 import PdfToolsEngine from "./engines/pdfToolsEngine";
 import ImageToolsEngine from "./engines/imageToolsEngine";
 import ImageAdvancedToolsEngine from "./engines/imageAdvancedToolsEngine";
+import TextToolsEngine from "./engines/textToolsEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -422,6 +423,49 @@ function ToolEngineDispatcher({
     case "img_splitter":
     case "img_frame_extractor":
       return <ImageAdvancedToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    // 20. 100% Offline Word & Text Tools Suite (Phase 5 - 40 Tools)
+    case "text_docx_to_txt":
+    case "text_txt_to_docx":
+    case "text_docx_to_md":
+    case "text_md_to_docx":
+    case "text_md_to_html":
+    case "text_html_to_md":
+    case "text_txt_to_html":
+    case "text_html_to_txt":
+    case "text_rtf_to_txt":
+    case "text_case_converter":
+    case "text_uppercase":
+    case "text_lowercase":
+    case "text_title_case":
+    case "text_sentence_case":
+    case "text_reverser":
+    case "text_word_counter":
+    case "text_char_counter":
+    case "text_line_counter":
+    case "text_sort_alpha":
+    case "text_line_dedup":
+    case "text_whitespace_cleaner":
+    case "text_blank_line_remover":
+    case "text_line_number_adder":
+    case "text_line_number_remover":
+    case "text_prefix_adder":
+    case "text_suffix_adder":
+    case "text_wrap_formatter":
+    case "text_word_frequency":
+    case "text_stopword_remover":
+    case "text_unicode_normalizer":
+    case "text_smart_quotes":
+    case "text_diff_viewer":
+    case "text_inline_diff":
+    case "text_unified_diff":
+    case "text_regex_tester":
+    case "text_regex_validator":
+    case "text_search_replace":
+    case "text_snippet_extractor":
+    case "text_punctuation_remover":
+    case "text_similarity_comparator":
+      return <TextToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (
