@@ -42,6 +42,7 @@ if (failures.length) {
 }
 console.log("SAMAHIT static audit PASSED");
 console.log(` - Catalog tools: ${tools.length}`);
+console.log(" - Audit evaluated catalog and dispatcher from the same checked-out commit");
 console.log(` - Unique dispatcher handlers: ${uniqueCases.length}`);
 console.log(" - Catalog/dispatcher mapping: complete, no duplicates");
 console.log(" - Native Android save path: present in both utility interfaces");
