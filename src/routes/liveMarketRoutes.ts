@@ -1,5 +1,6 @@
 import express from "express";
 import axios from "axios";
+import { getJagannathaPanchang } from "../services/jagannathaHoraService.js";
 import {
   getVerifiedMarketSummary,
   getLiveDrikPanchang,
@@ -55,15 +56,22 @@ router.get("/api/public/market-summary", async (req, res) => {
 });
 
 // 2. Drik Panchang
-router.get("/api/public/live-panchang", async (_req, res) => {
-  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+router.get("/api/public/live-panchang", async (req, res) => {
+  res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=300");
   try {
-    const city = typeof _req.query.city === "string" ? _req.query.city : undefined;
-    const state = typeof _req.query.state === "string" ? _req.query.state : undefined;
-    const data = await getLiveDrikPanchang(city, state);
+    const city = typeof req.query.city === "string" ? req.query.city : "bhopal";
+    const state = typeof req.query.state === "string" ? req.query.state : undefined;
+    const date = typeof req.query.date === "string" ? req.query.date : undefined;
+    const latitude = req.query.lat !== undefined ? Number(req.query.lat) : undefined;
+    const longitude = req.query.lon !== undefined ? Number(req.query.lon) : undefined;
+    if ((latitude !== undefined && !Number.isFinite(latitude)) || (longitude !== undefined && !Number.isFinite(longitude))) {
+      return res.status(400).json({ success: false, error: "Invalid latitude/longitude" });
+    }
+    const data = await getJagannathaPanchang({ city, state, date, latitude, longitude });
     return res.json({ success: true, data });
   } catch (error: any) {
-    return res.status(500).json({ success: false, error: "Unable to load panchang" });
+    console.error("Jagannatha Hora Panchang request failed:", error?.response?.data || error?.message || error);
+    return res.status(502).json({ success: false, error: "Live Vedic Panchang is temporarily unavailable" });
   }
 });
 
