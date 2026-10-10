@@ -195,7 +195,30 @@ export default function LiveTVStudio() {
       );
 
       if (res.data?.success === false) throw new Error(res.data?.error || "Publish failed");
-      toast.success("Broadcast channels live on mobile & web!", { id: toastId });
+
+      // Read the persisted CMS state back before telling administrators that media is live.
+      // This catches API responses that acknowledge a publish while the public CMS remains stale.
+      const verifyResponse = await axios.get("/api/cms", {
+        params: { _verify: Date.now() },
+        headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+      });
+      const savedCms = verifyResponse.data?.cms || verifyResponse.data?.data || {};
+      const sameMediaEntries = (expected: Array<{ id?: string; name?: string; url?: string; enabled?: boolean }>, actual: unknown) => {
+        if (!Array.isArray(actual) || actual.length !== expected.length) return false;
+        return expected.every((item) => actual.some((saved: any) =>
+          (item.id && saved?.id === item.id) ||
+          (!item.id && saved?.name?.trim().toLocaleLowerCase() === item.name?.trim().toLocaleLowerCase() && saved?.url === item.url)
+        ));
+      };
+      const mediaMatches =
+        sameMediaEntries(tvChannels, savedCms.liveTvChannels) &&
+        sameMediaEntries(radioStations, savedCms.internetRadioStations) &&
+        sameMediaEntries(epapers, savedCms.epapers);
+      if (!mediaMatches) {
+        throw new Error("Publish was accepted, but the saved media catalogue did not match. Reload CMS and verify the server state.");
+      }
+
+      toast.success("Broadcast channels saved and verified on the server.", { id: toastId });
     } catch (e: any) {
       toast.error(e?.response?.data?.error || "Save failed", { id: toastId });
     } finally {
