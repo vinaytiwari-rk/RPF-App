@@ -19,6 +19,7 @@ import {
 import { useApp } from "../context/AppContext";
 import { openExternalLink } from "../utils/browser";
 import BrandLoader from "../components/BrandLoader";
+import LiveVerifiedMarketSection from "../components/LiveVerifiedMarketSection";
 
 const REMOVED_SERVICE_IDS = new Set<string>(["countries","earthquakes","fuel-tracker","gps-toolkit","vitals","medications","medical-dict","period-tracker","child-tracker","resume-builder","doc-scanner","ai-chat","story-library","decision-maker","morse-code","habit-tracker","fasting-tracker","typing-speed","quick-calculator"]);
 
@@ -253,6 +254,9 @@ export default function Services() {
             {isHi ? "सत्यापित नागरिक कल्याण कार्यक्रम और आधिकारिक पोर्टल खोजें" : "Discover verified citizen welfare programs & official portals"}
           </p>
         </div>
+
+        {/* Live Market moved here from Home; Panchang remains on Home. */}
+        <LiveVerifiedMarketSection mode="market" />
 
         {/* Search Input */}
         <div className="relative">
