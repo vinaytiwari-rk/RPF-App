@@ -159,8 +159,6 @@ function ToolEngineDispatcher({
       return <GovtResizerEngine isHi={isHi} downloadBlob={downloadBlob} />;
     case "name_date_slate":
       return <NameDateSlateEngine isHi={isHi} downloadBlob={downloadBlob} />;
-    case "exam_age_calc":
-      return <ExamAgeCalcEngine isHi={isHi} />;
     case "aadhaar_masker":
       return <AadhaarMaskerEngine isHi={isHi} downloadBlob={downloadBlob} />;
 
@@ -186,12 +184,6 @@ function ToolEngineDispatcher({
       return <RtiDrafterEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     // 4. Agriculture & Farming
-    case "fertilizer_seed_calc":
-      return <FertilizerCalcEngine isHi={isHi} />;
-    case "crop_profit_planner":
-      return <CropProfitPlannerEngine isHi={isHi} />;
-    case "pesticide_spray_ratio":
-      return <PesticideSprayEngine isHi={isHi} />;
 
     // 5. Land & Measurement
     case "land_converter":
@@ -210,8 +202,6 @@ function ToolEngineDispatcher({
     // 7. School & College
     case "assignment_front_page":
       return <AssignmentFrontPageEngine isHi={isHi} downloadBlob={downloadBlob} />;
-    case "cgpa_percentage_calc":
-      return <CgpaPercentageEngine isHi={isHi} />;
     case "student_leave_application":
       return <StudentLeaveEngine isHi={isHi} copyToClipboard={copyToClipboard} />;
 
@@ -226,8 +216,6 @@ function ToolEngineDispatcher({
     // 9. Banking & Rural Finance
     case "cheque_fill_guide":
       return <ChequeGuideEngine isHi={isHi} />;
-    case "gramin_byaj_calc":
-      return <GraminByajCalcEngine isHi={isHi} />;
     case "daily_wages_slip":
       return <DailyWagesSlipEngine isHi={isHi} downloadBlob={downloadBlob} />;
 
@@ -250,8 +238,6 @@ function ToolEngineDispatcher({
       return <EmergencyHelplinesEngine isHi={isHi} />;
 
     // 12. Women & Child Care
-    case "pregnancy_edd_calc":
-      return <PregnancyEddEngine isHi={isHi} />;
     case "child_vaccine_tracker":
       return <ChildVaccineEngine isHi={isHi} />;
 
@@ -266,16 +252,10 @@ function ToolEngineDispatcher({
       return <HomeRationPlannerEngine isHi={isHi} />;
     case "milk_maid_register":
       return <MilkMaidRegisterEngine isHi={isHi} />;
-    case "electricity_estimator":
-      return <ElectricityEstimatorEngine isHi={isHi} />;
 
     // 15. Friends & Travel
-    case "split_bill_expense":
-      return <SplitBillEngine isHi={isHi} />;
     case "trip_packing_checklist":
       return <TripPackingChecklistEngine isHi={isHi} />;
-    case "trip_fuel_mileage":
-      return <TripFuelMileageEngine isHi={isHi} />;
 
     // 16. Cyber Safety & Media
     case "scam_alert_checklist":
@@ -315,11 +295,6 @@ function ToolEngineDispatcher({
     case "xml_escape": return <ExtraUtilityEngine mode="xml_escape" isHi={isHi} />;
     case "unicode_inspector": return <ExtraUtilityEngine mode="unicode_inspector" isHi={isHi} />;
     case "number_base_converter": return <ExtraUtilityEngine mode="number_base_converter" isHi={isHi} />;
-    case "percentage_calculator": return <ExtraUtilityEngine mode="percentage_calculator" isHi={isHi} />;
-    case "date_difference": return <ExtraUtilityEngine mode="date_difference" isHi={isHi} />;
-    case "age_calculator": return <ExtraUtilityEngine mode="age_calculator" isHi={isHi} />;
-    case "tip_calculator": return <ExtraUtilityEngine mode="tip_calculator" isHi={isHi} />;
-    case "loan_payment_calculator": return <ExtraUtilityEngine mode="loan_payment_calculator" isHi={isHi} />;
     case "unit_length_converter": return <ExtraUtilityEngine mode="unit_length_converter" isHi={isHi} />;
     case "unit_weight_converter": return <ExtraUtilityEngine mode="unit_weight_converter" isHi={isHi} />;
     case "unit_temperature_converter": return <ExtraUtilityEngine mode="unit_temperature_converter" isHi={isHi} />;
@@ -331,14 +306,10 @@ function ToolEngineDispatcher({
     case "json_path_extractor": return <ExtraUtilityEngine mode="json_path_extractor" isHi={isHi} />;
     case "markdown_table_generator": return <ExtraUtilityEngine mode="markdown_table_generator" isHi={isHi} />;
     case "csv_delimiter_converter": return <ExtraUtilityEngine mode="csv_delimiter_converter" isHi={isHi} />;
-    case "date_add_subtract": return <ExtraUtilityEngine mode="date_add_subtract" isHi={isHi} />;
-    case "business_days_calculator": return <ExtraUtilityEngine mode="business_days_calculator" isHi={isHi} />;
     case "unit_area_converter": return <ExtraUtilityEngine mode="unit_area_converter" isHi={isHi} />;
     case "unit_volume_converter": return <ExtraUtilityEngine mode="unit_volume_converter" isHi={isHi} />;
     case "unit_speed_converter": return <ExtraUtilityEngine mode="unit_speed_converter" isHi={isHi} />;
     case "data_size_converter": return <ExtraUtilityEngine mode="data_size_converter" isHi={isHi} />;
-    case "discount_calculator": return <ExtraUtilityEngine mode="discount_calculator" isHi={isHi} />;
-    case "compound_interest_calculator": return <ExtraUtilityEngine mode="compound_interest_calculator" isHi={isHi} />;
     case "random_team_splitter": return <ExtraUtilityEngine mode="random_team_splitter" isHi={isHi} />;
 
     default:
@@ -3832,11 +3803,6 @@ function ExtraUtilityEngine({ mode, isHi }: { mode: string; isHi: boolean }) {
         case "xml_escape": out=reverse?input.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,"&"):input.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");break;
         case "unicode_inspector": out=Array.from(input).map((c,i)=>i+": "+JSON.stringify(c)+" U+"+c.codePointAt(0)!.toString(16).toUpperCase().padStart(4,"0")).join("\n");break;
         case "number_base_converter": {const base=Number(p[1]||10);if(![2,8,10,16].includes(base))throw Error("Use source base 2, 8, 10, or 16.");const n=parseInt(p[0],base);if(!Number.isSafeInteger(n))throw Error("Enter a valid integer and source base.");out="Binary: "+n.toString(2)+"\nOctal: "+n.toString(8)+"\nDecimal: "+n+"\nHex: "+n.toString(16).toUpperCase();break;}
-        case "percentage_calculator": {const [a,b]=p.map(Number);if(p.length<2||!Number.isFinite(a+b)||b===0)throw Error("Enter value,total.");out=(a/b*100).toFixed(4)+"%";break;}
-        case "date_difference": {const [a,b]=p,x=Date.parse(a+"T00:00:00Z"),y=Date.parse(b+"T00:00:00Z");if(!Number.isFinite(x)||!Number.isFinite(y))throw Error("Use YYYY-MM-DD,YYYY-MM-DD.");out=Math.round(Math.abs(y-x)/86400000)+" days";break;}
-        case "age_calculator": {const d=new Date(input.trim()+"T00:00:00");if(Number.isNaN(d.getTime())||d>new Date())throw Error("Enter past date YYYY-MM-DD.");const n=new Date();let y=n.getFullYear()-d.getFullYear(),m=n.getMonth()-d.getMonth(),day=n.getDate()-d.getDate();if(day<0){m--;day+=new Date(n.getFullYear(),n.getMonth(),0).getDate();}if(m<0){y--;m+=12;}out="Years: "+y+"\nMonths: "+m+"\nDays: "+day;break;}
-        case "tip_calculator": {const [b,t,n]=p.map(Number);if(p.length<3||b<0||t<0||n<1||!Number.isFinite(b+t+n))throw Error("Enter bill,tip%,people.");const tip=b*t/100;out="Tip: "+tip.toFixed(2)+"\nTotal: "+(b+tip).toFixed(2)+"\nEach: "+((b+tip)/n).toFixed(2);break;}
-        case "loan_payment_calculator": {const [a,r,m]=p.map(Number);if(p.length<3||a<=0||r<0||m<1||!Number.isFinite(a+r+m))throw Error("Enter principal,annual-rate,months.");const rate=r/1200,emi=rate===0?a/m:a*rate*Math.pow(1+rate,m)/(Math.pow(1+rate,m)-1);out="Monthly EMI: "+emi.toFixed(2)+"\nTotal: "+(emi*m).toFixed(2)+"\nInterest: "+(emi*m-a).toFixed(2);break;}
         case "unit_length_converter": {const [v,f,t]=p,u:Record<string,number>={mm:.001,cm:.01,m:1,km:1000,in:.0254,inch:.0254,ft:.3048,feet:.3048,yd:.9144,mile:1609.344},n=Number(v);if(!Number.isFinite(n)||!u[f?.toLowerCase()]||!u[t?.toLowerCase()])throw Error("Use value,from,to (mm cm m km in ft yd mile).");out=String(n*u[f.toLowerCase()]/u[t.toLowerCase()]);break;}
         case "unit_weight_converter": {const [v,f,t]=p,u:Record<string,number>={mg:.000001,g:.001,kg:1,oz:.028349523125,lb:.45359237},n=Number(v);if(!Number.isFinite(n)||!u[f?.toLowerCase()]||!u[t?.toLowerCase()])throw Error("Use value,from,to (mg g kg oz lb).");out=String(n*u[f.toLowerCase()]/u[t.toLowerCase()]);break;}
         case "unit_temperature_converter": {const [v,f,t]=p,n=Number(v),a=f?.toUpperCase(),b=t?.toUpperCase();if(!Number.isFinite(n)||!["C","F","K"].includes(a)||!["C","F","K"].includes(b))throw Error("Use value,C/F/K,C/F/K.");const c=a==="C"?n:a==="F"?(n-32)*5/9:n-273.15;out=(b==="C"?c:b==="F"?c*9/5+32:c+273.15).toFixed(4)+" "+b;break;}
@@ -3849,14 +3815,10 @@ function ExtraUtilityEngine({ mode, isHi }: { mode: string; isHi: boolean }) {
         case "json_path_extractor": {const d=JSON.parse(input);const path=secondInput.trim();const v=path.split(".").filter(Boolean).reduce((o,k)=>o==null?undefined:(o as Record<string,unknown>)[k],d as unknown);if(v===undefined)throw Error("Path not found. Enter path in the second field.");out=JSON.stringify(v,null,2)??String(v);break;}
         case "markdown_table_generator": {const rows=input.trim().split(/\r?\n/).map(x=>x.split(",").map(y=>y.trim()));if(!rows.length||!rows[0].length)throw Error("Enter comma-separated rows.");const row=(a:string[])=>"| "+a.map(x=>x.replace(/\|/g,"\\|")).join(" | ")+" |";out=[row(rows[0]),row(rows[0].map(()=>"---")),...rows.slice(1).map(row)].join("\n");break;}
         case "csv_delimiter_converter": {const d=reverse?";":"\\t";out=lines.map(x=>x.split(",").map(v=>v.trim()).join(d)).join("\n");break;}
-        case "date_add_subtract": {const [date,daysRaw]=input.split(",").map(x=>x.trim()),days=Number(daysRaw),d=new Date(date+"T12:00:00");if(Number.isNaN(d.getTime())||!Number.isInteger(days))throw Error("Enter YYYY-MM-DD,days (negative subtracts).");d.setDate(d.getDate()+days);out=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");break;}
-        case "business_days_calculator": {const [a,b]=input.split(",").map(x=>x.trim()),d=new Date(a+"T12:00:00Z"),end=new Date(b+"T12:00:00Z");if(Number.isNaN(d.getTime())||Number.isNaN(end.getTime()))throw Error("Enter YYYY-MM-DD,YYYY-MM-DD.");let n=0;for(let x=d.getTime();x<=end.getTime();x+=86400000){const w=new Date(x).getUTCDay();if(w!==0&&w!==6)n++;}out="Weekdays (inclusive): "+n;break;}
         case "unit_area_converter": {const [v,f,t]=input.split(",").map(x=>x.trim().toLowerCase()),u:Record<string,number>={"m2":1,"sqm":1,"ft2":0.09290304,"sqft":0.09290304,acre:4046.8564224,hectare:10000,ha:10000},n=Number(v);if(!Number.isFinite(n)||!u[f]||!u[t])throw Error("Use value,m2/ft2/acre/hectare,target unit.");out=String(n*u[f]/u[t]);break;}
         case "unit_volume_converter": {const [v,f,t]=input.split(",").map(x=>x.trim().toLowerCase()),u:Record<string,number>={ml:.001,l:1,liter:1,m3:1000,gallon:3.785411784},n=Number(v);if(!Number.isFinite(n)||!u[f]||!u[t])throw Error("Use value,ml/l/m3/gallon,target unit.");out=String(n*u[f]/u[t]);break;}
         case "unit_speed_converter": {const [v,f,t]=input.split(",").map(x=>x.trim().toLowerCase()),u:Record<string,number>={"km/h":1,"kmh":1,"m/s":3.6,mph:1.609344},n=Number(v);if(!Number.isFinite(n)||!u[f]||!u[t])throw Error("Use value,km/h/m/s/mph,target unit.");out=String(n*u[f]/u[t]);break;}
         case "data_size_converter": {const [v,f,t]=input.split(",").map(x=>x.trim().toLowerCase()),u:Record<string,number>={b:1,byte:1,kb:1000,mb:1e6,gb:1e9,kib:1024,mib:1048576,gib:1073741824},n=Number(v);if(!Number.isFinite(n)||n<0||!u[f]||!u[t])throw Error("Use value,byte/KB/MB/GB/KiB/MiB/GiB,target unit.");out=String(n*u[f]/u[t]);break;}
-        case "discount_calculator": {const [price,discount]=input.split(",").map(Number);if(!Number.isFinite(price+discount)||price<0||discount<0||discount>100)throw Error("Enter price,discount percent (0–100).");out="Savings: "+(price*discount/100).toFixed(2)+"\nFinal price: "+(price*(1-discount/100)).toFixed(2);break;}
-        case "compound_interest_calculator": {const [p,r,y,n=1]=input.split(",").map(Number);if(!Number.isFinite(p+r+y+n)||p<0||r<0||y<0||n<1)throw Error("Enter principal,annual-rate,years,compounds-per-year.");const total=p*Math.pow(1+r/100/n,n*y);out="Final amount: "+total.toFixed(2)+"\nInterest earned: "+(total-p).toFixed(2);break;}
         case "random_team_splitter": {const people=lines.map(x=>x.trim()).filter(Boolean);const teams=Number(secondInput);if(!Number.isInteger(teams)||teams<1||teams>people.length)throw Error("Enter number of teams in the second field.");for(let i=people.length-1;i>0;i--){const n=new Uint32Array(1);crypto.getRandomValues(n);const j=n[0]%(i+1);[people[i],people[j]]=[people[j],people[i]];}const result=Array.from({length:teams},()=>[] as string[]);people.forEach((p,i)=>result[i%teams].push(p));out=result.map((t,i)=>"Team "+(i+1)+":\n"+t.join("\n")).join("\n\n");break;}
 
         default: throw Error("Unknown utility.");
