@@ -587,5 +587,16 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     iconName: "FileText",
     badge: "100% Offline",
     keywords: ["text", "word count", "character count", "uppercase", "lowercase", "sort lines", "duplicate lines", "clean text", "space remover"]
+  },
+  {
+    id: "json_formatter",
+    categoryId: "cyber_media",
+    titleEn: "JSON Formatter & Validator",
+    titleHi: "JSON फॉर्मेटर व वैलिडेटर",
+    descEn: "Format, minify and validate JSON locally without uploading private data.",
+    descHi: "निजी डेटा अपलोड किए बिना JSON को फॉर्मेट, छोटा और validate करें।",
+    iconName: "Braces",
+    badge: "100% Offline",
+    keywords: ["json", "formatter", "validator", "minify", "developer", "api response", "pretty print", "syntax"]
   }
 ];
