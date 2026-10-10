@@ -71,7 +71,7 @@ export default function LiveTV() {
   const [playerError, setPlayerError] = useState("");
   const [, setServerControlled] = useState(false);
   const [layout, setLayout] = useState<"grid" | "list" | "compact" | "theater">("grid");
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,14 +122,25 @@ export default function LiveTV() {
   // Initialize video.js player for non-YouTube streams.
   // Detect MIME type per URL; a hard-coded HLS type breaks direct MP4/audio URLs.
   useLayoutEffect(() => {
-    if (!active || !videoRef.current || embed) {
+    const container = playerContainerRef.current;
+    if (!active || !container || embed) {
       setPlayerError("");
       return;
     }
 
     setPlayerError("");
     const srcUrl = active.url;
-    const player = videojs(videoRef.current, {
+
+    // Give Video.js exclusive ownership of its internal DOM. React renders only
+    // the empty host element; Video.js creates and removes the video element.
+    // This prevents React and Video.js from both trying to remove the same node
+    // during route transitions, channel changes, or Android Back navigation.
+    const videoElement = document.createElement("video");
+    videoElement.className = "video-js vjs-default-skin h-full w-full";
+    videoElement.setAttribute("controls", "");
+    container.appendChild(videoElement);
+
+    const player = videojs(videoElement, {
       fluid: true,
       autoplay: true,
       controls: true,
@@ -163,6 +174,12 @@ export default function LiveTV() {
       } catch (cleanupError) {
         // Cleanup must never crash route transitions or the app error boundary.
         console.warn("Live TV player cleanup failed safely", cleanupError);
+      } finally {
+        // Video.js normally removes its own element during dispose. Only remove
+        // a leftover node if it is still owned by this exact host container.
+        if (videoElement.parentNode === container) {
+          container.removeChild(videoElement);
+        }
       }
     };
   }, [active, embed]);
@@ -205,11 +222,7 @@ export default function LiveTV() {
                 />
               ) : (
                 <div className="relative h-full w-full">
-                  <video
-                    ref={videoRef}
-                    className="video-js vjs-default-skin h-full w-full"
-                    controls
-                  />
+                  <div ref={playerContainerRef} className="h-full w-full" />
                   {playerError && (
                     <div role="alert" className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-950/95 p-5 text-center">
                       <p className="text-sm font-bold text-white">Stream playback failed</p>
