@@ -598,5 +598,50 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     iconName: "Braces",
     badge: "100% Offline",
     keywords: ["json", "formatter", "validator", "minify", "developer", "api response", "pretty print", "syntax"]
+  
+  },
+  {
+    id: "url_encoder",
+    categoryId: "cyber_media",
+    titleEn: "URL Encoder / Decoder",
+    titleHi: "URL एन्कोडर / डिकोडर",
+    descEn: "Encode or decode URL components locally.",
+    descHi: "URL टेक्स्ट को स्थानीय रूप से encode या decode करें।",
+    iconName: "Link",
+    badge: "100% Offline",
+    keywords: ["url", "encode url", "decode url", "percent encoding", "web developer"]
+  },
+  {
+    id: "base64_converter",
+    categoryId: "cyber_media",
+    titleEn: "Base64 Converter",
+    titleHi: "Base64 कन्वर्टर",
+    descEn: "Encode and decode UTF-8 text to Base64 without uploading data.",
+    descHi: "डेटा अपलोड किए बिना UTF-8 टेक्स्ट को Base64 में बदलें और वापस decode करें।",
+    iconName: "Binary",
+    badge: "100% Offline",
+    keywords: ["base64", "encode", "decode", "developer", "utf8"]
+  },
+  {
+    id: "html_entity_tool",
+    categoryId: "cyber_media",
+    titleEn: "HTML Entity Encoder / Decoder",
+    titleHi: "HTML Entity एन्कोडर / डिकोडर",
+    descEn: "Escape HTML special characters and decode common entities locally.",
+    descHi: "HTML के विशेष अक्षरों को encode करें और आम entities को स्थानीय रूप से decode करें।",
+    iconName: "Code",
+    badge: "100% Offline",
+    keywords: ["html", "entity", "escape html", "unescape html", "web developer"]
+  },
+  {
+    id: "uuid_generator",
+    categoryId: "cyber_media",
+    titleEn: "UUID Generator",
+    titleHi: "UUID जनरेटर",
+    descEn: "Generate five random UUID v4 identifiers locally.",
+    descHi: "स्थानीय रूप से पाँच random UUID v4 पहचानकर्ता बनाएँ।",
+    iconName: "Fingerprint",
+    badge: "100% Offline",
+    keywords: ["uuid", "guid", "random id", "developer tools", "identifier"]
   }
 ];
