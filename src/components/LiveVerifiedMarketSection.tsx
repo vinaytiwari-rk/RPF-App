@@ -297,7 +297,7 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
         <div className="flex items-center gap-1.5 min-w-0">
           <ShieldCheck className="h-4 w-4 text-[#167C5A] shrink-0" />
           <h2 className="text-[13px] sm:text-[14px] font-black uppercase tracking-wider text-[#14213D] truncate">
-            {mode === "panchang" ? "Panchang" : mode === "market" ? "Live Market" : "Live Market & Panchang"}
+            {mode === "market" ? "Live Market" : "Live Market & Panchang"}
           </h2>
         </div>
 
