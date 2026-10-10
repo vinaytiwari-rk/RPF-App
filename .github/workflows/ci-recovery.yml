@@ -1,0 +1,136 @@
+name: CI Recovery - Full Verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'android/**'
+      - 'server.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.*'
+      - 'vite.config.*'
+      - 'tsconfig*.json'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'android/**'
+      - 'server.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.*'
+      - 'vite.config.*'
+      - 'tsconfig*.json'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-recovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-and-source-checks:
+    name: Source, Utility, TV, TypeScript and Web Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies with retries
+        shell: bash
+        env:
+          npm_config_fetch_retries: '5'
+          npm_config_fetch_retry_mintimeout: '20000'
+          npm_config_fetch_retry_maxtimeout: '120000'
+          npm_config_fetch_timeout: '180000'
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if npm install --include=dev --prefer-offline --no-audit --no-fund; then exit 0; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep $((attempt * 15))
+          done
+      - name: Audit SAMAHIT utility catalog and exports
+        run: npm run audit:samahit
+      - name: Test Live TV stream type detection
+        run: npm run audit:live-tv
+      - name: TypeScript check
+        run: npm run lint
+      - name: Production build
+        run: npm run build
+
+  android-apk:
+    name: Android APK compilation
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    needs: web-and-source-checks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Install dependencies with retries
+        shell: bash
+        env:
+          npm_config_fetch_retries: '5'
+          npm_config_fetch_retry_mintimeout: '20000'
+          npm_config_fetch_retry_maxtimeout: '120000'
+          npm_config_fetch_timeout: '180000'
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if npm install --include=dev --prefer-offline --no-audit --no-fund; then exit 0; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep $((attempt * 15))
+          done
+      - name: Web build
+        run: npm run build
+      - name: Capacitor sync
+        run: npx cap sync android
+      - name: Normalize Capacitor Android version
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./node_modules/@capacitor/android/package.json').version")
+          if grep -q '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties 2>/dev/null; then
+            sed -i "s/^CAPACITOR_ANDROID_VERSION=.*/CAPACITOR_ANDROID_VERSION=${VERSION}/" android/gradle.properties
+          else
+            printf '\nCAPACITOR_ANDROID_VERSION=%s\n' "$VERSION" >> android/gradle.properties
+          fi
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Compile debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: RPF-Samahit-CI-Recovery-${{ github.sha }}
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
