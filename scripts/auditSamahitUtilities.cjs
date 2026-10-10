@@ -17,7 +17,12 @@ const failures = [];
 if (tools.length === 0) failures.push("Utility catalog is empty; expected at least one catalog tool");
 if (duplicateIds.length) failures.push(`Duplicate catalog IDs: ${duplicateIds.join(", ")}`);
 if (missingHandlers.length) failures.push(`Tools without dispatcher handlers: ${missingHandlers.map((tool) => tool.id).join(", ")}`);
-if (orphanHandlers.length) failures.push(`Dispatcher IDs absent from catalog: ${orphanHandlers.join(", ")}`);
+if (orphanHandlers.length) {
+  const catalogSnapshot = tools.map((tool) => tool.id).sort();
+  const handlerSnapshot = uniqueCases.slice().sort();
+  failures.push(`Dispatcher IDs absent from catalog: ${orphanHandlers.join(", ")}`);
+  failures.push(`Audit diagnostics: catalog=${catalogSnapshot.length}, dispatcher=${handlerSnapshot.length}, catalogHasUrlEncoder=${catalogSnapshot.includes("url_encoder")}, catalogHasBase64=${catalogSnapshot.includes("base64_converter")}, catalogHasHtmlEntity=${catalogSnapshot.includes("html_entity_tool")}, catalogHasUuid=${catalogSnapshot.includes("uuid_generator")}`);
+}
 if (!runner.includes("NativeDownloads.saveToDownloads(")) failures.push("Main utility runner lacks native Android save path");
 if (!everyday.includes("NativeDownloads.saveToDownloads(")) failures.push("Everyday utility page lacks native Android save path");
 if (!everyday.includes("const save = async")) failures.push("Everyday utility save helper is not asynchronous");
