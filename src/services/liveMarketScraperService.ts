@@ -272,24 +272,26 @@ export async function getLiveDrikPanchang(cityId?: string, state?: string) {
     const data = await getJagannathaPanchang({ city: cityInfo.id, state: cityInfo.state });
     return {
       ...data,
-      source: "Jagannatha Hora & Drik Panchang",
+      source: "Jagannatha Hora",
       city: cityInfo.name,
       state: cityInfo.state,
       date: data.date,
-      sunrise: data.sunrise || "06:14 AM",
-      sunset: data.sunset || "06:05 PM",
-      moonrise: data.moonrise || "11:45 PM",
-      abhijitMuhurat: data.abhijitMuhurat,
-      rahukaal: data.rahukaal,
-      unavailable: false
+      // Do not replace missing astronomical values with fabricated times or tithi.
+      sunrise: data.sunrise || "",
+      sunset: data.sunset || "",
+      moonrise: data.moonrise || "",
+      masa: data.masa || "",
+      paksha: data.paksha || "",
+      abhijitMuhurat: data.abhijitMuhurat || "",
+      rahukaal: data.rahukaal || "",
+      unavailable: Boolean(data.unavailable)
     };
   } catch (error) {
-    console.warn("Jagannatha Hora Panchang fetch error, using Vedic engine:", error);
+    console.warn("Jagannatha Hora Panchang fetch failed:", error);
     const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    const dateStr = `${day}-${month}-${year}`;
+    const dateStr = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Kolkata", day: "2-digit", month: "2-digit", year: "numeric"
+    }).format(now).replace(/\//g, "-");
 
     return {
       source: "Jagannatha Hora",
@@ -300,20 +302,21 @@ export async function getLiveDrikPanchang(cityId?: string, state?: string) {
       location: `${cityInfo.name}, ${cityInfo.state}`,
       city: cityInfo.name,
       state: cityInfo.state,
-      sunrise: "06:14 AM",
-      sunset: "06:05 PM",
-      moonrise: "11:45 PM",
-      tithi: "Krishna Saptami / Ashtami",
-      nakshatra: "Ardra Nakshatra",
-      paksha: "Krishna Paksha",
-      samvat: "Vikram Samvat 2083",
-      yoga: "Variyana Yoga",
-      karana: "Bava Karana",
-      sunSign: "Kanya (Virgo)",
-      moonSign: "Mithuna (Gemini)",
-      abhijitMuhurat: "11:46 AM to 12:33 PM",
-      rahukaal: "09:12 AM to 10:41 AM",
-      unavailable: false,
+      sunrise: "",
+      sunset: "",
+      moonrise: "",
+      tithi: "",
+      nakshatra: "",
+      masa: "",
+      paksha: "",
+      samvat: "",
+      yoga: "",
+      karana: "",
+      sunSign: "",
+      moonSign: "",
+      abhijitMuhurat: "",
+      rahukaal: "",
+      unavailable: true,
       updatedAt: new Date().toISOString()
     };
   }
