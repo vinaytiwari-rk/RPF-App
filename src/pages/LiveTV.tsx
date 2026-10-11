@@ -1,11 +1,25 @@
-import React, { useEffect, useLayoutEffect, useMemo, useState, useRef } from "react";
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import Hls from "hls.js";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns } from "lucide-react";
+import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns, RefreshCw } from "lucide-react";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
 import { openExternalLink } from "../utils/browser";
 import { getMediaSourceType } from "../utils/mediaSourceType";
+
+const DEAD_CHANNEL_IDS = new Set([
+  "tv-extract-121", "tv-extract-131", "tv-extract-134", "tv-extract-144",
+  "tv-extract-158", "tv-extract-160", "tv-extract-191", "tv-extract-196",
+  "tv-extract-201", "tv-extract-222", "tv-extract-269", "tv-extract-270",
+  "tv-extract-293", "tv-extract-358", "tv-extract-377", "tv-extract-390",
+  "tv-extract-428", "tv-extract-439", "tv-extract-457", "tv-extract-486",
+  "tv-extract-487", "tv-extract-503", "tv-extract-531", "tv-extract-535",
+  "tv-extract-551", "tv-extract-555", "tv-extract-559", "tv-extract-567",
+  "tv-extract-616", "tv-extract-645", "tv-extract-646", "tv-extract-692",
+  "tv-extract-695", "tv-extract-696", "tv-extract-724", "tv-extract-794",
+  "tv-extract-821", "tv-extract-825", "tv-extract-826", "tv-extract-827",
+  "tv-extract-828", "tv-extract-829", "tv-extract-830", "tv-extract-831",
+  "tv-extract-833", "tv-extract-834", "tv-extract-838"
+]);
 
 const U: Record<string, string> = {
   aajtak: "Nq2wYlWFucg",
@@ -49,8 +63,11 @@ const yt = (id: string) => `https://www.youtube.com/live/${id}`;
 
 const canonical = (items: LiveTvChannel[]) =>
   items
-    .filter((c) => !["ani", "ians"].includes(c.name.trim().toLowerCase()))
+    .filter((c) => !["ani", "ians"].includes(c.name.trim().toLowerCase()) && !DEAD_CHANNEL_IDS.has(c.id))
     .map((c) => {
+      if (c.id === "tv-extract-251") {
+        return { ...c, url: yt(U.news24), videoId: U.news24 };
+      }
       const id = U[c.name.trim().toLowerCase()];
       return id ? { ...c, url: yt(id), videoId: id } : c;
     });
@@ -69,9 +86,11 @@ export default function LiveTV() {
   const [channels, setChannels] = useState<LiveTvChannel[]>(() => canonical(LIVE_TV_DEFAULTS));
   const [active, setActive] = useState<LiveTvChannel | null>(null);
   const [playerError, setPlayerError] = useState("");
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [, setServerControlled] = useState(false);
   const [layout, setLayout] = useState<"grid" | "list" | "compact" | "theater">("grid");
-  const playerContainerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,70 +138,132 @@ export default function LiveTV() {
     else setActive(null);
   };
 
-  // Initialize video.js player for non-YouTube streams.
-  // Detect MIME type per URL; a hard-coded HLS type breaks direct MP4/audio URLs.
-  useLayoutEffect(() => {
-    const container = playerContainerRef.current;
-    if (!active || !container || embed) {
+  // High-performance Hls.js and native stream player with auto-retry and server proxy fallback
+  useEffect(() => {
+    if (!active || embed) {
       setPlayerError("");
+      setIsBuffering(false);
       return;
     }
 
+    const video = videoRef.current;
+    if (!video) return;
+
     setPlayerError("");
-    const srcUrl = active.url;
+    setIsBuffering(true);
 
-    // Give Video.js exclusive ownership of its internal DOM. React renders only
-    // the empty host element; Video.js creates and removes the video element.
-    // This prevents React and Video.js from both trying to remove the same node
-    // during route transitions, channel changes, or Android Back navigation.
-    const videoElement = document.createElement("video");
-    videoElement.className = "video-js vjs-default-skin h-full w-full";
-    videoElement.setAttribute("controls", "");
-    container.appendChild(videoElement);
+    let hlsInstance: Hls | null = null;
+    let cancelled = false;
+    let fallbackTried = false;
 
-    const player = videojs(videoElement, {
-      fluid: true,
-      autoplay: true,
-      controls: true,
-      preload: 'auto',
-      html5: {
-        vhs: {
-          enableLowInitialPlaylist: true,
-          smoothQualityChange: true,
-          fastReady: true,
-          useDeviceAmpSupported: true
-        }
+    const playVideo = (v: HTMLVideoElement) => {
+      const p = v.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          // Unmuted autoplay blocked by browser policy: mute and retry immediately
+          v.muted = true;
+          v.play().catch(() => {});
+        });
       }
-    });
-
-    const handlePlayerError = () => {
-      const error = player.error();
-      setPlayerError(error?.message || "This direct stream could not be played. The stream may be unavailable or blocked by its provider.");
     };
 
-    player.on("error", handlePlayerError);
-    const sourceType = getMediaSourceType(srcUrl);
-    player.src(sourceType ? { src: srcUrl, type: sourceType } : { src: srcUrl });
+    const loadStream = (streamUrl: string) => {
+      if (cancelled) return;
+
+      const isM3U8 = streamUrl.includes(".m3u8") || streamUrl.includes(".m3u") || streamUrl.includes("/proxy?url=");
+
+      if (isM3U8 && Hls.isSupported()) {
+        if (hlsInstance) {
+          hlsInstance.destroy();
+          hlsInstance = null;
+        }
+
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          backBufferLength: 30,
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60,
+          maxBufferSize: 30 * 1000 * 1000,
+          maxBufferHole: 0.5,
+          highBufferWatchdogPeriod: 2,
+          nudgeOffset: 0.1,
+          nudgeMaxRetry: 5,
+          liveSyncDurationCount: 3,
+          liveMaxLatencyDurationCount: 10,
+          startLevel: -1,
+          xhrSetup: (xhr) => {
+            xhr.withCredentials = false;
+          }
+        });
+
+        hlsInstance = hls;
+
+        hls.loadSource(streamUrl);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          if (!cancelled) {
+            setIsBuffering(false);
+            playVideo(video);
+          }
+        });
+
+        hls.on(Hls.Events.ERROR, (_event, data) => {
+          if (cancelled) return;
+
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                // Network / CORS failure on direct URL: try proxy once
+                if (!fallbackTried && !streamUrl.includes("/api/iptv/proxy")) {
+                  fallbackTried = true;
+                  console.warn(`Direct stream failed for ${active.name}, retrying via proxy...`);
+                  loadStream(`/api/iptv/proxy?url=${encodeURIComponent(active.url)}`);
+                  return;
+                }
+                console.warn("Fatal network error in HLS, attempting startLoad recovery...", data);
+                hls.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.warn("Fatal media error in HLS, attempting recoverMediaError...", data);
+                hls.recoverMediaError();
+                break;
+              default:
+                console.error("Unrecoverable HLS error:", data);
+                hls.destroy();
+                setIsBuffering(false);
+                setPlayerError(hi ? "यह लाइव स्ट्रीम वर्तमान में अनुपलब्ध है या प्रदाता द्वारा ब्लॉक की गई है।" : "This direct stream is currently unavailable or blocked by its provider.");
+                break;
+            }
+          }
+        });
+      } else if (video.canPlayType("application/vnd.apple.mpegurl") || !isM3U8) {
+        // Native HLS (iOS Safari) or direct MP4/audio
+        video.src = streamUrl;
+        video.load();
+        playVideo(video);
+      } else {
+        setIsBuffering(false);
+        setPlayerError(hi ? "आपका डिवाइस इस स्ट्रीम फॉर्मेट का समर्थन नहीं करता है।" : "Your device does not support this stream format.");
+      }
+    };
+
+    loadStream(active.url);
 
     return () => {
-      // Dispose before React removes the conditionally-rendered video node.
-      // Video.js mutates its player DOM; passive-effect cleanup can run after
-      // React has already detached children and trigger a removeChild DOMException.
-      try {
-        player.off("error", handlePlayerError);
-        if (!player.isDisposed()) player.dispose();
-      } catch (cleanupError) {
-        // Cleanup must never crash route transitions or the app error boundary.
-        console.warn("Live TV player cleanup failed safely", cleanupError);
-      } finally {
-        // Video.js normally removes its own element during dispose. Only remove
-        // a leftover node if it is still owned by this exact host container.
-        if (videoElement.parentNode === container) {
-          container.removeChild(videoElement);
-        }
+      cancelled = true;
+      if (hlsInstance) {
+        hlsInstance.destroy();
+        hlsInstance = null;
+      }
+      if (video) {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
       }
     };
-  }, [active, embed]);
+  }, [active, embed, hi, retryCount]);
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans text-slate-800 selection:bg-orange-100">
@@ -221,20 +302,54 @@ export default function LiveTV() {
                   allowFullScreen
                 />
               ) : (
-                <div className="relative h-full w-full">
-                  <div ref={playerContainerRef} className="h-full w-full" />
+                <div className="relative h-full w-full bg-black flex items-center justify-center">
+                  <video
+                    ref={videoRef}
+                    className="h-full w-full object-contain"
+                    controls
+                    playsInline
+                    autoPlay
+                    onWaiting={() => setIsBuffering(true)}
+                    onPlaying={() => { setIsBuffering(false); setPlayerError(""); }}
+                    onCanPlay={() => setIsBuffering(false)}
+                  />
+
+                  {/* High performance loading / buffering spinner */}
+                  {isBuffering && !playerError && (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xs pointer-events-none transition-opacity">
+                      <div className="h-10 w-10 animate-spin rounded-full border-3 border-orange-500 border-t-transparent shadow-lg mb-3" />
+                      <p className="text-xs font-bold text-white tracking-wide">
+                        {hi ? "लाइव स्ट्रीम लोड हो रही है..." : "Connecting live stream..."}
+                      </p>
+                      <p className="text-[10px] text-slate-300 mt-1">
+                        {hi ? "उच्च गति ब्रॉडकास्ट बफ़रिंग" : "Buffering high-speed broadcast"}
+                      </p>
+                    </div>
+                  )}
+
                   {playerError && (
-                    <div role="alert" className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-950/95 p-5 text-center">
-                      <p className="text-sm font-bold text-white">Stream playback failed</p>
+                    <div role="alert" className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-slate-950/95 p-5 text-center">
+                      <p className="text-sm font-bold text-white">{hi ? "स्ट्रीम प्लेबैक विफल" : "Stream playback failed"}</p>
                       <p className="max-w-lg text-xs leading-relaxed text-slate-300">{playerError}</p>
-                      <p className="max-w-lg text-[11px] leading-relaxed text-slate-400">Some providers block in-app playback (CORS), require a valid session, or may have an offline stream.</p>
-                      <button
-                        type="button"
-                        onClick={() => openExternalLink(active.url, navigate, active.name)}
-                        className="rounded-xl bg-orange-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-orange-400"
-                      >
-                        {hi ? "ब्राउज़र में खोलें" : "Open in Browser"}
-                      </button>
+                      <div className="flex items-center gap-3 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRetryCount((prev) => prev + 1);
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400 active:scale-95 transition"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                          {hi ? "पुनः प्रयास करें" : "Retry"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openExternalLink(active.url, navigate, active.name)}
+                          className="rounded-xl bg-white/10 border border-white/20 px-4 py-2 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition"
+                        >
+                          {hi ? "ब्राउज़र में खोलें" : "Open in Browser"}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

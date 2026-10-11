@@ -174,7 +174,7 @@ jobs:
               size: Number(process.env.SIZE),
               downloadUrl: 'https://appapi.therpfoundation.org/download/rpf-app.apk',
               minSupportedVersionCode: 20500,
-              releaseNotes: '• दैनिक पंचांग ऑटो-लोड (बिना लोकेशन अटके तुरंत उपलब्ध)\n• रील्स वर्टिकल स्वाइप प्लेयर व डायरेक्ट वीडियो प्लेबैक\n• MPInfo व राज्य समाचार बॉटम मार्की स्मूथ स्क्रॉल\n• ऑनलाइन टेस्ट सेंटर (330 प्रश्न बैंक व ऑटो-सर्टिफिकेट)\n• 364 ऑफ़लाइन यूटिलिटी टूल्स',
+              releaseNotes: '• High-speed Live TV Player: Instant HLS stream playback with hardware-accelerated Hls.js\n• Stream Error & Timeout Fix: Auto-recovering proxy fallback for CORS-restricted streams\n• Stream Directory Audit: Inactive channels pruned and mapped for error-free playback\n• Daily Panchang: Instant auto-load without GPS location delay\n• Instagram Reels: Seamless vertical playback with native WebView support\n• Bottom Marquee: Hardware-accelerated smooth scrolling ticker\n• Full Web & Android parity across all utilities',
               publishedAt: process.env.PUB_DATE
             };
             fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\n', 'utf8');

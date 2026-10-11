@@ -450,11 +450,11 @@ router.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21559,
+      versionCode: 21560,
       versionName: "2.5.1",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
-      releaseNotes: "Complete synchronization update: Live Panchang auto-load, Instagram Reels & video player fix, Bottom Marquee smooth scrolling, and full feature parity with Web."
+      releaseNotes: "• High-speed Live TV Player: Instant HLS stream playback with hardware-accelerated Hls.js\n• Stream Error & Timeout Fix: Auto-recovering proxy fallback for CORS-restricted streams\n• Stream Directory Audit: Inactive channels pruned and mapped for error-free playback\n• Daily Panchang: Instant auto-load without GPS location delay\n• Instagram Reels: Seamless vertical playback with native WebView support\n• Bottom Marquee: Hardware-accelerated smooth scrolling ticker\n• Full Web & Android parity across all utilities"
     });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err?.message || "Failed to read update manifest" });
