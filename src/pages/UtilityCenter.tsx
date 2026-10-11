@@ -61,7 +61,21 @@ export default function UtilityCenter() {
     }
   };
 
-  const handleOpenTool = (tool: UtilityToolDefinition) => setActiveTool(tool);
+  const handleOpenTool = (tool: UtilityToolDefinition) => {
+    const standaloneEditorRoutes: Record<string, string> = {
+      pdf_text_whiteout_editor: "/utilities/tool/pdf-text-whiteout-editor",
+      image_annotation_editor: "/utilities/tool/image-annotation-editor",
+      word_document_editor: "/utilities/tool/word-document-editor",
+      spreadsheet_formula_editor: "/utilities/tool/spreadsheet-formula-editor",
+      media_audio_video_editor: "/utilities/tool/media-audio-video-editor",
+    };
+    const route = standaloneEditorRoutes[tool.id];
+    if (route) {
+      navigate(route);
+      return;
+    }
+    setActiveTool(tool);
+  };
 
   // Filtered tools list based on Category and Search Query
   const filteredTools = useMemo(() => {
