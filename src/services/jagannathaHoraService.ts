@@ -53,9 +53,12 @@ function deepFirst(source: any, keys: string[], depth = 0): string {
 
 const MASA_KEYS = [
   "masa", "maasa", "maas", "lunar_month", "lunarMonth", "lunar_month_name",
-  "lunarMonthName", "hindu_month", "hinduMonth", "masa_name", "masaName",
-  "month_name", "monthName", "amanta_masa", "amantaMasa", "purnimanta_masa",
-  "purnimantaMasa", "vedic_month", "vedicMonth"
+  "lunarMonthName", "hindu_month", "hinduMonth", "hindu_lunar_month", "hinduLunarMonth",
+  "masa_name", "masaName", "masa_name_en", "masaNameEn", "maasa_name", "maasaName",
+  "month_name", "monthName", "month_name_en", "monthNameEn", "monthNameEnglish",
+  "lunar_month_en", "lunarMonthEn", "lunarMonthNameEn", "chandra_masa", "chandraMasa",
+  "amanta_masa", "amantaMasa", "amanta", "purnimanta_masa", "purnimantaMasa",
+  "purnimanta", "vedic_month", "vedicMonth"
 ];
 
 const HINDU_MONTH_NAMES = /^(magha|magh|phalguna|phalgun|chaitra|vaisakha|vaishakha|jyeshtha|jyestha|ashada|ashadha|shravana|shravan|bhadrapada|bhadra|ashvina|ashwin|kartika|kartik|margashirsha|margashirsh|pausha|paush|माघ|फाल्गुन|चैत्र|वैशाख|ज्येष्ठ|आषाढ़|श्रावण|भाद्रपद|आश्विन|कार्तिक|मार्गशीर्ष|पौष)$/i;
