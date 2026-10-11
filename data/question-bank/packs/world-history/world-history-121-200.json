@@ -8,7 +8,7 @@
   "questionCount": 80,
   "questions": [
     {
-      "id": "samahit-world-history-121-200-001",
+      "id": "samahit-world-history-121",
       "subject": "world-history",
       "topic": "Maya Civilization",
       "difficulty": "easy",
@@ -31,7 +31,7 @@
       "explanationEn": "Maya city-states developed across southern Mexico and parts of Central America."
     },
     {
-      "id": "samahit-world-history-121-200-002",
+      "id": "samahit-world-history-122",
       "subject": "world-history",
       "topic": "Aztec Empire",
       "difficulty": "easy",
@@ -54,7 +54,7 @@
       "explanationEn": "The Aztec capital Tenochtitlan stood in the area of present-day Mexico City."
     },
     {
-      "id": "samahit-world-history-121-200-003",
+      "id": "samahit-world-history-123",
       "subject": "world-history",
       "topic": "Inca Civilization",
       "difficulty": "easy",
@@ -77,7 +77,7 @@
       "explanationEn": "The Inca political center was Cusco, in present-day Peru."
     },
     {
-      "id": "samahit-world-history-121-200-004",
+      "id": "samahit-world-history-124",
       "subject": "world-history",
       "topic": "Silk Road",
       "difficulty": "medium",
@@ -100,7 +100,7 @@
       "explanationEn": "Diplomatic and commercial links with Central Asia expanded during the Han period."
     },
     {
-      "id": "samahit-world-history-121-200-005",
+      "id": "samahit-world-history-125",
       "subject": "world-history",
       "topic": "Black Death",
       "difficulty": "medium",
@@ -123,7 +123,7 @@
       "explanationEn": "The plague affected a large share of Europe's population in the mid-fourteenth century."
     },
     {
-      "id": "samahit-world-history-121-200-006",
+      "id": "samahit-world-history-126",
       "subject": "world-history",
       "topic": "Magna Carta",
       "difficulty": "easy",
@@ -146,7 +146,7 @@
       "explanationEn": "The 1215 Magna Carta placed certain limits on royal authority."
     },
     {
-      "id": "samahit-world-history-121-200-007",
+      "id": "samahit-world-history-127",
       "subject": "world-history",
       "topic": "Joan of Arc",
       "difficulty": "easy",
@@ -169,7 +169,7 @@
       "explanationEn": "Joan of Arc supported the French cause during the Hundred Years' War."
     },
     {
-      "id": "samahit-world-history-121-200-008",
+      "id": "samahit-world-history-128",
       "subject": "world-history",
       "topic": "Martin Luther King Jr.",
       "difficulty": "easy",
@@ -192,7 +192,7 @@
       "explanationEn": "He led nonviolent campaigns against racial discrimination in the United States."
     },
     {
-      "id": "samahit-world-history-121-200-009",
+      "id": "samahit-world-history-129",
       "subject": "world-history",
       "topic": "Iliad",
       "difficulty": "easy",
@@ -215,7 +215,7 @@
       "explanationEn": "The Iliad, attributed to Homer, focuses on an episode of the Trojan War."
     },
     {
-      "id": "samahit-world-history-121-200-010",
+      "id": "samahit-world-history-130",
       "subject": "world-history",
       "topic": "Cleopatra",
       "difficulty": "medium",
@@ -238,7 +238,7 @@
       "explanationEn": "Cleopatra was among the last active rulers of the Ptolemaic dynasty."
     },
     {
-      "id": "samahit-world-history-121-200-011",
+      "id": "samahit-world-history-131",
       "subject": "world-history",
       "topic": "Ancient Olympics",
       "difficulty": "medium",
@@ -261,7 +261,7 @@
       "explanationEn": "776 BCE is the traditional date of the earliest recorded ancient Olympic festival."
     },
     {
-      "id": "samahit-world-history-121-200-012",
+      "id": "samahit-world-history-132",
       "subject": "world-history",
       "topic": "Alexander and Porus",
       "difficulty": "medium",
@@ -284,7 +284,7 @@
       "explanationEn": "The Hydaspes battle between Alexander and Porus took place near the Jhelum River."
     },
     {
-      "id": "samahit-world-history-121-200-013",
+      "id": "samahit-world-history-133",
       "subject": "world-history",
       "topic": "Mongol Empire",
       "difficulty": "medium",
@@ -307,7 +307,7 @@
       "explanationEn": "Karakorum developed as the Mongol imperial capital under Ögedei Khan."
     },
     {
-      "id": "samahit-world-history-121-200-014",
+      "id": "samahit-world-history-134",
       "subject": "world-history",
       "topic": "Taj Mahal",
       "difficulty": "easy",
@@ -330,7 +330,7 @@
       "explanationEn": "Shah Jahan commissioned the Taj Mahal in Agra in memory of Mumtaz Mahal."
     },
     {
-      "id": "samahit-world-history-121-200-015",
+      "id": "samahit-world-history-135",
       "subject": "world-history",
       "topic": "Atomic Bomb",
       "difficulty": "easy",
@@ -353,7 +353,7 @@
       "explanationEn": "Little Boy was dropped on Hiroshima; Fat Man was dropped on Nagasaki."
     },
     {
-      "id": "samahit-world-history-121-200-016",
+      "id": "samahit-world-history-136",
       "subject": "world-history",
       "topic": "D-Day",
       "difficulty": "easy",
@@ -376,7 +376,7 @@
       "explanationEn": "On 6 June 1944, Allied forces began the Normandy operation in Nazi-occupied France."
     },
     {
-      "id": "samahit-world-history-121-200-017",
+      "id": "samahit-world-history-137",
       "subject": "world-history",
       "topic": "Waterloo",
       "difficulty": "easy",
@@ -399,7 +399,7 @@
       "explanationEn": "The defeat at Waterloo ended Napoleon's rule for the final time."
     },
     {
-      "id": "samahit-world-history-121-200-018",
+      "id": "samahit-world-history-138",
       "subject": "world-history",
       "topic": "US Constitution",
       "difficulty": "medium",
@@ -422,7 +422,7 @@
       "explanationEn": "The Constitution was signed at the Philadelphia Convention in 1787 and took effect in 1789."
     },
     {
-      "id": "samahit-world-history-121-200-019",
+      "id": "samahit-world-history-139",
       "subject": "world-history",
       "topic": "US Slavery",
       "difficulty": "medium",
@@ -445,7 +445,7 @@
       "explanationEn": "The Thirteenth Amendment was ratified in 1865."
     },
     {
-      "id": "samahit-world-history-121-200-020",
+      "id": "samahit-world-history-140",
       "subject": "world-history",
       "topic": "Soviet Union",
       "difficulty": "easy",
@@ -468,7 +468,7 @@
       "explanationEn": "The Soviet Union was formally dissolved in December 1991."
     },
     {
-      "id": "samahit-world-history-121-200-021",
+      "id": "samahit-world-history-141",
       "subject": "world-history",
       "topic": "Moon Landing",
       "difficulty": "easy",
@@ -491,7 +491,7 @@
       "explanationEn": "Neil Armstrong stepped onto the lunar surface on 20 July 1969 UTC."
     },
     {
-      "id": "samahit-world-history-121-200-022",
+      "id": "samahit-world-history-142",
       "subject": "world-history",
       "topic": "Marco Polo",
       "difficulty": "medium",
@@ -514,7 +514,7 @@
       "explanationEn": "Marco Polo's account describes travels in Asia during Kublai Khan's era."
     },
     {
-      "id": "samahit-world-history-121-200-023",
+      "id": "samahit-world-history-143",
       "subject": "world-history",
       "topic": "Columbus",
       "difficulty": "medium",
@@ -537,7 +537,7 @@
       "explanationEn": "Columbus was born in Genoa; his voyages sailed under the Spanish crown."
     },
     {
-      "id": "samahit-world-history-121-200-024",
+      "id": "samahit-world-history-144",
       "subject": "world-history",
       "topic": "Nile Length",
       "difficulty": "medium",
@@ -560,7 +560,7 @@
       "explanationEn": "The Nile is commonly estimated at about 6,650 km, though measurements vary by method and source."
     },
     {
-      "id": "samahit-world-history-121-200-025",
+      "id": "samahit-world-history-145",
       "subject": "world-history",
       "topic": "Great Sphinx",
       "difficulty": "easy",
@@ -583,7 +583,7 @@
       "explanationEn": "The Great Sphinx stands on the Giza Plateau near Egypt's pyramid complex."
     },
     {
-      "id": "samahit-world-history-121-200-026",
+      "id": "samahit-world-history-146",
       "subject": "world-history",
       "topic": "Code of Hammurabi",
       "difficulty": "medium",
@@ -606,7 +606,7 @@
       "explanationEn": "Hammurabi was king of Babylon around the eighteenth century BCE."
     },
     {
-      "id": "samahit-world-history-121-200-027",
+      "id": "samahit-world-history-147",
       "subject": "world-history",
       "topic": "Buddha Birth",
       "difficulty": "easy",
@@ -629,7 +629,7 @@
       "explanationEn": "Lumbini is in present-day Nepal; Bodh Gaya is associated with the Buddha's enlightenment."
     },
     {
-      "id": "samahit-world-history-121-200-028",
+      "id": "samahit-world-history-148",
       "subject": "world-history",
       "topic": "Jesus Birth",
       "difficulty": "easy",
@@ -652,7 +652,7 @@
       "explanationEn": "Bethlehem is identified as Jesus's birthplace in Christian tradition."
     },
     {
-      "id": "samahit-world-history-121-200-029",
+      "id": "samahit-world-history-149",
       "subject": "world-history",
       "topic": "Early Islam",
       "difficulty": "medium",
@@ -675,7 +675,7 @@
       "explanationEn": "610 CE is the traditional date of the first revelation; the Hijra occurred in 622."
     },
     {
-      "id": "samahit-world-history-121-200-030",
+      "id": "samahit-world-history-150",
       "subject": "world-history",
       "topic": "Printing Press",
       "difficulty": "easy",
@@ -698,7 +698,7 @@
       "explanationEn": "Gutenberg's fifteenth-century printing technology helped expand book production in Europe."
     },
     {
-      "id": "samahit-world-history-121-200-031",
+      "id": "samahit-world-history-151",
       "subject": "world-history",
       "topic": "Statue of Liberty",
       "difficulty": "easy",
@@ -721,7 +721,7 @@
       "explanationEn": "The statue was a gift from the people of France marking the US centennial era."
     },
     {
-      "id": "samahit-world-history-121-200-032",
+      "id": "samahit-world-history-152",
       "subject": "world-history",
       "topic": "Titanic",
       "difficulty": "easy",
@@ -744,7 +744,7 @@
       "explanationEn": "The Titanic sank in the North Atlantic on 15 April 1912."
     },
     {
-      "id": "samahit-world-history-121-200-033",
+      "id": "samahit-world-history-153",
       "subject": "world-history",
       "topic": "First Woman PM",
       "difficulty": "easy",
@@ -767,7 +767,7 @@
       "explanationEn": "Bandaranaike became prime minister of Ceylon in 1960."
     },
     {
-      "id": "samahit-world-history-121-200-034",
+      "id": "samahit-world-history-154",
       "subject": "world-history",
       "topic": "Chernobyl",
       "difficulty": "easy",
@@ -790,7 +790,7 @@
       "explanationEn": "The Chernobyl reactor accident occurred in Soviet Ukraine on 26 April 1986."
     },
     {
-      "id": "samahit-world-history-121-200-035",
+      "id": "samahit-world-history-155",
       "subject": "world-history",
       "topic": "Berlin Wall Length",
       "difficulty": "medium",
@@ -813,7 +813,7 @@
       "explanationEn": "The perimeter around West Berlin was about 155 km; figures vary depending on which barrier sections are counted."
     },
     {
-      "id": "samahit-world-history-121-200-036",
+      "id": "samahit-world-history-156",
       "subject": "world-history",
       "topic": "Columbus Voyages",
       "difficulty": "easy",
@@ -836,7 +836,7 @@
       "explanationEn": "Columbus made four voyages to the Americas between 1492 and 1504."
     },
     {
-      "id": "samahit-world-history-121-200-037",
+      "id": "samahit-world-history-157",
       "subject": "world-history",
       "topic": "Leonardo da Vinci",
       "difficulty": "easy",
@@ -859,7 +859,7 @@
       "explanationEn": "Leonardo was a Renaissance artist and inventor born in 1452."
     },
     {
-      "id": "samahit-world-history-121-200-038",
+      "id": "samahit-world-history-158",
       "subject": "world-history",
       "topic": "Michelangelo",
       "difficulty": "easy",
@@ -882,7 +882,7 @@
       "explanationEn": "Michelangelo produced major works in sculpture, painting, and architecture."
     },
     {
-      "id": "samahit-world-history-121-200-039",
+      "id": "samahit-world-history-159",
       "subject": "world-history",
       "topic": "Charlie Chaplin",
       "difficulty": "easy",
@@ -905,7 +905,7 @@
       "explanationEn": "Chaplin's Little Tramp became one of silent cinema's best-known characters."
     },
     {
-      "id": "samahit-world-history-121-200-040",
+      "id": "samahit-world-history-160",
       "subject": "world-history",
       "topic": "Einstein Birth",
       "difficulty": "medium",
@@ -928,7 +928,7 @@
       "explanationEn": "Einstein was born in Ulm, Germany, on 14 March 1879."
     },
     {
-      "id": "samahit-world-history-121-200-041",
+      "id": "samahit-world-history-161",
       "subject": "world-history",
       "topic": "World War II Deaths",
       "difficulty": "medium",
@@ -951,7 +951,7 @@
       "explanationEn": "Estimates of military and civilian deaths vary by source, but total deaths were in the tens of millions."
     },
     {
-      "id": "samahit-world-history-121-200-042",
+      "id": "samahit-world-history-162",
       "subject": "world-history",
       "topic": "Holocaust",
       "difficulty": "medium",
@@ -974,7 +974,7 @@
       "explanationEn": "Nazi Germany and its collaborators murdered about six million Jews in the Holocaust."
     },
     {
-      "id": "samahit-world-history-121-200-043",
+      "id": "samahit-world-history-163",
       "subject": "world-history",
       "topic": "Salt March",
       "difficulty": "easy",
@@ -997,7 +997,7 @@
       "explanationEn": "Gandhi began the march from Sabarmati to Dandi on 12 March 1930."
     },
     {
-      "id": "samahit-world-history-121-200-044",
+      "id": "samahit-world-history-164",
       "subject": "world-history",
       "topic": "95 Theses",
       "difficulty": "medium",
@@ -1020,7 +1020,7 @@
       "explanationEn": "The 95 Theses of 1517 are regarded as a major event in the Protestant Reformation."
     },
     {
-      "id": "samahit-world-history-121-200-045",
+      "id": "samahit-world-history-165",
       "subject": "world-history",
       "topic": "Paper",
       "difficulty": "easy",
@@ -1043,7 +1043,7 @@
       "explanationEn": "Papermaking developed in China and later spread to other regions."
     },
     {
-      "id": "samahit-world-history-121-200-046",
+      "id": "samahit-world-history-166",
       "subject": "world-history",
       "topic": "Gunpowder",
       "difficulty": "easy",
@@ -1066,7 +1066,7 @@
       "explanationEn": "Early gunpowder formulations were developed in medieval China."
     },
     {
-      "id": "samahit-world-history-121-200-047",
+      "id": "samahit-world-history-167",
       "subject": "world-history",
       "topic": "Compass",
       "difficulty": "medium",
@@ -1089,7 +1089,7 @@
       "explanationEn": "The magnetic compass was used early in China and later became widespread in navigation."
     },
     {
-      "id": "samahit-world-history-121-200-048",
+      "id": "samahit-world-history-168",
       "subject": "world-history",
       "topic": "Tea",
       "difficulty": "easy",
@@ -1112,7 +1112,7 @@
       "explanationEn": "The early cultivation and consumption history of tea is associated with China."
     },
     {
-      "id": "samahit-world-history-121-200-049",
+      "id": "samahit-world-history-169",
       "subject": "world-history",
       "topic": "Coffee",
       "difficulty": "medium",
@@ -1135,7 +1135,7 @@
       "explanationEn": "Arabica coffee is generally traced to the highlands of Ethiopia."
     },
     {
-      "id": "samahit-world-history-121-200-050",
+      "id": "samahit-world-history-170",
       "subject": "world-history",
       "topic": "Potato",
       "difficulty": "medium",
@@ -1158,7 +1158,7 @@
       "explanationEn": "Andean peoples domesticated the potato before it spread around the world."
     },
     {
-      "id": "samahit-world-history-121-200-051",
+      "id": "samahit-world-history-171",
       "subject": "world-history",
       "topic": "Tomato",
       "difficulty": "medium",
@@ -1181,7 +1181,7 @@
       "explanationEn": "Wild tomato ancestors are South American, while domestication is associated with Mesoamerica, especially Mexico."
     },
     {
-      "id": "samahit-world-history-121-200-052",
+      "id": "samahit-world-history-172",
       "subject": "world-history",
       "topic": "Zero",
       "difficulty": "medium",
@@ -1204,7 +1204,7 @@
       "explanationEn": "Indian mathematicians developed zero systematically as a numeral and in arithmetic operations."
     },
     {
-      "id": "samahit-world-history-121-200-053",
+      "id": "samahit-world-history-173",
       "subject": "world-history",
       "topic": "Calendar",
       "difficulty": "medium",
@@ -1227,7 +1227,7 @@
       "explanationEn": "The Egyptian civil calendar used twelve 30-day months plus five extra days."
     },
     {
-      "id": "samahit-world-history-121-200-054",
+      "id": "samahit-world-history-174",
       "subject": "world-history",
       "topic": "First Coins",
       "difficulty": "medium",
@@ -1250,7 +1250,7 @@
       "explanationEn": "Coins from the seventh century BCE have been found in Lydia in western Anatolia."
     },
     {
-      "id": "samahit-world-history-121-200-055",
+      "id": "samahit-world-history-175",
       "subject": "world-history",
       "topic": "Olympic Rings",
       "difficulty": "easy",
@@ -1273,7 +1273,7 @@
       "explanationEn": "The five rings symbolize the unity of the continents as described by the Olympic movement."
     },
     {
-      "id": "samahit-world-history-121-200-056",
+      "id": "samahit-world-history-176",
       "subject": "world-history",
       "topic": "FIFA World Cup",
       "difficulty": "easy",
@@ -1296,7 +1296,7 @@
       "explanationEn": "The first men's FIFA World Cup was held in Uruguay in 1930."
     },
     {
-      "id": "samahit-world-history-121-200-057",
+      "id": "samahit-world-history-177",
       "subject": "world-history",
       "topic": "Cricket World Cup",
       "difficulty": "easy",
@@ -1319,7 +1319,7 @@
       "explanationEn": "The first men's Cricket World Cup was played in England in 1975."
     },
     {
-      "id": "samahit-world-history-121-200-058",
+      "id": "samahit-world-history-178",
       "subject": "world-history",
       "topic": "Greek Currency",
       "difficulty": "medium",
@@ -1342,7 +1342,7 @@
       "explanationEn": "Greece used the drachma before euro cash entered circulation in 2002, with the euro adopted in 2001."
     },
     {
-      "id": "samahit-world-history-121-200-059",
+      "id": "samahit-world-history-179",
       "subject": "world-history",
       "topic": "Great Fire of Rome",
       "difficulty": "easy",
@@ -1365,7 +1365,7 @@
       "explanationEn": "The Great Fire of Rome occurred in 64 CE during Emperor Nero's reign."
     },
     {
-      "id": "samahit-world-history-121-200-060",
+      "id": "samahit-world-history-180",
       "subject": "world-history",
       "topic": "Great Wall",
       "difficulty": "medium",
@@ -1388,7 +1388,7 @@
       "explanationEn": "China's 2012 official survey reported about 21,196 km for the various wall sections and barriers."
     },
     {
-      "id": "samahit-world-history-121-200-061",
+      "id": "samahit-world-history-181",
       "subject": "world-history",
       "topic": "Petra",
       "difficulty": "easy",
@@ -1411,7 +1411,7 @@
       "explanationEn": "Petra in southern Jordan is famous for architecture carved into rock."
     },
     {
-      "id": "samahit-world-history-121-200-062",
+      "id": "samahit-world-history-182",
       "subject": "world-history",
       "topic": "Angkor Wat",
       "difficulty": "easy",
@@ -1434,7 +1434,7 @@
       "explanationEn": "Angkor Wat is a vast temple complex associated with the Khmer Empire."
     },
     {
-      "id": "samahit-world-history-121-200-063",
+      "id": "samahit-world-history-183",
       "subject": "world-history",
       "topic": "Borobudur",
       "difficulty": "easy",
@@ -1457,7 +1457,7 @@
       "explanationEn": "Borobudur is a Mahayana Buddhist monument in Central Java."
     },
     {
-      "id": "samahit-world-history-121-200-064",
+      "id": "samahit-world-history-184",
       "subject": "world-history",
       "topic": "Machu Picchu",
       "difficulty": "easy",
@@ -1480,7 +1480,7 @@
       "explanationEn": "Machu Picchu is an Inca-era site in the Andes."
     },
     {
-      "id": "samahit-world-history-121-200-065",
+      "id": "samahit-world-history-185",
       "subject": "world-history",
       "topic": "Stonehenge",
       "difficulty": "easy",
@@ -1503,7 +1503,7 @@
       "explanationEn": "Stonehenge is located in Wiltshire, England."
     },
     {
-      "id": "samahit-world-history-121-200-066",
+      "id": "samahit-world-history-186",
       "subject": "world-history",
       "topic": "Colosseum",
       "difficulty": "easy",
@@ -1526,7 +1526,7 @@
       "explanationEn": "The Colosseum was built in Rome during the Flavian emperors' era."
     },
     {
-      "id": "samahit-world-history-121-200-067",
+      "id": "samahit-world-history-187",
       "subject": "world-history",
       "topic": "Eiffel Tower",
       "difficulty": "easy",
@@ -1549,7 +1549,7 @@
       "explanationEn": "The Eiffel Tower was built for the 1889 Exposition Universelle in Paris."
     },
     {
-      "id": "samahit-world-history-121-200-068",
+      "id": "samahit-world-history-188",
       "subject": "world-history",
       "topic": "Tallest Statue",
       "difficulty": "easy",
@@ -1572,7 +1572,7 @@
       "explanationEn": "The Statue of Unity in Gujarat is dedicated to Sardar Vallabhbhai Patel."
     },
     {
-      "id": "samahit-world-history-121-200-069",
+      "id": "samahit-world-history-189",
       "subject": "world-history",
       "topic": "First Powered Flight",
       "difficulty": "medium",
@@ -1595,7 +1595,7 @@
       "explanationEn": "The Wright brothers' flight took place near Kitty Hawk on 17 December 1903."
     },
     {
-      "id": "samahit-world-history-121-200-070",
+      "id": "samahit-world-history-190",
       "subject": "world-history",
       "topic": "First Satellite",
       "difficulty": "easy",
@@ -1618,7 +1618,7 @@
       "explanationEn": "The Soviet Union launched Sputnik 1 on 4 October 1957."
     },
     {
-      "id": "samahit-world-history-121-200-071",
+      "id": "samahit-world-history-191",
       "subject": "world-history",
       "topic": "Yuri Gagarin",
       "difficulty": "easy",
@@ -1641,7 +1641,7 @@
       "explanationEn": "Gagarin orbited Earth aboard Vostok 1 on 12 April 1961."
     },
     {
-      "id": "samahit-world-history-121-200-072",
+      "id": "samahit-world-history-192",
       "subject": "world-history",
       "topic": "Neil Armstrong",
       "difficulty": "easy",
@@ -1664,7 +1664,7 @@
       "explanationEn": "Armstrong walked on the Moon during the Apollo 11 mission in 1969."
     },
     {
-      "id": "samahit-world-history-121-200-073",
+      "id": "samahit-world-history-193",
       "subject": "world-history",
       "topic": "Kalpana Chawla",
       "difficulty": "medium",
@@ -1687,7 +1687,7 @@
       "explanationEn": "Chawla was a NASA astronaut who died in the 2003 Columbia disaster."
     },
     {
-      "id": "samahit-world-history-121-200-074",
+      "id": "samahit-world-history-194",
       "subject": "world-history",
       "topic": "Allied Powers",
       "difficulty": "medium",
@@ -1710,7 +1710,7 @@
       "explanationEn": "The US, Britain, and Soviet Union became major Allies, alongside many other countries."
     },
     {
-      "id": "samahit-world-history-121-200-075",
+      "id": "samahit-world-history-195",
       "subject": "world-history",
       "topic": "Axis Powers",
       "difficulty": "easy",
@@ -1733,7 +1733,7 @@
       "explanationEn": "Germany, Italy, and Japan were the main members of the Axis alliance."
     },
     {
-      "id": "samahit-world-history-121-200-076",
+      "id": "samahit-world-history-196",
       "subject": "world-history",
       "topic": "League of Nations",
       "difficulty": "medium",
@@ -1756,7 +1756,7 @@
       "explanationEn": "The League of Nations came into existence in January 1920."
     },
     {
-      "id": "samahit-world-history-121-200-077",
+      "id": "samahit-world-history-197",
       "subject": "world-history",
       "topic": "Geneva Conventions",
       "difficulty": "medium",
@@ -1779,7 +1779,7 @@
       "explanationEn": "The conventions set rules protecting wounded soldiers, prisoners of war, and civilians during conflict."
     },
     {
-      "id": "samahit-world-history-121-200-078",
+      "id": "samahit-world-history-198",
       "subject": "world-history",
       "topic": "Red Cross",
       "difficulty": "medium",
@@ -1802,7 +1802,7 @@
       "explanationEn": "Dunant's efforts after the Battle of Solferino inspired the Red Cross movement."
     },
     {
-      "id": "samahit-world-history-121-200-079",
+      "id": "samahit-world-history-199",
       "subject": "world-history",
       "topic": "Amnesty International",
       "difficulty": "easy",
@@ -1825,7 +1825,7 @@
       "explanationEn": "Amnesty International researches and campaigns on human-rights issues."
     },
     {
-      "id": "samahit-world-history-121-200-080",
+      "id": "samahit-world-history-200",
       "subject": "world-history",
       "topic": "World Bank",
       "difficulty": "medium",
