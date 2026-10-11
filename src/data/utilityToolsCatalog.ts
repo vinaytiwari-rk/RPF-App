@@ -2212,5 +2212,5 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "design_aspect_calc", categoryId: "design_qr_tools", titleEn: "Design Aspect Ratio Calculator", titleHi: "आस्पेक्ट रेशियो गणक (16:9, 4:3)",
     descEn: "Calculate proportional width and height across common design ratios.", descHi: "चौड़ाई या ऊंचाई दर्ज कर आस्पेक्ट रेशियो अनुसार सही अनुपात निकालें।", iconName: "Maximize", badge: "100% Offline",
     keywords: ["aspect ratio calc", "width height", "screen ratio"]
-  },
+  }
 ];

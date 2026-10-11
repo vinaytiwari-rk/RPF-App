@@ -141,8 +141,6 @@ export default function UtilityCenter() {
         </div>
       </header>
 
-
-
       {/* 16 Category Navigation Chips (Horizontal Scroll) */}
       <section className="mt-4 -mx-3 px-3 sm:mx-0 sm:px-0">
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">

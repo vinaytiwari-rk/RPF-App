@@ -647,8 +647,6 @@ function ToolEngineDispatcher({
     case "design_aspect_calc":
       return <DesignQrToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
-
-
     default:
       return (
         <div className="py-8 text-center text-slate-500">
