@@ -14,14 +14,14 @@ interface NativeDownloadsPlugin {
 }
 const NativeDownloads = registerPlugin<NativeDownloadsPlugin>("NativeDownloads");
 
-type StudioMode = "audio" | "video";
+type EditorMode = "audio" | "video";
 
-export default function MediaStudioPage() {
+export default function MediaEditorPage() {
   const navigate = useNavigate();
   const context = useOutletContext<{ lang?: "en" | "hi" }>() || {};
   const isHi = context.lang === "hi";
 
-  const [mode, setMode] = useState<StudioMode>("audio");
+  const [mode, setMode] = useState<EditorMode>("audio");
   const [loading, setLoading] = useState(false);
 
   // ==========================================
@@ -385,9 +385,9 @@ export default function MediaStudioPage() {
           </button>
           <div>
             <h1 className="text-sm font-black tracking-tight text-slate-900 flex items-center gap-1.5">
-              <span>Media Studio Pro</span>
+              <span>Audio & Video Editor</span>
               <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 border border-purple-200">
-                Studio
+                Editor
               </span>
             </h1>
             <p className="text-[11px] text-slate-500">
@@ -398,7 +398,7 @@ export default function MediaStudioPage() {
           </div>
         </div>
 
-        {/* Studio Mode Switcher */}
+        {/* Editor Mode Switcher */}
         <div className="flex items-center gap-1 bg-slate-100 rounded-2xl p-1 border border-slate-200">
           <button
             type="button"
@@ -433,7 +433,7 @@ export default function MediaStudioPage() {
                 <Music className="h-8 w-8" />
               </div>
               <h2 className="text-lg font-black text-slate-900">
-                {isHi ? "ऑडियो स्टूडियो में शुरू करें" : "Open Audio in Studio"}
+                {isHi ? "ऑडियो स्टूडियो में शुरू करें" : "Open Audio in Editor"}
               </h2>
               <p className="mt-2 text-xs text-slate-600 leading-relaxed">
                 {isHi
@@ -679,7 +679,7 @@ export default function MediaStudioPage() {
                 <Video className="h-8 w-8" />
               </div>
               <h2 className="text-lg font-black text-slate-900">
-                {isHi ? "वीडियो स्टूडियो में शुरू करें" : "Open Video in Studio"}
+                {isHi ? "वीडियो स्टूडियो में शुरू करें" : "Open Video in Editor"}
               </h2>
               <p className="mt-2 text-xs text-slate-600 leading-relaxed">
                 {isHi
