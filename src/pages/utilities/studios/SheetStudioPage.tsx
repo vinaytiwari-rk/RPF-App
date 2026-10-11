@@ -99,7 +99,7 @@ const SHEET_TEMPLATES: SheetTemplate[] = [
   },
 ];
 
-export default function SheetStudioPage() {
+export default function SheetEditorPage() {
   const navigate = useNavigate();
   const context = useOutletContext<{ lang?: "en" | "hi" }>() || {};
   const isHi = context.lang === "hi";
@@ -494,7 +494,7 @@ export default function SheetStudioPage() {
                 title="Click to rename sheet"
               />
               <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-[#245D45] border border-emerald-200">
-                Excel Studio Pro
+                Spreadsheet & Formula Editor (XLSX)
               </span>
             </div>
             <p className="text-[11px] text-slate-500">
