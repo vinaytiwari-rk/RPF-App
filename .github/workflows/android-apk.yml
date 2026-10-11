@@ -110,9 +110,21 @@ jobs:
           RPF_RELEASE_KEY_PASSWORD: ${{ secrets.RPF_RELEASE_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          if [ -n "$RPF_RELEASE_KEYSTORE_B64" ] && [ -n "$RPF_RELEASE_STORE_PASSWORD" ] && [ -n "$RPF_RELEASE_KEY_ALIAS" ] && [ -n "$RPF_RELEASE_KEY_PASSWORD" ]; then
+          if [ -n "$RPF_RELEASE_KEYSTORE_B64" ] && [ -n "$RPF_RELEASE_STORE_PASSWORD" ] && [ -n "$RPF_RELEASE_KEY_PASSWORD" ]; then
             mkdir -p android/app/keystore
             printf '%s' "$RPF_RELEASE_KEYSTORE_B64" | base64 --decode > android/app/keystore/rpf-release.jks
+            
+            # Detect actual alias present inside the keystore (handles .p12, .jks, custom aliases, etc.)
+            DETECTED_ALIAS=$(keytool -list -keystore android/app/keystore/rpf-release.jks -storepass "$RPF_RELEASE_STORE_PASSWORD" 2>/dev/null | grep -E "PrivateKeyEntry|trustedCertEntry" | head -n 1 | cut -d',' -f1 | xargs || true)
+            
+            if [ -n "$DETECTED_ALIAS" ]; then
+              echo "ACTUAL_KEY_ALIAS=$DETECTED_ALIAS" >> "$GITHUB_ENV"
+              echo "Found alias in keystore: $DETECTED_ALIAS"
+            else
+              CLEAN_ALIAS=$(echo "${RPF_RELEASE_KEY_ALIAS:-rpf-release-key}" | xargs)
+              echo "ACTUAL_KEY_ALIAS=$CLEAN_ALIAS" >> "$GITHUB_ENV"
+            fi
+
             echo "release_ready=true" >> "$GITHUB_OUTPUT"
             echo "Stable release signing credentials are available."
           else
@@ -128,7 +140,7 @@ jobs:
         env:
           RPF_RELEASE_STORE_FILE: ${{ github.workspace }}/android/app/keystore/rpf-release.jks
           RPF_RELEASE_STORE_PASSWORD: ${{ secrets.RPF_RELEASE_STORE_PASSWORD }}
-          RPF_RELEASE_KEY_ALIAS: ${{ secrets.RPF_RELEASE_KEY_ALIAS }}
+          RPF_RELEASE_KEY_ALIAS: ${{ env.ACTUAL_KEY_ALIAS }}
           RPF_RELEASE_KEY_PASSWORD: ${{ secrets.RPF_RELEASE_KEY_PASSWORD }}
         run: |
           set -euo pipefail
