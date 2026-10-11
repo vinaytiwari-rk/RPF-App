@@ -5,7 +5,7 @@ import {
   LayoutGrid, BadgeCheck, FileText, Scale, Sprout, Maximize2,
   Briefcase, GraduationCap, Store, Landmark, ShieldAlert,
   HeartPulse, HeartHandshake, Award, Home, Compass, X,
-  Image as ImageIcon, FileSpreadsheet, Code, FolderArchive, Music, QrCode
+  Code, FolderArchive, QrCode
 } from "lucide-react";
 import {
   UTILITY_CATEGORIES,
@@ -61,29 +61,7 @@ export default function UtilityCenter() {
     }
   };
 
-  const handleOpenTool = (tool: UtilityToolDefinition) => {
-    if (tool.id === "studio_pdf_editor") {
-      navigate("/utilities/pdf-studio");
-      return;
-    }
-    if (tool.id === "studio_image_editor") {
-      navigate("/utilities/image-studio");
-      return;
-    }
-    if (tool.id === "studio_word_editor") {
-      navigate("/utilities/word-studio");
-      return;
-    }
-    if (tool.id === "studio_sheet_editor") {
-      navigate("/utilities/sheet-studio");
-      return;
-    }
-    if (tool.id === "studio_media_editor") {
-      navigate("/utilities/media-studio");
-      return;
-    }
-    setActiveTool(tool);
-  };
+  const handleOpenTool = (tool: UtilityToolDefinition) => setActiveTool(tool);
 
   // Filtered tools list based on Category and Search Query
   const filteredTools = useMemo(() => {
@@ -159,135 +137,6 @@ export default function UtilityCenter() {
           )}
         </div>
       </header>
-
-      {/* Featured All-in-One Studios Spotlight */}
-      <section className="mt-4 rounded-3xl bg-white border border-[#D8E8DB] p-4 text-slate-800 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-100 text-[#E67817]">
-              <Sparkles className="h-3.5 w-3.5" />
-            </span>
-            <span className="text-[11px] font-black uppercase tracking-wider text-[#245D45]">
-              {isHi ? "ऑल-इन-वन प्रो स्टूडियो वर्कस्पेस" : "All-in-One Pro Studios"}
-            </span>
-          </div>
-          <span className="text-[10px] font-bold text-[#245D45] bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full">
-            Full-Screen Dedicated
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-          {/* PDF Studio */}
-          <button
-            type="button"
-            onClick={() => navigate("/utilities/pdf-studio")}
-            className="group flex items-center justify-between rounded-2xl bg-[#FFFDF8] hover:bg-rose-50/50 border border-rose-200/60 p-3 transition text-left active:scale-98 shadow-2xs"
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600 group-hover:scale-105 transition">
-                <FileText className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-xs font-black text-slate-900 group-hover:text-rose-700 transition">
-                  {isHi ? "PDF स्टूडियो प्रो" : "PDF Studio Pro"}
-                </p>
-                <p className="text-[10px] text-slate-500 line-clamp-1">
-                  {isHi ? "ड्रैग टेक्स्ट, व्हाइटआउट, रोटेट" : "Movable text, whiteout, reorder"}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-0.5 group-hover:text-rose-600 transition" />
-          </button>
-
-          {/* Image Studio */}
-          <button
-            type="button"
-            onClick={() => navigate("/utilities/image-studio")}
-            className="group flex items-center justify-between rounded-2xl bg-[#FFFDF8] hover:bg-emerald-50/50 border border-emerald-200/60 p-3 transition text-left active:scale-98 shadow-2xs"
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-[#245D45] group-hover:scale-105 transition">
-                <ImageIcon className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-xs font-black text-slate-900 group-hover:text-[#245D45] transition">
-                  {isHi ? "फोटो स्टूडियो प्रो" : "Image Studio Pro"}
-                </p>
-                <p className="text-[10px] text-slate-500 line-clamp-1">
-                  {isHi ? "ड्रैग टेक्स्ट, मुहर/स्टैम्प, क्रॉप" : "Stamps, text layer, passport crop"}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-0.5 group-hover:text-[#245D45] transition" />
-          </button>
-
-          {/* Word Studio */}
-          <button
-            type="button"
-            onClick={() => navigate("/utilities/word-studio")}
-            className="group flex items-center justify-between rounded-2xl bg-[#FFFDF8] hover:bg-teal-50/50 border border-teal-200/60 p-3 transition text-left active:scale-98 shadow-2xs"
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-700 group-hover:scale-105 transition">
-                <FileText className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-xs font-black text-slate-900 group-hover:text-teal-700 transition">
-                  {isHi ? "वर्ड स्टूडियो प्रो" : "Word Studio Pro"}
-                </p>
-                <p className="text-[10px] text-slate-500 line-clamp-1">
-                  {isHi ? "A4 आवेदन, बायोडाटा, DOCX सेव" : "A4 letters, tables, save .docx"}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-0.5 group-hover:text-teal-700 transition" />
-          </button>
-
-          {/* Excel / Sheet Studio */}
-          <button
-            type="button"
-            onClick={() => navigate("/utilities/sheet-studio")}
-            className="group flex items-center justify-between rounded-2xl bg-[#FFFDF8] hover:bg-emerald-50/50 border border-emerald-200/60 p-3 transition text-left active:scale-98 shadow-2xs"
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-[#245D45] group-hover:scale-105 transition">
-                <FileSpreadsheet className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-xs font-black text-slate-900 group-hover:text-[#245D45] transition">
-                  {isHi ? "एक्सेल स्टूडियो प्रो" : "Excel Studio Pro"}
-                </p>
-                <p className="text-[10px] text-slate-500 line-clamp-1">
-                  {isHi ? "फॉर्मूले (=SUM), बजट, XLSX सेव" : "Formulas, budgets, save .xlsx"}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-0.5 group-hover:text-[#245D45] transition" />
-          </button>
-
-          {/* Audio & Video Studio */}
-          <button
-            type="button"
-            onClick={() => navigate("/utilities/media-studio")}
-            className="group flex items-center justify-between rounded-2xl bg-[#FFFDF8] hover:bg-purple-50/50 border border-purple-200/60 p-3 transition text-left active:scale-98 shadow-2xs"
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-700 group-hover:scale-105 transition">
-                <Music className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-xs font-black text-slate-900 group-hover:text-purple-700 transition">
-                  {isHi ? "मीडिया स्टूडियो प्रो" : "Media Studio Pro"}
-                </p>
-                <p className="text-[10px] text-slate-500 line-clamp-1">
-                  {isHi ? "ऑडियो कटर, 300% बूस्ट, वीडियो ऑडियो" : "Audio trim, 300% boost, video extract"}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-0.5 group-hover:text-purple-700 transition" />
-          </button>
-        </div>
-      </section>
 
       {/* 16 Category Navigation Chips (Horizontal Scroll) */}
       <section className="mt-4 -mx-3 px-3 sm:mx-0 sm:px-0">
