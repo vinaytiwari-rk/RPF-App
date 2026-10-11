@@ -86,7 +86,11 @@ router.get('/proxy', async (req: Request, res: Response) => {
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       const text = await upstream.text();
-      // Rewrite URIs so that nested playlists, audio tracks, keys, and ts segments go through /api/iptv/proxy
+      const host = req.headers['x-forwarded-host'] || req.get('host') || 'appapi.therpfoundation.org';
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+      const proxyBase = `${protocol}://${host}/api/iptv/proxy`;
+
+      // Rewrite URIs so that nested playlists, audio tracks, keys, and ts segments go through proxyBase
       const rewritten = text.split(/\r?\n/).map((line) => {
         const trimmed = line.trim();
         if (!trimmed) return line;
@@ -96,7 +100,7 @@ router.get('/proxy', async (req: Request, res: Response) => {
           return line.replace(/URI="([^"]+)"/g, (_, uri) => {
             try {
               const full = new URL(uri, rawUrl).href;
-              return `URI="/api/iptv/proxy?url=${encodeURIComponent(full)}"`;
+              return `URI="${proxyBase}?url=${encodeURIComponent(full)}"`;
             } catch {
               return `URI="${uri}"`;
             }
@@ -106,7 +110,7 @@ router.get('/proxy', async (req: Request, res: Response) => {
         // If line is a segment or sub-playlist URL
         try {
           const full = new URL(trimmed, rawUrl).href;
-          return `/api/iptv/proxy?url=${encodeURIComponent(full)}`;
+          return `${proxyBase}?url=${encodeURIComponent(full)}`;
         } catch {
           return line;
         }

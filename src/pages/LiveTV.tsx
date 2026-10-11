@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import Hls from "hls.js";
+import videojs from "video.js";
+import "video.js/dist/video-js.css";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns, RefreshCw } from "lucide-react";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
 import { openExternalLink } from "../utils/browser";
 import { getMediaSourceType } from "../utils/mediaSourceType";
+import { resolveMediaUrl } from "../utils/media";
 
 const DEAD_CHANNEL_IDS = new Set([
   "tv-extract-121", "tv-extract-131", "tv-extract-134", "tv-extract-144",
@@ -75,6 +77,142 @@ const canonical = (items: LiveTvChannel[]) =>
 const getId = (c: LiveTvChannel) =>
   c.videoId || c.url.match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|watch\?v=))([^?&/]+)/)?.[1];
 
+interface DirectStreamPlayerProps {
+  url: string;
+  name: string;
+  onOpenExternal: () => void;
+  langHi: boolean;
+}
+
+function DirectStreamPlayer({
+  url,
+  name,
+  onOpenExternal,
+  langHi,
+}: DirectStreamPlayerProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [currentSrc, setCurrentSrc] = useState<string>(url);
+  const proxyAttemptedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    setCurrentSrc(url);
+    proxyAttemptedRef.current = false;
+    setErrorMsg(null);
+  }, [url]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !currentSrc) return;
+
+    setErrorMsg(null);
+
+    // Create the video-js node inside our dedicated container
+    const videoElement = document.createElement("video-js");
+    videoElement.className = "video-js vjs-big-play-button-centered h-full w-full";
+    videoElement.setAttribute("playsinline", "true");
+    container.appendChild(videoElement);
+
+    const sourceType = getMediaSourceType(currentSrc) || "application/x-mpegURL";
+
+    const player = videojs(videoElement, {
+      controls: true,
+      autoplay: "any",
+      preload: "auto",
+      responsive: true,
+      fluid: false,
+      playsinline: true,
+      html5: {
+        vhs: {
+          enableLowInitialPlaylist: true,
+          smoothQualityChange: true,
+          fastReady: true,
+          useDeviceAmpSupported: true,
+          overrideNative: false,
+        },
+      },
+      sources: [
+        {
+          src: currentSrc,
+          type: sourceType,
+        },
+      ],
+    });
+
+    playerRef.current = player;
+
+    player.on("error", () => {
+      console.warn("Video.js playback error for:", currentSrc);
+      if (!proxyAttemptedRef.current && !currentSrc.includes("/api/iptv/proxy")) {
+        proxyAttemptedRef.current = true;
+        const proxyUrl = resolveMediaUrl(`/api/iptv/proxy?url=${encodeURIComponent(url)}`);
+        console.log("Switching to IPTV proxy fallback:", proxyUrl);
+        setCurrentSrc(proxyUrl);
+        return;
+      }
+      setErrorMsg(
+        langHi
+          ? "यह डायरेक्ट स्ट्रीम वर्तमान में अनुपलब्ध है या प्रदाता द्वारा ब्लॉक की गई है।"
+          : "This direct stream is currently unavailable or blocked by its provider."
+      );
+    });
+
+    return () => {
+      try {
+        if (player && !player.isDisposed()) {
+          player.dispose();
+        }
+      } catch (e) {
+        console.warn("Video.js player disposal caught safely:", e);
+      } finally {
+        playerRef.current = null;
+        if (videoElement.parentNode === container) {
+          container.removeChild(videoElement);
+        }
+      }
+    };
+  }, [currentSrc, url, langHi]);
+
+  return (
+    <div className="relative h-full w-full bg-black flex items-center justify-center">
+      <div ref={containerRef} className="h-full w-full" data-vjs-player />
+
+      {errorMsg && (
+        <div
+          role="alert"
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-slate-950/95 p-5 text-center"
+        >
+          <p className="text-sm font-bold text-white">
+            {langHi ? "स्ट्रीम प्लेबैक विफल" : "Stream playback failed"}
+          </p>
+          <p className="max-w-lg text-xs leading-relaxed text-slate-300">{errorMsg}</p>
+          <div className="flex items-center gap-3 mt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setErrorMsg(null);
+                proxyAttemptedRef.current = false;
+                setCurrentSrc(url);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400 active:scale-95 transition"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              {langHi ? "पुनः प्रयास करें" : "Retry"}
+            </button>
+            <button
+              type="button"
+              onClick={onOpenExternal}
+              className="rounded-xl bg-white/10 border border-white/20 px-4 py-2 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition"
+            >
+              {langHi ? "ब्राउज़र में खोलें" : "Open in Browser"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function LiveTV() {
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -85,16 +223,12 @@ export default function LiveTV() {
   const [visibleCount, setVisibleCount] = useState(40);
   const [channels, setChannels] = useState<LiveTvChannel[]>(() => canonical(LIVE_TV_DEFAULTS));
   const [active, setActive] = useState<LiveTvChannel | null>(null);
-  const [playerError, setPlayerError] = useState("");
-  const [isBuffering, setIsBuffering] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   const [, setServerControlled] = useState(false);
   const [layout, setLayout] = useState<"grid" | "list" | "compact" | "theater">("grid");
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/cms", { cache: "no-store" })
+    fetch(resolveMediaUrl("/api/cms"), { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const configured = data?.cms?.liveTvChannels;
@@ -138,133 +272,6 @@ export default function LiveTV() {
     else setActive(null);
   };
 
-  // High-performance Hls.js and native stream player with auto-retry and server proxy fallback
-  useEffect(() => {
-    if (!active || embed) {
-      setPlayerError("");
-      setIsBuffering(false);
-      return;
-    }
-
-    const video = videoRef.current;
-    if (!video) return;
-
-    setPlayerError("");
-    setIsBuffering(true);
-
-    let hlsInstance: Hls | null = null;
-    let cancelled = false;
-    let fallbackTried = false;
-
-    const playVideo = (v: HTMLVideoElement) => {
-      const p = v.play();
-      if (p !== undefined) {
-        p.catch(() => {
-          // Unmuted autoplay blocked by browser policy: mute and retry immediately
-          v.muted = true;
-          v.play().catch(() => {});
-        });
-      }
-    };
-
-    const loadStream = (streamUrl: string) => {
-      if (cancelled) return;
-
-      const isM3U8 = streamUrl.includes(".m3u8") || streamUrl.includes(".m3u") || streamUrl.includes("/proxy?url=");
-
-      if (isM3U8 && Hls.isSupported()) {
-        if (hlsInstance) {
-          hlsInstance.destroy();
-          hlsInstance = null;
-        }
-
-        const hls = new Hls({
-          enableWorker: true,
-          lowLatencyMode: true,
-          backBufferLength: 30,
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60,
-          maxBufferSize: 30 * 1000 * 1000,
-          maxBufferHole: 0.5,
-          highBufferWatchdogPeriod: 2,
-          nudgeOffset: 0.1,
-          nudgeMaxRetry: 5,
-          liveSyncDurationCount: 3,
-          liveMaxLatencyDurationCount: 10,
-          startLevel: -1,
-          xhrSetup: (xhr) => {
-            xhr.withCredentials = false;
-          }
-        });
-
-        hlsInstance = hls;
-
-        hls.loadSource(streamUrl);
-        hls.attachMedia(video);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          if (!cancelled) {
-            setIsBuffering(false);
-            playVideo(video);
-          }
-        });
-
-        hls.on(Hls.Events.ERROR, (_event, data) => {
-          if (cancelled) return;
-
-          if (data.fatal) {
-            switch (data.type) {
-              case Hls.ErrorTypes.NETWORK_ERROR:
-                // Network / CORS failure on direct URL: try proxy once
-                if (!fallbackTried && !streamUrl.includes("/api/iptv/proxy")) {
-                  fallbackTried = true;
-                  console.warn(`Direct stream failed for ${active.name}, retrying via proxy...`);
-                  loadStream(`/api/iptv/proxy?url=${encodeURIComponent(active.url)}`);
-                  return;
-                }
-                console.warn("Fatal network error in HLS, attempting startLoad recovery...", data);
-                hls.startLoad();
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                console.warn("Fatal media error in HLS, attempting recoverMediaError...", data);
-                hls.recoverMediaError();
-                break;
-              default:
-                console.error("Unrecoverable HLS error:", data);
-                hls.destroy();
-                setIsBuffering(false);
-                setPlayerError(hi ? "यह लाइव स्ट्रीम वर्तमान में अनुपलब्ध है या प्रदाता द्वारा ब्लॉक की गई है।" : "This direct stream is currently unavailable or blocked by its provider.");
-                break;
-            }
-          }
-        });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl") || !isM3U8) {
-        // Native HLS (iOS Safari) or direct MP4/audio
-        video.src = streamUrl;
-        video.load();
-        playVideo(video);
-      } else {
-        setIsBuffering(false);
-        setPlayerError(hi ? "आपका डिवाइस इस स्ट्रीम फॉर्मेट का समर्थन नहीं करता है।" : "Your device does not support this stream format.");
-      }
-    };
-
-    loadStream(active.url);
-
-    return () => {
-      cancelled = true;
-      if (hlsInstance) {
-        hlsInstance.destroy();
-        hlsInstance = null;
-      }
-      if (video) {
-        video.pause();
-        video.removeAttribute("src");
-        video.load();
-      }
-    };
-  }, [active, embed, hi, retryCount]);
-
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans text-slate-800 selection:bg-orange-100">
       {active ? (
@@ -302,57 +309,12 @@ export default function LiveTV() {
                   allowFullScreen
                 />
               ) : (
-                <div className="relative h-full w-full bg-black flex items-center justify-center">
-                  <video
-                    ref={videoRef}
-                    className="h-full w-full object-contain"
-                    controls
-                    playsInline
-                    autoPlay
-                    onWaiting={() => setIsBuffering(true)}
-                    onPlaying={() => { setIsBuffering(false); setPlayerError(""); }}
-                    onCanPlay={() => setIsBuffering(false)}
-                  />
-
-                  {/* High performance loading / buffering spinner */}
-                  {isBuffering && !playerError && (
-                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xs pointer-events-none transition-opacity">
-                      <div className="h-10 w-10 animate-spin rounded-full border-3 border-orange-500 border-t-transparent shadow-lg mb-3" />
-                      <p className="text-xs font-bold text-white tracking-wide">
-                        {hi ? "लाइव स्ट्रीम लोड हो रही है..." : "Connecting live stream..."}
-                      </p>
-                      <p className="text-[10px] text-slate-300 mt-1">
-                        {hi ? "उच्च गति ब्रॉडकास्ट बफ़रिंग" : "Buffering high-speed broadcast"}
-                      </p>
-                    </div>
-                  )}
-
-                  {playerError && (
-                    <div role="alert" className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-slate-950/95 p-5 text-center">
-                      <p className="text-sm font-bold text-white">{hi ? "स्ट्रीम प्लेबैक विफल" : "Stream playback failed"}</p>
-                      <p className="max-w-lg text-xs leading-relaxed text-slate-300">{playerError}</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRetryCount((prev) => prev + 1);
-                          }}
-                          className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400 active:scale-95 transition"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" />
-                          {hi ? "पुनः प्रयास करें" : "Retry"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => openExternalLink(active.url, navigate, active.name)}
-                          className="rounded-xl bg-white/10 border border-white/20 px-4 py-2 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition"
-                        >
-                          {hi ? "ब्राउज़र में खोलें" : "Open in Browser"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <DirectStreamPlayer
+                  url={active.url}
+                  name={active.name}
+                  onOpenExternal={() => openExternalLink(active.url, navigate, active.name)}
+                  langHi={hi}
+                />
               )}
             </div>
           </div>

@@ -303071,20 +303071,66 @@ router3.get("/proxy", async (req2, res) => {
   if (!rawUrl) {
     return res.status(400).json({ error: "Missing url query parameter" });
   }
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "*");
   try {
     const parsed = new import_url2.URL(rawUrl);
     if (!["http:", "https:"].includes(parsed.protocol)) {
       return res.status(400).json({ error: "Invalid URL protocol" });
     }
-    const upstream = await fetch2(rawUrl);
-    const contentType = upstream.headers.get("content-type");
+    const upstream = await fetch2(rawUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": `${parsed.protocol}//${parsed.host}/`
+      }
+    });
+    if (!upstream.ok && upstream.status >= 400) {
+      return res.status(upstream.status).json({ error: `Upstream HTTP ${upstream.status}` });
+    }
+    const contentType = upstream.headers.get("content-type") || "";
+    const isM3U8 = contentType.includes("mpegurl") || contentType.includes("application/x-mpegURL") || parsed.pathname.endsWith(".m3u8") || parsed.pathname.endsWith(".m3u");
+    if (isM3U8) {
+      res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      const text3 = await upstream.text();
+      const host = req2.headers["x-forwarded-host"] || req2.get("host") || "appapi.therpfoundation.org";
+      const protocol = req2.headers["x-forwarded-proto"] || req2.protocol || "https";
+      const proxyBase = `${protocol}://${host}/api/iptv/proxy`;
+      const rewritten = text3.split(/\r?\n/).map((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) return line;
+        if (trimmed.startsWith("#")) {
+          return line.replace(/URI="([^"]+)"/g, (_3, uri) => {
+            try {
+              const full = new import_url2.URL(uri, rawUrl).href;
+              return `URI="${proxyBase}?url=${encodeURIComponent(full)}"`;
+            } catch {
+              return `URI="${uri}"`;
+            }
+          });
+        }
+        try {
+          const full = new import_url2.URL(trimmed, rawUrl).href;
+          return `${proxyBase}?url=${encodeURIComponent(full)}`;
+        } catch {
+          return line;
+        }
+      }).join("\n");
+      return res.send(rewritten);
+    }
     if (contentType) res.setHeader("Content-Type", contentType);
     const cacheControl = upstream.headers.get("cache-control");
     if (cacheControl) res.setHeader("Cache-Control", cacheControl);
+    else res.setHeader("Cache-Control", "public, max-age=3600");
     upstream.body?.pipe(res);
   } catch (e6) {
-    console.error("Proxy error", e6);
-    res.status(502).json({ error: "Failed to proxy stream" });
+    console.error("IPTV proxy error:", e6?.message || e6);
+    if (!res.headersSent) {
+      res.status(502).json({ error: "Failed to proxy stream" });
+    }
   }
 });
 var iptvRoutes_default = router3;
@@ -352268,6 +352314,36 @@ router28.get("/api/public/live-feeds", async (_req, res) => {
   };
   save("official_live_feeds", data2);
   return res.set("Cache-Control", "no-store").json({ success: true, data: data2 });
+});
+router28.get("/api/public/app-update", async (_req, res) => {
+  try {
+    const fs11 = await import("fs");
+    const path13 = await import("path");
+    const candidates = [
+      path13.join(process.cwd(), "updates", "manifest.json"),
+      path13.join(process.cwd(), "dist", "updates", "manifest.json"),
+      path13.join(process.cwd(), "public", "updates", "manifest.json")
+    ];
+    for (const p5 of candidates) {
+      if (fs11.existsSync(p5)) {
+        const raw = fs11.readFileSync(p5, "utf8");
+        const json2 = JSON.parse(raw);
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        return res.json({ success: true, ...json2 });
+      }
+    }
+    return res.json({
+      success: true,
+      versionCode: 21562,
+      versionName: "2.5.2",
+      downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
+      minSupportedVersionCode: 20500,
+      releaseNotes: "\u2022 High-Speed Live TV Player: Instant 3-4 second playback via Video.js native hardware decoder\n\u2022 Direct Stream Fix: Resolved infinite buffering and black overlay issues on all Live TV channels\n\u2022 Universal IPTV Proxy: Fully rewritten absolute stream routing preventing localhost failures on Android\n\u2022 Internet Radio: Instant audio playback across Akashvani and Private FM stations without buffering\n\u2022 Full Web & Android Parity: Identical feature experience across Panchang, Reels, Marquee, and all services"
+    });
+  } catch (err2) {
+    return res.status(500).json({ success: false, error: err2?.message || "Failed to read update manifest" });
+  }
 });
 var publicExternalRoutes_default = router28;
 
