@@ -19,6 +19,7 @@ import DevEncodingToolsEngine from "./engines/devEncodingToolsEngine";
 import ArchiveToolsEngine from "./engines/archiveToolsEngine";
 import MediaToolsEngine from "./engines/mediaToolsEngine";
 import DesignQrToolsEngine from "./engines/designQrToolsEngine";
+import PdfStudioEditorEngine from "./engines/pdfStudioEditorEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -626,6 +627,10 @@ function ToolEngineDispatcher({
     case "design_contrast_checker":
     case "design_aspect_calc":
       return <DesignQrToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    // 26. OFFLINE STUDIO EDITORS SUITE
+    case "studio_pdf_editor":
+      return <PdfStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (

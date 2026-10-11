@@ -20,6 +20,7 @@ export interface UtilityCategoryDefinition {
 
 export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "all", titleEn: "All Tools", titleHi: "सभी टूल्स", iconName: "LayoutGrid", accent: "from-emerald-600 to-teal-700" },
+  { id: "studio_editors", titleEn: "Studio Editors (Offline)", titleHi: "स्टूडियो एडिटर्स (ऑफलाइन)", iconName: "Sparkles", accent: "from-rose-600 to-amber-600" },
   { id: "pdf_tools", titleEn: "PDF Tools (30)", titleHi: "PDF टूल्स (30)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
   { id: "image_tools", titleEn: "Image Tools (40)", titleHi: "इमेज टूल्स (40)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
   { id: "word_text_tools", titleEn: "Word & Text Tools (40)", titleHi: "वर्ड व टेक्स्ट टूल्स (40)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
@@ -2141,5 +2142,16 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "design_aspect_calc", categoryId: "design_qr_tools", titleEn: "Design Aspect Ratio Calculator", titleHi: "आस्पेक्ट रेशियो गणक (16:9, 4:3)",
     descEn: "Calculate proportional width and height across common design ratios.", descHi: "चौड़ाई या ऊंचाई दर्ज कर आस्पेक्ट रेशियो अनुसार सही अनुपात निकालें।", iconName: "Maximize", badge: "100% Offline",
     keywords: ["aspect ratio calc", "width height", "screen ratio"]
+  },
+
+  // =========================================================================
+  // 26. OFFLINE STUDIO EDITORS SUITE (All-in-One Multi-Feature Workspaces)
+  // =========================================================================
+  {
+    id: "studio_pdf_editor", categoryId: "studio_editors", titleEn: "PDF Studio Editor (All-in-One)", titleHi: "PDF स्टूडियो एडिटर (पूर्ण संपादक)",
+    descEn: "Complete offline PDF workspace: reorder, delete, rotate pages, add watermarks & text stamps.",
+    descHi: "संपूर्ण ऑफलाइन PDF वर्कस्पेस: पेज री-ऑर्डर, रोटेट, डिलीट करें, वाटरमार्क व टेक्स्ट स्टैम्प लगाएं।",
+    iconName: "FileText", badge: "All-in-One Studio",
+    keywords: ["pdf editor", "edit pdf", "pdf studio", "reorder pdf", "watermark pdf", "rotate pdf"]
   }
 ];

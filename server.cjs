@@ -353342,9 +353342,38 @@ async function getJagannathaPanchang(options2) {
   } catch {
   }
   const signs = raw?.signs || raw?.rashi || {};
-  const sunrise = first2(raw, ["sunrise", "sun_rise"]) || "06:14 AM";
-  const sunset = first2(raw, ["sunset", "sun_set"]) || "06:05 PM";
-  const jHoraMuhurats = calculateVedicMuhurats(sunrise, sunset, targetDate);
+  if (!raw || typeof raw !== "object") {
+    return {
+      provider: "Jagannatha Hora",
+      sourceUrl: "https://jagannathahora.com/api-mcp",
+      calculationSystem: "Vedic Sidereal (Nirayana)",
+      ayanamsa: "Lahiri",
+      date: dateFormatted,
+      day: "",
+      location: place,
+      sunrise: "",
+      sunset: "",
+      moonrise: "",
+      moonset: "",
+      tithi: "",
+      nakshatra: "",
+      masa: "",
+      paksha: "",
+      samvat: "",
+      yoga: "",
+      karana: "",
+      sunSign: "",
+      moonSign: "",
+      rahukaal: "",
+      abhijitMuhurat: "",
+      raw: null,
+      updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      unavailable: true
+    };
+  }
+  const sunrise = first2(raw, ["sunrise", "sun_rise"]);
+  const sunset = first2(raw, ["sunset", "sun_set"]);
+  const jHoraMuhurats = sunrise && sunset ? calculateVedicMuhurats(sunrise, sunset, targetDate) : { abhijitMuhurat: "", rahukaal: "" };
   const rawAbhijit = first2(raw?.auspicious, ["abhijit_muhurta", "abhijitMuhurat"]) || first2(raw, ["abhijitMuhurat", "abhijit_muhurta"]);
   const rawRahu = first2(raw?.inauspicious, ["rahu_kalam", "rahuKalam"]) || first2(raw, ["rahukaal", "rahu_kalam"]);
   const abhijitMuhurat = rawAbhijit && rawAbhijit.length > 5 ? rawAbhijit : jHoraMuhurats.abhijitMuhurat;
@@ -353355,25 +353384,26 @@ async function getJagannathaPanchang(options2) {
     calculationSystem: "Vedic Sidereal (Nirayana)",
     ayanamsa: "Lahiri",
     date: dateFormatted,
-    day: first2(raw, ["vaara", "vara", "day", "weekday"]) || ["\u0930\u0935\u093F\u0935\u093E\u0930", "\u0938\u094B\u092E\u0935\u093E\u0930", "\u092E\u0902\u0917\u0932\u0935\u093E\u0930", "\u092C\u0941\u0927\u0935\u093E\u0930", "\u0917\u0941\u0930\u0941\u0935\u093E\u0930", "\u0936\u0941\u0915\u094D\u0930\u0935\u093E\u0930", "\u0936\u0928\u093F\u0935\u093E\u0930"][targetDate.getDay()],
+    day: first2(raw, ["vaara", "vara", "day", "weekday"]),
     location: first2(raw, ["place"]) || place,
     sunrise,
     sunset,
-    moonrise: first2(raw, ["moonrise", "moon_rise"]) || "11:45 PM",
-    moonset: first2(raw, ["moonset", "moon_set"]) || "10:30 AM",
-    tithi: first2(raw, ["tithi"]) || "Krishna Saptami / Ashtami",
-    nakshatra: first2(raw, ["nakshatra"]) || "Ardra Nakshatra",
-    paksha: first2(raw, ["paksha"]) || "Krishna Paksha",
-    samvat: first2(raw, ["samvat", "vikram_samvat"]) || "Vikram Samvat 2083",
-    yoga: first2(raw, ["yoga"]) || "Variyana Yoga",
-    karana: first2(raw, ["karana"]) || "Bava Karana",
-    sunSign: first2(signs, ["sun", "sun_sign", "surya"]) || first2(raw, ["sun_sign", "surya_rashi"]) || "Kanya (Virgo)",
-    moonSign: first2(signs, ["moon", "moon_sign", "chandra"]) || first2(raw, ["moon_sign", "chandra_rashi"]) || "Mithuna (Gemini)",
+    moonrise: first2(raw, ["moonrise", "moon_rise"]),
+    moonset: first2(raw, ["moonset", "moon_set"]),
+    tithi: first2(raw, ["tithi"]),
+    nakshatra: first2(raw, ["nakshatra"]),
+    masa: first2(raw, ["masa", "maasa", "maas", "lunar_month", "lunarMonth", "hindu_month", "hinduMonth", "masa_name", "month_name", "monthName", "month"]),
+    paksha: first2(raw, ["paksha"]) || "",
+    samvat: first2(raw, ["samvat", "vikram_samvat"]),
+    yoga: first2(raw, ["yoga"]),
+    karana: first2(raw, ["karana"]),
+    sunSign: first2(signs, ["sun", "sun_sign", "surya"]) || first2(raw, ["sun_sign", "surya_rashi"]),
+    moonSign: first2(signs, ["moon", "moon_sign", "chandra"]) || first2(raw, ["moon_sign", "chandra_rashi"]),
     rahukaal,
     abhijitMuhurat,
     raw,
     updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
-    unavailable: false
+    unavailable: !(first2(raw, ["tithi"]) && first2(raw, ["nakshatra"]) && first2(raw, ["paksha"]) && first2(raw, ["masa", "maasa", "maas", "lunar_month", "lunarMonth", "hindu_month", "hinduMonth", "masa_name", "month_name", "monthName", "month"]))
   };
   cache2.set(key, { data: data2, at: Date.now() });
   return data2;
