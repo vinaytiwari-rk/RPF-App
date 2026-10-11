@@ -61,8 +61,6 @@ const MASA_KEYS = [
   "purnimanta", "vedic_month", "vedicMonth"
 ];
 
-const HINDU_MONTH_NAMES = /^(magha|magh|phalguna|phalgun|chaitra|vaisakha|vaishakha|jyeshtha|jyestha|ashada|ashadha|shravana|shravan|bhadrapada|bhadra|ashvina|ashwin|kartika|kartik|margashirsha|margashirsh|pausha|paush|माघ|फाल्गुन|चैत्र|वैशाख|ज्येष्ठ|आषाढ़|श्रावण|भाद्रपद|आश्विन|कार्तिक|मार्गशीर्ष|पौष)$/i;
-
 function deepMasa(source: any, depth = 0): string {
   if (!source || typeof source !== "object" || depth > 5) return "";
   const direct = first(source, MASA_KEYS);
