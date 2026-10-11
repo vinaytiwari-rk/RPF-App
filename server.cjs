@@ -353296,6 +353296,21 @@ var MASA_KEYS = [
   "vedic_month",
   "vedicMonth"
 ];
+var HINDU_MONTH_NAMES = /^(magha|magh|phalguna|phalgun|chaitra|vaisakha|vaishakha|jyeshtha|jyestha|ashada|ashadha|shravana|shravan|bhadrapada|bhadra|ashvina|ashwin|kartika|kartik|margashirsha|margashirsh|pausha|paush|माघ|फाल्गुन|चैत्र|वैशाख|ज्येष्ठ|आषाढ़|श्रावण|भाद्रपद|आश्विन|कार्तिक|मार्गशीर्ष|पौष)$/i;
+function deepMasa(source, depth = 0) {
+  if (!source || typeof source !== "object" || depth > 5) return "";
+  const direct = first2(source, MASA_KEYS);
+  if (direct) return direct;
+  const genericMonth = textValue(source.month ?? source.Month ?? source.MONTH).trim();
+  if (genericMonth && HINDU_MONTH_NAMES.test(genericMonth)) return genericMonth;
+  for (const value2 of Object.values(source)) {
+    if (value2 && typeof value2 === "object") {
+      const nested = deepMasa(value2, depth + 1);
+      if (nested) return nested;
+    }
+  }
+  return "";
+}
 var PAKSHA_KEYS = ["paksha", "pak\u1E63a", "lunar_fortnight", "lunarFortnight", "fortnight"];
 function toDDMMYYYY(val2) {
   if (!val2) {
@@ -353426,7 +353441,7 @@ async function getJagannathaPanchang(options2) {
     moonset: first2(raw, ["moonset", "moon_set"]),
     tithi: first2(raw, ["tithi"]),
     nakshatra: first2(raw, ["nakshatra"]),
-    masa: deepFirst(raw, MASA_KEYS),
+    masa: deepMasa(raw),
     paksha: deepFirst(raw, PAKSHA_KEYS) || "",
     samvat: first2(raw, ["samvat", "vikram_samvat"]),
     yoga: first2(raw, ["yoga"]),
@@ -353437,7 +353452,7 @@ async function getJagannathaPanchang(options2) {
     abhijitMuhurat,
     raw,
     updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
-    unavailable: !(first2(raw, ["tithi"]) && first2(raw, ["nakshatra"]) && deepFirst(raw, PAKSHA_KEYS) && deepFirst(raw, MASA_KEYS))
+    unavailable: !(first2(raw, ["tithi"]) && first2(raw, ["nakshatra"]) && deepFirst(raw, PAKSHA_KEYS) && deepMasa(raw))
   };
   cache2.set(key, { data: data2, at: Date.now() });
   return data2;

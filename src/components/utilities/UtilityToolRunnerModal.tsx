@@ -20,6 +20,7 @@ import ArchiveToolsEngine from "./engines/archiveToolsEngine";
 import MediaToolsEngine from "./engines/mediaToolsEngine";
 import DesignQrToolsEngine from "./engines/designQrToolsEngine";
 import PdfStudioEditorEngine from "./engines/pdfStudioEditorEngine";
+import ImageStudioEditorEngine from "./engines/imageStudioEditorEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -631,6 +632,8 @@ function ToolEngineDispatcher({
     // 26. OFFLINE STUDIO EDITORS SUITE
     case "studio_pdf_editor":
       return <PdfStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+    case "studio_image_editor":
+      return <ImageStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (

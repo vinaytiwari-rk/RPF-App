@@ -2153,5 +2153,12 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descHi: "संपूर्ण ऑफलाइन PDF वर्कस्पेस: पेज री-ऑर्डर, रोटेट, डिलीट करें, वाटरमार्क व टेक्स्ट स्टैम्प लगाएं।",
     iconName: "FileText", badge: "All-in-One Studio",
     keywords: ["pdf editor", "edit pdf", "pdf studio", "reorder pdf", "watermark pdf", "rotate pdf"]
+  },
+  {
+    id: "studio_image_editor", categoryId: "studio_editors", titleEn: "Image Studio Editor (All-in-One)", titleHi: "फोटो व इमेज स्टूडियो एडिटर",
+    descEn: "Full-fledged offline photo editor: brightness, contrast, crop ratios, filters, brush & text overlays.",
+    descHi: "संपूर्ण ऑफलाइन फोटो एडिटर: ब्राइटनेस, कंट्रास्ट, फ्रीहैंड क्रॉप, फिल्टर्स, ब्रश ड्रॉइंग व टेक्स्ट।",
+    iconName: "Image", badge: "All-in-One Studio",
+    keywords: ["image editor", "photo editor", "photo studio", "crop photo", "image filter", "photo effects"]
   }
 ];
