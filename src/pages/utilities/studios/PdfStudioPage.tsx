@@ -60,7 +60,7 @@ interface FreehandStroke {
   width: number;
 }
 
-export default function PdfStudioPage() {
+export default function PdfEditorPage() {
   const navigate = useNavigate();
   const context = useOutletContext<{ lang?: "en" | "hi" }>() || {};
   const isHi = context.lang === "hi";
@@ -510,9 +510,9 @@ export default function PdfStudioPage() {
           </button>
           <div>
             <h1 className="text-sm font-black tracking-tight text-slate-900 flex items-center gap-1.5">
-              <span>PDF Studio Pro</span>
+              <span>PDF Text & Whiteout Editor</span>
               <span className="rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-bold text-rose-700">
-                Studio
+                Editor
               </span>
             </h1>
             <p className="text-[11px] text-slate-500">
@@ -548,7 +548,7 @@ export default function PdfStudioPage() {
               <FileText className="h-8 w-8" />
             </div>
             <h2 className="text-lg font-black text-slate-900">
-              {isHi ? "PDF Studio में संपादन शुरू करें" : "Open PDF in Studio Workspace"}
+              {isHi ? "PDF एडिटर में संपादन शुरू करें" : "Open PDF Editor"}
             </h2>
             <p className="mt-2 text-xs text-slate-600 leading-relaxed">
               {isHi
