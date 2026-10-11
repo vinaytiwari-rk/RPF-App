@@ -291,7 +291,7 @@ export async function getLiveDrikPanchang(cityId?: string, state?: string) {
     const now = new Date();
     const dateStr = new Intl.DateTimeFormat("en-GB", {
       timeZone: "Asia/Kolkata", day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(now).replace(/\\//g, "-");
+    }).format(now).replace(/\//g, "-");
 
     return {
       source: "Jagannatha Hora",
