@@ -177,23 +177,23 @@
     {
       "id": "sci-007",
       "subject": "general-science",
-      "questionEn": "Which blood cells primarily transport oxygen?",
-      "questionHi": "कौन-सी रक्त कोशिकाएँ मुख्य रूप से ऑक्सीजन पहुँचाती हैं?",
+      "questionEn": "Which blood component plays the main role in forming the initial platelet plug after an injury?",
+      "questionHi": "रक्त का कौन-सा घटक चोट लगने पर शुरुआती प्लेटलेट प्लग बनाने में प्रमुख भूमिका निभाता है?",
       "optionsEn": [
-        "White blood cells",
         "Red blood cells",
         "Platelets",
-        "Plasma cells"
+        "White blood cells",
+        "Plasma"
       ],
       "optionsHi": [
-        "श्वेत रक्त कोशिकाएँ",
         "लाल रक्त कोशिकाएँ",
         "प्लेटलेट्स",
-        "प्लाज्मा कोशिकाएँ"
+        "श्वेत रक्त कोशिकाएँ",
+        "प्लाज़्मा"
       ],
       "correctIndex": 1,
-      "explanationEn": "Red blood cells carry oxygen using haemoglobin.",
-      "explanationHi": "लाल रक्त कोशिकाएँ हीमोग्लोबिन की सहायता से ऑक्सीजन पहुँचाती हैं।",
+      "explanationEn": "Platelets gather at an injury site to form an initial plug and start the process that limits bleeding.",
+      "explanationHi": "प्लेटलेट्स चोट वाली जगह पर एकत्र होकर शुरुआती प्लग बनाते हैं और रक्तस्राव रोकने की प्रक्रिया शुरू करते हैं।",
       "difficulty": "easy",
       "examTags": [
         "ssc",
