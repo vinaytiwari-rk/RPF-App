@@ -4,7 +4,8 @@ import {
   ArrowLeft, Search, ShieldCheck, Sparkles, ChevronRight,
   LayoutGrid, BadgeCheck, FileText, Scale, Sprout, Maximize2,
   Briefcase, GraduationCap, Store, Landmark, ShieldAlert,
-  HeartPulse, HeartHandshake, Award, Home, Compass, X
+  HeartPulse, HeartHandshake, Award, Home, Compass, X,
+  Image as ImageIcon, FileSpreadsheet, Code, FolderArchive, Music, QrCode
 } from "lucide-react";
 import {
   UTILITY_CATEGORIES,
@@ -35,6 +36,12 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
   Home,
   Compass,
   ShieldCheck,
+  Image: ImageIcon,
+  FileSpreadsheet,
+  Code,
+  FolderArchive,
+  Music,
+  QrCode,
 };
 
 export default function UtilityCenter() {
@@ -99,8 +106,8 @@ export default function UtilityCenter() {
         </h1>
         <p className="mt-1 text-xs sm:text-sm text-[#52685C] max-w-xl">
           {isHi
-            ? "16 महत्वपूर्ण श्रेणियां और 40+ कामकाजी टूल्स—0% सर्वर लोड, 100% ऑफलाइन, सीधे आपके फोन में सुरक्षित।"
-            : "16 essential categories & 40+ practical tools—0% server load, 100% client-side privacy on your device."}
+            ? "24 महत्वपूर्ण श्रेणियां और 350+ कामकाजी टूल्स—0% सर्वर लोड, 100% ऑफलाइन, सीधे आपके फोन में सुरक्षित।"
+            : "24 essential categories & 350+ practical tools—0% server load, 100% client-side privacy on your device."}
         </p>
 
         {/* Search Bar */}
