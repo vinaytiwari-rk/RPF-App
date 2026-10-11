@@ -5,7 +5,7 @@ import {
   Award, ChevronRight, HeartHandshake, IdCard, Mail, Phone, Settings, 
   ShieldCheck, User, LogOut, FileText, Camera, BadgeCheck,
   Lock, AlertTriangle, HelpCircle, Info, X, ExternalLink,
-  Clock, CheckCircle2, Sparkles, Users, Film
+  Clock, CheckCircle2, Sparkles, Users, Film, Download, RefreshCw, Smartphone
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate, useOutletContext } from "react-router-dom";
@@ -13,6 +13,14 @@ import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
 import { openBrowserSettings } from "../utils/browser";
+import { 
+  checkForAppUpdates, 
+  downloadAndInstallUpdate, 
+  getCurrentAppVersion, 
+  type AppVersionInfo, 
+  type UpdateManifest, 
+  DEFAULT_VERSION_INFO 
+} from "../services/appUpdateService";
 
 type Lang = "en" | "hi";
 type VolunteerMeta = {
@@ -26,7 +34,7 @@ type VolunteerMeta = {
   approval_status?: string;
 };
 
-type LegalModalType = "terms" | "privacy" | "disclaimer" | "support" | "about" | null;
+type LegalModalType = "terms" | "privacy" | "disclaimer" | "support" | "about" | "update" | null;
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -40,6 +48,16 @@ export default function Profile() {
   const [, setVolunteerLoading] = useState(false);
   const [activeModal, setActiveModal] = useState<LegalModalType>(null);
 
+  // App Update states
+  const [versionInfo, setVersionInfo] = useState<AppVersionInfo>(DEFAULT_VERSION_INFO);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateManifest, setUpdateManifest] = useState<UpdateManifest | null>(null);
+  const [updateAvailable, setUpdateAvailable] = useState<boolean | null>(null);
+  const [updateMessage, setUpdateMessage] = useState<string>("");
+  const [downloading, setDownloading] = useState(false);
+  const [downloadPercent, setDownloadPercent] = useState(0);
+  const [downloadStatusText, setDownloadStatusText] = useState("");
+
   const profileConfig = (cmsConfig as any)?.profileConfig;
   const localAvatarKey = `@rpf_profile_avatar:${user?.id || "guest"}`;
 
@@ -47,6 +65,66 @@ export default function Profile() {
     try { setAvatar(localStorage.getItem(localAvatarKey) || user?.avatar || ""); }
     catch { setAvatar(user?.avatar || ""); }
   }, [localAvatarKey, user?.avatar]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getCurrentAppVersion().then((info) => {
+      if (!cancelled) setVersionInfo(info);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleCheckForUpdates = async () => {
+    setActiveModal("update");
+    setCheckingUpdate(true);
+    setUpdateMessage("");
+    setUpdateAvailable(null);
+    setUpdateManifest(null);
+    setDownloadPercent(0);
+    setDownloadStatusText("");
+
+    try {
+      const result = await checkForAppUpdates();
+      setVersionInfo(result.currentVersion);
+      setUpdateAvailable(result.updateAvailable);
+      setUpdateManifest(result.latestManifest);
+      if (result.message) {
+        setUpdateMessage(result.message);
+      }
+    } catch (e: any) {
+      setUpdateAvailable(false);
+      setUpdateMessage(e?.message || "Failed to check for updates");
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
+
+  const handleStartUpdate = async () => {
+    if (!updateManifest) return;
+    setDownloading(true);
+    setDownloadPercent(0);
+    setDownloadStatusText(hi ? "डाउनलोड शुरू हो रहा है..." : "Initializing download...");
+
+    try {
+      await downloadAndInstallUpdate(updateManifest, (percent, loaded, total) => {
+        setDownloadPercent(percent);
+        const mbLoaded = (loaded / (1024 * 1024)).toFixed(1);
+        const mbTotal = total > 0 ? (total / (1024 * 1024)).toFixed(1) : "?";
+        setDownloadStatusText(
+          hi
+            ? `डाउनलोड हो रहा है: ${mbLoaded} MB / ${mbTotal} MB (${percent}%)`
+            : `Downloading: ${mbLoaded} MB / ${mbTotal} MB (${percent}%)`
+        );
+      });
+      setDownloadStatusText(hi ? "डाउनलोड पूर्ण! पैकेज इंस्टॉलर लॉन्च हो रहा है..." : "Download complete! Launching package installer...");
+    } catch (err: any) {
+      setDownloadStatusText(
+        hi ? `अपडेट विफल: ${err?.message || "अज्ञात त्रुटि"}` : `Update failed: ${err?.message || "Unknown error"}`
+      );
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   useEffect(() => {
     if (!user?.id) { setVolunteer(null); return; }
@@ -150,9 +228,10 @@ export default function Profile() {
       { id: "privacy" as const, icon: Lock, title: hi ? "गोपनीयता नीति" : "Privacy Policy", sub: hi ? "डेटा सुरक्षा व गोपनीयता नीति" : "How we handle information and privacy" },
       { id: "disclaimer" as const, icon: AlertTriangle, title: hi ? "अस्वीकरण व सूचना" : "Disclaimer & Notice", sub: hi ? "महत्वपूर्ण पारदर्शिता व उत्तरदायित्व सूचनाएं" : "Important transparency and responsibility notices" },
       { id: "support" as const, icon: HelpCircle, title: hi ? "सहायता एवं संपर्क" : "Help Desk & Support", sub: hi ? "सहायता, समस्या रिपोर्ट व सुझाव" : "Get help, report issues & share feedback" },
+      { id: "update" as const, icon: Download, title: hi ? "ऐप अपडेट केंद्र" : "Check for Updates", sub: hi ? `मौजूदा: v${versionInfo.versionName} • अपडेट जांचें` : `Current: v${versionInfo.versionName} • Check updates` },
       { id: "about" as const, icon: Info, title: hi ? "ऐप संस्करण एवं जानकारी" : "About App & Version", sub: hi ? "समाहित ऐप, वालंटियर्स व संस्करण" : "About Samahit, volunteers & app version" },
     ];
-  }, [profileConfig, hi]);
+  }, [profileConfig, hi, versionInfo.versionName]);
 
   return (
     <main className="min-h-full bg-[#FFF7E8] pb-28 text-[#243B32] font-sans">
@@ -416,7 +495,7 @@ export default function Profile() {
             {legalItems.map(({ id, icon: Icon, title, sub }) => (
               <button
                 key={id}
-                onClick={() => setActiveModal(id)}
+                onClick={() => id === "update" ? void handleCheckForUpdates() : setActiveModal(id)}
                 className="w-full flex items-center gap-3.5 p-3.5 text-left hover:bg-slate-50 transition-colors"
               >
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F0FAF4] text-[#245D45]">
@@ -668,11 +747,22 @@ export default function Profile() {
                       </div>
                       <div>
                         <h4 className="text-base font-black text-[#243B32]">Samahit Application</h4>
-                        <p className="text-[11px] text-[#D97706] font-extrabold uppercase tracking-wider">v2.4.0 • Build 2026.08</p>
+                        <p className="text-[11px] text-[#D97706] font-extrabold uppercase tracking-wider">
+                          v{versionInfo.versionName} • Build {versionInfo.versionCode}
+                        </p>
                       </div>
                       <p className="text-[11px] text-slate-600 max-w-xs mx-auto">
                         Useful • Simple • Transparent • Accessible • Community-Oriented
                       </p>
+                      <div className="pt-2">
+                        <button
+                          onClick={handleCheckForUpdates}
+                          className="inline-flex items-center gap-2 rounded-xl bg-[#245D45] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#1d4f3a] transition-all active:scale-95"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                          {hi ? "अपडेट जांचें" : "Check for Updates"}
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-2 border-t border-slate-100 pt-3">
@@ -689,6 +779,109 @@ export default function Profile() {
                         © 2026 Samahit Volunteer Initiative. All Rights Reserved.
                       </p>
                     </div>
+                  </div>
+                )}
+
+                {activeModal === "update" && (
+                  <div className="space-y-4">
+                    <div className="text-center py-2 space-y-2">
+                      <div className="mx-auto w-14 h-14 rounded-2xl bg-emerald-50 text-[#167C5A] flex items-center justify-center font-black text-xl border border-emerald-200 shadow-sm">
+                        <Download className="h-7 w-7 text-[#167C5A]" />
+                      </div>
+                      <div>
+                        <h4 className="text-base font-black text-[#243B32]">{hi ? "ऐप अपडेट केंद्र" : "App Update Center"}</h4>
+                        <p className="text-[11px] text-slate-500 font-semibold">
+                          {hi ? "मौजूदा संस्करण" : "Current Installed"}: v{versionInfo.versionName} (Build {versionInfo.versionCode})
+                        </p>
+                      </div>
+                    </div>
+
+                    {checkingUpdate && (
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center space-y-2">
+                        <RefreshCw className="h-6 w-6 animate-spin text-[#245D45] mx-auto" />
+                        <p className="text-xs font-bold text-[#243B32]">{hi ? "सर्वर से नए संस्करण की जांच हो रही है..." : "Checking server for available updates..."}</p>
+                      </div>
+                    )}
+
+                    {!checkingUpdate && updateAvailable === false && (
+                      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-center space-y-2">
+                        <CheckCircle2 className="h-8 w-8 text-[#167C5A] mx-auto" />
+                        <h5 className="text-xs font-bold text-[#243B32]">{hi ? "आपका ऐप नवीनतम संस्करण पर है!" : "You are on the latest version!"}</h5>
+                        <p className="text-[11px] text-slate-600">
+                          {updateMessage || (hi ? "कोई नया अपडेट उपलब्ध नहीं है।" : "No pending updates found on the server.")}
+                        </p>
+                        <button
+                          onClick={handleCheckForUpdates}
+                          className="mt-2 inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-white px-3.5 py-1.5 text-xs font-bold text-[#167C5A] shadow-sm hover:bg-emerald-50 transition-colors"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                          {hi ? "पुनः जांचें" : "Check Again"}
+                        </button>
+                      </div>
+                    )}
+
+                    {!checkingUpdate && updateAvailable === true && updateManifest && (
+                      <div className="rounded-2xl border border-[#D97706]/40 bg-orange-50/50 p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-[10px] font-extrabold text-[#D97706]">
+                            <Sparkles className="h-3 w-3" /> {hi ? "नया अपडेट उपलब्ध" : "New Update Available"}
+                          </span>
+                          <span className="text-xs font-bold text-[#243B32]">v{updateManifest.versionName}</span>
+                        </div>
+
+                        <div className="space-y-1 text-xs text-slate-600">
+                          <p className="font-semibold text-[#243B32]">{updateManifest.releaseNotes || (hi ? "नया प्रदर्शन व सुरक्षा अपडेट उपलब्ध है।" : "Performance and security enhancements.")}</p>
+                          <p className="text-[10px] text-slate-500">
+                            {hi ? "आकार" : "Size"}: {(updateManifest.size / (1024 * 1024)).toFixed(1)} MB • Build {updateManifest.versionCode}
+                          </p>
+                          {updateManifest.sha256 && (
+                            <p className="text-[9px] text-slate-400 font-mono truncate" title={updateManifest.sha256}>
+                              SHA-256: {updateManifest.sha256.substring(0, 16)}...
+                            </p>
+                          )}
+                        </div>
+
+                        {downloading && (
+                          <div className="space-y-1.5 pt-2">
+                            <div className="flex justify-between text-[11px] font-bold text-[#243B32]">
+                              <span>{hi ? "डाउनलोड प्रगति" : "Progress"}</span>
+                              <span>{downloadPercent}%</span>
+                            </div>
+                            <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+                              <div
+                                className="h-full bg-gradient-to-r from-[#245D45] to-[#167C5A] transition-all duration-300"
+                                style={{ width: `${downloadPercent}%` }}
+                              />
+                            </div>
+                            <p className="text-[10px] text-slate-500 text-center font-medium">{downloadStatusText}</p>
+                          </div>
+                        )}
+
+                        {!downloading && (
+                          <button
+                            onClick={handleStartUpdate}
+                            className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#245D45] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#1d4f3a] transition-all active:scale-95"
+                          >
+                            <Download className="h-4 w-4" />
+                            {hi ? "अपडेट डाउनलोड व इंस्टॉल करें" : "Download & Install Update"}
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {!checkingUpdate && updateAvailable === null && updateMessage && (
+                      <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-center space-y-2">
+                        <AlertTriangle className="h-6 w-6 text-red-500 mx-auto" />
+                        <p className="text-xs font-semibold text-red-700">{updateMessage}</p>
+                        <button
+                          onClick={handleCheckForUpdates}
+                          className="mt-1 inline-flex items-center gap-1.5 rounded-xl border border-red-300 bg-white px-3.5 py-1.5 text-xs font-bold text-red-600 shadow-sm hover:bg-red-50 transition-colors"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                          {hi ? "पुनः प्रयास करें" : "Retry"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 

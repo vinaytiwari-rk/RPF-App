@@ -141,6 +141,52 @@ jobs:
             cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/RPF-Samahit-debug.apk"
           fi
 
+      - name: Generate Update Manifest and Stage Deployment (Release Only)
+        if: steps.signing.outputs.release_ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p updates download
+          cp "$GITHUB_WORKSPACE/RPF-Samahit-update.apk" download/rpf-app.apk
+          SHA256=$(sha256sum download/rpf-app.apk | awk '{print $1}')
+          SIZE=$(wc -c < download/rpf-app.apk | tr -d ' ')
+          VERSION_NAME=$(node -p "require('./package.json').version")
+          
+          cat <<EOF > updates/manifest.json
+{
+  "versionCode": ${RPF_VERSION_CODE},
+  "versionName": "${VERSION_NAME}",
+  "sha256": "${SHA256}",
+  "size": ${SIZE},
+  "downloadUrl": "https://appapi.therpfoundation.org/download/rpf-app.apk",
+  "minSupportedVersionCode": 20500,
+  "releaseNotes": "RPF Samahit update ${VERSION_NAME} (build ${RPF_VERSION_CODE}) with enhanced features and performance improvements.",
+  "publishedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+          echo "Generated updates/manifest.json:"
+          cat updates/manifest.json
+
+      - name: Publish APK and Manifest to Server via FTP
+        if: steps.signing.outputs.release_ready == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          FTP_HOST: ${{ secrets.FTP_SERVER }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SECURE: ${{ secrets.FTP_SECURE }}
+          FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
+          FTP_INCREMENTAL: "true"
+        run: |
+          set -euo pipefail
+          if [ -n "$FTP_HOST" ] && [ -n "$FTP_USER" ] && [ -n "$FTP_PASSWORD" ]; then
+            echo "Deploying release APK and manifest to server via FTP..."
+            node deploy.cjs
+            echo "FTP update deployment complete."
+          else
+            echo "::warning::FTP secrets not configured; skipping automatic FTP APK deployment."
+          fi
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -148,5 +194,7 @@ jobs:
           path: |
             RPF-Samahit-update.apk
             RPF-Samahit-debug.apk
+            updates/manifest.json
+            download/rpf-app.apk
           if-no-files-found: warn
           retention-days: 14

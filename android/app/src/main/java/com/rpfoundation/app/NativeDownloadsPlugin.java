@@ -73,4 +73,68 @@ public class NativeDownloadsPlugin extends Plugin {
             call.reject("Could not save file to Downloads: " + e.getMessage(), e);
         }
     }
+
+    @PluginMethod
+    public void getAppVersion(PluginCall call) {
+        try {
+            android.content.pm.PackageInfo pInfo = getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0);
+            long versionCode = 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                versionCode = pInfo.getLongVersionCode();
+            } else {
+                versionCode = (long) pInfo.versionCode;
+            }
+            JSObject ret = new JSObject();
+            ret.put("versionCode", versionCode);
+            ret.put("versionName", pInfo.versionName != null ? pInfo.versionName : "2.5.0");
+            ret.put("packageName", pInfo.packageName);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Failed to retrieve package info: " + e.getMessage(), e);
+        }
+    }
+
+    @PluginMethod
+    public void installApk(PluginCall call) {
+        String base64Data = call.getString("data");
+        String filename = call.getString("filename", "rpf-app-update.apk");
+
+        if (base64Data == null || base64Data.trim().isEmpty()) {
+            call.reject("base64 apk data is required");
+            return;
+        }
+
+        try {
+            // Write to app's cache directory first so FileProvider can safely grant access to package installer
+            java.io.File cacheDir = new java.io.File(getContext().getCacheDir(), "updates");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+            java.io.File apkFile = new java.io.File(cacheDir, filename);
+            byte[] bytes = Base64.decode(base64Data, Base64.DEFAULT);
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(apkFile)) {
+                fos.write(bytes);
+                fos.flush();
+            }
+
+            android.content.Context ctx = getContext();
+            String authority = ctx.getPackageName() + ".fileprovider";
+            Uri contentUri = androidx.core.content.FileProvider.getUriForFile(ctx, authority, apkFile);
+
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
+            intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+            intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            ctx.startActivity(intent);
+
+            JSObject res = new JSObject();
+            res.put("success", true);
+            res.put("path", apkFile.getAbsolutePath());
+            call.resolve(res);
+        } catch (Exception e) {
+            call.reject("Failed to start package installer: " + e.getMessage(), e);
+        }
+    }
 }
+

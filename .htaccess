@@ -74,6 +74,8 @@ PassengerMaxPoolSize 2
   # API requests and static assets must stay with CloudLinux Passenger/Express or direct filesystem.
   RewriteCond %{REQUEST_URI} !^/api/
   RewriteCond %{REQUEST_URI} !^/uploads/
+  RewriteCond %{REQUEST_URI} !^/updates/
+  RewriteCond %{REQUEST_URI} !^/download/
   RewriteCond %{REQUEST_URI} !^/assets/
   RewriteCond %{REQUEST_URI} !^/src/
   RewriteCond %{REQUEST_URI} !^/dist/

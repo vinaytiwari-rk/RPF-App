@@ -8,8 +8,31 @@ android {
         applicationId 'com.rpfoundation.app'
         minSdk 24
         targetSdk 36
-        versionCode 20500
+        versionCode (System.getenv("RPF_VERSION_CODE") ? Integer.parseInt(System.getenv("RPF_VERSION_CODE")) : 20500)
         versionName '2.5.0'
+    }
+
+    signingConfigs {
+        release {
+            def storeFilePath = System.getenv("RPF_RELEASE_STORE_FILE")
+            if (storeFilePath && file(storeFilePath).exists()) {
+                storeFile file(storeFilePath)
+                storePassword System.getenv("RPF_RELEASE_STORE_PASSWORD")
+                keyAlias System.getenv("RPF_RELEASE_KEY_ALIAS")
+                keyPassword System.getenv("RPF_RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            def storeFilePath = System.getenv("RPF_RELEASE_STORE_FILE")
+            if (storeFilePath && file(storeFilePath).exists()) {
+                signingConfig signingConfigs.release
+            }
+        }
     }
 }
 

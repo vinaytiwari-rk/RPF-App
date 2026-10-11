@@ -79,6 +79,16 @@ function collectDeploymentFiles() {
     addFile(files, local, `migrations/${rel}`);
   }
 
+  // Application auto-update manifests and release APK downloads
+  for (const local of walkFiles('updates')) {
+    const rel = toPosix(path.relative('updates', local));
+    addFile(files, local, `updates/${rel}`);
+  }
+  for (const local of walkFiles('download')) {
+    const rel = toPosix(path.relative('download', local));
+    addFile(files, local, `download/${rel}`);
+  }
+
   addFile(files, '.htaccess', '.htaccess');
   addFile(files, 'rss-proxy.php', 'rss-proxy.php');
 
