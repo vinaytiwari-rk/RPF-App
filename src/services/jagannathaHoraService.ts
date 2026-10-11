@@ -53,21 +53,22 @@ function deepFirst(source: any, keys: string[], depth = 0): string {
 
 const MASA_KEYS = [
   "masa", "maasa", "maas", "lunar_month", "lunarMonth", "lunar_month_name",
-  "lunarMonthName", "hindu_month", "hinduMonth", "masa_name", "masaName",
-  "month_name", "monthName", "amanta_masa", "amantaMasa", "purnimanta_masa",
-  "purnimantaMasa", "vedic_month", "vedicMonth"
+  "lunarMonthName", "hindu_month", "hinduMonth", "hindu_lunar_month", "hinduLunarMonth",
+  "masa_name", "masaName", "masa_name_en", "masaNameEn", "maasa_name", "maasaName",
+  "month_name", "monthName", "month_name_en", "monthNameEn", "monthNameEnglish",
+  "lunar_month_en", "lunarMonthEn", "lunarMonthNameEn", "chandra_masa", "chandraMasa",
+  "amanta_masa", "amantaMasa", "amanta", "purnimanta_masa", "purnimantaMasa",
+  "purnimanta", "vedic_month", "vedicMonth"
 ];
-
-const HINDU_MONTH_NAMES = /^(magha|magh|phalguna|phalgun|chaitra|vaisakha|vaishakha|jyeshtha|jyestha|ashada|ashadha|shravana|shravan|bhadrapada|bhadra|ashvina|ashwin|kartika|kartik|margashirsha|margashirsh|pausha|paush|माघ|फाल्गुन|चैत्र|वैशाख|ज्येष्ठ|आषाढ़|श्रावण|भाद्रपद|आश्विन|कार्तिक|मार्गशीर्ष|पौष)$/i;
 
 function deepMasa(source: any, depth = 0): string {
   if (!source || typeof source !== "object" || depth > 5) return "";
   const direct = first(source, MASA_KEYS);
   if (direct) return direct;
-  // Some provider responses expose the lunar month under a generic month key.
-  // Accept it only when it is recognizably a Hindu lunar-month name.
+  // Jagannatha Hora documents "month" as the lunar month on its Panchang response.
+  // Preserve the provider's actual label (including regional/adhika variants), but never show a numeric index.
   const genericMonth = textValue(source.month ?? source.Month ?? source.MONTH).trim();
-  if (genericMonth && HINDU_MONTH_NAMES.test(genericMonth)) return genericMonth;
+  if (genericMonth && !/^\\d+(?:\\.\\d+)?$/.test(genericMonth)) return genericMonth;
   for (const value of Object.values(source)) {
     if (value && typeof value === "object") {
       const nested = deepMasa(value, depth + 1);
@@ -155,8 +156,12 @@ export async function getJagannathaPanchang(options: {
   const existing = cache.get(key);
   if (existing && Date.now() - existing.at < CACHE_TTL_MS) return existing.data;
 
-  const targetDate = new Date();
   const dateFormatted = toDDMMYYYY(dateInput);
+  // Use the requested Panchang date (not the server's current date) for weekday-based calculations.
+  const dateParts = dateFormatted.match(/^(\\d{2})-(\\d{2})-(\\d{4})$/);
+  const targetDate = dateParts
+    ? new Date(Number(dateParts[3]), Number(dateParts[2]) - 1, Number(dateParts[1]), 12, 0, 0)
+    : new Date();
 
   let raw: any = null;
   try {

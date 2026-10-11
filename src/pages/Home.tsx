@@ -176,11 +176,13 @@ function MarqueeTrack({
   const animationName = direction === "ltr" ? "rpf-marquee-ltr" : "rpf-marquee-rtl";
 
   return (
-    <div 
+    <div
+      dir="ltr"
       onClick={onClick}
       className={`relative overflow-hidden rounded-2xl border backdrop-blur-xs py-2.5 group ${containerClasses} ${onClick ? "cursor-pointer hover:border-orange-300 transition-all" : ""}`}
     >
       <div
+        dir="ltr"
         className="flex whitespace-nowrap min-w-max items-center transition-transform group-hover:[animation-play-state:paused]"
         style={{
           animation: `${animationName} ${duration}s linear infinite`
@@ -188,7 +190,7 @@ function MarqueeTrack({
       >
         {trackItems.map((title, idx) => (
           <div key={idx} className="flex items-center">
-            <span className={`text-[12.5px] tracking-normal px-2 ${textClasses}`}>
+            <span dir="ltr" className={`text-[12.5px] tracking-normal px-2 ${textClasses}`}>
               {title}
             </span>
             <span className={`text-xs px-3 select-none ${separatorClasses}`}>
@@ -552,7 +554,7 @@ export default function Home() {
               {!reduceMotion && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />}
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-600" />
             </span>
-            {cmsConfig?.alertBannerEn || cmsConfig?.alertBannerHi ? "Latest updates available" : "Explore community services"}
+            "Explore community services"
           </div>
         </motion.section>
 
@@ -776,6 +778,7 @@ export default function Home() {
           100% { transform: translate3d(-50%, 0, 0); }
         }
         @keyframes rpf-marquee-ltr {
+          /* Two identical copies are rendered; shift exactly one copy-width right for a seamless loop. */
           0% { transform: translate3d(-50%, 0, 0); }
           100% { transform: translate3d(0, 0, 0); }
         }

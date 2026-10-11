@@ -187,7 +187,7 @@ export default function HomeStudio() {
       name: "Jagannath Hora Vedic Panchang (जगन्नाथ होरा)",
       category: "panchang",
       providerType: "api",
-      feedUrl: "https://jagannatha-hora-359167915530.europe-west1.run.app/api/panchang",
+      feedUrl: "https://jagannatha-hora-359167915530.europe-west1.run.app/panchang",
       description: "Jagannath Hora 8.0 Ephemeris Engine: DD-MM-YYYY date format, Abhijit Muhurat, Rahu Kaal, Tithi & Nakshatra",
       badge: "जगन्नाथ होरा • Live",
       active: true
