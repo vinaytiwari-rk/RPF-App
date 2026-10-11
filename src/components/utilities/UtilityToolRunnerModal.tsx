@@ -16,6 +16,7 @@ import ImageAdvancedToolsEngine from "./engines/imageAdvancedToolsEngine";
 import TextToolsEngine from "./engines/textToolsEngine";
 import ExcelDataToolsEngine from "./engines/excelDataToolsEngine";
 import DevEncodingToolsEngine from "./engines/devEncodingToolsEngine";
+import ArchiveToolsEngine from "./engines/archiveToolsEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -554,6 +555,29 @@ function ToolEngineDispatcher({
     case "dev_js_minifier":
     case "dev_html_minifier":
       return <DevEncodingToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    // 23. 100% Offline Archive & File Management Tools Suite (Phase 8 - 20 Tools)
+    case "archive_zip_creator":
+    case "archive_zip_extractor":
+    case "archive_zip_inspector":
+    case "archive_zip_comment":
+    case "archive_tar_creator":
+    case "archive_tar_extractor":
+    case "archive_gzip_compress":
+    case "archive_gzip_decompress":
+    case "archive_file_checksum":
+    case "archive_file_size_calc":
+    case "archive_extension_changer":
+    case "archive_batch_renamer":
+    case "archive_file_splitter":
+    case "archive_file_merger":
+    case "archive_dup_file_checker":
+    case "archive_file_shredder":
+    case "archive_encoding_converter":
+    case "archive_magic_number":
+    case "archive_base64_to_file":
+    case "archive_file_to_base64":
+      return <ArchiveToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (

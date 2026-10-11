@@ -25,6 +25,7 @@ export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "word_text_tools", titleEn: "Word & Text Tools (40)", titleHi: "वर्ड व टेक्स्ट टूल्स (40)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
   { id: "excel_data_tools", titleEn: "Excel & Data File Tools (40)", titleHi: "एक्सेल व डेटा टूल्स (40)", iconName: "FileSpreadsheet", accent: "from-green-600 to-emerald-700" },
   { id: "dev_tools", titleEn: "Developer & Encoding Tools (40)", titleHi: "डेवलपर व एन्कोडिंग टूल्स (40)", iconName: "Code", accent: "from-indigo-600 to-purple-700" },
+  { id: "archive_tools", titleEn: "Archive & File Tools (20)", titleHi: "आर्काइव व फाइल टूल्स (20)", iconName: "FolderArchive", accent: "from-amber-700 to-yellow-800" },
   { id: "govt_forms", titleEn: "Govt Forms & Recruitment", titleHi: "सरकारी भर्ती व फॉर्म", iconName: "BadgeCheck", accent: "from-amber-600 to-orange-700" },
   { id: "pdf_docs", titleEn: "PDF & Document Office", titleHi: "दस्तावेज व PDF ऑफिस", iconName: "FileText", accent: "from-blue-600 to-indigo-700" },
   { id: "legal_drafts", titleEn: "Legal Drafts & Notices", titleHi: "कानूनी आवेदन व प्रारूप", iconName: "Scale", accent: "from-purple-600 to-indigo-800" },
@@ -1831,5 +1832,108 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "dev_html_minifier", categoryId: "dev_tools", titleEn: "HTML Minifier", titleHi: "HTML मिनिफायर",
     descEn: "Remove comments and compress HTML markup whitespace.", descHi: "HTML से कमेंट्स व अतिरिक्त स्पेस हटाकर कोड हल्का करें।", iconName: "Code", badge: "100% Offline",
     keywords: ["html minifier", "compress html", "clean html"]
+  },
+  // -----------------------------------------------------------------
+  // 21. Phase 8: Archive & File Management Tools Suite (20 Tools)
+  // -----------------------------------------------------------------
+  {
+    id: "archive_zip_creator", categoryId: "archive_tools", titleEn: "ZIP Archive Creator", titleHi: "ZIP आर्काइव मेकर",
+    descEn: "Compress multiple files into a standard encrypted ZIP archive.", descHi: "कई फाइलों को एक साथ कंप्रेस कर ZIP आर्काइव बनाएं।", iconName: "FolderArchive", badge: "100% Offline",
+    keywords: ["zip creator", "create zip", "make archive"]
+  },
+  {
+    id: "archive_zip_extractor", categoryId: "archive_tools", titleEn: "ZIP File Extractor", titleHi: "ZIP फाइल एक्सट्रैक्टर",
+    descEn: "Extract all compressed files and folders from ZIP package.", descHi: "ZIP फाइल से सभी दस्तावेज व तस्वीरें बाहर निकालें।", iconName: "FolderArchive", badge: "100% Offline",
+    keywords: ["unzip", "extract zip", "zip extractor"]
+  },
+  {
+    id: "archive_zip_inspector", categoryId: "archive_tools", titleEn: "ZIP File Inspector", titleHi: "ZIP फाइल इंस्पेक्टर (अंदर देखें)",
+    descEn: "Inspect names, dates, and compressed sizes inside ZIP without extracting.", descHi: "बिना अनजिप किए ZIP के अंदर मौजूद सभी फाइलों की सूची देखें।", iconName: "Eye", badge: "100% Offline",
+    keywords: ["inspect zip", "view zip", "zip contents"]
+  },
+  {
+    id: "archive_zip_comment", categoryId: "archive_tools", titleEn: "ZIP Comment Editor", titleHi: "ZIP कमेंट एडिटर",
+    descEn: "Read and attach custom text comments inside ZIP metadata.", descHi: "ZIP आर्काइव में अपना कमेंट या नोट जोड़ें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["zip comment", "edit zip note", "archive comment"]
+  },
+  {
+    id: "archive_tar_creator", categoryId: "archive_tools", titleEn: "TAR Archive Creator", titleHi: "TAR आर्काइव मेकर",
+    descEn: "Bundle multiple files into standard POSIX ustar TAR archive.", descHi: "फाइलों को लिनक्स/यूनिक्स मानक TAR आर्काइव में पैक करें।", iconName: "FolderArchive", badge: "100% Offline",
+    keywords: ["create tar", "tar maker", "tar archive"]
+  },
+  {
+    id: "archive_tar_extractor", categoryId: "archive_tools", titleEn: "TAR Archive Extractor", titleHi: "TAR फाइल एक्सट्रैक्टर",
+    descEn: "Unpack and download all individual files from TAR package.", descHi: "TAR आर्काइव से सभी फाइलें अलग-अलग निकालें।", iconName: "FolderArchive", badge: "100% Offline",
+    keywords: ["extract tar", "untar", "tar unpack"]
+  },
+  {
+    id: "archive_gzip_compress", categoryId: "archive_tools", titleEn: "GZIP Compression Tool", titleHi: "GZIP कंप्रेसर (.gz)",
+    descEn: "Compress files using standard GZIP streams into .gz format.", descHi: "फ़ाइल को मानक GZIP (.gz) फॉर्मेट में संपीड़ित करें।", iconName: "FileArchive", badge: "100% Offline",
+    keywords: ["gzip", "compress gz", "gzip file"]
+  },
+  {
+    id: "archive_gzip_decompress", categoryId: "archive_tools", titleEn: "GZIP Decompress Tool", titleHi: "GZIP डीकंप्रेसर (खोलें)",
+    descEn: "Decompress .gz stream files back into original uncompressed file.", descHi: ".gz फाइल को डीकंप्रेस कर मूल रूप में डाउनलोड करें।", iconName: "FileArchive", badge: "100% Offline",
+    keywords: ["gunzip", "decompress gz", "extract gzip"]
+  },
+  {
+    id: "archive_file_checksum", categoryId: "archive_tools", titleEn: "File Checksum Verifier", titleHi: "फ़ाइल चेकसम व अखंडता जांच",
+    descEn: "Calculate cryptographic SHA-256 and SHA-1 file checksum digests.", descHi: "फ़ाइल का SHA-256 व SHA-1 चेकसम निकालें।", iconName: "ShieldAlert", badge: "100% Offline",
+    keywords: ["file checksum", "file hash", "verify sha256"]
+  },
+  {
+    id: "archive_file_size_calc", categoryId: "archive_tools", titleEn: "File Size Calculator", titleHi: "फ़ाइल आकार विश्लेषक (Bytes / MB / GB)",
+    descEn: "Convert exact file sizes across Bytes, KB, MB, and GB precision.", descHi: "फ़ाइल का सटीक आकार बाइट्स, KB, MB और GB में देखें।", iconName: "Sparkles", badge: "100% Offline",
+    keywords: ["file size", "size calculator", "bytes to mb"]
+  },
+  {
+    id: "archive_extension_changer", categoryId: "archive_tools", titleEn: "File Extension Changer", titleHi: "फ़ाइल एक्सटेंशन परिवर्तक",
+    descEn: "Safely change file extensions (e.g. .txt to .pdf or .csv).", descHi: "फ़ाइल का एक्सटेंशन (जैसे .txt से .pdf) आसानी से बदलें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["change extension", "rename extension", "file format"]
+  },
+  {
+    id: "archive_batch_renamer", categoryId: "archive_tools", titleEn: "Batch File Renamer", titleHi: "बैच फ़ाइल रीनेमर (सामूहिक नामकरण)",
+    descEn: "Rename multiple files sequentially with custom prefixes and numbers.", descHi: "कई फाइलों को एक साथ क्रमबद्ध नंबर (001, 002...) दें।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["batch rename", "rename files", "sequence rename"]
+  },
+  {
+    id: "archive_file_splitter", categoryId: "archive_tools", titleEn: "File Splitter by Size", titleHi: "फ़ाइल स्प्लिटर (आकार अनुसार विभाजन)",
+    descEn: "Split massive files into smaller chunks of fixed KB/MB size.", descHi: "बड़ी फाइल को निश्चित आकार (KB) के छोटे टुकड़ों में बांटें।", iconName: "Split", badge: "100% Offline",
+    keywords: ["split file", "file chunker", "divide file"]
+  },
+  {
+    id: "archive_file_merger", categoryId: "archive_tools", titleEn: "File Chunk Merger", titleHi: "फ़ाइल चंक मर्जर (टुकड़े जोड़ें)",
+    descEn: "Merge sequentially split file parts back into single complete file.", descHi: "विभाजित टुकड़ों (part001, part002) को जोड़कर मूल फाइल बनाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["merge chunks", "join file", "file combiner"]
+  },
+  {
+    id: "archive_dup_file_checker", categoryId: "archive_tools", titleEn: "Duplicate File Hash Checker", titleHi: "डुप्लिकेट फ़ाइल डिटेक्टर",
+    descEn: "Identify duplicate matching files using SHA-256 byte comparison.", descHi: "बाइट-लेवल हैश मिलान से पहचानें कौन सी फाइलें एक जैसी हैं।", iconName: "ShieldAlert", badge: "100% Offline",
+    keywords: ["duplicate files", "find duplicates", "file comparison"]
+  },
+  {
+    id: "archive_file_shredder", categoryId: "archive_tools", titleEn: "Secure File Shredder (Zero-Fill)", titleHi: "सुरक्षित फ़ाइल श्रेडर (Zero-Fill)",
+    descEn: "Scrub and overwrite file bytes completely with zeros for privacy.", descHi: "गोपनीयता हेतु फ़ाइल डेटा को शून्य बाइट्स से ओवरराइट करें।", iconName: "ShieldAlert", badge: "100% Offline",
+    keywords: ["file shredder", "zero fill", "secure erase"]
+  },
+  {
+    id: "archive_encoding_converter", categoryId: "archive_tools", titleEn: "Text File Encoding Converter", titleHi: "टेक्स्ट एनकोडिंग कनवर्टर",
+    descEn: "Convert text file character encoding between UTF-8 and Latin-1.", descHi: "टेक्स्ट फाइल की एनकोडिंग (UTF-8, Latin-1) में बदलें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["convert encoding", "utf8 converter", "latin1"]
+  },
+  {
+    id: "archive_magic_number", categoryId: "archive_tools", titleEn: "File Header / Magic Byte Inspector", titleHi: "फ़ाइल हेडर व मैजिक बाइट इंस्पेक्टर",
+    descEn: "Inspect true file type by checking first 8 signature header bytes.", descHi: "शुरुआती मैजिक बाइट्स देखकर असली फ़ाइल प्रारूप पहचानें।", iconName: "Eye", badge: "100% Offline",
+    keywords: ["magic bytes", "file signature", "header inspector"]
+  },
+  {
+    id: "archive_base64_to_file", categoryId: "archive_tools", titleEn: "Base64 to File Downloader", titleHi: "Base64 से फ़ाइल डाउनलोडर",
+    descEn: "Convert Base64 data URI string back into downloadable file.", descHi: "Base64 कोड को वापस असली फ़ाइल में बदलकर डाउनलोड करें।", iconName: "Download", badge: "100% Offline",
+    keywords: ["base64 to file", "decode base64 file", "download base64"]
+  },
+  {
+    id: "archive_file_to_base64", categoryId: "archive_tools", titleEn: "Binary File to Base64 Exporter", titleHi: "फ़ाइल से Base64 डेटा कोड",
+    descEn: "Read any file and export as web-embeddable Base64 data string.", descHi: "किसी भी फ़ाइल को Base64 डेटा स्ट्रिंग में बदलें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["file to base64", "encode file", "data uri"]
   }
 ];
