@@ -353263,6 +353263,40 @@ function first2(source, keys) {
   }
   return "";
 }
+function deepFirst(source, keys, depth = 0) {
+  if (!source || typeof source !== "object" || depth > 4) return "";
+  const direct = first2(source, keys);
+  if (direct) return direct;
+  for (const value2 of Object.values(source)) {
+    if (value2 && typeof value2 === "object") {
+      const nested = deepFirst(value2, keys, depth + 1);
+      if (nested) return nested;
+    }
+  }
+  return "";
+}
+var MASA_KEYS = [
+  "masa",
+  "maasa",
+  "maas",
+  "lunar_month",
+  "lunarMonth",
+  "lunar_month_name",
+  "lunarMonthName",
+  "hindu_month",
+  "hinduMonth",
+  "masa_name",
+  "masaName",
+  "month_name",
+  "monthName",
+  "amanta_masa",
+  "amantaMasa",
+  "purnimanta_masa",
+  "purnimantaMasa",
+  "vedic_month",
+  "vedicMonth"
+];
+var PAKSHA_KEYS = ["paksha", "pak\u1E63a", "lunar_fortnight", "lunarFortnight", "fortnight"];
 function toDDMMYYYY(val2) {
   if (!val2) {
     const now = /* @__PURE__ */ new Date();
@@ -353392,8 +353426,8 @@ async function getJagannathaPanchang(options2) {
     moonset: first2(raw, ["moonset", "moon_set"]),
     tithi: first2(raw, ["tithi"]),
     nakshatra: first2(raw, ["nakshatra"]),
-    masa: first2(raw, ["masa", "maasa", "maas", "lunar_month", "lunarMonth", "hindu_month", "hinduMonth", "masa_name", "month_name", "monthName", "month"]),
-    paksha: first2(raw, ["paksha"]) || "",
+    masa: deepFirst(raw, MASA_KEYS),
+    paksha: deepFirst(raw, PAKSHA_KEYS) || "",
     samvat: first2(raw, ["samvat", "vikram_samvat"]),
     yoga: first2(raw, ["yoga"]),
     karana: first2(raw, ["karana"]),
@@ -353403,7 +353437,7 @@ async function getJagannathaPanchang(options2) {
     abhijitMuhurat,
     raw,
     updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
-    unavailable: !(first2(raw, ["tithi"]) && first2(raw, ["nakshatra"]) && first2(raw, ["paksha"]) && first2(raw, ["masa", "maasa", "maas", "lunar_month", "lunarMonth", "hindu_month", "hinduMonth", "masa_name", "month_name", "monthName", "month"]))
+    unavailable: !(first2(raw, ["tithi"]) && first2(raw, ["nakshatra"]) && deepFirst(raw, PAKSHA_KEYS) && deepFirst(raw, MASA_KEYS))
   };
   cache2.set(key, { data: data2, at: Date.now() });
   return data2;
@@ -353626,24 +353660,29 @@ async function getLiveDrikPanchang(cityId, state) {
     const data2 = await getJagannathaPanchang({ city: cityInfo.id, state: cityInfo.state });
     return {
       ...data2,
-      source: "Jagannatha Hora & Drik Panchang",
+      source: "Jagannatha Hora",
       city: cityInfo.name,
       state: cityInfo.state,
       date: data2.date,
-      sunrise: data2.sunrise || "06:14 AM",
-      sunset: data2.sunset || "06:05 PM",
-      moonrise: data2.moonrise || "11:45 PM",
-      abhijitMuhurat: data2.abhijitMuhurat,
-      rahukaal: data2.rahukaal,
-      unavailable: false
+      // Do not replace missing astronomical values with fabricated times or tithi.
+      sunrise: data2.sunrise || "",
+      sunset: data2.sunset || "",
+      moonrise: data2.moonrise || "",
+      masa: data2.masa || "",
+      paksha: data2.paksha || "",
+      abhijitMuhurat: data2.abhijitMuhurat || "",
+      rahukaal: data2.rahukaal || "",
+      unavailable: Boolean(data2.unavailable)
     };
   } catch (error3) {
-    console.warn("Jagannatha Hora Panchang fetch error, using Vedic engine:", error3);
+    console.warn("Jagannatha Hora Panchang fetch failed:", error3);
     const now = /* @__PURE__ */ new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    const dateStr = `${day}-${month}-${year}`;
+    const dateStr = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }).format(now).replace(/\//g, "-");
     return {
       source: "Jagannatha Hora",
       sourceUrl: "https://jagannathahora.com/api-mcp",
@@ -353653,20 +353692,21 @@ async function getLiveDrikPanchang(cityId, state) {
       location: `${cityInfo.name}, ${cityInfo.state}`,
       city: cityInfo.name,
       state: cityInfo.state,
-      sunrise: "06:14 AM",
-      sunset: "06:05 PM",
-      moonrise: "11:45 PM",
-      tithi: "Krishna Saptami / Ashtami",
-      nakshatra: "Ardra Nakshatra",
-      paksha: "Krishna Paksha",
-      samvat: "Vikram Samvat 2083",
-      yoga: "Variyana Yoga",
-      karana: "Bava Karana",
-      sunSign: "Kanya (Virgo)",
-      moonSign: "Mithuna (Gemini)",
-      abhijitMuhurat: "11:46 AM to 12:33 PM",
-      rahukaal: "09:12 AM to 10:41 AM",
-      unavailable: false,
+      sunrise: "",
+      sunset: "",
+      moonrise: "",
+      tithi: "",
+      nakshatra: "",
+      masa: "",
+      paksha: "",
+      samvat: "",
+      yoga: "",
+      karana: "",
+      sunSign: "",
+      moonSign: "",
+      abhijitMuhurat: "",
+      rahukaal: "",
+      unavailable: true,
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
   }
