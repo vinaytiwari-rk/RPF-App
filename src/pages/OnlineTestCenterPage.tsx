@@ -1,37 +1,16 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import {
-  ArrowLeft, GraduationCap, Flame, Scale, BookOpen, Atom,
-  BrainCircuit, Monitor, Play, Clock, CheckCircle2, Award,
-  Sparkles, ShieldCheck, ChevronRight, Search, Loader2,
-  Landmark, Shield, Flag, Globe, Compass, TrendingUp,
-  Palette, Trees, Dna, Zap, Layers, RefreshCw
+  ArrowLeft, Clock, CheckCircle2, Award, Play, Shield,
+  BookOpen, Sparkles, Layers, BarChart2
 } from "lucide-react";
-import { QUIZ_TOPICS, QuizTopic } from "../data/quiz/quizQuestionBank";
-import { GK_EXAM_SUBJECTS, CatalogSubject, CatalogTopic, TOTAL_GK_TOPICS } from "../data/quiz/quizCatalog";
-import { fetchTopicQuestions } from "../services/geminiQuizService";
+import { TEST_PRESETS, TestPreset, generateSamahitTest } from "../utils/samahitTestEngine";
+import { SamahitTestAttempt } from "../data/quiz/samahitQuestionTypes";
 import OnlineTestRunnerModal from "../components/quiz/OnlineTestRunnerModal";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 type Lang = "en" | "hi";
-
-const SUBJECT_ICONS: Record<string, React.ElementType> = {
-  Landmark,
-  Shield,
-  Flag,
-  Scale,
-  Globe,
-  Compass,
-  Award,
-  TrendingUp,
-  Palette,
-  Monitor,
-  Trees,
-  Dna,
-  Atom,
-  Zap,
-  BookOpen
-};
 
 export default function OnlineTestCenterPage() {
   const { lang } = useOutletContext<{ lang: Lang }>();
@@ -39,10 +18,9 @@ export default function OnlineTestCenterPage() {
   const navigate = useNavigate();
   const isHi = lang === "hi";
 
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string>("ancient_history");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [activeTopic, setActiveTopic] = useState<QuizTopic | null>(null);
-  const [loadingTopicId, setLoadingTopicId] = useState<string | null>(null);
+  // State: selected test duration preset (default: 15 mins / 50 questions)
+  const [selectedPreset, setSelectedPreset] = useState<TestPreset>(TEST_PRESETS[2]);
+  const [activeAttempt, setActiveAttempt] = useState<SamahitTestAttempt | null>(null);
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -52,76 +30,31 @@ export default function OnlineTestCenterPage() {
     }
   };
 
-  const selectedSubject = useMemo(() => {
-    return GK_EXAM_SUBJECTS.find((s) => s.id === selectedSubjectId) || GK_EXAM_SUBJECTS[0];
-  }, [selectedSubjectId]);
-
-  // Filter topics based on search query or selected subject
-  const displayedTopics = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) {
-      return selectedSubject ? selectedSubject.topics : [];
-    }
-    // Search across all 388 topics
-    const matched: { topic: CatalogTopic; subject: CatalogSubject }[] = [];
-    GK_EXAM_SUBJECTS.forEach((subj) => {
-      subj.topics.forEach((top) => {
-        if (
-          top.titleEn.toLowerCase().includes(q) ||
-          top.titleHi.toLowerCase().includes(q) ||
-          subj.titleEn.toLowerCase().includes(q) ||
-          subj.titleHi.toLowerCase().includes(q)
-        ) {
-          matched.push({ topic: top, subject: subj });
-        }
-      });
-    });
-    return matched.map((m) => m.topic);
-  }, [searchQuery, selectedSubject]);
-
-  const handleStartTopicTest = async (topic: CatalogTopic, subject: CatalogSubject) => {
-    // Check if topic is already in legacy hardcoded quiz bank
-    const legacyTopic = QUIZ_TOPICS.find((t) => t.id === topic.id);
-    if (legacyTopic && legacyTopic.questions.length > 0) {
-      setActiveTopic(legacyTopic);
-      return;
-    }
-
-    setLoadingTopicId(topic.id);
+  const handleStartTest = () => {
     try {
-      const questions = await fetchTopicQuestions(topic, subject.titleEn);
-      const runtimeTopic: QuizTopic = {
-        id: topic.id,
-        titleEn: topic.titleEn,
-        titleHi: topic.titleHi,
-        descEn: `Comprehensive mock test on ${topic.titleEn} (${subject.titleEn}). Standard UPSC / SSC pattern.`,
-        descHi: `${subject.titleHi} के अंतर्गत ${topic.titleHi} पर आधारित मानक वस्तुनिष्ठ परीक्षा।`,
-        iconName: subject.icon,
-        color: subject.color,
-        badge: topic.badge,
-        questionsCount: questions.length,
-        durationMinutes: topic.durationMinutes || 10,
-        questions
-      };
-      setActiveTopic(runtimeTopic);
-    } catch (err) {
-      console.error("Failed to load topic test", err);
-    } finally {
-      setLoadingTopicId(null);
+      const attempt = generateSamahitTest(
+        selectedPreset.questionCount,
+        selectedPreset.durationMinutes,
+        { shuffleOptions: true }
+      );
+      setActiveAttempt(attempt);
+    } catch (err: any) {
+      console.error("Test start failed:", err);
+      toast.error(err?.message || "Unable to start test attempt");
     }
   };
 
   return (
     <div className="min-h-screen bg-[#FFF7E8] p-3 sm:p-5 pb-32">
-      {/* Header Banner */}
-      <header className="rounded-3xl bg-[#F0FAF4] p-5 shadow-sm border border-emerald-100/70">
+      {/* Header Banner - Clean Light Theme */}
+      <header className="rounded-3xl bg-[#F0FAF4] p-5 sm:p-6 shadow-sm border border-emerald-100/80">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-[#245D45]">
             <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
-              <GraduationCap className="h-4 w-4" />
+              <Shield className="h-4 w-4" />
             </span>
             <span className="text-[11px] font-black uppercase tracking-widest text-[#245D45]">
-              {isHi ? "समाहित ऑनलाइन परीक्षा व मॉक टेस्ट" : "Samahit Online Test & Assessment"}
+              {isHi ? "आर. पी. फाउंडेशन • समाहित पोर्टल" : "RP Foundation • Samahit Portal"}
             </span>
           </div>
           <button
@@ -135,242 +68,205 @@ export default function OnlineTestCenterPage() {
         </div>
 
         <h1 className="mt-3 text-2xl sm:text-3xl font-black text-[#243B32]">
-          {isHi ? "ऑनलाइन टेस्ट एवं मूल्यांकन पोर्टल" : "Online Test & Mock Exam Portal"}
+          {isHi ? "समाहित ऑनलाइन परीक्षा पोर्टल" : "SAMAHIT Online Test Portal"}
         </h1>
-        <p className="mt-1 text-xs sm:text-sm text-[#52685C] max-w-xl">
+        <p className="mt-1 text-xs sm:text-sm text-[#52685C] max-w-xl leading-relaxed">
           {isHi
-            ? "UPSC, State PSC, SSC, रेलवे व सरकारी भर्ती हेतु 14 मुख्य विषयों के 388+ मानक टॉपिक्स। टेस्ट पूरा करें और तुरंत डिजिटल प्रशस्ति पत्र (Merit Certificate) प्राप्त करें।"
-            : "Standard mock exams for UPSC, State PSC, SSC & Govt recruitments across 14 subjects & 388+ topics. Submit test and download instant Merit Certificate."}
+            ? "गुणवत्ता-नियंत्रित बहुविकल्पीय वस्तुनिष्ठ परीक्षा। परीक्षा पूरी करने पर तुरंत आर. पी. फाउंडेशन का आधिकारिक योग्यता प्रमाणपत्र (Certificate of Achievement) प्राप्त करें।"
+            : "Quality-controlled bilingual multiple choice assessment. Complete the test and receive your official RP Foundation Certificate of Achievement."}
         </p>
 
-        {/* Quick Highlights */}
-        <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-bold text-emerald-900">
-          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
-            <Layers className="h-3.5 w-3.5 text-emerald-700" />
-            {isHi ? `14 विषय • ${TOTAL_GK_TOPICS} टॉपिक्स` : `14 Subjects • ${TOTAL_GK_TOPICS} Topics`}
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
-            <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-            {isHi ? "Gemini AI सत्यापित प्रश्न" : "AI Verified Questions"}
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
-            <Award className="h-3.5 w-3.5 text-amber-600" />
-            {isHi ? "सर्टिफिकेट डाउनलोड उपलब्ध" : "PDF Certificate Included"}
-          </span>
+        {/* 5-Category Proportional Evaluation Breakdown */}
+        <div className="mt-4 pt-3 border-t border-emerald-200/50">
+          <p className="text-[11px] font-extrabold text-[#245D45] uppercase tracking-wider mb-2">
+            {isHi ? "संतुलित 5-विषय मूल्यांकन पद्धति:" : "Balanced 5-Category Evaluation Scheme:"}
+          </p>
+          <div className="flex flex-wrap gap-2 text-[11px] font-bold text-emerald-950">
+            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
+              <span className="h-2 w-2 rounded-full bg-amber-500" />
+              {isHi ? "करेंट अफेयर्स — 25%" : "Current Affairs — 25%"}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
+              <span className="h-2 w-2 rounded-full bg-emerald-600" />
+              {isHi ? "सामान्य ज्ञान — 35%" : "General Knowledge — 35%"}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
+              <span className="h-2 w-2 rounded-full bg-blue-500" />
+              {isHi ? "तर्कशक्ति — 20%" : "Reasoning — 20%"}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
+              <span className="h-2 w-2 rounded-full bg-purple-500" />
+              {isHi ? "गणित — 10%" : "Mathematics — 10%"}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
+              <span className="h-2 w-2 rounded-full bg-rose-500" />
+              {isHi ? "अंग्रेजी — 10%" : "English — 10%"}
+            </span>
+          </div>
         </div>
       </header>
 
-      {/* Featured Daily Current Affairs Hero Card */}
-      <section className="mt-4">
-        {QUIZ_TOPICS.slice(0, 1).map((daily) => (
-          <div
-            key={daily.id}
-            onClick={() => setActiveTopic(daily)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") setActiveTopic(daily);
-            }}
-            className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-600 to-amber-700 p-5 text-white shadow-lg transition hover:scale-[1.01] cursor-pointer"
-          >
-            <div className="flex items-start justify-between">
-              <span className="rounded-full bg-white/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider backdrop-blur-xs">
-                🔥 {isHi ? "आज का विशेष लाइव टेस्ट" : "Today's Live Test"}
-              </span>
-              <span className="flex items-center gap-1 text-xs font-bold bg-white/20 px-2.5 py-0.5 rounded-full">
-                <Clock className="h-3 w-3" /> {daily.durationMinutes} {isHi ? "मिनट" : "mins"}
-              </span>
-            </div>
-
-            <h2 className="mt-3 text-lg sm:text-xl font-black leading-snug">
-              {isHi ? daily.titleHi : daily.titleEn}
-            </h2>
-            <p className="mt-1 text-xs sm:text-sm text-amber-100/90 leading-relaxed max-w-lg">
-              {isHi ? daily.descHi : daily.descEn}
-            </p>
-
-            <div className="mt-4 flex items-center justify-between border-t border-white/20 pt-3">
-              <span className="text-xs font-bold text-amber-100">
-                {daily.questionsCount} {isHi ? "प्रश्नों का मानक सेट" : "questions standard set"}
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-black text-orange-950 shadow group-hover:bg-amber-50">
-                <Play className="h-3.5 w-3.5 fill-current" />
-                {isHi ? "अभी टेस्ट शुरू करें" : "Start Test Now"}
-              </span>
+      {/* Main Test Selection Card */}
+      <main className="mt-5 space-y-4">
+        <div className="rounded-3xl bg-white p-5 sm:p-6 border border-emerald-100 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-[#243B32]">
+                {isHi ? "परीक्षा अवधि व प्रश्नों की संख्या चुनें" : "Select Test Duration & Question Count"}
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {isHi
+                  ? "अपनी सुविधानुसार समय सीमा चुनें और वास्तविक परीक्षा जैसा अभ्यास करें।"
+                  : "Choose your preferred time duration and question count to begin."}
+              </p>
             </div>
           </div>
-        ))}
-      </section>
 
-      {/* Realtime Search Bar across 388+ topics */}
-      <div className="mt-5 relative">
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={
-              isHi
-                ? "388+ टॉपिक्स में खोजें (उदा. सिंधु घाटी, हड़प्पा, संसद, संविधान, कोशिका, मौर्य...)"
-                : "Search across 388+ topics (e.g. Indus Valley, Parliament, Cell Biology, Mauryas...)"
-            }
-            className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border border-emerald-100 text-xs sm:text-sm text-slate-800 placeholder-slate-400 font-medium shadow-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* 14 Master Subjects Horizontal Pill Selector */}
-      {!searchQuery && (
-        <div className="mt-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black text-[#243B32] uppercase tracking-wider">
-              {isHi ? "14 मुख्य विषय (Master Subjects)" : "14 Master Subjects"}
-            </span>
-            <span className="text-[11px] font-bold text-emerald-800">
-              {selectedSubject?.totalTopics} {isHi ? "टॉपिक्स" : "topics"}
-            </span>
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-            {GK_EXAM_SUBJECTS.map((subj) => {
-              const IconComp = SUBJECT_ICONS[subj.icon] || BookOpen;
-              const isSelected = subj.id === selectedSubjectId;
-
-              return (
-                <button
-                  key={subj.id}
-                  onClick={() => setSelectedSubjectId(subj.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all ${
-                    isSelected
-                      ? "bg-[#245D45] text-white shadow-md scale-[1.02]"
-                      : "bg-white text-slate-700 border border-emerald-100/80 hover:bg-emerald-50/50"
-                  }`}
-                >
-                  <IconComp className={`h-3.5 w-3.5 ${isSelected ? "text-amber-300" : "text-emerald-700"}`} />
-                  <span>{isHi ? subj.titleHi : subj.titleEn}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                      isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {subj.totalTopics}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Topics Grid */}
-      <div className="mt-5">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-black text-[#243B32] flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-emerald-700" />
-            {searchQuery
-              ? isHi
-                ? `खोज परिणाम (${displayedTopics.length} टॉपिक्स):`
-                : `Search Results (${displayedTopics.length} topics):`
-              : isHi
-              ? `${selectedSubject.titleHi} (${displayedTopics.length} टॉपिक्स):`
-              : `${selectedSubject.titleEn} (${displayedTopics.length} topics):`}
-          </h3>
-        </div>
-
-        {displayedTopics.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500 text-xs">
-            {isHi ? "कोई टॉपिक नहीं मिला। कृपया दूसरा शब्द खोजें।" : "No topics found matching your query."}
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {displayedTopics.map((topic) => {
-              const currentSubj =
-                GK_EXAM_SUBJECTS.find((s) => s.id === topic.subjectId) || selectedSubject;
-              const IconComponent = SUBJECT_ICONS[currentSubj.icon] || BookOpen;
-              const isLoading = loadingTopicId === topic.id;
+          {/* Duration Choices Grid - Exactly 6 options */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {TEST_PRESETS.map((preset) => {
+              const isSelected =
+                selectedPreset.durationMinutes === preset.durationMinutes &&
+                selectedPreset.questionCount === preset.questionCount;
 
               return (
                 <div
-                  key={topic.id}
-                  onClick={() => !isLoading && handleStartTopicTest(topic, currentSubj)}
+                  key={`${preset.durationMinutes}_${preset.questionCount}`}
+                  onClick={() => setSelectedPreset(preset)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
-                    if ((e.key === "Enter" || e.key === " ") && !isLoading) {
-                      handleStartTopicTest(topic, currentSubj);
-                    }
+                    if (e.key === "Enter" || e.key === " ") setSelectedPreset(preset);
                   }}
-                  className={`group relative flex flex-col justify-between rounded-2xl border border-[#D8E8DB] bg-white p-4 shadow-xs transition hover:border-[#245D45] hover:shadow-md cursor-pointer text-left ${
-                    isLoading ? "opacity-75 pointer-events-none" : ""
+                  className={`relative flex flex-col justify-between rounded-2xl p-4 transition-all cursor-pointer border ${
+                    isSelected
+                      ? "border-[#245D45] bg-[#F0FAF4] shadow-md ring-2 ring-emerald-600/30 scale-[1.01]"
+                      : "border-slate-200 bg-white hover:border-emerald-300 hover:bg-slate-50/60 shadow-2xs"
                   }`}
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F0FAF4] text-[#245D45] group-hover:bg-[#245D45] group-hover:text-white transition">
-                        <IconComponent className="h-5 w-5" />
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                          {topic.badge || "UPSC / SSC"}
-                        </span>
-                        <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                          <Clock className="h-3 w-3" /> {topic.durationMinutes || 10} min
-                        </span>
-                      </div>
-                    </div>
+                  <div className="flex items-start justify-between">
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase ${
+                        isSelected
+                          ? "bg-[#245D45] text-white"
+                          : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      <Clock className="h-3 w-3" />
+                      {preset.durationMinutes} {isHi ? "मिनट" : "Minutes"}
+                    </span>
+                    <span className="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200/60 rounded-lg px-2 py-0.5">
+                      {preset.badge}
+                    </span>
+                  </div>
 
-                    <h4 className="mt-3 text-sm font-extrabold text-[#243B32] group-hover:text-[#245D45] transition leading-snug">
-                      {isHi ? topic.titleHi : topic.titleEn}
-                    </h4>
-                    <p className="mt-1 text-[11px] text-slate-500 line-clamp-1">
-                      {currentSubj.titleHi} • {topic.questionsCount} {isHi ? "मानक प्रश्न" : "standard MCQs"}
+                  <div className="mt-3">
+                    <span className="block text-2xl font-black text-[#243B32]">
+                      {preset.questionCount}{" "}
+                      <span className="text-xs font-bold text-slate-500">
+                        {isHi ? "प्रश्न" : "Questions"}
+                      </span>
+                    </span>
+                    <p className="text-xs font-semibold text-slate-600 mt-1">
+                      {isHi ? preset.labelHi : preset.labelEn}
                     </p>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs font-bold text-[#245D45]">
-                    <span className="text-[11px] text-slate-400">
-                      {topic.questionsCount} {isHi ? "ऑब्जेक्टिव प्रश्न" : "MCQs"}
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
+                    <span className={isSelected ? "text-emerald-800" : "text-slate-400"}>
+                      {isSelected
+                        ? isHi ? "चयनित (Selected)" : "Selected"
+                        : isHi ? "चुनने के लिए टैप करें" : "Click to select"}
                     </span>
-                    <span className="inline-flex items-center gap-1 group-hover:translate-x-1 transition text-emerald-800">
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-700" />
-                          <span className="text-emerald-700">{isHi ? "लोड हो रहा है..." : "Generating..."}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>{isHi ? "टेस्ट दें" : "Take Test"}</span>
-                          <ChevronRight className="h-4 w-4" />
-                        </>
-                      )}
-                    </span>
+                    <div
+                      className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
+                        isSelected
+                          ? "border-[#245D45] bg-[#245D45]"
+                          : "border-slate-300 bg-white"
+                      }`}
+                    >
+                      {isSelected && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
-        )}
-      </div>
+
+          {/* Action CTA Bar */}
+          <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <span className="text-xs font-bold text-slate-500">
+                {isHi ? "आपकी वर्तमान पसंद:" : "Current selection:"}
+              </span>
+              <p className="text-sm font-black text-[#243B32]">
+                {selectedPreset.durationMinutes} {isHi ? "मिनट" : "Minutes"} • {selectedPreset.questionCount} {isHi ? "प्रश्न (वस्तुनिष्ठ)" : "Questions (MCQs)"}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleStartTest}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-[#245D45] px-8 py-3.5 text-sm sm:text-base font-extrabold text-white shadow-lg hover:bg-emerald-800 transition active:scale-98"
+            >
+              <Play className="h-4 w-4 fill-current" />
+              <span>{isHi ? "ऑनलाइन टेस्ट शुरू करें" : "Start Test"}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Clear Instructions Card */}
+        <div className="rounded-3xl bg-white p-5 sm:p-6 border border-emerald-100 shadow-sm space-y-3">
+          <h3 className="text-sm font-black text-[#243B32] flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-emerald-700" />
+            {isHi ? "महत्वपूर्ण परीक्षा निर्देश" : "Important Test Guidelines"}
+          </h3>
+          <ul className="space-y-2 text-xs text-slate-600 leading-relaxed font-medium">
+            <li className="flex items-start gap-2">
+              <span className="text-emerald-700 font-bold">•</span>
+              <span>
+                {isHi
+                  ? "सभी प्रश्न हिंदी और अंग्रेजी दोनों भाषाओं में उपलब्ध हैं। आप परीक्षा के दौरान किसी भी समय भाषा बदल सकते हैं।"
+                  : "All questions are bilingual in English and Hindi. You can toggle language at any moment during the assessment."}
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-emerald-700 font-bold">•</span>
+              <span>
+                {isHi
+                  ? "प्रत्येक प्रश्न में 4 विकल्प हैं जिनमें से केवल एक विकल्प सही है। कोई नकारात्मक अंकन नहीं है।"
+                  : "Each MCQ has exactly 4 options with one unambiguous correct answer. No negative marking."}
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-emerald-700 font-bold">•</span>
+              <span>
+                {isHi
+                  ? "परीक्षा सबमिट होते ही तुरंत परिणाम प्रदर्शित होगा और आप RP Foundation का डिजिटल प्रशस्ति पत्र डाउनलोड कर सकेंगे।"
+                  : "Upon submitting, your scorecard is displayed immediately and you can download your official RP Foundation Certificate of Achievement."}
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-emerald-700 font-bold">•</span>
+              <span>
+                {isHi
+                  ? "लॉगिन किए हुए अभ्यर्थियों के प्रमाणपत्र स्वतः उनकी प्रोफाइल (My Certificates) में सुरक्षित हो जाते हैं।"
+                  : "Logged-in candidates have their certificates automatically saved to their profile under My Certificates for anytime access."}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </main>
 
       {/* Test Runner Modal */}
-      {activeTopic && (
+      {activeAttempt && (
         <OnlineTestRunnerModal
-          topic={activeTopic}
-          onClose={() => setActiveTopic(null)}
+          attempt={activeAttempt}
+          onClose={() => setActiveAttempt(null)}
           lang={lang}
-          userName={user?.displayName || user?.name || "Samahit Student"}
+          userName={user?.name || (user as any)?.full_name || "Candidate"}
         />
       )}
     </div>
   );
 }
-

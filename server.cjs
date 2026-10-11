@@ -9240,7 +9240,7 @@ var require_accepts = __commonJS({
 // node_modules/base64id/lib/base64id.js
 var require_base64id = __commonJS({
   "node_modules/base64id/lib/base64id.js"(exports2, module2) {
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var Base64Id = function() {
     };
     Base64Id.prototype.getRandomBytes = function(bytes) {
@@ -9248,12 +9248,12 @@ var require_base64id = __commonJS({
       var self2 = this;
       bytes = bytes || 12;
       if (bytes > BUFFER_SIZE) {
-        return crypto25.randomBytes(bytes);
+        return crypto26.randomBytes(bytes);
       }
       var bytesInBuffer = parseInt(BUFFER_SIZE / bytes);
       var threshold = parseInt(bytesInBuffer * 0.85);
       if (!threshold) {
-        return crypto25.randomBytes(bytes);
+        return crypto26.randomBytes(bytes);
       }
       if (this.bytesBufferIndex == null) {
         this.bytesBufferIndex = -1;
@@ -9265,14 +9265,14 @@ var require_base64id = __commonJS({
       if (this.bytesBufferIndex == -1 || this.bytesBufferIndex > threshold) {
         if (!this.isGeneratingBytes) {
           this.isGeneratingBytes = true;
-          crypto25.randomBytes(BUFFER_SIZE, function(err2, bytes2) {
+          crypto26.randomBytes(BUFFER_SIZE, function(err2, bytes2) {
             self2.bytesBuffer = bytes2;
             self2.bytesBufferIndex = 0;
             self2.isGeneratingBytes = false;
           });
         }
         if (this.bytesBufferIndex == -1) {
-          return crypto25.randomBytes(bytes);
+          return crypto26.randomBytes(bytes);
         }
       }
       var result = this.bytesBuffer.slice(bytes * this.bytesBufferIndex, bytes * (this.bytesBufferIndex + 1));
@@ -9286,7 +9286,7 @@ var require_base64id = __commonJS({
       }
       this.sequenceNumber = this.sequenceNumber + 1 | 0;
       rand.writeInt32BE(this.sequenceNumber, 11);
-      if (crypto25.randomBytes) {
+      if (crypto26.randomBytes) {
         this.getRandomBytes(12).copy(rand);
       } else {
         [0, 4, 8].forEach(function(i6) {
@@ -23914,7 +23914,7 @@ var require_form_data = __commonJS({
     var parseUrl3 = require("url").parse;
     var fs11 = require("fs");
     var Stream4 = require("stream").Stream;
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var mime = require_mime_types();
     var asynckit = require_asynckit();
     var setToStringTag = require_es_set_tostringtag();
@@ -24123,7 +24123,7 @@ var require_form_data = __commonJS({
       return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
     };
     FormData5.prototype._generateBoundary = function() {
-      this._boundary = "--------------------------" + crypto25.randomBytes(12).toString("hex");
+      this._boundary = "--------------------------" + crypto26.randomBytes(12).toString("hex");
     };
     FormData5.prototype.getLengthSync = function() {
       var knownLength = this._overheadLength + this._valueLength;
@@ -35750,14 +35750,14 @@ var require_etag = __commonJS({
   "node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag2;
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var Stats2 = require("fs").Stats;
     var toString7 = Object.prototype.toString;
     function entitytag2(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash4 = crypto25.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash4 = crypto26.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash4 + '"';
     }
@@ -37956,11 +37956,11 @@ var require_request = __commonJS({
 // node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/cookie-signature/index.js"(exports2) {
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     exports2.sign = function(val2, secret) {
       if ("string" !== typeof val2) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val2 + "." + crypto25.createHmac("sha256", secret).update(val2).digest("base64").replace(/\=+$/, "");
+      return val2 + "." + crypto26.createHmac("sha256", secret).update(val2).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val2, secret) {
       if ("string" !== typeof val2) throw new TypeError("Signed cookie string must be provided.");
@@ -37969,7 +37969,7 @@ var require_cookie_signature = __commonJS({
       return sha12(mac) == sha12(val2) ? str2 : false;
     };
     function sha12(str2) {
-      return crypto25.createHash("sha1").update(str2).digest("hex");
+      return crypto26.createHash("sha1").update(str2).digest("hex");
     }
   }
 });
@@ -40622,7 +40622,7 @@ var require_main = __commonJS({
     var fs11 = require("fs");
     var path13 = require("path");
     var os2 = require("os");
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var TIPS = [
       "\u25C8 encrypted .env [www.dotenvx.com]",
       "\u25C8 secrets for agents [www.dotenvx.com]",
@@ -40866,7 +40866,7 @@ var require_main = __commonJS({
       const authTag = ciphertext.subarray(-16);
       ciphertext = ciphertext.subarray(12, -16);
       try {
-        const aesgcm = crypto25.createDecipheriv("aes-256-gcm", key, nonce);
+        const aesgcm = crypto26.createDecipheriv("aes-256-gcm", key, nonce);
         aesgcm.setAuthTag(authTag);
         return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
       } catch (error3) {
@@ -42252,7 +42252,7 @@ var require_cert_signatures = __commonJS({
 var require_sasl = __commonJS({
   "node_modules/pg/lib/crypto/sasl.js"(exports2, module2) {
     "use strict";
-    var crypto25 = require_utils4();
+    var crypto26 = require_utils4();
     var { signatureAlgorithmHashFromCertificate } = require_cert_signatures();
     function saslprep(password) {
       const nonAsciiSpace = /[\u00A0\u1680\u2000-\u200B\u202F\u205F\u3000]/g;
@@ -42270,7 +42270,7 @@ var require_sasl = __commonJS({
       if (mechanism === "SCRAM-SHA-256-PLUS" && typeof stream6.getPeerCertificate !== "function") {
         throw new Error("SASL: Mechanism SCRAM-SHA-256-PLUS requires a certificate");
       }
-      const clientNonce = crypto25.randomBytes(18).toString("base64");
+      const clientNonce = crypto26.randomBytes(18).toString("base64");
       const gs2Header = mechanism === "SCRAM-SHA-256-PLUS" ? "p=tls-server-end-point" : stream6 ? "y" : "n";
       return {
         mechanism,
@@ -42312,20 +42312,20 @@ var require_sasl = __commonJS({
         const peerCert = stream6.getPeerCertificate().raw;
         let hashName = signatureAlgorithmHashFromCertificate(peerCert);
         if (hashName === "MD5" || hashName === "SHA-1") hashName = "SHA-256";
-        const certHash = await crypto25.hashByName(hashName, peerCert);
+        const certHash = await crypto26.hashByName(hashName, peerCert);
         const bindingData = Buffer.concat([Buffer.from("p=tls-server-end-point,,"), Buffer.from(certHash)]);
         channelBinding = bindingData.toString("base64");
       }
       const clientFinalMessageWithoutProof = "c=" + channelBinding + ",r=" + sv.nonce;
       const authMessage = clientFirstMessageBare + "," + serverFirstMessage + "," + clientFinalMessageWithoutProof;
       const saltBytes = Buffer.from(sv.salt, "base64");
-      const saltedPassword = await crypto25.deriveKey(saslprep(password), saltBytes, sv.iteration);
-      const clientKey = await crypto25.hmacSha256(saltedPassword, "Client Key");
-      const storedKey = await crypto25.sha256(clientKey);
-      const clientSignature = await crypto25.hmacSha256(storedKey, authMessage);
+      const saltedPassword = await crypto26.deriveKey(saslprep(password), saltBytes, sv.iteration);
+      const clientKey = await crypto26.hmacSha256(saltedPassword, "Client Key");
+      const storedKey = await crypto26.sha256(clientKey);
+      const clientSignature = await crypto26.hmacSha256(storedKey, authMessage);
       const clientProof = xorBuffers(Buffer.from(clientKey), Buffer.from(clientSignature)).toString("base64");
-      const serverKey = await crypto25.hmacSha256(saltedPassword, "Server Key");
-      const serverSignatureBytes = await crypto25.hmacSha256(serverKey, authMessage);
+      const serverKey = await crypto26.hmacSha256(saltedPassword, "Server Key");
+      const serverSignatureBytes = await crypto26.hmacSha256(serverKey, authMessage);
       session.message = "SASLResponse";
       session.serverSignature = Buffer.from(serverSignatureBytes).toString("base64");
       session.response = clientFinalMessageWithoutProof + ",p=" + clientProof;
@@ -44555,7 +44555,7 @@ var require_client2 = __commonJS({
     var Query2 = require_query2();
     var defaults3 = require_defaults();
     var Connection2 = require_connection();
-    var crypto25 = require_utils4();
+    var crypto26 = require_utils4();
     var activeQueryDeprecationNotice = nodeUtils.deprecate(
       () => {
       },
@@ -44806,7 +44806,7 @@ var require_client2 = __commonJS({
       _handleAuthMD5Password(msg) {
         this._getPassword(async () => {
           try {
-            const hashedPassword = await crypto25.postgresMd5PasswordHash(this.user, this.password, msg.salt);
+            const hashedPassword = await crypto26.postgresMd5PasswordHash(this.user, this.password, msg.salt);
             this.connection.password(hashedPassword);
           } catch (e6) {
             this.emit("error", e6);
@@ -46335,14 +46335,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer5 = require_safe_buffer().Buffer;
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util6 = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto25.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto26.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -46432,17 +46432,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto25.createHmac("sha" + bits, secret);
+        var hmac = crypto26.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto25 ? function timingSafeEqual2(a6, b2) {
+    var timingSafeEqual = "timingSafeEqual" in crypto26 ? function timingSafeEqual2(a6, b2) {
       if (a6.byteLength !== b2.byteLength) {
         return false;
       }
-      return crypto25.timingSafeEqual(a6, b2);
+      return crypto26.timingSafeEqual(a6, b2);
     } : function timingSafeEqual2(a6, b2) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -46459,7 +46459,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto25.createSign("RSA-SHA" + bits);
+        var signer = crypto26.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -46469,7 +46469,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase643(signature);
-        var verifier = crypto25.createVerify("RSA-SHA" + bits);
+        var verifier = crypto26.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -46478,11 +46478,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto25.createSign("RSA-SHA" + bits);
+        var signer = crypto26.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto25.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto25.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto26.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto26.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -46492,12 +46492,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase643(signature);
-        var verifier = crypto25.createVerify("RSA-SHA" + bits);
+        var verifier = crypto26.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto25.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto25.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto26.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto26.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -54085,9 +54085,9 @@ var require_disk = __commonJS({
     var fs11 = require("fs");
     var os2 = require("os");
     var path13 = require("path");
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     function getFilename(req2, file, cb) {
-      crypto25.randomBytes(16, function(err2, raw) {
+      crypto26.randomBytes(16, function(err2, raw) {
         cb(err2, err2 ? void 0 : raw.toString("hex"));
       });
     }
@@ -79323,11 +79323,11 @@ var require_x509_cjs = __commonJS({
         return this.items[Symbol.iterator]();
       }
       get(key = _CryptoProvider.DEFAULT) {
-        const crypto25 = this.items.get(key.toLowerCase());
-        if (!crypto25) {
+        const crypto26 = this.items.get(key.toLowerCase());
+        if (!crypto26) {
           throw new Error(`Cannot get Crypto by name '${key}'`);
         }
-        return crypto25;
+        return crypto26;
       }
       set(key, value2) {
         if (typeof key === "string") {
@@ -79555,15 +79555,15 @@ var require_x509_cjs = __commonJS({
       }
       async getThumbprint(...args) {
         var _a7;
-        let crypto25;
+        let crypto26;
         let algorithm = "SHA-1";
         if (args.length >= 1 && !((_a7 = args[0]) === null || _a7 === void 0 ? void 0 : _a7.subtle)) {
           algorithm = args[0] || algorithm;
-          crypto25 = args[1] || cryptoProvider.get();
+          crypto26 = args[1] || cryptoProvider.get();
         } else {
-          crypto25 = args[0] || cryptoProvider.get();
+          crypto26 = args[0] || cryptoProvider.get();
         }
-        return await crypto25.subtle.digest(algorithm, this.toArrayBuffer());
+        return await crypto26.subtle.digest(algorithm, this.toArrayBuffer());
       }
     };
     var ERR_GN_CONSTRUCTOR = "Cannot initialize GeneralName from ASN.1 data.";
@@ -79964,14 +79964,14 @@ var require_x509_cjs = __commonJS({
       }
     };
     var PublicKey = class _PublicKey extends PemData {
-      static async create(data2, crypto25 = cryptoProvider.get()) {
+      static async create(data2, crypto26 = cryptoProvider.get()) {
         if (data2 instanceof _PublicKey) {
           return data2;
         } else if (CryptoProvider.isCryptoKey(data2)) {
           if (data2.type !== "public") {
             throw new TypeError("Public key is required");
           }
-          const spki = await crypto25.subtle.exportKey("spki", data2);
+          const spki = await crypto26.subtle.exportKey("spki", data2);
           return new _PublicKey(spki);
         } else if (data2.publicKey) {
           return data2.publicKey;
@@ -79990,7 +79990,7 @@ var require_x509_cjs = __commonJS({
         this.tag = PemConverter.PublicKeyTag;
       }
       async export(...args) {
-        let crypto25;
+        let crypto26;
         let keyUsages = ["verify"];
         let algorithm = {
           hash: "SHA-256",
@@ -79999,16 +79999,16 @@ var require_x509_cjs = __commonJS({
         if (args.length > 1) {
           algorithm = args[0] || algorithm;
           keyUsages = args[1] || keyUsages;
-          crypto25 = args[2] || cryptoProvider.get();
+          crypto26 = args[2] || cryptoProvider.get();
         } else {
-          crypto25 = args[0] || cryptoProvider.get();
+          crypto26 = args[0] || cryptoProvider.get();
         }
         let raw = this.rawData;
         const asnSpki = asn1Schema.AsnConvert.parse(this.rawData, asn1X509.SubjectPublicKeyInfo);
         if (asnSpki.algorithm.algorithm === asn1Rsa.id_RSASSA_PSS) {
           raw = convertSpkiToRsaPkcs1(asnSpki, raw);
         }
-        return crypto25.subtle.importKey("spki", raw, algorithm, true, keyUsages);
+        return crypto26.subtle.importKey("spki", raw, algorithm, true, keyUsages);
       }
       onInit(asn) {
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
@@ -80025,34 +80025,34 @@ var require_x509_cjs = __commonJS({
       }
       async getThumbprint(...args) {
         var _a7;
-        let crypto25;
+        let crypto26;
         let algorithm = "SHA-1";
         if (args.length >= 1 && !((_a7 = args[0]) === null || _a7 === void 0 ? void 0 : _a7.subtle)) {
           algorithm = args[0] || algorithm;
-          crypto25 = args[1] || cryptoProvider.get();
+          crypto26 = args[1] || cryptoProvider.get();
         } else {
-          crypto25 = args[0] || cryptoProvider.get();
+          crypto26 = args[0] || cryptoProvider.get();
         }
-        return await crypto25.subtle.digest(algorithm, this.rawData);
+        return await crypto26.subtle.digest(algorithm, this.rawData);
       }
       async getKeyIdentifier(...args) {
-        let crypto25;
+        let crypto26;
         let algorithm = "SHA-1";
         if (args.length === 1) {
           if (typeof args[0] === "string") {
             algorithm = args[0];
-            crypto25 = cryptoProvider.get();
+            crypto26 = cryptoProvider.get();
           } else {
-            crypto25 = args[0];
+            crypto26 = args[0];
           }
         } else if (args.length === 2) {
           algorithm = args[0];
-          crypto25 = args[1];
+          crypto26 = args[1];
         } else {
-          crypto25 = cryptoProvider.get();
+          crypto26 = cryptoProvider.get();
         }
         const asn = asn1Schema.AsnConvert.parse(this.rawData, asn1X509.SubjectPublicKeyInfo);
-        return await crypto25.subtle.digest(algorithm, asn.subjectPublicKey);
+        return await crypto26.subtle.digest(algorithm, asn.subjectPublicKey);
       }
       toTextObject() {
         const obj = this.toTextObjectEmpty();
@@ -80078,12 +80078,12 @@ var require_x509_cjs = __commonJS({
       return raw;
     }
     var AuthorityKeyIdentifierExtension2 = class _AuthorityKeyIdentifierExtension extends Extension2 {
-      static async create(param, critical = false, crypto25 = cryptoProvider.get()) {
+      static async create(param, critical = false, crypto26 = cryptoProvider.get()) {
         if ("name" in param && "serialNumber" in param) {
           return new _AuthorityKeyIdentifierExtension(param, critical);
         }
-        const key = await PublicKey.create(param, crypto25);
-        const id3 = await key.getKeyIdentifier(crypto25);
+        const key = await PublicKey.create(param, crypto26);
+        const id3 = await key.getKeyIdentifier(crypto26);
         return new _AuthorityKeyIdentifierExtension(pvtsutils.Convert.ToHex(id3), critical);
       }
       constructor(...args) {
@@ -80221,9 +80221,9 @@ var require_x509_cjs = __commonJS({
     };
     KeyUsagesExtension.NAME = "Key Usages";
     var SubjectKeyIdentifierExtension2 = class _SubjectKeyIdentifierExtension extends Extension2 {
-      static async create(publicKey, critical = false, crypto25 = cryptoProvider.get()) {
-        const key = await PublicKey.create(publicKey, crypto25);
-        const id3 = await key.getKeyIdentifier(crypto25);
+      static async create(publicKey, critical = false, crypto26 = cryptoProvider.get()) {
+        const key = await PublicKey.create(publicKey, crypto26);
+        const id3 = await key.getKeyIdentifier(crypto26);
         return new _SubjectKeyIdentifierExtension(pvtsutils.Convert.ToHex(id3), critical);
       }
       constructor(...args) {
@@ -80961,12 +80961,12 @@ var require_x509_cjs = __commonJS({
       getExtensions(type) {
         return this.extensions.filter((o6) => o6.type === type);
       }
-      async verify(crypto25 = cryptoProvider.get()) {
+      async verify(crypto26 = cryptoProvider.get()) {
         const algorithm = {
           ...this.publicKey.algorithm,
           ...this.signatureAlgorithm
         };
-        const publicKey = await this.publicKey.export(algorithm, ["verify"], crypto25);
+        const publicKey = await this.publicKey.export(algorithm, ["verify"], crypto26);
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let signature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -80978,7 +80978,7 @@ var require_x509_cjs = __commonJS({
         if (!signature) {
           throw Error("Cannot convert WebCrypto signature value to ASN.1 format");
         }
-        const ok = await crypto25.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
+        const ok = await crypto26.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
         return ok;
       }
       toTextObject() {
@@ -81009,14 +81009,14 @@ var require_x509_cjs = __commonJS({
     _Pkcs10CertificateRequest_tbs = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_subjectName = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_subject = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_signatureAlgorithm = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_signature = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_publicKey = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_attributes = /* @__PURE__ */ new WeakMap(), _Pkcs10CertificateRequest_extensions = /* @__PURE__ */ new WeakMap();
     Pkcs10CertificateRequest.NAME = "PKCS#10 Certificate Request";
     var Pkcs10CertificateRequestGenerator = class {
-      static async create(params, crypto25 = cryptoProvider.get()) {
+      static async create(params, crypto26 = cryptoProvider.get()) {
         if (!params.keys.privateKey) {
           throw new Error("Bad field 'keys' in 'params' argument. 'privateKey' is empty");
         }
         if (!params.keys.publicKey) {
           throw new Error("Bad field 'keys' in 'params' argument. 'publicKey' is empty");
         }
-        const spki = await crypto25.subtle.exportKey("spki", params.keys.publicKey);
+        const spki = await crypto26.subtle.exportKey("spki", params.keys.publicKey);
         const asnReq = new asn1Csr.CertificationRequest({
           certificationRequestInfo: new asn1Csr.CertificationRequestInfo({ subjectPKInfo: asn1Schema.AsnConvert.parse(spki, asn1X509.SubjectPublicKeyInfo) })
         });
@@ -81045,7 +81045,7 @@ var require_x509_cjs = __commonJS({
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
         asnReq.signatureAlgorithm = algProv.toAsnAlgorithm(signingAlgorithm);
         const tbs = asn1Schema.AsnConvert.serialize(asnReq.certificationRequestInfo);
-        const signature = await crypto25.subtle.sign(signingAlgorithm, params.keys.privateKey, tbs);
+        const signature = await crypto26.subtle.sign(signingAlgorithm, params.keys.privateKey, tbs);
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let asnSignature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -81205,7 +81205,7 @@ var require_x509_cjs = __commonJS({
           }
         });
       }
-      async verify(params = {}, crypto25 = cryptoProvider.get()) {
+      async verify(params = {}, crypto26 = cryptoProvider.get()) {
         let keyAlgorithm;
         let publicKey;
         const paramsKey = params.publicKey;
@@ -81215,26 +81215,26 @@ var require_x509_cjs = __commonJS({
               ...this.publicKey.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await this.publicKey.export(keyAlgorithm, ["verify"], crypto25);
+            publicKey = await this.publicKey.export(keyAlgorithm, ["verify"], crypto26);
           } else if ("publicKey" in paramsKey) {
             keyAlgorithm = {
               ...paramsKey.publicKey.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await paramsKey.publicKey.export(keyAlgorithm, ["verify"], crypto25);
+            publicKey = await paramsKey.publicKey.export(keyAlgorithm, ["verify"], crypto26);
           } else if (paramsKey instanceof PublicKey) {
             keyAlgorithm = {
               ...paramsKey.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await paramsKey.export(keyAlgorithm, ["verify"], crypto25);
+            publicKey = await paramsKey.export(keyAlgorithm, ["verify"], crypto26);
           } else if (pvtsutils.BufferSourceConverter.isBufferSource(paramsKey)) {
             const key = new PublicKey(paramsKey);
             keyAlgorithm = {
               ...key.algorithm,
               ...this.signatureAlgorithm
             };
-            publicKey = await key.export(keyAlgorithm, ["verify"], crypto25);
+            publicKey = await key.export(keyAlgorithm, ["verify"], crypto26);
           } else {
             keyAlgorithm = {
               ...paramsKey.algorithm,
@@ -81256,7 +81256,7 @@ var require_x509_cjs = __commonJS({
         if (!signature) {
           throw Error("Cannot convert ASN.1 signature value to WebCrypto format");
         }
-        const ok = await crypto25.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
+        const ok = await crypto26.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
         if (params.signatureOnly) {
           return ok;
         } else {
@@ -81266,21 +81266,21 @@ var require_x509_cjs = __commonJS({
         }
       }
       async getThumbprint(...args) {
-        let crypto25;
+        let crypto26;
         let algorithm = "SHA-1";
         if (args[0]) {
           if (!args[0].subtle) {
             algorithm = args[0] || algorithm;
-            crypto25 = args[1];
+            crypto26 = args[1];
           } else {
-            crypto25 = args[0];
+            crypto26 = args[0];
           }
         }
-        crypto25 !== null && crypto25 !== void 0 ? crypto25 : crypto25 = cryptoProvider.get();
-        return await crypto25.subtle.digest(algorithm, this.rawData);
+        crypto26 !== null && crypto26 !== void 0 ? crypto26 : crypto26 = cryptoProvider.get();
+        return await crypto26.subtle.digest(algorithm, this.rawData);
       }
-      async isSelfSigned(crypto25 = cryptoProvider.get()) {
-        return this.subject === this.issuer && await this.verify({ signatureOnly: true }, crypto25);
+      async isSelfSigned(crypto26 = cryptoProvider.get()) {
+        return this.subject === this.issuer && await this.verify({ signatureOnly: true }, crypto26);
       }
       toTextObject() {
         const obj = this.toTextObjectEmpty();
@@ -81410,13 +81410,13 @@ var require_x509_cjs = __commonJS({
           this.certificates = params.certificates;
         }
       }
-      async build(cert2, crypto25 = cryptoProvider.get()) {
+      async build(cert2, crypto26 = cryptoProvider.get()) {
         const chain = new X509Certificates(cert2);
         let current = cert2;
-        while (current = await this.findIssuer(current, crypto25)) {
-          const thumbprint = await current.getThumbprint(crypto25);
+        while (current = await this.findIssuer(current, crypto26)) {
+          const thumbprint = await current.getThumbprint(crypto26);
           for (const item of chain) {
-            const thumbprint2 = await item.getThumbprint(crypto25);
+            const thumbprint2 = await item.getThumbprint(crypto26);
             if (pvtsutils.isEqual(thumbprint, thumbprint2)) {
               throw new Error("Cannot build a certificate chain. Circular dependency.");
             }
@@ -81425,8 +81425,8 @@ var require_x509_cjs = __commonJS({
         }
         return chain;
       }
-      async findIssuer(cert2, crypto25 = cryptoProvider.get()) {
-        if (!await cert2.isSelfSigned(crypto25)) {
+      async findIssuer(cert2, crypto26 = cryptoProvider.get()) {
+        if (!await cert2.isSelfSigned(crypto26)) {
           const akiExt = cert2.getExtension(asn1X509__namespace.id_ce_authorityKeyIdentifier);
           for (const item of this.certificates) {
             if (item.subject !== cert2.issuer) {
@@ -81450,11 +81450,11 @@ var require_x509_cjs = __commonJS({
                 ...item.publicKey.algorithm,
                 ...cert2.signatureAlgorithm
               };
-              const publicKey = await item.publicKey.export(algorithm, ["verify"], crypto25);
+              const publicKey = await item.publicKey.export(algorithm, ["verify"], crypto26);
               const ok = await cert2.verify({
                 publicKey,
                 signatureOnly: true
-              }, crypto25);
+              }, crypto26);
               if (!ok) {
                 continue;
               }
@@ -81467,11 +81467,11 @@ var require_x509_cjs = __commonJS({
         return null;
       }
     };
-    function generateCertificateSerialNumber(input, crypto25 = cryptoProvider.get()) {
+    function generateCertificateSerialNumber(input, crypto26 = cryptoProvider.get()) {
       const inputView = pvtsutils.BufferSourceConverter.toUint8Array(pvtsutils.Convert.FromHex(input || ""));
       let serialNumber = inputView && inputView.length && inputView.some((o6) => o6 > 0) ? new Uint8Array(inputView) : void 0;
       if (!serialNumber) {
-        serialNumber = crypto25.getRandomValues(new Uint8Array(16));
+        serialNumber = crypto26.getRandomValues(new Uint8Array(16));
       }
       let firstNonZero = 0;
       while (firstNonZero < serialNumber.length - 1 && serialNumber[firstNonZero] === 0) {
@@ -81487,7 +81487,7 @@ var require_x509_cjs = __commonJS({
       return serialNumber.buffer;
     }
     var X509CertificateGenerator = class {
-      static async createSelfSigned(params, crypto25 = cryptoProvider.get()) {
+      static async createSelfSigned(params, crypto26 = cryptoProvider.get()) {
         if (!params.keys.privateKey) {
           throw new Error("Bad field 'keys' in 'params' argument. 'privateKey' is empty");
         }
@@ -81504,9 +81504,9 @@ var require_x509_cjs = __commonJS({
           signingKey: params.keys.privateKey,
           signingAlgorithm: params.signingAlgorithm,
           extensions: params.extensions
-        }, crypto25);
+        }, crypto26);
       }
-      static async create(params, crypto25 = cryptoProvider.get()) {
+      static async create(params, crypto26 = cryptoProvider.get()) {
         var _a7;
         let spki;
         if (params.publicKey instanceof PublicKey) {
@@ -81516,9 +81516,9 @@ var require_x509_cjs = __commonJS({
         } else if (pvtsutils.BufferSourceConverter.isBufferSource(params.publicKey)) {
           spki = params.publicKey;
         } else {
-          spki = await crypto25.subtle.exportKey("spki", params.publicKey);
+          spki = await crypto26.subtle.exportKey("spki", params.publicKey);
         }
-        const serialNumber = generateCertificateSerialNumber(params.serialNumber, crypto25);
+        const serialNumber = generateCertificateSerialNumber(params.serialNumber, crypto26);
         const notBefore = params.notBefore || /* @__PURE__ */ new Date();
         const notAfter = params.notAfter || new Date(notBefore.getTime() + 31536e6);
         const asnX509 = new asn1X509__namespace.Certificate({
@@ -81553,7 +81553,7 @@ var require_x509_cjs = __commonJS({
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
         asnX509.tbsCertificate.signature = asnX509.signatureAlgorithm = algProv.toAsnAlgorithm(signatureAlgorithm);
         const tbs = asn1Schema.AsnConvert.serialize(asnX509.tbsCertificate);
-        const signatureValue = "signingKey" in params ? await crypto25.subtle.sign(signatureAlgorithm, params.signingKey, tbs) : params.signature;
+        const signatureValue = "signingKey" in params ? await crypto26.subtle.sign(signatureAlgorithm, params.signingKey, tbs) : params.signature;
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let asnSignature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -81774,7 +81774,7 @@ var require_x509_cjs = __commonJS({
           }
         });
       }
-      async verify(params, crypto25 = cryptoProvider.get()) {
+      async verify(params, crypto26 = cryptoProvider.get()) {
         if (!this.certListSignatureAlgorithm.isEqual(this.tbsCertListSignatureAlgorithm)) {
           throw new Error("algorithm identifier in the sequence tbsCertList and CertificateList mismatch");
         }
@@ -81815,21 +81815,21 @@ var require_x509_cjs = __commonJS({
         if (!signature) {
           throw Error("Cannot convert ASN.1 signature value to WebCrypto format");
         }
-        return await crypto25.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
+        return await crypto26.subtle.verify(this.signatureAlgorithm, publicKey, signature, this.tbs);
       }
       async getThumbprint(...args) {
-        let crypto25;
+        let crypto26;
         let algorithm = "SHA-1";
         if (args[0]) {
           if (!args[0].subtle) {
             algorithm = args[0] || algorithm;
-            crypto25 = args[1];
+            crypto26 = args[1];
           } else {
-            crypto25 = args[0];
+            crypto26 = args[0];
           }
         }
-        crypto25 !== null && crypto25 !== void 0 ? crypto25 : crypto25 = cryptoProvider.get();
-        return await crypto25.subtle.digest(algorithm, this.rawData);
+        crypto26 !== null && crypto26 !== void 0 ? crypto26 : crypto26 = cryptoProvider.get();
+        return await crypto26.subtle.digest(algorithm, this.rawData);
       }
       findRevoked(certOrSerialNumber) {
         const serialNumber = typeof certOrSerialNumber === "string" ? certOrSerialNumber : certOrSerialNumber.serialNumber;
@@ -81844,7 +81844,7 @@ var require_x509_cjs = __commonJS({
     };
     _X509Crl_tbs = /* @__PURE__ */ new WeakMap(), _X509Crl_signatureAlgorithm = /* @__PURE__ */ new WeakMap(), _X509Crl_issuerName = /* @__PURE__ */ new WeakMap(), _X509Crl_thisUpdate = /* @__PURE__ */ new WeakMap(), _X509Crl_nextUpdate = /* @__PURE__ */ new WeakMap(), _X509Crl_entries = /* @__PURE__ */ new WeakMap(), _X509Crl_extensions = /* @__PURE__ */ new WeakMap();
     var X509CrlGenerator = class {
-      static async create(params, crypto25 = cryptoProvider.get()) {
+      static async create(params, crypto26 = cryptoProvider.get()) {
         var _a7;
         const name = params.issuer instanceof Name3 ? params.issuer : new Name3(params.issuer);
         const asnX509Crl = new asn1X509__namespace.CertificateList({
@@ -81911,7 +81911,7 @@ var require_x509_cjs = __commonJS({
         const algProv = tsyringe.container.resolve(diAlgorithmProvider);
         asnX509Crl.tbsCertList.signature = asnX509Crl.signatureAlgorithm = algProv.toAsnAlgorithm(signingAlgorithm);
         const tbs = asn1Schema.AsnConvert.serialize(asnX509Crl.tbsCertList);
-        const signature = await crypto25.subtle.sign(signingAlgorithm, params.signingKey, tbs);
+        const signature = await crypto26.subtle.sign(signingAlgorithm, params.signingKey, tbs);
         const signatureFormatters = tsyringe.container.resolveAll(diAsnSignatureFormatter).reverse();
         let asnSignature = null;
         for (const signatureFormatter of signatureFormatters) {
@@ -103638,8 +103638,8 @@ var require_snapshot_utils = __commonJS({
         match: new Set(matchHeaders.map((header) => caseSensitive ? header : header.toLowerCase()))
       };
     }
-    var crypto25 = runtimeFeatures.has("crypto") ? require("node:crypto") : null;
-    var hashId = crypto25?.hash ? (value2) => crypto25.hash("sha256", value2, "base64url") : (value2) => Buffer.from(value2).toString("base64url");
+    var crypto26 = runtimeFeatures.has("crypto") ? require("node:crypto") : null;
+    var hashId = crypto26?.hash ? (value2) => crypto26.hash("sha256", value2, "base64url") : (value2) => Buffer.from(value2).toString("base64url");
     function isUndiciHeaders(headers) {
       return Array.isArray(headers) && (headers.length & 1) === 0;
     }
@@ -109707,10 +109707,10 @@ var require_subresource_integrity = __commonJS({
     var assert2 = require("node:assert");
     var { runtimeFeatures } = require_runtime_features();
     var validSRIHashAlgorithmTokenSet = /* @__PURE__ */ new Map([["sha256", 0], ["sha384", 1], ["sha512", 2]]);
-    var crypto25;
+    var crypto26;
     if (runtimeFeatures.has("crypto")) {
-      crypto25 = require("node:crypto");
-      const cryptoHashes = crypto25.getHashes();
+      crypto26 = require("node:crypto");
+      const cryptoHashes = crypto26.getHashes();
       if (cryptoHashes.length === 0) {
         validSRIHashAlgorithmTokenSet.clear();
       }
@@ -109800,7 +109800,7 @@ var require_subresource_integrity = __commonJS({
       return result;
     }
     var applyAlgorithmToBytes = (algorithm, bytes) => {
-      return crypto25.hash(algorithm, bytes, "base64");
+      return crypto26.hash(algorithm, bytes, "base64");
     };
     function caseSensitiveMatch(actualValue, expectedValue) {
       let actualValueLength = actualValue.length;
@@ -112745,7 +112745,7 @@ var require_connection2 = __commonJS({
     var { WebsocketFrameSend } = require_frame();
     var assert2 = require("node:assert");
     var { runtimeFeatures } = require_runtime_features();
-    var crypto25 = runtimeFeatures.has("crypto") ? require("node:crypto") : null;
+    var crypto26 = runtimeFeatures.has("crypto") ? require("node:crypto") : null;
     var warningEmitted = false;
     function establishWebSocketConnection(url3, protocols, client, handler, options2) {
       const requestURL = url3;
@@ -112765,7 +112765,7 @@ var require_connection2 = __commonJS({
         const headersList = getHeadersList(new Headers3(options2.headers));
         request.headersList = headersList;
       }
-      const keyValue = crypto25.randomBytes(16).toString("base64");
+      const keyValue = crypto26.randomBytes(16).toString("base64");
       request.headersList.append("sec-websocket-key", keyValue, true);
       request.headersList.append("sec-websocket-version", "13", true);
       for (const protocol of protocols) {
@@ -112805,7 +112805,7 @@ var require_connection2 = __commonJS({
             return;
           }
           const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
-          const digest2 = crypto25.hash("sha1", keyValue + uid, "base64");
+          const digest2 = crypto26.hash("sha1", keyValue + uid, "base64");
           if (secWSAccept !== digest2) {
             failWebsocketConnection(handler, 1002, "Incorrect hash received in Sec-WebSocket-Accept header.");
             return;
@@ -119923,22 +119923,22 @@ var require_crypto2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NodeCrypto = void 0;
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var NodeCrypto = class {
       async sha256DigestBase64(str2) {
-        return crypto25.createHash("sha256").update(str2).digest("base64");
+        return crypto26.createHash("sha256").update(str2).digest("base64");
       }
       randomBytesBase64(count) {
-        return crypto25.randomBytes(count).toString("base64");
+        return crypto26.randomBytes(count).toString("base64");
       }
       async verify(pubkey, data2, signature) {
-        const verifier = crypto25.createVerify("RSA-SHA256");
+        const verifier = crypto26.createVerify("RSA-SHA256");
         verifier.update(data2);
         verifier.end();
         return verifier.verify(pubkey, signature, "base64");
       }
       async sign(privateKey, data2) {
-        const signer = crypto25.createSign("RSA-SHA256");
+        const signer = crypto26.createSign("RSA-SHA256");
         signer.update(data2);
         signer.end();
         return signer.sign(privateKey, "base64");
@@ -119956,7 +119956,7 @@ var require_crypto2 = __commonJS({
        *   string in hexadecimal encoding.
        */
       async sha256DigestHex(str2) {
-        return crypto25.createHash("sha256").update(str2).digest("hex");
+        return crypto26.createHash("sha256").update(str2).digest("hex");
       }
       /**
        * Computes the HMAC hash of a message using the provided crypto key and the
@@ -119968,7 +119968,7 @@ var require_crypto2 = __commonJS({
        */
       async signWithHmacSha256(key, msg) {
         const cryptoKey = typeof key === "string" ? key : toBuffer3(key);
-        return toArrayBuffer3(crypto25.createHmac("sha256", cryptoKey).update(msg).digest());
+        return toArrayBuffer3(crypto26.createHmac("sha256", cryptoKey).update(msg).digest());
       }
     };
     exports2.NodeCrypto = NodeCrypto;
@@ -120659,10 +120659,10 @@ var require_oauth2client = __commonJS({
        * https://github.com/googleapis/google-auth-library-nodejs/blob/main/samples/oauth2-codeVerifier.js
        */
       async generateCodeVerifierAsync() {
-        const crypto25 = (0, crypto_1.createCrypto)();
-        const randomString = crypto25.randomBytesBase64(96);
+        const crypto26 = (0, crypto_1.createCrypto)();
+        const randomString = crypto26.randomBytesBase64(96);
         const codeVerifier = randomString.replace(/\+/g, "~").replace(/=/g, "_").replace(/\//g, "-");
-        const unencodedCodeChallenge = await crypto25.sha256DigestBase64(codeVerifier);
+        const unencodedCodeChallenge = await crypto26.sha256DigestBase64(codeVerifier);
         const codeChallenge = unencodedCodeChallenge.split("=")[0].replace(/\+/g, "-").replace(/\//g, "_");
         return { codeVerifier, codeChallenge };
       }
@@ -121103,7 +121103,7 @@ var require_oauth2client = __commonJS({
        * @return Returns a promise resolving to LoginTicket on verification.
        */
       async verifySignedJwtWithCertsAsync(jwt5, certs, requiredAudience, issuers, maxExpiry) {
-        const crypto25 = (0, crypto_1.createCrypto)();
+        const crypto26 = (0, crypto_1.createCrypto)();
         if (!maxExpiry) {
           maxExpiry = _OAuth2Client.DEFAULT_MAX_TOKEN_LIFETIME_SECS_;
         }
@@ -121116,7 +121116,7 @@ var require_oauth2client = __commonJS({
         let envelope;
         let payload;
         try {
-          envelope = JSON.parse(crypto25.decodeBase64StringUtf8(segments[0]));
+          envelope = JSON.parse(crypto26.decodeBase64StringUtf8(segments[0]));
         } catch (err2) {
           if (err2 instanceof Error) {
             err2.message = `Can't parse token envelope: ${segments[0]}': ${err2.message}`;
@@ -121127,7 +121127,7 @@ var require_oauth2client = __commonJS({
           throw new Error("Can't parse token envelope: " + segments[0]);
         }
         try {
-          payload = JSON.parse(crypto25.decodeBase64StringUtf8(segments[1]));
+          payload = JSON.parse(crypto26.decodeBase64StringUtf8(segments[1]));
         } catch (err2) {
           if (err2 instanceof Error) {
             err2.message = `Can't parse token payload '${segments[0]}`;
@@ -121144,7 +121144,7 @@ var require_oauth2client = __commonJS({
         if (envelope.alg === "ES256") {
           signature = formatEcdsa.joseToDer(signature, "ES256").toString("base64");
         }
-        const verified = await crypto25.verify(cert2, signed, signature);
+        const verified = await crypto26.verify(cert2, signed, signature);
         if (!verified) {
           throw new Error("Invalid token signature: " + jwt5);
         }
@@ -123714,14 +123714,14 @@ var require_awsrequestsigner = __commonJS({
       }
     };
     exports2.AwsRequestSigner = AwsRequestSigner;
-    async function sign(crypto25, key, msg) {
-      return await crypto25.signWithHmacSha256(key, msg);
+    async function sign(crypto26, key, msg) {
+      return await crypto26.signWithHmacSha256(key, msg);
     }
-    async function getSigningKey(crypto25, key, dateStamp, region, serviceName) {
-      const kDate = await sign(crypto25, `AWS4${key}`, dateStamp);
-      const kRegion = await sign(crypto25, kDate, region);
-      const kService = await sign(crypto25, kRegion, serviceName);
-      const kSigning = await sign(crypto25, kService, "aws4_request");
+    async function getSigningKey(crypto26, key, dateStamp, region, serviceName) {
+      const kDate = await sign(crypto26, `AWS4${key}`, dateStamp);
+      const kRegion = await sign(crypto26, kDate, region);
+      const kService = await sign(crypto26, kRegion, serviceName);
+      const kSigning = await sign(crypto26, kService, "aws4_request");
       return kSigning;
     }
     async function generateAuthenticationHeaderMap(options2) {
@@ -124687,7 +124687,7 @@ var require_gdchclient = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.GdchClient = exports2.GDCH_SERVICE_ACCOUNT_TYPE = void 0;
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var fs11 = require("fs");
     var https8 = require("https");
     var oauth2client_1 = require_oauth2client();
@@ -124878,7 +124878,7 @@ var require_gdchclient = __commonJS({
         const encodedHeader = this.base64UrlEncode(JSON.stringify(header));
         const encodedPayload = this.base64UrlEncode(JSON.stringify(payload));
         const signingInput = `${encodedHeader}.${encodedPayload}`;
-        const signature = crypto25.sign("sha256", Buffer.from(signingInput), {
+        const signature = crypto26.sign("sha256", Buffer.from(signingInput), {
           key: this.privateKey,
           dsaEncoding: "ieee-p1363"
         });
@@ -125739,24 +125739,24 @@ var require_googleauth = __commonJS({
           const signed = await client.sign(data2);
           return signed.signedBlob;
         }
-        const crypto25 = (0, crypto_1.createCrypto)();
+        const crypto26 = (0, crypto_1.createCrypto)();
         if (client instanceof jwtclient_1.JWT && client.key) {
-          const sign = await crypto25.sign(client.key, data2);
+          const sign = await crypto26.sign(client.key, data2);
           return sign;
         }
         const creds = await this.getCredentials();
         if (!creds.client_email) {
           throw new Error("Cannot sign data without `client_email`.");
         }
-        return this.signBlob(crypto25, creds.client_email, data2, endpoint);
+        return this.signBlob(crypto26, creds.client_email, data2, endpoint);
       }
-      async signBlob(crypto25, emailOrUniqueId, data2, endpoint) {
+      async signBlob(crypto26, emailOrUniqueId, data2, endpoint) {
         const url3 = new URL(endpoint + `${emailOrUniqueId}:signBlob`);
         const res = await this.request({
           method: "POST",
           url: url3.href,
           data: {
-            payload: crypto25.encodeBase64StringUtf8(data2)
+            payload: crypto26.encodeBase64StringUtf8(data2)
           },
           retry: true,
           retryConfig: {
@@ -171657,11 +171657,11 @@ var require_encodeDoubleArray = __commonJS({
 // node_modules/cloudinary/lib/auth_token.js
 var require_auth_token = __commonJS({
   "node_modules/cloudinary/lib/auth_token.js"(exports2, module2) {
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var smart_escape = require_smart_escape();
     var unsafe = /([ "#%&'/:;<=>?@[\]^`{|}~]+)/g;
     function digest2(message, key) {
-      return crypto25.createHmac("sha256", Buffer.from(key, "hex")).update(message).digest("hex");
+      return crypto26.createHmac("sha256", Buffer.from(key, "hex")).update(message).digest("hex");
     }
     function escapeToLower(url3) {
       const safeUrl = smart_escape(url3, unsafe);
@@ -172360,7 +172360,7 @@ var require_qPolyfill = __commonJS({
 // node_modules/cloudinary/lib/utils/index.js
 var require_utils13 = __commonJS({
   "node_modules/cloudinary/lib/utils/index.js"(exports2, module2) {
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var querystring = require("querystring");
     var { URL: URL3 } = require("url");
     var compact = require_compact();
@@ -173207,7 +173207,7 @@ var require_utils13 = __commonJS({
       return base_api_url_v1_1()([resource_type, action], options2);
     }
     function random_public_id() {
-      return crypto25.randomBytes(12).toString("base64").replace(/[^a-z0-9]/g, "");
+      return crypto26.randomBytes(12).toString("base64").replace(/[^a-z0-9]/g, "");
     }
     function signed_preloaded_image(result) {
       return `${result.resource_type}/upload/v${result.version}/${filter6([result.public_id, result.format], utils4.present).join(".")}#${result.signature}`;
@@ -173236,7 +173236,7 @@ var require_utils13 = __commonJS({
       if (!SUPPORTED_SIGNATURE_ALGORITHMS.includes(signature_algorithm)) {
         throw new Error(`Signature algorithm ${signature_algorithm} is not supported. Supported algorithms: ${SUPPORTED_SIGNATURE_ALGORITHMS.join(", ")}`);
       }
-      const hash4 = crypto25.createHash(signature_algorithm).update(input).digest();
+      const hash4 = crypto26.createHash(signature_algorithm).update(input).digest();
       return Buffer.from(hash4).toString(encoding);
     }
     function clear_blank(hash4) {
@@ -188709,7 +188709,7 @@ for your current platform.`);
       return { binPath, isWASM };
     }
     var child_process = require("child_process");
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var path22 = require("path");
     var fs22 = require("fs");
     var os22 = require("os");
@@ -189017,7 +189017,7 @@ More information: The file containing the code for esbuild's JavaScript API (${_
       afterClose(null);
     };
     var randomFileName = () => {
-      return path22.join(os22.tmpdir(), `esbuild-${crypto25.randomBytes(32).toString("hex")}`);
+      return path22.join(os22.tmpdir(), `esbuild-${crypto26.randomBytes(32).toString("hex")}`);
     };
     var workerThreadService = null;
     var startWorkerThreadService = (worker_threads2) => {
@@ -193489,7 +193489,7 @@ for your current platform.`);
       return { binPath, isWASM };
     }
     var child_process = require("child_process");
-    var crypto25 = require("crypto");
+    var crypto26 = require("crypto");
     var path22 = require("path");
     var fs22 = require("fs");
     var os22 = require("os");
@@ -193797,7 +193797,7 @@ More information: The file containing the code for esbuild's JavaScript API (${_
       afterClose(null);
     };
     var randomFileName = () => {
-      return path22.join(os22.tmpdir(), `esbuild-${crypto25.randomBytes(32).toString("hex")}`);
+      return path22.join(os22.tmpdir(), `esbuild-${crypto26.randomBytes(32).toString("hex")}`);
     };
     var workerThreadService = null;
     var startWorkerThreadService = (worker_threads2) => {
@@ -246156,22 +246156,22 @@ function getHashDigest$1(buffer, algorithm, digestType, maxLength) {
     }
     hash4 = new BatchedHash(createMd4());
   } else if (algorithm === "native-md4") {
-    if (typeof crypto23 === "undefined") {
-      crypto23 = import_crypto23.default;
+    if (typeof crypto24 === "undefined") {
+      crypto24 = import_crypto24.default;
       if (BulkUpdateDecorator === void 0) {
         BulkUpdateDecorator = requireBulkUpdateDecorator();
       }
     }
-    hash4 = new BulkUpdateDecorator(() => crypto23.createHash("md4"), "md4");
+    hash4 = new BulkUpdateDecorator(() => crypto24.createHash("md4"), "md4");
   } else {
-    if (typeof crypto23 === "undefined") {
-      crypto23 = import_crypto23.default;
+    if (typeof crypto24 === "undefined") {
+      crypto24 = import_crypto24.default;
       if (BulkUpdateDecorator === void 0) {
         BulkUpdateDecorator = requireBulkUpdateDecorator();
       }
     }
     hash4 = new BulkUpdateDecorator(
-      () => crypto23.createHash(algorithm),
+      () => crypto24.createHash(algorithm),
       algorithm
     );
   }
@@ -246768,14 +246768,14 @@ function makePlugin(opts) {
     }
   };
 }
-var import_fs10, import_path13, import_crypto23, import_util5, build2, fs8, fileSystem, pluginFactory, unquote$1, reg, Parser$1, matchValueName, replaceValueSymbols$2, replaceValueSymbols_1, replaceValueSymbols$1, replaceSymbols$1, replaceSymbols_1, importPattern, balancedQuotes, getDeclsObject, extractICSS$2, extractICSS_1, createImports, createExports, createICSSRules$1, createICSSRules_1, replaceValueSymbols, replaceSymbols, extractICSS$1, createICSSRules, src$4, _icssUtils, importRegexp, Parser7, saveJSON$1, _fs$2, localsConvention, symbolTag, reAsciiWord, reLatin, rsAstralRange, rsComboMarksRange, rsComboSymbolsRange, rsDingbatRange, rsLowerRange, rsMathOpRange, rsNonCharRange, rsPunctuationRange, rsSpaceRange, rsUpperRange, rsVarRange, rsBreakRange, rsApos, rsAstral, rsBreak, rsCombo, rsDigits, rsDingbat, rsLower, rsMisc, rsFitz, rsModifier, rsNonAstral, rsRegional, rsSurrPair, rsUpper, rsZWJ, rsLowerMisc, rsUpperMisc, rsOptLowerContr, rsOptUpperContr, reOptMod, rsOptVar, rsOptJoin, rsSeq, rsEmoji, rsSymbol, reApos, reComboMark, reUnicode, reUnicodeWord, reHasUnicode, reHasUnicodeWord, deburredLetters, freeGlobal, freeSelf, root$2, deburrLetter, objectProto, objectToString, Symbol$1, symbolProto, symbolToString, camelCase2, upperFirst, lodash_camelcase, _lodash, FileSystemLoader$1, _postcss$1, _path, _Parser$1, _fs$1, Core, traceKeySorter, FileSystemLoader, scoping, src$3, PERMANENT_MARKER, TEMPORARY_MARKER, topologicalSort_1, topologicalSort, matchImports$1, icssImport, VISITED_MARKER, srcExports$2, wasmHash, hasRequiredWasmHash, xxhash64_1, hasRequiredXxhash64, BatchedHash_1, hasRequiredBatchedHash, md4_1, hasRequiredMd4, BulkUpdateDecorator_1, hasRequiredBulkUpdateDecorator, baseEncodeTables, crypto23, createXXHash64, createMd4, BatchedHash, BulkUpdateDecorator, getHashDigest_1, path$12, getHashDigest, interpolateName_1, interpolateName, path10, genericNames, src$2, dist, processor, parser, root$1, container, node$1, util4, unesc, unescExports, getProp2, getPropExports, ensureObject, ensureObjectExports, stripComments, stripCommentsExports, _unesc, _getProp, _ensureObject, _stripComments, nodeExports, types4, TAG, STRING, SELECTOR, ROOT, PSEUDO, NESTING, ID, COMMENT, COMBINATOR, CLASS, ATTRIBUTE, UNIVERSAL, containerExports, rootExports, selector$1, selectorExports, className$1, object, hasOwnProperty$1, merge3, regexAnySingleEscape, regexSingleEscape, regexExcessiveSpaces, cssesc, cssesc_1, classNameExports, comment$2, commentExports, id$1, idExports, tag$1, namespace, namespaceExports, tagExports, string$1, stringExports, pseudo$1, pseudoExports, attribute$1, node, universal$1, universalExports, combinator$2, combinatorExports, nesting$1, nestingExports, sortAscending, sortAscendingExports, tokenize, tokenTypes, ampersand, asterisk, at3, comma4, colon2, semicolon2, openParenthesis, closeParenthesis, openSquare, closeSquare, dollar, tilde, caret, plus2, equals, pipe, greaterThan, space, singleQuote2, doubleQuote2, slash3, bang, backslash2, cr2, feed, newline, tab, str, comment$1, word, combinator$1, parserExports, processorExports, selectors, constructors, _attribute, _className, _combinator, _comment, _id, _nesting, _pseudo, _root, _selector, _string, _tag, _universal, attribute, className, combinator, comment2, id, nesting, pseudo, root3, selector, string, tag, universal, guards, _types, _IS_TYPE, IS_TYPE, isAttribute, isClassName, isCombinator, isComment2, isIdentifier, isNesting, isPseudo, isRoot2, isSelector, isString2, isTag3, isUniversal, distExports, selectorParser$1, valueParser2, extractICSS, IGNORE_FILE_MARKER, IGNORE_NEXT_LINE_MARKER, isSpacing, isPureCheckDisabled, isPureSelectorSymbol, specialKeywords, validIdent, animationKeywords, isPureSelector, isNodeWithoutDeclarations, srcExports$1, selectorParser, hasOwnProperty2, whitespace2, unescapeRegExp, plugin2, src$1, stringHash, src, ICSSUtils, matchImports, matchValueDefinition, matchImport, srcExports, _postcssModulesExtractImports, _genericNames, _postcssModulesLocalByDefault, _postcssModulesScope, _stringHash, _postcssModulesValues, behaviours, _postcss, _unquote, _Parser, _saveJSON, _localsConvention, _FileSystemLoader, _scoping, PLUGIN_NAME, _fs, _fs2, _pluginFactory, postcss2, buildExports, index3, index$12;
+var import_fs10, import_path13, import_crypto24, import_util5, build2, fs8, fileSystem, pluginFactory, unquote$1, reg, Parser$1, matchValueName, replaceValueSymbols$2, replaceValueSymbols_1, replaceValueSymbols$1, replaceSymbols$1, replaceSymbols_1, importPattern, balancedQuotes, getDeclsObject, extractICSS$2, extractICSS_1, createImports, createExports, createICSSRules$1, createICSSRules_1, replaceValueSymbols, replaceSymbols, extractICSS$1, createICSSRules, src$4, _icssUtils, importRegexp, Parser7, saveJSON$1, _fs$2, localsConvention, symbolTag, reAsciiWord, reLatin, rsAstralRange, rsComboMarksRange, rsComboSymbolsRange, rsDingbatRange, rsLowerRange, rsMathOpRange, rsNonCharRange, rsPunctuationRange, rsSpaceRange, rsUpperRange, rsVarRange, rsBreakRange, rsApos, rsAstral, rsBreak, rsCombo, rsDigits, rsDingbat, rsLower, rsMisc, rsFitz, rsModifier, rsNonAstral, rsRegional, rsSurrPair, rsUpper, rsZWJ, rsLowerMisc, rsUpperMisc, rsOptLowerContr, rsOptUpperContr, reOptMod, rsOptVar, rsOptJoin, rsSeq, rsEmoji, rsSymbol, reApos, reComboMark, reUnicode, reUnicodeWord, reHasUnicode, reHasUnicodeWord, deburredLetters, freeGlobal, freeSelf, root$2, deburrLetter, objectProto, objectToString, Symbol$1, symbolProto, symbolToString, camelCase2, upperFirst, lodash_camelcase, _lodash, FileSystemLoader$1, _postcss$1, _path, _Parser$1, _fs$1, Core, traceKeySorter, FileSystemLoader, scoping, src$3, PERMANENT_MARKER, TEMPORARY_MARKER, topologicalSort_1, topologicalSort, matchImports$1, icssImport, VISITED_MARKER, srcExports$2, wasmHash, hasRequiredWasmHash, xxhash64_1, hasRequiredXxhash64, BatchedHash_1, hasRequiredBatchedHash, md4_1, hasRequiredMd4, BulkUpdateDecorator_1, hasRequiredBulkUpdateDecorator, baseEncodeTables, crypto24, createXXHash64, createMd4, BatchedHash, BulkUpdateDecorator, getHashDigest_1, path$12, getHashDigest, interpolateName_1, interpolateName, path10, genericNames, src$2, dist, processor, parser, root$1, container, node$1, util4, unesc, unescExports, getProp2, getPropExports, ensureObject, ensureObjectExports, stripComments, stripCommentsExports, _unesc, _getProp, _ensureObject, _stripComments, nodeExports, types4, TAG, STRING, SELECTOR, ROOT, PSEUDO, NESTING, ID, COMMENT, COMBINATOR, CLASS, ATTRIBUTE, UNIVERSAL, containerExports, rootExports, selector$1, selectorExports, className$1, object, hasOwnProperty$1, merge3, regexAnySingleEscape, regexSingleEscape, regexExcessiveSpaces, cssesc, cssesc_1, classNameExports, comment$2, commentExports, id$1, idExports, tag$1, namespace, namespaceExports, tagExports, string$1, stringExports, pseudo$1, pseudoExports, attribute$1, node, universal$1, universalExports, combinator$2, combinatorExports, nesting$1, nestingExports, sortAscending, sortAscendingExports, tokenize, tokenTypes, ampersand, asterisk, at3, comma4, colon2, semicolon2, openParenthesis, closeParenthesis, openSquare, closeSquare, dollar, tilde, caret, plus2, equals, pipe, greaterThan, space, singleQuote2, doubleQuote2, slash3, bang, backslash2, cr2, feed, newline, tab, str, comment$1, word, combinator$1, parserExports, processorExports, selectors, constructors, _attribute, _className, _combinator, _comment, _id, _nesting, _pseudo, _root, _selector, _string, _tag, _universal, attribute, className, combinator, comment2, id, nesting, pseudo, root3, selector, string, tag, universal, guards, _types, _IS_TYPE, IS_TYPE, isAttribute, isClassName, isCombinator, isComment2, isIdentifier, isNesting, isPseudo, isRoot2, isSelector, isString2, isTag3, isUniversal, distExports, selectorParser$1, valueParser2, extractICSS, IGNORE_FILE_MARKER, IGNORE_NEXT_LINE_MARKER, isSpacing, isPureCheckDisabled, isPureSelectorSymbol, specialKeywords, validIdent, animationKeywords, isPureSelector, isNodeWithoutDeclarations, srcExports$1, selectorParser, hasOwnProperty2, whitespace2, unescapeRegExp, plugin2, src$1, stringHash, src, ICSSUtils, matchImports, matchValueDefinition, matchImport, srcExports, _postcssModulesExtractImports, _genericNames, _postcssModulesLocalByDefault, _postcssModulesScope, _stringHash, _postcssModulesValues, behaviours, _postcss, _unquote, _Parser, _saveJSON, _localsConvention, _FileSystemLoader, _scoping, PLUGIN_NAME, _fs, _fs2, _pluginFactory, postcss2, buildExports, index3, index$12;
 var init_dep_DDtvSN7 = __esm({
   "node_modules/vite/dist/node/chunks/dep-DDtvSN7_.js"() {
     init_dep_Dm0c1Wj2();
     import_fs10 = __toESM(require("fs"), 1);
     init_postcss();
     import_path13 = __toESM(require("path"), 1);
-    import_crypto23 = __toESM(require("crypto"), 1);
+    import_crypto24 = __toESM(require("crypto"), 1);
     import_util5 = __toESM(require("util"), 1);
     init_dep_3RmXg9uo();
     build2 = { exports: {} };
@@ -247539,7 +247539,7 @@ var init_dep_DDtvSN7 = __esm({
       62: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
       64: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
     };
-    crypto23 = void 0;
+    crypto24 = void 0;
     createXXHash64 = void 0;
     createMd4 = void 0;
     BatchedHash = void 0;
@@ -266607,7 +266607,7 @@ function entitytag(entity) {
   if (entity.length === 0) {
     return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
   }
-  var hash4 = crypto24.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+  var hash4 = crypto25.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
   var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
   return '"' + len.toString(16) + "-" + hash4 + '"';
 }
@@ -277543,7 +277543,7 @@ function optimizeDepsDisabledBackwardCompatibility(resolved, optimizeDeps2, opti
     }
   }
 }
-var fs$8, import_node_fs5, import_node_path10, import_promises3, import_node_url5, import_node_util6, import_node_perf_hooks2, import_node_module4, import_node_crypto3, import_picomatch2, import_esbuild3, import_path14, import_fs11, import_node_child_process2, import_node_http3, import_node_https2, import_tty, import_util6, import_net, import_events3, import_url5, import_http4, import_stream7, import_os3, import_child_process, import_node_os4, import_node_net6, import_node_dns, import_node_buffer4, import_module3, import_node_readline, import_node_process3, import_node_events, import_crypto24, import_node_assert, import_node_v8, import_node_worker_threads, import_https6, import_tls, import_zlib2, import_buffer, import_assert, qs, import_node_zlib2, import_node_module5, import_meta7, __require3, commonjsGlobal, picocolors2, p4, argv, env$1, isColorSupported, formatter, replaceClose, createColors, picocolorsExports2, colors$1, VALID_ID_PREFIX2, NULL_BYTE_PLACEHOLDER2, SOURCEMAPPING_URL3, MODULE_RUNNER_SOURCEMAPPING_SOURCE, ERR_OUTDATED_OPTIMIZED_DEP2, isWindows$3, windowsSlashRE2, postfixRE2, WalkerBase$1, SyncWalker$1, extractors2, extractAssignedNames3, blockDeclarations, Scope2, attachScopes, normalizePathRegExp2, normalizePath$5, createFilter$2, reservedWords2, builtins2, forbiddenIdentifiers2, makeLegalIdentifier, hasStringIsWellFormed, dataToEsm, path$a, commondir2, getCommonDir, comma5, semicolon3, chars$12, intToChar3, charToInt3, bufLength2, td2, StringWriter2, StringReader3, BitSet2, Chunk3, btoa$1, SourceMap$1, toString$1, wordRegex2, Mappings2, n$1, warned2, MagicString2, version$2, peerDependencies, firstpassGlobal, firstpassNoGlobal, getVirtualPathForDynamicRequirePath, FAILED_REQUIRE_ERROR, COMMONJS_REQUIRE_EXPORT, CREATE_COMMONJS_REQUIRE_EXPORT, isWrappedId, wrapId, unwrapId2, PROXY_SUFFIX, WRAPPED_SUFFIX, EXTERNAL_SUFFIX, EXPORTS_SUFFIX, MODULE_SUFFIX, ENTRY_SUFFIX, ES_IMPORT_SUFFIX, DYNAMIC_MODULES_ID, HELPERS_ID, IS_WRAPPED_COMMONJS, HELPERS, operators, KEY_COMPILED_ESM, reservedMethod, exportsPattern, functionType, PLUGIN_NAME2, schemeRegex, urlRegex, fileRegex, COLUMN$1, SOURCES_INDEX$1, SOURCE_LINE$1, SOURCE_COLUMN$1, NAMES_INDEX$1, found2, LINE_GTR_ZERO2, COL_GTR_EQ_ZERO2, LEAST_UPPER_BOUND2, GREATEST_LOWER_BOUND2, TraceMap, SetArray, COLUMN2, SOURCES_INDEX2, SOURCE_LINE2, SOURCE_COLUMN2, NAMES_INDEX2, NO_NAME, GenMapping, maybeAddSegment, SOURCELESS_MAPPING, EMPTY_SOURCES, SourceMap3, node$12, ms$1, hasRequiredMs, common$4, hasRequiredCommon, nodeExports$1, debug$j, pnp, createFilter$12, replaceSlashOrColonRE, replaceDotRE, replaceNestedIdRE, replaceHashRE, flattenId, FLATTEN_ID_HASH_LENGTH, FLATTEN_ID_MAX_FILE_LENGTH, limitFlattenIdLength, normalizeId, NODE_BUILTIN_NAMESPACE, NPM_BUILTIN_NAMESPACE, BUN_BUILTIN_NAMESPACE, nodeBuiltins2, isBuiltinCache, nodeLikeBuiltins, bareImportRE, deepImportRE, _require$1, _dirname, rollupVersion2, filter5, DEBUG, urlCanParse, isCaseInsensitiveFS, VOLUME_RE, externalRE, isExternalUrl, dataUrlRE, isDataUrl, virtualModuleRE, virtualModulePrefix, knownJsSrcRE, isJSRequest, importQueryRE, directRequestRE$1, internalPrefixes, InternalPrefixRE, trailingSeparatorRE, isImportRequest, isInternalRequest, urlRE$1, rawRE$1, timestampRE, splitRE, range, splitFirstDirRE, ERR_SYMLINK_IN_RECURSIVE_READDIR, safeRealpathSync, windowsNetworkMap, parseNetUseRE, firstSafeRealPathSyncRun, imageCandidateRegex, escapedSpaceCharacters, windowsDriveRE$1, replaceWindowsDriveRE, linuxAbsolutePathRE, revertWindowsDriveRE, nullSourceMap, multilineCommentsRE, singlelineCommentsRE, requestQuerySplitRE, requestQueryMaybeEscapedSplitRE, blankReplacer, hash$1, requireResolveFromRootWithFallback, windowsDrivePathPrefixRE, isNonDriveRelativeAbsolutePath, escapeRegexRE, sigtermCallbacks, parentSigtermCallback, setupSIGTERMListener, teardownSIGTERMListener, LogLevels, lastType, lastMsg, sameCount, timeFormatter, groups, COMPRESSIBLE_ASSETS_RE, POSIX_SEP_RE, NATIVE_SEP_RE, PATTERN_REGEX_CACHE, GLOB_ALL_PATTERN, TS_EXTENSIONS, JS_EXTENSIONS, TSJS_EXTENSIONS, TS_EXTENSIONS_RE_GROUP, TSJS_EXTENSIONS_RE_GROUP, IS_POSIX, isInNodeModules, posix2native, native2posix, resolve2posix, singleComment, multiComment, not_found_result, EXTENDABLE_KEYS, REBASE_KEYS, TSConfckParseError, DEFAULT_JSCONFIG_COMPILER_OPTIONS, TSConfckCache, debug$i, IIFE_BEGIN_RE, validExtensionRE, jsxExtensionsRE, defaultEsbuildSupported, rollupToEsbuildFormatMap, buildEsbuildPlugin, globalTSConfckCache, tsconfckCacheMap, AsyncFunction2, codeToDataUrl, viteSsrDynamicImport, Worker, importRe, internalImportName, FakeWorker, WorkerWithFallback, terserPath, loadTerserPath, mimes, publicFilesMap, assetUrlRE, jsSourceMapRE, noInlineRE, inlineRE$3, svgExtRE, assetCache, cssEntriesMap, publicAssetUrlCache, publicAssetUrlRE, GIT_LFS_PREFIX, nestedQuotesRE, endsWithJSRE, dataUriRE, base64RE, dataUriPrefix, ImportType, A3, C3, E2, init, convertSourceMap$1, convertSourceMap, debug$h, virtualSourceRE, src$12, path$9, fs$7, os$2, url$3, fsReadFileAsync, jsonLoader, requireFunc, defaultLoadersSync, dynamicImport, defaultLoaders, makeEmplace, createRequire3, fileURLToPath4, pathToFileURL, TS_EXT_RE, tsx, jiti, importError, req_1, req$2, options_1, req$1, plugins_1, resolve7, config$1, loadOptions, loadPlugins, req, interopRequireDefault, yaml, withLoaders, src2, postcssrc, jsonExtRE, jsonObjRE, jsonLangs, jsonLangRE, isJSONRequest, HASH_RE, AMPERSAND_RE, SLASH_RE, EQUAL_RE, PLUS_RE, ENC_CARET_RE, ENC_BACKTICK_RE, ENC_PIPE_RE, ENC_SPACE_RE, own$1, classRegExp, kTypes, messages, nodeInternalPrefix, userStackTraceLimit, captureLargerStackTrace, ESM_STATIC_IMPORT_RE, TYPE_RE, ESM_RE, COMMENT_RE, externalWithConversionNamespace, convertedExternalPrefix, cjsExternalFacadeNamespace, nonFacadePrefix, externalTypes, matchesEntireLine, environmentColors, PartialEnvironment, BaseEnvironment, HashbangComment, Identifier3, JSXIdentifier2, JSXPunctuator, JSXString, JSXText2, KeywordsWithExpressionAfter, KeywordsWithNoLineTerminatorAfter, LineTerminatorSequence, MultiLineComment, Newline, NumericLiteral, Punctuator, RegularExpressionLiteral, SingleLineComment, StringLiteral, Template, TokensNotPrecedingObjectLiteral, TokensPrecedingExpression, WhiteSpace, jsTokens_1, jsTokens, importGlobRE, objectKeysRE, objectValuesRE, knownOptions, forceDefaultAs, importPrefix, basename6, dirname5, relative4, ScanEnvironment, debug$g, htmlTypesRE, importsRE, scriptRE, commentRE$1, srcRE, typeRE, langRE, svelteScriptModuleRE, svelteModuleRE, debug$f, jsExtensionRE, jsMapExtensionRE, firstLoadCachedDepOptimizationMetadata, lockfileFormats, lockfilePaths, MAX_TEMP_DIR_AGE_MS, GRACEFUL_RENAME_TIMEOUT, safeRename, debug$e, isExternalCache, normalizedClientEntry$1, normalizedEnvEntry$1, ERR_RESOLVE_PACKAGE_ENTRY_FAIL, browserExternalId, optionalPeerDepId, subpathImportsPrefix, startsWithWordCharRE, debug$d, knownTsOutputRE, isPossibleTsOutput, debug$c, main, version$1, require$$4, fs$6, path$8, os$1, crypto$1, packageJson, version3, LINE, DotenvModule, parse_1$22, expand_1$1, debug$b, docsURL, deprecationCode, deprecationMessages, _ignoreDeprecationWarnings, node2, debug$a, s5, m5, h3, d3, y2, ms, debugExports, nodeExports2, encodeurl, ENCODE_CHARS_REGEXP, UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE, matchHtmlRegExp, escapeHtml_1, escapeHtml$2, onFinished$2, eeFirst, first3, defer$2, onFinishedExports, parseurl$1, url$2, parse$a, Url, parseurlExports, require$$0$13, codes, statuses$1, unpipe_1, debug$9, encodeUrl, escapeHtml, onFinished, parseUrl$2, statuses, unpipe, DOUBLE_SPACE_REGEXP, NEWLINE_REGEXP, defer$1, isFinished, finalhandler_1, utilsMerge, utilsMergeExports, debug$8, EventEmitter$3, finalhandler, http$4, merge5, parseUrl$1, connect, env3, proto, defer, connect$1, lib2, getOwnPropertySymbols, hasOwnProperty3, propIsEnumerable, objectAssign, vary$1, FIELD_NAME_REGEXP, varyExports, libExports, corsMiddleware, chokidar2, fs$5, Readable3, sysPath$3, promisify$3, picomatch$12, readdir$1, stat$3, lstat$2, realpath$1, BANG$2, RECURSIVE_ERROR_CODE, NORMAL_FLOW_ERRORS, FILE_TYPE, DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE, ALL_TYPES, isNormalFlowError, maj, min, wantBigintFsStats, normalizeFilter$1, ReaddirpStream, readdirp$1, readdirpPromise, readdirp_12, anymatch$2, normalizePath$2, anymatch_12, picomatch4, normalizePath$1, BANG$1, DEFAULT_OPTIONS, arrify$1, createPattern, matchPatterns, anymatch$1, anymatchExports, isExtglob$1, isExtglob3, chars4, strictCheck, relaxedCheck, isGlob$2, isGlob$1, pathPosixDirname, isWin32, slash4, backslash3, enclosure, globby, escaped, globParent$1, utils$3, utils$22, stringify$4, isNumber$2, isNumber$1, toRegexRange$1, toRegexRange_12, util5, toRegexRange, isObject3, transform3, isValidValue, isNumber7, zeros, stringify$3, pad, toMaxLen, toSequence, toRange, toRegex, rangeError, invalidRange, invalidStep, fillNumbers, fillLetters, fill$2, fillRange2, fill$1, utils$12, compile$1, compile_12, fill, stringify$2, utils3, append4, expand$1, expand_12, constants$22, stringify$12, MAX_LENGTH, CHAR_BACKSLASH, CHAR_BACKTICK, CHAR_COMMA, CHAR_DOT, CHAR_LEFT_PARENTHESES, CHAR_RIGHT_PARENTHESES, CHAR_LEFT_CURLY_BRACE, CHAR_RIGHT_CURLY_BRACE, CHAR_LEFT_SQUARE_BRACKET, CHAR_RIGHT_SQUARE_BRACKET, CHAR_DOUBLE_QUOTE, CHAR_SINGLE_QUOTE, CHAR_NO_BREAK_SPACE, CHAR_ZERO_WIDTH_NOBREAK_SPACE, parse$8, parse_1$12, stringify6, compile4, expand, parse$7, braces$1, braces_12, require$$03, binaryExtensions$1, path$7, binaryExtensions2, extensions, isBinaryPath$1, constants$12, fs$4, sysPath$2, promisify$2, isBinaryPath2, isWindows$2, isLinux, EMPTY_FN$2, EMPTY_STR$1, KEY_LISTENERS, KEY_ERR, KEY_RAW, HANDLER_KEYS, EV_CHANGE$2, EV_ADD$2, EV_ADD_DIR$2, EV_ERROR$2, STR_DATA$1, STR_END$2, BRACE_START$1, STAR, THROTTLE_MODE_WATCH, open$1, stat$2, lstat$1, close, fsrealpath, statMethods$1, foreach, addAndConvert, clearItem, delFromSet, isEmptySet, FsWatchInstances, fsWatchBroadcast, setFsWatchListener, FsWatchFileInstances, setFsWatchFileListener, NodeFsHandler$1, nodefsHandler2, fseventsHandler2, fs$3, sysPath$1, promisify$1, fsevents, EV_ADD$1, EV_CHANGE$1, EV_ADD_DIR$1, EV_UNLINK$1, EV_ERROR$1, STR_DATA, STR_END$1, FSEVENT_CREATED, FSEVENT_MODIFIED, FSEVENT_DELETED, FSEVENT_MOVED, FSEVENT_UNKNOWN, FSEVENT_FLAG_MUST_SCAN_SUBDIRS, FSEVENT_TYPE_FILE, FSEVENT_TYPE_DIRECTORY, FSEVENT_TYPE_SYMLINK, ROOT_GLOBSTAR, DIR_SUFFIX, DOT_SLASH, FUNCTION_TYPE$1, EMPTY_FN$1, IDENTITY_FN, Depth, stat$1, lstat, realpath2, statMethods, FSEventsWatchers, consolidateThreshhold, wrongEventFlags, createFSEventsInstance, couldConsolidate, canUse, calcDepth, sameTypes, FsEventsHandler$1, fseventsHandlerExports, EventEmitter$2, fs$2, sysPath, promisify3, readdirp, anymatch2, globParent3, isGlob3, braces, normalizePath6, NodeFsHandler2, FsEventsHandler2, EV_ALL, EV_READY, EV_ADD, EV_CHANGE, EV_UNLINK, EV_ADD_DIR, EV_UNLINK_DIR, EV_RAW, EV_ERROR, STR_CLOSE, STR_END, BACK_SLASH_RE, DOUBLE_SLASH_RE, SLASH_OR_BACK_SLASH_RE, DOT_RE, REPLACER_RE, SLASH, SLASH_SLASH, BRACE_START, BANG, ONE_DOT, TWO_DOTS, GLOBSTAR, SLASH_GLOBSTAR, ANYMATCH_OPTS, STRING_TYPE, FUNCTION_TYPE, EMPTY_STR, EMPTY_FN, isWindows$1, isMacos, isIBMi, stat4, readdir2, arrify, flatten, unifyPaths, toUnix, normalizePathToUnix, normalizeIgnored, getAbsolutePath, undef, DirEntry, STAT_METHOD_F, STAT_METHOD_L, WatchHelper, FSWatcher, watch2, guess, shellQuote$1, OPS, LINE_TERMINATORS, GLOB_SHELL_SPECIAL, quote, CONTROL, controlRE, META, SINGLE_QUOTE, DOUBLE_QUOTE, hash3, SQ, DQ, DS, TOKEN, mult, i6, startsWithToken, parse$6, macos, linux, windows$1, path$6, shellQuote, childProcess$1, COMMON_EDITORS_MACOS, COMMON_EDITORS_LINUX, COMMON_EDITORS_WIN, guessExports, path$5, getArgs, fs$1, os, path$4, colors, childProcess, guessEditor, getArgumentsForPosition2, positionRE, currentChildProcess, launchEditor_1, path$3, launch, launchEditorMiddleware, launchEditorMiddleware$1, offset, rewroteStacktraces, prepareStackTrace2, createServerModuleRunnerTransport, SSRCompatModuleRunner, WalkerBase2, SyncWalker2, ssrModuleExportsKey2, ssrImportKey2, ssrDynamicImportKey2, ssrExportAllKey2, ssrImportMetaKey2, hashbangRE, isNodeInPatternWeakSet, setIsNodeInPattern, isNodeInPattern, isStaticProperty, isStaticPropertyKey, functionNodeTypeRE, blockNodeTypeRE, isDockerCached, cachedResult, hasContainerEnv, isWsl, isWsl$1, execFileAsync$3, execFileAsync$2, execFileAsync$1, windowsBrowserProgIds, UnknownBrowserError, execFileAsync2, titleize, __dirname2, localXdgOpenPath, platform2, arch, getWslDrivesMountPoint, pTryEach, baseOpen, open2, apps, crossSpawn, windows, hasRequiredWindows, mode, hasRequiredMode, core, isexe_1, isWindows2, path$22, COLON2, isexe, getNotFoundError, getPathInfo, which$1, whichSync, which_1, pathKey$1, pathKey, pathKeyExports, path$13, which, getPathKey, resolveCommand_1, _escape, metaCharsRegExp, shebangRegex$1, shebangRegex, shebangCommand$1, fs9, shebangCommand, readShebang_1, path11, resolveCommand, escape$1, readShebang, isWin$1, isExecutableRegExp, isCmdShimRegExp, parse_13, isWin2, enoent$1, cp, parse$4, enoent, crossSpawnExports, spawn$1, supportedChromiumBrowsers, BASE_DEV_SHORTCUTS, BASE_PREVIEW_SHORTCUTS, NoopWatcher, bufferUtil$1, BINARY_TYPES$2, hasBlob$1, constants3, EMPTY_BUFFER$3, FastBuffer$2, bufferUtilExports, kDone, kRun, Limiter$1, limiter, zlib3, bufferUtil, Limiter2, kStatusCode$2, FastBuffer$1, TRAILER, kPerMessageDeflate, kTotalLength, kCallback, kBuffers, kError$1, zlibLimiter, PerMessageDeflate$4, permessageDeflate, validation, isUtf8, hasBlob, tokenChars$2, validationExports, Writable$1, PerMessageDeflate$3, BINARY_TYPES$1, EMPTY_BUFFER$2, kStatusCode$1, kWebSocket$3, concat3, toArrayBuffer2, unmask, isValidStatusCode$1, isValidUTF8, FastBuffer, GET_INFO, GET_PAYLOAD_LENGTH_16, GET_PAYLOAD_LENGTH_64, GET_MASK, GET_DATA, INFLATING, DEFER_EVENT, Receiver$1, receiver, randomFillSync, PerMessageDeflate$2, EMPTY_BUFFER$1, kWebSocket$2, NOOP$2, isBlob$1, isValidStatusCode, applyMask, toBuffer$1, kByteLength, maskBuffer, RANDOM_POOL_SIZE, randomPool, randomPoolPointer, DEFAULT, DEFLATING, GET_BLOB_DATA, Sender$1, sender, kForOnEventAttribute$1, kListener$1, kCode, kData, kError, kMessage, kReason, kTarget, kType, kWasClean, Event$1, CloseEvent, ErrorEvent, MessageEvent, EventTarget2, eventTarget, tokenChars$1, extension$1, EventEmitter$1, https$2, http$3, net, tls, randomBytes2, createHash$1, URL$2, PerMessageDeflate$1, Receiver3, Sender3, isBlob3, BINARY_TYPES, EMPTY_BUFFER, GUID$1, kForOnEventAttribute, kListener, kStatusCode, kWebSocket$1, NOOP$1, addEventListener, removeEventListener, format2, parse$2, toBuffer2, closeTimeout, kAborted, protocolVersions, readyStates, subprotocolRegex, WebSocket$1, websocket, tokenChars, subprotocol$1, EventEmitter2, http$2, createHash2, extension2, PerMessageDeflate3, subprotocol2, WebSocket3, GUID, kWebSocket, keyRegex, RUNNING, CLOSING, CLOSED, WebSocketServer2, websocketServer, WebSocketServerRaw_, allowedHostsServerCache, allowedHostsPreviewCache, isFileOrExtensionProtocolRE, WebSocketServerRaw, HMR_HEADER, isWebSocketServer, wsServerEvents, httpProxy$3, eventemitter3, eventemitter3Exports, common$3, requiresPort, url$1, common$2, redirectRegex, webOutgoing, followRedirects$1, debug$7, debug_1, url2, URL$1, http$1, https$1, Writable, assert, debug$6, useNativeURL, preservedUrlFields, events, eventHandlers, InvalidUrlError, RedirectionError, TooManyRedirectsError, MaxBodyLengthExceededError, WriteAfterEndError, destroy, followRedirectsExports, httpNative, httpsNative, web_o, common$1, followRedirects2, nativeAgents, webIncoming, http5, https7, common, wsIncoming, httpProxyExports, ProxyServer, httpProxy$2, httpProxy, httpProxy$1, debug$5, rewriteOriginHeader, debug$4, etag_1, crypto24, Stats, toString6, getEtag, debug$3, alias, noop4, ENCODING, knownJavascriptExtensionRE, ERR_DENIED_FILE, sirvOptions, windowsDriveRE, ERR_LOAD_URL, ERR_LOAD_PUBLIC_URL, ERR_DENIED_ID, debugLoad, debugTransform, debugCache$1, ALLOWED_META_NAME, ALLOWED_META_PROPERTY, DEFAULT_HTML_ASSET_SOURCES, modulePreloadPolyfillId, resolvedModulePreloadPolyfillId, htmlProxyRE$1, isHtmlProxyRE, inlineCSSRE$1, inlineImportRE, htmlLangRE, spaceRe, importMapRE, moduleScriptRE, modulePreloadLinkRE, importMapAppendRE, isHTMLProxy, isHTMLRequest, htmlProxyMap, htmlProxyResult, noInlineLinkRels, isAsyncScriptMap, attrValueStartRE, elementsAllowedInHead, importRE, commentRE, headInjectRE, headPrependInjectRE, htmlInjectRE, htmlPrependInjectRE, bodyInjectRE, bodyPrependInjectRE, doctypePrependInjectRE, unaryTags, debugCache, knownIgnoreList, trailingQuerySeparatorsRE, urlRE, rawRE, inlineRE$2, svgRE, wordCharRE, processNodeUrl, devHtmlHook, logTime, EMPTY_OBJECT$1, ModuleNode, ModuleGraph, DualWeakMap, ROOT_FILES, usedConfigs, serverConfigDefaults, debugHmr, whitespaceRE, normalizedClientDir, normalizeHotChannel, sortedHotUpdatePluginsCache, nonJsRe, isNonJsRequest, importMetaEnvMarker, importMetaEnvKeyReCache, workerOrSharedWorkerRE, workerFileRE, inlineRE$1, WORKER_FILE_ID, workerCache, workerAssetUrlRE, debug$2, clientDir, skipRE, canSkipImportAnalysis, optimizedDepChunkRE, optimizedDepDynamicRE, hasViteIgnoreRE, urlIsStringRE, templateLiteralRE, interopHelper, normalizedClientEntry, normalizedEnvEntry, wasmHelperId, wasmInitRE, wasmHelper, wasmHelperCode, wasmHelperPlugin, wasmFallbackPlugin, VariableDynamicImportError, example, defaultProtocol, ignoredProtocols, dynamicImportHelperId, relativePathRE, hasDynamicImportRE, dynamicImportHelper, filterForPlugin, viteAliasCustomResolver, EMPTY_OBJECT2, debugSourcemapCombineFilter, debugSourcemapCombine, debugResolve, debugPluginResolve, debugPluginTransform, debugPluginContainerContext, ERR_CLOSED_SERVER, EnvironmentPluginContainer, MinimalPluginContext, PluginContext, ResolveIdContext, LoadPluginContext, TransformPluginContext, PluginContainer, decoder, cssConfigDefaults, cssModuleRE, directRequestRE, htmlProxyRE, htmlProxyIndexRE, commonjsProxyRE, inlineRE, inlineCSSRE, styleAttrRE, functionCallRE, transformOnlyRE, nonEscapedDoubleQuoteRe, defaultCssBundleName, isCSSRequest, isModuleCSSRequest, isDirectCSSRequest, isDirectRequest, cssModulesCache, removedPureCssFilesCache, cssBundleNameCache, postcssConfigCache, cssUrlAssetRE, fileURLWithWindowsDriveRE, configToAtImportResolvers, importPostcssImport, importPostcssModules, importPostcss, preprocessorWorkerControllerCache, alwaysFakeWorkerWorkerControllerCache, viteHashUpdateMarker, viteHashUpdateMarkerRE, cssUrlRE, cssDataUriRE, importCssRE, cssImageSetRE, UrlRewritePostcssPlugin, cssNotProcessedRE, atImportRE, atCharsetRE, loadedPreprocessorPath, cachedSss, makeScssWorker, makeModernScssWorker, makeModernCompilerScssWorker, scssProcessor, makeLessWorker, lessProcessor, makeStylWorker, stylProcessor, createPreprocessorWorkerController, normalizeMaxWorkers, preprocessorSet, importLightningCSS, map2, esMap, esRE, versionRE, convertTargetsCache, convertTargets, isModernFlag, preloadMethod, preloadMarker, preloadHelperId, preloadMarkerRE, dynamicImportPrefixRE, dynamicImportTreeshakenRE, buildEnvironmentOptionsDefaults, warningIgnoreList, dynamicImportWarningIgnoreList, normalizeLog2, needsEscapeRegEx2, quoteNewlineRegEx2, backSlashRegEx2, getResolveUrl2, getRelativeUrlFromDocument2, getFileUrlFromFullPath2, getFileUrlFromRelativePath2, relativeUrlMechanisms2, customRelativeUrlMechanisms, toOutputFilePathInCss, toOutputFilePathInHtml, BuildEnvironment, builderOptionsDefaults, build$12, OTHER_SOURCE_MAP_REGEXP, debug$1, debounceMs, EnvironmentModuleNode, EnvironmentModuleGraph, DevEnvironment, callCrawlEndIfIdleAfterMs, RunnableDevEnvironment, NOOP, MIMES, ssrConfigDefaults, debug, promisifiedRealpath, SYMBOL_RESOLVED_CONFIG, configDefaults, clientAlias, _require;
+var fs$8, import_node_fs5, import_node_path10, import_promises3, import_node_url5, import_node_util6, import_node_perf_hooks2, import_node_module4, import_node_crypto3, import_picomatch2, import_esbuild3, import_path14, import_fs11, import_node_child_process2, import_node_http3, import_node_https2, import_tty, import_util6, import_net, import_events3, import_url5, import_http4, import_stream7, import_os3, import_child_process, import_node_os4, import_node_net6, import_node_dns, import_node_buffer4, import_module3, import_node_readline, import_node_process3, import_node_events, import_crypto25, import_node_assert, import_node_v8, import_node_worker_threads, import_https6, import_tls, import_zlib2, import_buffer, import_assert, qs, import_node_zlib2, import_node_module5, import_meta7, __require3, commonjsGlobal, picocolors2, p4, argv, env$1, isColorSupported, formatter, replaceClose, createColors, picocolorsExports2, colors$1, VALID_ID_PREFIX2, NULL_BYTE_PLACEHOLDER2, SOURCEMAPPING_URL3, MODULE_RUNNER_SOURCEMAPPING_SOURCE, ERR_OUTDATED_OPTIMIZED_DEP2, isWindows$3, windowsSlashRE2, postfixRE2, WalkerBase$1, SyncWalker$1, extractors2, extractAssignedNames3, blockDeclarations, Scope2, attachScopes, normalizePathRegExp2, normalizePath$5, createFilter$2, reservedWords2, builtins2, forbiddenIdentifiers2, makeLegalIdentifier, hasStringIsWellFormed, dataToEsm, path$a, commondir2, getCommonDir, comma5, semicolon3, chars$12, intToChar3, charToInt3, bufLength2, td2, StringWriter2, StringReader3, BitSet2, Chunk3, btoa$1, SourceMap$1, toString$1, wordRegex2, Mappings2, n$1, warned2, MagicString2, version$2, peerDependencies, firstpassGlobal, firstpassNoGlobal, getVirtualPathForDynamicRequirePath, FAILED_REQUIRE_ERROR, COMMONJS_REQUIRE_EXPORT, CREATE_COMMONJS_REQUIRE_EXPORT, isWrappedId, wrapId, unwrapId2, PROXY_SUFFIX, WRAPPED_SUFFIX, EXTERNAL_SUFFIX, EXPORTS_SUFFIX, MODULE_SUFFIX, ENTRY_SUFFIX, ES_IMPORT_SUFFIX, DYNAMIC_MODULES_ID, HELPERS_ID, IS_WRAPPED_COMMONJS, HELPERS, operators, KEY_COMPILED_ESM, reservedMethod, exportsPattern, functionType, PLUGIN_NAME2, schemeRegex, urlRegex, fileRegex, COLUMN$1, SOURCES_INDEX$1, SOURCE_LINE$1, SOURCE_COLUMN$1, NAMES_INDEX$1, found2, LINE_GTR_ZERO2, COL_GTR_EQ_ZERO2, LEAST_UPPER_BOUND2, GREATEST_LOWER_BOUND2, TraceMap, SetArray, COLUMN2, SOURCES_INDEX2, SOURCE_LINE2, SOURCE_COLUMN2, NAMES_INDEX2, NO_NAME, GenMapping, maybeAddSegment, SOURCELESS_MAPPING, EMPTY_SOURCES, SourceMap3, node$12, ms$1, hasRequiredMs, common$4, hasRequiredCommon, nodeExports$1, debug$j, pnp, createFilter$12, replaceSlashOrColonRE, replaceDotRE, replaceNestedIdRE, replaceHashRE, flattenId, FLATTEN_ID_HASH_LENGTH, FLATTEN_ID_MAX_FILE_LENGTH, limitFlattenIdLength, normalizeId, NODE_BUILTIN_NAMESPACE, NPM_BUILTIN_NAMESPACE, BUN_BUILTIN_NAMESPACE, nodeBuiltins2, isBuiltinCache, nodeLikeBuiltins, bareImportRE, deepImportRE, _require$1, _dirname, rollupVersion2, filter5, DEBUG, urlCanParse, isCaseInsensitiveFS, VOLUME_RE, externalRE, isExternalUrl, dataUrlRE, isDataUrl, virtualModuleRE, virtualModulePrefix, knownJsSrcRE, isJSRequest, importQueryRE, directRequestRE$1, internalPrefixes, InternalPrefixRE, trailingSeparatorRE, isImportRequest, isInternalRequest, urlRE$1, rawRE$1, timestampRE, splitRE, range, splitFirstDirRE, ERR_SYMLINK_IN_RECURSIVE_READDIR, safeRealpathSync, windowsNetworkMap, parseNetUseRE, firstSafeRealPathSyncRun, imageCandidateRegex, escapedSpaceCharacters, windowsDriveRE$1, replaceWindowsDriveRE, linuxAbsolutePathRE, revertWindowsDriveRE, nullSourceMap, multilineCommentsRE, singlelineCommentsRE, requestQuerySplitRE, requestQueryMaybeEscapedSplitRE, blankReplacer, hash$1, requireResolveFromRootWithFallback, windowsDrivePathPrefixRE, isNonDriveRelativeAbsolutePath, escapeRegexRE, sigtermCallbacks, parentSigtermCallback, setupSIGTERMListener, teardownSIGTERMListener, LogLevels, lastType, lastMsg, sameCount, timeFormatter, groups, COMPRESSIBLE_ASSETS_RE, POSIX_SEP_RE, NATIVE_SEP_RE, PATTERN_REGEX_CACHE, GLOB_ALL_PATTERN, TS_EXTENSIONS, JS_EXTENSIONS, TSJS_EXTENSIONS, TS_EXTENSIONS_RE_GROUP, TSJS_EXTENSIONS_RE_GROUP, IS_POSIX, isInNodeModules, posix2native, native2posix, resolve2posix, singleComment, multiComment, not_found_result, EXTENDABLE_KEYS, REBASE_KEYS, TSConfckParseError, DEFAULT_JSCONFIG_COMPILER_OPTIONS, TSConfckCache, debug$i, IIFE_BEGIN_RE, validExtensionRE, jsxExtensionsRE, defaultEsbuildSupported, rollupToEsbuildFormatMap, buildEsbuildPlugin, globalTSConfckCache, tsconfckCacheMap, AsyncFunction2, codeToDataUrl, viteSsrDynamicImport, Worker, importRe, internalImportName, FakeWorker, WorkerWithFallback, terserPath, loadTerserPath, mimes, publicFilesMap, assetUrlRE, jsSourceMapRE, noInlineRE, inlineRE$3, svgExtRE, assetCache, cssEntriesMap, publicAssetUrlCache, publicAssetUrlRE, GIT_LFS_PREFIX, nestedQuotesRE, endsWithJSRE, dataUriRE, base64RE, dataUriPrefix, ImportType, A3, C3, E2, init, convertSourceMap$1, convertSourceMap, debug$h, virtualSourceRE, src$12, path$9, fs$7, os$2, url$3, fsReadFileAsync, jsonLoader, requireFunc, defaultLoadersSync, dynamicImport, defaultLoaders, makeEmplace, createRequire3, fileURLToPath4, pathToFileURL, TS_EXT_RE, tsx, jiti, importError, req_1, req$2, options_1, req$1, plugins_1, resolve7, config$1, loadOptions, loadPlugins, req, interopRequireDefault, yaml, withLoaders, src2, postcssrc, jsonExtRE, jsonObjRE, jsonLangs, jsonLangRE, isJSONRequest, HASH_RE, AMPERSAND_RE, SLASH_RE, EQUAL_RE, PLUS_RE, ENC_CARET_RE, ENC_BACKTICK_RE, ENC_PIPE_RE, ENC_SPACE_RE, own$1, classRegExp, kTypes, messages, nodeInternalPrefix, userStackTraceLimit, captureLargerStackTrace, ESM_STATIC_IMPORT_RE, TYPE_RE, ESM_RE, COMMENT_RE, externalWithConversionNamespace, convertedExternalPrefix, cjsExternalFacadeNamespace, nonFacadePrefix, externalTypes, matchesEntireLine, environmentColors, PartialEnvironment, BaseEnvironment, HashbangComment, Identifier3, JSXIdentifier2, JSXPunctuator, JSXString, JSXText2, KeywordsWithExpressionAfter, KeywordsWithNoLineTerminatorAfter, LineTerminatorSequence, MultiLineComment, Newline, NumericLiteral, Punctuator, RegularExpressionLiteral, SingleLineComment, StringLiteral, Template, TokensNotPrecedingObjectLiteral, TokensPrecedingExpression, WhiteSpace, jsTokens_1, jsTokens, importGlobRE, objectKeysRE, objectValuesRE, knownOptions, forceDefaultAs, importPrefix, basename6, dirname5, relative4, ScanEnvironment, debug$g, htmlTypesRE, importsRE, scriptRE, commentRE$1, srcRE, typeRE, langRE, svelteScriptModuleRE, svelteModuleRE, debug$f, jsExtensionRE, jsMapExtensionRE, firstLoadCachedDepOptimizationMetadata, lockfileFormats, lockfilePaths, MAX_TEMP_DIR_AGE_MS, GRACEFUL_RENAME_TIMEOUT, safeRename, debug$e, isExternalCache, normalizedClientEntry$1, normalizedEnvEntry$1, ERR_RESOLVE_PACKAGE_ENTRY_FAIL, browserExternalId, optionalPeerDepId, subpathImportsPrefix, startsWithWordCharRE, debug$d, knownTsOutputRE, isPossibleTsOutput, debug$c, main, version$1, require$$4, fs$6, path$8, os$1, crypto$1, packageJson, version3, LINE, DotenvModule, parse_1$22, expand_1$1, debug$b, docsURL, deprecationCode, deprecationMessages, _ignoreDeprecationWarnings, node2, debug$a, s5, m5, h3, d3, y2, ms, debugExports, nodeExports2, encodeurl, ENCODE_CHARS_REGEXP, UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE, matchHtmlRegExp, escapeHtml_1, escapeHtml$2, onFinished$2, eeFirst, first3, defer$2, onFinishedExports, parseurl$1, url$2, parse$a, Url, parseurlExports, require$$0$13, codes, statuses$1, unpipe_1, debug$9, encodeUrl, escapeHtml, onFinished, parseUrl$2, statuses, unpipe, DOUBLE_SPACE_REGEXP, NEWLINE_REGEXP, defer$1, isFinished, finalhandler_1, utilsMerge, utilsMergeExports, debug$8, EventEmitter$3, finalhandler, http$4, merge5, parseUrl$1, connect, env3, proto, defer, connect$1, lib2, getOwnPropertySymbols, hasOwnProperty3, propIsEnumerable, objectAssign, vary$1, FIELD_NAME_REGEXP, varyExports, libExports, corsMiddleware, chokidar2, fs$5, Readable3, sysPath$3, promisify$3, picomatch$12, readdir$1, stat$3, lstat$2, realpath$1, BANG$2, RECURSIVE_ERROR_CODE, NORMAL_FLOW_ERRORS, FILE_TYPE, DIR_TYPE, FILE_DIR_TYPE, EVERYTHING_TYPE, ALL_TYPES, isNormalFlowError, maj, min, wantBigintFsStats, normalizeFilter$1, ReaddirpStream, readdirp$1, readdirpPromise, readdirp_12, anymatch$2, normalizePath$2, anymatch_12, picomatch4, normalizePath$1, BANG$1, DEFAULT_OPTIONS, arrify$1, createPattern, matchPatterns, anymatch$1, anymatchExports, isExtglob$1, isExtglob3, chars4, strictCheck, relaxedCheck, isGlob$2, isGlob$1, pathPosixDirname, isWin32, slash4, backslash3, enclosure, globby, escaped, globParent$1, utils$3, utils$22, stringify$4, isNumber$2, isNumber$1, toRegexRange$1, toRegexRange_12, util5, toRegexRange, isObject3, transform3, isValidValue, isNumber7, zeros, stringify$3, pad, toMaxLen, toSequence, toRange, toRegex, rangeError, invalidRange, invalidStep, fillNumbers, fillLetters, fill$2, fillRange2, fill$1, utils$12, compile$1, compile_12, fill, stringify$2, utils3, append4, expand$1, expand_12, constants$22, stringify$12, MAX_LENGTH, CHAR_BACKSLASH, CHAR_BACKTICK, CHAR_COMMA, CHAR_DOT, CHAR_LEFT_PARENTHESES, CHAR_RIGHT_PARENTHESES, CHAR_LEFT_CURLY_BRACE, CHAR_RIGHT_CURLY_BRACE, CHAR_LEFT_SQUARE_BRACKET, CHAR_RIGHT_SQUARE_BRACKET, CHAR_DOUBLE_QUOTE, CHAR_SINGLE_QUOTE, CHAR_NO_BREAK_SPACE, CHAR_ZERO_WIDTH_NOBREAK_SPACE, parse$8, parse_1$12, stringify6, compile4, expand, parse$7, braces$1, braces_12, require$$03, binaryExtensions$1, path$7, binaryExtensions2, extensions, isBinaryPath$1, constants$12, fs$4, sysPath$2, promisify$2, isBinaryPath2, isWindows$2, isLinux, EMPTY_FN$2, EMPTY_STR$1, KEY_LISTENERS, KEY_ERR, KEY_RAW, HANDLER_KEYS, EV_CHANGE$2, EV_ADD$2, EV_ADD_DIR$2, EV_ERROR$2, STR_DATA$1, STR_END$2, BRACE_START$1, STAR, THROTTLE_MODE_WATCH, open$1, stat$2, lstat$1, close, fsrealpath, statMethods$1, foreach, addAndConvert, clearItem, delFromSet, isEmptySet, FsWatchInstances, fsWatchBroadcast, setFsWatchListener, FsWatchFileInstances, setFsWatchFileListener, NodeFsHandler$1, nodefsHandler2, fseventsHandler2, fs$3, sysPath$1, promisify$1, fsevents, EV_ADD$1, EV_CHANGE$1, EV_ADD_DIR$1, EV_UNLINK$1, EV_ERROR$1, STR_DATA, STR_END$1, FSEVENT_CREATED, FSEVENT_MODIFIED, FSEVENT_DELETED, FSEVENT_MOVED, FSEVENT_UNKNOWN, FSEVENT_FLAG_MUST_SCAN_SUBDIRS, FSEVENT_TYPE_FILE, FSEVENT_TYPE_DIRECTORY, FSEVENT_TYPE_SYMLINK, ROOT_GLOBSTAR, DIR_SUFFIX, DOT_SLASH, FUNCTION_TYPE$1, EMPTY_FN$1, IDENTITY_FN, Depth, stat$1, lstat, realpath2, statMethods, FSEventsWatchers, consolidateThreshhold, wrongEventFlags, createFSEventsInstance, couldConsolidate, canUse, calcDepth, sameTypes, FsEventsHandler$1, fseventsHandlerExports, EventEmitter$2, fs$2, sysPath, promisify3, readdirp, anymatch2, globParent3, isGlob3, braces, normalizePath6, NodeFsHandler2, FsEventsHandler2, EV_ALL, EV_READY, EV_ADD, EV_CHANGE, EV_UNLINK, EV_ADD_DIR, EV_UNLINK_DIR, EV_RAW, EV_ERROR, STR_CLOSE, STR_END, BACK_SLASH_RE, DOUBLE_SLASH_RE, SLASH_OR_BACK_SLASH_RE, DOT_RE, REPLACER_RE, SLASH, SLASH_SLASH, BRACE_START, BANG, ONE_DOT, TWO_DOTS, GLOBSTAR, SLASH_GLOBSTAR, ANYMATCH_OPTS, STRING_TYPE, FUNCTION_TYPE, EMPTY_STR, EMPTY_FN, isWindows$1, isMacos, isIBMi, stat4, readdir2, arrify, flatten, unifyPaths, toUnix, normalizePathToUnix, normalizeIgnored, getAbsolutePath, undef, DirEntry, STAT_METHOD_F, STAT_METHOD_L, WatchHelper, FSWatcher, watch2, guess, shellQuote$1, OPS, LINE_TERMINATORS, GLOB_SHELL_SPECIAL, quote, CONTROL, controlRE, META, SINGLE_QUOTE, DOUBLE_QUOTE, hash3, SQ, DQ, DS, TOKEN, mult, i6, startsWithToken, parse$6, macos, linux, windows$1, path$6, shellQuote, childProcess$1, COMMON_EDITORS_MACOS, COMMON_EDITORS_LINUX, COMMON_EDITORS_WIN, guessExports, path$5, getArgs, fs$1, os, path$4, colors, childProcess, guessEditor, getArgumentsForPosition2, positionRE, currentChildProcess, launchEditor_1, path$3, launch, launchEditorMiddleware, launchEditorMiddleware$1, offset, rewroteStacktraces, prepareStackTrace2, createServerModuleRunnerTransport, SSRCompatModuleRunner, WalkerBase2, SyncWalker2, ssrModuleExportsKey2, ssrImportKey2, ssrDynamicImportKey2, ssrExportAllKey2, ssrImportMetaKey2, hashbangRE, isNodeInPatternWeakSet, setIsNodeInPattern, isNodeInPattern, isStaticProperty, isStaticPropertyKey, functionNodeTypeRE, blockNodeTypeRE, isDockerCached, cachedResult, hasContainerEnv, isWsl, isWsl$1, execFileAsync$3, execFileAsync$2, execFileAsync$1, windowsBrowserProgIds, UnknownBrowserError, execFileAsync2, titleize, __dirname2, localXdgOpenPath, platform2, arch, getWslDrivesMountPoint, pTryEach, baseOpen, open2, apps, crossSpawn, windows, hasRequiredWindows, mode, hasRequiredMode, core, isexe_1, isWindows2, path$22, COLON2, isexe, getNotFoundError, getPathInfo, which$1, whichSync, which_1, pathKey$1, pathKey, pathKeyExports, path$13, which, getPathKey, resolveCommand_1, _escape, metaCharsRegExp, shebangRegex$1, shebangRegex, shebangCommand$1, fs9, shebangCommand, readShebang_1, path11, resolveCommand, escape$1, readShebang, isWin$1, isExecutableRegExp, isCmdShimRegExp, parse_13, isWin2, enoent$1, cp, parse$4, enoent, crossSpawnExports, spawn$1, supportedChromiumBrowsers, BASE_DEV_SHORTCUTS, BASE_PREVIEW_SHORTCUTS, NoopWatcher, bufferUtil$1, BINARY_TYPES$2, hasBlob$1, constants3, EMPTY_BUFFER$3, FastBuffer$2, bufferUtilExports, kDone, kRun, Limiter$1, limiter, zlib3, bufferUtil, Limiter2, kStatusCode$2, FastBuffer$1, TRAILER, kPerMessageDeflate, kTotalLength, kCallback, kBuffers, kError$1, zlibLimiter, PerMessageDeflate$4, permessageDeflate, validation, isUtf8, hasBlob, tokenChars$2, validationExports, Writable$1, PerMessageDeflate$3, BINARY_TYPES$1, EMPTY_BUFFER$2, kStatusCode$1, kWebSocket$3, concat3, toArrayBuffer2, unmask, isValidStatusCode$1, isValidUTF8, FastBuffer, GET_INFO, GET_PAYLOAD_LENGTH_16, GET_PAYLOAD_LENGTH_64, GET_MASK, GET_DATA, INFLATING, DEFER_EVENT, Receiver$1, receiver, randomFillSync, PerMessageDeflate$2, EMPTY_BUFFER$1, kWebSocket$2, NOOP$2, isBlob$1, isValidStatusCode, applyMask, toBuffer$1, kByteLength, maskBuffer, RANDOM_POOL_SIZE, randomPool, randomPoolPointer, DEFAULT, DEFLATING, GET_BLOB_DATA, Sender$1, sender, kForOnEventAttribute$1, kListener$1, kCode, kData, kError, kMessage, kReason, kTarget, kType, kWasClean, Event$1, CloseEvent, ErrorEvent, MessageEvent, EventTarget2, eventTarget, tokenChars$1, extension$1, EventEmitter$1, https$2, http$3, net, tls, randomBytes2, createHash$1, URL$2, PerMessageDeflate$1, Receiver3, Sender3, isBlob3, BINARY_TYPES, EMPTY_BUFFER, GUID$1, kForOnEventAttribute, kListener, kStatusCode, kWebSocket$1, NOOP$1, addEventListener, removeEventListener, format2, parse$2, toBuffer2, closeTimeout, kAborted, protocolVersions, readyStates, subprotocolRegex, WebSocket$1, websocket, tokenChars, subprotocol$1, EventEmitter2, http$2, createHash2, extension2, PerMessageDeflate3, subprotocol2, WebSocket3, GUID, kWebSocket, keyRegex, RUNNING, CLOSING, CLOSED, WebSocketServer2, websocketServer, WebSocketServerRaw_, allowedHostsServerCache, allowedHostsPreviewCache, isFileOrExtensionProtocolRE, WebSocketServerRaw, HMR_HEADER, isWebSocketServer, wsServerEvents, httpProxy$3, eventemitter3, eventemitter3Exports, common$3, requiresPort, url$1, common$2, redirectRegex, webOutgoing, followRedirects$1, debug$7, debug_1, url2, URL$1, http$1, https$1, Writable, assert, debug$6, useNativeURL, preservedUrlFields, events, eventHandlers, InvalidUrlError, RedirectionError, TooManyRedirectsError, MaxBodyLengthExceededError, WriteAfterEndError, destroy, followRedirectsExports, httpNative, httpsNative, web_o, common$1, followRedirects2, nativeAgents, webIncoming, http5, https7, common, wsIncoming, httpProxyExports, ProxyServer, httpProxy$2, httpProxy, httpProxy$1, debug$5, rewriteOriginHeader, debug$4, etag_1, crypto25, Stats, toString6, getEtag, debug$3, alias, noop4, ENCODING, knownJavascriptExtensionRE, ERR_DENIED_FILE, sirvOptions, windowsDriveRE, ERR_LOAD_URL, ERR_LOAD_PUBLIC_URL, ERR_DENIED_ID, debugLoad, debugTransform, debugCache$1, ALLOWED_META_NAME, ALLOWED_META_PROPERTY, DEFAULT_HTML_ASSET_SOURCES, modulePreloadPolyfillId, resolvedModulePreloadPolyfillId, htmlProxyRE$1, isHtmlProxyRE, inlineCSSRE$1, inlineImportRE, htmlLangRE, spaceRe, importMapRE, moduleScriptRE, modulePreloadLinkRE, importMapAppendRE, isHTMLProxy, isHTMLRequest, htmlProxyMap, htmlProxyResult, noInlineLinkRels, isAsyncScriptMap, attrValueStartRE, elementsAllowedInHead, importRE, commentRE, headInjectRE, headPrependInjectRE, htmlInjectRE, htmlPrependInjectRE, bodyInjectRE, bodyPrependInjectRE, doctypePrependInjectRE, unaryTags, debugCache, knownIgnoreList, trailingQuerySeparatorsRE, urlRE, rawRE, inlineRE$2, svgRE, wordCharRE, processNodeUrl, devHtmlHook, logTime, EMPTY_OBJECT$1, ModuleNode, ModuleGraph, DualWeakMap, ROOT_FILES, usedConfigs, serverConfigDefaults, debugHmr, whitespaceRE, normalizedClientDir, normalizeHotChannel, sortedHotUpdatePluginsCache, nonJsRe, isNonJsRequest, importMetaEnvMarker, importMetaEnvKeyReCache, workerOrSharedWorkerRE, workerFileRE, inlineRE$1, WORKER_FILE_ID, workerCache, workerAssetUrlRE, debug$2, clientDir, skipRE, canSkipImportAnalysis, optimizedDepChunkRE, optimizedDepDynamicRE, hasViteIgnoreRE, urlIsStringRE, templateLiteralRE, interopHelper, normalizedClientEntry, normalizedEnvEntry, wasmHelperId, wasmInitRE, wasmHelper, wasmHelperCode, wasmHelperPlugin, wasmFallbackPlugin, VariableDynamicImportError, example, defaultProtocol, ignoredProtocols, dynamicImportHelperId, relativePathRE, hasDynamicImportRE, dynamicImportHelper, filterForPlugin, viteAliasCustomResolver, EMPTY_OBJECT2, debugSourcemapCombineFilter, debugSourcemapCombine, debugResolve, debugPluginResolve, debugPluginTransform, debugPluginContainerContext, ERR_CLOSED_SERVER, EnvironmentPluginContainer, MinimalPluginContext, PluginContext, ResolveIdContext, LoadPluginContext, TransformPluginContext, PluginContainer, decoder, cssConfigDefaults, cssModuleRE, directRequestRE, htmlProxyRE, htmlProxyIndexRE, commonjsProxyRE, inlineRE, inlineCSSRE, styleAttrRE, functionCallRE, transformOnlyRE, nonEscapedDoubleQuoteRe, defaultCssBundleName, isCSSRequest, isModuleCSSRequest, isDirectCSSRequest, isDirectRequest, cssModulesCache, removedPureCssFilesCache, cssBundleNameCache, postcssConfigCache, cssUrlAssetRE, fileURLWithWindowsDriveRE, configToAtImportResolvers, importPostcssImport, importPostcssModules, importPostcss, preprocessorWorkerControllerCache, alwaysFakeWorkerWorkerControllerCache, viteHashUpdateMarker, viteHashUpdateMarkerRE, cssUrlRE, cssDataUriRE, importCssRE, cssImageSetRE, UrlRewritePostcssPlugin, cssNotProcessedRE, atImportRE, atCharsetRE, loadedPreprocessorPath, cachedSss, makeScssWorker, makeModernScssWorker, makeModernCompilerScssWorker, scssProcessor, makeLessWorker, lessProcessor, makeStylWorker, stylProcessor, createPreprocessorWorkerController, normalizeMaxWorkers, preprocessorSet, importLightningCSS, map2, esMap, esRE, versionRE, convertTargetsCache, convertTargets, isModernFlag, preloadMethod, preloadMarker, preloadHelperId, preloadMarkerRE, dynamicImportPrefixRE, dynamicImportTreeshakenRE, buildEnvironmentOptionsDefaults, warningIgnoreList, dynamicImportWarningIgnoreList, normalizeLog2, needsEscapeRegEx2, quoteNewlineRegEx2, backSlashRegEx2, getResolveUrl2, getRelativeUrlFromDocument2, getFileUrlFromFullPath2, getFileUrlFromRelativePath2, relativeUrlMechanisms2, customRelativeUrlMechanisms, toOutputFilePathInCss, toOutputFilePathInHtml, BuildEnvironment, builderOptionsDefaults, build$12, OTHER_SOURCE_MAP_REGEXP, debug$1, debounceMs, EnvironmentModuleNode, EnvironmentModuleGraph, DevEnvironment, callCrawlEndIfIdleAfterMs, RunnableDevEnvironment, NOOP, MIMES, ssrConfigDefaults, debug, promisifiedRealpath, SYMBOL_RESOLVED_CONFIG, configDefaults, clientAlias, _require;
 var init_dep_Dm0c1Wj2 = __esm({
   "node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js"() {
     fs$8 = __toESM(require("node:fs"), 1);
@@ -277584,7 +277584,7 @@ var init_dep_Dm0c1Wj2 = __esm({
     import_node_process3 = __toESM(require("node:process"), 1);
     import_node_events = require("node:events");
     init_dist3();
-    import_crypto24 = __toESM(require("crypto"), 1);
+    import_crypto25 = __toESM(require("crypto"), 1);
     import_node_assert = __toESM(require("node:assert"), 1);
     import_node_v8 = __toESM(require("node:v8"), 1);
     import_node_worker_threads = require("node:worker_threads");
@@ -281943,7 +281943,7 @@ ${e6.message}`);
     fs$6 = import_fs11.default;
     path$8 = import_path14.default;
     os$1 = import_os3.default;
-    crypto$1 = import_crypto24.default;
+    crypto$1 = import_crypto25.default;
     packageJson = require$$4;
     version3 = packageJson.version;
     LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
@@ -288111,7 +288111,7 @@ ${e6.message}`);
       }
     };
     receiver = Receiver$1;
-    ({ randomFillSync } = import_crypto24.default);
+    ({ randomFillSync } = import_crypto25.default);
     PerMessageDeflate$2 = permessageDeflate;
     ({ EMPTY_BUFFER: EMPTY_BUFFER$1, kWebSocket: kWebSocket$2, NOOP: NOOP$2 } = constants3);
     ({ isBlob: isBlob$1, isValidStatusCode } = validationExports);
@@ -288796,7 +288796,7 @@ ${e6.message}`);
     http$3 = import_http4.default;
     net = import_net.default;
     tls = import_tls.default;
-    ({ randomBytes: randomBytes2, createHash: createHash$1 } = import_crypto24.default);
+    ({ randomBytes: randomBytes2, createHash: createHash$1 } = import_crypto25.default);
     ({ URL: URL$2 } = import_url5.default);
     PerMessageDeflate$1 = permessageDeflate;
     Receiver3 = receiver;
@@ -289264,7 +289264,7 @@ ${e6.message}`);
     subprotocol$1 = { parse: parse$12 };
     EventEmitter2 = import_events3.default;
     http$2 = import_http4.default;
-    ({ createHash: createHash2 } = import_crypto24.default);
+    ({ createHash: createHash2 } = import_crypto25.default);
     extension2 = extension$1;
     PerMessageDeflate3 = permessageDeflate;
     subprotocol2 = subprotocol$1;
@@ -290740,7 +290740,7 @@ ${e6.message}`);
     };
     debug$4 = createDebugger("vite:html-fallback");
     etag_1 = etag;
-    crypto24 = import_crypto24.default;
+    crypto25 = import_crypto25.default;
     Stats = import_fs11.default.Stats;
     toString6 = Object.prototype.toString;
     getEtag = /* @__PURE__ */ getDefaultExportFromCjs2(etag_1);
@@ -302762,9 +302762,9 @@ async function writeCms(payload) {
 }
 async function createCmsSnapshot(req2, payload, label) {
   await ensureControlTables();
-  const crypto25 = await import("node:crypto");
+  const crypto26 = await import("node:crypto");
   const serialized = JSON.stringify(payload);
-  const checksum = crypto25.createHash("sha256").update(serialized).digest("hex");
+  const checksum = crypto26.createHash("sha256").update(serialized).digest("hex");
   const existing = await pool.query("SELECT id FROM admin_cms_versions WHERE checksum=$1 LIMIT 1", [checksum]);
   if (existing.rows.length) return { id: existing.rows[0].id, duplicate: true, checksum };
   const result = await pool.query(
@@ -349590,6 +349590,7 @@ var volunteerRoutes_default = router17;
 var import_express19 = __toESM(require_express2(), 1);
 var import_pdf_lib = __toESM(require_cjs15(), 1);
 var import_path3 = __toESM(require("path"), 1);
+var import_crypto15 = __toESM(require("crypto"), 1);
 var import_fs3 = __toESM(require("fs"), 1);
 var router18 = import_express19.default.Router();
 router18.get("/api/certificates/verify/:certificate_id", async (req2, res) => {
@@ -349685,11 +349686,358 @@ router18.get("/api/certificates/download/:id", authenticateToken, async (req2, r
     res.status(500).json({ error: err2.message });
   }
 });
+async function ensureTestCertificatesTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS test_certificates (
+        id VARCHAR(255) PRIMARY KEY,
+        certificate_id VARCHAR(255) UNIQUE NOT NULL,
+        user_id VARCHAR(255) NOT NULL,
+        candidate_name VARCHAR(255) NOT NULL,
+        duration_minutes INT NOT NULL,
+        total_questions INT NOT NULL,
+        correct_count INT NOT NULL,
+        score_percentage INT NOT NULL,
+        grade VARCHAR(10) NOT NULL,
+        category_breakdown JSONB,
+        issue_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_test_certificates_user_id ON test_certificates(user_id);
+      CREATE INDEX IF NOT EXISTS idx_test_certificates_cert_id ON test_certificates(certificate_id);
+    `);
+  } catch (err2) {
+    console.warn("Could not ensure test_certificates table:", err2.message);
+  }
+}
+var testCertTableEnsured = false;
+router18.use(async (_req, _res, next2) => {
+  if (!testCertTableEnsured) {
+    await ensureTestCertificatesTable();
+    testCertTableEnsured = true;
+  }
+  next2();
+});
+router18.post("/api/test-certificates/save", authenticateToken, async (req2, res) => {
+  try {
+    const userId = req2.user.id;
+    const {
+      candidate_name,
+      duration_minutes,
+      total_questions,
+      correct_count,
+      score_percentage,
+      grade,
+      category_breakdown,
+      certificate_id: customCertId
+    } = req2.body;
+    const name = String(candidate_name || req2.user.name || "Candidate").trim();
+    const duration = Number(duration_minutes || 10);
+    const totalQ = Number(total_questions || 25);
+    const correctQ = Number(correct_count || 0);
+    const scorePct = Number(score_percentage || 0);
+    const gradeVal = String(grade || "B").trim();
+    const certId = customCertId || `RPF-TEST-${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10).replace(/-/g, "")}-${import_crypto15.default.randomBytes(3).toString("hex").toUpperCase()}`;
+    const id3 = import_crypto15.default.randomUUID();
+    const result = await pool.query(
+      `INSERT INTO test_certificates
+       (id, certificate_id, user_id, candidate_name, duration_minutes, total_questions, correct_count, score_percentage, grade, category_breakdown, issue_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+       ON CONFLICT (certificate_id) DO UPDATE SET
+         score_percentage = EXCLUDED.score_percentage,
+         correct_count = EXCLUDED.correct_count,
+         grade = EXCLUDED.grade
+       RETURNING *`,
+      [
+        id3,
+        certId,
+        userId,
+        name,
+        duration,
+        totalQ,
+        correctQ,
+        scorePct,
+        gradeVal,
+        JSON.stringify(category_breakdown || {})
+      ]
+    );
+    try {
+      await pool.query(
+        `INSERT INTO certificates
+         (id, certificate_id, volunteer_id, title, title_hi, recipient_name, role, duty_hours, issue_date)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+         ON CONFLICT (certificate_id) DO NOTHING`,
+        [
+          import_crypto15.default.randomUUID(),
+          certId,
+          userId,
+          "Online Test Assessment Certificate",
+          "\u0911\u0928\u0932\u093E\u0907\u0928 \u091F\u0947\u0938\u094D\u091F \u092E\u0942\u0932\u094D\u092F\u093E\u0902\u0915\u0928 \u092A\u094D\u0930\u092E\u093E\u0923\u092A\u0924\u094D\u0930",
+          name,
+          "Student",
+          Math.round(duration / 60)
+        ]
+      );
+    } catch {
+    }
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+  } catch (err2) {
+    console.error("Failed to save test certificate:", err2);
+    res.status(500).json({ success: false, error: err2.message });
+  }
+});
+router18.get("/api/test-certificates/my", authenticateToken, async (req2, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM test_certificates WHERE user_id = $1 ORDER BY issue_date DESC`,
+      [req2.user.id]
+    );
+    res.json({
+      success: true,
+      certificates: result.rows
+    });
+  } catch (err2) {
+    res.status(500).json({ success: false, error: err2.message });
+  }
+});
+router18.get("/api/test-certificates/:certificate_id", authenticateToken, async (req2, res) => {
+  try {
+    const certId = req2.params.certificate_id;
+    const result = await pool.query(
+      `SELECT * FROM test_certificates WHERE certificate_id = $1 OR id = $1`,
+      [certId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Certificate not found" });
+    }
+    const cert2 = result.rows[0];
+    if (String(cert2.user_id) !== String(req2.user.id) && !["admin", "super_admin", "superadmin"].includes(req2.user.role)) {
+      return res.status(403).json({ success: false, error: "Access denied: Unauthorized certificate access" });
+    }
+    res.json({ success: true, certificate: cert2 });
+  } catch (err2) {
+    res.status(500).json({ success: false, error: err2.message });
+  }
+});
+router18.get("/api/test-certificates/download/:certificate_id", authenticateToken, async (req2, res) => {
+  try {
+    const certId = req2.params.certificate_id;
+    const result = await pool.query(
+      `SELECT * FROM test_certificates WHERE certificate_id = $1 OR id = $1`,
+      [certId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Certificate not found" });
+    }
+    const cert2 = result.rows[0];
+    if (String(cert2.user_id) !== String(req2.user.id) && !["admin", "super_admin", "superadmin"].includes(req2.user.role)) {
+      return res.status(403).json({ success: false, error: "Unauthorized download access" });
+    }
+    const pdfDoc = await import_pdf_lib.PDFDocument.create();
+    const page = pdfDoc.addPage([842, 595]);
+    const { width, height } = page.getSize();
+    const fontBold = await pdfDoc.embedFont(import_pdf_lib.StandardFonts.HelveticaBold);
+    const fontNormal = await pdfDoc.embedFont(import_pdf_lib.StandardFonts.Helvetica);
+    const fontOblique = await pdfDoc.embedFont(import_pdf_lib.StandardFonts.HelveticaOblique);
+    page.drawRectangle({
+      x: 20,
+      y: 20,
+      width: width - 40,
+      height: height - 40,
+      borderColor: (0, import_pdf_lib.rgb)(0.14, 0.36, 0.27),
+      // #245D45 Emerald
+      borderWidth: 4
+    });
+    page.drawRectangle({
+      x: 26,
+      y: 26,
+      width: width - 52,
+      height: height - 52,
+      borderColor: (0, import_pdf_lib.rgb)(0.85, 0.65, 0.13),
+      // Gold border
+      borderWidth: 1.5
+    });
+    const logoCandidates = [
+      import_path3.default.join(process.cwd(), "public", "assets", "logo.png"),
+      import_path3.default.join(process.cwd(), "public", "assets", "rpf-samahit-icon.png")
+    ];
+    const logoPath = logoCandidates.find((c4) => import_fs3.default.existsSync(c4));
+    if (logoPath) {
+      try {
+        const logoBytes = import_fs3.default.readFileSync(logoPath);
+        const logoImage = await pdfDoc.embedPng(logoBytes);
+        const logoScale = 0.14;
+        const logoDims = logoImage.scale(logoScale);
+        page.drawImage(logoImage, {
+          x: (width - logoDims.width) / 2,
+          y: height - logoDims.height - 35,
+          width: logoDims.width,
+          height: logoDims.height
+        });
+      } catch {
+      }
+    }
+    const orgName = "RP Foundation";
+    const orgWidth = fontBold.widthOfTextAtSize(orgName, 26);
+    page.drawText(orgName, {
+      x: (width - orgWidth) / 2,
+      y: height - 120,
+      size: 26,
+      font: fontBold,
+      color: (0, import_pdf_lib.rgb)(0.14, 0.36, 0.27)
+      // Emerald
+    });
+    const title = "CERTIFICATE OF ACHIEVEMENT";
+    const titleWidth = fontBold.widthOfTextAtSize(title, 20);
+    page.drawText(title, {
+      x: (width - titleWidth) / 2,
+      y: height - 155,
+      size: 20,
+      font: fontBold,
+      color: (0, import_pdf_lib.rgb)(0.8, 0.5, 0.05)
+      // Gold/Amber
+    });
+    page.drawLine({
+      start: { x: width / 2 - 140, y: height - 168 },
+      end: { x: width / 2 + 140, y: height - 168 },
+      thickness: 1,
+      color: (0, import_pdf_lib.rgb)(0.85, 0.65, 0.13)
+    });
+    const subtitle = "This certificate is awarded to";
+    const subWidth = fontOblique.widthOfTextAtSize(subtitle, 14);
+    page.drawText(subtitle, {
+      x: (width - subWidth) / 2,
+      y: height - 210,
+      size: 14,
+      font: fontOblique,
+      color: (0, import_pdf_lib.rgb)(0.3, 0.3, 0.3)
+    });
+    const candidateName = String(cert2.candidate_name || "Candidate").toUpperCase();
+    const nameWidth = fontBold.widthOfTextAtSize(candidateName, 30);
+    page.drawText(candidateName, {
+      x: (width - nameWidth) / 2,
+      y: height - 260,
+      size: 30,
+      font: fontBold,
+      color: (0, import_pdf_lib.rgb)(0.08, 0.15, 0.25)
+    });
+    const expl = "for completing the online test and achieving the following result.";
+    const explWidth = fontNormal.widthOfTextAtSize(expl, 13);
+    page.drawText(expl, {
+      x: (width - explWidth) / 2,
+      y: height - 295,
+      size: 13,
+      font: fontNormal,
+      color: (0, import_pdf_lib.rgb)(0.35, 0.35, 0.35)
+    });
+    const scoreBoxY = height - 375;
+    page.drawRectangle({
+      x: width / 2 - 160,
+      y: scoreBoxY,
+      width: 320,
+      height: 55,
+      color: (0, import_pdf_lib.rgb)(0.95, 0.98, 0.96),
+      borderColor: (0, import_pdf_lib.rgb)(0.7, 0.85, 0.75),
+      borderWidth: 1
+    });
+    const gradeText = `Grade: ${cert2.grade}`;
+    const pctText = `Percentage: ${cert2.score_percentage}%`;
+    const scoreText = `${gradeText}    |    ${pctText}`;
+    const scoreTextWidth = fontBold.widthOfTextAtSize(scoreText, 16);
+    page.drawText(scoreText, {
+      x: (width - scoreTextWidth) / 2,
+      y: scoreBoxY + 30,
+      size: 16,
+      font: fontBold,
+      color: (0, import_pdf_lib.rgb)(0.14, 0.36, 0.27)
+    });
+    const detailText = `Correct: ${cert2.correct_count} of ${cert2.total_questions} Questions (${cert2.duration_minutes} Mins)`;
+    const detailWidth = fontNormal.widthOfTextAtSize(detailText, 11);
+    page.drawText(detailText, {
+      x: (width - detailWidth) / 2,
+      y: scoreBoxY + 12,
+      size: 11,
+      font: fontNormal,
+      color: (0, import_pdf_lib.rgb)(0.4, 0.45, 0.4)
+    });
+    const appLine = "Online Test through Samahit App";
+    const appLineWidth = fontNormal.widthOfTextAtSize(appLine, 12);
+    page.drawText(appLine, {
+      x: (width - appLineWidth) / 2,
+      y: height - 425,
+      size: 12,
+      font: fontNormal,
+      color: (0, import_pdf_lib.rgb)(0.2, 0.4, 0.3)
+    });
+    const certIdLine = `Certificate ID: ${cert2.certificate_id}`;
+    page.drawText(certIdLine, {
+      x: 50,
+      y: 50,
+      size: 10,
+      font: fontNormal,
+      color: (0, import_pdf_lib.rgb)(0.4, 0.4, 0.4)
+    });
+    const issueDate = new Date(cert2.issue_date || Date.now()).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+    const dateLine = `Date: ${issueDate}`;
+    const dateLineWidth = fontNormal.widthOfTextAtSize(dateLine, 10);
+    page.drawText(dateLine, {
+      x: width - dateLineWidth - 50,
+      y: 50,
+      size: 10,
+      font: fontNormal,
+      color: (0, import_pdf_lib.rgb)(0.4, 0.4, 0.4)
+    });
+    const verifyNote = "Verified Digital Certificate \u2022 RP Foundation";
+    const verifyWidth = fontNormal.widthOfTextAtSize(verifyNote, 9);
+    page.drawText(verifyNote, {
+      x: (width - verifyWidth) / 2,
+      y: 35,
+      size: 9,
+      font: fontNormal,
+      color: (0, import_pdf_lib.rgb)(0.5, 0.5, 0.5)
+    });
+    const pdfBytes = await pdfDoc.save();
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=RP_Foundation_Certificate_${cert2.certificate_id}.pdf`);
+    res.send(Buffer.from(pdfBytes));
+  } catch (err2) {
+    console.error("PDF download error:", err2);
+    res.status(500).json({ success: false, error: err2.message });
+  }
+});
+router18.get("/api/test-certificates/verify/:certificate_id", async (req2, res) => {
+  try {
+    const certId = req2.params.certificate_id;
+    const result = await pool.query(
+      `SELECT certificate_id, candidate_name, duration_minutes, total_questions, score_percentage, grade, issue_date
+       FROM test_certificates WHERE certificate_id = $1`,
+      [certId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Invalid or non-existent certificate ID" });
+    }
+    res.json({
+      success: true,
+      data: result.rows[0],
+      organization: "RP Foundation",
+      issuedThrough: "Samahit App"
+    });
+  } catch (err2) {
+    res.status(500).json({ success: false, error: err2.message });
+  }
+});
 var certificateRoutes_default = router18;
 
 // src/routes/communityRoutes.ts
 var import_express20 = __toESM(require_express2(), 1);
-var import_crypto15 = __toESM(require("crypto"), 1);
+var import_crypto16 = __toESM(require("crypto"), 1);
 var router19 = import_express20.default.Router();
 router19.get("/api/community_posts", async (req2, res) => {
   try {
@@ -349702,7 +350050,7 @@ router19.get("/api/community_posts", async (req2, res) => {
 router19.post("/api/community_posts", async (req2, res) => {
   try {
     const { authorName, authorPhone, authorRole, textEn, textHi, segment, location: location2, imageUrl, likes, likedByMe, createdAt } = req2.body;
-    const id3 = import_crypto15.default.randomUUID();
+    const id3 = import_crypto16.default.randomUUID();
     await pool.query(
       `INSERT INTO community_posts (id, "authorName", "authorPhone", "authorRole", "textEn", "textHi", segment, location, "imageUrl", likes, "likedByMe", "createdAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
@@ -349742,7 +350090,7 @@ router19.post("/api/blogs", authenticateToken, async (req2, res) => {
   try {
     const { title, content } = req2.body;
     if (!title || !content) return res.status(400).json({ success: false, error: "Title and Content are required" });
-    const id3 = import_crypto15.default.randomUUID();
+    const id3 = import_crypto16.default.randomUUID();
     const authorName = req2.user.displayName || req2.user.name || "Anonymous Volunteer";
     const authorId = req2.user.id;
     await pool.query(
@@ -349784,7 +350132,7 @@ router19.get("/api/social", async (req2, res) => {
 router19.post("/api/social", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { author, role, avatar, textEn, textHi, image, platform: platform3, link } = req2.body;
-    const id3 = import_crypto15.default.randomUUID();
+    const id3 = import_crypto16.default.randomUUID();
     await pool.query(
       `INSERT INTO social_posts 
        (id, author, role, avatar, "textEn", "textHi", image, likes, "commentsCount", liked, platform, link, "createdAt") 
@@ -349853,7 +350201,7 @@ var communityRoutes_default = router19;
 
 // src/routes/jobRoutes.ts
 var import_express21 = __toESM(require_express2(), 1);
-var import_crypto16 = __toESM(require("crypto"), 1);
+var import_crypto17 = __toESM(require("crypto"), 1);
 var router20 = import_express21.default.Router();
 var jobsQuery = 'SELECT id, "titleEn", "titleHi", "company", "locEn", "locHi", "salary", "typeEn", "typeHi", "postedAt" FROM jobs ORDER BY "postedAt" DESC';
 router20.get("/api/jobs", async (req2, res) => {
@@ -349877,7 +350225,7 @@ router20.get("/api/admin/jobs", authenticateToken, requireAdmin, async (req2, re
 router20.post("/api/jobs", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { titleEn, titleHi, locEn, locHi, salary, typeEn, typeHi, company } = req2.body;
-    const id3 = import_crypto16.default.randomUUID();
+    const id3 = import_crypto17.default.randomUUID();
     const result = await pool.query(`INSERT INTO jobs (id, "titleEn", "titleHi", "company", "locEn", "locHi", "salary", "typeEn", "typeHi", "postedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`, [id3, titleEn, titleHi, company, locEn, locHi, salary, typeEn, typeHi, (/* @__PURE__ */ new Date()).toISOString()]);
     res.json({ success: true, id: result.rows[0].id });
   } catch (error3) {
@@ -349905,7 +350253,7 @@ router20.post("/api/jobs/:id/edit", authenticateToken, requireAdmin, async (req2
 router20.post("/api/job_applications", async (req2, res) => {
   try {
     const { jobId, jobTitle, fullName, phone, resume: resume2 } = req2.body;
-    const id3 = import_crypto16.default.randomUUID();
+    const id3 = import_crypto17.default.randomUUID();
     await pool.query(`INSERT INTO job_applications (id, "jobId", "jobTitle", "fullName", phone, resume, "createdAt") VALUES ($1,$2,$3,$4,$5,$6,$7)`, [id3, jobId, jobTitle, fullName, phone, resume2 || "", (/* @__PURE__ */ new Date()).toISOString()]);
     res.json({ success: true });
   } catch (error3) {
@@ -349958,7 +350306,7 @@ var sendPushNotification = async (fcmToken, title, body) => {
 
 // src/routes/donationRoutes.ts
 var import_express22 = __toESM(require_express2(), 1);
-var import_crypto17 = __toESM(require("crypto"), 1);
+var import_crypto18 = __toESM(require("crypto"), 1);
 var router21 = import_express22.default.Router();
 var BLOOD_GROUPS = /* @__PURE__ */ new Set(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]);
 var VALID_URGENCY = /* @__PURE__ */ new Set(["Normal", "Urgent", "Emergency"]);
@@ -350072,7 +350420,7 @@ router21.post("/api/volunteer-registration/submit", async (req2, res) => {
       [mobile, email, username]
     );
     if (duplicate.rows.length) return res.status(409).json({ success: false, error: "This User ID, mobile number, or email is already registered." });
-    const id3 = import_crypto17.default.randomUUID();
+    const id3 = import_crypto18.default.randomUUID();
     const registrationNumber = `RPF/VOL/${(/* @__PURE__ */ new Date()).getFullYear().toString().slice(-2)}/${Math.floor(1e5 + Math.random() * 9e5)}`;
     const passwordHash = await bcryptjs_default.hash(password, 12);
     await pool.query("BEGIN");
@@ -350166,7 +350514,7 @@ router21.post("/api/blood-network/requests", async (req2, res) => {
       const body = group + " blood is required at " + request.hospital_name + ". Tap to Accept.";
       await pool.query(
         `INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_request',$5)`,
-        [import_crypto17.default.randomUUID(), match2.volunteer_id, title, body, request.id]
+        [import_crypto18.default.randomUUID(), match2.volunteer_id, title, body, request.id]
       );
       try {
         const t7 = await pool.query("SELECT fcm_token FROM volunteers WHERE id=$1", [match2.volunteer_id]);
@@ -350210,13 +350558,13 @@ router21.post("/api/blood-network/requests/:id/accept", async (req2, res) => {
     if (request.requester_id === volunteer.id) return res.status(400).json({ success: false, error: "You cannot accept your own requisition." });
     await pool.query(
       `INSERT INTO blood_request_acceptances(id,request_id,volunteer_id,status,expires_at) VALUES($1,$2,$3,'accepted',NOW()+INTERVAL '24 hours') ON CONFLICT(request_id,volunteer_id) DO UPDATE SET status='accepted',expires_at=NOW()+INTERVAL '24 hours'`,
-      [import_crypto17.default.randomUUID(), request.id, volunteer.id]
+      [import_crypto18.default.randomUUID(), request.id, volunteer.id]
     );
     const title = "Blood Request Accepted";
     const body = (volunteer.full_name || "A user") + " has accepted your " + request.blood_group + " blood request.";
     await pool.query(
       `INSERT INTO app_notifications(id,recipient_id,title,message,type,reference_id) VALUES($1,$2,$3,$4,'blood_acceptance',$5)`,
-      [import_crypto17.default.randomUUID(), request.requester_id, title, body, String(request.id)]
+      [import_crypto18.default.randomUUID(), request.requester_id, title, body, String(request.id)]
     );
     res.json({ success: true });
   } catch (error3) {
@@ -350658,7 +351006,7 @@ var cmsRoutes_default = router22;
 
 // src/routes/campaignRoutes.ts
 var import_express24 = __toESM(require_express2(), 1);
-var import_crypto18 = __toESM(require("crypto"), 1);
+var import_crypto19 = __toESM(require("crypto"), 1);
 var router23 = import_express24.default.Router();
 router23.get("/api/campaigns", async (req2, res) => {
   const cached = apiCache.get("/api/campaigns");
@@ -350680,7 +351028,7 @@ router23.get("/api/campaigns", async (req2, res) => {
 router23.post("/api/campaigns", authenticateToken, requireAdmin, async (req2, res) => {
   try {
     const { titleEn, titleHi, goalAmount, raisedAmount, imageUrl, urgent } = req2.body;
-    const id3 = import_crypto18.default.randomUUID();
+    const id3 = import_crypto19.default.randomUUID();
     await pool.query(
       `INSERT INTO campaigns 
        (id, "titleEn", "titleHi", "goalAmount", "raisedAmount", "imageUrl", "coverImgUrl", urgent, "createdAt") 
@@ -350740,7 +351088,7 @@ var campaignRoutes_default = router23;
 
 // src/routes/submissionRoutes.ts
 var import_express25 = __toESM(require_express2(), 1);
-var import_crypto19 = __toESM(require("crypto"), 1);
+var import_crypto20 = __toESM(require("crypto"), 1);
 var router24 = import_express25.default.Router();
 router24.get("/api/submissions", async (req2, res) => {
   try {
@@ -350762,7 +351110,7 @@ router24.post("/api/submissions", async (req2, res) => {
       body = body[0];
     }
     const { userId, citizenName, citizenPhone, serviceName, submissionData, status: status2, latitude, longitude, timestamp } = body;
-    const id3 = import_crypto19.default.randomUUID();
+    const id3 = import_crypto20.default.randomUUID();
     const result = await pool.query(
       `INSERT INTO service_submissions_v2 
        (id, "userId", "serviceNameEn", "serviceName", "citizenName", "citizenPhone", "submissionData", status, latitude, longitude, "createdAt", timestamp) 
@@ -350900,7 +351248,7 @@ var userRoutes_default = router25;
 
 // src/routes/uploadRoutes.ts
 var import_express27 = __toESM(require_express2(), 1);
-var import_crypto20 = __toESM(require("crypto"), 1);
+var import_crypto21 = __toESM(require("crypto"), 1);
 var import_multer = __toESM(require_multer(), 1);
 var import_path4 = __toESM(require("path"), 1);
 var import_fs4 = __toESM(require("fs"), 1);
@@ -351024,7 +351372,7 @@ var saveFileLocally = async (file, req2) => {
     else if (file.mimetype.includes("png")) ext = ".png";
     else ext = ".jpg";
   }
-  const filename = `${Date.now()}-${import_crypto20.default.randomUUID().slice(0, 8)}${ext}`;
+  const filename = `${Date.now()}-${import_crypto21.default.randomUUID().slice(0, 8)}${ext}`;
   const uploadDir = import_path4.default.join(process.cwd(), "uploads");
   if (!import_fs4.default.existsSync(uploadDir)) {
     import_fs4.default.mkdirSync(uploadDir, { recursive: true });
@@ -351925,7 +352273,7 @@ var publicExternalRoutes_default = router28;
 
 // src/routes/adminHqExtraRoutes.ts
 var import_express30 = __toESM(require_express2(), 1);
-var import_crypto21 = __toESM(require("crypto"), 1);
+var import_crypto22 = __toESM(require("crypto"), 1);
 var router29 = import_express30.default.Router();
 router29.all("/api/admin-setup", (_req, res) => {
   return res.status(410).json({
@@ -351986,7 +352334,7 @@ router29.post("/api/admin/hq/certificates/issue", async (req2, res) => {
   try {
     const { volunteer_id, service_id } = req2.body || {};
     if (!volunteer_id || !service_id) return res.status(400).json({ success: false, error: "Volunteer and service are required." });
-    const certId = `RP-${(/* @__PURE__ */ new Date()).getFullYear()}-${import_crypto21.default.randomBytes(6).toString("hex").toUpperCase()}`;
+    const certId = `RP-${(/* @__PURE__ */ new Date()).getFullYear()}-${import_crypto22.default.randomBytes(6).toString("hex").toUpperCase()}`;
     const volRes = await pool.query(`SELECT id FROM volunteers WHERE id = $1 OR username = $1 OR registration_number = $1`, [volunteer_id]);
     if (volRes.rows.length === 0) return res.status(404).json({ success: false, error: "Volunteer not found." });
     const realVolId = volRes.rows[0].id;
@@ -352063,7 +352411,7 @@ var adminHqExtraRoutes_default = router29;
 
 // src/routes/adminDynamicRoutes.ts
 var import_express31 = __toESM(require_express2(), 1);
-var import_crypto22 = __toESM(require("crypto"), 1);
+var import_crypto23 = __toESM(require("crypto"), 1);
 var router30 = import_express31.default.Router();
 router30.get("/api/admin-setup", async (req2, res) => {
   return res.status(410).json({ success: false, error: "This setup endpoint has been permanently retired for security." });
@@ -352181,7 +352529,7 @@ router30.post("/api/admin/users", authenticateToken, requireAdmin, async (req2, 
         return res.status(409).json({ success: false, error: "Username is already in use" });
       }
     }
-    const userId = import_crypto22.default.randomUUID();
+    const userId = import_crypto23.default.randomUUID();
     const passwordHash = password && password.trim() ? await bcryptjs_default.hash(password.trim(), 10) : await bcryptjs_default.hash("RPF@12345", 10);
     const safeUsername = username && username.trim() ? username.trim().toLowerCase() : phone && phone.trim() ? phone.trim() : `user_${userId.slice(0, 8)}`;
     const result = await pool.query(
