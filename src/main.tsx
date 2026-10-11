@@ -66,6 +66,10 @@ if (isNative || (!isSelfHostedBackend && !isLocalhost)) {
     else if (url.startsWith('api/public/live-feeds')) url = `${RPF_WEB_ORIGIN}/rss-proxy.php`;
     else if (url.startsWith('/api/')) url = `${RPF_WEB_ORIGIN}${url}`;
     else if (url.startsWith('api/')) url = `${RPF_WEB_ORIGIN}/${url}`;
+    else if (url.startsWith('/updates/')) url = `${RPF_WEB_ORIGIN}${url}`;
+    else if (url.startsWith('updates/')) url = `${RPF_WEB_ORIGIN}/${url}`;
+    else if (url.startsWith('/download/')) url = `${RPF_WEB_ORIGIN}${url}`;
+    else if (url.startsWith('download/')) url = `${RPF_WEB_ORIGIN}/${url}`;
     else if (url.startsWith('/rss-proxy.php')) url = `${RPF_WEB_ORIGIN}${url}`;
     else if (url.startsWith('rss-proxy.php')) url = `${RPF_WEB_ORIGIN}/${url}`;
 

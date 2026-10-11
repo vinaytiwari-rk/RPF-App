@@ -25,7 +25,7 @@ const actions = [
   { title: "Grievance", subtitle: "Submit and track an issue", icon: ClipboardList, route: "/grievance", accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20" }
 ];
 
-async function timedFetch(url: string, ms = 5000) {
+async function timedFetch(url: string, ms = 12000) {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), ms);
   try {
@@ -187,7 +187,9 @@ function MarqueeTrack({
         dir="ltr"
         className="flex whitespace-nowrap min-w-max items-center transition-transform group-hover:[animation-play-state:paused]"
         style={{
-          animation: `${animationName} ${duration}s linear infinite`
+          animation: `${animationName} ${duration}s linear infinite`,
+          willChange: "transform",
+          WebkitTransform: "translate3d(0, 0, 0)"
         }}
       >
         {trackItems.map((title, idx) => (
@@ -229,7 +231,13 @@ export default function Home() {
     return defaultNationalHeadlines;
   });
 
-  const [marquee2, setMarquee2] = useState<string[]>([]);
+  const [marquee2, setMarquee2] = useState<string[]>(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem("@rpf_marquee2_mpinfo_v2") || "[]");
+      if (Array.isArray(cached) && cached.length) return cached;
+    } catch {}
+    return defaultMpHeadlines;
+  });
   const [weather, setWeather] = useState<{ temperature: number; apparent: number; humidity: number; wind: number; code: number; timezone: string } | null>(() => {
     try {
       const cached = localStorage.getItem("@rpf_live_weather_temp");
@@ -402,8 +410,14 @@ export default function Home() {
         const mpItems = parseFeedItems(mpJson?.data || []);
 
         if (!alive) return;
-        setMarquee1(pibItems);
-        setMarquee2(mpItems);
+        if (pibItems.length) {
+          setMarquee1(pibItems);
+          try { localStorage.setItem("@rpf_marquee1_national_v2", JSON.stringify(pibItems)); } catch {}
+        }
+        if (mpItems.length) {
+          setMarquee2(mpItems);
+          try { localStorage.setItem("@rpf_marquee2_mpinfo_v2", JSON.stringify(mpItems)); } catch {}
+        }
       } catch {
         if (!alive) return;
       }

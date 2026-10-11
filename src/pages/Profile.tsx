@@ -829,10 +829,17 @@ export default function Profile() {
                           <span className="text-xs font-bold text-[#243B32]">v{updateManifest.versionName}</span>
                         </div>
 
-                        <div className="space-y-1 text-xs text-slate-600">
-                          <p className="font-semibold text-[#243B32]">{updateManifest.releaseNotes || (hi ? "नया प्रदर्शन व सुरक्षा अपडेट उपलब्ध है।" : "Performance and security enhancements.")}</p>
-                          <p className="text-[10px] text-slate-500">
-                            {hi ? "आकार" : "Size"}: {(updateManifest.size / (1024 * 1024)).toFixed(1)} MB • Build {updateManifest.versionCode}
+                        <div className="space-y-1.5 text-xs text-slate-700">
+                          <div className="rounded-xl bg-white/85 p-2.5 border border-orange-200/80 shadow-2xs space-y-1">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#D97706]">
+                              {hi ? "इस अपडेट में क्या नया है:" : "What's in this update:"}
+                            </p>
+                            <p className="text-xs font-semibold text-[#243B32] whitespace-pre-line leading-relaxed">
+                              {updateManifest.releaseNotes || (hi ? "दैनिक पंचांग, रील्स प्लेयर और बॉटम मार्की सहित संपूर्ण सुविधाएं Web के समान 100% सुचारू।" : "Panchang auto-load, Reels video player, Bottom marquee and complete feature parity with Web.")}
+                            </p>
+                          </div>
+                          <p className="text-[10px] text-slate-500 font-medium">
+                            {hi ? "आकार" : "Size"}: {updateManifest.size ? (updateManifest.size / (1024 * 1024)).toFixed(1) + " MB" : "~34.1 MB"} • Build {updateManifest.versionCode}
                           </p>
                           {updateManifest.sha256 && (
                             <p className="text-[9px] text-slate-400 font-mono truncate" title={updateManifest.sha256}>

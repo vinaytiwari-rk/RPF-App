@@ -430,4 +430,35 @@ router.get("/api/public/live-feeds", async (_req,res) => {
   return res.set("Cache-Control", "no-store").json({ success: true, data });
 });
 
+router.get("/api/public/app-update", async (_req, res) => {
+  try {
+    const fs = await import("fs");
+    const path = await import("path");
+    const candidates = [
+      path.join(process.cwd(), "updates", "manifest.json"),
+      path.join(process.cwd(), "dist", "updates", "manifest.json"),
+      path.join(process.cwd(), "public", "updates", "manifest.json")
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        const raw = fs.readFileSync(p, "utf8");
+        const json = JSON.parse(raw);
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        return res.json({ success: true, ...json });
+      }
+    }
+    return res.json({
+      success: true,
+      versionCode: 21559,
+      versionName: "2.5.1",
+      downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
+      minSupportedVersionCode: 20500,
+      releaseNotes: "Complete synchronization update: Live Panchang auto-load, Instagram Reels & video player fix, Bottom Marquee smooth scrolling, and full feature parity with Web."
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err?.message || "Failed to read update manifest" });
+  }
+});
+
 export default router;

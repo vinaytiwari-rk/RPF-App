@@ -56,7 +56,12 @@ export default function ReelsVerticalViewer({
 
   useEffect(() => {
     setLoaded({});
-  }, [currentIndex]);
+    const timer = window.setTimeout(() => {
+      const activeId = reels[currentIndex]?.id;
+      if (activeId) setLoaded((prev) => ({ ...prev, [activeId]: true }));
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [currentIndex, reels]);
 
   const handleScroll = () => {
     const container = containerRef.current;
@@ -108,7 +113,7 @@ export default function ReelsVerticalViewer({
             (tweetId
               ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`
               : igShortcode
-                ? `https://www.instagram.com/p/${igShortcode}/embed/captioned/`
+                ? `https://www.instagram.com/p/${igShortcode}/embed/`
                 : undefined);
 
           return (
@@ -178,8 +183,6 @@ export default function ReelsVerticalViewer({
                     className="h-full w-full max-w-sm overflow-hidden rounded-2xl border-0 bg-white shadow-2xl aspect-[9/16]"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
-                    scrolling="no"
-                    sandbox="allow-scripts allow-same-origin allow-forms"
                     onLoad={() => {
                       setLoaded((prev) => ({ ...prev, [reel.id]: true }));
                     }}

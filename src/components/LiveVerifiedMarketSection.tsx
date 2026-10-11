@@ -149,7 +149,14 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
     return FALLBACK_CITIES[0]; // Temporary UI placeholder until GPS/manual location resolves
   });
 
-  const [data, setData] = useState<MarketSummary | null>(null);
+  const [data, setData] = useState<MarketSummary | null>(() => {
+    try {
+      const raw = localStorage.getItem(`@rpf_market_summary_cache:${selectedCity.id}`);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const [viewMode, setViewMode] = useState<"grid" | "scroll">(() => {
     try {
@@ -173,22 +180,19 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
   const [showCityPicker, setShowCityPicker] = useState<boolean>(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState<boolean>(false);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
-  const [locationResolved, setLocationResolved] = useState<boolean>(() => {
-    try { return localStorage.getItem("@rpf_selected_market_manual") === "1"; } catch { return false; }
-  });
+  const [locationResolved, setLocationResolved] = useState<boolean>(true);
   const availableStates = Array.from(new Set(cities.map((c) => c.state))).sort();
   const citiesInState = cities.filter((c) => c.state === selectedState).sort((a, b) => a.name.localeCompare(b.name));
 
   const fetchMarketData = useCallback((cityId: string, state: string) => {
     setIsLoadingData(true);
-    setData(null);
     axios
       .get(`/api/public/market-summary?city=${encodeURIComponent(cityId)}&state=${encodeURIComponent(state)}&_t=${Date.now()}`, { headers: { "Cache-Control": "no-cache" } })
       .then((res) => {
         if (res.data?.success && res.data?.data) {
           setData(res.data.data);
           try {
-
+            localStorage.setItem(`@rpf_market_summary_cache:${cityId}`, JSON.stringify(res.data.data));
           } catch {}
         }
       })
@@ -236,9 +240,8 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
   }), []);
 
   useEffect(() => {
-    if (!locationResolved) return;
     fetchMarketData(selectedCity.id, selectedCity.state);
-  }, [locationResolved, selectedCity.id, selectedCity.state, fetchMarketData]);
+  }, [selectedCity.id, selectedCity.state, fetchMarketData]);
 
   // Auto-detect the user's real current city on first visit.
   useEffect(() => {
@@ -247,11 +250,12 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
       resolveCurrentLocation().then((current) => {
         setSelectedCity(current);
         setSelectedState(current.state);
-        setLocationResolved(true);
         try {
           localStorage.setItem("@rpf_selected_market_state", current.state);
         } catch {}
-      }).catch(() => {});
+      }).catch(() => {
+        // Fallback to default city gracefully without blocking data
+      });
     }
   }, [resolveCurrentLocation]);
 

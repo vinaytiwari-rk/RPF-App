@@ -8,10 +8,12 @@ PassengerMinInstances 1
 PassengerMaxPoolSize 2
 # DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
 
-# Disable Imunify360 Web Shield Bot Protection for API routes
+# Disable Imunify360 Web Shield Bot Protection for API routes and APK downloads
 <IfModule mod_env.c>
   SetEnvIf Request_URI "^/api/" imunify360_disabled=1
   SetEnvIf Request_URI "^/api/health" imunify360_disabled=1
+  SetEnvIf Request_URI "^/updates/" imunify360_disabled=1
+  SetEnvIf Request_URI "^/download/" imunify360_disabled=1
 </IfModule>
 
 # API CORS: the frontend uses bearer-token authorization, not cookie credentials.

@@ -44,7 +44,12 @@ interface NativeDownloadsPlugin {
 
 const NativeDownloads = registerPlugin<NativeDownloadsPlugin>("NativeDownloads");
 
-const MANIFEST_URL = "https://appapi.therpfoundation.org/updates/manifest.json";
+const MANIFEST_URLS = [
+  "https://appapi.therpfoundation.org/api/public/app-update",
+  "https://appapi.therpfoundation.org/updates/manifest.json",
+  "/api/public/app-update",
+  "/updates/manifest.json"
+];
 
 /**
  * Fallback static web/app version code and name
@@ -86,46 +91,44 @@ export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
  */
 export async function checkForAppUpdates(): Promise<UpdateCheckResult> {
   const current = await getCurrentAppVersion();
+  let lastErrorMsg = "";
 
-  try {
-    const res = await fetch(`${MANIFEST_URL}?_t=${Date.now()}`, {
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-    });
+  for (const url of MANIFEST_URLS) {
+    try {
+      const res = await fetch(`${url}?_t=${Date.now()}`, {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      });
 
-    if (!res.ok) {
+      if (!res.ok) {
+        lastErrorMsg = `HTTP ${res.status}: ${url}`;
+        continue;
+      }
+
+      const rawJson = await res.json();
+      const manifest: UpdateManifest = rawJson?.data || rawJson;
+      if (!manifest || typeof manifest.versionCode !== "number" || !manifest.downloadUrl) {
+        lastErrorMsg = "Invalid update manifest format";
+        continue;
+      }
+
+      const updateAvailable = manifest.versionCode > current.versionCode;
       return {
-        updateAvailable: false,
+        updateAvailable,
         currentVersion: current,
-        latestManifest: null,
-        message: `HTTP ${res.status}: Update manifest not reachable`,
+        latestManifest: manifest,
       };
+    } catch (e: any) {
+      lastErrorMsg = e?.message || "Connection failed";
     }
-
-    const manifest: UpdateManifest = await res.json();
-    if (!manifest || typeof manifest.versionCode !== "number" || !manifest.downloadUrl) {
-      return {
-        updateAvailable: false,
-        currentVersion: current,
-        latestManifest: null,
-        message: "Invalid update manifest format",
-      };
-    }
-
-    const updateAvailable = manifest.versionCode > current.versionCode;
-    return {
-      updateAvailable,
-      currentVersion: current,
-      latestManifest: manifest,
-    };
-  } catch (error: any) {
-    return {
-      updateAvailable: false,
-      currentVersion: current,
-      latestManifest: null,
-      message: error?.message || "Failed to check for updates",
-    };
   }
+
+  return {
+    updateAvailable: false,
+    currentVersion: current,
+    latestManifest: null,
+    message: lastErrorMsg ? `Unable to reach update server (${lastErrorMsg})` : "Failed to check for updates",
+  };
 }
 
 /**
