@@ -633,15 +633,15 @@ function ToolEngineDispatcher({
       return <DesignQrToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     // 26. OFFLINE STUDIO EDITORS SUITE
-    case "studio_pdf_editor":
+    case "pdf_text_whiteout_editor":
       return <PdfStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
-    case "studio_image_editor":
+    case "image_annotation_editor":
       return <ImageStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
-    case "studio_word_editor":
+    case "word_document_editor":
       return <WordStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
-    case "studio_sheet_editor":
+    case "spreadsheet_formula_editor":
       return <SheetStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
-    case "studio_media_editor":
+    case "media_audio_video_editor":
       return <MediaStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
