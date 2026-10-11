@@ -15,23 +15,23 @@
     {
       "id": "math-001",
       "subject": "mathematics",
-      "questionEn": "What is 15% of 240?",
-      "questionHi": "240 का 15% कितना है?",
+      "questionEn": "What is 12.5% of 320?",
+      "questionHi": "320 का 12.5% कितना है?",
       "optionsEn": [
-        "24",
-        "30",
+        "32",
         "36",
-        "40"
+        "40",
+        "48"
       ],
       "optionsHi": [
-        "24",
-        "30",
+        "32",
         "36",
-        "40"
+        "40",
+        "48"
       ],
       "correctIndex": 2,
-      "explanationEn": "10% of 240 is 24 and 5% is 12; total 36.",
-      "explanationHi": "240 का 10% 24 और 5% 12 है; कुल 36।",
+      "explanationEn": "12.5% equals one-eighth; dividing 320 by 8 gives 40.",
+      "explanationHi": "12.5% का अर्थ 1/8 है; 320 को 8 से भाग देने पर 40 मिलता है.",
       "difficulty": "easy",
       "examTags": [
         "ssc",
