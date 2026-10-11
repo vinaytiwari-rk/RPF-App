@@ -57,6 +57,25 @@ const MASA_KEYS = [
   "month_name", "monthName", "amanta_masa", "amantaMasa", "purnimanta_masa",
   "purnimantaMasa", "vedic_month", "vedicMonth"
 ];
+
+const HINDU_MONTH_NAMES = /^(magha|magh|phalguna|phalgun|chaitra|vaisakha|vaishakha|jyeshtha|jyestha|ashada|ashadha|shravana|shravan|bhadrapada|bhadra|ashvina|ashwin|kartika|kartik|margashirsha|margashirsh|pausha|paush|माघ|फाल्गुन|चैत्र|वैशाख|ज्येष्ठ|आषाढ़|श्रावण|भाद्रपद|आश्विन|कार्तिक|मार्गशीर्ष|पौष)$/i;
+
+function deepMasa(source: any, depth = 0): string {
+  if (!source || typeof source !== "object" || depth > 5) return "";
+  const direct = first(source, MASA_KEYS);
+  if (direct) return direct;
+  // Some provider responses expose the lunar month under a generic month key.
+  // Accept it only when it is recognizably a Hindu lunar-month name.
+  const genericMonth = textValue(source.month ?? source.Month ?? source.MONTH).trim();
+  if (genericMonth && HINDU_MONTH_NAMES.test(genericMonth)) return genericMonth;
+  for (const value of Object.values(source)) {
+    if (value && typeof value === "object") {
+      const nested = deepMasa(value, depth + 1);
+      if (nested) return nested;
+    }
+  }
+  return "";
+}
 const PAKSHA_KEYS = ["paksha", "pakṣa", "lunar_fortnight", "lunarFortnight", "fortnight"];
 
 export function toDDMMYYYY(val?: string | Date): string {
@@ -206,7 +225,7 @@ export async function getJagannathaPanchang(options: {
     moonset: first(raw, ["moonset", "moon_set"]),
     tithi: first(raw, ["tithi"]),
     nakshatra: first(raw, ["nakshatra"]),
-    masa: deepFirst(raw, MASA_KEYS),
+    masa: deepMasa(raw),
     paksha: deepFirst(raw, PAKSHA_KEYS) || "",
     samvat: first(raw, ["samvat", "vikram_samvat"]),
     yoga: first(raw, ["yoga"]),
@@ -217,7 +236,7 @@ export async function getJagannathaPanchang(options: {
     abhijitMuhurat,
     raw,
     updatedAt: new Date().toISOString(),
-    unavailable: !(first(raw, ["tithi"]) && first(raw, ["nakshatra"]) && deepFirst(raw, PAKSHA_KEYS) && deepFirst(raw, MASA_KEYS))
+    unavailable: !(first(raw, ["tithi"]) && first(raw, ["nakshatra"]) && deepFirst(raw, PAKSHA_KEYS) && deepMasa(raw))
   };
 
   cache.set(key, { data, at: Date.now() });
