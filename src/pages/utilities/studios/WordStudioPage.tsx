@@ -112,7 +112,7 @@ const DOCUMENT_TEMPLATES: TemplateOption[] = [
   },
 ];
 
-export default function WordStudioPage() {
+export default function WordEditorPage() {
   const navigate = useNavigate();
   const context = useOutletContext<{ lang?: "en" | "hi" }>() || {};
   const isHi = context.lang === "hi";
@@ -330,7 +330,7 @@ export default function WordStudioPage() {
                 title="Click to rename document"
               />
               <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-teal-700 border border-teal-200/60">
-                Word Studio Pro
+                Word Document Editor (DOCX)
               </span>
             </div>
             <p className="text-[11px] text-slate-400">
