@@ -3,7 +3,7 @@ import {
   FileText, Download, Copy, Check, AlertCircle, RefreshCw, 
   Bold, Italic, Underline, Strikethrough, AlignLeft, AlignCenter, 
   AlignRight, AlignJustify, List, ListOrdered, Heading1, Heading2, 
-  Heading3, Table, FileCode, Undo, Redo, Sparkles, Printer, Eraser
+  Heading3, Table, FileCode, Undo, Redo, Sparkles, Printer, Eraser, Maximize2
 } from "lucide-react";
 import JSZip from "jszip";
 
@@ -183,6 +183,30 @@ ${content}
 
   return (
     <div className="space-y-3">
+      {/* Full-Screen Workspace Launcher Banner */}
+      <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 p-3 text-white shadow-md">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500/20 text-teal-400">
+            <Maximize2 className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="text-xs font-black text-white">
+              {isHi ? "समर्पित फुल-स्क्रीन वर्ड स्टूडियो" : "Full-Screen Dedicated Word Studio"}
+            </p>
+            <p className="text-[10px] text-slate-400">
+              {isHi ? "वास्तविक A4 शीट, आवेदन व बायोडाटा प्रारूप, .docx व प्रिंट" : "True A4 canvas, applications & resumes, .docx & print"}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => { window.location.href = "/utilities/word-studio"; }}
+          className="rounded-xl bg-teal-600 px-3.5 py-1.5 text-xs font-black text-white shadow-md hover:bg-teal-500 transition active:scale-95 shrink-0"
+        >
+          {isHi ? "फुल-स्क्रीन खोलें →" : "Launch Studio →"}
+        </button>
+      </div>
+
       {/* 1. Header Bar: Document Title & Live Stats */}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-xs">
         <div className="flex items-center gap-2 flex-1 min-w-[200px]">

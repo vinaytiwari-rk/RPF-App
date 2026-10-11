@@ -277,6 +277,30 @@ export default function ImageStudioEditorEngine({ isHi, downloadBlob, copyToClip
 
   return (
     <div className="space-y-3">
+      {/* Full-Screen Workspace Launcher Banner */}
+      <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 p-3 text-white shadow-md">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
+            <Maximize2 className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="text-xs font-black text-white">
+              {isHi ? "समर्पित फुल-स्क्रीन इमेज स्टूडियो" : "Full-Screen Dedicated Image Studio"}
+            </p>
+            <p className="text-[10px] text-slate-400">
+              {isHi ? "बड़ा वर्कस्पेस, स्मूथ ड्रैग टेक्स्ट, मुहर/स्टैम्प व क्रॉप" : "Full canvas, movable text layer, stamps, cropping & filters"}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => { window.location.href = "/utilities/image-studio"; }}
+          className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-black text-white shadow-md hover:bg-emerald-500 transition active:scale-95 shrink-0"
+        >
+          {isHi ? "फुल-स्क्रीन खोलें →" : "Launch Studio →"}
+        </button>
+      </div>
+
       {/* 1. Header File Uploader */}
       {!file && (
         <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/40 p-6 text-center">

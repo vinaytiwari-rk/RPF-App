@@ -61,6 +61,22 @@ export default function UtilityCenter() {
     }
   };
 
+  const handleOpenTool = (tool: UtilityToolDefinition) => {
+    if (tool.id === "studio_pdf_editor") {
+      navigate("/utilities/pdf-studio");
+      return;
+    }
+    if (tool.id === "studio_image_editor") {
+      navigate("/utilities/image-studio");
+      return;
+    }
+    if (tool.id === "studio_word_editor") {
+      navigate("/utilities/word-studio");
+      return;
+    }
+    setActiveTool(tool);
+  };
+
   // Filtered tools list based on Category and Search Query
   const filteredTools = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -136,6 +152,91 @@ export default function UtilityCenter() {
         </div>
       </header>
 
+      {/* Featured All-in-One Offline Studios Spotlight */}
+      <section className="mt-4 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 p-4 text-white shadow-lg">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-500/20 text-rose-400">
+              <Sparkles className="h-3.5 w-3.5" />
+            </span>
+            <span className="text-[11px] font-black uppercase tracking-wider text-rose-300">
+              {isHi ? "ऑल-इन-वन प्रो स्टूडियो वर्कस्पेस" : "All-in-One Pro Studios (100% Offline)"}
+            </span>
+          </div>
+          <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">
+            Full-Screen Dedicated
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          {/* PDF Studio */}
+          <button
+            type="button"
+            onClick={() => navigate("/utilities/pdf-studio")}
+            className="group flex items-center justify-between rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 p-3 transition text-left active:scale-98"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400 group-hover:scale-105 transition">
+                <FileText className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-xs font-black text-white group-hover:text-rose-300 transition">
+                  {isHi ? "PDF स्टूडियो प्रो" : "PDF Studio Pro"}
+                </p>
+                <p className="text-[10px] text-slate-400 line-clamp-1">
+                  {isHi ? "ड्रैग टेक्स्ट, व्हाइटआउट, रोटेट" : "Movable text, whiteout, reorder"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-slate-500 group-hover:translate-x-0.5 group-hover:text-white transition" />
+          </button>
+
+          {/* Image Studio */}
+          <button
+            type="button"
+            onClick={() => navigate("/utilities/image-studio")}
+            className="group flex items-center justify-between rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 p-3 transition text-left active:scale-98"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 group-hover:scale-105 transition">
+                <ImageIcon className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-xs font-black text-white group-hover:text-emerald-300 transition">
+                  {isHi ? "फोटो स्टूडियो प्रो" : "Image Studio Pro"}
+                </p>
+                <p className="text-[10px] text-slate-400 line-clamp-1">
+                  {isHi ? "ड्रैग टेक्स्ट, मुहर/स्टैम्प, क्रॉप" : "Stamps, text layer, passport crop"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-slate-500 group-hover:translate-x-0.5 group-hover:text-white transition" />
+          </button>
+
+          {/* Word Studio */}
+          <button
+            type="button"
+            onClick={() => navigate("/utilities/word-studio")}
+            className="group flex items-center justify-between rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 p-3 transition text-left active:scale-98"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/20 text-teal-400 group-hover:scale-105 transition">
+                <FileText className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-xs font-black text-white group-hover:text-teal-300 transition">
+                  {isHi ? "वर्ड स्टूडियो प्रो" : "Word Studio Pro"}
+                </p>
+                <p className="text-[10px] text-slate-400 line-clamp-1">
+                  {isHi ? "A4 आवेदन, बायोडाटा, DOCX सेव" : "A4 letters, tables, save .docx"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-slate-500 group-hover:translate-x-0.5 group-hover:text-white transition" />
+          </button>
+        </div>
+      </section>
+
       {/* 16 Category Navigation Chips (Horizontal Scroll) */}
       <section className="mt-4 -mx-3 px-3 sm:mx-0 sm:px-0">
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
@@ -182,11 +283,11 @@ export default function UtilityCenter() {
         {filteredTools.map((tool) => (
           <div
             key={tool.id}
-            onClick={() => setActiveTool(tool)}
+            onClick={() => handleOpenTool(tool)}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") setActiveTool(tool);
+              if (e.key === "Enter" || e.key === " ") handleOpenTool(tool);
             }}
             className="group relative flex flex-col justify-between rounded-2xl border border-[#D8E8DB] bg-white p-4 shadow-xs transition hover:border-[#245D45] hover:shadow-md cursor-pointer text-left"
           >
