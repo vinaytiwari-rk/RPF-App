@@ -94,14 +94,19 @@ export default function PdfStudioPage() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentDrawPoints, setCurrentDrawPoints] = useState<{ x: number; y: number }[]>([]);
 
-  // Dragging State for Text Boxes
+  // Dragging & Resizing State for Text Boxes & Whiteouts
   const [draggingItem, setDraggingItem] = useState<{
     id: string;
     type: "text" | "whiteout";
+    mode: "move" | "resize";
     startX: number;
     startY: number;
     initialXPercent: number;
     initialYPercent: number;
+    initialFontSize?: number;
+    initialWPercent?: number;
+    initialHPercent?: number;
+    initialPinchDist?: number;
   } | null>(null);
 
   // Processing & Feedback
@@ -169,9 +174,17 @@ export default function PdfStudioPage() {
     renderPage();
   }, [renderPage]);
 
-  // Click on Page to add element
+  // Click on Page to add element or deselect/apply current active editing
   const handlePageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!workspaceRef.current || draggingItem) return;
+
+    // If an item is already selected, clicking outside immediately confirms & applies it
+    if (selectedTextId || selectedWhiteoutId) {
+      setSelectedTextId(null);
+      setSelectedWhiteoutId(null);
+      return;
+    }
+
     const rect = workspaceRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
@@ -217,38 +230,111 @@ export default function PdfStudioPage() {
     }
   };
 
-  // Drag Handlers for Text Boxes & Whiteouts (Touch & Mouse)
-  const handlePointerDown = (id: string, type: "text" | "whiteout", clientX: number, clientY: number, curXPct: number, curYPct: number) => {
-    if (type === "text") setSelectedTextId(id);
-    else setSelectedWhiteoutId(id);
+  // Drag & Resize Handlers for Text Boxes & Whiteouts (Touch, Mouse & Two-finger Pinch)
+  const handlePointerDown = (
+    id: string,
+    type: "text" | "whiteout",
+    e: React.MouseEvent | React.TouchEvent,
+    mode: "move" | "resize" = "move"
+  ) => {
+    e.stopPropagation();
+    if (type === "text") {
+      setSelectedTextId(id);
+      setSelectedWhiteoutId(null);
+    } else {
+      setSelectedWhiteoutId(id);
+      setSelectedTextId(null);
+    }
+
+    const isTouch = "touches" in e;
+    const clientX = isTouch ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = isTouch ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+
+    let initialPinchDist: number | undefined = undefined;
+    if (isTouch && e.touches.length >= 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      initialPinchDist = Math.hypot(dx, dy);
+    }
+
+    const curText = type === "text" ? textBoxes.find(t => t.id === id) : undefined;
+    const curWo = type === "whiteout" ? whiteouts.find(w => w.id === id) : undefined;
 
     setDraggingItem({
       id,
       type,
+      mode,
       startX: clientX,
       startY: clientY,
-      initialXPercent: curXPct,
-      initialYPercent: curYPct,
+      initialXPercent: curText ? curText.xPercent : (curWo ? curWo.xPercent : 0),
+      initialYPercent: curText ? curText.yPercent : (curWo ? curWo.yPercent : 0),
+      initialFontSize: curText?.fontSize || 16,
+      initialWPercent: curWo?.wPercent || 18,
+      initialHPercent: curWo?.hPercent || 4,
+      initialPinchDist,
     });
   };
 
   useEffect(() => {
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
       if (!draggingItem || !workspaceRef.current) return;
-      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+      const isTouch = "touches" in e;
+
+      // Two-Finger Pinch-to-Resize on touch screens
+      if (isTouch && (e as TouchEvent).touches.length >= 2) {
+        const t1 = (e as TouchEvent).touches[0];
+        const t2 = (e as TouchEvent).touches[1];
+        const currentDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+
+        if (draggingItem.initialPinchDist && draggingItem.initialPinchDist > 0) {
+          const ratio = currentDist / draggingItem.initialPinchDist;
+
+          if (draggingItem.type === "text") {
+            const baseSize = draggingItem.initialFontSize || 16;
+            const newSize = Math.max(10, Math.min(80, Math.round(baseSize * ratio)));
+            setTextBoxes(prev => prev.map(tb => tb.id === draggingItem.id ? { ...tb, fontSize: newSize } : tb));
+            setActiveFontSize(newSize);
+          } else {
+            const baseW = draggingItem.initialWPercent || 18;
+            const baseH = draggingItem.initialHPercent || 4;
+            const newW = Math.max(4, Math.min(60, Number((baseW * ratio).toFixed(1))));
+            const newH = Math.max(2, Math.min(30, Number((baseH * ratio).toFixed(1))));
+            setWhiteouts(prev => prev.map(wo => wo.id === draggingItem.id ? { ...wo, wPercent: newW, hPercent: newH } : wo));
+          }
+        }
+        return;
+      }
+
+      const clientX = isTouch ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
+      const clientY = isTouch ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
 
       const rect = workspaceRef.current.getBoundingClientRect();
       const deltaXPercent = ((clientX - draggingItem.startX) / rect.width) * 100;
       const deltaYPercent = ((clientY - draggingItem.startY) / rect.height) * 100;
 
-      const newXPct = Math.max(0, Math.min(95, draggingItem.initialXPercent + deltaXPercent));
-      const newYPct = Math.max(0, Math.min(98, draggingItem.initialYPercent + deltaYPercent));
-
-      if (draggingItem.type === "text") {
-        setTextBoxes(prev => prev.map(tb => tb.id === draggingItem.id ? { ...tb, xPercent: newXPct, yPercent: newYPct } : tb));
+      if (draggingItem.mode === "resize") {
+        if (draggingItem.type === "text") {
+          const deltaPx = clientX - draggingItem.startX;
+          const baseSize = draggingItem.initialFontSize || 16;
+          const newSize = Math.max(10, Math.min(80, Math.round(baseSize + deltaPx / 4)));
+          setTextBoxes(prev => prev.map(tb => tb.id === draggingItem.id ? { ...tb, fontSize: newSize } : tb));
+          setActiveFontSize(newSize);
+        } else {
+          const baseW = draggingItem.initialWPercent || 18;
+          const baseH = draggingItem.initialHPercent || 4;
+          const newW = Math.max(4, Math.min(80, Number((baseW + deltaXPercent).toFixed(1))));
+          const newH = Math.max(2, Math.min(40, Number((baseH + deltaYPercent).toFixed(1))));
+          setWhiteouts(prev => prev.map(wo => wo.id === draggingItem.id ? { ...wo, wPercent: newW, hPercent: newH } : wo));
+        }
       } else {
-        setWhiteouts(prev => prev.map(wo => wo.id === draggingItem.id ? { ...wo, xPercent: newXPct, yPercent: newYPct } : wo));
+        const newXPct = Math.max(0, Math.min(95, draggingItem.initialXPercent + deltaXPercent));
+        const newYPct = Math.max(0, Math.min(98, draggingItem.initialYPercent + deltaYPercent));
+
+        if (draggingItem.type === "text") {
+          setTextBoxes(prev => prev.map(tb => tb.id === draggingItem.id ? { ...tb, xPercent: newXPct, yPercent: newYPct } : tb));
+        } else {
+          setWhiteouts(prev => prev.map(wo => wo.id === draggingItem.id ? { ...wo, xPercent: newXPct, yPercent: newYPct } : wo));
+        }
       }
     };
 
@@ -258,7 +344,7 @@ export default function PdfStudioPage() {
 
     window.addEventListener("mousemove", handlePointerMove);
     window.addEventListener("mouseup", handlePointerUp);
-    window.addEventListener("touchmove", handlePointerMove);
+    window.addEventListener("touchmove", handlePointerMove, { passive: false });
     window.addEventListener("touchend", handlePointerUp);
 
     return () => {
@@ -651,20 +737,14 @@ export default function PdfStudioPage() {
               {/* Background PDF Rendered Page */}
               <canvas ref={pageCanvasRef} className="block pointer-events-none" />
 
-              {/* Whiteout Patches (Draggable) */}
+              {/* Whiteout Patches (Draggable & Resizable) */}
               {curPageWhiteouts.map(wo => {
                 const isSelected = selectedWhiteoutId === wo.id;
                 return (
                   <div
                     key={wo.id}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      handlePointerDown(wo.id, "whiteout", e.clientX, e.clientY, wo.xPercent, wo.yPercent);
-                    }}
-                    onTouchStart={(e) => {
-                      e.stopPropagation();
-                      handlePointerDown(wo.id, "whiteout", e.touches[0].clientX, e.touches[0].clientY, wo.xPercent, wo.yPercent);
-                    }}
+                    onMouseDown={(e) => handlePointerDown(wo.id, "whiteout", e, "move")}
+                    onTouchStart={(e) => handlePointerDown(wo.id, "whiteout", e, "move")}
                     style={{
                       left: `${wo.xPercent}%`,
                       top: `${wo.yPercent}%`,
@@ -677,19 +757,40 @@ export default function PdfStudioPage() {
                     }`}
                   >
                     {isSelected && (
-                      <div className="absolute -top-6 right-0 flex gap-1 bg-white rounded shadow px-1 py-0.5 border border-slate-200 text-[10px]">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setWhiteouts(prev => prev.filter(w => w.id !== wo.id));
-                            setSelectedWhiteoutId(null);
-                          }}
-                          className="text-red-600 hover:font-bold"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </div>
+                      <>
+                        <div className="absolute -top-7 right-0 flex items-center gap-1 bg-white rounded shadow-md px-1.5 py-0.5 border border-slate-200 text-[10px] z-30">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedWhiteoutId(null);
+                            }}
+                            title="Apply (लागू करें)"
+                            className="text-emerald-700 hover:bg-emerald-50 px-1 py-0.5 rounded font-bold flex items-center gap-0.5"
+                          >
+                            <Check className="h-3 w-3" />
+                            <span>Apply</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setWhiteouts(prev => prev.filter(w => w.id !== wo.id));
+                              setSelectedWhiteoutId(null);
+                            }}
+                            className="text-red-600 hover:bg-red-50 p-0.5 rounded"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                        {/* Bottom-right Corner Resize Handle */}
+                        <div
+                          onMouseDown={(e) => handlePointerDown(wo.id, "whiteout", e, "resize")}
+                          onTouchStart={(e) => handlePointerDown(wo.id, "whiteout", e, "resize")}
+                          className="absolute -bottom-2 -right-2 h-4 w-4 rounded-full bg-amber-500 border-2 border-white shadow-md cursor-se-resize z-20 flex items-center justify-center touch-none"
+                          title="Drag or Pinch to resize"
+                        />
+                      </>
                     )}
                   </div>
                 );
@@ -710,20 +811,14 @@ export default function PdfStudioPage() {
                 />
               ))}
 
-              {/* Draggable & Live-Editable Text Boxes */}
+              {/* Draggable, Resizable & Live-Editable Text Boxes */}
               {curPageTexts.map(tb => {
                 const isSelected = selectedTextId === tb.id;
                 return (
                   <div
                     key={tb.id}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      handlePointerDown(tb.id, "text", e.clientX, e.clientY, tb.xPercent, tb.yPercent);
-                    }}
-                    onTouchStart={(e) => {
-                      e.stopPropagation();
-                      handlePointerDown(tb.id, "text", e.touches[0].clientX, e.touches[0].clientY, tb.xPercent, tb.yPercent);
-                    }}
+                    onMouseDown={(e) => handlePointerDown(tb.id, "text", e, "move")}
+                    onTouchStart={(e) => handlePointerDown(tb.id, "text", e, "move")}
                     style={{
                       left: `${tb.xPercent}%`,
                       top: `${tb.yPercent}%`,
@@ -732,7 +827,7 @@ export default function PdfStudioPage() {
                     }}
                     className={`absolute rounded px-1.5 py-0.5 cursor-move whitespace-pre font-bold select-none ${
                       isSelected
-                        ? "border-2 border-rose-500 bg-white/95 shadow-xl ring-2 ring-rose-400"
+                        ? "border-2 border-rose-500 bg-white/95 shadow-xl ring-2 ring-rose-400 z-30"
                         : "border border-transparent hover:border-slate-400"
                     }`}
                   >
@@ -745,19 +840,41 @@ export default function PdfStudioPage() {
                             const val = e.target.value;
                             setTextBoxes(prev => prev.map(t => t.id === tb.id ? { ...t, text: val } : t));
                           }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              setSelectedTextId(null);
+                            }
+                          }}
                           className="bg-transparent border-b border-rose-500 font-bold text-slate-900 focus:outline-none"
                           autoFocus
                         />
+                        {/* Direct Confirm / Apply Button */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTextId(null)}
+                          title="Apply Text (लागू करें)"
+                          className="rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-2xs hover:bg-emerald-700 flex items-center gap-0.5"
+                        >
+                          <Check className="h-3 w-3" />
+                          <span>Apply</span>
+                        </button>
                         <button
                           type="button"
                           onClick={() => {
                             setTextBoxes(prev => prev.filter(t => t.id !== tb.id));
                             setSelectedTextId(null);
                           }}
-                          className="text-red-600 hover:text-red-800"
+                          className="text-red-600 hover:text-red-800 p-0.5"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
+                        {/* Corner Resize Handle */}
+                        <div
+                          onMouseDown={(e) => handlePointerDown(tb.id, "text", e, "resize")}
+                          onTouchStart={(e) => handlePointerDown(tb.id, "text", e, "resize")}
+                          className="absolute -bottom-2 -right-2 h-4 w-4 rounded-full bg-rose-600 border-2 border-white shadow-md cursor-se-resize z-40 flex items-center justify-center touch-none"
+                          title="Drag or Pinch to resize text"
+                        />
                       </div>
                     ) : (
                       <span>{tb.text}</span>

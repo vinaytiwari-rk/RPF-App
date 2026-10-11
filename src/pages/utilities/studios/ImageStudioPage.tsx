@@ -83,14 +83,17 @@ export default function ImageStudioPage() {
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [drawingStrokes, setDrawingStrokes] = useState<{ xPct: number; yPct: number; color: string; size: number; isNew: boolean }[]>([]);
 
-  // Dragging interaction state
+  // Dragging & Resizing interaction state
   const [draggingItem, setDraggingItem] = useState<{
     id: string;
     type: "text" | "stamp";
+    mode: "move" | "resize";
     startX: number;
     startY: number;
     initialXPct: number;
     initialYPct: number;
+    initialFontSize?: number;
+    initialPinchDist?: number;
   } | null>(null);
 
   // Zoom & Viewport
@@ -200,15 +203,14 @@ export default function ImageStudioPage() {
     renderCanvas();
   }, [renderCanvas]);
 
-  // Pointer dragging handler (smooth touch & mouse)
+  // Pointer dragging & resizing handler (smooth touch, mouse, and two-finger pinch)
   const handlePointerDown = (
     id: string,
     type: "text" | "stamp",
-    clientX: number,
-    clientY: number,
-    initialXPct: number,
-    initialYPct: number
+    e: React.MouseEvent | React.TouchEvent,
+    mode: "move" | "resize" = "move"
   ) => {
+    e.stopPropagation();
     if (type === "text") {
       setSelectedTextId(id);
       setSelectedStampId(null);
@@ -217,33 +219,81 @@ export default function ImageStudioPage() {
       setSelectedTextId(null);
     }
 
+    const isTouch = "touches" in e;
+    const clientX = isTouch ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = isTouch ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+
+    let initialPinchDist: number | undefined = undefined;
+    if (isTouch && e.touches.length >= 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      initialPinchDist = Math.hypot(dx, dy);
+    }
+
+    const curText = type === "text" ? textBoxes.find(t => t.id === id) : undefined;
+    const curStamp = type === "stamp" ? stamps.find(s => s.id === id) : undefined;
+
     setDraggingItem({
       id,
       type,
+      mode,
       startX: clientX,
       startY: clientY,
-      initialXPct,
-      initialYPct,
+      initialXPct: curText ? curText.xPercent : (curStamp ? curStamp.xPercent : 30),
+      initialYPct: curText ? curText.yPercent : (curStamp ? curStamp.yPercent : 40),
+      initialFontSize: curText?.fontSize || 24,
+      initialPinchDist,
     });
   };
 
   useEffect(() => {
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
       if (!draggingItem || !workspaceRef.current) return;
-      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+      const isTouch = "touches" in e;
+
+      // Two-Finger Pinch-to-Resize on touch screens
+      if (isTouch && (e as TouchEvent).touches.length >= 2) {
+        const t1 = (e as TouchEvent).touches[0];
+        const t2 = (e as TouchEvent).touches[1];
+        const currentDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+
+        if (draggingItem.initialPinchDist && draggingItem.initialPinchDist > 0) {
+          const ratio = currentDist / draggingItem.initialPinchDist;
+
+          if (draggingItem.type === "text") {
+            const baseSize = draggingItem.initialFontSize || 24;
+            const newSize = Math.max(12, Math.min(100, Math.round(baseSize * ratio)));
+            setTextBoxes(prev => prev.map(t => t.id === draggingItem.id ? { ...t, fontSize: newSize } : t));
+            setActiveFontSize(newSize);
+          }
+        }
+        return;
+      }
+
+      const clientX = isTouch ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
+      const clientY = isTouch ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
 
       const rect = workspaceRef.current.getBoundingClientRect();
       const deltaXPercent = ((clientX - draggingItem.startX) / rect.width) * 100;
       const deltaYPercent = ((clientY - draggingItem.startY) / rect.height) * 100;
 
-      const newXPct = Math.max(1, Math.min(94, draggingItem.initialXPct + deltaXPercent));
-      const newYPct = Math.max(1, Math.min(94, draggingItem.initialYPct + deltaYPercent));
-
-      if (draggingItem.type === "text") {
-        setTextBoxes(prev => prev.map(t => t.id === draggingItem.id ? { ...t, xPercent: newXPct, yPercent: newYPct } : t));
+      if (draggingItem.mode === "resize") {
+        if (draggingItem.type === "text") {
+          const deltaPx = clientX - draggingItem.startX;
+          const baseSize = draggingItem.initialFontSize || 24;
+          const newSize = Math.max(12, Math.min(100, Math.round(baseSize + deltaPx / 4)));
+          setTextBoxes(prev => prev.map(t => t.id === draggingItem.id ? { ...t, fontSize: newSize } : t));
+          setActiveFontSize(newSize);
+        }
       } else {
-        setStamps(prev => prev.map(s => s.id === draggingItem.id ? { ...s, xPercent: newXPct, yPercent: newYPct } : s));
+        const newXPct = Math.max(1, Math.min(94, draggingItem.initialXPct + deltaXPercent));
+        const newYPct = Math.max(1, Math.min(94, draggingItem.initialYPct + deltaYPercent));
+
+        if (draggingItem.type === "text") {
+          setTextBoxes(prev => prev.map(t => t.id === draggingItem.id ? { ...t, xPercent: newXPct, yPercent: newYPct } : t));
+        } else {
+          setStamps(prev => prev.map(s => s.id === draggingItem.id ? { ...s, xPercent: newXPct, yPercent: newYPct } : s));
+        }
       }
     };
 
@@ -939,7 +989,13 @@ export default function ImageStudioPage() {
           <div className="flex flex-1 justify-center items-center overflow-auto p-4 sm:p-8 bg-slate-100">
             <div
               ref={workspaceRef}
-              className="relative shadow-xl bg-white border border-slate-300 rounded-sm transition-transform max-w-full max-h-full"
+              onClick={() => {
+                if (selectedTextId || selectedStampId) {
+                  setSelectedTextId(null);
+                  setSelectedStampId(null);
+                }
+              }}
+              className="relative shadow-xl bg-white border border-slate-300 rounded-sm transition-transform max-w-full max-h-full cursor-pointer"
               style={{
                 transform: `scale(${zoomScale})`,
                 transformOrigin: "center center",
@@ -962,14 +1018,8 @@ export default function ImageStudioPage() {
                 return (
                   <div
                     key={s.id}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      handlePointerDown(s.id, "stamp", e.clientX, e.clientY, s.xPercent, s.yPercent);
-                    }}
-                    onTouchStart={(e) => {
-                      e.stopPropagation();
-                      handlePointerDown(s.id, "stamp", e.touches[0].clientX, e.touches[0].clientY, s.xPercent, s.yPercent);
-                    }}
+                    onMouseDown={(e) => handlePointerDown(s.id, "stamp", e, "move")}
+                    onTouchStart={(e) => handlePointerDown(s.id, "stamp", e, "move")}
                     style={{
                       left: `${s.xPercent}%`,
                       top: `${s.yPercent}%`,
@@ -977,7 +1027,7 @@ export default function ImageStudioPage() {
                       color: s.color,
                     }}
                     className={`absolute cursor-move select-none rounded-xl border-2 bg-white/95 px-3 py-1.5 shadow-xl transition-all -rotate-3 ${
-                      isSelected ? "ring-2 ring-emerald-400 scale-105" : ""
+                      isSelected ? "ring-2 ring-emerald-400 scale-105 z-30" : ""
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -986,37 +1036,45 @@ export default function ImageStudioPage() {
                         {s.subLabel && <p className="text-[9px] font-bold text-slate-500 uppercase">{s.subLabel}</p>}
                       </div>
                       {isSelected && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setStamps(prev => prev.filter(item => item.id !== s.id));
-                            setSelectedStampId(null);
-                          }}
-                          className="rounded-full bg-red-100 p-0.5 text-red-600 hover:bg-red-200"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedStampId(null);
+                            }}
+                            title="Apply (लागू करें)"
+                            className="rounded bg-emerald-600 px-1 py-0.5 text-[10px] font-bold text-white hover:bg-emerald-700 flex items-center gap-0.5"
+                          >
+                            <Check className="h-3 w-3" />
+                            <span>Apply</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setStamps(prev => prev.filter(item => item.id !== s.id));
+                              setSelectedStampId(null);
+                            }}
+                            className="rounded-full bg-red-100 p-0.5 text-red-600 hover:bg-red-200"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
                 );
               })}
 
-              {/* Draggable & Editable Text Boxes */}
+              {/* Draggable & Resizable Editable Text Boxes */}
               {textBoxes.map(tb => {
                 const isSelected = selectedTextId === tb.id;
                 return (
                   <div
                     key={tb.id}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      handlePointerDown(tb.id, "text", e.clientX, e.clientY, tb.xPercent, tb.yPercent);
-                    }}
-                    onTouchStart={(e) => {
-                      e.stopPropagation();
-                      handlePointerDown(tb.id, "text", e.touches[0].clientX, e.touches[0].clientY, tb.xPercent, tb.yPercent);
-                    }}
+                    onMouseDown={(e) => handlePointerDown(tb.id, "text", e, "move")}
+                    onTouchStart={(e) => handlePointerDown(tb.id, "text", e, "move")}
                     style={{
                       left: `${tb.xPercent}%`,
                       top: `${tb.yPercent}%`,
@@ -1033,7 +1091,7 @@ export default function ImageStudioPage() {
                         : "bg-transparent"
                     } ${
                       isSelected
-                        ? "border-2 border-emerald-500 shadow-2xl ring-2 ring-emerald-400"
+                        ? "border-2 border-emerald-500 shadow-2xl ring-2 ring-emerald-400 z-30"
                         : "border border-transparent hover:border-slate-500"
                     }`}
                   >
@@ -1046,20 +1104,42 @@ export default function ImageStudioPage() {
                             const val = e.target.value;
                             setTextBoxes(prev => prev.map(t => t.id === tb.id ? { ...t, text: val } : t));
                           }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              setSelectedTextId(null);
+                            }
+                          }}
                           className="bg-transparent border-b border-emerald-500 font-bold focus:outline-none"
                           style={{ color: tb.color }}
                           autoFocus
                         />
+                        {/* Direct Confirm / Apply Button */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTextId(null)}
+                          title="Apply Text (लागू करें)"
+                          className="rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-2xs hover:bg-emerald-700 flex items-center gap-0.5"
+                        >
+                          <Check className="h-3 w-3" />
+                          <span>Apply</span>
+                        </button>
                         <button
                           type="button"
                           onClick={() => {
                             setTextBoxes(prev => prev.filter(t => t.id !== tb.id));
                             setSelectedTextId(null);
                           }}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:text-red-700 p-0.5"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
+                        {/* Corner Resize Handle */}
+                        <div
+                          onMouseDown={(e) => handlePointerDown(tb.id, "text", e, "resize")}
+                          onTouchStart={(e) => handlePointerDown(tb.id, "text", e, "resize")}
+                          className="absolute -bottom-2 -right-2 h-4 w-4 rounded-full bg-emerald-600 border-2 border-white shadow-md cursor-se-resize z-40 flex items-center justify-center touch-none"
+                          title="Drag or Pinch to resize text"
+                        />
                       </div>
                     ) : (
                       <span>{tb.text}</span>
