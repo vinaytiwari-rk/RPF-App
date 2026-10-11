@@ -94,13 +94,15 @@ function MarqueeTrack({
   direction = "rtl",
   variant = "saffron",
   label = "",
-  onClick
+  onClick,
+  reverseWords = false
 }: {
   items: string[];
   direction?: "rtl" | "ltr" | "utd";
   variant?: "saffron" | "red" | "green";
   label?: string;
   onClick?: () => void;
+  reverseWords?: boolean;
 }) {
   const cleanItems = useMemo(() => {
     return (items || [])
@@ -196,7 +198,7 @@ function MarqueeTrack({
               style={{ direction: "ltr", unicodeBidi: "plaintext", writingMode: "horizontal-tb" }}
               className={`text-[12.5px] tracking-normal px-2 ${textClasses}`}
             >
-              {title}
+              {reverseWords ? title.split(/\s+/).filter(Boolean).reverse().join(" ") : title}
             </span>
             <span className={`text-xs px-3 select-none ${separatorClasses}`}>
               |
@@ -603,6 +605,7 @@ export default function Home() {
             direction="ltr"
             variant="green"
             label="MPInfo"
+            reverseWords
             onClick={() => navigate("/news")}
           />
         )}
