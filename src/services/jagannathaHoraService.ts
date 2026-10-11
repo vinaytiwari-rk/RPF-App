@@ -158,13 +158,17 @@ export async function getJagannathaPanchang(options: {
   const existing = cache.get(key);
   if (existing && Date.now() - existing.at < CACHE_TTL_MS) return existing.data;
 
-  const targetDate = new Date();
   const dateFormatted = toDDMMYYYY(dateInput);
+  // Use the requested Panchang date (not the server's current date) for weekday-based calculations.
+  const dateParts = dateFormatted.match(/^(\\d{2})-(\\d{2})-(\\d{4})$/);
+  const targetDate = dateParts
+    ? new Date(Number(dateParts[3]), Number(dateParts[2]) - 1, Number(dateParts[1]), 12, 0, 0)
+    : new Date();
 
   let raw: any = null;
   try {
-    const response = await axios.post(`${BASE_URL}/panchang`, {
-      date: dateInput, latitude, longitude, timezone: 5.5, place, ayanamsa_mode: "LAHIRI"
+    const response = await axios.post(`${BASE_URL}/api/panchang`, {
+      date: dateFormatted, latitude, longitude, timezone: 5.5, place, ayanamsa_mode: "LAHIRI"
     }, { timeout: 4000, headers: { "Content-Type": "application/json", Accept: "application/json" } });
     raw = response.data?.panchang || response.data;
   } catch {
