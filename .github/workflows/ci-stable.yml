@@ -1,0 +1,130 @@
+name: RPF App - Stable CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'android/**'
+      - 'server.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.*'
+      - 'vite.config.*'
+      - 'tsconfig*.json'
+      - '.github/workflows/**'
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'android/**'
+      - 'server.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.*'
+      - 'vite.config.*'
+      - 'tsconfig*.json'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+# Queue runs for the same branch instead of cancelling a running verification.
+concurrency:
+  group: rpf-stable-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Audit, TypeScript, Web Build and Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Install locked dependencies
+        shell: bash
+        env:
+          npm_config_registry: https://registry.npmjs.org/
+          npm_config_fetch_retries: '5'
+          npm_config_fetch_retry_mintimeout: '20000'
+          npm_config_fetch_retry_maxtimeout: '120000'
+          npm_config_fetch_timeout: '180000'
+          npm_config_maxsockets: '8'
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "npm ci attempt ${attempt}/3"
+            if npm ci --include=dev --no-audit --no-fund; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "::error::npm ci failed after three attempts."
+              exit 1
+            fi
+            sleep $((attempt * 20))
+          done
+
+      - name: Audit SAMAHIT utility catalog
+        run: npm run audit:samahit
+
+      - name: Test Live TV source type detection
+        run: npm run audit:live-tv
+
+      - name: Check browser policy
+        run: npm run browser:check
+
+      - name: TypeScript check
+        run: npm run lint
+
+      - name: Production web build
+        run: npm run build
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
+      - name: Set Capacitor Android version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./node_modules/@capacitor/android/package.json').version")
+          if grep -q '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties 2>/dev/null; then
+            sed -i "s/^CAPACITOR_ANDROID_VERSION=.*/CAPACITOR_ANDROID_VERSION=${VERSION}/" android/gradle.properties
+          else
+            printf '\nCAPACITOR_ANDROID_VERSION=%s\n' "$VERSION" >> android/gradle.properties
+          fi
+          grep '^CAPACITOR_ANDROID_VERSION=' android/gradle.properties
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: RPF-Samahit-CI-${{ github.sha }}
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
