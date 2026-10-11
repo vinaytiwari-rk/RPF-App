@@ -384,6 +384,98 @@ export default function ImageAdvancedToolsEngine({ toolId, isHi, downloadBlob, c
             break;
           }
 
+          case "img_text_overlay": {
+            canvas.width = w;
+            canvas.height = h;
+            ctx.drawImage(img, 0, 0);
+            const overlayText = textValue.trim() || (isHi ? "समाहित सेवा 2026" : "SAMAHIT 2026");
+            const fontSize = Math.max(16, Math.round((w / 800) * (numericValue || 32)));
+            ctx.font = `bold ${fontSize}px sans-serif`;
+            const textMetrics = ctx.measureText(overlayText);
+            const textW = textMetrics.width;
+            const textH = fontSize;
+            let posX = (w - textW) / 2;
+            let posY = h - Math.round(fontSize * 1.5);
+            if (splitGrid === "top") {
+              posY = Math.round(fontSize * 1.8);
+            } else if (splitGrid === "center") {
+              posY = (h + textH) / 2;
+            }
+
+            // Dark pill background if selected
+            if (blendMode === "multiply" || blendMode === "darken") {
+              ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+              const padX = fontSize * 0.6;
+              const padY = fontSize * 0.4;
+              ctx.beginPath();
+              ctx.roundRect(posX - padX, posY - textH - padY / 2, textW + padX * 2, textH + padY * 2, 8);
+              ctx.fill();
+            }
+
+            ctx.fillStyle = colorValue || "#ffffff";
+            ctx.fillText(overlayText, posX, posY);
+            break;
+          }
+
+          case "img_stamp_tool": {
+            canvas.width = w;
+            canvas.height = h;
+            ctx.drawImage(img, 0, 0);
+            const stampText = textValue.trim() || (isHi ? "सत्यापित / VERIFIED" : "APPROVED / स्वीकृत");
+            const stampColor = colorValue || "#16a34a";
+            const scale = Math.max(1, w / 800);
+            const fontSize = Math.round(24 * scale);
+            ctx.save();
+            let stampX = w - Math.round(220 * scale);
+            let stampY = Math.round(100 * scale);
+            if (splitGrid === "center") {
+              stampX = w / 2;
+              stampY = h / 2;
+            } else if (splitGrid === "bottom") {
+              stampX = w - Math.round(220 * scale);
+              stampY = h - Math.round(100 * scale);
+            }
+
+            ctx.translate(stampX, stampY);
+            ctx.rotate((-12 * Math.PI) / 180);
+            ctx.font = `900 ${fontSize}px sans-serif`;
+            const metrics = ctx.measureText(stampText);
+            const boxW = metrics.width + 30 * scale;
+            const boxH = fontSize + 24 * scale;
+
+            ctx.strokeStyle = stampColor;
+            ctx.lineWidth = 4 * scale;
+            ctx.strokeRect(-boxW / 2, -boxH / 2, boxW, boxH);
+
+            ctx.lineWidth = 1.5 * scale;
+            ctx.strokeRect(-boxW / 2 + 4 * scale, -boxH / 2 + 4 * scale, boxW - 8 * scale, boxH - 8 * scale);
+
+            ctx.fillStyle = stampColor;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(stampText, 0, 0);
+            ctx.restore();
+            break;
+          }
+
+          case "img_passport_crop": {
+            const targetRatio = 3 / 4;
+            let cropW = w;
+            let cropH = Math.round(w / targetRatio);
+            if (cropH > h) {
+              cropH = h;
+              cropW = Math.round(h * targetRatio);
+            }
+            const cropX = Math.round((w - cropW) / 2);
+            const cropY = Math.round((h - cropH) / 2);
+
+            canvas.width = 600;
+            canvas.height = 800;
+            ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, 600, 800);
+            setMessage(isHi ? "मानक 3.5x4.5cm (3:4) पासपोर्ट फोटो तैयार है!" : "Standard 3.5x4.5cm passport photo ready!");
+            break;
+          }
+
           default: {
             canvas.width = w;
             canvas.height = h;
@@ -693,6 +785,147 @@ export default function ImageAdvancedToolsEngine({ toolId, isHi, downloadBlob, c
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {toolId === "img_text_overlay" && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  {isHi ? "ओवरले टेक्स्ट" : "Overlay Text"}
+                </label>
+                <input
+                  type="text"
+                  value={textValue}
+                  onChange={e => setTextValue(e.target.value)}
+                  placeholder={isHi ? "शीर्षक / तारीख / नाम" : "Title / Date / Name"}
+                  className="w-full rounded-xl border border-slate-300 p-2 text-xs text-slate-800"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {isHi ? "फ़ॉन्ट साइज" : "Font Size"}
+                  </label>
+                  <input
+                    type="number"
+                    min={14}
+                    max={120}
+                    value={numericValue || 32}
+                    onChange={e => setNumericValue(Number(e.target.value))}
+                    className="w-full rounded-xl border border-slate-300 p-2 text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {isHi ? "स्थान" : "Position"}
+                  </label>
+                  <select
+                    value={splitGrid}
+                    onChange={e => setSplitGrid(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 p-2 text-xs"
+                  >
+                    <option value="bottom">{isHi ? "नीचे (Bottom)" : "Bottom"}</option>
+                    <option value="center">{isHi ? "मध्य (Center)" : "Center"}</option>
+                    <option value="top">{isHi ? "ऊपर (Top)" : "Top"}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {isHi ? "रंग" : "Color"}
+                  </label>
+                  <input
+                    type="color"
+                    value={colorValue}
+                    onChange={e => setColorValue(e.target.value)}
+                    className="h-8 w-full rounded-xl border border-slate-300 cursor-pointer p-0.5"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="dark-pill-bg"
+                  checked={blendMode === "darken"}
+                  onChange={e => setBlendMode(e.target.checked ? "darken" : "source-over")}
+                  className="rounded text-emerald-600 cursor-pointer"
+                />
+                <label htmlFor="dark-pill-bg" className="text-xs text-slate-700 cursor-pointer">
+                  {isHi ? "डार्क बैकग्राउंड बॉक्स जोड़ें (स्पष्ट पढ़ने हेतु)" : "Add dark background pill (for readability)"}
+                </label>
+              </div>
+            </div>
+          )}
+
+          {toolId === "img_stamp_tool" && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  {isHi ? "मुहर का प्रकार चुनें" : "Select Official Stamp"}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: isHi ? "सत्यापित (VERIFIED)" : "VERIFIED / सत्यापित", color: "#16a34a" },
+                    { label: isHi ? "स्वीकृत (APPROVED)" : "APPROVED / स्वीकृत", color: "#2563eb" },
+                    { label: isHi ? "गोपनीय (CONFIDENTIAL)" : "CONFIDENTIAL", color: "#dc2626" },
+                    { label: isHi ? "अस्वीकृत (REJECTED)" : "REJECTED / अस्वीकृत", color: "#e11d48" },
+                    { label: isHi ? "प्रतिलिपि (COPY)" : "COPY / प्रति", color: "#475569" },
+                    { label: isHi ? "अति-आवश्यक (URGENT)" : "URGENT", color: "#7c3aed" }
+                  ].map(st => (
+                    <button
+                      key={st.label}
+                      type="button"
+                      onClick={() => { setTextValue(st.label); setColorValue(st.color); }}
+                      className={`rounded-xl border p-2 text-xs font-bold text-left transition ${
+                        textValue === st.label
+                          ? "border-emerald-600 bg-emerald-50 text-emerald-900"
+                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <span className="inline-block h-2 w-2 rounded-full mr-1.5" style={{ backgroundColor: st.color }} />
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {isHi ? "मुहर की स्थिति" : "Stamp Placement"}
+                  </label>
+                  <select
+                    value={splitGrid}
+                    onChange={e => setSplitGrid(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 p-2 text-xs"
+                  >
+                    <option value="top">{isHi ? "ऊपर दाएं (Top-Right)" : "Top-Right"}</option>
+                    <option value="center">{isHi ? "मध्य में (Center)" : "Center"}</option>
+                    <option value="bottom">{isHi ? "नीचे दाएं (Bottom-Right)" : "Bottom-Right"}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {isHi ? "कस्टम स्टैम्प टेक्स्ट" : "Custom Stamp Text"}
+                  </label>
+                  <input
+                    type="text"
+                    value={textValue}
+                    onChange={e => setTextValue(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 p-2 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {toolId === "img_passport_crop" && (
+            <div className="rounded-xl bg-amber-50/70 border border-amber-200 p-3 text-xs text-amber-900">
+              <p className="font-bold">📸 {isHi ? "मानक 3.5cm × 4.5cm पासपोर्ट क्रॉप" : "Standard 3.5cm x 4.5cm Passport Format"}</p>
+              <p className="mt-1 text-amber-800 text-[11px]">
+                {isHi
+                  ? "सरकारी फॉर्म (SSC, UPSC, रेलवे) हेतु फोटो स्वतः मानक 3:4 आस्पेक्ट रेशियो में क्रॉप व सेंट्रलाइज होगी।"
+                  : "Automatically frames and crops photo to standard 3:4 aspect ratio suitable for official exams and ID applications."}
+              </p>
             </div>
           )}
         </div>

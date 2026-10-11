@@ -20,14 +20,14 @@ export interface UtilityCategoryDefinition {
 
 export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "all", titleEn: "All Tools", titleHi: "सभी टूल्स", iconName: "LayoutGrid", accent: "from-emerald-600 to-teal-700" },
-  { id: "studio_editors", titleEn: "Studio Editors", titleHi: "स्टूडियो एडिटर्स", iconName: "Sparkles", accent: "from-[#FF9933] to-[#138808]" },
-  { id: "pdf_tools", titleEn: "PDF Tools (30)", titleHi: "PDF टूल्स (30)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
-  { id: "image_tools", titleEn: "Image Tools (40)", titleHi: "इमेज टूल्स (40)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
-  { id: "word_text_tools", titleEn: "Word & Text Tools (40)", titleHi: "वर्ड व टेक्स्ट टूल्स (40)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
-  { id: "excel_data_tools", titleEn: "Excel & Data File Tools (40)", titleHi: "एक्सेल व डेटा टूल्स (40)", iconName: "FileSpreadsheet", accent: "from-green-600 to-emerald-700" },
+  { id: "pdf_tools", titleEn: "PDF Tools", titleHi: "PDF टूल्स", iconName: "FileText", accent: "from-rose-600 to-red-700" },
+  { id: "image_tools", titleEn: "Image Tools", titleHi: "इमेज टूल्स", iconName: "Image", accent: "from-amber-600 to-orange-700" },
+  { id: "word_text_tools", titleEn: "Word Tools", titleHi: "वर्ड टूल्स", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
+  { id: "excel_data_tools", titleEn: "Excel Tools", titleHi: "एक्सेल टूल्स", iconName: "FileSpreadsheet", accent: "from-green-600 to-emerald-700" },
+  { id: "video_tools", titleEn: "Video Tools", titleHi: "वीडियो टूल्स", iconName: "Video", accent: "from-indigo-600 to-purple-700" },
+  { id: "audio_tools", titleEn: "Audio Tools", titleHi: "ऑडियो टूल्स", iconName: "Music", accent: "from-purple-600 to-pink-700" },
   { id: "dev_tools", titleEn: "Developer & Encoding Tools (40)", titleHi: "डेवलपर व एन्कोडिंग टूल्स (40)", iconName: "Code", accent: "from-indigo-600 to-purple-700" },
   { id: "archive_tools", titleEn: "Archive & File Tools (20)", titleHi: "आर्काइव व फाइल टूल्स (20)", iconName: "FolderArchive", accent: "from-amber-700 to-yellow-800" },
-  { id: "audio_video_tools", titleEn: "Audio & Video Tools (20)", titleHi: "ऑडियो व वीडियो टूल्स (20)", iconName: "Music", accent: "from-purple-600 to-pink-700" },
   { id: "design_qr_tools", titleEn: "QR, Barcode & Design Tools (20)", titleHi: "QR, बारकोड व डिजाइन टूल्स (20)", iconName: "QrCode", accent: "from-teal-600 to-emerald-700" },
   { id: "govt_forms", titleEn: "Govt Forms & Recruitment", titleHi: "सरकारी भर्ती व फॉर्म", iconName: "BadgeCheck", accent: "from-amber-600 to-orange-700" },
   { id: "pdf_docs", titleEn: "PDF & Document Office", titleHi: "दस्तावेज व PDF ऑफिस", iconName: "FileText", accent: "from-blue-600 to-indigo-700" },
@@ -1025,6 +1025,16 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descEn: "Arrange multiple pages side-by-side onto a single printed sheet.", descHi: "कागज़ की बचत हेतु 2 या 4 पेजों को एक ही पेज पर व्यवस्थित करें।", iconName: "Grid", badge: "100% Offline",
     keywords: ["n up", "2 up pdf", "4 up pdf", "multi page sheet"]
   },
+  {
+    id: "pdf_text_editor", categoryId: "pdf_tools", titleEn: "PDF Text Editor & Overlay", titleHi: "PDF टेक्स्ट एडिटर व ओवरले",
+    descEn: "Add movable text overlay with custom font size, color and positioning.", descHi: "PDF पेज पर मनचाहे स्थान पर नया टेक्स्ट, फॉन्ट साइज व रंग के साथ जोड़ें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["pdf text editor", "add text to pdf", "type on pdf", "text overlay"]
+  },
+  {
+    id: "pdf_whiteout_tool", categoryId: "pdf_tools", titleEn: "PDF Whiteout & Redaction", titleHi: "PDF व्हाइटआउट व रिडैक्शन पैच",
+    descEn: "Cover sensitive or incorrect text with clean whiteout correction patches.", descHi: "PDF में गलत या गोपनीय जानकारी पर सफेद सुधार पट्टी (व्हाइटआउट) लगाएं।", iconName: "Eraser", badge: "100% Offline",
+    keywords: ["pdf whiteout", "redact pdf", "whiteout tool", "cover text"]
+  },
 
   // 18. 100% Offline Image Tools Suite (Phase 3 - 20 Tools)
   {
@@ -1226,6 +1236,21 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "img_frame_extractor", categoryId: "image_tools", titleEn: "Image Frame Extractor", titleHi: "इमेज फ्रेम एक्सट्रैक्टर",
     descEn: "Capture high-resolution still frames and render crisp photo snapshots.", descHi: "ग्राफिक्स से सटीक हाई-क्वालिटी स्थिर फ्रेम कैप्चर करें।", iconName: "FileImage", badge: "100% Offline",
     keywords: ["frame extractor", "snapshot", "still frame"]
+  },
+  {
+    id: "img_text_overlay", categoryId: "image_tools", titleEn: "Image Text Overlay & Captions", titleHi: "फोटो टेक्स्ट ओवरले व कैप्शन",
+    descEn: "Add custom text, titles and captions anywhere on photos with fonts and colors.", descHi: "फोटो पर मनचाहा टेक्स्ट, कैप्शन, फॉन्ट साइज और रंग के साथ जोड़ें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["image text", "add text to photo", "caption photo", "text overlay"]
+  },
+  {
+    id: "img_stamp_tool", categoryId: "image_tools", titleEn: "Official Stamp & Seal Maker", titleHi: "आधिकारिक मुहर व स्टैम्प मेकर",
+    descEn: "Apply verified, approved, paid, or confidential stamps directly onto documents.", descHi: "दस्तावेजों व तस्वीरों पर प्रमाणित (Verified), स्वीकृत (Approved) या पेड की मुहर लगाएं।", iconName: "BadgeCheck", badge: "100% Offline",
+    keywords: ["stamp maker", "verified stamp", "seal", "official stamp", "muhar"]
+  },
+  {
+    id: "img_passport_crop", categoryId: "image_tools", titleEn: "Passport Photo 3:4 Cropper", titleHi: "पासपोर्ट फोटो 3:4 क्रॉप टूल",
+    descEn: "Crop photos to exact official 3:4 or 35x45mm passport and visa standards.", descHi: "सरकारी फॉर्म्स व पासपोर्ट हेतु फोटो को सटीक 3:4 अनुपात में काटें।", iconName: "Crop", badge: "100% Offline",
+    keywords: ["passport photo", "passport crop", "3:4 photo", "visa photo"]
   },
   // -----------------------------------------------------------------
   // 18. Phase 5: Word & Text Tools Suite (40 Tools)
@@ -1430,6 +1455,26 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descEn: "Calculate Jaccard content similarity score between two texts.", descHi: "दो लेखों के बीच समानता प्रतिशत (%) और कॉमन शब्द निकालें।", iconName: "GitCompare", badge: "100% Offline",
     keywords: ["text similarity", "similarity score", "compare content"]
   },
+  {
+    id: "word_doc_editor", categoryId: "word_text_tools", titleEn: "Word Document Editor", titleHi: "वर्ड डॉक्यूमेंट एडिटर",
+    descEn: "Full rich-text word processor: formatted headings, styling, alignment and DOCX export.", descHi: "संपूर्ण वर्ड प्रोसेसर: हेडिंग, स्टाइलिंग, अलाइनमेंट और सीधे .docx में डाउनलोड।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["word editor", "document editor", "docx creator", "word processor"]
+  },
+  {
+    id: "word_template_draft", categoryId: "word_text_tools", titleEn: "Application & Notice Templates", titleHi: "आवेदन व नोटिस प्रारूप",
+    descEn: "Draft standard applications, notices, agreements and biodata formats in DOCX.", descHi: "प्रार्थना पत्र, सार्वजनिक नोटिस, बायोडाटा व अनुबंध प्रारूप तैयार करें।", iconName: "LayoutTemplate", badge: "100% Offline",
+    keywords: ["application format", "notice template", "biodata", "prathna patra"]
+  },
+  {
+    id: "word_table_builder", categoryId: "word_text_tools", titleEn: "Word Document Table Builder", titleHi: "वर्ड तालिका व टेबल मेकर",
+    descEn: "Insert customizable data tables into formatted documents with DOCX export.", descHi: "वर्ड डॉक्यूमेंट में तालिका बनाएं और .docx फाइल में सुरक्षित करें।", iconName: "Table", badge: "100% Offline",
+    keywords: ["word table", "table builder", "insert table", "docx table"]
+  },
+  {
+    id: "word_page_setup", categoryId: "word_text_tools", titleEn: "Word Page Setup & Margin Tool", titleHi: "वर्ड पेज सेटअप व मार्जिन टूल",
+    descEn: "Configure A4, Letter, and Legal paper dimensions with print-ready margins.", descHi: "A4, Letter व लीगल साइज के साथ प्रिंट-रेडी मार्जिन सेट करें।", iconName: "Maximize2", badge: "100% Offline",
+    keywords: ["page setup", "a4 page", "word margins", "letter size"]
+  },
   // -----------------------------------------------------------------
   // 19. Phase 6: Excel & Data File Tools Suite (40 Tools)
   // -----------------------------------------------------------------
@@ -1632,6 +1677,21 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "data_json_flatten", categoryId: "excel_data_tools", titleEn: "JSON Flattening Tool", titleHi: "JSON फ्लैटनर (Flatten)",
     descEn: "Flatten deeply nested JSON objects into simple dot-notated keys.", descHi: "जटिल नेस्टेड JSON को सरल डॉट नोटेशन (a.b.c) में बदलें।", iconName: "Table", badge: "100% Offline",
     keywords: ["flatten json", "flatten object", "dot notation"]
+  },
+  {
+    id: "excel_sheet_editor", categoryId: "excel_data_tools", titleEn: "Excel Spreadsheet Grid Editor", titleHi: "एक्सेल स्प्रेडशीट ग्रिड एडिटर",
+    descEn: "Interactive spreadsheet grid with formula support, CSV and XLSX export.", descHi: "इंटरएक्टिव स्प्रेडशीट ग्रिड: फॉर्मूला गणना, CSV व Excel (.xls/.xlsx) एक्सपोर्ट।", iconName: "FileSpreadsheet", badge: "100% Offline",
+    keywords: ["excel editor", "spreadsheet grid", "sheet editor", "xlsx export"]
+  },
+  {
+    id: "excel_formula_calc", categoryId: "excel_data_tools", titleEn: "Spreadsheet Formula Calculator", titleHi: "स्प्रेडशीट फॉर्मूला कैलकुलेटर",
+    descEn: "Calculate cell sums (=SUM), averages (=AVERAGE), counts, and mathematical expressions.", descHi: "सेल जोड़ (=SUM), औसत (=AVERAGE) व अंकगणितीय सूत्रों की तुरंत गणना करें।", iconName: "Calculator", badge: "100% Offline",
+    keywords: ["excel formula", "sum formula", "average formula", "sheet calc"]
+  },
+  {
+    id: "excel_budget_sheet", categoryId: "excel_data_tools", titleEn: "Expense & Register Templates", titleHi: "खर्च, बहीखाता व रजिस्टर प्रारूप",
+    descEn: "Pre-built expense sheets, donation records, and attendance ledger templates.", descHi: "मासिक खर्च, चंदा रजिस्टर व उपस्थिति बहीखाता तैयार करें और Excel में सेव करें।", iconName: "LayoutTemplate", badge: "100% Offline",
+    keywords: ["budget sheet", "chanda register", "attendance ledger", "expense register"]
   },
   // -----------------------------------------------------------------
   // 20. Phase 7: Developer & Encoding Tools Suite (40 Tools)
@@ -1942,104 +2002,114 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
 
   // 24. 100% Offline Audio & Video Suite (Phase 9 - 20 Tools)
   {
-    id: "media_audio_trimmer", categoryId: "audio_video_tools", titleEn: "Audio Trimmer & Cutter", titleHi: "ऑडियो ट्रिमर व कटर",
+    id: "media_audio_trimmer", categoryId: "audio_tools", titleEn: "Audio Trimmer & Cutter", titleHi: "ऑडियो ट्रिमर व कटर",
     descEn: "Cut and trim audio tracks with millisecond precision to 16-bit WAV.", descHi: "ऑडियो ट्रैक को सटीक सेकंड अनुसार काटकर 16-बिट WAV में डाउनलोड करें।", iconName: "Scissors", badge: "100% Offline",
     keywords: ["trim audio", "cut audio", "audio trimmer", "crop mp3", "wav cutter"]
   },
   {
-    id: "media_audio_volume", categoryId: "audio_video_tools", titleEn: "Audio Volume Booster & Attenuator", titleHi: "ऑडियो वॉल्यूम बूस्टर",
+    id: "media_audio_volume", categoryId: "audio_tools", titleEn: "Audio Volume Booster & Attenuator", titleHi: "ऑडियो वॉल्यूम बूस्टर",
     descEn: "Amplify or reduce audio decibel levels safely up to 300%.", descHi: "धीमी आवाज वाले ऑडियो को 300% तक बूस्ट करें या कम करें।", iconName: "Volume2", badge: "100% Offline",
     keywords: ["audio volume", "amplify audio", "volume boost", "boost sound"]
   },
   {
-    id: "media_audio_speed", categoryId: "audio_video_tools", titleEn: "Audio Speed Changer", titleHi: "ऑडियो स्पीड परिवर्तक",
+    id: "media_audio_speed", categoryId: "audio_tools", titleEn: "Audio Speed Changer", titleHi: "ऑडियो स्पीड परिवर्तक",
     descEn: "Speed up or slow down audio playback rate (0.5x to 2.0x).", descHi: "ऑडियो की गति धीमी (0.5x) या तेज़ (2x) करें।", iconName: "FastForward", badge: "100% Offline",
     keywords: ["audio speed", "tempo changer", "fast audio", "slow audio"]
   },
   {
-    id: "media_audio_reverse", categoryId: "audio_video_tools", titleEn: "Audio Reverser", titleHi: "ऑडियो रिवर्सर (उल्टा बजाएं)",
+    id: "media_audio_reverse", categoryId: "audio_tools", titleEn: "Audio Reverser", titleHi: "ऑडियो रिवर्सर (उल्टा बजाएं)",
     descEn: "Reverse PCM audio waveforms backwards for sound design.", descHi: "ऑडियो ट्रैक को पीछे से आगे की ओर उल्टा चलाएं।", iconName: "RefreshCw", badge: "100% Offline",
     keywords: ["reverse audio", "backwards audio", "reverse sound"]
   },
   {
-    id: "media_audio_channel_split", categoryId: "audio_video_tools", titleEn: "Stereo to Mono Splitter", titleHi: "स्टीरियो से मोनो कनवर्टर",
+    id: "media_audio_channel_split", categoryId: "audio_tools", titleEn: "Stereo to Mono Splitter", titleHi: "स्टीरियो से मोनो कनवर्टर",
     descEn: "Fold stereo multi-channel audio tracks into single mono channel.", descHi: "दोहरी स्टीरियो आवाज़ को सिंगल मोनो चैनल में मिलाएं।", iconName: "Music", badge: "100% Offline",
     keywords: ["stereo to mono", "channel split", "mono audio"]
   },
   {
-    id: "media_audio_channel_merge", categoryId: "audio_video_tools", titleEn: "Mono to Stereo Duplicator", titleHi: "मोनो से स्टीरियो डुप्लीकेटर",
+    id: "media_audio_channel_merge", categoryId: "audio_tools", titleEn: "Mono to Stereo Duplicator", titleHi: "मोनो से स्टीरियो डुप्लीकेटर",
     descEn: "Duplicate mono voice track across left and right channels.", descHi: "एकल मोनो ऑडियो को बाएं व दाएं दोनों कानों के लिए डुप्लीकेट करें।", iconName: "Music", badge: "100% Offline",
     keywords: ["mono to stereo", "duplicate channels", "dual audio"]
   },
   {
-    id: "media_audio_silence_remove", categoryId: "audio_video_tools", titleEn: "Audio Silence Remover", titleHi: "ऑडियो साइलेंस रिमूवर",
+    id: "media_audio_silence_remove", categoryId: "audio_tools", titleEn: "Audio Silence Remover", titleHi: "ऑडियो साइलेंस रिमूवर",
     descEn: "Detect and remove dead silence gaps from beginning and end.", descHi: "ऑडियो के शुरू व अंत से सन्नाटा (Silence) हटाएँ।", iconName: "Scissors", badge: "100% Offline",
     keywords: ["remove silence", "trim silence", "mute cutter"]
   },
   {
-    id: "media_audio_fade", categoryId: "audio_video_tools", titleEn: "Audio Fade-In & Fade-Out", titleHi: "ऑडियो फेड-इन व फेड-आउट",
+    id: "media_audio_fade", categoryId: "audio_tools", titleEn: "Audio Fade-In & Fade-Out", titleHi: "ऑडियो फेड-इन व फेड-आउट",
     descEn: "Smooth volume transitions at start and ending of sound clips.", descHi: "ऑडियो की शुरुआत और अंत में धीमा-से-तेज़ प्रभाव जोड़ें।", iconName: "Volume2", badge: "100% Offline",
     keywords: ["fade in", "fade out", "audio transition"]
   },
   {
-    id: "media_audio_normalize", categoryId: "audio_video_tools", titleEn: "Audio Normalizer (Peak Gain)", titleHi: "ऑडियो नॉर्मलाइज़र (पीक गेन)",
+    id: "media_audio_normalize", categoryId: "audio_tools", titleEn: "Audio Normalizer (Peak Gain)", titleHi: "ऑडियो नॉर्मलाइज़र (पीक गेन)",
     descEn: "Normalize audio volume peaks to maximum 0.98 amplitude.", descHi: "ऑडियो को बिना फटे अधिकतम स्पष्टता पर सामान्य करें।", iconName: "Sliders", badge: "100% Offline",
     keywords: ["normalize audio", "audio leveling", "peak gain"]
   },
   {
-    id: "media_audio_samplerate", categoryId: "audio_video_tools", titleEn: "Audio Sample Rate Standardizer", titleHi: "ऑडियो सैंपल रेट मानकीकरण",
+    id: "media_audio_samplerate", categoryId: "audio_tools", titleEn: "Audio Sample Rate Standardizer", titleHi: "ऑडियो सैंपल रेट मानकीकरण",
     descEn: "Standardize audio sample rate to 44.1 kHz CD audio standard.", descHi: "ऑडियो सैंपल रेट को 44.1 kHz मानक पर रीसैंपल करें।", iconName: "Music", badge: "100% Offline",
     keywords: ["sample rate", "resample audio", "44100hz"]
   },
   {
-    id: "media_audio_pitch", categoryId: "audio_video_tools", titleEn: "Audio Pitch Shifter", titleHi: "ऑडियो पिच शिफ्टर",
+    id: "media_audio_pitch", categoryId: "audio_tools", titleEn: "Audio Pitch Shifter", titleHi: "ऑडियो पिच शिफ्टर",
     descEn: "Shift audio pitch and voice tone higher or lower.", descHi: "ऑडियो की पिच (पतली या भारी आवाज़) बदलें।", iconName: "Sliders", badge: "100% Offline",
     keywords: ["pitch shift", "change pitch", "voice tone"]
   },
   {
-    id: "media_audio_metadata", categoryId: "audio_video_tools", titleEn: "Audio Metadata & Duration Inspector", titleHi: "ऑडियो मेटाडेटा व अवधि दर्शक",
+    id: "media_audio_metadata", categoryId: "audio_tools", titleEn: "Audio Metadata & Duration Inspector", titleHi: "ऑडियो मेटाडेटा व अवधि दर्शक",
     descEn: "Inspect sample rate, channels, bit depth and duration of audio.", descHi: "ऑडियो की सटीक सेकंड, फ़्रीक्वेंसी व चैनल विवरण देखें।", iconName: "Eye", badge: "100% Offline",
     keywords: ["audio metadata", "audio info", "audio duration"]
   },
   {
-    id: "media_video_frame_capture", categoryId: "audio_video_tools", titleEn: "Video Frame Snapshot Grabber", titleHi: "वीडियो फ्रेम कैप्चर (HD फोटो)",
+    id: "media_voice_recorder", categoryId: "audio_tools", titleEn: "Voice Recorder & Audio Notes", titleHi: "वॉयस रिकॉर्डर व ऑडियो नोट्स",
+    descEn: "Record clear voice audio offline via microphone with live timer and WAV download.", descHi: "माइक्रोफोन से स्पष्ट आवाज़ रिकॉर्ड करें और बिना इंटरनेट WAV में डाउनलोड करें।", iconName: "Mic", badge: "100% Offline",
+    keywords: ["voice recorder", "audio recorder", "record sound", "microphone", "audio notes"]
+  },
+  {
+    id: "media_video_frame_capture", categoryId: "video_tools", titleEn: "Video Frame Snapshot Grabber", titleHi: "वीडियो फ्रेम कैप्चर (HD फोटो)",
     descEn: "Grab exact high-resolution PNG snapshot from video at current time.", descHi: "चलते वीडियो से मनचाहे समय की हाई-डेफिनिशन PNG फोटो निकालें।", iconName: "Video", badge: "100% Offline",
     keywords: ["video frame", "video snapshot", "video screenshot", "grab frame"]
   },
   {
-    id: "media_video_trimmer", categoryId: "audio_video_tools", titleEn: "Video Interval Frame Extractor", titleHi: "वीडियो इंटरवल फ्रेम एक्सट्रैक्टर",
+    id: "media_video_trimmer", categoryId: "video_tools", titleEn: "Video Interval Frame Extractor", titleHi: "वीडियो इंटरवल फ्रेम एक्सट्रैक्टर",
     descEn: "Mark start and end intervals and snapshot key sequences.", descHi: "वीडियो की शुरुआत व अंत समय सेट कर फ्रेम निकालें।", iconName: "Scissors", badge: "100% Offline",
     keywords: ["video trim", "video cutter", "video interval"]
   },
   {
-    id: "media_video_rotate", categoryId: "audio_video_tools", titleEn: "Video Frame Rotator (90°/180°/270°)", titleHi: "वीडियो फ्रेम रोटेटर (घूर्णन)",
+    id: "media_video_rotate", categoryId: "video_tools", titleEn: "Video Frame Rotator (90°/180°/270°)", titleHi: "वीडियो फ्रेम रोटेटर (घूर्णन)",
     descEn: "Rotate video frames 90, 180 or 270 degrees orientation.", descHi: "उल्टे रिकॉर्ड हुए वीडियो फ्रेम को 90° या 180° सीधा करें।", iconName: "RotateCw", badge: "100% Offline",
     keywords: ["rotate video", "flip video", "orientation video"]
   },
   {
-    id: "media_video_flip_h", categoryId: "audio_video_tools", titleEn: "Video Mirror (Horizontal Flip)", titleHi: "वीडियो मिरर (क्षैतिज फ्लिप)",
+    id: "media_video_flip_h", categoryId: "video_tools", titleEn: "Video Mirror (Horizontal Flip)", titleHi: "वीडियो मिरर (क्षैतिज फ्लिप)",
     descEn: "Mirror flip video horizontally like front camera selfies.", descHi: "सेल्फी कैमरे जैसे वीडियो को क्षैतिज रूप से सीधा/मिरर करें।", iconName: "RefreshCw", badge: "100% Offline",
     keywords: ["mirror video", "flip horizontal video", "selfie flip"]
   },
   {
-    id: "media_video_flip_v", categoryId: "audio_video_tools", titleEn: "Video Invert (Vertical Flip)", titleHi: "वीडियो वर्टिकल फ्लिप",
+    id: "media_video_flip_v", categoryId: "video_tools", titleEn: "Video Invert (Vertical Flip)", titleHi: "वीडियो वर्टिकल फ्लिप",
     descEn: "Invert video upside down vertically.", descHi: "वीडियो फ्रेम को लंबवत रूप से उल्टा/सीधा करें।", iconName: "RefreshCw", badge: "100% Offline",
     keywords: ["flip vertical video", "invert video"]
   },
   {
-    id: "media_video_aspect_ratio", categoryId: "audio_video_tools", titleEn: "Video Aspect Ratio Cropper", titleHi: "वीडियो आस्पेक्ट रेशियो क्रॉप",
+    id: "media_video_aspect_ratio", categoryId: "video_tools", titleEn: "Video Aspect Ratio Cropper", titleHi: "वीडियो आस्पेक्ट रेशियो क्रॉप",
     descEn: "Crop video view to 16:9, 4:3, 1:1 or 9:16 mobile format.", descHi: "वीडियो को 16:9 (YouTube) या 9:16 (Shorts/Reel) में सेट करें।", iconName: "Maximize", badge: "100% Offline",
     keywords: ["aspect ratio", "video crop", "shorts format", "16:9", "9:16"]
   },
   {
-    id: "media_video_speed", categoryId: "audio_video_tools", titleEn: "Video Playback Speed Controller", titleHi: "वीडियो प्लेबैक स्पीड नियंत्रक",
+    id: "media_video_speed", categoryId: "video_tools", titleEn: "Video Playback Speed Controller", titleHi: "वीडियो प्लेबैक स्पीड नियंत्रक",
     descEn: "Preview video playback at custom speed multipliers (0.5x - 2.0x).", descHi: "वीडियो को धीमी या दोगुनी गति पर चलाकर देखें।", iconName: "FastForward", badge: "100% Offline",
     keywords: ["video speed", "slow motion video", "fast forward video"]
   },
   {
-    id: "media_video_metadata", categoryId: "audio_video_tools", titleEn: "Video Dimensions & Codec Inspector", titleHi: "वीडियो डायमेंशन व मेटाडेटा दर्शक",
+    id: "media_video_metadata", categoryId: "video_tools", titleEn: "Video Dimensions & Codec Inspector", titleHi: "वीडियो डायमेंशन व मेटाडेटा दर्शक",
     descEn: "Inspect video resolution, aspect ratio, duration and file size.", descHi: "वीडियो का रिज़ॉल्यूशन, अवधि व फ़ाइल साइज़ विवरण देखें।", iconName: "Eye", badge: "100% Offline",
     keywords: ["video metadata", "video resolution", "video specs", "video duration"]
+  },
+  {
+    id: "media_video_to_audio", categoryId: "video_tools", titleEn: "Video to Audio Extractor (MP4 to WAV)", titleHi: "वीडियो से ऑडियो एक्सट्रैक्टर",
+    descEn: "Extract crystal-clear sound track from MP4/WebM videos into offline WAV audio.", descHi: "किसी भी वीडियो से तुरंत ऑडियो अलग करें और WAV फॉर्मेट में सुरक्षित करें।", iconName: "Music", badge: "100% Offline",
+    keywords: ["video to audio", "extract audio from video", "mp4 to wav", "video to mp3"]
   },
 
   // 25. 100% Offline QR, Barcode, Fonts & Design Suite (Phase 9 - 20 Tools)
@@ -2143,43 +2213,4 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descEn: "Calculate proportional width and height across common design ratios.", descHi: "चौड़ाई या ऊंचाई दर्ज कर आस्पेक्ट रेशियो अनुसार सही अनुपात निकालें।", iconName: "Maximize", badge: "100% Offline",
     keywords: ["aspect ratio calc", "width height", "screen ratio"]
   },
-
-  // =========================================================================
-  // 26. STUDIO EDITORS SUITE (Full-Featured Creative Workspaces)
-  // =========================================================================
-  {
-    id: "studio_pdf_editor", categoryId: "studio_editors", titleEn: "PDF Studio Editor", titleHi: "PDF स्टूडियो एडिटर",
-    descEn: "Complete PDF workspace: drag movable text, whiteout correction patch, rotate and delete pages.",
-    descHi: "संपूर्ण PDF वर्कस्पेस: ड्रैग टेक्स्ट, सुधार व्हाइटआउट पैच, पेज रोटेट व डिलीट करें।",
-    iconName: "FileText", badge: "Pro Studio",
-    keywords: ["pdf editor", "edit pdf", "pdf studio", "reorder pdf", "watermark pdf", "rotate pdf"]
-  },
-  {
-    id: "studio_image_editor", categoryId: "studio_editors", titleEn: "Image Studio Editor", titleHi: "फोटो व इमेज स्टूडियो एडिटर",
-    descEn: "Full-fledged photo editor: drag text, verified stamps, passport crop, brightness & filters.",
-    descHi: "संपूर्ण फोटो एडिटर: ड्रैग टेक्स्ट लेयर, सत्यापित मुहर/स्टैम्प, पासपोर्ट साइज क्रॉप व फिल्टर्स।",
-    iconName: "Image", badge: "Pro Studio",
-    keywords: ["image editor", "photo editor", "photo studio", "crop photo", "image filter", "photo effects"]
-  },
-  {
-    id: "studio_word_editor", categoryId: "studio_editors", titleEn: "Word Document Studio", titleHi: "वर्ड व दस्तावेज़ स्टूडियो",
-    descEn: "Full rich-text word processor: A4 layout, applications, biodata, tables and DOCX export.",
-    descHi: "संपूर्ण वर्ड प्रोसेसर: A4 लेआउट, सरकारी प्रार्थना पत्र, बायोडाटा, टेबल्स और सीधे .docx में डाउनलोड।",
-    iconName: "FileText", badge: "Pro Studio",
-    keywords: ["word editor", "document editor", "docx editor", "rich text", "word processor", "create docx"]
-  },
-  {
-    id: "studio_sheet_editor", categoryId: "studio_editors", titleEn: "Excel & Sheet Studio", titleHi: "एक्सेल व स्प्रेडशीट स्टूडियो",
-    descEn: "Full spreadsheet workspace: formula engine (=SUM, =AVG), budget ledgers, CSV and Excel XLSX export.",
-    descHi: "संपूर्ण स्प्रेडशीट वर्कस्पेस: फॉर्मूले (=SUM), बजट बहीखाता, छात्र अंकतालिका व Excel (.xlsx) सेव।",
-    iconName: "FileSpreadsheet", badge: "Pro Studio",
-    keywords: ["excel editor", "sheet editor", "spreadsheet", "csv editor", "xlsx editor", "budget sheet"]
-  },
-  {
-    id: "studio_media_editor", categoryId: "studio_editors", titleEn: "Audio & Video Studio", titleHi: "ऑडियो व वीडियो स्टूडियो",
-    descEn: "Audio cutter, 300% volume booster, voice recorder, video trimmer & MP4 audio extractor.",
-    descHi: "ऑडियो कटर, 300% वॉल्यूम बूस्टर, वॉयस रिकॉर्डर, वीडियो से ऑडियो निकालना व एचडी फ्रेम कैप्चर।",
-    iconName: "Music", badge: "Pro Studio",
-    keywords: ["audio editor", "video editor", "audio cutter", "trim audio", "extract audio", "voice recorder", "video trimmer"]
-  }
 ];

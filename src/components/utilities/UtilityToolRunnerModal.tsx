@@ -19,11 +19,8 @@ import DevEncodingToolsEngine from "./engines/devEncodingToolsEngine";
 import ArchiveToolsEngine from "./engines/archiveToolsEngine";
 import MediaToolsEngine from "./engines/mediaToolsEngine";
 import DesignQrToolsEngine from "./engines/designQrToolsEngine";
-import PdfStudioEditorEngine from "./engines/pdfStudioEditorEngine";
-import ImageStudioEditorEngine from "./engines/imageStudioEditorEngine";
-import WordStudioEditorEngine from "./engines/wordStudioEditorEngine";
+import WordToolsEngine from "./engines/wordToolsEngine";
 import SheetStudioEditorEngine from "./engines/sheetStudioEditorEngine";
-import MediaStudioEditorEngine from "./engines/mediaStudioEditorEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -386,6 +383,8 @@ function ToolEngineDispatcher({
     case "pdf_page_duplication":
     case "pdf_booklet_maker":
     case "pdf_nup_imposition":
+    case "pdf_text_editor":
+    case "pdf_whiteout_tool":
       return <PdfToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     // 18. 100% Offline Image Tools Suite (Phase 3 - 20 Tools)
@@ -432,6 +431,9 @@ function ToolEngineDispatcher({
     case "img_collage_maker":
     case "img_splitter":
     case "img_frame_extractor":
+    case "img_text_overlay":
+    case "img_stamp_tool":
+    case "img_passport_crop":
       return <ImageAdvancedToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     // 20. 100% Offline Word & Text Tools Suite (Phase 5 - 40 Tools)
@@ -477,6 +479,12 @@ function ToolEngineDispatcher({
     case "text_similarity_comparator":
       return <TextToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
+    case "word_doc_editor":
+    case "word_template_draft":
+    case "word_table_builder":
+    case "word_page_setup":
+      return <WordToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
     // 21. 100% Offline Excel & Data File Tools Suite (Phase 6 - 40 Tools)
     case "data_csv_to_json":
     case "data_json_to_csv":
@@ -519,6 +527,11 @@ function ToolEngineDispatcher({
     case "data_json_array_dedup":
     case "data_json_flatten":
       return <ExcelDataToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    case "excel_sheet_editor":
+    case "excel_formula_calc":
+    case "excel_budget_sheet":
+      return <SheetStudioEditorEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     // 22. 100% Offline Developer & Encoding Tools Suite (Phase 7 - 40 Tools)
     case "dev_base64_encode":
@@ -607,6 +620,8 @@ function ToolEngineDispatcher({
     case "media_video_aspect_ratio":
     case "media_video_speed":
     case "media_video_metadata":
+    case "media_voice_recorder":
+    case "media_video_to_audio":
       return <MediaToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     // 25. 100% Offline QR, Barcode, Fonts & Design Suite (Phase 9 - 20 Tools)
@@ -632,17 +647,7 @@ function ToolEngineDispatcher({
     case "design_aspect_calc":
       return <DesignQrToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
-    // 26. OFFLINE STUDIO EDITORS SUITE
-    case "studio_pdf_editor":
-      return <PdfStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
-    case "studio_image_editor":
-      return <ImageStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
-    case "studio_word_editor":
-      return <WordStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
-    case "studio_sheet_editor":
-      return <SheetStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
-    case "studio_media_editor":
-      return <MediaStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
 
     default:
       return (

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { 
   Music, Video, Upload, Download, Copy, Check, 
   AlertCircle, RefreshCw, Play, Pause, Volume2, 
-  FastForward, Scissors, Eye, Maximize, RotateCw
+  FastForward, Scissors, Eye, Maximize, RotateCw, Mic, MicOff
 } from "lucide-react";
 
 interface Props {
@@ -30,6 +30,15 @@ export default function MediaToolsEngine({ toolId, isHi, downloadBlob, copyToCli
   const [targetWidth, setTargetWidth] = useState(1280);
   const [targetHeight, setTargetHeight] = useState(720);
   const [rotationAngle, setRotationAngle] = useState(90);
+
+  // Voice Recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const recordTimerRef = useRef<number | null>(null);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -340,13 +349,86 @@ export default function MediaToolsEngine({ toolId, isHi, downloadBlob, copyToCli
     }, "image/png");
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      recordedChunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recordedChunksRef.current.push(event.data);
+      };
+
+      recorder.onstop = () => {
+        const audioBlob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
+        setRecordedAudioBlob(audioBlob);
+        if (recordedAudioUrl) URL.revokeObjectURL(recordedAudioUrl);
+        const url = URL.createObjectURL(audioBlob);
+        setRecordedAudioUrl(url);
+        stream.getTracks().forEach(track => track.stop());
+        setSuccessMsg(isHi ? "वॉयस रिकॉर्डिंग पूरी हुई!" : "Recording completed!");
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+      setRecordingSeconds(0);
+
+      recordTimerRef.current = window.setInterval(() => {
+        setRecordingSeconds(s => s + 1);
+      }, 1000);
+    } catch {
+      setError(isHi ? "माइक्रोफ़ोन अनुमति नहीं मिली" : "Microphone permission denied");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (recordTimerRef.current) {
+        clearInterval(recordTimerRef.current);
+        recordTimerRef.current = null;
+      }
+    }
+  };
+
+  const saveRecordedAudio = async () => {
+    if (!recordedAudioBlob) return;
+    setLoading(true);
+    try {
+      const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const arrayBuffer = await recordedAudioBlob.arrayBuffer();
+      const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+      const wavBlob = audioBufferToWav(decoded);
+      const filename = `Voice_Recording_${Date.now()}.wav`;
+      downloadBlob(wavBlob, filename);
+      setSuccessMsg(isHi ? `ऑडियो सेव हुआ: ${filename}` : `Recording saved: ${filename}`);
+      setLoading(false);
+    } catch {
+      downloadBlob(recordedAudioBlob, `Voice_Recording_${Date.now()}.webm`);
+      setLoading(false);
+    }
+  };
+
   const processTool = async () => {
     setError(null);
     setSuccessMsg(null);
     setLoading(true);
 
     try {
-      if (toolId.startsWith("media_audio_")) {
+      if (toolId === "media_video_to_audio") {
+        if (!file) throw new Error(isHi ? "कृपया पहले वीडियो फ़ाइल चुनें।" : "Please select a video file first.");
+        const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        const arrayBuffer = await file.arrayBuffer();
+        const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+        const wavBlob = audioBufferToWav(decoded);
+        const outName = `${file.name.replace(/\.[^/.]+$/, "")}_Audio.wav`;
+        downloadBlob(wavBlob, outName);
+        setSuccessMsg(isHi ? `ऑडियो निकाला गया: ${outName}` : `Audio successfully extracted: ${outName}`);
+      } else if (toolId === "media_voice_recorder") {
+        await saveRecordedAudio();
+      } else if (toolId.startsWith("media_audio_")) {
         await processAudio();
       } else {
         await processVideoFrame();
@@ -358,31 +440,78 @@ export default function MediaToolsEngine({ toolId, isHi, downloadBlob, copyToCli
     }
   };
 
+  const formatTimer = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
   return (
     <div className="space-y-4">
-      {/* Upload File */}
-      <div className="rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 p-4 text-center">
-        <input
-          type="file"
-          accept={toolId.includes("video") ? "video/*" : "audio/*"}
-          onChange={handleFileChange}
-          id="media-file-upload"
-          className="hidden"
-        />
-        <label htmlFor="media-file-upload" className="cursor-pointer">
-          {toolId.includes("video") ? (
-            <Video className="mx-auto h-8 w-8 text-emerald-600" />
-          ) : (
-            <Music className="mx-auto h-8 w-8 text-emerald-600" />
+      {/* Voice Recorder Mode UI */}
+      {toolId === "media_voice_recorder" ? (
+        <div className="rounded-2xl border border-purple-200 bg-purple-50/40 p-5 text-center space-y-4">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
+            <Mic className={`h-8 w-8 ${isRecording ? "text-rose-600 animate-pulse" : "text-purple-600"}`} />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              {isHi ? "माइक से लाइव ऑडियो रिकॉर्डर" : "Microphone Live Voice Recorder"}
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              {isHi ? "100% ऑफलाइन, सीधे आपके ब्राउज़र में रिकॉर्ड करें व WAV में सेव करें।" : "100% offline, record directly in browser and save high quality WAV."}
+            </p>
+          </div>
+
+          <div className="text-2xl font-mono font-black text-slate-900">
+            {formatTimer(recordingSeconds)}
+          </div>
+
+          <div className="flex justify-center gap-3">
+            <button
+              type="button"
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold text-white shadow-sm transition active:scale-95 ${
+                isRecording ? "bg-rose-600 hover:bg-rose-700 animate-pulse" : "bg-purple-600 hover:bg-purple-700"
+              }`}
+            >
+              {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              <span>{isRecording ? (isHi ? "रिकॉर्डिंग रोकें" : "Stop Recording") : (isHi ? "रिकॉर्डिंग शुरू करें" : "Start Recording")}</span>
+            </button>
+          </div>
+
+          {recordedAudioUrl && (
+            <div className="pt-3 border-t border-purple-200 space-y-3">
+              <p className="text-xs font-bold text-slate-700">{isHi ? "रिकॉर्ड किया गया ऑडियो सुनें:" : "Preview Recording:"}</p>
+              <audio src={recordedAudioUrl} controls className="w-full h-10" />
+            </div>
           )}
-          <p className="mt-1 text-xs font-semibold text-emerald-950">
-            {file ? file.name : isHi ? "मीडिया फ़ाइल चुनें (Audio / Video)" : "Select Media File"}
-          </p>
-          <p className="text-[10px] text-emerald-700">
-            {isHi ? "100% ऑफलाइन लोकल प्रोसेसिंग (सुरक्षित)" : "100% offline client-side processing"}
-          </p>
-        </label>
-      </div>
+        </div>
+      ) : (
+        /* Upload File */
+        <div className="rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 p-4 text-center">
+          <input
+            type="file"
+            accept={toolId.includes("video") ? "video/*" : "audio/*"}
+            onChange={handleFileChange}
+            id="media-file-upload"
+            className="hidden"
+          />
+          <label htmlFor="media-file-upload" className="cursor-pointer">
+            {toolId.includes("video") ? (
+              <Video className="mx-auto h-8 w-8 text-emerald-600" />
+            ) : (
+              <Music className="mx-auto h-8 w-8 text-emerald-600" />
+            )}
+            <p className="mt-1 text-xs font-semibold text-emerald-950">
+              {file ? file.name : isHi ? "मीडिया फ़ाइल चुनें (Audio / Video)" : "Select Media File"}
+            </p>
+            <p className="text-[10px] text-emerald-700">
+              {isHi ? "100% ऑफलाइन लोकल प्रोसेसिंग (सुरक्षित)" : "100% offline client-side processing"}
+            </p>
+          </label>
+        </div>
+      )}
 
       {/* Video Preview Player */}
       {fileUrl && toolId.includes("video") && (

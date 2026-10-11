@@ -531,6 +531,80 @@ export default function PdfToolsEngine({ toolId, isHi, downloadBlob, copyToClipb
           break;
         }
 
+        // 31. PDF Text Editor (Add Text Overlay)
+        case "pdf_text_editor": {
+          if (!file) throw new Error(isHi ? "PDF चुनें।" : "Select a PDF.");
+          const bytes = await file.arrayBuffer();
+          const doc = await PDFDocument.load(bytes);
+          const font = await doc.embedFont(StandardFonts.Helvetica);
+          const pageIdx = Math.max(0, Math.min(doc.getPageCount() - 1, numberVal - 1));
+          const targetPage = doc.getPages()[pageIdx];
+          const { width, height } = targetPage.getSize();
+          const textToAdd = inputVal.trim() || (isHi ? "सत्यापित प्रति (Verified)" : "Approved Copy");
+          const fontSize = optionVal === "small" ? 12 : optionVal === "large" ? 22 : 16;
+          
+          let xPos = 50;
+          let yPos = height - 60;
+          if (secondInputVal === "center") {
+            xPos = Math.max(20, (width - textToAdd.length * (fontSize * 0.5)) / 2);
+            yPos = height / 2;
+          } else if (secondInputVal === "bottom") {
+            xPos = 50;
+            yPos = 50;
+          }
+
+          targetPage.drawText(textToAdd, {
+            x: Math.max(20, xPos),
+            y: Math.max(20, yPos),
+            size: fontSize,
+            font,
+            color: rgb(0.1, 0.2, 0.5),
+          });
+          const pdfBytes = await doc.save();
+          await downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), `TextEdited_${file.name}`);
+          setStatusMsg(isHi ? "टेक्स्ट सफलतापूर्वक जोड़ा गया!" : "Text added to PDF!");
+          break;
+        }
+
+        // 32. PDF Whiteout & Redaction
+        case "pdf_whiteout_tool": {
+          if (!file) throw new Error(isHi ? "PDF चुनें।" : "Select a PDF.");
+          const bytes = await file.arrayBuffer();
+          const doc = await PDFDocument.load(bytes);
+          const pageIdx = Math.max(0, Math.min(doc.getPageCount() - 1, numberVal - 1));
+          const targetPage = doc.getPages()[pageIdx];
+          const { width, height } = targetPage.getSize();
+          
+          let rectX = 40;
+          let rectY = height - 80;
+          let rectW = width - 80;
+          let rectH = 50;
+
+          if (optionVal === "footer") {
+            rectY = 30;
+            rectH = 45;
+          } else if (optionVal === "center") {
+            rectY = height / 2 - 30;
+            rectH = 60;
+          } else if (optionVal === "custom") {
+            const hVal = Math.max(10, Math.min(200, parseInt(inputVal || "40", 10)));
+            rectH = hVal;
+          }
+
+          targetPage.drawRectangle({
+            x: rectX,
+            y: rectY,
+            width: rectW,
+            height: rectH,
+            color: rgb(1, 1, 1),
+          });
+
+          const pdfBytes = await doc.save();
+          await downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), `Redacted_${file.name}`);
+          setStatusMsg(isHi ? "व्हाइटआउट लागू हुआ, संवेदनशील जानकारी हटाई गई!" : "Whiteout applied successfully!");
+          break;
+        }
+
         default:
           throw new Error("Unknown PDF tool");
       }
@@ -764,6 +838,114 @@ export default function PdfToolsEngine({ toolId, isHi, downloadBlob, copyToClipb
             onChange={(e) => setInputVal(e.target.value)}
             className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-800"
           />
+        </div>
+      )}
+
+      {toolId === "pdf_text_editor" && (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+              {isHi ? "जोड़ने हेतु टेक्स्ट" : "Text to Add"}
+            </label>
+            <input
+              type="text"
+              value={inputVal}
+              onChange={(e) => setInputVal(e.target.value)}
+              placeholder={isHi ? "सत्यापित प्रति / Approved" : "Verified / Approved Note"}
+              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800"
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {isHi ? "पेज संख्या" : "Page #"}
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={numberVal}
+                onChange={(e) => setNumberVal(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-800"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {isHi ? "फ़ॉन्ट साइज" : "Font Size"}
+              </label>
+              <select
+                value={optionVal}
+                onChange={(e) => setOptionVal(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800"
+              >
+                <option value="small">Small (12pt)</option>
+                <option value="medium">Medium (16pt)</option>
+                <option value="large">Large (22pt)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {isHi ? "स्थिति" : "Position"}
+              </label>
+              <select
+                value={secondInputVal || "top"}
+                onChange={(e) => setSecondInputVal(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800"
+              >
+                <option value="top">Top Header</option>
+                <option value="center">Center</option>
+                <option value="bottom">Bottom Footer</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toolId === "pdf_whiteout_tool" && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {isHi ? "पेज संख्या" : "Page Number"}
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={numberVal}
+                onChange={(e) => setNumberVal(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-800"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {isHi ? "व्हाइटआउट क्षेत्र" : "Redaction Area"}
+              </label>
+              <select
+                value={optionVal}
+                onChange={(e) => setOptionVal(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800"
+              >
+                <option value="header">Top Header (50px)</option>
+                <option value="center">Center Body Block</option>
+                <option value="footer">Bottom Footer (45px)</option>
+                <option value="custom">Custom Height</option>
+              </select>
+            </div>
+          </div>
+          {optionVal === "custom" && (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                {isHi ? "व्हाइटआउट ऊंचाई (Pixels)" : "Whiteout Height (Pixels)"}
+              </label>
+              <input
+                type="number"
+                min={10}
+                max={300}
+                value={inputVal || "60"}
+                onChange={(e) => setInputVal(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-800"
+              />
+            </div>
+          )}
         </div>
       )}
 
