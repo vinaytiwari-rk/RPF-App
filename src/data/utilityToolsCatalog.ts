@@ -20,7 +20,6 @@ export interface UtilityCategoryDefinition {
 
 export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "all", titleEn: "All Tools", titleHi: "सभी टूल्स", iconName: "LayoutGrid", accent: "from-emerald-600 to-teal-700" },
-  { id: "studio_editors", titleEn: "Studio Editors", titleHi: "स्टूडियो एडिटर्स", iconName: "Sparkles", accent: "from-[#FF9933] to-[#138808]" },
   { id: "pdf_tools", titleEn: "PDF Tools (30)", titleHi: "PDF टूल्स (30)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
   { id: "image_tools", titleEn: "Image Tools (40)", titleHi: "इमेज टूल्स (40)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
   { id: "word_text_tools", titleEn: "Word & Text Tools (40)", titleHi: "वर्ड व टेक्स्ट टूल्स (40)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
