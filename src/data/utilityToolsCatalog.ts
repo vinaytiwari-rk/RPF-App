@@ -2144,42 +2144,40 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     keywords: ["aspect ratio calc", "width height", "screen ratio"]
   },
 
-  // =========================================================================
-  // 26. STUDIO EDITORS SUITE (Full-Featured Creative Workspaces)
-  // =========================================================================
+  // Standalone editors: preserve the former Studio capabilities as individual tools.
   {
-    id: "studio_pdf_editor", categoryId: "studio_editors", titleEn: "PDF Studio Editor", titleHi: "PDF स्टूडियो एडिटर",
-    descEn: "Complete PDF workspace: drag movable text, whiteout correction patch, rotate and delete pages.",
-    descHi: "संपूर्ण PDF वर्कस्पेस: ड्रैग टेक्स्ट, सुधार व्हाइटआउट पैच, पेज रोटेट व डिलीट करें।",
-    iconName: "FileText", badge: "Pro Studio",
-    keywords: ["pdf editor", "edit pdf", "pdf studio", "reorder pdf", "watermark pdf", "rotate pdf"]
+    id: "pdf_text_whiteout_editor", categoryId: "pdf_tools", titleEn: "PDF Text & Whiteout Editor", titleHi: "PDF टेक्स्ट व व्हाइटआउट एडिटर",
+    descEn: "Add movable text and whiteout correction patches to PDFs; rotate, reorder and remove pages.",
+    descHi: "PDF में टेक्स्ट व व्हाइटआउट सुधार जोड़ें; पेज घुमाएँ, क्रम बदलें और हटाएँ।",
+    iconName: "FileText", badge: "100% Offline",
+    keywords: ["pdf editor", "edit pdf", "movable text", "whiteout", "reorder pdf", "rotate pdf"]
   },
   {
-    id: "studio_image_editor", categoryId: "studio_editors", titleEn: "Image Studio Editor", titleHi: "फोटो व इमेज स्टूडियो एडिटर",
-    descEn: "Full-fledged photo editor: drag text, verified stamps, passport crop, brightness & filters.",
-    descHi: "संपूर्ण फोटो एडिटर: ड्रैग टेक्स्ट लेयर, सत्यापित मुहर/स्टैम्प, पासपोर्ट साइज क्रॉप व फिल्टर्स।",
-    iconName: "Image", badge: "Pro Studio",
-    keywords: ["image editor", "photo editor", "photo studio", "crop photo", "image filter", "photo effects"]
+    id: "image_annotation_editor", categoryId: "image_tools", titleEn: "Image Annotation & Passport Crop", titleHi: "इमेज एनोटेशन व पासपोर्ट क्रॉप",
+    descEn: "Add text layers and stamps, crop passport/ID photos, adjust brightness and apply filters.",
+    descHi: "इमेज पर टेक्स्ट व स्टैम्प लगाएँ, पासपोर्ट/ID फोटो क्रॉप करें, ब्राइटनेस व फ़िल्टर बदलें।",
+    iconName: "Image", badge: "100% Offline",
+    keywords: ["image editor", "photo editor", "text layer", "stamp", "passport crop", "photo effects"]
   },
   {
-    id: "studio_word_editor", categoryId: "studio_editors", titleEn: "Word Document Studio", titleHi: "वर्ड व दस्तावेज़ स्टूडियो",
-    descEn: "Full rich-text word processor: A4 layout, applications, biodata, tables and DOCX export.",
-    descHi: "संपूर्ण वर्ड प्रोसेसर: A4 लेआउट, सरकारी प्रार्थना पत्र, बायोडाटा, टेबल्स और सीधे .docx में डाउनलोड।",
-    iconName: "FileText", badge: "Pro Studio",
-    keywords: ["word editor", "document editor", "docx editor", "rich text", "word processor", "create docx"]
+    id: "word_document_editor", categoryId: "word_text_tools", titleEn: "Word Document Editor (DOCX)", titleHi: "वर्ड दस्तावेज़ एडिटर (DOCX)",
+    descEn: "Create and format A4 letters, applications, biodata and tables; export documents as DOCX.",
+    descHi: "A4 पत्र, आवेदन, बायोडाटा व टेबल बनाएँ; दस्तावेज़ DOCX में सेव करें।",
+    iconName: "FileText", badge: "100% Offline",
+    keywords: ["word editor", "document editor", "docx editor", "rich text", "word processor", "create docx", "a4 letter"]
   },
   {
-    id: "studio_sheet_editor", categoryId: "studio_editors", titleEn: "Excel & Sheet Studio", titleHi: "एक्सेल व स्प्रेडशीट स्टूडियो",
-    descEn: "Full spreadsheet workspace: formula engine (=SUM, =AVG), budget ledgers, CSV and Excel XLSX export.",
-    descHi: "संपूर्ण स्प्रेडशीट वर्कस्पेस: फॉर्मूले (=SUM), बजट बहीखाता, छात्र अंकतालिका व Excel (.xlsx) सेव।",
-    iconName: "FileSpreadsheet", badge: "Pro Studio",
-    keywords: ["excel editor", "sheet editor", "spreadsheet", "csv editor", "xlsx editor", "budget sheet"]
+    id: "spreadsheet_formula_editor", categoryId: "excel_data_tools", titleEn: "Spreadsheet & Formula Editor (XLSX)", titleHi: "स्प्रेडशीट व फॉर्मूला एडिटर (XLSX)",
+    descEn: "Edit spreadsheet cells, calculate common formulas, build budgets and export CSV/XLSX files.",
+    descHi: "स्प्रेडशीट सेल संपादित करें, सामान्य फॉर्मूले चलाएँ, बजट बनाएँ और CSV/XLSX सेव करें।",
+    iconName: "FileSpreadsheet", badge: "100% Offline",
+    keywords: ["excel editor", "sheet editor", "spreadsheet", "formula", "xlsx editor", "budget sheet", "sum"]
   },
   {
-    id: "studio_media_editor", categoryId: "studio_editors", titleEn: "Audio & Video Studio", titleHi: "ऑडियो व वीडियो स्टूडियो",
-    descEn: "Audio cutter, 300% volume booster, voice recorder, video trimmer & MP4 audio extractor.",
-    descHi: "ऑडियो कटर, 300% वॉल्यूम बूस्टर, वॉयस रिकॉर्डर, वीडियो से ऑडियो निकालना व एचडी फ्रेम कैप्चर।",
-    iconName: "Music", badge: "Pro Studio",
+    id: "media_audio_video_editor", categoryId: "audio_video_tools", titleEn: "Audio & Video Editor", titleHi: "ऑडियो व वीडियो एडिटर",
+    descEn: "Trim audio/video, boost audio up to 300%, record voice and extract audio from video files.",
+    descHi: "ऑडियो/वीडियो ट्रिम करें, आवाज़ 300% तक बढ़ाएँ, वॉइस रिकॉर्ड करें और वीडियो से ऑडियो निकालें।",
+    iconName: "Music", badge: "100% Offline",
     keywords: ["audio editor", "video editor", "audio cutter", "trim audio", "extract audio", "voice recorder", "video trimmer"]
   }
 ];
