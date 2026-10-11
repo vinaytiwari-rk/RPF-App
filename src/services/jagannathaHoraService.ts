@@ -67,10 +67,10 @@ function deepMasa(source: any, depth = 0): string {
   if (!source || typeof source !== "object" || depth > 5) return "";
   const direct = first(source, MASA_KEYS);
   if (direct) return direct;
-  // Some provider responses expose the lunar month under a generic month key.
-  // Accept it only when it is recognizably a Hindu lunar-month name.
+  // Jagannatha Hora documents "month" as the lunar month on its Panchang response.
+  // Preserve the provider's actual label (including regional/adhika variants), but never show a numeric index.
   const genericMonth = textValue(source.month ?? source.Month ?? source.MONTH).trim();
-  if (genericMonth && HINDU_MONTH_NAMES.test(genericMonth)) return genericMonth;
+  if (genericMonth && !/^\\d+(?:\\.\\d+)?$/.test(genericMonth)) return genericMonth;
   for (const value of Object.values(source)) {
     if (value && typeof value === "object") {
       const nested = deepMasa(value, depth + 1);
@@ -167,8 +167,8 @@ export async function getJagannathaPanchang(options: {
 
   let raw: any = null;
   try {
-    const response = await axios.post(`${BASE_URL}/api/panchang`, {
-      date: dateFormatted, latitude, longitude, timezone: 5.5, place, ayanamsa_mode: "LAHIRI"
+    const response = await axios.post(`${BASE_URL}/panchang`, {
+      date: dateInput, latitude, longitude, timezone: 5.5, place, ayanamsa_mode: "LAHIRI"
     }, { timeout: 4000, headers: { "Content-Type": "application/json", Accept: "application/json" } });
     raw = response.data?.panchang || response.data;
   } catch {
