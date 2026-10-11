@@ -24,6 +24,7 @@ export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "image_tools", titleEn: "Image Tools (40)", titleHi: "इमेज टूल्स (40)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
   { id: "word_text_tools", titleEn: "Word & Text Tools (40)", titleHi: "वर्ड व टेक्स्ट टूल्स (40)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
   { id: "excel_data_tools", titleEn: "Excel & Data File Tools (40)", titleHi: "एक्सेल व डेटा टूल्स (40)", iconName: "FileSpreadsheet", accent: "from-green-600 to-emerald-700" },
+  { id: "dev_tools", titleEn: "Developer & Encoding Tools (40)", titleHi: "डेवलपर व एन्कोडिंग टूल्स (40)", iconName: "Code", accent: "from-indigo-600 to-purple-700" },
   { id: "govt_forms", titleEn: "Govt Forms & Recruitment", titleHi: "सरकारी भर्ती व फॉर्म", iconName: "BadgeCheck", accent: "from-amber-600 to-orange-700" },
   { id: "pdf_docs", titleEn: "PDF & Document Office", titleHi: "दस्तावेज व PDF ऑफिस", iconName: "FileText", accent: "from-blue-600 to-indigo-700" },
   { id: "legal_drafts", titleEn: "Legal Drafts & Notices", titleHi: "कानूनी आवेदन व प्रारूप", iconName: "Scale", accent: "from-purple-600 to-indigo-800" },
@@ -1627,5 +1628,208 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "data_json_flatten", categoryId: "excel_data_tools", titleEn: "JSON Flattening Tool", titleHi: "JSON फ्लैटनर (Flatten)",
     descEn: "Flatten deeply nested JSON objects into simple dot-notated keys.", descHi: "जटिल नेस्टेड JSON को सरल डॉट नोटेशन (a.b.c) में बदलें।", iconName: "Table", badge: "100% Offline",
     keywords: ["flatten json", "flatten object", "dot notation"]
+  },
+  // -----------------------------------------------------------------
+  // 20. Phase 7: Developer & Encoding Tools Suite (40 Tools)
+  // -----------------------------------------------------------------
+  {
+    id: "dev_base64_encode", categoryId: "dev_tools", titleEn: "Base64 Encoder", titleHi: "Base64 एन्कोडर",
+    descEn: "Encode UTF-8 text string into standard Base64 representation.", descHi: "टेक्स्ट को मानक Base64 कोड में बदलें।", iconName: "Binary", badge: "100% Offline",
+    keywords: ["base64 encode", "text to base64", "btoa"]
+  },
+  {
+    id: "dev_base64_decode", categoryId: "dev_tools", titleEn: "Base64 Decoder", titleHi: "Base64 डिकोडर",
+    descEn: "Decode Base64 string back into readable plain text.", descHi: "Base64 कोड को वापस सादे टेक्स्ट में पढ़ें।", iconName: "Binary", badge: "100% Offline",
+    keywords: ["base64 decode", "base64 to text", "atob"]
+  },
+  {
+    id: "dev_base64url_encode", categoryId: "dev_tools", titleEn: "Base64URL Encoder", titleHi: "Base64URL एन्कोडर",
+    descEn: "URL-safe Base64 encoding without padding or slash chars.", descHi: "वेब व URL के लिए सुरक्षित Base64URL बनाएं।", iconName: "Globe", badge: "100% Offline",
+    keywords: ["base64url", "url safe base64", "encode url"]
+  },
+  {
+    id: "dev_base64url_decode", categoryId: "dev_tools", titleEn: "Base64URL Decoder", titleHi: "Base64URL डिकोडर",
+    descEn: "Decode URL-safe Base64 strings into original text.", descHi: "Base64URL को मूल टेक्स्ट में डिकोड करें।", iconName: "Globe", badge: "100% Offline",
+    keywords: ["base64url decode", "decode url base64", "jwt decode"]
+  },
+  {
+    id: "dev_hex_encode", categoryId: "dev_tools", titleEn: "Hex Encoder", titleHi: "हेक्स (Hex) एन्कोडर",
+    descEn: "Convert raw characters into two-digit Hexadecimal byte string.", descHi: "टेक्स्ट को हेक्साडेसिमल (Hex) कोड में बदलें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["hex encode", "text to hex", "hexadecimal"]
+  },
+  {
+    id: "dev_hex_decode", categoryId: "dev_tools", titleEn: "Hex Decoder", titleHi: "हेक्स (Hex) डिकोडर",
+    descEn: "Decode Hexadecimal byte representation back into text.", descHi: "Hex कोड को वापस पठनीय टेक्स्ट में बदलें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["hex decode", "hex to text", "hex string"]
+  },
+  {
+    id: "dev_binary_encode", categoryId: "dev_tools", titleEn: "Binary Encoder", titleHi: "बाइनरी (Binary) एन्कोडर",
+    descEn: "Convert string into 8-bit binary 0s and 1s stream.", descHi: "टेक्स्ट को बाइनरी (0 और 1) कोड में बदलें।", iconName: "Binary", badge: "100% Offline",
+    keywords: ["binary encode", "text to binary", "0101"]
+  },
+  {
+    id: "dev_binary_decode", categoryId: "dev_tools", titleEn: "Binary Decoder", titleHi: "बाइनरी (Binary) डिकोडर",
+    descEn: "Convert binary 0s and 1s stream back into characters.", descHi: "बाइनरी 0 और 1 कोड को टेक्स्ट में पढ़ें।", iconName: "Binary", badge: "100% Offline",
+    keywords: ["binary decode", "binary to text", "bits to text"]
+  },
+  {
+    id: "dev_ascii_to_hex", categoryId: "dev_tools", titleEn: "ASCII to Hex", titleHi: "ASCII से हेक्स (Hex)",
+    descEn: "Convert ASCII character codes to Hexadecimal representation.", descHi: "ASCII कोड को हेक्साडेसिमल में बदलें।", iconName: "Code", badge: "100% Offline",
+    keywords: ["ascii to hex", "ascii code", "hex converter"]
+  },
+  {
+    id: "dev_hex_to_ascii", categoryId: "dev_tools", titleEn: "Hex to ASCII", titleHi: "हेक्स से ASCII कनवर्टर",
+    descEn: "Convert Hexadecimal byte codes back to ASCII text.", descHi: "हेक्स कोड से ASCII टेक्स्ट प्राप्त करें।", iconName: "Code", badge: "100% Offline",
+    keywords: ["hex to ascii", "hex decode", "ascii text"]
+  },
+  {
+    id: "dev_decimal_to_binary", categoryId: "dev_tools", titleEn: "Decimal to Binary", titleHi: "दशमलव से बाइनरी",
+    descEn: "Convert base-10 integer into base-2 binary format.", descHi: "दशमलव संख्या को बाइनरी (Base 2) में बदलें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["decimal to binary", "dec to bin", "base 10 to 2"]
+  },
+  {
+    id: "dev_binary_to_decimal", categoryId: "dev_tools", titleEn: "Binary to Decimal", titleHi: "बाइनरी से दशमलव",
+    descEn: "Convert base-2 binary stream into base-10 integer.", descHi: "बाइनरी कोड को साधारण दशमलव संख्या में बदलें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["binary to decimal", "bin to dec", "base 2 to 10"]
+  },
+  {
+    id: "dev_rot13", categoryId: "dev_tools", titleEn: "ROT13 Cipher", titleHi: "ROT13 सिफर (सादा एन्क्रिप्शन)",
+    descEn: "Rotate alphabetical letters by 13 positions symmetrically.", descHi: "अक्षरों को 13 स्थान घुमाकर एन्कोड/डिकोड करें।", iconName: "RefreshCw", badge: "100% Offline",
+    keywords: ["rot13", "rotate 13", "caesar 13"]
+  },
+  {
+    id: "dev_caesar_encode", categoryId: "dev_tools", titleEn: "Caesar Cipher Encoder", titleHi: "सीज़र सिफर एन्कोडर",
+    descEn: "Encrypt messages with historical Caesar alphabet shift key.", descHi: "चुनी गई शिफ्ट की (Shift Key) से संदेश गुप्त बनाएं।", iconName: "Lock", badge: "100% Offline",
+    keywords: ["caesar cipher", "caesar encode", "shift cipher"]
+  },
+  {
+    id: "dev_caesar_decode", categoryId: "dev_tools", titleEn: "Caesar Cipher Decoder", titleHi: "सीज़र सिफर डिकोडर",
+    descEn: "Decrypt Caesar shifted cipher text with reverse shift step.", descHi: "गुप्त सीज़र सिफर संदेश को आसानी से पढ़ें।", iconName: "Lock", badge: "100% Offline",
+    keywords: ["caesar decode", "decrypt caesar", "reverse shift"]
+  },
+  {
+    id: "dev_url_encode", categoryId: "dev_tools", titleEn: "URL Encoder", titleHi: "URL एन्कोडर",
+    descEn: "Encode query parameters with safe percent encoding.", descHi: "URL और लिंक के लिए सुरक्षित परसेंट एन्कोडिंग करें।", iconName: "Globe", badge: "100% Offline",
+    keywords: ["url encode", "percent encoding", "encodeURI"]
+  },
+  {
+    id: "dev_url_decode", categoryId: "dev_tools", titleEn: "URL Decoder", titleHi: "URL डिकोडर",
+    descEn: "Decode percent-encoded URL query string parameters.", descHi: "परसेंट एन्कोडेड URL को साफ अक्षरों में पढ़ें।", iconName: "Globe", badge: "100% Offline",
+    keywords: ["url decode", "decodeURI", "unescape url"]
+  },
+  {
+    id: "dev_html_entity_encode", categoryId: "dev_tools", titleEn: "HTML Entity Encoder", titleHi: "HTML एंटिटी एन्कोडर",
+    descEn: "Escape special characters like <, >, & to safe HTML entities.", descHi: "विशेष चिन्हों को सुरक्षित HTML कोड में बदलें।", iconName: "Code", badge: "100% Offline",
+    keywords: ["html encode", "html entities", "escape html"]
+  },
+  {
+    id: "dev_html_entity_decode", categoryId: "dev_tools", titleEn: "HTML Entity Decoder", titleHi: "HTML एंटिटी डिकोडर",
+    descEn: "Convert HTML numeric and named entities back to text.", descHi: "HTML एंटिटीज कोड को वापस सादे चिन्हों में बदलें।", iconName: "Code", badge: "100% Offline",
+    keywords: ["html decode", "unescape html", "decode entities"]
+  },
+  {
+    id: "dev_unicode_escape", categoryId: "dev_tools", titleEn: "Unicode Escape Tool", titleHi: "Unicode एस्केप (\\uXXXX)",
+    descEn: "Escape non-ASCII unicode characters to \\uXXXX representation.", descHi: "यूनिकोड अक्षरों को \\uXXXX एस्केप कोड में बदलें।", iconName: "Terminal", badge: "100% Offline",
+    keywords: ["unicode escape", "backslash u", "escape unicode"]
+  },
+  {
+    id: "dev_unicode_unescape", categoryId: "dev_tools", titleEn: "Unicode Unescape Tool", titleHi: "Unicode अन-एस्केप",
+    descEn: "Decode \\uXXXX escape notations back to native glyphs.", descHi: "\\uXXXX कोड को वापस सुंदर अक्षरों में पढ़ें।", iconName: "Terminal", badge: "100% Offline",
+    keywords: ["unicode unescape", "decode unicode", "unescape characters"]
+  },
+  {
+    id: "dev_jwt_decoder", categoryId: "dev_tools", titleEn: "JWT Decoder", titleHi: "JWT टोकन डिकोडर",
+    descEn: "Decode JSON Web Token header and payload claims securely.", descHi: "JSON Web Token (JWT) का हेडर व पेलोड डेटा देखें।", iconName: "Key", badge: "100% Offline",
+    keywords: ["jwt decode", "json web token", "jwt payload"]
+  },
+  {
+    id: "dev_jwt_inspector", categoryId: "dev_tools", titleEn: "JWT Inspector & Expiry Checker", titleHi: "JWT इंस्पेक्टर व एक्सपायरी जांच",
+    descEn: "Inspect token expiration timestamp and signature headers.", descHi: "टोकन की समाप्ति तारीख (Expiry) और सिग्नेचर जांचें।", iconName: "Key", badge: "100% Offline",
+    keywords: ["jwt inspect", "jwt expiration", "token debug"]
+  },
+  {
+    id: "dev_uuid_generator", categoryId: "dev_tools", titleEn: "UUID v4 Generator", titleHi: "UUID v4 जनरेटर (सुरक्षित ID)",
+    descEn: "Generate cryptographically secure RFC-4122 UUID v4 IDs.", descHi: "सुरक्षित और कभी न दोहराने वाली UUID आईडी बनाएं।", iconName: "Cpu", badge: "100% Offline",
+    keywords: ["uuid generator", "uuid v4", "guid generator"]
+  },
+  {
+    id: "dev_sha256_hash", categoryId: "dev_tools", titleEn: "SHA-256 Hash Generator", titleHi: "SHA-256 हैश जनरेटर",
+    descEn: "Generate 256-bit secure cryptographic cryptographic digest.", descHi: "256-बिट सुरक्षित क्रिप्टोग्राफिक हैश तैयार करें।", iconName: "ShieldCheck", badge: "100% Offline",
+    keywords: ["sha256", "sha-256", "crypto hash"]
+  },
+  {
+    id: "dev_sha512_hash", categoryId: "dev_tools", titleEn: "SHA-512 Hash Generator", titleHi: "SHA-512 हैश जनरेटर",
+    descEn: "Generate high-security 512-bit cryptographic hash checksum.", descHi: "उच्च-सुरक्षा 512-बिट क्रिप्टोग्राफिक हैश तैयार करें।", iconName: "ShieldCheck", badge: "100% Offline",
+    keywords: ["sha512", "sha-512", "high security hash"]
+  },
+  {
+    id: "dev_md5_hash", categoryId: "dev_tools", titleEn: "MD5 Hash Generator", titleHi: "MD5 हैश जनरेटर",
+    descEn: "Calculate standard 128-bit MD5 checksum digest.", descHi: "दस्तावेज़ या टेक्स्ट का 128-बिट MD5 हैश निकालें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["md5", "md5 hash", "checksum"]
+  },
+  {
+    id: "dev_crc32_checksum", categoryId: "dev_tools", titleEn: "CRC32 Checksum Calculator", titleHi: "CRC32 चेकसम गणक",
+    descEn: "Calculate standard cyclic redundancy check 32-bit checksum.", descHi: "फाइल अखंडता जांच हेतु 32-बिट CRC चेकसम निकालें।", iconName: "Hash", badge: "100% Offline",
+    keywords: ["crc32", "checksum", "crc calculator"]
+  },
+  {
+    id: "dev_hmac_sha256", categoryId: "dev_tools", titleEn: "HMAC-SHA256 Generator", titleHi: "HMAC-SHA256 जनरेटर",
+    descEn: "Generate keyed-hash message authentication code (HMAC).", descHi: "सीक्रेट की के साथ सुरक्षित HMAC ऑथेंटिकेशन कोड बनाएं।", iconName: "Lock", badge: "100% Offline",
+    keywords: ["hmac", "hmac-sha256", "api signature"]
+  },
+  {
+    id: "dev_password_generator", categoryId: "dev_tools", titleEn: "Strong Password Generator", titleHi: "मजबूत पासवर्ड जनरेटर",
+    descEn: "Generate strong passwords with length and symbol controls.", descHi: "अति-सुरक्षित और अटूट पासवर्ड तैयार करें।", iconName: "Lock", badge: "100% Offline",
+    keywords: ["password generator", "strong password", "random password"]
+  },
+  {
+    id: "dev_bcrypt_validator", categoryId: "dev_tools", titleEn: "Bcrypt Hash Validator", titleHi: "Bcrypt हैश प्रारूप जांच",
+    descEn: "Validate format, cost factor, and salt of Bcrypt hash string.", descHi: "Bcrypt पासवर्ड हैश का प्रारूप और कॉस्ट फैक्टर जांचें।", iconName: "ShieldCheck", badge: "100% Offline",
+    keywords: ["bcrypt validator", "bcrypt hash", "check bcrypt"]
+  },
+  {
+    id: "dev_timestamp_to_date", categoryId: "dev_tools", titleEn: "Unix Timestamp to Date", titleHi: "टाइमस्टैम्प से तारीख व समय",
+    descEn: "Convert Unix seconds/milliseconds into readable UTC and local date.", descHi: "Unix टाइमस्टैम्प को सामान्य तारीख व समय में बदलें।", iconName: "Terminal", badge: "100% Offline",
+    keywords: ["timestamp to date", "epoch to date", "unix time"]
+  },
+  {
+    id: "dev_date_to_timestamp", categoryId: "dev_tools", titleEn: "Date to Unix Timestamp", titleHi: "तारीख से Unix टाइमस्टैम्प",
+    descEn: "Convert date and time string into Unix epoch timestamp.", descHi: "तारीख और समय को Unix सेकेंड्स में बदलें।", iconName: "Terminal", badge: "100% Offline",
+    keywords: ["date to timestamp", "date to epoch", "get timestamp"]
+  },
+  {
+    id: "dev_ip_validator", categoryId: "dev_tools", titleEn: "IP Address Validator", titleHi: "IP एड्रेस जांच (IPv4 / IPv6)",
+    descEn: "Validate IPv4 and IPv6 network address structures.", descHi: "IPv4 और IPv6 नेटवर्क पते की वैधता जांचें।", iconName: "Globe", badge: "100% Offline",
+    keywords: ["ip validator", "ipv4", "ipv6"]
+  },
+  {
+    id: "dev_cidr_calc", categoryId: "dev_tools", titleEn: "CIDR Subnet Calculator", titleHi: "CIDR सबनेट गणक",
+    descEn: "Calculate subnet mask and usable host count from CIDR notation.", descHi: "CIDR (/24) से सबनेट मास्क और उपलब्ध होस्ट्स संख्या निकालें।", iconName: "Globe", badge: "100% Offline",
+    keywords: ["cidr calculator", "subnet mask", "ip subnet"]
+  },
+  {
+    id: "dev_mac_formatter", categoryId: "dev_tools", titleEn: "MAC Address Formatter", titleHi: "MAC एड्रेस फॉर्मेटर",
+    descEn: "Format MAC addresses to standard colon, hyphen, or dot style.", descHi: "MAC एड्रेस को मानक कॉलन, हाइफ़न या सिस्को डॉट में बदलें।", iconName: "Cpu", badge: "100% Offline",
+    keywords: ["mac formatter", "mac address", "hardware address"]
+  },
+  {
+    id: "dev_sql_formatter", categoryId: "dev_tools", titleEn: "SQL Query Formatter", titleHi: "SQL क्वेरी फॉर्मेटर (Beautify)",
+    descEn: "Format and capitalize keywords in complex SQL queries.", descHi: "SQL क्वेरी को सुंदर व पठनीय लाइन-ब्रेक्स में सजाएं।", iconName: "Database", badge: "100% Offline",
+    keywords: ["sql formatter", "beautify sql", "format query"]
+  },
+  {
+    id: "dev_css_minifier", categoryId: "dev_tools", titleEn: "CSS Minifier", titleHi: "CSS मिनिफायर (हल्का कोड)",
+    descEn: "Compress CSS stylesheets by stripping comments and spaces.", descHi: "CSS में से टिप्पणियां और स्पेस हटाकर साइज घटाएं।", iconName: "Code", badge: "100% Offline",
+    keywords: ["css minifier", "compress css", "minify css"]
+  },
+  {
+    id: "dev_js_minifier", categoryId: "dev_tools", titleEn: "JavaScript Minifier", titleHi: "JS मिनिफायर (हल्का कोड)",
+    descEn: "Strip comments and redundant blank rows from JS code.", descHi: "JavaScript कोड को हल्का व कॉम्पैक्ट बनाएं।", iconName: "Code", badge: "100% Offline",
+    keywords: ["js minifier", "compress javascript", "clean js"]
+  },
+  {
+    id: "dev_html_minifier", categoryId: "dev_tools", titleEn: "HTML Minifier", titleHi: "HTML मिनिफायर",
+    descEn: "Remove comments and compress HTML markup whitespace.", descHi: "HTML से कमेंट्स व अतिरिक्त स्पेस हटाकर कोड हल्का करें।", iconName: "Code", badge: "100% Offline",
+    keywords: ["html minifier", "compress html", "clean html"]
   }
 ];

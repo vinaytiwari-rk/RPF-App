@@ -15,6 +15,7 @@ import ImageToolsEngine from "./engines/imageToolsEngine";
 import ImageAdvancedToolsEngine from "./engines/imageAdvancedToolsEngine";
 import TextToolsEngine from "./engines/textToolsEngine";
 import ExcelDataToolsEngine from "./engines/excelDataToolsEngine";
+import DevEncodingToolsEngine from "./engines/devEncodingToolsEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -510,6 +511,49 @@ function ToolEngineDispatcher({
     case "data_json_array_dedup":
     case "data_json_flatten":
       return <ExcelDataToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    // 22. 100% Offline Developer & Encoding Tools Suite (Phase 7 - 40 Tools)
+    case "dev_base64_encode":
+    case "dev_base64_decode":
+    case "dev_base64url_encode":
+    case "dev_base64url_decode":
+    case "dev_hex_encode":
+    case "dev_hex_decode":
+    case "dev_binary_encode":
+    case "dev_binary_decode":
+    case "dev_ascii_to_hex":
+    case "dev_hex_to_ascii":
+    case "dev_decimal_to_binary":
+    case "dev_binary_to_decimal":
+    case "dev_rot13":
+    case "dev_caesar_encode":
+    case "dev_caesar_decode":
+    case "dev_url_encode":
+    case "dev_url_decode":
+    case "dev_html_entity_encode":
+    case "dev_html_entity_decode":
+    case "dev_unicode_escape":
+    case "dev_unicode_unescape":
+    case "dev_jwt_decoder":
+    case "dev_jwt_inspector":
+    case "dev_uuid_generator":
+    case "dev_sha256_hash":
+    case "dev_sha512_hash":
+    case "dev_md5_hash":
+    case "dev_crc32_checksum":
+    case "dev_hmac_sha256":
+    case "dev_password_generator":
+    case "dev_bcrypt_validator":
+    case "dev_timestamp_to_date":
+    case "dev_date_to_timestamp":
+    case "dev_ip_validator":
+    case "dev_cidr_calc":
+    case "dev_mac_formatter":
+    case "dev_sql_formatter":
+    case "dev_css_minifier":
+    case "dev_js_minifier":
+    case "dev_html_minifier":
+      return <DevEncodingToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (
