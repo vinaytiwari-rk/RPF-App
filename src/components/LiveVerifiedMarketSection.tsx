@@ -86,6 +86,7 @@ interface MarketSummary {
     tithi: string;
     nakshatra: string;
     paksha: string;
+    masa?: string;
     samvat: string;
     yoga: string;
     karana: string;
