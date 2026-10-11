@@ -190,7 +190,12 @@ function MarqueeTrack({
       >
         {trackItems.map((title, idx) => (
           <div key={idx} className="flex items-center">
-            <span dir="ltr" className={`text-[12.5px] tracking-normal px-2 ${textClasses}`}>
+            <span
+              dir="ltr"
+              lang="hi"
+              style={{ direction: "ltr", unicodeBidi: "plaintext", writingMode: "horizontal-tb" }}
+              className={`text-[12.5px] tracking-normal px-2 ${textClasses}`}
+            >
               {title}
             </span>
             <span className={`text-xs px-3 select-none ${separatorClasses}`}>
