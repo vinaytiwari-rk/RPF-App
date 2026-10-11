@@ -371,26 +371,26 @@ export default function MediaStudioPage() {
   };
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-[#0B0F19] text-slate-100 overflow-hidden font-sans select-none fixed inset-0 z-50">
+    <div className="flex h-screen w-screen flex-col bg-[#FFF7E8] text-slate-800 overflow-hidden font-sans select-none fixed inset-0 z-50">
       {/* 1. TOP PREMIUM HEADER BAR */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-800 bg-[#111827] px-4 shadow-md">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-xs">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => navigate("/utilities")}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition"
             title="Back to Utilities"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-sm font-black tracking-tight text-white flex items-center gap-1.5">
+            <h1 className="text-sm font-black tracking-tight text-slate-900 flex items-center gap-1.5">
               <span>Media Studio Pro</span>
-              <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-bold text-violet-300 border border-violet-500/30">
-                100% Offline
+              <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 border border-purple-200">
+                Studio
               </span>
             </h1>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               {mode === "audio"
                 ? audioFile ? audioFile.name : (isHi ? "ऑडियो कटर व रिकॉर्डर" : "Audio Cutter & Booster")
                 : videoFile ? videoFile.name : (isHi ? "वीडियो ट्रिमर व ऑडियो एक्सट्रेक्टर" : "Video Trimmer & Extractor")}
@@ -399,12 +399,12 @@ export default function MediaStudioPage() {
         </div>
 
         {/* Studio Mode Switcher */}
-        <div className="flex items-center gap-1 bg-slate-800/90 rounded-2xl p-1 border border-slate-700">
+        <div className="flex items-center gap-1 bg-slate-100 rounded-2xl p-1 border border-slate-200">
           <button
             type="button"
             onClick={() => setMode("audio")}
             className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-              mode === "audio" ? "bg-violet-600 text-white shadow-sm" : "text-slate-400 hover:text-white"
+              mode === "audio" ? "bg-purple-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
             }`}
           >
             <Music className="h-3.5 w-3.5" />
@@ -415,7 +415,7 @@ export default function MediaStudioPage() {
             type="button"
             onClick={() => setMode("video")}
             className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-              mode === "video" ? "bg-violet-600 text-white shadow-sm" : "text-slate-400 hover:text-white"
+              mode === "video" ? "bg-purple-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
             }`}
           >
             <Video className="h-3.5 w-3.5" />
@@ -428,14 +428,14 @@ export default function MediaStudioPage() {
       {mode === "audio" && (
         <main className="flex-1 overflow-auto p-4 sm:p-8 flex flex-col items-center justify-center">
           {!audioUrl ? (
-            <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900/90 p-8 text-center shadow-2xl backdrop-blur-xl">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-400 mb-4 ring-1 ring-violet-500/20">
+            <div className="w-full max-w-md rounded-3xl border border-[#D8E8DB] bg-white p-8 text-center shadow-md">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 mb-4 ring-1 ring-purple-200">
                 <Music className="h-8 w-8" />
               </div>
-              <h2 className="text-lg font-black text-white">
+              <h2 className="text-lg font-black text-slate-900">
                 {isHi ? "ऑडियो स्टूडियो में शुरू करें" : "Open Audio in Studio"}
               </h2>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+              <p className="mt-2 text-xs text-slate-600 leading-relaxed">
                 {isHi
                   ? "डिवाइस से गाना/ऑडियो चुनें या सीधे माइक से रिकॉर्ड करें। रिंगटोन बनाएं, वॉल्यूम 300% बूस्ट करें व ट्रिम करें।"
                   : "Trim audio, boost volume up to 300%, change pitch/speed, or record live voice without uploading to any server."}
@@ -452,7 +452,7 @@ export default function MediaStudioPage() {
                 />
                 <label
                   htmlFor="audio-file-studio-upload"
-                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-violet-600 py-3.5 text-xs font-black text-white shadow-lg shadow-violet-900/30 hover:bg-violet-500 transition active:scale-95"
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-purple-600 py-3.5 text-xs font-black text-white shadow-md hover:bg-purple-500 transition active:scale-95"
                 >
                   <Plus className="h-4 w-4" />
                   <span>{isHi ? "डिवाइस से ऑडियो फ़ाइल चुनें" : "Select Audio from Device"}</span>
@@ -465,10 +465,10 @@ export default function MediaStudioPage() {
                   className={`flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-xs font-black transition ${
                     isRecording
                       ? "bg-rose-600 text-white animate-pulse"
-                      : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
                   }`}
                 >
-                  {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4 text-rose-400" />}
+                  {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4 text-rose-500" />}
                   <span>
                     {isRecording
                       ? `${isHi ? "रिकॉर्डिंग रोकें" : "Stop Recording"} (${formatTime(recordingSeconds)})`
@@ -478,7 +478,7 @@ export default function MediaStudioPage() {
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-2xl rounded-3xl border border-slate-800 bg-[#111827] p-6 sm:p-8 shadow-2xl">
+            <div className="w-full max-w-2xl rounded-3xl border border-[#D8E8DB] bg-white p-6 sm:p-8 shadow-md">
               <audio
                 ref={audioRef}
                 src={audioUrl}
@@ -490,7 +490,7 @@ export default function MediaStudioPage() {
               />
 
               {/* Audio Track Visual Wave Display */}
-              <div className="rounded-2xl bg-slate-900/90 p-6 border border-slate-800 text-center relative overflow-hidden">
+              <div className="rounded-2xl bg-slate-50 p-6 border border-slate-200 text-center relative overflow-hidden">
                 <div className="flex items-center justify-center gap-1.5 h-16">
                   {Array.from({ length: 32 }).map((_, idx) => {
                     const isPassed = (audioCurrentTime / (audioDuration || 1)) * 32 > idx;
@@ -500,14 +500,14 @@ export default function MediaStudioPage() {
                         key={idx}
                         style={{ height: `${randomH}px` }}
                         className={`w-1.5 rounded-full transition-all ${
-                          isPassed ? "bg-violet-500" : "bg-slate-700"
+                          isPassed ? "bg-purple-600" : "bg-slate-300"
                         }`}
                       />
                     );
                   })}
                 </div>
 
-                <div className="mt-3 flex items-center justify-between text-xs font-mono font-bold text-slate-400">
+                <div className="mt-3 flex items-center justify-between text-xs font-mono font-bold text-slate-600">
                   <span>{formatTime(audioCurrentTime)}</span>
                   <span>{formatTime(audioDuration)}</span>
                 </div>
@@ -524,7 +524,7 @@ export default function MediaStudioPage() {
                       setIsPlayingAudio(true);
                     }
                   }}
-                  className="p-3 rounded-full bg-slate-800 text-slate-300 hover:text-white"
+                  className="p-3 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
                   title="Replay from Trim Start"
                 >
                   <RotateCcw className="h-5 w-5" />
@@ -533,26 +533,26 @@ export default function MediaStudioPage() {
                 <button
                   type="button"
                   onClick={togglePlayAudio}
-                  className="flex h-14 w-14 items-center justify-center rounded-full bg-violet-600 text-white shadow-lg shadow-violet-900/40 hover:bg-violet-500 transition active:scale-95"
+                  className="flex h-14 w-14 items-center justify-center rounded-full bg-purple-600 text-white shadow-md hover:bg-purple-500 transition active:scale-95"
                 >
                   {isPlayingAudio ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
                 </button>
               </div>
 
               {/* Trimmer Sliders */}
-              <div className="mt-8 space-y-4 rounded-2xl bg-slate-900/60 p-4 border border-slate-800">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-                  <span className="flex items-center gap-1.5 text-violet-400">
+              <div className="mt-8 space-y-4 rounded-2xl bg-slate-50 p-4 border border-slate-200">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                  <span className="flex items-center gap-1.5 text-purple-700">
                     <Scissors className="h-4 w-4" />
                     <span>{isHi ? "ऑडियो ट्रिम / कटर" : "Trim Range"}</span>
                   </span>
-                  <span>
+                  <span className="text-slate-600">
                     {formatTime(audioTrimStart)} - {formatTime(audioTrimEnd)} (कुल: {formatTime(audioTrimEnd - audioTrimStart)})
                   </span>
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                  <div className="flex justify-between text-[11px] text-slate-600 mb-1 font-semibold">
                     <span>{isHi ? "शुरुआती समय (Start):" : "Start Time:"} {formatTime(audioTrimStart)}</span>
                   </div>
                   <input
@@ -565,12 +565,12 @@ export default function MediaStudioPage() {
                       const val = Number(e.target.value);
                       if (val < audioTrimEnd) setAudioTrimStart(val);
                     }}
-                    className="w-full accent-violet-500 cursor-pointer"
+                    className="w-full accent-purple-600 cursor-pointer"
                   />
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                  <div className="flex justify-between text-[11px] text-slate-600 mb-1 font-semibold">
                     <span>{isHi ? "समाप्ति समय (End):" : "End Time:"} {formatTime(audioTrimEnd)}</span>
                   </div>
                   <input
@@ -583,7 +583,7 @@ export default function MediaStudioPage() {
                       const val = Number(e.target.value);
                       if (val > audioTrimStart) setAudioTrimEnd(val);
                     }}
-                    className="w-full accent-violet-500 cursor-pointer"
+                    className="w-full accent-purple-600 cursor-pointer"
                   />
                 </div>
               </div>
@@ -591,10 +591,10 @@ export default function MediaStudioPage() {
               {/* Volume Booster & Speed Controls */}
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Volume Booster */}
-                <div className="rounded-2xl bg-slate-900/60 p-3.5 border border-slate-800 flex items-center justify-between">
+                <div className="rounded-2xl bg-slate-50 p-3.5 border border-slate-200 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Volume2 className="h-4 w-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-slate-300">{isHi ? "वॉल्यूम बूस्टर:" : "Boost:"}</span>
+                    <Volume2 className="h-4 w-4 text-[#245D45]" />
+                    <span className="text-xs font-bold text-slate-700">{isHi ? "वॉल्यूम बूस्टर:" : "Boost:"}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -608,19 +608,19 @@ export default function MediaStudioPage() {
                         setAudioVolume(v);
                         if (audioRef.current) audioRef.current.volume = Math.min(1, v);
                       }}
-                      className="w-24 accent-emerald-500"
+                      className="w-24 accent-[#245D45]"
                     />
-                    <span className="text-xs font-mono font-bold text-emerald-400 w-10 text-right">
+                    <span className="text-xs font-mono font-bold text-[#245D45] w-10 text-right">
                       {Math.round(audioVolume * 100)}%
                     </span>
                   </div>
                 </div>
 
                 {/* Speed Pitch */}
-                <div className="rounded-2xl bg-slate-900/60 p-3.5 border border-slate-800 flex items-center justify-between">
+                <div className="rounded-2xl bg-slate-50 p-3.5 border border-slate-200 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Gauge className="h-4 w-4 text-amber-400" />
-                    <span className="text-xs font-bold text-slate-300">{isHi ? "गति:" : "Speed:"}</span>
+                    <Gauge className="h-4 w-4 text-amber-600" />
+                    <span className="text-xs font-bold text-slate-700">{isHi ? "गति:" : "Speed:"}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     {[0.75, 1.0, 1.25, 1.5].map((spd) => (
@@ -632,7 +632,7 @@ export default function MediaStudioPage() {
                           if (audioRef.current) audioRef.current.playbackRate = spd;
                         }}
                         className={`rounded-lg px-2 py-1 text-[11px] font-bold ${
-                          audioSpeed === spd ? "bg-amber-600 text-white" : "bg-slate-800 text-slate-400"
+                          audioSpeed === spd ? "bg-amber-600 text-white" : "bg-slate-200 text-slate-700"
                         }`}
                       >
                         {spd}x
@@ -650,7 +650,7 @@ export default function MediaStudioPage() {
                     setAudioUrl(null);
                     setAudioFile(null);
                   }}
-                  className="rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-300 hover:bg-slate-700"
+                  className="rounded-xl bg-slate-100 border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200"
                 >
                   {isHi ? "अन्य फ़ाइल चुनें" : "Change File"}
                 </button>
@@ -659,7 +659,7 @@ export default function MediaStudioPage() {
                   type="button"
                   onClick={exportTrimmedAudio}
                   disabled={loading}
-                  className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2.5 text-xs font-black text-white shadow-lg hover:from-violet-500 hover:to-indigo-500 transition active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-2.5 text-xs font-black text-white shadow-md hover:from-purple-500 hover:to-indigo-500 transition active:scale-95 disabled:opacity-50"
                 >
                   {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                   <span>{isHi ? "ट्रिम किया ऑडियो सेव करें" : "Save Trimmed Audio"}</span>
@@ -674,17 +674,17 @@ export default function MediaStudioPage() {
       {mode === "video" && (
         <main className="flex-1 overflow-auto p-4 sm:p-6 flex flex-col items-center justify-center">
           {!videoUrl ? (
-            <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900/90 p-8 text-center shadow-2xl backdrop-blur-xl">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 mb-4 ring-1 ring-indigo-500/20">
+            <div className="w-full max-w-md rounded-3xl border border-[#D8E8DB] bg-white p-8 text-center shadow-md">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 mb-4 ring-1 ring-indigo-200">
                 <Video className="h-8 w-8" />
               </div>
-              <h2 className="text-lg font-black text-white">
+              <h2 className="text-lg font-black text-slate-900">
                 {isHi ? "वीडियो स्टूडियो में शुरू करें" : "Open Video in Studio"}
               </h2>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+              <p className="mt-2 text-xs text-slate-600 leading-relaxed">
                 {isHi
-                  ? "वीडियो से ऑडियो निकालें (MP4 से MP3/WAV), एचडी फोटो फ्रेम कैप्चर करें, स्पीड बदलें व ट्रिम करें—100% ऑफलाइन।"
-                  : "Extract pure audio from video, capture crisp HD frame snapshot, change video speed & mute completely offline."}
+                  ? "वीडियो से ऑडियो निकालें (MP4 से MP3/WAV), एचडी फोटो फ्रेम कैप्चर करें, स्पीड बदलें व ट्रिम करें—100% सुरक्षित।"
+                  : "Extract pure audio from video, capture crisp HD frame snapshot, change video speed & mute completely private."}
               </p>
 
               <div className="mt-6">
@@ -697,7 +697,7 @@ export default function MediaStudioPage() {
                 />
                 <label
                   htmlFor="video-file-studio-upload"
-                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3.5 text-xs font-black text-white shadow-lg shadow-indigo-900/30 hover:bg-indigo-500 transition active:scale-95"
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3.5 text-xs font-black text-white shadow-md hover:bg-indigo-500 transition active:scale-95"
                 >
                   <Plus className="h-4 w-4" />
                   <span>{isHi ? "डिवाइस से वीडियो फ़ाइल चुनें" : "Select Video from Device"}</span>
@@ -707,7 +707,7 @@ export default function MediaStudioPage() {
           ) : (
             <div className="w-full max-w-3xl flex flex-col gap-4">
               {/* Video Player Canvas View */}
-              <div className="relative rounded-2xl overflow-hidden bg-black border border-slate-800 shadow-2xl max-h-[50vh] flex justify-center items-center">
+              <div className="relative rounded-2xl overflow-hidden bg-black border border-slate-300 shadow-md max-h-[50vh] flex justify-center items-center">
                 <video
                   ref={videoRef}
                   src={videoUrl}
@@ -730,9 +730,9 @@ export default function MediaStudioPage() {
               </div>
 
               {/* Video Tools Bar */}
-              <div className="rounded-2xl bg-[#111827] p-4 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <div className="rounded-2xl bg-white p-4 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-slate-300">
+                  <span className="text-xs font-mono font-bold text-slate-800">
                     {formatTime(videoCurrentTime)} / {formatTime(videoDuration)}
                   </span>
                 </div>
@@ -742,9 +742,9 @@ export default function MediaStudioPage() {
                   <button
                     type="button"
                     onClick={captureVideoFrame}
-                    className="flex items-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-700 transition"
+                    className="flex items-center gap-1.5 rounded-xl bg-slate-100 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
                   >
-                    <Camera className="h-4 w-4 text-indigo-400" />
+                    <Camera className="h-4 w-4 text-indigo-600" />
                     <span>{isHi ? "फ्रेम फोटो लें" : "Take Snapshot"}</span>
                   </button>
 
@@ -753,7 +753,7 @@ export default function MediaStudioPage() {
                     type="button"
                     onClick={extractAudioFromVideo}
                     disabled={loading}
-                    className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-black text-white hover:bg-indigo-500 shadow transition active:scale-95 disabled:opacity-50"
+                    className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-black text-white hover:bg-indigo-500 shadow-xs transition active:scale-95 disabled:opacity-50"
                   >
                     {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Music className="h-4 w-4" />}
                     <span>{isHi ? "ऑडियो निकालें (WAV)" : "Extract Audio"}</span>
@@ -764,8 +764,8 @@ export default function MediaStudioPage() {
               {/* Video Controls & Mute */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Speed */}
-                <div className="rounded-2xl bg-slate-900/60 p-3.5 border border-slate-800 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300">{isHi ? "वीडियो गति:" : "Speed:"}</span>
+                <div className="rounded-2xl bg-white p-3.5 border border-slate-200 shadow-xs flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700">{isHi ? "वीडियो गति:" : "Speed:"}</span>
                   <div className="flex items-center gap-1">
                     {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((spd) => (
                       <button
@@ -776,7 +776,7 @@ export default function MediaStudioPage() {
                           if (videoRef.current) videoRef.current.playbackRate = spd;
                         }}
                         className={`rounded-lg px-2 py-1 text-[11px] font-bold ${
-                          videoSpeed === spd ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-400"
+                          videoSpeed === spd ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
                       >
                         {spd}x
@@ -786,13 +786,13 @@ export default function MediaStudioPage() {
                 </div>
 
                 {/* Mute */}
-                <div className="rounded-2xl bg-slate-900/60 p-3.5 border border-slate-800 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300">{isHi ? "ऑडियो म्यूट:" : "Mute Sound:"}</span>
+                <div className="rounded-2xl bg-white p-3.5 border border-slate-200 shadow-xs flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700">{isHi ? "ऑडियो म्यूट:" : "Mute Sound:"}</span>
                   <button
                     type="button"
                     onClick={() => setVideoMuted(m => !m)}
                     className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                      videoMuted ? "bg-rose-600 text-white" : "bg-slate-800 text-slate-300"
+                      videoMuted ? "bg-rose-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
                     }`}
                   >
                     {videoMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}

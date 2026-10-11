@@ -477,26 +477,26 @@ export default function ImageStudioPage() {
   };
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-[#0F172A] text-slate-100 overflow-hidden font-sans select-none fixed inset-0 z-50">
+    <div className="flex h-screen w-screen flex-col bg-[#FFF7E8] text-slate-800 overflow-hidden font-sans select-none fixed inset-0 z-50">
       {/* 1. TOP PREMIUM HEADER BAR */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-800 bg-[#1E293B] px-4 shadow-md">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-xs">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => navigate("/utilities")}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition"
             title="Back to Utilities"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-sm font-black tracking-tight text-white flex items-center gap-1.5">
+            <h1 className="text-sm font-black tracking-tight text-slate-900 flex items-center gap-1.5">
               <span>Image Studio Pro</span>
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
-                100% Offline
+              <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                Studio
               </span>
             </h1>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               {imageFile ? imageFile.name : (isHi ? "फ़ोटो खोलें" : "Open Image")}
             </p>
           </div>
@@ -508,7 +508,7 @@ export default function ImageStudioPage() {
             <select
               value={exportFormat}
               onChange={(e) => setExportFormat(e.target.value as any)}
-              className="rounded-lg bg-slate-800 px-2 py-1 text-xs font-bold text-slate-200 border border-slate-700 focus:outline-none"
+              className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700 border border-slate-200 focus:outline-none"
             >
               <option value="image/jpeg">JPG</option>
               <option value="image/png">PNG</option>
@@ -519,7 +519,7 @@ export default function ImageStudioPage() {
               type="button"
               onClick={saveAndExport}
               disabled={loading}
-              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-black text-white shadow-lg hover:from-emerald-500 hover:to-teal-500 transition active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-black text-white shadow-md hover:from-emerald-500 hover:to-teal-500 transition active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -535,16 +535,16 @@ export default function ImageStudioPage() {
       {/* 2. MAIN WORKSPACE / EMPTY STATE */}
       {!imageElement ? (
         <div className="flex flex-1 items-center justify-center p-4">
-          <div className="max-w-md rounded-3xl border border-slate-800 bg-slate-900/90 p-8 text-center shadow-2xl backdrop-blur-xl">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500 mb-4 ring-1 ring-emerald-500/20">
+          <div className="max-w-md rounded-3xl border border-[#D8E8DB] bg-white p-8 text-center shadow-md">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 mb-4 ring-1 ring-emerald-200">
               <ImageIcon className="h-8 w-8" />
             </div>
-            <h2 className="text-lg font-black text-white">
+            <h2 className="text-lg font-black text-slate-900">
               {isHi ? "Image Studio में संपादन शुरू करें" : "Open Photo in Studio Workspace"}
             </h2>
-            <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+            <p className="mt-2 text-xs text-slate-600 leading-relaxed">
               {isHi
-                ? "सीधे ड्रैग करके टेक्स्ट लगाएं, स्टैम्प व मुहर चिपकाएं, पासपोर्ट साइज क्रॉप करें, फिल्टर्स व एडजस्टमेंट लगाएं—पूरी तरह सुरक्षित व ऑफलाइन।"
+                ? "सीधे ड्रैग करके टेक्स्ट लगाएं, स्टैम्प व मुहर चिपकाएं, पासपोर्ट साइज क्रॉप करें, फिल्टर्स व एडजस्टमेंट लगाएं—पूरी तरह सुरक्षित व निजी।"
                 : "Full visual workspace: Drag-and-drop movable text, official verified stamps, passport crops, filters, and brush drawing without uploading anywhere."}
             </p>
 
@@ -558,7 +558,7 @@ export default function ImageStudioPage() {
               />
               <label
                 htmlFor="image-full-studio-upload"
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-xs font-black text-white shadow-lg shadow-emerald-900/30 hover:bg-emerald-500 transition active:scale-95"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#245D45] py-3.5 text-xs font-black text-white shadow-md hover:bg-emerald-700 transition active:scale-95"
               >
                 <Plus className="h-4 w-4" />
                 <span>{isHi ? "गैलरी / डिवाइस से फोटो चुनें" : "Select Photo from Device"}</span>
@@ -569,13 +569,13 @@ export default function ImageStudioPage() {
       ) : (
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* TOOLBAR TABS (CANVA / PHOTOSHOP STYLE) */}
-          <div className="flex h-12 shrink-0 items-center justify-between border-b border-slate-800 bg-[#162032] px-3">
+          <div className="flex h-12 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-3">
             <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-1">
               <button
                 type="button"
                 onClick={() => { setActiveTab("adjust"); setIsBrushActive(false); }}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  activeTab === "adjust" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-300 hover:bg-slate-800"
+                  activeTab === "adjust" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 <Sliders className="h-3.5 w-3.5" />
@@ -586,7 +586,7 @@ export default function ImageStudioPage() {
                 type="button"
                 onClick={() => { setActiveTab("crop"); setIsBrushActive(false); }}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  activeTab === "crop" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-300 hover:bg-slate-800"
+                  activeTab === "crop" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 <Crop className="h-3.5 w-3.5" />
@@ -597,7 +597,7 @@ export default function ImageStudioPage() {
                 type="button"
                 onClick={() => { setActiveTab("text"); setIsBrushActive(false); }}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  activeTab === "text" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-300 hover:bg-slate-800"
+                  activeTab === "text" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 <Type className="h-3.5 w-3.5" />
@@ -608,7 +608,7 @@ export default function ImageStudioPage() {
                 type="button"
                 onClick={() => { setActiveTab("stamps"); setIsBrushActive(false); }}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  activeTab === "stamps" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-300 hover:bg-slate-800"
+                  activeTab === "stamps" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 <Stamp className="h-3.5 w-3.5" />
@@ -619,7 +619,7 @@ export default function ImageStudioPage() {
                 type="button"
                 onClick={() => { setActiveTab("brush"); setIsBrushActive(true); }}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  activeTab === "brush" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-300 hover:bg-slate-800"
+                  activeTab === "brush" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 <Brush className="h-3.5 w-3.5" />
@@ -629,12 +629,12 @@ export default function ImageStudioPage() {
 
             {/* Quick Zoom & Reset */}
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-1 bg-slate-800/80 rounded-xl px-2 py-1 text-xs font-bold text-slate-200">
+              <div className="hidden sm:flex items-center gap-1 bg-slate-100 rounded-xl px-2 py-1 text-xs font-bold text-slate-700 border border-slate-200">
                 <button
                   type="button"
                   onClick={() => setZoomScale(z => Math.max(0.5, Number((z - 0.2).toFixed(1))))}
                   title="Zoom Out"
-                  className="hover:text-emerald-400 p-0.5"
+                  className="hover:text-emerald-600 p-0.5"
                 >
                   <ZoomOut className="h-3.5 w-3.5" />
                 </button>
@@ -643,7 +643,7 @@ export default function ImageStudioPage() {
                   type="button"
                   onClick={() => setZoomScale(z => Math.min(2.5, Number((z + 0.2).toFixed(1))))}
                   title="Zoom In"
-                  className="hover:text-emerald-400 p-0.5"
+                  className="hover:text-emerald-600 p-0.5"
                 >
                   <ZoomIn className="h-3.5 w-3.5" />
                 </button>
@@ -667,7 +667,7 @@ export default function ImageStudioPage() {
                   toast.success(isHi ? "रिसेट हो गया" : "Reset to original");
                 }}
                 title="Reset All"
-                className="p-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white"
+                className="p-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200"
               >
                 <Undo2 className="h-4 w-4" />
               </button>
@@ -675,51 +675,51 @@ export default function ImageStudioPage() {
           </div>
 
           {/* ACTIVE TOOL SUB-CONTROLS PANEL */}
-          <div className="shrink-0 border-b border-slate-800 bg-[#121927] px-4 py-2.5 text-xs">
+          <div className="shrink-0 border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs">
             {activeTab === "adjust" && (
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 w-16">{isHi ? "ब्राइटनेस:" : "Brightness:"}</span>
+                  <span className="text-slate-600 font-semibold w-16">{isHi ? "ब्राइटनेस:" : "Brightness:"}</span>
                   <input
                     type="range"
                     min="50"
                     max="150"
                     value={brightness}
                     onChange={(e) => setBrightness(Number(e.target.value))}
-                    className="w-24 accent-emerald-500"
+                    className="w-24 accent-[#245D45]"
                   />
-                  <span className="text-[11px] text-slate-300 w-8">{brightness}%</span>
+                  <span className="text-[11px] text-slate-700 font-bold w-8">{brightness}%</span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 w-14">{isHi ? "कंट्रास्ट:" : "Contrast:"}</span>
+                  <span className="text-slate-600 font-semibold w-14">{isHi ? "कंट्रास्ट:" : "Contrast:"}</span>
                   <input
                     type="range"
                     min="50"
                     max="150"
                     value={contrast}
                     onChange={(e) => setContrast(Number(e.target.value))}
-                    className="w-24 accent-emerald-500"
+                    className="w-24 accent-[#245D45]"
                   />
-                  <span className="text-[11px] text-slate-300 w-8">{contrast}%</span>
+                  <span className="text-[11px] text-slate-700 font-bold w-8">{contrast}%</span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 w-16">{isHi ? "सैचुरेशन:" : "Saturation:"}</span>
+                  <span className="text-slate-600 font-semibold w-16">{isHi ? "सैचुरेशन:" : "Saturation:"}</span>
                   <input
                     type="range"
                     min="0"
                     max="200"
                     value={saturation}
                     onChange={(e) => setSaturation(Number(e.target.value))}
-                    className="w-24 accent-emerald-500"
+                    className="w-24 accent-[#245D45]"
                   />
-                  <span className="text-[11px] text-slate-300 w-8">{saturation}%</span>
+                  <span className="text-[11px] text-slate-700 font-bold w-8">{saturation}%</span>
                 </div>
 
                 {/* Preset filter chips */}
                 <div className="flex items-center gap-1.5 overflow-x-auto">
-                  <span className="text-slate-400 mr-1">{isHi ? "फिल्टर:" : "Presets:"}</span>
+                  <span className="text-slate-600 font-semibold mr-1">{isHi ? "फिल्टर:" : "Presets:"}</span>
                   {[
                     { id: "none", label: "Normal" },
                     { id: "grayscale", label: "B&W" },
@@ -733,8 +733,8 @@ export default function ImageStudioPage() {
                       onClick={() => setFilterPreset(f.id)}
                       className={`rounded-lg px-2.5 py-1 font-bold text-[11px] transition ${
                         filterPreset === f.id
-                          ? "bg-emerald-600 text-white"
-                          : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                          ? "bg-[#245D45] text-white shadow-xs"
+                          : "bg-slate-200/80 text-slate-700 hover:bg-slate-300"
                       }`}
                     >
                       {f.label}
@@ -750,7 +750,7 @@ export default function ImageStudioPage() {
                   <button
                     type="button"
                     onClick={() => setRotation(r => (r + 90) % 360)}
-                    className="flex items-center gap-1 rounded-lg bg-slate-800 px-2.5 py-1.5 text-slate-200 hover:bg-slate-700"
+                    className="flex items-center gap-1 rounded-lg bg-slate-200 px-2.5 py-1.5 text-slate-800 hover:bg-slate-300 font-bold"
                   >
                     <RotateCw className="h-3.5 w-3.5" />
                     <span>90° Rot</span>
@@ -759,8 +759,8 @@ export default function ImageStudioPage() {
                   <button
                     type="button"
                     onClick={() => setFlipH(f => !f)}
-                    className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 ${
-                      flipH ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                    className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 font-bold ${
+                      flipH ? "bg-[#245D45] text-white" : "bg-slate-200 text-slate-800 hover:bg-slate-300"
                     }`}
                   >
                     <FlipHorizontal className="h-3.5 w-3.5" />
@@ -770,8 +770,8 @@ export default function ImageStudioPage() {
                   <button
                     type="button"
                     onClick={() => setFlipV(f => !f)}
-                    className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 ${
-                      flipV ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                    className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 font-bold ${
+                      flipV ? "bg-[#245D45] text-white" : "bg-slate-200 text-slate-800 hover:bg-slate-300"
                     }`}
                   >
                     <FlipVertical className="h-3.5 w-3.5" />
@@ -779,8 +779,8 @@ export default function ImageStudioPage() {
                   </button>
                 </div>
 
-                <div className="flex items-center gap-1.5 border-l border-slate-700 pl-3">
-                  <span className="text-slate-400">{isHi ? "क्रॉप अनुपात:" : "Aspect Crop:"}</span>
+                <div className="flex items-center gap-1.5 border-l border-slate-300 pl-3">
+                  <span className="text-slate-600 font-semibold">{isHi ? "क्रॉप अनुपात:" : "Aspect Crop:"}</span>
                   {[
                     { label: "1:1 (Square)", ratio: 1 },
                     { label: "4:3 (Photo)", ratio: 4 / 3 },
@@ -791,7 +791,7 @@ export default function ImageStudioPage() {
                       key={c.label}
                       type="button"
                       onClick={() => applyAspectCrop(c.ratio)}
-                      className="rounded-lg bg-slate-800 px-2.5 py-1 font-bold text-[11px] text-emerald-400 hover:bg-slate-700"
+                      className="rounded-lg bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 font-bold text-[11px] text-[#245D45] hover:bg-emerald-100"
                     >
                       {c.label}
                     </button>
@@ -808,40 +808,40 @@ export default function ImageStudioPage() {
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") addTextBox(); }}
-                  className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 w-48 sm:w-64"
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600 w-48 sm:w-64"
                 />
 
                 <div className="flex items-center gap-1">
-                  <span className="text-slate-400">{isHi ? "साइज़:" : "Size:"}</span>
+                  <span className="text-slate-600 font-semibold">{isHi ? "साइज़:" : "Size:"}</span>
                   <input
                     type="number"
                     min="12"
                     max="72"
                     value={activeFontSize}
                     onChange={(e) => setActiveFontSize(Number(e.target.value))}
-                    className="w-14 rounded-lg bg-slate-800 px-2 py-1 text-center font-bold text-white border border-slate-700"
+                    className="w-14 rounded-lg bg-white px-2 py-1 text-center font-bold text-slate-900 border border-slate-300"
                   />
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <span className="text-slate-400">{isHi ? "रंग:" : "Color:"}</span>
+                  <span className="text-slate-600 font-semibold">{isHi ? "रंग:" : "Color:"}</span>
                   <input
                     type="color"
                     value={activeTextColor}
                     onChange={(e) => setActiveTextColor(e.target.value)}
-                    className="h-7 w-7 rounded cursor-pointer border border-slate-700"
+                    className="h-7 w-7 rounded cursor-pointer border border-slate-300"
                   />
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <span className="text-slate-400">{isHi ? "पृष्ठभूमि:" : "Bg:"}</span>
+                  <span className="text-slate-600 font-semibold">{isHi ? "पृष्ठभूमि:" : "Bg:"}</span>
                   {(["none", "dark", "light", "red"] as const).map(bg => (
                     <button
                       key={bg}
                       type="button"
                       onClick={() => setActiveTextBg(bg)}
                       className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase ${
-                        activeTextBg === bg ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"
+                        activeTextBg === bg ? "bg-[#245D45] text-white" : "bg-slate-200 text-slate-700"
                       }`}
                     >
                       {bg}
@@ -852,7 +852,7 @@ export default function ImageStudioPage() {
                 <button
                   type="button"
                   onClick={addTextBox}
-                  className="flex items-center gap-1 rounded-xl bg-emerald-600 px-3.5 py-1.5 font-bold text-white hover:bg-emerald-500 transition active:scale-95 ml-auto"
+                  className="flex items-center gap-1 rounded-xl bg-[#245D45] px-3.5 py-1.5 font-bold text-white hover:bg-emerald-700 transition active:scale-95 ml-auto shadow-xs"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>{isHi ? "टेक्स्ट जोड़ें" : "Add Text"}</span>
@@ -862,32 +862,32 @@ export default function ImageStudioPage() {
 
             {activeTab === "stamps" && (
               <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
-                <span className="text-slate-400 mr-1">{isHi ? "रेडीमेड मुहर/स्टैम्प चिपकाएं:" : "Add Stamp:"}</span>
+                <span className="text-slate-600 font-semibold mr-1">{isHi ? "रेडीमेड मुहर/स्टैम्प चिपकाएं:" : "Add Stamp:"}</span>
                 <button
                   type="button"
                   onClick={() => addStamp("APPROVED", "#10B981", "RPF VERIFIED")}
-                  className="rounded-lg border-2 border-emerald-500 bg-emerald-500/10 px-3 py-1 font-black text-emerald-400 hover:bg-emerald-500/20"
+                  className="rounded-lg border-2 border-emerald-600 bg-emerald-50 px-3 py-1 font-black text-emerald-700 hover:bg-emerald-100"
                 >
                   ✓ APPROVED / स्वीकृत
                 </button>
                 <button
                   type="button"
                   onClick={() => addStamp("PAID", "#3B82F6", "OFFLINE RECEIPT")}
-                  className="rounded-lg border-2 border-blue-500 bg-blue-500/10 px-3 py-1 font-black text-blue-400 hover:bg-blue-500/20"
+                  className="rounded-lg border-2 border-blue-600 bg-blue-50 px-3 py-1 font-black text-blue-700 hover:bg-blue-100"
                 >
                   ₹ PAID / भुगतान संपन्न
                 </button>
                 <button
                   type="button"
                   onClick={() => addStamp("CONFIDENTIAL", "#EF4444", "DO NOT SHARE")}
-                  className="rounded-lg border-2 border-rose-500 bg-rose-500/10 px-3 py-1 font-black text-rose-400 hover:bg-rose-500/20"
+                  className="rounded-lg border-2 border-rose-600 bg-rose-50 px-3 py-1 font-black text-rose-700 hover:bg-rose-100"
                 >
                   🔒 CONFIDENTIAL / गोपनीय
                 </button>
                 <button
                   type="button"
                   onClick={() => addStamp("VERIFIED", "#14B8A6", new Date().toLocaleDateString())}
-                  className="rounded-lg border-2 border-teal-500 bg-teal-500/10 px-3 py-1 font-black text-teal-400 hover:bg-teal-500/20"
+                  className="rounded-lg border-2 border-teal-600 bg-teal-50 px-3 py-1 font-black text-teal-700 hover:bg-teal-100"
                 >
                   ★ VERIFIED DATE
                 </button>
@@ -897,38 +897,38 @@ export default function ImageStudioPage() {
             {activeTab === "brush" && (
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400">{isHi ? "ब्रश रंग:" : "Color:"}</span>
+                  <span className="text-slate-600 font-semibold">{isHi ? "ब्रश रंग:" : "Color:"}</span>
                   <input
                     type="color"
                     value={brushColor}
                     onChange={(e) => setBrushColor(e.target.value)}
-                    className="h-7 w-7 rounded cursor-pointer border border-slate-700"
+                    className="h-7 w-7 rounded cursor-pointer border border-slate-300"
                   />
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400">{isHi ? "मोटाई:" : "Width:"}</span>
+                  <span className="text-slate-600 font-semibold">{isHi ? "मोटाई:" : "Width:"}</span>
                   <input
                     type="range"
                     min="2"
                     max="25"
                     value={brushSize}
                     onChange={(e) => setBrushSize(Number(e.target.value))}
-                    className="w-24 accent-emerald-500"
+                    className="w-24 accent-[#245D45]"
                   />
-                  <span className="text-[11px] text-slate-300">{brushSize}px</span>
+                  <span className="text-[11px] text-slate-700 font-bold">{brushSize}px</span>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setDrawingStrokes([])}
-                  className="flex items-center gap-1 rounded-lg bg-red-900/40 px-2.5 py-1 text-red-400 hover:bg-red-900/60"
+                  className="flex items-center gap-1 rounded-lg bg-rose-50 border border-rose-200 px-2.5 py-1 text-rose-700 hover:bg-rose-100 font-bold"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   <span>{isHi ? "ड्राइंग मिटाएं" : "Clear Strokes"}</span>
                 </button>
 
-                <span className="text-emerald-400 text-[11px] font-bold ml-auto">
+                <span className="text-[#245D45] text-[11px] font-bold ml-auto">
                   {isHi ? "👉 इमेज पर सीधे माउस/उंगली से बनाएं" : "👉 Draw directly on the image"}
                 </span>
               </div>
@@ -936,10 +936,10 @@ export default function ImageStudioPage() {
           </div>
 
           {/* 3. VISUAL INTERACTIVE WORKSPACE (CANVAS + DRAGGABLE OVERLAYS) */}
-          <div className="flex flex-1 justify-center items-center overflow-auto p-4 sm:p-8 bg-[#090D16]">
+          <div className="flex flex-1 justify-center items-center overflow-auto p-4 sm:p-8 bg-slate-100">
             <div
               ref={workspaceRef}
-              className="relative shadow-2xl bg-black border border-slate-800 rounded-sm transition-transform max-w-full max-h-full"
+              className="relative shadow-xl bg-white border border-slate-300 rounded-sm transition-transform max-w-full max-h-full"
               style={{
                 transform: `scale(${zoomScale})`,
                 transformOrigin: "center center",

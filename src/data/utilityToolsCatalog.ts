@@ -20,7 +20,7 @@ export interface UtilityCategoryDefinition {
 
 export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "all", titleEn: "All Tools", titleHi: "सभी टूल्स", iconName: "LayoutGrid", accent: "from-emerald-600 to-teal-700" },
-  { id: "studio_editors", titleEn: "Studio Editors (Offline)", titleHi: "स्टूडियो एडिटर्स (ऑफलाइन)", iconName: "Sparkles", accent: "from-rose-600 to-amber-600" },
+  { id: "studio_editors", titleEn: "Studio Editors", titleHi: "स्टूडियो एडिटर्स", iconName: "Sparkles", accent: "from-[#FF9933] to-[#138808]" },
   { id: "pdf_tools", titleEn: "PDF Tools (30)", titleHi: "PDF टूल्स (30)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
   { id: "image_tools", titleEn: "Image Tools (40)", titleHi: "इमेज टूल्स (40)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
   { id: "word_text_tools", titleEn: "Word & Text Tools (40)", titleHi: "वर्ड व टेक्स्ट टूल्स (40)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
@@ -2145,41 +2145,41 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
   },
 
   // =========================================================================
-  // 26. OFFLINE STUDIO EDITORS SUITE (All-in-One Multi-Feature Workspaces)
+  // 26. STUDIO EDITORS SUITE (Full-Featured Creative Workspaces)
   // =========================================================================
   {
-    id: "studio_pdf_editor", categoryId: "studio_editors", titleEn: "PDF Studio Editor (All-in-One)", titleHi: "PDF स्टूडियो एडिटर (पूर्ण संपादक)",
-    descEn: "Complete offline PDF workspace: reorder, delete, rotate pages, add watermarks & text stamps.",
-    descHi: "संपूर्ण ऑफलाइन PDF वर्कस्पेस: पेज री-ऑर्डर, रोटेट, डिलीट करें, वाटरमार्क व टेक्स्ट स्टैम्प लगाएं।",
-    iconName: "FileText", badge: "All-in-One Studio",
+    id: "studio_pdf_editor", categoryId: "studio_editors", titleEn: "PDF Studio Editor", titleHi: "PDF स्टूडियो एडिटर",
+    descEn: "Complete PDF workspace: drag movable text, whiteout correction patch, rotate and delete pages.",
+    descHi: "संपूर्ण PDF वर्कस्पेस: ड्रैग टेक्स्ट, सुधार व्हाइटआउट पैच, पेज रोटेट व डिलीट करें।",
+    iconName: "FileText", badge: "Pro Studio",
     keywords: ["pdf editor", "edit pdf", "pdf studio", "reorder pdf", "watermark pdf", "rotate pdf"]
   },
   {
-    id: "studio_image_editor", categoryId: "studio_editors", titleEn: "Image Studio Editor (All-in-One)", titleHi: "फोटो व इमेज स्टूडियो एडिटर",
-    descEn: "Full-fledged offline photo editor: brightness, contrast, crop ratios, filters, brush & text overlays.",
-    descHi: "संपूर्ण ऑफलाइन फोटो एडिटर: ब्राइटनेस, कंट्रास्ट, फ्रीहैंड क्रॉप, फिल्टर्स, ब्रश ड्रॉइंग व टेक्स्ट।",
-    iconName: "Image", badge: "All-in-One Studio",
+    id: "studio_image_editor", categoryId: "studio_editors", titleEn: "Image Studio Editor", titleHi: "फोटो व इमेज स्टूडियो एडिटर",
+    descEn: "Full-fledged photo editor: drag text, verified stamps, passport crop, brightness & filters.",
+    descHi: "संपूर्ण फोटो एडिटर: ड्रैग टेक्स्ट लेयर, सत्यापित मुहर/स्टैम्प, पासपोर्ट साइज क्रॉप व फिल्टर्स।",
+    iconName: "Image", badge: "Pro Studio",
     keywords: ["image editor", "photo editor", "photo studio", "crop photo", "image filter", "photo effects"]
   },
   {
-    id: "studio_word_editor", categoryId: "studio_editors", titleEn: "Word Document Studio Editor", titleHi: "वर्ड व दस्तावेज़ स्टूडियो एडिटर",
-    descEn: "Full rich-text word processor: headings, tables, bullet lists, text alignment, DOCX & HTML exports.",
-    descHi: "संपूर्ण ऑफलाइन वर्ड प्रोसेसर: हेडिंग्स, टेबल्स, बुलेट लिस्ट, फॉन्ट्स और सीधे .docx में डाउनलोड।",
-    iconName: "FileText", badge: "All-in-One Studio",
+    id: "studio_word_editor", categoryId: "studio_editors", titleEn: "Word Document Studio", titleHi: "वर्ड व दस्तावेज़ स्टूडियो",
+    descEn: "Full rich-text word processor: A4 layout, applications, biodata, tables and DOCX export.",
+    descHi: "संपूर्ण वर्ड प्रोसेसर: A4 लेआउट, सरकारी प्रार्थना पत्र, बायोडाटा, टेबल्स और सीधे .docx में डाउनलोड।",
+    iconName: "FileText", badge: "Pro Studio",
     keywords: ["word editor", "document editor", "docx editor", "rich text", "word processor", "create docx"]
   },
   {
-    id: "studio_sheet_editor", categoryId: "studio_editors", titleEn: "Excel & Sheet Studio Editor", titleHi: "एक्सेल व स्प्रेडशीट स्टूडियो",
-    descEn: "Full offline spreadsheet workspace: formulas (=SUM, =AVG), budget ledgers, CSV and Excel XLSX export.",
-    descHi: "संपूर्ण ऑफलाइन स्प्रेडशीट वर्कस्पेस: फॉर्मूले (=SUM), बजट बहीखाता, छात्र अंकतालिका व Excel (.xlsx) सेव।",
-    iconName: "FileSpreadsheet", badge: "All-in-One Studio",
+    id: "studio_sheet_editor", categoryId: "studio_editors", titleEn: "Excel & Sheet Studio", titleHi: "एक्सेल व स्प्रेडशीट स्टूडियो",
+    descEn: "Full spreadsheet workspace: formula engine (=SUM, =AVG), budget ledgers, CSV and Excel XLSX export.",
+    descHi: "संपूर्ण स्प्रेडशीट वर्कस्पेस: फॉर्मूले (=SUM), बजट बहीखाता, छात्र अंकतालिका व Excel (.xlsx) सेव।",
+    iconName: "FileSpreadsheet", badge: "Pro Studio",
     keywords: ["excel editor", "sheet editor", "spreadsheet", "csv editor", "xlsx editor", "budget sheet"]
   },
   {
-    id: "studio_media_editor", categoryId: "studio_editors", titleEn: "Audio & Video Studio Editor", titleHi: "ऑडियो व वीडियो स्टूडियो एडिटर",
-    descEn: "Full offline audio cutter, 300% volume booster, voice recorder, video trimmer & MP4 audio extractor.",
-    descHi: "संपूर्ण ऑफलाइन ऑडियो कटर, 300% वॉल्यूम बूस्टर, वॉयस रिकॉर्डर, वीडियो से ऑडियो निकालना व एचडी फ्रेम कैप्चर।",
-    iconName: "Music", badge: "All-in-One Studio",
+    id: "studio_media_editor", categoryId: "studio_editors", titleEn: "Audio & Video Studio", titleHi: "ऑडियो व वीडियो स्टूडियो",
+    descEn: "Audio cutter, 300% volume booster, voice recorder, video trimmer & MP4 audio extractor.",
+    descHi: "ऑडियो कटर, 300% वॉल्यूम बूस्टर, वॉयस रिकॉर्डर, वीडियो से ऑडियो निकालना व एचडी फ्रेम कैप्चर।",
+    iconName: "Music", badge: "Pro Studio",
     keywords: ["audio editor", "video editor", "audio cutter", "trim audio", "extract audio", "voice recorder", "video trimmer"]
   }
 ];

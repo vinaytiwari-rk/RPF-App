@@ -334,7 +334,7 @@ export default function WordStudioPage() {
               </span>
             </div>
             <p className="text-[11px] text-slate-400">
-              {wordCount} {isHi ? "शब्द" : "words"} · {charCount} {isHi ? "अक्षर" : "chars"} · 100% Offline
+              {wordCount} {isHi ? "शब्द" : "words"} · {charCount} {isHi ? "अक्षर" : "chars"}
             </p>
           </div>
         </div>

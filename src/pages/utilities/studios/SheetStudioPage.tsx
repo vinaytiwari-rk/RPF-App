@@ -474,12 +474,12 @@ export default function SheetStudioPage() {
   return (
     <div className="flex h-screen w-screen flex-col bg-[#F8FAFC] text-slate-800 overflow-hidden font-sans select-none fixed inset-0 z-50">
       {/* 1. TOP PREMIUM HEADER BAR */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-emerald-900/30 bg-[#064E3B] px-4 shadow-md text-white">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-xs text-slate-800">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => navigate("/utilities")}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-800/80 text-emerald-100 hover:bg-emerald-700 hover:text-white transition"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition"
             title="Back to Utilities"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -490,15 +490,15 @@ export default function SheetStudioPage() {
                 type="text"
                 value={docTitle}
                 onChange={(e) => setDocTitle(e.target.value)}
-                className="text-sm font-black tracking-tight text-white bg-transparent border-b border-transparent hover:border-emerald-400 focus:border-emerald-400 focus:outline-none max-w-[200px] sm:max-w-[280px]"
+                className="text-sm font-black tracking-tight text-slate-900 bg-transparent border-b border-transparent hover:border-[#245D45] focus:border-[#245D45] focus:outline-none max-w-[200px] sm:max-w-[280px]"
                 title="Click to rename sheet"
               />
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-200 border border-emerald-400/30">
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-[#245D45] border border-emerald-200">
                 Excel Studio Pro
               </span>
             </div>
-            <p className="text-[11px] text-emerald-200/70">
-              {rows} {isHi ? "पंक्तियां" : "rows"} × {columns.length} {isHi ? "कॉलम" : "cols"} · 100% Offline
+            <p className="text-[11px] text-slate-500">
+              {rows} {isHi ? "पंक्तियां" : "rows"} × {columns.length} {isHi ? "कॉलम" : "cols"}
             </p>
           </div>
         </div>
@@ -509,14 +509,14 @@ export default function SheetStudioPage() {
           <button
             type="button"
             onClick={() => setIsTemplateModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 rounded-xl bg-emerald-800/80 px-3 py-1.5 text-xs font-bold text-emerald-100 border border-emerald-700 hover:bg-emerald-700 transition"
+            className="hidden sm:flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 border border-slate-200 hover:bg-slate-200 transition"
           >
-            <LayoutTemplate className="h-3.5 w-3.5 text-emerald-300" />
+            <LayoutTemplate className="h-3.5 w-3.5 text-[#245D45]" />
             <span>{isHi ? "रेडीमेड बहीखाता" : "Templates"}</span>
           </button>
 
           {/* Import CSV */}
-          <label className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-800/80 text-emerald-200 hover:bg-emerald-700 cursor-pointer transition" title="Import CSV">
+          <label className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 cursor-pointer transition" title="Import CSV">
             <Upload className="h-4 w-4" />
             <input type="file" accept=".csv" onChange={handleImportCsv} className="hidden" />
           </label>
@@ -526,7 +526,7 @@ export default function SheetStudioPage() {
             type="button"
             onClick={exportCsv}
             disabled={loading}
-            className="hidden sm:flex items-center gap-1 rounded-xl bg-emerald-800/80 px-2.5 py-1.5 text-xs font-bold text-emerald-100 hover:bg-emerald-700 transition"
+            className="hidden sm:flex items-center gap-1 rounded-xl bg-slate-100 border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
           >
             <span>.CSV</span>
           </button>
@@ -536,7 +536,7 @@ export default function SheetStudioPage() {
             type="button"
             onClick={exportXlsx}
             disabled={loading}
-            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-3.5 py-2 text-xs font-black text-white shadow-md hover:from-emerald-400 hover:to-teal-400 transition active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-3.5 py-2 text-xs font-black text-white shadow-xs hover:from-emerald-500 hover:to-teal-500 transition active:scale-95 disabled:opacity-50"
           >
             {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
             <span>{isHi ? "Excel सेव करें" : "Save Excel"}</span>

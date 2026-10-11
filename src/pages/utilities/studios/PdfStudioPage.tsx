@@ -410,26 +410,26 @@ export default function PdfStudioPage() {
   const curPageHighlights = highlights.filter(h => h.pageIndex === currentPage);
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-[#0F172A] text-slate-100 overflow-hidden font-sans select-none">
+    <div className="flex h-screen w-screen flex-col bg-[#FFF7E8] text-slate-800 overflow-hidden font-sans select-none">
       {/* 1. TOP PREMIUM APP BAR */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-800 bg-[#1E293B] px-4 shadow-md">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-xs">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => navigate("/utilities")}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition"
             title="Back to Utilities"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-sm font-black tracking-tight text-white flex items-center gap-1.5">
+            <h1 className="text-sm font-black tracking-tight text-slate-900 flex items-center gap-1.5">
               <span>PDF Studio Pro</span>
-              <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-400">
-                100% Offline
+              <span className="rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-bold text-rose-700">
+                Studio
               </span>
             </h1>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               {file ? file.name : (isHi ? "दस्तावेज़ खोलें" : "Open Document")}
             </p>
           </div>
@@ -441,7 +441,7 @@ export default function PdfStudioPage() {
               type="button"
               onClick={saveAndExport}
               disabled={loading}
-              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-black text-white shadow-lg hover:from-emerald-500 hover:to-teal-500 transition active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-black text-white shadow-md hover:from-emerald-500 hover:to-teal-500 transition active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -457,16 +457,16 @@ export default function PdfStudioPage() {
       {/* 2. MAIN WORKSPACE / EMPTY STATE */}
       {!file ? (
         <div className="flex flex-1 items-center justify-center p-4">
-          <div className="max-w-md rounded-3xl border border-slate-800 bg-slate-900/90 p-8 text-center shadow-2xl backdrop-blur-xl">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500 mb-4 ring-1 ring-rose-500/20">
+          <div className="max-w-md rounded-3xl border border-[#D8E8DB] bg-white p-8 text-center shadow-md">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 mb-4 ring-1 ring-rose-200">
               <FileText className="h-8 w-8" />
             </div>
-            <h2 className="text-lg font-black text-white">
+            <h2 className="text-lg font-black text-slate-900">
               {isHi ? "PDF Studio में संपादन शुरू करें" : "Open PDF in Studio Workspace"}
             </h2>
-            <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+            <p className="mt-2 text-xs text-slate-600 leading-relaxed">
               {isHi
-                ? "सीधे पेज पर क्लिक करके टेक्स्ट लिखें, ड्रैग करके कहीं भी ले जाएं, गलत शब्दों पर व्हाइटआउट लगाएं, और पेज रोटेट करें—पूरी तरह सुरक्षित व ऑफलाइन।"
+                ? "सीधे पेज पर क्लिक करके टेक्स्ट लिखें, ड्रैग करके कहीं भी ले जाएं, गलत शब्दों पर व्हाइटआउट लगाएं, और पेज रोटेट करें—पूरी तरह सुरक्षित व निजी।"
                 : "Full visual workspace: Click anywhere to type, smoothly drag text boxes, whiteout errors, rotate and delete pages without uploading anywhere."}
             </p>
 
@@ -480,7 +480,7 @@ export default function PdfStudioPage() {
               />
               <label
                 htmlFor="pdf-full-studio-upload"
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-rose-600 py-3.5 text-xs font-black text-white shadow-lg shadow-rose-900/30 hover:bg-rose-500 transition active:scale-95"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-rose-600 py-3.5 text-xs font-black text-white shadow-md hover:bg-rose-500 transition active:scale-95"
               >
                 <Plus className="h-4 w-4" />
                 <span>{isHi ? "डिवाइस से PDF फ़ाइल चुनें" : "Select PDF Document"}</span>
@@ -491,13 +491,13 @@ export default function PdfStudioPage() {
       ) : (
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* TOOLBAR TABS (CANVA STYLE) */}
-          <div className="flex h-12 shrink-0 items-center justify-between border-b border-slate-800 bg-[#162032] px-3">
+          <div className="flex h-12 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-3">
             <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-1">
               <button
                 type="button"
                 onClick={() => setActiveTool("select")}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  activeTool === "select" ? "bg-rose-600 text-white shadow-sm" : "text-slate-300 hover:bg-slate-800"
+                  activeTool === "select" ? "bg-rose-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 <Move className="h-3.5 w-3.5" />
@@ -508,7 +508,7 @@ export default function PdfStudioPage() {
                 type="button"
                 onClick={() => setActiveTool("text")}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  activeTool === "text" ? "bg-rose-600 text-white shadow-sm" : "text-slate-300 hover:bg-slate-800"
+                  activeTool === "text" ? "bg-rose-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 <Type className="h-3.5 w-3.5" />
@@ -519,7 +519,7 @@ export default function PdfStudioPage() {
                 type="button"
                 onClick={() => setActiveTool("whiteout")}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  activeTool === "whiteout" ? "bg-amber-600 text-white shadow-sm" : "text-slate-300 hover:bg-slate-800"
+                  activeTool === "whiteout" ? "bg-amber-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 <Eraser className="h-3.5 w-3.5" />
@@ -530,7 +530,7 @@ export default function PdfStudioPage() {
                 type="button"
                 onClick={() => setActiveTool("highlight")}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  activeTool === "highlight" ? "bg-yellow-500 text-slate-900 shadow-sm" : "text-slate-300 hover:bg-slate-800"
+                  activeTool === "highlight" ? "bg-yellow-400 text-slate-900 shadow-sm" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 <Highlighter className="h-3.5 w-3.5" />
@@ -541,12 +541,12 @@ export default function PdfStudioPage() {
             {/* Page Navigation & Zoom Controls */}
             <div className="flex items-center gap-2">
               {/* Zoom Controls */}
-              <div className="hidden sm:flex items-center gap-1 bg-slate-800/80 rounded-xl px-2 py-1 text-xs font-bold text-slate-200">
+              <div className="hidden sm:flex items-center gap-1 bg-slate-100 rounded-xl px-2 py-1 text-xs font-bold text-slate-700 border border-slate-200">
                 <button
                   type="button"
                   onClick={() => setZoomScale(z => Math.max(0.6, Number((z - 0.2).toFixed(1))))}
                   title="Zoom Out"
-                  className="hover:text-rose-400 p-0.5"
+                  className="hover:text-rose-600 p-0.5"
                 >
                   <ZoomOut className="h-3.5 w-3.5" />
                 </button>
@@ -555,18 +555,18 @@ export default function PdfStudioPage() {
                   type="button"
                   onClick={() => setZoomScale(z => Math.min(2.5, Number((z + 0.2).toFixed(1))))}
                   title="Zoom In"
-                  className="hover:text-rose-400 p-0.5"
+                  className="hover:text-rose-600 p-0.5"
                 >
                   <ZoomIn className="h-3.5 w-3.5" />
                 </button>
               </div>
 
-              <div className="flex items-center gap-1 bg-slate-800/80 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-200">
+              <div className="flex items-center gap-1 bg-slate-100 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-700 border border-slate-200">
                 <button
                   type="button"
                   disabled={currentPage === 0}
                   onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
-                  className="disabled:opacity-30 hover:text-rose-400"
+                  className="disabled:opacity-30 hover:text-rose-600"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -575,7 +575,7 @@ export default function PdfStudioPage() {
                   type="button"
                   disabled={currentPage >= numPages - 1}
                   onClick={() => setCurrentPage(p => Math.min(numPages - 1, p + 1))}
-                  className="disabled:opacity-30 hover:text-rose-400"
+                  className="disabled:opacity-30 hover:text-rose-600"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -586,7 +586,7 @@ export default function PdfStudioPage() {
                 type="button"
                 onClick={rotatePage}
                 title="Rotate Page"
-                className="p-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white"
+                className="p-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200"
               >
                 <RotateCw className="h-4 w-4" />
               </button>
@@ -594,7 +594,7 @@ export default function PdfStudioPage() {
                 type="button"
                 onClick={deletePage}
                 title="Delete Page"
-                className="p-1.5 rounded-xl bg-red-900/30 text-red-400 hover:bg-red-900/50"
+                className="p-1.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -603,42 +603,42 @@ export default function PdfStudioPage() {
 
           {/* ACTIVE TOOL SUB-CONTROLS */}
           {activeTool === "text" && (
-            <div className="flex h-10 shrink-0 items-center gap-3 border-b border-slate-800 bg-slate-900 px-4 text-xs">
-              <span className="text-slate-400 font-semibold">{isHi ? "फॉन्ट साइज़:" : "Size:"}</span>
+            <div className="flex h-10 shrink-0 items-center gap-3 border-b border-slate-200 bg-slate-50 px-4 text-xs">
+              <span className="text-slate-600 font-semibold">{isHi ? "फॉन्ट साइज़:" : "Size:"}</span>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => setActiveFontSize(s => Math.max(10, s - 2))}
-                  className="p-1 rounded bg-slate-800 text-slate-300"
+                  className="p-1 rounded bg-slate-200 text-slate-700 hover:bg-slate-300"
                 >
                   <Minus className="h-3 w-3" />
                 </button>
-                <span className="w-8 text-center font-bold">{activeFontSize}px</span>
+                <span className="w-8 text-center font-bold text-slate-800">{activeFontSize}px</span>
                 <button
                   type="button"
                   onClick={() => setActiveFontSize(s => Math.min(48, s + 2))}
-                  className="p-1 rounded bg-slate-800 text-slate-300"
+                  className="p-1 rounded bg-slate-200 text-slate-700 hover:bg-slate-300"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
               </div>
 
-              <span className="text-slate-400 font-semibold ml-2">{isHi ? "रंग:" : "Color:"}</span>
+              <span className="text-slate-600 font-semibold ml-2">{isHi ? "रंग:" : "Color:"}</span>
               <input
                 type="color"
                 value={activeColor}
                 onChange={e => setActiveColor(e.target.value)}
-                className="h-6 w-6 rounded cursor-pointer border border-slate-700"
+                className="h-6 w-6 rounded cursor-pointer border border-slate-300"
               />
 
-              <span className="text-rose-400 text-[11px] font-bold ml-auto">
+              <span className="text-rose-600 text-[11px] font-bold ml-auto">
                 {isHi ? "👉 नीचे पेज पर जहाँ चाहें क्लिक करें" : "👉 Click anywhere on page to place text"}
               </span>
             </div>
           )}
 
           {/* 3. VISUAL INTERACTIVE WORKSPACE (CANVAS + DRAGGABLE OVERLAYS) */}
-          <div className="flex flex-1 justify-center items-start overflow-auto p-4 sm:p-8 bg-[#090D16]">
+          <div className="flex flex-1 justify-center items-start overflow-auto p-4 sm:p-8 bg-slate-100">
             <div
               ref={workspaceRef}
               onClick={handlePageClick}
