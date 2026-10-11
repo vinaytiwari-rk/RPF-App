@@ -35,7 +35,7 @@ interface DraggableStamp {
   color: string;
 }
 
-export default function ImageStudioPage() {
+export default function ImageEditorPage() {
   const navigate = useNavigate();
   const context = useOutletContext<{ lang?: "en" | "hi" }>() || {};
   const isHi = context.lang === "hi";
@@ -130,7 +130,7 @@ export default function ImageStudioPage() {
         setStamps([]);
         setDrawingStrokes([]);
         setZoomScale(1);
-        toast.success(isHi ? "इमेज सफलतापूर्वक लोड हुई" : "Image loaded into Studio");
+        toast.success(isHi ? "इमेज सफलतापूर्वक लोड हुई" : "Image loaded into Editor");
       };
       img.src = src;
     };
@@ -492,7 +492,7 @@ export default function ImageStudioPage() {
 
       // Convert to Blob
       const ext = exportFormat === "image/jpeg" ? "jpg" : exportFormat === "image/png" ? "png" : "webp";
-      const filename = `Studio_Image_${Date.now()}.${ext}`;
+      const filename = `Editor_Image_${Date.now()}.${ext}`;
 
       compCanvas.toBlob(async (blob) => {
         if (!blob) throw new Error("Export failed");
@@ -541,9 +541,9 @@ export default function ImageStudioPage() {
           </button>
           <div>
             <h1 className="text-sm font-black tracking-tight text-slate-900 flex items-center gap-1.5">
-              <span>Image Studio Pro</span>
+              <span>Image Annotation & Passport Crop</span>
               <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                Studio
+                Editor
               </span>
             </h1>
             <p className="text-[11px] text-slate-500">
@@ -590,7 +590,7 @@ export default function ImageStudioPage() {
               <ImageIcon className="h-8 w-8" />
             </div>
             <h2 className="text-lg font-black text-slate-900">
-              {isHi ? "Image Studio में संपादन शुरू करें" : "Open Photo in Studio Workspace"}
+              {isHi ? "इमेज एडिटर में संपादन शुरू करें" : "Open Image Editor"}
             </h2>
             <p className="mt-2 text-xs text-slate-600 leading-relaxed">
               {isHi
