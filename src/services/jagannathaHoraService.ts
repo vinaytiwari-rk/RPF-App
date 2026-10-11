@@ -38,6 +38,27 @@ function first(source: any, keys: string[]): string {
   return "";
 }
 
+function deepFirst(source: any, keys: string[], depth = 0): string {
+  if (!source || typeof source !== "object" || depth > 4) return "";
+  const direct = first(source, keys);
+  if (direct) return direct;
+  for (const value of Object.values(source)) {
+    if (value && typeof value === "object") {
+      const nested = deepFirst(value, keys, depth + 1);
+      if (nested) return nested;
+    }
+  }
+  return "";
+}
+
+const MASA_KEYS = [
+  "masa", "maasa", "maas", "lunar_month", "lunarMonth", "lunar_month_name",
+  "lunarMonthName", "hindu_month", "hinduMonth", "masa_name", "masaName",
+  "month_name", "monthName", "amanta_masa", "amantaMasa", "purnimanta_masa",
+  "purnimantaMasa", "vedic_month", "vedicMonth"
+];
+const PAKSHA_KEYS = ["paksha", "pakṣa", "lunar_fortnight", "lunarFortnight", "fortnight"];
+
 export function toDDMMYYYY(val?: string | Date): string {
   if (!val) {
     const now = new Date();
@@ -185,8 +206,8 @@ export async function getJagannathaPanchang(options: {
     moonset: first(raw, ["moonset", "moon_set"]),
     tithi: first(raw, ["tithi"]),
     nakshatra: first(raw, ["nakshatra"]),
-    masa: first(raw, ["masa", "maasa", "maas", "lunar_month", "lunarMonth", "hindu_month", "hinduMonth", "masa_name", "month_name", "monthName", "month"]),
-    paksha: first(raw, ["paksha"]) || "",
+    masa: deepFirst(raw, MASA_KEYS),
+    paksha: deepFirst(raw, PAKSHA_KEYS) || "",
     samvat: first(raw, ["samvat", "vikram_samvat"]),
     yoga: first(raw, ["yoga"]),
     karana: first(raw, ["karana"]),
@@ -196,7 +217,7 @@ export async function getJagannathaPanchang(options: {
     abhijitMuhurat,
     raw,
     updatedAt: new Date().toISOString(),
-    unavailable: !(first(raw, ["tithi"]) && first(raw, ["nakshatra"]) && first(raw, ["paksha"]) && first(raw, ["masa", "maasa", "maas", "lunar_month", "lunarMonth", "hindu_month", "hinduMonth", "masa_name", "month_name", "monthName", "month"]))
+    unavailable: !(first(raw, ["tithi"]) && first(raw, ["nakshatra"]) && deepFirst(raw, PAKSHA_KEYS) && deepFirst(raw, MASA_KEYS))
   };
 
   cache.set(key, { data, at: Date.now() });
