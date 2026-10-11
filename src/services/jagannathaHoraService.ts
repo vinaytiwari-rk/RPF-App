@@ -153,7 +153,7 @@ export async function getJagannathaPanchang(options: {
     moonset: first(raw, ["moonset", "moon_set"]) || "10:30 AM",
     tithi: first(raw, ["tithi"]) || "Krishna Saptami / Ashtami",
     nakshatra: first(raw, ["nakshatra"]) || "Ardra Nakshatra",
-    masa: first(raw, ["masa", "maasa", "maas", "lunar_month", "hindu_month", "month_name"]),
+    masa: first(raw, ["masa", "maasa", "maas", "lunar_month", "lunarMonth", "hindu_month", "hinduMonth", "masa_name", "month_name", "monthName", "month"]),
     paksha: first(raw, ["paksha"]) || "",
     samvat: first(raw, ["samvat", "vikram_samvat"]) || "Vikram Samvat 2083",
     yoga: first(raw, ["yoga"]) || "Variyana Yoga",
