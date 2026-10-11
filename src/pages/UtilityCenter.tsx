@@ -5,7 +5,7 @@ import {
   LayoutGrid, BadgeCheck, FileText, Scale, Sprout, Maximize2,
   Briefcase, GraduationCap, Store, Landmark, ShieldAlert,
   HeartPulse, HeartHandshake, Award, Home, Compass, X,
-  Code, FolderArchive, QrCode
+  Image as ImageIcon, FileSpreadsheet, Code, FolderArchive, QrCode
 } from "lucide-react";
 import {
   UTILITY_CATEGORIES,
