@@ -552,7 +552,7 @@ export default function Home() {
               {!reduceMotion && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />}
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-600" />
             </span>
-            {cmsConfig?.alertBannerEn || cmsConfig?.alertBannerHi ? "Latest updates available" : "Explore community services"}
+            "Explore community services"
           </div>
         </motion.section>
 
