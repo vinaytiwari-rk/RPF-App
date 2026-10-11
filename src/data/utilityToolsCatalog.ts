@@ -20,13 +20,13 @@ export interface UtilityCategoryDefinition {
 
 export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "all", titleEn: "All Tools", titleHi: "सभी टूल्स", iconName: "LayoutGrid", accent: "from-emerald-600 to-teal-700" },
-  { id: "pdf_tools", titleEn: "PDF Tools (30)", titleHi: "PDF टूल्स (30)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
-  { id: "image_tools", titleEn: "Image Tools (40)", titleHi: "इमेज टूल्स (40)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
-  { id: "word_text_tools", titleEn: "Word & Text Tools (40)", titleHi: "वर्ड व टेक्स्ट टूल्स (40)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
-  { id: "excel_data_tools", titleEn: "Excel & Data File Tools (40)", titleHi: "एक्सेल व डेटा टूल्स (40)", iconName: "FileSpreadsheet", accent: "from-green-600 to-emerald-700" },
+  { id: "pdf_tools", titleEn: "PDF Tools (31)", titleHi: "PDF टूल्स (31)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
+  { id: "image_tools", titleEn: "Image Tools (41)", titleHi: "इमेज टूल्स (41)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
+  { id: "word_text_tools", titleEn: "Word & Text Tools (41)", titleHi: "वर्ड व टेक्स्ट टूल्स (41)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
+  { id: "excel_data_tools", titleEn: "Excel & Data File Tools (41)", titleHi: "एक्सेल व डेटा टूल्स (41)", iconName: "FileSpreadsheet", accent: "from-green-600 to-emerald-700" },
   { id: "dev_tools", titleEn: "Developer & Encoding Tools (40)", titleHi: "डेवलपर व एन्कोडिंग टूल्स (40)", iconName: "Code", accent: "from-indigo-600 to-purple-700" },
   { id: "archive_tools", titleEn: "Archive & File Tools (20)", titleHi: "आर्काइव व फाइल टूल्स (20)", iconName: "FolderArchive", accent: "from-amber-700 to-yellow-800" },
-  { id: "audio_video_tools", titleEn: "Audio & Video Tools (20)", titleHi: "ऑडियो व वीडियो टूल्स (20)", iconName: "Music", accent: "from-purple-600 to-pink-700" },
+  { id: "audio_video_tools", titleEn: "Audio & Video Tools (21)", titleHi: "ऑडियो व वीडियो टूल्स (21)", iconName: "Music", accent: "from-purple-600 to-pink-700" },
   { id: "design_qr_tools", titleEn: "QR, Barcode & Design Tools (20)", titleHi: "QR, बारकोड व डिजाइन टूल्स (20)", iconName: "QrCode", accent: "from-teal-600 to-emerald-700" },
   { id: "govt_forms", titleEn: "Govt Forms & Recruitment", titleHi: "सरकारी भर्ती व फॉर्म", iconName: "BadgeCheck", accent: "from-amber-600 to-orange-700" },
   { id: "pdf_docs", titleEn: "PDF & Document Office", titleHi: "दस्तावेज व PDF ऑफिस", iconName: "FileText", accent: "from-blue-600 to-indigo-700" },
