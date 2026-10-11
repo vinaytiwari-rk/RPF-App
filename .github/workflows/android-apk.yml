@@ -151,19 +151,22 @@ jobs:
           SHA256=$(sha256sum download/rpf-app.apk | awk '{print $1}')
           SIZE=$(wc -c < download/rpf-app.apk | tr -d ' ')
           VERSION_NAME=$(node -p "require('./package.json').version")
+          PUB_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           
-          cat <<EOF > updates/manifest.json
-{
-  "versionCode": ${RPF_VERSION_CODE},
-  "versionName": "${VERSION_NAME}",
-  "sha256": "${SHA256}",
-  "size": ${SIZE},
-  "downloadUrl": "https://appapi.therpfoundation.org/download/rpf-app.apk",
-  "minSupportedVersionCode": 20500,
-  "releaseNotes": "RPF Samahit update ${VERSION_NAME} (build ${RPF_VERSION_CODE}) with enhanced features and performance improvements.",
-  "publishedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-}
-EOF
+          node -e "
+            const fs = require('fs');
+            const manifest = {
+              versionCode: Number(process.env.RPF_VERSION_CODE),
+              versionName: process.env.VERSION_NAME,
+              sha256: process.env.SHA256,
+              size: Number(process.env.SIZE),
+              downloadUrl: 'https://appapi.therpfoundation.org/download/rpf-app.apk',
+              minSupportedVersionCode: 20500,
+              releaseNotes: 'RPF Samahit update ' + process.env.VERSION_NAME + ' (build ' + process.env.RPF_VERSION_CODE + ') with enhanced features and performance improvements.',
+              publishedAt: process.env.PUB_DATE
+            };
+            fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\n', 'utf8');
+          "
           echo "Generated updates/manifest.json:"
           cat updates/manifest.json
 
