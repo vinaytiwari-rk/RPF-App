@@ -64,11 +64,11 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const audio = new Audio();
     audio.preload = 'auto';
-    audio.crossOrigin = 'anonymous';
     audioRef.current = audio;
 
     const onPlay = () => {
       setIsRadioPlaying(true);
+      setIsRadioLoading(false);
       setRadioError(null);
     };
 
@@ -149,18 +149,22 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
       if (isHlsStream && Hls.isSupported()) {
         const hls = new Hls({
           enableWorker: true,
-          lowLatencyMode: false,
+          lowLatencyMode: true,
           backBufferLength: 30,
           maxBufferLength: 20,
           maxMaxBufferLength: 40,
-          manifestLoadingMaxRetry: 5,
-          manifestLoadingRetryDelay: 1000,
-          levelLoadingMaxRetry: 5,
-          fragLoadingMaxRetry: 5,
+          manifestLoadingMaxRetry: 3,
+          levelLoadingMaxRetry: 3,
+          fragLoadingMaxRetry: 3,
         });
         hlsRef.current = hls;
-        hls.loadSource(station.url);
-        hls.attachMedia(audio);
+
+        const loadHlsSource = (urlToLoad: string) => {
+          hls.loadSource(urlToLoad);
+          hls.attachMedia(audio);
+        };
+
+        loadHlsSource(station.url);
 
         hls.on(Hls.Events.MANIFEST_PARSED, async () => {
           if (!isCurrent()) return;
@@ -168,28 +172,43 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
             await audio.play();
             if (isCurrent()) {
               setIsRadioPlaying(true);
+              setIsRadioLoading(false);
               setRadioError(null);
             }
           } catch {
             if (!isCurrent()) return;
-            setIsRadioPlaying(false);
-            setRadioError('Tap play button to start streaming');
-          } finally {
-            if (isCurrent()) setIsRadioLoading(false);
+            // Handle unmuted mobile autoplay policy: mute and retry
+            audio.muted = true;
+            try {
+              await audio.play();
+              setIsRadioPlaying(true);
+              setIsRadioLoading(false);
+              setRadioError(null);
+            } catch {
+              setIsRadioPlaying(false);
+              setIsRadioLoading(false);
+              setRadioError('Tap play button to start streaming');
+            }
           }
         });
 
-        let recoveryAttempts = 0;
+        let triedProxy = false;
         hls.on(Hls.Events.ERROR, (_: any, data: any) => {
           if (!isCurrent() || !data.fatal) return;
-          if (recoveryAttempts++ < 3 && data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            // Auto fallback to server proxy on network/CORS error
+            if (!triedProxy && !station.url.includes('/api/iptv/proxy')) {
+              triedProxy = true;
+              console.warn(`Direct radio stream failed for ${station.name}, retrying via proxy...`);
+              loadHlsSource(`/api/iptv/proxy?url=${encodeURIComponent(station.url)}`);
+              return;
+            }
             hls.startLoad();
             setRadioError('Buffering live stream…');
             return;
           }
-          if (recoveryAttempts <= 3 && data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
             hls.recoverMediaError();
-            setRadioError('Stabilizing stream…');
             return;
           }
           hls.destroy();
@@ -207,9 +226,21 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
         audio.src = station.url;
       }
 
-      await audio.play();
+      try {
+        await audio.play();
+      } catch (err: any) {
+        // If direct stream fails, retry via server proxy
+        if (!station.url.includes('/api/iptv/proxy')) {
+          audio.src = `/api/iptv/proxy?url=${encodeURIComponent(station.url)}`;
+          await audio.play();
+        } else {
+          throw err;
+        }
+      }
+
       if (isCurrent()) {
         setIsRadioPlaying(true);
+        setIsRadioLoading(false);
         setRadioError(null);
       }
     } catch (err: any) {

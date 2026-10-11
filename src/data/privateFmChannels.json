@@ -60,12 +60,6 @@
     "page": "/channel-private-fm/"
   },
   {
-    "name": "Free FM Bombay",
-    "url": "https://rocafmadrid.radioca.st/",
-    "image": "https://dt89je83l7epy.cloudfront.net/images/air-live.jpg",
-    "page": "/channel-private-fm/"
-  },
-  {
     "name": "RadioNev (24x Hits Music Station)",
     "url": "https://a7.asurahosting.com:8140/radio.mp3",
     "image": "https://www.liveradio.uk/files/images/501591/resized/180x172c/radionev.jpg",
@@ -93,12 +87,6 @@
     "name": "AIR Fm Gold Delhi",
     "url": "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio005/hlspbaudio00564kbps.m3u8",
     "image": "https://liveradios.in/wp-content/uploads/output-onlinepngtools-1-150x150.png",
-    "page": "/channel-private-fm/"
-  },
-  {
-    "name": "Free FM 80´s India",
-    "url": "https://freefm80.radioca.st/",
-    "image": "https://lh4.googleusercontent.com/acjVH3-jt6Rup86sTS16ZbClPjcB-xcVHsr-0RxPZplbCCgvPbb9WKSj2XdpcTdOCe_wzLfv9uktiQIJKkKgYc4lajlD5qKO6rSJl18sDC9yIehJREvzmK2zj9jc3V-n=w1280",
     "page": "/channel-private-fm/"
   },
   {
@@ -312,12 +300,6 @@
     "page": "/channel-private-fm/"
   },
   {
-    "name": "Free FM Rock Bombay",
-    "url": "http://tachyon.shoutca.st:8298/",
-    "image": "https://dt89je83l7epy.cloudfront.net/images/air-live.jpg",
-    "page": "/channel-private-fm/"
-  },
-  {
     "name": "AIR Kolkata Geetanjali",
     "url": "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio055/hlspbaudio05564kbps.m3u8",
     "image": "https://prasarbharati.gov.in/wp-content/uploads/2020/04/cropped-pblogo-180x180.png",
@@ -336,21 +318,9 @@
     "page": "/channel-private-fm/"
   },
   {
-    "name": "AIR Kolhapur",
-    "url": "https://air.pc.cdn.bitgravity.com/air/live/pbaudio063/playlist.m3u8",
-    "image": "https://dt89je83l7epy.cloudfront.net/images/air-live.jpg",
-    "page": "/channel-private-fm/"
-  },
-  {
     "name": "Tamil Panpalai Gold",
     "url": "https://tamilpanpalai.radioca.st/ind",
     "image": "https://dt89je83l7epy.cloudfront.net/images/air-live.jpg",
-    "page": "/channel-private-fm/"
-  },
-  {
-    "name": "Nila Fm HD  bollywood",
-    "url": "http://comet.shoutca.st:8074/",
-    "image": "null",
     "page": "/channel-private-fm/"
   },
   {
@@ -405,12 +375,6 @@
     "name": "Easy 96 Radio",
     "url": "https://ice8.securenetsystems.net/EASY96",
     "image": "https://onlineradiohub.com/wp-content/uploads/2023/06/easy-96-radio.jpg",
-    "page": "/channel-private-fm/"
-  },
-  {
-    "name": "MixiFy Evergreen Hits",
-    "url": "https://server.mixify.in:8010/",
-    "image": "https://onlineradiohub.com/wp-content/uploads/2023/12/mixiFy-evergreen-hits.jpg",
     "page": "/channel-private-fm/"
   },
   {
