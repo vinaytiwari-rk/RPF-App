@@ -23,6 +23,7 @@ export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "pdf_tools", titleEn: "PDF Tools (30)", titleHi: "PDF टूल्स (30)", iconName: "FileText", accent: "from-rose-600 to-red-700" },
   { id: "image_tools", titleEn: "Image Tools (40)", titleHi: "इमेज टूल्स (40)", iconName: "Image", accent: "from-amber-600 to-orange-700" },
   { id: "word_text_tools", titleEn: "Word & Text Tools (40)", titleHi: "वर्ड व टेक्स्ट टूल्स (40)", iconName: "FileText", accent: "from-blue-600 to-cyan-700" },
+  { id: "excel_data_tools", titleEn: "Excel & Data File Tools (40)", titleHi: "एक्सेल व डेटा टूल्स (40)", iconName: "FileSpreadsheet", accent: "from-green-600 to-emerald-700" },
   { id: "govt_forms", titleEn: "Govt Forms & Recruitment", titleHi: "सरकारी भर्ती व फॉर्म", iconName: "BadgeCheck", accent: "from-amber-600 to-orange-700" },
   { id: "pdf_docs", titleEn: "PDF & Document Office", titleHi: "दस्तावेज व PDF ऑफिस", iconName: "FileText", accent: "from-blue-600 to-indigo-700" },
   { id: "legal_drafts", titleEn: "Legal Drafts & Notices", titleHi: "कानूनी आवेदन व प्रारूप", iconName: "Scale", accent: "from-purple-600 to-indigo-800" },
@@ -1423,5 +1424,208 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "text_similarity_comparator", categoryId: "word_text_tools", titleEn: "Text Similarity Comparator", titleHi: "टेक्स्ट समानता गणक (%)",
     descEn: "Calculate Jaccard content similarity score between two texts.", descHi: "दो लेखों के बीच समानता प्रतिशत (%) और कॉमन शब्द निकालें।", iconName: "GitCompare", badge: "100% Offline",
     keywords: ["text similarity", "similarity score", "compare content"]
+  },
+  // -----------------------------------------------------------------
+  // 19. Phase 6: Excel & Data File Tools Suite (40 Tools)
+  // -----------------------------------------------------------------
+  {
+    id: "data_csv_to_json", categoryId: "excel_data_tools", titleEn: "CSV to JSON", titleHi: "CSV से JSON कनवर्टर",
+    descEn: "Convert comma-separated CSV records into structured JSON array.", descHi: "CSV तालिका को संरचित JSON ऑब्जेक्ट्स में बदलें।", iconName: "FileJson", badge: "100% Offline",
+    keywords: ["csv to json", "convert csv", "csv parse"]
+  },
+  {
+    id: "data_json_to_csv", categoryId: "excel_data_tools", titleEn: "JSON to CSV", titleHi: "JSON से CSV कनवर्टर",
+    descEn: "Convert JSON array of objects into standard spreadsheet CSV.", descHi: "JSON डेटा को स्प्रेडशीट CSV तालिका में बदलें।", iconName: "FileSpreadsheet", badge: "100% Offline",
+    keywords: ["json to csv", "export csv", "json table"]
+  },
+  {
+    id: "data_csv_to_tsv", categoryId: "excel_data_tools", titleEn: "CSV to TSV", titleHi: "CSV से TSV (टैब सेपरेटेड)",
+    descEn: "Convert comma-separated CSV to tab-separated TSV spreadsheet.", descHi: "कॉमा सेपरेटेड CSV को टैब सेपरेटेड TSV में बदलें।", iconName: "Table", badge: "100% Offline",
+    keywords: ["csv to tsv", "tab separated", "tsv converter"]
+  },
+  {
+    id: "data_tsv_to_csv", categoryId: "excel_data_tools", titleEn: "TSV to CSV", titleHi: "TSV से CSV कनवर्टर",
+    descEn: "Convert tab-separated values into standard comma-separated CSV.", descHi: "टैब अलग किए गए डेटा को मानक CSV में बदलें।", iconName: "Table", badge: "100% Offline",
+    keywords: ["tsv to csv", "tsv import", "csv export"]
+  },
+  {
+    id: "data_csv_delimiter_conv", categoryId: "excel_data_tools", titleEn: "CSV Delimiter Converter", titleHi: "CSV डेलीमीटर कनवर्टर",
+    descEn: "Convert delimiters between commas, semicolons, tabs, and pipes.", descHi: "विभाजक चिन्ह (कॉमा, सेमीकोलन, पाइप, टैब) आसानी से बदलें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["delimiter converter", "change delimiter", "csv separator"]
+  },
+  {
+    id: "data_csv_col_extractor", categoryId: "excel_data_tools", titleEn: "CSV Column Extractor", titleHi: "CSV कॉलम एक्सट्रैक्टर",
+    descEn: "Extract specific column index from multi-column CSV table.", descHi: "पूरी टेबल में से केवल इच्छित कॉलम का डेटा निकालें।", iconName: "Split", badge: "100% Offline",
+    keywords: ["column extractor", "extract column", "csv columns"]
+  },
+  {
+    id: "data_csv_col_reorder", categoryId: "excel_data_tools", titleEn: "CSV Column Reorderer", titleHi: "CSV कॉलम रीऑर्डरर",
+    descEn: "Rearrange column sequence order in CSV spreadsheet.", descHi: "कॉलमों का क्रम अपनी पसंद के अनुसार आगे-पीछे सेट करें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["reorder columns", "column order", "csv sequence"]
+  },
+  {
+    id: "data_csv_col_renamer", categoryId: "excel_data_tools", titleEn: "CSV Column Renamer", titleHi: "CSV कॉलम रीनेमर (हेडर बदलें)",
+    descEn: "Rename column header labels across your dataset easily.", descHi: "डेटा टेबल के सभी शीर्षकों (हेडर्स) के नाम बदलें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["rename columns", "change header", "csv rename"]
+  },
+  {
+    id: "data_csv_row_filter", categoryId: "excel_data_tools", titleEn: "CSV Row Filter", titleHi: "CSV पंक्ति फ़िल्टर",
+    descEn: "Filter and extract rows containing specific target keyword.", descHi: "विशिष्ट शब्द या शर्त वाली पंक्तियों को फ़िल्टर करें।", iconName: "Search", badge: "100% Offline",
+    keywords: ["filter rows", "csv filter", "search table"]
+  },
+  {
+    id: "data_csv_dup_row_remover", categoryId: "excel_data_tools", titleEn: "CSV Duplicate Row Remover", titleHi: "डुप्लीकेट रिकॉर्ड रिमूवर",
+    descEn: "Remove duplicate and repeated rows from tabular data.", descHi: "डेटाबेस तालिका में से बार-बार आने वाली पंक्तियाँ हटाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["remove duplicate rows", "dedup csv", "unique rows"]
+  },
+  {
+    id: "data_csv_merger", categoryId: "excel_data_tools", titleEn: "CSV Merger", titleHi: "CSV फाइल मर्जर (जोड़ें)",
+    descEn: "Merge multiple CSV datasets together under unified header.", descHi: "दो अलग-अलग CSV टेबल्स को एक साथ जोड़ें।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["merge csv", "combine tables", "join datasets"]
+  },
+  {
+    id: "data_csv_splitter", categoryId: "excel_data_tools", titleEn: "CSV Splitter by Row Count", titleHi: "CSV स्प्लिटर (पंक्ति अनुसार)",
+    descEn: "Split massive CSV files into smaller chunks of fixed rows.", descHi: "बड़ी CSV फाइल को निश्चित पंक्तियों (उदा: 100) में विभाजित करें।", iconName: "Split", badge: "100% Offline",
+    keywords: ["split csv", "chunk csv", "divide table"]
+  },
+  {
+    id: "data_csv_header_editor", categoryId: "excel_data_tools", titleEn: "CSV Header Editor", titleHi: "CSV हेडर एडिटर",
+    descEn: "Add, modify, or insert custom headers into raw CSV data.", descHi: "बिना हेडर वाले डेटा में नए हेडर शीर्षक जोड़ें।", iconName: "FileText", badge: "100% Offline",
+    keywords: ["edit header", "add header", "csv header"]
+  },
+  {
+    id: "data_csv_empty_row_remover", categoryId: "excel_data_tools", titleEn: "CSV Empty Row Remover", titleHi: "रिक्त पंक्तियाँ हटाएं",
+    descEn: "Clean empty rows and whitespace blanks from CSV records.", descHi: "तालिका में से सभी खाली और बेकार पंक्तियां हटाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["remove empty rows", "clean csv", "blank rows"]
+  },
+  {
+    id: "data_xlsx_to_csv", categoryId: "excel_data_tools", titleEn: "XLSX to CSV", titleHi: "Excel XLSX से CSV",
+    descEn: "Convert Excel spreadsheet workbook into clean CSV text.", descHi: "माइक्रोसॉफ्ट एक्सेल (.xlsx) फाइल को सादे CSV में बदलें।", iconName: "FileSpreadsheet", badge: "100% Offline",
+    keywords: ["xlsx to csv", "excel to csv", "convert spreadsheet"]
+  },
+  {
+    id: "data_csv_to_xlsx", categoryId: "excel_data_tools", titleEn: "CSV to XLSX", titleHi: "CSV से Excel XLSX फाइल",
+    descEn: "Convert CSV records into standard Microsoft Excel workbook.", descHi: "CSV डेटा को सीधे खोलने योग्य Excel (.xlsx) में बदलें।", iconName: "FileSpreadsheet", badge: "100% Offline",
+    keywords: ["csv to xlsx", "csv to excel", "generate excel"]
+  },
+  {
+    id: "data_xlsx_to_json", categoryId: "excel_data_tools", titleEn: "XLSX to JSON", titleHi: "Excel XLSX से JSON",
+    descEn: "Parse Excel spreadsheets directly into JSON structured objects.", descHi: "एक्सेल शीट को वेब-फ्रेंडली JSON डेटा में बदलें।", iconName: "FileJson", badge: "100% Offline",
+    keywords: ["xlsx to json", "excel to json", "parse spreadsheet"]
+  },
+  {
+    id: "data_json_to_xlsx", categoryId: "excel_data_tools", titleEn: "JSON to XLSX", titleHi: "JSON से Excel XLSX फाइल",
+    descEn: "Export JSON database objects into Microsoft Excel XLSX file.", descHi: "JSON ऑब्जेक्ट्स को सीधे Excel (.xlsx) फाइल में एक्सपोर्ट करें।", iconName: "FileSpreadsheet", badge: "100% Offline",
+    keywords: ["json to xlsx", "json to excel", "export spreadsheet"]
+  },
+  {
+    id: "data_xlsx_to_html", categoryId: "excel_data_tools", titleEn: "XLSX to HTML", titleHi: "Excel XLSX से HTML टेबल",
+    descEn: "Convert Excel sheets into responsive HTML table markup.", descHi: "एक्सेल डेटा को वेबसाइट में दिखाने योग्य HTML टेबल में बदलें।", iconName: "Table", badge: "100% Offline",
+    keywords: ["xlsx to html", "excel to html", "spreadsheet to web"]
+  },
+  {
+    id: "data_html_table_to_xlsx", categoryId: "excel_data_tools", titleEn: "HTML Table to XLSX", titleHi: "HTML टेबल से Excel XLSX",
+    descEn: "Convert web HTML table markup into downloadable Excel sheet.", descHi: "वेबसाइट की HTML टेबल को Excel (.xlsx) फाइल में डाउनलोड करें।", iconName: "FileSpreadsheet", badge: "100% Offline",
+    keywords: ["html table to xlsx", "html to excel", "table export"]
+  },
+  {
+    id: "data_excel_sheet_merger", categoryId: "excel_data_tools", titleEn: "Excel Sheet Merger", titleHi: "Excel शीट मर्जर",
+    descEn: "Merge multiple spreadsheet sheets into single unified sheet.", descHi: "अलग-अलग शीट्स का डेटा एक मुख्य शीट में मर्ज करें।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["merge sheets", "excel combine", "sheet merger"]
+  },
+  {
+    id: "data_excel_sheet_splitter", categoryId: "excel_data_tools", titleEn: "Excel Sheet Splitter", titleHi: "Excel शीट स्प्लिटर",
+    descEn: "Extract and split multi-sheet workbook into individual sheets.", descHi: "एक्सेल वर्कबुक से अलग-अलग शीट्स को पृथक करें।", iconName: "Split", badge: "100% Offline",
+    keywords: ["split sheets", "sheet extractor", "excel splitter"]
+  },
+  {
+    id: "data_excel_sheet_renamer", categoryId: "excel_data_tools", titleEn: "Excel Sheet Renamer", titleHi: "Excel शीट नाम बदलें",
+    descEn: "Change workbook sheet tab titles to custom label names.", descHi: "एक्सेल शीट टैब का नाम अपनी पसंद से बदलें।", iconName: "FileSpreadsheet", badge: "100% Offline",
+    keywords: ["rename sheet", "sheet name", "tab title"]
+  },
+  {
+    id: "data_excel_sheet_reorder", categoryId: "excel_data_tools", titleEn: "Excel Sheet Reorderer", titleHi: "Excel शीट रीऑर्डरर",
+    descEn: "Rearrange worksheet tab sequence in Excel spreadsheet.", descHi: "वर्कशीट टैब्स का क्रम आगे-पीछे रीऑर्डर करें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["reorder sheets", "sheet order", "tab sequence"]
+  },
+  {
+    id: "data_excel_row_dedup", categoryId: "excel_data_tools", titleEn: "Excel Row Deduplicator", titleHi: "Excel पंक्ति डिडुप्लिकेटर",
+    descEn: "Deduplicate and clean repeated data rows in spreadsheet.", descHi: "एक्सेल शीट में से डुप्लीकेट पंक्तियाँ खोजकर हटाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["excel deduplicate", "remove duplicates", "unique records"]
+  },
+  {
+    id: "data_excel_blank_row_remover", categoryId: "excel_data_tools", titleEn: "Excel Blank Row Remover", titleHi: "Excel खाली पंक्ति रिमूवर",
+    descEn: "Strip empty rows and whitespace gaps from Excel sheets.", descHi: "शीट में से अनावश्यक खाली लाइनें हटाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["remove blank rows", "clean excel", "empty rows"]
+  },
+  {
+    id: "data_excel_find_replace", categoryId: "excel_data_tools", titleEn: "Excel Find and Replace", titleHi: "Excel खोजें और बदलें",
+    descEn: "Find cell values and replace them across entire sheet.", descHi: "पूरी शीट में किसी भी सेल मान को खोजें और नया मान भरें।", iconName: "Search", badge: "100% Offline",
+    keywords: ["excel find replace", "replace cells", "find in sheet"]
+  },
+  {
+    id: "data_excel_col_splitter", categoryId: "excel_data_tools", titleEn: "Excel Column Splitter", titleHi: "Excel कॉलम स्प्लिटर (टेक्स्ट टू कॉलम)",
+    descEn: "Split full names or addresses into separate column fields.", descHi: "एक कॉलम के टेक्स्ट (उदा: नाम सरनेम) को दो कॉलम में बांटें।", iconName: "Split", badge: "100% Offline",
+    keywords: ["text to columns", "split column", "excel split"]
+  },
+  {
+    id: "data_excel_col_merger", categoryId: "excel_data_tools", titleEn: "Excel Column Merger", titleHi: "Excel कॉलम मर्जर",
+    descEn: "Combine two separate columns into single merged column.", descHi: "दो अलग-अलग कॉलम के डेटा को मिलाकर एक कॉलम बनाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["merge columns", "concatenate columns", "excel merge"]
+  },
+  {
+    id: "data_excel_data_filter", categoryId: "excel_data_tools", titleEn: "Excel Data Filter", titleHi: "Excel डेटा फ़िल्टर",
+    descEn: "Filter sheet records by column criteria and conditions.", descHi: "कॉलम के आधार पर विशिष्ट रिकॉर्ड्स फ़िल्टर करें।", iconName: "Search", badge: "100% Offline",
+    keywords: ["excel filter", "filter column", "spreadsheet filter"]
+  },
+  {
+    id: "data_excel_unique_vals", categoryId: "excel_data_tools", titleEn: "Excel Unique Values Extractor", titleHi: "अद्वितीय मान एक्सट्रैक्टर",
+    descEn: "Extract unique distinct list of values from specific column.", descHi: "कॉलम में से केवल अलग-अलग (यूनिक) मानों की सूची निकालें।", iconName: "Check", badge: "100% Offline",
+    keywords: ["unique values", "distinct values", "excel unique"]
+  },
+  {
+    id: "data_csv_datatype_detector", categoryId: "excel_data_tools", titleEn: "CSV Data Type Detector", titleHi: "CSV डेटा टाइप डिटेक्टर",
+    descEn: "Inspect column values and identify strings, numbers, dates.", descHi: "कॉलम के प्रकार (संख्या, टेक्स्ट, दिनांक) का स्वचालित विश्लेषण करें।", iconName: "Search", badge: "100% Offline",
+    keywords: ["detect datatype", "csv types", "schema analysis"]
+  },
+  {
+    id: "data_csv_schema_gen", categoryId: "excel_data_tools", titleEn: "CSV Schema Generator", titleHi: "CSV स्कीमा जनरेटर",
+    descEn: "Generate JSON Schema or database column definitions from CSV.", descHi: "CSV से डेटाबेस और JSON Schema परिभाषा तैयार करें।", iconName: "FileJson", badge: "100% Offline",
+    keywords: ["csv schema", "generate schema", "json schema"]
+  },
+  {
+    id: "data_json_formatter", categoryId: "excel_data_tools", titleEn: "JSON Formatter", titleHi: "JSON फॉर्मेटर (Beautify)",
+    descEn: "Format and indent JSON code with clean 2-space readability.", descHi: "अव्यवस्थित JSON को सुंदर और पठनीय फॉर्मेट में सजाएं।", iconName: "Braces", badge: "100% Offline",
+    keywords: ["json formatter", "beautify json", "format json"]
+  },
+  {
+    id: "data_json_minifier", categoryId: "excel_data_tools", titleEn: "JSON Minifier", titleHi: "JSON मिनिफायर (Compact)",
+    descEn: "Compress JSON by stripping whitespace to save bandwidth.", descHi: "JSON में से खाली जगह हटाकर कॉम्पैक्ट सिंगल लाइन बनाएं।", iconName: "Braces", badge: "100% Offline",
+    keywords: ["json minifier", "compress json", "minify json"]
+  },
+  {
+    id: "data_json_validator", categoryId: "excel_data_tools", titleEn: "JSON Validator", titleHi: "JSON वैधता जांच (Validator)",
+    descEn: "Validate JSON syntax and detect syntax errors with line clues.", descHi: "JSON सही है या उसमें कोई सिंटैक्स त्रुटि है, तुरंत जांचें।", iconName: "Check", badge: "100% Offline",
+    keywords: ["json validator", "check json", "lint json"]
+  },
+  {
+    id: "data_json_tree_viewer", categoryId: "excel_data_tools", titleEn: "JSON Tree Viewer", titleHi: "JSON ट्री व्यूअर (स्ट्रक्चर)",
+    descEn: "Explore nested JSON objects and arrays in readable tree hierarchy.", descHi: "जटिल JSON को श्रेणीबद्ध ट्री संरचना में आसानी से देखें।", iconName: "Eye", badge: "100% Offline",
+    keywords: ["json tree", "explore json", "view hierarchy"]
+  },
+  {
+    id: "data_json_key_extractor", categoryId: "excel_data_tools", titleEn: "JSON Key Extractor", titleHi: "JSON कीज एक्सट्रैक्टर",
+    descEn: "Extract and list all unique keys and paths from JSON data.", descHi: "JSON में मौजूद सभी शीर्षकों व कीज (Keys) की सूची बनाएं।", iconName: "Search", badge: "100% Offline",
+    keywords: ["extract keys", "json properties", "list keys"]
+  },
+  {
+    id: "data_json_array_dedup", categoryId: "excel_data_tools", titleEn: "JSON Array Deduplicator", titleHi: "JSON ऐरे डिडुप्लिकेटर",
+    descEn: "Remove duplicate items and objects from JSON list array.", descHi: "JSON सूची में से डुप्लीकेट रिकॉर्ड्स और मान हटाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["json dedup", "unique array", "filter json"]
+  },
+  {
+    id: "data_json_flatten", categoryId: "excel_data_tools", titleEn: "JSON Flattening Tool", titleHi: "JSON फ्लैटनर (Flatten)",
+    descEn: "Flatten deeply nested JSON objects into simple dot-notated keys.", descHi: "जटिल नेस्टेड JSON को सरल डॉट नोटेशन (a.b.c) में बदलें।", iconName: "Table", badge: "100% Offline",
+    keywords: ["flatten json", "flatten object", "dot notation"]
   }
 ];

@@ -14,6 +14,7 @@ import PdfToolsEngine from "./engines/pdfToolsEngine";
 import ImageToolsEngine from "./engines/imageToolsEngine";
 import ImageAdvancedToolsEngine from "./engines/imageAdvancedToolsEngine";
 import TextToolsEngine from "./engines/textToolsEngine";
+import ExcelDataToolsEngine from "./engines/excelDataToolsEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -466,6 +467,49 @@ function ToolEngineDispatcher({
     case "text_punctuation_remover":
     case "text_similarity_comparator":
       return <TextToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    // 21. 100% Offline Excel & Data File Tools Suite (Phase 6 - 40 Tools)
+    case "data_csv_to_json":
+    case "data_json_to_csv":
+    case "data_csv_to_tsv":
+    case "data_tsv_to_csv":
+    case "data_csv_delimiter_conv":
+    case "data_csv_col_extractor":
+    case "data_csv_col_reorder":
+    case "data_csv_col_renamer":
+    case "data_csv_row_filter":
+    case "data_csv_dup_row_remover":
+    case "data_csv_merger":
+    case "data_csv_splitter":
+    case "data_csv_header_editor":
+    case "data_csv_empty_row_remover":
+    case "data_xlsx_to_csv":
+    case "data_csv_to_xlsx":
+    case "data_xlsx_to_json":
+    case "data_json_to_xlsx":
+    case "data_xlsx_to_html":
+    case "data_html_table_to_xlsx":
+    case "data_excel_sheet_merger":
+    case "data_excel_sheet_splitter":
+    case "data_excel_sheet_renamer":
+    case "data_excel_sheet_reorder":
+    case "data_excel_row_dedup":
+    case "data_excel_blank_row_remover":
+    case "data_excel_find_replace":
+    case "data_excel_col_splitter":
+    case "data_excel_col_merger":
+    case "data_excel_data_filter":
+    case "data_excel_unique_vals":
+    case "data_csv_datatype_detector":
+    case "data_csv_schema_gen":
+    case "data_json_formatter":
+    case "data_json_minifier":
+    case "data_json_validator":
+    case "data_json_tree_viewer":
+    case "data_json_key_extractor":
+    case "data_json_array_dedup":
+    case "data_json_flatten":
+      return <ExcelDataToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (
