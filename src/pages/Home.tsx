@@ -778,8 +778,8 @@ export default function Home() {
           100% { transform: translate3d(-50%, 0, 0); }
         }
         @keyframes rpf-marquee-ltr {
-          0% { transform: translate3d(-50%, 0, 0); }
-          100% { transform: translate3d(0, 0, 0); }
+          0% { transform: translate3d(-100%, 0, 0); }
+          100% { transform: translate3d(100vw, 0, 0); }
         }
         @keyframes rpf-marquee-utd {
           0% { transform: translate3d(0, -50%, 0); }
