@@ -388,19 +388,10 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
                 <div className="truncate">Moon Sign: <span className="font-semibold text-slate-900">{data?.panchang?.moonSign || "Mithuna"}</span></div>
                 <div className="truncate">Tithi: <span className="font-semibold text-slate-900">{data?.panchang?.tithi || "Shukla"}</span></div>
                 <div className="truncate">Nakshatra: <span className="font-semibold text-slate-900">{data?.panchang?.nakshatra || "Rohini"}</span></div>
+                <div className="truncate">Maas: <span className="font-semibold text-slate-900">{data?.panchang?.masa || "—"}</span></div>
+                <div className="truncate">Paksha: <span className="font-semibold text-slate-900">{data?.panchang?.paksha || "—"}</span></div>
               </div>
 
-              {/* Crucial: Abhijit Muhurat & Rahu Kaal directly on card */}
-              <div className="grid grid-cols-2 gap-1 pt-0.5 text-[9.5px]">
-                <div className="bg-emerald-50/90 border border-emerald-200 rounded-lg p-1">
-                  <div className="font-extrabold text-emerald-800 leading-tight">🟢 अभिजीत मुहूर्त</div>
-                  <div className="font-bold text-slate-800 text-[8.5px] truncate mt-0.5">{data?.panchang?.abhijitMuhurat || "11:46 AM to 12:33 PM"}</div>
-                </div>
-                <div className="bg-rose-50/90 border border-rose-200 rounded-lg p-1">
-                  <div className="font-extrabold text-rose-800 leading-tight">🔴 राहु काल</div>
-                  <div className="font-bold text-rose-900 text-[8.5px] truncate mt-0.5">{data?.panchang?.rahukaal || "09:12 AM to 10:41 AM"}</div>
-                </div>
-              </div>
 
               <div className="text-[10px] text-slate-500 font-medium line-clamp-1 pt-0.5">
                 ☀️ {data?.panchang?.sunrise || "06:14 AM"} • 🌙 {data?.panchang?.sunset || "06:05 PM"}
@@ -819,8 +810,11 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
                       <div className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
                         {data.panchang.samvat}
                       </div>
-                      <div className="text-[17px] font-black text-[#14213D]">
+                      <div className="text-[15px] font-bold text-[#14213D]">
                         {data.panchang.tithi}
+                      </div>
+                      <div className="text-xs text-emerald-700 font-medium">
+                        {data.panchang.masa || "Maas unavailable"} • {data.panchang.paksha || "Paksha unavailable"}
                       </div>
                       <div className="text-xs text-emerald-700 font-medium">
                         Nakshatra: {data.panchang.nakshatra}
