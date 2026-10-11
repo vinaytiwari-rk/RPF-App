@@ -17,6 +17,8 @@ import TextToolsEngine from "./engines/textToolsEngine";
 import ExcelDataToolsEngine from "./engines/excelDataToolsEngine";
 import DevEncodingToolsEngine from "./engines/devEncodingToolsEngine";
 import ArchiveToolsEngine from "./engines/archiveToolsEngine";
+import MediaToolsEngine from "./engines/mediaToolsEngine";
+import DesignQrToolsEngine from "./engines/designQrToolsEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -578,6 +580,52 @@ function ToolEngineDispatcher({
     case "archive_base64_to_file":
     case "archive_file_to_base64":
       return <ArchiveToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    // 24. 100% Offline Audio & Video Suite (Phase 9 - 20 Tools)
+    case "media_audio_trimmer":
+    case "media_audio_volume":
+    case "media_audio_speed":
+    case "media_audio_reverse":
+    case "media_audio_channel_split":
+    case "media_audio_channel_merge":
+    case "media_audio_silence_remove":
+    case "media_audio_fade":
+    case "media_audio_normalize":
+    case "media_audio_samplerate":
+    case "media_audio_pitch":
+    case "media_audio_metadata":
+    case "media_video_frame_capture":
+    case "media_video_trimmer":
+    case "media_video_rotate":
+    case "media_video_flip_h":
+    case "media_video_flip_v":
+    case "media_video_aspect_ratio":
+    case "media_video_speed":
+    case "media_video_metadata":
+      return <MediaToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+
+    // 25. 100% Offline QR, Barcode, Fonts & Design Suite (Phase 9 - 20 Tools)
+    case "design_qr_generator":
+    case "design_wifi_qr":
+    case "design_upi_qr":
+    case "design_vcard_qr":
+    case "design_sms_qr":
+    case "design_geo_qr":
+    case "design_barcode_code128":
+    case "design_palette_generator":
+    case "design_gradient_generator":
+    case "design_box_shadow":
+    case "design_border_radius":
+    case "design_glassmorphism":
+    case "design_font_viewer":
+    case "design_font_glyphs":
+    case "design_font_metadata":
+    case "design_svg_visualizer":
+    case "design_svg_minifier":
+    case "design_favicon_suite":
+    case "design_contrast_checker":
+    case "design_aspect_calc":
+      return <DesignQrToolsEngine toolId={toolId} isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (

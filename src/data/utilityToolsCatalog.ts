@@ -26,6 +26,8 @@ export const UTILITY_CATEGORIES: UtilityCategoryDefinition[] = [
   { id: "excel_data_tools", titleEn: "Excel & Data File Tools (40)", titleHi: "एक्सेल व डेटा टूल्स (40)", iconName: "FileSpreadsheet", accent: "from-green-600 to-emerald-700" },
   { id: "dev_tools", titleEn: "Developer & Encoding Tools (40)", titleHi: "डेवलपर व एन्कोडिंग टूल्स (40)", iconName: "Code", accent: "from-indigo-600 to-purple-700" },
   { id: "archive_tools", titleEn: "Archive & File Tools (20)", titleHi: "आर्काइव व फाइल टूल्स (20)", iconName: "FolderArchive", accent: "from-amber-700 to-yellow-800" },
+  { id: "audio_video_tools", titleEn: "Audio & Video Tools (20)", titleHi: "ऑडियो व वीडियो टूल्स (20)", iconName: "Music", accent: "from-purple-600 to-pink-700" },
+  { id: "design_qr_tools", titleEn: "QR, Barcode & Design Tools (20)", titleHi: "QR, बारकोड व डिजाइन टूल्स (20)", iconName: "QrCode", accent: "from-teal-600 to-emerald-700" },
   { id: "govt_forms", titleEn: "Govt Forms & Recruitment", titleHi: "सरकारी भर्ती व फॉर्म", iconName: "BadgeCheck", accent: "from-amber-600 to-orange-700" },
   { id: "pdf_docs", titleEn: "PDF & Document Office", titleHi: "दस्तावेज व PDF ऑफिस", iconName: "FileText", accent: "from-blue-600 to-indigo-700" },
   { id: "legal_drafts", titleEn: "Legal Drafts & Notices", titleHi: "कानूनी आवेदन व प्रारूप", iconName: "Scale", accent: "from-purple-600 to-indigo-800" },
@@ -1935,5 +1937,209 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     id: "archive_file_to_base64", categoryId: "archive_tools", titleEn: "Binary File to Base64 Exporter", titleHi: "फ़ाइल से Base64 डेटा कोड",
     descEn: "Read any file and export as web-embeddable Base64 data string.", descHi: "किसी भी फ़ाइल को Base64 डेटा स्ट्रिंग में बदलें।", iconName: "FileText", badge: "100% Offline",
     keywords: ["file to base64", "encode file", "data uri"]
+  },
+
+  // 24. 100% Offline Audio & Video Suite (Phase 9 - 20 Tools)
+  {
+    id: "media_audio_trimmer", categoryId: "audio_video_tools", titleEn: "Audio Trimmer & Cutter", titleHi: "ऑडियो ट्रिमर व कटर",
+    descEn: "Cut and trim audio tracks with millisecond precision to 16-bit WAV.", descHi: "ऑडियो ट्रैक को सटीक सेकंड अनुसार काटकर 16-बिट WAV में डाउनलोड करें।", iconName: "Scissors", badge: "100% Offline",
+    keywords: ["trim audio", "cut audio", "audio trimmer", "crop mp3", "wav cutter"]
+  },
+  {
+    id: "media_audio_volume", categoryId: "audio_video_tools", titleEn: "Audio Volume Booster & Attenuator", titleHi: "ऑडियो वॉल्यूम बूस्टर",
+    descEn: "Amplify or reduce audio decibel levels safely up to 300%.", descHi: "धीमी आवाज वाले ऑडियो को 300% तक बूस्ट करें या कम करें।", iconName: "Volume2", badge: "100% Offline",
+    keywords: ["audio volume", "amplify audio", "volume boost", "boost sound"]
+  },
+  {
+    id: "media_audio_speed", categoryId: "audio_video_tools", titleEn: "Audio Speed Changer", titleHi: "ऑडियो स्पीड परिवर्तक",
+    descEn: "Speed up or slow down audio playback rate (0.5x to 2.0x).", descHi: "ऑडियो की गति धीमी (0.5x) या तेज़ (2x) करें।", iconName: "FastForward", badge: "100% Offline",
+    keywords: ["audio speed", "tempo changer", "fast audio", "slow audio"]
+  },
+  {
+    id: "media_audio_reverse", categoryId: "audio_video_tools", titleEn: "Audio Reverser", titleHi: "ऑडियो रिवर्सर (उल्टा बजाएं)",
+    descEn: "Reverse PCM audio waveforms backwards for sound design.", descHi: "ऑडियो ट्रैक को पीछे से आगे की ओर उल्टा चलाएं।", iconName: "RefreshCw", badge: "100% Offline",
+    keywords: ["reverse audio", "backwards audio", "reverse sound"]
+  },
+  {
+    id: "media_audio_channel_split", categoryId: "audio_video_tools", titleEn: "Stereo to Mono Splitter", titleHi: "स्टीरियो से मोनो कनवर्टर",
+    descEn: "Fold stereo multi-channel audio tracks into single mono channel.", descHi: "दोहरी स्टीरियो आवाज़ को सिंगल मोनो चैनल में मिलाएं।", iconName: "Music", badge: "100% Offline",
+    keywords: ["stereo to mono", "channel split", "mono audio"]
+  },
+  {
+    id: "media_audio_channel_merge", categoryId: "audio_video_tools", titleEn: "Mono to Stereo Duplicator", titleHi: "मोनो से स्टीरियो डुप्लीकेटर",
+    descEn: "Duplicate mono voice track across left and right channels.", descHi: "एकल मोनो ऑडियो को बाएं व दाएं दोनों कानों के लिए डुप्लीकेट करें।", iconName: "Music", badge: "100% Offline",
+    keywords: ["mono to stereo", "duplicate channels", "dual audio"]
+  },
+  {
+    id: "media_audio_silence_remove", categoryId: "audio_video_tools", titleEn: "Audio Silence Remover", titleHi: "ऑडियो साइलेंस रिमूवर",
+    descEn: "Detect and remove dead silence gaps from beginning and end.", descHi: "ऑडियो के शुरू व अंत से सन्नाटा (Silence) हटाएँ।", iconName: "Scissors", badge: "100% Offline",
+    keywords: ["remove silence", "trim silence", "mute cutter"]
+  },
+  {
+    id: "media_audio_fade", categoryId: "audio_video_tools", titleEn: "Audio Fade-In & Fade-Out", titleHi: "ऑडियो फेड-इन व फेड-आउट",
+    descEn: "Smooth volume transitions at start and ending of sound clips.", descHi: "ऑडियो की शुरुआत और अंत में धीमा-से-तेज़ प्रभाव जोड़ें।", iconName: "Volume2", badge: "100% Offline",
+    keywords: ["fade in", "fade out", "audio transition"]
+  },
+  {
+    id: "media_audio_normalize", categoryId: "audio_video_tools", titleEn: "Audio Normalizer (Peak Gain)", titleHi: "ऑडियो नॉर्मलाइज़र (पीक गेन)",
+    descEn: "Normalize audio volume peaks to maximum 0.98 amplitude.", descHi: "ऑडियो को बिना फटे अधिकतम स्पष्टता पर सामान्य करें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["normalize audio", "audio leveling", "peak gain"]
+  },
+  {
+    id: "media_audio_samplerate", categoryId: "audio_video_tools", titleEn: "Audio Sample Rate Standardizer", titleHi: "ऑडियो सैंपल रेट मानकीकरण",
+    descEn: "Standardize audio sample rate to 44.1 kHz CD audio standard.", descHi: "ऑडियो सैंपल रेट को 44.1 kHz मानक पर रीसैंपल करें।", iconName: "Music", badge: "100% Offline",
+    keywords: ["sample rate", "resample audio", "44100hz"]
+  },
+  {
+    id: "media_audio_pitch", categoryId: "audio_video_tools", titleEn: "Audio Pitch Shifter", titleHi: "ऑडियो पिच शिफ्टर",
+    descEn: "Shift audio pitch and voice tone higher or lower.", descHi: "ऑडियो की पिच (पतली या भारी आवाज़) बदलें।", iconName: "Sliders", badge: "100% Offline",
+    keywords: ["pitch shift", "change pitch", "voice tone"]
+  },
+  {
+    id: "media_audio_metadata", categoryId: "audio_video_tools", titleEn: "Audio Metadata & Duration Inspector", titleHi: "ऑडियो मेटाडेटा व अवधि दर्शक",
+    descEn: "Inspect sample rate, channels, bit depth and duration of audio.", descHi: "ऑडियो की सटीक सेकंड, फ़्रीक्वेंसी व चैनल विवरण देखें।", iconName: "Eye", badge: "100% Offline",
+    keywords: ["audio metadata", "audio info", "audio duration"]
+  },
+  {
+    id: "media_video_frame_capture", categoryId: "audio_video_tools", titleEn: "Video Frame Snapshot Grabber", titleHi: "वीडियो फ्रेम कैप्चर (HD फोटो)",
+    descEn: "Grab exact high-resolution PNG snapshot from video at current time.", descHi: "चलते वीडियो से मनचाहे समय की हाई-डेफिनिशन PNG फोटो निकालें।", iconName: "Video", badge: "100% Offline",
+    keywords: ["video frame", "video snapshot", "video screenshot", "grab frame"]
+  },
+  {
+    id: "media_video_trimmer", categoryId: "audio_video_tools", titleEn: "Video Interval Frame Extractor", titleHi: "वीडियो इंटरवल फ्रेम एक्सट्रैक्टर",
+    descEn: "Mark start and end intervals and snapshot key sequences.", descHi: "वीडियो की शुरुआत व अंत समय सेट कर फ्रेम निकालें।", iconName: "Scissors", badge: "100% Offline",
+    keywords: ["video trim", "video cutter", "video interval"]
+  },
+  {
+    id: "media_video_rotate", categoryId: "audio_video_tools", titleEn: "Video Frame Rotator (90°/180°/270°)", titleHi: "वीडियो फ्रेम रोटेटर (घूर्णन)",
+    descEn: "Rotate video frames 90, 180 or 270 degrees orientation.", descHi: "उल्टे रिकॉर्ड हुए वीडियो फ्रेम को 90° या 180° सीधा करें।", iconName: "RotateCw", badge: "100% Offline",
+    keywords: ["rotate video", "flip video", "orientation video"]
+  },
+  {
+    id: "media_video_flip_h", categoryId: "audio_video_tools", titleEn: "Video Mirror (Horizontal Flip)", titleHi: "वीडियो मिरर (क्षैतिज फ्लिप)",
+    descEn: "Mirror flip video horizontally like front camera selfies.", descHi: "सेल्फी कैमरे जैसे वीडियो को क्षैतिज रूप से सीधा/मिरर करें।", iconName: "RefreshCw", badge: "100% Offline",
+    keywords: ["mirror video", "flip horizontal video", "selfie flip"]
+  },
+  {
+    id: "media_video_flip_v", categoryId: "audio_video_tools", titleEn: "Video Invert (Vertical Flip)", titleHi: "वीडियो वर्टिकल फ्लिप",
+    descEn: "Invert video upside down vertically.", descHi: "वीडियो फ्रेम को लंबवत रूप से उल्टा/सीधा करें।", iconName: "RefreshCw", badge: "100% Offline",
+    keywords: ["flip vertical video", "invert video"]
+  },
+  {
+    id: "media_video_aspect_ratio", categoryId: "audio_video_tools", titleEn: "Video Aspect Ratio Cropper", titleHi: "वीडियो आस्पेक्ट रेशियो क्रॉप",
+    descEn: "Crop video view to 16:9, 4:3, 1:1 or 9:16 mobile format.", descHi: "वीडियो को 16:9 (YouTube) या 9:16 (Shorts/Reel) में सेट करें।", iconName: "Maximize", badge: "100% Offline",
+    keywords: ["aspect ratio", "video crop", "shorts format", "16:9", "9:16"]
+  },
+  {
+    id: "media_video_speed", categoryId: "audio_video_tools", titleEn: "Video Playback Speed Controller", titleHi: "वीडियो प्लेबैक स्पीड नियंत्रक",
+    descEn: "Preview video playback at custom speed multipliers (0.5x - 2.0x).", descHi: "वीडियो को धीमी या दोगुनी गति पर चलाकर देखें।", iconName: "FastForward", badge: "100% Offline",
+    keywords: ["video speed", "slow motion video", "fast forward video"]
+  },
+  {
+    id: "media_video_metadata", categoryId: "audio_video_tools", titleEn: "Video Dimensions & Codec Inspector", titleHi: "वीडियो डायमेंशन व मेटाडेटा दर्शक",
+    descEn: "Inspect video resolution, aspect ratio, duration and file size.", descHi: "वीडियो का रिज़ॉल्यूशन, अवधि व फ़ाइल साइज़ विवरण देखें।", iconName: "Eye", badge: "100% Offline",
+    keywords: ["video metadata", "video resolution", "video specs", "video duration"]
+  },
+
+  // 25. 100% Offline QR, Barcode, Fonts & Design Suite (Phase 9 - 20 Tools)
+  {
+    id: "design_qr_generator", categoryId: "design_qr_tools", titleEn: "Custom QR Code Generator", titleHi: "कस्टम QR कोड जेनरेटर",
+    descEn: "Generate high-resolution colored QR codes for text, URLs & links.", descHi: "वेबसाइट लिंक या टेक्स्ट हेतु रंगीन HD QR कोड बनाएं और PNG में डाउनलोड करें।", iconName: "QrCode", badge: "100% Offline",
+    keywords: ["qr generator", "create qr", "custom qr", "make qr code"]
+  },
+  {
+    id: "design_wifi_qr", categoryId: "design_qr_tools", titleEn: "Wi-Fi Access QR Code Generator", titleHi: "Wi-Fi पासवर्ड QR कोड जेनरेटर",
+    descEn: "Generate instant connect Wi-Fi QR code without sharing passwords.", descHi: "बिना पासवर्ड बताए मेहमानों को Wi-Fi से जोड़ने हेतु QR कोड बनाएं।", iconName: "Wifi", badge: "100% Offline",
+    keywords: ["wifi qr", "wifi password qr", "scan wifi", "connect wifi"]
+  },
+  {
+    id: "design_upi_qr", categoryId: "design_qr_tools", titleEn: "UPI Payment QR Code Maker", titleHi: "UPI पेमेंट QR कोड मेकर",
+    descEn: "Generate instant payment QR for GPay, PhonePe, Paytm with custom amounts.", descHi: "GPay, PhonePe, Paytm हेतु दुकान व व्यक्तिगत UPI QR कोड बनाएं।", iconName: "QrCode", badge: "100% Offline",
+    keywords: ["upi qr", "payment qr", "gpay qr", "phonepe qr", "bhim upi"]
+  },
+  {
+    id: "design_vcard_qr", categoryId: "design_qr_tools", titleEn: "vCard Contact QR Code Maker", titleHi: "vCard संपर्क (Contact) QR कोड",
+    descEn: "Generate scannable vCard QR codes for phonebook contacts.", descHi: "नाम, फोन नंबर व ईमेल वाला डिजिटल संपर्क QR कोड बनाएं।", iconName: "Phone", badge: "100% Offline",
+    keywords: ["vcard qr", "contact qr", "business card qr"]
+  },
+  {
+    id: "design_sms_qr", categoryId: "design_qr_tools", titleEn: "SMS Auto-Draft QR Code", titleHi: "SMS ऑटो-ड्राफ्ट QR कोड",
+    descEn: "Generate QR codes pre-filling SMS recipient and message body.", descHi: "स्कैन करते ही पहले से लिखा संदेश भेजने वाला QR कोड बनाएं।", iconName: "MessageSquare", badge: "100% Offline",
+    keywords: ["sms qr", "message qr", "text qr"]
+  },
+  {
+    id: "design_geo_qr", categoryId: "design_qr_tools", titleEn: "Geolocation Coordinates QR Code", titleHi: "भू-स्थान (GPS) QR कोड",
+    descEn: "Encode latitude and longitude GPS coordinates for instant mapping.", descHi: "गूगल मैप्स लोकेशन हेतु अक्षांश-देशांतर का QR कोड बनाएं।", iconName: "MapPin", badge: "100% Offline",
+    keywords: ["geo qr", "gps qr", "map qr", "location qr"]
+  },
+  {
+    id: "design_barcode_code128", categoryId: "design_qr_tools", titleEn: "Code 128 Barcode Generator", titleHi: "Code 128 बारकोड जेनरेटर",
+    descEn: "Generate standard Code 128 retail and inventory barcodes.", descHi: "दुकान व इन्वेंट्री हेतु मानक Code 128 बारकोड बनाएं।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["barcode generator", "code 128", "inventory barcode"]
+  },
+  {
+    id: "design_palette_generator", categoryId: "design_qr_tools", titleEn: "Color Palette Harmonizer", titleHi: "कलर पैलेट हार्मोनाइज़र",
+    descEn: "Generate 5 harmonious color palette steps from any seed hex.", descHi: "किसी भी रंग से 5 रंगों का सुसंगत पैलेट बनाएं।", iconName: "Palette", badge: "100% Offline",
+    keywords: ["color palette", "palette generator", "hex palette", "shades"]
+  },
+  {
+    id: "design_gradient_generator", categoryId: "design_qr_tools", titleEn: "CSS Linear Gradient Generator", titleHi: "CSS लीनियर ग्रेडिएंट मेकर",
+    descEn: "Create two-color linear gradient backgrounds with angle sliders.", descHi: "डिग्री व रंगों के साथ आधुनिक CSS ग्रेडिएंट बैकग्राउंड बनाएं।", iconName: "Sparkles", badge: "100% Offline",
+    keywords: ["gradient generator", "css gradient", "linear gradient"]
+  },
+  {
+    id: "design_box_shadow", categoryId: "design_qr_tools", titleEn: "CSS Box Shadow Generator", titleHi: "CSS बॉक्स शैडो जेनरेटर",
+    descEn: "Interactive shadow generator with X, Y, Blur and Spread controls.", descHi: "सटीक X, Y, ब्लर स्लाइडर्स के साथ रियलिस्टिक CSS शैडो कोड प्राप्त करें।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["box shadow", "css shadow", "shadow generator"]
+  },
+  {
+    id: "design_border_radius", categoryId: "design_qr_tools", titleEn: "CSS Border Radius Visualizer", titleHi: "CSS बॉर्डर रेडियस विज़ुअलाइज़र",
+    descEn: "Visual slider control for rounded corner border radius values.", descHi: "सॉफ्ट कोनों के लिए बॉर्डर रेडियस का दृश्य नियंत्रण व CSS कोड।", iconName: "Layers", badge: "100% Offline",
+    keywords: ["border radius", "rounded corners", "css border"]
+  },
+  {
+    id: "design_glassmorphism", categoryId: "design_qr_tools", titleEn: "Glassmorphism CSS Generator", titleHi: "ग्लासमॉर्फिज्म CSS जनरेटर",
+    descEn: "Modern frosted glass effect generator with blur and opacity.", descHi: "पारदर्शी फ्रॉस्टेड ग्लास (कांच जैसा) प्रभाव व CSS कोड बनाएं।", iconName: "Sparkles", badge: "100% Offline",
+    keywords: ["glassmorphism", "frosted glass", "backdrop filter"]
+  },
+  {
+    id: "design_font_viewer", categoryId: "design_qr_tools", titleEn: "Custom Font File Tester & Viewer", titleHi: "कस्टम फॉन्ट फ़ाइल परीक्षक",
+    descEn: "Load and test custom TTF, OTF, WOFF font files in real-time.", descHi: "अपने डिवाइस के TTF या OTF फॉन्ट को तुरंत टेस्ट व प्रीव्यू करें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["font viewer", "ttf viewer", "otf viewer", "preview font"]
+  },
+  {
+    id: "design_font_glyphs", categoryId: "design_qr_tools", titleEn: "Font Glyph Character Map", titleHi: "फॉन्ट ग्लिफ कैरेक्टर मैप",
+    descEn: "Browse all ASCII and symbol glyphs supported by uploaded font.", descHi: "अपलोड किए गए फॉन्ट में मौजूद सभी अक्षरों व प्रतीकों का चार्ट देखें।", iconName: "Type", badge: "100% Offline",
+    keywords: ["font glyphs", "character map", "font symbols"]
+  },
+  {
+    id: "design_font_metadata", categoryId: "design_qr_tools", titleEn: "Font Header & Metadata Inspector", titleHi: "फॉन्ट मेटाडेटा व हेडर दर्शक",
+    descEn: "Inspect font file format, naming, and file size details.", descHi: "फॉन्ट फ़ाइल का आंतरिक नाम, प्रकार व फ़ाइल साइज़ देखें।", iconName: "Eye", badge: "100% Offline",
+    keywords: ["font metadata", "font info", "inspect font"]
+  },
+  {
+    id: "design_svg_visualizer", categoryId: "design_qr_tools", titleEn: "SVG Code Visualizer & Renderer", titleHi: "SVG कोड विज़ुअलाइज़र व रेंडरर",
+    descEn: "Paste raw SVG XML code and render immediate interactive vector view.", descHi: "कच्चे SVG कोड को पेस्ट कर उसका वेक्टर चित्र देखें।", iconName: "Code", badge: "100% Offline",
+    keywords: ["svg viewer", "render svg", "preview svg", "vector visualizer"]
+  },
+  {
+    id: "design_svg_minifier", categoryId: "design_qr_tools", titleEn: "SVG Code Minifier", titleHi: "SVG कोड संकुचक (Minifier)",
+    descEn: "Minify SVG XML markup by eliminating superfluous whitespace.", descHi: "SVG कोड से अतिरिक्त स्पेस हटाकर उसे हल्का करें।", iconName: "Code", badge: "100% Offline",
+    keywords: ["minify svg", "compress svg", "clean svg"]
+  },
+  {
+    id: "design_favicon_suite", categoryId: "design_qr_tools", titleEn: "Favicon HTML Meta Header Suite", titleHi: "फ़ेविकॉन HTML मेटा हेडर सुइट",
+    descEn: "Generate full set of HTML head tags for multi-resolution favicons.", descHi: "वेबसाइट के लिए सभी आवश्यक फेविकॉन मेटा टैग्स का कोड प्राप्त करें।", iconName: "Globe", badge: "100% Offline",
+    keywords: ["favicon", "favicon generator", "html meta tags", "app icon"]
+  },
+  {
+    id: "design_contrast_checker", categoryId: "design_qr_tools", titleEn: "WCAG Color Contrast Checker", titleHi: "रंग कंट्रास्ट चेकर (WCAG)",
+    descEn: "Calculate luminance contrast ratio between foreground and background.", descHi: "टेक्स्ट व बैकग्राउंड के बीच पठनीयता (Contrast Ratio) की जाँच करें।", iconName: "Eye", badge: "100% Offline",
+    keywords: ["color contrast", "wcag contrast", "accessibility color"]
+  },
+  {
+    id: "design_aspect_calc", categoryId: "design_qr_tools", titleEn: "Design Aspect Ratio Calculator", titleHi: "आस्पेक्ट रेशियो गणक (16:9, 4:3)",
+    descEn: "Calculate proportional width and height across common design ratios.", descHi: "चौड़ाई या ऊंचाई दर्ज कर आस्पेक्ट रेशियो अनुसार सही अनुपात निकालें।", iconName: "Maximize", badge: "100% Offline",
+    keywords: ["aspect ratio calc", "width height", "screen ratio"]
   }
 ];
