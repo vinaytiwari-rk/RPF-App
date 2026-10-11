@@ -1,0 +1,177 @@
+{
+  "packId": "computer-literacy-foundations-002",
+  "version": 1,
+  "subject": "computer-literacy",
+  "category": "computer-awareness",
+  "titleEn": "Computer Literacy — Practice Set 2",
+  "titleHi": "कंप्यूटर साक्षरता — अभ्यास सेट 2",
+  "descEn": "Original computer basics and online safety questions.",
+  "descHi": "कंप्यूटर की मूल बातें और ऑनलाइन सुरक्षा के मौलिक प्रश्न।",
+  "iconName": "Monitor",
+  "color": "from-sky-600 to-blue-700",
+  "durationMinutes": 8,
+  "questions": [
+    {
+      "id": "comp2-001",
+      "subject": "computer-literacy",
+      "questionEn": "Which device is primarily used to enter text into a computer?",
+      "questionHi": "कंप्यूटर में टेक्स्ट दर्ज करने के लिए मुख्यतः किस उपकरण का उपयोग होता है?",
+      "optionsEn": [
+        "Monitor",
+        "Keyboard",
+        "Speaker",
+        "Projector"
+      ],
+      "optionsHi": [
+        "मॉनिटर",
+        "कीबोर्ड",
+        "स्पीकर",
+        "प्रोजेक्टर"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "A keyboard is a common input device for text.",
+      "explanationHi": "कीबोर्ड टेक्स्ट दर्ज करने का सामान्य इनपुट उपकरण है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "comp2-002",
+      "subject": "computer-literacy",
+      "questionEn": "Which of these is an example of cloud storage?",
+      "questionHi": "इनमें से कौन cloud storage का उदाहरण है?",
+      "optionsEn": [
+        "A local DVD only",
+        "Google Drive",
+        "A wired mouse",
+        "A monitor"
+      ],
+      "optionsHi": [
+        "केवल स्थानीय DVD",
+        "Google Drive",
+        "वायर्ड माउस",
+        "मॉनिटर"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Google Drive stores files on remote infrastructure accessible over the internet.",
+      "explanationHi": "Google Drive इंटरनेट के माध्यम से उपलब्ध दूरस्थ ढाँचे पर फाइलें संग्रहीत करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "comp2-003",
+      "subject": "computer-literacy",
+      "questionEn": "What does a web browser do?",
+      "questionHi": "वेब ब्राउज़र क्या करता है?",
+      "optionsEn": [
+        "Displays and interacts with web pages",
+        "Repairs hardware automatically",
+        "Creates electricity",
+        "Replaces an operating system"
+      ],
+      "optionsHi": [
+        "वेब पेज दिखाता और उनसे इंटरैक्ट करता है",
+        "हार्डवेयर अपने-आप ठीक करता है",
+        "बिजली बनाता है",
+        "ऑपरेटिंग सिस्टम को बदलता है"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "A browser retrieves and renders web content for users.",
+      "explanationHi": "ब्राउज़र उपयोगकर्ताओं के लिए वेब सामग्री प्राप्त और प्रदर्शित करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "comp2-004",
+      "subject": "computer-literacy",
+      "questionEn": "What is two-factor authentication designed to do?",
+      "questionHi": "Two-factor authentication का उद्देश्य क्या है?",
+      "optionsEn": [
+        "Add a second verification step",
+        "Make passwords public",
+        "Disable encryption",
+        "Increase screen brightness"
+      ],
+      "optionsHi": [
+        "सत्यापन का दूसरा चरण जोड़ना",
+        "पासवर्ड सार्वजनिक करना",
+        "एन्क्रिप्शन बंद करना",
+        "स्क्रीन की चमक बढ़ाना"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "It requires two different categories of proof to help protect an account.",
+      "explanationHi": "यह खाते की सुरक्षा के लिए प्रमाण के दो अलग-अलग प्रकार माँगता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "comp2-005",
+      "subject": "computer-literacy",
+      "questionEn": "Which format is commonly used for structured tabular data exchange?",
+      "questionHi": "संरचित सारणीबद्ध डेटा के आदान-प्रदान के लिए कौन-सा format सामान्य है?",
+      "optionsEn": [
+        "CSV",
+        "MP3",
+        "JPEG",
+        "EXE"
+      ],
+      "optionsHi": [
+        "CSV",
+        "MP3",
+        "JPEG",
+        "EXE"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "CSV stores rows of values separated by delimiters, commonly commas.",
+      "explanationHi": "CSV में मान पंक्तियों में delimiter, सामान्यतः comma, से अलग किए जाते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "comp2-006",
+      "subject": "computer-literacy",
+      "questionEn": "Why should software updates be installed promptly?",
+      "questionHi": "सॉफ्टवेयर अपडेट समय पर क्यों स्थापित करने चाहिए?",
+      "optionsEn": [
+        "They can fix security vulnerabilities and bugs",
+        "They always remove all ads",
+        "They guarantee unlimited battery",
+        "They replace the need for backups"
+      ],
+      "optionsHi": [
+        "वे सुरक्षा कमजोरियाँ और त्रुटियाँ ठीक कर सकते हैं",
+        "वे सभी विज्ञापन हमेशा हटा देते हैं",
+        "वे असीमित बैटरी की गारंटी देते हैं",
+        "वे बैकअप की जरूरत समाप्त करते हैं"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Updates often include security patches and reliability fixes.",
+      "explanationHi": "अपडेट में अक्सर सुरक्षा पैच और विश्वसनीयता सुधार शामिल होते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "packId": "mathematics-foundations-002",
+  "version": 1,
+  "subject": "mathematics",
+  "category": "quantitative-aptitude",
+  "titleEn": "Mathematics — Practice Set 2",
+  "titleHi": "गणित — अभ्यास सेट 2",
+  "descEn": "Original arithmetic questions.",
+  "descHi": "अंकगणित के मौलिक प्रश्न।",
+  "iconName": "Calculator",
+  "color": "from-blue-600 to-cyan-600",
+  "durationMinutes": 8,
+  "questions": [
+    {
+      "id": "math2-001",
+      "subject": "mathematics",
+      "questionEn": "What is 12 × 15?",
+      "questionHi": "12 × 15 कितना है?",
+      "optionsEn": [
+        "150",
+        "160",
+        "180",
+        "190"
+      ],
+      "optionsHi": [
+        "150",
+        "160",
+        "180",
+        "190"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "12 × 15 = 180.",
+      "explanationHi": "12 × 15 = 180।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math2-002",
+      "subject": "mathematics",
+      "questionEn": "What is the square root of 2025?",
+      "questionHi": "2025 का वर्गमूल क्या है?",
+      "optionsEn": [
+        "35",
+        "40",
+        "45",
+        "55"
+      ],
+      "optionsHi": [
+        "35",
+        "40",
+        "45",
+        "55"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "45 × 45 = 2025.",
+      "explanationHi": "45 × 45 = 2025।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math2-003",
+      "subject": "mathematics",
+      "questionEn": "A ₹800 item is discounted by 10%. What is the sale price?",
+      "questionHi": "₹800 की वस्तु पर 10% छूट है। बिक्री मूल्य क्या होगा?",
+      "optionsEn": [
+        "₹700",
+        "₹720",
+        "₹740",
+        "₹780"
+      ],
+      "optionsHi": [
+        "₹700",
+        "₹720",
+        "₹740",
+        "₹780"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "10% of ₹800 is ₹80; sale price is ₹720.",
+      "explanationHi": "₹800 का 10% ₹80 है; बिक्री मूल्य ₹720 है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math2-004",
+      "subject": "mathematics",
+      "questionEn": "What is the LCM of 6 and 8?",
+      "questionHi": "6 और 8 का लघुत्तम समापवर्त्य (LCM) क्या है?",
+      "optionsEn": [
+        "12",
+        "18",
+        "24",
+        "48"
+      ],
+      "optionsHi": [
+        "12",
+        "18",
+        "24",
+        "48"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "24 is the smallest positive number divisible by both 6 and 8.",
+      "explanationHi": "24 वह सबसे छोटी धनात्मक संख्या है जो 6 और 8 दोनों से विभाजित होती है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math2-005",
+      "subject": "mathematics",
+      "questionEn": "The ratio 18:24 in simplest form is:",
+      "questionHi": "18:24 का सरलतम अनुपात क्या है?",
+      "optionsEn": [
+        "2:3",
+        "3:4",
+        "4:5",
+        "6:8"
+      ],
+      "optionsHi": [
+        "2:3",
+        "3:4",
+        "4:5",
+        "6:8"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Divide both terms by 6 to obtain 3:4.",
+      "explanationHi": "दोनों पदों को 6 से भाग देने पर 3:4 मिलता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "math2-006",
+      "subject": "mathematics",
+      "questionEn": "What is the mean of 4, 8, 10 and 14?",
+      "questionHi": "4, 8, 10 और 14 का औसत क्या है?",
+      "optionsEn": [
+        "8",
+        "9",
+        "10",
+        "12"
+      ],
+      "optionsHi": [
+        "8",
+        "9",
+        "10",
+        "12"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Their sum is 36; 36 ÷ 4 = 9.",
+      "explanationHi": "योग 36 है; 36 ÷ 4 = 9।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
