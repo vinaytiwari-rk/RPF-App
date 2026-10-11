@@ -22,6 +22,8 @@ import DesignQrToolsEngine from "./engines/designQrToolsEngine";
 import PdfStudioEditorEngine from "./engines/pdfStudioEditorEngine";
 import ImageStudioEditorEngine from "./engines/imageStudioEditorEngine";
 import WordStudioEditorEngine from "./engines/wordStudioEditorEngine";
+import SheetStudioEditorEngine from "./engines/sheetStudioEditorEngine";
+import MediaStudioEditorEngine from "./engines/mediaStudioEditorEngine";
 
 interface NativeDownloadsPlugin {
   saveToDownloads(options: { filename: string; mimeType: string; data: string }): Promise<{ uri: string; filename: string }>;
@@ -637,6 +639,10 @@ function ToolEngineDispatcher({
       return <ImageStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
     case "studio_word_editor":
       return <WordStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+    case "studio_sheet_editor":
+      return <SheetStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
+    case "studio_media_editor":
+      return <MediaStudioEditorEngine isHi={isHi} downloadBlob={downloadBlob} copyToClipboard={copyToClipboard} />;
 
     default:
       return (

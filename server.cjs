@@ -353285,24 +353285,39 @@ var MASA_KEYS = [
   "lunarMonthName",
   "hindu_month",
   "hinduMonth",
+  "hindu_lunar_month",
+  "hinduLunarMonth",
   "masa_name",
   "masaName",
+  "masa_name_en",
+  "masaNameEn",
+  "maasa_name",
+  "maasaName",
   "month_name",
   "monthName",
+  "month_name_en",
+  "monthNameEn",
+  "monthNameEnglish",
+  "lunar_month_en",
+  "lunarMonthEn",
+  "lunarMonthNameEn",
+  "chandra_masa",
+  "chandraMasa",
   "amanta_masa",
   "amantaMasa",
+  "amanta",
   "purnimanta_masa",
   "purnimantaMasa",
+  "purnimanta",
   "vedic_month",
   "vedicMonth"
 ];
-var HINDU_MONTH_NAMES = /^(magha|magh|phalguna|phalgun|chaitra|vaisakha|vaishakha|jyeshtha|jyestha|ashada|ashadha|shravana|shravan|bhadrapada|bhadra|ashvina|ashwin|kartika|kartik|margashirsha|margashirsh|pausha|paush|माघ|फाल्गुन|चैत्र|वैशाख|ज्येष्ठ|आषाढ़|श्रावण|भाद्रपद|आश्विन|कार्तिक|मार्गशीर्ष|पौष)$/i;
 function deepMasa(source, depth = 0) {
   if (!source || typeof source !== "object" || depth > 5) return "";
   const direct = first2(source, MASA_KEYS);
   if (direct) return direct;
   const genericMonth = textValue(source.month ?? source.Month ?? source.MONTH).trim();
-  if (genericMonth && HINDU_MONTH_NAMES.test(genericMonth)) return genericMonth;
+  if (genericMonth && !/^\\d+(?:\\.\\d+)?$/.test(genericMonth)) return genericMonth;
   for (const value2 of Object.values(source)) {
     if (value2 && typeof value2 === "object") {
       const nested = deepMasa(value2, depth + 1);
@@ -353375,8 +353390,9 @@ async function getJagannathaPanchang(options2) {
   const key = [dateInput, latitude.toFixed(4), longitude.toFixed(4), "LAHIRI"].join("|");
   const existing = cache2.get(key);
   if (existing && Date.now() - existing.at < CACHE_TTL_MS3) return existing.data;
-  const targetDate = /* @__PURE__ */ new Date();
   const dateFormatted = toDDMMYYYY(dateInput);
+  const dateParts = dateFormatted.match(/^(\\d{2})-(\\d{2})-(\\d{4})$/);
+  const targetDate = dateParts ? new Date(Number(dateParts[3]), Number(dateParts[2]) - 1, Number(dateParts[1]), 12, 0, 0) : /* @__PURE__ */ new Date();
   let raw = null;
   try {
     const response = await axios_default.post(`${BASE_URL}/panchang`, {

@@ -74,6 +74,14 @@ export default function UtilityCenter() {
       navigate("/utilities/word-studio");
       return;
     }
+    if (tool.id === "studio_sheet_editor") {
+      navigate("/utilities/sheet-studio");
+      return;
+    }
+    if (tool.id === "studio_media_editor") {
+      navigate("/utilities/media-studio");
+      return;
+    }
     setActiveTool(tool);
   };
 
@@ -168,7 +176,7 @@ export default function UtilityCenter() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
           {/* PDF Studio */}
           <button
             type="button"
@@ -229,6 +237,50 @@ export default function UtilityCenter() {
                 </p>
                 <p className="text-[10px] text-slate-400 line-clamp-1">
                   {isHi ? "A4 आवेदन, बायोडाटा, DOCX सेव" : "A4 letters, tables, save .docx"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-slate-500 group-hover:translate-x-0.5 group-hover:text-white transition" />
+          </button>
+
+          {/* Excel / Sheet Studio */}
+          <button
+            type="button"
+            onClick={() => navigate("/utilities/sheet-studio")}
+            className="group flex items-center justify-between rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 p-3 transition text-left active:scale-98"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600/20 text-emerald-400 group-hover:scale-105 transition">
+                <FileSpreadsheet className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-xs font-black text-white group-hover:text-emerald-300 transition">
+                  {isHi ? "एक्सेल स्टूडियो प्रो" : "Excel Studio Pro"}
+                </p>
+                <p className="text-[10px] text-slate-400 line-clamp-1">
+                  {isHi ? "फॉर्मूले (=SUM), बजट, XLSX सेव" : "Formulas, budgets, save .xlsx"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-slate-500 group-hover:translate-x-0.5 group-hover:text-white transition" />
+          </button>
+
+          {/* Audio & Video Studio */}
+          <button
+            type="button"
+            onClick={() => navigate("/utilities/media-studio")}
+            className="group flex items-center justify-between rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 p-3 transition text-left active:scale-98"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/20 text-violet-400 group-hover:scale-105 transition">
+                <Music className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-xs font-black text-white group-hover:text-violet-300 transition">
+                  {isHi ? "मीडिया स्टूडियो प्रो" : "Media Studio Pro"}
+                </p>
+                <p className="text-[10px] text-slate-400 line-clamp-1">
+                  {isHi ? "ऑडियो कटर, 300% बूस्ट, वीडियो ऑडियो" : "Audio trim, 300% boost, video extract"}
                 </p>
               </div>
             </div>

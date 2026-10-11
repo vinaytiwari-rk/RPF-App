@@ -2167,5 +2167,19 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descHi: "संपूर्ण ऑफलाइन वर्ड प्रोसेसर: हेडिंग्स, टेबल्स, बुलेट लिस्ट, फॉन्ट्स और सीधे .docx में डाउनलोड।",
     iconName: "FileText", badge: "All-in-One Studio",
     keywords: ["word editor", "document editor", "docx editor", "rich text", "word processor", "create docx"]
+  },
+  {
+    id: "studio_sheet_editor", categoryId: "studio_editors", titleEn: "Excel & Sheet Studio Editor", titleHi: "एक्सेल व स्प्रेडशीट स्टूडियो",
+    descEn: "Full offline spreadsheet workspace: formulas (=SUM, =AVG), budget ledgers, CSV and Excel XLSX export.",
+    descHi: "संपूर्ण ऑफलाइन स्प्रेडशीट वर्कस्पेस: फॉर्मूले (=SUM), बजट बहीखाता, छात्र अंकतालिका व Excel (.xlsx) सेव।",
+    iconName: "FileSpreadsheet", badge: "All-in-One Studio",
+    keywords: ["excel editor", "sheet editor", "spreadsheet", "csv editor", "xlsx editor", "budget sheet"]
+  },
+  {
+    id: "studio_media_editor", categoryId: "studio_editors", titleEn: "Audio & Video Studio Editor", titleHi: "ऑडियो व वीडियो स्टूडियो एडिटर",
+    descEn: "Full offline audio cutter, 300% volume booster, voice recorder, video trimmer & MP4 audio extractor.",
+    descHi: "संपूर्ण ऑफलाइन ऑडियो कटर, 300% वॉल्यूम बूस्टर, वॉयस रिकॉर्डर, वीडियो से ऑडियो निकालना व एचडी फ्रेम कैप्चर।",
+    iconName: "Music", badge: "All-in-One Studio",
+    keywords: ["audio editor", "video editor", "audio cutter", "trim audio", "extract audio", "voice recorder", "video trimmer"]
   }
 ];
