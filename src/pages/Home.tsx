@@ -568,6 +568,18 @@ export default function Home() {
         {/* 2. LIVE VERIFIED MARKET & PANCHANG SECTION (Directly below Greeting & Explore community services) */}
         <LiveVerifiedMarketSection mode="panchang" />
 
+        {/* TOP MARQUEE: PIB RSS only */}
+        {cmsConfig?.marqueeConfig?.enabled !== false && marquee1.length > 0 && (
+          <MarqueeTrack
+            items={marquee1}
+            direction="rtl"
+            variant="saffron"
+            label="PIB News"
+            onClick={() => navigate("/news")}
+          />
+        )}
+
+
         {/* 3. THOUGHT OF THE DAY */}
         {cmsConfig?.thoughtConfig?.enabled !== false && (
           <section className="rounded-2xl border border-amber-200/60 bg-amber-50/40 backdrop-blur-xs px-4 py-3 shadow-2xs">
@@ -587,25 +599,13 @@ export default function Home() {
         )}
 
         {/* 4. LIVE RSS NEWS MARQUEES: STRICTLY TWO (2) MARQUEES */}
-        {/* TOP MARQUEE: PIB RSS only */}
-        {cmsConfig?.marqueeConfig?.enabled !== false && marquee1.length > 0 && (
-          <MarqueeTrack
-            items={marquee1}
-            direction="rtl"
-            variant="saffron"
-            label="PIB News"
-            onClick={() => navigate("/news")}
-          />
-        )}
-
         {/* BOTTOM MARQUEE: MPInfo RSS only */}
         {cmsConfig?.marqueeConfig?.enabled !== false && marquee2.length > 0 && (
           <MarqueeTrack
             items={marquee2}
-            direction="ltr"
+            direction="rtl"
             variant="green"
             label="MPInfo"
-            reverseWords
             onClick={() => navigate("/news")}
           />
         )}
