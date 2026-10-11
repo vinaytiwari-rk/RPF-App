@@ -2160,5 +2160,12 @@ export const UTILITY_TOOLS: UtilityToolDefinition[] = [
     descHi: "संपूर्ण ऑफलाइन फोटो एडिटर: ब्राइटनेस, कंट्रास्ट, फ्रीहैंड क्रॉप, फिल्टर्स, ब्रश ड्रॉइंग व टेक्स्ट।",
     iconName: "Image", badge: "All-in-One Studio",
     keywords: ["image editor", "photo editor", "photo studio", "crop photo", "image filter", "photo effects"]
+  },
+  {
+    id: "studio_word_editor", categoryId: "studio_editors", titleEn: "Word Document Studio Editor", titleHi: "वर्ड व दस्तावेज़ स्टूडियो एडिटर",
+    descEn: "Full rich-text word processor: headings, tables, bullet lists, text alignment, DOCX & HTML exports.",
+    descHi: "संपूर्ण ऑफलाइन वर्ड प्रोसेसर: हेडिंग्स, टेबल्स, बुलेट लिस्ट, फॉन्ट्स और सीधे .docx में डाउनलोड।",
+    iconName: "FileText", badge: "All-in-One Studio",
+    keywords: ["word editor", "document editor", "docx editor", "rich text", "word processor", "create docx"]
   }
 ];
