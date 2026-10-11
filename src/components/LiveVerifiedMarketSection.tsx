@@ -385,17 +385,17 @@ export default function LiveVerifiedMarketSection({ marketConfig, mode = "all" }
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10.5px] text-slate-700">
-                <div className="truncate">Sun Sign: <span className="font-semibold text-slate-900">{data?.panchang?.sunSign || "Kanya"}</span></div>
-                <div className="truncate">Moon Sign: <span className="font-semibold text-slate-900">{data?.panchang?.moonSign || "Mithuna"}</span></div>
-                <div className="truncate">Tithi: <span className="font-semibold text-slate-900">{data?.panchang?.tithi || "Shukla"}</span></div>
-                <div className="truncate">Nakshatra: <span className="font-semibold text-slate-900">{data?.panchang?.nakshatra || "Rohini"}</span></div>
+                <div className="truncate">Sun Sign: <span className="font-semibold text-slate-900">{data?.panchang?.sunSign || "—"}</span></div>
+                <div className="truncate">Moon Sign: <span className="font-semibold text-slate-900">{data?.panchang?.moonSign || "—"}</span></div>
+                <div className="truncate">Tithi: <span className="font-semibold text-slate-900">{data?.panchang?.tithi || "—"}</span></div>
+                <div className="truncate">Nakshatra: <span className="font-semibold text-slate-900">{data?.panchang?.nakshatra || "—"}</span></div>
                 <div className="truncate">Maas: <span className="font-semibold text-slate-900">{data?.panchang?.masa || "—"}</span></div>
                 <div className="truncate">Paksha: <span className="font-semibold text-slate-900">{data?.panchang?.paksha || "—"}</span></div>
               </div>
 
 
               <div className="text-[10px] text-slate-500 font-medium line-clamp-1 pt-0.5">
-                ☀️ {data?.panchang?.sunrise || "06:14 AM"} • 🌙 {data?.panchang?.sunset || "06:05 PM"}
+                ☀️ {data?.panchang?.sunrise || "—"} • 🌙 {data?.panchang?.sunset || "—"}
               </div>
             </div>
           </div>
