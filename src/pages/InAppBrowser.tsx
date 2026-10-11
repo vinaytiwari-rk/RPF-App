@@ -46,7 +46,7 @@ export default function InAppBrowser() {
   const showControlsTemporarily = () => {
     setControls(true);
     if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = window.setTimeout(() => setControls(false), 5000);
+    hideTimerRef.current = window.setTimeout(() => setControls(false), 4000);
   };
 
   useEffect(() => () => { if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current); }, []);
