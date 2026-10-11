@@ -176,11 +176,13 @@ function MarqueeTrack({
   const animationName = direction === "ltr" ? "rpf-marquee-ltr" : "rpf-marquee-rtl";
 
   return (
-    <div 
+    <div
+      dir="ltr"
       onClick={onClick}
       className={`relative overflow-hidden rounded-2xl border backdrop-blur-xs py-2.5 group ${containerClasses} ${onClick ? "cursor-pointer hover:border-orange-300 transition-all" : ""}`}
     >
       <div
+        dir="ltr"
         className="flex whitespace-nowrap min-w-max items-center transition-transform group-hover:[animation-play-state:paused]"
         style={{
           animation: `${animationName} ${duration}s linear infinite`
@@ -188,7 +190,7 @@ function MarqueeTrack({
       >
         {trackItems.map((title, idx) => (
           <div key={idx} className="flex items-center">
-            <span className={`text-[12.5px] tracking-normal px-2 ${textClasses}`}>
+            <span dir="ltr" className={`text-[12.5px] tracking-normal px-2 ${textClasses}`}>
               {title}
             </span>
             <span className={`text-xs px-3 select-none ${separatorClasses}`}>
