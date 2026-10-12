@@ -50,7 +50,7 @@ const REMOVED_SERVICE_IDS = new Set<string>([
   "hindu-calendar"
 ]);
 
-const EXPLORE_LINKS = [
+const EXPLORE_LINKS: Array<{ id: string; category: string; iconName: string; titleEn: string; titleHi: string; descEn: string; descHi?: string; route?: string; url?: string }> = [
   { id: "online-test", category: "education", iconName: "GraduationCap", titleEn: "Online Mock Test & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", descEn: "G[..." },
   { id: "epaper", category: "community", iconName: "Newspaper", titleEn: "Epaper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Read today's leading daily e-papers", descHi: "[...]" },
   { id: "directory", category: "government", iconName: "BookOpen", titleEn: "National Directory", titleHi: "राष्ट्रीय निर्देशिका", descEn: "Government contact[..." },
