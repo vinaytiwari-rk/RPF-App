@@ -1,0 +1,122 @@
+name: Automatic Versioning
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: automatic-versioning-main
+  cancel-in-progress: false
+
+jobs:
+  verify-and-bump:
+    name: Verify changes and prepare next version
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Avoid processing a version-bump commit
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          MESSAGE="$(git log -1 --format=%s origin/main)"
+          echo "Latest main commit: $MESSAGE"
+          if [[ "$MESSAGE" == "chore(release): bump version to "* ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Latest main commit is already the automated version bump."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js
+        if: steps.guard.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install locked dependencies
+        if: steps.guard.outputs.skip != 'true'
+        run: npm ci --include=dev --no-audit --no-fund
+
+      - name: Audit SAMAHIT utilities
+        if: steps.guard.outputs.skip != 'true'
+        run: npm run audit:samahit
+
+      - name: Audit Live TV source types
+        if: steps.guard.outputs.skip != 'true'
+        run: npm run audit:live-tv
+
+      - name: Type check
+        if: steps.guard.outputs.skip != 'true'
+        run: npm run lint
+
+      - name: Build web application
+        if: steps.guard.outputs.skip != 'true'
+        run: npm run build
+
+      - name: Increment patch version and synchronize version files
+        if: steps.guard.outputs.skip != 'true'
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const packagePath = 'package.json';
+          const lockPath = 'package-lock.json';
+          const gradlePath = 'android/app/build.gradle';
+
+          const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+          const match = String(pkg.version).match(/^(\d+)\.(\d+)\.(\d+)$/);
+          if (!match) throw new Error(`Expected semantic version MAJOR.MINOR.PATCH, got: ${pkg.version}`);
+          const nextVersion = `${match[1]}.${match[2]}.${Number(match[3]) + 1}`;
+          pkg.version = nextVersion;
+          fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + '\n');
+
+          const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+          lock.version = nextVersion;
+          if (lock.packages && lock.packages['']) {
+            lock.packages[''].version = nextVersion;
+          }
+          fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n');
+
+          let gradle = fs.readFileSync(gradlePath, 'utf8');
+          if (!/versionName\s+['"][^'"]+['"]/.test(gradle)) {
+            throw new Error('Could not find a literal versionName in android/app/build.gradle');
+          }
+          gradle = gradle.replace(/versionName\s+['"][^'"]+['"]/, `versionName '${nextVersion}'`);
+          fs.writeFileSync(gradlePath, gradle);
+
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${nextVersion}\n`);
+          console.log(`Prepared release version ${nextVersion}`);
+          NODE
+
+      - name: Commit and push version bump
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          NEXT_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json android/app/build.gradle
+          git commit -m "chore(release): bump version to ${NEXT_VERSION} for patch release"
+          git push origin HEAD:main
+
+      - name: Dispatch Android build for the versioned commit
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run android-apk.yml --ref main
