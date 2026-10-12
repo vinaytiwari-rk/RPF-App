@@ -94,17 +94,37 @@ jobs:
           console.log(`Prepared release version ${nextVersion}`);
           NODE
 
-      - name: Commit and push version bump
+      - name: Commit and push version bump safely
         if: steps.guard.outputs.skip != 'true'
         env:
           NEXT_VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Do not publish a version bump for source that was superseded while
+          # audits/build were running. The newest main push gets its own run.
+          git fetch origin main
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+            echo "::notice::main advanced during verification; skipping this stale version bump. The newest main commit will be verified separately."
+            exit 0
+          fi
+
           git add package.json package-lock.json
           git commit -m "chore(release): bump version to ${NEXT_VERSION} for patch release"
-          git push origin HEAD:main
+
+          # A push can still race with another commit after the preflight check.
+          if ! git push origin HEAD:main; then
+            git fetch origin main
+            if [ "$(git rev-parse HEAD^)" != "$(git rev-parse origin/main)" ]; then
+              echo "::notice::main advanced during the push; this run is superseded. The latest main push will run versioning."
+              exit 0
+            fi
+            echo "::error::Version bump push failed for a reason other than a concurrent main update."
+            exit 1
+          fi
 
       - name: Dispatch Android build for the versioned commit
         if: steps.guard.outputs.skip != 'true'
