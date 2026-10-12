@@ -40,6 +40,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
@@ -174,7 +176,7 @@ jobs:
               size: Number(process.env.SIZE),
               downloadUrl: 'https://appapi.therpfoundation.org/download/rpf-app.apk',
               minSupportedVersionCode: 20500,
-              releaseNotes: '• 760+ Verified Indian & Global Live TV Channels: Fully upgraded Live TV with 684 verified active Indian national and regional channels (News, Entertainment, Movies, Music, Sports, Kids, Devotional, Education, Documentary, Weather) from official IPTV-org and Free-TV playlists\n• Universal Instant Stream Proxying: Eliminated Android WebView Mixed-Content and CORS blocks by routing HLS streams through our high-speed server proxy with full CORS headers on all playlists and TS segments\n• Live TV Category Filter Tabs: Added 11 fast category filters (News, Entertainment, Movies, Music, Sports, Kids, Devotional, Knowledge, Education, Weather) with live count indicators and bilingual labels\n• Supreme Command Center & Studio Sync: Connected Admin Supreme Command with 760 live channels badge and upgraded Live TV Studio with category filtering, live preview tester, and safe CMS merge',
+              releaseNotes: require('child_process').execSync("git log -n 12 --pretty=format:'• %s' HEAD", { encoding: 'utf8' }).split('\n').filter(line => !/chore\\(release\\): bump version/i.test(line)).slice(0, 8).join('\n') || 'Bug fixes and improvements'
               publishedAt: process.env.PUB_DATE
             };
             fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\n', 'utf8');
