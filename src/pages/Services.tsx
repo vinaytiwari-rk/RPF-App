@@ -325,28 +325,22 @@ export default function Services() {
                 {isHi ? "प्रमुख सेवाएं" : "Featured Services"}
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-3 gap-y-4">
               {featuredServicesList.map((feat: any) => {
                 const FeatIcon = feat.icon || BadgePlus;
                 return (
                   <button
                     key={feat.id}
                     onClick={() => navigate(feat.route)}
-                    className="rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-3.5 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all flex flex-col justify-between min-h-[120px]"
+                    className="group flex min-w-0 flex-col items-center gap-2 rounded-2xl px-1.5 py-2 text-center transition hover:bg-emerald-50/60 active:scale-[0.98]"
+                    aria-label={isHi ? feat.titleHi : feat.titleEn}
                   >
-                    <div className="h-14 w-14" aria-hidden="true">
-                      {serviceArtFor(feat.id) ? (
-                        <ServiceIllustration kind={serviceArtFor(feat.id)!} className="h-full w-full" />
-                      ) : (
-                        <div className={`flex h-full w-full items-center justify-center rounded-xl ${feat.accent}`}>
-                          <FeatIcon className="h-6 w-6" />
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="mt-2 text-[14px] font-bold text-[#14213D]">{isHi ? feat.titleHi : feat.titleEn}</p>
-                      <p className="mt-0.5 text-[11px] text-slate-500 font-medium leading-snug line-clamp-1">{isHi ? feat.descHi : feat.descEn}</p>
-                    </div>
+                    <span className={`flex h-14 w-14 items-center justify-center rounded-full border shadow-sm transition group-hover:scale-105 group-hover:shadow-md ${feat.accent || "text-[#167C5A] bg-emerald-50 border-emerald-200"}`}>
+                      <FeatIcon className="h-6 w-6" />
+                    </span>
+                    <span className="line-clamp-2 text-[11px] font-bold leading-snug text-[#14213D]">
+                      {isHi ? feat.titleHi : feat.titleEn}
+                    </span>
                   </button>
                 );
               })}
