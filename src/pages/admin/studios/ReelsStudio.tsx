@@ -11,7 +11,8 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 import { resolveMediaUrl } from "../../../utils/media";
 
-export { DEFAULT_20_REELS, type InstagramPost } from "../../../data/defaultReels";
+import { DEFAULT_20_REELS, type InstagramPost } from "../../../data/defaultReels";
+export { DEFAULT_20_REELS, type InstagramPost };
 
 export function parseSocialEmbed(raw: string): {
   platform: "youtube" | "instagram" | "facebook";
