@@ -51,20 +51,20 @@ const REMOVED_SERVICE_IDS = new Set<string>([
 ]);
 
 const EXPLORE_LINKS = [
-  { id: "online-test", category: "education", iconName: "GraduationCap", titleEn: "Online Mock Test & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", descEn: "Govt exams, GK, reasoning & merit certificates", descHi: "सरकारी भर्ती, सामान्य ज्ञान व टेस्ट सर्टिफिकेट", route: "/online-test" },
-  { id: "epaper", category: "community", iconName: "Newspaper", titleEn: "Epaper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Read today's leading daily e-papers", descHi: "आज के प्रमुख दैनिक ई-पेपर पढ़ें", route: "/epaper" },
-  { id: "directory", category: "government", iconName: "BookOpen", titleEn: "National Directory", titleHi: "राष्ट्रीय निर्देशिका", descEn: "Government contacts & helplines", descHi: "सरकारी संपर्क और उपयोगिता निर्देशिका", route: "/directory" },
-  { id: "peoples-university", category: "education", iconName: "GraduationCap", titleEn: "People's University Portal", titleHi: "पीपुल्स यूनिवर्सिटी पोर्टल", descEn: "Official University Information", descHi: "आधिकारिक विश्वविद्यालय पोर्टल", url: "https://www.peoplesuniversity.edu.in/" },
-  { id: "fact-check", category: "community", iconName: "ShieldCheck", titleEn: "Fact Check Hub", titleHi: "फैक्ट चेक हब", descEn: "Check claims and viral news", descHi: "वायरल दावों और खबरों की जांच करें", route: "/fact-check" },
-  { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "आधिकारिक लाइव टीवी चैनल", route: "/live-tv" },
-  { id: "social-reels", category: "community", iconName: "Film", titleEn: "Shorts & Reels", titleHi: "शॉर्ट्स और रील्स", descEn: "Official videos, shorts & foundation reels", descHi: "फाउंडेशन के आधिकारिक शॉर्ट्स और वीडियो", route: "/reels" }
+  { id: "online-test", category: "education", iconName: "GraduationCap", titleEn: "Online Mock Test & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", descEn: "G[..." },
+  { id: "epaper", category: "community", iconName: "Newspaper", titleEn: "Epaper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Read today's leading daily e-papers", descHi: "[...]" },
+  { id: "directory", category: "government", iconName: "BookOpen", titleEn: "National Directory", titleHi: "राष्ट्रीय निर्देशिका", descEn: "Government contact[..." },
+  { id: "peoples-university", category: "education", iconName: "GraduationCap", titleEn: "People's University Portal", titleHi: "पीपुल्स यूनिवर्सिटी पोर��[..." },
+  { id: "fact-check", category: "community", iconName: "ShieldCheck", titleEn: "Fact Check Hub", titleHi: "फैक्ट चेक हब", descEn: "Check claims and viral news", descHi: "वा[..." },
+  { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "अधिकारी समाचार और संस्कृति चैनल" },
+  { id: "social-reels", category: "community", iconName: "Film", titleEn: "Shorts & Reels", titleHi: "शॉर्ट्स और रील्स", descEn: "Official videos, shorts & foundation reels", descHi: "अधिकारिक वीडियो, शॉर्ट्स और फाउंडेशन रील्स" },
 ];
 
 const DEFAULT_FEATURED_SERVICES = [
-  { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवा पहचान और कल्याण पहुंच", icon: BadgePlus, route: "/jan-seva-card", accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20" },
-  { id: "health-care", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", descEn: "Health camps, medicines & hospital locator", descHi: "स्वास्थ्य शिविर, दवाएं और अस्पताल खोजक", icon: HeartPulse, route: "/health-care", accent: "text-[#DC2626] bg-red-500/10 border border-red-500/20" },
-  { id: "employment", titleEn: "Employment", titleHi: "रोजगार पोर्टल", descEn: "Jobs, skill development & career guidance", descHi: "नौकरियां, कौशल विकास और करियर मार्गदर्शन", icon: BriefcaseBusiness, route: "/employment", accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20" },
-  { id: "grievance", titleEn: "Grievance", titleHi: "शिकायत समाधान", descEn: "Submit issues & track resolution progress", descHi: "समस्याएं दर्ज करें और समाधान की स्थिति देखें", icon: ClipboardList, route: "/grievance", accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20" }
+  { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवा पहचान", iconName: "BadgePlus" },
+  { id: "health-care", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", descEn: "Health camps, medicines & hospital locator", descHi: "स्वास्थ्य शिविर, दवा और हॉस्पिटल", iconName: "HeartPulse" },
+  { id: "employment", titleEn: "Employment", titleHi: "रोजगार पोर्टल", descEn: "Jobs, skill development & career guidance", descHi: "नौकरियाँ, कौशल और मार्गदर्शन", iconName: "BriefcaseBusiness" },
+  { id: "grievance", titleEn: "Grievance", titleHi: "शिकायत समाधान", descEn: "Submit issues & track resolution progress", descHi: "शिकायत दर्ज करें और प्रगति देखें", iconName: "ClipboardList" },
 ];
 
 export default function Services() {
@@ -96,7 +96,6 @@ export default function Services() {
     return new Set<string>([...configured, ...REMOVED_SERVICE_IDS]);
   }, [cmsConfig]);
 
-  // Featured services loaded dynamically from CMS if provided
   const featuredServicesList = useMemo(() => {
     const customFeatured = (cmsConfig as any)?.featuredServices;
     if (Array.isArray(customFeatured) && customFeatured.length > 0) {
@@ -113,10 +112,14 @@ export default function Services() {
           accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
         }));
     }
-    return DEFAULT_FEATURED_SERVICES;
+    return DEFAULT_FEATURED_SERVICES.map((item) => ({
+      ...item,
+      icon: (LucideIcons as any)[item.iconName] || BadgePlus,
+      route: item.route || routeFor(item.id),
+      accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
+    }));
   }, [cmsConfig]);
 
-  // All services loaded dynamically from CMS if provided, or merged from default catalog
   const allServices = useMemo(() => {
     const customAll = (cmsConfig as any)?.allServices;
     if (Array.isArray(customAll) && customAll.length > 0) {
@@ -233,14 +236,14 @@ export default function Services() {
           if (isExternal) openExternalLink(target, navigate, svc.titleEn);
           else navigate(target);
         }}
-        className="group relative w-full rounded-2xl p-4 flex items-center justify-between border border-amber-100/80 bg-white/80 backdrop-blur-md shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all text-left cursor-pointer"
+        className="group relative w-full rounded-2xl p-4 flex items-center justify-between border border-amber-100/80 bg-white/80 backdrop-blur-md shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all"
       >
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="h-14 w-14 shrink-0" aria-hidden="true">
             {serviceArtFor(svc.id) ? (
               <ServiceIllustration kind={serviceArtFor(svc.id)!} className="h-full w-full transition-transform group-hover:scale-105" />
             ) : (
-              <div className={`flex h-full w-full items-center justify-center rounded-xl ${getSemanticIconStyle(svc.id)}`}>
+              <div className={`flex h-full w-full items-center justify-center rounded-full ${getSemanticIconStyle(svc.id)}`}>
                 <IconComponent className="h-6 w-6" />
               </div>
             )}
@@ -258,7 +261,7 @@ export default function Services() {
           </div>
         </div>
 
-        <div className="w-7 h-7 rounded-full bg-slate-100/80 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-400 group-hover:bg-[#14213D] group-hover:text-white group-hover:border-transparent transition-all">
+        <div className="w-7 h-7 rounded-full bg-slate-100/80 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-400 group-hover:bg-[#14213D] group-hover:text-white transition-colors">
           <ChevronRight className="w-4 h-4" />
         </div>
       </button>
@@ -268,9 +271,8 @@ export default function Services() {
   return (
     <div className="min-h-full bg-transparent pb-16 text-[#14213D]">
       <div className="mx-auto max-w-3xl px-4 pt-4 pb-2 sm:px-6 space-y-4">
-        {/* Header Title */}
         <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-amber-50/70 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#D97706] uppercase shadow-2xs backdrop-blur-xs mb-1">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-amber-50/70 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#D97706] uppercase shadow-xs">
             <Sparkles className="h-3.5 w-3.5 text-[#D97706]" />
             Samahit Ecosystem
           </div>
@@ -278,14 +280,12 @@ export default function Services() {
             {isHi ? "सेवाएं और पोर्टल" : "Explore & Services"}
           </h1>
           <p className="text-xs sm:text-sm font-medium text-slate-600 mt-0.5">
-            {isHi ? "सत्यापित नागरिक कल्याण कार्यक्रम और आधिकारिक पोर्टल खोजें" : "Discover verified citizen welfare programs & official portals"}
+            {isHi ? "सत्यापित नागरिक कल्याण कार्यक्रम और आधिकारिक पोर्टल खोजें" : "Discover verified civic welfare programmes and official portals"}
           </p>
         </div>
 
-        {/* Live Market moved here from Home; Panchang remains on Home. */}
         <LiveVerifiedMarketSection mode="market" />
 
-        {/* Search Input */}
         <div className="relative">
           <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
             <Search className="h-4 w-4 text-slate-400" />
@@ -295,11 +295,10 @@ export default function Services() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={isHi ? "सेवाएं या योजनाएं खोजें..." : "Search services, portals or schemes..."}
-            className="w-full pl-10 pr-4 py-3 bg-white/80 backdrop-blur-md border border-amber-200/80 rounded-2xl text-xs font-semibold shadow-2xs focus:outline-none focus:border-[#D97706] focus:bg-white text-[#14213D] placeholder:text-slate-400 transition"
+            className="w-full pl-10 pr-4 py-3 bg-white/80 backdrop-blur-md border border-amber-200/80 rounded-2xl text-xs font-semibold shadow-2xs focus:outline-none focus:border-[#D97706] focus:ring-2 focus:ring-[#FF9933]/20"
           />
         </div>
 
-        {/* Category Filter Pills */}
         <div className="flex overflow-x-auto gap-2 pb-1 -mx-4 px-4 scrollbar-hide">
           {categories.map((c) => (
             <button
@@ -316,7 +315,6 @@ export default function Services() {
           ))}
         </div>
 
-        {/* Featured / Most Used Services (Only show when not searching and category is 'all') */}
         {!search.trim() && category === "all" && (
           <section className="pt-1 pb-2">
             <div className="flex items-center gap-1.5 mb-2.5">
@@ -325,27 +323,27 @@ export default function Services() {
                 {isHi ? "प्रमुख सेवाएं" : "Featured Services"}
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {featuredServicesList.map((feat: any) => {
                 const FeatIcon = feat.icon || BadgePlus;
                 return (
                   <button
                     key={feat.id}
-                    onClick={() => navigate(feat.route)}
-                    className="rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-3.5 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all flex flex-col justify-between min-h-[120px]"
+                    onClick={() => navigate(feat.route || "/services")}
+                    className="rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-3.5 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all flex flex-col items-center justify-center text-center"
                   >
-                    <div className="h-14 w-14" aria-hidden="true">
+                    <div className="h-12 w-12 shrink-0" aria-hidden="true">
                       {serviceArtFor(feat.id) ? (
                         <ServiceIllustration kind={serviceArtFor(feat.id)!} className="h-full w-full" />
                       ) : (
-                        <div className={`flex h-full w-full items-center justify-center rounded-xl ${feat.accent}`}>
-                          <FeatIcon className="h-6 w-6" />
+                        <div className={`flex h-full w-full items-center justify-center rounded-full ${feat.accent}`}>
+                          <FeatIcon className="h-5 w-5" />
                         </div>
                       )}
                     </div>
-                    <div>
-                      <p className="mt-2 text-[14px] font-bold text-[#14213D]">{isHi ? feat.titleHi : feat.titleEn}</p>
-                      <p className="mt-0.5 text-[11px] text-slate-500 font-medium leading-snug line-clamp-1">{isHi ? feat.descHi : feat.descEn}</p>
+                    <div className="mt-2 w-full">
+                      <p className="text-[13px] font-bold text-[#14213D] line-clamp-2">{isHi ? feat.titleHi : feat.titleEn}</p>
+                      <p className="mt-0.5 text-[10.5px] text-slate-500 font-medium leading-snug line-clamp-2">{isHi ? feat.descHi : feat.descEn}</p>
                     </div>
                   </button>
                 );
@@ -354,14 +352,12 @@ export default function Services() {
           </section>
         )}
 
-        {/* Section Heading for All Services */}
         <div className="pt-2">
           <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#14213D]">
             {search.trim() ? (isHi ? "समाहित सेवाएं" : "SAMAHIT SERVICES") : (isHi ? "सभी नागरिक सेवाएं" : "All Services")}
           </p>
         </div>
 
-        {/* Main Services List */}
         {isLoadingServices ? (
           <div className="py-12 flex justify-center">
             <BrandLoader size="sm" label="Loading services" />
@@ -385,3 +381,325 @@ export default function Services() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

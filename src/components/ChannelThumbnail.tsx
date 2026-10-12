@@ -3,7 +3,7 @@ import { Tv } from "lucide-react";
 import type { LiveTvChannel } from "../data/liveTvDefaults";
 
 export const getTvVideoId = (c: LiveTvChannel) =>
-  c.videoId || c.url?.match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|watch\?v=))([^?&/]+)/)?.[1];
+  c.videoId || c.url?.match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|embed\/|shorts\/|watch\?v=))([^?&/]+)/)?.[1];
 
 export interface ChannelThumbnailProps {
   channel: LiveTvChannel;

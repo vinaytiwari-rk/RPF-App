@@ -1,8 +1,6 @@
-import {ArrowLeft,ArrowRight,Briefcase,GraduationCap,HeartHandshake,HeartPulse,Quote,Sparkles,Users} from "lucide-react";
-import {motion} from "motion/react";
-import {useNavigate,useOutletContext} from "react-router-dom";
-
-type Lang = "en" | "hi";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { ArrowLeft, ChevronRight, Quote, Sparkles, Users, HeartPulse, HeartHandshake, Briefcase, GraduationCap } from "lucide-react";
+import { motion } from "motion/react";
 
 const beliefs = [
   { icon: Users, title: "People first", text: "Social change begins by understanding the real barriers communities face." },
@@ -14,7 +12,7 @@ const beliefs = [
 
 export default function FounderMessage() {
   const nav = useNavigate();
-  const { lang } = useOutletContext<{ lang: Lang }>();
+  const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
   const hi = lang === "hi";
 
   return (
@@ -69,7 +67,7 @@ export default function FounderMessage() {
             <blockquote className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-[14px] font-medium leading-relaxed text-slate-700 sm:text-[15px]">
               <Quote className="mb-2 h-4 w-4 text-[#D97706]" />
               {hi
-                ? "हमारी सेवा तभी सार्थक होती है जब वह लोगों के जीवन में सच्ची सहानुभूति, वास्तविक समाधान और सम्मान के साथ पहुंचती है।" 
+                ? "हमारी सेवा तभी सार्थक होती है जब वह लोगों के जीवन में सच्ची सहानुभूति, वास्तविक समाधान और सम्मान के साथ पहुंचती है।"
                 : "Our service becomes meaningful only when it reaches people with genuine empathy, practical solutions, and lasting dignity."}
             </blockquote>
 
@@ -112,7 +110,7 @@ export default function FounderMessage() {
               className="inline-flex items-center gap-2 rounded-full bg-[#D97706] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm transition hover:bg-[#c76b05]"
             >
               {hi ? "दृष्टि देखें" : "Explore Our Vision"}
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </motion.section>
