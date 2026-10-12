@@ -1,5 +1,8 @@
 plugins { id 'com.android.application' }
 
+// Keep Android's user-visible versionName aligned with the root package.json.
+def appPackageVersion = new groovy.json.JsonSlurper().parse(file("${rootProject.projectDir}/../package.json")).version
+
 android {
     namespace 'com.rpfoundation.app'
     compileSdk 36
@@ -9,7 +12,7 @@ android {
         minSdk 24
         targetSdk 36
         versionCode (System.getenv("RPF_VERSION_CODE") ? Integer.parseInt(System.getenv("RPF_VERSION_CODE")) : 21567)
-        versionName '2.5.7'
+        versionName appPackageVersion
     }
 
     signingConfigs {

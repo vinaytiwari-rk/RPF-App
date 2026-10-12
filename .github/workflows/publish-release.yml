@@ -65,16 +65,13 @@ jobs:
             APK_PATH="$(find release-assets -type f -name 'RPF-Samahit-update.apk' -print -quit || true)"
           fi
 
-          if [ -n "$APK_PATH" ]; then
-            gh release create "$RELEASE_TAG" "$APK_PATH" \
-              --target "$RELEASE_SHA" \
-              --title "RPF-App $RELEASE_TAG" \
-              --generate-notes
-            echo "Published $RELEASE_TAG with signed update APK."
-          else
-            gh release create "$RELEASE_TAG" \
-              --target "$RELEASE_SHA" \
-              --title "RPF-App $RELEASE_TAG" \
-              --generate-notes
-            echo "::warning::Published $RELEASE_TAG without an APK because no signed RPF-Samahit-update.apk was available. Debug APKs are intentionally not attached as production updates."
+          if [ -z "$APK_PATH" ]; then
+            echo "::error::No signed RPF-Samahit-update.apk was found in the successful Android workflow artifacts. Refusing to publish an incomplete production release."
+            exit 1
           fi
+
+          gh release create "$RELEASE_TAG" "$APK_PATH" \
+            --target "$RELEASE_SHA" \
+            --title "RPF-App $RELEASE_TAG" \
+            --generate-notes
+          echo "Published $RELEASE_TAG with signed update APK."
