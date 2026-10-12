@@ -4,7 +4,7 @@ import {
   BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, 
   CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, CloudSun, 
   GraduationCap, Tv, Play, Sparkles, Award, Clapperboard, Film, Heart, HandHeart, 
-  Droplets, Trash2, Trees, Landmark, Activity, TrendingUp 
+  Droplets, Trash2, Trees, Landmark, TrendingUp 
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
@@ -233,16 +233,6 @@ export default function Home() {
     fetch("/api/supreme/configs").then(r => r.json()).then(d => { if(d.success) setSupremeConfig(d.configs); }).catch(() => {});
   }, []);
 
-  const [cardImpact, setCardImpact] = useState<{ totalCards: number; scope: string } | null>(null);
-  useEffect(() => {
-    let active = true;
-    axios.get("/api/public/cards/impact", { timeout: 8000 }).then(({ data }) => {
-      if (active && data?.success && Number.isFinite(data.totalCards)) {
-        setCardImpact({ totalCards: data.totalCards, scope: data.scope });
-      }
-    }).catch(() => {});
-    return () => { active = false; };
-  }, []);
 
   const [homeReels, setHomeReels] = useState<any[]>(() => DEFAULT_20_REELS.slice(0, 8));
   useEffect(() => {
@@ -263,29 +253,7 @@ export default function Home() {
     return list.filter((c: any) => c && c.enabled !== false).slice(0, 8);
   }, [cmsConfig?.liveTvChannels]);
 
-  const liveImpactStats = useMemo(() => {
-    if (Array.isArray(cmsConfig?.impactStats) && cmsConfig.impactStats.length > 0) {
-      return [...cmsConfig.impactStats]
-        .filter((s: any) => s && s.enabled !== false)
-        .sort((a: any, b: any) => (Number(a.order) || 0) - (Number(b.order) || 0))
-        .map((s: any) => {
-          const val = s.id === "cards_issued" && cardImpact?.totalCards ? cardImpact.totalCards : s.value;
-          const num = typeof val === "number" ? val.toLocaleString("en-IN") : val;
-          return {
-            id: s.id,
-            label: s.label || s.labelEn || "Metric",
-            value: `${num}${s.suffix || "+"}`,
-            icon: (AVAILABLE_ICONS as any)[s.iconName] || Award
-          };
-        });
-    }
-    return [
-      { id: "cards", label: "Jan Seva Cards", value: (cardImpact?.totalCards || 66505).toLocaleString("en-IN") + "+", icon: Award },
-      { id: "camps", label: "Health & Eye Camps", value: "150+", icon: Stethoscope },
-      { id: "volunteers", label: "Active Volunteers", value: "2,400+", icon: UsersRound },
-      { id: "jobs", label: "Livelihood & Jobs", value: "1,800+", icon: BriefcaseBusiness }
-    ];
-  }, [cmsConfig?.impactStats, cardImpact]);
+
   const [marquee1, setMarquee1] = useState<string[]>(() => {
     try {
       const cached = JSON.parse(localStorage.getItem("@rpf_marquee1_national_v2") || "[]");
@@ -812,74 +780,6 @@ export default function Home() {
               </div>
             </div>
 
-            <hr className="border-slate-200/60" />
-
-            {/* Integrated Ground Impact Metrics & Seva Focus */}
-            <div className="space-y-3 pt-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <Activity className="h-4 w-4 text-[#167C5A]" />
-                  <span className="text-[12px] font-extrabold uppercase tracking-wider text-[#14213D]">
-                    Ground Seva Impact & Field Results
-                  </span>
-                </div>
-                <span className="text-[10.5px] font-bold text-slate-400">Live Verified</span>
-              </div>
-
-              {/* 4 Impact Metric Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {liveImpactStats.map((stat: any) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div
-                      key={stat.id || stat.label}
-                      onClick={() => navigate("/impact")}
-                      className="cursor-pointer rounded-xl border border-slate-200/80 bg-white/60 hover:bg-emerald-50/40 p-2.5 text-center transition-all hover:scale-[1.02] shadow-2xs"
-                    >
-                      <Icon className="mx-auto h-4 w-4 text-[#167C5A] mb-1" />
-                      <p className="text-[15px] sm:text-[16px] font-black text-[#14213D] leading-tight">
-                        {stat.value}
-                      </p>
-                      <p className="text-[10px] font-bold text-slate-500 mt-0.5 line-clamp-1">
-                        {stat.label}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Seva Action Focus Badges */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                {[
-                  { label: "Clean Environment", icon: Trees, color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
-                  { label: "Water Relief", icon: Droplets, color: "text-sky-700 bg-sky-50 border-sky-200" },
-                  { label: "Pink E-Rickshaw", icon: Heart, color: "text-rose-700 bg-rose-50 border-rose-200" },
-                  { label: "Free Healthcare", icon: Stethoscope, color: "text-teal-700 bg-teal-50 border-teal-200" },
-                  { label: "Education & Youth", icon: GraduationCap, color: "text-indigo-700 bg-indigo-50 border-indigo-200" },
-                ].map((tag) => {
-                  const TagIcon = tag.icon;
-                  return (
-                    <span
-                      key={tag.label}
-                      onClick={() => navigate("/impact")}
-                      className={`cursor-pointer inline-flex items-center gap-1 text-[10.5px] font-extrabold px-2 py-0.5 rounded-md border ${tag.color} hover:opacity-85 transition`}
-                    >
-                      <TagIcon className="h-3 w-3" />
-                      {tag.label}
-                    </span>
-                  );
-                })}
-              </div>
-
-              {/* Link to Full Impact Portal */}
-              <button
-                onClick={() => navigate("/impact")}
-                className="w-full mt-2 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 py-2 px-3 text-xs font-black text-[#167C5A] transition active:scale-[0.99]"
-              >
-                <span>View Full Ground Impact, Initiatives & Volunteer Network</span>
-                <ChevronRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
           </div>
         </section>
 
