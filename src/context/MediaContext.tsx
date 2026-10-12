@@ -58,15 +58,39 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
   const [isTvOpen, setIsTvOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
   const hlsRef = useRef<any>(null);
   // Ignore late HLS callbacks when a listener switches stations or stops playback.
   const playbackGeneration = useRef(0);
 
-  // Initialize background audio element
+  // Initialize Web Audio API GainNode for reliable software volume control across Android WebView, iOS, and Web
+  const initWebAudio = () => {
+    try {
+      const audio = audioRef.current;
+      if (!audio || gainNodeRef.current) return;
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const source = ctx.createMediaElementSource(audio);
+      const gain = ctx.createGain();
+      gain.gain.value = isRadioMuted ? 0 : radioVolume;
+      source.connect(gain);
+      gain.connect(ctx.destination);
+      audioCtxRef.current = ctx;
+      gainNodeRef.current = gain;
+    } catch (err) {
+      console.warn("Web Audio GainNode initialization fallback:", err);
+    }
+  };
+
+  // Wire event listeners to the mounted audio element
   useEffect(() => {
-    const audio = new Audio();
-    audio.preload = 'auto';
-    audioRef.current = audio;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = radioVolume;
+    audio.muted = isRadioMuted;
 
     const onPlay = () => {
       setIsRadioPlaying(true);
@@ -79,7 +103,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     };
 
     const onError = () => {
-      if (!audio.currentSrc || audio.currentSrc === 'about:blank' || !audioRef.current) return;
+      if (!audio.currentSrc || audio.currentSrc === 'about:blank') return;
       setIsRadioPlaying(false);
       setIsRadioLoading(false);
       setRadioError('Station stream could not be loaded. Try another station or check your connection.');
@@ -132,6 +156,12 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     setIsRadioLoading(true);
     setRadioError(null);
 
+    // Initialize Web Audio graph if not yet created
+    initWebAudio();
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      try { await audioCtxRef.current.resume(); } catch {}
+    }
+
     // Stop current stream if any
     if (hlsRef.current) {
       try { hlsRef.current.destroy(); } catch {}
@@ -140,15 +170,22 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     audio.pause();
     audio.volume = radioVolume;
     audio.muted = isRadioMuted;
-
-    // Resolve target stream URL with auto-fixes for wavespb -> cloudfront and http: -> proxy
-    let targetUrl = station.url.trim();
-    if (targetUrl.includes('radio.wavespb.com/live/')) {
-      targetUrl = targetUrl.replace('https://radio.wavespb.com/live/', 'https://d1tmej9eu7kw5c.cloudfront.net/');
+    if (gainNodeRef.current && audioCtxRef.current) {
+      gainNodeRef.current.gain.setValueAtTime(isRadioMuted ? 0 : radioVolume, audioCtxRef.current.currentTime);
     }
 
-    // Auto-route plain http: streams through our secure proxy to prevent Mixed Content blocking on HTTPS & Android
-    if (targetUrl.startsWith('http://')) {
+    // Resolve target stream URL with auto-fixes for wavespb -> cloudfront and bitgravity -> cloudfront
+    let targetUrl = station.url.trim();
+    if (targetUrl.includes('radio.wavespb.com/live/')) {
+      targetUrl = targetUrl.replace(/https?:\/\/radio\.wavespb\.com\/live\//, 'https://d1tmej9eu7kw5c.cloudfront.net/');
+    }
+    if (targetUrl.includes('air.pc.cdn.bitgravity.com/air/live/pbaudio001')) {
+      targetUrl = 'https://d1tmej9eu7kw5c.cloudfront.net/146ed6ec6dea5a24/146ed6ec6dea5a24.m3u8';
+    }
+
+    // Always route HLS m3u8 streams and plain http: streams through our secure proxy
+    // to guarantee Access-Control-Allow-Origin: * on both m3u8 playlist and all .ts audio chunks!
+    if (!targetUrl.includes('/api/iptv/proxy')) {
       targetUrl = resolveMediaUrl(`/api/iptv/proxy?url=${encodeURIComponent(targetUrl)}`);
     }
 
@@ -178,6 +215,9 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
         hls.on(Hls.Events.MANIFEST_PARSED, async () => {
           if (!isCurrent()) return;
           try {
+            if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+              await audioCtxRef.current.resume();
+            }
             await audio.play();
             if (isCurrent()) {
               setIsRadioPlaying(true);
@@ -193,18 +233,9 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
           }
         });
 
-        let triedProxy = false;
         hls.on(Hls.Events.ERROR, (_: any, data: any) => {
           if (!isCurrent() || !data.fatal) return;
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-            // Auto fallback to server proxy on network/CORS error
-            if (!triedProxy && !targetUrl.includes('/api/iptv/proxy')) {
-              triedProxy = true;
-              const proxyUrl = resolveMediaUrl(`/api/iptv/proxy?url=${encodeURIComponent(station.url)}`);
-              console.warn(`Direct radio stream failed for ${station.name}, retrying via proxy:`, proxyUrl);
-              loadHlsSource(proxyUrl);
-              return;
-            }
             hls.startLoad();
             return;
           }
@@ -230,17 +261,12 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
+        if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+          await audioCtxRef.current.resume();
+        }
         await audio.play();
       } catch (err: any) {
-        // If direct stream fails, retry via server proxy
-        if (!targetUrl.includes('/api/iptv/proxy')) {
-          const proxyUrl = resolveMediaUrl(`/api/iptv/proxy?url=${encodeURIComponent(station.url)}`);
-          audio.src = proxyUrl;
-          audio.load();
-          await audio.play();
-        } else {
-          throw err;
-        }
+        throw err;
       }
 
       if (isCurrent()) {
@@ -275,9 +301,20 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setRadioVolume = (vol: number) => {
-    setRadioVolumeState(vol);
+    const clamped = Math.max(0, Math.min(1, vol));
+    setRadioVolumeState(clamped);
     if (audioRef.current) {
-      audioRef.current.volume = vol;
+      audioRef.current.volume = clamped;
+    }
+    if (gainNodeRef.current && audioCtxRef.current) {
+      gainNodeRef.current.gain.setValueAtTime(clamped, audioCtxRef.current.currentTime);
+    }
+    // If muted and volume is adjusted above zero, automatically unmute
+    if (isRadioMuted && clamped > 0) {
+      setIsRadioMuted(false);
+      if (audioRef.current) {
+        audioRef.current.muted = false;
+      }
     }
   };
 
@@ -286,6 +323,9 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     setIsRadioMuted(next);
     if (audioRef.current) {
       audioRef.current.muted = next;
+    }
+    if (gainNodeRef.current && audioCtxRef.current) {
+      gainNodeRef.current.gain.setValueAtTime(next ? 0 : radioVolume, audioCtxRef.current.currentTime);
     }
   };
 
@@ -330,6 +370,14 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
+      <audio
+        ref={audioRef}
+        preload="auto"
+        playsInline
+        crossOrigin="anonymous"
+        aria-hidden="true"
+        style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+      />
     </MediaContext.Provider>
   );
 }

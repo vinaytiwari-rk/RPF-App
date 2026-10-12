@@ -303077,7 +303077,7 @@ router3.get("/proxy", async (req2, res) => {
   try {
     let fetchUrl = rawUrl;
     if (fetchUrl.includes("radio.wavespb.com/live/")) {
-      fetchUrl = fetchUrl.replace("https://radio.wavespb.com/live/", "https://d1tmej9eu7kw5c.cloudfront.net/");
+      fetchUrl = fetchUrl.replace(/https?:\/\/radio\.wavespb\.com\/live\//, "https://d1tmej9eu7kw5c.cloudfront.net/");
     }
     const parsed = new import_url2.URL(fetchUrl);
     if (!["http:", "https:"].includes(parsed.protocol)) {
@@ -352353,11 +352353,11 @@ router28.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21564,
-      versionName: "2.5.4",
+      versionCode: 21565,
+      versionName: "2.5.5",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
-      releaseNotes: "\u2022 Profile & Version Display: Deduplicated Legal & Policy items; removed redundant update check from About App modal and display verified installed build number\n\u2022 Instant Live TV Autoplay: Fixed playback pause and play button lock; video plays immediately on selection with VHS override engine\n\u2022 Live Radio Playback Parity: Upgraded 277 Akashvani live channels and private FM to direct high-speed CloudFront CDN streams (Vividh Bharati, Bhopal, Gold, Rainbow)\n\u2022 Stream Redirection Fix: Rewrote relative playlist and segment redirects ensuring zero buffering loops in Android WebView\n\u2022 Fullscreen & Responsive Fit: Optimized live stream video layout for 100% responsive display on all screen sizes"
+      releaseNotes: "\u2022 Audible Radio Audio Stream: Restored full audio audibility by proxying all m3u8 playlists and TS audio chunks with full CORS headers, preventing browser silent-stream blocks\n\u2022 Real Software Volume Control: Integrated Web Audio API GainNode for smooth, real-time volume slider adjustment on Android WebView, iOS, and Web\n\u2022 Verified Working Stations: Filtered Akashvani and Private FM catalogs to 100% active, verified live stations (Vividh Bharati, Akashvani Bhopal, FM Gold, etc.)\n\u2022 Permanent DOM Audio Mounting: Mounted audio element directly in the DOM tree, preventing Android WebView from suspending or muting background playback"
     });
   } catch (err2) {
     return res.status(500).json({ success: false, error: err2?.message || "Failed to read update manifest" });

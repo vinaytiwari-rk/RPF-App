@@ -54,9 +54,13 @@ const mergeStationCatalogue = (bundled: RadioStation[], configured: unknown): Ra
           typeof station.url !== 'string' || !/^https?:\/\//i.test(station.url)) return;
       const key = normalizeStationName(station.name);
       const existing = merged.get(key);
+      const finalUrl = (station.url.includes('bitgravity') || station.url.includes('wavespb')) && existing?.url
+        ? existing.url
+        : station.url;
       merged.set(key, {
         ...existing,
         ...station,
+        url: finalUrl,
         enabled: station.enabled !== false,
         order: Number.isFinite(station.order) ? station.order : (existing?.order ?? bundled.length + index),
       });
@@ -230,19 +234,27 @@ export default function InternetRadio() {
 
             <div className="flex-1">{isRadioPlaying && !isRadioLoading ? <SoundBars /> : <div className="h-5" />}</div>
 
-            <div className="flex items-center gap-2">
-              <button onClick={toggleRadioMute}>
-                {isRadioMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={toggleRadioMute}
+                aria-label={isRadioMuted ? (hi ? 'आवाज़ चालू करें' : 'Unmute') : (hi ? 'म्यूट करें' : 'Mute')}
+                className="p-1 text-slate-700 hover:text-orange-600 transition"
+              >
+                {isRadioMuted ? <VolumeX className="h-4 w-4 text-red-500" /> : <Volume2 className="h-4 w-4" />}
               </button>
               <input
                 type="range"
                 min="0"
                 max="1"
-                step=".01"
+                step=".02"
+                aria-label="Volume"
                 value={isRadioMuted ? 0 : radioVolume}
                 onChange={(e) => setRadioVolume(+e.target.value)}
-                className="w-20 accent-[#FF9933] h-1"
+                className="w-20 accent-[#FF9933] h-1.5 cursor-pointer"
               />
+              <span className="text-[10px] font-bold text-slate-500 w-7 text-right tabular-nums">
+                {isRadioMuted ? '0%' : `${Math.round(radioVolume * 100)}%`}
+              </span>
             </div>
           </div>
 

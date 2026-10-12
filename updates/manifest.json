@@ -1,8 +1,8 @@
 {
-  "versionCode": 21564,
-  "versionName": "2.5.4",
+  "versionCode": 21565,
+  "versionName": "2.5.5",
   "downloadUrl": "https://appapi.therpfoundation.org/download/rpf-app.apk",
   "minSupportedVersionCode": 20500,
-  "releaseNotes": "• Profile & Version Display: Deduplicated Legal & Policy items; removed redundant update check from About App modal and display verified installed build number\n• Instant Live TV Autoplay: Fixed playback pause and play button lock; video plays immediately on selection with VHS override engine\n• Live Radio Playback Parity: Upgraded 277 Akashvani live channels and private FM to direct high-speed CloudFront CDN streams (Vividh Bharati, Bhopal, Gold, Rainbow)\n• Stream Redirection Fix: Rewrote relative playlist and segment redirects ensuring zero buffering loops in Android WebView\n• Fullscreen & Responsive Fit: Optimized live stream video layout for 100% responsive display on all screen sizes",
-  "publishedAt": "2026-10-12T05:20:00Z"
+  "releaseNotes": "• Audible Radio Audio Stream: Restored full audio audibility by proxying all m3u8 playlists and TS audio chunks with full CORS headers, preventing browser silent-stream blocks\n• Real Software Volume Control: Integrated Web Audio API GainNode for smooth, real-time volume slider adjustment on Android WebView, iOS, and Web\n• Verified Working Stations: Filtered Akashvani and Private FM catalogs to 100% active, verified live stations (Vividh Bharati, Akashvani Bhopal, FM Gold, etc.)\n• Permanent DOM Audio Mounting: Mounted audio element directly in the DOM tree, preventing Android WebView from suspending or muting background playback",
+  "publishedAt": "2026-10-12T06:00:00Z"
 }

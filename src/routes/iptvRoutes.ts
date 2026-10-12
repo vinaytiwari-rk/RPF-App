@@ -64,7 +64,7 @@ router.get('/proxy', async (req: Request, res: Response) => {
     // Auto-map wavespb live streams directly to fast CloudFront endpoint
     let fetchUrl = rawUrl;
     if (fetchUrl.includes('radio.wavespb.com/live/')) {
-      fetchUrl = fetchUrl.replace('https://radio.wavespb.com/live/', 'https://d1tmej9eu7kw5c.cloudfront.net/');
+      fetchUrl = fetchUrl.replace(/https?:\/\/radio\.wavespb\.com\/live\//, 'https://d1tmej9eu7kw5c.cloudfront.net/');
     }
 
     const parsed = new URL(fetchUrl);
