@@ -18,7 +18,7 @@ const STUDIOS = [
   { id: "impact", path: "/admin/impact", label: "Impact", icon: HeartHandshake, badge: "Real" },
   { id: "activity", path: "/admin/activity", label: "Activity", icon: Activity, badge: "Action" },
   { id: "campaigns", path: "/admin/campaigns", label: "Campaigns & Funds", icon: TrendingUp, badge: "Donations" },
-  { id: "live-tv", path: "/admin/live-tv", label: "Live TV & Radio", icon: Tv },
+  { id: "live-tv", path: "/admin/live-tv", label: "Live TV & Radio", icon: Tv, badge: "760 Live" },
   { id: "explore", path: "/admin/explore", label: "Explore", icon: Compass },
   { id: "profile", path: "/admin/profile", label: "Profile", icon: User },
   { id: "reels", path: "/admin/reels", label: "Reels / Social", icon: Film, badge: "Media" },

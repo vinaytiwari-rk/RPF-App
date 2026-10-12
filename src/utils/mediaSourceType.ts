@@ -5,7 +5,14 @@
  */
 export function getMediaSourceType(rawUrl: string): string | undefined {
   try {
-    const path = new URL(rawUrl).pathname.toLowerCase();
+    const parsed = new URL(rawUrl);
+    let path = parsed.pathname.toLowerCase();
+    const queryUrl = parsed.searchParams.get("url");
+    if (queryUrl) {
+      try {
+        path = new URL(queryUrl).pathname.toLowerCase();
+      } catch {}
+    }
     if (path.endsWith(".m3u8") || path.endsWith(".m3u")) return "application/x-mpegURL";
     if (path.endsWith(".mp4") || path.endsWith(".m4v")) return "video/mp4";
     if (path.endsWith(".webm")) return "video/webm";

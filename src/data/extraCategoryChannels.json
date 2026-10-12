@@ -1,0 +1,443 @@
+[
+  {
+    "id": "cat-30agolfkingdom-us-sd",
+    "name": "30A Golf Kingdom (720p)",
+    "url": "https://30a-tv.com/feeds/vidaa/golf.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/Lv53nh4.png"
+  },
+  {
+    "id": "cat-aspor-tr-sd",
+    "name": "A Spor SD (1080p)",
+    "url": "https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/ZhkZzLf.png"
+  },
+  {
+    "id": "cat-accdigitalnetwork-us-sd",
+    "name": "ACC Digital Network (1080p)",
+    "url": "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/V6Kaqha.png"
+  },
+  {
+    "id": "cat-accnetwork-us-sd",
+    "name": "ACC Network (720p)",
+    "url": "http://23.239.31.26:8989/accnetwork/index.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/TpCkbkT.png"
+  },
+  {
+    "id": "cat-adotv-bj-sd",
+    "name": "ADO TV (720p)",
+    "url": "https://strhls.streamakaci.tv/ortb/ortb2-multi/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/pxFamLr.png"
+  },
+  {
+    "id": "cat-aliraqiasport-iq-sd",
+    "name": "Al Iraqia Sport (720p)",
+    "url": "https://imn-live.esite-lab.com/hls/iraqia-sports-1.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/DrrlxTO.png"
+  },
+  {
+    "id": "cat-arena4-hu-sd",
+    "name": "Arena4",
+    "url": "http://88.212.15.17/live/arena4/index.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/uAaQDr6.png"
+  },
+  {
+    "id": "cat-arenasport1-sk-sd",
+    "name": "like Gecko) Chrome/149.0.0.0 Safari/537.3\" group-title=\"Sports\",Arena Sport 1",
+    "url": "http://88.212.15.19/live/test_arenasport/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/2qf67zW.png"
+  },
+  {
+    "id": "cat-arenasport2-sk-sd",
+    "name": "like Gecko) Chrome/149.0.0.0 Safari/537.3\" group-title=\"Sports\",Arena Sport 2",
+    "url": "http://88.212.15.19/live/test_arenasport_dva/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/Yq3Jf19.png"
+  },
+  {
+    "id": "cat-arryadia-ma-sd",
+    "name": "Arryadia (720p)",
+    "url": "http://149.100.11.252:8000/play/a065/index.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/XjzK3gZ.png"
+  },
+  {
+    "id": "cat-as3sporttv-ve-sd",
+    "name": "AS3 Sport TV (1080p)",
+    "url": "https://streamtv.as3sport.online:3394/hybrid/play.m3u8",
+    "category": "Sports",
+    "logo": "https://i.ibb.co/bRmGbsyV/A3-SPORTTV.jpg"
+  },
+  {
+    "id": "cat-astrahanrusport-ru-sd",
+    "name": "Astrahan.Ru Sport (720p)",
+    "url": "https://streaming.astrakhan.ru/astrakhanrusporthd/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/BKaEtqL.png"
+  },
+  {
+    "id": "cat-atglive-se-sd",
+    "name": "ATG Live (720p)",
+    "url": "https://kanal75xto-llhls.akamaized.net/live/Data/atg-kanal-15-02a-rr/HLS-Legacy-HL/atg-kanal-15-02a-rr.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/bPWFXkL.png"
+  },
+  {
+    "id": "cat-aymsports-mx-sd",
+    "name": "AyM Sports (1080p)",
+    "url": "http://168.196.127.137:6001/play/a06v/index.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/yu3Bpbd.png"
+  },
+  {
+    "id": "cat-aztecadeportesnetwork-mx-sd",
+    "name": "Azteca Deportes Network (1080p)",
+    "url": "http://181.119.66.28:8081/AZTECA-DEPORTES-HD/index.m3u8",
+    "category": "Sports",
+    "logo": "https://match-images.icdb.tv/5913207f2494844101287828e87625eb.jpg"
+  },
+  {
+    "id": "cat-bahrainsports1-bh-sd",
+    "name": "Bahrain Sports 1 (720p) [Not 24/7]",
+    "url": "https://5c7b683162943.streamlock.net/live/ngrp:sportsone_all/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/fBpLsbC.png"
+  },
+  {
+    "id": "cat-bahrainsports2-bh-sd",
+    "name": "Bahrain Sports 2 (720p) [Not 24/7]",
+    "url": "https://5c7b683162943.streamlock.net/live/ngrp:bahrainsportstwo_all/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/ZkuZmIo.png"
+  },
+  {
+    "id": "cat-beinsportsxtra-us-sd",
+    "name": "beIN SPORTS XTRA (1080p)",
+    "url": "https://bein-xtra-bein.amagi.tv/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.ibb.co/HT49GPmB/XTRA-2.png"
+  },
+  {
+    "id": "cat-beksports-us-west",
+    "name": "BEK Sports West (720p)",
+    "url": "https://cdn3.wowza.com/5/ZWQ1K2NYTmpFbGsr/BEK-WOWZA-1/smil:BEKPRIMEW.smil/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/1l3t5jd.png"
+  },
+  {
+    "id": "cat-belarus5-by-sd",
+    "name": "Belarus-5 (1080p) [Not 24/7]",
+    "url": "https://ngtrk.dc.beltelecom.by/ngtrk/smil:belarus5.smil/playlist.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/NJsRFud.png"
+  },
+  {
+    "id": "cat-belarus5-by-hd",
+    "name": "Belarus-5 HD (1080p)",
+    "url": "http://178.124.179.122:8080/BT5/index.m3u8",
+    "category": "Sports",
+    "logo": "https://i.imgur.com/NJsRFud.png"
+  },
+  {
+    "id": "cat-30aloomeredtv-us-sd",
+    "name": "30A Loomered TV",
+    "url": "https://30a-tv.com/loomer.m3u8",
+    "category": "Documentary",
+    "logo": "https://cbs12.com/resources/media/0c1ecad8-fb09-4bb2-beaa-fc561dfe624a-small21x9_LoomerStill.jpg?1603419052801"
+  },
+  {
+    "id": "cat-365daystv-ru-sd",
+    "name": "365 days TV (576p)",
+    "url": "http://stream.mcquack.net/70/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/NfnAiTR.png"
+  },
+  {
+    "id": "cat-adventureearth-de-sd",
+    "name": "Adventure Earth (1080p)",
+    "url": "https://a57e9c69976649b582a8d7604c00e69a.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/RlaxxTV-eu_AdventureEarth/playlist.m3u8",
+    "category": "Documentary",
+    "logo": "https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/adventureearth_white.png"
+  },
+  {
+    "id": "cat-alarabiyaprograms-ae-sd",
+    "name": "Al Arabiya Programs (1280p)",
+    "url": "https://live.alarabiya.net/alarabiapublish/aaprograms.smil/playlist.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/Hoc3cfO.png"
+  },
+  {
+    "id": "cat-alternatv-ar-sd",
+    "name": "AlternaTV (720p) [Not 24/7]",
+    "url": "https://tv.alterna.ar/stream/hls/live.m3u8",
+    "category": "Documentary",
+    "logo": "https://tv.alterna.ar/alternatv.png"
+  },
+  {
+    "id": "cat-americanheroeschannel-us-sd",
+    "name": "American Heroes Channel (720p)",
+    "url": "http://23.237.104.106:8080/USA_AMERICAN_HEROES/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/American_Heroes_Channel_logo.svg/960px-American_Heroes_Channel_logo.svg.png"
+  },
+  {
+    "id": "cat-animalplanet-ru-sd",
+    "name": "Animal Planet (Russia) (1080p)",
+    "url": "http://stream.mcquack.net/114/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png"
+  },
+  {
+    "id": "cat-animalplanet-us-east",
+    "name": "Animal Planet (United States) (720p)",
+    "url": "http://23.239.31.26:8989/animalplanet/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png"
+  },
+  {
+    "id": "cat-animalplanetlatinamerica-us-sd",
+    "name": "Animal Planet Latin America (1080p)",
+    "url": "http://190.128.214.97:64333/play/a01n/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png"
+  },
+  {
+    "id": "cat-animalplanetlatinamerica-us-hd",
+    "name": "Animal Planet Latin America HD (720p) [Geo-blocked]",
+    "url": "http://15.204.246.24:8080/AnimalPlanetHD/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png"
+  },
+  {
+    "id": "cat-arsenal-ru-sd",
+    "name": "Arsenal (576p)",
+    "url": "https://stream8.cinerama.uz/1414/tracks-v1a1/mono.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/DBpVeb0.png"
+  },
+  {
+    "id": "cat-asharqdiscovery-sa-sd",
+    "name": "Asharq Discovery (1080p)",
+    "url": "https://svs.itworkscdn.net/asharqdiscoverylive/asharqd.smil/playlist_dvr.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/Czxi7yk.png"
+  },
+  {
+    "id": "cat-asharqdocumentary-sa-sd",
+    "name": "Asharq Documentary (1080p)",
+    "url": "https://svs.itworkscdn.net/asharqdocumentarylive/asharqdocumentary.smil/playlist_dvr.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/v6VsFEt.png"
+  },
+  {
+    "id": "cat-atlas-us-sd",
+    "name": "Atlas (480p)",
+    "url": "https://cdn.whiplash.cc/whiplash-atlas/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://whiplash.cc/assets/img/channels/atlas.png"
+  },
+  {
+    "id": "cat-autentichistory-de-sd",
+    "name": "Autentic History (1080p)",
+    "url": "https://9e754fa707344ccca6d84955c8fcaf36.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/RlaxxTV-eu_AutenticHistory/playlist.m3u8",
+    "category": "Documentary",
+    "logo": "https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/autentichistory_white.png"
+  },
+  {
+    "id": "cat-backstage-us-sd",
+    "name": "Backstage (1080p)",
+    "url": "https://d2ah48mnofquik.cloudfront.net/Backstage.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/qcTNvNU.png"
+  },
+  {
+    "id": "cat-bbcearth-uk-poland",
+    "name": "BBC Earth (1080p)",
+    "url": "http://57.128.231.171:8080/307/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/nGSsUd4.png"
+  },
+  {
+    "id": "cat-bbcearth-uk-czechia",
+    "name": "BBC Earth Czechia",
+    "url": "http://88.212.15.29/live/test_bbc_eartch_hevc/playlist.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/nGSsUd4.png"
+  },
+  {
+    "id": "cat-bbcearth-uk-hungary",
+    "name": "like Gecko) Chrome/120.0.0.0 Safari/537.36\" group-title=\"Documentary\",BBC Earth Hungary",
+    "url": "http://88.212.15.19/live/bbce_hun/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/nGSsUd4.png"
+  },
+  {
+    "id": "cat-bbcearth-uk-us",
+    "name": "BBC Earth US (1080p)",
+    "url": "https://amg00793-amg00793c6-xumo-us-2669.playouts.now.amagi.tv/BBCStudios-BBCEarthA-hls/playlist.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/nGSsUd4.png"
+  },
+  {
+    "id": "cat-bloombergoriginals-us-us",
+    "name": "Bloomberg Originals (1080p)",
+    "url": "https://bloomberg.com/media-manifest/streams/qt.m3u8",
+    "category": "Documentary",
+    "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Bloomberg_Originals.png"
+  },
+  {
+    "id": "cat-bloombergoriginals-us-sd",
+    "name": "Bloomberg Originals SD (1080p)",
+    "url": "https://86fdc85a.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfQmxvb21iZXJnT3JpZ2luYWxzX0hMUw/playlist.m3u8",
+    "category": "Documentary",
+    "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Bloomberg_Originals.png"
+  },
+  {
+    "id": "cat-britboxmysteries-us-sd",
+    "name": "BritBox Mysteries (1080p)",
+    "url": "https://aegis-cloudfront-1.tubi.video/c95700f8-e51c-4a36-ad46-56f70fc9f1d9/playlist.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/PJdzoLN.png"
+  },
+  {
+    "id": "cat-cctv9-cn-sd",
+    "name": "CCTV-9 (576i)",
+    "url": "https://xykt-fix.github.io/Y77.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/3tivvMm.png"
+  },
+  {
+    "id": "cat-cgtndocumentary-cn-sd",
+    "name": "CGTN Documentary (1080p)",
+    "url": "https://amg00405-rakutentv-cgtndocumentary-rakuten-0ql8j.amagi.tv/master.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/JHv0WxM.png"
+  },
+  {
+    "id": "cat-chemodantv-ua-sd",
+    "name": "like Gecko) Chrome/130.0.0.0 Safari/537.36\" group-title=\"Documentary;Education\",Chemodan TV (1080p)",
+    "url": "http://stream.mcquack.net/399/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/1WjGN8u.png"
+  },
+  {
+    "id": "cat-chinatravel-cn-sd",
+    "name": "China Travel (1080p)",
+    "url": "https://fastlive.cctvplus.com/out/v1/ca6f9297b7314a63959435028af287fc/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/vSgY3CD.png"
+  },
+  {
+    "id": "cat-cityedenkinodok-ru-hd",
+    "name": "City Eden KinoDok [Not 24/7]",
+    "url": "https://cityeden.catcast.tv/content/38354/index.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/itRbMX3.png"
+  },
+  {
+    "id": "cat-clicktvchile-cl-sd",
+    "name": "ClickTV Chile (720p)",
+    "url": "https://v2.tustreaming.cl/clicktv/playlist.m3u8",
+    "category": "Documentary",
+    "logo": "https://i.imgur.com/H0XNbMS.png"
+  },
+  {
+    "id": "cat-3catcameresdeltemps-es-sd",
+    "name": "3Cat Cameres del temps (1080p)",
+    "url": "https://directes-tv-int.3catdirectes.cat/live-content/beauties-hls/master.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/zXy2kbe.png"
+  },
+  {
+    "id": "cat-accuweathernow-us-sd",
+    "name": "AccuWeather NOW (1080p)",
+    "url": "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg00684-accuweather-accuweather-plex/playlist.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/M8wbVYK.png"
+  },
+  {
+    "id": "cat-foxweather-us-sd",
+    "name": "Fox Weather (720p)",
+    "url": "https://247wlive.foxweather.com/stream/index.m3u8",
+    "category": "Weather",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Fox_Weather_logo.svg/960px-Fox_Weather_logo.svg.png"
+  },
+  {
+    "id": "cat-meteonews-ch-sd",
+    "name": "Meteonews (1080p)",
+    "url": "https://streaming.meteonews.net/hls/stream.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/YtYhbJD.png"
+  },
+  {
+    "id": "cat-norcastweather-us-hd",
+    "name": "NorCast Weather (1080p)",
+    "url": "https://norcast-weather.streamology.live/api/v1/streams/c1b5b114698e1ad4687153c4402d5ef0/live.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/AfjoZgo.png"
+  },
+  {
+    "id": "cat-skynewsweather-uk-sd",
+    "name": "Sky News Weather (720p)",
+    "url": "https://distro001-gb-hls1-prd.delivery.skycdp.com/easel_cdn/ngrp:weather_loop.stream_all/playlist.m3u8",
+    "category": "Weather",
+    "logo": "https://pbs.twimg.com/profile_images/1604994875459518464/lGt2wEqM_400x400.jpg"
+  },
+  {
+    "id": "cat-theweatherchannel-us-sd",
+    "name": "The Weather Channel (1080p)",
+    "url": "https://twcprod-live.twc-tv.com/v1/manifest/b4d4d63a49309cc5140171fb2e92485c31be1e9e/DSP_6228e4760505741a116f1ba2_twcprod-live/6bf09ce5-366b-463c-b67e-c4b799f73c3f/4.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/PIaNjfa.png"
+  },
+  {
+    "id": "cat-weathernation-us-sd",
+    "name": "WeatherNation (1080p)",
+    "url": "https://d2ferbiwcx1539.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-8zd06wicndthf-ssai-prd/WNNationalSamsung/WNNationalSamsung.m3u8",
+    "category": "Weather",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/WeatherNation_Logo.svg/960px-WeatherNation_Logo.svg.png"
+  },
+  {
+    "id": "cat-weathernews-jp-sd",
+    "name": "Weathernews (720p)",
+    "url": "https://rch01e-alive-hls.akamaized.net/38fb45b25cdb05a1/out/v1/4e907bfabc684a1dae10df8431a84d21/index.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/A8uRSTS.png"
+  },
+  {
+    "id": "cat-weatherspy-au-sd",
+    "name": "WeatherSpy (Australia) (720p)",
+    "url": "https://jukin-weatherspy-2-au.samsung.wurl.tv/playlist.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/GTxN2nH.png"
+  },
+  {
+    "id": "cat-weatherspy-in-sd",
+    "name": "WeatherSpy (India)",
+    "url": "https://jukin-weatherspy-2-in.samsung.wurl.tv/playlist.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/KIEKOt1.png"
+  },
+  {
+    "id": "cat-weatherspy-mx-sd",
+    "name": "WeatherSpy (Mexico) (720p)",
+    "url": "https://jukin-weatherspy-2-mx.samsung.wurl.tv/playlist.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/KIEKOt1.png"
+  },
+  {
+    "id": "cat-weatherspy-us-sd",
+    "name": "WeatherSpy (United States) (720p)",
+    "url": "https://d12gab6t5iutxf.cloudfront.net/playlist.m3u8",
+    "category": "Weather",
+    "logo": "https://i.imgur.com/yHUUIIz.png"
+  }
+]

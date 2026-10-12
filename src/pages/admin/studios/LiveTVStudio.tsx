@@ -25,7 +25,7 @@ import {
   Pencil
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../../../data/liveTvDefaults";
+import { LIVE_TV_DEFAULTS, mergeTvCatalogue, type LiveTvChannel } from "../../../data/liveTvDefaults";
 import rawChannels from "../../../data/akashvaniChannels.json";
 import privateFm from "../../../data/privateFmChannels.json";
 
@@ -98,6 +98,7 @@ export default function LiveTVStudio() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [tvCategory, setTvCategory] = useState("all");
 
   // Media Collections
   const [tvChannels, setTvChannels] = useState<LiveTvChannel[]>([]);
@@ -127,9 +128,9 @@ export default function LiveTVStudio() {
       const res = await axios.get("/api/cms");
       const cms = res.data?.cms || res.data?.data || {};
 
-      // Live TV Channels (respect saved array even if empty)
+      // Live TV Channels (respect saved array while keeping full verified defaults)
       if (Array.isArray(cms.liveTvChannels)) {
-        setTvChannels(cms.liveTvChannels);
+        setTvChannels(mergeTvCatalogue(cms.liveTvChannels));
       } else {
         setTvChannels(LIVE_TV_DEFAULTS);
       }
@@ -327,13 +328,18 @@ export default function LiveTVStudio() {
   const currentItems = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (activeTab === "tv") {
-      return tvChannels.filter(c => (c.name || "").toLowerCase().includes(q) || (c.category || "").toLowerCase().includes(q) || (c.url || "").toLowerCase().includes(q));
+      return tvChannels.filter(c => {
+        const matchesCategory = tvCategory === "all" || (c.category || "").toLowerCase() === tvCategory.toLowerCase();
+        if (!matchesCategory) return false;
+        if (!q) return true;
+        return (c.name || "").toLowerCase().includes(q) || (c.category || "").toLowerCase().includes(q) || (c.url || "").toLowerCase().includes(q);
+      });
     } else if (activeTab === "radio") {
       return radioStations.filter(s => (s.name || "").toLowerCase().includes(q) || (s.category || "").toLowerCase().includes(q) || (s.region || "").toLowerCase().includes(q));
     } else {
       return epapers.filter(p => (p.name || "").toLowerCase().includes(q) || (p.language || "").toLowerCase().includes(q));
     }
-  }, [activeTab, tvChannels, radioStations, epapers, search]);
+  }, [activeTab, tvChannels, radioStations, epapers, search, tvCategory]);
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
@@ -507,6 +513,25 @@ export default function LiveTVStudio() {
               className="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:ring-1 focus:ring-amber-500 shadow-2xs"
             />
           </div>
+
+          {/* CATEGORY FILTER PILLS (FOR TV) */}
+          {activeTab === "tv" && (
+            <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
+              {["all", "News", "Entertainment", "Movies", "Music", "Sports", "Kids", "Religious", "Documentary", "Education", "Weather"].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setTvCategory(cat)}
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-bold whitespace-nowrap transition ${
+                    tvCategory === cat
+                      ? "bg-amber-600 text-white shadow-2xs"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {cat === "all" ? "All Categories" : cat}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* SCROLLABLE STREAMS LIST */}
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
@@ -767,10 +792,11 @@ export default function LiveTVStudio() {
                             );
                           }
                           if (url.includes(".m3u8") || url.includes(".mp4") || url.startsWith("blob:") || url.includes("stream")) {
+                            const previewSrc = url.includes("/api/iptv/proxy") || url.startsWith("blob:") ? url : `/api/iptv/proxy?url=${encodeURIComponent(url)}`;
                             return (
                               <video
-                                key={url}
-                                src={url}
+                                key={previewSrc}
+                                src={previewSrc}
                                 controls
                                 playsInline
                                 className="w-full h-full object-contain"
