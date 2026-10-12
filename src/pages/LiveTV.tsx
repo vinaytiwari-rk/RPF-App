@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns, RefreshCw } from "lucide-react";
+import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns, RefreshCw, Volume2, VolumeX } from "lucide-react";
 import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../data/liveTvDefaults";
 import { openExternalLink } from "../utils/browser";
 import { getMediaSourceType } from "../utils/mediaSourceType";
@@ -94,6 +94,7 @@ function DirectStreamPlayer({
   const playerRef = useRef<any>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [currentSrc, setCurrentSrc] = useState<string>(url);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
   const proxyAttemptedRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -110,17 +111,20 @@ function DirectStreamPlayer({
 
     // Create the video-js node inside our dedicated container
     const videoElement = document.createElement("video-js");
-    videoElement.className = "video-js vjs-big-play-button-centered h-full w-full";
+    videoElement.className = "video-js vjs-big-play-button-centered vjs-fill w-full h-full";
     videoElement.setAttribute("playsinline", "true");
+    videoElement.setAttribute("webkit-playsinline", "true");
+    videoElement.setAttribute("autoplay", "true");
     container.appendChild(videoElement);
 
     const sourceType = getMediaSourceType(currentSrc) || "application/x-mpegURL";
 
     const player = videojs(videoElement, {
       controls: true,
-      autoplay: "any",
+      autoplay: true,
       preload: "auto",
       responsive: true,
+      fill: true,
       fluid: false,
       playsinline: true,
       html5: {
@@ -141,6 +145,29 @@ function DirectStreamPlayer({
     });
 
     playerRef.current = player;
+
+    player.ready(() => {
+      // Force immediate playback on mount without waiting for manual tap
+      const playPromise = player.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log("Direct stream autoplay started unmuted");
+          })
+          .catch((err: any) => {
+            console.warn("Unmuted autoplay restricted, starting muted autoplay immediately:", err);
+            player.muted(true);
+            setIsMuted(true);
+            player.play().catch((e: any) => console.warn("Muted autoplay also rejected:", e));
+          });
+      }
+    });
+
+    player.on("volumechange", () => {
+      if (player && !player.isDisposed()) {
+        setIsMuted(player.muted());
+      }
+    });
 
     player.on("error", () => {
       console.warn("Video.js playback error for:", currentSrc);
@@ -175,8 +202,34 @@ function DirectStreamPlayer({
   }, [currentSrc, url, langHi]);
 
   return (
-    <div className="relative h-full w-full bg-black flex items-center justify-center">
-      <div ref={containerRef} className="h-full w-full" data-vjs-player />
+    <div
+      className="relative h-full w-full bg-black flex items-center justify-center overflow-hidden"
+      onClick={() => {
+        if (isMuted && playerRef.current && !playerRef.current.isDisposed()) {
+          playerRef.current.muted(false);
+          setIsMuted(false);
+        }
+      }}
+    >
+      <div ref={containerRef} className="h-full w-full vjs-fill" data-vjs-player />
+
+      {/* Floating unmute notification if browser enforced muted initial autoplay */}
+      {isMuted && !errorMsg && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (playerRef.current && !playerRef.current.isDisposed()) {
+              playerRef.current.muted(false);
+              setIsMuted(false);
+            }
+          }}
+          className="absolute top-3 right-3 z-30 flex items-center gap-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs font-bold text-white shadow-xl hover:bg-black/95 active:scale-95 transition"
+        >
+          <VolumeX className="w-4 h-4 text-amber-400 animate-pulse" />
+          <span>{langHi ? "आवाज़ चालू करें (टैप करें)" : "Tap to Unmute"}</span>
+        </button>
+      )}
 
       {errorMsg && (
         <div
@@ -288,18 +341,38 @@ export default function LiveTV() {
             <p className="min-w-0 flex-1 truncate text-center text-sm font-black font-serif px-2">
               {active.name}
             </p>
-            <button
-              onClick={() => openExternalLink(active.url, navigate, active.name)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-orange-500/20 text-orange-300 border border-orange-400/30 px-3 py-1.5 text-xs font-bold hover:bg-orange-500/30 transition"
-              title="Open External"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{hi ? "ब्राउज़र" : "Browser"}</span>
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  const elem = document.querySelector(".video-js video") || document.querySelector(".video-js");
+                  if (elem) {
+                    if (document.fullscreenElement) {
+                      document.exitFullscreen().catch(() => {});
+                    } else {
+                      (elem as any).requestFullscreen?.().catch(() => {});
+                    }
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 text-white border border-white/20 px-2.5 py-1.5 text-xs font-bold hover:bg-white/20 transition active:scale-95"
+                title="Fullscreen"
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{hi ? "पूर्ण स्क्रीन" : "Fullscreen"}</span>
+              </button>
+              <button
+                onClick={() => openExternalLink(active.url, navigate, active.name)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-orange-500/20 text-orange-300 border border-orange-400/30 px-3 py-1.5 text-xs font-bold hover:bg-orange-500/30 transition"
+                title="Open External"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{hi ? "ब्राउज़र" : "Browser"}</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-1 items-center justify-center bg-black p-2 sm:p-4">
-            <div className="w-full max-w-5xl aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-slate-950 relative">
+          <div className="flex flex-1 items-center justify-center bg-black p-0 sm:p-4">
+            <div className="w-full max-w-5xl aspect-video sm:rounded-2xl overflow-hidden shadow-2xl border-y sm:border border-white/10 bg-slate-950 relative flex items-center justify-center">
               {embed ? (
                 <iframe
                   className="h-full w-full border-0"

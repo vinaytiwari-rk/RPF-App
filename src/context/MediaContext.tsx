@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import Hls from 'hls.js';
+import { resolveMediaUrl } from '../utils/media';
 
 export interface RadioStation {
   name: string;
@@ -144,7 +146,6 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const isHlsStream = /\.m3u8(?:\?|$)/i.test(station.url);
-      const Hls = (await import('hls.js')).default;
 
       if (isHlsStream && Hls.isSupported()) {
         const hls = new Hls({
@@ -175,20 +176,12 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
               setIsRadioLoading(false);
               setRadioError(null);
             }
-          } catch {
+          } catch (e: any) {
+            console.warn("audio.play() failed on start:", e);
             if (!isCurrent()) return;
-            // Handle unmuted mobile autoplay policy: mute and retry
-            audio.muted = true;
-            try {
-              await audio.play();
-              setIsRadioPlaying(true);
-              setIsRadioLoading(false);
-              setRadioError(null);
-            } catch {
-              setIsRadioPlaying(false);
-              setIsRadioLoading(false);
-              setRadioError('Tap play button to start streaming');
-            }
+            setIsRadioPlaying(false);
+            setIsRadioLoading(false);
+            setRadioError('Tap play button to start streaming');
           }
         });
 
@@ -199,8 +192,9 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
             // Auto fallback to server proxy on network/CORS error
             if (!triedProxy && !station.url.includes('/api/iptv/proxy')) {
               triedProxy = true;
-              console.warn(`Direct radio stream failed for ${station.name}, retrying via proxy...`);
-              loadHlsSource(`/api/iptv/proxy?url=${encodeURIComponent(station.url)}`);
+              const proxyUrl = resolveMediaUrl(`/api/iptv/proxy?url=${encodeURIComponent(station.url)}`);
+              console.warn(`Direct radio stream failed for ${station.name}, retrying via proxy:`, proxyUrl);
+              loadHlsSource(proxyUrl);
               return;
             }
             hls.startLoad();
@@ -221,9 +215,11 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
       } else if (isHlsStream && (audio.canPlayType('application/vnd.apple.mpegurl') || audio.canPlayType('application/x-mpegURL'))) {
         // Native HLS fallback (primarily iOS Safari)
         audio.src = station.url;
+        audio.load();
       } else {
         // Direct stream (MP3/AAC/Shoutcast/Icecast)
         audio.src = station.url;
+        audio.load();
       }
 
       try {
@@ -231,7 +227,9 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
       } catch (err: any) {
         // If direct stream fails, retry via server proxy
         if (!station.url.includes('/api/iptv/proxy')) {
-          audio.src = `/api/iptv/proxy?url=${encodeURIComponent(station.url)}`;
+          const proxyUrl = resolveMediaUrl(`/api/iptv/proxy?url=${encodeURIComponent(station.url)}`);
+          audio.src = proxyUrl;
+          audio.load();
           await audio.play();
         } else {
           throw err;

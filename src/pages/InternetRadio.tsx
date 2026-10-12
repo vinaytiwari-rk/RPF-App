@@ -5,6 +5,7 @@ import BrandLoader from '../components/BrandLoader';
 import rawChannels from '../data/akashvaniChannels.json';
 import privateFm from '../data/privateFmChannels.json';
 import { useMedia } from '../context/MediaContext';
+import { resolveMediaUrl } from '../utils/media';
 
 interface RadioStation {
   name: string;
@@ -119,7 +120,7 @@ export default function InternetRadio() {
 
   useEffect(() => {
     let cancelled = false;
-    const loadStations = () => fetch('/api/cms', { cache: 'no-store' })
+    const loadStations = () => fetch(resolveMediaUrl('/api/cms'), { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => {
         const configured = d?.cms?.internetRadioStations;

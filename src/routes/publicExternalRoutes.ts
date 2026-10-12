@@ -450,11 +450,11 @@ router.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21562,
-      versionName: "2.5.2",
+      versionCode: 21563,
+      versionName: "2.5.3",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
-      releaseNotes: "• High-Speed Live TV Player: Instant 3-4 second playback via Video.js native hardware decoder\n• Direct Stream Fix: Resolved infinite buffering and black overlay issues on all Live TV channels\n• Universal IPTV Proxy: Fully rewritten absolute stream routing preventing localhost failures on Android\n• Internet Radio: Instant audio playback across Akashvani and Private FM stations without buffering\n• Full Web & Android Parity: Identical feature experience across Panchang, Reels, Marquee, and all services"
+      releaseNotes: "• Instant Live TV Autoplay: Fixed playback pause and play button lock; video plays immediately on selection\n• Full-Screen Responsive Fill: Fixed zoomed-out and shrunk video rendering; player expands cleanly to 100% container\n• Android Media WebSettings: Enabled native autoplay without gesture restrictions in WebView\n• Internet Radio Stream Fix: Restored Akashvani and Private FM streaming with instant playback and verified Bitgravity stream\n• Quick Fullscreen & Unmute: Added dedicated 1-tap buttons for fullscreen view and instant unmuting\n• Universal IPTV Proxy: Rewrote absolute segment and playlist URLs preventing Android connection failures"
     });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err?.message || "Failed to read update manifest" });
