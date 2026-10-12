@@ -8,18 +8,32 @@ import {
   ChevronRight,
   Sparkles,
   ShieldCheck,
-  Globe2,
   BadgePlus,
   HeartPulse,
   BriefcaseBusiness,
   ClipboardList,
-  ExternalLink,
-  Flame
+  Flame,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { openExternalLink } from "../utils/browser";
 import BrandLoader from "../components/BrandLoader";
 import LiveVerifiedMarketSection from "../components/LiveVerifiedMarketSection";
+
+type ServiceItem = {
+  id: string;
+  category?: string;
+  iconName?: string;
+  titleEn: string;
+  titleHi?: string;
+  descEn?: string;
+  descHi?: string;
+  route?: string;
+  url?: string;
+  link?: string;
+  enabled?: boolean;
+  active?: boolean;
+  hidden?: boolean;
+};
 
 const REMOVED_SERVICE_IDS = new Set<string>([
   "countries",
@@ -47,24 +61,24 @@ const REMOVED_SERVICE_IDS = new Set<string>([
   "pomodoro",
   "pomodoro-timer",
   "breathing-meditator",
-  "hindu-calendar"
+  "hindu-calendar",
 ]);
 
-const EXPLORE_LINKS: Array<{ id: string; category: string; iconName: string; titleEn: string; titleHi: string; descEn: string; descHi?: string; route?: string; url?: string }> = [
-  { id: "online-test", category: "education", iconName: "GraduationCap", titleEn: "Online Mock Test & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", descEn: "G[..." },
-  { id: "epaper", category: "community", iconName: "Newspaper", titleEn: "Epaper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Read today's leading daily e-papers", descHi: "[...]" },
-  { id: "directory", category: "government", iconName: "BookOpen", titleEn: "National Directory", titleHi: "राष्ट्रीय निर्देशिका", descEn: "Government contact[..." },
-  { id: "peoples-university", category: "education", iconName: "GraduationCap", titleEn: "People's University Portal", titleHi: "पीपुल्स यूनिवर्सिटी पोर��[..." },
-  { id: "fact-check", category: "community", iconName: "ShieldCheck", titleEn: "Fact Check Hub", titleHi: "फैक्ट चेक हब", descEn: "Check claims and viral news", descHi: "वा[..." },
-  { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "अधिकारी समाचार और संस्कृति चैनल" },
-  { id: "social-reels", category: "community", iconName: "Film", titleEn: "Shorts & Reels", titleHi: "शॉर्ट्स और रील्स", descEn: "Official videos, shorts & foundation reels", descHi: "अधिकारिक वीडियो, शॉर्ट्स और फाउंडेशन रील्स" },
+const EXPLORE_LINKS: ServiceItem[] = [
+  { id: "online-test", category: "education", iconName: "GraduationCap", titleEn: "Online Mock Test & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", descEn: "Get exam-ready with quick mock tests and revision practice", descHi: "त्वरित मॉक टेस्ट और रिवीजन के साथ तैयारी", route: "/online-test" },
+  { id: "epaper", category: "community", iconName: "Newspaper", titleEn: "Epaper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Read today's leading daily e-papers", descHi: "आज के प्रमुख ई-पेपर पढ़ें", route: "/epaper" },
+  { id: "directory", category: "government", iconName: "BookOpen", titleEn: "National Directory", titleHi: "राष्ट्रीय निर्देशिका", descEn: "Government contacts and important directories", descHi: "सरकारी संपर्क और निर्देशिका", route: "/directory" },
+  { id: "peoples-university", category: "education", iconName: "GraduationCap", titleEn: "People's University Portal", titleHi: "पीपुल्स यूनिवर्सिटी पोर्टल", descEn: "Learning resources and self-learning pathways", descHi: "सीखने के संसाधन और स्वयं-सीखने के रास्ते", route: "/peoples-university" },
+  { id: "fact-check", category: "community", iconName: "ShieldCheck", titleEn: "Fact Check Hub", titleHi: "फैक्ट चेक हब", descEn: "Check claims and viral news", descHi: "दावों और वायरल खबरों की पड़ताल", route: "/fact-check" },
+  { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "अधिकारिक समाचार और संस्कृति चैनल", route: "/live-tv" },
+  { id: "social-reels", category: "community", iconName: "Film", titleEn: "Shorts & Reels", titleHi: "शॉर्ट्स और रील्स", descEn: "Official videos, shorts & foundation reels", descHi: "अधिकारी वीडियो, शॉर्ट्स और फाउंडेशन रील्स", route: "/reels" },
 ];
 
-const DEFAULT_FEATURED_SERVICES = [
-  { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवा पहचान", iconName: "BadgePlus" },
-  { id: "health-care", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", descEn: "Health camps, medicines & hospital locator", descHi: "स्वास्थ्य शिविर, दवा और हॉस्पिटल", iconName: "HeartPulse" },
-  { id: "employment", titleEn: "Employment", titleHi: "रोजगार पोर्टल", descEn: "Jobs, skill development & career guidance", descHi: "नौकरियाँ, कौशल और मार्गदर्शन", iconName: "BriefcaseBusiness" },
-  { id: "grievance", titleEn: "Grievance", titleHi: "शिकायत समाधान", descEn: "Submit issues & track resolution progress", descHi: "शिकायत दर्ज करें और प्रगति देखें", iconName: "ClipboardList" },
+const DEFAULT_FEATURED_SERVICES: ServiceItem[] = [
+  { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवा पहचान", iconName: "BadgePlus", route: "/jan-seva-card" },
+  { id: "health-care", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", descEn: "Health camps, medicines & hospital locator", descHi: "स्वास्थ्य शिविर, दवा और हॉस्पिटल", iconName: "HeartPulse", route: "/health-care" },
+  { id: "employment", titleEn: "Employment", titleHi: "रोजगार पोर्टल", descEn: "Jobs, skill development & career guidance", descHi: "नौकरियाँ, कौशल और मार्गदर्शन", iconName: "BriefcaseBusiness", route: "/employment" },
+  { id: "grievance", titleEn: "Grievance", titleHi: "शिकायत समाधान", descEn: "Submit issues & track resolution progress", descHi: "शिकायत दर्ज करें और प्रगति देखें", iconName: "ClipboardList", route: "/grievance" },
 ];
 
 export default function Services() {
@@ -97,11 +111,12 @@ export default function Services() {
   }, [cmsConfig]);
 
   const featuredServicesList = useMemo(() => {
-    const customFeatured = (cmsConfig as any)?.featuredServices;
-    if (Array.isArray(customFeatured) && customFeatured.length > 0) {
+    const customFeatured = Array.isArray((cmsConfig as any)?.featuredServices) ? (cmsConfig as any).featuredServices : [];
+    if (customFeatured.length > 0) {
       return customFeatured
         .filter((s: any) => s.active !== false && s.enabled !== false)
         .map((s: any) => ({
+          ...s,
           id: s.id,
           titleEn: s.title || s.titleEn,
           titleHi: s.titleHi || s.title || s.titleEn,
@@ -109,20 +124,21 @@ export default function Services() {
           descHi: s.descHi || s.desc || s.descEn,
           icon: (LucideIcons as any)[s.iconName] || BadgePlus,
           route: s.route || "/services",
-          accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
+          accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20",
         }));
     }
+
     return DEFAULT_FEATURED_SERVICES.map((item) => ({
       ...item,
-      icon: (LucideIcons as any)[item.iconName] || BadgePlus,
-      route: item.route || routeFor(item.id),
-      accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
+      icon: (LucideIcons as any)[item.iconName || "BadgePlus"] || BadgePlus,
+      route: item.route || "/services",
+      accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20",
     }));
   }, [cmsConfig]);
 
   const allServices = useMemo(() => {
-    const customAll = (cmsConfig as any)?.allServices;
-    if (Array.isArray(customAll) && customAll.length > 0) {
+    const customAll = Array.isArray((cmsConfig as any)?.allServices) ? (cmsConfig as any).allServices : [];
+    if (customAll.length > 0) {
       return customAll
         .filter((s: any) => s.active !== false && s.enabled !== false && !hiddenIds.has(s.id))
         .map((s: any) => ({
@@ -133,19 +149,34 @@ export default function Services() {
           descHi: s.descHi || s.desc || s.descEn,
           iconName: s.iconName || "Compass",
           route: s.route,
-          category: s.category?.toLowerCase() || "community"
-        }));
+          url: s.url,
+          category: s.category?.toLowerCase() || "community",
+        } as ServiceItem));
     }
 
     const base = Array.isArray(servicesList) ? servicesList : [];
     const cmsUtils = Array.isArray((cmsConfig as any)?.exploreUtilities) ? (cmsConfig as any).exploreUtilities : [];
     const combined = [...base, ...EXPLORE_LINKS, ...cmsUtils].filter((item: any) => item?.id && !REMOVED_SERVICE_IDS.has(item.id));
     const seen = new Set<string>();
-    const list: any[] = [];
+    const list: ServiceItem[] = [];
     for (const item of combined) {
       if (item && item.id && !seen.has(item.id)) {
         seen.add(item.id);
-        list.push(item);
+        list.push({
+          id: item.id,
+          category: item.category,
+          iconName: item.iconName,
+          titleEn: item.titleEn || item.title || "Service",
+          titleHi: item.titleHi || item.title || item.titleEn || "Service",
+          descEn: item.descEn || item.desc || "Service",
+          descHi: item.descHi || item.desc || item.descEn || "Service",
+          route: item.route,
+          url: item.url,
+          link: item.link,
+          enabled: item.enabled,
+          active: item.active,
+          hidden: item.hidden,
+        });
       }
     }
     return list;
@@ -381,325 +412,3 @@ export default function Services() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
