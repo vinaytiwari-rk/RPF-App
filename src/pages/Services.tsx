@@ -345,3 +345,37 @@ export default function Services() {
                 );
               })}
             </div>
+          </section>
+        )}
+
+        {/* Section Heading for All Services */}
+        <div className="pt-2">
+          <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#14213D]">
+            {search.trim() ? (isHi ? "समाहित सेवाएं" : "SAMAHIT SERVICES") : (isHi ? "सभी नागरिक सेवाएं" : "All Services")}
+          </p>
+        </div>
+
+        {/* Main Services List */}
+        {isLoadingServices ? (
+          <div className="py-12 flex justify-center">
+            <BrandLoader size="sm" label="Loading services" />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((svc: any) => (
+              <React.Fragment key={svc.id}>
+                {renderService(svc)}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+
+        {!filtered.length && !isLoadingServices && (
+          <div className="py-12 text-center text-xs font-semibold text-slate-500 bg-white/80 backdrop-blur-md rounded-2xl border border-amber-100/80 p-6 shadow-2xs">
+            {isHi ? "कोई सेवा नहीं मिली" : "No services found matching your query."}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
