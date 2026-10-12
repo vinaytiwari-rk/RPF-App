@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Tv } from "lucide-react";
 import type { LiveTvChannel } from "../data/liveTvDefaults";
 
 export const getTvVideoId = (c: LiveTvChannel) =>
-  c.videoId || c.url?.match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|watch\?v=))([^?&/]+)/)?.[1];
+  c.videoId || c.url?.match(/(?:youtu\.be\/|youtube\.com\/(?:live\/|watch\?v=|embed\/))([^?&/]+)/)?.[1];
 
 export interface ChannelThumbnailProps {
   channel: LiveTvChannel;
@@ -12,8 +12,23 @@ export interface ChannelThumbnailProps {
 }
 
 export default function ChannelThumbnail({ channel, className = "", size = "md" }: ChannelThumbnailProps) {
-  const [hasError, setHasError] = useState(false);
   const videoId = getTvVideoId(channel);
+  const candidateUrls = useMemo(() => {
+    const urls: string[] = [];
+    if (videoId) {
+      urls.push(
+        `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+        `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+        `https://i.ytimg.com/vi/${videoId}/sddefault.jpg`,
+        `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+      );
+    }
+    if (channel.logo && !channel.logo.includes("upload.wikimedia.org")) urls.push(channel.logo);
+    return [...new Set(urls.filter(Boolean))];
+  }, [channel.logo, videoId]);
+  const candidateKey = candidateUrls.join("|");
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  useEffect(() => setCandidateIndex(0), [channel.id, candidateKey]);
 
   const initials = useMemo(() => {
     const clean = channel.name.replace(/(\b(HD|TV|Live|Channel|News|India|Hindi|English)\b)/gi, "").trim();
@@ -30,20 +45,11 @@ export default function ChannelThumbnail({ channel, className = "", size = "md" 
     if (cat.includes("religio") || cat.includes("devot")) return "from-amber-600 to-orange-700";
     if (cat.includes("music")) return "from-pink-600 to-rose-700";
     if (cat.includes("kid")) return "from-emerald-500 to-teal-700";
+    if (cat.includes("education")) return "from-emerald-600 to-teal-800";
     return "from-slate-700 to-slate-900";
   }, [channel.category]);
 
-  const candidateUrl = useMemo(() => {
-    if (channel.logo && !channel.logo.includes("upload.wikimedia.org")) {
-      return channel.logo;
-    }
-    if (videoId) {
-      return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-    }
-    return channel.logo || null;
-  }, [channel.logo, videoId]);
-
-  if (hasError || !candidateUrl) {
+  if (candidateIndex >= candidateUrls.length) {
     return (
       <div className={`flex flex-col items-center justify-center bg-gradient-to-br ${gradientClass} text-white font-black select-none ${className}`}>
         <Tv className={size === "lg" ? "h-8 w-8 mb-1 opacity-80" : size === "sm" ? "h-4 w-4 opacity-80" : "h-6 w-6 mb-0.5 opacity-80"} />
@@ -56,10 +62,11 @@ export default function ChannelThumbnail({ channel, className = "", size = "md" 
 
   return (
     <img
-      src={candidateUrl}
-      alt=""
+      key={candidateUrls[candidateIndex]}
+      src={candidateUrls[candidateIndex]}
+      alt={`${channel.name} thumbnail`}
       loading="lazy"
-      onError={() => setHasError(true)}
+      onError={() => setCandidateIndex((index) => index + 1)}
       className={`${className} object-contain`}
     />
   );
