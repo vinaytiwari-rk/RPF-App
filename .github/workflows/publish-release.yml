@@ -5,29 +5,80 @@ on:
     workflows: ["Build Android APK"]
     types: [completed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Successful Build Android APK run ID to publish (main branch only)"
+        required: true
+        type: string
 
 permissions:
   contents: write
   actions: read
 
 concurrency:
-  group: publish-release-${{ github.event.workflow_run.head_sha }}
+  group: publish-release-${{ github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}
   cancel-in-progress: false
 
 jobs:
   publish-release:
     if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main' &&
-      startsWith(github.event.workflow_run.head_commit.message, 'chore(release): bump version to ')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     steps:
+      - name: Resolve and validate source build
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_RUN_ID: ${{ github.event.workflow_run.id }}
+          INPUT_RUN_ID: ${{ inputs.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            RUN_ID="$EVENT_RUN_ID"
+          else
+            RUN_ID="$INPUT_RUN_ID"
+          fi
+          if ! [[ "$RUN_ID" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid workflow run ID."
+            exit 1
+          fi
+
+          RUN_JSON="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID")"
+          CONCLUSION="$(jq -r '.conclusion // empty' <<< "$RUN_JSON")"
+          HEAD_BRANCH="$(jq -r '.head_branch // empty' <<< "$RUN_JSON")"
+          HEAD_SHA="$(jq -r '.head_sha // empty' <<< "$RUN_JSON")"
+          HEAD_REPO="$(jq -r '.repository.full_name // empty' <<< "$RUN_JSON")"
+          if [ "$HEAD_REPO" != "$GITHUB_REPOSITORY" ] || [ "$CONCLUSION" != "success" ] || [ "$HEAD_BRANCH" != "main" ] || [ -z "$HEAD_SHA" ]; then
+            echo "::error::Source build must be a successful Build Android APK run from this repository's main branch."
+            exit 1
+          fi
+
+          SUBJECT="$(gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA" --jq '.commit.message' | head -n 1)"
+          echo "Source run: $RUN_ID"
+          echo "Source SHA: $HEAD_SHA"
+          echo "Source subject: $SUBJECT"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          if [[ "$SUBJECT" == "chore(release): bump version to "* ]]; then
+            echo "is_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_release=false" >> "$GITHUB_OUTPUT"
+            echo "Source commit is not a version-bump release commit; nothing to publish."
+          fi
+
       - name: Checkout versioned commit
+        if: steps.source.outputs.is_release == 'true'
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ steps.source.outputs.sha }}
 
       - name: Read release version
+        if: steps.source.outputs.is_release == 'true'
         id: version
         shell: bash
         run: |
@@ -37,21 +88,20 @@ jobs:
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Download Android build artifacts
-        id: artifacts
-        continue-on-error: true
+        if: steps.source.outputs.is_release == 'true'
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ steps.source.outputs.run_id }}
           path: release-assets
           merge-multiple: true
 
-      - name: Publish release with signed APK when available
+      - name: Publish release with signed APK
+        if: steps.source.outputs.is_release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
-          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+          RELEASE_SHA: ${{ steps.source.outputs.sha }}
         shell: bash
         run: |
           set -euo pipefail
@@ -60,13 +110,9 @@ jobs:
             exit 0
           fi
 
-          APK_PATH=""
-          if [ -d release-assets ]; then
-            APK_PATH="$(find release-assets -type f -name 'RPF-Samahit-update.apk' -print -quit || true)"
-          fi
-
+          APK_PATH="$(find release-assets -type f -name 'RPF-Samahit-update.apk' -print -quit || true)"
           if [ -z "$APK_PATH" ]; then
-            echo "::error::No signed RPF-Samahit-update.apk was found in the successful Android workflow artifacts. Refusing to publish an incomplete production release."
+            echo "::error::No signed RPF-Samahit-update.apk was found in the source build artifacts. Refusing to publish an incomplete production release."
             exit 1
           fi
 
