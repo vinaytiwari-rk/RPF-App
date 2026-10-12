@@ -303075,11 +303075,15 @@ router3.get("/proxy", async (req2, res) => {
   res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "*");
   try {
-    const parsed = new import_url2.URL(rawUrl);
+    let fetchUrl = rawUrl;
+    if (fetchUrl.includes("radio.wavespb.com/live/")) {
+      fetchUrl = fetchUrl.replace("https://radio.wavespb.com/live/", "https://d1tmej9eu7kw5c.cloudfront.net/");
+    }
+    const parsed = new import_url2.URL(fetchUrl);
     if (!["http:", "https:"].includes(parsed.protocol)) {
       return res.status(400).json({ error: "Invalid URL protocol" });
     }
-    const upstream = await fetch2(rawUrl, {
+    const upstream = await fetch2(fetchUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Accept": "*/*",
@@ -303099,13 +303103,14 @@ router3.get("/proxy", async (req2, res) => {
       const host = req2.headers["x-forwarded-host"] || req2.get("host") || "appapi.therpfoundation.org";
       const protocol = req2.headers["x-forwarded-proto"] || req2.protocol || "https";
       const proxyBase = `${protocol}://${host}/api/iptv/proxy`;
+      const targetBaseUrl = upstream.url || fetchUrl;
       const rewritten = text3.split(/\r?\n/).map((line) => {
         const trimmed = line.trim();
         if (!trimmed) return line;
         if (trimmed.startsWith("#")) {
           return line.replace(/URI="([^"]+)"/g, (_3, uri) => {
             try {
-              const full = new import_url2.URL(uri, rawUrl).href;
+              const full = new import_url2.URL(uri, targetBaseUrl).href;
               return `URI="${proxyBase}?url=${encodeURIComponent(full)}"`;
             } catch {
               return `URI="${uri}"`;
@@ -303113,7 +303118,7 @@ router3.get("/proxy", async (req2, res) => {
           });
         }
         try {
-          const full = new import_url2.URL(trimmed, rawUrl).href;
+          const full = new import_url2.URL(trimmed, targetBaseUrl).href;
           return `${proxyBase}?url=${encodeURIComponent(full)}`;
         } catch {
           return line;
@@ -303122,9 +303127,22 @@ router3.get("/proxy", async (req2, res) => {
       return res.send(rewritten);
     }
     if (contentType) res.setHeader("Content-Type", contentType);
-    const cacheControl = upstream.headers.get("cache-control");
-    if (cacheControl) res.setHeader("Cache-Control", cacheControl);
-    else res.setHeader("Cache-Control", "public, max-age=3600");
+    if (contentType.startsWith("audio/") || contentType.includes("mpeg") || contentType.includes("aac")) {
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.setHeader("Connection", "keep-alive");
+    } else {
+      const cacheControl = upstream.headers.get("cache-control");
+      if (cacheControl) res.setHeader("Cache-Control", cacheControl);
+      else res.setHeader("Cache-Control", "public, max-age=3600");
+    }
+    req2.on("close", () => {
+      try {
+        if (upstream.body && typeof upstream.body.destroy === "function") {
+          upstream.body.destroy();
+        }
+      } catch {
+      }
+    });
     upstream.body?.pipe(res);
   } catch (e6) {
     console.error("IPTV proxy error:", e6?.message || e6);
@@ -352335,11 +352353,11 @@ router28.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21563,
-      versionName: "2.5.3",
+      versionCode: 21564,
+      versionName: "2.5.4",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
-      releaseNotes: "\u2022 Instant Live TV Autoplay: Fixed playback pause and play button lock; video plays immediately on selection\n\u2022 Full-Screen Responsive Fill: Fixed zoomed-out and shrunk video rendering; player expands cleanly to 100% container\n\u2022 Android Media WebSettings: Enabled native autoplay without gesture restrictions in WebView\n\u2022 Internet Radio Stream Fix: Restored Akashvani and Private FM streaming with instant playback and verified Bitgravity stream\n\u2022 Quick Fullscreen & Unmute: Added dedicated 1-tap buttons for fullscreen view and instant unmuting\n\u2022 Universal IPTV Proxy: Rewrote absolute segment and playlist URLs preventing Android connection failures"
+      releaseNotes: "\u2022 Profile & Version Display: Deduplicated Legal & Policy items; removed redundant update check from About App modal and display verified installed build number\n\u2022 Instant Live TV Autoplay: Fixed playback pause and play button lock; video plays immediately on selection with VHS override engine\n\u2022 Live Radio Playback Parity: Upgraded 277 Akashvani live channels and private FM to direct high-speed CloudFront CDN streams (Vividh Bharati, Bhopal, Gold, Rainbow)\n\u2022 Stream Redirection Fix: Rewrote relative playlist and segment redirects ensuring zero buffering loops in Android WebView\n\u2022 Fullscreen & Responsive Fit: Optimized live stream video layout for 100% responsive display on all screen sizes"
     });
   } catch (err2) {
     return res.status(500).json({ success: false, error: err2?.message || "Failed to read update manifest" });
@@ -355679,6 +355697,28 @@ app.use("/uploads", (req2, res, next2) => {
   res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
   next2();
 }, import_express36.default.static(import_path15.default.join(process.cwd(), "uploads")));
+app.use("/updates", (req2, res, next2) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  next2();
+}, import_express36.default.static(import_path15.default.join(process.cwd(), "updates")));
+app.get("/updates/manifest.json", (req2, res, next2) => {
+  const p5 = import_path15.default.join(process.cwd(), "updates", "manifest.json");
+  if (import_fs12.default.existsSync(p5)) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    return res.sendFile(p5);
+  }
+  return res.redirect("/api/public/app-update");
+});
+app.use("/download", (req2, res, next2) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  next2();
+}, import_express36.default.static(import_path15.default.join(process.cwd(), "download")));
 app.use("/app", import_express36.default.static(import_path15.default.join(process.cwd(), "public", "app")));
 app.get("/app", (req2, res) => {
   res.redirect("/app/");

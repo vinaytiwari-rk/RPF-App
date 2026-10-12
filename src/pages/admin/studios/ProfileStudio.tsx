@@ -183,7 +183,8 @@ export const DEFAULT_PROFILE_CONFIG: ProfileConfig = {
     { id: "privacy", title: "Privacy Policy", sub: "How we handle information and privacy", iconName: "Lock", active: true },
     { id: "disclaimer", title: "Disclaimer & Notice", sub: "Important transparency and responsibility notices", iconName: "AlertTriangle", active: true },
     { id: "support", title: "Help Desk & Support", sub: "Get help, report issues & share feedback", iconName: "HelpCircle", active: true },
-    { id: "about", title: "About App & Version", sub: "About Samahit, volunteers & app version", iconName: "Info", active: true },
+    { id: "update", title: "Check for Updates", sub: "Check for newer app release", iconName: "Download", active: true },
+    { id: "about", title: "About App & Version", sub: "Installed version & app details", iconName: "Info", active: true },
     { id: "logout", title: "Log Out of Account", sub: "Sign out safely", iconName: "LogOut", active: true }
   ]
 };

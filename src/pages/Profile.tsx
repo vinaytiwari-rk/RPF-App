@@ -213,24 +213,33 @@ export default function Profile() {
   }, [profileConfig, hi]);
 
   const legalItems = useMemo(() => {
-    if (Array.isArray(profileConfig?.legalItems) && profileConfig.legalItems.length > 0) {
-      return profileConfig.legalItems
-        .filter((i: any) => i.active !== false && i.id !== "logout")
-        .map((i: any) => ({
-          id: i.id as LegalModalType,
-          icon: (LucideIcons as any)[i.iconName] || FileText,
-          title: i.title,
-          sub: i.sub
-        }));
-    }
-    return [
-      { id: "terms" as const, icon: FileText, title: hi ? "नियम एवं शर्तें" : "Terms & Conditions", sub: hi ? "समाहित उपयोग के नियम व शर्तें" : "Terms governing Samahit usage" },
-      { id: "privacy" as const, icon: Lock, title: hi ? "गोपनीयता नीति" : "Privacy Policy", sub: hi ? "डेटा सुरक्षा व गोपनीयता नीति" : "How we handle information and privacy" },
-      { id: "disclaimer" as const, icon: AlertTriangle, title: hi ? "अस्वीकरण व सूचना" : "Disclaimer & Notice", sub: hi ? "महत्वपूर्ण पारदर्शिता व उत्तरदायित्व सूचनाएं" : "Important transparency and responsibility notices" },
-      { id: "support" as const, icon: HelpCircle, title: hi ? "सहायता एवं संपर्क" : "Help Desk & Support", sub: hi ? "सहायता, समस्या रिपोर्ट व सुझाव" : "Get help, report issues & share feedback" },
-      { id: "update" as const, icon: Download, title: hi ? "ऐप अपडेट केंद्र" : "Check for Updates", sub: hi ? `मौजूदा: v${versionInfo.versionName} • अपडेट जांचें` : `Current: v${versionInfo.versionName} • Check updates` },
-      { id: "about" as const, icon: Info, title: hi ? "ऐप संस्करण एवं जानकारी" : "About App & Version", sub: hi ? "समाहित ऐप, वालंटियर्स व संस्करण" : "About Samahit, volunteers & app version" },
-    ];
+    const rawItems: { id: LegalModalType; icon: any; title: string; sub: string }[] =
+      Array.isArray(profileConfig?.legalItems) && profileConfig.legalItems.length > 0
+        ? profileConfig.legalItems
+            .filter((i: any) => i.active !== false && i.id !== "logout")
+            .map((i: any) => ({
+              id: i.id as LegalModalType,
+              icon: (LucideIcons as any)[i.iconName] || FileText,
+              title: i.title,
+              sub: i.sub
+            }))
+        : [
+            { id: "terms" as const, icon: FileText, title: hi ? "नियम एवं शर्तें" : "Terms & Conditions", sub: hi ? "समाहित उपयोग के नियम व शर्तें" : "Terms governing Samahit usage" },
+            { id: "privacy" as const, icon: Lock, title: hi ? "गोपनीयता नीति" : "Privacy Policy", sub: hi ? "डेटा सुरक्षा व गोपनीयता नीति" : "How we handle information and privacy" },
+            { id: "disclaimer" as const, icon: AlertTriangle, title: hi ? "अस्वीकरण व सूचना" : "Disclaimer & Notice", sub: hi ? "महत्वपूर्ण पारदर्शिता व उत्तरदायित्व सूचनाएं" : "Important transparency and responsibility notices" },
+            { id: "support" as const, icon: HelpCircle, title: hi ? "सहायता एवं संपर्क" : "Help Desk & Support", sub: hi ? "सहायता, समस्या रिपोर्ट व सुझाव" : "Get help, report issues & share feedback" },
+            { id: "update" as const, icon: Download, title: hi ? "ऐप अपडेट केंद्र" : "Check for Updates", sub: hi ? `मौजूदा: v${versionInfo.versionName} • अपडेट जांचें` : `Current: v${versionInfo.versionName} • Check updates` },
+            { id: "about" as const, icon: Info, title: hi ? "ऐप संस्करण एवं जानकारी" : "About App & Version", sub: hi ? `संस्करण: v${versionInfo.versionName} • वालंटियर्स व विवरण` : `Version: v${versionInfo.versionName} • Volunteers & Details` },
+          ];
+
+    // Enforce strict uniqueness by id to prevent duplicate display
+    const seen = new Set<string>();
+    return rawItems.filter((item) => {
+      const key = item.id || "";
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }, [profileConfig, hi, versionInfo.versionName]);
 
   return (
@@ -747,22 +756,16 @@ export default function Profile() {
                       </div>
                       <div>
                         <h4 className="text-base font-black text-[#243B32]">Samahit Application</h4>
-                        <p className="text-[11px] text-[#D97706] font-extrabold uppercase tracking-wider">
-                          v{versionInfo.versionName} • Build {versionInfo.versionCode}
-                        </p>
+                        <div className="mt-1.5 inline-flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200/80 px-3.5 py-1">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-[#167C5A]" />
+                          <span className="text-xs font-black text-[#167C5A] tracking-wide">
+                            Version {versionInfo.versionName} (Build {versionInfo.versionCode})
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-[11px] text-slate-600 max-w-xs mx-auto">
-                        Useful • Simple • Transparent • Accessible • Community-Oriented
+                      <p className="text-[11px] text-slate-500 max-w-xs mx-auto pt-1 font-medium">
+                        {hi ? "स्थापित व नवीनतम संस्करण • अपडेट के लिए मुख्य मेनू में 'ऐप अपडेट केंद्र' देखें" : "Installed & verified version • For updates, use 'Check for Updates' in Profile"}
                       </p>
-                      <div className="pt-2">
-                        <button
-                          onClick={handleCheckForUpdates}
-                          className="inline-flex items-center gap-2 rounded-xl bg-[#245D45] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#1d4f3a] transition-all active:scale-95"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" />
-                          {hi ? "अपडेट जांचें" : "Check for Updates"}
-                        </button>
-                      </div>
                     </div>
 
                     <div className="space-y-2 border-t border-slate-100 pt-3">

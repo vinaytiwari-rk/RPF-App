@@ -95,12 +95,14 @@ function DirectStreamPlayer({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [currentSrc, setCurrentSrc] = useState<string>(url);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isBuffering, setIsBuffering] = useState<boolean>(true);
   const proxyAttemptedRef = useRef<boolean>(false);
 
   useEffect(() => {
     setCurrentSrc(url);
     proxyAttemptedRef.current = false;
     setErrorMsg(null);
+    setIsBuffering(true);
   }, [url]);
 
   useEffect(() => {
@@ -108,20 +110,22 @@ function DirectStreamPlayer({
     if (!container || !currentSrc) return;
 
     setErrorMsg(null);
+    setIsBuffering(true);
 
     // Create the video-js node inside our dedicated container
     const videoElement = document.createElement("video-js");
-    videoElement.className = "video-js vjs-big-play-button-centered vjs-fill w-full h-full";
+    videoElement.className = "video-js vjs-fill w-full h-full";
     videoElement.setAttribute("playsinline", "true");
     videoElement.setAttribute("webkit-playsinline", "true");
-    videoElement.setAttribute("autoplay", "true");
+    videoElement.setAttribute("autoplay", "autoplay");
     container.appendChild(videoElement);
 
     const sourceType = getMediaSourceType(currentSrc) || "application/x-mpegURL";
 
     const player = videojs(videoElement, {
       controls: true,
-      autoplay: true,
+      autoplay: "any",
+      bigPlayButton: false,
       preload: "auto",
       responsive: true,
       fill: true,
@@ -132,8 +136,10 @@ function DirectStreamPlayer({
           enableLowInitialPlaylist: true,
           smoothQualityChange: true,
           fastReady: true,
-          useDeviceAmpSupported: true,
-          overrideNative: false,
+          maxBufferLength: 6,
+          maxMaxBufferLength: 14,
+          experimentalBufferBasedABR: true,
+          overrideNative: true,
         },
       },
       sources: [
@@ -147,7 +153,7 @@ function DirectStreamPlayer({
     playerRef.current = player;
 
     player.ready(() => {
-      // Force immediate playback on mount without waiting for manual tap
+      // Force immediate playback on mount without waiting for manual gesture
       const playPromise = player.play();
       if (playPromise !== undefined) {
         playPromise
@@ -161,6 +167,18 @@ function DirectStreamPlayer({
             player.play().catch((e: any) => console.warn("Muted autoplay also rejected:", e));
           });
       }
+    });
+
+    player.on("playing", () => {
+      setIsBuffering(false);
+    });
+
+    player.on("canplay", () => {
+      setIsBuffering(false);
+    });
+
+    player.on("waiting", () => {
+      setIsBuffering(true);
     });
 
     player.on("volumechange", () => {
@@ -178,6 +196,7 @@ function DirectStreamPlayer({
         setCurrentSrc(proxyUrl);
         return;
       }
+      setIsBuffering(false);
       setErrorMsg(
         langHi
           ? "यह डायरेक्ट स्ट्रीम वर्तमान में अनुपलब्ध है या प्रदाता द्वारा ब्लॉक की गई है।"
@@ -212,6 +231,18 @@ function DirectStreamPlayer({
       }}
     >
       <div ref={containerRef} className="h-full w-full vjs-fill" data-vjs-player />
+
+      {/* Starting stream / Buffering status indicator */}
+      {isBuffering && !errorMsg && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-[2px] pointer-events-none">
+          <div className="flex items-center gap-2.5 rounded-full bg-slate-900/85 px-4 py-2 border border-white/15 text-white shadow-2xl">
+            <RefreshCw className="h-4 w-4 animate-spin text-amber-400" />
+            <span className="text-xs font-bold tracking-wide">
+              {langHi ? "लाइव स्ट्रीम शुरू हो रही है..." : "Starting Live Stream..."}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Floating unmute notification if browser enforced muted initial autoplay */}
       {isMuted && !errorMsg && (

@@ -23,9 +23,6 @@ html,body,#root{min-height:100%;overflow-x:hidden;background-color:#FFF9F0;backg
   object-fit: contain !important;
 }
 .video-js .vjs-big-play-button {
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
+  display: none !important;
 }
 

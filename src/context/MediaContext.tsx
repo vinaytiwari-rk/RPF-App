@@ -79,6 +79,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     };
 
     const onError = () => {
+      if (!audio.currentSrc || audio.currentSrc === 'about:blank' || !audioRef.current) return;
       setIsRadioPlaying(false);
       setIsRadioLoading(false);
       setRadioError('Station stream could not be loaded. Try another station or check your connection.');
@@ -108,8 +109,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
     const audio = audioRef.current;
     if (audio) {
       audio.pause();
-      audio.removeAttribute('src');
-      audio.load();
+      audio.src = '';
     }
     setIsRadioPlaying(false);
     setIsRadioLoading(false);
@@ -138,25 +138,33 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
       hlsRef.current = null;
     }
     audio.pause();
-    audio.removeAttribute('src');
-    audio.load();
-
     audio.volume = radioVolume;
     audio.muted = isRadioMuted;
 
+    // Resolve target stream URL with auto-fixes for wavespb -> cloudfront and http: -> proxy
+    let targetUrl = station.url.trim();
+    if (targetUrl.includes('radio.wavespb.com/live/')) {
+      targetUrl = targetUrl.replace('https://radio.wavespb.com/live/', 'https://d1tmej9eu7kw5c.cloudfront.net/');
+    }
+
+    // Auto-route plain http: streams through our secure proxy to prevent Mixed Content blocking on HTTPS & Android
+    if (targetUrl.startsWith('http://')) {
+      targetUrl = resolveMediaUrl(`/api/iptv/proxy?url=${encodeURIComponent(targetUrl)}`);
+    }
+
     try {
-      const isHlsStream = /\.m3u8(?:\?|$)/i.test(station.url);
+      const isHlsStream = /\.m3u8(?:\?|$)/i.test(targetUrl);
 
       if (isHlsStream && Hls.isSupported()) {
         const hls = new Hls({
-          enableWorker: true,
+          enableWorker: false,
           lowLatencyMode: true,
-          backBufferLength: 30,
-          maxBufferLength: 20,
-          maxMaxBufferLength: 40,
-          manifestLoadingMaxRetry: 3,
-          levelLoadingMaxRetry: 3,
-          fragLoadingMaxRetry: 3,
+          backBufferLength: 15,
+          maxBufferLength: 10,
+          maxMaxBufferLength: 20,
+          manifestLoadingMaxRetry: 4,
+          levelLoadingMaxRetry: 4,
+          fragLoadingMaxRetry: 4,
         });
         hlsRef.current = hls;
 
@@ -165,7 +173,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
           hls.attachMedia(audio);
         };
 
-        loadHlsSource(station.url);
+        loadHlsSource(targetUrl);
 
         hls.on(Hls.Events.MANIFEST_PARSED, async () => {
           if (!isCurrent()) return;
@@ -190,7 +198,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
           if (!isCurrent() || !data.fatal) return;
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
             // Auto fallback to server proxy on network/CORS error
-            if (!triedProxy && !station.url.includes('/api/iptv/proxy')) {
+            if (!triedProxy && !targetUrl.includes('/api/iptv/proxy')) {
               triedProxy = true;
               const proxyUrl = resolveMediaUrl(`/api/iptv/proxy?url=${encodeURIComponent(station.url)}`);
               console.warn(`Direct radio stream failed for ${station.name}, retrying via proxy:`, proxyUrl);
@@ -198,7 +206,6 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
               return;
             }
             hls.startLoad();
-            setRadioError('Buffering live stream…');
             return;
           }
           if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
@@ -214,11 +221,11 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
         return;
       } else if (isHlsStream && (audio.canPlayType('application/vnd.apple.mpegurl') || audio.canPlayType('application/x-mpegURL'))) {
         // Native HLS fallback (primarily iOS Safari)
-        audio.src = station.url;
+        audio.src = targetUrl;
         audio.load();
       } else {
         // Direct stream (MP3/AAC/Shoutcast/Icecast)
-        audio.src = station.url;
+        audio.src = targetUrl;
         audio.load();
       }
 
@@ -226,7 +233,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
         await audio.play();
       } catch (err: any) {
         // If direct stream fails, retry via server proxy
-        if (!station.url.includes('/api/iptv/proxy')) {
+        if (!targetUrl.includes('/api/iptv/proxy')) {
           const proxyUrl = resolveMediaUrl(`/api/iptv/proxy?url=${encodeURIComponent(station.url)}`);
           audio.src = proxyUrl;
           audio.load();
@@ -248,6 +255,7 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
       } else {
         setRadioError('Could not start this stream. Please try another station or check your connection.');
       }
+      setIsRadioLoading(false);
     } finally {
       if (isCurrent() && !hlsRef.current) {
         setIsRadioLoading(false);

@@ -61,12 +61,18 @@ router.get('/proxy', async (req: Request, res: Response) => {
   res.setHeader('Access-Control-Allow-Headers', '*');
 
   try {
-    const parsed = new URL(rawUrl);
+    // Auto-map wavespb live streams directly to fast CloudFront endpoint
+    let fetchUrl = rawUrl;
+    if (fetchUrl.includes('radio.wavespb.com/live/')) {
+      fetchUrl = fetchUrl.replace('https://radio.wavespb.com/live/', 'https://d1tmej9eu7kw5c.cloudfront.net/');
+    }
+
+    const parsed = new URL(fetchUrl);
     if (!['http:', 'https:'].includes(parsed.protocol)) {
       return res.status(400).json({ error: 'Invalid URL protocol' });
     }
 
-    const upstream = await fetch(rawUrl, {
+    const upstream = await fetch(fetchUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': '*/*',
@@ -89,6 +95,7 @@ router.get('/proxy', async (req: Request, res: Response) => {
       const host = req.headers['x-forwarded-host'] || req.get('host') || 'appapi.therpfoundation.org';
       const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
       const proxyBase = `${protocol}://${host}/api/iptv/proxy`;
+      const targetBaseUrl = upstream.url || fetchUrl;
 
       // Rewrite URIs so that nested playlists, audio tracks, keys, and ts segments go through proxyBase
       const rewritten = text.split(/\r?\n/).map((line) => {
@@ -99,7 +106,7 @@ router.get('/proxy', async (req: Request, res: Response) => {
         if (trimmed.startsWith('#')) {
           return line.replace(/URI="([^"]+)"/g, (_, uri) => {
             try {
-              const full = new URL(uri, rawUrl).href;
+              const full = new URL(uri, targetBaseUrl).href;
               return `URI="${proxyBase}?url=${encodeURIComponent(full)}"`;
             } catch {
               return `URI="${uri}"`;
@@ -109,7 +116,7 @@ router.get('/proxy', async (req: Request, res: Response) => {
 
         // If line is a segment or sub-playlist URL
         try {
-          const full = new URL(trimmed, rawUrl).href;
+          const full = new URL(trimmed, targetBaseUrl).href;
           return `${proxyBase}?url=${encodeURIComponent(full)}`;
         } catch {
           return line;
@@ -119,11 +126,25 @@ router.get('/proxy', async (req: Request, res: Response) => {
       return res.send(rewritten);
     }
 
-    // Direct TS chunk, MP4, or audio
+    // Direct TS chunk, MP4, or live audio stream (Icecast/Shoutcast/AAC/MP3)
     if (contentType) res.setHeader('Content-Type', contentType);
-    const cacheControl = upstream.headers.get('cache-control');
-    if (cacheControl) res.setHeader('Cache-Control', cacheControl);
-    else res.setHeader('Cache-Control', 'public, max-age=3600');
+    if (contentType.startsWith('audio/') || contentType.includes('mpeg') || contentType.includes('aac')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Connection', 'keep-alive');
+    } else {
+      const cacheControl = upstream.headers.get('cache-control');
+      if (cacheControl) res.setHeader('Cache-Control', cacheControl);
+      else res.setHeader('Cache-Control', 'public, max-age=3600');
+    }
+
+    req.on('close', () => {
+      try {
+        if (upstream.body && typeof (upstream.body as any).destroy === 'function') {
+          (upstream.body as any).destroy();
+        }
+      } catch {}
+    });
+
     upstream.body?.pipe(res);
   } catch (e: any) {
     console.error('IPTV proxy error:', e?.message || e);

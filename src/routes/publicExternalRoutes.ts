@@ -450,11 +450,11 @@ router.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21563,
-      versionName: "2.5.3",
+      versionCode: 21564,
+      versionName: "2.5.4",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
-      releaseNotes: "• Instant Live TV Autoplay: Fixed playback pause and play button lock; video plays immediately on selection\n• Full-Screen Responsive Fill: Fixed zoomed-out and shrunk video rendering; player expands cleanly to 100% container\n• Android Media WebSettings: Enabled native autoplay without gesture restrictions in WebView\n• Internet Radio Stream Fix: Restored Akashvani and Private FM streaming with instant playback and verified Bitgravity stream\n• Quick Fullscreen & Unmute: Added dedicated 1-tap buttons for fullscreen view and instant unmuting\n• Universal IPTV Proxy: Rewrote absolute segment and playlist URLs preventing Android connection failures"
+      releaseNotes: "• Profile & Version Display: Deduplicated Legal & Policy items; removed redundant update check from About App modal and display verified installed build number\n• Instant Live TV Autoplay: Fixed playback pause and play button lock; video plays immediately on selection with VHS override engine\n• Live Radio Playback Parity: Upgraded 277 Akashvani live channels and private FM to direct high-speed CloudFront CDN streams (Vividh Bharati, Bhopal, Gold, Rainbow)\n• Stream Redirection Fix: Rewrote relative playlist and segment redirects ensuring zero buffering loops in Android WebView\n• Fullscreen & Responsive Fit: Optimized live stream video layout for 100% responsive display on all screen sizes"
     });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err?.message || "Failed to read update manifest" });

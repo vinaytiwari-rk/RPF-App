@@ -663,6 +663,33 @@ app.use("/uploads", (req, res, next) => {
   next();
 }, express.static(path.join(process.cwd(), "uploads")));
 
+// Serve app updates and downloadable APKs with universal CORS & no-cache headers
+app.use("/updates", (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  next();
+}, express.static(path.join(process.cwd(), "updates")));
+
+app.get("/updates/manifest.json", (req, res, next) => {
+  const p = path.join(process.cwd(), "updates", "manifest.json");
+  if (fs.existsSync(p)) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    return res.sendFile(p);
+  }
+  // If static file is not present on disk, route dynamically to public app-update handler
+  return res.redirect("/api/public/app-update");
+});
+
+app.use("/download", (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  next();
+}, express.static(path.join(process.cwd(), "download")));
+
 // Serve Flutter web app statically at /app
 app.use("/app", express.static(path.join(process.cwd(), "public", "app")));
 app.get("/app", (req, res) => {

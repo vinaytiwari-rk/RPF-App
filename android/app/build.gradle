@@ -9,7 +9,7 @@ android {
         minSdk 24
         targetSdk 36
         versionCode (System.getenv("RPF_VERSION_CODE") ? Integer.parseInt(System.getenv("RPF_VERSION_CODE")) : 20500)
-        versionName '2.5.0'
+        versionName '2.5.4'
     }
 
     signingConfigs {
