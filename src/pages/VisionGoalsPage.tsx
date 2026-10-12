@@ -133,10 +133,10 @@ export default function VisionGoalsPage() {
         <section className="space-y-3">
           <div>
             <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#D97706]">
-              {hi ? "प्रभाव के 6 मुख्य स्तंभ" : "Pillars of Action"}
+              {hi ? "हमारा सामाजिक प्रभाव" : "Our Social Impact"}
             </p>
             <h2 className="mt-0.5 text-xl font-bold text-[#14213D]">
-              {hi ? "कार्य के मुख्य क्षेत्र" : "Strategic Action Pillars"}
+              {hi ? "जहाँ हमारा कार्य बदलाव लाता है" : "Where Our Work Creates Change"}
             </h2>
           </div>
 
