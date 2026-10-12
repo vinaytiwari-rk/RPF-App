@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
-import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns, RefreshCw, VolumeX, RotateCw } from "lucide-react";
+import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2 as MaximizeIcon, ExternalLink, LayoutGrid, List, Columns, RefreshCw, VolumeX, RotateCw } from "lucide-react";
 import { LIVE_TV_DEFAULTS, mergeTvCatalogue, type LiveTvChannel } from "../data/liveTvDefaults";
 import { openExternalLink } from "../utils/browser";
 import { getMediaSourceType } from "../utils/mediaSourceType";
@@ -641,7 +641,7 @@ export default function LiveTV() {
                           {c.category}
                         </p>
                       </div>
-                      <Maximize2 className="w-4 h-4 text-slate-400 group-hover:text-[#14213D] transition-colors shrink-0 ml-2" />
+                      <MaximizeIcon className="w-4 h-4 text-slate-400 group-hover:text-[#14213D] transition-colors shrink-0 ml-2" />
                     </div>
                   </button>
                 );
