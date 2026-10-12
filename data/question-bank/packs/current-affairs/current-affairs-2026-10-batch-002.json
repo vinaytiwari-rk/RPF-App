@@ -1,0 +1,558 @@
+{
+  "packId": "current-affairs-2026-10-batch-002",
+  "version": 1,
+  "subject": "current-affairs",
+  "category": "current_affairs",
+  "titleEn": "Current Affairs — October 2026, Batch 002",
+  "titleHi": "करेंट अफेयर्स — अक्टूबर 2026, बैच 002",
+  "descEn": "Fifteen original bilingual questions based on PIB releases published 9–11 October 2026. Facts were checked against the linked official releases on 12 October 2026.",
+  "descHi": "9–11 अक्टूबर 2026 को प्रकाशित PIB विज्ञप्तियों पर आधारित 15 मौलिक द्विभाषी प्रश्न। तथ्यों को 12 अक्टूबर 2026 को संबंधित आधिकारिक विज्ञप्तियों से जाँचा गया।",
+  "iconName": "Newspaper",
+  "color": "from-blue-600 to-indigo-700",
+  "badge": "PIB source-checked",
+  "questionsCount": 15,
+  "durationMinutes": 15,
+  "questionCount": 15,
+  "questions": [
+    {
+      "id": "ca-pib-20261009-dst-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Science and Technology",
+      "difficulty": "easy",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "Which service was integrated into the redeveloped DST and MoST websites to provide content access in 22 languages?",
+      "questionHi": "22 भाषाओं में सामग्री उपलब्ध कराने के लिए पुनर्विकसित DST और MoST वेबसाइटों में किस सेवा को एकीकृत किया गया?",
+      "optionsEn": [
+        "DigiLocker",
+        "Bhashini",
+        "UMANG",
+        "GeM"
+      ],
+      "optionsHi": [
+        "डिजिलॉकर",
+        "भाषिणी",
+        "उमंग",
+        "जेम"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The PIB release states that integration of Bhashini enables access to content in 22 languages.",
+      "explanationHi": "PIB विज्ञप्ति के अनुसार भाषिणी के एकीकरण से 22 भाषाओं में सामग्री उपलब्ध होती है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321379&lang=1&reg=3",
+        "publishedAt": "2026-10-09",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321379&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261009-dst-002",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Government Digital Services",
+      "difficulty": "medium",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "Which two frameworks were cited for the redeveloped DST and MoST websites?",
+      "questionHi": "पुनर्विकसित DST और MoST वेबसाइटों के लिए किन दो ढाँचों का उल्लेख किया गया?",
+      "optionsEn": [
+        "DBIM 2.0 and GIGW 2.0",
+        "UPI 2.0 and Aadhaar 2.0",
+        "DBIM 3.0 and GIGW 3.0",
+        "RTI Rules and GST Rules"
+      ],
+      "optionsHi": [
+        "DBIM 2.0 और GIGW 2.0",
+        "UPI 2.0 और आधार 2.0",
+        "DBIM 3.0 और GIGW 3.0",
+        "RTI नियम और GST नियम"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "PIB says the portals were developed in accordance with DBIM 3.0 and the Guidelines for Indian Government Websites and Apps (GIGW) 3.0.",
+      "explanationHi": "PIB के अनुसार पोर्टल DBIM 3.0 और Guidelines for Indian Government Websites and Apps (GIGW) 3.0 के अनुरूप बनाए गए।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321379&lang=1&reg=3",
+        "publishedAt": "2026-10-09",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321379&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261009-telemanas-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Public Health",
+      "difficulty": "easy",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "Which toll-free number does the Tele-MANAS mental-health support service use?",
+      "questionHi": "Tele-MANAS मानसिक स्वास्थ्य सहायता सेवा का टोल-फ्री नंबर कौन-सा है?",
+      "optionsEn": [
+        "1098",
+        "112",
+        "1930",
+        "14416"
+      ],
+      "optionsHi": [
+        "1098",
+        "112",
+        "1930",
+        "14416"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The Ministry of Health and Family Welfare identifies 14416 as the national toll-free Tele-MANAS helpline.",
+      "explanationHi": "स्वास्थ्य एवं परिवार कल्याण मंत्रालय ने 14416 को राष्ट्रीय टोल-फ्री Tele-MANAS हेल्पलाइन बताया है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321522&lang=1&reg=3",
+        "publishedAt": "2026-10-09",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321522&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261009-telemanas-002",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Public Health",
+      "difficulty": "easy",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "On which date was Tele-MANAS launched, according to the October 2026 PIB update?",
+      "questionHi": "अक्टूबर 2026 की PIB जानकारी के अनुसार Tele-MANAS किस तारीख को शुरू किया गया था?",
+      "optionsEn": [
+        "10 October 2022",
+        "10 October 2023",
+        "1 January 2022",
+        "15 August 2021"
+      ],
+      "optionsHi": [
+        "10 अक्टूबर 2022",
+        "10 अक्टूबर 2023",
+        "1 जनवरी 2022",
+        "15 अगस्त 2021"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The official release states that Tele-MANAS was launched on 10 October 2022.",
+      "explanationHi": "आधिकारिक विज्ञप्ति के अनुसार Tele-MANAS की शुरुआत 10 अक्टूबर 2022 को हुई थी।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321522&lang=1&reg=3",
+        "publishedAt": "2026-10-09",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321522&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261009-telemanas-003",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Public Health",
+      "difficulty": "medium",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "As of October 2026, how many operational Tele-MANAS cells were reported across all 36 States and Union Territories?",
+      "questionHi": "अक्टूबर 2026 तक सभी 36 राज्यों और केंद्रशासित प्रदेशों में Tele-MANAS के कितने सक्रिय सेल बताए गए?",
+      "optionsEn": [
+        "36",
+        "53",
+        "767",
+        "14,416"
+      ],
+      "optionsHi": [
+        "36",
+        "53",
+        "767",
+        "14,416"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "PIB reported 53 operational cells across all 36 States and Union Territories.",
+      "explanationHi": "PIB ने सभी 36 राज्यों और केंद्रशासित प्रदेशों में 53 सक्रिय सेल बताए।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321522&lang=1&reg=3",
+        "publishedAt": "2026-10-09",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321522&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261011-indra-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Defence and Exercises",
+      "difficulty": "easy",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "INS Sahyadri arrived at which Russian city for Exercise INDRA 2026?",
+      "questionHi": "Exercise INDRA 2026 के लिए INS Sahyadri रूस के किस शहर पहुँचा?",
+      "optionsEn": [
+        "Sochi",
+        "Moscow",
+        "Vladivostok",
+        "Murmansk"
+      ],
+      "optionsHi": [
+        "सोची",
+        "मॉस्को",
+        "व्लादिवोस्तोक",
+        "मरमंस्क"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The PIB release says INS Sahyadri arrived at Vladivostok, Russia, on 10 October 2026.",
+      "explanationHi": "PIB विज्ञप्ति के अनुसार INS Sahyadri 10 अक्टूबर 2026 को रूस के व्लादिवोस्तोक पहुँचा।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321926&lang=1&reg=3",
+        "publishedAt": "2026-10-11",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321926&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261011-indra-002",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Defence and Exercises",
+      "difficulty": "medium",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "Exercise INDRA 2026 is a bilateral exercise between which two navies?",
+      "questionHi": "Exercise INDRA 2026 किन दो नौसेनाओं के बीच द्विपक्षीय अभ्यास है?",
+      "optionsEn": [
+        "Indian Navy and French Navy",
+        "Indian Navy and Royal Navy of the United Kingdom",
+        "Indian Navy and Japan Maritime Self-Defense Force",
+        "Indian Navy and Russian Federation Navy"
+      ],
+      "optionsHi": [
+        "भारतीय नौसेना और फ्रांसीसी नौसेना",
+        "भारतीय नौसेना और यूनाइटेड किंगडम की रॉयल नेवी",
+        "भारतीय नौसेना और जापान की समुद्री आत्मरक्षा बल",
+        "भारतीय नौसेना और रूसी संघ की नौसेना"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "PIB identifies INDRA as a bilateral exercise between the Indian Navy and the Russian Federation Navy.",
+      "explanationHi": "PIB ने INDRA को भारतीय नौसेना और रूसी संघ की नौसेना के बीच द्विपक्षीय अभ्यास बताया है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321926&lang=1&reg=3",
+        "publishedAt": "2026-10-11",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321926&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261011-indra-003",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Defence and Exercises",
+      "difficulty": "medium",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "For which dates was Exercise INDRA 2026 scheduled?",
+      "questionHi": "Exercise INDRA 2026 किन तारीखों के लिए निर्धारित था?",
+      "optionsEn": [
+        "13–18 October 2026",
+        "10–12 October 2026",
+        "20–25 October 2026",
+        "1–6 November 2026"
+      ],
+      "optionsHi": [
+        "13–18 अक्टूबर 2026",
+        "10–12 अक्टूबर 2026",
+        "20–25 अक्टूबर 2026",
+        "1–6 नवंबर 2026"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The release scheduled the exercise for 13 to 18 October 2026.",
+      "explanationHi": "विज्ञप्ति में अभ्यास की अवधि 13 से 18 अक्टूबर 2026 बताई गई।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321926&lang=1&reg=3",
+        "publishedAt": "2026-10-11",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321926&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261010-shreyas-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Defence Manufacturing",
+      "difficulty": "easy",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "What type of vessel is Yard 3040, named Shreyas?",
+      "questionHi": "श्रेयस नाम वाला यार्ड 3040 किस प्रकार का पोत है?",
+      "optionsEn": [
+        "Aircraft carrier",
+        "Next Generation Offshore Patrol Vessel",
+        "Nuclear-powered submarine",
+        "Fleet tanker"
+      ],
+      "optionsHi": [
+        "विमानवाहक पोत",
+        "अगली पीढ़ी का अपतटीय गश्ती पोत",
+        "परमाणु-संचालित पनडुब्बी",
+        "बेड़ा टैंकर"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "PIB identifies Shreyas (Yard 3040) as a Next Generation Offshore Patrol Vessel (NGOPV).",
+      "explanationHi": "PIB ने श्रेयस (यार्ड 3040) को अगली पीढ़ी का अपतटीय गश्ती पोत (NGOPV) बताया है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321795&lang=1&reg=3",
+        "publishedAt": "2026-10-10",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321795&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261010-shreyas-002",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Defence Manufacturing",
+      "difficulty": "easy",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "Where was Yard 3040 (Shreyas) launched on 10 October 2026?",
+      "questionHi": "10 अक्टूबर 2026 को यार्ड 3040 (श्रेयस) का जलावतरण कहाँ हुआ?",
+      "optionsEn": [
+        "Goa Shipyard Ltd, Goa",
+        "Mazagon Dock Shipbuilders, Mumbai",
+        "GRSE, Kolkata",
+        "Hindustan Shipyard, Visakhapatnam"
+      ],
+      "optionsHi": [
+        "गोवा शिपयार्ड लिमिटेड, गोवा",
+        "मझगाँव डॉक शिपबिल्डर्स, मुंबई",
+        "GRSE, कोलकाता",
+        "हिंदुस्तान शिपयार्ड, विशाखापत्तनम"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The vessel was launched at Garden Reach Shipbuilders & Engineers (GRSE) in Kolkata.",
+      "explanationHi": "इस पोत का जलावतरण कोलकाता स्थित गार्डन रीच शिपबिल्डर्स एंड इंजीनियर्स (GRSE) में हुआ।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321795&lang=1&reg=3",
+        "publishedAt": "2026-10-10",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321795&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261010-shreyas-003",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Defence Manufacturing",
+      "difficulty": "medium",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "According to PIB, construction of Next Generation Offshore Patrol Vessels is being undertaken concurrently at which pair of shipyards?",
+      "questionHi": "PIB के अनुसार अगली पीढ़ी के अपतटीय गश्ती पोतों का निर्माण एक साथ किन दो शिपयार्डों में हो रहा है?",
+      "optionsEn": [
+        "Cochin Shipyard and Mazagon Dock",
+        "Hindustan Shipyard and Mazagon Dock",
+        "GRSE and Cochin Shipyard",
+        "Goa Shipyard Ltd (GSL) and GRSE in Kolkata"
+      ],
+      "optionsHi": [
+        "कोचीन शिपयार्ड और मझगाँव डॉक",
+        "हिंदुस्तान शिपयार्ड और मझगाँव डॉक",
+        "GRSE और कोचीन शिपयार्ड",
+        "गोवा शिपयार्ड लिमिटेड (GSL) और कोलकाता स्थित GRSE"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The release names GSL in Goa and GRSE in Kolkata as the two shipyards building NGOPVs concurrently.",
+      "explanationHi": "विज्ञप्ति में NGOPV का एक साथ निर्माण करने वाले शिपयार्ड गोवा का GSL और कोलकाता का GRSE बताए गए हैं।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321795&lang=1&reg=3",
+        "publishedAt": "2026-10-10",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321795&lang=1&reg=3"
+      }
+    },
+    {
+      "id": "ca-pib-20261009-posts-bluedart-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Postal Services",
+      "difficulty": "easy",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "Which organisations signed the October 2026 agreement for India Post Parcel services?",
+      "questionHi": "India Post Parcel सेवाओं के लिए अक्टूबर 2026 का समझौता किन संगठनों के बीच हुआ?",
+      "optionsEn": [
+        "Department of Posts and Blue Dart Express Limited",
+        "Department of Posts and Delhivery",
+        "India Post Payments Bank and Blue Dart",
+        "Department of Telecommunications and DTDC"
+      ],
+      "optionsHi": [
+        "डाक विभाग और ब्लू डार्ट एक्सप्रेस लिमिटेड",
+        "डाक विभाग और डेल्हिवरी",
+        "इंडिया पोस्ट पेमेंट्स बैंक और ब्लू डार्ट",
+        "दूरसंचार विभाग और DTDC"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "PIB reports that the Department of Posts and Blue Dart Express Limited signed the agreement on 9 October 2026.",
+      "explanationHi": "PIB के अनुसार डाक विभाग और ब्लू डार्ट एक्सप्रेस लिमिटेड ने 9 अक्टूबर 2026 को समझौते पर हस्ताक्षर किए।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2321512&lang=2&reg=48",
+        "publishedAt": "2026-10-09",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2321512&lang=2&reg=48"
+      }
+    },
+    {
+      "id": "ca-pib-20261009-posts-bluedart-002",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Postal Services",
+      "difficulty": "medium",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "What capability was the Department of Posts–Blue Dart partnership intended to combine for parcel delivery?",
+      "questionHi": "पार्सल डिलीवरी के लिए डाक विभाग–ब्लू डार्ट साझेदारी का उद्देश्य किन क्षमताओं को जोड़ना था?",
+      "optionsEn": [
+        "Airport security with railway ticketing",
+        "The postal network's nationwide last-mile reach with Blue Dart's logistics presence",
+        "Digital payments with crop insurance",
+        "Mobile networks with satellite navigation"
+      ],
+      "optionsHi": [
+        "हवाईअड्डा सुरक्षा और रेलवे टिकटिंग",
+        "डाक नेटवर्क की देशव्यापी अंतिम-मील पहुँच और ब्लू डार्ट की लॉजिस्टिक्स उपस्थिति",
+        "डिजिटल भुगतान और फसल बीमा",
+        "मोबाइल नेटवर्क और उपग्रह नेविगेशन"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "PIB says the partnership is intended to combine the Department of Posts' extensive reach with Blue Dart's logistics network.",
+      "explanationHi": "PIB के अनुसार इस साझेदारी का उद्देश्य डाक विभाग की व्यापक पहुँच को ब्लू डार्ट के लॉजिस्टिक्स नेटवर्क से जोड़ना है।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2321512&lang=2&reg=48",
+        "publishedAt": "2026-10-09",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2321512&lang=2&reg=48"
+      }
+    },
+    {
+      "id": "ca-pib-20261010-sainya-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Veterans' Welfare",
+      "difficulty": "easy",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "Where did Vice-President C. P. Radhakrishnan visit the Sainya Sampark Mela on 10 October 2026?",
+      "questionHi": "10 अक्टूबर 2026 को उपराष्ट्रपति सी. पी. राधाकृष्णन ने सैनिक संपर्क मेला कहाँ देखा?",
+      "optionsEn": [
+        "Ranchi, Jharkhand",
+        "Patna, Bihar",
+        "Deoghar, Jharkhand",
+        "Guwahati, Assam"
+      ],
+      "optionsHi": [
+        "राँची, झारखंड",
+        "पटना, बिहार",
+        "देवघर, झारखंड",
+        "गुवाहाटी, असम"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "PIB reports that the Vice-President visited the Sainya Sampark Mela in Deoghar, Jharkhand.",
+      "explanationHi": "PIB के अनुसार उपराष्ट्रपति ने झारखंड के देवघर में सैनिक संपर्क मेले का दौरा किया।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2321754&lang=2&reg=48",
+        "publishedAt": "2026-10-10",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2321754&lang=2&reg=48"
+      }
+    },
+    {
+      "id": "ca-pib-20261010-chennai-001",
+      "subject": "current-affairs",
+      "type": "current_affairs",
+      "topic": "Infrastructure",
+      "difficulty": "medium",
+      "examTags": [
+        "general-awareness",
+        "current-affairs",
+        "government"
+      ],
+      "questionEn": "According to PIB's 10 October preview, development projects worth over ₹13,000 crore were scheduled for 11 October in which city?",
+      "questionHi": "PIB की 10 अक्टूबर की पूर्व-घोषणा के अनुसार 11 अक्टूबर को ₹13,000 करोड़ से अधिक की विकास परियोजनाएँ किस शहर में निर्धारित थीं?",
+      "optionsEn": [
+        "Kolkata, West Bengal",
+        "Jaipur, Rajasthan",
+        "Lucknow, Uttar Pradesh",
+        "Chennai, Tamil Nadu"
+      ],
+      "optionsHi": [
+        "कोलकाता, पश्चिम बंगाल",
+        "जयपुर, राजस्थान",
+        "लखनऊ, उत्तर प्रदेश",
+        "चेन्नई, तमिलनाडु"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The PIB preview stated that the Prime Minister was scheduled to inaugurate, dedicate and lay foundation stones for projects worth over ₹13,000 crore in Chennai.",
+      "explanationHi": "PIB की पूर्व-घोषणा में बताया गया था कि प्रधानमंत्री चेन्नई में ₹13,000 करोड़ से अधिक की परियोजनाओं का उद्घाटन, लोकार्पण और शिलान्यास करने वाले थे।",
+      "source": {
+        "sourceId": "pib",
+        "articleUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321671&lang=1&reg=3",
+        "publishedAt": "2026-10-10",
+        "verifiedAt": "2026-10-12",
+        "factCheckUrl": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321671&lang=1&reg=3"
+      }
+    }
+  ]
+}
