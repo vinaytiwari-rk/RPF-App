@@ -45,11 +45,11 @@ export default function FounderMessage() {
               <h1 className="mt-2 text-2xl font-black tracking-tight text-[#14213D] sm:text-3xl">
                 {hi ? "सद्भाव, सेवा और संकल्प" : "Compassion, Service & Resolve"}
               </h1>
-              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-amber-200 bg-white/70 p-3 shadow-xs">
-                <div className="h-12 w-12 overflow-hidden rounded-full border border-amber-300 bg-slate-100">
+              <div className="mt-5 flex items-center gap-4 rounded-2xl border border-amber-200 bg-white/70 p-3 shadow-xs sm:items-start sm:p-4">
+                <div className="h-32 w-24 shrink-0 overflow-hidden rounded-2xl border border-amber-300 bg-slate-100 shadow-sm sm:h-48 sm:w-36">
                   <img
                     src="/assets/founder.png"
-                    alt="Rohit Pandit"
+                    alt="Rohit Pandit, Founder of RP Foundation"
                     className="h-full w-full object-cover object-top"
                   />
                 </div>
@@ -109,7 +109,7 @@ export default function FounderMessage() {
               onClick={() => nav("/vision-goals")}
               className="inline-flex items-center gap-2 rounded-full bg-[#D97706] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm transition hover:bg-[#c76b05]"
             >
-              {hi ? "दृष्टि देखें" : "Explore Our Vision"}
+              {hi ? "मेरी दृष्टि देखें" : "Explore My Vision"}
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
