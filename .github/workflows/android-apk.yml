@@ -184,7 +184,7 @@ jobs:
             'git',
             ['log', range, '--pretty=format:%s'],
             { encoding: 'utf8' }
-          ).split('\\n').filter(line => line.trim());
+          ).split('\n').filter(line => line.trim());
 
           const friendly = [];
           for (const subject of subjects) {
@@ -211,11 +211,11 @@ jobs:
             downloadUrl: 'https://appapi.therpfoundation.org/download/rpf-app.apk',
             minSupportedVersionCode: 20500,
             releaseNotes: friendly.length
-              ? 'What’s new in this update:\\n• ' + friendly.join('\\n• ')
+              ? 'What’s new in this update:\n• ' + friendly.join('\n• ')
               : 'Bug fixes and app stability improvements.',
             publishedAt: process.env.PUB_DATE
           };
-          fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\\n', 'utf8');
+          fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\n', 'utf8');
           NODE
           echo "Generated updates/manifest.json:"
           cat updates/manifest.json
