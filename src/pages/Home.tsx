@@ -1,8 +1,14 @@
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
-import { BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, CloudSun, GraduationCap } from "lucide-react";
+import { 
+  BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, 
+  CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, CloudSun, 
+  GraduationCap, Tv, Play, Sparkles, Award, Clapperboard, Film, Heart, HandHeart, 
+  Droplets, Trash2, Trees, Landmark, Activity, TrendingUp 
+} from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 import { resolveMediaUrl } from "../utils/media";
@@ -10,6 +16,9 @@ import { RP_FOUNDATION_LOGO, ROHIT_PANDIT_PHOTO } from "../assets/foundationBran
 import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
 import LiveVerifiedMarketSection from "../components/LiveVerifiedMarketSection";
 import { AVAILABLE_ICONS } from "../components/admin/IconPickerModal";
+import ChannelThumbnail from "../components/ChannelThumbnail";
+import { LIVE_TV_DEFAULTS } from "../data/liveTvDefaults";
+import { DEFAULT_20_REELS } from "../data/defaultReels";
 
 const fallbackSlides = [
   { image: "/assets/mega_camp_banner.png", titleEn: "Healthcare support for the community", subEn: "Health camps, medical support and community care.", route: "/health-care" },
@@ -223,6 +232,60 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/supreme/configs").then(r => r.json()).then(d => { if(d.success) setSupremeConfig(d.configs); }).catch(() => {});
   }, []);
+
+  const [cardImpact, setCardImpact] = useState<{ totalCards: number; scope: string } | null>(null);
+  useEffect(() => {
+    let active = true;
+    axios.get("/api/public/cards/impact", { timeout: 8000 }).then(({ data }) => {
+      if (active && data?.success && Number.isFinite(data.totalCards)) {
+        setCardImpact({ totalCards: data.totalCards, scope: data.scope });
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const [homeReels, setHomeReels] = useState<any[]>(() => DEFAULT_20_REELS.slice(0, 8));
+  useEffect(() => {
+    let active = true;
+    axios.get("/api/public/social-feed")
+      .then(res => {
+        if (active && res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+          setHomeReels(res.data.data.slice(0, 8));
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const homeTvChannels = useMemo(() => {
+    const configured = Array.isArray(cmsConfig?.liveTvChannels) ? cmsConfig.liveTvChannels : [];
+    const list = configured.length > 0 ? configured : LIVE_TV_DEFAULTS;
+    return list.filter((c: any) => c && c.enabled !== false).slice(0, 8);
+  }, [cmsConfig?.liveTvChannels]);
+
+  const liveImpactStats = useMemo(() => {
+    if (Array.isArray(cmsConfig?.impactStats) && cmsConfig.impactStats.length > 0) {
+      return [...cmsConfig.impactStats]
+        .filter((s: any) => s && s.enabled !== false)
+        .sort((a: any, b: any) => (Number(a.order) || 0) - (Number(b.order) || 0))
+        .map((s: any) => {
+          const val = s.id === "cards_issued" && cardImpact?.totalCards ? cardImpact.totalCards : s.value;
+          const num = typeof val === "number" ? val.toLocaleString("en-IN") : val;
+          return {
+            id: s.id,
+            label: s.label || s.labelEn || "Metric",
+            value: `${num}${s.suffix || "+"}`,
+            icon: (AVAILABLE_ICONS as any)[s.iconName] || Award
+          };
+        });
+    }
+    return [
+      { id: "cards", label: "Jan Seva Cards", value: (cardImpact?.totalCards || 66505).toLocaleString("en-IN") + "+", icon: Award },
+      { id: "camps", label: "Health & Eye Camps", value: "150+", icon: Stethoscope },
+      { id: "volunteers", label: "Active Volunteers", value: "2,400+", icon: UsersRound },
+      { id: "jobs", label: "Livelihood & Jobs", value: "1,800+", icon: BriefcaseBusiness }
+    ];
+  }, [cmsConfig?.impactStats, cardImpact]);
   const [marquee1, setMarquee1] = useState<string[]>(() => {
     try {
       const cached = JSON.parse(localStorage.getItem("@rpf_marquee1_national_v2") || "[]");
@@ -677,14 +740,22 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 5. OUR VISION & LEADERSHIP (TRANSPARENT BACKGROUND) */}
+        {/* 5. OUR VISION & LEADERSHIP (WITH INTEGRATED GROUND IMPACT INITIATIVES) */}
         <section className="pt-2">
-          <div className="mb-2.5">
-            <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Foundation</p>
-            <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Our Vision & Leadership</h2>
+          <div className="mb-2.5 flex items-center justify-between">
+            <div>
+              <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Foundation & Impact</p>
+              <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Our Vision & Leadership</h2>
+            </div>
+            <button
+              onClick={() => navigate("/impact")}
+              className="text-xs font-bold text-[#167C5A] hover:underline flex items-center gap-1"
+            >
+              Full Impact <ChevronRight className="h-3.5 w-3.5" />
+            </button>
           </div>
 
-          <div className="rounded-[24px] border border-slate-200/80 bg-transparent backdrop-blur-xs p-5 shadow-2xs space-y-4">
+          <div className="rounded-[24px] border border-slate-200/80 bg-transparent backdrop-blur-xs p-4 sm:p-5 shadow-2xs space-y-4">
             {/* Vision Narrative */}
             <div className="flex items-start gap-3.5">
               <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-white border border-emerald-500/20 p-1.5 shadow-sm">
@@ -740,6 +811,75 @@ export default function Home() {
                 </button>
               </div>
             </div>
+
+            <hr className="border-slate-200/60" />
+
+            {/* Integrated Ground Impact Metrics & Seva Focus */}
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Activity className="h-4 w-4 text-[#167C5A]" />
+                  <span className="text-[12px] font-extrabold uppercase tracking-wider text-[#14213D]">
+                    Ground Seva Impact & Field Results
+                  </span>
+                </div>
+                <span className="text-[10.5px] font-bold text-slate-400">Live Verified</span>
+              </div>
+
+              {/* 4 Impact Metric Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {liveImpactStats.map((stat: any) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div
+                      key={stat.id || stat.label}
+                      onClick={() => navigate("/impact")}
+                      className="cursor-pointer rounded-xl border border-slate-200/80 bg-white/60 hover:bg-emerald-50/40 p-2.5 text-center transition-all hover:scale-[1.02] shadow-2xs"
+                    >
+                      <Icon className="mx-auto h-4 w-4 text-[#167C5A] mb-1" />
+                      <p className="text-[15px] sm:text-[16px] font-black text-[#14213D] leading-tight">
+                        {stat.value}
+                      </p>
+                      <p className="text-[10px] font-bold text-slate-500 mt-0.5 line-clamp-1">
+                        {stat.label}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Seva Action Focus Badges */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {[
+                  { label: "Clean Environment", icon: Trees, color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+                  { label: "Water Relief", icon: Droplets, color: "text-sky-700 bg-sky-50 border-sky-200" },
+                  { label: "Pink E-Rickshaw", icon: Heart, color: "text-rose-700 bg-rose-50 border-rose-200" },
+                  { label: "Free Healthcare", icon: Stethoscope, color: "text-teal-700 bg-teal-50 border-teal-200" },
+                  { label: "Education & Youth", icon: GraduationCap, color: "text-indigo-700 bg-indigo-50 border-indigo-200" },
+                ].map((tag) => {
+                  const TagIcon = tag.icon;
+                  return (
+                    <span
+                      key={tag.label}
+                      onClick={() => navigate("/impact")}
+                      className={`cursor-pointer inline-flex items-center gap-1 text-[10.5px] font-extrabold px-2 py-0.5 rounded-md border ${tag.color} hover:opacity-85 transition`}
+                    >
+                      <TagIcon className="h-3 w-3" />
+                      {tag.label}
+                    </span>
+                  );
+                })}
+              </div>
+
+              {/* Link to Full Impact Portal */}
+              <button
+                onClick={() => navigate("/impact")}
+                className="w-full mt-2 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 py-2 px-3 text-xs font-black text-[#167C5A] transition active:scale-[0.99]"
+              >
+                <span>View Full Ground Impact, Initiatives & Volunteer Network</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
         </section>
 
@@ -767,41 +907,122 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 7. SOCIAL IMPACT HIGHLIGHTS (COMMUNITY, CARE, ACTIVE - TRANSPARENT BACKGROUND & LINKED TO IMPACT PAGE) */}
+        {/* 7. LIVE TV BROADCAST PREVIEW */}
         <section className="pt-2">
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#167C5A]">Our Field Impact</p>
-              <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Community, Care, Active</h2>
+          <div className="mb-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2.5 w-2.5 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+              </span>
+              <div>
+                <p className="text-[10.5px] font-bold uppercase tracking-widest text-red-600">Live Streaming</p>
+                <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Live TV Channels</h2>
+              </div>
             </div>
             <button
-              onClick={() => navigate("/community-care-active")}
-              className="text-xs font-bold text-[#167C5A] hover:underline flex items-center gap-1"
+              onClick={() => navigate("/live-tv")}
+              className="text-xs font-bold text-[#C2410C] hover:underline flex items-center gap-1"
             >
-              View All <ChevronRight className="h-3.5 w-3.5" />
+              Watch All (760+) <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          <div 
-            onClick={() => navigate("/community-care-active")}
-            className="grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-transparent backdrop-blur-xs shadow-2xs cursor-pointer hover:border-emerald-300/80 transition-all"
-          >
-            {fieldImpactMetrics.map(({ icon: Icon, value, label, route }) => (
-              <div 
-                key={label} 
-                onClick={(e) => {
-                  if (route && route !== "/community-care-active") {
-                    e.stopPropagation();
-                    navigate(route);
-                  }
-                }}
-                className="border-r border-slate-200/60 px-2 py-4 text-center last:border-r-0 hover:bg-emerald-50/20 transition-colors"
+          <div className="flex gap-3 overflow-x-auto pb-2 pt-1 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+            {homeTvChannels.map((ch: any) => (
+              <motion.div
+                key={ch.id || ch.name}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => navigate(`/live-tv?ch=${encodeURIComponent(ch.id || ch.name)}`)}
+                className="group relative flex-shrink-0 w-[145px] sm:w-[160px] cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 hover:bg-white shadow-2xs hover:shadow-md transition-all flex flex-col"
               >
-                <Icon className="mx-auto h-4.5 w-4.5 text-[#167C5A]" />
-                <p className="mt-2 text-[13px] sm:text-[14px] font-bold text-[#14213D]">{value}</p>
-                <p className="mt-0.5 text-[9px] text-slate-500 font-semibold tracking-tight">{label}</p>
-              </div>
+                <div className="relative h-[95px] w-full overflow-hidden bg-slate-900 flex items-center justify-center">
+                  <ChannelThumbnail channel={ch} className="h-full w-full" size="md" />
+                  <div className="absolute top-2 left-2 flex items-center gap-1 rounded bg-red-600/90 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                    LIVE
+                  </div>
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="h-9 w-9 rounded-full bg-white/90 text-[#14213D] flex items-center justify-center shadow-lg">
+                      <Play className="h-4 w-4 fill-current ml-0.5" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-2.5 flex-1 flex flex-col justify-between">
+                  <p className="text-[13px] font-bold text-[#14213D] leading-tight line-clamp-1 group-hover:text-[#C2410C] transition-colors">
+                    {ch.name}
+                  </p>
+                  <p className="text-[10px] font-semibold text-slate-500 mt-0.5">
+                    {ch.category || "General"}
+                  </p>
+                </div>
+              </motion.div>
             ))}
+          </div>
+        </section>
+
+        {/* 8. SHORTS & OFFICIAL REELS PREVIEW */}
+        <section className="pt-2">
+          <div className="mb-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-[#E11D48]">
+                <Clapperboard className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-[10.5px] font-bold uppercase tracking-widest text-[#E11D48]">Social & Media</p>
+                <h2 className="mt-0.5 text-[20px] sm:text-[22px] font-bold text-[#14213D]">Shorts & Official Reels</h2>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate("/reels")}
+              className="text-xs font-bold text-[#E11D48] hover:underline flex items-center gap-1"
+            >
+              Watch All <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          <div className="flex gap-3 overflow-x-auto pb-2 pt-1 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+            {homeReels.map((reel: any, idx: number) => {
+              const rawUrl = String(reel.link || reel.url || "");
+              const ytMatch = rawUrl.match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+              const videoId = reel.videoId || (ytMatch ? ytMatch[1] : undefined);
+              const thumb = reel.thumbnailUrl || reel.thumbnail || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "/assets/mega_camp_banner.png");
+              const title = reel.title || reel.description || "RP Foundation Update";
+
+              return (
+                <motion.div
+                  key={reel.id || idx}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => navigate("/reels")}
+                  className="group relative flex-shrink-0 w-[120px] sm:w-[135px] h-[210px] sm:h-[235px] cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-2xs hover:shadow-md transition-all"
+                >
+                  <img
+                    src={thumb}
+                    alt=""
+                    onError={(e) => {
+                      const el = e.currentTarget as HTMLImageElement;
+                      if (!el.src.includes("/assets/mega_camp_banner.png")) el.src = "/assets/mega_camp_banner.png";
+                    }}
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex flex-col justify-between p-2.5">
+                    <div className="flex justify-end">
+                      <span className="rounded-full bg-black/50 backdrop-blur-md p-1 text-white/90">
+                        <Clapperboard className="h-3 w-3" />
+                      </span>
+                    </div>
+                    <div>
+                      <div className="h-7 w-7 mx-auto mb-2 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                        <Play className="h-3.5 w-3.5 fill-current ml-0.5" />
+                      </div>
+                      <p className="text-[11px] font-bold text-white line-clamp-2 leading-tight drop-shadow-sm">
+                        {title}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </section>
 
