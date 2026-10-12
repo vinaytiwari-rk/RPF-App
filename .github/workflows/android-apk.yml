@@ -167,39 +167,56 @@ jobs:
           VERSION_NAME=$(node -p "require('./package.json').version")
           PUB_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           
-          node -e "
-            const fs = require('fs');
-            const manifest = {
-              versionCode: Number(process.env.RPF_VERSION_CODE),
-              versionName: process.env.VERSION_NAME,
-              sha256: process.env.SHA256,
-              size: Number(process.env.SIZE),
-              downloadUrl: 'https://appapi.therpfoundation.org/download/rpf-app.apk',
-              minSupportedVersionCode: 20500,
-              releaseNotes: (() => {
-                const subjects = require('child_process').execSync("git log -n 20 --pretty=format:%s HEAD", { encoding: 'utf8' }).split('\n').filter(line => line.trim() && !line.includes('chore(release): bump version'));
-                const friendly = [];
-                for (const subject of subjects) {
-                  let note = '';
-                  if (/fix\\(updater\\)|download progress|completed state|content length/i.test(subject)) note = 'Update Center: download progress, completion status, and update notice improvements.';
-                  else if (/fix\\(founder\\)|founder portrait|vision CTA/i.test(subject)) note = 'Founder section: improved portrait display and Vision navigation.';
-                  else if (/feat\\(explore\\)|artwork icons|service tile/i.test(subject)) note = 'Explore: improved service artwork icons and service browsing.';
-                  else if (/fix\\(home\\)|vision roadmap|impact metrics/i.test(subject)) note = 'Home: Vision and Strategic Roadmap now open the Impact page.';
-                  else if (/live tv|stream|radio/i.test(subject)) note = 'Live TV and media playback improvements.';
-                  else if (/certificate/i.test(subject)) note = 'Certificate access and download improvements.';
-                  else if (/jan.?seva|card sync/i.test(subject)) note = 'Jan Seva Card sync and account improvements.';
-                  else if (/fix\\(ci\\)|workflow|versioning|release/i.test(subject)) note = 'App update delivery, reliability, and release-process improvements.';
-                  else if (/fix\\(|bug|repair|correct/i.test(subject)) note = 'Bug fixes and app stability improvements.';
-                  else if (/feat\\(|add|implement|introduc/i.test(subject)) note = 'New app functionality and usability improvements.';
-                  if (note && !friendly.includes(note)) friendly.push(note);
-                  if (friendly.length >= 8) break;
-                }
-                return friendly.length ? 'What’s new in this update:\\n• ' + friendly.join('\\n• ') : 'Bug fixes and app stability improvements.';
-              })(),
-              publishedAt: process.env.PUB_DATE
-            };
-            fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\n', 'utf8');
-          "
+          export VERSION_NAME SHA256 SIZE PUB_DATE
+          node <<'NODE'
+          const fs = require('fs');
+          const { execFileSync } = require('child_process');
+
+          // Use only changes since the previous version-bump commit.
+          const previousBump = execFileSync(
+            'git',
+            ['log', '-1', '--format=%H', '--grep=^chore(release): bump version to ', 'HEAD^'],
+            { encoding: 'utf8' }
+          ).trim();
+
+          const range = previousBump ? `${previousBump}..HEAD^` : 'HEAD~20..HEAD^';
+          const subjects = execFileSync(
+            'git',
+            ['log', range, '--pretty=format:%s'],
+            { encoding: 'utf8' }
+          ).split('\\n').filter(line => line.trim());
+
+          const friendly = [];
+          for (const subject of subjects) {
+            let note = '';
+            if (/updater|download progress|completed state|content length/i.test(subject)) note = 'Update Center: download progress, completion status, and update notice improvements.';
+            else if (/founder portrait|vision CTA|fix\\(founder\\)/i.test(subject)) note = 'Founder section: improved portrait display and Vision navigation.';
+            else if (/artwork icons|service tile|feat\\(explore\\)/i.test(subject)) note = 'Explore: improved service artwork icons and service browsing.';
+            else if (/vision roadmap|impact metrics|fix\\(home\\)/i.test(subject)) note = 'Home: Vision and Strategic Roadmap navigation improvements.';
+            else if (/live tv|stream|radio/i.test(subject)) note = 'Live TV and media playback improvements.';
+            else if (/certificate/i.test(subject)) note = 'Certificate access and download improvements.';
+            else if (/jan.?seva|card sync/i.test(subject)) note = 'Jan Seva Card sync and account improvements.';
+            else if (/fix\\(ci\\)|workflow|versioning|release/i.test(subject)) note = 'App update delivery, reliability, and release-process improvements.';
+            else if (/fix|bug|repair|correct/i.test(subject)) note = 'Bug fixes and app stability improvements.';
+            else if (/feat|add|implement|introduc/i.test(subject)) note = 'New app functionality and usability improvements.';
+            if (note && !friendly.includes(note)) friendly.push(note);
+            if (friendly.length >= 8) break;
+          }
+
+          const manifest = {
+            versionCode: Number(process.env.RPF_VERSION_CODE),
+            versionName: process.env.VERSION_NAME,
+            sha256: process.env.SHA256,
+            size: Number(process.env.SIZE),
+            downloadUrl: 'https://appapi.therpfoundation.org/download/rpf-app.apk',
+            minSupportedVersionCode: 20500,
+            releaseNotes: friendly.length
+              ? 'What’s new in this update:\\n• ' + friendly.join('\\n• ')
+              : 'Bug fixes and app stability improvements.',
+            publishedAt: process.env.PUB_DATE
+          };
+          fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\\n', 'utf8');
+          NODE
           echo "Generated updates/manifest.json:"
           cat updates/manifest.json
 
