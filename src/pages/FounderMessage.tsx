@@ -1,6 +1,122 @@
-import {ArrowLeft,HeartHandshake,Quote,Sparkles,ArrowRight,Users,HeartPulse,Briefcase,GraduationCap} from "lucide-react";
+import {ArrowLeft,ArrowRight,Briefcase,GraduationCap,HeartHandshake,HeartPulse,Quote,Sparkles,Users} from "lucide-react";
 import {motion} from "motion/react";
 import {useNavigate,useOutletContext} from "react-router-dom";
-type Lang="en"|"hi";
-const beliefs=[{icon:Users,title:"People first",text:"Social change begins by understanding the real barriers communities face."},{icon:HeartPulse,title:"Dignity in service",text:"Support should preserve dignity and create confidence, not dependence."},{icon:Briefcase,title:"Opportunity creates independence",text:"Skills and livelihoods can turn assistance into long-term self-reliance."},{icon:GraduationCap,title:"Change must continue",text:"Education and capability-building help impact travel beyond one intervention."}];
-export default function FounderMessage(){const nav=useNavigate();const{lang}=useOutletContext<{lang:Lang}>();const hi=lang==='hi';return <main className="min-h-full bg-[#fff9e9] pb-28"><div className="mx-auto max-w-3xl px-4 py-4"><button onClick={()=>nav(-1)} className="mb-4 inline-flex items-center gap-2 rounded-2xl bg-white px-3 py-2 text-xs font-black text-[#7a3d18] shadow-sm"><ArrowLeft className="h-4 w-4"/>{hi?'वापस':'Back'}</button><motion.section initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} className="overflow-hidden rounded-[32px] border border-amber-200 bg-white shadow-[0_18px_50px_rgba(123,73,22,.10)]"><div className="h-2 bg-gradient-to-r from-[#d97706] via-[#f4c56a] to-[#138808]"/><div className="p-5 sm:p-7"><div className="flex flex-col gap-5 sm:flex-row sm:items-center"><div className="relative mx-auto shrink-0 sm:mx-0"><div className="absolute -inset-2 rounded-[30px] bg-amber-200/50 blur-xl"/><img src="/assets/founder.png" alt="Rohit Pandit" className="relative h-48 w-40 rounded-[26px] border-4 border-white object-cover object-top shadow-xl"/></div><div><span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[.16em] text-[#9a4d1b]"><Sparkles className="h-3.5 w-3.5"/>Founder & Vision</span><h1 className="mt-3 text-3xl font-black text-[#4b2b16]">Rohit Pandit</h1><p className="mt-1 text-sm font-bold text-[#d97706]">Founder, Rohit Pandit Foundation</p><p className="mt-3 text-sm leading-6 text-slate-600">A leadership approach centred on contribution, ground-level action and creating systems that help people build independent futures.</p></div></div><div className="mt-6 rounded-[26px] border border-amber-100 bg-[#fff8e7] p-5"><Quote className="h-7 w-7 text-[#d97706]"/><p className="mt-2 text-base font-bold italic leading-7 text-[#4b2b16]">“Service becomes meaningful when compassion is supported by structure, opportunity and the dignity to stand on one’s own feet.”</p></div></div></motion.section><section className="mt-5 rounded-[30px] border border-amber-100 bg-white/90 p-5 shadow-sm"><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#d97706]">The message</p><h2 className="mt-1 text-2xl font-black text-[#4b2b16]">Purpose into public impact</h2><div className="mt-4 space-y-4 text-sm leading-7 text-slate-600"><p>{hi?'प्रिय नागरिकों और स्वयंसेवकों, हमारा उद्देश्य केवल सहायता पहुँचाना नहीं, बल्कि लोगों को अवसर, आत्मविश्वास और आत्मनिर्भरता की दिशा में आगे बढ़ने में सहयोग देना है।':'Dear citizens and volunteers, our purpose is not limited to delivering assistance. It is to help people move toward opportunity, confidence and self-reliance.'}</p><p>{hi?'स्वास्थ्य, शिक्षा, रोजगार और महिला सशक्तिकरण अलग-अलग चुनौतियाँ नहीं हैं। जब इन्हें एक साथ जोड़ा जाता है, तो परिवार और समुदाय लंबे समय तक मजबूत बनते हैं।':'Healthcare, education, livelihoods and women’s empowerment are not isolated challenges. When they are connected, families and communities can become stronger for the long term.'}</p><p>{hi?'आइए सेवा को एक क्षणिक गतिविधि नहीं, बल्कि परिवर्तन की सतत प्रक्रिया बनाएं।':'Let us treat service not as a momentary activity, but as a continuous process of creating meaningful change.'}</p></div></section><section className="mt-5"><div className="mb-3"><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#d97706]">Leadership principles</p><h2 className="text-xl font-black text-[#4b2b16]">What guides the mission</h2></div><div className="grid gap-3 sm:grid-cols-2">{beliefs.map((b,i)=>{const I=b.icon;return <motion.div key={b.title} initial={{opacity:0,y:10}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.05}} className="rounded-[26px] border border-amber-100 bg-white p-4 shadow-sm"><div className="flex gap-3"><div className="rounded-2xl bg-[#fff4d7] p-3 text-[#9a4d1b]"><I className="h-5 w-5"/></div><div><h3 className="font-black text-[#4b2b16]">{b.title}</h3><p className="mt-1 text-xs leading-5 text-slate-600">{b.text}</p></div></div></motion.div>})}</div></section><section className="mt-5 rounded-[30px] bg-gradient-to-br from-[#4b2b16] to-[#7a3d18] p-5 text-white"><p className="text-[10px] font-black uppercase tracking-[.16em] text-amber-300">Join the journey</p><h2 className="mt-1 text-xl font-black">Every contribution can strengthen a community.</h2><p className="mt-2 text-xs leading-6 text-white/75">Explore the Foundation’s work and the initiatives shaping opportunities across health, education, livelihoods and community development.</p><div className="mt-4 flex flex-wrap gap-3"><button onClick={()=>nav('/vision-goals')} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-xs font-black text-[#4b2b16]">Explore RP Foundation <ArrowRight className="h-4 w-4"/></button><button onClick={()=>nav('/jan-seva-card')} className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-4 py-3 text-xs font-black text-white"><HeartHandshake className="h-4 w-4"/>Join as a citizen</button></div></section></div></main>}
+
+type Lang = "en" | "hi";
+
+const beliefs = [
+  { icon: Users, title: "People first", text: "Social change begins by understanding the real barriers communities face." },
+  { icon: HeartPulse, title: "Dignity in service", text: "Support should be rooted in respect, empathy, and care for every life touched." },
+  { icon: HeartHandshake, title: "Service beyond status", text: "We work with humility and practical action, without discrimination or hierarchy." },
+  { icon: Briefcase, title: "Skills for livelihoods", text: "A stronger society grows when dignity, opportunity, and skill-building move together." },
+  { icon: GraduationCap, title: "Learning for all", text: "Education is a public good and a foundation for communities to rise together." },
+];
+
+export default function FounderMessage() {
+  const nav = useNavigate();
+  const { lang } = useOutletContext<{ lang: Lang }>();
+  const hi = lang === "hi";
+
+  return (
+    <main className="min-h-full bg-[#fff9e9] pb-28 text-[#14213D]">
+      <div className="mx-auto max-w-3xl px-4 pt-4 sm:px-6">
+        <button
+          type="button"
+          onClick={() => nav(-1)}
+          className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold text-[#14213D] shadow-xs"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          {hi ? "वापस" : "Back"}
+        </button>
+
+        <motion.section
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="mt-4 overflow-hidden rounded-[28px] border border-amber-200/70 bg-white/80 shadow-sm backdrop-blur-sm"
+        >
+          <div className="relative bg-gradient-to-br from-[#FFF7E8] via-[#F0FAF4] to-[#FFE5C4] p-5 sm:p-7">
+            <div className="absolute right-4 top-4 rounded-full bg-white/70 p-2 text-amber-600 shadow-sm">
+              <Sparkles className="h-4 w-4" />
+            </div>
+
+            <div className="max-w-2xl">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#D97706]">
+                {hi ? "संस्थापक संदेश" : "Founder’s Message"}
+              </p>
+              <h1 className="mt-2 text-2xl font-black tracking-tight text-[#14213D] sm:text-3xl">
+                {hi ? "सद्भाव, सेवा और संकल्प" : "Compassion, Service & Resolve"}
+              </h1>
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-amber-200 bg-white/70 p-3 shadow-xs">
+                <div className="h-12 w-12 overflow-hidden rounded-full border border-amber-300 bg-slate-100">
+                  <img
+                    src="/assets/founder.png"
+                    alt="Rohit Pandit"
+                    className="h-full w-full object-cover object-top"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-[#14213D]">Rohit Pandit</p>
+                  <p className="text-[11px] font-semibold text-slate-600">
+                    {hi ? "संस्थापक, आर.पी. फाउंडेशन" : "Founder, RP Foundation"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6 p-5 sm:p-7">
+            <blockquote className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-[14px] font-medium leading-relaxed text-slate-700 sm:text-[15px]">
+              <Quote className="mb-2 h-4 w-4 text-[#D97706]" />
+              {hi
+                ? "हमारी सेवा तभी सार्थक होती है जब वह लोगों के जीवन में सच्ची सहानुभूति, वास्तविक समाधान और सम्मान के साथ पहुंचती है।" 
+                : "Our service becomes meaningful only when it reaches people with genuine empathy, practical solutions, and lasting dignity."}
+            </blockquote>
+
+            <div className="space-y-4">
+              <h2 className="text-lg font-black text-[#14213D]">
+                {hi ? "हमारे मूल विचार" : "Our Core Beliefs"}
+              </h2>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {beliefs.map(({ icon: Icon, title, text }) => (
+                  <motion.div
+                    key={title}
+                    whileHover={{ y: -2 }}
+                    className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5"
+                  >
+                    <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-[#D97706]">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <h3 className="text-sm font-black text-[#14213D]">{title}</h3>
+                    <p className="mt-1 text-[12px] leading-relaxed text-slate-600">{text}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4">
+              <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#167C5A]">
+                {hi ? "हमारा दृष्टिकोण" : "Our approach"}
+              </p>
+              <p className="mt-2 text-[13px] leading-relaxed text-slate-700">
+                {hi
+                  ? "आर.पी. फाउंडेशन का उद्देश्य केवल सहायता देना नहीं है; बल्कि समुदायों को सक्षम बनाना, अवसर देना और जीवन की गुणवत्ता को स्थायी रूप से बढ़ाना है।"
+                  : "RP Foundation is not only about relief—it is about strengthening communities, creating opportunity, and improving the quality of life in a sustainable way."}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => nav("/vision-goals")}
+              className="inline-flex items-center gap-2 rounded-full bg-[#D97706] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm transition hover:bg-[#c76b05]"
+            >
+              {hi ? "दृष्टि देखें" : "Explore Our Vision"}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </motion.section>
+      </div>
+    </main>
+  );
+}
