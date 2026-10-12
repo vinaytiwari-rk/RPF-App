@@ -192,7 +192,7 @@ export async function downloadAndInstallUpdate(
       chunks.push(value);
       receivedBytes += value.length;
       if (onProgress) {
-        const percent = contentLength > 0 ? Math.min(100, Math.round((receivedBytes / contentLength) * 100)) : 50;
+        const percent = contentLength > 0 ? Math.min(99, Math.round((receivedBytes / contentLength) * 100)) : 0;
         onProgress(percent, receivedBytes, contentLength);
       }
     }
