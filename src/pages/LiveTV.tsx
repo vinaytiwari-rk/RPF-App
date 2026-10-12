@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
-import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns, RefreshCw, VolumeX } from "lucide-react";
+import { RadioReceiver, ArrowLeft, Play, Search, Tv, Sparkles, Maximize2, ExternalLink, LayoutGrid, List, Columns, RefreshCw, VolumeX, RotateCw } from "lucide-react";
 import { LIVE_TV_DEFAULTS, mergeTvCatalogue, type LiveTvChannel } from "../data/liveTvDefaults";
 import { openExternalLink } from "../utils/browser";
 import { getMediaSourceType } from "../utils/mediaSourceType";
@@ -21,6 +21,7 @@ export const CATEGORIES = [
   { id: "Religious", labelEn: "Devotional", labelHi: "भक्ति/धार्मिक" },
   { id: "Documentary", labelEn: "Knowledge", labelHi: "ज्ञान/विज्ञान" },
   { id: "Education", labelEn: "Education", labelHi: "शिक्षा" },
+  { id: "YouTube", labelEn: "YouTube Live", labelHi: "YouTube लाइव" },
   { id: "Weather", labelEn: "Weather", labelHi: "मौसम" },
 ];
 
@@ -267,6 +268,7 @@ export default function LiveTV() {
   const [visibleCount, setVisibleCount] = useState(40);
   const [channels, setChannels] = useState<LiveTvChannel[]>(() => LIVE_TV_DEFAULTS);
   const [active, setActive] = useState<LiveTvChannel | null>(null);
+  const playerModalRef = useRef<HTMLDivElement>(null);
   const [, setServerControlled] = useState(false);
   const [layout, setLayout] = useState<"grid" | "list" | "compact" | "theater">("grid");
 
@@ -309,7 +311,14 @@ export default function LiveTV() {
     return () => window.removeEventListener("popstate", f);
   }, []);
 
-  const visible = useMemo(() => channels.filter((c) => c.enabled !== false), [channels]);
+  const visible = useMemo(() => channels
+    .filter((c) => c.enabled !== false || c.id.startsWith("gov-swayam-"))
+    .sort((a, b) => {
+      const aSwayam = a.id.startsWith("gov-swayam-");
+      const bSwayam = b.id.startsWith("gov-swayam-");
+      if (aSwayam !== bSwayam) return aSwayam ? -1 : 1;
+      return (a.order ?? 0) - (b.order ?? 0);
+    }), [channels]);
   
   useEffect(() => {
     setVisibleCount(40);
@@ -318,9 +327,8 @@ export default function LiveTV() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return visible.filter((c) => {
-      const matchesCategory =
-        selectedCategory === "all" ||
-        c.category.toLowerCase() === selectedCategory.toLowerCase();
+      const matchesCategory = selectedCategory === "all"
+        || (selectedCategory === "YouTube" ? Boolean(getId(c)) : c.category.toLowerCase() === selectedCategory.toLowerCase());
       if (!matchesCategory) return false;
       if (!q) return true;
       return `${c.name} ${c.category}`.toLowerCase().includes(q);
@@ -328,7 +336,7 @@ export default function LiveTV() {
   }, [search, selectedCategory, visible]);
 
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: visible.length };
+    const counts: Record<string, number> = { all: visible.length, YouTube: visible.filter((c) => Boolean(getId(c))).length };
     visible.forEach((c) => {
       counts[c.category] = (counts[c.category] || 0) + 1;
     });
@@ -336,7 +344,7 @@ export default function LiveTV() {
   }, [visible]);
 
   const id = active ? getId(active) : undefined;
-  const embed = id ? `https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&rel=0` : null;
+  const embed = id ? `https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&rel=0&controls=1&fs=1&modestbranding=1` : null;
 
   const openPlayer = (c: LiveTvChannel) => {
     window.history.pushState({ rpfLiveTvPlayer: true }, "");
@@ -344,15 +352,35 @@ export default function LiveTV() {
   };
 
   const close = () => {
+    try { (screen as any).orientation?.unlock?.(); } catch {}
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     if (window.history.state?.rpfLiveTvPlayer) window.history.back();
     else setActive(null);
+  };
+
+  const toggleLandscapeFullscreen = async () => {
+    const target = playerModalRef.current;
+    if (!target) return;
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+        try { (screen as any).orientation?.unlock?.(); } catch {}
+      } else {
+        await (target as any).requestFullscreen?.();
+        try { await (screen as any).orientation?.lock?.("landscape"); } catch {
+          // Some browsers/WebViews do not expose orientation locking; fullscreen still works.
+        }
+      }
+    } catch (error) {
+      console.warn("Landscape fullscreen is not available in this WebView:", error);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] pb-28 font-sans text-slate-800 selection:bg-orange-100">
       {active ? (
         /* Fullscreen Player Modal */
-        <div className="fixed inset-0 z-50 flex min-h-[100dvh] flex-col bg-black text-white">
+        <div ref={playerModalRef} className="fixed inset-0 z-50 flex min-h-[100dvh] flex-col bg-black text-white">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 bg-slate-900/90 backdrop-blur-md">
             <button
               onClick={close}
@@ -372,21 +400,12 @@ export default function LiveTV() {
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => {
-                  const elem = document.querySelector(".video-js video") || document.querySelector(".video-js");
-                  if (elem) {
-                    if (document.fullscreenElement) {
-                      document.exitFullscreen().catch(() => {});
-                    } else {
-                      (elem as any).requestFullscreen?.().catch(() => {});
-                    }
-                  }
-                }}
+                onClick={toggleLandscapeFullscreen}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 text-white border border-white/20 px-2.5 py-1.5 text-xs font-bold hover:bg-white/20 transition active:scale-95"
-                title="Fullscreen"
+                title={hi ? "लैंडस्केप में देखें" : "Landscape / Fullscreen"}
               >
-                <Maximize2 className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{hi ? "पूर्ण स्क्रीन" : "Fullscreen"}</span>
+                <RotateCw className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{hi ? "लैंडस्केप" : "Landscape"}</span>
               </button>
               <button
                 onClick={() => openExternalLink(active.url, navigate, active.name)}
@@ -399,8 +418,8 @@ export default function LiveTV() {
             </div>
           </div>
 
-          <div className="flex flex-1 items-center justify-center bg-black p-0 sm:p-4">
-            <div className="w-full max-w-5xl aspect-video sm:rounded-2xl overflow-hidden shadow-2xl border-y sm:border border-white/10 bg-slate-950 relative flex items-center justify-center">
+          <div className="flex min-h-0 flex-1 items-center justify-center bg-black p-0 sm:p-4">
+            <div className="w-full max-w-5xl max-h-full aspect-video sm:rounded-2xl overflow-hidden shadow-2xl border-y sm:border border-white/10 bg-slate-950 relative flex items-center justify-center">
               {embed ? (
                 <iframe
                   className="h-full w-full border-0"
