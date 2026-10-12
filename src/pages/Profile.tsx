@@ -55,6 +55,7 @@ export default function Profile() {
   const [updateAvailable, setUpdateAvailable] = useState<boolean | null>(null);
   const [updateMessage, setUpdateMessage] = useState<string>("");
   const [downloading, setDownloading] = useState(false);
+  const [downloadFinished, setDownloadFinished] = useState(false);
   const [downloadPercent, setDownloadPercent] = useState(0);
   const [downloadStatusText, setDownloadStatusText] = useState("");
 
@@ -81,6 +82,7 @@ export default function Profile() {
     setUpdateAvailable(null);
     setUpdateManifest(null);
     setDownloadPercent(0);
+    setDownloadFinished(false);
     setDownloadStatusText("");
 
     try {
@@ -102,11 +104,12 @@ export default function Profile() {
   const handleStartUpdate = async () => {
     if (!updateManifest) return;
     setDownloading(true);
+    setDownloadFinished(false);
     setDownloadPercent(0);
     setDownloadStatusText(hi ? "डाउनलोड शुरू हो रहा है..." : "Initializing download...");
 
     try {
-      await downloadAndInstallUpdate(updateManifest, (percent, loaded, total) => {
+      const result = await downloadAndInstallUpdate(updateManifest, (percent, loaded, total) => {
         setDownloadPercent(percent);
         const mbLoaded = (loaded / (1024 * 1024)).toFixed(1);
         const mbTotal = total > 0 ? (total / (1024 * 1024)).toFixed(1) : "?";
@@ -116,7 +119,9 @@ export default function Profile() {
             : `Downloading: ${mbLoaded} MB / ${mbTotal} MB (${percent}%)`
         );
       });
-      setDownloadStatusText(hi ? "डाउनलोड पूर्ण! पैकेज इंस्टॉलर लॉन्च हो रहा है..." : "Download complete! Launching package installer...");
+      setDownloadPercent(100);
+      setDownloadFinished(true);
+      setDownloadStatusText(result.message || (hi ? "डाउनलोड पूर्ण! पैकेज इंस्टॉलर लॉन्च हो रहा है..." : "Download complete! Launching package installer..."));
     } catch (err: any) {
       setDownloadStatusText(
         hi ? `अपडेट विफल: ${err?.message || "अज्ञात त्रुटि"}` : `Update failed: ${err?.message || "Unknown error"}`
@@ -571,8 +576,8 @@ export default function Profile() {
                 </button>
               </div>
 
-              {/* Core Consistency Disclaimer Banner */}
-              <div className="bg-amber-50 p-3 border-b border-amber-200/80 text-[11px] leading-relaxed text-[#243B32] font-medium shrink-0 space-y-1">
+              {/* Keep the repeated transparency notice out of the update progress modal. */}
+              {activeModal !== "update" && <div className="bg-amber-50 p-3 border-b border-amber-200/80 text-[11px] leading-relaxed text-[#243B32] font-medium shrink-0 space-y-1">
                 <div className="flex items-center gap-1.5 font-bold text-[#D97706]">
                   <AlertTriangle className="h-4 w-4 shrink-0 text-[#D97706]" />
                   <span>{hi ? "मुख्य पारदर्शिता घोषणाएं (Core Transparency Notice)" : "Core Organizational Transparency Notice"}</span>
@@ -581,7 +586,7 @@ export default function Profile() {
                 <p>• <strong>Samahit is not an official government application.</strong></p>
                 <p>• <strong>RP Foundation is not responsible for the Samahit application, its operation, content, functionality, or services.</strong></p>
                 <p className="text-[10px] text-slate-600 italic">Government and third-party websites are independently operated and are not controlled by Samahit. Users should verify important information directly through the relevant official source.</p>
-              </div>
+              </div>}
 
               {/* Modal Body Content */}
               <div className="overflow-y-auto p-4 flex-1 space-y-4 text-xs text-slate-700 leading-relaxed font-normal">
@@ -851,23 +856,23 @@ export default function Profile() {
                           )}
                         </div>
 
-                        {downloading && (
+                        {(downloading || downloadFinished) && (
                           <div className="space-y-1.5 pt-2">
                             <div className="flex justify-between text-[11px] font-bold text-[#243B32]">
                               <span>{hi ? "डाउनलोड प्रगति" : "Progress"}</span>
-                              <span>{downloadPercent}%</span>
+                              <span>{downloadFinished ? "100%" : downloadPercent > 0 ? `${downloadPercent}%` : "…"}</span>
                             </div>
                             <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
                               <div
                                 className="h-full bg-gradient-to-r from-[#245D45] to-[#167C5A] transition-all duration-300"
-                                style={{ width: `${downloadPercent}%` }}
+                                style={{ width: downloadFinished ? "100%" : downloadPercent > 0 ? `${downloadPercent}%` : "35%" }}
                               />
                             </div>
                             <p className="text-[10px] text-slate-500 text-center font-medium">{downloadStatusText}</p>
                           </div>
                         )}
 
-                        {!downloading && (
+                        {!downloading && !downloadFinished && (
                           <button
                             onClick={handleStartUpdate}
                             className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#245D45] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#1d4f3a] transition-all active:scale-95"
