@@ -453,7 +453,7 @@ export default function Home() {
                 <p className="text-[12.5px] sm:text-[13px] leading-relaxed text-slate-600 font-medium">
                   RP Foundation is built on an interconnected model of social development—uniting accessible healthcare, sustainable employment, women’s self-reliance, and direct grievance resolution for lasting empowerment across India.
                 </p>
-                <button onClick={() => navigate("/vision-goals")} className="mt-1 inline-flex items-center gap-1 text-[12px] font-bold text-[#167C5A] hover:underline">
+                <button onClick={() => navigate("/impact")} className="mt-1 inline-flex items-center gap-1 text-[12px] font-bold text-[#167C5A] hover:underline">
                   Explore Full Vision & Strategic Roadmap <ChevronRight className="h-3.5 w-3.5" />
                 </button>
               </div>
