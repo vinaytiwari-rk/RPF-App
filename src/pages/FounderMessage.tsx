@@ -1,4 +1,4 @@
-import {ArrowLeft,HeartHandshake,Quote,Sparkles,ArrowRight,Users,HeartPulse,Briefcase,GraduationCap} from "lucide-react";
+import {ArrowLeft,Quote,Sparkles,Users,HeartPulse,Briefcase,GraduationCap} from "lucide-react";
 import {motion} from "motion/react";
 import {useNavigate,useOutletContext} from "react-router-dom";
 type Lang="en"|"hi";
