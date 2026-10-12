@@ -1,11 +1,6 @@
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import { useEffect, useMemo, useState } from "react";
-import { 
-  BadgePlus, BriefcaseBusiness, ClipboardList, HeartPulse, UsersRound, Stethoscope, 
-  CalendarDays, ChevronRight, Compass, UserRound, Quote, Calculator, Wrench, CloudSun, 
-  GraduationCap, Tv, Play, Sparkles, Award, Clapperboard, Film, Heart, HandHeart, 
-  Droplets, Trash2, Trees, Landmark, TrendingUp 
-} from "lucide-react";
+import { BadgePlus, ClipboardList, UsersRound, Stethoscope, CalendarDays, ChevronRight, Quote, Calculator, Wrench, CloudSun, GraduationCap, Play, Clapperboard } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
