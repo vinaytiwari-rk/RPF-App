@@ -1,8 +1,8 @@
 import React from "react";
 
 /** Lightweight illustrated service artwork; navigation icons deliberately stay unchanged. */
-export type ServiceArt = "sanitation" | "water" | "jobs" | "pink-erickshaw" | "health" | "jan-seva-card" | "grievance" | "volunteer" | "blood" | "radio" | "epaper" | "directory" | "university" | "fact-check" | "disaster" | "youth" | "nation" | "women-safety" | "live-tv" | "donations" | "scholarships" | "food" | "medicine" | "education" | "seniors" | "animals" | "environment" | "culture" | "farmer" | "schemes" | "skills" | "crowdfunding" | "sos" | "utilities" | "calculator" | "online-test";
-export function serviceArtFor(value: string): ServiceArt | null {
+export type ServiceArt = "community" | "sanitation" | "water" | "jobs" | "pink-erickshaw" | "health" | "jan-seva-card" | "grievance" | "volunteer" | "blood" | "radio" | "epaper" | "directory" | "university" | "fact-check" | "disaster" | "youth" | "nation" | "women-safety" | "live-tv" | "donations" | "scholarships" | "food" | "medicine" | "education" | "seniors" | "animals" | "environment" | "culture" | "farmer" | "schemes" | "skills" | "crowdfunding" | "sos" | "utilities" | "calculator" | "online-test";
+export function serviceArtFor(value: string): ServiceArt {
   const s = value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   if (/utilit|tool|device-tool/.test(s)) return "utilities";
   if (/calculat/.test(s)) return "calculator";
@@ -40,10 +40,11 @@ export function serviceArtFor(value: string): ServiceArt | null {
   if (/jan-seva|^card$/.test(s)) return "jan-seva-card";
   if (/grievance|complaint/.test(s)) return "grievance";
   if (/volunteer/.test(s)) return "volunteer";
-  return null;
+  return "community";
 }
 export default function ServiceIllustration({kind, className = "h-16 w-16"}: {kind: ServiceArt; className?: string}) {
   const palette: Record<ServiceArt, [string,string]> = {
+    community:["#E4F5EC","#8CCFB0"],
     sanitation:["#D7F5E4","#7BCE9B"],water:["#DBF3FF","#83C5ED"],jobs:["#FFF0D5","#E9B16D"],
     "pink-erickshaw":["#FFE0ED","#F2A1C4"],health:["#FFE7E4","#F4A7A1"],
     "jan-seva-card":["#FFF1D6","#F2C77D"],grievance:["#EDF0FA","#B5C4E7"],
@@ -79,6 +80,7 @@ export default function ServiceIllustration({kind, className = "h-16 w-16"}: {ki
     <rect x="1" y="1" width="98" height="98" rx="22" fill={"url(#"+kind+"-bg)"} />
     <ellipse cx="51" cy="84" rx="31" ry="5" fill="#243B32" opacity=".09"/>
     <g filter={"url(#"+kind+"-shadow)"}>
+    {kind==="community" && <><circle cx="35" cy="32" r="10" fill="#F0B68E"/><circle cx="65" cy="32" r="10" fill="#DCA17B"/><circle cx="50" cy="25" r="11" fill="#F3C39D"/><path d="M15 77Q16 51 35 51Q49 51 51 67Q54 51 66 51Q85 51 86 77V84H15Z" fill="#4AA981"/><path d="M28 58L50 76L72 58" fill="none" stroke="#FFF8E9" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/><path d="M40 43Q50 51 60 43" fill="none" stroke="#D97706" strokeWidth="4" strokeLinecap="round"/></>}
     {kind==="sanitation" && <><circle cx="29" cy="34" r="12" fill="#F5BE90"/><path d="M17 28Q28 9 42 28L38 31H19Z" fill="#23844D"/><rect x="18" y="47" width="24" height="29" rx="8" fill="#399D60"/><path d="M36 54L48 78M28 76L23 86M36 76L40 86" stroke="#845B3A" strokeWidth="5" strokeLinecap="round"/><path d="M49 38L62 83" stroke="#96632F" strokeWidth="3"/><path d="M53 69L71 72L60 87Z" fill="#DCA34E"/><rect x="60" y="42" width="27" height="38" rx="4" fill="#27985D"/><rect x="57" y="39" width="33" height="6" rx="3" fill="#167C5A"/><path d="M71 54L76 62H66Z M67 67H79" stroke="#D7F5E4" strokeWidth="3" fill="none"/></>}
     {kind==="water" && <><path d="M13 68Q30 54 47 68T88 67V88H13Z" fill="#9BD9B2"/><path d="M31 27H68L73 66H27Z" fill="#3E9ED9"/><ellipse cx="49" cy="27" rx="19" ry="6" fill="#78C5F0"/><path d="M31 31H68M29 60H71" stroke="#287DB6" strokeWidth="3"/><path d="M35 66L29 85M65 66L72 85" stroke="#668C9A" strokeWidth="4"/><path d="M49 37C38 51 43 57 49 57S60 51 49 37Z" fill="#E7F9FF"/><path d="M69 49H85V61H78V69" fill="none" stroke="#A4AEB4" strokeWidth="7" strokeLinecap="round"/><path d="M78 72Q69 82 78 86Q87 82 78 72Z" fill="#54B9EA"/></>}
     {kind==="jobs" && <><rect x="43" y="18" width="45" height="53" rx="5" fill="#FFF9ED"/><rect x="49" y="26" width="31" height="6" rx="2" fill="#E5A450"/><rect x="49" y="38" width="25" height="3" rx="1" fill="#C7B79E"/><rect x="49" y="46" width="30" height="3" rx="1" fill="#C7B79E"/><circle cx="31" cy="37" r="13" fill="#F1B988"/><path d="M18 34Q18 15 35 21Q46 24 43 37L36 29L23 34Z" fill="#45362D"/><path d="M12 72Q12 51 31 51Q51 51 51 72V86H12Z" fill="#448AB3"/><path d="M28 52L31 70L35 52" fill="#fff"/><path d="M31 57L35 70L31 76L27 70Z" fill="#D97706"/><rect x="42" y="68" width="25" height="18" rx="3" fill="#8B5B35"/><path d="M49 68V64H60V68" fill="none" stroke="#8B5B35" strokeWidth="3"/></>}
