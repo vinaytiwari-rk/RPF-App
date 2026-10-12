@@ -176,7 +176,7 @@ jobs:
               size: Number(process.env.SIZE),
               downloadUrl: 'https://appapi.therpfoundation.org/download/rpf-app.apk',
               minSupportedVersionCode: 20500,
-              releaseNotes: require('child_process').execSync("git log -n 12 --pretty=format:'• %s' HEAD", { encoding: 'utf8' }).split('\n').filter(line => !/chore\\(release\\): bump version/i.test(line)).slice(0, 8).join('\n') || 'Bug fixes and improvements'
+              releaseNotes: require('child_process').execSync("git log -n 12 --pretty=format:'• %s' HEAD", { encoding: 'utf8' }).split('\n').filter(line => !line.includes('chore(release): bump version')).slice(0, 8).join('\n') || 'Bug fixes and improvements',
               publishedAt: process.env.PUB_DATE
             };
             fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\n', 'utf8');
