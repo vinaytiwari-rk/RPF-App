@@ -1,9 +1,12 @@
 import React from "react";
 
 /** Lightweight illustrated service artwork; navigation icons deliberately stay unchanged. */
-export type ServiceArt = "sanitation" | "water" | "jobs" | "pink-erickshaw" | "health" | "jan-seva-card" | "grievance" | "volunteer" | "blood" | "radio" | "epaper" | "directory" | "university" | "fact-check" | "disaster" | "youth" | "nation" | "women-safety" | "live-tv" | "donations" | "scholarships" | "food" | "medicine" | "education" | "seniors" | "animals" | "environment" | "culture" | "farmer" | "schemes" | "skills" | "crowdfunding" | "sos";
+export type ServiceArt = "sanitation" | "water" | "jobs" | "pink-erickshaw" | "health" | "jan-seva-card" | "grievance" | "volunteer" | "blood" | "radio" | "epaper" | "directory" | "university" | "fact-check" | "disaster" | "youth" | "nation" | "women-safety" | "live-tv" | "donations" | "scholarships" | "food" | "medicine" | "education" | "seniors" | "animals" | "environment" | "culture" | "farmer" | "schemes" | "skills" | "crowdfunding" | "sos" | "utilities" | "calculator" | "online-test";
 export function serviceArtFor(value: string): ServiceArt | null {
   const s = value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  if (/utilit|tool|device-tool/.test(s)) return "utilities";
+  if (/calculat/.test(s)) return "calculator";
+  if (/online-test|mock-test|^test$|exam/.test(s)) return "online-test";
   if (/internet-radio|^radio$/.test(s)) return "radio";
   if (/epaper|newspaper/.test(s)) return "epaper";
   if (/directory/.test(s)) return "directory";
@@ -61,7 +64,10 @@ export default function ServiceIllustration({kind, className = "h-16 w-16"}: {ki
     "schemes":["#E4F5EC","#8CCFB0"],
     "skills":["#FFF1DA","#E3BA7D"],
     "crowdfunding":["#FFF1DC","#DDA96B"],
-    "sos":["#FFE8E8","#E9A0A0"]
+    "sos":["#FFE8E8","#E9A0A0"],
+    utilities:["#E8F0FE","#8AB4F8"],
+    calculator:["#FFF0E0","#FB8C00"],
+    "online-test":["#E6F4EA","#5BB974"]
   };
   const [light, shade] = palette[kind];
   return <svg className={className} viewBox="0 0 100 100" role="img" aria-label={kind.replaceAll("-"," ")} xmlns="http://www.w3.org/2000/svg">
@@ -106,6 +112,63 @@ export default function ServiceIllustration({kind, className = "h-16 w-16"}: {ki
     {kind==="crowdfunding" && <><circle cx="32" cy="33" r="11" fill="#F1C19D"/><circle cx="68" cy="33" r="11" fill="#DDA67F"/><path d="M13 79Q14 48 32 48Q50 48 50 79ZM50 79Q50 48 68 48Q86 48 87 79Z" fill="#64AB8D"/><circle cx="50" cy="57" r="13" fill="#E4B864"/><path d="M50 48V66M44 52H55M44 61H55" stroke="#FFF" strokeWidth="3"/></>}
     {kind==="sos" && <><path d="M50 15L79 28V50Q76 72 50 85Q24 72 21 50V28Z" fill="#E77A74"/><path d="M45 32H55V51H45ZM45 58H55V68H45Z" fill="#FFF"/></>}
     {kind==="blood" && <><path d="M50 14C41 31 23 46 23 62A27 27 0 0 0 77 62C77 46 59 31 50 14Z" fill="#D94E57"/><path d="M50 30C45 42 35 52 35 63" fill="none" stroke="#F6B3B6" strokeWidth="6" strokeLinecap="round"/><path d="M48 50H56V58H64V66H56V74H48V66H40V58H48Z" fill="#fff"/></>}
+    {kind==="utilities" && <>
+      <rect x="20" y="22" width="60" height="58" rx="10" fill="#FFFFFF" stroke="#8AB4F8" strokeWidth="2.5"/>
+      <rect x="20" y="22" width="60" height="14" rx="8" fill="#4285F4"/>
+      <circle cx="28" cy="29" r="2.5" fill="#FFFFFF" opacity="0.9"/>
+      <circle cx="35" cy="29" r="2.5" fill="#FFFFFF" opacity="0.6"/>
+      <circle cx="42" cy="29" r="2.5" fill="#FFFFFF" opacity="0.6"/>
+      <circle cx="40" cy="56" r="12" fill="#E8F0FE" stroke="#3367D6" strokeWidth="3.5" strokeDasharray="5 3"/>
+      <circle cx="40" cy="56" r="5" fill="#4285F4"/>
+      <path d="M52 68L68 46C70 43 74 43 76 45L77 46C79 48 79 52 76 54L60 76C58 78 55 78 53 76L52 75C50 73 50 70 52 68Z" fill="#5F6368"/>
+      <circle cx="73" cy="48" r="3" fill="#FFFFFF"/>
+      <rect x="26" y="70" width="18" height="4" rx="2" fill="#8AB4F8"/>
+      <circle cx="32" cy="72" r="3.5" fill="#1A73E8"/>
+      <circle cx="68" cy="32" r="11" fill="#FEEFC3" stroke="#F9AB00" strokeWidth="2"/>
+      <path d="M68 25V30M68 34V39M62 32H66M70 32H74" stroke="#EA8600" strokeWidth="2" strokeLinecap="round"/>
+    </>}
+    {kind==="calculator" && <>
+      <rect x="22" y="16" width="56" height="68" rx="10" fill="#2D3748" stroke="#FB8C00" strokeWidth="2.5"/>
+      <rect x="30" y="22" width="16" height="5" rx="1.5" fill="#4A5568"/>
+      <path d="M35 22V27M41 22V27" stroke="#718096" strokeWidth="1"/>
+      <rect x="30" y="30" width="40" height="15" rx="3" fill="#D1FAE5" stroke="#059669" strokeWidth="1.5"/>
+      <text x="66" y="42" fontFamily="monospace" fontSize="11" fontWeight="bold" fill="#065F46" textAnchor="end">1,250</text>
+      <rect x="30" y="49" width="10" height="8" rx="2" fill="#E2E8F0"/>
+      <rect x="43" y="49" width="10" height="8" rx="2" fill="#E2E8F0"/>
+      <rect x="56" y="49" width="14" height="8" rx="2" fill="#FF9800"/>
+      <rect x="30" y="60" width="10" height="8" rx="2" fill="#E2E8F0"/>
+      <rect x="43" y="60" width="10" height="8" rx="2" fill="#E2E8F0"/>
+      <rect x="56" y="60" width="14" height="8" rx="2" fill="#FF9800"/>
+      <rect x="30" y="71" width="10" height="8" rx="2" fill="#E2E8F0"/>
+      <rect x="43" y="71" width="10" height="8" rx="2" fill="#E2E8F0"/>
+      <rect x="56" y="71" width="14" height="8" rx="2" fill="#4CAF50"/>
+      <path d="M60 53H66M63 50V56" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M60 64H66" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M60 74H66M60 77H66" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round"/>
+    </>}
+    {kind==="online-test" && <>
+      <rect x="20" y="18" width="54" height="66" rx="8" fill="#F6AD55"/>
+      <rect x="24" y="22" width="50" height="62" rx="5" fill="#FFFFFF" stroke="#CBD5E0" strokeWidth="1.5"/>
+      <rect x="37" y="14" width="22" height="9" rx="3" fill="#4A5568"/>
+      <circle cx="48" cy="18" r="2.5" fill="#CBD5E0"/>
+      <rect x="30" y="30" width="7" height="7" rx="1.5" fill="#38A169"/>
+      <path d="M32 33.5L34 35.5L36 32" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="41" y="32" width="24" height="3" rx="1" fill="#718096"/>
+      <rect x="30" y="42" width="7" height="7" rx="1.5" fill="#38A169"/>
+      <path d="M32 45.5L34 47.5L36 44" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="41" y="44" width="22" height="3" rx="1" fill="#718096"/>
+      <rect x="30" y="54" width="7" height="7" rx="1.5" fill="#4299E1"/>
+      <circle cx="33.5" cy="57.5" r="1.5" fill="#FFFFFF"/>
+      <rect x="41" y="56" width="20" height="3" rx="1" fill="#718096"/>
+      <rect x="30" y="66" width="7" height="7" rx="1.5" fill="#E2E8F0" stroke="#CBD5E0"/>
+      <rect x="41" y="68" width="16" height="3" rx="1" fill="#A0AEC0"/>
+      <path d="M68 48L78 34C80 32 83 32 85 34L86 35C88 37 88 40 86 42L76 56L66 58Z" fill="#F6AD55"/>
+      <path d="M66 58L68 48L76 56Z" fill="#FBD38D"/>
+      <path d="M66 58L69 55L71 57Z" fill="#2D3748"/>
+      <circle cx="73" cy="72" r="13" fill="#E53E3E"/>
+      <circle cx="73" cy="72" r="11" fill="none" stroke="#FFFFFF" strokeWidth="1.5" strokeDasharray="3 1.5"/>
+      <text x="73" y="76" fontFamily="sans-serif" fontSize="10" fontWeight="900" fill="#FFFFFF" textAnchor="middle">A+</text>
+    </>}
     </g>
   </svg>;
 }

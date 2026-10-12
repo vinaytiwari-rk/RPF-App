@@ -303043,7 +303043,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://www.youtube.com/live/qD6GkaU2lD0",
     "videoId": "qD6GkaU2lD0",
     "category": "News",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/DD_News_logo.svg/512px-DD_News_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/qD6GkaU2lD0/hqdefault.jpg",
     "enabled": true,
     "order": 0
   },
@@ -303053,7 +303053,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://www.youtube.com/live/9X37FfIrKio",
     "videoId": "9X37FfIrKio",
     "category": "News",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/DD_India_logo.svg/512px-DD_India_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/9X37FfIrKio/hqdefault.jpg",
     "enabled": true,
     "order": 1
   },
@@ -303063,7 +303063,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://www.youtube.com/live/JO7CTaWAmGk",
     "videoId": "JO7CTaWAmGk",
     "category": "Legislative",
-    "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Sansad_TV_logo.svg/512px-Sansad_TV_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/JO7CTaWAmGk/hqdefault.jpg",
     "enabled": true,
     "order": 2
   },
@@ -303073,7 +303073,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://www.youtube.com/live/py0W3aPWNXY",
     "videoId": "py0W3aPWNXY",
     "category": "Legislative",
-    "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Sansad_TV_logo.svg/512px-Sansad_TV_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/py0W3aPWNXY/hqdefault.jpg",
     "enabled": true,
     "order": 3
   },
@@ -303083,7 +303083,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://www.youtube.com/live/izXvukZFBtg",
     "videoId": "izXvukZFBtg",
     "category": "News",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/DD_Kisan_logo.svg/512px-DD_Kisan_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/izXvukZFBtg/hqdefault.jpg",
     "enabled": true,
     "order": 4
   },
@@ -359218,11 +359218,11 @@ router28.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21566,
-      versionName: "2.5.6",
+      versionCode: 21567,
+      versionName: "2.5.7",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
-      releaseNotes: "\u2022 760+ Verified Indian & Global Live TV Channels: Fully upgraded Live TV with 684 verified active Indian national and regional channels (News, Entertainment, Movies, Music, Sports, Kids, Devotional, Education, Documentary, Weather) from official IPTV-org and Free-TV playlists\n\u2022 Universal Instant Stream Proxying: Eliminated Android WebView Mixed-Content and CORS blocks by routing HLS streams through our high-speed server proxy with full CORS headers on all playlists and TS segments\n\u2022 Live TV Category Filter Tabs: Added 11 fast category filters (News, Entertainment, Movies, Music, Sports, Kids, Devotional, Knowledge, Education, Weather) with live count indicators and bilingual labels\n\u2022 Supreme Command Center & Studio Sync: Connected Admin Supreme Command with 760 live channels badge and upgraded Live TV Studio with category filtering, live preview tester, and safe CMS merge"
+      releaseNotes: "\u2022 Home Screen Modernization: Reconfigured quick access grid to exclusively feature Utilities, Calculator, Online Test, and Grievance with custom illustrated vector artwork\n\u2022 Fixed Broken Icons on Home & Live TV: Replaced unstable Wikimedia thumbnails with YouTube live stream thumbnails and built self-healing ChannelThumbnail with category-matched gradients and initials\n\u2022 Leadership & Vision Brand Protection: Enforced high-resolution local PNG assets with automatic fallback handlers for RP Foundation Logo and Rohit Pandit portrait\n\u2022 Admin Studio Synchronization: Aligned HomeStudio defaults and quick access items with the live application"
     });
   } catch (err2) {
     return res.status(500).json({ success: false, error: err2?.message || "Failed to read update manifest" });

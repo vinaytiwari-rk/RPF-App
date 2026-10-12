@@ -19,10 +19,10 @@ const fallbackSlides = [
 ];
 
 const actions = [
-  { title: "Jan Seva Card", subtitle: "Your digital service identity", icon: BadgePlus, route: "/jan-seva-card", accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20" },
-  { title: "Healthcare", subtitle: "Health services and support", icon: HeartPulse, route: "/health-care", accent: "text-[#DC2626] bg-red-500/10 border border-red-500/20" },
-  { title: "Employment", subtitle: "Jobs, skills and opportunities", icon: BriefcaseBusiness, route: "/employment", accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20" },
-  { title: "Grievance", subtitle: "Submit and track an issue", icon: ClipboardList, route: "/grievance", accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20" }
+  { title: "Utilities", subtitle: "Everyday tools & civic utilities", icon: Wrench, route: "/utilities", accent: "text-[#0A192F] bg-blue-500/10 border border-blue-500/20" },
+  { title: "Calculator", subtitle: "GST, split bill & loan EMI calculators", icon: Calculator, route: "/utilities/calculators", accent: "text-[#C2410C] bg-orange-500/10 border border-orange-500/20" },
+  { title: "Online Test", subtitle: "Govt exam mock tests & daily quiz", icon: GraduationCap, route: "/online-test", accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20" },
+  { title: "Grievance", subtitle: "Submit public issues & track status", icon: ClipboardList, route: "/grievance", accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20" }
 ];
 
 async function timedFetch(url: string, ms = 12000) {
@@ -436,9 +436,48 @@ export default function Home() {
   };
 
   const quickAccessList = useMemo(() => {
+    const defaultFour = [
+      {
+        title: "Utilities",
+        subtitle: "Digital tools, emergency kit & everyday utilities",
+        icon: Wrench,
+        route: "/utilities",
+        accent: "text-[#0A192F] bg-blue-500/10 border border-blue-500/20"
+      },
+      {
+        title: "Calculator",
+        subtitle: "GST, split bill, loan EMI & smart calculators",
+        icon: Calculator,
+        route: "/utilities/calculators",
+        accent: "text-[#C2410C] bg-orange-500/10 border border-orange-500/20"
+      },
+      {
+        title: "Online Test",
+        subtitle: "Govt exam mock tests, daily quiz & certificates",
+        icon: GraduationCap,
+        route: "/online-test",
+        accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20"
+      },
+      {
+        title: "Grievance",
+        subtitle: "Submit public issues, track resolution & support status",
+        icon: ClipboardList,
+        route: "/grievance",
+        accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20"
+      }
+    ];
+
     if (Array.isArray(cmsConfig?.quickAccessItems) && cmsConfig.quickAccessItems.length > 0) {
-      return cmsConfig.quickAccessItems
-        .filter((item: any) => item.active !== false)
+      const filtered = cmsConfig.quickAccessItems
+        .filter((item: any) => {
+          if (item.active === false) return false;
+          const t = (item.title || "").toLowerCase();
+          const r = (item.route || "").toLowerCase();
+          if (t.includes("jan seva") || r.includes("jan-seva")) return false;
+          if (t.includes("health") || r.includes("health")) return false;
+          if (t.includes("employment") || t.includes("job") || r.includes("employment")) return false;
+          return true;
+        })
         .map((item: any) => {
           const IconComponent = (AVAILABLE_ICONS as any)[item.icon] || BadgePlus;
           return {
@@ -449,65 +488,22 @@ export default function Home() {
             accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
           };
         });
-    }
-    return [
-      {
-        title: "Jan Seva Card",
-        subtitle: "Your digital service identity & welfare benefit card",
-        icon: BadgePlus,
-        route: "/jan-seva-card",
-        accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
-      },
-      {
-        title: "Healthcare",
-        subtitle: "Free health camps, medical support & emergency assistance",
-        icon: HeartPulse,
-        route: "/health-care",
-        accent: "text-[#DC2626] bg-red-500/10 border border-red-500/20"
-      },
-      {
-        title: "Employment",
-        subtitle: "Job opportunities, skill training & career support",
-        icon: BriefcaseBusiness,
-        route: "/employment",
-        accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20"
-      },
-      {
-        title: "Grievance",
-        subtitle: "Submit public issues, track resolution & support status",
-        icon: ClipboardList,
-        route: "/grievance",
-        accent: "text-[#14213D] bg-slate-500/10 border border-slate-500/20"
-      },
-      {
-        title: "Samahit Utilities",
-        subtitle: "Everyday tools, fasting tracker, breathing & digital utilities",
-        icon: Wrench,
-        route: "/utilities",
-        accent: "text-[#0A192F] bg-blue-500/10 border border-blue-500/20"
-      },
-      {
-        title: "Smart Calculators",
-        subtitle: "GST, split bill, BMI, loan EMI & all-in-one calculators",
-        icon: Calculator,
-        route: "/utilities/calculators",
-        accent: "text-[#C2410C] bg-orange-500/10 border border-orange-500/20"
-      },
-      {
-        title: "Online Mock Test",
-        subtitle: "Govt exam mock test, daily current affairs & merit certificates",
-        icon: GraduationCap,
-        route: "/online-test",
-        accent: "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20"
-      },
-      {
-        title: "Shorts & Reels",
-        subtitle: "Watch official foundation videos, updates & stories",
-        icon: Compass,
-        route: "/reels",
-        accent: "text-[#D97706] bg-amber-500/10 border border-amber-500/20"
+
+      if (filtered.length >= 4) {
+        return filtered.slice(0, 4);
       }
-    ];
+      if (filtered.length > 0) {
+        const existingRoutes = new Set(filtered.map((f: any) => f.route));
+        const combined = [...filtered];
+        for (const item of defaultFour) {
+          if (!existingRoutes.has(item.route) && combined.length < 4) {
+            combined.push(item);
+          }
+        }
+        return combined;
+      }
+    }
+    return defaultFour;
   }, [cmsConfig?.quickAccessItems]);
 
   const fieldImpactMetrics = useMemo(() => {
@@ -692,7 +688,15 @@ export default function Home() {
             {/* Vision Narrative */}
             <div className="flex items-start gap-3.5">
               <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-white border border-emerald-500/20 p-1.5 shadow-sm">
-                <img src={RP_FOUNDATION_LOGO} alt="RP Foundation" className="h-full w-full object-contain" />
+                <img
+                  src={RP_FOUNDATION_LOGO}
+                  alt=""
+                  onError={(e) => {
+                    const el = e.currentTarget as HTMLImageElement;
+                    if (!el.src.includes("/assets/logo.png")) el.src = "/assets/logo.png";
+                  }}
+                  className="h-full w-full object-contain"
+                />
               </div>
               <div className="space-y-1">
                 <h3 className="text-[16px] font-bold text-[#14213D]">Empowering Communities Through Direct Ground Action</h3>
@@ -713,7 +717,15 @@ export default function Home() {
             {/* Founder's Message Narrative */}
             <div className="flex items-start gap-3.5">
               <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-amber-500/30 bg-white shadow-sm">
-                <img src={ROHIT_PANDIT_PHOTO} alt="Rohit Pandit, Founder of RP Foundation" className="h-full w-full object-cover object-top" />
+                <img
+                  src={ROHIT_PANDIT_PHOTO}
+                  alt=""
+                  onError={(e) => {
+                    const el = e.currentTarget as HTMLImageElement;
+                    if (!el.src.includes("/assets/founder.png")) el.src = "/assets/founder.png";
+                  }}
+                  className="h-full w-full object-cover object-top"
+                />
               </div>
               <div className="space-y-1">
                 <h3 className="text-[16px] font-bold text-[#14213D]">Message from Founder Rohit Pandit</h3>

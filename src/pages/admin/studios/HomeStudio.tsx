@@ -435,28 +435,47 @@ export default function HomeStudio() {
       }
 
       // 7. Quick Access Grid
-      if (Array.isArray(d.quickAccessItems)) {
-        setQuickAccessItems(
-          d.quickAccessItems.map((q: any) => ({
-            id: q.id,
+      const defaultCoreQuickAccess: QuickAccessItem[] = [
+        { id: "qa-utilities", title: "Utilities", subtitle: "Digital tools, emergency kit & everyday utilities", icon: "Wrench", route: "/utilities", active: true, accentColor: "#0A192F" },
+        { id: "qa-calculator", title: "Calculator", subtitle: "GST, split bill, loan EMI & smart calculators", icon: "Calculator", route: "/utilities/calculators", active: true, accentColor: "#C2410C" },
+        { id: "qa-test", title: "Online Test", subtitle: "Govt exam mock tests, daily quiz & certificates", icon: "GraduationCap", route: "/online-test", active: true, accentColor: "#167C5A" },
+        { id: "qa-grievance", title: "Grievance", subtitle: "Submit public issues, track resolution & support status", icon: "ClipboardList", route: "/grievance", active: true, accentColor: "#14213D" }
+      ];
+
+      if (Array.isArray(d.quickAccessItems) && d.quickAccessItems.length > 0) {
+        const filtered = d.quickAccessItems
+          .filter((q: any) => {
+            const t = (q.title || "").toLowerCase();
+            const r = (q.route || "").toLowerCase();
+            if (t.includes("jan seva") || r.includes("jan-seva")) return false;
+            if (t.includes("health") || r.includes("health")) return false;
+            if (t.includes("employment") || t.includes("job") || r.includes("employment")) return false;
+            return true;
+          })
+          .map((q: any) => ({
+            id: q.id || `qa-${q.route || Math.random()}`,
             title: q.title || "Service",
             subtitle: q.subtitle || "",
             icon: q.icon || "Compass",
             route: q.route || "/explore",
             active: q.active !== false,
             accentColor: q.accentColor || "#167C5A"
-          }))
-        );
+          }));
+
+        if (filtered.length >= 4) {
+          setQuickAccessItems(filtered);
+        } else {
+          const existingRoutes = new Set(filtered.map((item: any) => item.route));
+          const merged = [...filtered];
+          for (const item of defaultCoreQuickAccess) {
+            if (!existingRoutes.has(item.route)) {
+              merged.push(item);
+            }
+          }
+          setQuickAccessItems(merged);
+        }
       } else {
-        setQuickAccessItems([
-          { id: "qa-1", title: "Jan Seva Card", subtitle: "Your digital service identity & welfare benefit card", icon: "BadgePlus", route: "/jan-seva-card", active: true, accentColor: "#D97706" },
-          { id: "qa-2", title: "Healthcare", subtitle: "Free health camps, medical support & emergency assistance", icon: "HeartPulse", route: "/health-care", active: true, accentColor: "#DC2626" },
-          { id: "qa-3", title: "Employment", subtitle: "Job opportunities, skill training & career support", icon: "BriefcaseBusiness", route: "/employment", active: true, accentColor: "#167C5A" },
-          { id: "qa-4", title: "Grievance", subtitle: "Submit public issues, track resolution & support status", icon: "ClipboardList", route: "/grievance", active: true, accentColor: "#14213D" },
-          { id: "qa-5", title: "Samahit Utilities", subtitle: "Everyday tools, fasting tracker, breathing & digital utilities", icon: "Wrench", route: "/utilities", active: true, accentColor: "#0A192F" },
-          { id: "qa-6", title: "Smart Calculators", subtitle: "GST, split bill, BMI, loan EMI & all-in-one calculators", icon: "Calculator", route: "/utilities/calculators", active: true, accentColor: "#C2410C" },
-          { id: "qa-7", title: "Shorts & Reels", subtitle: "Watch official foundation videos, updates & stories", icon: "Film", route: "/reels", active: true, accentColor: "#D97706" }
-        ]);
+        setQuickAccessItems(defaultCoreQuickAccess);
       }
 
       // 8. Field Impact: Master KPI Counters (Unified)

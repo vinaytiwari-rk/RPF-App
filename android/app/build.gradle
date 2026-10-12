@@ -8,8 +8,8 @@ android {
         applicationId 'com.rpfoundation.app'
         minSdk 24
         targetSdk 36
-        versionCode (System.getenv("RPF_VERSION_CODE") ? Integer.parseInt(System.getenv("RPF_VERSION_CODE")) : 21566)
-        versionName '2.5.6'
+        versionCode (System.getenv("RPF_VERSION_CODE") ? Integer.parseInt(System.getenv("RPF_VERSION_CODE")) : 21567)
+        versionName '2.5.7'
     }
 
     signingConfigs {

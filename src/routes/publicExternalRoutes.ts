@@ -450,11 +450,11 @@ router.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21566,
-      versionName: "2.5.6",
+      versionCode: 21567,
+      versionName: "2.5.7",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
-      releaseNotes: "• 760+ Verified Indian & Global Live TV Channels: Fully upgraded Live TV with 684 verified active Indian national and regional channels (News, Entertainment, Movies, Music, Sports, Kids, Devotional, Education, Documentary, Weather) from official IPTV-org and Free-TV playlists\n• Universal Instant Stream Proxying: Eliminated Android WebView Mixed-Content and CORS blocks by routing HLS streams through our high-speed server proxy with full CORS headers on all playlists and TS segments\n• Live TV Category Filter Tabs: Added 11 fast category filters (News, Entertainment, Movies, Music, Sports, Kids, Devotional, Knowledge, Education, Weather) with live count indicators and bilingual labels\n• Supreme Command Center & Studio Sync: Connected Admin Supreme Command with 760 live channels badge and upgraded Live TV Studio with category filtering, live preview tester, and safe CMS merge"
+      releaseNotes: "• Home Screen Modernization: Reconfigured quick access grid to exclusively feature Utilities, Calculator, Online Test, and Grievance with custom illustrated vector artwork\n• Fixed Broken Icons on Home & Live TV: Replaced unstable Wikimedia thumbnails with YouTube live stream thumbnails and built self-healing ChannelThumbnail with category-matched gradients and initials\n• Leadership & Vision Brand Protection: Enforced high-resolution local PNG assets with automatic fallback handlers for RP Foundation Logo and Rohit Pandit portrait\n• Admin Studio Synchronization: Aligned HomeStudio defaults and quick access items with the live application"
     });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err?.message || "Failed to read update manifest" });

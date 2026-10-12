@@ -50,7 +50,7 @@ export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
     "url": "https://www.youtube.com/live/qD6GkaU2lD0",
     "videoId": "qD6GkaU2lD0",
     "category": "News",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/DD_News_logo.svg/512px-DD_News_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/qD6GkaU2lD0/hqdefault.jpg",
     "enabled": true,
     "order": 0
   },
@@ -60,7 +60,7 @@ export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
     "url": "https://www.youtube.com/live/9X37FfIrKio",
     "videoId": "9X37FfIrKio",
     "category": "News",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/DD_India_logo.svg/512px-DD_India_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/9X37FfIrKio/hqdefault.jpg",
     "enabled": true,
     "order": 1
   },
@@ -70,7 +70,7 @@ export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
     "url": "https://www.youtube.com/live/JO7CTaWAmGk",
     "videoId": "JO7CTaWAmGk",
     "category": "Legislative",
-    "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Sansad_TV_logo.svg/512px-Sansad_TV_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/JO7CTaWAmGk/hqdefault.jpg",
     "enabled": true,
     "order": 2
   },
@@ -80,7 +80,7 @@ export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
     "url": "https://www.youtube.com/live/py0W3aPWNXY",
     "videoId": "py0W3aPWNXY",
     "category": "Legislative",
-    "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Sansad_TV_logo.svg/512px-Sansad_TV_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/py0W3aPWNXY/hqdefault.jpg",
     "enabled": true,
     "order": 3
   },
@@ -90,7 +90,7 @@ export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
     "url": "https://www.youtube.com/live/izXvukZFBtg",
     "videoId": "izXvukZFBtg",
     "category": "News",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/DD_Kisan_logo.svg/512px-DD_Kisan_logo.svg.png",
+    "logo": "https://i.ytimg.com/vi/izXvukZFBtg/hqdefault.jpg",
     "enabled": true,
     "order": 4
   },

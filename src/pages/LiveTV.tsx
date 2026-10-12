@@ -25,6 +25,66 @@ const CATEGORIES = [
   { id: "Weather", labelEn: "Weather", labelHi: "मौसम" },
 ];
 
+interface ChannelThumbnailProps {
+  channel: LiveTvChannel;
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}
+
+function ChannelThumbnail({ channel, className = "", size = "md" }: ChannelThumbnailProps) {
+  const [hasError, setHasError] = useState(false);
+  const videoId = getId(channel);
+
+  const initials = useMemo(() => {
+    const clean = channel.name.replace(/(\b(HD|TV|Live|Channel|News|India|Hindi|English)\b)/gi, "").trim();
+    const parts = (clean || channel.name).split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return (parts[0]?.slice(0, 3) || "TV").toUpperCase();
+  }, [channel.name]);
+
+  const gradientClass = useMemo(() => {
+    const cat = channel.category?.toLowerCase() || "";
+    if (cat.includes("news")) return "from-red-600 to-amber-700";
+    if (cat.includes("sport")) return "from-blue-600 to-indigo-800";
+    if (cat.includes("movie") || cat.includes("entertainment")) return "from-purple-600 to-pink-700";
+    if (cat.includes("religio") || cat.includes("devot")) return "from-amber-600 to-orange-700";
+    if (cat.includes("music")) return "from-pink-600 to-rose-700";
+    if (cat.includes("kid")) return "from-emerald-500 to-teal-700";
+    return "from-slate-700 to-slate-900";
+  }, [channel.category]);
+
+  const candidateUrl = useMemo(() => {
+    if (channel.logo && !channel.logo.includes("upload.wikimedia.org")) {
+      return channel.logo;
+    }
+    if (videoId) {
+      return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+    }
+    return channel.logo || null;
+  }, [channel.logo, videoId]);
+
+  if (hasError || !candidateUrl) {
+    return (
+      <div className={`flex flex-col items-center justify-center bg-gradient-to-br ${gradientClass} text-white font-black select-none ${className}`}>
+        <Tv className={size === "lg" ? "h-8 w-8 mb-1 opacity-80" : size === "sm" ? "h-4 w-4 opacity-80" : "h-6 w-6 mb-0.5 opacity-80"} />
+        <span className={size === "lg" ? "text-sm tracking-wider" : size === "sm" ? "text-[10px] tracking-tight" : "text-xs tracking-wide"}>
+          {initials}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={candidateUrl}
+      alt=""
+      loading="lazy"
+      onError={() => setHasError(true)}
+      className={`${className} object-contain`}
+    />
+  );
+}
+
 interface DirectStreamPlayerProps {
   url: string;
   name: string;
@@ -524,8 +584,6 @@ export default function LiveTV() {
             /* LIST LAYOUT */
             <div className="space-y-2">
               {filtered.slice(0, visibleCount).map((c) => {
-                const v = getId(c);
-                const thumb = c.logo || (v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null);
                 return (
                   <button
                     key={c.id}
@@ -534,11 +592,7 @@ export default function LiveTV() {
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div className="h-12 w-20 rounded-xl overflow-hidden bg-slate-900 shrink-0 relative flex items-center justify-center p-1">
-                        {thumb ? (
-                          <img src={thumb} alt={c.name} className="h-full w-full object-contain" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-slate-500"><Tv className="h-5 w-5" /></div>
-                        )}
+                        <ChannelThumbnail channel={c} size="sm" className="h-full w-full" />
                         <span className="absolute inset-0 flex items-center justify-center bg-black/25">
                           <Play className="h-4 w-4 text-white fill-current" />
                         </span>
@@ -561,8 +615,6 @@ export default function LiveTV() {
             /* COMPACT GRID LAYOUT */
             <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
               {filtered.slice(0, visibleCount).map((c) => {
-                const v = getId(c);
-                const thumb = c.logo || (v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null);
                 return (
                   <button
                     key={c.id}
@@ -570,11 +622,7 @@ export default function LiveTV() {
                     className="group overflow-hidden rounded-xl border border-amber-100/80 bg-white/80 backdrop-blur-md text-left shadow-2xs hover:shadow-xs hover:border-amber-300 transition active:scale-[0.98]"
                   >
                     <div className="relative aspect-video w-full overflow-hidden bg-slate-900 flex items-center justify-center p-2">
-                      {thumb ? (
-                        <img src={thumb} alt={c.name} className="h-full w-full object-contain" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-slate-500"><Tv className="h-6 w-6" /></div>
-                      )}
+                      <ChannelThumbnail channel={c} size="md" className="h-full w-full" />
                       <span className="absolute bottom-2 left-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#D97706] shadow-sm">
                         <Play className="h-3 w-3 fill-current ml-0.5" />
                       </span>
@@ -591,8 +639,6 @@ export default function LiveTV() {
             /* STANDARD 3-COLUMN GRID LAYOUT */
             <div className="grid gap-3.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.slice(0, visibleCount).map((c) => {
-                const v = getId(c);
-                const thumb = c.logo || (v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null);
                 return (
                   <button
                     key={c.id}
@@ -600,18 +646,11 @@ export default function LiveTV() {
                     className="group overflow-hidden rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md text-left shadow-2xs hover:shadow-xs hover:border-amber-300/80 transition-all duration-200 active:scale-[0.99]"
                   >
                     <div className="relative aspect-video w-full overflow-hidden bg-slate-900 flex items-center justify-center p-3">
-                      {thumb ? (
-                        <img
-                          src={thumb}
-                          alt={c.name}
-                          loading="lazy"
-                          className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center bg-slate-800 text-slate-400">
-                          <Tv className="h-10 w-10" />
-                        </div>
-                      )}
+                      <ChannelThumbnail
+                        channel={c}
+                        size="lg"
+                        className="h-full w-full group-hover:scale-105 transition-transform duration-300"
+                      />
                       <span className="absolute bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-[#D97706] shadow-md group-hover:scale-110 transition-transform">
                         <Play className="h-4 w-4 fill-current ml-0.5" />
                       </span>
