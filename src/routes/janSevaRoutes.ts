@@ -727,8 +727,8 @@ router.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, r
         masterRecord.aadhaarNo ?? masterRecord.aadhaarNumber ?? masterRecord.aadhaar_no ??
         masterRecord.idNumber ?? masterRecord.id_number ?? masterRecord.patient?.aadhaarNo ??
         masterRecord.data?.aadhaarNo ?? ""
-      ).replace(/\\D/g, "");
-      const applicantIdDigits = String(applicant.rows[0].idNumber || "").replace(/\\D/g, "");
+      ).replace(/\D/g, "");
+      const applicantIdDigits = String(applicant.rows[0].idNumber || "").replace(/\D/g, "");
       const fullIdMatches = masterIdDigits.length === 12 && applicantIdDigits.length === 12 && masterIdDigits === applicantIdDigits;
       const ownerMatches = masterOwner.length > 0 && masterOwner === userId;
       const fullIdMismatch = masterIdDigits.length === 12 && applicantIdDigits.length === 12 && masterIdDigits !== applicantIdDigits;
