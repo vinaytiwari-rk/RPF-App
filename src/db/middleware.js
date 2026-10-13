@@ -143,7 +143,7 @@ export const auditEvent = async ({
        VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
       [
         String(userId ?? "anonymous"),
-        req?.user?.role ? normalizeRole(req.user.role) : "anonymous",
+        (req?.user?.role || metadata?.role) ? normalizeRole(req?.user?.role || metadata.role) : "anonymous",
         action,
         resource,
         resourceId,
