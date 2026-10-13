@@ -165,7 +165,22 @@ export function AuthProvider({children}:{children:React.ReactNode}){
     if(data.token){await setPersistentItem(TOKEN_KEY,data.token);setToken(data.token);}
     await saveUser({janSevaCardStatus:'none',...data.user},true);
   },[saveUser]);
-  const logout=useCallback(async()=>{await clearSession();},[clearSession]);
+  const logout=useCallback(async()=>{
+    const activeToken=token;
+    try {
+      // Revoke the server-side session before clearing local credentials.
+      if(activeToken) {
+        await fetch(apiUrl('/api/auth/logout'), {
+          method:'POST',
+          headers:{Authorization:`Bearer ${activeToken}`}
+        });
+      }
+    } catch {
+      // Always clear local credentials even if the API is temporarily unavailable.
+    } finally {
+      await clearSession();
+    }
+  },[clearSession,token]);
   const updateUser=useCallback(async(updates:Partial<User>)=>{
     if(!user)return false;
     const response=await fetch(apiUrl(`/api/users/${user.id}/update`),{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify(updates)});
