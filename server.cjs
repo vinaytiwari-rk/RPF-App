@@ -302782,7 +302782,7 @@ router.get("/api/admin/control/overview", ...admin, async (_req, res) => {
     const tables = await pool.query(`SELECT COUNT(*)::int AS count FROM information_schema.tables WHERE table_schema = current_schema()`);
     const versions = await pool.query("SELECT COUNT(*)::int AS count, MAX(created_at) AS latest FROM admin_cms_versions");
     const flags = await pool.query("SELECT COUNT(*)::int AS count, COUNT(*) FILTER (WHERE enabled)::int AS enabled FROM admin_feature_flags");
-    return res.json({ success: true, data: { status: "healthy", apiLatencyMs: Date.now() - started, database: { connected: true, serverTime: db.rows[0]?.server_time }, schemaTables: tables.rows[0]?.count || 0, cmsVersions: versions.rows[0], featureFlags: flags.rows[0], node: process.version, environment: process.env.NODE_ENV || "development", checkedAt: (/* @__PURE__ */ new Date()).toISOString() } });
+    return res.json({ success: true, data: { status: "healthy", apiLatencyMs: Date.now() - started, database: { connected: true, serverTime: db.rows[0]?.server_time }, schemaTables: tables.rows[0]?.count || 0, cmsVersions: versions.rows[0], featureFlags: flags.rows[0], node: process.version, appVersion: "2.5.17", environment: process.env.NODE_ENV || "development", checkedAt: (/* @__PURE__ */ new Date()).toISOString() } });
   } catch (error3) {
     return res.status(500).json({ success: false, error: error3?.message || "Control center diagnostics failed." });
   }
@@ -318243,6 +318243,7 @@ router6.get("/api/liveness", (_req, res) => {
     success: true,
     status: "ok",
     service: "rpf-app",
+    version: "2.5.17",
     timestamp: (/* @__PURE__ */ new Date()).toISOString()
   });
 });
@@ -359218,8 +359219,8 @@ router28.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21576,
-      versionName: "2.5.16",
+      versionCode: 21577,
+      versionName: "2.5.17",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
       releaseNotes: "What\u2019s new in this update:\n\u2022 Navigation: Configured exactly four bottom navigation menus (Home, Explore, Activity, and Profile)\n\u2022 Explore: Added custom artwork-style vector illustrations across all services\n\u2022 Social Impact: Dedicated Seva Domain section with All Work, Community, Care & Relief, and Active Ground filters\n\u2022 Vision & Leadership: Connected Founder's Vision navigation with strategic goals"

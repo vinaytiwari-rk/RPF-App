@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
+import { getCurrentAppVersion } from "../../../services/appUpdateService";
 import JanSevaSyncStudio from "../../../components/admin/JanSevaSyncStudio";
 import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
 
@@ -181,6 +182,28 @@ export default function DashboardStudio() {
   const [savingWidgets, setSavingWidgets] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "volunteers" | "users" | "widgets">("overview");
   const [search, setSearch] = useState("");
+  const [appVersion, setAppVersion] = useState("2.5.17");
+  const [manifestVersion, setManifestVersion] = useState("2.5.17");
+
+  useEffect(() => {
+    let active = true;
+    getCurrentAppVersion().then((info) => {
+      if (active && info?.versionName) {
+        setAppVersion(info.versionName);
+      }
+    });
+    fetch(`/api/public/app-update?_t=${Date.now()}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (active && data?.versionName) {
+          setManifestVersion(data.versionName);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Dynamic Widgets State
   const [widgets, setWidgets] = useState<DashboardWidget[]>(DEFAULT_WIDGETS);
@@ -442,8 +465,9 @@ export default function DashboardStudio() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#166534] border border-emerald-200">
-                Live Verified
+              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#166534] border border-emerald-200 flex items-center gap-1 shadow-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                v{appVersion} Live Verified
               </span>
               <span className="text-[10px] font-bold text-slate-400">Database & Registry Telemetry</span>
             </div>
@@ -496,6 +520,39 @@ export default function DashboardStudio() {
       {/* OVERVIEW TAB: RENDERS ACTIVE WIDGETS IN CONFIGURED ORDER */}
       {activeTab === "overview" && (
         <div className="space-y-6 animate-fade-in">
+          {/* Production Version & Release Synchronization Telemetry */}
+          <div className="rounded-3xl border border-slate-200/90 bg-gradient-to-r from-slate-900 via-[#0A192F] to-slate-900 p-5 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="h-11 w-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-black text-white">Supreme Command Release Engine</span>
+                  <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                    v{appVersion} Synchronized
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 mt-1">
+                  Master web application, studio configurations, and mobile APK release pipeline are running on matching production version tags.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 self-stretch md:self-auto justify-end text-xs border-t md:border-t-0 pt-3 md:pt-0 border-slate-800 shrink-0">
+              <div className="text-right">
+                <div className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Android Target</div>
+                <div className="font-bold text-slate-100 font-mono text-xs">v{manifestVersion} (Live APK)</div>
+              </div>
+              <div className="h-8 w-px bg-slate-800 hidden md:block" />
+              <div className="text-right">
+                <div className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Control Plane</div>
+                <div className="font-bold text-emerald-400 flex items-center gap-1.5 justify-end text-xs">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Active Online
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {widgets
               .filter(w => w.active !== false)

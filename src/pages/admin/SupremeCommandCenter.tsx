@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "motion/react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import { useApp } from "../../context/AppContext";
+import { getCurrentAppVersion } from "../../services/appUpdateService";
 import axios from "axios";
 
 const STUDIOS = [
@@ -46,6 +47,41 @@ export default function SupremeCommandCenter() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const [refreshing, setRefreshing] = useState(false);
+  const [appVersion, setAppVersion] = useState("2.5.17");
+  const [buildTime, setBuildTime] = useState<string>("");
+
+  // Dynamic App Version & Build Stamping
+  useEffect(() => {
+    let active = true;
+    getCurrentAppVersion().then((info) => {
+      if (active && info?.versionName) {
+        setAppVersion(info.versionName);
+      }
+    });
+
+    fetch(`/version.json?_t=${Date.now()}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (active && data) {
+          if (data.version) setAppVersion(String(data.version));
+          if (data.generatedAt) {
+            try {
+              const dt = new Date(data.generatedAt);
+              setBuildTime(
+                dt.toLocaleDateString(undefined, { month: "short", day: "numeric" }) +
+                  " " +
+                  dt.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+              );
+            } catch {}
+          }
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Global Admin Search Handler
   useEffect(() => {
@@ -238,8 +274,9 @@ export default function SupremeCommandCenter() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#166534] border border-emerald-200">
-                  Supreme Admin
+                <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#166534] border border-emerald-200 flex items-center gap-1 shadow-xs">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  v{appVersion} • Supreme Admin
                 </span>
                 <span className="text-[10px] font-bold text-slate-400">RP Foundation Control Room</span>
               </div>
@@ -409,12 +446,30 @@ export default function SupremeCommandCenter() {
                   <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Live Online
                 </span>
               </div>
-              <p className="text-xs font-bold text-slate-200">
-                RPF Master Engine v2.5
-              </p>
-              <p className="text-[10px] text-slate-400 mt-1">
-                PostgreSQL • Cloudinary • Node Express
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-200">
+                  RPF Master Engine
+                </p>
+                <span className="rounded-md bg-emerald-950/80 px-2 py-0.5 font-mono text-[10px] font-black text-emerald-300 border border-emerald-500/30">
+                  v{appVersion}
+                </span>
+              </div>
+              <div className="text-[10px] text-slate-400 mt-2.5 pt-2.5 border-t border-slate-800 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span>Release Track:</span>
+                  <span className="font-bold text-slate-200">Production (Main)</span>
+                </div>
+                {buildTime && (
+                  <div className="flex items-center justify-between">
+                    <span>Build Stamped:</span>
+                    <span className="font-medium text-slate-300">{buildTime}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span>Core Stack:</span>
+                  <span className="font-medium text-slate-400">PostgreSQL • Express</span>
+                </div>
+              </div>
             </div>
 
           </div>

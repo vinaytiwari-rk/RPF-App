@@ -55,15 +55,18 @@ const MANIFEST_URLS = [
  * Fallback static web/app version code and name
  */
 export const DEFAULT_VERSION_INFO: AppVersionInfo = {
-  versionCode: 20500,
-  versionName: "2.5.0",
+  versionCode: 21577,
+  versionName: "2.5.17",
   packageName: "com.rpfoundation.app",
   isNativeAndroid: Capacitor.getPlatform() === "android",
 };
 
+let cachedWebVersionInfo: AppVersionInfo | null = null;
+
 /**
  * Retrieves the currently running app version details.
  * Queries native Android PackageInfo if running inside the native APK container.
+ * On web, queries /version.json dynamically to reflect live production releases.
  */
 export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
   const isAndroid = Capacitor.getPlatform() === "android";
@@ -73,7 +76,7 @@ export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
       if (nativeInfo && typeof nativeInfo.versionCode === "number") {
         return {
           versionCode: nativeInfo.versionCode,
-          versionName: nativeInfo.versionName || "2.5.0",
+          versionName: nativeInfo.versionName || "2.5.17",
           packageName: nativeInfo.packageName || "com.rpfoundation.app",
           isNativeAndroid: true,
         };
@@ -81,6 +84,28 @@ export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
     } catch (err) {
       console.warn("NativeDownloads.getAppVersion failed, falling back to defaults:", err);
     }
+  }
+
+  if (cachedWebVersionInfo) {
+    return cachedWebVersionInfo;
+  }
+
+  try {
+    const res = await fetch(`/version.json?_t=${Date.now()}`, { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.version) {
+        cachedWebVersionInfo = {
+          versionCode: 21577,
+          versionName: String(data.version),
+          packageName: "com.rpfoundation.app",
+          isNativeAndroid: isAndroid,
+        };
+        return cachedWebVersionInfo;
+      }
+    }
+  } catch {
+    // Network or offline fallback
   }
 
   return { ...DEFAULT_VERSION_INFO, isNativeAndroid: isAndroid };

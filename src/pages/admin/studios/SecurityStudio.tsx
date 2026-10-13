@@ -117,6 +117,7 @@ export default function SecurityStudio() {
             </span>
           </div>
           <div className="text-xs text-slate-600 space-y-1">
+            <p><strong>Release Version:</strong> {overview?.appVersion ? `v${overview.appVersion}` : "v2.5.17"}</p>
             <p><strong>Environment:</strong> {overview?.environment || "production"}</p>
             <p><strong>Architecture:</strong> Node.js ({overview?.node || "v20"}) • Express • TS</p>
             <p><strong>API Latency:</strong> {overview?.apiLatencyMs ? `${overview.apiLatencyMs} ms` : "Normal"}</p>
