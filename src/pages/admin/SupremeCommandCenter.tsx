@@ -14,12 +14,12 @@ import { getCurrentAppVersion, isValidSemver } from "../../services/appUpdateSer
 import axios from "axios";
 
 const STUDIOS = [
-  { id: "dashboard", path: "/admin", label: "Dashboard", icon: LayoutGrid, badge: "Live" },
+  { id: "dashboard", path: "/admin", label: "Dashboard", icon: LayoutGrid },
   { id: "home", path: "/admin/home", label: "Home", icon: Images },
   { id: "impact", path: "/admin/impact", label: "Impact", icon: HeartHandshake, badge: "Real" },
   { id: "activity", path: "/admin/activity", label: "Activity", icon: Activity, badge: "Action" },
   { id: "campaigns", path: "/admin/campaigns", label: "Campaigns & Funds", icon: TrendingUp, badge: "Donations" },
-  { id: "live-tv", path: "/admin/live-tv", label: "Live TV & Radio", icon: Tv, badge: "760 Live" },
+  { id: "live-tv", path: "/admin/live-tv", label: "Live TV & Radio", icon: Tv },
   { id: "explore", path: "/admin/explore", label: "Explore", icon: Compass },
   { id: "profile", path: "/admin/profile", label: "Profile", icon: User },
   { id: "reels", path: "/admin/reels", label: "Reels / Social", icon: Film, badge: "Media" },
@@ -47,7 +47,7 @@ export default function SupremeCommandCenter() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const [refreshing, setRefreshing] = useState(false);
-  const [appVersion, setAppVersion] = useState("2.5.18");
+  const [appVersion, setAppVersion] = useState("Unknown");
   const [buildTime, setBuildTime] = useState<string>("");
   const [authExpired, setAuthExpired] = useState(false);
 
