@@ -697,7 +697,7 @@ router.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, r
       // A card number is only approvable when it exists in the synchronized
       // Jan Seva master mirror. Never manufacture or accept an arbitrary number.
       const masterCard = await client.query(
-        'SELECT card_no FROM jan_seva_card_mirror WHERE card_no = $1 LIMIT 1',
+        'SELECT card_no, record FROM jan_seva_card_mirror WHERE card_no = $1 LIMIT 1',
         [cardNo]
       );
       if (!masterCard.rows.length) {
@@ -709,6 +709,38 @@ router.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, r
         return res.status(400).json({
           success: false,
           error: 'This card number does not exist in the synchronized Jan Seva master record. Sync/import the master record before approval.'
+        });
+      }
+
+      const applicant = await client.query(
+        'SELECT "idNumber" FROM card_applications_v2 WHERE "userId" = $1 LIMIT 1',
+        [userId]
+      );
+      if (!applicant.rows.length) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ success: false, error: 'Application not found' });
+      }
+
+      const masterRecord = masterCard.rows[0].record || {};
+      const masterOwner = String(masterRecord.createdBy ?? masterRecord.userId ?? masterRecord.user_id ?? "").trim();
+      const masterIdDigits = String(
+        masterRecord.aadhaarNo ?? masterRecord.aadhaarNumber ?? masterRecord.aadhaar_no ??
+        masterRecord.idNumber ?? masterRecord.id_number ?? masterRecord.patient?.aadhaarNo ??
+        masterRecord.data?.aadhaarNo ?? ""
+      ).replace(/\\D/g, "");
+      const applicantIdDigits = String(applicant.rows[0].idNumber || "").replace(/\\D/g, "");
+      const fullIdMatches = masterIdDigits.length === 12 && applicantIdDigits.length === 12 && masterIdDigits === applicantIdDigits;
+      const ownerMatches = masterOwner.length > 0 && masterOwner === userId;
+      const fullIdMismatch = masterIdDigits.length === 12 && applicantIdDigits.length === 12 && masterIdDigits !== applicantIdDigits;
+      if (fullIdMismatch || (!fullIdMatches && !ownerMatches)) {
+        await client.query('ROLLBACK');
+        await writeAuditLog(req, 'JAN_SEVA_CARD_APPROVAL_REJECTED', 'card_application', userId, {
+          reason: fullIdMismatch ? 'master_identity_mismatch' : 'master_identity_not_verifiable',
+          cardNo
+        });
+        return res.status(409).json({
+          success: false,
+          error: 'The synced master record could not be matched to this applicant. Verify the applicant identity in the Jan Seva master data before approval.'
         });
       }
 
