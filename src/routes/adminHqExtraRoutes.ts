@@ -36,8 +36,9 @@ router.get("/api/admin/hq/certificates/signatures/:service_id", async (req, res)
 router.use("/api/admin", authenticateToken, requireAdmin);
 
 router.put("/api/admin/hq/credentials", async (req, res) => {
-  const client = await pool.connect();
+  let client: any;
   try {
+    client = await pool.connect();
     const body = req.body || {};
     const { username, newPassword } = body;
     const normalizedUsername = String(username || "").trim();
@@ -70,7 +71,7 @@ router.put("/api/admin/hq/credentials", async (req, res) => {
     console.error("Administrator credential rotation failed:", err?.message);
     return res.status(500).json({ success: false, error: "Failed to update administrator credentials. No partial update was committed." });
   } finally {
-    client.release();
+    client?.release();
   }
 });
 
