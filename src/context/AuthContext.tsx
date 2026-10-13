@@ -115,7 +115,12 @@ export function AuthProvider({children}:{children:React.ReactNode}){
                 const merged={...parsed,...fresh,role:(fresh.role as UserRole)??parsed.role,name:fresh.name??parsed.name,displayName:fresh.displayName??fresh.name??parsed.name,janSevaCardStatus:(fresh.janSevaCardStatus as User['janSevaCardStatus'])||parsed.janSevaCardStatus||'none'} as User;
                 await setPersistentItem(STORAGE_KEY,JSON.stringify(merged));
                 setUser(merged);
+              } else if (["admin","super_admin","superadmin"].includes(String(parsed.role || "").toLowerCase())) {
+                await clearSession();
               }
+            } else if ([401, 403].includes(res.status) && ["admin","super_admin","superadmin"].includes(String(parsed.role || "").toLowerCase())) {
+              // Never keep rendering a cached Supreme Admin session after the server rejects it.
+              await clearSession();
             }
           } catch {
             /* cached session remains authoritative; network or refresh failures must not force logout */
