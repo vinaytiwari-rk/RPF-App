@@ -1,0 +1,438 @@
+{
+  "packId": "reasoning-analytical-foundations-2026-10-13-a",
+  "version": 1,
+  "subject": "reasoning",
+  "category": "logical-reasoning",
+  "titleEn": "Logical Reasoning — Foundations A",
+  "titleHi": "तार्किक क्षमता — आधार A",
+  "descEn": "Fifteen original bilingual questions on series, analogies, coding, directions, relations, ranking and syllogism.",
+  "descHi": "श्रृंखला, समानता, कूटलेखन, दिशा, संबंध, क्रम और न्यायवाक्य पर 15 मौलिक द्विभाषी प्रश्न।",
+  "iconName": "BrainCircuit",
+  "color": "from-emerald-600 to-teal-600",
+  "badge": "Original practice",
+  "durationMinutes": 10,
+  "questionsCount": 15,
+  "questionCount": 15,
+  "questions": [
+    {
+      "id": "reasoning-20261013-001",
+      "subject": "reasoning",
+      "topic": "Number Series",
+      "difficulty": "easy",
+      "questionEn": "Find the next number: 2, 6, 12, 20, 30, __.",
+      "questionHi": "अगली संख्या ज्ञात करें: 2, 6, 12, 20, 30, __।",
+      "optionsEn": [
+        "40",
+        "41",
+        "42",
+        "44"
+      ],
+      "optionsHi": [
+        "40",
+        "41",
+        "42",
+        "44"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The differences are +4, +6, +8 and +10. The next difference is +12, so 30 + 12 = 42.",
+      "explanationHi": "अंतर +4, +6, +8 और +10 हैं। अगला अंतर +12 होगा, इसलिए 30 + 12 = 42।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-002",
+      "subject": "reasoning",
+      "topic": "Number Series",
+      "difficulty": "easy",
+      "questionEn": "What comes next in the series 3, 9, 27, 81, __?",
+      "questionHi": "श्रृंखला 3, 9, 27, 81, __ में अगली संख्या क्या होगी?",
+      "optionsEn": [
+        "162",
+        "243",
+        "324",
+        "729"
+      ],
+      "optionsHi": [
+        "162",
+        "243",
+        "324",
+        "729"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Each term is multiplied by 3. Therefore, 81 × 3 = 243.",
+      "explanationHi": "हर पद को 3 से गुणा किया गया है। इसलिए 81 × 3 = 243।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-003",
+      "subject": "reasoning",
+      "topic": "Letter Series",
+      "difficulty": "medium",
+      "questionEn": "Which letter comes next: A, C, F, J, O, __?",
+      "questionHi": "अगला अक्षर कौन-सा होगा: A, C, F, J, O, __?",
+      "optionsEn": [
+        "T",
+        "U",
+        "V",
+        "W"
+      ],
+      "optionsHi": [
+        "T",
+        "U",
+        "V",
+        "W"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The jumps are +2, +3, +4 and +5 alphabet positions. The next jump is +6: O to U.",
+      "explanationHi": "अक्षर-स्थान की छलाँगें +2, +3, +4 और +5 हैं। अगली छलाँग +6 होगी: O से U।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-004",
+      "subject": "reasoning",
+      "topic": "Analogy",
+      "difficulty": "easy",
+      "questionEn": "Bird is related to nest in the same way that bee is related to __.",
+      "questionHi": "पक्षी का संबंध घोंसले से है। इसी प्रकार मधुमक्खी का संबंध किससे है?",
+      "optionsEn": [
+        "Hive",
+        "Burrow",
+        "Stable",
+        "Web"
+      ],
+      "optionsHi": [
+        "छत्ता",
+        "बिल",
+        "अस्तबल",
+        "जाला"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "A nest is a bird's dwelling; a hive is a colony of bees' dwelling.",
+      "explanationHi": "घोंसला पक्षी का निवास है; छत्ता मधुमक्खियों के रहने का स्थान है।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-005",
+      "subject": "reasoning",
+      "topic": "Number Analogy",
+      "difficulty": "easy",
+      "questionEn": "Complete the analogy: 8 : 64 :: 11 : __.",
+      "questionHi": "समान संबंध पूरा करें: 8 : 64 :: 11 : __।",
+      "optionsEn": [
+        "110",
+        "111",
+        "121",
+        "132"
+      ],
+      "optionsHi": [
+        "110",
+        "111",
+        "121",
+        "132"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The second number is the square of the first: 8² = 64, so 11² = 121.",
+      "explanationHi": "दूसरी संख्या पहली संख्या का वर्ग है: 8² = 64, इसलिए 11² = 121।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-006",
+      "subject": "reasoning",
+      "topic": "Classification",
+      "difficulty": "easy",
+      "questionEn": "Which number is not a perfect square?",
+      "questionHi": "इनमें से कौन-सी संख्या पूर्ण वर्ग नहीं है?",
+      "optionsEn": [
+        "16",
+        "25",
+        "49",
+        "63"
+      ],
+      "optionsHi": [
+        "16",
+        "25",
+        "49",
+        "63"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "16 = 4², 25 = 5² and 49 = 7². The number 63 is not a perfect square.",
+      "explanationHi": "16 = 4², 25 = 5² और 49 = 7² हैं। 63 पूर्ण वर्ग नहीं है।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-007",
+      "subject": "reasoning",
+      "topic": "Letter Coding",
+      "difficulty": "medium",
+      "questionEn": "If a word's value is the sum of its letters' alphabet positions and CAT = 24, what is BAT?",
+      "questionHi": "यदि किसी शब्द का मान उसके अक्षरों के वर्णमाला-स्थान का योग है और CAT = 24, तो BAT का मान क्या होगा?",
+      "optionsEn": [
+        "22",
+        "23",
+        "24",
+        "25"
+      ],
+      "optionsHi": [
+        "22",
+        "23",
+        "24",
+        "25"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "B = 2, A = 1 and T = 20. Their sum is 2 + 1 + 20 = 23.",
+      "explanationHi": "B = 2, A = 1 और T = 20। योग 2 + 1 + 20 = 23 है।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-008",
+      "subject": "reasoning",
+      "topic": "Coding-Decoding",
+      "difficulty": "easy",
+      "questionEn": "Each letter is replaced by the next alphabet letter: BOOK becomes CPPL. How is LAMP written?",
+      "questionHi": "हर अक्षर को वर्णमाला के अगले अक्षर से बदला जाता है: BOOK को CPPL लिखा जाता है। LAMP कैसे लिखा जाएगा?",
+      "optionsEn": [
+        "MBNQ",
+        "KZLO",
+        "MBOQ",
+        "NBNQ"
+      ],
+      "optionsHi": [
+        "MBNQ",
+        "KZLO",
+        "MBOQ",
+        "NBNQ"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Move each letter forward by one: L→M, A→B, M→N and P→Q, giving MBNQ.",
+      "explanationHi": "हर अक्षर को एक स्थान आगे करें: L→M, A→B, M→N और P→Q; उत्तर MBNQ है।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-009",
+      "subject": "reasoning",
+      "topic": "Direction Sense",
+      "difficulty": "easy",
+      "questionEn": "A person faces north, turns right, then left, and then left again. Which direction are they facing?",
+      "questionHi": "एक व्यक्ति उत्तर की ओर मुँह करके खड़ा है। वह दाएँ, फिर बाएँ और फिर दोबारा बाएँ मुड़ता है। अब उसका मुँह किस दिशा में है?",
+      "optionsEn": [
+        "North",
+        "East",
+        "West",
+        "South"
+      ],
+      "optionsHi": [
+        "उत्तर",
+        "पूर्व",
+        "पश्चिम",
+        "दक्षिण"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "North → right to east → left to north → left to west.",
+      "explanationHi": "उत्तर → दाएँ मुड़ने पर पूर्व → बाएँ मुड़ने पर उत्तर → फिर बाएँ मुड़ने पर पश्चिम।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-010",
+      "subject": "reasoning",
+      "topic": "Direction Sense",
+      "difficulty": "easy",
+      "questionEn": "A person walks 5 km east, then 3 km north, then 5 km west. Where are they relative to the start?",
+      "questionHi": "एक व्यक्ति 5 किमी पूर्व, फिर 3 किमी उत्तर और फिर 5 किमी पश्चिम चलता है। वह शुरुआती स्थान के सापेक्ष कहाँ है?",
+      "optionsEn": [
+        "At the starting point",
+        "3 km north",
+        "3 km south",
+        "5 km north"
+      ],
+      "optionsHi": [
+        "शुरुआती स्थान पर",
+        "3 किमी उत्तर",
+        "3 किमी दक्षिण",
+        "5 किमी उत्तर"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The east and west movements cancel, leaving the person 3 km north of the start.",
+      "explanationHi": "पूर्व और पश्चिम की 5-5 किमी चाल निरस्त हो जाती हैं। व्यक्ति शुरुआती स्थान से 3 किमी उत्तर में है।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-011",
+      "subject": "reasoning",
+      "topic": "Blood Relations",
+      "difficulty": "easy",
+      "questionEn": "A is the brother of B. B is the mother of C. How is A related to C?",
+      "questionHi": "A, B का भाई है। B, C की माँ है। A का C से क्या संबंध है?",
+      "optionsEn": [
+        "Father",
+        "Paternal uncle",
+        "Cousin",
+        "Maternal uncle"
+      ],
+      "optionsHi": [
+        "पिता",
+        "चाचा/ताऊ",
+        "चचेरा/ममेरा भाई",
+        "मामा"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "B is C's mother, so her brother A is C's maternal uncle.",
+      "explanationHi": "B, C की माँ है, इसलिए B का भाई A, C का मामा है।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-012",
+      "subject": "reasoning",
+      "topic": "Blood Relations",
+      "difficulty": "easy",
+      "questionEn": "P is the daughter of Q, and Q is the son of R. What is R's relationship to P?",
+      "questionHi": "P, Q की बेटी है और Q, R का बेटा है। R का P से क्या संबंध है?",
+      "optionsEn": [
+        "Grandparent",
+        "Parent",
+        "Aunt or uncle",
+        "Sibling"
+      ],
+      "optionsHi": [
+        "दादा/दादी या नाना/नानी",
+        "माता या पिता",
+        "चाची/मौसी/बुआ/मामी/मामा",
+        "भाई या बहन"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "R is Q's parent and Q is P's parent; therefore R is P's grandparent.",
+      "explanationHi": "R, Q का माता-पिता है और Q, P का माता-पिता है; इसलिए R, P का दादा-दादी या नाना-नानी है।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-013",
+      "subject": "reasoning",
+      "topic": "Order and Ranking",
+      "difficulty": "easy",
+      "questionEn": "D is taller than A, A is taller than B, and B is taller than C. Who is tallest?",
+      "questionHi": "D की लंबाई A से अधिक है, A की B से और B की C से अधिक है। सबसे लंबा कौन है?",
+      "optionsEn": [
+        "A",
+        "B",
+        "D",
+        "C"
+      ],
+      "optionsHi": [
+        "A",
+        "B",
+        "D",
+        "C"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The order from tallest to shortest is D, A, B, C.",
+      "explanationHi": "ऊँचाई का क्रम सबसे लंबे से सबसे छोटे तक D, A, B, C है।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-014",
+      "subject": "reasoning",
+      "topic": "Order and Ranking",
+      "difficulty": "easy",
+      "questionEn": "A student is 17th from the left and 21st from the right in a row. How many students are there?",
+      "questionHi": "एक पंक्ति में विद्यार्थी बाएँ से 17वें और दाएँ से 21वें स्थान पर है। पंक्ति में कुल कितने विद्यार्थी हैं?",
+      "optionsEn": [
+        "36",
+        "37",
+        "38",
+        "39"
+      ],
+      "optionsHi": [
+        "36",
+        "37",
+        "38",
+        "39"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Total = left rank + right rank − 1 = 17 + 21 − 1 = 37.",
+      "explanationHi": "कुल संख्या = बाएँ स्थान + दाएँ स्थान − 1 = 17 + 21 − 1 = 37।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-015",
+      "subject": "reasoning",
+      "topic": "Syllogism",
+      "difficulty": "medium",
+      "questionEn": "Statements: All pens are tools. Some tools are metal. Can we conclude that some pens are metal?",
+      "questionHi": "कथन: सभी पेन औज़ार हैं। कुछ औज़ार धातु के हैं। क्या निष्कर्ष निकाला जा सकता है कि कुछ पेन धातु के हैं?",
+      "optionsEn": [
+        "Yes, some pens must be metal",
+        "All pens are metal",
+        "No pen is metal",
+        "No definite conclusion about whether any pen is metal"
+      ],
+      "optionsHi": [
+        "हाँ, कुछ पेन धातु के अवश्य हैं",
+        "सभी पेन धातु के हैं",
+        "कोई पेन धातु का नहीं है",
+        "पेन के धातु का होने के बारे में निश्चित निष्कर्ष नहीं निकलता"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The metal tools may or may not be pens. The statements do not establish an overlap between pens and metal tools.",
+      "explanationHi": "धातु के औज़ार पेन हो भी सकते हैं और नहीं भी। कथन पेन और धातु के औज़ारों के बीच निश्चित समानता स्थापित नहीं करते।",
+      "examTags": [
+        "reasoning",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    }
+  ]
+}

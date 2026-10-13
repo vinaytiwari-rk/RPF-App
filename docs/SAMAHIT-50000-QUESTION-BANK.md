@@ -8,18 +8,22 @@ Build a 50,000+ question bank with a hybrid delivery model: versioned, subject-w
 
 ## Current pack inventory
 
-The branch contains 100 questions across 9 packs:
+The current PR branch contains **229 question records across 13 JSON packs**:
+- Biology / Human Body: 8
 - Current Affairs: 10
-- Constitution & Polity: 20
-- General Science: 15
+- Economics & Civics: 8
+- English Grammar: 8
 - Indian Geography: 15
 - Modern Indian History: 8
-- Mathematics / Arithmetic: 8
-- English Grammar & Vocabulary: 8
-- Economics & Civics: 8
-- Biology & Human Body: 8
+- Mathematics / Arithmetic: 16
+- Constitution & Polity: 20
+- General Science: 15
+- World History: 100 (questions 101–200)
+- World Geography: 21 (questions 201–221)
 
-The 40-question second batch adds original bilingual questions across History, Mathematics, English, Economics/Civics, and Biology. The remaining gap to 50,000 is 49,900. These are pilot packs and still require full editorial/source review; do not call the whole bank 50,000+ or fully verified yet.
+A repository-content audit found 229 unique IDs and 229 distinct normalized English prompts after replacing two exact duplicate prompts. Structural checks found no missing bilingual fields, invalid option counts, out-of-range answer indices, or stale questionCount metadata.
+
+**Remaining gap to 50,000 records: 49,771.** This is not a claim that the target has been met or that every fact has received independent editorial review. The legacy bundled bank remains separate until it is migrated and deduplicated before inclusion in the canonical total.
 
 ## Using Lucent / Arihant as study references
 
