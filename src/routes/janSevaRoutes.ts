@@ -128,8 +128,7 @@ const extractCardNumber = (record: any): string | null => {
     record?.patient?.cardNo ??
     record?.patient?.cardNumber ??
     record?.data?.cardNo ??
-    record?.data?.cardNumber ??
-    record?._id;
+    record?.data?.cardNumber;
   return typeof value === 'string' || typeof value === 'number'
     ? String(value).trim() || null
     : null;
