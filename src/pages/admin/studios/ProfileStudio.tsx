@@ -615,6 +615,7 @@ export default function ProfileStudio() {
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
+      {loadError && <div role="alert" className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900"><div><p className="font-bold">Profile configuration could not be verified.</p><p className="mt-1 text-xs">{loadError} Publishing is disabled to protect saved content.</p></div><button type="button" onClick={() => void loadData()} disabled={loading} className="rounded-xl border border-rose-300 bg-white px-3 py-2 text-xs font-bold disabled:opacity-50">Retry</button></div>}
       {/* HEADER WITH SAVE AND REFRESH */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
@@ -649,7 +650,7 @@ export default function ProfileStudio() {
           {["profile_cms", "certificates", "volunteer_rules", "browser_settings"].includes(activeTab) && (
             <button
               onClick={handleSaveProfileConfig}
-              disabled={actionBusy}
+              disabled={actionBusy || loading || Boolean(loadError)}
               className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition shadow-xs disabled:opacity-60"
             >
               <Save className="h-4 w-4" /> {actionBusy ? "Publishing..." : "Save & Publish"}
