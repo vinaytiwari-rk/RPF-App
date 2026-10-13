@@ -36,20 +36,41 @@ router.get("/api/admin/hq/certificates/signatures/:service_id", async (req, res)
 router.use("/api/admin", authenticateToken, requireAdmin);
 
 router.put("/api/admin/hq/credentials", async (req, res) => {
+  const client = await pool.connect();
   try {
     const body = req.body || {};
     const { username, newPassword } = body;
-    if (!username || !newPassword) return res.status(400).json({ success: false, error: "Username and password are required." });
+    const normalizedUsername = String(username || "").trim();
+    if (!normalizedUsername || !newPassword) return res.status(400).json({ success: false, error: "Username and password are required." });
     if (String(newPassword).length < 12) return res.status(400).json({ success: false, error: "Administrator password must be at least 12 characters." });
 
     const hash = await bcrypt.hash(String(newPassword), 12);
-    const result = await pool.query(`UPDATE admin_credentials SET username = $1, password_hash = $2 WHERE id = $3 RETURNING id, username`, [String(username).trim(), hash, String(req.user?.id || "")]);
-    if (!result.rows.length) return res.status(404).json({ success: false, error: "Administrator credential record not found." });
+    await client.query("BEGIN");
+    const result = await client.query(
+      `UPDATE admin_credentials SET username = $1, password_hash = $2 WHERE id = $3 RETURNING id, username`,
+      [normalizedUsername, hash, String(req.user?.id || "")]
+    );
+    if (!result.rows.length) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ success: false, error: "Administrator credential record not found." });
+    }
+
+    // Credential rotation revokes every other administrator session. Keep only
+    // the current verified session so the admin can finish the operation safely.
+    await client.query(
+      "DELETE FROM sessions WHERE user_id = $1 AND token <> $2",
+      [String(req.user?.id || ""), String(req.authToken || "")]
+    );
+    await client.query("COMMIT");
 
     await auditEvent({ userId: String(req.user?.id || ""), action: "admin_credentials_updated", resource: "admin_credentials", req });
-    return res.json({ success: true, data: result.rows[0] });
+    return res.json({ success: true, data: result.rows[0], sessionsRevoked: true });
   } catch (err: any) {
-    return res.status(500).json({ success: false, error: "Failed to update administrator credentials." });
+    try { await client.query("ROLLBACK"); } catch {}
+    console.error("Administrator credential rotation failed:", err?.message);
+    return res.status(500).json({ success: false, error: "Failed to update administrator credentials. No partial update was committed." });
+  } finally {
+    client.release();
   }
 });
 
