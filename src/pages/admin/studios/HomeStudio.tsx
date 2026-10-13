@@ -715,11 +715,24 @@ export default function HomeStudio() {
         { headers: authHeader() }
       );
 
-      if (res.data?.success === false) throw new Error(res.data?.error || "Publish failed");
+      if (res.data?.success !== true) throw new Error(res.data?.error || "Publish failed");
+      const verifyResponse = await axios.get("/api/cms", {
+        params: { _verify: Date.now() },
+        headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+        timeout: 10000
+      });
+      const savedCms = verifyResponse.data?.cms;
+      const stable = (value: any): string => {
+        if (Array.isArray(value)) return `[${value.map(stable).join(",")}]`;
+        if (value && typeof value === "object") return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${stable(value[key])}`).join(",")}}`;
+        return JSON.stringify(value) ?? "undefined";
+      };
+      const mismatches = Object.keys(patch).filter(key => stable(savedCms?.[key]) !== stable((patch as any)[key]));
+      if (mismatches.length) throw new Error(`Publish was accepted, but server verification failed for: ${mismatches.join(", ")}.`);
       window.dispatchEvent(new CustomEvent("samahit-admin-updated"));
-      toast.success("Home controls published safely to live apps!", { id: toastId });
+      toast.success("Home controls saved and verified on the server.", { id: toastId });
     } catch (e: any) {
-      toast.error(e?.response?.data?.error || "Failed to publish", { id: toastId });
+      toast.error(e?.response?.data?.error || e?.message || "Failed to publish", { id: toastId });
     } finally {
       setSaving(false);
     }
