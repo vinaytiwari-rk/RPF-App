@@ -45,9 +45,12 @@ async function readCms(): Promise<Record<string, any>> {
   if (!result.rows.length || !result.rows[0].founderMessageEn) return {};
   try {
     const parsed = JSON.parse(result.rows[0].founderMessageEn);
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("Stored CMS configuration must be a JSON object.");
+    }
+    return parsed;
   } catch {
-    return {};
+    throw new Error("Stored CMS configuration is invalid JSON; refusing to overwrite existing content.");
   }
 }
 
