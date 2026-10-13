@@ -3,6 +3,8 @@ import React, { useMemo, useState } from "react";
 import { HeartPulse, Search, ExternalLink, Stethoscope, ShieldCheck, Activity, FileHeart, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { openExternalLink } from "../utils/browser";
+import { useApp } from "../context/AppContext";
+import { resolveAdminServiceLinks } from "../utils/adminServiceLinks";
 
 const links = [
   { name: "Ayushman Bharat", category: "Benefits", desc: "Check official health benefit and beneficiary services.", url: "https://beneficiary.nha.gov.in/" },
@@ -17,14 +19,25 @@ const links = [
 
 export default function HealthCare() {
   const nav = useNavigate();
+  const { cmsConfig } = useApp();
   const openUrl = (url: string, title: string) => void openExternalLink(url, nav, title);
   const [q, setQ] = useState("");
   const [tab, setTab] = useState("All");
+  const adminLinks = useMemo(
+    () => resolveAdminServiceLinks(cmsConfig, ["health-care"], ["/health-care"]),
+    [cmsConfig]
+  );
+  const visibleLinks = useMemo(
+    () => adminLinks.configured
+      ? adminLinks.links.map((link, index) => ({ name: link.title, category: "Configured", desc: link.description, url: link.url, key: `admin-${index}-${link.url}` }))
+      : links.map(link => ({ ...link, key: link.name })),
+    [adminLinks]
+  );
 
-  const cats = ["All", ...Array.from(new Set(links.map((x) => x.category)))];
+  const cats = ["All", ...Array.from(new Set(visibleLinks.map((x) => x.category)))];
   const filtered = useMemo(
-    () => links.filter((x) => (tab === "All" || x.category === tab) && `${x.name} ${x.desc}`.toLowerCase().includes(q.toLowerCase())),
-    [q, tab]
+    () => visibleLinks.filter((x) => (tab === "All" || x.category === tab) && `${x.name} ${x.desc}`.toLowerCase().includes(q.toLowerCase())),
+    [q, tab, visibleLinks]
   );
 
   return (
@@ -130,8 +143,8 @@ export default function HealthCare() {
         <div className="space-y-3">
           {filtered.map((x) => (
             <button
-              key={x.name}
-              onClick={() => openUrl(x.url, x.name)}
+              key={x.key}
+              onClick={() => openUrl(x.url, x.name)
               className="flex w-full items-center gap-3.5 rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all group"
             >
               <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-2.5 text-[#DC2626] shrink-0">
