@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "motion/react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import { useApp } from "../../context/AppContext";
-import { getCurrentAppVersion } from "../../services/appUpdateService";
+import { getCurrentAppVersion, isValidSemver } from "../../services/appUpdateService";
 import axios from "axios";
 
 const STUDIOS = [
@@ -47,14 +47,24 @@ export default function SupremeCommandCenter() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const [refreshing, setRefreshing] = useState(false);
-  const [appVersion, setAppVersion] = useState("2.5.17");
+  const [appVersion, setAppVersion] = useState("2.5.18");
   const [buildTime, setBuildTime] = useState<string>("");
+  const [authExpired, setAuthExpired] = useState(false);
+
+  // Auth Expiration Listener
+  useEffect(() => {
+    const onAuthExpired = () => {
+      setAuthExpired(true);
+    };
+    window.addEventListener("samahit-auth-expired", onAuthExpired);
+    return () => window.removeEventListener("samahit-auth-expired", onAuthExpired);
+  }, []);
 
   // Dynamic App Version & Build Stamping
   useEffect(() => {
     let active = true;
     getCurrentAppVersion().then((info) => {
-      if (active && info?.versionName) {
+      if (active && info?.versionName && isValidSemver(info.versionName)) {
         setAppVersion(info.versionName);
       }
     });
@@ -63,7 +73,9 @@ export default function SupremeCommandCenter() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (active && data) {
-          if (data.version) setAppVersion(String(data.version));
+          if (data.version && isValidSemver(data.version)) {
+            setAppVersion(String(data.version).trim().replace(/^v/, ''));
+          }
           if (data.generatedAt) {
             try {
               const dt = new Date(data.generatedAt);
@@ -389,6 +401,31 @@ export default function SupremeCommandCenter() {
           </div>
         </div>
       </header>
+
+      {/* Session Expired Alert Banner */}
+      {authExpired && (
+        <div className="bg-gradient-to-r from-amber-600 via-rose-600 to-amber-700 px-4 py-3 text-white shadow-md animate-fade-in">
+          <div className="mx-auto flex max-w-[1750px] 2xl:max-w-[1880px] flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-2">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle className="h-5 w-5 shrink-0 text-amber-200 animate-pulse" />
+              <div>
+                <p className="text-xs sm:text-sm font-black tracking-wide">
+                  Administrator Session Expired (Token Timeout)
+                </p>
+                <p className="text-[11px] text-amber-100">
+                  Protected user, volunteer, card, and grievance APIs require an active login session.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate("/login?redirect=" + encodeURIComponent(location.pathname))}
+              className="rounded-xl bg-white px-4 py-2 text-xs font-black text-rose-700 hover:bg-rose-50 transition shadow-sm shrink-0 flex items-center gap-1.5"
+            >
+              Sign In Again &rarr;
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* MAIN CONTAINER */}
       <div className="mx-auto flex max-w-[1750px] 2xl:max-w-[1880px] gap-6 px-4 py-6 sm:px-6 lg:px-8 flex-col lg:flex-row">

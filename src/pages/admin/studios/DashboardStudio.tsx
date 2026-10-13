@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
-import { getCurrentAppVersion } from "../../../services/appUpdateService";
+import { getCurrentAppVersion, isValidSemver } from "../../../services/appUpdateService";
 import JanSevaSyncStudio from "../../../components/admin/JanSevaSyncStudio";
 import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
 
@@ -182,26 +182,34 @@ export default function DashboardStudio() {
   const [savingWidgets, setSavingWidgets] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "volunteers" | "users" | "widgets">("overview");
   const [search, setSearch] = useState("");
-  const [appVersion, setAppVersion] = useState("2.5.17");
-  const [manifestVersion, setManifestVersion] = useState("2.5.17");
+  const [appVersion, setAppVersion] = useState("2.5.18");
+  const [manifestVersion, setManifestVersion] = useState("2.5.18");
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   useEffect(() => {
     let active = true;
     getCurrentAppVersion().then((info) => {
-      if (active && info?.versionName) {
+      if (active && info?.versionName && isValidSemver(info.versionName)) {
         setAppVersion(info.versionName);
       }
     });
     fetch(`/api/public/app-update?_t=${Date.now()}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (active && data?.versionName) {
+        if (active && data?.versionName && isValidSemver(data.versionName)) {
           setManifestVersion(data.versionName);
         }
       })
       .catch(() => {});
+
+    const onAuthExpired = () => {
+      if (active) setSessionExpired(true);
+    };
+    window.addEventListener("samahit-auth-expired", onAuthExpired);
+
     return () => {
       active = false;
+      window.removeEventListener("samahit-auth-expired", onAuthExpired);
     };
   }, []);
 
@@ -235,7 +243,7 @@ export default function DashboardStudio() {
     reels: { value: 0, loading: true, status: "live" }
   });
 
-  async function getAdminData(url: string, t: string): Promise<{ items: Row[]; error?: string }> {
+  async function getAdminData(url: string, t: string): Promise<{ items: Row[]; error?: string; isAuthError?: boolean }> {
     try {
       const response = await axios.get(url, { headers: authHeaders(t), timeout: 8000 });
       const payload = response.data?.data ?? response.data;
@@ -243,7 +251,11 @@ export default function DashboardStudio() {
       if (Array.isArray(payload?.items)) return { items: payload.items as Row[] };
       return { items: [] };
     } catch (err: any) {
-      return { items: [], error: err?.message || "Unavailable" };
+      const isAuth = err?.response?.status === 401;
+      if (isAuth) {
+        setSessionExpired(true);
+      }
+      return { items: [], error: err?.response?.data?.error || err?.message || "Unavailable", isAuthError: isAuth };
     }
   }
 
@@ -553,12 +565,38 @@ export default function DashboardStudio() {
             </div>
           </div>
 
+          {/* Administrator Session Expired Notice */}
+          {sessionExpired && (
+            <div className="rounded-3xl border border-rose-300 bg-rose-50/90 p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
+              <div className="flex items-center gap-3.5">
+                <div className="h-10 w-10 rounded-2xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-700 shrink-0 font-bold">
+                  <AlertCircle className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-rose-950">
+                    Administrator Session Expired (Token Timeout)
+                  </h4>
+                  <p className="text-xs text-rose-800 mt-0.5">
+                    Your secure login token has timed out. Public catalog services and media streams remain live, but protected citizen, volunteer, card, and grievance records require signing in again.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="/login?redirect=/admin"
+                className="px-5 py-2.5 bg-[#0A192F] hover:bg-rose-700 text-white text-xs font-black rounded-xl transition shadow-xs shrink-0 flex items-center gap-2"
+              >
+                Sign In Again &rarr;
+              </a>
+            </div>
+          )}
+
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {widgets
               .filter(w => w.active !== false)
               .map((widget, wIdx) => {
                 const metricInfo = metrics[widget.metricKey] || { value: 0, loading: false, status: "live" };
                 const IconComp = AVAILABLE_ICONS[widget.iconName] || Activity;
+                const isAuthRequired = sessionExpired && (widget.metricKey === "users" || widget.metricKey === "volunteers" || widget.metricKey === "cards" || widget.metricKey === "grievances");
                 return (
                   <div
                     key={widget.id}
@@ -578,11 +616,13 @@ export default function DashboardStudio() {
                           className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                             metricInfo.status === "live"
                               ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                              : isAuthRequired
+                              ? "text-rose-700 bg-rose-50 border-rose-200"
                               : "text-amber-700 bg-amber-50 border-amber-200"
                           }`}
                         >
                           {metricInfo.status === "live" ? <CheckCircle2 className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
-                          {metricInfo.status === "live" ? "Live" : "Unavailable"}
+                          {metricInfo.status === "live" ? "Live" : isAuthRequired ? "Auth Required" : "Unavailable"}
                         </span>
                       </div>
                       <h3 className="mt-3 text-xs font-black uppercase tracking-widest text-slate-500">
@@ -591,9 +631,13 @@ export default function DashboardStudio() {
                       <p className="mt-2 text-3xl font-black text-[#0A192F]">
                         {loading
                           ? "..."
-                          : typeof metricInfo.value === "number"
-                          ? metricInfo.value.toLocaleString()
-                          : metricInfo.value}
+                          : metricInfo.status === "live"
+                          ? typeof metricInfo.value === "number"
+                            ? metricInfo.value.toLocaleString()
+                            : metricInfo.value
+                          : isAuthRequired
+                          ? <span className="text-sm font-black text-rose-600 uppercase tracking-wider">Session Expired</span>
+                          : <span className="text-sm font-black text-amber-600 uppercase tracking-wider">Unavailable</span>}
                       </p>
                     </div>
 
@@ -601,7 +645,11 @@ export default function DashboardStudio() {
                       <span className="text-slate-400 text-[10px] font-mono truncate max-w-[170px]" title={widget.endpoint}>
                         {widget.endpoint}
                       </span>
-                      {widget.canExportCsv && widget.csvResource ? (
+                      {isAuthRequired ? (
+                        <a href="/login?redirect=/admin" className="font-bold text-rose-600 hover:underline flex items-center gap-0.5">
+                          Sign In &rarr;
+                        </a>
+                      ) : widget.canExportCsv && widget.csvResource ? (
                         <button
                           onClick={() => exportCsv(widget.csvResource!, `rpf_${widget.csvResource}`)}
                           className="font-bold text-[#C2410C] hover:underline"

@@ -683,6 +683,22 @@ app.get("/updates/manifest.json", (req, res, next) => {
   return res.redirect("/api/public/app-update");
 });
 
+app.get("/version.json", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  let version = "2.5.18";
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"));
+    if (pkg?.version) version = pkg.version;
+  } catch {}
+  return res.json({
+    version,
+    build: process.env.GITHUB_SHA || null,
+    generatedAt: new Date().toISOString()
+  });
+});
+
 app.use("/download", (req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");

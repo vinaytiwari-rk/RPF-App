@@ -1,8 +1,8 @@
 {
-  "versionCode": 21577,
-  "versionName": "2.5.17",
+  "versionCode": 21609,
+  "versionName": "2.5.18",
   "downloadUrl": "https://appapi.therpfoundation.org/download/rpf-app.apk",
   "minSupportedVersionCode": 20500,
-  "releaseNotes": "What’s new in this update:\n• Navigation: Configured exactly four bottom navigation menus (Home, Explore, Activity, and Profile)\n• Explore: Added custom artwork-style vector illustrations across all services\n• Social Impact: Dedicated Seva Domain section with All Work, Community, Care & Relief, and Active Ground filters\n• Admin Studio: Synchronized Supreme Command Center and Dashboard with live v2.5.17 release telemetry",
-  "publishedAt": "2026-10-13T06:00:00Z"
+  "releaseNotes": "What’s new in this update:\n• Admin Studio: Resolved version display string validation and added dynamic re-login prompt on session expiry\n• Security: Extended admin authentication session to 30 days and added graceful 401 interceptor\n• Navigation: Configured exactly four bottom navigation menus (Home, Explore, Activity, and Profile)\n• Explore: Custom artwork-style vector illustrations across all services",
+  "publishedAt": "2026-10-13T06:20:00Z"
 }

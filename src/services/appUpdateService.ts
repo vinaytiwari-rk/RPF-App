@@ -52,11 +52,21 @@ const MANIFEST_URLS = [
 ];
 
 /**
+ * Validates that a string is a clean semantic version (e.g. "2.5.18")
+ * and prevents raw ISO timestamps from masquerading as version numbers.
+ */
+export function isValidSemver(v: any): boolean {
+  if (typeof v !== "string") return false;
+  const clean = v.trim().replace(/^v/, '');
+  return /^\d+\.\d+(\.\d+)?(-[a-zA-Z0-9.]+)?$/.test(clean) && !clean.includes("T") && !clean.includes("Z");
+}
+
+/**
  * Fallback static web/app version code and name
  */
 export const DEFAULT_VERSION_INFO: AppVersionInfo = {
-  versionCode: 21577,
-  versionName: "2.5.17",
+  versionCode: 21609,
+  versionName: "2.5.18",
   packageName: "com.rpfoundation.app",
   isNativeAndroid: Capacitor.getPlatform() === "android",
 };
@@ -74,9 +84,12 @@ export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
     try {
       const nativeInfo = await NativeDownloads.getAppVersion();
       if (nativeInfo && typeof nativeInfo.versionCode === "number") {
+        const nativeName = nativeInfo.versionName && isValidSemver(nativeInfo.versionName)
+          ? nativeInfo.versionName
+          : "2.5.18";
         return {
           versionCode: nativeInfo.versionCode,
-          versionName: nativeInfo.versionName || "2.5.17",
+          versionName: nativeName,
           packageName: nativeInfo.packageName || "com.rpfoundation.app",
           isNativeAndroid: true,
         };
@@ -94,10 +107,10 @@ export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
     const res = await fetch(`/version.json?_t=${Date.now()}`, { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
-      if (data?.version) {
+      if (data?.version && isValidSemver(data.version)) {
         cachedWebVersionInfo = {
-          versionCode: 21577,
-          versionName: String(data.version),
+          versionCode: 21609,
+          versionName: String(data.version).trim().replace(/^v/, ''),
           packageName: "com.rpfoundation.app",
           isNativeAndroid: isAndroid,
         };

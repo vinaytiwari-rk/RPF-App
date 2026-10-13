@@ -44,11 +44,11 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
 
     const adminRole = credential.role === "super_admin" || credential.role === "superadmin" ? "super_admin" : "admin";
     const user = { id: String(credential.id), name: "System Administrator", role: adminRole };
-    const token = jwt.sign(user, JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign(user, JWT_SECRET, { expiresIn: "30d" });
 
     try {
       await pool.query(
-        `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '7 days')`,
+        `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '30 days')`,
         [`admin-${Date.now()}-${credential.id}`, String(user.id), token]
       );
     } catch (e: any) {

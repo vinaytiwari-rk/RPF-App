@@ -450,8 +450,8 @@ router.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21577,
-      versionName: "2.5.17",
+      versionCode: 21609,
+      versionName: "2.5.18",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
       releaseNotes: "What’s new in this update:\n• Navigation: Configured exactly four bottom navigation menus (Home, Explore, Activity, and Profile)\n• Explore: Added custom artwork-style vector illustrations across all services\n• Social Impact: Dedicated Seva Domain section with All Work, Community, Care & Relief, and Active Ground filters\n• Vision & Leadership: Connected Founder's Vision navigation with strategic goals"

@@ -160,12 +160,13 @@ router.post("/api/auth/login", async (req, res) => {
       email: userEmail
     };
 
-    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
+    const isAdminRole = userRole === 'admin' || userRole === 'super_admin' || userRole === 'superadmin';
+    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: isAdminRole ? '30d' : '7d' });
 
     try {
       await ensureSessionsTable();
       await pool.query(
-        `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
+        `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL ${isAdminRole ? "'30 days'" : "'7 days'"})`,
         ["sess-" + Date.now() + crypto.randomBytes(4).toString("hex"), String(userPayload.id), token]
       );
     } catch (sessErr: any) {

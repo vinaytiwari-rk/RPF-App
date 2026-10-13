@@ -302782,7 +302782,7 @@ router.get("/api/admin/control/overview", ...admin, async (_req, res) => {
     const tables = await pool.query(`SELECT COUNT(*)::int AS count FROM information_schema.tables WHERE table_schema = current_schema()`);
     const versions = await pool.query("SELECT COUNT(*)::int AS count, MAX(created_at) AS latest FROM admin_cms_versions");
     const flags = await pool.query("SELECT COUNT(*)::int AS count, COUNT(*) FILTER (WHERE enabled)::int AS enabled FROM admin_feature_flags");
-    return res.json({ success: true, data: { status: "healthy", apiLatencyMs: Date.now() - started, database: { connected: true, serverTime: db.rows[0]?.server_time }, schemaTables: tables.rows[0]?.count || 0, cmsVersions: versions.rows[0], featureFlags: flags.rows[0], node: process.version, appVersion: "2.5.17", environment: process.env.NODE_ENV || "development", checkedAt: (/* @__PURE__ */ new Date()).toISOString() } });
+    return res.json({ success: true, data: { status: "healthy", apiLatencyMs: Date.now() - started, database: { connected: true, serverTime: db.rows[0]?.server_time }, schemaTables: tables.rows[0]?.count || 0, cmsVersions: versions.rows[0], featureFlags: flags.rows[0], node: process.version, appVersion: "2.5.18", environment: process.env.NODE_ENV || "development", checkedAt: (/* @__PURE__ */ new Date()).toISOString() } });
   } catch (error3) {
     return res.status(500).json({ success: false, error: error3?.message || "Control center diagnostics failed." });
   }
@@ -302922,10 +302922,10 @@ router2.post("/api/auth/admin-login", adminLoginLimiter, async (req2, res) => {
     }
     const adminRole = credential.role === "super_admin" || credential.role === "superadmin" ? "super_admin" : "admin";
     const user = { id: String(credential.id), name: "System Administrator", role: adminRole };
-    const token = import_jsonwebtoken2.default.sign(user, JWT_SECRET, { expiresIn: "7d" });
+    const token = import_jsonwebtoken2.default.sign(user, JWT_SECRET, { expiresIn: "30d" });
     try {
       await pool.query(
-        `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '7 days')`,
+        `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '30 days')`,
         [`admin-${Date.now()}-${credential.id}`, String(user.id), token]
       );
     } catch (e6) {
@@ -317694,11 +317694,12 @@ router4.post("/api/auth/login", async (req2, res) => {
       phone: userPhone,
       email: userEmail
     };
-    const token = import_jsonwebtoken3.default.sign(userPayload, JWT_SECRET, { expiresIn: "7d" });
+    const isAdminRole = userRole === "admin" || userRole === "super_admin" || userRole === "superadmin";
+    const token = import_jsonwebtoken3.default.sign(userPayload, JWT_SECRET, { expiresIn: isAdminRole ? "30d" : "7d" });
     try {
       await ensureSessionsTable();
       await pool.query(
-        `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
+        `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL ${isAdminRole ? "'30 days'" : "'7 days'"})`,
         ["sess-" + Date.now() + import_crypto3.default.randomBytes(4).toString("hex"), String(userPayload.id), token]
       );
     } catch (sessErr) {
@@ -318243,7 +318244,7 @@ router6.get("/api/liveness", (_req, res) => {
     success: true,
     status: "ok",
     service: "rpf-app",
-    version: "2.5.17",
+    version: "2.5.18",
     timestamp: (/* @__PURE__ */ new Date()).toISOString()
   });
 });
@@ -359219,8 +359220,8 @@ router28.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21577,
-      versionName: "2.5.17",
+      versionCode: 21609,
+      versionName: "2.5.18",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
       releaseNotes: "What\u2019s new in this update:\n\u2022 Navigation: Configured exactly four bottom navigation menus (Home, Explore, Activity, and Profile)\n\u2022 Explore: Added custom artwork-style vector illustrations across all services\n\u2022 Social Impact: Dedicated Seva Domain section with All Work, Community, Care & Relief, and Active Ground filters\n\u2022 Vision & Leadership: Connected Founder's Vision navigation with strategic goals"
@@ -362578,6 +362579,22 @@ app.get("/updates/manifest.json", (req2, res, next2) => {
     return res.sendFile(p5);
   }
   return res.redirect("/api/public/app-update");
+});
+app.get("/version.json", (req2, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  let version5 = "2.5.18";
+  try {
+    const pkg = JSON.parse(import_fs12.default.readFileSync(import_path15.default.join(process.cwd(), "package.json"), "utf8"));
+    if (pkg?.version) version5 = pkg.version;
+  } catch {
+  }
+  return res.json({
+    version: version5,
+    build: process.env.GITHUB_SHA || null,
+    generatedAt: (/* @__PURE__ */ new Date()).toISOString()
+  });
 });
 app.use("/download", (req2, res, next2) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

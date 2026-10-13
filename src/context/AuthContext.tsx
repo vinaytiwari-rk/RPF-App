@@ -47,13 +47,30 @@ export function AuthProvider({children}:{children:React.ReactNode}){
   const[language,setLanguageState]=useState<'en'|'hi'>('en');
   const[isLoading,setIsLoading]=useState(true);
 
-  /* ── Sync Authorization header on token change ── */
+  /* ── Sync Authorization header on token change & Intercept 401 Expirations ── */
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     } else {
       delete axios.defaults.headers.common["Authorization"];
     }
+
+    const interceptor = axios.interceptors.response.use(
+      (res) => res,
+      (err) => {
+        if (err?.response?.status === 401) {
+          const msg = String(err.response?.data?.error || "").toLowerCase();
+          if (msg.includes("token expired") || msg.includes("session expired") || msg.includes("jwt expired") || msg.includes("authentication required")) {
+            window.dispatchEvent(new CustomEvent("samahit-auth-expired", { detail: err.response?.data?.error || "Token expired" }));
+          }
+        }
+        return Promise.reject(err);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
   }, [token]);
 
   const clearSession=useCallback(async()=>{
