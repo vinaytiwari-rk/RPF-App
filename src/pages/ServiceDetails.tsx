@@ -146,8 +146,10 @@ export default function ServiceDetails() {
       (Array.isArray(allServices) ? allServices.find((s: any) => s.id === id || s.route === `/services/${id}` || s.route === `/${id}`) : null) ||
       (Array.isArray(featuredServices) ? featuredServices.find((s: any) => s.id === id || s.route === `/services/${id}` || s.route === `/${id}`) : null);
 
-    if (matchedService && Array.isArray(matchedService.subLinks) && matchedService.subLinks.length > 0) {
-      const activeAdminLinks = matchedService.subLinks
+    if (matchedService && Array.isArray(matchedService.subLinks)) {
+      // A configured array is authoritative, including an empty list or all-disabled links.
+      // Never fall through to legacy/default government links after the admin removes them.
+      return matchedService.subLinks
         .filter((l: any) => l && l.active !== false)
         .map((l: any) => ({
           title: l.title || "Portal Link",
@@ -157,7 +159,6 @@ export default function ServiceDetails() {
           url: l.url,
           isGov: l.isExternal !== false
         }));
-      if (activeAdminLinks.length > 0) return activeAdminLinks;
     }
 
     // 2. Check serviceWebsiteLinks override
