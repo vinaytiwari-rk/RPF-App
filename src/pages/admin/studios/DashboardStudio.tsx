@@ -489,7 +489,7 @@ export default function DashboardStudio() {
             <div className="flex items-center gap-2">
               <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#166534] border border-emerald-200 flex items-center gap-1 shadow-xs">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                v{appVersion} Live Verified
+                {appVersion === "Unknown" ? "Version unavailable" : `v${appVersion} detected`}
               </span>
               <span className="text-[10px] font-bold text-slate-400">Database & Registry Telemetry</span>
             </div>
@@ -552,24 +552,24 @@ export default function DashboardStudio() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-black text-white">Supreme Command Release Engine</span>
                   <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                    v{appVersion} Synchronized
+                    {appVersion === "Unknown" ? "Version unavailable" : `v${appVersion} detected`}
                   </span>
                 </div>
                 <p className="text-xs text-slate-300 mt-1">
-                  Master web application, studio configurations, and mobile APK release pipeline are running on matching production version tags.
+                  Version metadata is shown only when reported by the application or update manifest. Build parity is not assumed.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-4 self-stretch md:self-auto justify-end text-xs border-t md:border-t-0 pt-3 md:pt-0 border-slate-800 shrink-0">
               <div className="text-right">
-                <div className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Android Target</div>
-                <div className="font-bold text-slate-100 font-mono text-xs">v{manifestVersion} (Live APK)</div>
+                <div className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Android Manifest Version</div>
+                <div className="font-bold text-slate-100 font-mono text-xs">v{manifestVersion}</div>
               </div>
               <div className="h-8 w-px bg-slate-800 hidden md:block" />
               <div className="text-right">
                 <div className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Control Plane</div>
                 <div className="font-bold text-emerald-400 flex items-center gap-1.5 justify-end text-xs">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Active Online
+                  <span className="h-2 w-2 rounded-full bg-slate-400" /> Status not checked
                 </div>
               </div>
             </div>
@@ -604,7 +604,7 @@ export default function DashboardStudio() {
             {widgets
               .filter(w => w.active !== false)
               .map((widget, wIdx) => {
-                const metricInfo = metrics[widget.metricKey] || { value: 0, loading: false, status: "live" };
+                const metricInfo = metrics[widget.metricKey] || { value: "Unavailable", loading: false, status: "unavailable" };
                 const IconComp = AVAILABLE_ICONS[widget.iconName] || Activity;
                 const isAuthRequired = sessionExpired && (widget.metricKey === "users" || widget.metricKey === "volunteers" || widget.metricKey === "cards" || widget.metricKey === "grievances");
                 return (
