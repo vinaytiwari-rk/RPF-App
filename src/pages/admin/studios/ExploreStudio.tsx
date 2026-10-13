@@ -70,6 +70,8 @@ export interface ServiceCard {
   active: boolean;
   order?: number;
   subLinks?: SubFeatureLink[];
+  /** True only after an administrator explicitly publishes the child-link list, including an empty list. */
+  subLinksConfigured?: boolean;
 }
 
 export const DEFAULT_FEATURED_SERVICES: ServiceCard[] = [
@@ -193,10 +195,9 @@ export default function ExploreStudio() {
 
       const hydrateCardsWithLinks = (cards: ServiceCard[]) => {
         return cards.map(card => {
-          // An explicitly stored array (including []) is authoritative. Do not resurrect
-          // default or legacy links after an administrator intentionally removes them.
-          if (Array.isArray(card.subLinks)) return card;
-          // Only older cards with no subLinks field are hydrated from legacy/default links.
+          // Preserve explicitly published link lists, including an intentional empty list.
+          if (card.subLinksConfigured === true || (Array.isArray(card.subLinks) && card.subLinks.length > 0)) return card;
+          // Legacy cards with empty/unconfigured child links may still hydrate from the legacy map/default catalog.
           const aliasKey = SERVICE_ALIASES[card.id] || card.id;
           const existingLinks = (Array.isArray(websiteMap[card.id]) && websiteMap[card.id].length > 0)
             ? websiteMap[card.id]
@@ -253,8 +254,12 @@ export default function ExploreStudio() {
     setSaving(true);
     const toastId = toast.loading("Saving and publishing Explore services...");
     try {
-      const cleanFeatured = featuredServices.filter(s => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id));
-      const cleanAll = allServices.filter(s => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id));
+      const cleanFeatured = featuredServices
+        .filter(s => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id))
+        .map(s => ({ ...s, subLinksConfigured: true, subLinks: Array.isArray(s.subLinks) ? s.subLinks : [] }));
+      const cleanAll = allServices
+        .filter(s => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id))
+        .map(s => ({ ...s, subLinksConfigured: true, subLinks: Array.isArray(s.subLinks) ? s.subLinks : [] }));
 
       // Construct serviceWebsiteLinks map so both legacy and modern readers receive identical child links
       const serviceWebsiteLinks: Record<string, any[]> = {};
