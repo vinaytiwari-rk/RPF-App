@@ -9,7 +9,9 @@ const execFileAsync = promisify(execFile);
 const admin = [authenticateToken, requireAdmin] as const;
 
 function isSuperAdmin(req: any): boolean {
-  return String(req.user?.role || "").toLowerCase() === "super_admin";
+  // This application intentionally has a unified admin role: admin is Super Admin.
+  const role = String(req.user?.role || "").trim().toLowerCase();
+  return role === "admin" || role === "super_admin" || role === "superadmin";
 }
 
 async function ensureControlTables() {
@@ -76,7 +78,7 @@ router.get("/api/admin/control/overview", ...admin, async (_req, res) => {
     const tables = await pool.query(`SELECT COUNT(*)::int AS count FROM information_schema.tables WHERE table_schema = current_schema()`);
     const versions = await pool.query("SELECT COUNT(*)::int AS count, MAX(created_at) AS latest FROM admin_cms_versions");
     const flags = await pool.query("SELECT COUNT(*)::int AS count, COUNT(*) FILTER (WHERE enabled)::int AS enabled FROM admin_feature_flags");
-    return res.json({ success: true, data: { status: "healthy", apiLatencyMs: Date.now() - started, database: { connected: true, serverTime: db.rows[0]?.server_time }, schemaTables: tables.rows[0]?.count || 0, cmsVersions: versions.rows[0], featureFlags: flags.rows[0], node: process.version, appVersion: "2.5.18", environment: process.env.NODE_ENV || "development", checkedAt: new Date().toISOString() } });
+    return res.json({ success: true, data: { status: "healthy", apiLatencyMs: Date.now() - started, database: { connected: true, serverTime: db.rows[0]?.server_time }, schemaTables: tables.rows[0]?.count || 0, cmsVersions: versions.rows[0], featureFlags: flags.rows[0], node: process.version, appVersion: process.env.npm_package_version || "unknown", environment: process.env.NODE_ENV || "development", checkedAt: new Date().toISOString() } });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: error?.message || "Control center diagnostics failed." });
   }
