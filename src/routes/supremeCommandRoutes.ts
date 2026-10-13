@@ -62,7 +62,7 @@ supremeCommandRouter.get("/api/supreme/configs", async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT config_key, config_value FROM system_configs WHERE config_key = ANY($1::text[])',
-      [[...PUBLIC_CONFIG_KEYS]]
+      [...PUBLIC_CONFIG_KEYS]
     );
     const configs: Record<string, string> = {};
     result.rows.forEach(row => {
