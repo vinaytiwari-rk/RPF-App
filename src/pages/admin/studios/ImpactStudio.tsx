@@ -287,14 +287,24 @@ export default function ImpactStudio() {
         }
       );
 
-      if (res.data?.success) {
-        window.dispatchEvent(new CustomEvent("samahit-admin-updated"));
-        toast.success("Impact Studio configuration saved & published live!");
-      } else {
-        toast.error("Server responded with error while saving");
-      }
+      if (res.data?.success !== true) throw new Error(res.data?.error || "Publish failed");
+      const verifyResponse = await axios.get("/api/cms", {
+        params: { _verify: Date.now() },
+        headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+        timeout: 10000
+      });
+      const savedCms = verifyResponse.data?.cms;
+      const stable = (value: any): string => {
+        if (Array.isArray(value)) return `[${value.map(stable).join(",")}]`;
+        if (value && typeof value === "object") return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${stable(value[key])}`).join(",")}}`;
+        return JSON.stringify(value) ?? "undefined";
+      };
+      const mismatches = Object.keys(payload).filter(key => stable(savedCms?.[key]) !== stable((payload as any)[key]));
+      if (mismatches.length) throw new Error(`Publish was accepted, but server verification failed for: ${mismatches.join(", ")}.`);
+      window.dispatchEvent(new CustomEvent("samahit-admin-updated"));
+      toast.success("Impact configuration saved and verified on the server.");
     } catch (e: any) {
-      toast.error(e?.response?.data?.error || "Failed to save impact changes");
+      toast.error(e?.response?.data?.error || e?.message || "Failed to save impact changes");
     } finally {
       setSaving(false);
     }
