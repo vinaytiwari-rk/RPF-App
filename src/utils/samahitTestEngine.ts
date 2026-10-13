@@ -310,10 +310,11 @@ export function generateTripleFusionTest(
   aiQuestions: SamahitQuestion[] = [],
   options: GenerateTestOptions = {}
 ): SamahitTestAttempt {
-  // Proportions: ~40% Samahit, ~30% Hugging Face, ~30% AI/Wiki (or remaining)
-  const countSamahit = Math.max(2, Math.floor(questionCount * 0.4));
-  const countHF = Math.max(2, Math.floor(questionCount * 0.3));
-  const countAI = Math.max(0, questionCount - countSamahit - countHF);
+  // Proportions: Blends Samahit Core, Hugging Face benchmarks, and AI/Wiki questions
+  const countAI = Math.min(aiQuestions.length, Math.floor(questionCount * 0.3));
+  const remaining = questionCount - countAI;
+  const countHF = Math.min(HUGGINGFACE_QUESTIONS.length, Math.floor(remaining * 0.35));
+  const countSamahit = questionCount - countAI - countHF;
 
   const samahitPool = shuffleArray(SAMAHIT_QUESTION_BANK).slice(0, countSamahit);
   const hfPool = shuffleArray(HUGGINGFACE_QUESTIONS).slice(0, countHF);
