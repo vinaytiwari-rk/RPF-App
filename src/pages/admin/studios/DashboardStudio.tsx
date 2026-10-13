@@ -75,7 +75,7 @@ const DEFAULT_WIDGETS: DashboardWidget[] = [
   },
   {
     id: "w-volunteers",
-    title: "Active Volunteers",
+    title: "Registered Volunteers",
     category: "Ground Force",
     metricKey: "volunteers",
     endpoint: "/api/admin/volunteers",
@@ -125,7 +125,7 @@ const DEFAULT_WIDGETS: DashboardWidget[] = [
   },
   {
     id: "w-campaigns",
-    title: "Active Campaigns & Relief",
+    title: "Campaigns & Relief",
     category: "Crowdfunding",
     metricKey: "campaigns",
     endpoint: "/api/campaigns",
@@ -929,7 +929,7 @@ export default function DashboardStudio() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-black text-[#0A192F]">Registered Ground Volunteers</h2>
-              <p className="text-xs text-slate-400">Total verified volunteers: {metrics.volunteers.value}</p>
+              <p className="text-xs text-slate-400">Total volunteer records returned by the API: {metrics.volunteers.value}</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
@@ -986,7 +986,7 @@ export default function DashboardStudio() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-black text-[#0A192F]">Citizen User Accounts</h2>
-              <p className="text-xs text-slate-400">Total registered citizens: {metrics.users.value}</p>
+              <p className="text-xs text-slate-400">Total registered user records reported by the API: {metrics.users.value}</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
