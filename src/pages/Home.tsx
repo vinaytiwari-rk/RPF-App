@@ -152,7 +152,7 @@ export default function Home() {
         .filter((s: any) => s && s.enabled !== false)
         .sort((a: any, b: any) => (Number(a.order) || 0) - (Number(b.order) || 0))
         .map((s: any) => {
-          const val = s.id === "cards_issued" && cardImpact?.totalCards ? cardImpact.totalCards : s.value;
+          const val = s.id === "cards_issued" && cardImpact?.totalCards !== undefined ? cardImpact.totalCards : s.value;
           const num = typeof val === "number" ? val.toLocaleString("en-IN") : val;
           return {
             id: s.id,
@@ -162,12 +162,8 @@ export default function Home() {
           };
         });
     }
-    return [
-      { id: "cards", label: "Jan Seva Cards", value: (cardImpact?.totalCards || 66505).toLocaleString("en-IN") + "+", icon: Award },
-      { id: "camps", label: "Health & Eye Camps", value: "150+", icon: Stethoscope },
-      { id: "volunteers", label: "Active Volunteers", value: "2,400+", icon: UsersRound },
-      { id: "jobs", label: "Livelihood & Jobs", value: "1,800+", icon: BriefcaseBusiness }
-    ];
+    // Do not present invented impact totals when the CMS has no verified counters.
+    return [];
   }, [cmsConfig?.impactStats, cardImpact]);
 
   const [marquee1, setMarquee1] = useState<string[]>(() => {
