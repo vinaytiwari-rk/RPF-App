@@ -105,16 +105,20 @@ router.post("/api/admin/services/:id/visibility", authenticateToken, requireAdmi
   }
 });
 
-router.get("/api/cms/config", async (req, res) => {
+router.get("/api/cms/config", async (_req, res) => {
   try {
     const result = await pool.query("SELECT * FROM settings WHERE id = $1", ["cms_data"]);
     if (result.rows.length > 0 && result.rows[0].founderMessageEn) {
-      res.json({ success: true, data: JSON.parse(result.rows[0].founderMessageEn) });
-    } else {
-      res.json({ success: true, data: {} });
+      const parsed = JSON.parse(result.rows[0].founderMessageEn);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return res.status(500).json({ success: false, error: "Stored CMS configuration is not a valid object." });
+      }
+      return res.json({ success: true, data: parsed });
     }
+    return res.json({ success: true, data: {} });
   } catch (error: any) {
-    res.json({ success: true, data: {} });
+    console.error("CMS configuration read failed:", error);
+    return res.status(503).json({ success: false, error: "CMS configuration is unavailable or invalid. Existing content was not replaced." });
   }
 });
 
