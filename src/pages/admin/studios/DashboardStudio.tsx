@@ -620,15 +620,17 @@ export default function DashboardStudio() {
                         </div>
                         <span
                           className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                            metricInfo.status === "live"
+                            metricInfo.loading
+                              ? "text-amber-700 bg-amber-50 border-amber-200"
+                              : metricInfo.status === "live"
                               ? "text-emerald-700 bg-emerald-50 border-emerald-200"
                               : isAuthRequired
                               ? "text-rose-700 bg-rose-50 border-rose-200"
                               : "text-amber-700 bg-amber-50 border-amber-200"
                           }`}
                         >
-                          {metricInfo.status === "live" ? <CheckCircle2 className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
-                          {metricInfo.status === "live" ? "Live" : isAuthRequired ? "Auth Required" : "Unavailable"}
+                          {!metricInfo.loading && metricInfo.status === "live" ? <CheckCircle2 className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                          {metricInfo.loading ? "Checking…" : metricInfo.status === "live" ? "Live" : isAuthRequired ? "Auth Required" : "Unavailable"}
                         </span>
                       </div>
                       <h3 className="mt-3 text-xs font-black uppercase tracking-widest text-slate-500">
