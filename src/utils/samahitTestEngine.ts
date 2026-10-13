@@ -9,6 +9,7 @@ import {
 import {
   SAMAHIT_QUESTION_BANK,
   HUGGINGFACE_QUESTIONS,
+  WIKIPEDIA_AI_QUESTIONS,
   CATEGORY_PERCENTAGES,
   getQuestionsByCategory,
   getQuestionCountByCategory
@@ -310,15 +311,17 @@ export function generateTripleFusionTest(
   aiQuestions: SamahitQuestion[] = [],
   options: GenerateTestOptions = {}
 ): SamahitTestAttempt {
-  // Proportions: Blends Samahit Core, Hugging Face benchmarks, and AI/Wiki questions
-  const countAI = Math.min(aiQuestions.length, Math.floor(questionCount * 0.3));
+  // Triple Fusion: Blends Samahit Core, Hugging Face benchmarks, and Wikipedia Grounded + Gemini AI questions
+  const effectiveAiPool = aiQuestions.length > 0 ? aiQuestions : WIKIPEDIA_AI_QUESTIONS;
+
+  const countAI = Math.min(effectiveAiPool.length, Math.max(1, Math.floor(questionCount * 0.3)));
   const remaining = questionCount - countAI;
-  const countHF = Math.min(HUGGINGFACE_QUESTIONS.length, Math.floor(remaining * 0.35));
+  const countHF = Math.min(HUGGINGFACE_QUESTIONS.length, Math.max(1, Math.floor(remaining * 0.4)));
   const countSamahit = questionCount - countAI - countHF;
 
   const samahitPool = shuffleArray(SAMAHIT_QUESTION_BANK).slice(0, countSamahit);
   const hfPool = shuffleArray(HUGGINGFACE_QUESTIONS).slice(0, countHF);
-  const aiPool = shuffleArray(aiQuestions).slice(0, countAI);
+  const aiPool = shuffleArray(effectiveAiPool).slice(0, countAI);
 
   const combined = shuffleArray([...samahitPool, ...hfPool, ...aiPool]);
   return createAttemptFromQuestions(combined, durationMinutes, "fusion", options);

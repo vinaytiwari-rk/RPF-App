@@ -5,9 +5,10 @@ import { ENGLISH_QUESTIONS } from "./questions/english";
 import { REASONING_QUESTIONS } from "./questions/reasoning";
 import { GENERAL_KNOWLEDGE_QUESTIONS } from "./questions/generalKnowledge";
 import { HUGGINGFACE_QUESTIONS } from "./questions/huggingface";
+import { WIKIPEDIA_AI_QUESTIONS } from "./questions/wikipediaAiQuestions";
 
 export * from "./samahitQuestionTypes";
-export { HUGGINGFACE_QUESTIONS };
+export { HUGGINGFACE_QUESTIONS, WIKIPEDIA_AI_QUESTIONS };
 
 export const SAMAHIT_QUESTION_BANK: SamahitQuestion[] = [
   ...CURRENT_AFFAIRS_QUESTIONS,
