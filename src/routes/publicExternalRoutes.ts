@@ -450,11 +450,11 @@ router.get("/api/public/app-update", async (_req, res) => {
     }
     return res.json({
       success: true,
-      versionCode: 21567,
-      versionName: "2.5.7",
+      versionCode: 21576,
+      versionName: "2.5.16",
       downloadUrl: "https://appapi.therpfoundation.org/download/rpf-app.apk",
       minSupportedVersionCode: 20500,
-      releaseNotes: "• Home Screen Modernization: Reconfigured quick access grid to exclusively feature Utilities, Calculator, Online Test, and Grievance with custom illustrated vector artwork\n• Fixed Broken Icons on Home & Live TV: Replaced unstable Wikimedia thumbnails with YouTube live stream thumbnails and built self-healing ChannelThumbnail with category-matched gradients and initials\n• Leadership & Vision Brand Protection: Enforced high-resolution local PNG assets with automatic fallback handlers for RP Foundation Logo and Rohit Pandit portrait\n• Admin Studio Synchronization: Aligned HomeStudio defaults and quick access items with the live application"
+      releaseNotes: "What’s new in this update:\n• Navigation: Configured exactly four bottom navigation menus (Home, Explore, Activity, and Profile)\n• Explore: Added custom artwork-style vector illustrations across all services\n• Social Impact: Dedicated Seva Domain section with All Work, Community, Care & Relief, and Active Ground filters\n• Vision & Leadership: Connected Founder's Vision navigation with strategic goals"
     });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err?.message || "Failed to read update manifest" });

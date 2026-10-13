@@ -184,23 +184,70 @@ jobs:
             'git',
             ['log', range, '--pretty=format:%s'],
             { encoding: 'utf8' }
-          ).split('\n').filter(line => line.trim());
+          ).split('\n').map(line => line.trim()).filter(Boolean);
+
+          function formatSubject(str) {
+            if (!str) return null;
+            if (/^chore\(release\)|^Merge branch|^Merge pull request|\[skip ci\]/i.test(str)) return null;
+
+            const scopedMatch = str.match(/^(?:feat|fix|perf|refactor|style|build|docs)\(([^)]+)\):\s*(.+)$/i);
+            if (scopedMatch) {
+              const rawScope = scopedMatch[1].trim().toLowerCase();
+              if (/^ci\b|^deps\b|^test\b/i.test(rawScope)) return null;
+              let desc = scopedMatch[2].trim();
+              desc = desc.charAt(0).toUpperCase() + desc.slice(1);
+              const scopeMap = {
+                nav: 'Navigation',
+                ui: 'UI & Design',
+                home: 'Home Screen',
+                explore: 'Explore',
+                activity: 'Activity',
+                impact: 'Social Impact',
+                auth: 'Account & Login',
+                'live-tv': 'Live TV',
+                livetv: 'Live TV',
+                reels: 'Shorts & Reels',
+                reel: 'Shorts & Reels',
+                admin: 'Admin Studio',
+                updater: 'Update Center',
+                update: 'Update Center',
+                sync: 'Data Sync',
+                icon: 'Icons & Artwork',
+                icons: 'Icons & Artwork'
+              };
+              const scope = scopeMap[rawScope] || (rawScope.charAt(0).toUpperCase() + rawScope.slice(1));
+              return `${scope}: ${desc}`;
+            }
+
+            const simpleMatch = str.match(/^(?:feat|fix|perf|refactor|style|build|docs):\s*(.+)$/i);
+            if (simpleMatch) {
+              let desc = simpleMatch[1].trim();
+              return desc.charAt(0).toUpperCase() + desc.slice(1);
+            }
+
+            return str.charAt(0).toUpperCase() + str.slice(1);
+          }
 
           const friendly = [];
           for (const subject of subjects) {
-            let note = '';
-            if (/updater|download progress|completed state|content length/i.test(subject)) note = 'Update Center: download progress, completion status, and update notice improvements.';
-            else if (/founder portrait|vision CTA|fix\\(founder\\)/i.test(subject)) note = 'Founder section: improved portrait display and Vision navigation.';
-            else if (/artwork icons|service tile|feat\\(explore\\)/i.test(subject)) note = 'Explore: improved service artwork icons and service browsing.';
-            else if (/vision roadmap|impact metrics|fix\\(home\\)/i.test(subject)) note = 'Home: Vision and Strategic Roadmap navigation improvements.';
-            else if (/live tv|stream|radio/i.test(subject)) note = 'Live TV and media playback improvements.';
-            else if (/certificate/i.test(subject)) note = 'Certificate access and download improvements.';
-            else if (/jan.?seva|card sync/i.test(subject)) note = 'Jan Seva Card sync and account improvements.';
-            else if (/fix\\(ci\\)|workflow|versioning|release/i.test(subject)) note = 'App update delivery, reliability, and release-process improvements.';
-            else if (/fix|bug|repair|correct/i.test(subject)) note = 'Bug fixes and app stability improvements.';
-            else if (/feat|add|implement|introduc/i.test(subject)) note = 'New app functionality and usability improvements.';
+            const note = formatSubject(subject);
             if (note && !friendly.includes(note)) friendly.push(note);
             if (friendly.length >= 8) break;
+          }
+
+          if (!friendly.length) {
+            try {
+              const fallbackSubjects = execFileSync(
+                'git',
+                ['log', '-15', '--pretty=format:%s', 'HEAD'],
+                { encoding: 'utf8' }
+              ).split('\n').map(line => line.trim()).filter(Boolean);
+              for (const subject of fallbackSubjects) {
+                const note = formatSubject(subject);
+                if (note && !friendly.includes(note)) friendly.push(note);
+                if (friendly.length >= 5) break;
+              }
+            } catch (e) {}
           }
 
           const manifest = {
@@ -212,7 +259,7 @@ jobs:
             minSupportedVersionCode: 20500,
             releaseNotes: friendly.length
               ? 'What’s new in this update:\n• ' + friendly.join('\n• ')
-              : 'Bug fixes and app stability improvements.',
+              : 'General performance enhancements and feature updates.',
             publishedAt: process.env.PUB_DATE
           };
           fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\n', 'utf8');
