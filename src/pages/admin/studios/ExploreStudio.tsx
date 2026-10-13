@@ -193,8 +193,10 @@ export default function ExploreStudio() {
 
       const hydrateCardsWithLinks = (cards: ServiceCard[]) => {
         return cards.map(card => {
-          if (Array.isArray(card.subLinks) && card.subLinks.length > 0) return card;
-          // Hydrate from serviceWebsiteLinks or default catalog using alias lookup
+          // An explicitly stored array (including []) is authoritative. Do not resurrect
+          // default or legacy links after an administrator intentionally removes them.
+          if (Array.isArray(card.subLinks)) return card;
+          // Only older cards with no subLinks field are hydrated from legacy/default links.
           const aliasKey = SERVICE_ALIASES[card.id] || card.id;
           const existingLinks = (Array.isArray(websiteMap[card.id]) && websiteMap[card.id].length > 0)
             ? websiteMap[card.id]
