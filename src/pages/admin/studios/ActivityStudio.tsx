@@ -178,19 +178,23 @@ export default function ActivityStudio() {
   };
 
   const handleApproveCard = async (userId: string, cardNo?: string) => {
+    const verifiedCardNo = String(cardNo || "").trim();
+    if (!verifiedCardNo) {
+      toast.error("Cannot approve: this application has no card number from the synced Jan Seva master record.");
+      return;
+    }
     setActionBusy(true);
-    const generatedNo = cardNo || `RPF-${Math.floor(10000000 + Math.random() * 90000000)}`;
-    const toastId = toast.loading("Approving Jan Seva Card...");
+    const toastId = toast.loading("Verifying master card number and approving...");
     try {
       await axios.post(
         "/api/cards/approve",
-        { userId, cardNo: generatedNo },
+        { userId, cardNo: verifiedCardNo },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success(`Card ${generatedNo} Approved & Issued!`, { id: toastId });
-      setCards(prev => prev.map(c => ((c.userId === userId || c.id === userId) ? { ...c, status: "approved", cardNo: generatedNo } : c)));
+      toast.success(`Verified master card ${verifiedCardNo} approved.`, { id: toastId });
+      setCards(prev => prev.map(c => ((c.userId === userId || c.id === userId) ? { ...c, status: "approved", cardNo: verifiedCardNo } : c)));
       if (selectedItem?.data?.userId === userId || selectedItem?.data?.id === userId) {
-        setSelectedItem(prev => prev ? { ...prev, data: { ...prev.data, status: "approved", cardNo: generatedNo } } : null);
+        setSelectedItem(prev => prev ? { ...prev, data: { ...prev.data, status: "approved", cardNo: verifiedCardNo } } : null);
       }
     } catch (e: any) {
       toast.error(e?.response?.data?.error || "Card approval failed", { id: toastId });
