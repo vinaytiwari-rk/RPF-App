@@ -170,7 +170,10 @@ router.post("/api/auth/login", async (req, res) => {
         ["sess-" + Date.now() + crypto.randomBytes(4).toString("hex"), String(userPayload.id), token]
       );
     } catch (sessErr: any) {
-      console.error("Non-fatal session persistence failure during login:", sessErr?.message);
+      console.error("Session persistence failure during login:", sessErr?.message);
+      if (isAdminRole) {
+        return res.status(503).json({ success: false, error: "Secure administrator session could not be created. Please retry." });
+      }
     }
 
     try {
