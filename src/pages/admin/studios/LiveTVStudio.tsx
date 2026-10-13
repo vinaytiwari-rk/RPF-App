@@ -274,7 +274,7 @@ export default function LiveTVStudio() {
     if (selectedItem?.data?.id === id) {
       setSelectedItem(null);
     }
-    toast.success("Channel removed");
+    toast("Removed from draft. Click Save & Publish to apply this change to the live app.", { icon: "📝" });
   };
 
   // Toggle enable status
