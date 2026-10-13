@@ -479,8 +479,8 @@ export default function SupremeCommandCenter() {
                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
                   Node Status
                 </span>
-                <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Live Online
+                <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                  <span className="h-2 w-2 rounded-full bg-slate-400" /> Status not checked
                 </span>
               </div>
               <div className="flex items-center justify-between">
