@@ -970,7 +970,7 @@ export default function HomeStudio() {
           <div className="space-y-6 animate-fade-in max-w-5xl">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-black text-slate-800">Live Verified Market & Jagannath Hora Panchang Engine</h3>
+                <h3 className="text-base font-black text-slate-800">Market & Jagannath Hora Panchang Configuration</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Dynamic commodities, Jagannath Hora 8.0 Vedic Panchang (DD-MM-YYYY, Abhijit Muhurat, Rahu Kaal), Gold/Silver, Fuel, and Mandi feeds.
                 </p>
