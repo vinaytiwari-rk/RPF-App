@@ -97,8 +97,10 @@ export default function JanSevaCardPage() {
         ? featuredServices.find((s: any) => s.id === "card" || s.route === "/jan-seva-card" || s.route === "/services/card")
         : null);
 
-    if (matchedService && Array.isArray(matchedService.subLinks) && matchedService.subLinks.length > 0) {
-      const activeAdminLinks = matchedService.subLinks
+    if (matchedService && Array.isArray(matchedService.subLinks)) {
+      // An explicit empty list or all-disabled links means the admin intentionally removed them.
+      // Do not resurrect legacy/default government links in that case.
+      return matchedService.subLinks
         .filter((l: any) => l && l.active !== false && l.url !== "/jan-seva-card")
         .map((l: any) => ({
           title: l.title || "Portal Link",
@@ -108,7 +110,6 @@ export default function JanSevaCardPage() {
           url: l.url,
           isGov: l.isExternal !== false,
         }));
-      if (activeAdminLinks.length > 0) return activeAdminLinks;
     }
 
     const overrides = (cmsConfig as any)?.serviceWebsiteLinks;
