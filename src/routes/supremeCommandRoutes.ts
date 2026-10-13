@@ -16,7 +16,7 @@ supremeCommandRouter.get("/api/supreme/seed", (_req, res) => {
   return res.status(405).json({ success: false, error: "Seeding is a protected administrator action; use POST after administrator login." });
 });
 
-supremeCommandRouter.post("/api/supreme/seed", authenticateToken, requireAdmin, async (req, res) => {
+supremeCommandRouter.post("/api/supreme/seed", authenticateToken, requireAdmin, async (_req, res) => {
   const defaults = {
     founder_name: "Rohit Pandit",
     founder_image_url: "/assets/founder.png",
@@ -62,7 +62,7 @@ supremeCommandRouter.get("/api/supreme/configs", async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT config_key, config_value FROM system_configs WHERE config_key = ANY($1::text[])',
-      [PUBLIC_CONFIG_KEYS]
+      [[...PUBLIC_CONFIG_KEYS]]
     );
     const configs: Record<string, string> = {};
     result.rows.forEach(row => {
