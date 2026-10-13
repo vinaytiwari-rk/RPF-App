@@ -688,11 +688,30 @@ router.post("/api/cards/approve", authenticateToken, requireAdmin, async (req, r
     if (!userId || !cardNo || cardNo.length > 100)
       return res.status(400).json({ success: false, error: 'Verified user ID and issued card number required' });
 
+    await ensureMirror();
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
       await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [cardNo]);
-      
+
+      // A card number is only approvable when it exists in the synchronized
+      // Jan Seva master mirror. Never manufacture or accept an arbitrary number.
+      const masterCard = await client.query(
+        'SELECT card_no FROM jan_seva_card_mirror WHERE card_no = $1 LIMIT 1',
+        [cardNo]
+      );
+      if (!masterCard.rows.length) {
+        await client.query('ROLLBACK');
+        await writeAuditLog(req, 'JAN_SEVA_CARD_APPROVAL_REJECTED', 'card_application', userId, {
+          reason: 'card_number_not_in_synced_master',
+          cardNo
+        });
+        return res.status(400).json({
+          success: false,
+          error: 'This card number does not exist in the synchronized Jan Seva master record. Sync/import the master record before approval.'
+        });
+      }
+
       const assigned = await client.query(
         'SELECT "userId" FROM card_applications_v2 WHERE "cardNo" = $1 AND "userId" <> $2 LIMIT 1',
         [cardNo, userId]
