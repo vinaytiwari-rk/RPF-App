@@ -243,12 +243,14 @@ export default function DashboardStudio() {
     reels: { value: 0, loading: true, status: "live" }
   });
 
-  async function getAdminData(url: string, t: string): Promise<{ items: Row[]; error?: string; isAuthError?: boolean }> {
+  async function getAdminData(url: string, t: string): Promise<{ items: Row[]; totalCount?: number; error?: string; isAuthError?: boolean }> {
     try {
       const response = await axios.get(url, { headers: authHeaders(t), timeout: 8000 });
       const payload = response.data?.data ?? response.data;
-      if (Array.isArray(payload)) return { items: payload as Row[] };
-      if (Array.isArray(payload?.items)) return { items: payload.items as Row[] };
+      const rawTotal = Number(response.data?.totalCount ?? payload?.totalCount);
+      const totalCount = Number.isFinite(rawTotal) && rawTotal >= 0 ? rawTotal : undefined;
+      if (Array.isArray(payload)) return { items: payload as Row[], totalCount };
+      if (Array.isArray(payload?.items)) return { items: payload.items as Row[], totalCount };
       return { items: [], error: "Unexpected API response shape" };
     } catch (err: any) {
       const isAuth = err?.response?.status === 401;
@@ -336,13 +338,13 @@ export default function DashboardStudio() {
     // PURE VERIFIED REAL NUMBERS (ZERO FAKE FALLBACK CONSTANTS)
     setMetrics({
       users: {
-        value: usersRes.error ? "Unavailable" : usersRes.items.length,
+        value: usersRes.error ? "Unavailable" : (usersRes.totalCount ?? usersRes.items.length),
         loading: false,
         status: usersRes.error ? "unavailable" : "live",
         lastUpdated: now
       },
       volunteers: {
-        value: volRes.error ? "Unavailable" : volRes.items.length,
+        value: volRes.error ? "Unavailable" : (volRes.totalCount ?? volRes.items.length),
         loading: false,
         status: volRes.error ? "unavailable" : "live",
         lastUpdated: now
@@ -962,7 +964,7 @@ export default function DashboardStudio() {
                       <td className="p-3 text-slate-600">{v.skills || v.city || "General Service"}</td>
                       <td className="p-3">
                         <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-[#166534] border border-emerald-200">
-                          Verified
+                          {String(v.approval_status || v.status || "Unknown").replace(/[_-]+/g, " ")}
                         </span>
                       </td>
                     </tr>
@@ -1018,7 +1020,7 @@ export default function DashboardStudio() {
                       <td className="p-3 text-slate-600">{u.phone || u.email || "—"}</td>
                       <td className="p-3 text-slate-600 uppercase font-bold text-[10px]">{u.role || "user"}</td>
                       <td className="p-3">
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">Active</span>
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">{String(u.status || u.account_status || "Unknown").replace(/[_-]+/g, " ")}</span>
                       </td>
                     </tr>
                   ))
