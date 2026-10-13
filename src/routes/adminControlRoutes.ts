@@ -186,6 +186,35 @@ router.put("/api/admin/control/feature-flags/:key", ...admin, async (req: any, r
   }
 });
 
+router.get("/api/admin/control/audit-log", ...admin, async (req: any, res) => {
+  try {
+    const page = Math.max(1, Number.parseInt(String(req.query.page || "1"), 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(String(req.query.limit || "25"), 10) || 25));
+    const actionFilter = typeof req.query.action === "string" ? req.query.action.trim().slice(0, 100) : "";
+    const where = actionFilter ? "WHERE action ILIKE $1" : "";
+    const filterValues = actionFilter ? [`%${actionFilter}%`] : [];
+    const count = await pool.query(
+      `SELECT COUNT(*)::int AS total_count FROM administrator_audit_log ${where}`,
+      filterValues
+    );
+    const result = await pool.query(
+      `SELECT id, actor_user_id, actor_role, action, entity_type, entity_id, request_id, details, created_at
+       FROM administrator_audit_log ${where}
+       ORDER BY created_at DESC
+       LIMIT ${filterValues.length + 1} OFFSET ${filterValues.length + 2}`,
+      [...filterValues, limit, (page - 1) * limit]
+    );
+    return res.json({
+      success: true,
+      data: result.rows,
+      pagination: { page, limit, totalCount: count.rows[0]?.total_count ?? 0, totalPages: Math.ceil((count.rows[0]?.total_count ?? 0) / limit) }
+    });
+  } catch (error: any) {
+    console.error("Administrator audit log read failed:", error);
+    return res.status(503).json({ success: false, error: "Administrator audit log is unavailable. Verify that the audit-log migration has been applied." });
+  }
+});
+
 router.get("/api/admin/control/database/export", ...admin, async (req: any, res) => {
   if (!isSuperAdmin(req)) return res.status(403).json({ success: false, error: "Super Admin permission required." });
   try {
