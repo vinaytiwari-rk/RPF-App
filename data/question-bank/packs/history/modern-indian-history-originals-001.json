@@ -1,0 +1,242 @@
+{
+  "packId": "modern-indian-history-originals-001",
+  "version": 1,
+  "subject": "modern-indian-history",
+  "category": "history",
+  "titleEn": "Modern Indian History — Foundations",
+  "titleHi": "आधुनिक भारतीय इतिहास — आधार",
+  "descEn": "Eight original bilingual questions on the 1857 uprising, Congress, Swadeshi, Home Rule, Gandhian movements and the Constituent Assembly.",
+  "descHi": "1857 के विद्रोह, कांग्रेस, स्वदेशी, होम रूल, गांधीवादी आंदोलनों और संविधान सभा पर आठ मौलिक द्विभाषी प्रश्न।",
+  "iconName": "Landmark",
+  "color": "from-amber-600 to-orange-600",
+  "badge": "Original practice",
+  "durationMinutes": 10,
+  "questions": [
+    {
+      "id": "mih-20261013-001",
+      "subject": "modern-indian-history",
+      "topic": "Revolt of 1857",
+      "difficulty": "easy",
+      "questionEn": "Which immediate military grievance helped trigger the uprising of 1857?",
+      "questionHi": "1857 के विद्रोह को भड़काने वाली तात्कालिक सैन्य शिकायतों में से कौन-सी प्रमुख थी?",
+      "optionsEn": [
+        "A new income-tax rule",
+        "The issue of rifle cartridges believed to be greased with animal fat",
+        "The introduction of railways",
+        "The abolition of the Indian Civil Service"
+      ],
+      "optionsHi": [
+        "नया आयकर नियम",
+        "ऐसी राइफल कारतूसों का मुद्दा जिनमें पशु-चर्बी होने की आशंका थी",
+        "रेलवे की शुरुआत",
+        "भारतीय सिविल सेवा का उन्मूलन"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The cartridge controversy offended religious sensibilities among many sepoys and became an immediate trigger.",
+      "explanationHi": "कारतूस विवाद ने अनेक सिपाहियों की धार्मिक भावनाओं को ठेस पहुँचाई और तात्कालिक कारण बना।",
+      "examTags": [
+        "history",
+        "modern-india",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "mih-20261013-002",
+      "subject": "modern-indian-history",
+      "topic": "Indian National Congress",
+      "difficulty": "easy",
+      "questionEn": "In which year was the Indian National Congress founded?",
+      "questionHi": "भारतीय राष्ट्रीय कांग्रेस की स्थापना किस वर्ष हुई थी?",
+      "optionsEn": [
+        "1875",
+        "1885",
+        "1905",
+        "1919"
+      ],
+      "optionsHi": [
+        "1875",
+        "1885",
+        "1905",
+        "1919"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Indian National Congress was founded in 1885; its first session met in Bombay.",
+      "explanationHi": "भारतीय राष्ट्रीय कांग्रेस की स्थापना 1885 में हुई; इसका पहला अधिवेशन बंबई में हुआ।",
+      "examTags": [
+        "history",
+        "modern-india",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "mih-20261013-003",
+      "subject": "modern-indian-history",
+      "topic": "Swadeshi Movement",
+      "difficulty": "medium",
+      "questionEn": "Which event in 1905 directly helped launch the Swadeshi Movement in Bengal?",
+      "questionHi": "1905 की किस घटना ने बंगाल में स्वदेशी आंदोलन को सीधे गति दी?",
+      "optionsEn": [
+        "The Rowlatt Act",
+        "The Jallianwala Bagh massacre",
+        "The partition of Bengal",
+        "The Simon Commission"
+      ],
+      "optionsHi": [
+        "रॉलेट एक्ट",
+        "जलियाँवाला बाग हत्याकांड",
+        "बंगाल का विभाजन",
+        "साइमन कमीशन"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The 1905 partition of Bengal provoked protests and a boycott of foreign goods.",
+      "explanationHi": "1905 में बंगाल विभाजन के विरोध में आंदोलन और विदेशी वस्तुओं के बहिष्कार को बल मिला।",
+      "examTags": [
+        "history",
+        "modern-india",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "mih-20261013-004",
+      "subject": "modern-indian-history",
+      "topic": "Home Rule Movement",
+      "difficulty": "medium",
+      "questionEn": "Which pair is associated with the Home Rule Leagues in India during 1916?",
+      "questionHi": "1916 में भारत के होम रूल लीग आंदोलन से कौन-सी जोड़ी जुड़ी थी?",
+      "optionsEn": [
+        "Dadabhai Naoroji and Gopal Krishna Gokhale",
+        "Annie Besant and Bal Gangadhar Tilak",
+        "Subhas Chandra Bose and Bhagat Singh",
+        "Lala Lajpat Rai and C. R. Das"
+      ],
+      "optionsHi": [
+        "दादाभाई नौरोजी और गोपाल कृष्ण गोखले",
+        "एनी बेसेंट और बाल गंगाधर तिलक",
+        "सुभाष चंद्र बोस और भगत सिंह",
+        "लाला लाजपत राय और सी. आर. दास"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Annie Besant and Bal Gangadhar Tilak led separate but related Home Rule League initiatives.",
+      "explanationHi": "एनी बेसेंट और बाल गंगाधर तिलक ने अलग-अलग, लेकिन संबंधित होम रूल लीग पहलें चलाईं।",
+      "examTags": [
+        "history",
+        "modern-india",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "mih-20261013-005",
+      "subject": "modern-indian-history",
+      "topic": "Champaran Satyagraha",
+      "difficulty": "easy",
+      "questionEn": "The Champaran Satyagraha of 1917 primarily supported which group?",
+      "questionHi": "1917 के चंपारण सत्याग्रह ने मुख्य रूप से किस समूह का समर्थन किया?",
+      "optionsEn": [
+        "Indigo cultivators",
+        "Textile mill owners",
+        "Railway contractors",
+        "Tea exporters"
+      ],
+      "optionsHi": [
+        "नील की खेती करने वाले किसान",
+        "कपड़ा मिल मालिक",
+        "रेलवे ठेकेदार",
+        "चाय निर्यातक"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Gandhi investigated the grievances of indigo cultivators in Champaran, Bihar.",
+      "explanationHi": "गांधी ने बिहार के चंपारण में नील किसानों की शिकायतों की जाँच की।",
+      "examTags": [
+        "history",
+        "modern-india",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "mih-20261013-006",
+      "subject": "modern-indian-history",
+      "topic": "Civil Disobedience Movement",
+      "difficulty": "easy",
+      "questionEn": "What law did Gandhi symbolically challenge by making salt at Dandi in 1930?",
+      "questionHi": "1930 में दांडी में नमक बनाकर गांधी ने किस कानून को प्रतीकात्मक रूप से चुनौती दी?",
+      "optionsEn": [
+        "Forest law",
+        "Arms Act",
+        "Salt law",
+        "Press Act"
+      ],
+      "optionsHi": [
+        "वन कानून",
+        "आर्म्स एक्ट",
+        "नमक कानून",
+        "प्रेस एक्ट"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Dandi March protested the British monopoly and taxation of salt.",
+      "explanationHi": "दांडी मार्च ने नमक पर ब्रिटिश एकाधिकार और कर का विरोध किया।",
+      "examTags": [
+        "history",
+        "modern-india",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "mih-20261013-007",
+      "subject": "modern-indian-history",
+      "topic": "Quit India Movement",
+      "difficulty": "medium",
+      "questionEn": "Where did the All India Congress Committee adopt the Quit India resolution in August 1942?",
+      "questionHi": "अगस्त 1942 में अखिल भारतीय कांग्रेस समिति ने भारत छोड़ो प्रस्ताव कहाँ अपनाया?",
+      "optionsEn": [
+        "Lahore",
+        "Bombay",
+        "Calcutta",
+        "Karachi"
+      ],
+      "optionsHi": [
+        "लाहौर",
+        "बंबई",
+        "कलकत्ता",
+        "कराची"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Quit India resolution was adopted at Gowalia Tank Maidan in Bombay on 8 August 1942.",
+      "explanationHi": "भारत छोड़ो प्रस्ताव 8 अगस्त 1942 को बंबई के गोवालिया टैंक मैदान में अपनाया गया।",
+      "examTags": [
+        "history",
+        "modern-india",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "mih-20261013-008",
+      "subject": "modern-indian-history",
+      "topic": "Constituent Assembly",
+      "difficulty": "medium",
+      "questionEn": "On which date did the Constituent Assembly of India hold its first meeting?",
+      "questionHi": "भारत की संविधान सभा की पहली बैठक किस तारीख को हुई?",
+      "optionsEn": [
+        "15 August 1947",
+        "26 November 1949",
+        "9 December 1946",
+        "26 January 1950"
+      ],
+      "optionsHi": [
+        "15 अगस्त 1947",
+        "26 नवंबर 1949",
+        "9 दिसंबर 1946",
+        "26 जनवरी 1950"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The Constituent Assembly first met on 9 December 1946, before independence.",
+      "explanationHi": "संविधान सभा की पहली बैठक स्वतंत्रता से पहले 9 दिसंबर 1946 को हुई।",
+      "examTags": [
+        "history",
+        "modern-india",
+        "competitive-exams"
+      ]
+    }
+  ],
+  "questionCount": 8,
+  "questionsCount": 8
+}
