@@ -1,0 +1,233 @@
+{
+  "packId": "biology-human-body-originals-001",
+  "version": 1,
+  "subject": "biology-human-body",
+  "category": "general-knowledge",
+  "titleEn": "Biology & Human Body — Original Practice Set 001",
+  "titleHi": "जीवविज्ञान एवं मानव शरीर — मौलिक अभ्यास सेट 001",
+  "descEn": "Original bilingual questions on basic biology and human physiology.",
+  "descHi": "मूल जीवविज्ञान और मानव शरीर क्रिया-विज्ञान पर मौलिक द्विभाषी प्रश्न।",
+  "iconName": "Dna",
+  "color": "from-green-600 to-teal-700",
+  "badge": "Original practice",
+  "durationMinutes": 10,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "biology-human-body-001",
+      "subject": "biology-human-body",
+      "questionEn": "Which blood cells primarily transport oxygen?",
+      "questionHi": "कौन-सी रक्त कोशिकाएँ मुख्यतः ऑक्सीजन का परिवहन करती हैं?",
+      "optionsEn": [
+        "Platelets",
+        "Red blood cells",
+        "White blood cells",
+        "Neurons"
+      ],
+      "optionsHi": [
+        "प्लेटलेट्स",
+        "लाल रक्त कोशिकाएँ",
+        "श्वेत रक्त कोशिकाएँ",
+        "न्यूरॉन"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Red blood cells contain haemoglobin, which binds and transports oxygen.",
+      "explanationHi": "लाल रक्त कोशिकाओं में हीमोग्लोबिन होता है, जो ऑक्सीजन बाँधकर ले जाता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "biology-human-body-002",
+      "subject": "biology-human-body",
+      "questionEn": "Which organ filters blood to form urine?",
+      "questionHi": "मूत्र बनाने के लिए रक्त को कौन-सा अंग छानता है?",
+      "optionsEn": [
+        "Liver",
+        "Kidney",
+        "Pancreas",
+        "Lung"
+      ],
+      "optionsHi": [
+        "यकृत",
+        "गुर्दा",
+        "अग्न्याशय",
+        "फेफड़ा"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The kidneys filter blood and regulate fluid and electrolyte balance.",
+      "explanationHi": "गुर्दे रक्त को छानते हैं और तरल व इलेक्ट्रोलाइट संतुलन बनाए रखते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "biology-human-body-003",
+      "subject": "biology-human-body",
+      "questionEn": "Which vitamin is essential for normal blood clotting?",
+      "questionHi": "सामान्य रक्त का थक्का बनने के लिए कौन-सा विटामिन आवश्यक है?",
+      "optionsEn": [
+        "Vitamin A",
+        "Vitamin C",
+        "Vitamin K",
+        "Vitamin D"
+      ],
+      "optionsHi": [
+        "विटामिन A",
+        "विटामिन C",
+        "विटामिन K",
+        "विटामिन D"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Vitamin K is required for the synthesis of several clotting factors.",
+      "explanationHi": "कई clotting factors के निर्माण के लिए विटामिन K आवश्यक है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "biology-human-body-004",
+      "subject": "biology-human-body",
+      "questionEn": "What is the basic structural and functional unit of life?",
+      "questionHi": "जीवन की मूल संरचनात्मक और क्रियात्मक इकाई क्या है?",
+      "optionsEn": [
+        "Tissue",
+        "Organ",
+        "Cell",
+        "Organ system"
+      ],
+      "optionsHi": [
+        "ऊतक",
+        "अंग",
+        "कोशिका",
+        "अंग तंत्र"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The cell is the basic structural and functional unit of living organisms.",
+      "explanationHi": "कोशिका जीवों की मूल संरचनात्मक और क्रियात्मक इकाई है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "biology-human-body-005",
+      "subject": "biology-human-body",
+      "questionEn": "Which chamber of the human heart pumps oxygenated blood to the body?",
+      "questionHi": "मानव हृदय का कौन-सा कक्ष ऑक्सीजनयुक्त रक्त शरीर में भेजता है?",
+      "optionsEn": [
+        "Right atrium",
+        "Right ventricle",
+        "Left atrium",
+        "Left ventricle"
+      ],
+      "optionsHi": [
+        "दायाँ आलिंद",
+        "दायाँ निलय",
+        "बायाँ आलिंद",
+        "बायाँ निलय"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The left ventricle pumps oxygenated blood into the aorta and systemic circulation.",
+      "explanationHi": "बायाँ निलय ऑक्सीजनयुक्त रक्त को महाधमनी और शरीर के परिसंचरण में भेजता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "biology-human-body-006",
+      "subject": "biology-human-body",
+      "questionEn": "Which part of the plant mainly absorbs water and minerals from soil?",
+      "questionHi": "पौधे का कौन-सा भाग मुख्यतः मिट्टी से जल और खनिज अवशोषित करता है?",
+      "optionsEn": [
+        "Flower",
+        "Root hairs",
+        "Fruit",
+        "Petal"
+      ],
+      "optionsHi": [
+        "फूल",
+        "मूल रोम",
+        "फल",
+        "पंखुड़ी"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Root hairs increase surface area for absorption of water and mineral ions.",
+      "explanationHi": "मूल रोम जल और खनिज आयनों के अवशोषण के लिए सतह क्षेत्र बढ़ाते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "biology-human-body-007",
+      "subject": "biology-human-body",
+      "questionEn": "Which molecule carries hereditary information in most living organisms?",
+      "questionHi": "अधिकांश जीवों में वंशानुगत जानकारी कौन-सा अणु वहन करता है?",
+      "optionsEn": [
+        "Starch",
+        "DNA",
+        "Chlorophyll",
+        "Glycogen"
+      ],
+      "optionsHi": [
+        "स्टार्च",
+        "DNA",
+        "क्लोरोफिल",
+        "ग्लाइकोजन"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "DNA stores genetic information in most organisms.",
+      "explanationHi": "अधिकांश जीवों में DNA आनुवंशिक जानकारी संग्रहीत करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "biology-human-body-008",
+      "subject": "biology-human-body",
+      "questionEn": "Which gas is released as a by-product of oxygenic photosynthesis?",
+      "questionHi": "ऑक्सीजनिक प्रकाश संश्लेषण के उप-उत्पाद के रूप में कौन-सी गैस निकलती है?",
+      "optionsEn": [
+        "Carbon monoxide",
+        "Oxygen",
+        "Methane",
+        "Ammonia"
+      ],
+      "optionsHi": [
+        "कार्बन मोनोऑक्साइड",
+        "ऑक्सीजन",
+        "मीथेन",
+        "अमोनिया"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Water splitting during oxygenic photosynthesis releases oxygen.",
+      "explanationHi": "ऑक्सीजनिक प्रकाश संश्लेषण में जल के विखंडन से ऑक्सीजन निकलती है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
