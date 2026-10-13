@@ -160,6 +160,7 @@ export const EXCLUDED_EXPLORE_SERVICE_IDS = new Set<string>([
 export default function ExploreStudio() {
   const [activeTab, setActiveTab] = useState<"featured" | "all">("all");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -180,9 +181,13 @@ export default function ExploreStudio() {
 
   const fetchCmsData = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
-      const res = await axios.get("/api/cms");
-      const cms = res.data?.cms || res.data?.data || {};
+      const res = await axios.get("/api/cms", { timeout: 10000 });
+      const cms = res.data?.cms || res.data?.data;
+      if (res.data?.success !== true || !cms || typeof cms !== "object" || Array.isArray(cms)) {
+        throw new Error("The server did not return a valid Services CMS configuration.");
+      }
 
       const websiteMap = cms.serviceWebsiteLinks || {};
 
@@ -224,10 +229,11 @@ export default function ExploreStudio() {
       } else {
         setAllServices(hydrateCardsWithLinks(DEFAULT_ALL_SERVICES.filter((s: any) => s && s.id && !EXCLUDED_EXPLORE_SERVICE_IDS.has(s.id))));
       }
-    } catch {
-      toast.error("Failed to load CMS data, loading default catalog");
-      setFeaturedServices(DEFAULT_FEATURED_SERVICES);
-      setAllServices(DEFAULT_ALL_SERVICES);
+    } catch (error: any) {
+      const message = error?.response?.data?.error || error?.message || "Failed to load Services CMS data";
+      setLoadError(message);
+      toast.error(message);
+      // Keep the draft visible for reference, but never publish it over unverified server data.
     } finally {
       setLoading(false);
     }
@@ -236,6 +242,10 @@ export default function ExploreStudio() {
   const handlePublish = async () => {
     if (!token) {
       toast.error("Admin session expired");
+      return;
+    }
+    if (loading || loadError) {
+      toast.error("Services configuration is not verified. Retry loading before publishing.");
       return;
     }
     setSaving(true);
@@ -407,7 +417,7 @@ export default function ExploreStudio() {
       const updated = [...syncedFeatured, ...syncedAll].find(s => s.id === selectedCard.id);
       if (updated) setSelectedCard(updated);
     }
-    toast.success("All 35+ services synchronized with master verified links! Click 'Save & Publish' to push live.");
+    toast.success(`Synchronized ${syncedFeatured.length + syncedAll.length} service entries with the configured master catalog. Click Save & Publish to publish.`);
   };
 
   // Synchronize the currently selected card with its master catalog links
@@ -445,6 +455,7 @@ export default function ExploreStudio() {
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
+      {loadError && <div role="alert" className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900"><div><p className="font-bold">Services configuration could not be verified.</p><p className="mt-1 text-xs">{loadError} Publishing is disabled to protect saved links.</p></div><button type="button" onClick={() => void fetchCmsData()} disabled={loading} className="rounded-xl border border-rose-300 bg-white px-3 py-2 text-xs font-bold disabled:opacity-50">Retry</button></div>}
       {/* HEADER WITH SAVE AND NEW */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
@@ -475,13 +486,13 @@ export default function ExploreStudio() {
           <button
             onClick={handleSyncAllFromMaster}
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition border border-indigo-200 shadow-2xs"
-            title="Synchronize all 35+ services with verified master portal links"
+            title="Synchronize service entries with the configured master catalog"
           >
             <RefreshCw className="h-3.5 w-3.5 text-indigo-600" /> Sync Master Links
           </button>
           <button
             onClick={handlePublish}
-            disabled={saving}
+            disabled={saving || loading || Boolean(loadError)}
             className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition shadow-xs disabled:opacity-60"
           >
             <Save className="h-4 w-4" /> {saving ? "Publishing..." : "Save & Publish"}
