@@ -963,7 +963,7 @@ export default function DashboardStudio() {
                       <td className="p-3 text-slate-600">{v.email || v.phone || "—"}</td>
                       <td className="p-3 text-slate-600">{v.skills || v.city || "General Service"}</td>
                       <td className="p-3">
-                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-[#166534] border border-emerald-200">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200">
                           {String(v.approval_status || v.status || "Unknown").replace(/[_-]+/g, " ")}
                         </span>
                       </td>
