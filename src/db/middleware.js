@@ -142,8 +142,8 @@ export const auditEvent = async ({
         (actor_user_id, actor_role, action, entity_type, entity_id, request_id, details)
        VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
       [
-        userId,
-        normalizeRole(req?.user?.role) || "system",
+        String(userId ?? "anonymous"),
+        req?.user?.role ? normalizeRole(req.user.role) : "anonymous",
         action,
         resource,
         resourceId,
