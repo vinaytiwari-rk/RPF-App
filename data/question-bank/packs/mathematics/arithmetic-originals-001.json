@@ -1,0 +1,233 @@
+{
+  "packId": "arithmetic-originals-001",
+  "version": 1,
+  "subject": "mathematics-arithmetic",
+  "category": "general-knowledge",
+  "titleEn": "Arithmetic & Mathematics — Original Practice Set 001",
+  "titleHi": "अंकगणित एवं गणित — मौलिक अभ्यास सेट 001",
+  "descEn": "Original bilingual arithmetic questions with worked explanations.",
+  "descHi": "हल सहित मौलिक द्विभाषी अंकगणित प्रश्न।",
+  "iconName": "Calculator",
+  "color": "from-blue-600 to-indigo-700",
+  "badge": "Original practice",
+  "durationMinutes": 12,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "mathematics-arithmetic-001",
+      "subject": "mathematics-arithmetic",
+      "questionEn": "What is 15% of 240?",
+      "questionHi": "240 का 15% कितना है?",
+      "optionsEn": [
+        "24",
+        "30",
+        "36",
+        "40"
+      ],
+      "optionsHi": [
+        "24",
+        "30",
+        "36",
+        "40"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "10% of 240 is 24 and 5% is 12; total 36.",
+      "explanationHi": "240 का 10% = 24 और 5% = 12; कुल 36।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "mathematics-arithmetic-002",
+      "subject": "mathematics-arithmetic",
+      "questionEn": "The ratio 18:24 in simplest form is:",
+      "questionHi": "18:24 का सरलतम रूप क्या है?",
+      "optionsEn": [
+        "2:3",
+        "3:4",
+        "4:5",
+        "6:8"
+      ],
+      "optionsHi": [
+        "2:3",
+        "3:4",
+        "4:5",
+        "6:8"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Divide both terms by their greatest common divisor, 6, to get 3:4.",
+      "explanationHi": "दोनों पदों को महत्तम समापवर्तक 6 से भाग देने पर 3:4 मिलता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "mathematics-arithmetic-003",
+      "subject": "mathematics-arithmetic",
+      "questionEn": "A train travels 150 km in 3 hours. What is its average speed?",
+      "questionHi": "एक ट्रेन 3 घंटे में 150 किमी चलती है। उसकी औसत गति क्या है?",
+      "optionsEn": [
+        "40 km/h",
+        "45 km/h",
+        "50 km/h",
+        "60 km/h"
+      ],
+      "optionsHi": [
+        "40 किमी/घंटा",
+        "45 किमी/घंटा",
+        "50 किमी/घंटा",
+        "60 किमी/घंटा"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Average speed = distance ÷ time = 150 ÷ 3 = 50 km/h.",
+      "explanationHi": "औसत गति = दूरी ÷ समय = 150 ÷ 3 = 50 किमी/घंटा।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "mathematics-arithmetic-004",
+      "subject": "mathematics-arithmetic",
+      "questionEn": "Find the simple interest on ₹2,000 at 5% per year for 3 years.",
+      "questionHi": "₹2,000 पर 5% वार्षिक दर से 3 वर्षों का साधारण ब्याज ज्ञात करें।",
+      "optionsEn": [
+        "₹200",
+        "₹250",
+        "₹300",
+        "₹350"
+      ],
+      "optionsHi": [
+        "₹200",
+        "₹250",
+        "₹300",
+        "₹350"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Simple interest = principal × rate × time ÷ 100 = 2000×5×3÷100 = ₹300.",
+      "explanationHi": "साधारण ब्याज = मूलधन × दर × समय ÷ 100 = ₹300।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "mathematics-arithmetic-005",
+      "subject": "mathematics-arithmetic",
+      "questionEn": "If 8 workers complete a task in 12 days at the same rate, how many days would 6 workers need?",
+      "questionHi": "यदि 8 मजदूर एक काम 12 दिनों में करते हैं, तो समान दर पर 6 मजदूर कितने दिन लेंगे?",
+      "optionsEn": [
+        "14",
+        "15",
+        "16",
+        "18"
+      ],
+      "optionsHi": [
+        "14",
+        "15",
+        "16",
+        "18"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Total work is 8×12 = 96 worker-days; 96÷6 = 16 days.",
+      "explanationHi": "कुल कार्य 8×12 = 96 मजदूर-दिन; 96÷6 = 16 दिन।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "mathematics-arithmetic-006",
+      "subject": "mathematics-arithmetic",
+      "questionEn": "What is the square root of 1,764?",
+      "questionHi": "1,764 का वर्गमूल क्या है?",
+      "optionsEn": [
+        "38",
+        "40",
+        "42",
+        "44"
+      ],
+      "optionsHi": [
+        "38",
+        "40",
+        "42",
+        "44"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "42×42 = 1,764.",
+      "explanationHi": "42×42 = 1,764।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "mathematics-arithmetic-007",
+      "subject": "mathematics-arithmetic",
+      "questionEn": "An item marked at ₹800 is sold at a 10% discount. What is the sale price?",
+      "questionHi": "₹800 अंकित मूल्य वाली वस्तु 10% छूट पर बेची जाती है। विक्रय मूल्य क्या होगा?",
+      "optionsEn": [
+        "₹700",
+        "₹720",
+        "₹740",
+        "₹760"
+      ],
+      "optionsHi": [
+        "₹700",
+        "₹720",
+        "₹740",
+        "₹760"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "10% of ₹800 is ₹80; sale price = ₹800−₹80 = ₹720.",
+      "explanationHi": "₹800 का 10% ₹80 है; विक्रय मूल्य ₹800−₹80 = ₹720।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "mathematics-arithmetic-008",
+      "subject": "mathematics-arithmetic",
+      "questionEn": "The mean of 6, 8, 10, 12 and 14 is:",
+      "questionHi": "6, 8, 10, 12 और 14 का औसत क्या है?",
+      "optionsEn": [
+        "8",
+        "9",
+        "10",
+        "11"
+      ],
+      "optionsHi": [
+        "8",
+        "9",
+        "10",
+        "11"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Their sum is 50; 50 divided by 5 equals 10.",
+      "explanationHi": "योग 50 है; 50 को 5 से भाग देने पर 10 मिलता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
