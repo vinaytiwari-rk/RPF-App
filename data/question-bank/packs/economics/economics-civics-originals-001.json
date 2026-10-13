@@ -1,0 +1,233 @@
+{
+  "packId": "economics-civics-originals-001",
+  "version": 1,
+  "subject": "economics-civics",
+  "category": "general-knowledge",
+  "titleEn": "Economics & Civics — Original Practice Set 001",
+  "titleHi": "अर्थशास्त्र एवं नागरिक शास्त्र — मौलिक अभ्यास सेट 001",
+  "descEn": "Original bilingual practice on basic economics, public finance and civic institutions.",
+  "descHi": "अर्थशास्त्र, सार्वजनिक वित्त और नागरिक संस्थाओं पर मौलिक द्विभाषी प्रश्न।",
+  "iconName": "Landmark",
+  "color": "from-teal-600 to-emerald-700",
+  "badge": "Original practice",
+  "durationMinutes": 10,
+  "questionCount": 8,
+  "questions": [
+    {
+      "id": "economics-civics-001",
+      "subject": "economics-civics",
+      "questionEn": "Which institution is responsible for monetary policy in India?",
+      "questionHi": "भारत में मौद्रिक नीति के लिए कौन-सी संस्था जिम्मेदार है?",
+      "optionsEn": [
+        "Finance Commission",
+        "Reserve Bank of India",
+        "NITI Aayog",
+        "Comptroller and Auditor General"
+      ],
+      "optionsHi": [
+        "वित्त आयोग",
+        "भारतीय रिज़र्व बैंक",
+        "नीति आयोग",
+        "नियंत्रक एवं महालेखा परीक्षक"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Reserve Bank of India formulates and implements monetary policy under its statutory framework.",
+      "explanationHi": "भारतीय रिज़र्व बैंक अपने वैधानिक ढाँचे के अंतर्गत मौद्रिक नीति बनाता और लागू करता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "economics-civics-002",
+      "subject": "economics-civics",
+      "questionEn": "Inflation generally refers to:",
+      "questionHi": "मुद्रास्फीति का सामान्य अर्थ क्या है?",
+      "optionsEn": [
+        "A sustained rise in the general price level",
+        "A fall in all prices",
+        "A rise in exports only",
+        "A decrease in money supply only"
+      ],
+      "optionsHi": [
+        "सामान्य मूल्य स्तर में लगातार वृद्धि",
+        "सभी कीमतों में गिरावट",
+        "केवल निर्यात में वृद्धि",
+        "केवल मुद्रा आपूर्ति में कमी"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Inflation is a sustained increase in the general level of prices over time.",
+      "explanationHi": "मुद्रास्फीति समय के साथ सामान्य मूल्य स्तर में लगातार वृद्धि है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "economics-civics-003",
+      "subject": "economics-civics",
+      "questionEn": "Which tax is generally levied on the supply of goods and services in India?",
+      "questionHi": "भारत में वस्तुओं और सेवाओं की आपूर्ति पर सामान्यतः कौन-सा कर लगाया जाता है?",
+      "optionsEn": [
+        "GST",
+        "Wealth tax",
+        "Road tax only",
+        "Customary fee"
+      ],
+      "optionsHi": [
+        "GST",
+        "संपत्ति कर",
+        "केवल सड़क कर",
+        "प्रथागत शुल्क"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Goods and Services Tax is an indirect tax on eligible supplies of goods and services.",
+      "explanationHi": "वस्तु एवं सेवा कर (GST) पात्र वस्तुओं और सेवाओं की आपूर्ति पर लगाया जाने वाला अप्रत्यक्ष कर है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "economics-civics-004",
+      "subject": "economics-civics",
+      "questionEn": "What is the main purpose of a government budget?",
+      "questionHi": "सरकारी बजट का मुख्य उद्देश्य क्या है?",
+      "optionsEn": [
+        "To plan estimated receipts and expenditure",
+        "To set school examination marks",
+        "To publish weather forecasts",
+        "To issue passports"
+      ],
+      "optionsHi": [
+        "अनुमानित प्राप्तियों और व्यय की योजना",
+        "स्कूल परीक्षा अंक तय करना",
+        "मौसम पूर्वानुमान प्रकाशित करना",
+        "पासपोर्ट जारी करना"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "A budget sets out expected government receipts and expenditure for a period.",
+      "explanationHi": "बजट एक अवधि के लिए सरकार की अनुमानित प्राप्तियों और व्यय का विवरण देता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "economics-civics-005",
+      "subject": "economics-civics",
+      "questionEn": "Which body audits the accounts of the Union and State governments in India?",
+      "questionHi": "भारत में केंद्र और राज्य सरकारों के खातों का लेखा-परीक्षण कौन करता है?",
+      "optionsEn": [
+        "Election Commission",
+        "CAG of India",
+        "UPSC",
+        "Finance Ministry alone"
+      ],
+      "optionsHi": [
+        "निर्वाचन आयोग",
+        "भारत के CAG",
+        "UPSC",
+        "केवल वित्त मंत्रालय"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Comptroller and Auditor General audits public accounts as provided by the Constitution and law.",
+      "explanationHi": "भारत के नियंत्रक एवं महालेखा परीक्षक (CAG) संविधान और कानून के अनुसार सार्वजनिक खातों का ऑडिट करते हैं।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "economics-civics-006",
+      "subject": "economics-civics",
+      "questionEn": "A market with only one seller is commonly called:",
+      "questionHi": "केवल एक विक्रेता वाले बाजार को सामान्यतः क्या कहते हैं?",
+      "optionsEn": [
+        "Perfect competition",
+        "Monopoly",
+        "Oligopoly",
+        "Barter"
+      ],
+      "optionsHi": [
+        "पूर्ण प्रतियोगिता",
+        "एकाधिकार",
+        "अल्पाधिकार",
+        "वस्तु-विनिमय"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "A monopoly is a market structure with a single seller and no close substitute in the basic model.",
+      "explanationHi": "एकाधिकार (Monopoly) में मूल मॉडल के अनुसार एक ही विक्रेता होता है और निकट विकल्प नहीं होता।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "economics-civics-007",
+      "subject": "economics-civics",
+      "questionEn": "Which level of government is most directly associated with a Gram Panchayat?",
+      "questionHi": "ग्राम पंचायत सीधे किस स्तर की सरकार से संबंधित है?",
+      "optionsEn": [
+        "Local self-government",
+        "Union government",
+        "Foreign government",
+        "Judiciary"
+      ],
+      "optionsHi": [
+        "स्थानीय स्वशासन",
+        "केंद्र सरकार",
+        "विदेशी सरकार",
+        "न्यायपालिका"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "A Gram Panchayat is an institution of rural local self-government.",
+      "explanationHi": "ग्राम पंचायत ग्रामीण स्थानीय स्वशासन की संस्था है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    },
+    {
+      "id": "economics-civics-008",
+      "subject": "economics-civics",
+      "questionEn": "What does GDP measure in a given period?",
+      "questionHi": "किसी निश्चित अवधि में GDP क्या मापता है?",
+      "optionsEn": [
+        "The market value of final goods and services produced within a country",
+        "Only government tax revenue",
+        "Only exports",
+        "Total population"
+      ],
+      "optionsHi": [
+        "देश में उत्पादित अंतिम वस्तुओं और सेवाओं का बाजार मूल्य",
+        "केवल सरकारी कर राजस्व",
+        "केवल निर्यात",
+        "कुल जनसंख्या"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "GDP measures the value of final goods and services produced within a country's domestic territory during a period.",
+      "explanationHi": "GDP एक अवधि में देश की घरेलू सीमा के भीतर उत्पादित अंतिम वस्तुओं और सेवाओं का मूल्य मापता है।",
+      "difficulty": "easy",
+      "examTags": [
+        "ssc",
+        "state-exams",
+        "general-awareness"
+      ]
+    }
+  ]
+}
