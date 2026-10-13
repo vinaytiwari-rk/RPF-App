@@ -11,14 +11,16 @@ export default function SecurityStudio() {
   const { user, token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [healthData, setHealthData] = useState<any>({
-    status: "healthy",
-    db: "connected"
+    status: "unknown",
+    db: "unknown"
   });
   const [overview, setOverview] = useState<any>(null);
 
   const loadHealth = async () => {
     try {
       setLoading(true);
+      setOverview(null);
+      setHealthData({ status: "checking", db: "checking" });
       const res = await axios.get("/api/admin/control/overview", {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         timeout: 5000
@@ -27,11 +29,13 @@ export default function SecurityStudio() {
         setOverview(res.data.data);
       }
     } catch {
-      // Fallback to basic health
+      // A public health endpoint can confirm basic API reachability, not administrator/database health.
       try {
         const hRes = await axios.get("/api/health", { timeout: 3000 });
-        setHealthData(hRes.data);
-      } catch {}
+        setHealthData({ ...hRes.data, status: hRes.data?.status || "api-reachable", db: "unknown" });
+      } catch {
+        setHealthData({ status: "unavailable", db: "unavailable" });
+      }
     } finally {
       setLoading(false);
     }
@@ -59,7 +63,7 @@ export default function SecurityStudio() {
       URL.revokeObjectURL(url);
       toast.success("Database backup SQL downloaded successfully!", { id: "db-backup" });
     } catch {
-      toast.error("Database export requires super_admin permissions or backend pg_dump.", { id: "db-backup" });
+      toast.error("Backup export failed. Check administrator permissions and server pg_dump availability.", { id: "db-backup" });
     }
   };
 
@@ -74,7 +78,7 @@ export default function SecurityStudio() {
           <div>
             <div className="flex items-center gap-2">
               <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#166534] border border-emerald-200">
-                System Active
+                {loading ? "Checking system" : overview ? "Diagnostics available" : healthData.status === "api-reachable" ? "API reachable only" : "Diagnostics unavailable"}
               </span>
               <span className="text-[11px] font-bold text-slate-400">Security & Infrastructure</span>
             </div>
@@ -113,14 +117,14 @@ export default function SecurityStudio() {
               <Server className="h-5 w-5 text-[#C2410C]" /> Node Express Server
             </div>
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-              <CheckCircle2 className="h-3 w-3" /> Online
+              {overview ? <><CheckCircle2 className="h-3 w-3" /> Online</> : <><AlertTriangle className="h-3 w-3" /> {loading ? "Checking…" : healthData.status === "api-reachable" ? "API reachable" : "Unavailable"}</>}
             </span>
           </div>
           <div className="text-xs text-slate-600 space-y-1">
-            <p><strong>Release Version:</strong> {overview?.appVersion ? `v${overview.appVersion}` : "v2.5.18"}</p>
-            <p><strong>Environment:</strong> {overview?.environment || "production"}</p>
-            <p><strong>Architecture:</strong> Node.js ({overview?.node || "v20"}) • Express • TS</p>
-            <p><strong>API Latency:</strong> {overview?.apiLatencyMs ? `${overview.apiLatencyMs} ms` : "Normal"}</p>
+            <p><strong>Release Version:</strong> {overview?.appVersion ? `v${overview.appVersion}` : "Unknown"}</p>
+            <p><strong>Environment:</strong> {overview?.environment || "Unknown"}</p>
+            <p><strong>Architecture:</strong> Node.js ({overview?.node || "Unknown"}) • Express • TS</p>
+            <p><strong>API Latency:</strong> {overview ? `${overview.apiLatencyMs} ms` : "Not measured"}</p>
           </div>
         </div>
 
@@ -131,13 +135,13 @@ export default function SecurityStudio() {
               <Database className="h-5 w-5 text-emerald-600" /> PostgreSQL Database
             </div>
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-              <CheckCircle2 className="h-3 w-3" /> {overview?.database?.connected ? "Connected" : "Online"}
+              {overview?.database?.connected ? <><CheckCircle2 className="h-3 w-3" /> Connected</> : <><AlertTriangle className="h-3 w-3" /> {loading ? "Checking…" : overview ? "Disconnected" : "Unknown"}</>}
             </span>
           </div>
           <div className="text-xs text-slate-600 space-y-1">
-            <p><strong>Database Tables:</strong> {overview?.schemaTables ? `${overview.schemaTables} tables` : "Verified"}</p>
-            <p><strong>CMS Snapshots:</strong> {overview?.cmsVersions?.count ? `${overview.cmsVersions.count} versions` : "Active"}</p>
-            <p><strong>Server Time:</strong> {overview?.database?.serverTime ? new Date(overview.database.serverTime).toLocaleTimeString() : "Synchronized"}</p>
+            <p><strong>Database Tables:</strong> {overview ? `${overview.schemaTables ?? 0} tables` : "Not verified"}</p>
+            <p><strong>CMS Snapshots:</strong> {overview ? `${overview.cmsVersions?.count ?? 0} versions` : "Unavailable"}</p>
+            <p><strong>Server Time:</strong> {overview?.database?.serverTime ? new Date(overview.database.serverTime).toLocaleTimeString() : "Not reported"}</p>
           </div>
         </div>
 
@@ -148,12 +152,12 @@ export default function SecurityStudio() {
               <Key className="h-5 w-5 text-amber-600" /> Authentication State
             </div>
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-              <ShieldCheck className="h-3 w-3" /> Verified
+              {token && user ? <><ShieldCheck className="h-3 w-3" /> Authenticated</> : <><AlertTriangle className="h-3 w-3" /> Unknown</>}
             </span>
           </div>
           <div className="text-xs text-slate-600 space-y-1">
             <p><strong>Admin User:</strong> {user?.name || "Administrator"}</p>
-            <p><strong>Role:</strong> {user?.role || "super_admin"}</p>
+            <p><strong>Role:</strong> {user?.role || "Unknown"}</p>
             <p><strong>Authorization:</strong> JWT Bearer Token Header</p>
           </div>
         </div>
