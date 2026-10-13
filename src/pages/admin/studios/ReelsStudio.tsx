@@ -135,20 +135,23 @@ export default function ReelsStudio() {
   const [selected, setSelected] = useState<number | null>(null);
   const [filterPlatform, setFilterPlatform] = useState<"all" | "youtube" | "instagram">("all");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const authHeader = useCallback(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
-  // Load existing posts from /api/cms or fallback to authentic 20 reels
+  // Load the saved catalogue. An explicitly empty list must remain empty.
   useEffect(() => {
     setLoading(true);
-    axios.get("/api/cms")
+    setLoadError(null);
+    axios.get("/api/cms", { timeout: 10000 })
       .then(res => {
-        const next = res.data?.cms || res.data?.data || {};
-        const list = Array.isArray(next.instagramPosts) && next.instagramPosts.length > 0 
-          ? next.instagramPosts 
-          : DEFAULT_20_REELS;
+        const next = res.data?.cms || res.data?.data;
+        if (res.data?.success !== true || !next || typeof next !== "object" || Array.isArray(next)) {
+          throw new Error("The server did not return a valid Reels CMS configuration.");
+        }
+        const list = Array.isArray(next.instagramPosts) ? next.instagramPosts : DEFAULT_20_REELS;
 
         setPosts(list.map((item: any, index: number) => ({
           ...item,
@@ -158,9 +161,11 @@ export default function ReelsStudio() {
           order: typeof item.order === "number" ? item.order : index
         })));
       })
-      .catch(() => {
-        toast.error("Using default verified reels catalog");
-        setPosts(DEFAULT_20_REELS);
+      .catch((error: any) => {
+        const message = error?.response?.data?.error || error?.message || "Failed to load Reels catalogue. Retry before publishing.";
+        setLoadError(message);
+        toast.error(message);
+        setPosts([]);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -250,6 +255,14 @@ export default function ReelsStudio() {
 
   // Publish to CMS with protected snapshot
   const save = async () => {
+    if (loading || loadError) {
+      toast.error("Reels catalogue is not verified. Retry loading before publishing.");
+      return;
+    }
+    if (!token) {
+      toast.error("Admin session expired. Please sign in.");
+      return;
+    }
     const invalid = posts.some(p => p.active !== false && (!p.title.trim() || (!p.url.trim() && !p.videoUrl?.trim())));
     if (invalid) {
       toast.error("Every active post needs a title and either a video upload or URL.");
@@ -257,7 +270,7 @@ export default function ReelsStudio() {
     }
 
     setSaving(true);
-    const toastId = toast.loading("Publishing all 20+ Media Embeds live...");
+    const toastId = toast.loading("Publishing social media catalogue...");
     try {
       const nextPosts = posts.map((p, index) => ({ ...p, order: index }));
       const res = await axios.post(
@@ -269,10 +282,20 @@ export default function ReelsStudio() {
         { headers: authHeader() }
       );
 
-      if (res.data?.success === false) throw new Error(res.data?.error || "Save failed");
+      if (res.data?.success !== true) throw new Error(res.data?.error || "Save failed");
+      const verify = await axios.get("/api/cms", {
+        params: { _verify: Date.now() },
+        headers: { "Cache-Control": "no-cache", Pragma: "no-cache" }
+      });
+      const savedPosts = verify.data?.cms?.instagramPosts;
+      const matches = Array.isArray(savedPosts) && savedPosts.length === nextPosts.length &&
+        nextPosts.every((post, index) => savedPosts[index]?.id === post.id &&
+          savedPosts[index]?.url === post.url &&
+          (savedPosts[index]?.active !== false) === (post.active !== false));
+      if (!matches) throw new Error("Publish was accepted, but the saved Reels catalogue did not match. Reload and verify server state.");
       setPosts(nextPosts);
       window.dispatchEvent(new CustomEvent("samahit-admin-updated"));
-      toast.success("Reels published live with snapshot protection!", { id: toastId });
+      toast.success("Reels saved and verified on the server.", { id: toastId });
     } catch (err: any) {
       toast.error(err?.response?.data?.error || "Unable to publish Instagram posts.", { id: toastId });
     } finally {
@@ -288,6 +311,7 @@ export default function ReelsStudio() {
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
+      {loadError && <div role="alert" className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900"><div><p className="font-bold">Reels catalogue could not be verified.</p><p className="mt-1 text-xs">{loadError} Publishing is disabled to protect saved content.</p></div><button type="button" onClick={() => { setLoading(true); setLoadError(null); axios.get("/api/cms", { timeout: 10000 }).then(res => { const next = res.data?.cms || res.data?.data || {}; const list = Array.isArray(next.instagramPosts) ? next.instagramPosts : DEFAULT_20_REELS; setPosts(list.map((item: any, index: number) => ({ ...item, id: item.id || `reel-${index + 1}`, platform: item.platform || (String(item.url || "").includes("youtube.com") ? "youtube" : "instagram"), active: item.active !== false, order: typeof item.order === "number" ? item.order : index }))); }).catch((error: any) => { const message = error?.response?.data?.error || error?.message || "Failed to load Reels catalogue."; setLoadError(message); toast.error(message); }).finally(() => setLoading(false)); }} disabled={loading} className="rounded-xl border border-rose-300 bg-white px-3 py-2 text-xs font-bold disabled:opacity-50">Retry</button></div>}
       {/* HEADER MATCHING HTTPS://APPAPI.THERPFOUNDATION.ORG/ADMIN/INSTAGRAM */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
@@ -327,7 +351,7 @@ export default function ReelsStudio() {
           <button
             type="button"
             onClick={save}
-            disabled={saving}
+            disabled={saving || loading || Boolean(loadError)}
             className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-[#0F3157] rounded-xl hover:bg-[#1D5B93] transition shadow-xs disabled:opacity-50"
           >
             <Save className="h-4 w-4" /> {saving ? "Publishing..." : "Save & Publish"}
