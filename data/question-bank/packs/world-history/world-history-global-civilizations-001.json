@@ -1,0 +1,578 @@
+{
+  "packId": "world-history-global-civilizations-001",
+  "version": 1,
+  "subject": "world-history",
+  "category": "history",
+  "titleEn": "World History — Global Civilizations & Turning Points",
+  "titleHi": "विश्व इतिहास — सभ्यताएँ और निर्णायक घटनाएँ",
+  "descEn": "Twenty original bilingual questions spanning ancient Egypt, China, Greece and Rome, medieval Europe, Renaissance, revolutions, industrialization and modern institutions.",
+  "descHi": "प्राचीन मिस्र, चीन, यूनान और रोम, मध्यकालीन यूरोप, पुनर्जागरण, क्रांतियों, औद्योगीकरण और आधुनिक संस्थाओं पर 20 मौलिक द्विभाषी प्रश्न।",
+  "iconName": "Globe2",
+  "color": "from-violet-600 to-indigo-600",
+  "badge": "Original practice",
+  "durationMinutes": 15,
+  "questionCount": 20,
+  "questionsCount": 20,
+  "questions": [
+    {
+      "id": "world-history-global-001",
+      "subject": "world-history",
+      "topic": "Ancient Egypt",
+      "difficulty": "medium",
+      "questionEn": "The Great Pyramid of Giza belongs to which ancient civilization?",
+      "questionHi": "गीज़ा का महान पिरामिड किस प्राचीन सभ्यता से संबंधित है?",
+      "optionsEn": [
+        "Egyptian",
+        "Maya",
+        "Inca",
+        "Persian"
+      ],
+      "optionsHi": [
+        "मिस्र",
+        "माया",
+        "इंका",
+        "फ़ारसी"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Great Pyramid of Giza was built in ancient Egypt during the Old Kingdom.",
+      "explanationHi": "गीज़ा का महान पिरामिड मिस्र के प्राचीन पुराने साम्राज्य काल में बनाया गया था।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-002",
+      "subject": "world-history",
+      "topic": "Ancient Egypt",
+      "difficulty": "medium",
+      "questionEn": "Which writing system is strongly associated with ancient Egypt?",
+      "questionHi": "कौन-सी लेखन प्रणाली प्राचीन मिस्र से विशेष रूप से जुड़ी है?",
+      "optionsEn": [
+        "Cuneiform",
+        "Hieroglyphs",
+        "Linear B",
+        "Runes"
+      ],
+      "optionsHi": [
+        "कीलाक्षर",
+        "चित्रलिपि (हाइरोग्लिफ़)",
+        "लीनियर B",
+        "रून"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Egyptian hieroglyphs used signs representing sounds, words and ideas.",
+      "explanationHi": "मिस्री चित्रलिपि में ध्वनियों, शब्दों और विचारों को दर्शाने वाले चिह्न थे।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-003",
+      "subject": "world-history",
+      "topic": "Ancient law",
+      "difficulty": "medium",
+      "questionEn": "The Code of Hammurabi is associated with which ancient ruler?",
+      "questionHi": "हम्मुराबी की संहिता किस प्राचीन शासक से संबंधित है?",
+      "optionsEn": [
+        "Cyrus the Great",
+        "Hammurabi of Babylon",
+        "Ashoka",
+        "Pericles"
+      ],
+      "optionsHi": [
+        "साइरस महान",
+        "बेबीलोन का हम्मुराबी",
+        "अशोक",
+        "पेरिक्लीज़"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Hammurabi ruled Babylon and is associated with one of the best-known early written law codes.",
+      "explanationHi": "हम्मुराबी बेबीलोन का शासक था और प्रारंभिक लिखित कानून-संहिताओं में से एक से जुड़ा है।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-004",
+      "subject": "world-history",
+      "topic": "Ancient China",
+      "difficulty": "medium",
+      "questionEn": "Which Chinese ruler is associated with linking earlier defensive walls into a unified Great Wall system?",
+      "questionHi": "कौन-सा चीनी शासक पहले से मौजूद रक्षात्मक दीवारों को जोड़कर महान दीवार की एकीकृत व्यवस्था से जुड़ा है?",
+      "optionsEn": [
+        "Qin Shi Huang",
+        "Kublai Khan",
+        "Sun Yat-sen",
+        "Hongwu"
+      ],
+      "optionsHi": [
+        "छिन शी हुआंग",
+        "कुबलाई ख़ान",
+        "सन यात-सेन",
+        "होंगवू"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Qin Shi Huang ordered the linking and expansion of earlier northern defensive walls.",
+      "explanationHi": "छिन शी हुआंग ने उत्तर की पहले से मौजूद रक्षात्मक दीवारों को जोड़ने और बढ़ाने का आदेश दिया।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-005",
+      "subject": "world-history",
+      "topic": "Ancient China",
+      "difficulty": "medium",
+      "questionEn": "The teachings of Confucius most strongly shaped the ethical and political traditions of which region?",
+      "questionHi": "कन्फ्यूशियस की शिक्षाओं ने किस क्षेत्र की नैतिक और राजनीतिक परंपराओं को सबसे अधिक प्रभावित किया?",
+      "optionsEn": [
+        "Ancient China",
+        "Ancient Egypt",
+        "The Andes",
+        "Scandinavia"
+      ],
+      "optionsHi": [
+        "प्राचीन चीन",
+        "प्राचीन मिस्र",
+        "एंडीज़",
+        "स्कैंडिनेविया"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Confucian thought became deeply influential in Chinese education, ethics and government.",
+      "explanationHi": "कन्फ्यूशियस विचार चीनी शिक्षा, नैतिकता और शासन में गहराई से प्रभावशाली बने।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-006",
+      "subject": "world-history",
+      "topic": "Ancient Greece",
+      "difficulty": "medium",
+      "questionEn": "The ancient Olympic Games were held at Olympia in which civilization?",
+      "questionHi": "प्राचीन ओलंपिक खेल किस सभ्यता में ओलंपिया में आयोजित होते थे?",
+      "optionsEn": [
+        "Greek",
+        "Roman",
+        "Persian",
+        "Phoenician"
+      ],
+      "optionsHi": [
+        "यूनानी",
+        "रोमन",
+        "फ़ारसी",
+        "फ़ोनीशियन"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Olympia was a major sanctuary and the site of the ancient Greek Olympic Games.",
+      "explanationHi": "ओलंपिया एक प्रमुख धार्मिक स्थल और प्राचीन यूनानी ओलंपिक खेलों का स्थान था।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-007",
+      "subject": "world-history",
+      "topic": "Ancient Greece",
+      "difficulty": "medium",
+      "questionEn": "Athenian democracy developed in which ancient city-state?",
+      "questionHi": "एथेंस का लोकतंत्र किस प्राचीन नगर-राज्य में विकसित हुआ?",
+      "optionsEn": [
+        "Sparta",
+        "Athens",
+        "Corinth",
+        "Thebes"
+      ],
+      "optionsHi": [
+        "स्पार्टा",
+        "एथेंस",
+        "कोरिंथ",
+        "थीब्स"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Athens developed a form of direct democracy for eligible male citizens in antiquity.",
+      "explanationHi": "प्राचीन काल में एथेंस में पात्र पुरुष नागरिकों के लिए प्रत्यक्ष लोकतंत्र का रूप विकसित हुआ।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-008",
+      "subject": "world-history",
+      "topic": "Ancient Rome",
+      "difficulty": "medium",
+      "questionEn": "Who is generally regarded as the first Roman emperor?",
+      "questionHi": "सामान्यतः किसे पहला रोमन सम्राट माना जाता है?",
+      "optionsEn": [
+        "Julius Caesar",
+        "Augustus",
+        "Nero",
+        "Constantine"
+      ],
+      "optionsHi": [
+        "जूलियस सीज़र",
+        "ऑगस्टस",
+        "नीरो",
+        "कॉन्स्टेंटाइन"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Augustus established the imperial system after the end of the Roman Republic.",
+      "explanationHi": "रोमन गणराज्य के अंत के बाद ऑगस्टस ने साम्राज्यवादी शासन-व्यवस्था स्थापित की।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-009",
+      "subject": "world-history",
+      "topic": "Ancient Rome",
+      "difficulty": "medium",
+      "questionEn": "The term “Pax Romana” refers to a long period of relative peace in which empire?",
+      "questionHi": "“पैक्स रोमाना” किस साम्राज्य में अपेक्षाकृत लंबे शांति-काल को दर्शाता है?",
+      "optionsEn": [
+        "Roman Empire",
+        "Mongol Empire",
+        "Ottoman Empire",
+        "Mughal Empire"
+      ],
+      "optionsHi": [
+        "रोमन साम्राज्य",
+        "मंगोल साम्राज्य",
+        "उस्मानी साम्राज्य",
+        "मुगल साम्राज्य"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Pax Romana describes a period of relative stability across much of the Roman Empire.",
+      "explanationHi": "पैक्स रोमाना रोमन साम्राज्य के बड़े हिस्से में अपेक्षाकृत स्थिरता के काल को कहते हैं।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-010",
+      "subject": "world-history",
+      "topic": "Medieval Europe",
+      "difficulty": "medium",
+      "questionEn": "The Magna Carta was agreed in England in which year?",
+      "questionHi": "मैग्ना कार्टा इंग्लैंड में किस वर्ष स्वीकार किया गया?",
+      "optionsEn": [
+        "1066",
+        "1215",
+        "1492",
+        "1649"
+      ],
+      "optionsHi": [
+        "1066",
+        "1215",
+        "1492",
+        "1649"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "King John sealed Magna Carta in 1215, placing limits on royal authority in specific matters.",
+      "explanationHi": "राजा जॉन ने 1215 में मैग्ना कार्टा पर मुहर लगाई, जिससे कुछ मामलों में शाही अधिकार सीमित हुए।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-011",
+      "subject": "world-history",
+      "topic": "Printing history",
+      "difficulty": "medium",
+      "questionEn": "Which invention helped make printed books more widely available in fifteenth-century Europe?",
+      "questionHi": "पंद्रहवीं सदी के यूरोप में मुद्रित पुस्तकों को अधिक सुलभ बनाने में किस आविष्कार ने मदद की?",
+      "optionsEn": [
+        "Movable-type printing press",
+        "Steam locomotive",
+        "Telegraph",
+        "Spinning jenny"
+      ],
+      "optionsHi": [
+        "चल अक्षरों वाला मुद्रण यंत्र",
+        "भाप इंजन रेलगाड़ी",
+        "टेलीग्राफ",
+        "स्पिनिंग जेनी"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Movable-type printing associated with Johannes Gutenberg accelerated book production in Europe.",
+      "explanationHi": "योहानेस गुटेनबर्ग से जुड़ी चल-अक्षर मुद्रण तकनीक ने यूरोप में पुस्तक-निर्माण तेज किया।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-012",
+      "subject": "world-history",
+      "topic": "Renaissance",
+      "difficulty": "medium",
+      "questionEn": "The European Renaissance first flourished prominently in which present-day country?",
+      "questionHi": "यूरोपीय पुनर्जागरण सबसे पहले प्रमुख रूप से किस वर्तमान देश में फला-फूला?",
+      "optionsEn": [
+        "Italy",
+        "Sweden",
+        "Portugal",
+        "Poland"
+      ],
+      "optionsHi": [
+        "इटली",
+        "स्वीडन",
+        "पुर्तगाल",
+        "पोलैंड"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Italian city-states such as Florence were major early centers of the Renaissance.",
+      "explanationHi": "फ्लोरेंस जैसे इतालवी नगर-राज्य पुनर्जागरण के शुरुआती प्रमुख केंद्र थे।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-013",
+      "subject": "world-history",
+      "topic": "Reformation",
+      "difficulty": "medium",
+      "questionEn": "Martin Luther’s Ninety-five Theses of 1517 are associated with the beginning of which movement?",
+      "questionHi": "1517 में मार्टिन लूथर की पंचानवे स्थापनाएँ किस आंदोलन की शुरुआत से जुड़ी हैं?",
+      "optionsEn": [
+        "Protestant Reformation",
+        "Scientific Revolution",
+        "Chartist movement",
+        "Romanticism"
+      ],
+      "optionsHi": [
+        "प्रोटेस्टेंट धर्म-सुधार आंदोलन",
+        "वैज्ञानिक क्रांति",
+        "चार्टिस्ट आंदोलन",
+        "रोमांटिकतावाद"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Luther’s challenge to church practices became a key catalyst for the Protestant Reformation.",
+      "explanationHi": "चर्च की प्रथाओं को लूथर की चुनौती प्रोटेस्टेंट धर्म-सुधार आंदोलन का प्रमुख प्रेरक बनी।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-014",
+      "subject": "world-history",
+      "topic": "French Revolution",
+      "difficulty": "medium",
+      "questionEn": "In which year did the French Revolution begin?",
+      "questionHi": "फ्रांसीसी क्रांति किस वर्ष शुरू हुई?",
+      "optionsEn": [
+        "1688",
+        "1776",
+        "1789",
+        "1815"
+      ],
+      "optionsHi": [
+        "1688",
+        "1776",
+        "1789",
+        "1815"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The French Revolution began in 1789 and transformed France’s political order.",
+      "explanationHi": "फ्रांसीसी क्रांति 1789 में शुरू हुई और उसने फ्रांस की राजनीतिक व्यवस्था बदल दी।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-015",
+      "subject": "world-history",
+      "topic": "American Revolution",
+      "difficulty": "medium",
+      "questionEn": "The United States Declaration of Independence was adopted in which year?",
+      "questionHi": "संयुक्त राज्य अमेरिका की स्वतंत्रता की घोषणा किस वर्ष अपनाई गई?",
+      "optionsEn": [
+        "1756",
+        "1776",
+        "1789",
+        "1812"
+      ],
+      "optionsHi": [
+        "1756",
+        "1776",
+        "1789",
+        "1812"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Continental Congress adopted the Declaration of Independence on 4 July 1776.",
+      "explanationHi": "महाद्वीपीय कांग्रेस ने 4 जुलाई 1776 को स्वतंत्रता की घोषणा अपनाई।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-016",
+      "subject": "world-history",
+      "topic": "Industrial Revolution",
+      "difficulty": "medium",
+      "questionEn": "Where did the Industrial Revolution begin before spreading to other regions?",
+      "questionHi": "अन्य क्षेत्रों में फैलने से पहले औद्योगिक क्रांति कहाँ शुरू हुई?",
+      "optionsEn": [
+        "Great Britain",
+        "Brazil",
+        "Japan",
+        "Egypt"
+      ],
+      "optionsHi": [
+        "ग्रेट ब्रिटेन",
+        "ब्राज़ील",
+        "जापान",
+        "मिस्र"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "Mechanized textile production and steam power helped Britain become the early center of industrialization in the eighteenth century.",
+      "explanationHi": "यंत्रीकृत वस्त्र-उत्पादन और भाप-शक्ति ने अठारहवीं सदी में ब्रिटेन को औद्योगीकरण का शुरुआती केंद्र बनाया।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-017",
+      "subject": "world-history",
+      "topic": "Nineteenth-century Europe",
+      "difficulty": "medium",
+      "questionEn": "The Congress of Vienna (1814–1815) mainly sought to do what after the Napoleonic Wars?",
+      "questionHi": "वियना कांग्रेस (1814–1815) ने नेपोलियन युद्धों के बाद मुख्यतः क्या करने का प्रयास किया?",
+      "optionsEn": [
+        "Restore a balance of power in Europe",
+        "Create the United Nations",
+        "Unify Germany under Bismarck",
+        "End the Cold War"
+      ],
+      "optionsHi": [
+        "यूरोप में शक्ति-संतुलन बहाल करना",
+        "संयुक्त राष्ट्र बनाना",
+        "बिस्मार्क के अधीन जर्मनी का एकीकरण",
+        "शीत युद्ध समाप्त करना"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The Congress redrew boundaries and sought a stable European balance after Napoleon’s defeat.",
+      "explanationHi": "कांग्रेस ने सीमाएँ पुनर्निर्धारित कीं और नेपोलियन की हार के बाद स्थिर यूरोपीय शक्ति-संतुलन चाहा।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-018",
+      "subject": "world-history",
+      "topic": "World War I",
+      "difficulty": "medium",
+      "questionEn": "The Treaty of Versailles was signed in which year after the First World War?",
+      "questionHi": "प्रथम विश्व युद्ध के बाद वर्साय की संधि किस वर्ष हस्ताक्षरित हुई?",
+      "optionsEn": [
+        "1918",
+        "1919",
+        "1925",
+        "1939"
+      ],
+      "optionsHi": [
+        "1918",
+        "1919",
+        "1925",
+        "1939"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The Treaty of Versailles was signed in 1919 and imposed terms on Germany.",
+      "explanationHi": "वर्साय की संधि 1919 में हस्ताक्षरित हुई और जर्मनी पर शर्तें लगाई गईं।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-019",
+      "subject": "world-history",
+      "topic": "International institutions",
+      "difficulty": "medium",
+      "questionEn": "In which year did the United Nations officially come into existence?",
+      "questionHi": "संयुक्त राष्ट्र आधिकारिक रूप से किस वर्ष अस्तित्व में आया?",
+      "optionsEn": [
+        "1919",
+        "1939",
+        "1945",
+        "1955"
+      ],
+      "optionsHi": [
+        "1919",
+        "1939",
+        "1945",
+        "1955"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The UN Charter entered into force on 24 October 1945.",
+      "explanationHi": "संयुक्त राष्ट्र चार्टर 24 अक्टूबर 1945 को लागू हुआ।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "world-history-global-020",
+      "subject": "world-history",
+      "topic": "Decolonization and democracy",
+      "difficulty": "medium",
+      "questionEn": "In which year did South Africa hold its first fully democratic, multiracial national election?",
+      "questionHi": "दक्षिण अफ्रीका में पहला पूर्ण लोकतांत्रिक, बहुजातीय राष्ट्रीय चुनाव किस वर्ष हुआ?",
+      "optionsEn": [
+        "1984",
+        "1990",
+        "1994",
+        "2001"
+      ],
+      "optionsHi": [
+        "1984",
+        "1990",
+        "1994",
+        "2001"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "South Africa held its first fully democratic multiracial election in 1994.",
+      "explanationHi": "दक्षिण अफ्रीका में पहला पूर्ण लोकतांत्रिक बहुजातीय चुनाव 1994 में हुआ।",
+      "examTags": [
+        "world-history",
+        "general-awareness",
+        "competitive-exams"
+      ]
+    }
+  ]
+}
