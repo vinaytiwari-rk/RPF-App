@@ -277,26 +277,20 @@ export default function DashboardStudio() {
     const campRes = await getAdminData("/api/campaigns", token);
 
     // 7. Fetch Cards Stats
-    let cardCount: number | string = 0;
+    let cardCount: number | string = "Unavailable";
     let cardStatus: "live" | "cached" | "unavailable" = "unavailable";
     try {
       const statsRes = await axios.get("/api/cards/stats", { headers: authHeaders(token), timeout: 8000 });
-      if (statsRes.data?.success && statsRes.data?.stats) {
-        const total = Number(statsRes.data.stats.totalMirrored || 0) + Number(statsRes.data.stats.totalLocal || 0);
-        cardCount = total;
-        cardStatus = "live";
-      } else if (cardsRes.items.length > 0) {
-        cardCount = cardsRes.items.length;
+      const mirrored = Number(statsRes.data?.stats?.totalMirrored);
+      const localTotal = Number(statsRes.data?.stats?.totalLocal);
+      if (statsRes.data?.success === true && Number.isFinite(mirrored) && Number.isFinite(localTotal)) {
+        cardCount = mirrored + localTotal;
         cardStatus = "live";
       }
     } catch {
-      if (cardsRes.items.length > 0) {
-        cardCount = cardsRes.items.length;
-        cardStatus = "live";
-      } else {
-        cardCount = "—";
-        cardStatus = "unavailable";
-      }
+      // A paginated card list is not a valid substitute for the total count.
+      cardCount = "Unavailable";
+      cardStatus = "unavailable";
     }
 
     // 8. Fetch CMS for Live TV, Radio, Reels & Widgets
