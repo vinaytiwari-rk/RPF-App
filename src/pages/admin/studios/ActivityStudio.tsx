@@ -648,21 +648,24 @@ export default function ActivityStudio() {
                   </>
                 )}
 
-                {selectedItem.type === "card" && (
+                {selectedItem.type === "card" &&
+                  !selectedItem.data.source &&
+                  !["approved", "rejected"].includes(String(selectedItem.data.status || "").toLowerCase()) && (
                   <>
                     <button
                       onClick={() => handleRejectCard(selectedItem.data.userId || selectedItem.data.id)}
                       disabled={actionBusy}
-                      className="px-4 py-2 rounded-lg text-xs font-bold border border-rose-200 text-rose-600 hover:bg-rose-50"
+                      className="px-4 py-2 rounded-lg text-xs font-bold border border-rose-200 text-rose-600 hover:bg-rose-50 disabled:opacity-50"
                     >
                       <X className="h-3.5 w-3.5 inline mr-1" /> Reject Application
                     </button>
                     <button
                       onClick={() => handleApproveCard(selectedItem.data.userId || selectedItem.data.id, selectedItem.data.cardNo)}
-                      disabled={actionBusy}
-                      className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs"
+                      disabled={actionBusy || !String(selectedItem.data.cardNo || "").trim()}
+                      title={!String(selectedItem.data.cardNo || "").trim() ? "Import/sync the issued card number into the Jan Seva master first." : "Approval will verify the card against the synced master record."}
+                      className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <Check className="h-3.5 w-3.5 inline mr-1" /> Issue & Approve Card
+                      <Check className="h-3.5 w-3.5 inline mr-1" /> Approve Synced Card
                     </button>
                   </>
                 )}
