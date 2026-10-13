@@ -262,7 +262,7 @@ router.get("/api/admin/users", authenticateToken, requireAdmin, async (req, res)
       `SELECT id, username, name, role, email, phone, "isVolunteer", "isDonor", "onboardingCompleted", created_at FROM users ORDER BY id DESC LIMIT $1 OFFSET $2`,
       [limit, offset]
     );
-    res.json({ success: true, data: result.rows, totalPages, currentPage: page });
+    res.json({ success: true, data: result.rows, totalCount, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch users" });
   }
@@ -300,7 +300,7 @@ router.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req,
       `SELECT id, full_name as name, username, mobile, email, status, registration_number, "createdAt" FROM volunteers ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
       [limit, offset]
     );
-    res.json({ success: true, data: result.rows, totalPages, currentPage: page });
+    res.json({ success: true, data: result.rows, totalCount, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch volunteers" });
   }
