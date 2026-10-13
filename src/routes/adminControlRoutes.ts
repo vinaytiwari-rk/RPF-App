@@ -8,6 +8,10 @@ const router = Router();
 const execFileAsync = promisify(execFile);
 const admin = [authenticateToken, requireAdmin] as const;
 
+// No admin_feature_flags key currently has a verified runtime consumer. Keep this
+// allowlist empty until a flag is wired into the real feature and covered by tests.
+const RUNTIME_CONNECTED_FEATURE_FLAGS = new Set<string>();
+
 function isSuperAdmin(req: any): boolean {
   // This application intentionally has a unified admin role: admin is Super Admin.
   const role = String(req.user?.role || "").trim().toLowerCase();
@@ -150,7 +154,11 @@ router.get("/api/admin/control/feature-flags", ...admin, async (_req, res) => {
   try {
     await ensureControlTables();
     const result = await pool.query("SELECT key,enabled,description,updated_at,updated_by FROM admin_feature_flags ORDER BY key");
-    return res.json({ success: true, data: result.rows });
+    return res.json({
+      success: true,
+      data: result.rows.map((row: any) => ({ ...row, runtimeConnected: RUNTIME_CONNECTED_FEATURE_FLAGS.has(String(row.key)) })),
+      notice: result.rows.length ? "Flags without a verified runtime consumer are read-only." : "No runtime-connected feature flags are registered."
+    });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: error?.message || "Unable to load feature flags." });
   }
@@ -161,7 +169,11 @@ router.put("/api/admin/control/feature-flags/:key", ...admin, async (req: any, r
     await ensureControlTables();
     const key = String(req.params.key || "").trim();
     if (!/^[a-zA-Z0-9._-]{1,100}$/.test(key)) return res.status(400).json({ success: false, error: "Invalid feature flag key." });
-    const enabled = Boolean(req.body?.enabled);
+    if (!RUNTIME_CONNECTED_FEATURE_FLAGS.has(key)) {
+      return res.status(409).json({ success: false, error: "This feature flag has no verified runtime integration and cannot be changed from Admin yet." });
+    }
+    if (typeof req.body?.enabled !== "boolean") return res.status(400).json({ success: false, error: "The enabled field must be a boolean." });
+    const enabled = req.body.enabled;
     const description = req.body?.description == null ? null : String(req.body.description).slice(0, 500);
     const result = await pool.query(`INSERT INTO admin_feature_flags(key,enabled,description,updated_by) VALUES($1,$2,$3,$4) ON CONFLICT(key) DO UPDATE SET enabled=$2,description=$3,updated_at=NOW(),updated_by=$4 RETURNING key,enabled,description,updated_at,updated_by`, [key, enabled, description, String(req.user?.id || "")]);
     await auditEvent({ action: "feature_flag_updated", resource: "feature_flag", resourceId: key, userId: String(req.user?.id || ""), req, metadata: { enabled } });
