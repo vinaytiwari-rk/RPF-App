@@ -52,7 +52,8 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
         [`admin-${Date.now()}-${credential.id}`, String(user.id), token]
       );
     } catch (e: any) {
-      console.error("Non-fatal administrator session tracking failure:", e?.message, e?.code);
+      console.error("Administrator session tracking failed:", e?.message, e?.code);
+      return res.status(503).json({ success: false, error: "Secure administrator session could not be created. Please retry." });
     }
 
     await auditEvent({ action: "admin_login_success", resource: "administrator", userId: user.id, req });
