@@ -471,8 +471,8 @@ router.get("/api/cards", authenticateToken, requireAdmin, async (req, res) => {
     setCached(cacheKey, payload, 15 * 1000);
     res.json(payload);
   } catch (error: any) {
-    console.error("Error fetching card applications:", error);
-    res.status(500).json({ error: error.message });
+    console.error("Admin card stats unavailable:", error?.message || error);
+    res.status(503).json({ success: false, error: "Verified card statistics are temporarily unavailable." });
   }
 });
 
@@ -482,42 +482,25 @@ router.get("/api/public/cards/impact", async (_req, res) => {
     const cached = getCached("cards:public-impact");
     if (cached) return res.json(cached);
 
-    let total = 0;
-    let source = "mirror";
-
-    try {
-      await ensureMirror();
-      const [mirrorCount, localApproved] = await Promise.all([
-        pool.query('SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror'),
-        pool.query("SELECT COUNT(*)::int AS count FROM card_applications_v2 WHERE status = 'approved'")
-      ]);
-      const dbCount = (mirrorCount.rows[0]?.count || 0) + (localApproved.rows[0]?.count || 0);
-      // Guarantee verified base of 66,505 records if mirror is initializing or syncing
-      total = Math.max(dbCount, 66505);
-    } catch {
-      // In case of any DB connection timeout locally, fallback to verified ground count
-      total = 66505;
-      source = "verified-cache";
-    }
-
+    await ensureMirror();
+    const [mirrorCount, localApproved] = await Promise.all([
+      pool.query('SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror'),
+      pool.query("SELECT COUNT(*)::int AS count FROM card_applications_v2 WHERE status = 'approved'")
+    ]);
+    const total = Number(mirrorCount.rows[0]?.count || 0) + Number(localApproved.rows[0]?.count || 0);
     const payload = {
       success: true,
       totalCards: total,
-      source,
+      source: "database",
       portalUrl: JAN_SEVA_PORTAL_URL,
       updatedAt: new Date().toISOString()
     };
 
     setCached("cards:public-impact", payload, 120000);
-    res.json(payload);
-  } catch {
-    res.json({
-      success: true,
-      totalCards: 66505,
-      source: "verified-cache",
-      portalUrl: JAN_SEVA_PORTAL_URL,
-      updatedAt: new Date().toISOString()
-    });
+    return res.json(payload);
+  } catch (error: any) {
+    console.error("Public card impact count unavailable:", error?.message || error);
+    return res.status(503).json({ success: false, error: "Verified card totals are temporarily unavailable." });
   }
 });
 
@@ -528,29 +511,21 @@ router.get("/api/cards/stats", authenticateToken, requireAdmin, async (_req, res
     const cachedStats = getCached(cacheKey);
     if (cachedStats) return res.json(cachedStats);
 
-    let mirrored = 66505;
-    let localTotal = 0;
-    let approved = 66505;
-    let pending = 0;
-    let rejected = 0;
-
-    try {
-      await ensureMirror();
-      const [mirrorCount, pgStats] = await Promise.all([
-        pool.query('SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror'),
-        pool.query(`SELECT 
-          COUNT(*)::int as total,
-          COUNT(*) FILTER (WHERE status = 'approved')::int as approved,
-          COUNT(*) FILTER (WHERE status = 'pending')::int as pending,
-          COUNT(*) FILTER (WHERE status = 'rejected')::int as rejected
-          FROM card_applications_v2`)
-      ]);
-      mirrored = Math.max(mirrorCount.rows[0]?.count || 0, 66505);
-      localTotal = pgStats.rows[0]?.total || 0;
-      approved = Math.max(pgStats.rows[0]?.approved || 0, 66505);
-      pending = pgStats.rows[0]?.pending || 0;
-      rejected = pgStats.rows[0]?.rejected || 0;
-    } catch {}
+    await ensureMirror();
+    const [mirrorCount, pgStats] = await Promise.all([
+      pool.query('SELECT COUNT(*)::int AS count FROM jan_seva_card_mirror'),
+      pool.query(`SELECT 
+        COUNT(*)::int as total,
+        COUNT(*) FILTER (WHERE status = 'approved')::int as approved,
+        COUNT(*) FILTER (WHERE status = 'pending')::int as pending,
+        COUNT(*) FILTER (WHERE status = 'rejected')::int as rejected
+        FROM card_applications_v2`)
+    ]);
+    const mirrored = Number(mirrorCount.rows[0]?.count || 0);
+    const localTotal = Number(pgStats.rows[0]?.total || 0);
+    const approved = Number(pgStats.rows[0]?.approved || 0);
+    const pending = Number(pgStats.rows[0]?.pending || 0);
+    const rejected = Number(pgStats.rows[0]?.rejected || 0);
 
     const payload = {
       success: true,
