@@ -117,10 +117,13 @@ router.post("/api/admin/users", authenticateToken, requireAdmin, async (req: any
       return res.status(400).json({ success: false, error: "Name is required" });
     }
 
-    const assignedRole = String(role || "user").toLowerCase();
-    if (["admin", "super_admin", "superadmin"].includes(assignedRole)) {
+    const requestedRole = String(role || "user").trim().toLowerCase();
+    if (["admin", "super_admin", "superadmin"].includes(requestedRole)) {
       return res.status(400).json({ success: false, error: "Administrator accounts must be managed through the protected administrator credential workflow, not the general user registry." });
     }
+    // Keep the application role model canonical: all non-admin accounts use "user".
+    // Volunteer/donor permissions are represented by their dedicated flags and records.
+    const assignedRole = "user";
 
     if (phone && phone.trim()) {
       const existingPhone = await pool.query("SELECT id FROM users WHERE phone = $1", [phone.trim()]);
@@ -178,9 +181,10 @@ router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: 
     const { name, username, role, email, phone, password, isVolunteer, isDonor } = req.body;
     const userId = req.params.id;
     
-    if (role && ["admin", "super_admin", "superadmin"].includes(String(role).toLowerCase())) {
+    if (role && ["admin", "super_admin", "superadmin"].includes(String(role).trim().toLowerCase())) {
       return res.status(400).json({ success: false, error: "Administrator accounts must be managed through the protected administrator credential workflow, not the general user registry." });
     }
+    const assignedRole = role == null ? null : "user";
 
     if (phone && phone.trim()) {
       const existingPhone = await pool.query("SELECT id FROM users WHERE phone = $1 AND id != $2", [phone.trim(), userId]);
@@ -220,7 +224,7 @@ router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: 
              "isDonor" = COALESCE($8, "isDonor"),
              updated_at = NOW()
          WHERE id = $9 RETURNING id, username, name, role, email, phone, "isVolunteer", "isDonor"`,
-        [name, username, role, email || null, phone || null, passwordHash, isVolunteer, isDonor, userId]
+        [name, username, assignedRole, email || null, phone || null, passwordHash, isVolunteer, isDonor, userId]
       );
     } else {
       result = await pool.query(
@@ -234,7 +238,7 @@ router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: 
              "isDonor" = COALESCE($7, "isDonor"),
              updated_at = NOW()
          WHERE id = $8 RETURNING id, username, name, role, email, phone, "isVolunteer", "isDonor"`,
-        [name, username, role, email || null, phone || null, isVolunteer, isDonor, userId]
+        [name, username, assignedRole, email || null, phone || null, isVolunteer, isDonor, userId]
       );
     }
 
