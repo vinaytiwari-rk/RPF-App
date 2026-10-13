@@ -155,21 +155,21 @@ export const DEFAULT_PROFILE_CONFIG: ProfileConfig = {
   showVerifiedBadge: true,
   demoUser: {
     avatarInitial: "V",
-    name: "Vinu",
-    phone: "7880121167",
-    email: "vinu27989@gmail.com"
+    name: "Preview User",
+    phone: "Not available",
+    email: "Not available"
   },
   impactSection: {
     title: "My Volunteer Seva Impact",
-    subtitle: "Live Real-Time",
+    subtitle: "Personal activity summary",
     noticeText: "This area contains only your personal profile and account options. Volunteer Duty belongs in Activity and Jan Seva Card is available in Explore.",
     active: true
   },
   metrics: [
-    { id: "metric-1", value: "38 hrs", label: "Duty Hours Logged", subLabel: "Active field service", iconName: "Clock", route: "/volunteer-duty", active: true },
-    { id: "metric-2", value: "14+", label: "Field Missions", subLabel: "Verified reports", iconName: "CheckCircle2", route: "/activity", active: true },
-    { id: "metric-3", value: "590 pts", label: "Seva Karma Points", subLabel: "Verified impact score", iconName: "Sparkles", route: "/my-certificates", active: true },
-    { id: "metric-4", value: "1,240+", label: "Citizens Reached", subLabel: "Directly supported", iconName: "Users", route: "/activity", active: true }
+    { id: "metric-1", value: "—", label: "Duty Hours Logged", subLabel: "Awaiting verified records", iconName: "Clock", route: "/volunteer-duty", active: true },
+    { id: "metric-2", value: "—", label: "Field Missions", subLabel: "Awaiting verified records", iconName: "CheckCircle2", route: "/activity", active: true },
+    { id: "metric-3", value: "—", label: "Seva Karma Points", subLabel: "Awaiting verified records", iconName: "Sparkles", route: "/my-certificates", active: true },
+    { id: "metric-4", value: "—", label: "Citizens Reached", subLabel: "Awaiting verified records", iconName: "Users", route: "/activity", active: true }
   ],
   accountItems: [
     { id: "item-activity", title: "My Activity", sub: "Your actions and impact", iconName: "Sparkles", route: "/activity", active: true },
@@ -233,6 +233,7 @@ export default function ProfileStudio() {
   const { token, user } = useAuth();
   const [activeTab, setActiveTab] = useState<SubTab>("profile_cms");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
 
   // 1. Profile Layout CMS State
@@ -291,10 +292,14 @@ export default function ProfileStudio() {
   const loadData = useCallback(async () => {
     if (!token) return;
     setLoading(true);
+    setLoadError(null);
     try {
       // 1. Fetch CMS config including profileConfig, certificateRules, volunteerRules, browserSettings
-      const cmsRes = await axios.get("/api/cms");
-      const cms = cmsRes.data?.cms || cmsRes.data?.data || {};
+      const cmsRes = await axios.get("/api/cms", { timeout: 10000 });
+      const cms = cmsRes.data?.cms || cmsRes.data?.data;
+      if (cmsRes.data?.success !== true || !cms || typeof cms !== "object" || Array.isArray(cms)) {
+        throw new Error("The server did not return a valid Profile CMS configuration.");
+      }
       if (cms.profileConfig) {
         setProfileConfig({
           ...DEFAULT_PROFILE_CONFIG,
@@ -344,13 +349,15 @@ export default function ProfileStudio() {
         const verRes = await axios.get("/api/admin/control/cms/versions", { headers: authHeader() });
         if (verRes.data?.data) setVersions(verRes.data.data);
 
-        const flagRes = await axios.get("/api/admin/control/flags", { headers: authHeader() });
+        const flagRes = await axios.get("/api/admin/control/feature-flags", { headers: authHeader() });
         if (flagRes.data?.data) setFlags(flagRes.data.data);
       } catch {
         // Control room optional endpoints
       }
-    } catch {
-      toast.error("Failed to load profile state");
+    } catch (error: any) {
+      const message = error?.response?.data?.error || error?.message || "Failed to load profile state";
+      setLoadError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -362,6 +369,10 @@ export default function ProfileStudio() {
 
   // Save and publish profileConfig, certRules, volunteerRules, and browserSettings
   const handleSaveProfileConfig = async () => {
+    if (loading || loadError) {
+      toast.error("Profile configuration is not verified. Retry loading before publishing.");
+      return;
+    }
     if (!token) {
       toast.error("Admin session expired");
       return;
@@ -386,22 +397,30 @@ export default function ProfileStudio() {
       );
       if (res.data?.success === false) throw new Error(res.data?.error || "Publish failed");
 
-      // Background sync certificate rules to PostgreSQL
+      // Persist every certificate rule and report partial failure instead of silently claiming success.
+      const failedRules: string[] = [];
       for (const rule of certRules) {
-        await axios.put(`/api/admin/certificate-rules/${rule.id}`, {
-          title: rule.title,
-          title_hi: rule.title_hi || rule.title,
-          min_hours: rule.min_hours,
-          min_reports: rule.min_reports,
-          min_tasks: rule.min_tasks,
-          active: rule.active
-        }, { headers: authHeader() }).catch(() => {});
+        try {
+          await axios.put(`/api/admin/certificate-rules/${rule.id}`, {
+            title: rule.title,
+            title_hi: rule.title_hi || rule.title,
+            min_hours: rule.min_hours,
+            min_reports: rule.min_reports,
+            min_tasks: rule.min_tasks,
+            active: rule.active
+          }, { headers: authHeader() });
+        } catch {
+          failedRules.push(String(rule.id));
+        }
+      }
+      if (failedRules.length) {
+        throw new Error(`Profile CMS was saved, but certificate rules failed to sync: ${failedRules.join(", ")}. Refresh and retry.`);
       }
 
       window.dispatchEvent(new CustomEvent("samahit-admin-updated"));
-      toast.success("Profile, Certificates & Governance live on apps!", { id: toastId });
+      toast.success("Profile, certificates, and governance settings saved and verified.", { id: toastId });
     } catch (e: any) {
-      toast.error(e?.response?.data?.error || "Failed to save configuration", { id: toastId });
+      toast.error(e?.response?.data?.error || e?.message || "Failed to save configuration", { id: toastId });
     } finally {
       setActionBusy(false);
     }
@@ -411,9 +430,9 @@ export default function ProfileStudio() {
   const handleAddMetric = () => {
     const newMetric: ProfileMetricItem = {
       id: `metric-${Date.now()}`,
-      value: "100+",
+      value: "—",
       label: "New Impact Metric",
-      subLabel: "Verified records",
+      subLabel: "Awaiting verified records",
       iconName: "Sparkles",
       route: "/activity",
       active: true
