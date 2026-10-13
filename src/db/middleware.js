@@ -44,35 +44,48 @@ export const authenticateToken = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     if (!decoded || typeof decoded !== "object") return res.status(403).json({ success: false, error: "Invalid token" });
 
-    let normalizedRole = normalizeRole(decoded.role);
     if (!decoded.id) return res.status(403).json({ success: false, error: "Invalid token claims" });
 
-    // Master Admin Auto-Resolution for Vinay Tiwari & System Admin
-    const isMasterAdmin = 
-      decoded.id === 'admin' ||
-      decoded.id === '751e722c-ba4f-4d36-bc50-2be7376cc38a' ||
-      decoded.username?.toLowerCase() === 'vinaytiwari' ||
-      decoded.email?.toLowerCase() === 'tiwari.vinay89@gmail.com' ||
-      decoded.phone === '9399945861';
-
-    if (isMasterAdmin) {
-      normalizedRole = 'admin';
+    // Never grant administrator privileges from identity strings or JWT claims alone.
+    // Administrator authority must be backed by an active admin_credentials record.
+    let normalizedRole = normalizeRole(decoded.role);
+    if (normalizedRole === "admin") {
+      let credential;
+      try {
+        credential = await pool.query(
+          "SELECT id FROM admin_credentials WHERE id = $1 LIMIT 1",
+          [String(decoded.id)]
+        );
+      } catch (error) {
+        console.error("Administrator credential verification failed:", error);
+        return res.status(503).json({ success: false, error: "Administrator access could not be verified. Please retry." });
+      }
+      if (credential.rows.length === 0) {
+        return res.status(403).json({ success: false, error: "Administrator credentials are not active for this account." });
+      }
+      normalizedRole = "admin";
+    } else if (normalizedRole !== "guest") {
+      // Roles embedded in old JWTs are not authoritative for regular users.
+      normalizedRole = "user";
     }
 
     const user = { ...decoded, role: normalizedRole || "user" };
 
-    if (user.role !== "guest" && !isMasterAdmin) {
+    // Admin sessions must be present and unexpired. No hard-coded identity bypass.
+    if (user.role === "admin") {
+      let sessionRes;
       try {
-        const sessionRes = await pool.query(
+        sessionRes = await pool.query(
           "SELECT 1 FROM sessions WHERE token = $1 AND expires_at > NOW() LIMIT 1",
           [token]
         );
-        if (sessionRes.rows.length === 0) {
-          if (user.role === "admin") {
-            return res.status(401).json({ success: false, error: "Session expired or logged out" });
-          }
-        }
-      } catch (sessionErr) {}
+      } catch (sessionErr) {
+        console.error("Administrator session verification failed:", sessionErr);
+        return res.status(503).json({ success: false, error: "Administrator session could not be verified. Please retry." });
+      }
+      if (sessionRes.rows.length === 0) {
+        return res.status(401).json({ success: false, error: "Administrator session expired or logged out" });
+      }
     }
 
     req.user = user;
@@ -87,19 +100,7 @@ export const authenticateToken = async (req, res, next) => {
 export const requireAdmin = async (req, res, next) => {
   if (!req.user) return res.status(401).json({ success: false, error: "Authentication required" });
 
-  let role = normalizeRole(req.user.role);
-
-  const isMasterAdmin = 
-    req.user.id === 'admin' ||
-    req.user.id === '751e722c-ba4f-4d36-bc50-2be7376cc38a' ||
-    req.user.username?.toLowerCase() === 'vinaytiwari' ||
-    req.user.email?.toLowerCase() === 'tiwari.vinay89@gmail.com' ||
-    req.user.phone === '9399945861';
-
-  if (isMasterAdmin) {
-    role = 'admin';
-    req.user.role = 'admin';
-  }
+  const role = normalizeRole(req.user.role);
 
   if (role !== "admin") {
     return res.status(403).json({ success: false, error: "Access Denied: Administrator role required" });
