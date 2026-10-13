@@ -43,7 +43,7 @@ router.put("/api/admin/hq/credentials", async (req, res) => {
     if (String(newPassword).length < 12) return res.status(400).json({ success: false, error: "Administrator password must be at least 12 characters." });
 
     const hash = await bcrypt.hash(String(newPassword), 12);
-    const result = await pool.query(`UPDATE admin_credentials SET username = $1, password_hash = $2 WHERE id = 'admin' RETURNING id, username`, [String(username).trim(), hash]);
+    const result = await pool.query(`UPDATE admin_credentials SET username = $1, password_hash = $2 WHERE id = $3 RETURNING id, username`, [String(username).trim(), hash, String(req.user?.id || "")]);
     if (!result.rows.length) return res.status(404).json({ success: false, error: "Administrator credential record not found." });
 
     await auditEvent({ userId: String(req.user?.id || ""), action: "admin_credentials_updated", resource: "admin_credentials", req });
