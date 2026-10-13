@@ -289,7 +289,9 @@ export default function LiveTV() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const configured = data?.cms?.liveTvChannels;
-        if (!cancelled && Array.isArray(configured) && configured.length > 0) {
+        // The saved server catalogue is authoritative, even when it is intentionally empty.
+        // Falling back to bundled defaults here would resurrect channels deleted by an admin.
+        if (!cancelled && Array.isArray(configured)) {
           setChannels(mergeTvCatalogue(configured));
           setServerControlled(true);
         }
