@@ -11,36 +11,31 @@ export type LiveTvChannel = {
 
 export const normalizeTvChannelName = (name: string) => name.trim().toLowerCase();
 
+/**
+ * A saved catalogue is authoritative, including an explicitly saved empty array.
+ * Defaults are used only before a catalogue has ever been configured.
+ * Never merge defaults into a saved list: doing so resurrects intentionally deleted channels.
+ */
 export const mergeTvCatalogue = (configured: unknown): LiveTvChannel[] => {
-  const map = new Map<string, LiveTvChannel>();
-  LIVE_TV_DEFAULTS.forEach((ch, idx) => {
-    const key = normalizeTvChannelName(ch.name);
-    map.set(key, { ...ch, order: idx });
-  });
-
-  if (Array.isArray(configured)) {
-    configured.forEach((item: any, idx) => {
-      if (!item || typeof item.name !== 'string' || !item.name.trim() || !item.url) return;
-      const key = normalizeTvChannelName(item.name);
-      if (map.has(key)) {
-        const existing = map.get(key)!;
-        map.set(key, {
-          ...existing,
-          ...item,
-          url: (existing.url && (!item.url || item.url.includes('example'))) ? existing.url : item.url,
-          enabled: item.enabled !== false,
-        });
-      } else {
-        map.set(key, {
-          ...item,
-          order: LIVE_TV_DEFAULTS.length + idx,
-          enabled: item.enabled !== false,
-        });
-      }
-    });
+  if (!Array.isArray(configured)) {
+    return [...LIVE_TV_DEFAULTS].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
 
-  return [...map.values()].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  return configured
+    .filter((item: any) =>
+      item &&
+      typeof item.id === "string" &&
+      typeof item.name === "string" &&
+      item.name.trim() &&
+      typeof item.url === "string" &&
+      item.url.trim()
+    )
+    .map((item: LiveTvChannel, idx: number) => ({
+      ...item,
+      order: typeof item.order === "number" ? item.order : idx,
+      enabled: item.enabled !== false,
+    }))
+    .sort((a: LiveTvChannel, b: LiveTvChannel) => (a.order ?? 0) - (b.order ?? 0));
 };
 
 export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
