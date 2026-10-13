@@ -117,10 +117,9 @@ router.post("/api/admin/users", authenticateToken, requireAdmin, async (req: any
       return res.status(400).json({ success: false, error: "Name is required" });
     }
 
-    const callerRole = String(req.user?.role || "").toLowerCase();
     const assignedRole = String(role || "user").toLowerCase();
-    if (assignedRole === "admin" && callerRole !== "admin" && callerRole !== "super_admin" && callerRole !== "superadmin") {
-      return res.status(403).json({ success: false, error: "Only Admin can assign admin role" });
+    if (["admin", "super_admin", "superadmin"].includes(assignedRole)) {
+      return res.status(400).json({ success: false, error: "Administrator accounts must be managed through the protected administrator credential workflow, not the general user registry." });
     }
 
     if (phone && phone.trim()) {
@@ -142,8 +141,11 @@ router.post("/api/admin/users", authenticateToken, requireAdmin, async (req: any
       }
     }
 
+    if (typeof password !== "string" || password.trim().length < 8) {
+      return res.status(400).json({ success: false, error: "A password of at least 8 characters is required; shared default passwords are not permitted." });
+    }
     const userId = crypto.randomUUID();
-    const passwordHash = password && password.trim() ? await bcrypt.hash(password.trim(), 10) : await bcrypt.hash("RPF@12345", 10);
+    const passwordHash = await bcrypt.hash(password.trim(), 10);
     const safeUsername = username && username.trim() ? username.trim().toLowerCase() : (phone && phone.trim() ? phone.trim() : `user_${userId.slice(0, 8)}`);
 
     const result = await pool.query(
@@ -176,9 +178,8 @@ router.put("/api/admin/users/:id", authenticateToken, requireAdmin, async (req: 
     const { name, username, role, email, phone, password, isVolunteer, isDonor } = req.body;
     const userId = req.params.id;
     
-    const callerRole = String(req.user?.role || "").toLowerCase();
-    if (role && callerRole !== "admin" && callerRole !== "super_admin" && callerRole !== "superadmin") {
-      return res.status(403).json({ success: false, error: "Only Admin can assign roles" });
+    if (role && ["admin", "super_admin", "superadmin"].includes(String(role).toLowerCase())) {
+      return res.status(400).json({ success: false, error: "Administrator accounts must be managed through the protected administrator credential workflow, not the general user registry." });
     }
 
     if (phone && phone.trim()) {
