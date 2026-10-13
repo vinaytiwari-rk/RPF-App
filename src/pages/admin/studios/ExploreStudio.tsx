@@ -49,6 +49,7 @@ import {
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
+import ServiceIllustration, { serviceArtFor } from "../../../components/ServiceIllustration";
 import { SERVICE_GOV_LINKS, SERVICE_ALIASES, getGovLinksForService } from "../../../data/serviceGovLinks";
 
 export interface SubFeatureLink {
@@ -576,8 +577,12 @@ export default function ExploreStudio() {
                   {/* Top: Icon + Title + Category + Sublink count + Active status */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <div className="h-11 w-11 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 shrink-0 font-bold border border-slate-200/60 shadow-2xs">
-                        {React.createElement(AVAILABLE_ICONS[card.iconName] || Compass, { className: "h-5 w-5" })}
+                      <div className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-200/60 shadow-2xs overflow-hidden p-0.5">
+                        {serviceArtFor(card.id || card.title) ? (
+                          <ServiceIllustration kind={serviceArtFor(card.id || card.title)!} className="h-full w-full" />
+                        ) : (
+                          React.createElement(AVAILABLE_ICONS[card.iconName] || Compass, { className: "h-5 w-5 text-indigo-600" })
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">

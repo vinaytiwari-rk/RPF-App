@@ -1,7 +1,7 @@
 import React from "react";
 
 /** Lightweight illustrated service artwork; navigation icons deliberately stay unchanged. */
-export type ServiceArt = "community" | "sanitation" | "water" | "jobs" | "pink-erickshaw" | "health" | "jan-seva-card" | "grievance" | "volunteer" | "blood" | "radio" | "epaper" | "directory" | "university" | "fact-check" | "disaster" | "youth" | "nation" | "women-safety" | "live-tv" | "donations" | "scholarships" | "food" | "medicine" | "education" | "seniors" | "animals" | "environment" | "culture" | "farmer" | "schemes" | "skills" | "crowdfunding" | "sos" | "utilities" | "calculator" | "online-test";
+export type ServiceArt = "community" | "sanitation" | "water" | "jobs" | "pink-erickshaw" | "health" | "jan-seva-card" | "grievance" | "volunteer" | "blood" | "radio" | "epaper" | "directory" | "university" | "fact-check" | "disaster" | "youth" | "nation" | "women-safety" | "live-tv" | "reels" | "donations" | "scholarships" | "food" | "medicine" | "education" | "seniors" | "animals" | "environment" | "culture" | "farmer" | "schemes" | "skills" | "crowdfunding" | "sos" | "utilities" | "calculator" | "online-test";
 export function serviceArtFor(value: string): ServiceArt {
   const s = value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   if (/utilit|tool|device-tool/.test(s)) return "utilities";
@@ -17,7 +17,8 @@ export function serviceArtFor(value: string): ServiceArt {
   if (/nation/.test(s)) return "nation";
   if (/women-safety/.test(s)) return "women-safety";
   if (/live-tv/.test(s)) return "live-tv";
-  if (/donat|charity/.test(s)) return "donations";
+  if (/reel|short|instagram/.test(s)) return "reels";
+  if (/donat|charity|welfare|relief/.test(s)) return "donations";
   if (/scholarship/.test(s)) return "scholarships";
   if (/food|ration/.test(s)) return "food";
   if (/medicine|pharmacy/.test(s)) return "medicine";
@@ -52,6 +53,7 @@ export default function ServiceIllustration({kind, className = "h-16 w-16"}: {ki
     radio:["#E0F5EA","#7ACCA5"],epaper:["#E9F4FF","#8DBBDD"],directory:["#FFF0D9","#E3B575"],university:["#EAF0FC","#99AFD7"],
     "fact-check":["#E4F7EE","#86D0AD"],disaster:["#FFF0DB","#E9BB76"],youth:["#E6F6F1","#86CDB9"],nation:["#FFF0D9","#E9BB76"],
     "women-safety":["#FFE8EC","#ECA5B7"],"live-tv":["#E9F0FC","#A6B6DE"],
+    reels:["#FFE8EC","#F43F5E"],
     "donations":["#E4F5EC","#8CCFB0"],
     "scholarships":["#FFF1DA","#E3BA7D"],
     "food":["#FFF1DC","#DDA96B"],
@@ -99,6 +101,17 @@ export default function ServiceIllustration({kind, className = "h-16 w-16"}: {ki
     {kind==="nation" && <><path d="M28 82V23" stroke="#98734E" strokeWidth="5" strokeLinecap="round"/><path d="M31 25Q51 15 76 27V62Q53 52 31 61Z" fill="#fff"/><path d="M31 25Q53 15 76 27V39Q53 28 31 38Z" fill="#F1A94B"/><path d="M31 49Q53 39 76 51V62Q53 52 31 61Z" fill="#4AA679"/><circle cx="54" cy="44" r="6" fill="none" stroke="#557EA3" strokeWidth="2"/><path d="M15 82H44" stroke="#98734E" strokeWidth="5" strokeLinecap="round"/></>}
     {kind==="women-safety" && <><path d="M50 15L78 26V48Q76 69 50 84Q24 69 22 48V26Z" fill="#E58FA9" stroke="#C55E7D" strokeWidth="3"/><circle cx="50" cy="43" r="10" fill="#F9D6B6"/><path d="M39 43Q36 28 50 30Q63 30 61 43L55 37L43 42Z" fill="#593F48"/><path d="M34 68Q35 52 50 52Q65 52 66 68" fill="#FFF1F3"/><path d="M45 64L50 69L58 59" fill="none" stroke="#B7496B" strokeWidth="3"/></>}
     {kind==="live-tv" && <><rect x="15" y="29" width="70" height="48" rx="8" fill="#516D9E"/><rect x="22" y="36" width="56" height="32" rx="4" fill="#C4E0F0"/><path d="M45 42L61 52L45 62Z" fill="#D97706"/><path d="M35 22L50 30L65 22" fill="none" stroke="#516D9E" strokeWidth="3"/><path d="M39 80H61" stroke="#516D9E" strokeWidth="4" strokeLinecap="round"/></>}
+    {kind==="reels" && <>
+      <rect x="25" y="16" width="50" height="68" rx="10" fill="#1E293B" stroke="#F43F5E" strokeWidth="2"/>
+      <rect x="29" y="21" width="42" height="58" rx="6" fill="#0F172A"/>
+      <rect x="32" y="25" width="36" height="50" rx="4" fill="#F43F5E" opacity="0.25"/>
+      <polygon points="46,43 46,57 58,50" fill="#FFFFFF"/>
+      <circle cx="68" cy="22" r="7" fill="#E11D48"/>
+      <path d="M65 22L67 24L71 20" stroke="#FFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="33" y="67" width="16" height="3" rx="1.5" fill="#FFFFFF" opacity="0.8"/>
+      <circle cx="58" cy="68.5" r="2" fill="#E11D48"/>
+      <circle cx="63" cy="68.5" r="2" fill="#38BDF8"/>
+    </>}
     {kind==="donations" && <><path d="M15 55Q33 39 49 55L62 47Q71 43 77 50L87 60Q71 82 47 81L15 66Z" fill="#F0C393"/><path d="M21 56L44 65L62 59" fill="none" stroke="#C58D60" strokeWidth="3"/><path d="M50 27Q58 15 67 27Q76 15 84 27Q88 38 67 51Q46 38 50 27Z" fill="#D85C6B"/></>}
     {kind==="scholarships" && <><path d="M17 42L50 24L83 42L50 60Z" fill="#567EA8"/><path d="M29 53V70Q50 84 71 70V53" fill="#8CB3D2"/><path d="M82 42V69" stroke="#D5A35C" strokeWidth="4"/><rect x="32" y="74" width="36" height="9" rx="3" fill="#E9B66A"/></>}
     {kind==="food" && <><path d="M23 45Q24 22 50 22Q76 22 77 45Z" fill="#D8A36A"/><path d="M19 48H81L74 77H26Z" fill="#E8BB7C"/><path d="M28 49Q35 37 43 50Q51 34 60 49Q69 39 75 50" fill="#75AE68"/><path d="M34 63H66" stroke="#B07A48" strokeWidth="4"/></>}

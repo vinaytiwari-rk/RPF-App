@@ -1,15 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import {
-  Instagram,
   Heart,
   Briefcase,
   Stethoscope,
   Sparkles,
-  ExternalLink,
-  ChevronRight,
   ShieldCheck,
-  Clock,
   Droplets,
   Trash2,
   GraduationCap,
@@ -18,8 +14,6 @@ import {
   HandHeart,
   Wrench,
   Users,
-  Search,
-  Send,
   Activity,
   Award,
   TrendingUp,
@@ -29,9 +23,8 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
-import { AnimatedMetricCard, AnimatedNumber } from "../components/AnimatedMetricCard";
+import { AnimatedMetricCard } from "../components/AnimatedMetricCard";
 
-type MainTab = "impact" | "volunteers" | "chat";
 type SubFilterTab = "all" | "community" | "care" | "active";
 
 const ICON_MAP: Record<string, any> = {
@@ -63,21 +56,6 @@ function renderDomainIcon(iconNameOrComp: any) {
   return <Comp className="w-5 h-5 text-[#C2410C]" />;
 }
 
-interface ChatMessage {
-  id: string;
-  authorName: string;
-  text: string;
-  time?: string;
-}
-
-interface Volunteer {
-  id: string;
-  name: string;
-  role?: string;
-  city?: string;
-  skills?: string[] | string;
-}
-
 export default function ImpactPage() {
   const navigate = useNavigate();
   const { lang } = useOutletContext<{ lang: "en" | "hi" }>();
@@ -85,9 +63,7 @@ export default function ImpactPage() {
   const { cmsConfig } = useApp();
   const isHi = lang === "hi";
 
-  const [activeMainTab, setActiveMainTab] = useState<MainTab>("impact");
   const [subTab, setSubTab] = useState<SubFilterTab>("all");
-  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [cardImpact, setCardImpact] = useState<{ totalCards: number; scope: string } | null>(null);
   useEffect(() => {
     let active = true;
@@ -98,47 +74,6 @@ export default function ImpactPage() {
     }).catch(() => {});
     return () => { active = false; };
   }, []);
-
-  const [volunteerCityFilter, setVolunteerCityFilter] = useState("");
-
-  // Chat states
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { id: "c1", authorName: "Rohit Pandit", text: "Welcome to Samahit Activity & Impact Portal! Together we serve.", time: "10:30 AM" },
-    { id: "c2", authorName: "Sunita Verma", text: "Bhopal Pink E-Rickshaw drive was a great success today!", time: "11:15 AM" }
-  ]);
-  const [chatInput, setChatInput] = useState("");
-
-  useEffect(() => {
-    fetchVolunteers();
-  }, []);
-
-  const fetchVolunteers = async (city?: string) => {
-    try {
-      const res = await axios.get("/api/public/volunteers", { params: city ? { city } : {} });
-      if (res.data.success && Array.isArray(res.data.data)) {
-        setVolunteers(res.data.data);
-      }
-    } catch {
-      setVolunteers([
-        { id: "v1", name: "Ramesh Sharma", role: "Healthcare Coordinator", city: "Bhopal", skills: "First Aid, Logistics" },
-        { id: "v2", name: "Pooja Verma", role: "Women Empowerment Lead", city: "Bhopal", skills: "Counseling, Training" },
-        { id: "v3", name: "Amit Kumar", role: "Emergency Relief Volunteer", city: "Indore", skills: "Disaster Relief, Transport" }
-      ]);
-    }
-  };
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
-    const newMsg: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      authorName: user?.name || (isHi ? "नागरिक स्वयंसेवक" : "Citizen Volunteer"),
-      text: chatInput,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    };
-    setChatMessages((prev) => [...prev, newMsg]);
-    setChatInput("");
-  };
 
   const DEFAULT_IMPACT_DOMAINS = [
     {
@@ -352,9 +287,7 @@ export default function ImpactPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
 
-        {/* Tab 1: Field Impact & Relief */}
-        {activeMainTab === "impact" && (
-          <div className="space-y-5">
+        <div className="space-y-5">
             {/* LIVE IMPACT STATS COUNTERS (SYNCED DIRECTLY FROM CMS ADMIN) */}
             <section className="space-y-2">
               <div className="flex items-center justify-between px-1">
@@ -383,11 +316,11 @@ export default function ImpactPage() {
               </div>
             </section>
 
-            {/* Category Filter Pills: All, Community, Care, Active */}
+            {/* Category Filter Pills: All Work, Community, Care & Relief, Active Ground */}
             <section className="space-y-2">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-xs font-black uppercase tracking-wider text-[#245D45]">
-                  {isHi ? "कार्यक्षेत्र श्रेणियां" : "Impact Categories"}
+                  {isHi ? "सेवा क्षेत्र (Seva Domain)" : "Seva Domain"}
                 </h2>
                 <span className="text-[11px] font-bold text-slate-400">
                   {filteredDomains.length} {isHi ? "पहल" : "Initiatives"}
@@ -484,7 +417,6 @@ export default function ImpactPage() {
               </section>
             )}
           </div>
-        )}
 
       </div>
     </div>

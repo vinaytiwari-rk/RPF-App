@@ -23,6 +23,7 @@ import {
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 import IconPickerModal, { AVAILABLE_ICONS } from "../../../components/admin/IconPickerModal";
+import ServiceIllustration, { serviceArtFor } from "../../../components/ServiceIllustration";
 
 export interface ImpactStatItem {
   id: string;
@@ -614,10 +615,14 @@ export default function ImpactStudio() {
                     <div className="flex items-center gap-2.5">
                       <button
                         onClick={() => openIconPicker("domain", domain.id, domain.iconName)}
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-700 transition border border-slate-200"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-700 transition border border-slate-200 overflow-hidden p-0.5"
                         title="Click to change icon visually (No code)"
                       >
-                        <IconComp className="h-5 w-5 text-emerald-700" />
+                        {serviceArtFor(domain.id) ? (
+                          <ServiceIllustration kind={serviceArtFor(domain.id)!} className="h-full w-full" />
+                        ) : (
+                          <IconComp className="h-5 w-5 text-emerald-700" />
+                        )}
                       </button>
                       <div>
                         <div className="flex items-center gap-2">

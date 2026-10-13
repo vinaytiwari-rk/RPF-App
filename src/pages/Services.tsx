@@ -65,20 +65,20 @@ const REMOVED_SERVICE_IDS = new Set<string>([
 ]);
 
 const EXPLORE_LINKS: ServiceItem[] = [
-  { id: "online-test", category: "education", iconName: "GraduationCap", titleEn: "Online Mock Test & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", descEn: "G[...]" } as any,
-  { id: "epaper", category: "community", iconName: "Newspaper", titleEn: "Epaper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Read today's leading daily e-papers", descHi: "[...]" } as any,
-  { id: "directory", category: "government", iconName: "BookOpen", titleEn: "National Directory", titleHi: "राष्ट्रीय निर्देशिका", descEn: "Government contact[...]" } as any,
-  { id: "peoples-university", category: "education", iconName: "GraduationCap", titleEn: "People's University Portal", titleHi: "पीपुल्स यूनिवर्सिटी पोर्टल", descEn: "[...]" } as any,
-  { id: "fact-check", category: "community", iconName: "ShieldCheck", titleEn: "Fact Check Hub", titleHi: "फैक्ट चेक हब", descEn: "Check claims and viral news", descHi: "[...]" } as any,
-  { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "[...]" } as any,
-  { id: "social-reels", category: "community", iconName: "Film", titleEn: "Shorts & Reels", titleHi: "शॉर्ट्स और रील्स", descEn: "Official videos, shorts & foundation r[...]" } as any,
+  { id: "online-test", category: "education", iconName: "GraduationCap", titleEn: "Online Mock Test & Quiz", titleHi: "ऑनलाइन मॉक टेस्ट व क्विज", descEn: "Government exam test portal, daily quiz & dynamic question banks", route: "/online-test" } as any,
+  { id: "epaper", category: "community", iconName: "Newspaper", titleEn: "Epaper Kiosk", titleHi: "ई-पेपर कियोस्क", descEn: "Read today's leading daily e-papers", descHi: "आज के प्रमुख ई-पेपर पढ़ें", route: "/epaper" } as any,
+  { id: "directory", category: "government", iconName: "BookOpen", titleEn: "National Directory", titleHi: "राष्ट्रीय निर्देशिका", descEn: "Government contacts, emergency helplines & official portals", route: "/directory" } as any,
+  { id: "peoples-university", category: "education", iconName: "GraduationCap", titleEn: "People's University Portal", titleHi: "पीपुल्स यूनिवर्सिटी पोर्टल", descEn: "Official academic portal, courses, admissions & campus services", route: "https://www.peoplesuniversity.edu.in/" } as any,
+  { id: "fact-check", category: "community", iconName: "ShieldCheck", titleEn: "Fact Check Hub", titleHi: "फैक्ट चेक हब", descEn: "Check claims and viral news", descHi: "वायरल दावों व खबरों की सत्यता जांचें", route: "/fact-check" } as any,
+  { id: "live-tv", category: "community", iconName: "Tv", titleEn: "Live Broadcast TV", titleHi: "लाइव प्रसारण टीवी", descEn: "Official news & culture channels", descHi: "आधिकारिक समाचार व सांस्कृतिक चैनल", route: "/live-tv" } as any,
+  { id: "social-reels", category: "community", iconName: "Film", titleEn: "Shorts & Reels", titleHi: "शॉर्ट्स और रील्स", descEn: "Official videos, shorts & foundation reels", descHi: "फाउंडेशन के आधिकारिक वीडियो व रील्स", route: "/reels" } as any,
 ];
 
 const DEFAULT_FEATURED_SERVICES: ServiceItem[] = [
-  { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवाइयाँ" } as any,
-  { id: "health-care", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", descEn: "Health camps, medicines & hospital locator", descHi: "स्वास्थ्य सुविधा" } as any,
-  { id: "employment", titleEn: "Employment", titleHi: "रोजगार पोर्टल", descEn: "Jobs, skill development & career guidance", descHi: "नौकरियाँ, कौशल" } as any,
-  { id: "grievance", titleEn: "Grievance", titleHi: "शिकायत समाधान", descEn: "Submit issues & track resolution progress", descHi: "शिकायत दर्ज करें" } as any,
+  { id: "card", titleEn: "Jan Seva Card", titleHi: "जन सेवा कार्ड", descEn: "Your digital service identity & welfare access", descHi: "आपकी डिजिटल सेवा पहचान", route: "/jan-seva-card" } as any,
+  { id: "health-care", titleEn: "Healthcare", titleHi: "स्वास्थ्य सेवा", descEn: "Health camps, medicines & hospital locator", descHi: "स्वास्थ्य सुविधा", route: "/health-care" } as any,
+  { id: "employment", titleEn: "Employment", titleHi: "रोजगार पोर्टल", descEn: "Jobs, skill development & career guidance", descHi: "नौकरियाँ, कौशल", route: "/employment" } as any,
+  { id: "grievance", titleEn: "Grievance", titleHi: "शिकायत समाधान", descEn: "Submit issues & track resolution progress", descHi: "शिकायत दर्ज करें", route: "/grievance" } as any,
 ];
 
 export default function Services() {
@@ -227,22 +227,24 @@ export default function Services() {
     const item = EXPLORE_LINKS.find((x) => x.id === id);
     if (item?.route) return item.route;
     if (item?.url) return item.url;
-    if (id === "card") return "/jan-seva-card";
-    if (id === "blood") return "/blood-network";
-    if (id === "donations") return "/donations";
-    if (id === "health-care") return "/health-care";
-    if (id === "grievance") return "/grievance";
+    if (id === "card" || id === "jan-seva-card") return "/jan-seva-card";
+    if (id === "blood" || id === "blood-network") return "/blood-network";
+    if (id === "donations" || id === "donation") return "/donations";
+    if (id === "health-care" || id === "health") return "/health-care";
+    if (id === "employment" || id === "jobs") return "/employment";
+    if (id === "grievance" || id === "grievances") return "/grievance";
+    if (id === "volunteers" || id === "volunteer") return "/volunteers";
     if (id === "culture") return "/culture";
-    if (id === "internet-radio") return "/internet-radio";
+    if (id === "internet-radio" || id === "radio") return "/internet-radio";
+    if (id === "live-tv") return "/live-tv";
+    if (id === "social-reels" || id === "reels") return "/reels";
+    if (id === "online-test") return "/online-test";
+    if (id === "epaper") return "/epaper";
+    if (id === "directory") return "/directory";
+    if (id === "fact-check") return "/fact-check";
+    if (id === "sos") return "/sos";
     if (id === "schemes") return "/services/schemes";
     return `/services/${id}`;
-  };
-
-  const getSemanticIconStyle = (svcId: string) => {
-    if (HEALTH_SERVICES.includes(svcId)) return "text-[#DC2626] bg-red-500/10 border border-red-500/20";
-    if (GOV_SERVICES.includes(svcId)) return "text-[#D97706] bg-amber-500/10 border border-amber-500/20";
-    if (COMMUNITY_SERVICES.includes(svcId)) return "text-[#167C5A] bg-emerald-500/10 border border-emerald-500/20";
-    return "text-[#14213D] bg-slate-500/10 border border-slate-500/20";
   };
 
   const renderService = (svc: any) => {
@@ -267,20 +269,22 @@ export default function Services() {
           if (isExternal) openExternalLink(target, navigate, svc.titleEn);
           else navigate(target);
         }}
-        className="group relative w-full rounded-2xl p-3 flex flex-col items-start border border-amber-100/80 bg-white/80 backdrop-blur-md shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all"
+        className="group relative w-full rounded-2xl p-3.5 flex flex-col items-start border border-amber-100/80 bg-white/85 backdrop-blur-md shadow-2xs hover:border-amber-300 hover:shadow-xs transition-all text-left"
       >
-        <div className="w-full flex justify-center" aria-hidden="true">
-          <div className={`flex h-14 w-14 items-center justify-center rounded-full ${getSemanticIconStyle(svc.id)}`}>
-            {serviceArtFor(svc.id) ? (
-              <ServiceIllustration kind={serviceArtFor(svc.id)!} className="h-10 w-10" />
+        <div className="w-full flex justify-center pt-1 pb-1.5" aria-hidden="true">
+          <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 transition-transform duration-200 group-hover:scale-105">
+            {serviceArtFor(svc.id || svc.titleEn) ? (
+              <ServiceIllustration kind={serviceArtFor(svc.id || svc.titleEn)} className="h-full w-full drop-shadow-xs" />
             ) : (
-              <IconComponent className="h-6 w-6" />
+              <div className="flex h-full w-full items-center justify-center rounded-2xl bg-amber-50 border border-amber-200 text-[#D97706]">
+                <IconComponent className="h-7 w-7" />
+              </div>
             )}
           </div>
         </div>
 
-        <div className="mt-3 w-full text-left">
-          <h3 className="text-[13px] font-bold text-[#14213D] group-hover:text-[#D97706] transition-colors truncate">
+        <div className="mt-2 w-full text-left">
+          <h3 className="text-[13px] sm:text-[14px] font-bold text-[#14213D] group-hover:text-[#D97706] transition-colors truncate">
             {isHi ? svc.titleHi || svc.titleEn : svc.titleEn}
           </h3>
           {svc.descEn ? (
@@ -290,8 +294,8 @@ export default function Services() {
           ) : null}
         </div>
 
-        <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-slate-100/80 border border-slate-200/60 flex items-center justify-center text-slate-400 group-hover:bg-[#14213D] group-hover:text-white transition-colors">
-          <ChevronRight className="w-4 h-4" />
+        <div className="absolute top-2.5 right-2.5 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100/80 border border-slate-200/60 flex items-center justify-center text-slate-400 group-hover:bg-[#14213D] group-hover:text-white transition-colors">
+          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </div>
       </button>
     );

@@ -8,6 +8,7 @@ import { useApp } from "../context/AppContext";
 import { resolveMediaUrl } from "../utils/media";
 import { RP_FOUNDATION_LOGO, ROHIT_PANDIT_PHOTO } from "../assets/foundationBrand";
 import { AVAILABLE_ICONS } from "../components/admin/IconPickerModal";
+import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import ChannelThumbnail from "../components/ChannelThumbnail";
 import LiveVerifiedMarketSection from "../components/LiveVerifiedMarketSection";
 import { LIVE_TV_DEFAULTS } from "../data/liveTvDefaults";
@@ -470,9 +471,15 @@ export default function Home() {
                 <p className="text-[12.5px] sm:text-[13px] leading-relaxed text-slate-600 font-medium italic">
                   “True service begins when we reach out to those in need with humility, resolve, and unyielding commitment. Every initiative at RP Foundation is driven by our passionate volunteers working at the grass-roots level.”
                 </p>
-                <button onClick={() => navigate("/founder-message")} className="mt-1 inline-flex items-center gap-1 text-[12px] font-bold text-[#D97706] hover:underline">
-                  Read Founder’s Message & Values <ChevronRight className="h-3.5 w-3.5" />
-                </button>
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <button onClick={() => navigate("/founder-message")} className="inline-flex items-center gap-1 text-[12px] font-bold text-[#D97706] hover:underline">
+                    Read Founder’s Message & Values <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="text-slate-300">·</span>
+                  <button onClick={() => navigate("/vision-goals")} className="inline-flex items-center gap-1 text-[12px] font-bold text-[#167C5A] hover:underline">
+                    Explore My Vision <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -485,10 +492,16 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 gap-3.5">
             {quickAccessList.map(({ title, subtitle, icon: Icon, route, accent }) => (
-              <motion.button key={title} whileTap={{ scale: 0.98 }} onClick={() => navigate(route)} className="min-h-[155px] rounded-2xl border border-slate-200/80 bg-transparent hover:bg-slate-50/50 backdrop-blur-xs p-4 text-left shadow-2xs hover:border-slate-300 transition-all">
-                <div className="h-16 w-16" aria-hidden="true">{<div className={`flex h-full w-full items-center justify-center rounded-2xl ${accent}`}><Icon className="h-7 w-7" /></div>}</div>
+              <motion.button key={title} whileTap={{ scale: 0.98 }} onClick={() => navigate(route)} className="group min-h-[155px] rounded-2xl border border-amber-100/80 bg-white/80 hover:bg-white backdrop-blur-xs p-4 text-left shadow-2xs hover:border-amber-300 hover:shadow-xs transition-all">
+                <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 transition-transform duration-200 group-hover:scale-105" aria-hidden="true">
+                  {serviceArtFor(title || route) ? (
+                    <ServiceIllustration kind={serviceArtFor(title || route)} className="h-full w-full drop-shadow-xs" />
+                  ) : (
+                    <div className={`flex h-full w-full items-center justify-center rounded-2xl ${accent}`}><Icon className="h-7 w-7" /></div>
+                  )}
+                </div>
                 <div>
-                  <p className="mt-3 text-[15px] font-bold text-[#14213D]">{title}</p>
+                  <p className="mt-2 text-[15px] font-bold text-[#14213D] group-hover:text-[#D97706] transition-colors">{title}</p>
                   <p className="mt-1 text-[11.5px] text-slate-500 font-medium leading-snug">{subtitle}</p>
                 </div>
               </motion.button>
