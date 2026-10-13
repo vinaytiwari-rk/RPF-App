@@ -533,24 +533,24 @@ export const REASONING_QUESTIONS: SamahitQuestion[] = [
     "id": "reas_017",
     "category": "reasoning",
     "subcategory": "clock_calendar",
-    "questionEn": "If 1st January 2024 was a Monday, what day of the week was 31st December 2024?",
-    "questionHi": "यदि 1 जनवरी 2024 को सोमवार था, तो 31 दिसंबर 2024 को सप्ताह का कौन सा दिन था?",
+    "questionEn": "If 1st January 2026 is a Thursday, what day of the week is 31st December 2026?",
+    "questionHi": "यदि 1 जनवरी 2026 को गुरुवार है, तो 31 दिसंबर 2026 को सप्ताह का कौन सा दिन होगा?",
     "optionsEn": [
-      "Monday",
-      "Tuesday",
+      "Thursday",
+      "Friday",
       "Wednesday",
-      "Sunday"
+      "Tuesday"
     ],
     "optionsHi": [
-      "सोमवार",
-      "मंगलवार (Tuesday)",
+      "गुरुवार (Thursday)",
+      "शुक्रवार",
       "बुधवार",
-      "रविवार"
+      "मंगलवार"
     ],
-    "correctOptionId": "opt_b",
-    "correctIndex": 1,
-    "explanationEn": "2024 was a leap year (366 days). A leap year ends on the day following the day it starts. Monday + 1 = Tuesday.",
-    "explanationHi": "2024 एक लीप वर्ष (366 दिन) था। लीप वर्ष जिस दिन शुरू होता है, उसके अगले दिन समाप्त होता है। सोमवार + 1 = मंगलवार।",
+    "correctOptionId": "opt_a",
+    "correctIndex": 0,
+    "explanationEn": "2026 is an ordinary non-leap year (365 days = 52 weeks + 1 day). An ordinary year always starts and ends on the exact same day of the week. Therefore, it ends on Thursday.",
+    "explanationHi": "2026 एक साधारण गैर-लीप वर्ष (365 दिन) है। साधारण वर्ष जिस दिन शुरू होता है, उसी दिन समाप्त होता है। अतः 31 दिसंबर 2026 को भी गुरुवार होगा।",
     "difficulty": "easy",
     "source": {
       "name": "Original Logical Reasoning & Cognitive Assessment Standard",
