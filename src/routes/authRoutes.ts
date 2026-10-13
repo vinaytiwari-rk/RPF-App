@@ -121,9 +121,22 @@ router.post("/api/auth/login", async (req, res) => {
           }
         }
         if (validPassword) {
-          user = { id: adminRow.id || 'admin', name: 'System Administrator', role: 'admin' };
-          userRole = 'admin';
-          userName = 'System Administrator';
+          const storedAdminRole = String(adminRow.role || "").trim().toLowerCase();
+          if (["admin", "super_admin", "superadmin"].includes(storedAdminRole)) {
+            user = { id: adminRow.id, name: 'System Administrator', role: 'admin' };
+            userRole = 'admin';
+            userName = 'System Administrator';
+          } else {
+            // Do not turn a credential record with an ordinary or missing role into an administrator.
+            validPassword = false;
+            await auditEvent({
+              action: "admin_login_failed",
+              resource: "administrator",
+              userId: String(adminRow.id || ""),
+              req,
+              metadata: { reason: "credential_role_not_authorized", storedRole: storedAdminRole || "missing" }
+            });
+          }
         }
       }
     }
