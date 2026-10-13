@@ -116,7 +116,7 @@ export default function SecurityStudio() {
             <div className="flex items-center gap-2 text-[#0A192F] font-bold text-sm">
               <Server className="h-5 w-5 text-[#C2410C]" /> Node Express Server
             </div>
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${overview ? "text-emerald-700 bg-emerald-50 border-emerald-200" : loading ? "text-amber-700 bg-amber-50 border-amber-200" : "text-rose-700 bg-rose-50 border-rose-200"}`}>
               {overview ? <><CheckCircle2 className="h-3 w-3" /> Online</> : <><AlertTriangle className="h-3 w-3" /> {loading ? "Checking…" : healthData.status === "api-reachable" ? "API reachable" : "Unavailable"}</>}
             </span>
           </div>
@@ -134,7 +134,7 @@ export default function SecurityStudio() {
             <div className="flex items-center gap-2 text-[#0A192F] font-bold text-sm">
               <Database className="h-5 w-5 text-emerald-600" /> PostgreSQL Database
             </div>
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${overview?.database?.connected ? "text-emerald-700 bg-emerald-50 border-emerald-200" : loading ? "text-amber-700 bg-amber-50 border-amber-200" : "text-rose-700 bg-rose-50 border-rose-200"}`}>
               {overview?.database?.connected ? <><CheckCircle2 className="h-3 w-3" /> Connected</> : <><AlertTriangle className="h-3 w-3" /> {loading ? "Checking…" : overview ? "Disconnected" : "Unknown"}</>}
             </span>
           </div>
@@ -151,7 +151,7 @@ export default function SecurityStudio() {
             <div className="flex items-center gap-2 text-[#0A192F] font-bold text-sm">
               <Key className="h-5 w-5 text-amber-600" /> Authentication State
             </div>
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${token && user ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-rose-700 bg-rose-50 border-rose-200"}`}>
               {token && user ? <><ShieldCheck className="h-3 w-3" /> Authenticated</> : <><AlertTriangle className="h-3 w-3" /> Unknown</>}
             </span>
           </div>
