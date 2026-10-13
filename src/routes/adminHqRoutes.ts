@@ -70,7 +70,7 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
       return res.status(503).json({ success: false, error: "Secure administrator session could not be created. Please retry." });
     }
 
-    await auditEvent({ action: "admin_login_success", resource: "administrator", userId: user.id, req });
+    await auditEvent({ action: "admin_login_success", resource: "administrator", userId: user.id, req, metadata: { role: "admin" } });
     return res.json({ success: true, user, token });
   } catch (error) {
     console.error("Administrator login error:", error);
