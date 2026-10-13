@@ -146,10 +146,10 @@ export default function ServiceDetails() {
       (Array.isArray(allServices) ? allServices.find((s: any) => s.id === id || s.route === `/services/${id}` || s.route === `/${id}`) : null) ||
       (Array.isArray(featuredServices) ? featuredServices.find((s: any) => s.id === id || s.route === `/services/${id}` || s.route === `/${id}`) : null);
 
-    if (matchedService && Array.isArray(matchedService.subLinks)) {
-      // A configured array is authoritative, including an empty list or all-disabled links.
-      // Never fall through to legacy/default government links after the admin removes them.
-      return matchedService.subLinks
+    if (matchedService && (matchedService.subLinksConfigured === true || (Array.isArray(matchedService.subLinks) && matchedService.subLinks.length > 0))) {
+      // An explicitly published empty list or all-disabled links is authoritative.
+      // Unconfigured legacy cards may still use serviceWebsiteLinks/defaults below.
+      return (Array.isArray(matchedService.subLinks) ? matchedService.subLinks : [])
         .filter((l: any) => l && l.active !== false)
         .map((l: any) => ({
           title: l.title || "Portal Link",
