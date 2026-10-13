@@ -25,7 +25,7 @@ import {
   Pencil
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { LIVE_TV_DEFAULTS, mergeTvCatalogue, type LiveTvChannel } from "../../../data/liveTvDefaults";
+import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../../../data/liveTvDefaults";
 import rawChannels from "../../../data/akashvaniChannels.json";
 import privateFm from "../../../data/privateFmChannels.json";
 
@@ -71,31 +71,12 @@ const DEFAULT_RADIO_STATIONS: RadioStation[] = [
   }))
 ];
 
-const normalizeRadioName = (name: string) => name.trim().toLocaleLowerCase();
 
-const mergeRadioCatalogue = (configured: unknown): RadioStation[] => {
-  const merged = new Map<string, RadioStation>();
-  DEFAULT_RADIO_STATIONS.forEach((station, index) => {
-    const key = normalizeRadioName(station.name);
-    if (key && (station.url.startsWith("http://") || station.url.startsWith("https://"))) {
-      merged.set(key, { ...station, enabled: station.enabled !== false });
-    }
-  });
-  if (Array.isArray(configured)) {
-    configured.forEach((value) => {
-      const station = value as RadioStation;
-      if (!station || typeof station.name !== "string" || !station.name.trim() ||
-          typeof station.url !== "string" || !(station.url.startsWith("http://") || station.url.startsWith("https://"))) return;
-      const key = normalizeRadioName(station.name);
-      merged.set(key, { ...merged.get(key), ...station, enabled: station.enabled !== false });
-    });
-  }
-  return [...merged.values()];
-};
 
 export default function LiveTVStudio() {
   const [activeTab, setActiveTab] = useState<MediaType>("tv");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [tvCategory, setTvCategory] = useState("all");
@@ -124,13 +105,14 @@ export default function LiveTVStudio() {
 
   const fetchCmsMedia = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await axios.get("/api/cms");
       const cms = res.data?.cms || res.data?.data || {};
 
       // Live TV Channels (respect saved array while keeping full verified defaults)
       if (Array.isArray(cms.liveTvChannels)) {
-        setTvChannels(mergeTvCatalogue(cms.liveTvChannels));
+        setTvChannels(cms.liveTvChannels);
       } else {
         setTvChannels(LIVE_TV_DEFAULTS);
       }
@@ -142,7 +124,7 @@ export default function LiveTVStudio() {
 
       // Internet Radio Stations (respect saved array even if empty)
       if (Array.isArray(cms.internetRadioStations)) {
-        setRadioStations(mergeRadioCatalogue(cms.internetRadioStations));
+        setRadioStations(cms.internetRadioStations);
       } else {
         setRadioStations(DEFAULT_RADIO_STATIONS);
       }
@@ -164,10 +146,15 @@ export default function LiveTVStudio() {
           { id: "epaper-5", name: "Lokdesh Bhopal", nameHi: "लोकदेश भोपाल", url: "https://lokdesh.com/bhopal-e-papers/", language: "Hindi", enabled: true },
         ]);
       }
-    } catch {
-      toast.error("Failed to load broadcast media catalog");
-      setTvChannels(LIVE_TV_DEFAULTS);
-      setRadioStations(DEFAULT_RADIO_STATIONS);
+    } catch (error: any) {
+      const message = error?.response?.data?.error || "Failed to load broadcast media catalog. Retry before publishing.";
+      setLoadError(message);
+      toast.error(message);
+      // Never populate the editor with defaults after a failed read: doing so could
+      // overwrite the real server catalogue when an administrator presses Save.
+      setTvChannels([]);
+      setRadioStations([]);
+      setEpapers([]);
     } finally {
       setLoading(false);
     }
@@ -176,6 +163,10 @@ export default function LiveTVStudio() {
   const handlePublish = async () => {
     if (!token) {
       toast.error("Admin session expired");
+      return;
+    }
+    if (loading || loadError) {
+      toast.error("Catalogue is not verified. Retry loading before publishing.");
       return;
     }
     setSaving(true);
@@ -206,10 +197,15 @@ export default function LiveTVStudio() {
       const savedCms = verifyResponse.data?.cms || verifyResponse.data?.data || {};
       const sameMediaEntries = (expected: Array<{ id?: string; name?: string; url?: string; enabled?: boolean }>, actual: unknown) => {
         if (!Array.isArray(actual) || actual.length !== expected.length) return false;
-        return expected.every((item) => actual.some((saved: any) =>
-          (item.id && saved?.id === item.id) ||
-          (!item.id && saved?.name?.trim().toLocaleLowerCase() === item.name?.trim().toLocaleLowerCase() && saved?.url === item.url)
-        ));
+        return expected.every((item, index) => {
+          const saved = actual[index] as any;
+          const sameIdentity = item.id
+            ? saved?.id === item.id
+            : saved?.name?.trim().toLocaleLowerCase() === item.name?.trim().toLocaleLowerCase();
+          return sameIdentity &&
+            saved?.url === item.url &&
+            (item.enabled === undefined || saved?.enabled === item.enabled);
+        });
       };
       const mediaMatches =
         sameMediaEntries(tvChannels, savedCms.liveTvChannels) &&
@@ -366,7 +362,7 @@ export default function LiveTVStudio() {
           </button>
           <button
             onClick={handlePublish}
-            disabled={saving}
+            disabled={saving || loading || Boolean(loadError)}
             className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition shadow-xs disabled:opacity-60"
           >
             <Save className="h-4 w-4" /> {saving ? "Publishing..." : "Save & Publish"}
@@ -833,7 +829,7 @@ export default function LiveTVStudio() {
                 <span>Changes will take effect in real-time across apps upon saving.</span>
                 <button
                   onClick={handlePublish}
-                  disabled={saving}
+                  disabled={saving || loading || Boolean(loadError)}
                   className="px-5 py-2 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 transition shadow-xs"
                 >
                   {saving ? "Saving..." : "Save All Streams"}
