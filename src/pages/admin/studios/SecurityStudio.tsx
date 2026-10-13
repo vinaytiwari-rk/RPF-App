@@ -151,8 +151,8 @@ export default function SecurityStudio() {
             <div className="flex items-center gap-2 text-[#0A192F] font-bold text-sm">
               <Key className="h-5 w-5 text-amber-600" /> Authentication State
             </div>
-            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${token && user ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-rose-700 bg-rose-50 border-rose-200"}`}>
-              {token && user ? <><ShieldCheck className="h-3 w-3" /> Authenticated</> : <><AlertTriangle className="h-3 w-3" /> Unknown</>}
+            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${overview ? "text-emerald-700 bg-emerald-50 border-emerald-200" : loading ? "text-amber-700 bg-amber-50 border-amber-200" : "text-rose-700 bg-rose-50 border-rose-200"}`}>
+              {overview ? <><ShieldCheck className="h-3 w-3" /> Admin API verified</> : <><AlertTriangle className="h-3 w-3" /> {loading ? "Checking…" : "Not verified"}</>}
             </span>
           </div>
           <div className="text-xs text-slate-600 space-y-1">
@@ -166,20 +166,21 @@ export default function SecurityStudio() {
       {/* Security Policies Overview */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-xs">
         <h3 className="text-sm font-black text-[#0A192F] flex items-center gap-2">
-          <ShieldAlert className="h-4 w-4 text-[#C2410C]" /> Active Security & Access Rules
+          <ShieldAlert className="h-4 w-4 text-[#C2410C]" /> Configured Security Policies
         </h3>
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">These are configuration/policy descriptions, not a complete live penetration test. A policy is not marked as verified merely because this screen displays it.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
             <h4 className="font-bold text-slate-800">1. CORS Restricted Origins</h4>
             <p className="text-slate-600 leading-relaxed">
-              Only verified domains (<code className="bg-slate-200 px-1 py-0.5 rounded text-[11px]">therpfoundation.org</code>, <code className="bg-slate-200 px-1 py-0.5 rounded text-[11px]">rpfoundation.org</code>, localhost, Capacitor native bridge) are permitted. Arbitrary or third-party web origins are blocked.
+              The server's CORS configuration must be checked against the deployed origin allowlist. This card alone does not prove that every runtime origin is blocked.
             </p>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
             <h4 className="font-bold text-slate-800">2. Admin Endpoint Authorization</h4>
             <p className="text-slate-600 leading-relaxed">
-              All <code className="bg-slate-200 px-1 py-0.5 rounded text-[11px]">/api/admin/*</code> and CMS write mutations require both <code className="bg-slate-200 px-1 py-0.5 rounded text-[11px]">authenticateToken</code> and <code className="bg-slate-200 px-1 py-0.5 rounded text-[11px]">requireAdmin</code> authorization guards.
+              Admin routes are intended to require both <code className="bg-slate-200 px-1 py-0.5 rounded text-[11px]">authenticateToken</code> and <code className="bg-slate-200 px-1 py-0.5 rounded text-[11px]">requireAdmin</code>. Full route-by-route enforcement still requires automated verification.
             </p>
           </div>
 
@@ -193,7 +194,7 @@ export default function SecurityStudio() {
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
             <h4 className="font-bold text-slate-800">4. Safe Database Credentials</h4>
             <p className="text-slate-600 leading-relaxed">
-              Production database connections use strict environment variables (<code className="bg-slate-200 px-1 py-0.5 rounded text-[11px]">process.env.DATABASE_URL</code>). No plain credentials exist in source code.
+              Database credentials should be provided through server environment variables. This screen does not scan deployment secrets or prove that no credential was ever committed.
             </p>
           </div>
         </div>
