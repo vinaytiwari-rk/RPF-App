@@ -144,6 +144,7 @@ const DEFAULT_DOMAINS: ImpactDomainItem[] = [
 export default function ImpactStudio() {
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<"header" | "counters" | "domains" | "stories">("counters");
 
@@ -172,8 +173,12 @@ export default function ImpactStudio() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/api/cms");
-      const cms = res.data?.cms || {};
+      setLoadError(null);
+      const res = await axios.get("/api/cms", { timeout: 10000 });
+      const cms = res.data?.cms;
+      if (res.data?.success !== true || !cms || typeof cms !== "object" || Array.isArray(cms)) {
+        throw new Error("The server did not return a valid Impact CMS configuration.");
+      }
 
       if (cms.impactHeadline || cms.impactHeadlineEn || cms.impactHeadlineHi) {
         setHeadline(cms.impactHeadline || cms.impactHeadlineEn || cms.impactHeadlineHi);
@@ -195,12 +200,8 @@ export default function ImpactStudio() {
           })).sort((a: ImpactStatItem, b: ImpactStatItem) => (a.order ?? 0) - (b.order ?? 0))
         );
       } else {
-        setImpactStats([
-          { id: "beneficiaries", label: "Total Beneficiaries", value: 250000, suffix: "+", iconName: "Users", enabled: true },
-          { id: "health_camps", label: "Health & Eye Camps", value: 450, suffix: "+", iconName: "Stethoscope", enabled: true },
-          { id: "tree_plantations", label: "Trees Planted", value: 50000, suffix: "+", iconName: "Trees", enabled: true },
-          { id: "cards_issued", label: "Jan Seva Cards", value: 66505, suffix: "+", iconName: "Award", enabled: true }
-        ]);
+        // Keep counters empty until an administrator supplies verified figures.
+        setImpactStats([]);
       }
 
       if (Array.isArray(cms.impactDomains)) {
@@ -235,25 +236,13 @@ export default function ImpactStudio() {
           })).sort((a: ImpactStoryItem, b: ImpactStoryItem) => (a.order ?? 0) - (b.order ?? 0))
         );
       } else {
-        setStories([
-          {
-            id: "t1",
-            name: "Satyendra Thakur",
-            village: "Karond Ward 5, Bhopal",
-            quote: "My daughter received the Saraswati Scholarship directly in her bank account within 2 weeks of applying. This support is helping her pursue college education.",
-            enabled: true
-          },
-          {
-            id: "t2",
-            name: "Shanti Devi",
-            village: "Sehore Block, MP",
-            quote: "During my husband's eye surgery, RP Foundation volunteers did everything from hospital registration to arranging blood donors.",
-            enabled: true
-          }
-        ]);
+        // Never invent beneficiary names or testimonials when the CMS has none.
+        setStories([]);
       }
-    } catch {
-      toast.error("Failed to load Impact data from server");
+    } catch (error: any) {
+      const message = error?.response?.data?.error || error?.message || "Failed to load Impact data from server";
+      setLoadError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -265,6 +254,14 @@ export default function ImpactStudio() {
 
   // Save All Changes to Live Application - Automatically synchronizes single inputs to En and Hi fields
   const handleSaveAll = async () => {
+    if (loading || loadError) {
+      toast.error("Impact configuration is not verified. Retry loading before publishing.");
+      return;
+    }
+    if (!token) {
+      toast.error("Admin session expired. Please sign in.");
+      return;
+    }
     try {
       setSaving(true);
       const payload = {
@@ -362,6 +359,7 @@ export default function ImpactStudio() {
 
   return (
     <div className="space-y-6 pb-20">
+      {loadError && <div role="alert" className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900"><div><p className="font-bold">Impact configuration could not be verified.</p><p className="mt-1 text-xs">{loadError} Publishing is disabled to protect saved content.</p></div><button type="button" onClick={() => void loadData()} disabled={loading} className="rounded-xl border border-rose-300 bg-white px-3 py-2 text-xs font-bold disabled:opacity-50">Retry</button></div>}
       {/* Studio Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center gap-3">
@@ -392,7 +390,7 @@ export default function ImpactStudio() {
           </button>
           <button
             onClick={handleSaveAll}
-            disabled={saving}
+            disabled={saving || loading || Boolean(loadError)}
             className="inline-flex items-center gap-2 rounded-xl bg-[#166534] px-5 py-2.5 text-xs font-black text-white shadow-md shadow-emerald-700/20 hover:bg-[#14532d] transition"
           >
             {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
