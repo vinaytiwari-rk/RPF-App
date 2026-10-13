@@ -339,6 +339,7 @@ export default function LiveTVStudio() {
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
+      {loadError && <div role="alert" className="flex flex-col gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-bold">Live media catalogue could not be verified.</p><p className="mt-1 text-xs">{loadError} Publishing is disabled to protect the saved server catalogue.</p></div><button type="button" onClick={() => void fetchCmsMedia()} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-300 bg-white px-3 py-2 text-xs font-bold disabled:opacity-50"><RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Retry loading</button></div>}
       {/* HEADER WITH PUBLISH & ADD STREAM */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
@@ -349,14 +350,15 @@ export default function LiveTVStudio() {
             <p className="text-[10px] font-bold tracking-widest uppercase text-amber-600">Broadcast & Infotainment CMS</p>
             <h1 className="text-xl md:text-2xl font-black text-slate-800">Live TV, Radio & Media Command</h1>
             <p className="text-xs text-slate-500 mt-1">
-              Live TV links, FM Radio frequencies, layout selector, and real-time Active/Deactivate controls.
+              Edit channel catalogues and layouts, then publish and verify the saved server state.
             </p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleAddNew}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition shadow-xs"
+            disabled={loading || Boolean(loadError)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition shadow-xs disabled:opacity-60"
           >
             <Plus className="h-4 w-4" /> Add New Stream
           </button>
