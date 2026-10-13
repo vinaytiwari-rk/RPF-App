@@ -53,7 +53,7 @@ export const authenticateToken = async (req, res, next) => {
       let credential;
       try {
         credential = await pool.query(
-          "SELECT id FROM admin_credentials WHERE id = $1 LIMIT 1",
+          "SELECT id FROM admin_credentials WHERE id = $1 AND LOWER(COALESCE(role, '')) IN ('admin', 'super_admin', 'superadmin') LIMIT 1",
           [String(decoded.id)]
         );
       } catch (error) {
