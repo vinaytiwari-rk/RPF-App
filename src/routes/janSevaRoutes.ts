@@ -471,8 +471,8 @@ router.get("/api/cards", authenticateToken, requireAdmin, async (req, res) => {
     setCached(cacheKey, payload, 15 * 1000);
     res.json(payload);
   } catch (error: any) {
-    console.error("Admin card stats unavailable:", error?.message || error);
-    res.status(503).json({ success: false, error: "Verified card statistics are temporarily unavailable." });
+    console.error("Error fetching card applications:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -543,7 +543,8 @@ router.get("/api/cards/stats", authenticateToken, requireAdmin, async (_req, res
     setCached(cacheKey, payload, 30 * 1000);
     return res.json(payload);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error("Admin card stats unavailable:", error?.message || error);
+    return res.status(503).json({ success: false, error: "Verified card statistics are temporarily unavailable." });
   }
 });
 
