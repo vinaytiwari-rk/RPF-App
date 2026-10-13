@@ -1,0 +1,423 @@
+{
+  "packId": "reasoning-analytical-foundations-2026-10-13-b",
+  "version": 1,
+  "subject": "reasoning",
+  "category": "logical-reasoning",
+  "titleEn": "Logical Reasoning — Foundations B",
+  "titleHi": "तार्किक क्षमता — आधार B",
+  "descEn": "Fifteen original bilingual questions on patterns, calendars, clocks, classification and deductions.",
+  "descHi": "पैटर्न, कैलेंडर, घड़ी, वर्गीकरण और निष्कर्ष पर 15 मौलिक द्विभाषी प्रश्न।",
+  "iconName": "BrainCircuit",
+  "color": "from-emerald-600 to-teal-600",
+  "badge": "Original practice",
+  "durationMinutes": 12,
+  "questionCount": 15,
+  "questionsCount": 15,
+  "questions": [
+    {
+      "id": "reasoning-20261013-016",
+      "subject": "reasoning",
+      "topic": "Number series",
+      "difficulty": "easy",
+      "questionEn": "Find the next number: 7, 14, 28, 56, __.",
+      "questionHi": "अगली संख्या ज्ञात करें: 7, 14, 28, 56, __।",
+      "optionsEn": [
+        "84",
+        "98",
+        "112",
+        "120"
+      ],
+      "optionsHi": [
+        "84",
+        "98",
+        "112",
+        "120"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Each term doubles; 56 × 2 = 112.",
+      "explanationHi": "हर पद दोगुना है; 56 × 2 = 112।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-017",
+      "subject": "reasoning",
+      "topic": "Coding",
+      "difficulty": "medium",
+      "questionEn": "Using the opposite letter of the alphabet (A↔Z, B↔Y), CAT is coded as XZG. How is DOG coded?",
+      "questionHi": "वर्णमाला के उलटे अक्षरों (A↔Z, B↔Y) से CAT का कूट XZG है। DOG का कूट क्या होगा?",
+      "optionsEn": [
+        "WOG",
+        "WLT",
+        "DLT",
+        "WLG"
+      ],
+      "optionsHi": [
+        "WOG",
+        "WLT",
+        "DLT",
+        "WLG"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "D maps to W, O to L and G to T, so DOG becomes WLT.",
+      "explanationHi": "D का विपरीत W, O का L और G का T है; इसलिए DOG का कूट WLT है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-018",
+      "subject": "reasoning",
+      "topic": "Analogy",
+      "difficulty": "easy",
+      "questionEn": "Author is to novel as composer is to __.",
+      "questionHi": "लेखक का संबंध उपन्यास से है, वैसे ही संगीतकार का संबंध ___ से है।",
+      "optionsEn": [
+        "Canvas",
+        "Blueprint",
+        "Symphony",
+        "Sculpture"
+      ],
+      "optionsHi": [
+        "कैनवास",
+        "नक्शा",
+        "सिम्फनी",
+        "मूर्तिकला"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "An author creates a novel; a composer creates a musical composition such as a symphony.",
+      "explanationHi": "लेखक उपन्यास रचता है; संगीतकार सिम्फनी जैसी संगीत-रचना करता है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-019",
+      "subject": "reasoning",
+      "topic": "Odd one out",
+      "difficulty": "easy",
+      "questionEn": "Which is the odd one out: cube, sphere, cylinder, triangle?",
+      "questionHi": "कौन अलग है: घन, गोला, बेलन, त्रिभुज?",
+      "optionsEn": [
+        "Cube",
+        "Sphere",
+        "Cylinder",
+        "Triangle"
+      ],
+      "optionsHi": [
+        "घन",
+        "गोला",
+        "बेलन",
+        "त्रिभुज"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "A triangle is a two-dimensional plane shape; the others are three-dimensional solids.",
+      "explanationHi": "त्रिभुज द्वि-आयामी आकृति है; अन्य तीन-आयामी ठोस हैं।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-020",
+      "subject": "reasoning",
+      "topic": "Directions",
+      "difficulty": "easy",
+      "questionEn": "A person faces east, turns left, then right, then right again. Which direction are they facing?",
+      "questionHi": "एक व्यक्ति पूर्व की ओर है, बाएँ मुड़ता है, फिर दाएँ और फिर दाएँ मुड़ता है। अब वह किस दिशा में है?",
+      "optionsEn": [
+        "North",
+        "East",
+        "South",
+        "West"
+      ],
+      "optionsHi": [
+        "उत्तर",
+        "पूर्व",
+        "दक्षिण",
+        "पश्चिम"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "East → left to north → right to east → right to south.",
+      "explanationHi": "पूर्व → बाएँ उत्तर → दाएँ पूर्व → दाएँ दक्षिण।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-021",
+      "subject": "reasoning",
+      "topic": "Blood relations",
+      "difficulty": "easy",
+      "questionEn": "P is the son of Q, and Q is the daughter of R. If R is a woman, how is P related to R?",
+      "questionHi": "P, Q का पुत्र है और Q, R की पुत्री है। यदि R महिला है, तो P का R से क्या संबंध है?",
+      "optionsEn": [
+        "Grandson",
+        "Nephew",
+        "Brother",
+        "Grandfather"
+      ],
+      "optionsHi": [
+        "नाती/पोता",
+        "भांजा/भतीजा",
+        "भाई",
+        "दादा/नाना"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "P is the son of R’s daughter, so P is R’s grandson.",
+      "explanationHi": "P, R की बेटी का बेटा है, इसलिए वह R का नाती/पोता है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-022",
+      "subject": "reasoning",
+      "topic": "Ranking",
+      "difficulty": "easy",
+      "questionEn": "In a class of 35 students, Meera ranks 9th from the top. What is her rank from the bottom?",
+      "questionHi": "35 विद्यार्थियों की कक्षा में मीरा ऊपर से 9वें स्थान पर है। नीचे से उसका स्थान क्या होगा?",
+      "optionsEn": [
+        "26th",
+        "27th",
+        "28th",
+        "29th"
+      ],
+      "optionsHi": [
+        "26वाँ",
+        "27वाँ",
+        "28वाँ",
+        "29वाँ"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Rank from bottom = 35 − 9 + 1 = 27.",
+      "explanationHi": "नीचे से स्थान = 35 − 9 + 1 = 27।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-023",
+      "subject": "reasoning",
+      "topic": "Syllogism",
+      "difficulty": "easy",
+      "questionEn": "All laptops are devices. No device is edible. Which conclusion follows?",
+      "questionHi": "सभी लैपटॉप उपकरण हैं। कोई भी उपकरण खाने योग्य नहीं है। कौन-सा निष्कर्ष निकलता है?",
+      "optionsEn": [
+        "Some laptops are edible",
+        "All devices are laptops",
+        "No laptop is edible",
+        "Some devices are food"
+      ],
+      "optionsHi": [
+        "कुछ लैपटॉप खाने योग्य हैं",
+        "सभी उपकरण लैपटॉप हैं",
+        "कोई लैपटॉप खाने योग्य नहीं है",
+        "कुछ उपकरण भोजन हैं"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Because every laptop is a device and no device is edible, no laptop is edible.",
+      "explanationHi": "हर लैपटॉप उपकरण है और कोई उपकरण खाने योग्य नहीं; इसलिए कोई लैपटॉप खाने योग्य नहीं है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-024",
+      "subject": "reasoning",
+      "topic": "Alphabet coding",
+      "difficulty": "easy",
+      "questionEn": "If each letter is valued by its alphabet position, CAT totals 24. What does DOG total?",
+      "questionHi": "यदि हर अक्षर का मान वर्णमाला में उसका स्थान है, तो CAT का योग 24 है। DOG का योग क्या होगा?",
+      "optionsEn": [
+        "22",
+        "23",
+        "24",
+        "26"
+      ],
+      "optionsHi": [
+        "22",
+        "23",
+        "24",
+        "26"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "D=4, O=15 and G=7; 4 + 15 + 7 = 26.",
+      "explanationHi": "D=4, O=15 और G=7; 4 + 15 + 7 = 26।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-025",
+      "subject": "reasoning",
+      "topic": "Calendar",
+      "difficulty": "medium",
+      "questionEn": "What day is 45 days after Tuesday?",
+      "questionHi": "मंगलवार के 45 दिन बाद कौन-सा दिन होगा?",
+      "optionsEn": [
+        "Wednesday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "optionsHi": [
+        "बुधवार",
+        "शुक्रवार",
+        "शनिवार",
+        "रविवार"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "45 mod 7 = 3; three days after Tuesday is Friday.",
+      "explanationHi": "45 को 7 से भाग देने पर शेष 3; मंगलवार के तीन दिन बाद शुक्रवार है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-026",
+      "subject": "reasoning",
+      "topic": "Clock",
+      "difficulty": "easy",
+      "questionEn": "What is the smaller angle between the hands of a clock at exactly 6:00?",
+      "questionHi": "ठीक 6:00 बजे घड़ी की सुइयों के बीच छोटा कोण कितना है?",
+      "optionsEn": [
+        "180°",
+        "90°",
+        "150°",
+        "120°"
+      ],
+      "optionsHi": [
+        "180°",
+        "90°",
+        "150°",
+        "120°"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "At 6:00 the minute hand is at 12 and the hour hand at 6, making a straight angle of 180°.",
+      "explanationHi": "6:00 बजे मिनट की सुई 12 और घंटे की सुई 6 पर होती है; कोण 180° है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-027",
+      "subject": "reasoning",
+      "topic": "Number pattern",
+      "difficulty": "easy",
+      "questionEn": "Complete the pattern: 3→10, 4→17, 5→26, 6→___.",
+      "questionHi": "पैटर्न पूरा करें: 3→10, 4→17, 5→26, 6→___।",
+      "optionsEn": [
+        "35",
+        "36",
+        "37",
+        "38"
+      ],
+      "optionsHi": [
+        "35",
+        "36",
+        "37",
+        "38"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The rule is n² + 1; 6² + 1 = 37.",
+      "explanationHi": "नियम n² + 1 है; 6² + 1 = 37।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-028",
+      "subject": "reasoning",
+      "topic": "Syllogism",
+      "difficulty": "medium",
+      "questionEn": "Some doctors are artists. All artists are readers. Which conclusion follows?",
+      "questionHi": "कुछ डॉक्टर कलाकार हैं। सभी कलाकार पाठक हैं। कौन-सा निष्कर्ष निकलता है?",
+      "optionsEn": [
+        "Some doctors are readers",
+        "All doctors are readers",
+        "No doctor is a reader",
+        "No conclusion follows"
+      ],
+      "optionsHi": [
+        "कुछ डॉक्टर पाठक हैं",
+        "सभी डॉक्टर पाठक हैं",
+        "कोई डॉक्टर पाठक नहीं है",
+        "कोई निष्कर्ष नहीं निकलता"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The doctors who are artists must be readers because all artists are readers.",
+      "explanationHi": "जो डॉक्टर कलाकार हैं, वे पाठक भी होंगे क्योंकि सभी कलाकार पाठक हैं।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-029",
+      "subject": "reasoning",
+      "topic": "Alphabetical order",
+      "difficulty": "medium",
+      "questionEn": "Which word comes second in alphabetical order: angle, anger, ankle, annual?",
+      "questionHi": "वर्णक्रम में angle, anger, ankle, annual में दूसरा शब्द कौन-सा है?",
+      "optionsEn": [
+        "anger",
+        "angle",
+        "ankle",
+        "annual"
+      ],
+      "optionsHi": [
+        "anger",
+        "angle",
+        "ankle",
+        "annual"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "The order is anger, angle, ankle, annual; angle is second.",
+      "explanationHi": "क्रम anger, angle, ankle, annual है; दूसरा शब्द angle है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-030",
+      "subject": "reasoning",
+      "topic": "Ordering",
+      "difficulty": "easy",
+      "questionEn": "A is older than B, B is older than C, and C is older than D. Who is the second youngest?",
+      "questionHi": "A, B से बड़ा है; B, C से बड़ा है; और C, D से बड़ा है। दूसरा सबसे छोटा कौन है?",
+      "optionsEn": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "optionsHi": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The order from oldest to youngest is A, B, C, D; C is second youngest.",
+      "explanationHi": "बड़े से छोटे का क्रम A, B, C, D है; C दूसरा सबसे छोटा है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    }
+  ]
+}
