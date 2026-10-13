@@ -249,7 +249,7 @@ export default function DashboardStudio() {
       const payload = response.data?.data ?? response.data;
       if (Array.isArray(payload)) return { items: payload as Row[] };
       if (Array.isArray(payload?.items)) return { items: payload.items as Row[] };
-      return { items: [] };
+      return { items: [], error: "Unexpected API response shape" };
     } catch (err: any) {
       const isAuth = err?.response?.status === 401;
       if (isAuth) {
@@ -300,12 +300,17 @@ export default function DashboardStudio() {
     }
 
     // 8. Fetch CMS for Live TV, Radio, Reels & Widgets
-    let tvCount = 0;
-    let radioCount = 0;
-    let reelsCount = 0;
+    let tvCount: number | string = "Not configured";
+    let radioCount: number | string = "Not configured";
+    let reelsCount: number | string = "Not configured";
+    let cmsStatus: "live" | "unavailable" = "unavailable";
     try {
-      const cmsRes = await axios.get("/api/cms");
-      const cms = cmsRes.data?.cms || {};
+      const cmsRes = await axios.get("/api/cms", { timeout: 8000 });
+      const cms = cmsRes.data?.cms;
+      if (!cmsRes.data?.success || !cms || typeof cms !== "object" || Array.isArray(cms)) {
+        throw new Error("Invalid CMS response");
+      }
+      cmsStatus = "live";
       if (Array.isArray(cms.liveTvChannels)) tvCount = cms.liveTvChannels.filter((c: any) => c.enabled !== false).length;
       if (Array.isArray(cms.internetRadioStations)) radioCount = cms.internetRadioStations.filter((r: any) => r.enabled !== false).length;
       else if (Array.isArray(cms.radioStations)) radioCount = cms.radioStations.filter((r: any) => r.enabled !== false).length;
@@ -315,7 +320,12 @@ export default function DashboardStudio() {
       if (Array.isArray(cms.dashboardWidgets)) {
         setWidgets(cms.dashboardWidgets);
       }
-    } catch {}
+    } catch {
+      tvCount = "Unavailable";
+      radioCount = "Unavailable";
+      reelsCount = "Unavailable";
+      cmsStatus = "unavailable";
+    }
 
     setData({
       users: usersRes.items,
@@ -370,19 +380,19 @@ export default function DashboardStudio() {
       channels: {
         value: tvCount,
         loading: false,
-        status: "live",
+        status: cmsStatus,
         lastUpdated: now
       },
       radio: {
         value: radioCount,
         loading: false,
-        status: "live",
+        status: cmsStatus,
         lastUpdated: now
       },
       reels: {
         value: reelsCount,
         loading: false,
-        status: "live",
+        status: cmsStatus,
         lastUpdated: now
       }
     });
