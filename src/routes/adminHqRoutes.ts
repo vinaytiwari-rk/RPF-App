@@ -42,8 +42,22 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
       return res.status(401).json({ success: false, error: "Invalid administrator credentials." });
     }
 
-    const adminRole = credential.role === "super_admin" || credential.role === "superadmin" ? "super_admin" : "admin";
-    const user = { id: String(credential.id), name: "System Administrator", role: adminRole };
+    // Only an explicitly provisioned administrator credential may issue an admin session.
+    // Never promote a credential with a missing, malformed, or ordinary-user role.
+    const storedRole = String(credential.role || "").trim().toLowerCase();
+    if (!["admin", "super_admin", "superadmin"].includes(storedRole)) {
+      await auditEvent({
+        action: "admin_login_failed",
+        resource: "administrator",
+        userId: String(credential.id),
+        req,
+        metadata: { reason: "credential_role_not_authorized", storedRole: storedRole || "missing" },
+      });
+      return res.status(403).json({ success: false, error: "This account is not authorized for administrator access." });
+    }
+
+    // The application has one canonical privileged role: admin.
+    const user = { id: String(credential.id), name: "System Administrator", role: "admin" };
     const token = jwt.sign(user, JWT_SECRET, { expiresIn: "30d" });
 
     try {
