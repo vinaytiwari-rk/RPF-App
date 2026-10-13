@@ -1,0 +1,242 @@
+{
+  "packId": "english-grammar-originals-001",
+  "version": 1,
+  "subject": "english-grammar",
+  "category": "english",
+  "titleEn": "English Grammar — Foundations",
+  "titleHi": "अंग्रेज़ी व्याकरण — आधार",
+  "descEn": "Eight original bilingual questions covering agreement, tense, articles, prepositions, voice, conditionals, usage and vocabulary.",
+  "descHi": "वाक्य-सामंजस्य, काल, आर्टिकल, संबंधसूचक शब्द, वाच्य, शर्तीय वाक्य, प्रयोग और शब्दावली पर आठ मौलिक द्विभाषी प्रश्न।",
+  "iconName": "Languages",
+  "color": "from-indigo-600 to-violet-600",
+  "badge": "Original practice",
+  "durationMinutes": 10,
+  "questions": [
+    {
+      "id": "eng-grammar-20261013-001",
+      "subject": "english-grammar",
+      "topic": "Subject-verb agreement",
+      "difficulty": "easy",
+      "questionEn": "Neither of the two proposals ___ acceptable.",
+      "questionHi": "दोनों प्रस्तावों में से कोई भी स्वीकार्य नहीं ___।",
+      "optionsEn": [
+        "are",
+        "is",
+        "were",
+        "have been"
+      ],
+      "optionsHi": [
+        "हैं",
+        "है",
+        "थे",
+        "हो चुके हैं"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "“Neither” is singular in this construction, so it takes “is.”",
+      "explanationHi": "इस वाक्य-रचना में “Neither” एकवचन है, इसलिए “is” सही है।",
+      "examTags": [
+        "english",
+        "grammar",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "eng-grammar-20261013-002",
+      "subject": "english-grammar",
+      "topic": "Prepositions",
+      "difficulty": "easy",
+      "questionEn": "She has been working here ___ 2021.",
+      "questionHi": "वह 2021 ___ यहाँ काम कर रही है।",
+      "optionsEn": [
+        "for",
+        "since",
+        "from",
+        "by"
+      ],
+      "optionsHi": [
+        "से (अवधि)",
+        "से (आरंभ-बिंदु)",
+        "की ओर से",
+        "तक"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Use “since” with a specific starting point in time.",
+      "explanationHi": "समय के निश्चित आरंभ-बिंदु के साथ “since” का प्रयोग होता है।",
+      "examTags": [
+        "english",
+        "grammar",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "eng-grammar-20261013-003",
+      "subject": "english-grammar",
+      "topic": "Articles",
+      "difficulty": "easy",
+      "questionEn": "Choose the correct article: She is ___ honest officer.",
+      "questionHi": "सही आर्टिकल चुनें: She is ___ honest officer.",
+      "optionsEn": [
+        "a",
+        "an",
+        "the",
+        "no article"
+      ],
+      "optionsHi": [
+        "a",
+        "an",
+        "the",
+        "कोई आर्टिकल नहीं"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "“Honest” begins with a vowel sound because its “h” is silent, so “an” is used.",
+      "explanationHi": "“Honest” में h का उच्चारण नहीं होता और शब्द स्वर-ध्वनि से शुरू होता है, इसलिए “an” आएगा।",
+      "examTags": [
+        "english",
+        "grammar",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "eng-grammar-20261013-004",
+      "subject": "english-grammar",
+      "topic": "Prepositions",
+      "difficulty": "easy",
+      "questionEn": "The committee will meet ___ Monday.",
+      "questionHi": "समिति ___ सोमवार को बैठक करेगी।",
+      "optionsEn": [
+        "at",
+        "on",
+        "in",
+        "by"
+      ],
+      "optionsHi": [
+        "at",
+        "on",
+        "in",
+        "by"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Use “on” with days of the week.",
+      "explanationHi": "सप्ताह के दिनों के साथ “on” का प्रयोग किया जाता है।",
+      "examTags": [
+        "english",
+        "grammar",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "eng-grammar-20261013-005",
+      "subject": "english-grammar",
+      "topic": "Passive voice",
+      "difficulty": "medium",
+      "questionEn": "Choose the correct passive form of: “The clerk filed the report yesterday.”",
+      "questionHi": "“The clerk filed the report yesterday.” का सही कर्मवाच्य चुनें।",
+      "optionsEn": [
+        "The report is filed by the clerk yesterday.",
+        "The report has filed by the clerk yesterday.",
+        "The report was filed by the clerk yesterday.",
+        "The report had been file by the clerk yesterday."
+      ],
+      "optionsHi": [
+        "The report is filed by the clerk yesterday.",
+        "The report has filed by the clerk yesterday.",
+        "The report was filed by the clerk yesterday.",
+        "The report had been file by the clerk yesterday."
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Simple past active changes to “was/were + past participle” in the passive.",
+      "explanationHi": "सामान्य भूतकाल के कर्मवाच्य में “was/were + past participle” आता है।",
+      "examTags": [
+        "english",
+        "grammar",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "eng-grammar-20261013-006",
+      "subject": "english-grammar",
+      "topic": "Conditionals",
+      "difficulty": "medium",
+      "questionEn": "If I ___ more time, I would learn another language.",
+      "questionHi": "यदि मेरे पास अधिक समय ___, तो मैं एक और भाषा सीखता।",
+      "optionsEn": [
+        "had",
+        "have",
+        "will have",
+        "am having"
+      ],
+      "optionsHi": [
+        "होता",
+        "है",
+        "होगा",
+        "हो रहा है"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "The second conditional uses the past form in the if-clause: “If I had…, I would…”.",
+      "explanationHi": "द्वितीय शर्तीय वाक्य में if-clause के साथ past form आता है: “If I had…, I would…”.",
+      "examTags": [
+        "english",
+        "grammar",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "eng-grammar-20261013-007",
+      "subject": "english-grammar",
+      "topic": "Usage",
+      "difficulty": "easy",
+      "questionEn": "Choose the grammatically correct sentence.",
+      "questionHi": "व्याकरण की दृष्टि से सही वाक्य चुनें।",
+      "optionsEn": [
+        "Each of the students have submitted the form.",
+        "Each of the students has submitted the form.",
+        "Each of the students are submitting the form.",
+        "Each students has submitted the form."
+      ],
+      "optionsHi": [
+        "Each of the students have submitted the form.",
+        "Each of the students has submitted the form.",
+        "Each of the students are submitting the form.",
+        "Each students has submitted the form."
+      ],
+      "correctIndex": 1,
+      "explanationEn": "“Each” is singular and takes the singular verb “has.”",
+      "explanationHi": "“Each” एकवचन है, इसलिए इसके साथ एकवचन क्रिया “has” आती है।",
+      "examTags": [
+        "english",
+        "grammar",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "eng-grammar-20261013-008",
+      "subject": "english-grammar",
+      "topic": "Vocabulary",
+      "difficulty": "easy",
+      "questionEn": "Which word is closest in meaning to “meticulous”?",
+      "questionHi": "“Meticulous” शब्द का सबसे निकट अर्थ कौन-सा है?",
+      "optionsEn": [
+        "Careless",
+        "Impatient",
+        "Uncertain",
+        "Careful and precise"
+      ],
+      "optionsHi": [
+        "लापरवाह",
+        "अधीर",
+        "अनिश्चित",
+        "सावधान और सटीक"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "“Meticulous” means showing great attention to detail.",
+      "explanationHi": "“Meticulous” का अर्थ है बारीकियों पर बहुत ध्यान देने वाला।",
+      "examTags": [
+        "english",
+        "vocabulary",
+        "competitive-exams"
+      ]
+    }
+  ],
+  "questionCount": 8,
+  "questionsCount": 8
+}
