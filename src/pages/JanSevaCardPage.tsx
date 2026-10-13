@@ -97,10 +97,10 @@ export default function JanSevaCardPage() {
         ? featuredServices.find((s: any) => s.id === "card" || s.route === "/jan-seva-card" || s.route === "/services/card")
         : null);
 
-    if (matchedService && Array.isArray(matchedService.subLinks)) {
-      // An explicit empty list or all-disabled links means the admin intentionally removed them.
-      // Do not resurrect legacy/default government links in that case.
-      return matchedService.subLinks
+    if (matchedService && (matchedService.subLinksConfigured === true || (Array.isArray(matchedService.subLinks) && matchedService.subLinks.length > 0))) {
+      // An explicitly published empty list or all-disabled links is authoritative.
+      // Unconfigured legacy cards may still use serviceWebsiteLinks/defaults below.
+      return (Array.isArray(matchedService.subLinks) ? matchedService.subLinks : [])
         .filter((l: any) => l && l.active !== false && l.url !== "/jan-seva-card")
         .map((l: any) => ({
           title: l.title || "Portal Link",
