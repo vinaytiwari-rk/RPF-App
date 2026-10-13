@@ -1,0 +1,423 @@
+{
+  "packId": "reasoning-analytical-foundations-2026-10-13-a",
+  "version": 1,
+  "subject": "reasoning",
+  "category": "logical-reasoning",
+  "titleEn": "Logical Reasoning — Foundations A",
+  "titleHi": "तार्किक क्षमता — आधार A",
+  "descEn": "Fifteen original bilingual questions on series, analogy, coding, directions, relations, ranking, syllogisms and patterns.",
+  "descHi": "श्रृंखला, समानता, कूटलेखन, दिशा, संबंध, क्रम, तर्क और पैटर्न पर 15 मौलिक द्विभाषी प्रश्न।",
+  "iconName": "BrainCircuit",
+  "color": "from-emerald-600 to-teal-600",
+  "badge": "Original practice",
+  "durationMinutes": 12,
+  "questionCount": 15,
+  "questionsCount": 15,
+  "questions": [
+    {
+      "id": "reasoning-20261013-a-001",
+      "subject": "reasoning",
+      "topic": "Series",
+      "difficulty": "easy",
+      "questionEn": "Find the next number: 2, 5, 10, 17, 26, __.",
+      "questionHi": "अगली संख्या ज्ञात करें: 2, 5, 10, 17, 26, __।",
+      "optionsEn": [
+        "35",
+        "36",
+        "37",
+        "38"
+      ],
+      "optionsHi": [
+        "35",
+        "36",
+        "37",
+        "38"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The differences are 3, 5, 7, 9; next is 11, so 37.",
+      "explanationHi": "अंतर 3, 5, 7, 9 हैं; अगला 11 है, इसलिए 37।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-002",
+      "subject": "reasoning",
+      "topic": "Squares",
+      "difficulty": "easy",
+      "questionEn": "What comes next: 1, 4, 9, 16, 25, __?",
+      "questionHi": "अगला पद क्या है: 1, 4, 9, 16, 25, __?",
+      "optionsEn": [
+        "30",
+        "35",
+        "36",
+        "49"
+      ],
+      "optionsHi": [
+        "30",
+        "35",
+        "36",
+        "49"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "These are squares from 1² through 5²; next is 6² = 36.",
+      "explanationHi": "ये 1² से 5² तक के वर्ग हैं; अगला 6² = 36 है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-003",
+      "subject": "reasoning",
+      "topic": "Analogy",
+      "difficulty": "easy",
+      "questionEn": "Eye is to sight as ear is to __.",
+      "questionHi": "आँख का संबंध देखने से है, वैसे ही कान का संबंध ___ से है।",
+      "optionsEn": [
+        "Taste",
+        "Hearing",
+        "Smell",
+        "Touch"
+      ],
+      "optionsHi": [
+        "स्वाद",
+        "सुनने",
+        "गंध",
+        "स्पर्श"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Eyes enable sight; ears enable hearing.",
+      "explanationHi": "आँखें देखने और कान सुनने में सहायक हैं।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-004",
+      "subject": "reasoning",
+      "topic": "Coding",
+      "difficulty": "easy",
+      "questionEn": "If each letter is replaced by the next alphabet letter, how is LAMP coded?",
+      "questionHi": "यदि हर अक्षर को वर्णमाला के अगले अक्षर से बदलें, तो LAMP का कूट क्या होगा?",
+      "optionsEn": [
+        "MBNQ",
+        "KZLO",
+        "MBOQ",
+        "NBNQ"
+      ],
+      "optionsHi": [
+        "MBNQ",
+        "KZLO",
+        "MBOQ",
+        "NBNQ"
+      ],
+      "correctIndex": 0,
+      "explanationEn": "L→M, A→B, M→N and P→Q, producing MBNQ.",
+      "explanationHi": "L→M, A→B, M→N और P→Q; कूट MBNQ है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-005",
+      "subject": "reasoning",
+      "topic": "Odd one out",
+      "difficulty": "easy",
+      "questionEn": "Which number is different: 8, 27, 64, 100, 125?",
+      "questionHi": "कौन-सी संख्या अलग है: 8, 27, 64, 100, 125?",
+      "optionsEn": [
+        "8",
+        "27",
+        "100",
+        "125"
+      ],
+      "optionsHi": [
+        "8",
+        "27",
+        "100",
+        "125"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "8, 27, 64 and 125 are cubes; 100 is not a perfect cube.",
+      "explanationHi": "8, 27, 64 और 125 पूर्ण घन हैं; 100 पूर्ण घन नहीं है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-006",
+      "subject": "reasoning",
+      "topic": "Directions",
+      "difficulty": "easy",
+      "questionEn": "A person faces north, turns right, turns right again, then turns left. Which way are they facing?",
+      "questionHi": "एक व्यक्ति उत्तर की ओर है, दाएँ, फिर दाएँ और फिर बाएँ मुड़ता है। अब वह किस दिशा में है?",
+      "optionsEn": [
+        "North",
+        "East",
+        "South",
+        "West"
+      ],
+      "optionsHi": [
+        "उत्तर",
+        "पूर्व",
+        "दक्षिण",
+        "पश्चिम"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "North → east → south → east.",
+      "explanationHi": "उत्तर → पूर्व → दक्षिण → पूर्व।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-007",
+      "subject": "reasoning",
+      "topic": "Relations",
+      "difficulty": "easy",
+      "questionEn": "Asha is Ravi’s mother, and Ravi is Neha’s father. How is Asha related to Neha?",
+      "questionHi": "आशा रवि की माँ है और रवि नेहा का पिता है। आशा का नेहा से क्या संबंध है?",
+      "optionsEn": [
+        "Aunt",
+        "Sister",
+        "Grandmother",
+        "Cousin"
+      ],
+      "optionsHi": [
+        "चाची/मौसी",
+        "बहन",
+        "दादी/नानी",
+        "चचेरी/ममेरी बहन"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Asha is the mother of Neha’s father, so she is Neha’s grandmother.",
+      "explanationHi": "आशा, नेहा के पिता की माँ है, इसलिए वह नेहा की दादी/नानी है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-008",
+      "subject": "reasoning",
+      "topic": "Ranking",
+      "difficulty": "easy",
+      "questionEn": "A student ranks 7th from the left and 9th from the right. How many students are in the row?",
+      "questionHi": "एक विद्यार्थी बाएँ से 7वें और दाएँ से 9वें स्थान पर है। पंक्ति में कितने विद्यार्थी हैं?",
+      "optionsEn": [
+        "14",
+        "15",
+        "16",
+        "17"
+      ],
+      "optionsHi": [
+        "14",
+        "15",
+        "16",
+        "17"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Total = 7 + 9 − 1 = 15.",
+      "explanationHi": "कुल = 7 + 9 − 1 = 15।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-009",
+      "subject": "reasoning",
+      "topic": "Syllogism",
+      "difficulty": "easy",
+      "questionEn": "All poets are writers. Some writers are teachers. Must some poets be teachers?",
+      "questionHi": "सभी कवि लेखक हैं। कुछ लेखक शिक्षक हैं। क्या कुछ कवियों का शिक्षक होना निश्चित है?",
+      "optionsEn": [
+        "Yes, certainly",
+        "No poet can teach",
+        "All teachers are poets",
+        "Cannot be determined"
+      ],
+      "optionsHi": [
+        "हाँ, निश्चित रूप से",
+        "कोई कवि पढ़ा नहीं सकता",
+        "सभी शिक्षक कवि हैं",
+        "निर्धारित नहीं किया जा सकता"
+      ],
+      "correctIndex": 3,
+      "explanationEn": "The writers who are teachers may not be poets; no overlap is guaranteed.",
+      "explanationHi": "शिक्षक लेखक कवि न भी हों; कथनों से समानता निश्चित नहीं है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-010",
+      "subject": "reasoning",
+      "topic": "Letter series",
+      "difficulty": "easy",
+      "questionEn": "Complete the series: A, D, H, M, S, __.",
+      "questionHi": "श्रृंखला पूरी करें: A, D, H, M, S, __।",
+      "optionsEn": [
+        "X",
+        "Y",
+        "Z",
+        "A"
+      ],
+      "optionsHi": [
+        "X",
+        "Y",
+        "Z",
+        "A"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The jumps are +3, +4, +5, +6; next is +7, reaching Z.",
+      "explanationHi": "अंतर +3, +4, +5, +6 हैं; अगला +7 है, जिससे Z मिलता है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-011",
+      "subject": "reasoning",
+      "topic": "Clock",
+      "difficulty": "easy",
+      "questionEn": "What is the smaller angle between clock hands at 2:00?",
+      "questionHi": "2:00 बजे घड़ी की सुइयों के बीच छोटा कोण कितना है?",
+      "optionsEn": [
+        "30°",
+        "60°",
+        "90°",
+        "120°"
+      ],
+      "optionsHi": [
+        "30°",
+        "60°",
+        "90°",
+        "120°"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "Each hour mark is 30° apart; at 2:00 the angle is 2 × 30° = 60°.",
+      "explanationHi": "हर घंटे के निशान में 30° का अंतर है; 2:00 पर कोण 2 × 30° = 60° है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-012",
+      "subject": "reasoning",
+      "topic": "Calendar",
+      "difficulty": "easy",
+      "questionEn": "What day is exactly 28 days after Saturday?",
+      "questionHi": "शनिवार के ठीक 28 दिन बाद कौन-सा दिन होगा?",
+      "optionsEn": [
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "optionsHi": [
+        "गुरुवार",
+        "शुक्रवार",
+        "शनिवार",
+        "रविवार"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Twenty-eight days equal four full weeks, so the weekday remains Saturday.",
+      "explanationHi": "28 दिन चार पूरे सप्ताह हैं, इसलिए दिन शनिवार ही रहेगा।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-013",
+      "subject": "reasoning",
+      "topic": "Ordering",
+      "difficulty": "easy",
+      "questionEn": "R is before S, S is before T, and T is before U in a line. Who is third?",
+      "questionHi": "पंक्ति में R, S से पहले; S, T से पहले; और T, U से पहले है। तीसरे स्थान पर कौन है?",
+      "optionsEn": [
+        "R",
+        "S",
+        "T",
+        "U"
+      ],
+      "optionsHi": [
+        "R",
+        "S",
+        "T",
+        "U"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "The order is R, S, T, U, making T third.",
+      "explanationHi": "क्रम R, S, T, U है, इसलिए T तीसरे स्थान पर है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-014",
+      "subject": "reasoning",
+      "topic": "Number pattern",
+      "difficulty": "easy",
+      "questionEn": "Complete the mapping: 2→8, 3→27, 4→64, 5→___.",
+      "questionHi": "संबंध पूरा करें: 2→8, 3→27, 4→64, 5→___।",
+      "optionsEn": [
+        "100",
+        "115",
+        "125",
+        "150"
+      ],
+      "optionsHi": [
+        "100",
+        "115",
+        "125",
+        "150"
+      ],
+      "correctIndex": 2,
+      "explanationEn": "Each number maps to its cube; 5³ = 125.",
+      "explanationHi": "हर संख्या का घन लिया गया है; 5³ = 125।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    },
+    {
+      "id": "reasoning-20261013-a-015",
+      "subject": "reasoning",
+      "topic": "Classification",
+      "difficulty": "easy",
+      "questionEn": "Which sequence shows the correct category relationship?",
+      "questionHi": "कौन-सा क्रम सही वर्ग-संबंध दर्शाता है?",
+      "optionsEn": [
+        "Plant ⊂ rose ⊂ flower",
+        "Rose ⊂ flower ⊂ plant",
+        "Flower ⊂ plant ⊂ rose",
+        "Rose and plant never overlap"
+      ],
+      "optionsHi": [
+        "पौधा ⊂ गुलाब ⊂ फूल",
+        "गुलाब ⊂ फूल ⊂ पौधा",
+        "फूल ⊂ पौधा ⊂ गुलाब",
+        "गुलाब और पौधे का संबंध नहीं"
+      ],
+      "correctIndex": 1,
+      "explanationEn": "A rose is a kind of flower, and a flower is part of a plant.",
+      "explanationHi": "गुलाब एक प्रकार का फूल है और फूल पौधे का भाग है।",
+      "examTags": [
+        "logical-reasoning",
+        "competitive-exams"
+      ]
+    }
+  ]
+}
