@@ -144,7 +144,7 @@ export default function HealthCare() {
           {filtered.map((x) => (
             <button
               key={x.key}
-              onClick={() => openUrl(x.url, x.name)
+              onClick={() => openUrl(x.url, x.name)}
               className="flex w-full items-center gap-3.5 rounded-2xl border border-amber-100/80 bg-white/80 backdrop-blur-md p-4 text-left shadow-2xs hover:border-amber-300/80 hover:shadow-xs transition-all group"
             >
               <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-2.5 text-[#DC2626] shrink-0">
