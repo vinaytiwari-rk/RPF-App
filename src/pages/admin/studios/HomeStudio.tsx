@@ -145,6 +145,7 @@ export default function HomeStudio() {
   const { token } = useAuth();
   const [activeTab, setActiveTab] = useState<ControlTab>("weather");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -330,9 +331,13 @@ export default function HomeStudio() {
   // Load existing configuration from /api/cms
   const loadCmsData = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
-      const res = await axios.get("/api/cms");
-      const d = res.data?.cms || res.data?.data || {};
+      const res = await axios.get("/api/cms", { timeout: 10000 });
+      const d = res.data?.cms || res.data?.data;
+      if (res.data?.success !== true || !d || typeof d !== "object" || Array.isArray(d)) {
+        throw new Error("The server did not return a valid Home CMS configuration.");
+      }
 
       // 1. Weather
       if (d.weatherConfig) {
@@ -491,12 +496,8 @@ export default function HomeStudio() {
           }))
         );
       } else {
-        setImpactStats([
-          { id: "cards_issued", label: "Jan Seva Cards", value: 66505, suffix: "+", iconName: "Award", enabled: true },
-          { id: "health_camps", label: "Health & Eye Camps", value: 150, suffix: "+", iconName: "Stethoscope", enabled: true },
-          { id: "volunteers", label: "Volunteers Network", value: 2400, suffix: "+", iconName: "Users", enabled: true },
-          { id: "jobs_empowered", label: "Jobs & Livelihood", value: 1800, suffix: "+", iconName: "Briefcase", enabled: true }
-        ]);
+        // Do not prefill public impact counters with unverified sample figures.
+        setImpactStats([]);
       }
 
       // 8. Field Impact: Seva Domains (Unified)
@@ -539,8 +540,10 @@ export default function HomeStudio() {
 
       // 9. Theme & Layout
       if (d.themeConfig) setThemeConfig(prev => ({ ...prev, ...d.themeConfig }));
-    } catch {
-      toast.error("Failed to load Home configuration");
+    } catch (error: any) {
+      const message = error?.response?.data?.error || error?.message || "Failed to load Home configuration";
+      setLoadError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -586,6 +589,10 @@ export default function HomeStudio() {
   const handleSaveAll = async () => {
     if (!token) {
       toast.error("Admin session expired. Please sign in.");
+      return;
+    }
+    if (loading || loadError) {
+      toast.error("Home configuration is not verified. Retry loading before publishing.");
       return;
     }
 
@@ -720,6 +727,7 @@ export default function HomeStudio() {
 
   return (
     <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-6">
+      {loadError && <div role="alert" className="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900"><div><p className="font-bold">Home configuration could not be verified.</p><p className="mt-1 text-xs">{loadError} Publishing is disabled to protect saved content.</p></div><button type="button" onClick={() => void loadCmsData()} disabled={loading} className="rounded-xl border border-rose-300 bg-white px-3 py-2 text-xs font-bold disabled:opacity-50">Retry</button></div>}
       {/* HEADER */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
@@ -749,7 +757,7 @@ export default function HomeStudio() {
           </button>
           <button
             onClick={handleSaveAll}
-            disabled={saving}
+            disabled={saving || loading || Boolean(loadError)}
             className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition shadow-xs disabled:opacity-50"
           >
             <Save className="h-4 w-4" /> {saving ? "Publishing..." : "Save & Publish Live"}
