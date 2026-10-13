@@ -182,8 +182,8 @@ export default function DashboardStudio() {
   const [savingWidgets, setSavingWidgets] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "volunteers" | "users" | "widgets">("overview");
   const [search, setSearch] = useState("");
-  const [appVersion, setAppVersion] = useState("2.5.18");
-  const [manifestVersion, setManifestVersion] = useState("2.5.18");
+  const [appVersion, setAppVersion] = useState("Unknown");
+  const [manifestVersion, setManifestVersion] = useState("Unknown");
   const [sessionExpired, setSessionExpired] = useState(false);
 
   useEffect(() => {
