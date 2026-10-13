@@ -1,0 +1,494 @@
+{
+  "packId": "samahit-world-geography-201-221",
+  "subject": "world-geography",
+  "category": "general-knowledge",
+  "version": 1,
+  "titleEn": "World Geography: Questions 201–221",
+  "titleHi": "विश्व भूगोल: प्रश्न 201–221",
+  "questionCount": 21,
+  "questions": [
+    {
+      "id": "samahit-world-geography-201",
+      "subject": "world-geography",
+      "topic": "Plateaus",
+      "difficulty": "easy",
+      "questionHi": "विश्व का सबसे ऊँचा और विस्तृत पठार सामान्यतः किसे कहा जाता है?",
+      "questionEn": "Which plateau is generally regarded as the world's highest and most extensive?",
+      "optionsHi": [
+        "दक्कन का पठार",
+        "तिब्बती पठार",
+        "छोटानागपुर का पठार",
+        "कोलोराडो पठार"
+      ],
+      "optionsEn": [
+        "Deccan Plateau",
+        "Tibetan Plateau",
+        "Chota Nagpur Plateau",
+        "Colorado Plateau"
+      ],
+      "correctIndex": 1,
+      "explanationHi": "तिब्बती पठार की औसत ऊँचाई लगभग 4,500 मीटर है।",
+      "explanationEn": "The Tibetan Plateau averages roughly 4,500 metres in elevation."
+    },
+    {
+      "id": "samahit-world-geography-202",
+      "subject": "world-geography",
+      "topic": "Deepest Lake",
+      "difficulty": "easy",
+      "questionHi": "विश्व की सबसे गहरी झील कौन-सी है?",
+      "questionEn": "Which is the world's deepest lake?",
+      "optionsHi": [
+        "सुपीरियर झील",
+        "विक्टोरिया झील",
+        "चिल्का झील",
+        "बैकाल झील"
+      ],
+      "optionsEn": [
+        "Lake Superior",
+        "Lake Victoria",
+        "Chilika Lake",
+        "Lake Baikal"
+      ],
+      "correctIndex": 3,
+      "explanationHi": "रूस की बैकाल झील की अधिकतम गहराई लगभग 1,642 मीटर है।",
+      "explanationEn": "Russia's Lake Baikal reaches a maximum depth of about 1,642 metres."
+    },
+    {
+      "id": "samahit-world-geography-203",
+      "subject": "world-geography",
+      "topic": "Largest Lake",
+      "difficulty": "medium",
+      "questionHi": "क्षेत्रफल के आधार पर विश्व की सबसे बड़ी झील कौन-सी है?",
+      "questionEn": "Which is the world's largest lake by surface area?",
+      "optionsHi": [
+        "कैस्पियन सागर",
+        "बैकाल झील",
+        "सुपीरियर झील",
+        "विक्टोरिया झील"
+      ],
+      "optionsEn": [
+        "Caspian Sea",
+        "Lake Baikal",
+        "Lake Superior",
+        "Lake Victoria"
+      ],
+      "correctIndex": 0,
+      "explanationHi": "नाम में सागर होने पर भी कैस्पियन एक अंतर्देशीय खारे पानी का झील-तंत्र है।",
+      "explanationEn": "Despite its name, the Caspian is an inland saline lake."
+    },
+    {
+      "id": "samahit-world-geography-204",
+      "subject": "world-geography",
+      "topic": "Deserts",
+      "difficulty": "easy",
+      "questionHi": "विश्व का सबसे बड़ा मरुस्थल कौन-सा है, यदि ध्रुवीय मरुस्थल भी गिने जाएँ?",
+      "questionEn": "What is the world's largest desert when polar deserts are included?",
+      "optionsHi": [
+        "सहारा",
+        "थार",
+        "अंटार्कटिक मरुस्थल",
+        "गोबी"
+      ],
+      "optionsEn": [
+        "Sahara",
+        "Thar",
+        "Antarctic Desert",
+        "Gobi"
+      ],
+      "correctIndex": 2,
+      "explanationHi": "कम वर्षा के कारण अंटार्कटिका को ध्रुवीय मरुस्थल माना जाता है।",
+      "explanationEn": "Because of its very low precipitation, Antarctica is classified as a polar desert."
+    },
+    {
+      "id": "samahit-world-geography-205",
+      "subject": "world-geography",
+      "topic": "Hot Desert",
+      "difficulty": "easy",
+      "questionHi": "विश्व का सबसे बड़ा गर्म मरुस्थल कौन-सा है?",
+      "questionEn": "What is the world's largest hot desert?",
+      "optionsHi": [
+        "थार",
+        "सहारा",
+        "गोबी",
+        "कालाहारी"
+      ],
+      "optionsEn": [
+        "Thar",
+        "Sahara",
+        "Gobi",
+        "Kalahari"
+      ],
+      "correctIndex": 1,
+      "explanationHi": "सहारा उत्तरी अफ्रीका में फैला सबसे बड़ा गर्म मरुस्थल है।",
+      "explanationEn": "The Sahara is the largest hot desert, extending across North Africa."
+    },
+    {
+      "id": "samahit-world-geography-206",
+      "subject": "world-geography",
+      "topic": "Nile Mouth",
+      "difficulty": "easy",
+      "questionHi": "नील नदी का मुख्य प्रवाह किस सागर में गिरता है?",
+      "questionEn": "Into which sea does the Nile's main flow empty?",
+      "optionsHi": [
+        "अरब सागर",
+        "बंगाल की खाड़ी",
+        "लाल सागर",
+        "भूमध्य सागर"
+      ],
+      "optionsEn": [
+        "Arabian Sea",
+        "Bay of Bengal",
+        "Red Sea",
+        "Mediterranean Sea"
+      ],
+      "correctIndex": 3,
+      "explanationHi": "नील नदी मिस्र में डेल्टा बनाकर भूमध्य सागर में मिलती है।",
+      "explanationEn": "The Nile forms a delta in Egypt before entering the Mediterranean Sea."
+    },
+    {
+      "id": "samahit-world-geography-207",
+      "subject": "world-geography",
+      "topic": "Amazon Mouth",
+      "difficulty": "easy",
+      "questionHi": "अमेज़न नदी किस महासागर में गिरती है?",
+      "questionEn": "Into which ocean does the Amazon River flow?",
+      "optionsHi": [
+        "अटलांटिक महासागर",
+        "प्रशांत महासागर",
+        "हिंद महासागर",
+        "आर्कटिक महासागर"
+      ],
+      "optionsEn": [
+        "Atlantic Ocean",
+        "Pacific Ocean",
+        "Indian Ocean",
+        "Arctic Ocean"
+      ],
+      "correctIndex": 0,
+      "explanationHi": "अमेज़न का विशाल नदी-प्रवाह ब्राज़ील के तट पर अटलांटिक में पहुँचता है।",
+      "explanationEn": "The Amazon's vast discharge reaches the Atlantic off the Brazilian coast."
+    },
+    {
+      "id": "samahit-world-geography-208",
+      "subject": "world-geography",
+      "topic": "Islands",
+      "difficulty": "medium",
+      "questionHi": "राष्ट्रीय द्वीप-गणना के अनेक तुलनात्मक आँकड़ों में सबसे अधिक द्वीप किस देश के दर्ज किए जाते हैं?",
+      "questionEn": "In many comparative national island inventories, which country records the most islands?",
+      "optionsHi": [
+        "भारत",
+        "चीन",
+        "स्वीडन",
+        "ब्राज़ील"
+      ],
+      "optionsEn": [
+        "India",
+        "China",
+        "Sweden",
+        "Brazil"
+      ],
+      "correctIndex": 2,
+      "explanationHi": "द्वीपों की संख्या गणना की परिभाषा पर निर्भर करती है; स्वीडन की सूची में बहुत बड़ी संख्या में द्वीप हैं।",
+      "explanationEn": "Island totals depend on counting criteria; Sweden's inventory includes a very large number of islands."
+    },
+    {
+      "id": "samahit-world-geography-209",
+      "subject": "world-geography",
+      "topic": "Volcanoes",
+      "difficulty": "easy",
+      "questionHi": "सक्रिय ज्वालामुखियों की बड़ी संख्या किस द्वीपीय देश में पाई जाती है?",
+      "questionEn": "Which island country has a large number of active volcanoes?",
+      "optionsHi": [
+        "भारत",
+        "इंडोनेशिया",
+        "यूनाइटेड किंगडम",
+        "मोरक्को"
+      ],
+      "optionsEn": [
+        "India",
+        "Indonesia",
+        "United Kingdom",
+        "Morocco"
+      ],
+      "correctIndex": 1,
+      "explanationHi": "इंडोनेशिया प्रशांत अग्नि-वृत्त में स्थित है और वहाँ अनेक सक्रिय ज्वालामुखी हैं।",
+      "explanationEn": "Indonesia lies on the Pacific Ring of Fire and has many active volcanoes."
+    },
+    {
+      "id": "samahit-world-geography-210",
+      "subject": "world-geography",
+      "topic": "Seismograph",
+      "difficulty": "easy",
+      "questionHi": "भूकंपीय तरंगों को दर्ज करने वाला यंत्र कौन-सा है?",
+      "questionEn": "Which instrument records seismic waves?",
+      "optionsHi": [
+        "बैरोमीटर",
+        "थर्मामीटर",
+        "हाइग्रोमीटर",
+        "सीस्मोग्राफ"
+      ],
+      "optionsEn": [
+        "Barometer",
+        "Thermometer",
+        "Hygrometer",
+        "Seismograph"
+      ],
+      "correctIndex": 3,
+      "explanationHi": "सीस्मोग्राफ भूकंप से उत्पन्न जमीन की गति को रिकॉर्ड करता है।",
+      "explanationEn": "A seismograph records ground motion caused by earthquakes."
+    },
+    {
+      "id": "samahit-world-geography-211",
+      "subject": "world-geography",
+      "topic": "Barometer",
+      "difficulty": "easy",
+      "questionHi": "वायुमंडलीय दबाव मापने के लिए किस यंत्र का उपयोग किया जाता है?",
+      "questionEn": "Which instrument is used to measure atmospheric pressure?",
+      "optionsHi": [
+        "बैरोमीटर",
+        "थर्मामीटर",
+        "सीस्मोग्राफ",
+        "हाइग्रोमीटर"
+      ],
+      "optionsEn": [
+        "Barometer",
+        "Thermometer",
+        "Seismograph",
+        "Hygrometer"
+      ],
+      "correctIndex": 0,
+      "explanationHi": "बैरोमीटर मौसम विज्ञान में वायुदाब मापने का प्रमुख उपकरण है।",
+      "explanationEn": "A barometer is a standard instrument for measuring air pressure in meteorology."
+    },
+    {
+      "id": "samahit-world-geography-212",
+      "subject": "world-geography",
+      "topic": "Continents",
+      "difficulty": "easy",
+      "questionHi": "क्षेत्रफल के आधार पर सबसे बड़ा महाद्वीप कौन-सा है?",
+      "questionEn": "Which is the largest continent by area?",
+      "optionsHi": [
+        "अफ्रीका",
+        "यूरोप",
+        "एशिया",
+        "ऑस्ट्रेलिया"
+      ],
+      "optionsEn": [
+        "Africa",
+        "Europe",
+        "Asia",
+        "Australia"
+      ],
+      "correctIndex": 2,
+      "explanationHi": "एशिया विश्व का सबसे बड़ा महाद्वीप है और इसकी आबादी भी सबसे अधिक है।",
+      "explanationEn": "Asia is the largest continent and also has the largest population."
+    },
+    {
+      "id": "samahit-world-geography-213",
+      "subject": "world-geography",
+      "topic": "Smallest Ocean",
+      "difficulty": "easy",
+      "questionHi": "क्षेत्रफल के आधार पर सबसे छोटा महासागर कौन-सा है?",
+      "questionEn": "Which is the smallest ocean by area?",
+      "optionsHi": [
+        "हिंद महासागर",
+        "आर्कटिक महासागर",
+        "अटलांटिक महासागर",
+        "प्रशांत महासागर"
+      ],
+      "optionsEn": [
+        "Indian Ocean",
+        "Arctic Ocean",
+        "Atlantic Ocean",
+        "Pacific Ocean"
+      ],
+      "correctIndex": 1,
+      "explanationHi": "आर्कटिक महासागर उत्तरी ध्रुवीय क्षेत्र में स्थित है और पाँच महासागरों में सबसे छोटा है।",
+      "explanationEn": "The Arctic Ocean surrounds the North Polar region and is the smallest of the five oceans."
+    },
+    {
+      "id": "samahit-world-geography-214",
+      "subject": "world-geography",
+      "topic": "Date Line",
+      "difficulty": "medium",
+      "questionHi": "अंतरराष्ट्रीय तिथि रेखा सामान्यतः किस देशांतर के आसपास स्थित है?",
+      "questionEn": "Around which longitude is the International Date Line generally located?",
+      "optionsHi": [
+        "0° देशांतर",
+        "90° पूर्व",
+        "23.5° उत्तर",
+        "180° देशांतर"
+      ],
+      "optionsEn": [
+        "0° longitude",
+        "90° east",
+        "23.5° north",
+        "180° longitude"
+      ],
+      "correctIndex": 3,
+      "explanationHi": "तिथि रेखा 180° देशांतर के आसपास चलती है, लेकिन देशों और द्वीपों से बचने के लिए मुड़ती है।",
+      "explanationEn": "The date line follows roughly 180° longitude but bends to avoid splitting countries and island groups."
+    },
+    {
+      "id": "samahit-world-geography-215",
+      "subject": "world-geography",
+      "topic": "Rainfall",
+      "difficulty": "medium",
+      "questionHi": "भारत में अत्यधिक औसत वार्षिक वर्षा के लिए कौन-सा स्थान प्रसिद्ध है?",
+      "questionEn": "Which place in India is known for exceptionally high average annual rainfall?",
+      "optionsHi": [
+        "मौसिनराम",
+        "मुंबई",
+        "दिल्ली",
+        "जैसलमेर"
+      ],
+      "optionsEn": [
+        "Mawsynram",
+        "Mumbai",
+        "Delhi",
+        "Jaisalmer"
+      ],
+      "correctIndex": 0,
+      "explanationHi": "मेघालय का मौसिनराम अत्यधिक औसत वार्षिक वर्षा के लिए प्रसिद्ध है; रिकॉर्ड अवधि के अनुसार तुलना बदल सकती है।",
+      "explanationEn": "Mawsynram in Meghalaya is known for very high average annual rainfall; rankings depend on the period measured."
+    },
+    {
+      "id": "samahit-world-geography-216",
+      "subject": "world-geography",
+      "topic": "Atacama",
+      "difficulty": "easy",
+      "questionHi": "अटाकामा मरुस्थल किस महाद्वीप में स्थित है?",
+      "questionEn": "On which continent is the Atacama Desert located?",
+      "optionsHi": [
+        "अफ्रीका",
+        "एशिया",
+        "दक्षिण अमेरिका",
+        "ऑस्ट्रेलिया"
+      ],
+      "optionsEn": [
+        "Africa",
+        "Asia",
+        "South America",
+        "Australia"
+      ],
+      "correctIndex": 2,
+      "explanationHi": "अटाकामा मुख्यतः उत्तरी चिली में है और पृथ्वी के सबसे शुष्क गैर-ध्रुवीय क्षेत्रों में गिना जाता है।",
+      "explanationEn": "The Atacama is mainly in northern Chile and is among the driest non-polar regions on Earth."
+    },
+    {
+      "id": "samahit-world-geography-217",
+      "subject": "world-geography",
+      "topic": "Coldest Continent",
+      "difficulty": "easy",
+      "questionHi": "औसतन सबसे ठंडा महाद्वीप कौन-सा है?",
+      "questionEn": "Which is the coldest continent on average?",
+      "optionsHi": [
+        "एशिया",
+        "अंटार्कटिका",
+        "यूरोप",
+        "ऑस्ट्रेलिया"
+      ],
+      "optionsEn": [
+        "Asia",
+        "Antarctica",
+        "Europe",
+        "Australia"
+      ],
+      "correctIndex": 1,
+      "explanationHi": "अंटार्कटिका की ऊँचाई, बर्फ और ध्रुवीय स्थिति अत्यंत कम तापमान में योगदान देती हैं।",
+      "explanationEn": "Antarctica's elevation, ice cover, and polar location contribute to its extreme cold."
+    },
+    {
+      "id": "samahit-world-geography-218",
+      "subject": "world-geography",
+      "topic": "Heat Record",
+      "difficulty": "medium",
+      "questionHi": "पृथ्वी पर आधिकारिक रूप से मान्य उच्चतम वायु तापमान रिकॉर्ड किस स्थान से जुड़ा है?",
+      "questionEn": "Where was the officially recognized highest air-temperature record recorded?",
+      "optionsHi": [
+        "सहारा का केंद्र",
+        "थार मरुस्थल",
+        "गोबी मरुस्थल",
+        "फर्नेस क्रीक, डेथ वैली"
+      ],
+      "optionsEn": [
+        "Central Sahara",
+        "Thar Desert",
+        "Gobi Desert",
+        "Furnace Creek, Death Valley"
+      ],
+      "correctIndex": 3,
+      "explanationHi": "विश्व मौसम संगठन के रिकॉर्ड में 1913 में डेथ वैली का 56.7°C मापन दर्ज है, हालांकि पुराने रिकॉर्ड पर चर्चा होती रही है।",
+      "explanationEn": "The WMO record lists 56.7°C at Death Valley in 1913, though historical extremes have been debated."
+    },
+    {
+      "id": "samahit-world-geography-219",
+      "subject": "world-geography",
+      "topic": "Great Barrier Reef",
+      "difficulty": "easy",
+      "questionHi": "ग्रेट बैरियर रीफ किस देश के उत्तर-पूर्वी तट के पास है?",
+      "questionEn": "Off the northeastern coast of which country is the Great Barrier Reef?",
+      "optionsHi": [
+        "ऑस्ट्रेलिया",
+        "भारत",
+        "जापान",
+        "दक्षिण अफ्रीका"
+      ],
+      "optionsEn": [
+        "Australia",
+        "India",
+        "Japan",
+        "South Africa"
+      ],
+      "correctIndex": 0,
+      "explanationHi": "ग्रेट बैरियर रीफ क्वींसलैंड के तट के समानांतर स्थित विशाल प्रवाल-भित्ति तंत्र है।",
+      "explanationEn": "The Great Barrier Reef is an extensive coral-reef system off Queensland."
+    },
+    {
+      "id": "samahit-world-geography-220",
+      "subject": "world-geography",
+      "topic": "Delta",
+      "difficulty": "medium",
+      "questionHi": "विश्व का सबसे बड़ा नदी डेल्टा सामान्यतः किस नदी-तंत्र से जोड़ा जाता है?",
+      "questionEn": "Which river system is generally associated with the world's largest river delta?",
+      "optionsHi": [
+        "नील",
+        "मिसिसिपी",
+        "गंगा–ब्रह्मपुत्र–मेघना",
+        "राइन"
+      ],
+      "optionsEn": [
+        "Nile",
+        "Mississippi",
+        "Ganges–Brahmaputra–Meghna",
+        "Rhine"
+      ],
+      "correctIndex": 2,
+      "explanationHi": "गंगा–ब्रह्मपुत्र–मेघना डेल्टा भारत और बांग्लादेश में फैला है और सुंदरबन को समाहित करता है।",
+      "explanationEn": "The Ganges–Brahmaputra–Meghna delta spans India and Bangladesh and includes the Sundarbans."
+    },
+    {
+      "id": "samahit-world-geography-221",
+      "subject": "world-geography",
+      "topic": "Volga",
+      "difficulty": "easy",
+      "questionHi": "यूरोप की सबसे लंबी नदी कौन-सी है?",
+      "questionEn": "Which is Europe's longest river?",
+      "optionsHi": [
+        "डेन्यूब",
+        "वोल्गा",
+        "राइन",
+        "थेम्स"
+      ],
+      "optionsEn": [
+        "Danube",
+        "Volga",
+        "Rhine",
+        "Thames"
+      ],
+      "correctIndex": 1,
+      "explanationHi": "वोल्गा नदी रूस से होकर कैस्पियन सागर में गिरती है।",
+      "explanationEn": "The Volga flows through Russia and empties into the Caspian Sea."
+    }
+  ]
+}
