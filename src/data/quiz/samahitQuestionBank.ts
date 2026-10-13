@@ -4,8 +4,10 @@ import { MATHEMATICS_QUESTIONS } from "./questions/mathematics";
 import { ENGLISH_QUESTIONS } from "./questions/english";
 import { REASONING_QUESTIONS } from "./questions/reasoning";
 import { GENERAL_KNOWLEDGE_QUESTIONS } from "./questions/generalKnowledge";
+import { HUGGINGFACE_QUESTIONS } from "./questions/huggingface";
 
 export * from "./samahitQuestionTypes";
+export { HUGGINGFACE_QUESTIONS };
 
 export const SAMAHIT_QUESTION_BANK: SamahitQuestion[] = [
   ...CURRENT_AFFAIRS_QUESTIONS,

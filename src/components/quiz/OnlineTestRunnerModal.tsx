@@ -430,7 +430,7 @@ export default function OnlineTestRunnerModal({
               {/* Top Progress & Category Indicator */}
               <div>
                 <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span>
                       {isHi ? "प्रश्न संख्या" : "Question"}: <b>{currentIndex + 1}</b> / {totalQuestions}
                     </span>
@@ -439,6 +439,12 @@ export default function OnlineTestRunnerModal({
                         ? CATEGORY_LABELS[currentQ.category]?.hi || currentQ.category
                         : CATEGORY_LABELS[currentQ.category]?.en || currentQ.category}
                     </span>
+                    {currentQ.source?.name && (
+                      <span className="rounded-md bg-amber-50 text-amber-800 border border-amber-200/60 px-2 py-0.5 text-[10px] font-bold inline-flex items-center gap-1">
+                        <Globe className="h-2.5 w-2.5 text-amber-600" />
+                        {currentQ.source.name}
+                      </span>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -733,6 +739,24 @@ export default function OnlineTestRunnerModal({
                             💡 <b>{isHi ? "व्याख्या:" : "Explanation:"}</b>{" "}
                             {isHi ? q.explanationHi : q.explanationEn}
                           </p>
+                          {q.source?.name && (
+                            <div className="pt-1 text-[11px] text-slate-600 flex items-center gap-1.5 flex-wrap">
+                              <Globe className="h-3 w-3 text-emerald-600 shrink-0" />
+                              <span className="font-semibold">{isHi ? "प्रमाणित स्रोत:" : "Verified Source:"}</span>
+                              {q.source.url ? (
+                                <a
+                                  href={q.source.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-emerald-700 hover:text-emerald-900 font-bold underline inline-flex items-center gap-0.5"
+                                >
+                                  {q.source.name}
+                                </a>
+                              ) : (
+                                <span className="font-bold text-slate-700">{q.source.name}</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

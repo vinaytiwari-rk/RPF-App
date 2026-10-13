@@ -8,6 +8,7 @@ import {
 } from "../data/quiz/samahitQuestionTypes";
 import {
   SAMAHIT_QUESTION_BANK,
+  HUGGINGFACE_QUESTIONS,
   CATEGORY_PERCENTAGES,
   getQuestionsByCategory,
   getQuestionCountByCategory
@@ -204,6 +205,122 @@ export function generateSamahitTest(
     answerKey,
     startedAt: new Date().toISOString()
   };
+}
+
+/**
+ * Transforms raw SamahitQuestion array into a structured SamahitTestAttempt.
+ */
+function createAttemptFromQuestions(
+  questions: SamahitQuestion[],
+  durationMinutes: number,
+  prefix: string,
+  options: GenerateTestOptions = {}
+): SamahitTestAttempt {
+  const selectedQuestions: TestAttemptQuestion[] = [];
+  const answerKey: Record<string, { correctOptionId: OptionId; correctIndex: number }> = {};
+  const quotas: Record<QuestionCategory, number> = {
+    general_knowledge: 0,
+    current_affairs: 0,
+    reasoning: 0,
+    mathematics: 0,
+    english: 0
+  };
+
+  for (const q of questions) {
+    quotas[q.category] = (quotas[q.category] || 0) + 1;
+
+    let order = [0, 1, 2, 3];
+    if (options.shuffleOptions) {
+      order = shuffleArray(order);
+    }
+
+    const displayOptionsEn: [string, string, string, string] = [
+      q.optionsEn[order[0]] || "",
+      q.optionsEn[order[1]] || "",
+      q.optionsEn[order[2]] || "",
+      q.optionsEn[order[3]] || ""
+    ];
+
+    const displayOptionsHi: [string, string, string, string] = [
+      q.optionsHi[order[0]] || q.optionsEn[order[0]] || "",
+      q.optionsHi[order[1]] || q.optionsEn[order[1]] || "",
+      q.optionsHi[order[2]] || q.optionsEn[order[2]] || "",
+      q.optionsHi[order[3]] || q.optionsEn[order[3]] || ""
+    ];
+
+    const displayCorrectIndex = order.indexOf(q.correctIndex);
+
+    selectedQuestions.push({
+      ...q,
+      displayOptionsEn,
+      displayOptionsHi,
+      displayCorrectIndex,
+      optionOrder: order
+    });
+
+    answerKey[q.id] = {
+      correctOptionId: q.correctOptionId,
+      correctIndex: displayCorrectIndex
+    };
+  }
+
+  const attemptId = `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+  return {
+    attemptId,
+    durationMinutes,
+    totalQuestions: selectedQuestions.length,
+    categoryQuotas: quotas,
+    questions: selectedQuestions,
+    answerKey,
+    startedAt: new Date().toISOString()
+  };
+}
+
+/**
+ * Generates an assessment using Hugging Face's open multiple-choice benchmark datasets (SciQ, Belebele, AI2-ARC).
+ */
+export function generateHuggingFaceTest(
+  questionCount: number,
+  durationMinutes: number,
+  options: GenerateTestOptions = {}
+): SamahitTestAttempt {
+  const pool = shuffleArray(HUGGINGFACE_QUESTIONS);
+  const chosen = pool.slice(0, Math.min(questionCount, pool.length));
+  return createAttemptFromQuestions(chosen, durationMinutes, "hf", options);
+}
+
+/**
+ * Generates an assessment using Gemini AI questions grounded in Wikipedia facts.
+ */
+export function generateGroundedAITest(
+  aiQuestions: SamahitQuestion[],
+  durationMinutes: number,
+  options: GenerateTestOptions = {}
+): SamahitTestAttempt {
+  return createAttemptFromQuestions(aiQuestions, durationMinutes, "ai_wiki", options);
+}
+
+/**
+ * Triple Fusion (त्रिवेणी संगम): Blends Samahit Institutional Core + Gemini/Wikipedia AI + Hugging Face Benchmarks into one comprehensive exam.
+ */
+export function generateTripleFusionTest(
+  questionCount: number,
+  durationMinutes: number,
+  aiQuestions: SamahitQuestion[] = [],
+  options: GenerateTestOptions = {}
+): SamahitTestAttempt {
+  // Proportions: ~40% Samahit, ~30% Hugging Face, ~30% AI/Wiki (or remaining)
+  const countSamahit = Math.max(2, Math.floor(questionCount * 0.4));
+  const countHF = Math.max(2, Math.floor(questionCount * 0.3));
+  const countAI = Math.max(0, questionCount - countSamahit - countHF);
+
+  const samahitPool = shuffleArray(SAMAHIT_QUESTION_BANK).slice(0, countSamahit);
+  const hfPool = shuffleArray(HUGGINGFACE_QUESTIONS).slice(0, countHF);
+  const aiPool = shuffleArray(aiQuestions).slice(0, countAI);
+
+  const combined = shuffleArray([...samahitPool, ...hfPool, ...aiPool]);
+  return createAttemptFromQuestions(combined, durationMinutes, "fusion", options);
 }
 
 /**
