@@ -18,6 +18,31 @@ const adminLoginLimiter = rateLimit({
   message: { success: false, error: "Too many administrator login attempts. Please try again later." },
 });
 
+/**
+ * Repair the legacy session-table contract before issuing an administrator token.
+ * Some production databases were created with sessions.token VARCHAR(255), which
+ * truncates/rejects JWTs. Do not rely on asynchronous boot migrations having finished.
+ */
+async function ensureAdminSessionSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id VARCHAR(255) PRIMARY KEY,
+      user_id VARCHAR(255) NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await pool.query("ALTER TABLE sessions ALTER COLUMN token TYPE TEXT USING token::TEXT");
+  await pool.query("UPDATE sessions SET expires_at = NOW() WHERE expires_at IS NULL");
+  await pool.query("ALTER TABLE sessions ALTER COLUMN expires_at TYPE TIMESTAMPTZ USING expires_at::TIMESTAMPTZ");
+  await pool.query("ALTER TABLE sessions ALTER COLUMN token SET NOT NULL");
+  await pool.query("ALTER TABLE sessions ALTER COLUMN expires_at SET NOT NULL");
+  await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)");
+  await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)");
+  await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)");
+}
+
 router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
   try {
     const { identifier, password } = req.body || {};
@@ -79,12 +104,20 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
     const token = jwt.sign(user, JWT_SECRET, { expiresIn: "30d" });
 
     try {
+      // Repair/verify the actual database schema synchronously before session persistence.
+      await ensureAdminSessionSchema();
       await pool.query(
         `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '30 days')`,
         [`admin-${Date.now()}-${credential.id}`, String(user.id), token]
       );
     } catch (e: any) {
-      console.error("Administrator session tracking failed:", e?.message, e?.code);
+      // Keep internal DB details in server logs only; never expose schema details to clients.
+      console.error("Administrator session tracking failed:", {
+        message: e?.message,
+        code: e?.code,
+        detail: e?.detail,
+        constraint: e?.constraint,
+      });
       return res.status(503).json({ success: false, error: "Secure administrator session could not be created. Please retry." });
     }
 
