@@ -32,6 +32,11 @@ on:
       - 'tsconfig*.json'
       - '.github/workflows/android-apk.yml'
 
+# A newer main push must supersede an older release so an older APK/manifest
+# can never finish uploading after a newer release.
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   android-apk:
     name: Build Android APK
