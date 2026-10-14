@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const connStr = "postgresql://rp_admin:therpfoundation%40321@localhost:5432/rp_db";
+const connStr = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;\nif (!connStr) throw new Error("Database configuration missing: set LOCAL_DB_URL or DATABASE_URL.");
 
 const pool = new pg.Pool({
   connectionString: connStr.replace(/@base(?=[:\/]|$)/g, '@localhost'),
