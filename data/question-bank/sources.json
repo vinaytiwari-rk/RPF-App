@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "policy": {
+    "storeArticleText": false,
+    "storeHeadlinesOrExcerptsAsQuestions": false,
+    "requireOriginalQuestionWording": true,
+    "requireFactCheckForCurrentAffairs": true,
+    "note": "Use source pages to verify facts and write original questions. Do not bulk-copy or redistribute publisher article text or feeds without permission or a suitable licence."
+  },
+  "sources": [
+    {
+      "id": "pib",
+      "name": "Press Information Bureau (PIB)",
+      "url": "https://pib.gov.in/",
+      "role": "primary_official_fact_check",
+      "currentAffairs": true,
+      "automatedMetadataFetch": true,
+      "contentReuse": "Verify facts from official releases and write original questions."
+    },
+    {
+      "id": "sarkaritel",
+      "name": "SarkariTel",
+      "url": "https://www.sarkaritel.com/",
+      "role": "discovery_and_secondary_cross_check",
+      "currentAffairs": true,
+      "automatedMetadataFetch": false,
+      "contentReuse": "Manual review only until a supported feed/API and reuse terms are confirmed."
+    },
+    {
+      "id": "drishti_ias",
+      "name": "Drishti IAS",
+      "url": "https://www.drishtiias.com/",
+      "role": "discovery_and_secondary_cross_check",
+      "currentAffairs": true,
+      "automatedMetadataFetch": false,
+      "contentReuse": "Use for discovery; independently verify facts and write original questions."
+    },
+    {
+      "id": "the_hindu",
+      "name": "The Hindu",
+      "url": "https://www.thehindu.com/",
+      "role": "manual_reference_only",
+      "currentAffairs": true,
+      "automatedMetadataFetch": false,
+      "contentReuse": "Do not bulk-copy articles or feeds; follow current reuse terms."
+    },
+    {
+      "id": "times_of_india",
+      "name": "Times of India",
+      "url": "https://timesofindia.indiatimes.com/",
+      "role": "manual_reference_only",
+      "currentAffairs": true,
+      "automatedMetadataFetch": false,
+      "contentReuse": "Do not bulk-copy articles or feeds; follow current reuse terms."
+    },
+    {
+      "id": "unesco_whc",
+      "name": "UNESCO World Heritage Centre",
+      "url": "https://whc.unesco.org/en/statesparties/IN",
+      "role": "official_world_heritage_reference",
+      "currentAffairs": false,
+      "automatedMetadataFetch": false,
+      "contentReuse": "Use official heritage facts with attribution and original question wording."
+    },
+    {
+      "id": "unesco_ich",
+      "name": "UNESCO Intangible Cultural Heritage",
+      "url": "https://ich.unesco.org/en/state/india-IN",
+      "role": "official_intangible_heritage_reference",
+      "currentAffairs": false,
+      "automatedMetadataFetch": false,
+      "contentReuse": "Use official heritage facts with attribution and original question wording."
+    }
+  ]
+}
