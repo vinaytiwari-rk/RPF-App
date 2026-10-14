@@ -1,6 +1,7 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import rateLimit from "express-rate-limit";
 import { updateServiceContent } from "../controllers/adminHqController.js";
 import { pool } from "../db/dbPool.js";
@@ -36,10 +37,27 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
     }
 
     const credential = result.rows[0];
-    const valid = await bcrypt.compare(String(password), credential.password_hash);
+    const storedHash = String(credential.password_hash || "");
+    let valid = false;
+    let legacySha256 = false;
+    if (storedHash.startsWith("$2")) {
+      valid = await bcrypt.compare(String(password), storedHash);
+    } else if (/^[a-f0-9]{64}$/i.test(storedHash)) {
+      // Support existing SHA-256 admin credentials during migration, then upgrade
+      // the hash immediately after successful verification.
+      const suppliedHash = crypto.createHash("sha256").update(String(password)).digest();
+      const storedDigest = Buffer.from(storedHash, "hex");
+      legacySha256 = storedDigest.length === suppliedHash.length && crypto.timingSafeEqual(storedDigest, suppliedHash);
+      valid = legacySha256;
+    }
     if (!valid) {
       await auditEvent({ action: "admin_login_failed", resource: "administrator", req, metadata: { reason: "invalid_password", username: normalizedIdentifier } });
       return res.status(401).json({ success: false, error: "Invalid administrator credentials." });
+    }
+
+    if (legacySha256) {
+      const upgradedHash = await bcrypt.hash(String(password), 12);
+      await pool.query("UPDATE admin_credentials SET password_hash = $1 WHERE id = $2", [upgradedHash, credential.id]);
     }
 
     // Only an explicitly provisioned administrator credential may issue an admin session.
