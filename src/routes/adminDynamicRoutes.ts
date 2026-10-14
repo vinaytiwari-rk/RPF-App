@@ -43,26 +43,40 @@ const ALLOWED_SETTINGS_KEYS = new Set([
 router.post("/api/admin/settings", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const updates = req.body;
-    let setClause = [];
-    let values = [];
+    if (!updates || typeof updates !== "object" || Array.isArray(updates)) {
+      return res.status(400).json({ success: false, error: "Settings payload must be an object." });
+    }
+
+    const setClause: string[] = [];
+    const values: unknown[] = [];
     let index = 1;
 
     for (const [key, value] of Object.entries(updates)) {
       if (!ALLOWED_SETTINGS_KEYS.has(key)) continue;
-      setClause.push(`"${key}" = $${index}`);
+      setClause.push(`"${key}" = ${index}`);
       values.push(value);
       index++;
     }
 
-    if (setClause.length === 0) return res.json({ success: true });
+    if (setClause.length === 0) {
+      return res.status(400).json({ success: false, error: "No supported settings fields were provided." });
+    }
 
     const query = `UPDATE app_settings SET ${setClause.join(', ')} WHERE id = 1 RETURNING *`;
     const result = await pool.query(query, values);
+    if (!result.rows[0]) {
+      return res.status(503).json({
+        success: false,
+        error: "Global settings are not initialized. Apply the app_settings migration before saving."
+      });
+    }
 
-    res.json({ success: true, data: result.rows[0] });
+    // The GET endpoint caches app_settings for 60 seconds; invalidate immediately after a successful write.
+    apiCache.delete("admin_settings");
+    return res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
     console.error("Error updating settings:", error);
-    res.status(500).json({ success: false, error: "Failed to update settings" });
+    return res.status(500).json({ success: false, error: "Failed to update settings" });
   }
 });
 
