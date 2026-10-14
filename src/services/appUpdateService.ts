@@ -65,8 +65,8 @@ export function isValidSemver(v: any): boolean {
  * Fallback static web/app version code and name
  */
 export const DEFAULT_VERSION_INFO: AppVersionInfo = {
-  versionCode: 21609,
-  versionName: "2.5.18",
+  versionCode: 21739,
+  versionName: "2.5.31",
   packageName: "com.rpfoundation.app",
   isNativeAndroid: Capacitor.getPlatform() === "android",
 };
@@ -86,7 +86,7 @@ export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
       if (nativeInfo && typeof nativeInfo.versionCode === "number") {
         const nativeName = nativeInfo.versionName && isValidSemver(nativeInfo.versionName)
           ? nativeInfo.versionName
-          : "2.5.18";
+          : "2.5.31";
         return {
           versionCode: nativeInfo.versionCode,
           versionName: nativeName,
@@ -104,12 +104,28 @@ export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
   }
 
   try {
+    const res = await fetch(`/api/public/app-update?_t=${Date.now()}`, { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.versionName && isValidSemver(data.versionName)) {
+        cachedWebVersionInfo = {
+          versionCode: data.versionCode || 21739,
+          versionName: String(data.versionName).trim().replace(/^v/, ''),
+          packageName: "com.rpfoundation.app",
+          isNativeAndroid: isAndroid,
+        };
+        return cachedWebVersionInfo;
+      }
+    }
+  } catch {}
+
+  try {
     const res = await fetch(`/version.json?_t=${Date.now()}`, { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
       if (data?.version && isValidSemver(data.version)) {
         cachedWebVersionInfo = {
-          versionCode: 21609,
+          versionCode: 21739,
           versionName: String(data.version).trim().replace(/^v/, ''),
           packageName: "com.rpfoundation.app",
           isNativeAndroid: isAndroid,

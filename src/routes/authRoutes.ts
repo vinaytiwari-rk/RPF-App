@@ -221,12 +221,29 @@ router.post("/api/auth/login", async (req, res) => {
     if (!user) return res.status(401).json({ success: false, error: "User not found" });
     if (!validPassword) return res.status(401).json({ success: false, error: "Invalid credentials" });
 
+    // Master Admin Auto-Resolution for Shri Vinay Tiwari & Authorized System Admins
+    const isMasterAdminUser = 
+      String(finalIdentifier).toLowerCase() === '9399945861' ||
+      String(finalIdentifier).toLowerCase() === 'vinaytiwari' ||
+      String(finalIdentifier).toLowerCase() === 'tiwari.vinay89@gmail.com' ||
+      String(finalIdentifier).toLowerCase() === 'admin' ||
+      String(user.id).toLowerCase() === 'admin' ||
+      String(user.id) === '751e722c-ba4f-4d36-bc50-2be7376cc38a' ||
+      String(userPhone || user.mobile || user.phone || '') === '9399945861' ||
+      String(userEmail || user.email || '').toLowerCase() === 'tiwari.vinay89@gmail.com' ||
+      String(user.username || '').toLowerCase() === 'vinaytiwari';
+
+    if (isMasterAdminUser) {
+      userRole = 'admin';
+    }
+
     const userPayload = {
       id: user.id,
       role: userRole,
-      name: userName,
-      phone: userPhone,
-      email: userEmail
+      name: userName || (isMasterAdminUser ? "Shri Vinay Tiwari" : "User"),
+      phone: userPhone || (isMasterAdminUser ? "9399945861" : ""),
+      email: userEmail || (isMasterAdminUser ? "tiwari.vinay89@gmail.com" : ""),
+      username: user.username || (isMasterAdminUser ? "vinaytiwari" : "")
     };
 
     const isAdminRole = userRole === 'admin' || userRole === 'super_admin' || userRole === 'superadmin';
@@ -283,14 +300,29 @@ router.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
     
+    // Master Admin Auto-Resolution
+    const isMasterAdmin = 
+      String(userId).toLowerCase() === 'admin' ||
+      String(userId) === '751e722c-ba4f-4d36-bc50-2be7376cc38a' ||
+      String(req.user.username || '').toLowerCase() === 'vinaytiwari' ||
+      String(req.user.email || '').toLowerCase() === 'tiwari.vinay89@gmail.com' ||
+      String(req.user.phone || req.user.mobile || '') === '9399945861';
+
+    if (isMasterAdmin) {
+      req.user.role = 'admin';
+    }
+
     // If the user is a guest or admin, do not query the normal users/volunteers tables.
     if (req.user.role === 'guest' || req.user.role === 'admin' || req.user.role === 'super_admin') {
       return res.json({ 
         success: true, 
         user: { 
           id: userId, 
-          name: req.user.role === 'guest' ? "Guest User" : "System Admin", 
+          name: req.user.role === 'guest' ? "Guest User" : (isMasterAdmin ? (req.user.name || "Shri Vinay Tiwari (Master Admin)") : "System Admin"), 
           role: req.user.role,
+          phone: req.user.phone || (isMasterAdmin ? "9399945861" : undefined),
+          email: req.user.email || (isMasterAdmin ? "tiwari.vinay89@gmail.com" : undefined),
+          username: req.user.username || (isMasterAdmin ? "vinaytiwari" : undefined),
           janSevaCardStatus: "none",
           points: 0,
           badges: 0
@@ -303,7 +335,8 @@ router.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
       const volResult = await pool.query(`SELECT id, username, registration_number, full_name as name, email, mobile as phone, avatar, cover FROM volunteers WHERE id = $1`, [userId]);
       if (volResult.rows.length === 0) return res.status(404).json({ success: false, error: "User not found" });
       const vol = volResult.rows[0];
-      return res.json({ success: true, user: { ...vol, role: "volunteer", isVolunteer: true, volunteerData: vol } });
+      const isVolMaster = isMasterAdmin || vol.mobile === '9399945861' || vol.email?.toLowerCase() === 'tiwari.vinay89@gmail.com' || vol.username?.toLowerCase() === 'vinaytiwari';
+      return res.json({ success: true, user: { ...vol, role: isVolMaster ? "admin" : "volunteer", isVolunteer: true, volunteerData: vol } });
     }
     const user = result.rows[0];
     if (user.phone || user.email) {
@@ -312,6 +345,9 @@ router.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
         user.volunteerData = volResult.rows[0];
         user.isVolunteer = true;
       }
+    }
+    if (isMasterAdmin || user.phone === '9399945861' || user.email?.toLowerCase() === 'tiwari.vinay89@gmail.com' || user.username?.toLowerCase() === 'vinaytiwari') {
+      user.role = 'admin';
     }
     res.json({ success: true, user });
   } catch (error: any) {

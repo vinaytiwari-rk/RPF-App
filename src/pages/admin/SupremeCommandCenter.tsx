@@ -47,7 +47,7 @@ export default function SupremeCommandCenter() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const [refreshing, setRefreshing] = useState(false);
-  const [appVersion, setAppVersion] = useState("Unknown");
+  const [appVersion, setAppVersion] = useState("2.5.31");
   const [buildTime, setBuildTime] = useState<string>("");
   const [authExpired, setAuthExpired] = useState(false);
 
@@ -63,28 +63,52 @@ export default function SupremeCommandCenter() {
   // Dynamic App Version & Build Stamping
   useEffect(() => {
     let active = true;
+
+    // 1. Authoritative Live Release Manifest
+    fetch(`/api/public/app-update?_t=${Date.now()}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!active || !data) return;
+        if (data.versionName && isValidSemver(data.versionName)) {
+          setAppVersion(String(data.versionName).trim().replace(/^v/, ''));
+        }
+        if (data.publishedAt) {
+          try {
+            const dt = new Date(data.publishedAt);
+            setBuildTime(
+              dt.toLocaleDateString(undefined, { month: "short", day: "numeric" }) +
+                " " +
+                dt.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+            );
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
+    // 2. Query native runtime package info
     getCurrentAppVersion().then((info) => {
       if (active && info?.versionName && isValidSemver(info.versionName)) {
         setAppVersion(info.versionName);
       }
     });
 
+    // 3. Fallback to build version.json (only when semantic version is valid)
     fetch(`/version.json?_t=${Date.now()}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (active && data) {
           if (data.version && isValidSemver(data.version)) {
             setAppVersion(String(data.version).trim().replace(/^v/, ''));
-          }
-          if (data.generatedAt) {
-            try {
-              const dt = new Date(data.generatedAt);
-              setBuildTime(
-                dt.toLocaleDateString(undefined, { month: "short", day: "numeric" }) +
-                  " " +
-                  dt.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
-              );
-            } catch {}
+            if (data.generatedAt) {
+              try {
+                const dt = new Date(data.generatedAt);
+                setBuildTime(
+                  dt.toLocaleDateString(undefined, { month: "short", day: "numeric" }) +
+                    " " +
+                    dt.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+                );
+              } catch {}
+            }
           }
         }
       })

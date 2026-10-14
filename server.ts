@@ -687,7 +687,7 @@ app.get("/version.json", (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  let version = "2.5.18";
+  let version = "2.5.31";
   try {
     const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"));
     if (pkg?.version) version = pkg.version;

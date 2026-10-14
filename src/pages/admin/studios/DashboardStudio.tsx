@@ -182,8 +182,8 @@ export default function DashboardStudio() {
   const [savingWidgets, setSavingWidgets] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "volunteers" | "users" | "widgets">("overview");
   const [search, setSearch] = useState("");
-  const [appVersion, setAppVersion] = useState("Unknown");
-  const [manifestVersion, setManifestVersion] = useState("Unknown");
+  const [appVersion, setAppVersion] = useState("2.5.31");
+  const [manifestVersion, setManifestVersion] = useState("2.5.31");
   const [sessionExpired, setSessionExpired] = useState(false);
 
   useEffect(() => {
@@ -197,7 +197,9 @@ export default function DashboardStudio() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (active && data?.versionName && isValidSemver(data.versionName)) {
-          setManifestVersion(data.versionName);
+          const v = String(data.versionName).trim().replace(/^v/, '');
+          setManifestVersion(v);
+          setAppVersion(v);
         }
       })
       .catch(() => {});

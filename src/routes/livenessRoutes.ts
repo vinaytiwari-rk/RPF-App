@@ -13,7 +13,7 @@ router.get('/api/liveness', (_req, res) => {
     success: true,
     status: 'ok',
     service: 'rpf-app',
-    version: '2.5.18',
+    version: process.env.npm_package_version || '2.5.31',
     timestamp: new Date().toISOString(),
   });
 });
