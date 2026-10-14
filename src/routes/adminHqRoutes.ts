@@ -37,7 +37,7 @@ async function ensureAdminSessionSchema() {
   // Older deployments may have a partial sessions table. Inspect first and only
   // perform DDL when a required column/constraint is actually missing or incompatible.
   let columns = await pool.query(
-    `SELECT column_name, data_type, is_nullable
+    `SELECT column_name, data_type, is_nullable, column_default, is_identity
        FROM information_schema.columns
       WHERE table_schema = current_schema() AND table_name = 'sessions'`
   );
@@ -48,7 +48,7 @@ async function ensureAdminSessionSchema() {
   if (!byName.has("created_at")) await pool.query("ALTER TABLE sessions ADD COLUMN created_at TIMESTAMPTZ DEFAULT NOW()");
 
   columns = await pool.query(
-    `SELECT column_name, data_type, is_nullable
+    `SELECT column_name, data_type, is_nullable, column_default, is_identity
        FROM information_schema.columns
       WHERE table_schema = current_schema() AND table_name = 'sessions'`
   );
@@ -72,6 +72,9 @@ async function ensureAdminSessionSchema() {
   await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)");
   await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)");
   await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)");
+
+  // Return the real legacy id contract so the INSERT matches UUID, text, or serial schemas.
+  return byName.get("id") || null;
 }
 
 router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
@@ -136,11 +139,26 @@ router.post("/api/auth/admin-login", adminLoginLimiter, async (req, res) => {
 
     try {
       // Repair/verify the actual database schema synchronously before session persistence.
-      await ensureAdminSessionSchema();
-      await pool.query(
-        `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '30 days')`,
-        [`admin-${Date.now()}-${credential.id}`, String(user.id), token]
-      );
+      const sessionIdColumn = await ensureAdminSessionSchema();
+      const sessionIdType = String(sessionIdColumn?.data_type || "").toLowerCase();
+      const numericSessionId = ["smallint", "integer", "bigint"].includes(sessionIdType);
+      const hasGeneratedSessionId = Boolean(sessionIdColumn?.column_default) || sessionIdColumn?.is_identity === "YES";
+
+      if (numericSessionId && hasGeneratedSessionId) {
+        // Legacy SERIAL/IDENTITY schemas must generate their own numeric primary key.
+        await pool.query(
+          `INSERT INTO sessions(user_id,token,expires_at) VALUES($1,$2,NOW()+INTERVAL '30 days')`,
+          [String(user.id), token]
+        );
+      } else if (numericSessionId) {
+        throw new Error("sessions.id is numeric but has no database generator");
+      } else {
+        // UUID strings work for both UUID and text/varchar primary-key schemas.
+        await pool.query(
+          `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+INTERVAL '30 days')`,
+          [crypto.randomUUID(), String(user.id), token]
+        );
+      }
     } catch (e: any) {
       // Keep internal DB details in server logs only; never expose schema details to clients.
       console.error("Administrator session tracking failed:", {
