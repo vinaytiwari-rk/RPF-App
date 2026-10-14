@@ -69,6 +69,8 @@ jobs:
         run: npm run audit:samahit
       - name: Test Live TV stream type detection
         run: npm run audit:live-tv
+      - name: Audit release artifact isolation
+        run: npm run audit:deploy-artifacts
       - name: TypeScript check
         run: npm run lint
       - name: Production build

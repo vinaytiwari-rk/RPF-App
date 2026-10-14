@@ -130,8 +130,12 @@ jobs:
             echo "release_ready=true" >> "$GITHUB_OUTPUT"
             echo "Stable release signing credentials are available."
           else
+            if [ "$GITHUB_REF" = "refs/heads/main" ] && [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
+              echo "::error::Production APK release blocked: configure RPF_RELEASE_KEYSTORE_B64, RPF_RELEASE_STORE_PASSWORD, and RPF_RELEASE_KEY_PASSWORD in GitHub Actions secrets. A debug APK cannot update the installed signed app."
+              exit 1
+            fi
             echo "release_ready=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Stable release signing secrets are not configured. Building debug APK only; it will NOT update an APK signed with another key."
+            echo "::notice::Release signing secrets are unavailable for this non-production build; building a debug APK only."
           fi
 
       - name: Calculate monotonically increasing Android versionCode
@@ -264,7 +268,22 @@ jobs:
           };
           fs.writeFileSync('updates/manifest.json', JSON.stringify(manifest, null, 2) + '\n', 'utf8');
           NODE
-          echo "Generated updates/manifest.json:"
+          # Keep the runtime manifest, bundled web fallback, and published artifact in sync.
+          mkdir -p public/updates dist/updates
+          cp updates/manifest.json public/updates/manifest.json
+          cp updates/manifest.json dist/updates/manifest.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const pkg = require('./package.json');
+          const manifest = JSON.parse(fs.readFileSync('updates/manifest.json', 'utf8'));
+          if (manifest.versionName !== pkg.version) throw new Error('Update manifest version does not match package.json.');
+          if (!Number.isInteger(manifest.versionCode) || manifest.versionCode < 1) throw new Error('Update manifest versionCode is invalid.');
+          if (!/^[a-f0-9]{64}$/i.test(String(manifest.sha256 || ''))) throw new Error('Update manifest SHA-256 is missing or invalid.');
+          if (!Number.isInteger(manifest.size) || manifest.size < 1) throw new Error('Update manifest APK size is invalid.');
+          if (!fs.existsSync('download/rpf-app.apk')) throw new Error('Release APK download file is missing.');
+          console.log('Validated release manifest for version', manifest.versionName, 'code', manifest.versionCode);
+          NODE
+          echo "Generated and validated updates/manifest.json:"
           cat updates/manifest.json
 
       - name: Publish APK and Manifest to Server via FTP
@@ -277,6 +296,7 @@ jobs:
           FTP_SECURE: ${{ secrets.FTP_SECURE }}
           FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
           FTP_INCREMENTAL: "true"
+          DEPLOY_RELEASE_ARTIFACTS: "true"
         run: |
           set -euo pipefail
           if [ -n "$FTP_HOST" ] && [ -n "$FTP_USER" ] && [ -n "$FTP_PASSWORD" ]; then
@@ -284,10 +304,45 @@ jobs:
             node deploy.cjs
             echo "FTP update deployment complete."
           else
-            echo "::warning::FTP secrets not configured; skipping automatic FTP APK deployment."
+            echo "::error::Production APK was built but not published: configure FTP_SERVER, FTP_USERNAME, and FTP_PASSWORD GitHub Actions secrets; set FTP_REMOTE_DIR if the app is not at the FTP account root."
+            exit 1
           fi
 
+      - name: Verify live Android update manifest
+        if: steps.signing.outputs.release_ready == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          LIVE_MANIFEST_URL="https://appapi.therpfoundation.org/api/public/app-update?_t=$(date +%s)"
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 5 \
+            -H "Cache-Control: no-cache" "$LIVE_MANIFEST_URL" -o /tmp/rpf-live-update-manifest.json
+          DOWNLOAD_URL=$(node -p "require('./updates/manifest.json').downloadUrl")
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 5 \
+            "$DOWNLOAD_URL" -o /tmp/rpf-live-release.apk
+          node - <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const expected = JSON.parse(fs.readFileSync('updates/manifest.json', 'utf8'));
+          const live = JSON.parse(fs.readFileSync('/tmp/rpf-live-update-manifest.json', 'utf8'));
+          if (live.success === false) throw new Error('Live update endpoint reported failure.');
+          if (live.versionName !== expected.versionName) {
+            throw new Error('Live update version mismatch: expected ' + expected.versionName + ', received ' + live.versionName);
+          }
+          if (live.versionCode !== expected.versionCode) {
+            throw new Error('Live update versionCode mismatch: expected ' + expected.versionCode + ', received ' + live.versionCode);
+          }
+          if (String(live.sha256 || '').toLowerCase() !== String(expected.sha256 || '').toLowerCase()) {
+            throw new Error('Live update SHA-256 does not match the uploaded release APK.');
+          }
+          const apk = fs.readFileSync('/tmp/rpf-live-release.apk');
+          const actualHash = crypto.createHash('sha256').update(apk).digest('hex');
+          if (apk.length !== expected.size) throw new Error('Live APK size mismatch: expected ' + expected.size + ', received ' + apk.length);
+          if (actualHash !== String(expected.sha256).toLowerCase()) throw new Error('Downloaded live APK SHA-256 mismatch.');
+          console.log('Live APK and update manifest verified:', live.versionName, live.versionCode, apk.length, 'bytes');
+          NODE
+
       - name: Upload APK Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: RPF-Samahit-Android-${{ github.sha }}

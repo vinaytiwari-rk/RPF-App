@@ -15,7 +15,8 @@
     "android:sync": "npm run build && npx cap sync android",
     "android:build": "npm run android:sync && cd android && gradlew assembleDebug",
     "audit:samahit": "node scripts/auditSamahitUtilities.cjs",
-    "audit:live-tv": "tsx scripts/checkLiveTvSourceTypes.ts"
+    "audit:live-tv": "tsx scripts/checkLiveTvSourceTypes.ts",
+    "audit:deploy-artifacts": "node scripts/auditDeployReleaseArtifacts.cjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

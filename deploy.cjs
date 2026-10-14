@@ -15,6 +15,7 @@ const remoteDir = String(process.env.FTP_REMOTE_DIR || '').trim().replace(/^\/+|
 const ftpPort = Number.parseInt(process.env.FTP_PORT || '21', 10);
 const ftpSecure = process.env.FTP_SECURE !== 'false';
 const incremental = process.env.FTP_INCREMENTAL !== 'false';
+const includeReleaseArtifacts = process.env.DEPLOY_RELEASE_ARTIFACTS === 'true';
 const manifestName = '.rpf-deploy-manifest.json';
 
 if (!Number.isInteger(ftpPort) || ftpPort < 1 || ftpPort > 65535) {
@@ -63,6 +64,9 @@ function collectDeploymentFiles() {
 
   for (const local of walkFiles('dist')) {
     const rel = toPosix(path.relative('dist', local));
+    // The ordinary web deployment must never overwrite the release-generated manifest
+    // with the stale tracked public/updates/manifest.json copy.
+    if (!includeReleaseArtifacts && rel === 'updates/manifest.json') continue;
     addFile(files, local, `dist/${rel}`);
   }
 
@@ -79,14 +83,17 @@ function collectDeploymentFiles() {
     addFile(files, local, `migrations/${rel}`);
   }
 
-  // Application auto-update manifests and release APK downloads
-  for (const local of walkFiles('updates')) {
-    const rel = toPosix(path.relative('updates', local));
-    addFile(files, local, `updates/${rel}`);
-  }
-  for (const local of walkFiles('download')) {
-    const rel = toPosix(path.relative('download', local));
-    addFile(files, local, `download/${rel}`);
+  // Release APKs/manifests are managed only by the signed Android release workflow.
+  // Normal web deploys must not publish stale manifests or delete the APK.
+  if (includeReleaseArtifacts) {
+    for (const local of walkFiles('updates')) {
+      const rel = toPosix(path.relative('updates', local));
+      addFile(files, local, `updates/${rel}`);
+    }
+    for (const local of walkFiles('download')) {
+      const rel = toPosix(path.relative('download', local));
+      addFile(files, local, `download/${rel}`);
+    }
   }
 
   addFile(files, '.htaccess', '.htaccess');
@@ -189,7 +196,14 @@ async function uploadChangedFiles(client, files, previousManifest, currentManife
 }
 
 async function removeDeletedFiles(client, previousManifest, currentManifest) {
-  const deleted = Object.keys(previousManifest).filter((remote) => !currentManifest.files[remote]);
+  const isReleaseArtifact = (remote) =>
+    remote === 'dist/updates/manifest.json' ||
+    remote.startsWith('updates/') ||
+    remote.startsWith('download/');
+  const deleted = Object.keys(previousManifest).filter((remote) =>
+    !currentManifest.files[remote] &&
+    (includeReleaseArtifacts || !isReleaseArtifact(remote))
+  );
   if (!deleted.length) return;
 
   await resetToDeployRoot(client);

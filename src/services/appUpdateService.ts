@@ -146,6 +146,7 @@ export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
 export async function checkForAppUpdates(): Promise<UpdateCheckResult> {
   const current = await getCurrentAppVersion();
   let lastErrorMsg = "";
+  let bestManifest: UpdateManifest | null = null;
 
   for (const url of MANIFEST_URLS) {
     try {
@@ -161,20 +162,39 @@ export async function checkForAppUpdates(): Promise<UpdateCheckResult> {
 
       const rawJson = await res.json();
       const manifest: UpdateManifest = rawJson?.data || rawJson;
-      if (!manifest || typeof manifest.versionCode !== "number" || !manifest.downloadUrl) {
-        lastErrorMsg = "Invalid update manifest format";
+      const hasValidVersion = Number.isInteger(manifest?.versionCode) &&
+        manifest.versionCode > 0 &&
+        isValidSemver(manifest.versionName);
+      const hasValidIntegrity = typeof manifest?.sha256 === "string" &&
+        /^[a-f0-9]{64}$/i.test(manifest.sha256.trim()) &&
+        Number.isInteger(manifest.size) &&
+        manifest.size > 0;
+      let hasTrustedDownloadUrl = false;
+      try {
+        const downloadUrl = new URL(manifest?.downloadUrl || "");
+        hasTrustedDownloadUrl = downloadUrl.protocol === "https:" &&
+          downloadUrl.hostname.toLowerCase() === "appapi.therpfoundation.org";
+      } catch {}
+      if (!manifest || !hasValidVersion || !hasValidIntegrity || !hasTrustedDownloadUrl) {
+        lastErrorMsg = "Invalid update manifest: trusted HTTPS URL, version, size, and SHA-256 are required";
         continue;
       }
 
-      const updateAvailable = manifest.versionCode > current.versionCode;
-      return {
-        updateAvailable,
-        currentVersion: current,
-        latestManifest: manifest,
-      };
+      // Try every configured endpoint; an old but valid first response must not hide a newer manifest.
+      if (!bestManifest || manifest.versionCode > bestManifest.versionCode) {
+        bestManifest = manifest;
+      }
     } catch (e: any) {
       lastErrorMsg = e?.message || "Connection failed";
     }
+  }
+
+  if (bestManifest) {
+    return {
+      updateAvailable: bestManifest.versionCode > current.versionCode,
+      currentVersion: current,
+      latestManifest: bestManifest,
+    };
   }
 
   return {
@@ -216,6 +236,22 @@ export async function downloadAndInstallUpdate(
   onProgress?: (percent: number, loadedBytes: number, totalBytes: number) => void
 ): Promise<{ success: boolean; message?: string }> {
   const isAndroid = Capacitor.getPlatform() === "android";
+
+  if (!isValidSemver(manifest.versionName) ||
+      !Number.isInteger(manifest.versionCode) || manifest.versionCode < 1 ||
+      !/^[a-f0-9]{64}$/i.test(String(manifest.sha256 || "").trim()) ||
+      !Number.isInteger(manifest.size) || manifest.size < 1) {
+    throw new Error("Update blocked: the release manifest is missing valid version or integrity metadata.");
+  }
+  let secureDownloadUrl = false;
+  try {
+    const downloadUrl = new URL(manifest.downloadUrl);
+    secureDownloadUrl = downloadUrl.protocol === "https:" &&
+      downloadUrl.hostname.toLowerCase() === "appapi.therpfoundation.org";
+  } catch {}
+  if (!secureDownloadUrl) {
+    throw new Error("Update blocked: the APK download URL must use HTTPS.");
+  }
 
   // For web users, simply open the download URL in browser
   if (!isAndroid) {
@@ -260,14 +296,15 @@ export async function downloadAndInstallUpdate(
     position += chunk.length;
   }
 
-  // Verify SHA-256 Checksum if present in manifest
-  if (manifest.sha256 && manifest.sha256.trim().length > 0) {
-    const computedHash = await computeSha256(allBytes.buffer);
-    if (computedHash.toLowerCase() !== manifest.sha256.toLowerCase().trim()) {
-      throw new Error(
-        `Integrity check failed! Expected SHA-256: ${manifest.sha256}, but received: ${computedHash}. Download aborted for security.`
-      );
-    }
+  // Require exact APK size and SHA-256 match before handing the file to Android.
+  if (receivedBytes !== manifest.size) {
+    throw new Error(`Integrity check failed! Expected ${manifest.size} bytes, received ${receivedBytes}. Download aborted.`);
+  }
+  const computedHash = await computeSha256(allBytes.buffer);
+  if (computedHash.toLowerCase() !== manifest.sha256.toLowerCase().trim()) {
+    throw new Error(
+      `Integrity check failed! Expected SHA-256: ${manifest.sha256}, but received: ${computedHash}. Download aborted for security.`
+    );
   }
 
   // Convert to Base64 and trigger native installer
