@@ -1,0 +1,738 @@
+{
+  "packId": "indian-arts-culture-foundations-001",
+  "version": 1,
+  "subject": "arts-culture",
+  "category": "general-knowledge",
+  "titleEn": "Indian Arts & Culture — Foundations",
+  "titleHi": "भारतीय कला एवं संस्कृति — आधार",
+  "descEn": "Twenty original bilingual questions based on official UNESCO World Heritage and Intangible Cultural Heritage records.",
+  "descHi": "यूनेस्को के आधिकारिक विश्व धरोहर और अमूर्त सांस्कृतिक विरासत अभिलेखों पर आधारित बीस मौलिक द्विभाषी प्रश्न।",
+  "iconName": "Landmark",
+  "color": "from-emerald-600 to-teal-600",
+  "badge": "Source checked",
+  "durationMinutes": 10,
+  "questionCount": 20,
+  "questionsCount": 20,
+  "questions": [
+    {
+      "id": "arts-culture-20261014-001",
+      "subject": "arts-culture",
+      "topic": "Ajanta Caves",
+      "difficulty": "easy",
+      "questionEn": "The paintings and sculptures of Ajanta are regarded as masterpieces of which artistic tradition?",
+      "questionHi": "अजंता की चित्रकला और मूर्तियाँ किस कलात्मक परंपरा की उत्कृष्ट कृतियाँ मानी जाती हैं?",
+      "optionsEn": [
+        "Buddhist religious art",
+        "Roman military engineering",
+        "Maya astronomy",
+        "Persian miniature painting"
+      ],
+      "optionsHi": [
+        "बौद्ध धार्मिक कला",
+        "रोमन सैन्य स्थापत्य",
+        "माया खगोल-विज्ञान",
+        "फ़ारसी लघुचित्रकला"
+      ],
+      "correctIndex": 0,
+      "answerEn": "Buddhist religious art",
+      "answerHi": "बौद्ध धार्मिक कला",
+      "explanationEn": "UNESCO describes Ajanta's paintings and sculptures as masterpieces of Buddhist religious art.",
+      "explanationHi": "यूनेस्को अजंता की चित्रकला और मूर्तियों को बौद्ध धार्मिक कला की उत्कृष्ट कृतियाँ बताता है।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/242/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/242/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-002",
+      "subject": "arts-culture",
+      "topic": "Ajanta Caves",
+      "difficulty": "easy",
+      "questionEn": "The earliest Buddhist cave monuments at Ajanta date mainly to which period?",
+      "questionHi": "अजंता के सबसे पुराने बौद्ध गुफा-स्मारक मुख्यतः किस काल के हैं?",
+      "optionsEn": [
+        "The first and second centuries CE",
+        "The second and first centuries BCE",
+        "The ninth and tenth centuries CE",
+        "The sixteenth and seventeenth centuries CE"
+      ],
+      "optionsHi": [
+        "पहली और दूसरी शताब्दी ईस्वी",
+        "दूसरी और पहली शताब्दी ईसा पूर्व",
+        "नौवीं और दसवीं शताब्दी ईस्वी",
+        "सोलहवीं और सत्रहवीं शताब्दी ईस्वी"
+      ],
+      "correctIndex": 1,
+      "answerEn": "The second and first centuries BCE",
+      "answerHi": "दूसरी और पहली शताब्दी ईसा पूर्व",
+      "explanationEn": "UNESCO dates the earliest Ajanta cave monuments to the second and first centuries BCE.",
+      "explanationHi": "यूनेस्को अजंता के शुरुआती गुफा-स्मारकों को दूसरी और पहली शताब्दी ईसा पूर्व का बताता है।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/242/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/242/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-003",
+      "subject": "arts-culture",
+      "topic": "Ajanta Caves",
+      "difficulty": "easy",
+      "questionEn": "During which period were many richly decorated caves added to the earlier Ajanta group?",
+      "questionHi": "अजंता के पुराने गुफा-समूह में अनेक समृद्ध सजावट वाली गुफाएँ किस काल में जोड़ी गईं?",
+      "optionsEn": [
+        "Only the Mauryan period",
+        "The Mughal period",
+        "The Gupta period",
+        "The colonial period"
+      ],
+      "optionsHi": [
+        "केवल मौर्य काल",
+        "मुगल काल",
+        "गुप्त काल",
+        "औपनिवेशिक काल"
+      ],
+      "correctIndex": 2,
+      "answerEn": "The Gupta period",
+      "answerHi": "गुप्त काल",
+      "explanationEn": "UNESCO notes that many richly decorated caves were added during the Gupta period, in the fifth and sixth centuries CE.",
+      "explanationHi": "यूनेस्को के अनुसार पाँचवीं और छठी शताब्दी ईस्वी के गुप्त काल में अनेक सुसज्जित गुफाएँ जोड़ी गईं।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/242/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/242/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-004",
+      "subject": "arts-culture",
+      "topic": "Ajanta Caves",
+      "difficulty": "easy",
+      "questionEn": "In which year were the Ajanta Caves inscribed on the UNESCO World Heritage List?",
+      "questionHi": "अजंता की गुफाएँ किस वर्ष यूनेस्को विश्व धरोहर सूची में शामिल हुईं?",
+      "optionsEn": [
+        "1972",
+        "2001",
+        "2016",
+        "1983"
+      ],
+      "optionsHi": [
+        "1972",
+        "2001",
+        "2016",
+        "1983"
+      ],
+      "correctIndex": 3,
+      "answerEn": "1983",
+      "answerHi": "1983",
+      "explanationEn": "UNESCO records the Ajanta Caves as inscribed in 1983.",
+      "explanationHi": "यूनेस्को के अभिलेख में अजंता की गुफाओं का सूचीकरण वर्ष 1983 दर्ज है।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/242/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/242/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-005",
+      "subject": "arts-culture",
+      "topic": "Sanchi",
+      "difficulty": "easy",
+      "questionEn": "The Buddhist monuments at Sanchi are primarily associated with which religion?",
+      "questionHi": "साँची के बौद्ध स्मारक मुख्यतः किस धर्म से संबंधित हैं?",
+      "optionsEn": [
+        "Buddhism",
+        "Zoroastrianism",
+        "Confucianism",
+        "Shinto"
+      ],
+      "optionsHi": [
+        "बौद्ध धर्म",
+        "पारसी धर्म",
+        "कन्फ्यूशीवाद",
+        "शिंतो धर्म"
+      ],
+      "correctIndex": 0,
+      "answerEn": "Buddhism",
+      "answerHi": "बौद्ध धर्म",
+      "explanationEn": "UNESCO identifies Sanchi's stupas, temples, monasteries and pillars as Buddhist monuments.",
+      "explanationHi": "यूनेस्को साँची के स्तूपों, मंदिरों, विहारों और स्तंभों को बौद्ध स्मारक बताता है।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/524/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/524/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-006",
+      "subject": "arts-culture",
+      "topic": "Sanchi",
+      "difficulty": "easy",
+      "questionEn": "The establishment of Sanchi as an important sacred centre is attributed to which Mauryan emperor?",
+      "questionHi": "साँची को महत्वपूर्ण पवित्र केंद्र के रूप में स्थापित करने का श्रेय किस मौर्य सम्राट को दिया जाता है?",
+      "optionsEn": [
+        "Chandragupta II",
+        "Emperor Ashoka",
+        "Harsha",
+        "Kanishka"
+      ],
+      "optionsHi": [
+        "चंद्रगुप्त द्वितीय",
+        "सम्राट अशोक",
+        "हर्ष",
+        "कनिष्क"
+      ],
+      "correctIndex": 1,
+      "answerEn": "Emperor Ashoka",
+      "answerHi": "सम्राट अशोक",
+      "explanationEn": "UNESCO attributes Sanchi's beginnings as a sacred centre to Mauryan emperor Ashoka.",
+      "explanationHi": "यूनेस्को साँची को पवित्र केंद्र के रूप में विकसित करने का श्रेय मौर्य सम्राट अशोक को देता है।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/524/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/524/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-007",
+      "subject": "arts-culture",
+      "topic": "Sanchi",
+      "difficulty": "easy",
+      "questionEn": "In which year were the Buddhist Monuments at Sanchi inscribed on the UNESCO World Heritage List?",
+      "questionHi": "साँची के बौद्ध स्मारक किस वर्ष यूनेस्को विश्व धरोहर सूची में शामिल हुए?",
+      "optionsEn": [
+        "1979",
+        "2004",
+        "1989",
+        "2017"
+      ],
+      "optionsHi": [
+        "1979",
+        "2004",
+        "1989",
+        "2017"
+      ],
+      "correctIndex": 2,
+      "answerEn": "1989",
+      "answerHi": "1989",
+      "explanationEn": "UNESCO records the Buddhist Monuments at Sanchi as inscribed in 1989.",
+      "explanationHi": "यूनेस्को के अभिलेख में साँची के बौद्ध स्मारकों का सूचीकरण वर्ष 1989 दर्ज है।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/524/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/524/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-008",
+      "subject": "arts-culture",
+      "topic": "Elephanta Caves",
+      "difficulty": "easy",
+      "questionEn": "The rock-cut art of the Elephanta Caves is especially linked with the cult of which deity?",
+      "questionHi": "एलिफेंटा की गुफाओं की शैल-कला विशेष रूप से किस देवता की उपासना से जुड़ी है?",
+      "optionsEn": [
+        "Vishnu",
+        "Surya",
+        "Indra",
+        "Shiva"
+      ],
+      "optionsHi": [
+        "विष्णु",
+        "सूर्य",
+        "इंद्र",
+        "शिव"
+      ],
+      "correctIndex": 3,
+      "answerEn": "Shiva",
+      "answerHi": "शिव",
+      "explanationEn": "UNESCO describes Elephanta's rock art as linked to the cult of Shiva.",
+      "explanationHi": "यूनेस्को एलिफेंटा की शैल-कला को शिव-उपासना से जुड़ा बताता है।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/244/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/244/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-009",
+      "subject": "arts-culture",
+      "topic": "Elephanta Caves",
+      "difficulty": "easy",
+      "questionEn": "The main rock-cut Elephanta Caves were constructed approximately during which period?",
+      "questionHi": "एलिफेंटा की मुख्य शैल-कट गुफाएँ लगभग किस काल में बनाई गईं?",
+      "optionsEn": [
+        "The mid-fifth to sixth centuries CE",
+        "The third century BCE",
+        "The twelfth century CE",
+        "The eighteenth century CE"
+      ],
+      "optionsHi": [
+        "पाँचवीं शताब्दी का मध्य से छठी शताब्दी ईस्वी",
+        "तीसरी शताब्दी ईसा पूर्व",
+        "बारहवीं शताब्दी ईस्वी",
+        "अठारहवीं शताब्दी ईस्वी"
+      ],
+      "correctIndex": 0,
+      "answerEn": "The mid-fifth to sixth centuries CE",
+      "answerHi": "पाँचवीं शताब्दी का मध्य से छठी शताब्दी ईस्वी",
+      "explanationEn": "UNESCO dates construction of the rock-cut Elephanta Caves to about the mid-fifth to sixth centuries CE.",
+      "explanationHi": "यूनेस्को एलिफेंटा की शैल-कट गुफाओं का निर्माण लगभग पाँचवीं शताब्दी के मध्य से छठी शताब्दी ईस्वी तक का बताता है।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/244/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/244/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-010",
+      "subject": "arts-culture",
+      "topic": "Elephanta Caves",
+      "difficulty": "easy",
+      "questionEn": "The Elephanta Caves are located on an island close to which city?",
+      "questionHi": "एलिफेंटा की गुफाएँ किस शहर के निकट स्थित एक द्वीप पर हैं?",
+      "optionsEn": [
+        "Kolkata",
+        "Mumbai",
+        "Chennai",
+        "Kochi"
+      ],
+      "optionsHi": [
+        "कोलकाता",
+        "मुंबई",
+        "चेन्नई",
+        "कोच्चि"
+      ],
+      "correctIndex": 1,
+      "answerEn": "Mumbai",
+      "answerHi": "मुंबई",
+      "explanationEn": "UNESCO places Elephanta Island near Mumbai on India's western coast.",
+      "explanationHi": "यूनेस्को एलिफेंटा द्वीप को भारत के पश्चिमी तट पर मुंबई के निकट स्थित बताता है।",
+      "source": {
+        "sourceId": "unesco_whc",
+        "sourceName": "UNESCO World Heritage Centre",
+        "articleUrl": "https://whc.unesco.org/en/list/244/",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://whc.unesco.org/en/list/244/"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-011",
+      "subject": "arts-culture",
+      "topic": "Ramlila",
+      "difficulty": "easy",
+      "questionEn": "Ramlila is a traditional performance based on which Indian epic?",
+      "questionHi": "रामलीला किस भारतीय महाकाव्य पर आधारित पारंपरिक प्रस्तुति है?",
+      "optionsEn": [
+        "Mahabharata",
+        "Silappadikaram",
+        "Ramayana",
+        "Arthashastra"
+      ],
+      "optionsHi": [
+        "महाभारत",
+        "शिलप्पदिकारम्",
+        "रामायण",
+        "अर्थशास्त्र"
+      ],
+      "correctIndex": 2,
+      "answerEn": "Ramayana",
+      "answerHi": "रामायण",
+      "explanationEn": "UNESCO describes Ramlila as a performance of the Ramayana through scenes, songs, narration and dialogue.",
+      "explanationHi": "यूनेस्को रामलीला को दृश्यों, गीतों, कथन और संवाद के माध्यम से रामायण की प्रस्तुति बताता है।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/RL/ramlila-the-traditional-performance-of-the-ramayana-00110",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/RL/ramlila-the-traditional-performance-of-the-ramayana-00110"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-012",
+      "subject": "arts-culture",
+      "topic": "Ramlila",
+      "difficulty": "easy",
+      "questionEn": "In which year was Ramlila inscribed on UNESCO's Representative List of the Intangible Cultural Heritage of Humanity?",
+      "questionHi": "रामलीला को मानवता की अमूर्त सांस्कृतिक विरासत की यूनेस्को प्रतिनिधि सूची में किस वर्ष शामिल किया गया?",
+      "optionsEn": [
+        "1995",
+        "2014",
+        "2021",
+        "2008"
+      ],
+      "optionsHi": [
+        "1995",
+        "2014",
+        "2021",
+        "2008"
+      ],
+      "correctIndex": 3,
+      "answerEn": "2008",
+      "answerHi": "2008",
+      "explanationEn": "UNESCO records Ramlila's inscription on the Representative List in 2008.",
+      "explanationHi": "यूनेस्को के अभिलेख में रामलीला का प्रतिनिधि सूची में समावेश वर्ष 2008 दर्ज है।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/RL/ramlila-the-traditional-performance-of-the-ramayana-00110",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/RL/ramlila-the-traditional-performance-of-the-ramayana-00110"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-013",
+      "subject": "arts-culture",
+      "topic": "Ramlila",
+      "difficulty": "easy",
+      "questionEn": "Ramlila performances across northern India are especially associated with which festival?",
+      "questionHi": "उत्तर भारत में रामलीला की प्रस्तुतियाँ विशेष रूप से किस त्योहार से जुड़ी हैं?",
+      "optionsEn": [
+        "Dussehra",
+        "Holi",
+        "Baisakhi",
+        "Onam"
+      ],
+      "optionsHi": [
+        "दशहरा",
+        "होली",
+        "बैसाखी",
+        "ओणम"
+      ],
+      "correctIndex": 0,
+      "answerEn": "Dussehra",
+      "answerHi": "दशहरा",
+      "explanationEn": "UNESCO notes that Ramlila is performed across northern India during the Dussehra season.",
+      "explanationHi": "यूनेस्को के अनुसार उत्तर भारत में रामलीला की प्रस्तुतियाँ दशहरा के समय होती हैं।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/RL/ramlila-the-traditional-performance-of-the-ramayana-00110",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/RL/ramlila-the-traditional-performance-of-the-ramayana-00110"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-014",
+      "subject": "arts-culture",
+      "topic": "Durga Puja",
+      "difficulty": "easy",
+      "questionEn": "In which year was Durga Puja in Kolkata inscribed on UNESCO's Intangible Cultural Heritage list?",
+      "questionHi": "कोलकाता की दुर्गा पूजा को यूनेस्को की अमूर्त सांस्कृतिक विरासत सूची में किस वर्ष शामिल किया गया?",
+      "optionsEn": [
+        "2010",
+        "2021",
+        "2017",
+        "2024"
+      ],
+      "optionsHi": [
+        "2010",
+        "2021",
+        "2017",
+        "2024"
+      ],
+      "correctIndex": 1,
+      "answerEn": "2021",
+      "answerHi": "2021",
+      "explanationEn": "UNESCO records Durga Puja in Kolkata as inscribed in 2021.",
+      "explanationHi": "यूनेस्को के अभिलेख में कोलकाता की दुर्गा पूजा का सूचीकरण वर्ष 2021 दर्ज है।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/RL/durga-puja-in-kolkata-00703",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/RL/durga-puja-in-kolkata-00703"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-015",
+      "subject": "arts-culture",
+      "topic": "Durga Puja",
+      "difficulty": "easy",
+      "questionEn": "What does Durga Puja in Kolkata mark, according to UNESCO's description?",
+      "questionHi": "यूनेस्को के विवरण के अनुसार कोलकाता की दुर्गा पूजा किसका प्रतीक है?",
+      "optionsEn": [
+        "The wheat harvest",
+        "The start of the financial year",
+        "The ten-day worship of Goddess Durga",
+        "The winter solstice"
+      ],
+      "optionsHi": [
+        "गेहूँ की कटाई",
+        "वित्तीय वर्ष की शुरुआत",
+        "देवी दुर्गा की दस-दिवसीय उपासना",
+        "शीत अयनांत"
+      ],
+      "correctIndex": 2,
+      "answerEn": "The ten-day worship of Goddess Durga",
+      "answerHi": "देवी दुर्गा की दस-दिवसीय उपासना",
+      "explanationEn": "UNESCO describes Durga Puja as marking the ten-day worship of the goddess Durga.",
+      "explanationHi": "यूनेस्को दुर्गा पूजा को देवी दुर्गा की दस-दिवसीय उपासना के रूप में वर्णित करता है।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/RL/durga-puja-in-kolkata-00703",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/RL/durga-puja-in-kolkata-00703"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-016",
+      "subject": "arts-culture",
+      "topic": "Garba",
+      "difficulty": "easy",
+      "questionEn": "In which year was Garba of Gujarat inscribed on UNESCO's Representative List of Intangible Cultural Heritage?",
+      "questionHi": "गुजरात के गरबा को अमूर्त सांस्कृतिक विरासत की यूनेस्को प्रतिनिधि सूची में किस वर्ष शामिल किया गया?",
+      "optionsEn": [
+        "2016",
+        "2019",
+        "2025",
+        "2023"
+      ],
+      "optionsHi": [
+        "2016",
+        "2019",
+        "2025",
+        "2023"
+      ],
+      "correctIndex": 3,
+      "answerEn": "2023",
+      "answerHi": "2023",
+      "explanationEn": "UNESCO's India list records Garba of Gujarat as inscribed in 2023.",
+      "explanationHi": "यूनेस्को की भारत सूची में गुजरात के गरबा का सूचीकरण वर्ष 2023 दर्ज है।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/state/india-IN",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/state/india-IN"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-017",
+      "subject": "arts-culture",
+      "topic": "Kumbh Mela",
+      "difficulty": "easy",
+      "questionEn": "In which year was Kumbh Mela inscribed on UNESCO's Representative List of Intangible Cultural Heritage?",
+      "questionHi": "कुंभ मेले को अमूर्त सांस्कृतिक विरासत की यूनेस्को प्रतिनिधि सूची में किस वर्ष शामिल किया गया?",
+      "optionsEn": [
+        "2017",
+        "2008",
+        "2013",
+        "2023"
+      ],
+      "optionsHi": [
+        "2017",
+        "2008",
+        "2013",
+        "2023"
+      ],
+      "correctIndex": 0,
+      "answerEn": "2017",
+      "answerHi": "2017",
+      "explanationEn": "UNESCO's India list records Kumbh Mela as inscribed in 2017.",
+      "explanationHi": "यूनेस्को की भारत सूची में कुंभ मेले का सूचीकरण वर्ष 2017 दर्ज है।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/state/india-IN",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/state/india-IN"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-018",
+      "subject": "arts-culture",
+      "topic": "Chhau Dance",
+      "difficulty": "easy",
+      "questionEn": "In which year was Chhau dance inscribed on UNESCO's Representative List of Intangible Cultural Heritage?",
+      "questionHi": "छऊ नृत्य को अमूर्त सांस्कृतिक विरासत की यूनेस्को प्रतिनिधि सूची में किस वर्ष शामिल किया गया?",
+      "optionsEn": [
+        "1999",
+        "2010",
+        "2017",
+        "2021"
+      ],
+      "optionsHi": [
+        "1999",
+        "2010",
+        "2017",
+        "2021"
+      ],
+      "correctIndex": 1,
+      "answerEn": "2010",
+      "answerHi": "2010",
+      "explanationEn": "UNESCO's India list records Chhau dance as inscribed in 2010.",
+      "explanationHi": "यूनेस्को की भारत सूची में छऊ नृत्य का सूचीकरण वर्ष 2010 दर्ज है।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/state/india-IN",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/state/india-IN"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-019",
+      "subject": "arts-culture",
+      "topic": "Yoga",
+      "difficulty": "easy",
+      "questionEn": "In which year was Yoga inscribed on UNESCO's Representative List of Intangible Cultural Heritage?",
+      "questionHi": "योग को अमूर्त सांस्कृतिक विरासत की यूनेस्को प्रतिनिधि सूची में किस वर्ष शामिल किया गया?",
+      "optionsEn": [
+        "2005",
+        "2010",
+        "2016",
+        "2025"
+      ],
+      "optionsHi": [
+        "2005",
+        "2010",
+        "2016",
+        "2025"
+      ],
+      "correctIndex": 2,
+      "answerEn": "2016",
+      "answerHi": "2016",
+      "explanationEn": "UNESCO's India list records Yoga as inscribed in 2016.",
+      "explanationHi": "यूनेस्को की भारत सूची में योग का सूचीकरण वर्ष 2016 दर्ज है।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/state/india-IN",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/state/india-IN"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    },
+    {
+      "id": "arts-culture-20261014-020",
+      "subject": "arts-culture",
+      "topic": "Thatheras Craft",
+      "difficulty": "easy",
+      "questionEn": "Which traditional craft from Punjab was inscribed by UNESCO in 2014?",
+      "questionHi": "पंजाब की किस पारंपरिक शिल्प-कला को यूनेस्को ने 2014 में सूचीबद्ध किया?",
+      "optionsEn": [
+        "Silk weaving in Kanchipuram, Tamil Nadu",
+        "Wood carving in Saharanpur, Uttar Pradesh",
+        "Pottery in Khurja, Uttar Pradesh",
+        "Traditional brass and copper utensil-making among the Thatheras of Jandiala Guru"
+      ],
+      "optionsHi": [
+        "कांचीपुरम, तमिलनाडु की रेशम-बुनाई",
+        "सहारनपुर, उत्तर प्रदेश की लकड़ी की नक्काशी",
+        "खुर्जा, उत्तर प्रदेश की मिट्टी के बर्तन-कला",
+        "जंडियाला गुरु के ठठेरों की पारंपरिक पीतल और ताँबे के बर्तन बनाने की कला"
+      ],
+      "correctIndex": 3,
+      "answerEn": "Traditional brass and copper utensil-making among the Thatheras of Jandiala Guru",
+      "answerHi": "जंडियाला गुरु के ठठेरों की पारंपरिक पीतल और ताँबे के बर्तन बनाने की कला",
+      "explanationEn": "UNESCO lists the traditional brass and copper utensil-making craft among the Thatheras of Jandiala Guru, Punjab, as inscribed in 2014.",
+      "explanationHi": "यूनेस्को जंडियाला गुरु, पंजाब के ठठेरों की पारंपरिक पीतल और ताँबे के बर्तन बनाने की कला को 2014 में सूचीबद्ध बताता है।",
+      "source": {
+        "sourceId": "unesco_ich",
+        "sourceName": "UNESCO Intangible Cultural Heritage",
+        "articleUrl": "https://ich.unesco.org/en/state/india-IN",
+        "verifiedAt": "2026-10-14",
+        "factCheckUrl": "https://ich.unesco.org/en/state/india-IN"
+      },
+      "examTags": [
+        "indian-arts-culture",
+        "general-knowledge"
+      ]
+    }
+  ]
+}
