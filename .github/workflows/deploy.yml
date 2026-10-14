@@ -33,6 +33,9 @@ jobs:
       - name: Verify generated assets
         run: node -e "const fs=require('fs'),p=require('path');const h=fs.readFileSync('dist/index.html','utf8');const refs=[...h.matchAll(/(?:src|href)=\\\"([^\\\"]+\\.(?:js|css))\\\"/g)].map(m=>m[1].replace(/^\\//,''));if(!refs.length)throw new Error('No JS/CSS assets');for(const r of refs){if(!fs.existsSync(p.join('dist',r)))throw new Error('Missing '+r)}console.log('Assets verified',refs.length)"
 
+      - name: Audit release artifact isolation
+        run: npm run audit:deploy-artifacts
+
       - name: Deploy to cPanel
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
