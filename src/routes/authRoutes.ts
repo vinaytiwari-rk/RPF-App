@@ -175,9 +175,21 @@ router.post("/api/auth/login", async (req, res) => {
     // Check this table first so a matching volunteer/user profile cannot override admin authentication.
     let adminCredentialMatched = false;
     const adminCredResult = await pool.query(
-      `SELECT id, username, password_hash, role FROM admin_credentials
-        WHERE LOWER(username) = LOWER($1) OR id::text = $1
-        ORDER BY CASE WHEN LOWER(username) = LOWER($1) THEN 0 ELSE 1 END
+      `SELECT ac.id, ac.username, ac.password_hash, ac.role
+         FROM admin_credentials ac
+        WHERE LOWER(ac.username) = LOWER($1)
+           OR ac.id::text = $1
+           OR EXISTS (
+                SELECT 1 FROM volunteers v
+                 WHERE (v.mobile = $1 OR LOWER(v.email) = LOWER($1))
+                   AND LOWER(v.username) = LOWER(ac.username)
+              )
+           OR EXISTS (
+                SELECT 1 FROM users u
+                 WHERE (u.phone = $1 OR LOWER(u.email) = LOWER($1))
+                   AND LOWER(u.username) = LOWER(ac.username)
+              )
+        ORDER BY CASE WHEN LOWER(ac.username) = LOWER($1) THEN 0 ELSE 1 END
         LIMIT 1`,
       [finalIdentifier]
     );
