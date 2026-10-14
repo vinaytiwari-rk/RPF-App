@@ -50,6 +50,39 @@ async function ensureSessionsTable() {
       WHERE table_schema = current_schema() AND table_name = 'sessions'`
   );
   byName = new Map(columns.rows.map((row: any) => [row.column_name, row]));
+  // Session records may belong to either a citizen/volunteer or an admin_credentials row.
+  // Legacy deployments sometimes constrained user_id to users(id) or typed it as UUID,
+  // which makes legitimate administrator session inserts fail. The token row is the
+  // authorization source, so keep user_id as a text identifier without a users-only FK.
+  await pool.query(`
+    DO $
+    DECLARE fk RECORD;
+    DECLARE user_id_attnum SMALLINT;
+    BEGIN
+      SELECT attnum INTO user_id_attnum
+        FROM pg_attribute
+       WHERE attrelid = 'sessions'::regclass
+         AND attname = 'user_id'
+         AND NOT attisdropped;
+      IF user_id_attnum IS NOT NULL THEN
+        FOR fk IN
+          SELECT conname
+            FROM pg_constraint
+           WHERE conrelid = 'sessions'::regclass
+             AND contype = 'f'
+             AND user_id_attnum = ANY(conkey)
+        LOOP
+          EXECUTE format('ALTER TABLE sessions DROP CONSTRAINT %I', fk.conname);
+        END LOOP;
+      END IF;
+    END $;
+  `);
+
+  const userIdColumn: any = byName.get("user_id");
+  if (userIdColumn && userIdColumn.data_type !== "character varying") {
+    await pool.query("ALTER TABLE sessions ALTER COLUMN user_id TYPE VARCHAR(255) USING user_id::TEXT");
+  }
+
   const tokenColumn: any = byName.get("token");
   const expiryColumn: any = byName.get("expires_at");
 
