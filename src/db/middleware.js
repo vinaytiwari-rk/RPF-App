@@ -2,11 +2,12 @@ import jwt from "jsonwebtoken";
 import { pool } from "./dbPool.js";
 
 const configuredSecret = process.env.JWT_SECRET?.trim();
-if (process.env.NODE_ENV === "production" && (!configuredSecret || configuredSecret.length < 32)) {
-  throw new Error("JWT_SECRET must be configured with at least 32 characters in production.");
+const isLocalRuntime = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+if (!isLocalRuntime && (!configuredSecret || configuredSecret.length < 32)) {
+  throw new Error("JWT_SECRET must be configured with at least 32 characters outside development/test.");
 }
 
-export const JWT_SECRET = configuredSecret || "development_only_change_me_please_32_chars";
+export const JWT_SECRET = configuredSecret || (isLocalRuntime ? "development_only_change_me_please_32_chars" : "");
 
 /**
  * Unified 2-Role System:
