@@ -56,8 +56,9 @@ async function ensureSessionsTable() {
   // authorization source, so keep user_id as a text identifier without a users-only FK.
   await pool.query(`
     DO $session_repair$
-    DECLARE fk RECORD;
-    DECLARE user_id_attnum SMALLINT;
+    DECLARE
+      fk RECORD;
+      user_id_attnum SMALLINT;
     BEGIN
       SELECT attnum INTO user_id_attnum
         FROM pg_attribute
