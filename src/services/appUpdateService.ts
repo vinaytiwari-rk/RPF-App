@@ -146,6 +146,7 @@ export async function getCurrentAppVersion(): Promise<AppVersionInfo> {
 export async function checkForAppUpdates(): Promise<UpdateCheckResult> {
   const current = await getCurrentAppVersion();
   let lastErrorMsg = "";
+  let bestManifest: UpdateManifest | null = null;
 
   for (const url of MANIFEST_URLS) {
     try {
@@ -168,24 +169,32 @@ export async function checkForAppUpdates(): Promise<UpdateCheckResult> {
         /^[a-f0-9]{64}$/i.test(manifest.sha256.trim()) &&
         Number.isInteger(manifest.size) &&
         manifest.size > 0;
-      let hasSecureDownloadUrl = false;
+      let hasTrustedDownloadUrl = false;
       try {
-        hasSecureDownloadUrl = new URL(manifest?.downloadUrl || "").protocol === "https:";
+        const downloadUrl = new URL(manifest?.downloadUrl || "");
+        hasTrustedDownloadUrl = downloadUrl.protocol === "https:" &&
+          downloadUrl.hostname.toLowerCase() === "appapi.therpfoundation.org";
       } catch {}
-      if (!manifest || !hasValidVersion || !hasValidIntegrity || !hasSecureDownloadUrl) {
-        lastErrorMsg = "Invalid update manifest: version, HTTPS URL, size, and SHA-256 are required";
+      if (!manifest || !hasValidVersion || !hasValidIntegrity || !hasTrustedDownloadUrl) {
+        lastErrorMsg = "Invalid update manifest: trusted HTTPS URL, version, size, and SHA-256 are required";
         continue;
       }
 
-      const updateAvailable = manifest.versionCode > current.versionCode;
-      return {
-        updateAvailable,
-        currentVersion: current,
-        latestManifest: manifest,
-      };
+      // Try every configured endpoint; an old but valid first response must not hide a newer manifest.
+      if (!bestManifest || manifest.versionCode > bestManifest.versionCode) {
+        bestManifest = manifest;
+      }
     } catch (e: any) {
       lastErrorMsg = e?.message || "Connection failed";
     }
+  }
+
+  if (bestManifest) {
+    return {
+      updateAvailable: bestManifest.versionCode > current.versionCode,
+      currentVersion: current,
+      latestManifest: bestManifest,
+    };
   }
 
   return {
@@ -236,7 +245,9 @@ export async function downloadAndInstallUpdate(
   }
   let secureDownloadUrl = false;
   try {
-    secureDownloadUrl = new URL(manifest.downloadUrl).protocol === "https:";
+    const downloadUrl = new URL(manifest.downloadUrl);
+    secureDownloadUrl = downloadUrl.protocol === "https:" &&
+      downloadUrl.hostname.toLowerCase() === "appapi.therpfoundation.org";
   } catch {}
   if (!secureDownloadUrl) {
     throw new Error("Update blocked: the APK download URL must use HTTPS.");
