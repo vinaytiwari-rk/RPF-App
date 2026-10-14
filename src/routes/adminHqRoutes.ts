@@ -58,7 +58,7 @@ async function ensureAdminSessionSchema() {
   // which makes legitimate administrator session inserts fail. The token row is the
   // authorization source, so keep user_id as a text identifier without a users-only FK.
   await pool.query(`
-    DO $
+    DO $session_repair$
     DECLARE fk RECORD;
     DECLARE user_id_attnum SMALLINT;
     BEGIN
@@ -78,7 +78,7 @@ async function ensureAdminSessionSchema() {
           EXECUTE format('ALTER TABLE sessions DROP CONSTRAINT %I', fk.conname);
         END LOOP;
       END IF;
-    END $;
+    END $session_repair$;
   `);
 
   const userIdColumn: any = byName.get("user_id");
