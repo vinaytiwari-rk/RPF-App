@@ -307,6 +307,31 @@ jobs:
             exit 1
           fi
 
+      - name: Verify live Android update manifest
+        if: steps.signing.outputs.release_ready == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          LIVE_MANIFEST_URL="https://appapi.therpfoundation.org/api/public/app-update?_t=$(date +%s)"
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 5 \
+            -H "Cache-Control: no-cache" "$LIVE_MANIFEST_URL" -o /tmp/rpf-live-update-manifest.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const expected = JSON.parse(fs.readFileSync('updates/manifest.json', 'utf8'));
+          const live = JSON.parse(fs.readFileSync('/tmp/rpf-live-update-manifest.json', 'utf8'));
+          if (live.success === false) throw new Error('Live update endpoint reported failure.');
+          if (live.versionName !== expected.versionName) {
+            throw new Error('Live update version mismatch: expected ' + expected.versionName + ', received ' + live.versionName);
+          }
+          if (live.versionCode !== expected.versionCode) {
+            throw new Error('Live update versionCode mismatch: expected ' + expected.versionCode + ', received ' + live.versionCode);
+          }
+          if (String(live.sha256 || '').toLowerCase() !== String(expected.sha256 || '').toLowerCase()) {
+            throw new Error('Live update SHA-256 does not match the uploaded release APK.');
+          }
+          console.log('Live update manifest verified:', live.versionName, live.versionCode);
+          NODE
+
       - name: Upload APK Artifact
         if: always()
         uses: actions/upload-artifact@v4
