@@ -1,7 +1,7 @@
 {
   "name": "samahit-seva-app",
   "private": true,
-  "version": "2.5.33",
+  "version": "2.5.34",
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx server.ts",
