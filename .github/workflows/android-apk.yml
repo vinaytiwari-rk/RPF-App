@@ -298,12 +298,12 @@ jobs:
           FTP_INCREMENTAL: "true"
         run: |
           set -euo pipefail
-          if [ -n "$FTP_HOST" ] && [ -n "$FTP_USER" ] && [ -n "$FTP_PASSWORD" ] && [ -n "$FTP_REMOTE_DIR" ]; then
+          if [ -n "$FTP_HOST" ] && [ -n "$FTP_USER" ] && [ -n "$FTP_PASSWORD" ]; then
             echo "Deploying release APK and manifest to server via FTP..."
             node deploy.cjs
             echo "FTP update deployment complete."
           else
-            echo "::error::Production APK was built but not published: configure FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, and FTP_REMOTE_DIR GitHub Actions secrets."
+            echo "::error::Production APK was built but not published: configure FTP_SERVER, FTP_USERNAME, and FTP_PASSWORD GitHub Actions secrets; set FTP_REMOTE_DIR if the app is not at the FTP account root."
             exit 1
           fi
 
