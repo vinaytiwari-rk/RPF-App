@@ -196,26 +196,10 @@ export function AuthProvider({children}:{children:React.ReactNode}){
     if(!response.ok||!data.success)throw new Error(data.error||'Onboarding update failed');
     await saveUser({...user,interests,onboardingCompleted:true,...(data.user||{})});
   },[user,token,saveUser]);
-  const isMasterAdmin = (u: any) => {
-    if (!u) return false;
-    const phone = String(u.phone || u.mobile || "").trim();
-    const email = String(u.email || "").trim().toLowerCase();
-    const username = String(u.username || "").trim().toLowerCase();
-    const id = String(u.id || "").trim().toLowerCase();
-    return (
-      phone === "9399945861" ||
-      email === "tiwari.vinay89@gmail.com" ||
-      username === "vinaytiwari" ||
-      id === "admin" ||
-      id === "751e722c-ba4f-4d36-bc50-2be7376cc38a"
-    );
-  };
-
   const hasAdminAccess = !!user && (
     user.role === 'admin' ||
     user.role === 'super_admin' ||
-    user.role === 'superadmin' ||
-    isMasterAdmin(user)
+    user.role === 'superadmin'
   );
 
   return <AuthContext.Provider value={{token,user,isLoading,isAuthenticated:!!user,language,setLanguage,login,loginAsGuest,logout,updateUser,completeOnboarding,hasAdminAccess}}>{children}</AuthContext.Provider>;
