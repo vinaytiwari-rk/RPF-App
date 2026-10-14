@@ -1,5 +1,8 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const { execFileSync } = require("node:child_process");
+
+execFileSync(process.execPath, ["--check", "deploy.cjs"], { stdio: "inherit" });
 
 const deploySource = fs.readFileSync("deploy.cjs", "utf8");
 const androidWorkflow = fs.readFileSync(".github/workflows/android-apk.yml", "utf8");
