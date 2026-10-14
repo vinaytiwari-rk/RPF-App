@@ -46,7 +46,8 @@ export function getPgPoolConfig(rawUrl?: string) {
   };
 }
 
-export const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://rp_admin:therpfoundation%40321@localhost:5432/rp_db";
+export const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+if (!dbUrl) throw new Error("Database configuration missing: set LOCAL_DB_URL or DATABASE_URL.");
 
 export const pool = new pg.Pool(getPgPoolConfig());
 
