@@ -7660,41 +7660,53 @@ export const LIVE_TV_DEFAULTS: LiveTvChannel[] = [
  * ALWAYS remain at the very top (orders 0 to 40), while all other channels
  * follow directly after them.
  */
+/**
+ * Prioritize requested channels only when they are present in the configured catalogue.
+ * A persisted empty array is intentional: admins must be able to remove channels,
+ * including priority channels, without the client silently restoring defaults.
+ * Defaults are used only when no saved catalogue was supplied at all.
+ */
 export const mergeTvCatalogue = (configured: unknown): LiveTvChannel[] => {
-  const priorityList = PRIORITY_LIVE_TV_CHANNELS.map((ch, idx) => ({
-    ...ch,
-    order: idx,
-    enabled: true
+  const sourceList: LiveTvChannel[] = Array.isArray(configured)
+    ? configured as LiveTvChannel[]
+    : LIVE_TV_DEFAULTS;
+
+  const valid = sourceList.filter((item: any): item is LiveTvChannel =>
+    item &&
+    typeof item.id === "string" &&
+    typeof item.name === "string" &&
+    item.name.trim() &&
+    typeof item.url === "string" &&
+    item.url.trim()
+  );
+
+  const priorityRank = (item: LiveTvChannel) => {
+    const id = String(item.id || "").trim().toLowerCase();
+    const url = String(item.url || "").trim().toLowerCase();
+    const name = normalizeTvChannelName(String(item.name || ""));
+    return PRIORITY_LIVE_TV_CHANNELS.findIndex((priority) =>
+      id === priority.id.toLowerCase() ||
+      url === priority.url.trim().toLowerCase() ||
+      name === normalizeTvChannelName(priority.name)
+    );
+  };
+
+  const priority = valid
+    .filter((item) => priorityRank(item) >= 0)
+    .sort((a, b) => priorityRank(a) - priorityRank(b));
+  const priorityItems = new Set(priority);
+  const remaining = valid.filter((item) => !priorityItems.has(item));
+  const seenUrls = new Set<string>();
+  const ordered = [...priority, ...remaining].filter((item) => {
+    const url = item.url.trim().toLowerCase();
+    if (seenUrls.has(url)) return false;
+    seenUrls.add(url);
+    return true;
+  });
+
+  return ordered.map((item, idx) => ({
+    ...item,
+    enabled: item.enabled !== false,
+    order: idx
   }));
-
-  const seenUrls = new Set(priorityList.map(c => c.url.trim().toLowerCase()));
-  const seenNames = new Set(priorityList.map(c => c.name.trim().toLowerCase()));
-
-  const sourceList = Array.isArray(configured) ? configured : LIVE_TV_DEFAULTS;
-
-  const remaining = sourceList
-    .filter((item: any) =>
-      item &&
-      typeof item.id === "string" &&
-      typeof item.name === "string" &&
-      item.name.trim() &&
-      typeof item.url === "string" &&
-      item.url.trim()
-    )
-    .filter((item: LiveTvChannel) => {
-      const u = item.url.trim().toLowerCase();
-      const n = item.name.trim().toLowerCase();
-      if (seenUrls.has(u) || seenNames.has(n)) return false;
-      seenUrls.add(u);
-      return true;
-    })
-    .map((item: LiveTvChannel) => ({
-      ...item,
-      enabled: item.enabled !== false,
-    }));
-
-  return [
-    ...priorityList,
-    ...remaining
-  ].map((c, idx) => ({ ...c, order: idx }));
 };
