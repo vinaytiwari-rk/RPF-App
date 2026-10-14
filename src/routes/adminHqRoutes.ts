@@ -33,11 +33,42 @@ async function ensureAdminSessionSchema() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
-  await pool.query("ALTER TABLE sessions ALTER COLUMN token TYPE TEXT USING token::TEXT");
-  await pool.query("UPDATE sessions SET expires_at = NOW() WHERE expires_at IS NULL");
-  await pool.query("ALTER TABLE sessions ALTER COLUMN expires_at TYPE TIMESTAMPTZ USING expires_at::TIMESTAMPTZ");
-  await pool.query("ALTER TABLE sessions ALTER COLUMN token SET NOT NULL");
-  await pool.query("ALTER TABLE sessions ALTER COLUMN expires_at SET NOT NULL");
+
+  // Older deployments may have a partial sessions table. Inspect first and only
+  // perform DDL when a required column/constraint is actually missing or incompatible.
+  let columns = await pool.query(
+    `SELECT column_name, data_type, is_nullable
+       FROM information_schema.columns
+      WHERE table_schema = current_schema() AND table_name = 'sessions'`
+  );
+  let byName = new Map(columns.rows.map((row: any) => [row.column_name, row]));
+  if (!byName.has("user_id")) await pool.query("ALTER TABLE sessions ADD COLUMN user_id VARCHAR(255)");
+  if (!byName.has("token")) await pool.query("ALTER TABLE sessions ADD COLUMN token TEXT");
+  if (!byName.has("expires_at")) await pool.query("ALTER TABLE sessions ADD COLUMN expires_at TIMESTAMPTZ");
+  if (!byName.has("created_at")) await pool.query("ALTER TABLE sessions ADD COLUMN created_at TIMESTAMPTZ DEFAULT NOW()");
+
+  columns = await pool.query(
+    `SELECT column_name, data_type, is_nullable
+       FROM information_schema.columns
+      WHERE table_schema = current_schema() AND table_name = 'sessions'`
+  );
+  byName = new Map(columns.rows.map((row: any) => [row.column_name, row]));
+  const tokenColumn: any = byName.get("token");
+  const expiryColumn: any = byName.get("expires_at");
+
+  if (tokenColumn?.data_type !== "text") {
+    await pool.query("ALTER TABLE sessions ALTER COLUMN token TYPE TEXT USING token::TEXT");
+  }
+  if (tokenColumn?.is_nullable === "YES") {
+    // Rows without tokens can never authenticate a session; remove only these unusable rows.
+    await pool.query("DELETE FROM sessions WHERE token IS NULL");
+    await pool.query("ALTER TABLE sessions ALTER COLUMN token SET NOT NULL");
+  }
+  if (expiryColumn?.is_nullable === "YES") {
+    // Incomplete legacy sessions are expired immediately, never granted a fresh lifetime.
+    await pool.query("UPDATE sessions SET expires_at = NOW() WHERE expires_at IS NULL");
+    await pool.query("ALTER TABLE sessions ALTER COLUMN expires_at SET NOT NULL");
+  }
   await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)");
   await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)");
   await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)");
