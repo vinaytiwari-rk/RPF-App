@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const connStr = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;\nif (!connStr) throw new Error("Database configuration missing: set LOCAL_DB_URL or DATABASE_URL.");
+const connStr = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+if (!connStr) throw new Error("Database configuration missing: set LOCAL_DB_URL or DATABASE_URL.");
 
 const pool = new pg.Pool({
   connectionString: connStr.replace(/@base(?=[:\/]|$)/g, '@localhost'),
