@@ -253,7 +253,7 @@ router.post("/api/auth/login", async (req, res) => {
 
       if (volResult.rows.length > 0) {
         user = volResult.rows[0];
-        userRole = "user";
+        userRole = "volunteer";
         userName = user.full_name || user.username;
         userEmail = user.email || "";
         userPhone = user.mobile || "";
