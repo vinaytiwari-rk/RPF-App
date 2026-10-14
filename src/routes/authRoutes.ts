@@ -72,7 +72,7 @@ async function ensureSessionsTable() {
              AND contype = 'f'
              AND user_id_attnum = ANY(conkey)
         LOOP
-          EXECUTE format('ALTER TABLE sessions DROP CONSTRAINT %I', fk.conname);
+          EXECUTE format('ALTER TABLE sessions DROP CONSTRAINT IF EXISTS %I', fk.conname);
         END LOOP;
       END IF;
     END $session_repair$;
