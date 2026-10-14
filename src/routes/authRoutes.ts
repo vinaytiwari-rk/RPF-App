@@ -136,106 +136,114 @@ router.post("/api/auth/login", async (req, res) => {
     let userEmail = "";
     let userPhone = "";
 
-    // 1. Check volunteers table first
-    const volResult = await pool.query(
-      `SELECT * FROM volunteers WHERE mobile = $1 OR LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1) OR LOWER(registration_number) = LOWER($1) OR id = $1`,
+    // Administrator access is granted only by an explicit, active admin_credentials record.
+    // Check this table first so a matching volunteer/user profile cannot override admin authentication.
+    let adminCredentialMatched = false;
+    const adminCredResult = await pool.query(
+      `SELECT id, username, password_hash, role FROM admin_credentials
+        WHERE LOWER(username) = LOWER($1) OR id::text = $1
+        ORDER BY CASE WHEN LOWER(username) = LOWER($1) THEN 0 ELSE 1 END
+        LIMIT 1`,
       [finalIdentifier]
     );
 
-    if (volResult.rows.length > 0) {
-      user = volResult.rows[0];
-      userRole = user.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
-      userName = user.full_name || user.username;
-      userEmail = user.email || '';
-      userPhone = user.mobile || '';
-
-      if (user.password_hash) {
-        if (user.password_hash.startsWith('$2')) {
-          validPassword = await bcrypt.compare(password, user.password_hash);
-        } else {
-          const oldHash = crypto.createHash('sha256').update(password).digest('hex');
-          validPassword = (oldHash === user.password_hash);
-        }
+    if (adminCredResult.rows.length > 0) {
+      adminCredentialMatched = true;
+      const adminRow = adminCredResult.rows[0];
+      const storedRole = String(adminRow.role || "").trim().toLowerCase();
+      if (!["admin", "super_admin", "superadmin"].includes(storedRole)) {
+        await auditEvent({
+          action: "admin_login_failed",
+          resource: "administrator",
+          userId: String(adminRow.id || ""),
+          req,
+          metadata: { reason: "credential_role_not_authorized", storedRole: storedRole || "missing" }
+        });
+        return res.status(403).json({ success: false, error: "This account is not authorized for administrator access." });
       }
+
+      const storedHash = String(adminRow.password_hash || "");
+      let adminPasswordValid = false;
+      let legacySha256 = false;
+      if (storedHash.startsWith("$2")) {
+        adminPasswordValid = await bcrypt.compare(String(password), storedHash);
+      } else if (/^[a-f0-9]{64}$/i.test(storedHash)) {
+        const suppliedDigest = crypto.createHash("sha256").update(String(password)).digest();
+        const storedDigest = Buffer.from(storedHash, "hex");
+        legacySha256 = storedDigest.length === suppliedDigest.length && crypto.timingSafeEqual(storedDigest, suppliedDigest);
+        adminPasswordValid = legacySha256;
+      }
+
+      if (!adminPasswordValid) {
+        await auditEvent({
+          action: "admin_login_failed",
+          resource: "administrator",
+          userId: String(adminRow.id || ""),
+          req,
+          metadata: { reason: "invalid_password" }
+        });
+        return res.status(401).json({ success: false, error: "Invalid credentials" });
+      }
+
+      if (legacySha256) {
+        const upgradedHash = await bcrypt.hash(String(password), 12);
+        await pool.query("UPDATE admin_credentials SET password_hash = $1 WHERE id = $2", [upgradedHash, adminRow.id]);
+      }
+
+      user = { id: adminRow.id, name: "System Administrator", role: "admin", username: adminRow.username };
+      userRole = "admin";
+      userName = "System Administrator";
+      validPassword = true;
     }
 
-    // 2. Check admin_credentials table if not found or invalid
-    if (!validPassword) {
-      const adminCredResult = await pool.query(
-        `SELECT * FROM admin_credentials WHERE LOWER(username) = LOWER($1) OR id = $1`,
+    // Regular accounts can never become administrators from a phone, email, username,
+    // user-controlled profile role, or matching identity string.
+    if (!adminCredentialMatched) {
+      const volResult = await pool.query(
+        `SELECT * FROM volunteers WHERE mobile = $1 OR LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1) OR LOWER(registration_number) = LOWER($1) OR id = $1`,
         [finalIdentifier]
       );
 
-      if (adminCredResult.rows.length > 0) {
-        const adminRow = adminCredResult.rows[0];
-        if (adminRow.password_hash) {
-          if (adminRow.password_hash.startsWith('$2')) {
-            validPassword = await bcrypt.compare(password, adminRow.password_hash);
+      if (volResult.rows.length > 0) {
+        user = volResult.rows[0];
+        userRole = "user";
+        userName = user.full_name || user.username;
+        userEmail = user.email || "";
+        userPhone = user.mobile || "";
+
+        if (user.password_hash) {
+          if (user.password_hash.startsWith("$2")) {
+            validPassword = await bcrypt.compare(String(password), user.password_hash);
           } else {
-            const oldHash = crypto.createHash('sha256').update(password).digest('hex');
-            validPassword = (oldHash === adminRow.password_hash);
-          }
-        }
-        if (validPassword) {
-          const storedAdminRole = String(adminRow.role || "").trim().toLowerCase();
-          if (["admin", "super_admin", "superadmin"].includes(storedAdminRole)) {
-            user = { id: adminRow.id, name: 'System Administrator', role: 'admin' };
-            userRole = 'admin';
-            userName = 'System Administrator';
-          } else {
-            // Do not turn a credential record with an ordinary or missing role into an administrator.
-            validPassword = false;
-            await auditEvent({
-              action: "admin_login_failed",
-              resource: "administrator",
-              userId: String(adminRow.id || ""),
-              req,
-              metadata: { reason: "credential_role_not_authorized", storedRole: storedAdminRole || "missing" }
-            });
+            const oldHash = crypto.createHash("sha256").update(String(password)).digest("hex");
+            validPassword = oldHash === user.password_hash;
           }
         }
       }
-    }
 
-    // 3. Check users table
-    if (!validPassword) {
-      const userResult = await pool.query(
-        `SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR phone = $1 OR LOWER(username) = LOWER($1) OR id = $1`,
-        [finalIdentifier]
-      );
-      if (userResult.rows.length > 0) {
-        const uRow = userResult.rows[0];
-        if (uRow.password_hash) {
-          validPassword = await bcrypt.compare(password, uRow.password_hash);
-        }
-        if (validPassword) {
-          user = uRow;
-          userRole = user.role?.toLowerCase() === 'admin' ? 'admin' : 'user';
-          userName = user.name || user.username || 'User';
-          userEmail = user.email || '';
-          userPhone = user.phone || '';
+      if (!validPassword) {
+        const userResult = await pool.query(
+          `SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR phone = $1 OR LOWER(username) = LOWER($1) OR id = $1`,
+          [finalIdentifier]
+        );
+        if (userResult.rows.length > 0) {
+          const uRow = userResult.rows[0];
+          if (uRow.password_hash) {
+            validPassword = await bcrypt.compare(String(password), uRow.password_hash);
+          }
+          if (validPassword) {
+            user = uRow;
+            userRole = "user";
+            userName = user.name || user.username || "User";
+            userEmail = user.email || "";
+            userPhone = user.phone || "";
+          }
         }
       }
     }
 
     if (!user) return res.status(401).json({ success: false, error: "User not found" });
     if (!validPassword) return res.status(401).json({ success: false, error: "Invalid credentials" });
-
-    // Master Admin Auto-Resolution for Shri Vinay Tiwari & Authorized System Admins
-    const isMasterAdminUser = 
-      String(finalIdentifier).toLowerCase() === '9399945861' ||
-      String(finalIdentifier).toLowerCase() === 'vinaytiwari' ||
-      String(finalIdentifier).toLowerCase() === 'tiwari.vinay89@gmail.com' ||
-      String(finalIdentifier).toLowerCase() === 'admin' ||
-      String(user.id).toLowerCase() === 'admin' ||
-      String(user.id) === '751e722c-ba4f-4d36-bc50-2be7376cc38a' ||
-      String(userPhone || user.mobile || user.phone || '') === '9399945861' ||
-      String(userEmail || user.email || '').toLowerCase() === 'tiwari.vinay89@gmail.com' ||
-      String(user.username || '').toLowerCase() === 'vinaytiwari';
-
-    if (isMasterAdminUser) {
-      userRole = 'admin';
-    }
 
     const userPayload = {
       id: user.id,
