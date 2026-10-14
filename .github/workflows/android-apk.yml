@@ -131,7 +131,7 @@ jobs:
             echo "Stable release signing credentials are available."
           else
             if [ "$GITHUB_REF" = "refs/heads/main" ] && [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
-              echo "::error::Production APK release blocked: configure RPF_RELEASE_KEYSTORE_B64, RPF_RELEASE_STORE_PASSWORD, RPF_RELEASE_KEY_ALIAS, and RPF_RELEASE_KEY_PASSWORD in GitHub Actions secrets. A debug APK cannot update the installed signed app."
+              echo "::error::Production APK release blocked: configure RPF_RELEASE_KEYSTORE_B64, RPF_RELEASE_STORE_PASSWORD, and RPF_RELEASE_KEY_PASSWORD in GitHub Actions secrets. A debug APK cannot update the installed signed app."
               exit 1
             fi
             echo "release_ready=false" >> "$GITHUB_OUTPUT"
@@ -298,7 +298,7 @@ jobs:
           FTP_INCREMENTAL: "true"
         run: |
           set -euo pipefail
-          if [ -n "$FTP_HOST" ] && [ -n "$FTP_USER" ] && [ -n "$FTP_PASSWORD" ]; then
+          if [ -n "$FTP_HOST" ] && [ -n "$FTP_USER" ] && [ -n "$FTP_PASSWORD" ] && [ -n "$FTP_REMOTE_DIR" ]; then
             echo "Deploying release APK and manifest to server via FTP..."
             node deploy.cjs
             echo "FTP update deployment complete."
