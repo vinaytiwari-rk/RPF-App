@@ -34,7 +34,7 @@ async function ensureSessionsTable() {
   // CREATE TABLE IF NOT EXISTS does not repair older VARCHAR(255) token columns.
   // Inspect the live schema and repair only missing/incompatible parts before login.
   let columns = await pool.query(
-    `SELECT column_name, data_type, is_nullable
+    `SELECT column_name, data_type, is_nullable, column_default, is_identity
        FROM information_schema.columns
       WHERE table_schema = current_schema() AND table_name = 'sessions'`
   );
@@ -45,7 +45,7 @@ async function ensureSessionsTable() {
   if (!byName.has("created_at")) await pool.query("ALTER TABLE sessions ADD COLUMN created_at TIMESTAMPTZ DEFAULT NOW()");
 
   columns = await pool.query(
-    `SELECT column_name, data_type, is_nullable
+    `SELECT column_name, data_type, is_nullable, column_default, is_identity
        FROM information_schema.columns
       WHERE table_schema = current_schema() AND table_name = 'sessions'`
   );
@@ -69,6 +69,27 @@ async function ensureSessionsTable() {
   await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)");
   await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)");
   await pool.query("CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)");
+  return byName.get("id") || null;
+}
+
+async function persistSession(sessionIdColumn: any, userId: string, token: string, days: number) {
+  const idType = String(sessionIdColumn?.data_type || "").toLowerCase();
+  const numericId = ["smallint", "integer", "bigint"].includes(idType);
+  const generatedId = Boolean(sessionIdColumn?.column_default) || sessionIdColumn?.is_identity === "YES";
+
+  if (numericId && generatedId) {
+    await pool.query(
+      `INSERT INTO sessions(user_id,token,expires_at) VALUES($1,$2,NOW()+($3::int * INTERVAL '1 day'))`,
+      [userId, token, days]
+    );
+    return;
+  }
+  if (numericId) throw new Error("sessions.id is numeric but has no database generator");
+
+  await pool.query(
+    `INSERT INTO sessions(id,user_id,token,expires_at) VALUES($1,$2,$3,NOW()+($4::int * INTERVAL '1 day'))`,
+    [crypto.randomUUID(), userId, token, days]
+  );
 }
 
 router.post("/api/auth/register", async (req, res) => {
@@ -84,10 +105,8 @@ router.post("/api/auth/register", async (req, res) => {
 
     const userPayload = { id: userId, role: 'citizen', name };
     const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
-    await pool.query(
-      `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
-      ["sess-" + Date.now(), userId, token]
-    );
+    const sessionIdColumn = await ensureSessionsTable();
+    await persistSession(sessionIdColumn, String(userId), token, 7);
 
     res.json({ success: true, token, user: userPayload });
   } catch (error: any) {
@@ -214,11 +233,8 @@ router.post("/api/auth/login", async (req, res) => {
     const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: isAdminRole ? '30d' : '7d' });
 
     try {
-      await ensureSessionsTable();
-      await pool.query(
-        `INSERT INTO sessions (id, user_id, token, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL ${isAdminRole ? "'30 days'" : "'7 days'"})`,
-        ["sess-" + Date.now() + crypto.randomBytes(4).toString("hex"), String(userPayload.id), token]
-      );
+      const sessionIdColumn = await ensureSessionsTable();
+      await persistSession(sessionIdColumn, String(userPayload.id), token, isAdminRole ? 30 : 7);
     } catch (sessErr: any) {
       console.error("Session persistence failure during login:", sessErr?.message);
       if (isAdminRole) {
