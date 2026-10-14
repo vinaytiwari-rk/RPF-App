@@ -10,9 +10,7 @@ import {
   SAMAHIT_QUESTION_BANK,
   HUGGINGFACE_QUESTIONS,
   WIKIPEDIA_AI_QUESTIONS,
-  CATEGORY_PERCENTAGES,
-  getQuestionsByCategory,
-  getQuestionCountByCategory
+  CATEGORY_PERCENTAGES
 } from "../data/quiz/samahitQuestionBank";
 
 export interface TestPreset {
@@ -106,11 +104,14 @@ export interface GenerateTestOptions {
 /**
  * Validates question availability against required quotas.
  */
-export function validateQuotaAvailability(quotas: Record<QuestionCategory, number>): {
+export function validateQuotaAvailability(quotas: Record<QuestionCategory, number>, questionBank: SamahitQuestion[] = SAMAHIT_QUESTION_BANK): {
   valid: boolean;
   errors: string[];
 } {
-  const counts = getQuestionCountByCategory();
+  const counts = CATEGORY_ORDER.reduce((result, category) => {
+    result[category] = questionBank.filter((question) => question.category === category && question.isActive).length;
+    return result;
+  }, {} as Record<QuestionCategory, number>);
   const errors: string[] = [];
 
   for (const cat of CATEGORY_ORDER) {
@@ -136,10 +137,12 @@ export function validateQuotaAvailability(quotas: Record<QuestionCategory, numbe
 export function generateSamahitTest(
   questionCount: number,
   durationMinutes: number,
-  options: GenerateTestOptions = {}
+  options: GenerateTestOptions = {},
+  additionalQuestions: SamahitQuestion[] = []
 ): SamahitTestAttempt {
+  const questionBank = [...SAMAHIT_QUESTION_BANK, ...additionalQuestions];
   const quotas = calculateCategoryQuotas(questionCount);
-  const check = validateQuotaAvailability(quotas);
+  const check = validateQuotaAvailability(quotas, questionBank);
 
   if (!check.valid) {
     throw new Error(`Cannot start test: ${check.errors.join(" ")}`);
@@ -150,7 +153,7 @@ export function generateSamahitTest(
 
   for (const cat of CATEGORY_ORDER) {
     const needed = quotas[cat];
-    const pool = getQuestionsByCategory(cat);
+    const pool = questionBank.filter((question) => question.category === cat && question.isActive);
     const shuffledPool = shuffleArray(pool);
     const chosen = shuffledPool.slice(0, needed);
 

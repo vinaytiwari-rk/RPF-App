@@ -7,8 +7,9 @@ import {
 import {
   TEST_PRESETS,
   TestPreset,
-  generateTripleFusionTest
+  generateSamahitTest
 } from "../utils/samahitTestEngine";
+import { loadHybridQuestionBank } from "../lib/hybridQuestionBank";
 import { SamahitTestAttempt } from "../data/quiz/samahitQuestionTypes";
 import OnlineTestRunnerModal from "../components/quiz/OnlineTestRunnerModal";
 import { useAuth } from "../context/AuthContext";
@@ -25,6 +26,7 @@ export default function OnlineTestCenterPage() {
   // State: selected test duration preset (default: 15 mins / 50 questions)
   const [selectedPreset, setSelectedPreset] = useState<TestPreset>(TEST_PRESETS[2]);
   const [activeAttempt, setActiveAttempt] = useState<SamahitTestAttempt | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -34,19 +36,27 @@ export default function OnlineTestCenterPage() {
     }
   };
 
-  // Starts the test using Triple Fusion (Samahit Core + Hugging Face Benchmarks + Grounded Questions) by default
-  const handleStartTest = () => {
+  // Load integrity-checked online/offline packs, then use the fixed category-quota engine.
+  const handleStartTest = async () => {
+    if (isStarting) return;
+    setIsStarting(true);
     try {
-      const attempt = generateTripleFusionTest(
+      const packQuestions = await loadHybridQuestionBank();
+      if (packQuestions.length === 0) {
+        toast("Question packs are unavailable; this attempt will use the built-in question bank only.");
+      }
+      const attempt = generateSamahitTest(
         selectedPreset.questionCount,
         selectedPreset.durationMinutes,
-        [],
-        { shuffleOptions: true }
+        { shuffleOptions: true },
+        packQuestions
       );
       setActiveAttempt(attempt);
     } catch (err: any) {
       console.error("Test start failed:", err);
       toast.error(err?.message || "Unable to start test attempt");
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -82,34 +92,6 @@ export default function OnlineTestCenterPage() {
             : "Quality-controlled bilingual multiple choice assessment. Complete the test and receive your official RP Foundation Certificate of Achievement."}
         </p>
 
-        {/* 5-Category Proportional Evaluation Breakdown */}
-        <div className="mt-4 pt-3 border-t border-emerald-200/50">
-          <p className="text-[11px] font-extrabold text-[#245D45] uppercase tracking-wider mb-2">
-            {isHi ? "संतुलित 5-विषय मूल्यांकन पद्धति:" : "Balanced 5-Category Evaluation Scheme:"}
-          </p>
-          <div className="flex flex-wrap gap-2 text-[11px] font-bold text-emerald-950">
-            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-amber-500" />
-              {isHi ? "करेंट अफेयर्स — 25%" : "Current Affairs — 25%"}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-emerald-600" />
-              {isHi ? "सामान्य ज्ञान — 35%" : "General Knowledge — 35%"}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
-              {isHi ? "तर्कशक्ति — 20%" : "Reasoning — 20%"}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-purple-500" />
-              {isHi ? "गणित — 10%" : "Mathematics — 10%"}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-emerald-200 shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-rose-500" />
-              {isHi ? "अंग्रेजी — 10%" : "English — 10%"}
-            </span>
-          </div>
-        </div>
       </header>
 
       {/* Main Test Selection Card */}
@@ -161,9 +143,7 @@ export default function OnlineTestCenterPage() {
                       <Clock className="h-3 w-3" />
                       {preset.durationMinutes} {isHi ? "मिनट" : "Minutes"}
                     </span>
-                    <span className="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200/60 rounded-lg px-2 py-0.5">
-                      {preset.badge}
-                    </span>
+
                   </div>
 
                   <div className="mt-3">
@@ -173,9 +153,7 @@ export default function OnlineTestCenterPage() {
                         {isHi ? "प्रश्न" : "Questions"}
                       </span>
                     </span>
-                    <p className="text-xs font-semibold text-slate-600 mt-1">
-                      {isHi ? preset.labelHi : preset.labelEn}
-                    </p>
+
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
@@ -212,11 +190,12 @@ export default function OnlineTestCenterPage() {
 
             <button
               type="button"
+              disabled={isStarting}
               onClick={handleStartTest}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-[#245D45] px-8 py-3.5 text-sm sm:text-base font-extrabold text-white shadow-lg hover:bg-emerald-800 transition active:scale-98"
             >
               <Play className="h-4 w-4 fill-current" />
-              <span>{isHi ? "ऑनलाइन टेस्ट शुरू करें" : "Start Test"}</span>
+              <span>{isStarting ? (isHi ? "प्रश्न बैंक लोड हो रहा है..." : "Loading question bank...") : (isHi ? "ऑनलाइन टेस्ट शुरू करें" : "Start Test")}</span>
             </button>
           </div>
         </div>
