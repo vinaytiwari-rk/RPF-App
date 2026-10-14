@@ -366,7 +366,6 @@ router.get("/api/auth/me", authenticateToken, async (req: any, res: any) => {
       const volResult = await pool.query(`SELECT id, username, registration_number, full_name as name, email, mobile as phone, avatar, cover FROM volunteers WHERE id = $1`, [userId]);
       if (volResult.rows.length === 0) return res.status(404).json({ success: false, error: "User not found" });
       const vol = volResult.rows[0];
-      const isVolMaster = isMasterAdmin || vol.mobile === '9399945861' || vol.email?.toLowerCase() === 'tiwari.vinay89@gmail.com' || vol.username?.toLowerCase() === 'vinaytiwari';
       return res.json({ success: true, user: { ...vol, role: "volunteer", isVolunteer: true, volunteerData: vol } });
     }
     const user = result.rows[0];
