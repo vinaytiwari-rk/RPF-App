@@ -303190,36 +303190,828 @@ var import_https2 = __toESM(require("https"), 1);
 var import_url2 = require("url");
 
 // src/data/liveTvDefaults.ts
-var LIVE_TV_DEFAULTS = [
+var PRIORITY_LIVE_TV_CHANNELS = [
   {
-    "id": "gov-dd-news",
-    "name": "DD News HD",
+    "id": "top-1-dd-news",
+    "name": "DD News",
     "url": "https://www.youtube.com/live/qD6GkaU2lD0",
     "videoId": "qD6GkaU2lD0",
     "category": "News",
-    "logo": "https://i.ytimg.com/vi/qD6GkaU2lD0/hqdefault.jpg",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/DD_News_logo.svg/512px-DD_News_logo.svg.png",
     "enabled": true,
     "order": 0
   },
   {
-    "id": "gov-dd-india",
-    "name": "DD India HD",
+    "id": "top-2-dd-india",
+    "name": "DD India",
     "url": "https://www.youtube.com/live/9X37FfIrKio",
     "videoId": "9X37FfIrKio",
     "category": "News",
-    "logo": "https://i.ytimg.com/vi/9X37FfIrKio/hqdefault.jpg",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/DD_India_logo.svg/512px-DD_India_logo.svg.png",
     "enabled": true,
     "order": 1
   },
   {
-    "id": "gov-sansad-1",
-    "name": "Sansad TV 1",
-    "url": "https://www.youtube.com/live/JO7CTaWAmGk",
-    "videoId": "JO7CTaWAmGk",
-    "category": "Legislative",
-    "logo": "https://i.ytimg.com/vi/JO7CTaWAmGk/hqdefault.jpg",
+    "id": "top-3-nasa",
+    "name": "NASA",
+    "url": "https://www.youtube.com/live/M3HKLzjvKPc",
+    "videoId": "M3HKLzjvKPc",
+    "category": "Documentary",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/512px-NASA_logo.svg.png",
     "enabled": true,
     "order": 2
+  },
+  {
+    "id": "top-4-united-nation",
+    "name": "United Nation",
+    "url": "https://www.youtube.com/live/vYRfQo6JMxc",
+    "videoId": "vYRfQo6JMxc",
+    "category": "News",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Flag_of_the_United_Nations.svg/512px-Flag_of_the_United_Nations.svg.png",
+    "enabled": true,
+    "order": 3
+  },
+  {
+    "id": "top-5-sansad-1",
+    "name": "Sansad 1",
+    "url": "https://www.youtube.com/live/JO7CTaWAmGk",
+    "videoId": "JO7CTaWAmGk",
+    "category": "News",
+    "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Sansad_TV_logo.svg/512px-Sansad_TV_logo.svg.png",
+    "enabled": true,
+    "order": 4
+  },
+  {
+    "id": "top-6-swayam-prabha-language-literat",
+    "name": "Swayam Prabha: Language, Literature, History, Culture & Philosophy",
+    "url": "https://www.youtube.com/live/gFHiva4w7zU",
+    "videoId": "gFHiva4w7zU",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/gFHiva4w7zU/hqdefault.jpg",
+    "enabled": true,
+    "order": 5
+  },
+  {
+    "id": "top-7-education-home-science-informa",
+    "name": "Education, Home Science, Information & Management Studies",
+    "url": "https://www.youtube.com/live/dCnCJ4g96HA",
+    "videoId": "dCnCJ4g96HA",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/dCnCJ4g96HA/hqdefault.jpg",
+    "enabled": true,
+    "order": 6
+  },
+  {
+    "id": "top-8-economics-commerce-and-finance",
+    "name": "Economics, Commerce and Finance",
+    "url": "https://www.youtube.com/live/-xHUL9Qtdqo",
+    "videoId": "-xHUL9Qtdqo",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/-xHUL9Qtdqo/hqdefault.jpg",
+    "enabled": true,
+    "order": 7
+  },
+  {
+    "id": "top-9-physical-sciences-mathematics-",
+    "name": "Physical Sciences, Mathematics, Physics & Chemistry",
+    "url": "https://www.youtube.com/live/xrBzYPH5xyY",
+    "videoId": "xrBzYPH5xyY",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/xrBzYPH5xyY/hqdefault.jpg",
+    "enabled": true,
+    "order": 8
+  },
+  {
+    "id": "top-10-life-sciences-botany-zoology-b",
+    "name": "Life Sciences, Botany, Zoology & Bio-Science",
+    "url": "https://www.youtube.com/live/AQn627K1WL0",
+    "videoId": "AQn627K1WL0",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/AQn627K1WL0/hqdefault.jpg",
+    "enabled": true,
+    "order": 9
+  },
+  {
+    "id": "top-11-applied-sciences-allied-physic",
+    "name": "Applied Sciences & Allied Physical and Chemical Sciences",
+    "url": "https://www.youtube.com/live/bboEr8Xsujg",
+    "videoId": "bboEr8Xsujg",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/bboEr8Xsujg/hqdefault.jpg",
+    "enabled": true,
+    "order": 10
+  },
+  {
+    "id": "top-12-social-behavioural-sciences-la",
+    "name": "Social & Behavioural Sciences, Law & Human Rights",
+    "url": "https://www.youtube.com/live/dVj9AMYKQj8",
+    "videoId": "dVj9AMYKQj8",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/dVj9AMYKQj8/hqdefault.jpg",
+    "enabled": true,
+    "order": 11
+  },
+  {
+    "id": "top-13-technology-and-innovation",
+    "name": "Technology and Innovation",
+    "url": "https://www.youtube.com/live/eI5jfKFwCyk",
+    "videoId": "eI5jfKFwCyk",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/eI5jfKFwCyk/hqdefault.jpg",
+    "enabled": true,
+    "order": 12
+  },
+  {
+    "id": "top-14-indian-and-foreign-languages",
+    "name": "Indian and Foreign Languages",
+    "url": "https://www.youtube.com/live/xsnd2UeR8sE",
+    "videoId": "xsnd2UeR8sE",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/xsnd2UeR8sE/hqdefault.jpg",
+    "enabled": true,
+    "order": 13
+  },
+  {
+    "id": "top-15-social-sciences-and-humanities",
+    "name": "Social Sciences and Humanities",
+    "url": "https://www.youtube.com/live/cMGdvs6Y42k",
+    "videoId": "cMGdvs6Y42k",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/cMGdvs6Y42k/hqdefault.jpg",
+    "enabled": true,
+    "order": 14
+  },
+  {
+    "id": "top-16-basic-and-applied-sciences",
+    "name": "Basic and Applied Sciences",
+    "url": "https://www.youtube.com/live/YOKsWfGFBTo",
+    "videoId": "YOKsWfGFBTo",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/YOKsWfGFBTo/hqdefault.jpg",
+    "enabled": true,
+    "order": 15
+  },
+  {
+    "id": "top-17-professional-education",
+    "name": "Professional Education",
+    "url": "https://www.youtube.com/live/JvLnbpOdEWg",
+    "videoId": "JvLnbpOdEWg",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/JvLnbpOdEWg/hqdefault.jpg",
+    "enabled": true,
+    "order": 16
+  },
+  {
+    "id": "top-18-capacity-building-and-teacher-",
+    "name": "Capacity Building and Teacher Education",
+    "url": "https://www.youtube.com/live/HwerScCSY54",
+    "videoId": "HwerScCSY54",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/HwerScCSY54/hqdefault.jpg",
+    "enabled": true,
+    "order": 17
+  },
+  {
+    "id": "top-19-skill-and-vocational-education",
+    "name": "Skill and Vocational Education",
+    "url": "https://www.youtube.com/live/mc87pn4MizM",
+    "videoId": "mc87pn4MizM",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/mc87pn4MizM/hqdefault.jpg",
+    "enabled": true,
+    "order": 18
+  },
+  {
+    "id": "top-20-biotechnology-and-biochemical-",
+    "name": "Biotechnology and Biochemical Engineering",
+    "url": "https://www.youtube.com/live/QGbT-R5Yghk",
+    "videoId": "QGbT-R5Yghk",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/QGbT-R5Yghk/hqdefault.jpg",
+    "enabled": true,
+    "order": 19
+  },
+  {
+    "id": "top-21-electronics-and-communication-",
+    "name": "Electronics and Communication Engineering",
+    "url": "https://www.youtube.com/live/K0nBC65e_Dc",
+    "videoId": "K0nBC65e_Dc",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/K0nBC65e_Dc/hqdefault.jpg",
+    "enabled": true,
+    "order": 20
+  },
+  {
+    "id": "top-22-electrical-engineering",
+    "name": "Electrical Engineering",
+    "url": "https://www.youtube.com/live/m0hIkld8UsE",
+    "videoId": "m0hIkld8UsE",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/m0hIkld8UsE/hqdefault.jpg",
+    "enabled": true,
+    "order": 21
+  },
+  {
+    "id": "top-23-physics",
+    "name": "Physics",
+    "url": "https://www.youtube.com/live/Yf7DJvAPaBs",
+    "videoId": "Yf7DJvAPaBs",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/Yf7DJvAPaBs/hqdefault.jpg",
+    "enabled": true,
+    "order": 22
+  },
+  {
+    "id": "top-24-textile-engineering",
+    "name": "Textile Engineering",
+    "url": "https://www.youtube.com/live/PnYOgDdeWPI",
+    "videoId": "PnYOgDdeWPI",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/PnYOgDdeWPI/hqdefault.jpg",
+    "enabled": true,
+    "order": 23
+  },
+  {
+    "id": "top-25-civil-engineering",
+    "name": "Civil Engineering",
+    "url": "https://www.youtube.com/live/QcXp4RaOrRM",
+    "videoId": "QcXp4RaOrRM",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/QcXp4RaOrRM/hqdefault.jpg",
+    "enabled": true,
+    "order": 24
+  },
+  {
+    "id": "top-26-aeronautical-engineering",
+    "name": "Aeronautical Engineering",
+    "url": "https://www.youtube.com/live/QWvODUxBDMQ",
+    "videoId": "QWvODUxBDMQ",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/QWvODUxBDMQ/hqdefault.jpg",
+    "enabled": true,
+    "order": 25
+  },
+  {
+    "id": "top-27-humanities-and-social-sciences",
+    "name": "Humanities and Social Sciences",
+    "url": "https://www.youtube.com/live/zlO9Xt1qgno",
+    "videoId": "zlO9Xt1qgno",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/zlO9Xt1qgno/hqdefault.jpg",
+    "enabled": true,
+    "order": 26
+  },
+  {
+    "id": "top-28-management-law-economics-busin",
+    "name": "Management, Law, Economics & Business Analytics",
+    "url": "https://www.youtube.com/live/FpwpJ-q6W0I",
+    "videoId": "FpwpJ-q6W0I",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/FpwpJ-q6W0I/hqdefault.jpg",
+    "enabled": true,
+    "order": 27
+  },
+  {
+    "id": "top-29-mechanical-engineering-and-man",
+    "name": "Mechanical Engineering and Manufacturing",
+    "url": "https://www.youtube.com/live/PriApwtX0g0",
+    "videoId": "PriApwtX0g0",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/PriApwtX0g0/hqdefault.jpg",
+    "enabled": true,
+    "order": 28
+  },
+  {
+    "id": "top-30-visual-communications-graphic-",
+    "name": "Visual Communications, Graphic Design & Media Technology",
+    "url": "https://www.youtube.com/live/1Pb9hz1TqGo",
+    "videoId": "1Pb9hz1TqGo",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/1Pb9hz1TqGo/hqdefault.jpg",
+    "enabled": true,
+    "order": 29
+  },
+  {
+    "id": "top-31-architecture-and-interior-desi",
+    "name": "Architecture and Interior Design",
+    "url": "https://www.youtube.com/live/mFSfDJJo6Mg",
+    "videoId": "mFSfDJJo6Mg",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/mFSfDJJo6Mg/hqdefault.jpg",
+    "enabled": true,
+    "order": 30
+  },
+  {
+    "id": "top-32-computer-science-engineering-i",
+    "name": "Computer Science Engineering / IT",
+    "url": "https://www.youtube.com/live/mFSfDJJo6Mg",
+    "videoId": "mFSfDJJo6Mg",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/mFSfDJJo6Mg/hqdefault.jpg",
+    "enabled": true,
+    "order": 31
+  },
+  {
+    "id": "top-33-instrumentation-control-biomed",
+    "name": "Instrumentation Control, Biomedical and Engineering",
+    "url": "https://www.youtube.com/live/SgGWOXHeErM",
+    "videoId": "SgGWOXHeErM",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/SgGWOXHeErM/hqdefault.jpg",
+    "enabled": true,
+    "order": 32
+  },
+  {
+    "id": "top-34-bridge-courses-and-impact-seri",
+    "name": "Bridge Courses and Impact Series",
+    "url": "https://www.youtube.com/live/oXCdp4PHIPE",
+    "videoId": "oXCdp4PHIPE",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/oXCdp4PHIPE/hqdefault.jpg",
+    "enabled": true,
+    "order": 33
+  },
+  {
+    "id": "top-35-chemical-engineering-nanotechn",
+    "name": "Chemical Engineering, Nanotechnology & Environmental Sciences",
+    "url": "https://www.youtube.com/live/6IkM4xJzDZQ",
+    "videoId": "6IkM4xJzDZQ",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/6IkM4xJzDZQ/hqdefault.jpg",
+    "enabled": true,
+    "order": 34
+  },
+  {
+    "id": "top-36-health-sciences",
+    "name": "Health Sciences",
+    "url": "https://www.youtube.com/live/_aelcmNSYBo",
+    "videoId": "_aelcmNSYBo",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/_aelcmNSYBo/hqdefault.jpg",
+    "enabled": true,
+    "order": 35
+  },
+  {
+    "id": "top-37-metallurgical-material-science",
+    "name": "Metallurgical, Material Science, Mining and Ocean Engineering",
+    "url": "https://www.youtube.com/live/ONnJq2xBZaQ",
+    "videoId": "ONnJq2xBZaQ",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/ONnJq2xBZaQ/hqdefault.jpg",
+    "enabled": true,
+    "order": 36
+  },
+  {
+    "id": "top-38-chemistry-biochemistry-and-foo",
+    "name": "Chemistry, Biochemistry and Food Processing Engineering",
+    "url": "https://www.youtube.com/live/uFY8aWjAwLs",
+    "videoId": "uFY8aWjAwLs",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/uFY8aWjAwLs/hqdefault.jpg",
+    "enabled": true,
+    "order": 37
+  },
+  {
+    "id": "top-39-mathematics",
+    "name": "Mathematics",
+    "url": "https://www.youtube.com/live/VJYuwoSV910",
+    "videoId": "VJYuwoSV910",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/VJYuwoSV910/hqdefault.jpg",
+    "enabled": true,
+    "order": 38
+  },
+  {
+    "id": "top-40-performing-arts-classical-danc",
+    "name": "Performing Arts: Classical Dances, Theatre & Painting",
+    "url": "https://www.youtube.com/live/GC8DcaZXShM",
+    "videoId": "GC8DcaZXShM",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/GC8DcaZXShM/hqdefault.jpg",
+    "enabled": true,
+    "order": 39
+  },
+  {
+    "id": "top-41-performing-arts-indian-classic",
+    "name": "Performing Arts: Indian Classical Music",
+    "url": "https://www.youtube.com/live/8JsyhcIoeuI",
+    "videoId": "8JsyhcIoeuI",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/8JsyhcIoeuI/hqdefault.jpg",
+    "enabled": true,
+    "order": 40
+  }
+];
+var LIVE_TV_DEFAULTS = [
+  {
+    "id": "top-1-dd-news",
+    "name": "DD News",
+    "url": "https://www.youtube.com/live/qD6GkaU2lD0",
+    "videoId": "qD6GkaU2lD0",
+    "category": "News",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/DD_News_logo.svg/512px-DD_News_logo.svg.png",
+    "enabled": true,
+    "order": 0
+  },
+  {
+    "id": "top-2-dd-india",
+    "name": "DD India",
+    "url": "https://www.youtube.com/live/9X37FfIrKio",
+    "videoId": "9X37FfIrKio",
+    "category": "News",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/DD_India_logo.svg/512px-DD_India_logo.svg.png",
+    "enabled": true,
+    "order": 1
+  },
+  {
+    "id": "top-3-nasa",
+    "name": "NASA",
+    "url": "https://www.youtube.com/live/M3HKLzjvKPc",
+    "videoId": "M3HKLzjvKPc",
+    "category": "Documentary",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/512px-NASA_logo.svg.png",
+    "enabled": true,
+    "order": 2
+  },
+  {
+    "id": "top-4-united-nation",
+    "name": "United Nation",
+    "url": "https://www.youtube.com/live/vYRfQo6JMxc",
+    "videoId": "vYRfQo6JMxc",
+    "category": "News",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Flag_of_the_United_Nations.svg/512px-Flag_of_the_United_Nations.svg.png",
+    "enabled": true,
+    "order": 3
+  },
+  {
+    "id": "top-5-sansad-1",
+    "name": "Sansad 1",
+    "url": "https://www.youtube.com/live/JO7CTaWAmGk",
+    "videoId": "JO7CTaWAmGk",
+    "category": "News",
+    "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Sansad_TV_logo.svg/512px-Sansad_TV_logo.svg.png",
+    "enabled": true,
+    "order": 4
+  },
+  {
+    "id": "top-6-swayam-prabha-language-literat",
+    "name": "Swayam Prabha: Language, Literature, History, Culture & Philosophy",
+    "url": "https://www.youtube.com/live/gFHiva4w7zU",
+    "videoId": "gFHiva4w7zU",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/gFHiva4w7zU/hqdefault.jpg",
+    "enabled": true,
+    "order": 5
+  },
+  {
+    "id": "top-7-education-home-science-informa",
+    "name": "Education, Home Science, Information & Management Studies",
+    "url": "https://www.youtube.com/live/dCnCJ4g96HA",
+    "videoId": "dCnCJ4g96HA",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/dCnCJ4g96HA/hqdefault.jpg",
+    "enabled": true,
+    "order": 6
+  },
+  {
+    "id": "top-8-economics-commerce-and-finance",
+    "name": "Economics, Commerce and Finance",
+    "url": "https://www.youtube.com/live/-xHUL9Qtdqo",
+    "videoId": "-xHUL9Qtdqo",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/-xHUL9Qtdqo/hqdefault.jpg",
+    "enabled": true,
+    "order": 7
+  },
+  {
+    "id": "top-9-physical-sciences-mathematics-",
+    "name": "Physical Sciences, Mathematics, Physics & Chemistry",
+    "url": "https://www.youtube.com/live/xrBzYPH5xyY",
+    "videoId": "xrBzYPH5xyY",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/xrBzYPH5xyY/hqdefault.jpg",
+    "enabled": true,
+    "order": 8
+  },
+  {
+    "id": "top-10-life-sciences-botany-zoology-b",
+    "name": "Life Sciences, Botany, Zoology & Bio-Science",
+    "url": "https://www.youtube.com/live/AQn627K1WL0",
+    "videoId": "AQn627K1WL0",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/AQn627K1WL0/hqdefault.jpg",
+    "enabled": true,
+    "order": 9
+  },
+  {
+    "id": "top-11-applied-sciences-allied-physic",
+    "name": "Applied Sciences & Allied Physical and Chemical Sciences",
+    "url": "https://www.youtube.com/live/bboEr8Xsujg",
+    "videoId": "bboEr8Xsujg",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/bboEr8Xsujg/hqdefault.jpg",
+    "enabled": true,
+    "order": 10
+  },
+  {
+    "id": "top-12-social-behavioural-sciences-la",
+    "name": "Social & Behavioural Sciences, Law & Human Rights",
+    "url": "https://www.youtube.com/live/dVj9AMYKQj8",
+    "videoId": "dVj9AMYKQj8",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/dVj9AMYKQj8/hqdefault.jpg",
+    "enabled": true,
+    "order": 11
+  },
+  {
+    "id": "top-13-technology-and-innovation",
+    "name": "Technology and Innovation",
+    "url": "https://www.youtube.com/live/eI5jfKFwCyk",
+    "videoId": "eI5jfKFwCyk",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/eI5jfKFwCyk/hqdefault.jpg",
+    "enabled": true,
+    "order": 12
+  },
+  {
+    "id": "top-14-indian-and-foreign-languages",
+    "name": "Indian and Foreign Languages",
+    "url": "https://www.youtube.com/live/xsnd2UeR8sE",
+    "videoId": "xsnd2UeR8sE",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/xsnd2UeR8sE/hqdefault.jpg",
+    "enabled": true,
+    "order": 13
+  },
+  {
+    "id": "top-15-social-sciences-and-humanities",
+    "name": "Social Sciences and Humanities",
+    "url": "https://www.youtube.com/live/cMGdvs6Y42k",
+    "videoId": "cMGdvs6Y42k",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/cMGdvs6Y42k/hqdefault.jpg",
+    "enabled": true,
+    "order": 14
+  },
+  {
+    "id": "top-16-basic-and-applied-sciences",
+    "name": "Basic and Applied Sciences",
+    "url": "https://www.youtube.com/live/YOKsWfGFBTo",
+    "videoId": "YOKsWfGFBTo",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/YOKsWfGFBTo/hqdefault.jpg",
+    "enabled": true,
+    "order": 15
+  },
+  {
+    "id": "top-17-professional-education",
+    "name": "Professional Education",
+    "url": "https://www.youtube.com/live/JvLnbpOdEWg",
+    "videoId": "JvLnbpOdEWg",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/JvLnbpOdEWg/hqdefault.jpg",
+    "enabled": true,
+    "order": 16
+  },
+  {
+    "id": "top-18-capacity-building-and-teacher-",
+    "name": "Capacity Building and Teacher Education",
+    "url": "https://www.youtube.com/live/HwerScCSY54",
+    "videoId": "HwerScCSY54",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/HwerScCSY54/hqdefault.jpg",
+    "enabled": true,
+    "order": 17
+  },
+  {
+    "id": "top-19-skill-and-vocational-education",
+    "name": "Skill and Vocational Education",
+    "url": "https://www.youtube.com/live/mc87pn4MizM",
+    "videoId": "mc87pn4MizM",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/mc87pn4MizM/hqdefault.jpg",
+    "enabled": true,
+    "order": 18
+  },
+  {
+    "id": "top-20-biotechnology-and-biochemical-",
+    "name": "Biotechnology and Biochemical Engineering",
+    "url": "https://www.youtube.com/live/QGbT-R5Yghk",
+    "videoId": "QGbT-R5Yghk",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/QGbT-R5Yghk/hqdefault.jpg",
+    "enabled": true,
+    "order": 19
+  },
+  {
+    "id": "top-21-electronics-and-communication-",
+    "name": "Electronics and Communication Engineering",
+    "url": "https://www.youtube.com/live/K0nBC65e_Dc",
+    "videoId": "K0nBC65e_Dc",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/K0nBC65e_Dc/hqdefault.jpg",
+    "enabled": true,
+    "order": 20
+  },
+  {
+    "id": "top-22-electrical-engineering",
+    "name": "Electrical Engineering",
+    "url": "https://www.youtube.com/live/m0hIkld8UsE",
+    "videoId": "m0hIkld8UsE",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/m0hIkld8UsE/hqdefault.jpg",
+    "enabled": true,
+    "order": 21
+  },
+  {
+    "id": "top-23-physics",
+    "name": "Physics",
+    "url": "https://www.youtube.com/live/Yf7DJvAPaBs",
+    "videoId": "Yf7DJvAPaBs",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/Yf7DJvAPaBs/hqdefault.jpg",
+    "enabled": true,
+    "order": 22
+  },
+  {
+    "id": "top-24-textile-engineering",
+    "name": "Textile Engineering",
+    "url": "https://www.youtube.com/live/PnYOgDdeWPI",
+    "videoId": "PnYOgDdeWPI",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/PnYOgDdeWPI/hqdefault.jpg",
+    "enabled": true,
+    "order": 23
+  },
+  {
+    "id": "top-25-civil-engineering",
+    "name": "Civil Engineering",
+    "url": "https://www.youtube.com/live/QcXp4RaOrRM",
+    "videoId": "QcXp4RaOrRM",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/QcXp4RaOrRM/hqdefault.jpg",
+    "enabled": true,
+    "order": 24
+  },
+  {
+    "id": "top-26-aeronautical-engineering",
+    "name": "Aeronautical Engineering",
+    "url": "https://www.youtube.com/live/QWvODUxBDMQ",
+    "videoId": "QWvODUxBDMQ",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/QWvODUxBDMQ/hqdefault.jpg",
+    "enabled": true,
+    "order": 25
+  },
+  {
+    "id": "top-27-humanities-and-social-sciences",
+    "name": "Humanities and Social Sciences",
+    "url": "https://www.youtube.com/live/zlO9Xt1qgno",
+    "videoId": "zlO9Xt1qgno",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/zlO9Xt1qgno/hqdefault.jpg",
+    "enabled": true,
+    "order": 26
+  },
+  {
+    "id": "top-28-management-law-economics-busin",
+    "name": "Management, Law, Economics & Business Analytics",
+    "url": "https://www.youtube.com/live/FpwpJ-q6W0I",
+    "videoId": "FpwpJ-q6W0I",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/FpwpJ-q6W0I/hqdefault.jpg",
+    "enabled": true,
+    "order": 27
+  },
+  {
+    "id": "top-29-mechanical-engineering-and-man",
+    "name": "Mechanical Engineering and Manufacturing",
+    "url": "https://www.youtube.com/live/PriApwtX0g0",
+    "videoId": "PriApwtX0g0",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/PriApwtX0g0/hqdefault.jpg",
+    "enabled": true,
+    "order": 28
+  },
+  {
+    "id": "top-30-visual-communications-graphic-",
+    "name": "Visual Communications, Graphic Design & Media Technology",
+    "url": "https://www.youtube.com/live/1Pb9hz1TqGo",
+    "videoId": "1Pb9hz1TqGo",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/1Pb9hz1TqGo/hqdefault.jpg",
+    "enabled": true,
+    "order": 29
+  },
+  {
+    "id": "top-31-architecture-and-interior-desi",
+    "name": "Architecture and Interior Design",
+    "url": "https://www.youtube.com/live/mFSfDJJo6Mg",
+    "videoId": "mFSfDJJo6Mg",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/mFSfDJJo6Mg/hqdefault.jpg",
+    "enabled": true,
+    "order": 30
+  },
+  {
+    "id": "top-32-computer-science-engineering-i",
+    "name": "Computer Science Engineering / IT",
+    "url": "https://www.youtube.com/live/mFSfDJJo6Mg",
+    "videoId": "mFSfDJJo6Mg",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/mFSfDJJo6Mg/hqdefault.jpg",
+    "enabled": true,
+    "order": 31
+  },
+  {
+    "id": "top-33-instrumentation-control-biomed",
+    "name": "Instrumentation Control, Biomedical and Engineering",
+    "url": "https://www.youtube.com/live/SgGWOXHeErM",
+    "videoId": "SgGWOXHeErM",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/SgGWOXHeErM/hqdefault.jpg",
+    "enabled": true,
+    "order": 32
+  },
+  {
+    "id": "top-34-bridge-courses-and-impact-seri",
+    "name": "Bridge Courses and Impact Series",
+    "url": "https://www.youtube.com/live/oXCdp4PHIPE",
+    "videoId": "oXCdp4PHIPE",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/oXCdp4PHIPE/hqdefault.jpg",
+    "enabled": true,
+    "order": 33
+  },
+  {
+    "id": "top-35-chemical-engineering-nanotechn",
+    "name": "Chemical Engineering, Nanotechnology & Environmental Sciences",
+    "url": "https://www.youtube.com/live/6IkM4xJzDZQ",
+    "videoId": "6IkM4xJzDZQ",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/6IkM4xJzDZQ/hqdefault.jpg",
+    "enabled": true,
+    "order": 34
+  },
+  {
+    "id": "top-36-health-sciences",
+    "name": "Health Sciences",
+    "url": "https://www.youtube.com/live/_aelcmNSYBo",
+    "videoId": "_aelcmNSYBo",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/_aelcmNSYBo/hqdefault.jpg",
+    "enabled": true,
+    "order": 35
+  },
+  {
+    "id": "top-37-metallurgical-material-science",
+    "name": "Metallurgical, Material Science, Mining and Ocean Engineering",
+    "url": "https://www.youtube.com/live/ONnJq2xBZaQ",
+    "videoId": "ONnJq2xBZaQ",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/ONnJq2xBZaQ/hqdefault.jpg",
+    "enabled": true,
+    "order": 36
+  },
+  {
+    "id": "top-38-chemistry-biochemistry-and-foo",
+    "name": "Chemistry, Biochemistry and Food Processing Engineering",
+    "url": "https://www.youtube.com/live/uFY8aWjAwLs",
+    "videoId": "uFY8aWjAwLs",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/uFY8aWjAwLs/hqdefault.jpg",
+    "enabled": true,
+    "order": 37
+  },
+  {
+    "id": "top-39-mathematics",
+    "name": "Mathematics",
+    "url": "https://www.youtube.com/live/VJYuwoSV910",
+    "videoId": "VJYuwoSV910",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/VJYuwoSV910/hqdefault.jpg",
+    "enabled": true,
+    "order": 38
+  },
+  {
+    "id": "top-40-performing-arts-classical-danc",
+    "name": "Performing Arts: Classical Dances, Theatre & Painting",
+    "url": "https://www.youtube.com/live/GC8DcaZXShM",
+    "videoId": "GC8DcaZXShM",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/GC8DcaZXShM/hqdefault.jpg",
+    "enabled": true,
+    "order": 39
+  },
+  {
+    "id": "top-41-performing-arts-indian-classic",
+    "name": "Performing Arts: Indian Classical Music",
+    "url": "https://www.youtube.com/live/8JsyhcIoeuI",
+    "videoId": "8JsyhcIoeuI",
+    "category": "Education",
+    "logo": "https://i.ytimg.com/vi/8JsyhcIoeuI/hqdefault.jpg",
+    "enabled": true,
+    "order": 40
   },
   {
     "id": "gov-sansad-2",
@@ -303229,7 +304021,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Legislative",
     "logo": "https://i.ytimg.com/vi/py0W3aPWNXY/hqdefault.jpg",
     "enabled": true,
-    "order": 3
+    "order": 41
   },
   {
     "id": "gov-dd-kisan",
@@ -303239,7 +304031,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.ytimg.com/vi/izXvukZFBtg/hqdefault.jpg",
     "enabled": true,
-    "order": 4
+    "order": 42
   },
   {
     "id": "gov-swayam-1",
@@ -303249,7 +304041,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.swayamprabha.gov.in/assets/images/logo.png",
     "enabled": true,
-    "order": 5
+    "order": 43
   },
   {
     "id": "gov-swayam-2",
@@ -303259,7 +304051,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.swayamprabha.gov.in/assets/images/logo.png",
     "enabled": true,
-    "order": 6
+    "order": 44
   },
   {
     "id": "gov-swayam-3",
@@ -303269,7 +304061,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.swayamprabha.gov.in/assets/images/logo.png",
     "enabled": true,
-    "order": 7
+    "order": 45
   },
   {
     "id": "gov-swayam-4",
@@ -303279,7 +304071,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.swayamprabha.gov.in/assets/images/logo.png",
     "enabled": true,
-    "order": 8
+    "order": 46
   },
   {
     "id": "gov-swayam-5",
@@ -303289,7 +304081,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.swayamprabha.gov.in/assets/images/logo.png",
     "enabled": true,
-    "order": 9
+    "order": 47
   },
   {
     "id": "gov-swayam-6",
@@ -303299,7 +304091,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.swayamprabha.gov.in/assets/images/logo.png",
     "enabled": true,
-    "order": 10
+    "order": 48
   },
   {
     "id": "gov-swayam-7",
@@ -303309,7 +304101,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.swayamprabha.gov.in/assets/images/logo.png",
     "enabled": true,
-    "order": 11
+    "order": 49
   },
   {
     "id": "gov-swayam-8",
@@ -303319,7 +304111,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.swayamprabha.gov.in/assets/images/logo.png",
     "enabled": true,
-    "order": 12
+    "order": 50
   },
   {
     "id": "gov-swayam-9",
@@ -303329,7 +304121,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.swayamprabha.gov.in/assets/images/logo.png",
     "enabled": true,
-    "order": 13
+    "order": 51
   },
   {
     "id": "in-4sidestv-in-sd",
@@ -303338,7 +304130,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/4sites.png",
     "enabled": true,
-    "order": 14
+    "order": 52
   },
   {
     "id": "in-4tvnews-in-sd",
@@ -303347,7 +304139,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/4_TV.png",
     "enabled": true,
-    "order": 15
+    "order": 53
   },
   {
     "id": "in-6tvtelugu-in-sd",
@@ -303356,7 +304148,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/l3EcRnZ.png",
     "enabled": true,
-    "order": 16
+    "order": 54
   },
   {
     "id": "in-7smusic-in-sd",
@@ -303365,7 +304157,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/zDiIhdN.png",
     "enabled": true,
-    "order": 17
+    "order": 55
   },
   {
     "id": "in-9plusnews-in-sd",
@@ -303374,7 +304166,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/9plusnews.png",
     "enabled": true,
-    "order": 18
+    "order": 56
   },
   {
     "id": "in-9xjalwa-in-sd",
@@ -303383,7 +304175,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_9X_JALWA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 19
+    "order": 57
   },
   {
     "id": "in-9xjhakaas-in-sd",
@@ -303392,7 +304184,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://dtil.tmsimg.com/assets/s90012_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 20
+    "order": 58
   },
   {
     "id": "in-9xtashan-in-sd",
@@ -303401,7 +304193,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_9X_TASHAN/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 21
+    "order": 59
   },
   {
     "id": "in-10tv-in-sd",
@@ -303410,7 +304202,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_10TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 22
+    "order": 60
   },
   {
     "id": "in-22scopenews-in-sd",
@@ -303419,7 +304211,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/22Scope_News.png",
     "enabled": true,
-    "order": 23
+    "order": 61
   },
   {
     "id": "in-24news-in-sd",
@@ -303428,7 +304220,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://sund-images.sunnxt.com/202222/300x300_24News_202222_d63feca0-79ae-47ea-b75a-66c17d456f4c.png",
     "enabled": true,
-    "order": 24
+    "order": 62
   },
   {
     "id": "in-99tv-in-sd",
@@ -303437,7 +304229,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/dZA4gel.png",
     "enabled": true,
-    "order": 25
+    "order": 63
   },
   {
     "id": "in-aadinathtv-in-sd",
@@ -303446,7 +304238,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_AADINATH_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 26
+    "order": 64
   },
   {
     "id": "in-aajkikhabar-in-sd",
@@ -303455,7 +304247,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://m.media-amazon.com/images/I/71q8sOMPwHL.png",
     "enabled": true,
-    "order": 27
+    "order": 65
   },
   {
     "id": "in-aajtak-in-hd",
@@ -303464,7 +304256,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_AAJ_TAK/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 28
+    "order": 66
   },
   {
     "id": "in-aakaashaath-in-sd",
@@ -303473,7 +304265,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s142510_ld_h15_ab.png?lock=720x540",
     "enabled": true,
-    "order": 29
+    "order": 67
   },
   {
     "id": "in-aamarbangla-in-sd",
@@ -303482,7 +304274,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Amaar_Bangla.png",
     "enabled": true,
-    "order": 30
+    "order": 68
   },
   {
     "id": "in-aaryaatv-in-sd",
@@ -303491,7 +304283,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/aryatvtamil.png",
     "enabled": true,
-    "order": 31
+    "order": 69
   },
   {
     "id": "in-aaseervathamtv-in-sd",
@@ -303500,7 +304292,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/GlfrYs7.png",
     "enabled": true,
-    "order": 32
+    "order": 70
   },
   {
     "id": "in-aastha-in-hd",
@@ -303509,7 +304301,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/IqgrV92.png",
     "enabled": true,
-    "order": 33
+    "order": 71
   },
   {
     "id": "in-aasthagujarati-in-sd",
@@ -303518,7 +304310,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Aastha_Tamil.png",
     "enabled": true,
-    "order": 34
+    "order": 72
   },
   {
     "id": "in-aasthakannada-in-sd",
@@ -303527,7 +304319,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s158134_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 35
+    "order": 73
   },
   {
     "id": "in-aasthaprime1-in-sd",
@@ -303536,7 +304328,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/LyWSMJS.png",
     "enabled": true,
-    "order": 36
+    "order": 74
   },
   {
     "id": "in-aasthatamil-in-sd",
@@ -303545,7 +304337,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/YQK9ewf.png",
     "enabled": true,
-    "order": 37
+    "order": 75
   },
   {
     "id": "in-aasthatelugu-in-sd",
@@ -303554,7 +304346,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s158136_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 38
+    "order": 76
   },
   {
     "id": "in-abnandhrajyoti-in-sd",
@@ -303563,7 +304355,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s142517_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 39
+    "order": 77
   },
   {
     "id": "in-abntvindia-us-sd",
@@ -303572,7 +304364,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/VcZn60X.png",
     "enabled": true,
-    "order": 40
+    "order": 78
   },
   {
     "id": "in-abpananda-in-sd",
@@ -303581,7 +304373,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s142518_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 41
+    "order": 79
   },
   {
     "id": "in-abpasmita-in-sd",
@@ -303590,7 +304382,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ABP_Asmita_logo.svg/500px-ABP_Asmita_logo.svg.png",
     "enabled": true,
-    "order": 42
+    "order": 80
   },
   {
     "id": "in-abpganga-in-sd",
@@ -303599,7 +304391,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/ABP_Ganga.svg/500px-ABP_Ganga.svg.png",
     "enabled": true,
-    "order": 43
+    "order": 81
   },
   {
     "id": "in-abpmajha-in-sd",
@@ -303608,7 +304400,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s142521_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 44
+    "order": 82
   },
   {
     "id": "in-abpnews-in-sd",
@@ -303617,7 +304409,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s158138_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 45
+    "order": 83
   },
   {
     "id": "in-adhyatmtv-in-sd",
@@ -303626,7 +304418,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Adhyatam_TV.png",
     "enabled": true,
-    "order": 46
+    "order": 84
   },
   {
     "id": "in-akdcalcuttanews-in-sd",
@@ -303635,7 +304427,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/Calcutta%20News.png",
     "enabled": true,
-    "order": 47
+    "order": 85
   },
   {
     "id": "in-akhonkolkata-in-sd",
@@ -303644,7 +304436,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/ekhonkolkata.png",
     "enabled": true,
-    "order": 48
+    "order": 86
   },
   {
     "id": "in-alankartv-in-sd",
@@ -303653,7 +304445,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ALANKAR/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 49
+    "order": 87
   },
   {
     "id": "in-amritatv-in-sd",
@@ -303662,7 +304454,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/WdSjlPl.png",
     "enabled": true,
-    "order": 50
+    "order": 88
   },
   {
     "id": "in-anandtv-in-sd",
@@ -303671,7 +304463,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Anand_TV.png",
     "enabled": true,
-    "order": 51
+    "order": 89
   },
   {
     "id": "in-anandwaritv-in-sd",
@@ -303680,7 +304472,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://papaji.freetvindia.com/media/channels/anandvari.png",
     "enabled": true,
-    "order": 52
+    "order": 90
   },
   {
     "id": "in-anandabarta-in-sd",
@@ -303689,7 +304481,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Anand_Barta.png",
     "enabled": true,
-    "order": 53
+    "order": 91
   },
   {
     "id": "in-anbnews-in-sd",
@@ -303698,7 +304490,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ANB_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 54
+    "order": 92
   },
   {
     "id": "in-andyharyana-in-sd",
@@ -303707,7 +304499,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/rmCBD3e.png",
     "enabled": true,
-    "order": 55
+    "order": 93
   },
   {
     "id": "in-angeltv-in-india",
@@ -303716,7 +304508,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/qKLEGU7.png",
     "enabled": true,
-    "order": 56
+    "order": 94
   },
   {
     "id": "in-animaxasia-sg-india",
@@ -303725,7 +304517,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Animax.png",
     "enabled": true,
-    "order": 57
+    "order": 95
   },
   {
     "id": "in-anjantv-in-sd",
@@ -303734,7 +304526,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/sh0yFSf.png",
     "enabled": true,
-    "order": 58
+    "order": 96
   },
   {
     "id": "in-apn-in-sd",
@@ -303743,7 +304535,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/APN.png",
     "enabled": true,
-    "order": 59
+    "order": 97
   },
   {
     "id": "in-apnapunjabtv-ca-sd",
@@ -303752,7 +304544,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/IM4D8Wz.png",
     "enabled": true,
-    "order": 60
+    "order": 98
   },
   {
     "id": "in-argusnews-in-sd",
@@ -303761,7 +304553,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ARGUS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 61
+    "order": 99
   },
   {
     "id": "in-arputharyesutv-in-sd",
@@ -303770,7 +304562,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://arputharyesutv.net/wp-content/uploads/2022/07/AR-LOGO-PNG.png",
     "enabled": true,
-    "order": 62
+    "order": 100
   },
   {
     "id": "in-asiannews-in-sd",
@@ -303779,7 +304571,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Asian_News.png",
     "enabled": true,
-    "order": 63
+    "order": 101
   },
   {
     "id": "in-asianet-in-hd",
@@ -303788,7 +304580,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/Wv7MOzg.png",
     "enabled": true,
-    "order": 64
+    "order": 102
   },
   {
     "id": "in-asianetnews-in-sd",
@@ -303797,7 +304589,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ASIANET_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 65
+    "order": 103
   },
   {
     "id": "in-asianetsuvarnanews-in-sd",
@@ -303806,7 +304598,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s142682_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 66
+    "order": 104
   },
   {
     "id": "in-asomlive24-in-sd",
@@ -303815,7 +304607,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://papaji.freetvindia.com/media/channels/asom_live_24x7.png",
     "enabled": true,
-    "order": 67
+    "order": 105
   },
   {
     "id": "in-assamtalks-in-sd",
@@ -303824,7 +304616,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s142683_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 68
+    "order": 106
   },
   {
     "id": "in-awaazindiatv-in-sd",
@@ -303833,7 +304625,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/eKQs51V.png",
     "enabled": true,
-    "order": 69
+    "order": 107
   },
   {
     "id": "in-awakeningtv-in-sd",
@@ -303842,7 +304634,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/p26iWOi.png",
     "enabled": true,
-    "order": 70
+    "order": 108
   },
   {
     "id": "in-ayushtv-in-sd",
@@ -303851,7 +304643,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142692_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 71
+    "order": 109
   },
   {
     "id": "in-b4ubhojpuri-in-sd",
@@ -303860,7 +304652,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/NwOQUDp.png",
     "enabled": true,
-    "order": 72
+    "order": 110
   },
   {
     "id": "in-b4ukadak-in-sd",
@@ -303869,7 +304661,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/s142695_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 73
+    "order": 111
   },
   {
     "id": "in-b4umovies-in-india",
@@ -303878,7 +304670,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/M9kMFJl.png",
     "enabled": true,
-    "order": 74
+    "order": 112
   },
   {
     "id": "in-b4umusic-in-india",
@@ -303887,7 +304679,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://dtil.tmsimg.com/assets/s158141_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 75
+    "order": 113
   },
   {
     "id": "in-balleballe-in-sd",
@@ -303896,7 +304688,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Balle_Balle_TV.png",
     "enabled": true,
-    "order": 76
+    "order": 114
   },
   {
     "id": "in-balleballe-in-hd",
@@ -303905,7 +304697,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Balle_Balle_TV.png",
     "enabled": true,
-    "order": 77
+    "order": 115
   },
   {
     "id": "in-bansalnews-in-sd",
@@ -303914,7 +304706,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_BANSAL_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 78
+    "order": 116
   },
   {
     "id": "in-bflixmovies-in-sd",
@@ -303923,7 +304715,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/5CtiQ45.png",
     "enabled": true,
-    "order": 79
+    "order": 117
   },
   {
     "id": "in-bhagyamtv-in-sd",
@@ -303932,7 +304724,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/aanadhamtvtamil.png",
     "enabled": true,
-    "order": 80
+    "order": 118
   },
   {
     "id": "in-bhakthitv-in-sd",
@@ -303941,7 +304733,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://upload.wikimedia.org/wikipedia/en/6/61/Bhakthi_TV_logo.jpg",
     "enabled": true,
-    "order": 81
+    "order": 119
   },
   {
     "id": "in-bhaktisagar-in-sd",
@@ -303950,7 +304742,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Bhaktisagar.png",
     "enabled": true,
-    "order": 82
+    "order": 120
   },
   {
     "id": "in-bharat24-in-sd",
@@ -303959,7 +304751,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s142710_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 83
+    "order": 121
   },
   {
     "id": "in-bharatexpress-in-sd",
@@ -303968,7 +304760,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_BHARAT_EXPRESS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 84
+    "order": 122
   },
   {
     "id": "in-bharatsamachar-in-sd",
@@ -303977,7 +304769,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_BHARAT_SAMACHAR/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 85
+    "order": 123
   },
   {
     "id": "in-bharatupdate-in-sd",
@@ -303986,7 +304778,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Bharat_Update.png",
     "enabled": true,
-    "order": 86
+    "order": 124
   },
   {
     "id": "in-bhojpuricinema-in-sd",
@@ -303995,7 +304787,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_BHOJPURI_CINEMA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 87
+    "order": 125
   },
   {
     "id": "in-bigtv24x7-in-sd",
@@ -304004,7 +304796,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.postimg.cc/rpHrRxR5/big_tv_malayalam.png",
     "enabled": true,
-    "order": 88
+    "order": 126
   },
   {
     "id": "in-bigtv-in-sd",
@@ -304013,7 +304805,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Big_TV.png",
     "enabled": true,
-    "order": 89
+    "order": 127
   },
   {
     "id": "in-bollygold-in-hd",
@@ -304022,7 +304814,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4000600Q_20260805T003941SQUARE.png",
     "enabled": true,
-    "order": 90
+    "order": 128
   },
   {
     "id": "in-booglebollywood-in-sd",
@@ -304031,7 +304823,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Boogle_Bollywood.png",
     "enabled": true,
-    "order": 91
+    "order": 129
   },
   {
     "id": "in-bttv-in-sd",
@@ -304040,7 +304832,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://akm-img-a-in.tosshub.com/businesstoday/resource/img/best-bank-new.png",
     "enabled": true,
-    "order": 92
+    "order": 130
   },
   {
     "id": "in-bvg-in-sd",
@@ -304049,7 +304841,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/BVG.png",
     "enabled": true,
-    "order": 93
+    "order": 131
   },
   {
     "id": "in-calvarytv-in-sd",
@@ -304058,7 +304850,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Calvary.png",
     "enabled": true,
-    "order": 94
+    "order": 132
   },
   {
     "id": "in-channeldivya-in-sd",
@@ -304067,7 +304859,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143010_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 95
+    "order": 133
   },
   {
     "id": "in-channelwin-in-sd",
@@ -304076,7 +304868,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_CHANNEL_WIN/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 96
+    "order": 134
   },
   {
     "id": "in-chardiklagurbaanitv-in-sd",
@@ -304085,7 +304877,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/NXD8CPq.png",
     "enabled": true,
-    "order": 97
+    "order": 135
   },
   {
     "id": "in-chardiklatimetv-in-sd",
@@ -304094,7 +304886,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_CHARDIKLA_TIME_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 98
+    "order": 136
   },
   {
     "id": "in-chithiram-in-sd",
@@ -304103,7 +304895,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://i.imgur.com/xv9cWSh.png",
     "enabled": true,
-    "order": 99
+    "order": 137
   },
   {
     "id": "in-cnbcawaaz-in-sd",
@@ -304112,7 +304904,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/CNBCAwaaz.png",
     "enabled": true,
-    "order": 100
+    "order": 138
   },
   {
     "id": "in-cnbcbajar-in-sd",
@@ -304121,7 +304913,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/CNBCBajar.png",
     "enabled": true,
-    "order": 101
+    "order": 139
   },
   {
     "id": "in-cnbctv18-in-sd",
@@ -304130,7 +304922,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/CNBCTV18.png",
     "enabled": true,
-    "order": 102
+    "order": 140
   },
   {
     "id": "in-cnbctv18primehd-in-sd",
@@ -304139,7 +304931,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/CNBCTV18Prime.png",
     "enabled": true,
-    "order": 103
+    "order": 141
   },
   {
     "id": "in-cnewsbharat-in-sd",
@@ -304148,7 +304940,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/C_News_Bharat.png",
     "enabled": true,
-    "order": 104
+    "order": 142
   },
   {
     "id": "in-colors-in-sd",
@@ -304157,7 +304949,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/M8uCJ0D.png",
     "enabled": true,
-    "order": 105
+    "order": 143
   },
   {
     "id": "in-colorsbanglacinema-in-sd",
@@ -304166,7 +304958,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_COLORS_BANGLA_CINEMA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 106
+    "order": 144
   },
   {
     "id": "in-colorscineplex-in-sd",
@@ -304175,7 +304967,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_COLORS_CINEPLEX/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 107
+    "order": 145
   },
   {
     "id": "in-colorsgujarati-in-sd",
@@ -304184,7 +304976,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_COLORS_GUJARATI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 108
+    "order": 146
   },
   {
     "id": "in-colorsinfinity-in-hd",
@@ -304193,7 +304985,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_COLORS_INFINITY/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 109
+    "order": 147
   },
   {
     "id": "in-colorskannada-in-hd",
@@ -304202,7 +304994,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_COLORS_KANNADA_HD/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 110
+    "order": 148
   },
   {
     "id": "in-colorsmarathi-in-hd",
@@ -304211,7 +305003,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_COLORS_MARATHI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 111
+    "order": 149
   },
   {
     "id": "in-colorsrishteyamericas-in-sd",
@@ -304220,7 +305012,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/xkOunuW.png",
     "enabled": true,
-    "order": 112
+    "order": 150
   },
   {
     "id": "in-colorssuper-in-sd",
@@ -304229,7 +305021,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_COLORS_SUPER/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 113
+    "order": 151
   },
   {
     "id": "in-colorstamil-in-hd",
@@ -304238,7 +305030,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_COLORS_TAMIL/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 114
+    "order": 152
   },
   {
     "id": "in-ctvnakdplus-in-sd",
@@ -304247,7 +305039,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s142754_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 115
+    "order": 153
   },
   {
     "id": "in-cvrenglish-in-sd",
@@ -304256,7 +305048,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/k0WTQKi.png",
     "enabled": true,
-    "order": 116
+    "order": 154
   },
   {
     "id": "in-cvrhealth-in-sd",
@@ -304265,7 +305057,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/bCyW32I.png",
     "enabled": true,
-    "order": 117
+    "order": 155
   },
   {
     "id": "in-cvrnews-in-sd",
@@ -304274,7 +305066,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_CVR_NEWS/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 118
+    "order": 156
   },
   {
     "id": "in-cvromspiritual-in-sd",
@@ -304283,7 +305075,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/CVR_OM_Spiritual.png",
     "enabled": true,
-    "order": 119
+    "order": 157
   },
   {
     "id": "in-dailyposttv-in-sd",
@@ -304292,7 +305084,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://papaji.freetvindia.com/media/Daily_post.png",
     "enabled": true,
-    "order": 120
+    "order": 158
   },
   {
     "id": "in-dangal2-in-sd",
@@ -304301,7 +305093,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/BEr1r7L.png",
     "enabled": true,
-    "order": 121
+    "order": 159
   },
   {
     "id": "in-dangaltv-in-sd",
@@ -304310,7 +305102,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DANGAL/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 122
+    "order": 160
   },
   {
     "id": "in-darshan24-in-sd",
@@ -304319,7 +305111,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Darshan_24.png",
     "enabled": true,
-    "order": 123
+    "order": 161
   },
   {
     "id": "in-darshanatv-in-sd",
@@ -304328,7 +305120,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s142774_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 124
+    "order": 162
   },
   {
     "id": "in-ddarunprabha-in-sd",
@@ -304337,7 +305129,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_ARUNPRABHA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 125
+    "order": 163
   },
   {
     "id": "in-ddassam-in-sd",
@@ -304346,7 +305138,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142777_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 126
+    "order": 164
   },
   {
     "id": "in-ddbangla-in-sd",
@@ -304355,7 +305147,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142778_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 127
+    "order": 165
   },
   {
     "id": "in-ddbharati-in-sd",
@@ -304364,7 +305156,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/4tfUIEo.png",
     "enabled": true,
-    "order": 128
+    "order": 166
   },
   {
     "id": "in-ddbihar-in-sd",
@@ -304373,7 +305165,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/C7KQiZI.png",
     "enabled": true,
-    "order": 129
+    "order": 167
   },
   {
     "id": "in-ddchandana-in-sd",
@@ -304382,7 +305174,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_CHANDANA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 130
+    "order": 168
   },
   {
     "id": "in-ddchhattisgarh-in-sd",
@@ -304391,7 +305183,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/zBg6Iuv.png",
     "enabled": true,
-    "order": 131
+    "order": 169
   },
   {
     "id": "in-ddgirnar-in-sd",
@@ -304400,7 +305192,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142782_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 132
+    "order": 170
   },
   {
     "id": "in-ddgoa-in-sd",
@@ -304409,7 +305201,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD-Goa-Logo_2000_X_1125_Transpharent.png",
     "enabled": true,
-    "order": 133
+    "order": 171
   },
   {
     "id": "in-ddharyana-in-sd",
@@ -304418,7 +305210,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD-Haryana-Logo_2000_X_1125_Transpharent.png",
     "enabled": true,
-    "order": 134
+    "order": 172
   },
   {
     "id": "in-ddhimachalpradesh-in-sd",
@@ -304427,7 +305219,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142785_ld_h9_aa.png?lock=720x540",
     "enabled": true,
-    "order": 135
+    "order": 173
   },
   {
     "id": "in-ddindia-in-sd",
@@ -304436,7 +305228,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s158251_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 136
+    "order": 174
   },
   {
     "id": "in-ddjharkhand-in-sd",
@@ -304445,7 +305237,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142787_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 137
+    "order": 175
   },
   {
     "id": "in-ddkashir-in-sd",
@@ -304454,7 +305246,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_KASHIR/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 138
+    "order": 176
   },
   {
     "id": "in-ddkisan-in-sd",
@@ -304463,7 +305255,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://i.imgur.com/x56WJEa.png",
     "enabled": true,
-    "order": 139
+    "order": 177
   },
   {
     "id": "in-ddmadhyapradesh-in-sd",
@@ -304472,7 +305264,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142790_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 140
+    "order": 178
   },
   {
     "id": "in-ddmalayalam-in-sd",
@@ -304481,7 +305273,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.postimg.cc/BZjmjJJs/DD-Malayalam.png",
     "enabled": true,
-    "order": 141
+    "order": 179
   },
   {
     "id": "in-ddmanipur-in-sd",
@@ -304490,7 +305282,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_IMPHAL/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 142
+    "order": 180
   },
   {
     "id": "in-ddmeghalaya-in-sd",
@@ -304499,7 +305291,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_SHILLONG/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 143
+    "order": 181
   },
   {
     "id": "in-ddmizoram-in-sd",
@@ -304508,7 +305300,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/I5zT1DG.png",
     "enabled": true,
-    "order": 144
+    "order": 182
   },
   {
     "id": "in-ddnagaland-in-sd",
@@ -304517,7 +305309,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/HUL4aF6.png",
     "enabled": true,
-    "order": 145
+    "order": 183
   },
   {
     "id": "in-ddnational-in-sd",
@@ -304526,7 +305318,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD%20National.png",
     "enabled": true,
-    "order": 146
+    "order": 184
   },
   {
     "id": "in-ddnational-in-hd",
@@ -304535,7 +305327,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD%20National.png",
     "enabled": true,
-    "order": 147
+    "order": 185
   },
   {
     "id": "in-ddnews-in-sd",
@@ -304544,7 +305336,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD%20News%20HD.png",
     "enabled": true,
-    "order": 148
+    "order": 186
   },
   {
     "id": "in-ddnews-in-hd",
@@ -304553,7 +305345,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/DD%20News%20HD.png",
     "enabled": true,
-    "order": 149
+    "order": 187
   },
   {
     "id": "in-ddodia-in-sd",
@@ -304562,7 +305354,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_ORIYA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 150
+    "order": 188
   },
   {
     "id": "in-ddpunjabi-in-sd",
@@ -304571,7 +305363,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142800_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 151
+    "order": 189
   },
   {
     "id": "in-ddrajasthan-in-sd",
@@ -304580,7 +305372,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_RAJASTHAN/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 152
+    "order": 190
   },
   {
     "id": "in-ddsahyadri-in-sd",
@@ -304589,7 +305381,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_SAHYADRI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 153
+    "order": 191
   },
   {
     "id": "in-ddsaptagiri-in-sd",
@@ -304598,7 +305390,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_SAPTAGIRI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 154
+    "order": 192
   },
   {
     "id": "in-ddsports-in-hd",
@@ -304607,7 +305399,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://dtil.tmsimg.com/assets/s158255_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 155
+    "order": 193
   },
   {
     "id": "in-ddsports-in-sd",
@@ -304616,7 +305408,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://dtil.tmsimg.com/assets/s158255_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 156
+    "order": 194
   },
   {
     "id": "in-ddtamil-in-hd",
@@ -304625,7 +305417,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_TAMIL/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 157
+    "order": 195
   },
   {
     "id": "in-ddtripura-in-sd",
@@ -304634,7 +305426,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_TRIPURA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 158
+    "order": 196
   },
   {
     "id": "in-ddurdu-in-sd",
@@ -304643,7 +305435,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_URDU/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 159
+    "order": 197
   },
   {
     "id": "in-dduttarpradesh-in-sd",
@@ -304652,7 +305444,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142807_ld_h9_ab.png?lock=720x540",
     "enabled": true,
-    "order": 160
+    "order": 198
   },
   {
     "id": "in-dduttarakhand-in-sd",
@@ -304661,7 +305453,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s142809_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 161
+    "order": 199
   },
   {
     "id": "in-ddyadagiri-in-sd",
@@ -304670,7 +305462,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DD_YADAGIRI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 162
+    "order": 200
   },
   {
     "id": "in-deewanahd-in-sd",
@@ -304679,7 +305471,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/xIYITQ9.png",
     "enabled": true,
-    "order": 163
+    "order": 201
   },
   {
     "id": "in-desichannel-in-sd",
@@ -304688,7 +305480,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://desichannel.in/wp-content/uploads/2025/01/desi-channel.png",
     "enabled": true,
-    "order": 164
+    "order": 202
   },
   {
     "id": "in-dhamaal-in-sd",
@@ -304697,7 +305489,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Dhamaal_TV.png",
     "enabled": true,
-    "order": 165
+    "order": 203
   },
   {
     "id": "in-dharsantv-in-sd",
@@ -304706,7 +305498,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://play-lh.googleusercontent.com/brn76ZzRlqS8ylZVVcc5ZFWcqUp36iJ82WyzwiQ8-Nqi_8pIZZ_gsMCXNn6YiLhOEQ",
     "enabled": true,
-    "order": 166
+    "order": 204
   },
   {
     "id": "in-dheerantv-in-sd",
@@ -304715,7 +305507,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/jSedjXf.png",
     "enabled": true,
-    "order": 167
+    "order": 205
   },
   {
     "id": "in-dhooltv-in-sd",
@@ -304724,7 +305516,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.ibb.co/Rk78p2LB/dhooltv.png",
     "enabled": true,
-    "order": 168
+    "order": 206
   },
   {
     "id": "in-dhoommusic-in-sd",
@@ -304733,7 +305525,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DHOOM_MUSIC/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 169
+    "order": 207
   },
   {
     "id": "in-dishatv-in-sd",
@@ -304742,7 +305534,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Disha_tv.png",
     "enabled": true,
-    "order": 170
+    "order": 208
   },
   {
     "id": "in-disneyinternationalhd-in-sd",
@@ -304751,7 +305543,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DISNEY_INTERNATIONAL_HD/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 171
+    "order": 209
   },
   {
     "id": "in-disneyjunior-in-sd",
@@ -304760,7 +305552,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_DISNEY_JUNIOR/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 172
+    "order": 210
   },
   {
     "id": "in-divyavanitv-in-sd",
@@ -304769,7 +305561,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Divya_Vani.png",
     "enabled": true,
-    "order": 173
+    "order": 211
   },
   {
     "id": "in-docubaytv-in-sd",
@@ -304778,7 +305570,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/OGyeLLR.png",
     "enabled": true,
-    "order": 174
+    "order": 212
   },
   {
     "id": "in-dy365-in-sd",
@@ -304787,7 +305579,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143015_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 175
+    "order": 213
   },
   {
     "id": "in-e24-in-sd",
@@ -304796,7 +305588,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_E24/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 176
+    "order": 214
   },
   {
     "id": "in-ekamrabharatodia-in-sd",
@@ -304805,7 +305597,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotv.catchup.cdn.jio.com/dare_images/images/Ekamra_Bharat_Odia.png",
     "enabled": true,
-    "order": 177
+    "order": 215
   },
   {
     "id": "in-enterr10bangla-in-sd",
@@ -304814,7 +305606,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ENTERR10_BANGLA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 178
+    "order": 216
   },
   {
     "id": "in-epicbharat-in-sd",
@@ -304823,7 +305615,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0032BW6T.png?lock=720x540",
     "enabled": true,
-    "order": 179
+    "order": 217
   },
   {
     "id": "in-epicbharat-in-digital",
@@ -304832,7 +305624,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0032BW6T.png?lock=720x540",
     "enabled": true,
-    "order": 180
+    "order": 218
   },
   {
     "id": "in-epicbhojpuri-in-sd",
@@ -304841,7 +305633,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0032BVJ8.png?lock=720x540",
     "enabled": true,
-    "order": 181
+    "order": 219
   },
   {
     "id": "in-epicbhojpuri-in-digital",
@@ -304850,7 +305642,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0032BVJ8.png?lock=720x540",
     "enabled": true,
-    "order": 182
+    "order": 220
   },
   {
     "id": "in-epiccrimes-in-sd",
@@ -304859,7 +305651,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/a5kaqDc.png",
     "enabled": true,
-    "order": 183
+    "order": 221
   },
   {
     "id": "in-epickids-in-digital",
@@ -304868,7 +305660,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_GUBBARE/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 184
+    "order": 222
   },
   {
     "id": "in-epicmusic-in-sd",
@@ -304877,7 +305669,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SHOWBOX/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 185
+    "order": 223
   },
   {
     "id": "in-epicmusic-in-digital",
@@ -304886,7 +305678,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SHOWBOX/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 186
+    "order": 224
   },
   {
     "id": "in-epicparivar-in-sd",
@@ -304895,7 +305687,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0032BVZH.png?lock=720x540",
     "enabled": true,
-    "order": 187
+    "order": 225
   },
   {
     "id": "in-epictv-in-digital",
@@ -304904,7 +305696,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_EPIC/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 188
+    "order": 226
   },
   {
     "id": "in-etnow-in-sd",
@@ -304913,7 +305705,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ET_NOW/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 189
+    "order": 227
   },
   {
     "id": "in-etvbalbharat-in-sd",
@@ -304922,7 +305714,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://i.imgur.com/zsTxPV9.png",
     "enabled": true,
-    "order": 190
+    "order": 228
   },
   {
     "id": "in-etvbeats-in-hd",
@@ -304931,7 +305723,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/ETVBeats1.png",
     "enabled": true,
-    "order": 191
+    "order": 229
   },
   {
     "id": "in-etvcinema-in-sd",
@@ -304940,7 +305732,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/s143026_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 192
+    "order": 230
   },
   {
     "id": "in-etvcomedy-in-hd",
@@ -304949,7 +305741,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/ETV_Comedy.png",
     "enabled": true,
-    "order": 193
+    "order": 231
   },
   {
     "id": "in-etvjosh-in-hd",
@@ -304958,7 +305750,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/ETV_Josh.png",
     "enabled": true,
-    "order": 194
+    "order": 232
   },
   {
     "id": "in-etvnews-in-hd",
@@ -304967,7 +305759,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/ETV_News.png",
     "enabled": true,
-    "order": 195
+    "order": 233
   },
   {
     "id": "in-etvplus-in-sd",
@@ -304976,7 +305768,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ETV_PLUS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 196
+    "order": 234
   },
   {
     "id": "in-faktmarathi-in-sd",
@@ -304985,7 +305777,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s143038_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 197
+    "order": 235
   },
   {
     "id": "in-fast1-in-sd",
@@ -304994,7 +305786,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://papaji.freetvindia.com/media/channels/fast1.png",
     "enabled": true,
-    "order": 198
+    "order": 236
   },
   {
     "id": "in-fatehtv-in-sd",
@@ -305003,7 +305795,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/c4ItNkB.png",
     "enabled": true,
-    "order": 199
+    "order": 237
   },
   {
     "id": "in-firstindianews-in-sd",
@@ -305012,7 +305804,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_FIRST_INDIA_NEWS_RAJASTHAN/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 200
+    "order": 238
   },
   {
     "id": "in-foodfood-in-sd",
@@ -305021,7 +305813,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Food_Food.png",
     "enabled": true,
-    "order": 201
+    "order": 239
   },
   {
     "id": "in-friendstv-in-sd",
@@ -305030,7 +305822,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Friends_TV.png",
     "enabled": true,
-    "order": 202
+    "order": 240
   },
   {
     "id": "in-gangaurtv-in-sd",
@@ -305039,7 +305831,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Gangaur.png",
     "enabled": true,
-    "order": 203
+    "order": 241
   },
   {
     "id": "in-gaundapunjabtv-ca-sd",
@@ -305048,7 +305840,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/ArRZRM3.png",
     "enabled": true,
-    "order": 204
+    "order": 242
   },
   {
     "id": "in-globalpunjab-in-sd",
@@ -305057,7 +305849,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/WDLqcWW.png",
     "enabled": true,
-    "order": 205
+    "order": 243
   },
   {
     "id": "in-goldmines2-in-sd",
@@ -305065,7 +305857,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://mumt03.tangotv.in/Dsly5z3HGOLDMINES2/index.m3u8",
     "category": "Movies",
     "enabled": true,
-    "order": 206
+    "order": 244
   },
   {
     "id": "in-goldmines-in-sd",
@@ -305074,7 +305866,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_GOLDMINES/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 207
+    "order": 245
   },
   {
     "id": "in-goldminesaction-in-sd",
@@ -305083,7 +305875,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://yt3.googleusercontent.com/_X6U6bMLF-pTu5wBMFwsSI6aubGrXk2B0kUKdGiLIMqFLyDIne4Ot4ro76BS1S8fX3pWcCwS=s900-c-k-c0x00ffffff-no-rj",
     "enabled": true,
-    "order": 208
+    "order": 246
   },
   {
     "id": "in-goldminesbollywood-in-sd",
@@ -305092,7 +305884,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/6mNQ9mM.png",
     "enabled": true,
-    "order": 209
+    "order": 247
   },
   {
     "id": "in-goodnewstoday-in-sd",
@@ -305101,7 +305893,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_GOOD_NEWS_TODAY/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 210
+    "order": 248
   },
   {
     "id": "in-goodnesstv-in-sd",
@@ -305110,7 +305902,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143091_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 211
+    "order": 249
   },
   {
     "id": "in-goodnewstv-in-sd",
@@ -305119,7 +305911,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_GOODNEWS_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 212
+    "order": 250
   },
   {
     "id": "in-gospeltvindia-in-sd",
@@ -305128,7 +305920,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.ibb.co/xhbZvzt/cropped-final-logo-300x127.png",
     "enabled": true,
-    "order": 213
+    "order": 251
   },
   {
     "id": "in-gstv-in-sd",
@@ -305137,7 +305929,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/GS_TV.png",
     "enabled": true,
-    "order": 214
+    "order": 252
   },
   {
     "id": "in-gtcnews-in-sd",
@@ -305146,7 +305938,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://www.thegtcnetwork.com/gtc-news.png",
     "enabled": true,
-    "order": 215
+    "order": 253
   },
   {
     "id": "in-gtcpunjabi-in-sd",
@@ -305155,7 +305947,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://media.thegtcnetwork.com/uploads/gtc-pujabin-s.jpg",
     "enabled": true,
-    "order": 216
+    "order": 254
   },
   {
     "id": "in-guaranteenews-in-sd",
@@ -305164,7 +305956,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://media.licdn.com/dms/image/v2/D560BAQHYZzbGJ7ViZA/company-logo_200_200/company-logo_200_200/0/1728031377890?e=2147483647&v=beta&t=bIsZgNUCcg0M_-Zqeu5wKYgBt_1-pI798X9lP5CxhTM",
     "enabled": true,
-    "order": 217
+    "order": 255
   },
   {
     "id": "in-gujaratfirst-in-sd",
@@ -305173,7 +305965,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Gujarat_First_24x7.png",
     "enabled": true,
-    "order": 218
+    "order": 256
   },
   {
     "id": "in-gyandarshan-in-sd",
@@ -305182,7 +305974,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_GYANDARSHAN/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 219
+    "order": 257
   },
   {
     "id": "in-gyandarshan-in-hd",
@@ -305191,7 +305983,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_GYANDARSHAN/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 220
+    "order": 258
   },
   {
     "id": "in-hamdardtv-ca-sd",
@@ -305200,7 +305992,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.ibb.co/JcD2xck/logo-hamda.png",
     "enabled": true,
-    "order": 221
+    "order": 259
   },
   {
     "id": "in-harekrsnatv-in-sd",
@@ -305209,7 +306001,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143102_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 222
+    "order": 260
   },
   {
     "id": "in-harvesttvkeralam-in-sd",
@@ -305218,7 +306010,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/1DyPuIt.png",
     "enabled": true,
-    "order": 223
+    "order": 261
   },
   {
     "id": "in-harvestusa-in-sd",
@@ -305226,7 +306018,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://7mbd4ogkr3gx-hls-live.wmncdn.net/harvestusa/d57ffba6564caea2fee3f4085f19a098.sdp/playlist.m3u8",
     "category": "Religious",
     "enabled": true,
-    "order": 224
+    "order": 262
   },
   {
     "id": "in-headlinestripura-in-sd",
@@ -305235,7 +306027,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Headlines_Tripura.png",
     "enabled": true,
-    "order": 225
+    "order": 263
   },
   {
     "id": "in-hebrontv-in-sd",
@@ -305244,7 +306036,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i0.wp.com/hebrontv.in/wp-content/uploads/2023/11/hebron-.png?w=512",
     "enabled": true,
-    "order": 226
+    "order": 264
   },
   {
     "id": "in-hidost-in-sd",
@@ -305253,7 +306045,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Hi_Dost.png",
     "enabled": true,
-    "order": 227
+    "order": 265
   },
   {
     "id": "in-highnews-in-sd",
@@ -305262,7 +306054,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://pbs.twimg.com/profile_images/1104268476858937351/USUT4ykS_400x400.png",
     "enabled": true,
-    "order": 228
+    "order": 266
   },
   {
     "id": "in-hindikhabar-in-sd",
@@ -305271,7 +306063,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_HINDI_KHABAR/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 229
+    "order": 267
   },
   {
     "id": "in-historytv18-in-sd",
@@ -305280,7 +306072,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://dtil.tmsimg.com/assets/s143132_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 230
+    "order": 268
   },
   {
     "id": "in-hmtv-in-sd",
@@ -305289,7 +306081,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143136_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 231
+    "order": 269
   },
   {
     "id": "in-hnn24x7-in-sd",
@@ -305298,7 +306090,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/HNN24x7.png",
     "enabled": true,
-    "order": 232
+    "order": 270
   },
   {
     "id": "in-hopechannelindia-in-sd",
@@ -305307,7 +306099,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/wPzPUrK.png",
     "enabled": true,
-    "order": 233
+    "order": 271
   },
   {
     "id": "in-hornbilltv-in-sd",
@@ -305316,7 +306108,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_HORNBILL/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 234
+    "order": 272
   },
   {
     "id": "in-hosannatv-in-tamil",
@@ -305325,7 +306117,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/VYorU1L.png",
     "enabled": true,
-    "order": 235
+    "order": 273
   },
   {
     "id": "in-hosannatv-in-global",
@@ -305334,7 +306126,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/VYorU1L.png",
     "enabled": true,
-    "order": 236
+    "order": 274
   },
   {
     "id": "in-hungamatv-in-sd",
@@ -305343,7 +306135,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_HUNGAMA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 237
+    "order": 275
   },
   {
     "id": "in-hydertv-ca-sd",
@@ -305352,7 +306144,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/reHjjRZ.png",
     "enabled": true,
-    "order": 238
+    "order": 276
   },
   {
     "id": "in-ibc24-in-sd",
@@ -305361,7 +306153,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_IBC24/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 239
+    "order": 277
   },
   {
     "id": "in-indiaahead-in-sd",
@@ -305370,7 +306162,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/hBkTmf9.png",
     "enabled": true,
-    "order": 240
+    "order": 278
   },
   {
     "id": "in-indiadailylive-in-sd",
@@ -305379,7 +306171,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/India_Daily_24x7.png",
     "enabled": true,
-    "order": 241
+    "order": 279
   },
   {
     "id": "in-indiatoday-in-sd",
@@ -305388,7 +306180,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_INDIA_TODAY/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 242
+    "order": 280
   },
   {
     "id": "in-indiatv-in-sd",
@@ -305397,7 +306189,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_INDIA_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 243
+    "order": 281
   },
   {
     "id": "in-indiatvaapkiadalat-in-sd",
@@ -305406,7 +306198,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://play-lh.googleusercontent.com/2IlBX3IQHna8g4g-56vwGWb14K38spcviIh3i7uJCJ32ydfhcKZdOsacgijPkPeerEA",
     "enabled": true,
-    "order": 244
+    "order": 282
   },
   {
     "id": "in-indiatvspeednews-in-hd",
@@ -305415,7 +306207,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_INDIA_TV_SPEED_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 245
+    "order": 283
   },
   {
     "id": "in-indiavoice-in-sd",
@@ -305424,7 +306216,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/India_Voice.png",
     "enabled": true,
-    "order": 246
+    "order": 284
   },
   {
     "id": "in-indywoodtv-in-sd",
@@ -305433,7 +306225,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.ibb.co/jT3NCPp/logo-tv.png",
     "enabled": true,
-    "order": 247
+    "order": 285
   },
   {
     "id": "in-inews-in-sd",
@@ -305442,7 +306234,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/I_News.png",
     "enabled": true,
-    "order": 248
+    "order": 286
   },
   {
     "id": "in-infast-nl-sd",
@@ -305451,7 +306243,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/VwAMqA7.png",
     "enabled": true,
-    "order": 249
+    "order": 287
   },
   {
     "id": "in-inh24x7-in-sd",
@@ -305460,7 +306252,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_INH_24X7/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 250
+    "order": 288
   },
   {
     "id": "in-insync-in-sd",
@@ -305469,7 +306261,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Insync.png",
     "enabled": true,
-    "order": 251
+    "order": 289
   },
   {
     "id": "in-inwild-nl-sd",
@@ -305478,7 +306270,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://cdn.uc.assets.prezly.com/92770c71-9d6f-400f-8311-38e9cfec52c2/InWild_landscape-green.png",
     "enabled": true,
-    "order": 252
+    "order": 290
   },
   {
     "id": "in-inwonder-nl-sd",
@@ -305487,7 +306279,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://cdn.uc.assets.prezly.com/f12e798d-6da4-46e1-8ec5-e391d6762659/InWonder_portrait-purple.png",
     "enabled": true,
-    "order": 253
+    "order": 291
   },
   {
     "id": "in-isaiaruvi-in-sd",
@@ -305496,7 +306288,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ISAI_ARUVI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 254
+    "order": 292
   },
   {
     "id": "in-ishwarbhaktitv-in-sd",
@@ -305505,7 +306297,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ISHWAR_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 255
+    "order": 293
   },
   {
     "id": "in-jaimaharashtra-in-sd",
@@ -305514,7 +306306,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Jai_Maharashtra.png",
     "enabled": true,
-    "order": 256
+    "order": 294
   },
   {
     "id": "in-jaihindtv-in-sd",
@@ -305523,7 +306315,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/NaiA73p.png",
     "enabled": true,
-    "order": 257
+    "order": 295
   },
   {
     "id": "in-jalshamovies-in-hd",
@@ -305532,7 +306324,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/25eWjX2.png",
     "enabled": true,
-    "order": 258
+    "order": 296
   },
   {
     "id": "in-jantv-in-sd",
@@ -305541,7 +306333,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_JAN_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 259
+    "order": 297
   },
   {
     "id": "in-janamtv-in-sd",
@@ -305550,7 +306342,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143221_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 260
+    "order": 298
   },
   {
     "id": "in-jantatv-in-sd",
@@ -305559,7 +306351,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_JANTA_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 261
+    "order": 299
   },
   {
     "id": "in-jantantratv-in-sd",
@@ -305568,7 +306360,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Jantantra.png",
     "enabled": true,
-    "order": 262
+    "order": 300
   },
   {
     "id": "in-jeevantv-in-sd",
@@ -305577,7 +306369,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Jeevan_TV.png",
     "enabled": true,
-    "order": 263
+    "order": 301
   },
   {
     "id": "in-jinvanichannel-in-sd",
@@ -305586,7 +306378,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143230_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 264
+    "order": 302
   },
   {
     "id": "in-jonack-in-sd",
@@ -305595,7 +306387,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_JONACK/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 265
+    "order": 303
   },
   {
     "id": "in-joytv-in-sd",
@@ -305604,7 +306396,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://joytvchennai.org/wp-content/uploads/2026/04/cropped-512.png",
     "enabled": true,
-    "order": 266
+    "order": 304
   },
   {
     "id": "in-kadak-in-sd",
@@ -305613,7 +306405,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Kadak.png",
     "enabled": true,
-    "order": 267
+    "order": 305
   },
   {
     "id": "in-kairaliarabia-in-sd",
@@ -305622,7 +306414,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/BBEfplL.png",
     "enabled": true,
-    "order": 268
+    "order": 306
   },
   {
     "id": "in-kairalinews-in-sd",
@@ -305631,7 +306423,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143246_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 269
+    "order": 307
   },
   {
     "id": "in-kairalitv-in-sd",
@@ -305640,7 +306432,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6e/Kairali_TV.svg/500px-Kairali_TV.svg.png",
     "enabled": true,
-    "order": 270
+    "order": 308
   },
   {
     "id": "in-kairaliwe-in-sd",
@@ -305649,7 +306441,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_KAIRALI_WE/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 271
+    "order": 309
   },
   {
     "id": "in-kalaignarmurasu-in-sd",
@@ -305658,7 +306450,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s143561_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 272
+    "order": 310
   },
   {
     "id": "in-kalaignarseithigal-in-sd",
@@ -305667,7 +306459,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143769_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 273
+    "order": 311
   },
   {
     "id": "in-kalaignartv-in-sd",
@@ -305676,7 +306468,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/Kalaignar%20TV.png",
     "enabled": true,
-    "order": 274
+    "order": 312
   },
   {
     "id": "in-kalikatv-in-sd",
@@ -305685,7 +306477,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/XWXFoJA.png",
     "enabled": true,
-    "order": 275
+    "order": 313
   },
   {
     "id": "in-kalingatv-in-sd",
@@ -305694,7 +306486,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_KALINGA_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 276
+    "order": 314
   },
   {
     "id": "in-kappatv-in-sd",
@@ -305703,7 +306495,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Kappa_TV.png",
     "enabled": true,
-    "order": 277
+    "order": 315
   },
   {
     "id": "in-kashishnews-in-sd",
@@ -305712,7 +306504,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/qfINs2r.png",
     "enabled": true,
-    "order": 278
+    "order": 316
   },
   {
     "id": "in-kaumudytv-in-sd",
@@ -305721,7 +306513,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s143259_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 279
+    "order": 317
   },
   {
     "id": "in-kbcnews-in-sd",
@@ -305730,7 +306522,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/kbcnews.png",
     "enabled": true,
-    "order": 280
+    "order": 318
   },
   {
     "id": "in-kbptimes-in-sd",
@@ -305739,7 +306531,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/KBPTimes.png",
     "enabled": true,
-    "order": 281
+    "order": 319
   },
   {
     "id": "in-kcltv-in-sd",
@@ -305748,7 +306540,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/bkp9dIm.png",
     "enabled": true,
-    "order": 282
+    "order": 320
   },
   {
     "id": "in-kcm-sg-india",
@@ -305757,7 +306549,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/KCM.png",
     "enabled": true,
-    "order": 283
+    "order": 321
   },
   {
     "id": "in-keralavision-in-sd",
@@ -305766,7 +306558,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/SWNjyyp.png",
     "enabled": true,
-    "order": 284
+    "order": 322
   },
   {
     "id": "in-khabarfast-in-sd",
@@ -305775,7 +306567,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Khabar_Fast.png",
     "enabled": true,
-    "order": 285
+    "order": 323
   },
   {
     "id": "in-khabrainabhitak-in-sd",
@@ -305784,7 +306576,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143262_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 286
+    "order": 324
   },
   {
     "id": "in-khushboobangla-in-sd",
@@ -305793,7 +306585,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_KHUSHBOO_BANGLA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 287
+    "order": 325
   },
   {
     "id": "in-kitevicters-in-sd",
@@ -305802,7 +306594,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://i.imgur.com/kj4OEsb.png",
     "enabled": true,
-    "order": 288
+    "order": 326
   },
   {
     "id": "in-knockbhakti-in-sd",
@@ -305811,7 +306603,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/KnockBhakti.png",
     "enabled": true,
-    "order": 289
+    "order": 327
   },
   {
     "id": "in-kolkatatv-in-sd",
@@ -305820,7 +306612,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143271_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 290
+    "order": 328
   },
   {
     "id": "in-ktvbangla-in-sd",
@@ -305829,7 +306621,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/channel/2f8e3b371c660faa2f43a7f0942948a4.png",
     "enabled": true,
-    "order": 291
+    "order": 329
   },
   {
     "id": "in-lifetv-in-sd",
@@ -305838,7 +306630,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.ibb.co/v1C0bdR/logo-1.png",
     "enabled": true,
-    "order": 292
+    "order": 330
   },
   {
     "id": "in-livetimes-in-sd",
@@ -305847,7 +306639,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://www.livetimes.news/wp-content/uploads/2021/11/LT-logoConverted-01.png",
     "enabled": true,
-    "order": 293
+    "order": 331
   },
   {
     "id": "in-livingindianews-in-sd",
@@ -305856,7 +306648,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/YikaJvd.png",
     "enabled": true,
-    "order": 294
+    "order": 332
   },
   {
     "id": "in-lokshahinews-in-sd",
@@ -305865,7 +306657,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_LOKSHAHI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 295
+    "order": 333
   },
   {
     "id": "in-mnadutv-in-sd",
@@ -305874,7 +306666,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/M_Nadu.png",
     "enabled": true,
-    "order": 296
+    "order": 334
   },
   {
     "id": "in-madhatv-in-sd",
@@ -305883,7 +306675,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143287_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 297
+    "order": 335
   },
   {
     "id": "in-madhimugamtv-in-sd",
@@ -305892,7 +306684,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Madhimugam_TV.png",
     "enabled": true,
-    "order": 298
+    "order": 336
   },
   {
     "id": "in-mahamovie-in-sd",
@@ -305901,7 +306693,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Maha_Movies.png",
     "enabled": true,
-    "order": 299
+    "order": 337
   },
   {
     "id": "in-mahapunjabi-in-sd",
@@ -305910,7 +306702,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/AWUcSb8.png",
     "enabled": true,
-    "order": 300
+    "order": 338
   },
   {
     "id": "in-mahaabhakti-in-sd",
@@ -305919,7 +306711,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://yt3.googleusercontent.com/OWECRvCVJh-dXU2MTRZhMRIDvFvcWan0YMoWWfXsM5_WEHobQy2QoHQbGr7AZUXzMOByTMAXbg=s900-c-k-c0x00ffffff-no-rj",
     "enabled": true,
-    "order": 301
+    "order": 339
   },
   {
     "id": "in-mahaamax-in-sd",
@@ -305928,7 +306720,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://objectstorage.ap-mumbai-1.oraclecloud.com/p/7Eg7LPw1gBcncVDrfwf__7yyrg13awaU6DmMk4gutavGYZgoAuAziv8e0aSEdU4G/n/bmaqqlwez184/b/GTPL_CHANNEL_LOGO/o/gtpl/MAHAA+MAX+LOGO.png",
     "enabled": true,
-    "order": 302
+    "order": 340
   },
   {
     "id": "in-mahaanews-in-sd",
@@ -305937,7 +306729,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/buT76vR.png",
     "enabled": true,
-    "order": 303
+    "order": 341
   },
   {
     "id": "in-makkaltv-in-sd",
@@ -305946,7 +306738,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_MAKKAL_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 304
+    "order": 342
   },
   {
     "id": "in-malaimurasutv-in-sd",
@@ -305955,7 +306747,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/OC5TQxp.png",
     "enabled": true,
-    "order": 305
+    "order": 343
   },
   {
     "id": "in-mangalmaytv-in-sd",
@@ -305964,7 +306756,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Mangalmaylive.png",
     "enabled": true,
-    "order": 306
+    "order": 344
   },
   {
     "id": "in-mango-in-sd",
@@ -305973,7 +306765,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/neZm4CY.png",
     "enabled": true,
-    "order": 307
+    "order": 345
   },
   {
     "id": "in-mangomobiletv-in-hd",
@@ -305982,7 +306774,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dvvlqr1rtlak3.cloudfront.net/Mango/MANGOTVLOGO.jpg",
     "enabled": true,
-    "order": 308
+    "order": 346
   },
   {
     "id": "in-manoramanews-in-sd",
@@ -305991,7 +306783,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/adjRrVx.png",
     "enabled": true,
-    "order": 309
+    "order": 347
   },
   {
     "id": "in-manoranjangrand-in-sd",
@@ -306000,7 +306792,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/s143302_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 310
+    "order": 348
   },
   {
     "id": "in-manoranjanmovies-in-sd",
@@ -306009,7 +306801,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/s143303_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 311
+    "order": 349
   },
   {
     "id": "in-manoranjanprime-in-sd",
@@ -306018,7 +306810,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjrGNUi4TMw8UslbIJF1ja-NrA1Ps656h9cxrj6aTfl3Cm-_C2gxtBBAKz-fLdPk7rJ0YrXfNvcQaBSDFTUdPgSYt8sBA0xn4aSMPnl-J2hiKa7P3Ybjd3BlE3XjoAJ0d7HNvhy8mZFDbf1JfAdMVBpdnPBuim3y3x0zMw1D3ryOw3NCoOsPA5fMMplPbU/s500/manoranjan-prime-tv-schedule-on-dd-freedish.jpg",
     "enabled": true,
-    "order": 312
+    "order": 350
   },
   {
     "id": "in-manoranjantv-in-sd",
@@ -306027,7 +306819,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_MANORANJAN_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 313
+    "order": 351
   },
   {
     "id": "in-mantavyanews-in-sd",
@@ -306036,7 +306828,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Mantavya_News.png",
     "enabled": true,
-    "order": 314
+    "order": 352
   },
   {
     "id": "in-marutamtv-in-sd",
@@ -306045,7 +306837,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/cFNw4Af.png",
     "enabled": true,
-    "order": 315
+    "order": 353
   },
   {
     "id": "in-mastiii-in-sd",
@@ -306054,7 +306846,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/lxgXHx4.png",
     "enabled": true,
-    "order": 316
+    "order": 354
   },
   {
     "id": "in-mathrubhuminews-in-sd",
@@ -306063,7 +306855,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/diQftzP.png",
     "enabled": true,
-    "order": 317
+    "order": 355
   },
   {
     "id": "in-mazhavilmanorama-in-sd",
@@ -306072,7 +306864,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/fjgzW20.png",
     "enabled": true,
-    "order": 318
+    "order": 356
   },
   {
     "id": "in-mazhavilmanorama-in-hd",
@@ -306081,7 +306873,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/fjgzW20.png",
     "enabled": true,
-    "order": 319
+    "order": 357
   },
   {
     "id": "in-mediaone-in-sd",
@@ -306090,7 +306882,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_MEDIA_ONE/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 320
+    "order": 358
   },
   {
     "id": "in-medibiztv-in-sd",
@@ -306099,7 +306891,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.medibiztv.com/assets/logo-E76jcvP9.png",
     "enabled": true,
-    "order": 321
+    "order": 359
   },
   {
     "id": "in-meialaitv-in-sd",
@@ -306108,7 +306900,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://www.meialai.in/assets/meialai-DBaBUZTH.png",
     "enabled": true,
-    "order": 322
+    "order": 360
   },
   {
     "id": "in-mercytv-in-sd",
@@ -306117,7 +306909,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/klNH4tV.png",
     "enabled": true,
-    "order": 323
+    "order": 361
   },
   {
     "id": "in-metrotv-in-sd",
@@ -306126,7 +306918,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Metro_TV.png",
     "enabled": true,
-    "order": 324
+    "order": 362
   },
   {
     "id": "in-mh1music-in-sd",
@@ -306135,7 +306927,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://dtil.tmsimg.com/assets/s143539_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 325
+    "order": 363
   },
   {
     "id": "in-mh1news-in-sd",
@@ -306144,7 +306936,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143540_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 326
+    "order": 364
   },
   {
     "id": "in-mh1prime-in-sd",
@@ -306152,7 +306944,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://streams.tangotv.in/MHONE/ORIGIN/index.m3u8",
     "category": "General",
     "enabled": true,
-    "order": 327
+    "order": 365
   },
   {
     "id": "in-mhonedilse-in-sd",
@@ -306161,7 +306953,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dilse.mhone.in/wp-content/uploads/2022/02/MH-ONE-dil-se-LOGO-white-copy.png",
     "enabled": true,
-    "order": 328
+    "order": 366
   },
   {
     "id": "in-mhonemovies-in-sd",
@@ -306169,7 +306961,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://mumt03.tangotv.in/Dsly5z3HMHONEMOVIE/index.m3u8",
     "category": "Movies",
     "enabled": true,
-    "order": 329
+    "order": 367
   },
   {
     "id": "in-mhoneshraddha-in-sd",
@@ -306178,7 +306970,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/Lrm8qTO.png",
     "enabled": true,
-    "order": 330
+    "order": 368
   },
   {
     "id": "in-mirrornow-in-sd",
@@ -306187,7 +306979,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_MIRROR_NOW/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 331
+    "order": 369
   },
   {
     "id": "in-mksix-in-sd",
@@ -306196,7 +306988,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/MK_Six.png",
     "enabled": true,
-    "order": 332
+    "order": 370
   },
   {
     "id": "in-mojotv-in-sd",
@@ -306205,7 +306997,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://upload.wikimedia.org/wikipedia/en/1/19/MOJO_TV_LOGO.png",
     "enabled": true,
-    "order": 333
+    "order": 371
   },
   {
     "id": "in-moontv-in-sd",
@@ -306214,7 +307006,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/3l25EZI.png",
     "enabled": true,
-    "order": 334
+    "order": 372
   },
   {
     "id": "in-moviesnow-in-hd",
@@ -306223,7 +307015,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_MOVIES_NOW/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 335
+    "order": 373
   },
   {
     "id": "in-mrbeananimated-uk-english",
@@ -306232,7 +307024,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://static.wikia.nocookie.net/logopedia/images/2/25/Mr._Bean_Animated_Series_stacked_logo.png",
     "enabled": true,
-    "order": 336
+    "order": 374
   },
   {
     "id": "in-munsiftv-in-sd",
@@ -306241,7 +307033,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Munsif_TV.png",
     "enabled": true,
-    "order": 337
+    "order": 375
   },
   {
     "id": "in-musicindia-in-sd",
@@ -306250,7 +307042,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://dtil.tmsimg.com/assets/s143563_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 338
+    "order": 376
   },
   {
     "id": "in-nambikkaitv-in-sd",
@@ -306259,7 +307051,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NAMBIKKAI_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 339
+    "order": 377
   },
   {
     "id": "in-namdharitv-in-sd",
@@ -306268,7 +307060,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/NalsXTo.png",
     "enabled": true,
-    "order": 340
+    "order": 378
   },
   {
     "id": "in-nandighoshatv-in-sd",
@@ -306277,7 +307069,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Nandighosha.png",
     "enabled": true,
-    "order": 341
+    "order": 379
   },
   {
     "id": "in-nationnews-in-sd",
@@ -306286,7 +307078,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/nationnews.png",
     "enabled": true,
-    "order": 342
+    "order": 380
   },
   {
     "id": "in-nationalgeographic-in-hd",
@@ -306295,7 +307087,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://dtil.tmsimg.com/assets/s143574_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 343
+    "order": 381
   },
   {
     "id": "in-nationalgeographicwild-in-hd",
@@ -306304,7 +307096,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NAT_GEO_WILD/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 344
+    "order": 382
   },
   {
     "id": "in-ndtv24x7-in-sd",
@@ -306313,7 +307105,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s154895_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 345
+    "order": 383
   },
   {
     "id": "in-ndtvgoodtimes-in-sd",
@@ -306322,7 +307114,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_GOOD_TIMES/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 346
+    "order": 384
   },
   {
     "id": "in-ndtvindia-in-sd",
@@ -306331,7 +307123,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NDTV_INDIA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 347
+    "order": 385
   },
   {
     "id": "in-ndtvmadhyapradeshchhattisgarh-in-sd",
@@ -306340,7 +307132,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NDTV_MPCG/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 348
+    "order": 386
   },
   {
     "id": "in-ndtvmarathi-in-sd",
@@ -306349,7 +307141,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NDTV_MARATHI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 349
+    "order": 387
   },
   {
     "id": "in-ndtvprofit-in-sd",
@@ -306358,7 +307150,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NDTV_PROFIT_PRIME/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 350
+    "order": 388
   },
   {
     "id": "in-ndtvrajasthan-in-sd",
@@ -306367,7 +307159,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NDTV_RAJASTHAN/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 351
+    "order": 389
   },
   {
     "id": "in-nenews-in-sd",
@@ -306376,7 +307168,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/L5GeJFb.png",
     "enabled": true,
-    "order": 352
+    "order": 390
   },
   {
     "id": "in-nepal1-in-sd",
@@ -306385,7 +307177,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/Xr4FjC8.png",
     "enabled": true,
-    "order": 353
+    "order": 391
   },
   {
     "id": "in-network10-in-sd",
@@ -306394,7 +307186,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Network_10.png",
     "enabled": true,
-    "order": 354
+    "order": 392
   },
   {
     "id": "in-news1india-in-sd",
@@ -306403,7 +307195,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS_1_INDIA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 355
+    "order": 393
   },
   {
     "id": "in-news1st-in-sd",
@@ -306412,7 +307204,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143587_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 356
+    "order": 394
   },
   {
     "id": "in-news7tamil-in-sd",
@@ -306421,7 +307213,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/News7_Tamil.png",
     "enabled": true,
-    "order": 357
+    "order": 395
   },
   {
     "id": "in-news9live-in-sd",
@@ -306430,7 +307222,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/News9.png",
     "enabled": true,
-    "order": 358
+    "order": 396
   },
   {
     "id": "in-news11-in-sd",
@@ -306439,7 +307231,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/News11.png",
     "enabled": true,
-    "order": 359
+    "order": 397
   },
   {
     "id": "in-news18assamnortheast-in-sd",
@@ -306448,7 +307240,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_ASSAM_NORTHSYMHYPEAST/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 360
+    "order": 398
   },
   {
     "id": "in-news18bangla-in-sd",
@@ -306457,7 +307249,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_BANGLA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 361
+    "order": 399
   },
   {
     "id": "in-news18biharjharkhand-in-sd",
@@ -306466,7 +307258,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/FQ3zDZE.png",
     "enabled": true,
-    "order": 362
+    "order": 400
   },
   {
     "id": "in-news18delhincrjk-in-sd",
@@ -306475,7 +307267,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/News18JKLH.png",
     "enabled": true,
-    "order": 363
+    "order": 401
   },
   {
     "id": "in-news18gujarati-in-sd",
@@ -306484,7 +307276,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_GUJARATI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 364
+    "order": 402
   },
   {
     "id": "in-news18india-in-sd",
@@ -306493,7 +307285,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_INDIA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 365
+    "order": 403
   },
   {
     "id": "in-news18kannada-in-sd",
@@ -306502,7 +307294,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/3XVFxdO.png",
     "enabled": true,
-    "order": 366
+    "order": 404
   },
   {
     "id": "in-news18kerala-in-sd",
@@ -306511,7 +307303,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_KERALA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 367
+    "order": 405
   },
   {
     "id": "in-news18madhyapradeshchhattisgarh-in-sd",
@@ -306520,7 +307312,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_MADHYA_PRADESH_CHHATTISGARH/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 368
+    "order": 406
   },
   {
     "id": "in-news18marathi-in-sd",
@@ -306529,7 +307321,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_LOKMAT/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 369
+    "order": 407
   },
   {
     "id": "in-news18odia-in-sd",
@@ -306538,7 +307330,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_ODIA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 370
+    "order": 408
   },
   {
     "id": "in-news18punjabharyanahimachal-in-sd",
@@ -306547,7 +307339,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_PUNJAB_HARYANA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 371
+    "order": 409
   },
   {
     "id": "in-news18rajasthan-in-sd",
@@ -306556,7 +307348,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_RAJASTHAN/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 372
+    "order": 410
   },
   {
     "id": "in-news18tamilnadu-in-sd",
@@ -306565,7 +307357,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_TAMIL_NADU/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 373
+    "order": 411
   },
   {
     "id": "in-news18urdu-in-sd",
@@ -306574,7 +307366,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/8xnwMRR.png",
     "enabled": true,
-    "order": 374
+    "order": 412
   },
   {
     "id": "in-news18uttarpradeshuttarakhand-in-sd",
@@ -306583,7 +307375,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS18_UTTAR_PRADESH_UTTARAKHAND/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 375
+    "order": 413
   },
   {
     "id": "in-news24mpchhattisgarh-in-sd",
@@ -306592,7 +307384,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS24_MPCG/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 376
+    "order": 414
   },
   {
     "id": "in-newscapitalgujarat-in-sd",
@@ -306601,7 +307393,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/NewsCapital_Gujarat.png",
     "enabled": true,
-    "order": 377
+    "order": 415
   },
   {
     "id": "in-newscapitalmarket-in-sd",
@@ -306610,7 +307402,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/NewsCapitalMarket.png",
     "enabled": true,
-    "order": 378
+    "order": 416
   },
   {
     "id": "in-newsdaily24-in-sd",
@@ -306619,7 +307411,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/lT8rihP.png",
     "enabled": true,
-    "order": 379
+    "order": 417
   },
   {
     "id": "in-newsindia24x7-in-sd",
@@ -306628,7 +307420,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG002N1TXH.png?lock=720x540",
     "enabled": true,
-    "order": 380
+    "order": 418
   },
   {
     "id": "in-newsj-in-sd",
@@ -306637,7 +307429,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/News_J.png",
     "enabled": true,
-    "order": 381
+    "order": 419
   },
   {
     "id": "in-newsleader-in-sd",
@@ -306646,7 +307438,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://img-cdn.publive.online/fit-in/360x280/filters:format(webp)/newsleaderlive/media/agency_attachments/2026/04/15/2026-04-15t100517555z-news-leader-640-480-1-sarvajeet-singh-chauhan-2026-04-15-15-35-17.png",
     "enabled": true,
-    "order": 382
+    "order": 420
   },
   {
     "id": "in-newslive-in-sd",
@@ -306655,7 +307447,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS_LIVE/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 383
+    "order": 421
   },
   {
     "id": "in-newslivebangla-in-sd",
@@ -306664,7 +307456,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://papaji.freetvindia.com/media/News_Live_Bangla.png",
     "enabled": true,
-    "order": 384
+    "order": 422
   },
   {
     "id": "in-newsmarathi24x7-in-sd",
@@ -306673,7 +307465,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/channel/cb84d7f7e19bcbfb9b6d664e7fb2adee.png",
     "enabled": true,
-    "order": 385
+    "order": 423
   },
   {
     "id": "in-newsnation81-in-sd",
@@ -306682,7 +307474,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/News_Nation_81.png",
     "enabled": true,
-    "order": 386
+    "order": 424
   },
   {
     "id": "in-newsnation-in-sd",
@@ -306691,7 +307483,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143596_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 387
+    "order": 425
   },
   {
     "id": "in-newsstatempchg-in-sd",
@@ -306700,7 +307492,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS_STATE_MADHYA_PRADESH_CHHATTISGARH/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 388
+    "order": 426
   },
   {
     "id": "in-newsstatepunjabharyanahimachal-in-sd",
@@ -306708,7 +307500,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://jmp2.uk/stvp-IN300083R1",
     "category": "News",
     "enabled": true,
-    "order": 389
+    "order": 427
   },
   {
     "id": "in-newsstateupuk-in-sd",
@@ -306717,7 +307509,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS_STATE_UP_UK/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 390
+    "order": 428
   },
   {
     "id": "in-newstamil24x7-in-sd",
@@ -306726,7 +307518,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NEWS_TAMIL_24X7/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 391
+    "order": 429
   },
   {
     "id": "in-newsxworld-in-hd",
@@ -306735,7 +307527,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/News_X_World.png",
     "enabled": true,
-    "order": 392
+    "order": 430
   },
   {
     "id": "in-nhbollyflix-in-hd",
@@ -306744,7 +307536,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.ibb.co/yF9MPTDK/blyflx.png",
     "enabled": true,
-    "order": 393
+    "order": 431
   },
   {
     "id": "in-nhbollygold-in-hd",
@@ -306753,7 +307545,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.ibb.co/x9PsrMy/NH-BOLLYGOLD.png",
     "enabled": true,
-    "order": 394
+    "order": 432
   },
   {
     "id": "in-nhbollyraga-in-hd",
@@ -306762,7 +307554,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.ibb.co/BKB9mv1K/NH-Bolly-Raga.png",
     "enabled": true,
-    "order": 395
+    "order": 433
   },
   {
     "id": "in-nhtamilgold-in-hd",
@@ -306771,7 +307563,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN400061DB_20260623T015348SQUARE.png",
     "enabled": true,
-    "order": 396
+    "order": 434
   },
   {
     "id": "in-nickjr-in-sd",
@@ -306780,7 +307572,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NICK_JUNIOR/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 397
+    "order": 435
   },
   {
     "id": "in-nickelodeon-in-sd",
@@ -306789,7 +307581,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NICK/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 398
+    "order": 436
   },
   {
     "id": "in-nireekshanatv-in-sd",
@@ -306798,7 +307590,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/nGJv6QR.png",
     "enabled": true,
-    "order": 399
+    "order": 437
   },
   {
     "id": "in-nktv24x7-in-sd",
@@ -306807,7 +307599,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://www.nktv.in/wp-content/uploads/2023/01/NEW-LOGO-NEW.png",
     "enabled": true,
-    "order": 400
+    "order": 438
   },
   {
     "id": "in-nktvbangla-in-sd",
@@ -306816,7 +307608,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://www.nktvbangla.com/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-12-at-2.59.18-PM.jpg",
     "enabled": true,
-    "order": 401
+    "order": 439
   },
   {
     "id": "in-nkrtvkannada-in-sd",
@@ -306825,7 +307617,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/NKRTV.png",
     "enabled": true,
-    "order": 402
+    "order": 440
   },
   {
     "id": "in-northeastlive-in-hd",
@@ -306834,7 +307626,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_NORTH_EAST_LIVE/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 403
+    "order": 441
   },
   {
     "id": "in-nsc9news-in-sd",
@@ -306843,7 +307635,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/nsc9.png",
     "enabled": true,
-    "order": 404
+    "order": 442
   },
   {
     "id": "in-ntctv-in-sd",
@@ -306852,7 +307644,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/ntvtamil.png",
     "enabled": true,
-    "order": 405
+    "order": 443
   },
   {
     "id": "in-ntvtelugu-in-sd",
@@ -306861,7 +307653,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/WqTIoWS.png",
     "enabled": true,
-    "order": 406
+    "order": 444
   },
   {
     "id": "in-odishatv-in-sd",
@@ -306870,7 +307662,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s143639_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 407
+    "order": 445
   },
   {
     "id": "in-olitv-in-sd",
@@ -306879,7 +307671,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.ibb.co/XfvTQyJn/main-removebg-preview.png",
     "enabled": true,
-    "order": 408
+    "order": 446
   },
   {
     "id": "in-omtv-in-sd",
@@ -306888,7 +307680,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/OM_TV.png",
     "enabled": true,
-    "order": 409
+    "order": 447
   },
   {
     "id": "in-onepaschima-in-sd",
@@ -306897,7 +307689,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotv.catchup.cdn.jio.com/dare_images/images/One_Paschima.png",
     "enabled": true,
-    "order": 410
+    "order": 448
   },
   {
     "id": "in-onlybharat-in-sd",
@@ -306906,7 +307698,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_AMV_NETWORK/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 411
+    "order": 449
   },
   {
     "id": "in-orangebanglatv-in-sd",
@@ -306915,7 +307707,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/wjSaHj5.png",
     "enabled": true,
-    "order": 412
+    "order": 450
   },
   {
     "id": "in-oscarmoviesbhojpuri-in-sd",
@@ -306924,7 +307716,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/s143638_ld_h9_ab.png?lock=720x540",
     "enabled": true,
-    "order": 413
+    "order": 451
   },
   {
     "id": "in-parasgold-in-sd",
@@ -306933,7 +307725,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PARAS_GOLD_ONE/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 414
+    "order": 452
   },
   {
     "id": "in-pasandtv-in-sd",
@@ -306942,7 +307734,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG002NFYY1.png?lock=720x540",
     "enabled": true,
-    "order": 415
+    "order": 453
   },
   {
     "id": "in-peaceofmindtv-in-sd",
@@ -306951,7 +307743,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PEACE_OF_MIND/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 416
+    "order": 454
   },
   {
     "id": "in-peacetvbangla-ae-sd",
@@ -306960,7 +307752,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/1ztVXUi.png",
     "enabled": true,
-    "order": 417
+    "order": 455
   },
   {
     "id": "in-peacetvurdu-ae-sd",
@@ -306969,7 +307761,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://github.com/fawazahmed0/tiger/raw/master/peace/urdu.jpg",
     "enabled": true,
-    "order": 418
+    "order": 456
   },
   {
     "id": "in-peartv-in-sd",
@@ -306978,7 +307770,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PEARS_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 419
+    "order": 457
   },
   {
     "id": "in-pepperstv-in-sd",
@@ -306987,7 +307779,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Peppers_TV.png",
     "enabled": true,
-    "order": 420
+    "order": 458
   },
   {
     "id": "in-pitaara-in-sd",
@@ -306996,7 +307788,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PITAARA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 421
+    "order": 459
   },
   {
     "id": "in-pmctelugu-in-sd",
@@ -307005,7 +307797,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/PMC_Telugu.png",
     "enabled": true,
-    "order": 422
+    "order": 460
   },
   {
     "id": "in-pocketfilms-in-sd",
@@ -307014,7 +307806,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/p_pktflm.png",
     "enabled": true,
-    "order": 423
+    "order": 461
   },
   {
     "id": "in-polimernews-in-sd",
@@ -307023,7 +307815,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143664_ld_h9_aa.png?lock=720x540",
     "enabled": true,
-    "order": 424
+    "order": 462
   },
   {
     "id": "in-polimertv-in-sd",
@@ -307032,7 +307824,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s143665_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 425
+    "order": 463
   },
   {
     "id": "in-powertv-in-sd",
@@ -307041,7 +307833,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_POWER_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 426
+    "order": 464
   },
   {
     "id": "in-powervisiontv-in-sd",
@@ -307050,7 +307842,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143670_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 427
+    "order": 465
   },
   {
     "id": "in-pragnews-in-sd",
@@ -307059,7 +307851,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143671_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 428
+    "order": 466
   },
   {
     "id": "in-prameyanews7-in-sd",
@@ -307068,7 +307860,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143578_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 429
+    "order": 467
   },
   {
     "id": "in-prarthanatv-in-sd",
@@ -307077,7 +307869,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/gj7dtNF.png",
     "enabled": true,
-    "order": 430
+    "order": 468
   },
   {
     "id": "in-prathamkhabar24x7-in-sd",
@@ -307086,7 +307878,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/HNsg5Px.png",
     "enabled": true,
-    "order": 431
+    "order": 469
   },
   {
     "id": "in-pratidintime-in-sd",
@@ -307095,7 +307887,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PRATIDIN_TIME/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 432
+    "order": 470
   },
   {
     "id": "in-pravasichannel-in-sd",
@@ -307104,7 +307896,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/1dHarb7.png",
     "enabled": true,
-    "order": 433
+    "order": 471
   },
   {
     "id": "in-prime9news-in-sd",
@@ -307113,7 +307905,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Prime_9_News.png",
     "enabled": true,
-    "order": 434
+    "order": 472
   },
   {
     "id": "in-primenews-in-sd",
@@ -307122,7 +307914,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Prime_News.png",
     "enabled": true,
-    "order": 435
+    "order": 473
   },
   {
     "id": "in-prudentmedia-in-sd",
@@ -307131,7 +307923,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/DG0x4UD.png",
     "enabled": true,
-    "order": 436
+    "order": 474
   },
   {
     "id": "in-ptcchakde-in-sd",
@@ -307140,7 +307932,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PTC_CHAKDE/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 437
+    "order": 475
   },
   {
     "id": "in-ptcmusic-in-sd",
@@ -307149,7 +307941,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PTC_MUSIC/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 438
+    "order": 476
   },
   {
     "id": "in-ptcnews-in-sd",
@@ -307158,7 +307950,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PTC_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 439
+    "order": 477
   },
   {
     "id": "in-ptcpunjabi-in-sd",
@@ -307167,7 +307959,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PTC_PUNJABI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 440
+    "order": 478
   },
   {
     "id": "in-ptcpunjabi-in-hd",
@@ -307176,7 +307968,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PTC_PUNJABI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 441
+    "order": 479
   },
   {
     "id": "in-ptcpunjabigold-in-sd",
@@ -307185,7 +307977,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PTC_PUNJABI_GOLD/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 442
+    "order": 480
   },
   {
     "id": "in-ptcsimran-in-sd",
@@ -307194,7 +307986,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG002NG05K.png?lock=720x540",
     "enabled": true,
-    "order": 443
+    "order": 481
   },
   {
     "id": "in-publicmovies-in-sd",
@@ -307203,7 +307995,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PUBLIC_MOVIES/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 444
+    "order": 482
   },
   {
     "id": "in-publicmusic-in-sd",
@@ -307212,7 +308004,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PUBLIC_MUSIC/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 445
+    "order": 483
   },
   {
     "id": "in-publictv-in-sd",
@@ -307221,7 +308013,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PUBLIC_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 446
+    "order": 484
   },
   {
     "id": "in-pudharinews-in-sd",
@@ -307230,7 +308022,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_PUDHARI_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 447
+    "order": 485
   },
   {
     "id": "in-pularitv-in-sd",
@@ -307239,7 +308031,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/v5urG30.png",
     "enabled": true,
-    "order": 448
+    "order": 486
   },
   {
     "id": "in-punjabihits-in-sd",
@@ -307248,7 +308040,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://dtil.tmsimg.com/assets/s143691_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 449
+    "order": 487
   },
   {
     "id": "in-punjabishorts-in-sd",
@@ -307257,7 +308049,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://www.thegtcnetwork.com/punjabi-shorts.jpg",
     "enabled": true,
-    "order": 450
+    "order": 488
   },
   {
     "id": "in-puthiyathalaimurai-in-sd",
@@ -307266,7 +308058,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143692_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 451
+    "order": 489
   },
   {
     "id": "in-puthuyugamtv-in-sd",
@@ -307275,7 +308067,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s143693_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 452
+    "order": 490
   },
   {
     "id": "in-qtv-in-sd",
@@ -307284,7 +308076,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://www.theq.tv/wp-content/uploads/2023/10/The-Q-new-Logo.png",
     "enabled": true,
-    "order": 453
+    "order": 491
   },
   {
     "id": "in-qelloconcertsbystingray-ca-sd",
@@ -307293,7 +308085,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/IRyFTWq.png",
     "enabled": true,
-    "order": 454
+    "order": 492
   },
   {
     "id": "in-rplus-in-sd",
@@ -307302,7 +308094,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/XUnWcZF.png",
     "enabled": true,
-    "order": 455
+    "order": 493
   },
   {
     "id": "in-rplusgold-in-sd",
@@ -307311,7 +308103,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/dpI7XPC.png",
     "enabled": true,
-    "order": 456
+    "order": 494
   },
   {
     "id": "in-raatdinbangla-in-sd",
@@ -307320,7 +308112,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/raatdinbangla.png",
     "enabled": true,
-    "order": 457
+    "order": 495
   },
   {
     "id": "in-raftaarmedia-in-sd",
@@ -307329,7 +308121,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RAFTAAR_MEDIA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 458
+    "order": 496
   },
   {
     "id": "in-rajdigitalplus-in-sd",
@@ -307338,7 +308130,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RAJ_DIGITAL_PLUS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 459
+    "order": 497
   },
   {
     "id": "in-rajmusixkannada-in-sd",
@@ -307347,7 +308139,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/z7fhhyX.png",
     "enabled": true,
-    "order": 460
+    "order": 498
   },
   {
     "id": "in-rajmusixmalayalam-in-sd",
@@ -307356,7 +308148,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RAJ_MUSIX_MALAYALAM/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 461
+    "order": 499
   },
   {
     "id": "in-rajmusixtamil-in-sd",
@@ -307365,7 +308157,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RAJ_MUSIX_TAMIL/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 462
+    "order": 500
   },
   {
     "id": "in-rajmusixtelugu-in-sd",
@@ -307374,7 +308166,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RAJ_MUSIX_TELUGU/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 463
+    "order": 501
   },
   {
     "id": "in-rajnewsmalayalam-in-sd",
@@ -307383,7 +308175,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RAJ_NEWS_MALAYALAM/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 464
+    "order": 502
   },
   {
     "id": "in-rajnewstelugu-in-sd",
@@ -307392,7 +308184,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RAJ_NEWS_TELUGU/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 465
+    "order": 503
   },
   {
     "id": "in-rajtv-in-sd",
@@ -307401,7 +308193,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RAJ_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 466
+    "order": 504
   },
   {
     "id": "in-ramdhenu-in-sd",
@@ -307410,7 +308202,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s143717_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 467
+    "order": 505
   },
   {
     "id": "in-rang-in-sd",
@@ -307419,7 +308211,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RANG/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 468
+    "order": 506
   },
   {
     "id": "in-rdxgoa-in-sd",
@@ -307428,7 +308220,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/RDX_News.png",
     "enabled": true,
-    "order": 469
+    "order": 507
   },
   {
     "id": "in-rengoni-in-sd",
@@ -307437,7 +308229,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s143722_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 470
+    "order": 508
   },
   {
     "id": "in-reportertv-in-sd",
@@ -307446,7 +308238,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s85096_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 471
+    "order": 509
   },
   {
     "id": "in-republicbangla-in-sd",
@@ -307455,7 +308247,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RSYMDOT_BANGLA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 472
+    "order": 510
   },
   {
     "id": "in-republicbharat-in-sd",
@@ -307464,7 +308256,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143724_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 473
+    "order": 511
   },
   {
     "id": "in-republickannada-in-sd",
@@ -307473,7 +308265,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_RSYMDOTKANNADA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 474
+    "order": 512
   },
   {
     "id": "in-republictv-in-sd",
@@ -307482,7 +308274,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143723_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 475
+    "order": 513
   },
   {
     "id": "in-rongeentv-in-sd",
@@ -307491,7 +308283,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Rongeen_TV.png",
     "enabled": true,
-    "order": 476
+    "order": 514
   },
   {
     "id": "in-rozanaspokesman-in-sd",
@@ -307500,7 +308292,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://www.rozanaspokesman.in/images/logospokesman.png",
     "enabled": true,
-    "order": 477
+    "order": 515
   },
   {
     "id": "in-rtindia-in-hd",
@@ -307509,7 +308301,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/a/a0/Russia-today-logo.svg",
     "enabled": true,
-    "order": 478
+    "order": 516
   },
   {
     "id": "in-rupasibangla-in-sd",
@@ -307518,7 +308310,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s143733_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 479
+    "order": 517
   },
   {
     "id": "in-saamtv-in-sd",
@@ -307527,7 +308319,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SAAM_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 480
+    "order": 518
   },
   {
     "id": "in-sachbedhadak-in-sd",
@@ -307536,7 +308328,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s158864_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 481
+    "order": 519
   },
   {
     "id": "in-sadatv-in-sd",
@@ -307545,7 +308337,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.ibb.co/cXPzpGp/SADA-CHANNEL-HBN-global-Punjabi-Satellite-TV.png",
     "enabled": true,
-    "order": 482
+    "order": 520
   },
   {
     "id": "in-sadhna-in-sd",
@@ -307554,7 +308346,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SADHNA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 483
+    "order": 521
   },
   {
     "id": "in-sadhnanewsmadhyapradeshchhattisgarh-in-sd",
@@ -307563,7 +308355,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/799WMit.png",
     "enabled": true,
-    "order": 484
+    "order": 522
   },
   {
     "id": "in-sadhnaplusnews-in-sd",
@@ -307572,7 +308364,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Sadhna_News_Plus.png",
     "enabled": true,
-    "order": 485
+    "order": 523
   },
   {
     "id": "in-sadhnatv-in-sd",
@@ -307581,7 +308373,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143736_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 486
+    "order": 524
   },
   {
     "id": "in-safaritv-in-sd",
@@ -307590,7 +308382,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SAFARI_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 487
+    "order": 525
   },
   {
     "id": "in-sahananews-in-sd",
@@ -307599,7 +308391,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/3odbJJq.png",
     "enabled": true,
-    "order": 488
+    "order": 526
   },
   {
     "id": "in-saitv-in-sd",
@@ -307608,7 +308400,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SAI_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 489
+    "order": 527
   },
   {
     "id": "in-sairamtv-in-sd",
@@ -307616,7 +308408,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://mumt04.tangotv.in/m18aqlK4SAIRAMTV/index.m3u8",
     "category": "Religious",
     "enabled": true,
-    "order": 490
+    "order": 528
   },
   {
     "id": "in-sakshitv-in-sd",
@@ -307625,7 +308417,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SAKSHI_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 491
+    "order": 529
   },
   {
     "id": "in-salaamtv-in-sd",
@@ -307634,7 +308426,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s144466_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 492
+    "order": 530
   },
   {
     "id": "in-salvationtv-in-sd",
@@ -307643,7 +308435,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://content.jdmagicbox.com/comp/bangalore/l5/080pxx80.xx80.150207120517.e4l5/catalogue/salvation-tv-network-pvt-m-g-road-bangalore-religious-organizations-1sabn2d.jpg",
     "enabled": true,
-    "order": 493
+    "order": 531
   },
   {
     "id": "in-samacharplus24x7-in-sd",
@@ -307652,7 +308444,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Samachar_Plus.png",
     "enabled": true,
-    "order": 494
+    "order": 532
   },
   {
     "id": "in-samaykolkata-in-sd",
@@ -307661,7 +308453,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Samay_Kolkata.png",
     "enabled": true,
-    "order": 495
+    "order": 533
   },
   {
     "id": "in-sanaplus-in-sd",
@@ -307670,7 +308462,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/N6tKUZv.png",
     "enabled": true,
-    "order": 496
+    "order": 534
   },
   {
     "id": "in-sandeshnews-in-sd",
@@ -307679,7 +308471,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143755_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 497
+    "order": 535
   },
   {
     "id": "in-sangeetbangla-in-sd",
@@ -307688,7 +308480,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/transparentImages/Sangeet%20Bangla.png",
     "enabled": true,
-    "order": 498
+    "order": 536
   },
   {
     "id": "in-sangeetbhojpuri-in-sd",
@@ -307697,7 +308489,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://dtil.tmsimg.com/assets/s143757_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 499
+    "order": 537
   },
   {
     "id": "in-sangeetmarathi-in-sd",
@@ -307706,7 +308498,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SANGEET_MARATHI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 500
+    "order": 538
   },
   {
     "id": "in-sankaratv-in-sd",
@@ -307715,7 +308507,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/2z0bDRD.png",
     "enabled": true,
-    "order": 501
+    "order": 539
   },
   {
     "id": "in-sansadtv1-in-sd",
@@ -307724,7 +308516,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SANSAD_TV_SYMHYP_1_HD/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 502
+    "order": 540
   },
   {
     "id": "in-sansadtv1-in-hd",
@@ -307733,7 +308525,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SANSAD_TV_SYMHYP_1_HD/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 503
+    "order": 541
   },
   {
     "id": "in-sansadtv2-in-sd",
@@ -307742,7 +308534,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143761_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 504
+    "order": 542
   },
   {
     "id": "in-sansadtv2-in-hd",
@@ -307751,7 +308543,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143761_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 505
+    "order": 543
   },
   {
     "id": "in-sanskartv-in-sd",
@@ -307760,7 +308552,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SANSKAR/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 506
+    "order": 544
   },
   {
     "id": "in-sanskarwebtv-in-sd",
@@ -307769,7 +308561,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/mu2B6hw.png",
     "enabled": true,
-    "order": 507
+    "order": 545
   },
   {
     "id": "in-santvanichannel-in-sd",
@@ -307778,7 +308570,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://dtil.tmsimg.com/assets/s143763_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 508
+    "order": 546
   },
   {
     "id": "in-sarvdharmsangam-in-sd",
@@ -307787,7 +308579,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SARV_DHARAM_SANGAM/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 509
+    "order": 547
   },
   {
     "id": "in-sathiyamtv-in-sd",
@@ -307796,7 +308588,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143765_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 510
+    "order": 548
   },
   {
     "id": "in-satsangtv-in-sd",
@@ -307805,7 +308597,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SATSANG/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 511
+    "order": 549
   },
   {
     "id": "in-satsangwebtv-in-sd",
@@ -307814,7 +308606,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/40kNu1w.png",
     "enabled": true,
-    "order": 512
+    "order": 550
   },
   {
     "id": "in-shalom-in-sd",
@@ -307823,7 +308615,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143774_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 513
+    "order": 551
   },
   {
     "id": "in-sharnamtv-in-sd",
@@ -307832,7 +308624,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://papaji.freetvindia.com/media/channels/SarnamTV.png",
     "enabled": true,
-    "order": 514
+    "order": 552
   },
   {
     "id": "in-shemaroofilmigaane-in-hd",
@@ -307841,7 +308633,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/channel/0d5b07555b2d4415aa9f145273095ed7.png",
     "enabled": true,
-    "order": 515
+    "order": 553
   },
   {
     "id": "in-shemaroojosh-in-sd",
@@ -307850,7 +308642,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG00297P3E.png?lock=720x540",
     "enabled": true,
-    "order": 516
+    "order": 554
   },
   {
     "id": "in-shemaroomarathibana-in-sd",
@@ -307859,7 +308651,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SHEMAROO_MARATHIBANA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 517
+    "order": 555
   },
   {
     "id": "in-shemarootv-in-sd",
@@ -307868,7 +308660,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SHEMAROO_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 518
+    "order": 556
   },
   {
     "id": "in-shemarooumang-in-sd",
@@ -307877,7 +308669,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s143779_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 519
+    "order": 557
   },
   {
     "id": "in-shubhcinematv-in-sd",
@@ -307886,7 +308678,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/RQhorAG.png",
     "enabled": true,
-    "order": 520
+    "order": 558
   },
   {
     "id": "in-shubhtv-in-sd",
@@ -307895,7 +308687,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SHUBH_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 521
+    "order": 559
   },
   {
     "id": "in-shubhsandeshtv-in-sd",
@@ -307904,7 +308696,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SHUBHSANDESH_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 522
+    "order": 560
   },
   {
     "id": "in-sirikannada-in-sd",
@@ -307913,7 +308705,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s143790_ld_h9_aa.png?lock=720x540",
     "enabled": true,
-    "order": 523
+    "order": 561
   },
   {
     "id": "in-sirikannadaalltime-in-sd",
@@ -307922,7 +308714,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/IR0BrEX.jpeg",
     "enabled": true,
-    "order": 524
+    "order": 562
   },
   {
     "id": "in-sirippolitv-in-sd",
@@ -307931,7 +308723,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s143791_ld_h9_aa.png?lock=720x540",
     "enabled": true,
-    "order": 525
+    "order": 563
   },
   {
     "id": "in-sohamtv-in-sd",
@@ -307940,7 +308732,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/cpedJ0L.png",
     "enabled": true,
-    "order": 526
+    "order": 564
   },
   {
     "id": "in-songdewtv-in-sd",
@@ -307949,7 +308741,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://dtil.tmsimg.com/assets/s142920_ld_h9_aa.png?lock=720x540",
     "enabled": true,
-    "order": 527
+    "order": 565
   },
   {
     "id": "in-sonic-in-sd",
@@ -307958,7 +308750,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONIC/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 528
+    "order": 566
   },
   {
     "id": "in-sonybbcearth-in-hd",
@@ -307967,7 +308759,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://dtil.tmsimg.com/assets/s143800_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 529
+    "order": 567
   },
   {
     "id": "in-sonyentertainmenttelevision-in-sd",
@@ -307976,7 +308768,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s157589_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 530
+    "order": 568
   },
   {
     "id": "in-sonyentertainmenttelevision-in-hd",
@@ -307985,7 +308777,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s159096_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 531
+    "order": 569
   },
   {
     "id": "in-sonymarathi-in-sd",
@@ -307994,7 +308786,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s157970_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 532
+    "order": 570
   },
   {
     "id": "in-sonymax2-in-sd",
@@ -308003,7 +308795,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/gqUYk6C.png",
     "enabled": true,
-    "order": 533
+    "order": 571
   },
   {
     "id": "in-sonymax-in-hd",
@@ -308012,7 +308804,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/s157590_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 534
+    "order": 572
   },
   {
     "id": "in-sonypix-in-hd",
@@ -308021,7 +308813,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.postimg.cc/Z5G8j67L/PIX-HD-WHITE.png",
     "enabled": true,
-    "order": 535
+    "order": 573
   },
   {
     "id": "in-sonysab-in-sd",
@@ -308030,7 +308822,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s159099_ld_h15_ab.png?lock=720x540",
     "enabled": true,
-    "order": 536
+    "order": 574
   },
   {
     "id": "in-sonysportsten1-in-sd",
@@ -308039,7 +308831,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONY_SPORTS_TEN_1/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 537
+    "order": 575
   },
   {
     "id": "in-sonysportsten1-in-hd",
@@ -308048,7 +308840,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONY_SPORTS_TEN_1/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 538
+    "order": 576
   },
   {
     "id": "in-sonysportsten2-in-sd",
@@ -308057,7 +308849,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONY_SPORTS_TEN_2/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 539
+    "order": 577
   },
   {
     "id": "in-sonysportsten3hindi-in-sd",
@@ -308066,7 +308858,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0025TCMR.png?lock=720x540",
     "enabled": true,
-    "order": 540
+    "order": 578
   },
   {
     "id": "in-sonysportsten5-in-sd",
@@ -308075,7 +308867,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SONY_SPORTS_TEN_5/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 541
+    "order": 579
   },
   {
     "id": "in-sonywah-in-sd",
@@ -308084,7 +308876,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/s157974_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 542
+    "order": 580
   },
   {
     "id": "in-sooriyantv-ca-sd",
@@ -308093,7 +308885,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.ibb.co/LSyydKj/Sooriyan-TV-Tamil.jpg",
     "enabled": true,
-    "order": 543
+    "order": 581
   },
   {
     "id": "in-southstation-in-hd",
@@ -308102,7 +308894,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN3800008CX_20260325T012316SQUARE.png",
     "enabled": true,
-    "order": 544
+    "order": 582
   },
   {
     "id": "in-spondon-in-sd",
@@ -308111,7 +308903,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://www.spondontv.com/wp-content/uploads/2025/10/cropped-SPONDON_Blue-Violet_1-copy-300x100.png",
     "enabled": true,
-    "order": 545
+    "order": 583
   },
   {
     "id": "in-stargold2-in-hd",
@@ -308120,7 +308912,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/G0ZfzZr.png",
     "enabled": true,
-    "order": 546
+    "order": 584
   },
   {
     "id": "in-stargold-in-hd",
@@ -308129,7 +308921,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/xC460sj.png",
     "enabled": true,
-    "order": 547
+    "order": 585
   },
   {
     "id": "in-starjalsha-in-sd",
@@ -308138,7 +308930,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/IlufzR5.png",
     "enabled": true,
-    "order": 548
+    "order": 586
   },
   {
     "id": "in-starjalsha-in-hd",
@@ -308147,7 +308939,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/IlufzR5.png",
     "enabled": true,
-    "order": 549
+    "order": 587
   },
   {
     "id": "in-starmaa-in-hd",
@@ -308156,7 +308948,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/5c9PVS0.png",
     "enabled": true,
-    "order": 550
+    "order": 588
   },
   {
     "id": "in-starmaamovies-in-hd",
@@ -308165,7 +308957,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/s143826_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 551
+    "order": 589
   },
   {
     "id": "in-starmovies-in-hd",
@@ -308174,7 +308966,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_STAR_MOVIES/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 552
+    "order": 590
   },
   {
     "id": "in-starmoviesselect-in-hd",
@@ -308183,7 +308975,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_STAR_MOVIES_SELECT_HD/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 553
+    "order": 591
   },
   {
     "id": "in-starpravah-in-hd",
@@ -308192,7 +308984,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/ZT0u7AK.png",
     "enabled": true,
-    "order": 554
+    "order": 592
   },
   {
     "id": "in-starsports2-in-sd",
@@ -308201,7 +308993,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_STAR_SPORTS_2/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 555
+    "order": 593
   },
   {
     "id": "in-starsports2telugu-in-hd",
@@ -308210,7 +309002,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/m7DvvqF.png",
     "enabled": true,
-    "order": 556
+    "order": 594
   },
   {
     "id": "in-starsportsselect1-in-hd",
@@ -308219,7 +309011,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/Mh9tKPx.png",
     "enabled": true,
-    "order": 557
+    "order": 595
   },
   {
     "id": "in-starsportsselect2-in-hd",
@@ -308228,7 +309020,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/FtRT73R.png",
     "enabled": true,
-    "order": 558
+    "order": 596
   },
   {
     "id": "in-starnet-in-sd",
@@ -308237,7 +309029,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/J3jB7Kr.png",
     "enabled": true,
-    "order": 559
+    "order": 597
   },
   {
     "id": "in-steelbirdmusic-in-sd",
@@ -308246,7 +309038,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Steelbird_Music.png",
     "enabled": true,
-    "order": 560
+    "order": 598
   },
   {
     "id": "in-stingrayclassicrock-ca-sd",
@@ -308255,7 +309047,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/FBgu8yB.png",
     "enabled": true,
-    "order": 561
+    "order": 599
   },
   {
     "id": "in-stingraydjazz-ca-sd",
@@ -308264,7 +309056,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Stingray_Djazz.png/960px-Stingray_Djazz.png",
     "enabled": true,
-    "order": 562
+    "order": 600
   },
   {
     "id": "in-stingrayeasylistening-ca-sd",
@@ -308273,7 +309065,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Stingray_Music_logo.svg/960px-Stingray_Music_logo.svg.png",
     "enabled": true,
-    "order": 563
+    "order": 601
   },
   {
     "id": "in-stingraynaturescape-ca-sd",
@@ -308282,7 +309074,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/882kd90.png",
     "enabled": true,
-    "order": 564
+    "order": 602
   },
   {
     "id": "in-stingraythespa-ca-sd",
@@ -308291,7 +309083,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/ywAN923.png",
     "enabled": true,
-    "order": 565
+    "order": 603
   },
   {
     "id": "in-stingraytodayskpop-ca-sd",
@@ -308300,7 +309092,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/mMbntB5.png",
     "enabled": true,
-    "order": 566
+    "order": 604
   },
   {
     "id": "in-studiooneplus-in-sd",
@@ -308309,7 +309101,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://i.imgur.com/yOPB7JB.png",
     "enabled": true,
-    "order": 567
+    "order": 605
   },
   {
     "id": "in-studioyuva-in-sd",
@@ -308318,7 +309110,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/BOhgz2T.png",
     "enabled": true,
-    "order": 568
+    "order": 606
   },
   {
     "id": "in-subhavaarthatv-in-sd",
@@ -308327,7 +309119,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SUBHAVAARTHA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 569
+    "order": 607
   },
   {
     "id": "in-subintv-in-sd",
@@ -308336,7 +309128,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/subintvtamil.png",
     "enabled": true,
-    "order": 570
+    "order": 608
   },
   {
     "id": "in-sudarshannews-in-sd",
@@ -308345,7 +309137,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SUDARSHAN_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 571
+    "order": 609
   },
   {
     "id": "in-sungemini-in-sd",
@@ -308354,7 +309146,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://sund-images.sunnxt.com/194396/300x300_SunGemini_194396_22c18c1e-7eb9-4855-9c4e-12e109911559.png",
     "enabled": true,
-    "order": 572
+    "order": 610
   },
   {
     "id": "in-superhungama-in-sd",
@@ -308363,7 +309155,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_SUPER_HUNGAMA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 573
+    "order": 611
   },
   {
     "id": "in-superhitz-in-sd",
@@ -308372,7 +309164,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/aRNBvTU.png",
     "enabled": true,
-    "order": 574
+    "order": 612
   },
   {
     "id": "in-suriyatv-in-sd",
@@ -308381,7 +309173,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/suryatvtamil.png",
     "enabled": true,
-    "order": 575
+    "order": 613
   },
   {
     "id": "in-suvarnanews-in-sd",
@@ -308390,7 +309182,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://i.imgur.com/0H1HObK.png",
     "enabled": true,
-    "order": 576
+    "order": 614
   },
   {
     "id": "in-svbc2-in-sd",
@@ -308399,7 +309191,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143890_ld_h9_aa.png?lock=720x540",
     "enabled": true,
-    "order": 577
+    "order": 615
   },
   {
     "id": "in-svbc3-in-sd",
@@ -308408,7 +309200,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/SVBC3.png",
     "enabled": true,
-    "order": 578
+    "order": 616
   },
   {
     "id": "in-svbc4-in-sd",
@@ -308417,7 +309209,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/SVBC4.png",
     "enabled": true,
-    "order": 579
+    "order": 617
   },
   {
     "id": "in-svbc-in-sd",
@@ -308426,7 +309218,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s143889_ld_h9_ab.png?lock=720x540",
     "enabled": true,
-    "order": 580
+    "order": 618
   },
   {
     "id": "in-swadeshnews-in-sd",
@@ -308435,7 +309227,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Swadesh_News.png",
     "enabled": true,
-    "order": 581
+    "order": 619
   },
   {
     "id": "in-swarajexpresssmbc-in-sd",
@@ -308444,7 +309236,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/SMBC_TV.png",
     "enabled": true,
-    "order": 582
+    "order": 620
   },
   {
     "id": "in-swastiktv-in-sd",
@@ -308453,7 +309245,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/swastiktv.png",
     "enabled": true,
-    "order": 583
+    "order": 621
   },
   {
     "id": "in-swatantratv-in-sd",
@@ -308462,7 +309254,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Swatantra_News.png",
     "enabled": true,
-    "order": 584
+    "order": 622
   },
   {
     "id": "in-tnews-in-sd",
@@ -308471,7 +309263,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s143919_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 585
+    "order": 623
   },
   {
     "id": "in-taazatv-in-sd",
@@ -308480,7 +309272,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Taaza_TV.png",
     "enabled": true,
-    "order": 586
+    "order": 624
   },
   {
     "id": "in-tabbarhits-in-sd",
@@ -308489,7 +309281,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TABBAR_HITS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 587
+    "order": 625
   },
   {
     "id": "in-tamiljanam-in-sd",
@@ -308498,7 +309290,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Janam_Tamil.png",
     "enabled": true,
-    "order": 588
+    "order": 626
   },
   {
     "id": "in-tamilantv-in-sd",
@@ -308507,7 +309299,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Tamilan_Television.png",
     "enabled": true,
-    "order": 589
+    "order": 627
   },
   {
     "id": "in-tamilvisiontv-ca-sd",
@@ -308516,7 +309308,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/DodsLuW.png",
     "enabled": true,
-    "order": 590
+    "order": 628
   },
   {
     "id": "in-tarangmusic-in-sd",
@@ -308525,7 +309317,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/oSm8zFD.png",
     "enabled": true,
-    "order": 591
+    "order": 629
   },
   {
     "id": "in-tarangtv-in-sd",
@@ -308534,7 +309326,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s143927_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 592
+    "order": 630
   },
   {
     "id": "in-tehzeebtv-in-sd",
@@ -308543,7 +309335,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/PCVOdup.png",
     "enabled": true,
-    "order": 593
+    "order": 631
   },
   {
     "id": "in-teluguone-in-hd",
@@ -308552,7 +309344,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/teluguone.png",
     "enabled": true,
-    "order": 594
+    "order": 632
   },
   {
     "id": "in-tencricket-in-sd",
@@ -308561,7 +309353,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/K5XIFuW.png",
     "enabled": true,
-    "order": 595
+    "order": 633
   },
   {
     "id": "in-thalaatv-in-hd",
@@ -308570,7 +309362,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://d229kpbsb5jevy.cloudfront.net/yuppfast/content/common/channel/logos/thalaa-tv.png",
     "enabled": true,
-    "order": 596
+    "order": 634
   },
   {
     "id": "in-thanthione-in-sd",
@@ -308579,7 +309371,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s158791_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 597
+    "order": 635
   },
   {
     "id": "in-thanthitv-in-sd",
@@ -308588,7 +309380,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s144000_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 598
+    "order": 636
   },
   {
     "id": "in-thejunglebook-in-sd",
@@ -308597,7 +309389,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://pash.ink/storage/uploads/JungleBook_Logo.png",
     "enabled": true,
-    "order": 599
+    "order": 637
   },
   {
     "id": "in-themovieclub-in-hd",
@@ -308606,7 +309398,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN38000072R_20260325T012318SQUARE.png",
     "enabled": true,
-    "order": 600
+    "order": 638
   },
   {
     "id": "in-themovieclub-in-plus2",
@@ -308615,7 +309407,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN40000100Y_20260204T004058SQUARE.png",
     "enabled": true,
-    "order": 601
+    "order": 639
   },
   {
     "id": "in-thepetcollective-us-india",
@@ -308624,7 +309416,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/yH7n2dF.png",
     "enabled": true,
-    "order": 602
+    "order": 640
   },
   {
     "id": "in-thevoicetv-in-sd",
@@ -308633,7 +309425,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/thevoicetv.png",
     "enabled": true,
-    "order": 603
+    "order": 641
   },
   {
     "id": "in-thendraltv-in-sd",
@@ -308642,7 +309434,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/kQK80gB.png",
     "enabled": true,
-    "order": 604
+    "order": 642
   },
   {
     "id": "in-timesnow-in-sd",
@@ -308651,7 +309443,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TIMES_NOW/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 605
+    "order": 643
   },
   {
     "id": "in-timesnownavbharat-in-sd",
@@ -308660,7 +309452,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TIMES_NOW_NAVBHARAT_HD/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 606
+    "order": 644
   },
   {
     "id": "in-timesnownavbharat-in-hd",
@@ -308669,7 +309461,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TIMES_NOW_NAVBHARAT_HD/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 607
+    "order": 645
   },
   {
     "id": "in-tnpnews-in-sd",
@@ -308678,7 +309470,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/TNP_News.png",
     "enabled": true,
-    "order": 608
+    "order": 646
   },
   {
     "id": "in-tollytv-in-hd",
@@ -308687,7 +309479,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://d229kpbsb5jevy.cloudfront.net/yuppfast/content/common/channel/logos/aumnrs.png",
     "enabled": true,
-    "order": 609
+    "order": 647
   },
   {
     "id": "in-topnewsmarathi-in-sd",
@@ -308696,7 +309488,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/topnewsmarathi.png",
     "enabled": true,
-    "order": 610
+    "order": 648
   },
   {
     "id": "in-totalbhakti-in-sd",
@@ -308705,7 +309497,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://i.imgur.com/LPwRdmF.png",
     "enabled": true,
-    "order": 611
+    "order": 649
   },
   {
     "id": "in-totaltvharyana-in-sd",
@@ -308714,7 +309506,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TOTAL_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 612
+    "order": 650
   },
   {
     "id": "in-travelxp-in-4khdr",
@@ -308723,7 +309515,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TRAVELXP/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 613
+    "order": 651
   },
   {
     "id": "in-travelxp-in-hd",
@@ -308732,7 +309524,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TRAVELXP/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 614
+    "order": 652
   },
   {
     "id": "in-tv5kannada-in-sd",
@@ -308741,7 +309533,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s144024_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 615
+    "order": 653
   },
   {
     "id": "in-tv5news-in-sd",
@@ -308750,7 +309542,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TV5_TELUGU/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 616
+    "order": 654
   },
   {
     "id": "in-tv7bharat-in-sd",
@@ -308759,7 +309551,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://tv7bharat.tv/wp-content/uploads/2023/07/Logo-Bharat.jpg",
     "enabled": true,
-    "order": 617
+    "order": 655
   },
   {
     "id": "in-tv9bangla-in-sd",
@@ -308768,7 +309560,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TV9_BANGLA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 618
+    "order": 656
   },
   {
     "id": "in-tv9bharatvarsh-in-sd",
@@ -308777,7 +309569,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TV9_BHARATVARSH/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 619
+    "order": 657
   },
   {
     "id": "in-tv9gujarati-in-sd",
@@ -308786,7 +309578,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TV9_GUJARATI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 620
+    "order": 658
   },
   {
     "id": "in-tv9kannada-in-sd",
@@ -308795,7 +309587,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TV9_KANNADA/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 621
+    "order": 659
   },
   {
     "id": "in-tv9marathi-in-sd",
@@ -308804,7 +309596,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TV9_MARATHI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 622
+    "order": 660
   },
   {
     "id": "in-tv9telugu-in-sd",
@@ -308813,7 +309605,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_TV9_TELUGU_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 623
+    "order": 661
   },
   {
     "id": "in-tv13gujarati-in-sd",
@@ -308822,7 +309614,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://www.tv13gujarati.com/assets/front/img/footer-logo.jpg",
     "enabled": true,
-    "order": 624
+    "order": 662
   },
   {
     "id": "in-tv27news-in-sd",
@@ -308831,7 +309623,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/TV27_News.png",
     "enabled": true,
-    "order": 625
+    "order": 663
   },
   {
     "id": "in-tv30india-in-sd",
@@ -308840,7 +309632,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/TV30India.png",
     "enabled": true,
-    "order": 626
+    "order": 664
   },
   {
     "id": "in-tv45-in-sd",
@@ -308849,7 +309641,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/TV45.png",
     "enabled": true,
-    "order": 627
+    "order": 665
   },
   {
     "id": "in-tvbricsenglish-in-sd",
@@ -308858,7 +309650,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/8rKNuS6.png",
     "enabled": true,
-    "order": 628
+    "order": 666
   },
   {
     "id": "in-tvpunjab-ca-sd",
@@ -308867,7 +309659,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://en.tvpunjab.com/storage/2022/03/logo-2022.png",
     "enabled": true,
-    "order": 629
+    "order": 667
   },
   {
     "id": "in-ubangla-in-sd",
@@ -308876,7 +309668,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/U_Bangla.png",
     "enabled": true,
-    "order": 630
+    "order": 668
   },
   {
     "id": "in-ultimatetv-in-sd",
@@ -308885,7 +309677,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/utvtamil.png",
     "enabled": true,
-    "order": 631
+    "order": 669
   },
   {
     "id": "in-uniquetv-in-sd",
@@ -308894,7 +309686,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Unique_Tv.png",
     "enabled": true,
-    "order": 632
+    "order": 670
   },
   {
     "id": "in-upnow-in-sd",
@@ -308903,7 +309695,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://papaji.freetvindia.com/media/channels/Upnow.png",
     "enabled": true,
-    "order": 633
+    "order": 671
   },
   {
     "id": "in-utvpalakkad-in-sd",
@@ -308912,7 +309704,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://utvpkd.in/assets/img/logo.png",
     "enabled": true,
-    "order": 634
+    "order": 672
   },
   {
     "id": "in-v6news-in-sd",
@@ -308921,7 +309713,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/s144047_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 635
+    "order": 673
   },
   {
     "id": "in-vaanaviltv-in-sd",
@@ -308930,7 +309722,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Vaanavil_TV.png",
     "enabled": true,
-    "order": 636
+    "order": 674
   },
   {
     "id": "in-valamtvdayro-in-sd",
@@ -308939,7 +309731,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://papaji.freetvindia.com/media/channels/Valam_Dayro.png",
     "enabled": true,
-    "order": 637
+    "order": 675
   },
   {
     "id": "in-vanithatv-in-sd",
@@ -308948,7 +309740,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Vanitha.png",
     "enabled": true,
-    "order": 638
+    "order": 676
   },
   {
     "id": "in-vasanthtv-in-sd",
@@ -308957,7 +309749,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/s144068_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 639
+    "order": 677
   },
   {
     "id": "in-vedic-in-sd",
@@ -308966,7 +309758,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://dtil.tmsimg.com/assets/s144069_ld_h15_aa.png?lock=720x540",
     "enabled": true,
-    "order": 640
+    "order": 678
   },
   {
     "id": "in-velichamtv-in-sd",
@@ -308975,7 +309767,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://upload.wikimedia.org/wikipedia/en/e/e4/Logo_of_Velicham_TV.png",
     "enabled": true,
-    "order": 641
+    "order": 679
   },
   {
     "id": "in-vendhartv-in-sd",
@@ -308984,7 +309776,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Vendhar_TV.png",
     "enabled": true,
-    "order": 642
+    "order": 680
   },
   {
     "id": "in-villagetv-in-sd",
@@ -308993,7 +309785,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/VillageTV.png",
     "enabled": true,
-    "order": 643
+    "order": 681
   },
   {
     "id": "in-vipnews-in-sd",
@@ -309002,7 +309794,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_VIP_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 644
+    "order": 682
   },
   {
     "id": "in-vision-in-sd",
@@ -309011,7 +309803,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/YozqNL3.jpg",
     "enabled": true,
-    "order": 645
+    "order": 683
   },
   {
     "id": "in-vissatv-in-sd",
@@ -309020,7 +309812,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_VISSA_TV/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 646
+    "order": 684
   },
   {
     "id": "in-vistaarnews-in-sd",
@@ -309029,7 +309821,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_VISTAAR_NEWS/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 647
+    "order": 685
   },
   {
     "id": "in-vrlive-in-sd",
@@ -309038,7 +309830,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/VRLive.png",
     "enabled": true,
-    "order": 648
+    "order": 686
   },
   {
     "id": "in-vtu-in-sd",
@@ -309047,7 +309839,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/zMwZRGJ.png",
     "enabled": true,
-    "order": 649
+    "order": 687
   },
   {
     "id": "in-vtvnews-in-sd",
@@ -309056,7 +309848,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_VTV_GUJARATI/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 650
+    "order": 688
   },
   {
     "id": "in-vyaschannel-in-sd",
@@ -309065,7 +309857,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Education",
     "logo": "https://www.yupptv.com/seo_img/UGC_GEC_big.jpg",
     "enabled": true,
-    "order": 651
+    "order": 689
   },
   {
     "id": "in-weatherspy-in-sd",
@@ -309074,7 +309866,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/KIEKOt1.png",
     "enabled": true,
-    "order": 652
+    "order": 690
   },
   {
     "id": "in-worldpunjabitv-in-sd",
@@ -309083,7 +309875,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://papaji.freetvindia.com/media/World_Punjabi_TV.png",
     "enabled": true,
-    "order": 653
+    "order": 691
   },
   {
     "id": "in-wowkidz-in-hindi",
@@ -309092,7 +309884,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://d229kpbsb5jevy.cloudfront.net/yupptvnew/content/common/channel/logos/mjvezt.png",
     "enabled": true,
-    "order": 654
+    "order": 692
   },
   {
     "id": "in-wowkidz-in-tamil",
@@ -309101,7 +309893,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://d229kpbsb5jevy.cloudfront.net/yupptvnew/content/common/channel/logos/mjvezt.png",
     "enabled": true,
-    "order": 655
+    "order": 693
   },
   {
     "id": "in-wowkidz-in-telugu",
@@ -309110,7 +309902,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://d229kpbsb5jevy.cloudfront.net/yupptvnew/content/common/channel/logos/mjvezt.png",
     "enabled": true,
-    "order": 656
+    "order": 694
   },
   {
     "id": "in-yrfmusic-in-sd",
@@ -309119,7 +309911,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/pKj3F4M.png",
     "enabled": true,
-    "order": 657
+    "order": 695
   },
   {
     "id": "in-yrfmusic-in-nepal",
@@ -309128,7 +309920,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://i.imgur.com/mxx05Z9.png",
     "enabled": true,
-    "order": 658
+    "order": 696
   },
   {
     "id": "in-zainabiachannel-in-sd",
@@ -309136,7 +309928,7 @@ var LIVE_TV_DEFAULTS = [
     "url": "https://zainabia.livebox.co.in/ZainabiaChannelhls/channel.m3u8",
     "category": "Religious",
     "enabled": true,
-    "order": 659
+    "order": 697
   },
   {
     "id": "in-zbbhakti-in-hd",
@@ -309145,7 +309937,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Religious",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/zbbhakti.png",
     "enabled": true,
-    "order": 660
+    "order": 698
   },
   {
     "id": "in-zbcartoon-in-hd",
@@ -309154,7 +309946,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Kids",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/zbcatun.png",
     "enabled": true,
-    "order": 661
+    "order": 699
   },
   {
     "id": "in-zee24kalak-in-sd",
@@ -309163,7 +309955,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG00230P1R.png?lock=720x540",
     "enabled": true,
-    "order": 662
+    "order": 700
   },
   {
     "id": "in-zee24taas-in-sd",
@@ -309172,7 +309964,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG00230LKE.png?lock=720x540",
     "enabled": true,
-    "order": 663
+    "order": 701
   },
   {
     "id": "in-zeeaction-in-sd",
@@ -309181,7 +309973,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0022K5ZV.png?lock=720x540",
     "enabled": true,
-    "order": 664
+    "order": 702
   },
   {
     "id": "in-zeebangla-in-sd",
@@ -309190,7 +309982,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_BANGLA_HD/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 665
+    "order": 703
   },
   {
     "id": "in-zeebangla-in-hd",
@@ -309199,7 +309991,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_BANGLA/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 666
+    "order": 704
   },
   {
     "id": "in-zeebanglasonar-in-sd",
@@ -309208,7 +310000,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG00287G7K.png?lock=720x540",
     "enabled": true,
-    "order": 667
+    "order": 705
   },
   {
     "id": "in-zeebharat-in-sd",
@@ -309217,7 +310009,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG00230QBL.png?lock=720x540",
     "enabled": true,
-    "order": 668
+    "order": 706
   },
   {
     "id": "in-zeebiharjharkhand-in-sd",
@@ -309226,7 +310018,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG00230Y44.png?lock=720x540",
     "enabled": true,
-    "order": 669
+    "order": 707
   },
   {
     "id": "in-zeebusiness-in-sd",
@@ -309235,7 +310027,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG00230YYJ.png?lock=720x540",
     "enabled": true,
-    "order": 670
+    "order": 708
   },
   {
     "id": "in-zeecineclassic-in-sd",
@@ -309244,7 +310036,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://i.imgur.com/QCRhS1n.png",
     "enabled": true,
-    "order": 671
+    "order": 709
   },
   {
     "id": "in-zeecinema-in-sd",
@@ -309253,7 +310045,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_CINEMA/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 672
+    "order": 710
   },
   {
     "id": "in-zeecinema-in-hd",
@@ -309262,7 +310054,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_CINEMA/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 673
+    "order": 711
   },
   {
     "id": "in-zeeclassic-in-sd",
@@ -309271,7 +310063,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_CLASSIC/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 674
+    "order": 712
   },
   {
     "id": "in-zeecomedynation-in-hd",
@@ -309280,7 +310072,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN2100002GD_20260325T012327SQUARE.png",
     "enabled": true,
-    "order": 675
+    "order": 713
   },
   {
     "id": "in-zeedelhincrharyana-in-sd",
@@ -309289,7 +310081,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0023166M.png?lock=720x540",
     "enabled": true,
-    "order": 676
+    "order": 714
   },
   {
     "id": "in-zeedilse-in-hd",
@@ -309298,7 +310090,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://d2mxb63djushzm.cloudfront.net/images/Zee_Dil_Se.png",
     "enabled": true,
-    "order": 677
+    "order": 715
   },
   {
     "id": "in-zeehorrornights-in-hd",
@@ -309307,7 +310099,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://d3bd0tgyk368z1.cloudfront.net/zeelg/LG%20logo%20artwork/400x200/zhornights.png",
     "enabled": true,
-    "order": 678
+    "order": 716
   },
   {
     "id": "in-zeekannada-in-hd",
@@ -309316,7 +310108,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_KANNADA_HD/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 679
+    "order": 717
   },
   {
     "id": "in-zeekannadanews-in-sd",
@@ -309325,7 +310117,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Zee_Kannada_News.png",
     "enabled": true,
-    "order": 680
+    "order": 718
   },
   {
     "id": "in-zeemadhyapradeshchhattisgarh-in-sd",
@@ -309334,7 +310126,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG002316X5.png?lock=720x540",
     "enabled": true,
-    "order": 681
+    "order": 719
   },
   {
     "id": "in-zeemarathi-in-hd",
@@ -309343,7 +310135,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_MARATHI/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 682
+    "order": 720
   },
   {
     "id": "in-zeenews-in-sd",
@@ -309352,7 +310144,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0023VWYC.png?lock=720x540",
     "enabled": true,
-    "order": 683
+    "order": 721
   },
   {
     "id": "in-zeepunjabharyanahimachal-in-sd",
@@ -309361,7 +310153,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0022KHKS.png?lock=720x540",
     "enabled": true,
-    "order": 684
+    "order": 722
   },
   {
     "id": "in-zeerajasthan-in-sd",
@@ -309370,7 +310162,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG00231732.png?lock=720x540",
     "enabled": true,
-    "order": 685
+    "order": 723
   },
   {
     "id": "in-zeesouthflix-in-hd",
@@ -309379,7 +310171,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://d3bd0tgyk368z1.cloudfront.net/zeelg/LG%20logo%20artwork/400x200/zsouthflix.png",
     "enabled": true,
-    "order": 686
+    "order": 724
   },
   {
     "id": "in-zeetalkies-in-sd",
@@ -309388,7 +310180,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Movies",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_TALKIES/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 687
+    "order": 725
   },
   {
     "id": "in-zeetamil-in-hd",
@@ -309397,7 +310189,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG00233WCL.png?lock=720x540",
     "enabled": true,
-    "order": 688
+    "order": 726
   },
   {
     "id": "in-zeetamilnews-in-sd",
@@ -309406,7 +310198,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://english.cdn.zeenews.com/images/logo/zee-tamil-logo-20.svg",
     "enabled": true,
-    "order": 689
+    "order": 727
   },
   {
     "id": "in-zeetelugunews-in-sd",
@@ -309415,7 +310207,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0023178R.png?lock=720x540",
     "enabled": true,
-    "order": 690
+    "order": 728
   },
   {
     "id": "in-zeetv-in-sd",
@@ -309424,7 +310216,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZEE_TV/images/LOGO_HD/LOGO_HD_image.png",
     "enabled": true,
-    "order": 691
+    "order": 729
   },
   {
     "id": "in-zeeuttarpradeshuttarakhand-in-sd",
@@ -309433,7 +310225,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "News",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG002317GQ.png?lock=720x540",
     "enabled": true,
-    "order": 692
+    "order": 730
   },
   {
     "id": "in-zillarbartanews-in-hd",
@@ -309442,7 +310234,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "General",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/zillarbarta.png",
     "enabled": true,
-    "order": 693
+    "order": 731
   },
   {
     "id": "in-zing-in-sd",
@@ -309451,7 +310243,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://dtil.tmsimg.com/assets/GNLZZGG0025L26R.png?lock=720x540",
     "enabled": true,
-    "order": 694
+    "order": 732
   },
   {
     "id": "in-zodiaktv-in-sd",
@@ -309460,7 +310252,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Entertainment",
     "logo": "https://i.imgur.com/gE166hZ.jpeg",
     "enabled": true,
-    "order": 695
+    "order": 733
   },
   {
     "id": "in-zoom-in-sd",
@@ -309469,7 +310261,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZOOM/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 696
+    "order": 734
   },
   {
     "id": "in-zoom-in-nepal",
@@ -309478,7 +310270,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Music",
     "logo": "https://xstreamcp-assets-msp.streamready.in/assets/LIVETV/LIVECHANNEL/LIVETV_LIVETVCHANNEL_ZOOM/images/LOGO_HD/image.png",
     "enabled": true,
-    "order": 697
+    "order": 735
   },
   {
     "id": "cat-30agolfkingdom-us-sd",
@@ -309487,7 +310279,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/Lv53nh4.png",
     "enabled": true,
-    "order": 698
+    "order": 736
   },
   {
     "id": "cat-aspor-tr-sd",
@@ -309496,7 +310288,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/ZhkZzLf.png",
     "enabled": true,
-    "order": 699
+    "order": 737
   },
   {
     "id": "cat-accdigitalnetwork-us-sd",
@@ -309505,7 +310297,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/V6Kaqha.png",
     "enabled": true,
-    "order": 700
+    "order": 738
   },
   {
     "id": "cat-accnetwork-us-sd",
@@ -309514,7 +310306,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/TpCkbkT.png",
     "enabled": true,
-    "order": 701
+    "order": 739
   },
   {
     "id": "cat-adotv-bj-sd",
@@ -309523,7 +310315,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/pxFamLr.png",
     "enabled": true,
-    "order": 702
+    "order": 740
   },
   {
     "id": "cat-aliraqiasport-iq-sd",
@@ -309532,7 +310324,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/DrrlxTO.png",
     "enabled": true,
-    "order": 703
+    "order": 741
   },
   {
     "id": "cat-arena4-hu-sd",
@@ -309541,7 +310333,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/uAaQDr6.png",
     "enabled": true,
-    "order": 704
+    "order": 742
   },
   {
     "id": "cat-arenasport1-sk-sd",
@@ -309550,7 +310342,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/2qf67zW.png",
     "enabled": true,
-    "order": 705
+    "order": 743
   },
   {
     "id": "cat-arenasport2-sk-sd",
@@ -309559,7 +310351,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/Yq3Jf19.png",
     "enabled": true,
-    "order": 706
+    "order": 744
   },
   {
     "id": "cat-arryadia-ma-sd",
@@ -309568,7 +310360,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/XjzK3gZ.png",
     "enabled": true,
-    "order": 707
+    "order": 745
   },
   {
     "id": "cat-as3sporttv-ve-sd",
@@ -309577,7 +310369,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.ibb.co/bRmGbsyV/A3-SPORTTV.jpg",
     "enabled": true,
-    "order": 708
+    "order": 746
   },
   {
     "id": "cat-astrahanrusport-ru-sd",
@@ -309586,7 +310378,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/BKaEtqL.png",
     "enabled": true,
-    "order": 709
+    "order": 747
   },
   {
     "id": "cat-atglive-se-sd",
@@ -309595,7 +310387,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/bPWFXkL.png",
     "enabled": true,
-    "order": 710
+    "order": 748
   },
   {
     "id": "cat-aymsports-mx-sd",
@@ -309604,7 +310396,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/yu3Bpbd.png",
     "enabled": true,
-    "order": 711
+    "order": 749
   },
   {
     "id": "cat-aztecadeportesnetwork-mx-sd",
@@ -309613,7 +310405,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://match-images.icdb.tv/5913207f2494844101287828e87625eb.jpg",
     "enabled": true,
-    "order": 712
+    "order": 750
   },
   {
     "id": "cat-bahrainsports1-bh-sd",
@@ -309622,7 +310414,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/fBpLsbC.png",
     "enabled": true,
-    "order": 713
+    "order": 751
   },
   {
     "id": "cat-bahrainsports2-bh-sd",
@@ -309631,7 +310423,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/ZkuZmIo.png",
     "enabled": true,
-    "order": 714
+    "order": 752
   },
   {
     "id": "cat-beinsportsxtra-us-sd",
@@ -309640,7 +310432,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.ibb.co/HT49GPmB/XTRA-2.png",
     "enabled": true,
-    "order": 715
+    "order": 753
   },
   {
     "id": "cat-beksports-us-west",
@@ -309649,7 +310441,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/1l3t5jd.png",
     "enabled": true,
-    "order": 716
+    "order": 754
   },
   {
     "id": "cat-belarus5-by-sd",
@@ -309658,7 +310450,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/NJsRFud.png",
     "enabled": true,
-    "order": 717
+    "order": 755
   },
   {
     "id": "cat-belarus5-by-hd",
@@ -309667,7 +310459,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Sports",
     "logo": "https://i.imgur.com/NJsRFud.png",
     "enabled": true,
-    "order": 718
+    "order": 756
   },
   {
     "id": "cat-30aloomeredtv-us-sd",
@@ -309676,7 +310468,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://cbs12.com/resources/media/0c1ecad8-fb09-4bb2-beaa-fc561dfe624a-small21x9_LoomerStill.jpg?1603419052801",
     "enabled": true,
-    "order": 719
+    "order": 757
   },
   {
     "id": "cat-365daystv-ru-sd",
@@ -309685,7 +310477,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/NfnAiTR.png",
     "enabled": true,
-    "order": 720
+    "order": 758
   },
   {
     "id": "cat-adventureearth-de-sd",
@@ -309694,7 +310486,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/adventureearth_white.png",
     "enabled": true,
-    "order": 721
+    "order": 759
   },
   {
     "id": "cat-alarabiyaprograms-ae-sd",
@@ -309703,7 +310495,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/Hoc3cfO.png",
     "enabled": true,
-    "order": 722
+    "order": 760
   },
   {
     "id": "cat-alternatv-ar-sd",
@@ -309712,7 +310504,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://tv.alterna.ar/alternatv.png",
     "enabled": true,
-    "order": 723
+    "order": 761
   },
   {
     "id": "cat-americanheroeschannel-us-sd",
@@ -309721,7 +310513,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/American_Heroes_Channel_logo.svg/960px-American_Heroes_Channel_logo.svg.png",
     "enabled": true,
-    "order": 724
+    "order": 762
   },
   {
     "id": "cat-animalplanet-ru-sd",
@@ -309730,7 +310522,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png",
     "enabled": true,
-    "order": 725
+    "order": 763
   },
   {
     "id": "cat-animalplanet-us-east",
@@ -309739,7 +310531,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png",
     "enabled": true,
-    "order": 726
+    "order": 764
   },
   {
     "id": "cat-animalplanetlatinamerica-us-sd",
@@ -309748,7 +310540,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png",
     "enabled": true,
-    "order": 727
+    "order": 765
   },
   {
     "id": "cat-animalplanetlatinamerica-us-hd",
@@ -309757,7 +310549,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png",
     "enabled": true,
-    "order": 728
+    "order": 766
   },
   {
     "id": "cat-arsenal-ru-sd",
@@ -309766,7 +310558,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/DBpVeb0.png",
     "enabled": true,
-    "order": 729
+    "order": 767
   },
   {
     "id": "cat-asharqdiscovery-sa-sd",
@@ -309775,7 +310567,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/Czxi7yk.png",
     "enabled": true,
-    "order": 730
+    "order": 768
   },
   {
     "id": "cat-asharqdocumentary-sa-sd",
@@ -309784,7 +310576,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/v6VsFEt.png",
     "enabled": true,
-    "order": 731
+    "order": 769
   },
   {
     "id": "cat-atlas-us-sd",
@@ -309793,7 +310585,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://whiplash.cc/assets/img/channels/atlas.png",
     "enabled": true,
-    "order": 732
+    "order": 770
   },
   {
     "id": "cat-autentichistory-de-sd",
@@ -309802,7 +310594,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://d3b6luslimvglo.cloudfront.net/images/79/rlaxximages/channels-rescaled/icon-white/autentichistory_white.png",
     "enabled": true,
-    "order": 733
+    "order": 771
   },
   {
     "id": "cat-backstage-us-sd",
@@ -309811,7 +310603,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/qcTNvNU.png",
     "enabled": true,
-    "order": 734
+    "order": 772
   },
   {
     "id": "cat-bbcearth-uk-poland",
@@ -309820,7 +310612,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/nGSsUd4.png",
     "enabled": true,
-    "order": 735
+    "order": 773
   },
   {
     "id": "cat-bbcearth-uk-czechia",
@@ -309829,7 +310621,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/nGSsUd4.png",
     "enabled": true,
-    "order": 736
+    "order": 774
   },
   {
     "id": "cat-bbcearth-uk-hungary",
@@ -309838,7 +310630,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/nGSsUd4.png",
     "enabled": true,
-    "order": 737
+    "order": 775
   },
   {
     "id": "cat-bbcearth-uk-us",
@@ -309847,7 +310639,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/nGSsUd4.png",
     "enabled": true,
-    "order": 738
+    "order": 776
   },
   {
     "id": "cat-bloombergoriginals-us-us",
@@ -309856,7 +310648,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Bloomberg_Originals.png",
     "enabled": true,
-    "order": 739
+    "order": 777
   },
   {
     "id": "cat-bloombergoriginals-us-sd",
@@ -309865,7 +310657,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://jiotvimages.cdn.jio.com/dare_images/images/Bloomberg_Originals.png",
     "enabled": true,
-    "order": 740
+    "order": 778
   },
   {
     "id": "cat-britboxmysteries-us-sd",
@@ -309874,7 +310666,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/PJdzoLN.png",
     "enabled": true,
-    "order": 741
+    "order": 779
   },
   {
     "id": "cat-cctv9-cn-sd",
@@ -309883,7 +310675,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/3tivvMm.png",
     "enabled": true,
-    "order": 742
+    "order": 780
   },
   {
     "id": "cat-cgtndocumentary-cn-sd",
@@ -309892,7 +310684,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/JHv0WxM.png",
     "enabled": true,
-    "order": 743
+    "order": 781
   },
   {
     "id": "cat-chemodantv-ua-sd",
@@ -309901,7 +310693,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/1WjGN8u.png",
     "enabled": true,
-    "order": 744
+    "order": 782
   },
   {
     "id": "cat-chinatravel-cn-sd",
@@ -309910,7 +310702,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/vSgY3CD.png",
     "enabled": true,
-    "order": 745
+    "order": 783
   },
   {
     "id": "cat-cityedenkinodok-ru-hd",
@@ -309919,7 +310711,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/itRbMX3.png",
     "enabled": true,
-    "order": 746
+    "order": 784
   },
   {
     "id": "cat-clicktvchile-cl-sd",
@@ -309928,7 +310720,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Documentary",
     "logo": "https://i.imgur.com/H0XNbMS.png",
     "enabled": true,
-    "order": 747
+    "order": 785
   },
   {
     "id": "cat-3catcameresdeltemps-es-sd",
@@ -309937,7 +310729,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/zXy2kbe.png",
     "enabled": true,
-    "order": 748
+    "order": 786
   },
   {
     "id": "cat-accuweathernow-us-sd",
@@ -309946,7 +310738,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/M8wbVYK.png",
     "enabled": true,
-    "order": 749
+    "order": 787
   },
   {
     "id": "cat-foxweather-us-sd",
@@ -309955,7 +310747,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Fox_Weather_logo.svg/960px-Fox_Weather_logo.svg.png",
     "enabled": true,
-    "order": 750
+    "order": 788
   },
   {
     "id": "cat-meteonews-ch-sd",
@@ -309964,7 +310756,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/YtYhbJD.png",
     "enabled": true,
-    "order": 751
+    "order": 789
   },
   {
     "id": "cat-norcastweather-us-hd",
@@ -309973,7 +310765,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/AfjoZgo.png",
     "enabled": true,
-    "order": 752
+    "order": 790
   },
   {
     "id": "cat-skynewsweather-uk-sd",
@@ -309982,7 +310774,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://pbs.twimg.com/profile_images/1604994875459518464/lGt2wEqM_400x400.jpg",
     "enabled": true,
-    "order": 753
+    "order": 791
   },
   {
     "id": "cat-theweatherchannel-us-sd",
@@ -309991,7 +310783,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/PIaNjfa.png",
     "enabled": true,
-    "order": 754
+    "order": 792
   },
   {
     "id": "cat-weathernation-us-sd",
@@ -310000,7 +310792,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/WeatherNation_Logo.svg/960px-WeatherNation_Logo.svg.png",
     "enabled": true,
-    "order": 755
+    "order": 793
   },
   {
     "id": "cat-weathernews-jp-sd",
@@ -310009,7 +310801,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/A8uRSTS.png",
     "enabled": true,
-    "order": 756
+    "order": 794
   },
   {
     "id": "cat-weatherspy-au-sd",
@@ -310018,7 +310810,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/GTxN2nH.png",
     "enabled": true,
-    "order": 757
+    "order": 795
   },
   {
     "id": "cat-weatherspy-mx-sd",
@@ -310027,7 +310819,7 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/KIEKOt1.png",
     "enabled": true,
-    "order": 758
+    "order": 796
   },
   {
     "id": "cat-weatherspy-us-sd",
@@ -310036,9 +310828,35 @@ var LIVE_TV_DEFAULTS = [
     "category": "Weather",
     "logo": "https://i.imgur.com/yHUUIIz.png",
     "enabled": true,
-    "order": 759
+    "order": 797
   }
 ];
+var mergeTvCatalogue = (configured) => {
+  const priorityList = PRIORITY_LIVE_TV_CHANNELS.map((ch, idx) => ({
+    ...ch,
+    order: idx,
+    enabled: true
+  }));
+  const seenUrls = new Set(priorityList.map((c4) => c4.url.trim().toLowerCase()));
+  const seenNames = new Set(priorityList.map((c4) => c4.name.trim().toLowerCase()));
+  const sourceList = Array.isArray(configured) ? configured : LIVE_TV_DEFAULTS;
+  const remaining = sourceList.filter(
+    (item) => item && typeof item.id === "string" && typeof item.name === "string" && item.name.trim() && typeof item.url === "string" && item.url.trim()
+  ).filter((item) => {
+    const u3 = item.url.trim().toLowerCase();
+    const n5 = item.name.trim().toLowerCase();
+    if (seenUrls.has(u3) || seenNames.has(n5)) return false;
+    seenUrls.add(u3);
+    return true;
+  }).map((item) => ({
+    ...item,
+    enabled: item.enabled !== false
+  }));
+  return [
+    ...priorityList,
+    ...remaining
+  ].map((c4, idx) => ({ ...c4, order: idx }));
+};
 
 // src/routes/iptvRoutes.ts
 var router3 = (0, import_express3.Router)();
@@ -357900,6 +358718,9 @@ router22.get("/api/cms/config", async (_req, res) => {
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         return res.status(500).json({ success: false, error: "Stored CMS configuration is not a valid object." });
       }
+      if (Array.isArray(parsed.liveTvChannels)) {
+        parsed.liveTvChannels = mergeTvCatalogue(parsed.liveTvChannels);
+      }
       return res.json({ success: true, data: parsed });
     }
     return res.json({ success: true, data: {} });
@@ -358023,6 +358844,9 @@ router22.get("/api/cms", async (req2, res) => {
           'UPDATE settings SET "founderMessageEn" = $1 WHERE id = $2',
           [JSON.stringify(parsed), "cms_data"]
         );
+      }
+      if (Array.isArray(parsed.liveTvChannels)) {
+        parsed.liveTvChannels = mergeTvCatalogue(parsed.liveTvChannels);
       }
       return res.json({ success: true, cms: parsed });
     } else {

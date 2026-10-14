@@ -11,8 +11,9 @@ import { AVAILABLE_ICONS } from "../components/admin/IconPickerModal";
 import ServiceIllustration, { serviceArtFor } from "../components/ServiceIllustration";
 import ChannelThumbnail from "../components/ChannelThumbnail";
 import LiveVerifiedMarketSection from "../components/LiveVerifiedMarketSection";
-import { LIVE_TV_DEFAULTS } from "../data/liveTvDefaults";
+import { LIVE_TV_DEFAULTS, mergeTvCatalogue } from "../data/liveTvDefaults";
 import { DEFAULT_20_REELS } from "../data/defaultReels";
+
 
 
 const fallbackSlides = [
@@ -142,9 +143,10 @@ export default function Home() {
 
   const homeTvChannels = useMemo(() => {
     const configured = Array.isArray(cmsConfig?.liveTvChannels) ? cmsConfig.liveTvChannels : [];
-    const list = configured.length > 0 ? configured : LIVE_TV_DEFAULTS;
+    const list = mergeTvCatalogue(configured);
     return list.filter((c: any) => c && c.enabled !== false).slice(0, 8);
   }, [cmsConfig?.liveTvChannels]);
+
 
   const liveImpactStats = useMemo(() => {
     if (Array.isArray(cmsConfig?.impactStats) && cmsConfig.impactStats.length > 0) {

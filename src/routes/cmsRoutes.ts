@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import axios from 'axios';
 import multer from 'multer';
+import { mergeTvCatalogue } from '../data/liveTvDefaults';
 
 const router = express.Router();
 
@@ -113,8 +114,12 @@ router.get("/api/cms/config", async (_req, res) => {
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         return res.status(500).json({ success: false, error: "Stored CMS configuration is not a valid object." });
       }
+      if (Array.isArray(parsed.liveTvChannels)) {
+        parsed.liveTvChannels = mergeTvCatalogue(parsed.liveTvChannels);
+      }
       return res.json({ success: true, data: parsed });
     }
+
     return res.json({ success: true, data: {} });
   } catch (error: any) {
     console.error("CMS configuration read failed:", error);
@@ -236,8 +241,12 @@ router.get("/api/cms", async (req, res) => {
           [JSON.stringify(parsed), "cms_data"]
         );
       }
+      if (Array.isArray(parsed.liveTvChannels)) {
+        parsed.liveTvChannels = mergeTvCatalogue(parsed.liveTvChannels);
+      }
       return res.json({ success: true, cms: parsed });
     } else {
+
       const defaults = {
         alertBannerEn: "",
         alertBannerHi: "",

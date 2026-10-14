@@ -25,7 +25,7 @@ import {
   Pencil
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { LIVE_TV_DEFAULTS, type LiveTvChannel } from "../../../data/liveTvDefaults";
+import { LIVE_TV_DEFAULTS, mergeTvCatalogue, type LiveTvChannel } from "../../../data/liveTvDefaults";
 import rawChannels from "../../../data/akashvaniChannels.json";
 import privateFm from "../../../data/privateFmChannels.json";
 
@@ -110,9 +110,9 @@ export default function LiveTVStudio() {
       const res = await axios.get("/api/cms");
       const cms = res.data?.cms || res.data?.data || {};
 
-      // Live TV Channels (respect saved array while keeping full verified defaults)
+      // Live TV Channels (respect saved array while keeping priority channels first)
       if (Array.isArray(cms.liveTvChannels)) {
-        setTvChannels(cms.liveTvChannels);
+        setTvChannels(mergeTvCatalogue(cms.liveTvChannels));
       } else {
         setTvChannels(LIVE_TV_DEFAULTS);
       }
