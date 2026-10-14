@@ -78,7 +78,8 @@ async function ensureAdminSessionSchema() {
           EXECUTE format('ALTER TABLE sessions DROP CONSTRAINT IF EXISTS %I', fk.conname);
         END LOOP;
       END IF;
-    END $session_repair$;
+    END;
+  $session_repair$;
   `);
 
   const userIdColumn: any = byName.get("user_id");
