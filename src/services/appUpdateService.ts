@@ -161,8 +161,19 @@ export async function checkForAppUpdates(): Promise<UpdateCheckResult> {
 
       const rawJson = await res.json();
       const manifest: UpdateManifest = rawJson?.data || rawJson;
-      if (!manifest || typeof manifest.versionCode !== "number" || !manifest.downloadUrl) {
-        lastErrorMsg = "Invalid update manifest format";
+      const hasValidVersion = Number.isInteger(manifest?.versionCode) &&
+        manifest.versionCode > 0 &&
+        isValidSemver(manifest.versionName);
+      const hasValidIntegrity = typeof manifest?.sha256 === "string" &&
+        /^[a-f0-9]{64}$/i.test(manifest.sha256.trim()) &&
+        Number.isInteger(manifest.size) &&
+        manifest.size > 0;
+      let hasSecureDownloadUrl = false;
+      try {
+        hasSecureDownloadUrl = new URL(manifest?.downloadUrl || "").protocol === "https:";
+      } catch {}
+      if (!manifest || !hasValidVersion || !hasValidIntegrity || !hasSecureDownloadUrl) {
+        lastErrorMsg = "Invalid update manifest: version, HTTPS URL, size, and SHA-256 are required";
         continue;
       }
 
@@ -217,6 +228,20 @@ export async function downloadAndInstallUpdate(
 ): Promise<{ success: boolean; message?: string }> {
   const isAndroid = Capacitor.getPlatform() === "android";
 
+  if (!isValidSemver(manifest.versionName) ||
+      !Number.isInteger(manifest.versionCode) || manifest.versionCode < 1 ||
+      !/^[a-f0-9]{64}$/i.test(String(manifest.sha256 || "").trim()) ||
+      !Number.isInteger(manifest.size) || manifest.size < 1) {
+    throw new Error("Update blocked: the release manifest is missing valid version or integrity metadata.");
+  }
+  let secureDownloadUrl = false;
+  try {
+    secureDownloadUrl = new URL(manifest.downloadUrl).protocol === "https:";
+  } catch {}
+  if (!secureDownloadUrl) {
+    throw new Error("Update blocked: the APK download URL must use HTTPS.");
+  }
+
   // For web users, simply open the download URL in browser
   if (!isAndroid) {
     window.open(manifest.downloadUrl, "_blank");
@@ -260,14 +285,15 @@ export async function downloadAndInstallUpdate(
     position += chunk.length;
   }
 
-  // Verify SHA-256 Checksum if present in manifest
-  if (manifest.sha256 && manifest.sha256.trim().length > 0) {
-    const computedHash = await computeSha256(allBytes.buffer);
-    if (computedHash.toLowerCase() !== manifest.sha256.toLowerCase().trim()) {
-      throw new Error(
-        `Integrity check failed! Expected SHA-256: ${manifest.sha256}, but received: ${computedHash}. Download aborted for security.`
-      );
-    }
+  // Require exact APK size and SHA-256 match before handing the file to Android.
+  if (receivedBytes !== manifest.size) {
+    throw new Error(`Integrity check failed! Expected ${manifest.size} bytes, received ${receivedBytes}. Download aborted.`);
+  }
+  const computedHash = await computeSha256(allBytes.buffer);
+  if (computedHash.toLowerCase() !== manifest.sha256.toLowerCase().trim()) {
+    throw new Error(
+      `Integrity check failed! Expected SHA-256: ${manifest.sha256}, but received: ${computedHash}. Download aborted for security.`
+    );
   }
 
   // Convert to Base64 and trigger native installer
