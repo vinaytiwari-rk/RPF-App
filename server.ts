@@ -272,7 +272,8 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 import { getPgPoolConfig } from './src/db/dbPool';
 
-const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://rp_admin:therpfoundation%40321@localhost:5432/rp_db";
+const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+if (!dbUrl) throw new Error("Database configuration missing: set LOCAL_DB_URL or DATABASE_URL before starting the server.");
 const pool = new pg.Pool(getPgPoolConfig(dbUrl));
 
 pool.on('error', (err: any) => {

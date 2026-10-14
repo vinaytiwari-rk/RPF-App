@@ -4,10 +4,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export function getPgPoolConfig(rawUrl?: string) {
-  const connStr = rawUrl || process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://rp_admin:therpfoundation%40321@localhost:5432/rp_db";
+  const connStr = rawUrl || process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+  if (!connStr) throw new Error("Database configuration missing: set LOCAL_DB_URL or DATABASE_URL.");
   
-  let user = "rp_admin";
-  let password = "therpfoundation@321";
+  let user = "";
+  let password = "";
   let host = "localhost";
   let port = 5432;
   let database = "rp_db";
@@ -45,7 +46,8 @@ export function getPgPoolConfig(rawUrl?: string) {
   };
 }
 
-export const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL || "postgresql://rp_admin:therpfoundation%40321@localhost:5432/rp_db";
+export const dbUrl = process.env.LOCAL_DB_URL || process.env.DATABASE_URL;
+if (!dbUrl) throw new Error("Database configuration missing: set LOCAL_DB_URL or DATABASE_URL.");
 
 export const pool = new pg.Pool(getPgPoolConfig());
 
