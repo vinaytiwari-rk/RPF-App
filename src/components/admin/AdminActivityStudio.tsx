@@ -155,26 +155,27 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
         console.warn("Grievances fetch note:", err);
       }
 
-      // 2. Fetch Volunteers
+      // 2. Fetch canonical volunteer records; do not fabricate skills or approval state.
       try {
-        const res = await axios.get("/api/admin/users", { headers });
-        if (res.data?.users && Array.isArray(res.data.users)) {
-          const vols = res.data.users
-            .filter((u: any) => u.isVolunteer || u.role === "volunteer")
-            .map((u: any) => ({
-              id: u.id,
-              full_name: u.name,
-              username: u.username,
-              mobile: u.phone,
-              email: u.email,
-              skills: u.skills || "Social Service, Relief Work",
-              approval_status: u.approval_status || "approved",
-              created_at: u.created_at
-            }));
-          setVolunteers(vols);
+        const res = await axios.get("/api/volunteers", { headers });
+        if (Array.isArray(res.data?.volunteers)) {
+          setVolunteers(res.data.volunteers.map((v: any) => ({
+            id: String(v.id),
+            full_name: v.full_name || "",
+            username: v.username || "",
+            registration_number: v.registration_number || "",
+            mobile: v.mobile || "",
+            email: v.email || "",
+            skills: v.skills ?? [],
+            approval_status: v.approval_status || "pending",
+            created_at: v.registeredAt || v.created_at
+          })));
+        } else {
+          setVolunteers([]);
         }
       } catch (err) {
-        console.warn("Volunteers fetch note:", err);
+        console.warn("Canonical volunteers fetch failed:", err);
+        setVolunteers([]);
       }
     } finally {
       setLoading(false);
@@ -211,13 +212,25 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
     }
   };
 
-  // Toggle Volunteer Approval
+  // Persist approval changes before updating the visible state.
   const handleToggleVolunteerApproval = async (id: string, current: string) => {
     const nextStatus = current === "approved" ? "rejected" : "approved";
-    setVolunteers((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, approval_status: nextStatus as any } : v))
-    );
-    toast.success(`Volunteer status updated to ${nextStatus}`);
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const response = await axios.put(
+        `/api/volunteers/${encodeURIComponent(id)}/approve`,
+        { status: nextStatus },
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+      );
+      if (response.data?.success !== true) throw new Error("Approval update was not confirmed by the server");
+      setVolunteers((prev) =>
+        prev.map((v) => (v.id === id ? { ...v, approval_status: nextStatus } : v))
+      );
+      toast.success(`Volunteer status updated to ${nextStatus}`);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || err.message || "Failed to update volunteer status");
+      await loadData();
+    }
   };
 
   // Update Blood Request Status
