@@ -414,14 +414,21 @@ router.get("/api/admin/health-camps", authenticateToken, requireAdmin, async (re
 // POST health camp
 router.post("/api/admin/health-camps", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { title, description, date, location } = req.body;
+    const title = String(req.body?.title || "").trim();
+    const description = String(req.body?.description || "").trim();
+    const location = String(req.body?.location || "").trim();
+    const dateValue = req.body?.date;
+    if (!title || !location || !dateValue || Number.isNaN(Date.parse(String(dateValue)))) {
+      return res.status(400).json({ success: false, error: "A valid title, date, and location are required." });
+    }
     const result = await pool.query(
-      `INSERT INTO health_camps ("titleEn", "titleHi", "dateEn", "dateHi", "locationEn", "locationHi") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [title, title, date, date, location, location]
+      `INSERT INTO health_camps (title, location, date, services_offered) VALUES ($1, $2, $3, $4) RETURNING id, title, location, date, services_offered, created_at`,
+      [title, location, new Date(String(dateValue)).toISOString(), description]
     );
-    res.json({ success: true, data: result.rows[0] });
+    return res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: "Failed to create health camp" });
+    console.error("Admin health camp creation failed:", error);
+    return res.status(500).json({ success: false, error: "Failed to create health camp." });
   }
 });
 
