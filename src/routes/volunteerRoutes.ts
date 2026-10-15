@@ -1,14 +1,87 @@
 import express from 'express';
 import { pool } from '../db/dbPool.js';
-import { authenticateToken, requireAdmin } from '../db/middleware.js';
+import { authenticateToken, requireAdmin, requireVolunteer } from '../db/middleware.js';
 import crypto from 'crypto';
 import { ensureEligibleCertificates } from '../lib/certificateAutomation.js';
 
 const router = express.Router();
 
-router.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req, res) => { try { const { id } = req.params; const { status } = req.body; await pool.query(`UPDATE volunteers SET approval_status = $1 WHERE id = $2`, [status, id]); res.json({ success: true, message: "Volunteer status updated" }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
+// Purge expired community chat rows independently of user traffic. API reads/writes
+// also run this cleanup so expired messages are never returned while the timer runs.
+const communityChatCleanupTimer = setInterval(() => {
+  pool.query(`DELETE FROM community_chat_messages WHERE "createdAt" < NOW() - INTERVAL '24 hours'`)
+    .catch((error: any) => console.error("Community chat retention cleanup failed:", error));
+}, 60 * 60 * 1000);
+communityChatCleanupTimer.unref?.();
+void pool.query(`DELETE FROM community_chat_messages WHERE "createdAt" < NOW() - INTERVAL '24 hours'`)
+  .catch((error: any) => console.error("Initial community chat retention cleanup failed:", error));
+
+router.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const status = typeof req.body?.status === "string" ? req.body.status.trim().toLowerCase() : "";
+    if (!["pending", "approved", "rejected"].includes(status)) {
+      return res.status(400).json({ success: false, error: "Invalid volunteer approval status" });
+    }
+    const result = await pool.query(
+      `UPDATE volunteers SET approval_status = $1 WHERE id = $2 RETURNING id`,
+      [status, id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ success: false, error: "Volunteer not found" });
+    res.json({ success: true, message: "Volunteer status updated" });
+  } catch (error: any) {
+    console.error("Volunteer approval update failed:", error);
+    res.status(500).json({ success: false, error: "Failed to update volunteer status" });
+  }
+});
 router.put("/api/volunteers/:id/allocate", authenticateToken, requireAdmin, async (req, res) => { try { const { id } = req.params; const { allocation } = req.body; await pool.query(`UPDATE volunteers SET constituency_allocation = $1 WHERE id = $2`, [allocation, id]); res.json({ success: true, message: "Volunteer allocated" }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
-router.post("/api/volunteers/report", authenticateToken, async (req, res) => { try { const { volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng } = req.body; await pool.query(`INSERT INTO volunteer_reports (id, volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [crypto.randomUUID(), volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng]); await ensureEligibleCertificates(req.user.id); res.json({ success: true, message: "Report submitted" }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
+router.post("/api/volunteers/report", authenticateToken, requireVolunteer, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
+
+    const reportText = typeof req.body?.report_text === "string" ? req.body.report_text.trim() : "";
+    if (!reportText) return res.status(400).json({ success: false, error: "Report text is required" });
+    if (reportText.length > 5000) return res.status(400).json({ success: false, error: "Report text must be 5000 characters or fewer" });
+
+    const parseOptionalDate = (value: unknown): Date | null | undefined => {
+      if (value === undefined || value === null || value === "") return null;
+      if (typeof value !== "string" && typeof value !== "number") return undefined;
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? undefined : date;
+    };
+    const checkIn = parseOptionalDate(req.body?.check_in_time);
+    const checkOut = parseOptionalDate(req.body?.check_out_time);
+    if (checkIn === undefined || checkOut === undefined) {
+      return res.status(400).json({ success: false, error: "Invalid check-in or check-out time" });
+    }
+    if (checkIn && checkOut && checkOut.getTime() < checkIn.getTime()) {
+      return res.status(400).json({ success: false, error: "Check-out cannot be earlier than check-in" });
+    }
+
+    const parseCoordinate = (value: unknown, min: number, max: number): number | null | undefined => {
+      if (value === undefined || value === null || value === "") return null;
+      const number = typeof value === "number" ? value : Number(value);
+      return Number.isFinite(number) && number >= min && number <= max ? number : undefined;
+    };
+    const latitude = parseCoordinate(req.body?.location_lat, -90, 90);
+    const longitude = parseCoordinate(req.body?.location_lng, -180, 180);
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({ success: false, error: "Invalid location coordinates" });
+    }
+
+    await pool.query(
+      `INSERT INTO volunteer_reports (id, volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [crypto.randomUUID(), userId, checkIn, checkOut, reportText, latitude, longitude]
+    );
+    await ensureEligibleCertificates(userId);
+    res.status(201).json({ success: true, message: "Report submitted" });
+  } catch (error: any) {
+    console.error("Volunteer report submission failed:", error);
+    res.status(500).json({ success: false, error: "Failed to submit volunteer report" });
+  }
+});
 
 router.get("/api/volunteers/me", authenticateToken, async (req: any, res) => {
   try {
@@ -24,7 +97,7 @@ router.get("/api/volunteers/me/certificates", authenticateToken, async (req: any
     const result = await pool.query(`SELECT * FROM certificates WHERE volunteer_id = $1 ORDER BY issue_date DESC`, [req.user.id]);
     const progress = await pool.query(`SELECT
       (SELECT COALESCE(SUM(duration_minutes),0) / 60.0 FROM volunteer_duty_sessions WHERE user_id = $1 AND status = 'completed') AS hours,
-      (SELECT COUNT(*) FROM volunteer_reports WHERE volunteer_id = $1) AS reports,
+      (SELECT COUNT(*) FROM volunteer_field_reports WHERE user_id = $1 AND approval_status = 'approved') AS reports,
       (SELECT COUNT(*) FROM volunteer_tasks WHERE "volunteerId" = $1 AND status = 'completed') AS tasks
     `, [req.user.id]);
     const rules = await pool.query(`SELECT id,title,title_hi,min_hours,min_reports,min_tasks,active FROM certificate_rules WHERE active = TRUE ORDER BY min_hours ASC`);
@@ -75,9 +148,145 @@ router.get("/api/volunteer_tasks", authenticateToken, async (req: any, res) => {
 router.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin, async (req, res) => { try { const { id } = req.params; const { status } = req.body; const taskRes = await pool.query('UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId"', [status, id]); if (taskRes.rows.length > 0 && status === "completed") { await pool.query('UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2', [10, taskRes.rows[0].volunteerId]); await ensureEligibleCertificates(taskRes.rows[0].volunteerId); } res.json({ success: true, message: "Task status updated" }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
 
 router.post("/api/volunteers", authenticateToken, async (req: any, res) => { try { const { name, phone, skills } = req.body; const userId = req.user.id; await pool.query(`UPDATE users SET "isVolunteer" = true WHERE id = $1`, [userId]); const volCheck = await pool.query(`SELECT id FROM volunteers WHERE id = $1`, [userId]); if (volCheck.rows.length === 0) { const userRes = await pool.query(`SELECT username, email FROM users WHERE id = $1`, [userId]); const username = userRes.rows[0]?.username || `user_${userId.slice(-6)}`; const email = userRes.rows[0]?.email || null; const regNumber = "RPF-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000); await pool.query(`INSERT INTO volunteers (id, username, registration_number, full_name, mobile, email, skills, approval_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [userId, username, regNumber, name || "Citizen", phone || "", email, JSON.stringify(skills ? skills.split(", ") : []), 'approved']); } else { await pool.query(`UPDATE volunteers SET skills = $1, full_name = $2, mobile = $3 WHERE id = $4`, [JSON.stringify(skills ? skills.split(", ") : []), name || "Citizen", phone || "", userId]); } res.json({ success: true }); } catch (error: any) { console.error("Error creating volunteer record:", error); res.status(500).json({ success: false, error: error.message }); } });
-router.get("/api/volunteers", authenticateToken, requireAdmin, async (_req, res) => { try { const result = await pool.query('SELECT id, full_name as name, email, mobile as phone, approval_status as status, "registeredAt" FROM volunteers ORDER BY "registeredAt" DESC'); res.json({ volunteers: result.rows }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
+router.get("/api/volunteers", authenticateToken, requireAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, full_name, username, registration_number, email, mobile, skills, approval_status, city, role, "registeredAt", created_at FROM volunteers ORDER BY "registeredAt" DESC'
+    );
+    res.json({ success: true, volunteers: result.rows });
+  } catch (error: any) {
+    console.error("Admin volunteer list failed:", error);
+    res.status(500).json({ success: false, error: "Failed to load volunteers" });
+  }
+});
 router.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => { try { await pool.query("DELETE FROM volunteers WHERE id = $1", [req.params.id]); res.json({ success: true }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
-router.get("/api/community/chat/messages", async (_req, res) => { try { const result = await pool.query(`SELECT id, "authorName", "authorAvatar", text, "createdAt" FROM community_chat_messages ORDER BY "createdAt" DESC LIMIT 50`); res.json({ success: true, data: result.rows.reverse() }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
+// Activity community chat: authenticated members only, with server-enforced 24-hour retention.
+router.get("/api/activity/messages/community", authenticateToken, async (req: any, res) => {
+  try {
+    if (String(req.user?.role || "").toLowerCase() === "guest") {
+      return res.status(403).json({ success: false, error: "Sign in to access community chat" });
+    }
+    await pool.query(`DELETE FROM community_chat_messages WHERE "createdAt" < NOW() - INTERVAL '24 hours'`);
+    const result = await pool.query(
+      `SELECT id, "authorName", text, "createdAt"
+       FROM community_chat_messages
+       WHERE "createdAt" >= NOW() - INTERVAL '24 hours'
+       ORDER BY "createdAt" ASC
+       LIMIT 100`
+    );
+    return res.json({ success: true, data: result.rows });
+  } catch (error: any) {
+    console.error("Community chat load failed:", error);
+    return res.status(500).json({ success: false, error: "Community chat is temporarily unavailable" });
+  }
+});
+
+router.post("/api/activity/messages/community", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId || String(req.user?.role || "").toLowerCase() === "guest") {
+      return res.status(403).json({ success: false, error: "Sign in to send community messages" });
+    }
+    const text = typeof req.body?.text === "string" ? req.body.text.trim() : "";
+    if (!text) return res.status(400).json({ success: false, error: "Message text is required" });
+    if (text.length > 2000) return res.status(400).json({ success: false, error: "Message must be 2000 characters or fewer" });
+
+    await pool.query(
+      `INSERT INTO community_chat_messages (id, "userId", "authorName", "authorAvatar", text)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [crypto.randomUUID(), userId, String(req.user?.name || "Community member").slice(0, 120), req.user?.avatar || null, text]
+    );
+    await pool.query(`DELETE FROM community_chat_messages WHERE "createdAt" < NOW() - INTERVAL '24 hours'`);
+    return res.status(201).json({ success: true });
+  } catch (error: any) {
+    console.error("Community chat send failed:", error);
+    return res.status(500).json({ success: false, error: "Message could not be sent" });
+  }
+});
+
+async function requireApprovedVolunteerPair(senderId: string, recipientId: string) {
+  if (!recipientId || senderId === recipientId) return false;
+  const result = await pool.query(
+    `SELECT id FROM volunteers
+     WHERE id = ANY($1::text[])
+       AND COALESCE(LOWER(approval_status), 'approved') = 'approved'`,
+    [[senderId, recipientId]]
+  );
+  return result.rows.length === 2;
+}
+
+router.get("/api/activity/messages/direct/:id", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    const recipientId = String(req.params.id || "");
+    if (!userId) return res.status(401).json({ success: false, error: "Authentication required" });
+    if (!(await requireApprovedVolunteerPair(userId, recipientId))) {
+      return res.status(403).json({ success: false, error: "Private chat is available between approved volunteers only" });
+    }
+    const result = await pool.query(
+      `SELECT m.id, COALESCE(u.name, 'Volunteer') AS "authorName", m.text, m.created_at AS "createdAt"
+       FROM volunteer_direct_messages m
+       LEFT JOIN users u ON u.id = m.sender_id
+       WHERE (m.sender_id = $1 AND m.recipient_id = $2)
+          OR (m.sender_id = $2 AND m.recipient_id = $1)
+       ORDER BY m.created_at DESC
+       LIMIT 100`,
+      [userId, recipientId]
+    );
+    return res.json({ success: true, data: result.rows.reverse() });
+  } catch (error: any) {
+    console.error("Direct volunteer chat load failed:", error);
+    return res.status(500).json({ success: false, error: "Private chat is temporarily unavailable" });
+  }
+});
+
+router.post("/api/activity/messages/direct/:id", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    const recipientId = String(req.params.id || "");
+    if (!userId) return res.status(401).json({ success: false, error: "Authentication required" });
+    if (!(await requireApprovedVolunteerPair(userId, recipientId))) {
+      return res.status(403).json({ success: false, error: "Private chat is available between approved volunteers only" });
+    }
+    const text = typeof req.body?.text === "string" ? req.body.text.trim() : "";
+    if (!text) return res.status(400).json({ success: false, error: "Message text is required" });
+    if (text.length > 2000) return res.status(400).json({ success: false, error: "Message must be 2000 characters or fewer" });
+
+    const result = await pool.query(
+      `INSERT INTO volunteer_direct_messages (id, sender_id, recipient_id, text)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, text, created_at AS "createdAt"`,
+      [crypto.randomUUID(), userId, recipientId, text]
+    );
+    return res.status(201).json({
+      success: true,
+      data: { id: result.rows[0].id, authorName: String(req.user?.name || "Volunteer").slice(0, 120), text: result.rows[0].text, createdAt: result.rows[0].createdAt }
+    });
+  } catch (error: any) {
+    console.error("Direct volunteer chat send failed:", error);
+    return res.status(500).json({ success: false, error: "Message could not be sent" });
+  }
+});
+
+router.get("/api/community/chat/messages", authenticateToken, async (req: any, res) => {
+  try {
+    if (!req.user?.id || String(req.user?.role || "").toLowerCase() === "guest") {
+      return res.status(403).json({ success: false, error: "Sign in to access community chat" });
+    }
+    await pool.query(`DELETE FROM community_chat_messages WHERE "createdAt" < NOW() - INTERVAL '24 hours'`);
+    const result = await pool.query(
+      `SELECT id, "authorName", "authorAvatar", text, "createdAt"
+       FROM community_chat_messages
+       WHERE "createdAt" >= NOW() - INTERVAL '24 hours'
+       ORDER BY "createdAt" DESC
+       LIMIT 50`
+    );
+    return res.json({ success: true, data: result.rows.reverse() });
+  } catch (error: any) {
+    console.error("Legacy community chat read failed:", error);
+    return res.status(500).json({ success: false, error: "Community chat is temporarily unavailable" });
+  }
+});
 router.get("/api/public/volunteers", async (req, res) => {
   try {
     const { city, skill } = req.query;

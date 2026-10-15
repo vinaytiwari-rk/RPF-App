@@ -857,44 +857,97 @@ app.post("/api/volunteers/reports/submit", authenticateToken, requireVolunteer, 
     const userId = req.user?.id;
     const userName = req.user?.name || "Volunteer";
     const userPhone = req.user?.phone || "";
-    const { title, description, imageUrl, locationName, latitude, longitude } = req.body;
-
     if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
-    if (!title) return res.status(400).json({ success: false, error: "Title is required" });
 
-    const reportId = "report_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+    const title = typeof req.body?.title === "string" ? req.body.title.trim() : "";
+    const description = typeof req.body?.description === "string" ? req.body.description.trim() : "";
+    const locationName = typeof req.body?.locationName === "string" ? req.body.locationName.trim() : "";
+    const imageUrl = typeof req.body?.imageUrl === "string" ? req.body.imageUrl : "";
+    if (!title) return res.status(400).json({ success: false, error: "Title is required" });
+    if (title.length > 200) return res.status(400).json({ success: false, error: "Title must be 200 characters or fewer" });
+    if (description.length < 10 || description.length > 5000) {
+      return res.status(400).json({ success: false, error: "Description must be between 10 and 5000 characters" });
+    }
+    if (locationName.length > 255) return res.status(400).json({ success: false, error: "Location must be 255 characters or fewer" });
+    if (imageUrl.length > 3_000_000) return res.status(413).json({ success: false, error: "Image evidence is too large" });
+    if (imageUrl && !/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(imageUrl) && !/^https?:\/\//i.test(imageUrl)) {
+      return res.status(400).json({ success: false, error: "Image evidence must be a supported image or HTTPS URL" });
+    }
+
+    const parseCoordinate = (value: unknown, min: number, max: number): number | null | undefined => {
+      if (value === undefined || value === null || value === "") return null;
+      const number = typeof value === "number" ? value : Number(value);
+      return Number.isFinite(number) && number >= min && number <= max ? number : undefined;
+    };
+    const latitude = parseCoordinate(req.body?.latitude, -90, 90);
+    const longitude = parseCoordinate(req.body?.longitude, -180, 180);
+    if (latitude === undefined || longitude === undefined || ((latitude === null) !== (longitude === null))) {
+      return res.status(400).json({ success: false, error: "Invalid location coordinates" });
+    }
+
+    const reportId = "report_" + crypto.randomUUID();
     const result = await pool.query(
-      `INSERT INTO volunteer_field_reports 
+      `INSERT INTO volunteer_field_reports
        (id, user_id, user_name, user_phone, title, description, image_url, location_name, latitude, longitude, approval_status, created_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', NOW())
        RETURNING *`,
-      [reportId, userId, userName, userPhone, title, description || "", imageUrl || "", locationName || "", latitude || null, longitude || null]
+      [reportId, userId, userName, userPhone, title, description, imageUrl, locationName, latitude, longitude]
     );
-
-    res.json({ success: true, report: result.rows[0] });
+    return res.status(201).json({ success: true, report: result.rows[0] });
   } catch (error: any) {
     console.error("Report submit error:", error);
-    res.status(500).json({ success: false, error: "Failed to submit field report" });
+    return res.status(500).json({ success: false, error: "Failed to submit field report" });
+  }
+});
+
+// Volunteers can review their own report status and Admin feedback.
+app.get("/api/volunteers/reports/mine", authenticateToken, requireVolunteer, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
+    const result = await pool.query(
+      `SELECT id, title, description, location_name, image_url, approval_status, admin_notes, created_at
+       FROM volunteer_field_reports
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 100`,
+      [userId]
+    );
+    return res.json({ success: true, reports: result.rows });
+  } catch (error: any) {
+    console.error("Volunteer report history failed:", error);
+    return res.status(500).json({ success: false, error: "Failed to load field reports" });
   }
 });
 
 // 5. Get Real Volunteer Leaderboard
 app.get("/api/volunteers/leaderboard", async (req, res) => {
   try {
+    // Aggregate sessions and reports independently to avoid join fan-out
+    // multiplying duty minutes when a volunteer has multiple approved reports.
     const result = await pool.query(`
-      SELECT 
-        u.id, 
-        u.name, 
-        u.avatar, 
+      SELECT
+        u.id,
+        u.name,
+        u.avatar,
         u.role,
-        COALESCE(SUM(s.duration_minutes), 0) AS total_duty_minutes,
-        COUNT(DISTINCT r.id) AS approved_reports_count,
+        COALESCE(s.total_duty_minutes, 0) AS total_duty_minutes,
+        COALESCE(r.approved_reports_count, 0) AS approved_reports_count,
         COALESCE(u.points, 0) AS total_points
       FROM users u
-      LEFT JOIN volunteer_duty_sessions s ON u.id = s.user_id AND s.status = 'completed'
-      LEFT JOIN volunteer_field_reports r ON u.id = r.user_id AND r.approval_status = 'approved'
+      LEFT JOIN (
+        SELECT user_id, SUM(duration_minutes)::int AS total_duty_minutes
+        FROM volunteer_duty_sessions
+        WHERE status = 'completed'
+        GROUP BY user_id
+      ) s ON s.user_id = u.id
+      LEFT JOIN (
+        SELECT user_id, COUNT(*)::int AS approved_reports_count
+        FROM volunteer_field_reports
+        WHERE approval_status = 'approved'
+        GROUP BY user_id
+      ) r ON r.user_id = u.id
       WHERE u.role IN ('volunteer', 'admin', 'super_admin') OR u."isVolunteer" = true
-      GROUP BY u.id, u.name, u.avatar, u.role, u.points
       ORDER BY total_duty_minutes DESC, total_points DESC
       LIMIT 20
     `);
@@ -929,39 +982,71 @@ app.get("/api/admin/field-reports", authenticateToken, requireAdmin, async (req,
   }
 });
 
-app.post("/api/admin/field-reports/approve", authenticateToken, requireAdmin, async (req, res) => {
+app.post("/api/admin/field-reports/approve", authenticateToken, requireAdmin, async (req: any, res) => {
+  const { reportId, status, adminNotes, points } = req.body || {};
+  if (typeof reportId !== "string" || !reportId.trim()) {
+    return res.status(400).json({ success: false, error: "Report ID required" });
+  }
+  if (!["pending", "approved", "rejected"].includes(status)) {
+    return res.status(400).json({ success: false, error: "Invalid field report status" });
+  }
+
+  const pointsToAward = Math.min(200, Math.max(0, Number.parseInt(String(points ?? 50), 10) || 0));
+  const client = await pool.connect();
+  let approvedUserId: string | null = null;
   try {
-    const { reportId, status, adminNotes, points } = req.body;
-    if (!reportId) return res.status(400).json({ success: false, error: "Report ID required" });
+    await client.query("BEGIN");
+    const currentResult = await client.query(
+      "SELECT id, user_id, approval_status, COALESCE(points_awarded, 0) AS points_awarded FROM volunteer_field_reports WHERE id = $1 FOR UPDATE",
+      [reportId.trim()]
+    );
+    const current = currentResult.rows[0];
+    if (!current) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ success: false, error: "Field report not found" });
+    }
 
-    const validStatus = status === 'rejected' ? 'rejected' : 'approved';
-    const pointsToAward = Math.min(200, Math.max(0, parseInt(points) || 50));
+    // Award points only once per report, even if Admin repeats approval.
+    const shouldAwardPoints = status === "approved" &&
+      current.approval_status !== "approved" &&
+      Number(current.points_awarded || 0) <= 0;
+    const award = shouldAwardPoints ? pointsToAward : 0;
+    const nextAwardedPoints = status === "approved" && shouldAwardPoints
+      ? pointsToAward
+      : Number(current.points_awarded || 0);
 
-    const result = await pool.query(
-      `UPDATE volunteer_field_reports 
-       SET approval_status = $1, admin_notes = $2, points_awarded = $3
+    const updateResult = await client.query(
+      `UPDATE volunteer_field_reports
+       SET approval_status = $1,
+           admin_notes = $2,
+           points_awarded = $3
        WHERE id = $4
        RETURNING *`,
-      [validStatus, adminNotes || 'Reviewed by Admin', pointsToAward, reportId]
+      [status, typeof adminNotes === "string" ? adminNotes.trim().slice(0, 2000) : "", nextAwardedPoints, reportId.trim()]
     );
 
-    if (result.rows.length > 0 && validStatus === 'approved') {
-      const report = result.rows[0];
-      await pool.query(
-        `UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2`,
-        [pointsToAward, report.user_id]
+    if (award > 0) {
+      await client.query(
+        "UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2",
+        [award, current.user_id]
       );
+    }
+    await client.query("COMMIT");
+    if (status === "approved") approvedUserId = current.user_id;
+    if (approvedUserId) {
       try {
-        await ensureEligibleCertificates(report.user_id);
+        await ensureEligibleCertificates(approvedUserId);
       } catch (certificateError) {
-        // Approval is already committed; do not imply the report failed if certificate refresh fails.
         console.error("Certificate eligibility refresh failed after field-report approval:", certificateError);
       }
     }
-
-    res.json({ success: true, report: result.rows[0] });
+    return res.json({ success: true, report: updateResult.rows[0], pointsAwarded: award });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: "Failed to approve field report" });
+    await client.query("ROLLBACK").catch(() => {});
+    console.error("Field report review failed:", error);
+    return res.status(500).json({ success: false, error: "Failed to update field report" });
+  } finally {
+    client.release();
   }
 });
 
