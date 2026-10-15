@@ -55,7 +55,7 @@ router.post("/api/volunteers/report", authenticateToken, requireVolunteer, async
     if (checkIn === undefined || checkOut === undefined) {
       return res.status(400).json({ success: false, error: "Invalid check-in or check-out time" });
     }
-    if (checkIn && checkOut && checkOut < checkIn) {
+    if (checkIn && checkOut && checkOut.getTime() < checkIn.getTime()) {
       return res.status(400).json({ success: false, error: "Check-out cannot be earlier than check-in" });
     }
 
