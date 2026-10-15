@@ -6,6 +6,16 @@ import { ensureEligibleCertificates } from '../lib/certificateAutomation.js';
 
 const router = express.Router();
 
+// Purge expired community chat rows independently of user traffic. API reads/writes
+// also run this cleanup so expired messages are never returned while the timer runs.
+const communityChatCleanupTimer = setInterval(() => {
+  pool.query(`DELETE FROM community_chat_messages WHERE "createdAt" < NOW() - INTERVAL '24 hours'`)
+    .catch((error: any) => console.error("Community chat retention cleanup failed:", error));
+}, 60 * 60 * 1000);
+communityChatCleanupTimer.unref?.();
+void pool.query(`DELETE FROM community_chat_messages WHERE "createdAt" < NOW() - INTERVAL '24 hours'`)
+  .catch((error: any) => console.error("Initial community chat retention cleanup failed:", error));
+
 router.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
