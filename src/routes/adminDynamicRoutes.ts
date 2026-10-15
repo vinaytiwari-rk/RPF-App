@@ -315,7 +315,7 @@ router.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req,
     const totalPages = Math.ceil(totalCount / limit);
 
     const result = await pool.query(
-      `SELECT id, full_name as name, username, mobile, email, status, registration_number, "createdAt" FROM volunteers ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
+      `SELECT id, full_name AS name, username, mobile, email, approval_status AS status, registration_number, created_at AS "createdAt" FROM volunteers ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
       [limit, offset]
     );
     res.json({ success: true, data: result.rows, totalCount, totalPages, currentPage: page });
@@ -327,8 +327,15 @@ router.get("/api/admin/volunteers", authenticateToken, requireAdmin, async (req,
 // PUT volunteer status
 router.put("/api/admin/volunteers/:id/status", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { status } = req.body;
-    const result = await pool.query("UPDATE volunteers SET status = $1 WHERE id = $2 RETURNING *", [status, req.params.id]);
+    const status = String(req.body?.status || "").toLowerCase();
+    if (!["pending", "approved", "rejected", "inactive"].includes(status)) {
+      return res.status(400).json({ success: false, error: "Invalid volunteer status." });
+    }
+    const result = await pool.query(
+      "UPDATE volunteers SET approval_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, username, registration_number, full_name AS name, approval_status AS status, updated_at",
+      [status, req.params.id]
+    );
+    if (!result.rows.length) return res.status(404).json({ success: false, error: "Volunteer not found." });
     res.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to update volunteer status" });
@@ -338,8 +345,13 @@ router.put("/api/admin/volunteers/:id/status", authenticateToken, requireAdmin, 
 // DELETE a volunteer
 router.delete("/api/admin/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    await pool.query("DELETE FROM volunteers WHERE id = $1", [req.params.id]);
-    res.json({ success: true, message: "Volunteer deleted successfully" });
+    // Preserve volunteer history and related records: deactivate instead of hard-deleting.
+    const result = await pool.query(
+      "UPDATE volunteers SET approval_status = 'inactive', updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING id, username, registration_number, full_name AS name, approval_status AS status, updated_at",
+      [req.params.id]
+    );
+    if (!result.rows.length) return res.status(404).json({ success: false, error: "Volunteer not found." });
+    res.json({ success: true, message: "Volunteer deactivated successfully", data: result.rows[0] });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to delete volunteer" });
   }
