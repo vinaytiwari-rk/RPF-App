@@ -258,7 +258,25 @@ router.post("/api/activity/messages/direct/:id", authenticateToken, async (req: 
   }
 });
 
-router.get("/api/community/chat/messages", async (_req, res) => { try { const result = await pool.query(`SELECT id, "authorName", "authorAvatar", text, "createdAt" FROM community_chat_messages ORDER BY "createdAt" DESC LIMIT 50`); res.json({ success: true, data: result.rows.reverse() }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
+router.get("/api/community/chat/messages", authenticateToken, async (req: any, res) => {
+  try {
+    if (!req.user?.id || String(req.user?.role || "").toLowerCase() === "guest") {
+      return res.status(403).json({ success: false, error: "Sign in to access community chat" });
+    }
+    await pool.query(`DELETE FROM community_chat_messages WHERE "createdAt" < NOW() - INTERVAL '24 hours'`);
+    const result = await pool.query(
+      `SELECT id, "authorName", "authorAvatar", text, "createdAt"
+       FROM community_chat_messages
+       WHERE "createdAt" >= NOW() - INTERVAL '24 hours'
+       ORDER BY "createdAt" DESC
+       LIMIT 50`
+    );
+    return res.json({ success: true, data: result.rows.reverse() });
+  } catch (error: any) {
+    console.error("Legacy community chat read failed:", error);
+    return res.status(500).json({ success: false, error: "Community chat is temporarily unavailable" });
+  }
+});
 router.get("/api/public/volunteers", async (req, res) => {
   try {
     const { city, skill } = req.query;
