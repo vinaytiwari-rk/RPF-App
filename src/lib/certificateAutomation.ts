@@ -4,7 +4,7 @@ import { pool } from "../db/dbPool.js";
 export async function ensureEligibleCertificates(userId: string) {
   const rules = await pool.query(`SELECT * FROM certificate_rules WHERE active = TRUE ORDER BY min_hours ASC, min_reports ASC, min_tasks ASC`);
   const hoursRes = await pool.query(`SELECT COALESCE(SUM(duration_minutes),0) / 60.0 AS hours FROM volunteer_duty_sessions WHERE user_id = $1 AND status = 'completed'`, [userId]);
-  const reportsRes = await pool.query(`SELECT COUNT(*)::int AS count FROM volunteer_reports WHERE volunteer_id = $1`, [userId]);
+  const reportsRes = await pool.query(`SELECT COUNT(*)::int AS count FROM volunteer_field_reports WHERE user_id = $1 AND approval_status = 'approved'`, [userId]);
   const tasksRes = await pool.query(`SELECT COUNT(*)::int AS count FROM volunteer_tasks WHERE "volunteerId" = $1 AND status = 'completed'`, [userId]);
   const hours = Number(hoursRes.rows[0]?.hours || 0);
   const reports = Number(reportsRes.rows[0]?.count || 0);
