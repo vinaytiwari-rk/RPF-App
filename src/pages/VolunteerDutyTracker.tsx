@@ -47,7 +47,7 @@ interface LeaderboardItem {
 export default function VolunteerDutyTracker() {
   const navigate = useNavigate();
   const { lang } = useOutletContext<{ lang: Lang }>();
-  const { user, token } = useAuth();
+  const { token } = useAuth();
   const hi = lang === "hi";
 
   const [activeSession, setActiveSession] = useState<DutySession | null>(null);
@@ -282,7 +282,7 @@ export default function VolunteerDutyTracker() {
       setReportSuccess(true);
       setError("");
       setReportTitle("");
-    setReportDesc("");
+      setReportDesc("");
       setReportLoc("");
       setReportImage("");
       await fetchLeaderboard();
