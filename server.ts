@@ -900,6 +900,26 @@ app.post("/api/volunteers/reports/submit", authenticateToken, requireVolunteer, 
   }
 });
 
+// Volunteers can review their own report status and Admin feedback.
+app.get("/api/volunteers/reports/mine", authenticateToken, requireVolunteer, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
+    const result = await pool.query(
+      `SELECT id, title, description, location_name, image_url, approval_status, admin_notes, created_at
+       FROM volunteer_field_reports
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 100`,
+      [userId]
+    );
+    return res.json({ success: true, reports: result.rows });
+  } catch (error: any) {
+    console.error("Volunteer report history failed:", error);
+    return res.status(500).json({ success: false, error: "Failed to load field reports" });
+  }
+});
+
 // 5. Get Real Volunteer Leaderboard
 app.get("/api/volunteers/leaderboard", async (req, res) => {
   try {
