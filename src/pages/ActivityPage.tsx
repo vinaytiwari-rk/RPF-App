@@ -16,6 +16,7 @@ type DutySession = {
   clock_out_time?: string; duration_minutes?: number; status: "active" | "completed";
 };
 type LeaderboardItem = { id: string; name: string; total_duty_minutes?: number; approved_reports_count?: number; total_points?: number };
+type FieldReport = { id: string; title: string; description: string; location_name?: string; approval_status: "pending" | "approved" | "rejected"; admin_notes?: string; created_at: string };
 
 const tabs: { id: Tab; en: string; hi: string; icon: React.ElementType }[] = [
   { id: "overview", en: "Overview", hi: "अवलोकन", icon: Activity },
@@ -44,6 +45,8 @@ export default function ActivityPage() {
   const [reportDescription, setReportDescription] = useState("");
   const [reportLocation, setReportLocation] = useState("");
   const [reportImage, setReportImage] = useState("");
+  const [myReports, setMyReports] = useState<FieldReport[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Volunteer | null>(null);
@@ -77,6 +80,22 @@ export default function ActivityPage() {
     }
   }
 
+  async function loadMyReports() {
+    if (!token) { setMyReports([]); return; }
+    setReportsLoading(true);
+    try {
+      const response = await fetch("/api/volunteers/reports/mine", { headers: authHeaders });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) throw new Error(data.error || "Could not load report history");
+      setMyReports(Array.isArray(data.reports) ? data.reports : []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : (hi ? "रिपोर्ट इतिहास लोड नहीं हुआ।" : "Could not load report history."));
+      setMyReports([]);
+    } finally {
+      setReportsLoading(false);
+    }
+  }
+
   useEffect(() => {
     void loadDuty();
     void loadLeaderboard();
@@ -90,6 +109,11 @@ export default function ActivityPage() {
     const timer = window.setInterval(tick, 1000);
     return () => window.clearInterval(timer);
   }, [activeSession]);
+
+  useEffect(() => {
+    if (tab !== "reports") return;
+    void loadMyReports();
+  }, [tab, token]);
 
   useEffect(() => {
     if (tab !== "network") return;
@@ -222,6 +246,7 @@ export default function ActivityPage() {
       setReportTitle(""); setReportDescription(""); setReportLocation(""); setReportImage("");
       setNotice(hi ? "रिपोर्ट सत्यापन के लिए जमा हो गई है।" : "Field report submitted for verification.");
       await loadLeaderboard();
+      await loadMyReports();
     } catch (e) {
       setError(e instanceof Error ? e.message : (hi ? "रिपोर्ट जमा नहीं हुई।" : "Report submission failed."));
     } finally { setBusy(false); }
@@ -332,6 +357,19 @@ export default function ActivityPage() {
           {reportImage && <p className="text-xs text-emerald-700">{hi ? "फोटो संलग्न है।" : "Photo attached."}</p>}
           <button disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#245D45] px-4 py-3 font-bold text-white disabled:opacity-60">{busy ? <Loader2 className="animate-spin" size={18}/> : <Send size={18}/>} {hi ? "सत्यापन के लिए जमा करें" : "Submit for Verification"}</button>
         </form>}
+
+        {tab === "reports" && <section className="space-y-3">
+          <div className="flex items-center justify-between gap-3"><h3 className="text-lg font-bold">{hi ? "मेरी जमा रिपोर्ट" : "My submitted reports"}</h3><button type="button" onClick={() => void loadMyReports()} className="text-xs font-bold underline">{hi ? "रिफ्रेश" : "Refresh"}</button></div>
+          {reportsLoading && <p className="rounded-xl bg-white p-4 text-sm text-slate-600">{hi ? "रिपोर्ट लोड हो रही हैं…" : "Loading reports…"}</p>}
+          {!reportsLoading && myReports.length === 0 && <p className="rounded-xl bg-white p-4 text-sm text-slate-600">{hi ? "अभी कोई रिपोर्ट नहीं मिली।" : "No submitted reports yet."}</p>}
+          {myReports.map(report => <article key={report.id} className="rounded-xl border border-[#B9E5CC] bg-white p-4">
+            <div className="flex flex-wrap items-start justify-between gap-2"><h4 className="font-bold">{report.title}</h4><span className={`rounded-full px-2 py-1 text-xs font-bold ${report.approval_status === "approved" ? "bg-emerald-100 text-emerald-800" : report.approval_status === "rejected" ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-800"}`}>{report.approval_status}</span></div>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{report.description}</p>
+            {report.location_name && <p className="mt-2 text-xs text-slate-500">{report.location_name}</p>}
+            {report.admin_notes && <p className="mt-3 rounded-lg bg-[#FFF7E8] p-3 text-sm"><b>{hi ? "Admin टिप्पणी:" : "Admin feedback:"}</b> {report.admin_notes}</p>}
+            <time className="mt-2 block text-xs text-slate-500">{new Date(report.created_at).toLocaleString()}</time>
+          </article>)}
+        </section>}
 
         {tab === "network" && <section className="space-y-3">
           <label className="flex items-center gap-2 rounded-xl border border-[#B9E5CC] bg-white p-3"><Search size={18}/><input aria-label="Search volunteers" value={search} onChange={e => setSearch(e.target.value)} placeholder={hi ? "नाम, शहर या कौशल खोजें" : "Search by name, city or skills"} className="w-full bg-transparent text-sm outline-none"/></label>
