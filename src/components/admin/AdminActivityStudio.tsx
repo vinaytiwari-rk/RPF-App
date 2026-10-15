@@ -506,7 +506,7 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
               : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
           }`}
         >
-          <FileText className="w-4 h-4 text-amber-500" />
+          <ClipboardList className="w-4 h-4 text-amber-500" />
           <span>Field Reports ({fieldReports.length})</span>
         </button>
 
@@ -831,7 +831,7 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
               {report.admin_notes && <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm"><b>Previous review note:</b> {report.admin_notes}</p>}
               <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
                 <button disabled={reviewingReportId === report.id || report.approval_status === "approved"} onClick={() => void handleReviewFieldReport(report, "approved")} className="rounded-lg bg-green-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">{reviewingReportId === report.id ? "Saving…" : "Approve report"}</button>
-                <button disabled={reviewingReportId === report.id || report.approval_status === "rejected"} onClick={() => void handleReviewFieldReport(report, "rejected")} className="rounded-lg bg-red-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Reject report</button>
+                <button disabled={reviewingReportId === report.id || report.approval_status !== "pending"} onClick={() => void handleReviewFieldReport(report, "rejected")} className="rounded-lg bg-red-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Reject report</button>
               </div>
             </article>
           ))}
