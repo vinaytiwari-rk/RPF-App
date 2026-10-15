@@ -482,7 +482,7 @@ router.get("/api/admin/women_complaints", authenticateToken, requireAdmin, async
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM women_complaints ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
+    const result = await pool.query(`SELECT * FROM women_complaints ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch women complaints" });
