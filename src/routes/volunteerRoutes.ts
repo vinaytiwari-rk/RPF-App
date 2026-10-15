@@ -148,7 +148,17 @@ router.get("/api/volunteer_tasks", authenticateToken, async (req: any, res) => {
 router.patch("/api/volunteer_tasks/:id/status", authenticateToken, requireAdmin, async (req, res) => { try { const { id } = req.params; const { status } = req.body; const taskRes = await pool.query('UPDATE volunteer_tasks SET status = $1 WHERE id = $2 RETURNING "volunteerId"', [status, id]); if (taskRes.rows.length > 0 && status === "completed") { await pool.query('UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2', [10, taskRes.rows[0].volunteerId]); await ensureEligibleCertificates(taskRes.rows[0].volunteerId); } res.json({ success: true, message: "Task status updated" }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
 
 router.post("/api/volunteers", authenticateToken, async (req: any, res) => { try { const { name, phone, skills } = req.body; const userId = req.user.id; await pool.query(`UPDATE users SET "isVolunteer" = true WHERE id = $1`, [userId]); const volCheck = await pool.query(`SELECT id FROM volunteers WHERE id = $1`, [userId]); if (volCheck.rows.length === 0) { const userRes = await pool.query(`SELECT username, email FROM users WHERE id = $1`, [userId]); const username = userRes.rows[0]?.username || `user_${userId.slice(-6)}`; const email = userRes.rows[0]?.email || null; const regNumber = "RPF-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000); await pool.query(`INSERT INTO volunteers (id, username, registration_number, full_name, mobile, email, skills, approval_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [userId, username, regNumber, name || "Citizen", phone || "", email, JSON.stringify(skills ? skills.split(", ") : []), 'approved']); } else { await pool.query(`UPDATE volunteers SET skills = $1, full_name = $2, mobile = $3 WHERE id = $4`, [JSON.stringify(skills ? skills.split(", ") : []), name || "Citizen", phone || "", userId]); } res.json({ success: true }); } catch (error: any) { console.error("Error creating volunteer record:", error); res.status(500).json({ success: false, error: error.message }); } });
-router.get("/api/volunteers", authenticateToken, requireAdmin, async (_req, res) => { try { const result = await pool.query('SELECT id, full_name as name, email, mobile as phone, approval_status as status, "registeredAt" FROM volunteers ORDER BY "registeredAt" DESC'); res.json({ volunteers: result.rows }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
+router.get("/api/volunteers", authenticateToken, requireAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, full_name, username, registration_number, email, mobile, skills, approval_status, city, role, "registeredAt", created_at FROM volunteers ORDER BY "registeredAt" DESC'
+    );
+    res.json({ success: true, volunteers: result.rows });
+  } catch (error: any) {
+    console.error("Admin volunteer list failed:", error);
+    res.status(500).json({ success: false, error: "Failed to load volunteers" });
+  }
+});
 router.delete("/api/volunteers/:id", authenticateToken, requireAdmin, async (req, res) => { try { await pool.query("DELETE FROM volunteers WHERE id = $1", [req.params.id]); res.json({ success: true }); } catch (error: any) { res.status(500).json({ error: error.message }); } });
 // Activity community chat: authenticated members only, with server-enforced 24-hour retention.
 router.get("/api/activity/messages/community", authenticateToken, async (req: any, res) => {
