@@ -1,6 +1,6 @@
 import express from 'express';
 import { pool } from '../db/dbPool.js';
-import { authenticateToken, requireAdmin } from '../db/middleware.js';
+import { authenticateToken, requireAdmin, requireVolunteer } from '../db/middleware.js';
 import crypto from 'crypto';
 import { ensureEligibleCertificates } from '../lib/certificateAutomation.js';
 
@@ -25,7 +25,7 @@ router.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async
   }
 });
 router.put("/api/volunteers/:id/allocate", authenticateToken, requireAdmin, async (req, res) => { try { const { id } = req.params; const { allocation } = req.body; await pool.query(`UPDATE volunteers SET constituency_allocation = $1 WHERE id = $2`, [allocation, id]); res.json({ success: true, message: "Volunteer allocated" }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
-router.post("/api/volunteers/report", authenticateToken, async (req: any, res) => {
+router.post("/api/volunteers/report", authenticateToken, requireVolunteer, async (req: any, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
