@@ -951,6 +951,12 @@ app.post("/api/admin/field-reports/approve", authenticateToken, requireAdmin, as
         `UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2`,
         [pointsToAward, report.user_id]
       );
+      try {
+        await ensureEligibleCertificates(report.user_id);
+      } catch (certificateError) {
+        // Approval is already committed; do not imply the report failed if certificate refresh fails.
+        console.error("Certificate eligibility refresh failed after field-report approval:", certificateError);
+      }
     }
 
     res.json({ success: true, report: result.rows[0] });
