@@ -6,9 +6,72 @@ import { ensureEligibleCertificates } from '../lib/certificateAutomation.js';
 
 const router = express.Router();
 
-router.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req, res) => { try { const { id } = req.params; const { status } = req.body; await pool.query(`UPDATE volunteers SET approval_status = $1 WHERE id = $2`, [status, id]); res.json({ success: true, message: "Volunteer status updated" }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
+router.put("/api/volunteers/:id/approve", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const status = typeof req.body?.status === "string" ? req.body.status.trim().toLowerCase() : "";
+    if (!["pending", "approved", "rejected"].includes(status)) {
+      return res.status(400).json({ success: false, error: "Invalid volunteer approval status" });
+    }
+    const result = await pool.query(
+      `UPDATE volunteers SET approval_status = $1 WHERE id = $2 RETURNING id`,
+      [status, id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ success: false, error: "Volunteer not found" });
+    res.json({ success: true, message: "Volunteer status updated" });
+  } catch (error: any) {
+    console.error("Volunteer approval update failed:", error);
+    res.status(500).json({ success: false, error: "Failed to update volunteer status" });
+  }
+});
 router.put("/api/volunteers/:id/allocate", authenticateToken, requireAdmin, async (req, res) => { try { const { id } = req.params; const { allocation } = req.body; await pool.query(`UPDATE volunteers SET constituency_allocation = $1 WHERE id = $2`, [allocation, id]); res.json({ success: true, message: "Volunteer allocated" }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
-router.post("/api/volunteers/report", authenticateToken, async (req, res) => { try { const { volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng } = req.body; await pool.query(`INSERT INTO volunteer_reports (id, volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [crypto.randomUUID(), volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng]); await ensureEligibleCertificates(req.user.id); res.json({ success: true, message: "Report submitted" }); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } });
+router.post("/api/volunteers/report", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
+
+    const reportText = typeof req.body?.report_text === "string" ? req.body.report_text.trim() : "";
+    if (!reportText) return res.status(400).json({ success: false, error: "Report text is required" });
+    if (reportText.length > 5000) return res.status(400).json({ success: false, error: "Report text must be 5000 characters or fewer" });
+
+    const parseOptionalDate = (value: unknown): Date | null | undefined => {
+      if (value === undefined || value === null || value === "") return null;
+      if (typeof value !== "string" && typeof value !== "number") return undefined;
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? undefined : date;
+    };
+    const checkIn = parseOptionalDate(req.body?.check_in_time);
+    const checkOut = parseOptionalDate(req.body?.check_out_time);
+    if (checkIn === undefined || checkOut === undefined) {
+      return res.status(400).json({ success: false, error: "Invalid check-in or check-out time" });
+    }
+    if (checkIn && checkOut && checkOut < checkIn) {
+      return res.status(400).json({ success: false, error: "Check-out cannot be earlier than check-in" });
+    }
+
+    const parseCoordinate = (value: unknown, min: number, max: number): number | null | undefined => {
+      if (value === undefined || value === null || value === "") return null;
+      const number = typeof value === "number" ? value : Number(value);
+      return Number.isFinite(number) && number >= min && number <= max ? number : undefined;
+    };
+    const latitude = parseCoordinate(req.body?.location_lat, -90, 90);
+    const longitude = parseCoordinate(req.body?.location_lng, -180, 180);
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({ success: false, error: "Invalid location coordinates" });
+    }
+
+    await pool.query(
+      `INSERT INTO volunteer_reports (id, volunteer_id, check_in_time, check_out_time, report_text, location_lat, location_lng)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [crypto.randomUUID(), userId, checkIn, checkOut, reportText, latitude, longitude]
+    );
+    await ensureEligibleCertificates(userId);
+    res.status(201).json({ success: true, message: "Report submitted" });
+  } catch (error: any) {
+    console.error("Volunteer report submission failed:", error);
+    res.status(500).json({ success: false, error: "Failed to submit volunteer report" });
+  }
+});
 
 router.get("/api/volunteers/me", authenticateToken, async (req: any, res) => {
   try {
@@ -24,7 +87,7 @@ router.get("/api/volunteers/me/certificates", authenticateToken, async (req: any
     const result = await pool.query(`SELECT * FROM certificates WHERE volunteer_id = $1 ORDER BY issue_date DESC`, [req.user.id]);
     const progress = await pool.query(`SELECT
       (SELECT COALESCE(SUM(duration_minutes),0) / 60.0 FROM volunteer_duty_sessions WHERE user_id = $1 AND status = 'completed') AS hours,
-      (SELECT COUNT(*) FROM volunteer_reports WHERE volunteer_id = $1) AS reports,
+      (SELECT COUNT(*) FROM volunteer_field_reports WHERE user_id = $1 AND approval_status = 'approved') AS reports,
       (SELECT COUNT(*) FROM volunteer_tasks WHERE "volunteerId" = $1 AND status = 'completed') AS tasks
     `, [req.user.id]);
     const rules = await pool.query(`SELECT id,title,title_hi,min_hours,min_reports,min_tasks,active FROM certificate_rules WHERE active = TRUE ORDER BY min_hours ASC`);
