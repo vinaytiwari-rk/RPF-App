@@ -940,39 +940,71 @@ app.get("/api/admin/field-reports", authenticateToken, requireAdmin, async (req,
   }
 });
 
-app.post("/api/admin/field-reports/approve", authenticateToken, requireAdmin, async (req, res) => {
+app.post("/api/admin/field-reports/approve", authenticateToken, requireAdmin, async (req: any, res) => {
+  const { reportId, status, adminNotes, points } = req.body || {};
+  if (typeof reportId !== "string" || !reportId.trim()) {
+    return res.status(400).json({ success: false, error: "Report ID required" });
+  }
+  if (!["pending", "approved", "rejected"].includes(status)) {
+    return res.status(400).json({ success: false, error: "Invalid field report status" });
+  }
+
+  const pointsToAward = Math.min(200, Math.max(0, Number.parseInt(String(points ?? 50), 10) || 0));
+  const client = await pool.connect();
+  let approvedUserId: string | null = null;
   try {
-    const { reportId, status, adminNotes, points } = req.body;
-    if (!reportId) return res.status(400).json({ success: false, error: "Report ID required" });
+    await client.query("BEGIN");
+    const currentResult = await client.query(
+      "SELECT id, user_id, approval_status, COALESCE(points_awarded, 0) AS points_awarded FROM volunteer_field_reports WHERE id = $1 FOR UPDATE",
+      [reportId.trim()]
+    );
+    const current = currentResult.rows[0];
+    if (!current) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ success: false, error: "Field report not found" });
+    }
 
-    const validStatus = status === 'rejected' ? 'rejected' : 'approved';
-    const pointsToAward = Math.min(200, Math.max(0, parseInt(points) || 50));
+    // Award points only once per report, even if Admin repeats approval.
+    const shouldAwardPoints = status === "approved" &&
+      current.approval_status !== "approved" &&
+      Number(current.points_awarded || 0) <= 0;
+    const award = shouldAwardPoints ? pointsToAward : 0;
+    const nextAwardedPoints = status === "approved" && shouldAwardPoints
+      ? pointsToAward
+      : Number(current.points_awarded || 0);
 
-    const result = await pool.query(
-      `UPDATE volunteer_field_reports 
-       SET approval_status = $1, admin_notes = $2, points_awarded = $3
+    const updateResult = await client.query(
+      `UPDATE volunteer_field_reports
+       SET approval_status = $1,
+           admin_notes = $2,
+           points_awarded = $3
        WHERE id = $4
        RETURNING *`,
-      [validStatus, adminNotes || 'Reviewed by Admin', pointsToAward, reportId]
+      [status, typeof adminNotes === "string" ? adminNotes.trim().slice(0, 2000) : "", nextAwardedPoints, reportId.trim()]
     );
 
-    if (result.rows.length > 0 && validStatus === 'approved') {
-      const report = result.rows[0];
-      await pool.query(
-        `UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2`,
-        [pointsToAward, report.user_id]
+    if (award > 0) {
+      await client.query(
+        "UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2",
+        [award, current.user_id]
       );
+    }
+    await client.query("COMMIT");
+    if (status === "approved") approvedUserId = current.user_id;
+    if (approvedUserId) {
       try {
-        await ensureEligibleCertificates(report.user_id);
+        await ensureEligibleCertificates(approvedUserId);
       } catch (certificateError) {
-        // Approval is already committed; do not imply the report failed if certificate refresh fails.
         console.error("Certificate eligibility refresh failed after field-report approval:", certificateError);
       }
     }
-
-    res.json({ success: true, report: result.rows[0] });
+    return res.json({ success: true, report: updateResult.rows[0], pointsAwarded: award });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: "Failed to approve field report" });
+    await client.query("ROLLBACK").catch(() => {});
+    console.error("Field report review failed:", error);
+    return res.status(500).json({ success: false, error: "Failed to update field report" });
+  } finally {
+    client.release();
   }
 });
 
