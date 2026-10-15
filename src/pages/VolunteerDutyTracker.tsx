@@ -55,6 +55,7 @@ export default function VolunteerDutyTracker() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [error, setError] = useState("");
 
   // Field Report Form State
   const [reportTitle, setReportTitle] = useState("");
@@ -68,56 +69,45 @@ export default function VolunteerDutyTracker() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
   const [loadingBoard, setLoadingBoard] = useState(false);
 
-  // Fetch Active Duty Session
+  // The authenticated server is the source of truth for active duty.
   const fetchActiveSession = async () => {
-    try {
-      const saved = localStorage.getItem("@rpf_active_duty_session");
-      if (saved) {
-        setActiveSession(JSON.parse(saved));
-      }
-    } catch {}
-
-    if (!token) return;
+    if (!token) {
+      setActiveSession(null);
+      return;
+    }
     try {
       const res = await fetch("/api/volunteers/duty/active", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.session) {
-          setActiveSession(data.session);
-          try { localStorage.setItem("@rpf_active_duty_session", JSON.stringify(data.session)); } catch {}
-        }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        throw new Error(data.error || "Unable to load active duty.");
       }
+      setActiveSession(data.session || null);
+      setError("");
     } catch (e) {
+      setActiveSession(null);
+      setError(hi ? "सक्रिय ड्यूटी लोड नहीं हो सकी। कृपया दोबारा प्रयास करें।" : "Could not load active duty. Please try again.");
       console.warn("Fetch active duty error:", e);
     }
   };
 
-  // Fetch Real Leaderboard with Fallback
+  // Only show records returned by the real leaderboard API; never fabricate volunteers.
   const fetchLeaderboard = async () => {
     setLoadingBoard(true);
     try {
       const res = await fetch("/api/volunteers/leaderboard");
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.leaderboard) && data.leaderboard.length) {
-          setLeaderboard(data.leaderboard);
-          return;
-        }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        throw new Error(data.error || "Unable to fetch leaderboard.");
       }
+      setLeaderboard(Array.isArray(data.leaderboard) ? data.leaderboard : []);
     } catch (e) {
+      setLeaderboard([]);
       console.warn("Fetch leaderboard error:", e);
     } finally {
       setLoadingBoard(false);
     }
-
-    // Default Leaderboard Fallback
-    setLeaderboard([
-      { id: "v1", name: user?.name || "Citizen Volunteer", role: "Active Volunteer", total_duty_minutes: 240, approved_reports_count: 5, total_points: 350 },
-      { id: "v2", name: "Ramesh Sharma", role: "Lead Volunteer", total_duty_minutes: 180, approved_reports_count: 4, total_points: 290 },
-      { id: "v3", name: "Pooja Verma", role: "Field Assistant", total_duty_minutes: 150, approved_reports_count: 3, total_points: 230 }
-    ]);
   };
 
   useEffect(() => {
@@ -140,102 +130,96 @@ export default function VolunteerDutyTracker() {
     return () => clearInterval(interval);
   }, [activeSession]);
 
-  // Handle Clock-In
+  // Start duty only after the server confirms that it was recorded.
   const handleClockIn = async () => {
+    if (!token) {
+      setError(hi ? "ड्यूटी शुरू करने के लिए लॉगिन करें।" : "Please sign in before starting duty.");
+      return;
+    }
     setLoading(true);
+    setError("");
 
     let lat: number | null = null;
     let lon: number | null = null;
-
     if (navigator.geolocation) {
       try {
-        const pos: any = await new Promise((res, rej) =>
-          navigator.geolocation.getCurrentPosition(res, rej, { timeout: 6000 })
+        const pos: GeolocationPosition = await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 })
         );
         lat = pos.coords.latitude;
         lon = pos.coords.longitude;
-      } catch {}
-    }
-
-    const newSession: DutySession = {
-      id: `duty-${Date.now()}`,
-      user_id: user?.id || "guest",
-      user_name: user?.name || "Volunteer",
-      initiative_name: initiative,
-      clock_in_time: new Date().toISOString(),
-      duration_minutes: 0,
-      status: "active"
-    };
-
-    setActiveSession(newSession);
-    try { localStorage.setItem("@rpf_active_duty_session", JSON.stringify(newSession)); } catch {}
-
-    if (token) {
-      try {
-        await fetch("/api/volunteers/duty/clock-in", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ initiativeName: initiative, lat, lon, notes }),
-        });
-      } catch (e) {
-        console.warn("Server clock-in failed, using local session:", e);
+      } catch {
+        // Location is optional when permission is unavailable.
       }
     }
-    setLoading(false);
-  };
-
-  // Handle Clock-Out
-  const handleClockOut = async () => {
-    if (!activeSession) return;
-    setLoading(true);
-
-    let lat: number | null = null;
-    let lon: number | null = null;
-
-    if (navigator.geolocation) {
-      try {
-        const pos: any = await new Promise((res, rej) =>
-          navigator.geolocation.getCurrentPosition(res, rej, { timeout: 6000 })
-        );
-        lat = pos.coords.latitude;
-        lon = pos.coords.longitude;
-      } catch {}
-    }
-
-    const completedSession = {
-      ...activeSession,
-      clock_out_time: new Date().toISOString(),
-      duration_minutes: Math.max(1, Math.round(elapsedSeconds / 60)),
-      status: "completed" as const
-    };
 
     try {
-      const history = JSON.parse(localStorage.getItem("@rpf_duty_history") || "[]");
-      localStorage.setItem("@rpf_duty_history", JSON.stringify([completedSession, ...history]));
-      localStorage.removeItem("@rpf_active_duty_session");
-    } catch {}
+      const res = await fetch("/api/volunteers/duty/clock-in", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ initiativeName: initiative, lat, lon, notes }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success || !data.session) {
+        throw new Error(data.error || "Duty could not be started.");
+      }
+      setActiveSession(data.session);
+      setError("");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : (hi ? "ड्यूटी शुरू नहीं हो सकी।" : "Could not start duty."));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    if (token) {
+  // Complete duty only after the server confirms the session was closed.
+  const handleClockOut = async () => {
+    if (!activeSession) return;
+    if (!token) {
+      setError(hi ? "ड्यूटी समाप्त करने के लिए दोबारा लॉगिन करें।" : "Please sign in again to complete duty.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+
+    let lat: number | null = null;
+    let lon: number | null = null;
+    if (navigator.geolocation) {
       try {
-        await fetch("/api/volunteers/duty/clock-out", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ sessionId: activeSession.id, lat, lon, notes }),
-        });
-      } catch (e) {
-        console.warn("Server clock-out failed, using local session:", e);
+        const pos: GeolocationPosition = await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 })
+        );
+        lat = pos.coords.latitude;
+        lon = pos.coords.longitude;
+      } catch {
+        // Location is optional when permission is unavailable.
       }
     }
 
-    setActiveSession(null);
-    setLoading(false);
-    fetchLeaderboard();
+    try {
+      const res = await fetch("/api/volunteers/duty/clock-out", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ sessionId: activeSession.id, lat, lon, notes }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Duty could not be completed.");
+      }
+      setActiveSession(null);
+      setError("");
+      await fetchLeaderboard();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : (hi ? "ड्यूटी समाप्त नहीं हो सकी।" : "Could not complete duty."));
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle Image Upload Base64
@@ -253,9 +237,14 @@ export default function VolunteerDutyTracker() {
   const handleReportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reportTitle.trim()) return;
+    if (!token) {
+      setError(hi ? "फील्ड रिपोर्ट जमा करने के लिए लॉगिन करें।" : "Please sign in before submitting a field report.");
+      return;
+    }
 
     setSubmittingReport(true);
     setReportSuccess(false);
+    setError("");
 
     let latitude: number | null = null;
     let longitude: number | null = null;
@@ -270,51 +259,38 @@ export default function VolunteerDutyTracker() {
       } catch {}
     }
 
-    const reportObj = {
-      id: `report-${Date.now()}`,
-      title: reportTitle,
-      description: reportDesc,
-      locationName: reportLoc || "On-Field Location",
-      imageUrl: reportImage,
-      latitude,
-      longitude,
-      date: new Date().toISOString()
-    };
-
     try {
-      const saved = JSON.parse(localStorage.getItem("@rpf_field_reports") || "[]");
-      localStorage.setItem("@rpf_field_reports", JSON.stringify([reportObj, ...saved]));
-    } catch {}
-
-    if (token) {
-      try {
-        await fetch("/api/volunteers/reports/submit", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            title: reportTitle,
-            description: reportDesc,
-            locationName: reportLoc || "On-Field Location",
-            imageUrl: reportImage,
-            latitude,
-            longitude,
-          }),
-        });
-      } catch (e) {
-        console.warn("Server report submit failed, saved locally:", e);
+      const res = await fetch("/api/volunteers/reports/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: reportTitle.trim(),
+          description: reportDesc.trim(),
+          locationName: reportLoc.trim(),
+          imageUrl: reportImage,
+          latitude,
+          longitude,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Field report could not be submitted.");
       }
-    }
-
-    setReportSuccess(true);
-    setReportTitle("");
+      setReportSuccess(true);
+      setError("");
+      setReportTitle("");
     setReportDesc("");
-    setReportLoc("");
-    setReportImage("");
-    setSubmittingReport(false);
-    fetchLeaderboard();
+      setReportLoc("");
+      setReportImage("");
+      await fetchLeaderboard();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : (hi ? "फील्ड रिपोर्ट जमा नहीं हो सकी।" : "Field report could not be submitted."));
+    } finally {
+      setSubmittingReport(false);
+    }
   };
 
   const formatHMS = (secs: number) => {
@@ -331,10 +307,10 @@ export default function VolunteerDutyTracker() {
     const totalReports = leaderboard.reduce((acc, v) => acc + (v.approved_reports_count || 0), 0);
     const totalPoints = leaderboard.reduce((acc, v) => acc + (v.total_points || 0), 0);
     return {
-      hours: Math.max(128, Math.round(totalMinutes / 60)),
-      reports: Math.max(45, totalReports),
-      points: Math.max(1850, totalPoints),
-      activeVolunteers: Math.max(24, leaderboard.length),
+      hours: Math.round(totalMinutes / 60),
+      reports: totalReports,
+      points: totalPoints,
+      activeVolunteers: leaderboard.length,
     };
   }, [leaderboard]);
 
@@ -359,6 +335,7 @@ export default function VolunteerDutyTracker() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-6">
+        {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{error}</div>}
         {/* Animated Volunteer Community Metrics */}
         <div className="space-y-2">
           <div className="flex items-center justify-between px-1">
