@@ -881,20 +881,31 @@ app.post("/api/volunteers/reports/submit", authenticateToken, requireVolunteer, 
 // 5. Get Real Volunteer Leaderboard
 app.get("/api/volunteers/leaderboard", async (req, res) => {
   try {
+    // Aggregate sessions and reports independently to avoid join fan-out
+    // multiplying duty minutes when a volunteer has multiple approved reports.
     const result = await pool.query(`
-      SELECT 
-        u.id, 
-        u.name, 
-        u.avatar, 
+      SELECT
+        u.id,
+        u.name,
+        u.avatar,
         u.role,
-        COALESCE(SUM(s.duration_minutes), 0) AS total_duty_minutes,
-        COUNT(DISTINCT r.id) AS approved_reports_count,
+        COALESCE(s.total_duty_minutes, 0) AS total_duty_minutes,
+        COALESCE(r.approved_reports_count, 0) AS approved_reports_count,
         COALESCE(u.points, 0) AS total_points
       FROM users u
-      LEFT JOIN volunteer_duty_sessions s ON u.id = s.user_id AND s.status = 'completed'
-      LEFT JOIN volunteer_field_reports r ON u.id = r.user_id AND r.approval_status = 'approved'
+      LEFT JOIN (
+        SELECT user_id, SUM(duration_minutes)::int AS total_duty_minutes
+        FROM volunteer_duty_sessions
+        WHERE status = 'completed'
+        GROUP BY user_id
+      ) s ON s.user_id = u.id
+      LEFT JOIN (
+        SELECT user_id, COUNT(*)::int AS approved_reports_count
+        FROM volunteer_field_reports
+        WHERE approval_status = 'approved'
+        GROUP BY user_id
+      ) r ON r.user_id = u.id
       WHERE u.role IN ('volunteer', 'admin', 'super_admin') OR u."isVolunteer" = true
-      GROUP BY u.id, u.name, u.avatar, u.role, u.points
       ORDER BY total_duty_minutes DESC, total_points DESC
       LIMIT 20
     `);
