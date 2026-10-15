@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import {
-  Activity, Award, Camera, CheckCircle2, Clock, FileText, Loader2,
-  MapPin, MessagesSquare, Play, Search, Send, ShieldCheck, Square, Users
+  Activity, Award, CheckCircle2, Clock, FileText, Loader2,
+  MessagesSquare, Play, Search, Send, ShieldCheck, Square, Users
 } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
