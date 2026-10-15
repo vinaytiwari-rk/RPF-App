@@ -53,6 +53,19 @@ interface VolunteerItem {
   assignedDuty?: string;
 }
 
+interface FieldReportItem {
+  id: string;
+  user_id: string;
+  user_name?: string;
+  title?: string;
+  description?: string;
+  location_name?: string;
+  image_url?: string;
+  approval_status: "pending" | "approved" | "rejected";
+  admin_notes?: string;
+  created_at: string;
+}
+
 interface BloodRequestItem {
   id: string;
   patientName: string;
@@ -83,7 +96,7 @@ interface AdminActivityStudioProps {
 }
 
 export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActivityStudioProps) {
-  const [subTab, setSubTab] = useState<"grievances" | "volunteers" | "blood" | "drives">("grievances");
+  const [subTab, setSubTab] = useState<"grievances" | "volunteers" | "fieldReports" | "blood" | "drives">("fieldReports");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -91,9 +104,11 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
   const [grievances, setGrievances] = useState<GrievanceItem[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // 2. Volunteers State
+  // 2. Volunteers and field-report review state
   const [volunteers, setVolunteers] = useState<VolunteerItem[]>([]);
   const [volFilter, setVolFilter] = useState<string>("all");
+  const [fieldReports, setFieldReports] = useState<FieldReportItem[]>([]);
+  const [reviewingReportId, setReviewingReportId] = useState<string | null>(null);
 
   // 3. Blood Requests State
   const [bloodRequests, setBloodRequests] = useState<BloodRequestItem[]>(() => {
@@ -177,6 +192,15 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
         console.warn("Canonical volunteers fetch failed:", err);
         setVolunteers([]);
       }
+
+      // 3. Load real field reports for the Admin review queue.
+      try {
+        const res = await axios.get("/api/admin/field-reports", { headers });
+        setFieldReports(Array.isArray(res.data?.reports) ? res.data.reports : []);
+      } catch (err) {
+        console.warn("Field report queue load failed:", err);
+        setFieldReports([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -230,6 +254,37 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
     } catch (err: any) {
       toast.error(err.response?.data?.error || err.message || "Failed to update volunteer status");
       await loadData();
+    }
+  };
+
+  // Review a field report through the server; do not show success optimistically.
+  const handleReviewFieldReport = async (report: FieldReportItem, status: "approved" | "rejected") => {
+    const adminNotes = window.prompt(
+      status === "approved" ? "Optional review note:" : "Please enter a reason for rejection:"
+    );
+    if (status === "rejected" && !adminNotes?.trim()) {
+      toast.error("A rejection reason is required");
+      return;
+    }
+    setReviewingReportId(report.id);
+    try {
+      const token = localStorage.getItem("@rpf_token");
+      const response = await axios.post("/api/admin/field-reports/approve", {
+        reportId: report.id,
+        status,
+        adminNotes: adminNotes?.trim() || "",
+        points: 50
+      }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (response.data?.success !== true || !response.data?.report) {
+        throw new Error(response.data?.error || "Server did not confirm report review");
+      }
+      setFieldReports(prev => prev.map(item => item.id === report.id ? response.data.report : item));
+      toast.success(`Field report ${status}`);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || err.message || "Failed to review field report");
+      await loadData();
+    } finally {
+      setReviewingReportId(null);
     }
   };
 
@@ -438,6 +493,21 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
         >
           <Users className="w-4 h-4 text-green-400" />
           <span>Volunteer Force ({volunteers.length})</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setSubTab("fieldReports");
+            setSearch("");
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+            subTab === "fieldReports"
+              ? "bg-[#0A192F] text-white shadow-sm"
+              : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+          }`}
+        >
+          <FileText className="w-4 h-4 text-amber-500" />
+          <span>Field Reports ({fieldReports.length})</span>
         </button>
 
         <button
@@ -693,7 +763,7 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
                     </div>
                   )}
                   <div className="text-[11px] text-slate-500 pt-1">
-                    Skills: {Array.isArray(vol.skills) ? vol.skills.join(", ") : vol.skills || "Relief, Outreach"}
+                    Skills: {Array.isArray(vol.skills) ? vol.skills.join(", ") : vol.skills || "Not provided"}
                   </div>
                 </div>
 
@@ -720,6 +790,51 @@ export default function AdminActivityStudio({ cmsConfig, onSaveCms }: AdminActiv
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* FIELD REPORT REVIEW QUEUE                                     */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {subTab === "fieldReports" && (
+        <div className="space-y-3">
+          {fieldReports.filter(report => {
+            const query = search.toLowerCase().trim();
+            return !query || [report.title, report.description, report.user_name, report.user_id, report.location_name]
+              .some(value => String(value || "").toLowerCase().includes(query));
+          }).length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+              No field reports awaiting review or matching this search.
+            </div>
+          ) : fieldReports.filter(report => {
+            const query = search.toLowerCase().trim();
+            return !query || [report.title, report.description, report.user_name, report.user_id, report.location_name]
+              .some(value => String(value || "").toLowerCase().includes(query));
+          }).map(report => (
+            <article key={report.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-bold text-[#0A192F]">{report.title || "Untitled field report"}</h3>
+                  <p className="mt-1 text-xs text-slate-500">{report.user_name || report.user_id} · {new Date(report.created_at).toLocaleString()}</p>
+                  {report.location_name && <p className="mt-1 flex items-center gap-1 text-xs text-slate-500"><MapPin className="h-3 w-3"/>{report.location_name}</p>}
+                </div>
+                <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${
+                  report.approval_status === "approved" ? "border-green-200 bg-green-50 text-green-700" :
+                  report.approval_status === "rejected" ? "border-red-200 bg-red-50 text-red-700" :
+                  "border-amber-200 bg-amber-50 text-amber-700"
+                }`}>{report.approval_status}</span>
+              </div>
+              <p className="mt-3 whitespace-pre-wrap text-sm text-slate-700">{report.description || "No description provided."}</p>
+              {report.image_url && (report.image_url.startsWith("data:image/") || report.image_url.startsWith("https://")) && (
+                <a href={report.image_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-xs font-bold text-blue-700 underline">View evidence image</a>
+              )}
+              {report.admin_notes && <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm"><b>Previous review note:</b> {report.admin_notes}</p>}
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+                <button disabled={reviewingReportId === report.id || report.approval_status === "approved"} onClick={() => void handleReviewFieldReport(report, "approved")} className="rounded-lg bg-green-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">{reviewingReportId === report.id ? "Saving…" : "Approve report"}</button>
+                <button disabled={reviewingReportId === report.id || report.approval_status === "rejected"} onClick={() => void handleReviewFieldReport(report, "rejected")} className="rounded-lg bg-red-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Reject report</button>
+              </div>
+            </article>
+          ))}
         </div>
       )}
 
