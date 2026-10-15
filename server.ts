@@ -857,24 +857,46 @@ app.post("/api/volunteers/reports/submit", authenticateToken, requireVolunteer, 
     const userId = req.user?.id;
     const userName = req.user?.name || "Volunteer";
     const userPhone = req.user?.phone || "";
-    const { title, description, imageUrl, locationName, latitude, longitude } = req.body;
-
     if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
-    if (!title) return res.status(400).json({ success: false, error: "Title is required" });
 
-    const reportId = "report_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+    const title = typeof req.body?.title === "string" ? req.body.title.trim() : "";
+    const description = typeof req.body?.description === "string" ? req.body.description.trim() : "";
+    const locationName = typeof req.body?.locationName === "string" ? req.body.locationName.trim() : "";
+    const imageUrl = typeof req.body?.imageUrl === "string" ? req.body.imageUrl : "";
+    if (!title) return res.status(400).json({ success: false, error: "Title is required" });
+    if (title.length > 200) return res.status(400).json({ success: false, error: "Title must be 200 characters or fewer" });
+    if (description.length < 10 || description.length > 5000) {
+      return res.status(400).json({ success: false, error: "Description must be between 10 and 5000 characters" });
+    }
+    if (locationName.length > 255) return res.status(400).json({ success: false, error: "Location must be 255 characters or fewer" });
+    if (imageUrl.length > 3_000_000) return res.status(413).json({ success: false, error: "Image evidence is too large" });
+    if (imageUrl && !/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(imageUrl) && !/^https?:\/\//i.test(imageUrl)) {
+      return res.status(400).json({ success: false, error: "Image evidence must be a supported image or HTTPS URL" });
+    }
+
+    const parseCoordinate = (value: unknown, min: number, max: number): number | null | undefined => {
+      if (value === undefined || value === null || value === "") return null;
+      const number = typeof value === "number" ? value : Number(value);
+      return Number.isFinite(number) && number >= min && number <= max ? number : undefined;
+    };
+    const latitude = parseCoordinate(req.body?.latitude, -90, 90);
+    const longitude = parseCoordinate(req.body?.longitude, -180, 180);
+    if (latitude === undefined || longitude === undefined || ((latitude === null) !== (longitude === null))) {
+      return res.status(400).json({ success: false, error: "Invalid location coordinates" });
+    }
+
+    const reportId = "report_" + crypto.randomUUID();
     const result = await pool.query(
-      `INSERT INTO volunteer_field_reports 
+      `INSERT INTO volunteer_field_reports
        (id, user_id, user_name, user_phone, title, description, image_url, location_name, latitude, longitude, approval_status, created_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', NOW())
        RETURNING *`,
-      [reportId, userId, userName, userPhone, title, description || "", imageUrl || "", locationName || "", latitude || null, longitude || null]
+      [reportId, userId, userName, userPhone, title, description, imageUrl, locationName, latitude, longitude]
     );
-
-    res.json({ success: true, report: result.rows[0] });
+    return res.status(201).json({ success: true, report: result.rows[0] });
   } catch (error: any) {
     console.error("Report submit error:", error);
-    res.status(500).json({ success: false, error: "Failed to submit field report" });
+    return res.status(500).json({ success: false, error: "Failed to submit field report" });
   }
 });
 
