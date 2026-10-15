@@ -250,8 +250,13 @@ router.delete('/api/health_camps/:id', authenticateToken, requireAdmin, async (r
 
 router.get('/api/blood_donors', async (_req, res) => {
   try {
+    // Read the canonical snake_case schema and preserve the established client response keys.
     const result = await pool.query(
-      'SELECT id,name,"bloodGroup",phone,location,verified,distance,"lastDonated" FROM blood_donors ORDER BY "createdAt" DESC'
+      `SELECT id, name, blood_group AS "bloodGroup", phone, city AS location,
+              FALSE AS verified, NULL::numeric AS distance,
+              last_donation_date AS "lastDonated"
+         FROM blood_donors
+        ORDER BY created_at DESC`
     );
     return res.json({ donors: result.rows });
   } catch (error: any) {
