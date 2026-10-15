@@ -536,7 +536,7 @@ router.get("/api/admin/blogs", authenticateToken, requireAdmin, async (req, res)
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM blogs ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
+    const result = await pool.query(`SELECT * FROM blogs ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch blogs" });
@@ -596,7 +596,7 @@ router.get("/api/admin/campaigns", authenticateToken, requireAdmin, async (req, 
     const totalCount = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(totalCount / limit);
 
-    const result = await pool.query(`SELECT * FROM campaigns ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]);
+    const result = await pool.query(`SELECT * FROM campaigns ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     res.json({ success: true, data: result.rows, totalPages, currentPage: page });
   } catch (error: any) {
     res.status(500).json({ success: false, error: "Failed to fetch campaigns" });
