@@ -84,20 +84,41 @@ router.get('/api/pediatric', authenticateToken, async (req: any, res: any) => {
 // authentication. Verification must never be inferred from the request body.
 router.post('/api/blood_donors', authenticateToken, async (req: any, res: any) => {
   try {
-    const { name, bloodGroup, phone, location, lastDonated } = req.body ?? {};
-    if (!name || !bloodGroup || !phone) {
-      return res.status(400).json({ success: false, error: 'Name, blood group and phone are required' });
+    const name = String(req.body?.name || '').trim();
+    const bloodGroup = String(req.body?.bloodGroup || '').trim().toUpperCase();
+    const phone = String(req.body?.phone || '').trim();
+    const city = String(req.body?.location || req.body?.city || '').trim();
+    const lastDonatedValue = req.body?.lastDonated;
+    if (!name || !bloodGroup || !phone || !city) {
+      return res.status(400).json({ success: false, error: 'Name, blood group, phone and city are required' });
+    }
+    if (!/^(A|B|AB|O)[+-]$/.test(bloodGroup)) {
+      return res.status(400).json({ success: false, error: 'Please provide a valid blood group' });
+    }
+    let lastDonationDate: string | null = null;
+    if (lastDonatedValue) {
+      const parsedDate = new Date(String(lastDonatedValue));
+      if (Number.isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ success: false, error: 'Last donation date is invalid' });
+      }
+      lastDonationDate = parsedDate.toISOString().slice(0, 10);
     }
 
-    const id = crypto.randomUUID();
-    await pool.query(
+    // Omit id so PostgreSQL can use the existing UUID or serial default safely.
+    // Link the donor only when the authenticated principal exists in the users table;
+    // this also keeps legacy volunteer tokens from violating an optional users FK.
+    const result = await pool.query(
       `INSERT INTO blood_donors
-       (id, name, "bloodGroup", phone, location, verified, distance, "lastDonated", "createdAt")
-       VALUES ($1, $2, $3, $4, $5, false, NULL, $6, NOW())`,
-      [id, String(name).trim(), String(bloodGroup).trim().toUpperCase(), String(phone).trim(), location || null, lastDonated || null],
+         (user_id, name, blood_group, city, phone, availability, last_donation_date, created_at)
+       VALUES (
+         (SELECT id::text FROM users WHERE id::text = $1 LIMIT 1),
+         $2, $3, $4, $5, 'available', $6, NOW()
+       )
+       RETURNING id`,
+      [String(req.user?.id || ''), name, bloodGroup, city, phone, lastDonationDate],
     );
 
-    return res.status(201).json({ success: true, id });
+    return res.status(201).json({ success: true, id: result.rows[0].id });
   } catch (error: any) {
     console.error('blood donor registration failed:', error);
     return res.status(500).json({ success: false, error: 'Unable to register donor' });
